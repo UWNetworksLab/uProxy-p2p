@@ -428,7 +428,7 @@ import ui = ui_connector.connector;
         return;
       }
       var userId = incoming.from.userId;
-      var msg :social.PeerMessage = JSON.parse(incoming.message);
+      var msg :social.VersionedPeerMessage = JSON.parse(incoming.message);
 
       var client :social.ClientState =
           freedomClientToUproxyClient(incoming.from);
@@ -559,11 +559,12 @@ import ui = ui_connector.connector;
     public send = (user :remote_user.User,
                    clientId :string,
                    message :social.PeerMessage) : Promise<void> => {
-      var messageString = JSON.stringify({
+      var versionedMessage :social.VersionedPeerMessage = {
         type: message.type,
         data: message.data,
         version: globals.MESSAGE_VERSION
-      });
+      };
+      var messageString = JSON.stringify(versionedMessage);
       log.info('sending message', {
         userTo: user.userId,
         clientTo: clientId,
@@ -678,7 +679,13 @@ import ui = ui_connector.connector;
                    message :social.PeerMessage) : Promise<void> => {
       // TODO: Batch messages.
       // Relay the message to the UI for display to the user.
-      ui.update(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
+      var versionedMessage :social.VersionedPeerMessage = {
+        type: message.type,
+        data: message.data,
+        version: globals.MESSAGE_VERSION
+      };
+      ui.update(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
+          versionedMessage);
 
       return Promise.resolve<void>();
     }
@@ -686,7 +693,7 @@ import ui = ui_connector.connector;
     // TODO: Consider adding a mechanism for reporting back to the UI that a
     // message is malformed or otherwise invalid.
     public receive = (senderClientId :string,
-                      message :social.PeerMessage) : void => {
+                      message :social.VersionedPeerMessage) : void => {
       log.debug('Received incoming manual message from %1: %2',
                 senderClientId, message);
 

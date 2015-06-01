@@ -21,6 +21,7 @@ interface FullfillAndReject {
 class FirefoxBrowserApi implements BrowserAPI {
 
   public browserSpecificElement :string;
+  public canProxy = true;
 
   // Global unique promise ID.
   private promiseId_ :number = 1;

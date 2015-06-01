@@ -25,7 +25,7 @@
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import consent = require('./consent');
 import globals = require('./globals');
 import ui = require('./ui_connector');
@@ -181,7 +181,8 @@ var log :logging.Log = new logging.Log('remote-user');
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :social.PeerMessage) : void => {
+    public handleMessage = (clientId :string,
+        msg :social.VersionedPeerMessage) : void => {
       if (!(clientId in this.clientIdToStatusMap)) {
         log.error('%1 received message for non-existing client %2',
                   this.userId, clientId);
@@ -189,8 +190,8 @@ var log :logging.Log = new logging.Log('remote-user');
       }
       switch (msg.type) {
         case social.PeerMessageType.INSTANCE:
-          this.syncInstance_(clientId, <social.InstanceHandshake>msg.data)
-              .catch((e) => {
+          this.syncInstance_(clientId, <social.InstanceHandshake>msg.data,
+              msg.version).catch((e) => {
             log.error('syncInstance_ failed for ', msg.data);
           });
           return;
@@ -207,7 +208,8 @@ var log :logging.Log = new logging.Log('remote-user');
             log.error('failed to get instance', clientId);
             return;
           }
-          instance.handleSignal(msg.type, <signals.Message>msg.data);
+          instance.handleSignal(msg.type, <bridge.SignallingMessage>msg.data,
+              msg.version);
           return;
 
         case social.PeerMessageType.INSTANCE_REQUEST:
@@ -247,7 +249,8 @@ var log :logging.Log = new logging.Log('remote-user');
      */
     public syncInstance_ = (
         clientId :string,
-        instanceHandshake :social.InstanceHandshake) : Promise<void> => {
+        instanceHandshake :social.InstanceHandshake,
+        messageVersion :number) : Promise<void> => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
@@ -298,7 +301,8 @@ var log :logging.Log = new logging.Log('remote-user');
         instance = new remote_instance.RemoteInstance(this, instanceId);
         this.instances_[instanceId] = instance;
       }
-      return instance.update(instanceHandshake).then(() => {
+      return instance.update(instanceHandshake,
+          messageVersion).then(() => {
         this.saveToStorage();
         this.notifyUI();
       });

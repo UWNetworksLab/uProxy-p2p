@@ -23,7 +23,7 @@ export import model = user_interface.model;
 
 export var ui   :user_interface.UserInterface;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
-export var chromeCoreConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
+export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
 export var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
 var chromeBrowserApi :ChromeBrowserApi;
 // Chrome Window ID of the window used to launch uProxy,
@@ -87,13 +87,13 @@ function initUI() : user_interface.UserInterface {
     chromeBrowserApi.bringUproxyToFront();
   });
 
-  chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-  chromeCoreConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
+  browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
+  browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
                            chromeBrowserApi.bringUproxyToFront);
 
-  core = new CoreConnector(chromeCoreConnector);
+  core = new CoreConnector(browserConnector);
   var oAuth = new ChromeTabAuth();
-  chromeCoreConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
+  browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
                            oAuth.login.bind(oAuth));
 
   // used for de-duplicating urls caught by the listeners

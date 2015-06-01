@@ -44,7 +44,7 @@
 
       <!-- not getting or trying to get access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
-        <paper-button raised on-tap='{{ start }}'>
+        <paper-button raised on-tap='{{ start }}' disabled?='{{ !ui.browserApi.canProxy }}'>
           Start getting access
         </paper-button>
       </div>

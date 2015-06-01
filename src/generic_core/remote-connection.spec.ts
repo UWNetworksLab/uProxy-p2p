@@ -8,13 +8,18 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+import mockFreedomRtcPeerConnection = require('../../../third_party/uproxy-lib/freedom/mocks/mock-rtcpeerconnection');
+
 import freedom_mocks = require('../mocks/freedom-mocks');
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
     'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
     'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); },
-    'metrics': () => { return new freedom_mocks.MockMetrics(); }
+    'metrics': () => { return new freedom_mocks.MockMetrics(); },
+    'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
+    'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); }
 });
 
+import globals = require('./globals');
 import remote_connection = require('./remote-connection');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
@@ -51,21 +56,21 @@ describe('remote_connection.RemoteConnection', () => {
 
   describe('client setup', () => {
     it('basic setup', () => {
-      spyOn(socksToRtc, 'startFromConfig').and.callThrough();
+      spyOn(socksToRtc, 'start').and.callThrough();
 
-      connection.startGet();
+      connection.startGet(globals.MESSAGE_VERSION);
 
-      expect(socksToRtc.startFromConfig).toHaveBeenCalled();
+      expect(socksToRtc.start).toHaveBeenCalled();
       expect(connection.localGettingFromRemote).toEqual(social.GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('starting get twice fails', () => {
-      connection.startGet();
+      connection.startGet(globals.MESSAGE_VERSION);
       expect(connection.startGet).toThrow();
     });
 
     it('getting access after success', (done) => {
-      var start = connection.startGet();
+      var start = connection.startGet(globals.MESSAGE_VERSION);
       socksToRtc.resolveStart(null);
 
       start.then(() => {
@@ -75,7 +80,7 @@ describe('remote_connection.RemoteConnection', () => {
     });
 
     it('cleanup after failure to start', (done) => {
-      var start = connection.startGet();
+      var start = connection.startGet(globals.MESSAGE_VERSION);
 
       socksToRtc.rejectStart(Error('fake rejection'));
 
@@ -85,14 +90,14 @@ describe('remote_connection.RemoteConnection', () => {
 
   describe('server setup', () => {
     it('basic setup', () => {
-      connection.startShare();
+      connection.startShare(globals.MESSAGE_VERSION);
 
       expect(rtc_to_net.RtcToNet).toHaveBeenCalled();
       expect(connection.localSharingWithRemote).toEqual(social.SharingState.TRYING_TO_SHARE_ACCESS);
     });
 
     it('sharing access after success', (done) => {
-      connection.startShare();
+      connection.startShare(globals.MESSAGE_VERSION);
 
       rtcToNet.resolveReady();
 
@@ -103,7 +108,7 @@ describe('remote_connection.RemoteConnection', () => {
     });
 
     it('cleanup after failure to start', (done) => {
-      var onceReady = connection.startShare();
+      var onceReady = connection.startShare(globals.MESSAGE_VERSION);
 
       onceReady.then(failTest)
       .catch(() => {
@@ -115,7 +120,7 @@ describe('remote_connection.RemoteConnection', () => {
     });
 
     it('close after successful start', (done) => {
-      connection.startShare();
+      connection.startShare(globals.MESSAGE_VERSION);
 
       rtcToNet.onceReady.then(() => {
         expect(connection.localSharingWithRemote).toEqual(social.SharingState.SHARING_ACCESS);
@@ -134,7 +139,7 @@ describe('remote_connection.RemoteConnection', () => {
   describe('bytes sent/received', () => {
     it('getting connection', (done) => {
       jasmine.clock().install();
-      var start = connection.startGet();
+      var start = connection.startGet(globals.MESSAGE_VERSION);
       socksToRtc.resolveStart(null);
 
       start.then(() => {

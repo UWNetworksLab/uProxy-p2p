@@ -93,6 +93,9 @@ Polymer({
       this.$.dialog.open();
     });
   },
+  openProxyError: function() {
+    this.$.proxyError.open();
+  },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     var signal = target.getAttribute('data-signal');
     if (signal) {
@@ -144,7 +147,7 @@ Polymer({
     }
   },
   signalToFireChanged: function() {
-    if (ui.signalToFire != '') {
+    if (ui.signalToFire) {
       this.fire('core-signal', {name: ui.signalToFire});
       ui.signalToFire = '';
     }
@@ -178,29 +181,8 @@ Polymer({
     }
     return false;
   },
-  topOfStatuses: function(statuses: string[], visible :boolean) {
-    // Returns number of pixels from the bottom of the window a toast
-    // can be positioned without interfering with the getting or sharing
-    // status bars.
-    // Since the toast always looks for the bottom of the window, not the
-    // bottom of its parent element, this function is needed to control toast
-    // placement rather than a simpler solution such as moving the toast
-    // inside the roster element.
-    var height = 10; // should start 10px up
-    var statusRowHeight = 58; // From style of the statusRow divs.
-
-    if (!visible) {
-      // if the statuses are not on the screen, we don't need to do anything
-      return height;
-    }
-
-    for (var i in statuses) {
-      if (statuses[i]) {
-        height += statusRowHeight;
-      }
-    }
-
-    return height;
+  topOfStatuses: function(statusHeight: number, visible :boolean) {
+    return 10 + (visible ? statusHeight : 0);
   },
   // mainPanel.selected can be either "drawer" or "main"
   // Our "drawer" is the settings panel. When the settings panel is open,
@@ -233,6 +215,7 @@ Polymer({
     //   someMethod(model.contacts.shareAccessContacts.trustedUproxy)
     // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
-        'updateIsSharingEnabledWithOthers'
+        'updateIsSharingEnabledWithOthers',
+    'ui.signalToFire': 'signalToFireChanged',
   }
 });

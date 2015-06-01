@@ -385,6 +385,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
+    browserApi.on('proxyDisconnected', this.proxyDisconnected);
   }
 
   // Because of an observer (in root.ts) watching the value of
@@ -528,6 +529,14 @@ export class UserInterface implements ui_constants.UiApi {
       }
 
       this.core.sendCopyPasteSignal(payload[i]);
+    }
+  }
+
+  public proxyDisconnected = () => {
+    if (this.isGettingAccess()) {
+      this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
+      this.fireSignal('open-proxy-error');
+      this.bringUproxyToFront();
     }
   }
 
