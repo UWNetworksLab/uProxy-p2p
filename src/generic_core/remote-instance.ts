@@ -15,6 +15,7 @@ import net = require('../../../third_party/uproxy-lib/net/net.types');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
 import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
@@ -184,8 +185,11 @@ export var remoteProxyInstance :RemoteInstance = null;
         }
 
         // Create a new RtcToNet instance each time a new round of client peer
-        // messages begins.
-        if (signalFromRemote.first) {
+        // messages begins. The type field check is so pre-bridge,
+        // MESSAGE_VERSION = 1, clients can initiate.
+        // TODO: remove the OFFER check once ancient clients are deprecated
+        if (signalFromRemote.first ||
+            ((<signals.Message>signalFromRemote).type === signals.Type.OFFER)) {
           this.connection_.resetSharerCreated();
           this.startShare_();
         }
