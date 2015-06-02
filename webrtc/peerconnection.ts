@@ -24,19 +24,16 @@ export enum State {
 }
 
 export interface PeerConnection<TSignallingMessage> {
-  // The |onceConnecting| promise is fulfilled when |pcState === CONNECTING|.
-  // i.e. when either |handleSignalMessage| is called with an offer message,
-  // or when |negotiateConnection| is called. The promise is never be rejected
-  // and is guarenteed to fulfilled before |onceConnected|.
-  onceConnecting  :Promise<void>;
-  // The |onceConnected| promise is fulfilled when pcState === CONNECTED
+  // Fulfills once a connection been established with the peer.
+  // Rejects if there is an error establishing the connection.
   onceConnected :Promise<void>;
-  // The |onceClosed| promise is fulfilled when pcState === CLOSED
+
+  // Fulfills when the peerconnection closes or fails to open.
+  // Never rejects.
   onceClosed :Promise<void>;
 
-  // Try to connect to the peer. Will change state from |WAITING| to
-  // |CONNECTING|. If there was an error, promise is rejected. Otherwise
-  // returned promise === |onceConnected|.
+  // Initiates a peerconnection.
+  // Returns onceConnected.
   negotiateConnection :() => Promise<void>;
 
   // A peer connection can either open a data channel to the peer (will
@@ -55,8 +52,7 @@ export interface PeerConnection<TSignallingMessage> {
   // peer.
   signalForPeerQueue :handler.QueueHandler<TSignallingMessage, void>;
 
-  // Closing the peer connection will close all associated data channels
-  // and set |pcState| to |CLOSED| (and hence fulfills |onceClosed|)
+  // Closes the peerconnection, fulfilling once the connection has closed.
   close: () => Promise<void>;
 }
 
@@ -114,16 +110,17 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Current state of this peer.
   private state_ = State.WAITING;
 
-  // Promise if fulfilled once we are starting to try to connect, either
-  // because a peer sent us the appropriate signalling message (an offer) or
-  // because we called negotiateConnection. Will be fulfilled before
-  // |onceConnected|. Will never be rejected.
-  public onceConnecting :Promise<void>;
-  // Fulfilled once we are connected to the peer. Rejected if connection fails
-  // to be established.
-  public onceConnected :Promise<void>;
-  // Fulfilled when closed. Will never reject.
-  public onceClosed :Promise<void>;
+  private fulfillConnected_ :() => void;
+  private rejectConnected_ :(e:Error) => void;
+  public onceConnected = new Promise<void>((F,R) => {
+    this.fulfillConnected_ = F;
+    this.rejectConnected_ = R;
+  });
+
+  private fulfillClosed_  :() => void;
+  public onceClosed = new Promise<void>((F,R) => {
+    this.fulfillClosed_ = F;
+  });
 
   // Queue of channels opened up by the remote peer.
   public peerOpenedChannelQueue :handler.Queue<DataChannel,void>;
@@ -132,14 +129,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   public signalForPeerQueue :handler.Queue<signals.Message,void>;
   public fromPeerCandidateQueue :
       handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>;
-
-  // Internal promise completion functions for the |onceConnecting|,
-  // |onceConnected| and |onceClosed| promises. Must only be
-  // called once (per respective promise).
-  private fulfillConnecting_    : () => void;
-  private fulfillConnected_     :() => void;
-  private rejectConnected_      :(e:Error) => void;
-  private fulfillClosed_  :() => void;
 
   // Data channel that acts as a control for if the peer connection should be
   // open or closed. Created during connection start up.
@@ -162,19 +151,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       public peerName_ ?:string) {
     this.peerName_ = this.peerName_ ||
         ('unnamed-' + (++PeerConnectionClass.automaticNameIndex_));
-
-    this.onceConnecting = new Promise<void>((F,R) => {
-        this.fulfillConnecting_ = F;
-      });
-    this.onceConnected = new Promise<void>((F,R) => {
-        // This ensures that onceConnecting consequences happen before
-        // onceConnected.
-        this.fulfillConnected_ = () => { this.onceConnecting.then(F); };
-        this.rejectConnected_ = R;
-      });
-    this.onceClosed = new Promise<void>((F,R) => {
-        this.fulfillClosed_ = F;
-      });
 
     // Once connected, add to global listing. Helpful for debugging.
     // Once disconnected, remove from global listing.
@@ -341,7 +317,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // Or only for the initiator?
     if (this.state_ === State.WAITING || this.state_ === State.CONNECTED) {
       this.state_ = State.CONNECTING;
-      this.fulfillConnecting_();
       this.pc_.createOffer().then(
           (d:freedom_RTCPeerConnection.RTCSessionDescription) => {
         // Emit the offer signal before calling setLocalDescription, which
@@ -393,7 +368,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     this.breakOfferTie_(description)
       .then(() => {
         this.state_ = State.CONNECTING;
-        this.fulfillConnecting_();
         // initial offer from peer
         return this.pc_.setRemoteDescription(description)
       })

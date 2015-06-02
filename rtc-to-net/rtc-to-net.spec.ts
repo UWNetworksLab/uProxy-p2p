@@ -61,7 +61,6 @@ describe('RtcToNet', function() {
     mockPeerconnection = <any>{
       dataChannels: {},
       negotiateConnection: jasmine.createSpy('negotiateConnection'),
-      onceConnecting: noopPromise,
       onceConnected: noopPromise,
       onceClosed: noopPromise,
       peerOpenedChannelQueue: new handler.Queue(),

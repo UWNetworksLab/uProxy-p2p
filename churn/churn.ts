@@ -205,7 +205,6 @@ var log :logging.Log = new logging.Log('churn');
     public signalForPeerQueue :handler.Queue<ChurnSignallingMessage, void>;
     public peerName :string;
 
-    public onceConnecting :Promise<void>;
     public onceConnected :Promise<void>;
     public onceClosed :Promise<void>;
 
@@ -289,7 +288,6 @@ var log :logging.Log = new logging.Log('churn');
       });
 
       // Forward onceXxx promises.
-      this.onceConnecting = this.obfuscatedConnection_.onceConnecting;
       this.onceConnected = this.obfuscatedConnection_.onceConnected;
       this.onceClosed = this.obfuscatedConnection_.onceClosed;
 
