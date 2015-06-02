@@ -421,12 +421,6 @@ var log :logging.Log = new logging.Log('churn');
         };
         this.signalForPeerQueue.handle(churnSignal);
       });
-      // NOTE: Replacing |this.dataChannels| in this way breaks recursive nesting.
-      // If the caller or |obfuscatedConnection_| applies the same approach,
-      // the code will break in hard-to-debug fashion.  This could be
-      // addressed by using a javascript "getter", or by changing the
-      // peerconnection.PeerConnection API.
-      this.dataChannels = this.obfuscatedConnection_.dataChannels;
       this.peerOpenedChannelQueue =
           this.obfuscatedConnection_.peerOpenedChannelQueue;
     }

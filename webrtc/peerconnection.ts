@@ -24,15 +24,6 @@ export enum State {
 }
 
 export interface PeerConnection<TSignallingMessage> {
-  // The state of this peer connection.
-  pcState :State;
-
-  // All open data channels.
-  // NOTE: There exists a bug in Chrome prior to version 37 which causes
-  //       entries in this object to continue to exist even after
-  //       the remote peer has closed a data channel.
-  dataChannels     :{[channelLabel:string] : DataChannel};
-
   // The |onceConnecting| promise is fulfilled when |pcState === CONNECTING|.
   // i.e. when either |handleSignalMessage| is called with an offer message,
   // or when |negotiateConnection| is called. The promise is never be rejected
