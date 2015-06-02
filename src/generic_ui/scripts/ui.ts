@@ -164,8 +164,6 @@ export class UserInterface implements ui_constants.UiApi {
 
   public isSharingDisabled = false;
 
-  public disconnectedWhileProxying = false;
-
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -214,10 +212,10 @@ export class UserInterface implements ui_constants.UiApi {
       // only react to updates to globalSettings and not reassignments.
       model.globalSettings = state.globalSettings;
 
-      this.copyPasteState.copyPasteState;
+      this.copyPasteState = state.copyPasteState;
       this.copyPastePendingEndpoint = state.copyPastePendingEndpoint;
       if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
-          this.copyPasteState.localSharingFromRemote !== social.SharingState.NONE) {
+          this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
         this.view = ui_constants.View.COPYPASTE;
       }
 
@@ -245,6 +243,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.syncUser(state['onlineNetwork'].roster[userId]);
       }
       this.updateSharingStatusBar_();
+      this.browserApi.fulfillLaunched();
 
     });
 
@@ -323,7 +322,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // indicates we just stopped offering access through copy+paste
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING, () => {
-      this.copyPasteState.localSharingFromRemote = social.SharingState.NONE;
+      this.copyPasteState.localSharingWithRemote = social.SharingState.NONE;
       if (!this.isGivingAccess()) {
         this.stopGivingInUi();
       }
@@ -428,8 +427,6 @@ export class UserInterface implements ui_constants.UiApi {
 
   public handleNotificationClick = (tag :string) => {
     // we want to bring uProxy to the front regardless of the info
-    this.browserApi.bringUproxyToFront();
-
     try {
       var data = JSON.parse(tag);
 
@@ -514,7 +511,7 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
 
-    if (social.SharingState.NONE !== this.copyPasteState.localSharingFromRemote) {
+    if (social.SharingState.NONE !== this.copyPasteState.localSharingWithRemote) {
       console.info('should not be processing a URL while in the middle of sharing');
       this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
       return;
@@ -553,7 +550,6 @@ export class UserInterface implements ui_constants.UiApi {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
       this.fireSignal('open-proxy-error');
-      this.bringUproxyToFront();
     }
   }
 
@@ -584,11 +580,11 @@ export class UserInterface implements ui_constants.UiApi {
     if (askUser) {
       this.browserApi.setIcon(Constants.ERROR_ICON);
       this.bringUproxyToFront();
-      this.disconnectedWhileProxying = true;
+      this.core.disconnectedWhileProxying = true;
       return;
     }
 
-    this.disconnectedWhileProxying = false;
+    this.core.disconnectedWhileProxying = false;
     this.proxySet_ = false;
     this.browserApi.stopUsingProxy();
   }
@@ -704,7 +700,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public isGivingAccess = () => {
     return Object.keys(this.instancesGivingAccessTo).length > 0 ||
-           this.copyPasteState.localSharingFromRemote === social.SharingState.SHARING_ACCESS;
+           this.copyPasteState.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
   }
 
   /**
@@ -738,7 +734,7 @@ export class UserInterface implements ui_constants.UiApi {
       model.onlineNetwork = null;
 
       if (!this.isLogoutExpected_ && !network.online &&
-          this.browser == 'chrome' && !this.disconnectedWhileProxying &&
+          this.browser == 'chrome' && !this.core.disconnectedWhileProxying &&
           this.instanceGettingAccessFrom_ == null) {
         console.warn('Unexpected logout, reconnecting to ' + network.name);
         this.reconnect(network.name);

@@ -33,10 +33,10 @@
     <core-signals on-core-signal-copypaste-back='{{ exitMode }}'></core-signals>
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
-    <uproxy-app-bar disableback='{{ ui.copyPasteState.localGettingFromRemote === GettingState.GETTING_ACCESS || ui.copyPasteState.localSharingFromRemote === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
-      <span hidden?='{{ SharingState.NONE === ui.copyPasteState.localSharingFromRemote }}'>Share a </span>
-      <span hidden?='{{ SharingState.NONE !== ui.copyPasteState.localSharingFromRemote || GettingState.NONE === ui.copyPasteState.localGettingFromRemote }}'>Request a </span>
-      <span hidden?='{{ SharingState.NONE !== ui.copyPasteState.localSharingFromRemote || !(SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteState.localGettingFromRemote) }}'>Start a </span>
+    <uproxy-app-bar disableback='{{ ui.copyPasteState.localGettingFromRemote === GettingState.GETTING_ACCESS || ui.copyPasteState.localSharingWithRemote === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
+      <span hidden?='{{ SharingState.NONE === ui.copyPasteState.localSharingWithRemote }}'>Share a </span>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteState.localSharingWithRemote || GettingState.NONE === ui.copyPasteState.localGettingFromRemote }}'>Request a </span>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteState.localSharingWithRemote || !(SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteState.localGettingFromRemote) }}'>Start a </span>
       <span>one-time connection</span>
     </uproxy-app-bar>
 
@@ -45,7 +45,7 @@
       navigating to the link again or asking your friend for a new link.
     </uproxy-bubble>
 
-    <div id='nothing' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.NONE || ui.copyPasteState.localSharingFromRemote !== SharingState.NONE }}'>
+    <div id='nothing' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.NONE || ui.copyPasteState.localSharingWithRemote !== SharingState.NONE }}'>
       <p>
         You are no longer getting access.  To request a connection, click the
         button below.
@@ -63,7 +63,7 @@
       <p>To share your connection, please ask your friend to send you their link.</p>
     </div>
 
-    <div id='getting' hidden?='{{ ui.copyPasteState.localGettingFromRemote === GettingState.NONE || ui.copyPasteState.localSharingFromRemote !== SharingState.NONE }}'>
+    <div id='getting' hidden?='{{ ui.copyPasteState.localGettingFromRemote === GettingState.NONE || ui.copyPasteState.localSharingWithRemote !== SharingState.NONE }}'>
       <div class='link' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.TRYING_TO_GET_ACCESS }}'>
         <p>
           To request access from a friend, copy and paste this URL to them over
@@ -112,8 +112,8 @@
       </div>
     </div>
 
-    <div id='sharing' hidden?='{{ ui.copyPasteState.localSharingFromRemote === SharingState.NONE }}'>
-      <div class='link' hidden?='{{ ui.copyPasteState.localSharingFromRemote !== SharingState.TRYING_TO_SHARE_ACCESS }}'>
+    <div id='sharing' hidden?='{{ ui.copyPasteState.localSharingWithRemote === SharingState.NONE }}'>
+      <div class='link' hidden?='{{ ui.copyPasteState.localSharingWithRemote !== SharingState.TRYING_TO_SHARE_ACCESS }}'>
         <p>Your friend has requested to use your internet connection.</p>
 
         <p>
@@ -145,7 +145,7 @@
 
       </div>
 
-      <div class='connected' hidden?='{{ ui.copyPasteState.localSharingFromRemote !== SharingState.SHARING_ACCESS }}'>
+      <div class='connected' hidden?='{{ ui.copyPasteState.localSharingWithRemote !== SharingState.SHARING_ACCESS }}'>
         <p>Success!  A one-time connection has been established.</p>
 
         <paper-button raised class='grey' on-tap='{{ stopSharing }}'>Stop sharing access</paper-button>

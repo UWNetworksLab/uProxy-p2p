@@ -30,6 +30,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
 
+  public disconnectedWhileProxying = false;
+
   constructor(private browserConnector_ :browser_connector.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_FULFILLED,
                                     this.handleRequestFulfilled_);

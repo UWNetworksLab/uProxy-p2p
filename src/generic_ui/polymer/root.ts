@@ -105,6 +105,7 @@ Polymer({
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
+    this.core = core;
     this.ui_constants = ui_types;
     this.user_interface = user_interface;
     this.model = model;

@@ -33,6 +33,9 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.on('emitRejected', this.handleEmitRejected_);
   }
 
+  public fulfillLaunched = () => {
+  }
+
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon',
         {

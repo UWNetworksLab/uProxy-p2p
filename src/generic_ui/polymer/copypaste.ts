@@ -52,12 +52,12 @@ Polymer({
   handleBackClick: function() {
     // do not let the user navigate away from this view if copypaste is active
     if ((ui.copyPasteState.localGettingFromRemote === social.GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) ||
-        ui.copyPasteState.localSharingFromRemote === social.SharingState.SHARING_ACCESS) {
+        ui.copyPasteState.localSharingWithRemote === social.SharingState.SHARING_ACCESS) {
       return;
     }
 
     if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE &&
-        ui.copyPasteState.localSharingFromRemote === social.SharingState.NONE) {
+        ui.copyPasteState.localSharingWithRemote === social.SharingState.NONE) {
       ui.view = ui_constants.View.SPLASH;
       return;
     }
@@ -123,7 +123,7 @@ Polymer({
     doneStopping.catch((e) => {
       console.warn('Error while closing getting connection', e);
     }).then(() => {
-      if (ui.copyPasteState.localSharingFromRemote !== social.SharingState.NONE) {
+      if (ui.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
         return this.stopSharing();
       }
     }).catch((e) => {
