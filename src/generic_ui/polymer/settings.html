@@ -121,21 +121,23 @@
     }
     </style>
 
-    <div hidden?='{{model.onlineNetwork==null}}' vertical layout>
+    <div hidden?='{{ !model.onlineNetworks.length }}' vertical layout>
       <div class='userInfo'>
-        <div class='userImage' hidden?='{{model.onlineNetwork.imageData==null}}'
-          style='background-image: url({{model.onlineNetwork.imageData}});'
-          ></div>
-        <div class='networkName'>Connected with {{model.onlineNetwork.name}}</div>
-        <!-- show userName and userId if both are available -->
-        <div hidden?='{{!model.onlineNetwork.userName}}'>
-          <div class='userInfoName'>{{model.onlineNetwork.userName}}</div>
-          <div class='userInfoID'>{{model.onlineNetwork.userId}}</div>
-        </div>
-        <!-- otherwise show only userId -->
-        <div hidden?='{{model.onlineNetwork.userName}}'>
-          <div class='userInfoIDWithoutName'>{{model.onlineNetwork.userId}}</div>
-        </div>
+        <template repeat="{{ network in model.onlineNetworks }}">
+          <div class='userImage' hidden?='{{network.imageData==null}}'
+            style='background-image: url({{network.imageData}});'
+            ></div>
+          <div class='networkName'>Connected with {{network.name}}</div>
+          <!-- show userName and userId if both are available -->
+          <div hidden?='{{!network.userName}}'>
+            <div class='userInfoName'>{{network.userName}}</div>
+            <div class='userInfoID'>{{network.userId}}</div>
+          </div>
+          <!-- otherwise show only userId -->
+          <div hidden?='{{network.userName}}'>
+            <div class='userInfoIDWithoutName'>{{network.userId}}</div>
+          </div>
+        </template>
       </div>
 
       <div id='settingsLinks'>
