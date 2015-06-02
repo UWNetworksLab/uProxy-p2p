@@ -14,6 +14,7 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
@@ -49,6 +50,9 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     public keyHash     :string;
     public description :string;
+
+    // Client version of the remote peer.
+    public messageVersion :number;
 
     public bytesSent   :number = 0;
     public bytesReceived    :number = 0;
@@ -116,6 +120,7 @@ export var remoteProxyInstance :RemoteInstance = null;
     }
 
     private handleConnectionUpdate_ = (update :uproxy_core_api.Update, data?:any) => {
+      log.debug('connection update: %1', uproxy_core_api.Update[update]);
       switch (update) {
         case uproxy_core_api.Update.SIGNALLING_MESSAGE:
           var clientId = this.user.instanceToClient(this.instanceId);
@@ -174,7 +179,8 @@ export var remoteProxyInstance :RemoteInstance = null;
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:social.PeerMessageType,
-                           signalFromRemote:signals.Message) :Promise<void> => {
+                           signalFromRemote:bridge.SignallingMessage,
+                           messageVersion:number) :Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -182,13 +188,16 @@ export var remoteProxyInstance :RemoteInstance = null;
           return Promise.resolve<void>();
         }
 
-        // Create a new rtcToNet object everytime there is an OFFER signal.
-        if (signalFromRemote.type == signals.Type.OFFER) {
-          // TODO: Move the logic for resetting the onceSharerCreated promise inside
-          // remote-connection.ts.
+        // Create a new RtcToNet instance each time a new round of client peer
+        // messages begins. The type field check is so pre-bridge,
+        // MESSAGE_VERSION = 1, clients can initiate.
+        // TODO: remove the OFFER check once ancient clients are deprecated
+        if (signalFromRemote.first ||
+            ((<signals.Message>signalFromRemote).type === signals.Type.OFFER)) {
           this.connection_.resetSharerCreated();
           this.startShare_();
         }
+
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
         return this.connection_.onceSharerCreated.then(() => {
@@ -245,7 +254,7 @@ export var remoteProxyInstance :RemoteInstance = null;
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
 
-        this.connection_.startShare().then(() => {
+        this.connection_.startShare(this.messageVersion).then(() => {
           clearTimeout(this.startRtcToNetTimeout_);
         }, () => {
           log.warn('Could not start sharing.');
@@ -282,7 +291,8 @@ export var remoteProxyInstance :RemoteInstance = null;
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection_.startGet().then((endpoints :net.Endpoint) => {
+      return this.connection_.startGet(this.messageVersion).then(
+          (endpoints :net.Endpoint) => {
         clearTimeout(this.startSocksToRtcTimeout_);
         return endpoints;
       });
@@ -300,11 +310,13 @@ export var remoteProxyInstance :RemoteInstance = null;
      * Instance Message.
      * Assumes that |data| actually belongs to this instance.
      */
-    public update = (data :social.InstanceHandshake) :Promise<void> => {
+    public update = (data:social.InstanceHandshake,
+        messageVersion:number) :Promise<void> => {
       return this.onceLoaded.then(() => {
         this.keyHash = data.keyHash;
         this.description = data.description;
         this.updateConsentFromWire_(data.consent);
+        this.messageVersion = messageVersion;
         this.saveToStorage();
       });
     }

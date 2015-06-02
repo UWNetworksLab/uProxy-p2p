@@ -454,7 +454,8 @@ module.exports = (grunt) ->
               'data/**/freedom-module.json'
               '!generic_core/freedom-module.json'
               'data/**/*.static.js'
-              'data/scripts/get_logs.js'
+              'data/generic_ui/scripts/get_logs.js'
+              'data/scripts/content-proxy.js'
               '!**/*spec*'
 
               'data/bower/webcomponentsjs/webcomponents.min.js'

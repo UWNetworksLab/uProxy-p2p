@@ -346,7 +346,8 @@ describe('social_network.FreedomNetwork', () => {
       type: social.PeerMessageType.INSTANCE,
       data: {
         'tigers': 'are also cats'
-      }
+      },
+      version: globals.MESSAGE_VERSION
     };
     spyOn(JSON, 'stringify').and.callThrough();
     network.send(network.getUser('mockuser'), 'fakeclient', outMsg)

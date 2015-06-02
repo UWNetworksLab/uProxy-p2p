@@ -7,6 +7,10 @@ export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public rejectStart :(v :Object) => void;
 
   public start = () => {
+    return new Promise<net.Endpoint>((resolve, reject) => {
+      this.resolveStart = resolve;
+      this.rejectStart = reject;
+    });
   }
 
   public stop = () => {
@@ -17,13 +21,6 @@ export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
 
   public on = (name :string, fn :(...args :Object[]) => void) => {
     this.events[name] = fn;
-  }
-
-  public startFromConfig = () => {
-    return new Promise<net.Endpoint>((resolve, reject) => {
-      this.resolveStart = resolve;
-      this.rejectStart = reject;
-    });
   }
 
   // TODO: remove onceStopping_ when

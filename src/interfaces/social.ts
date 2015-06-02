@@ -4,7 +4,6 @@
  */
 
 import net = require('../../../third_party/uproxy-lib/net/net.types');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import uproxy_core_api = require('./uproxy_core_api');
 
 export interface UserPath {
@@ -110,12 +109,18 @@ export enum PeerMessageType {
   INSTANCE_REQUEST
 }
 
-// Messages to the peer form the boundary for JSON parse / stringify.
 export interface PeerMessage {
   type :PeerMessageType;
   // TODO: Add a comment to explain the types that data can take and their
   // relationship to MessageType.
-  data : InstanceHandshake | signals.Message | {};
+  data: Object;
+}
+
+// Actual type sent over the wire; version is added immediately before
+// JSON-ification.
+export interface VersionedPeerMessage extends PeerMessage {
+  // Client version of the peer, viz. MESSAGE_VERSION.
+  version: number;
 }
 
 // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
@@ -123,7 +128,7 @@ export interface PeerMessage {
 // there is no concept of a single user having multiple clients; in the
 // manual network the client ID uniquely identifies the user.
 export interface HandleManualNetworkInboundMessageCommand {
-  message         :PeerMessage;
+  message         :VersionedPeerMessage;
   senderClientId  :string;
 }
 
