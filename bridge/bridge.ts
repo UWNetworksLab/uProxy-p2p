@@ -117,10 +117,6 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
-  // TODO: remove these public fields from the interface
-  public pcState :peerconnection.State;
-  public dataChannels :{[label:string] : peerconnection.DataChannel};
-
   // This is hazily defined by the superclass: roughly, it fulfills when the
   // peer has made or received an offer -- and there are several cases in which
   // it never fulfills, e.g. close is called before connection is established.
