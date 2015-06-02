@@ -1,0 +1,13 @@
+<polymer-element name='uproxy-name-for-network' attributes='network'>
+  <template>
+    <template if='{{ !network.userName || isEmail(network.userId) }}'>
+      {{network.userId}}
+    </template>
+
+    <template if='{{ network.userName && !isEmail(network.userId) }}'>
+      {{network.userName}}
+    </template>
+  </template>
+
+  <script src='name-for-network.js'></script>
+</polymer-element>
