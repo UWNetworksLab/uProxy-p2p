@@ -17,13 +17,13 @@ Polymer({
     /* bring copyPaste to the front in get mode */
     ui.view = ui_constants.View.COPYPASTE;
 
-    if (ui.copyPasteGettingState === social.GettingState.NONE) {
+    if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE) {
       this.startGetting();
     }
   },
   startGetting: function() {
     var doneStopping :Promise<void>;
-    if (ui.copyPasteGettingState !== social.GettingState.NONE) {
+    if (ui.copyPasteState.localGettingFromRemote !== social.GettingState.NONE) {
       console.warn('aborting previous copy+paste getting connection');
       doneStopping = this.stopGetting();
     } else {
@@ -51,13 +51,13 @@ Polymer({
   },
   handleBackClick: function() {
     // do not let the user navigate away from this view if copypaste is active
-    if ((ui.copyPasteGettingState === social.GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) ||
-        ui.copyPasteSharingState === social.SharingState.SHARING_ACCESS) {
+    if ((ui.copyPasteState.localGettingFromRemote === social.GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) ||
+        ui.copyPasteState.localSharingFromRemote === social.SharingState.SHARING_ACCESS) {
       return;
     }
 
-    if (ui.copyPasteGettingState === social.GettingState.NONE &&
-        ui.copyPasteSharingState === social.SharingState.NONE) {
+    if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE &&
+        ui.copyPasteState.localSharingFromRemote === social.SharingState.NONE) {
       ui.view = ui_constants.View.SPLASH;
       return;
     }
@@ -86,7 +86,7 @@ Polymer({
       return;
     }
 
-    if (ui.copyPasteGettingState !== social.GettingState.GETTING_ACCESS) {
+    if (ui.copyPasteState.localGettingFromRemote !== social.GettingState.GETTING_ACCESS) {
       console.error('Attempting to start copy+paste when not getting access');
       return;
     }
@@ -96,7 +96,7 @@ Polymer({
   },
   switchToGetting: function() {
     this.stopSharing().then(() => {
-      if (ui.copyPasteGettingState === social.GettingState.NONE) {
+      if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE) {
         this.startGetting();
       }
     });
@@ -114,7 +114,7 @@ Polymer({
   exitMode: function() {
     // if we are currently in the middle of setting up a connection, end it
     var doneStopping :Promise<void>;
-    if (ui.copyPasteGettingState !== social.GettingState.NONE) {
+    if (ui.copyPasteState.localGettingFromRemote !== social.GettingState.NONE) {
       doneStopping = this.stopGetting()
     } else {
       doneStopping = Promise.resolve<void>();
@@ -123,7 +123,7 @@ Polymer({
     doneStopping.catch((e) => {
       console.warn('Error while closing getting connection', e);
     }).then(() => {
-      if (ui.copyPasteSharingState !== social.SharingState.NONE) {
+      if (ui.copyPasteState.localSharingFromRemote !== social.SharingState.NONE) {
         return this.stopSharing();
       }
     }).catch((e) => {

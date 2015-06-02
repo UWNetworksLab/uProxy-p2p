@@ -133,10 +133,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   // TODO: refactor this to make fields on copy paste state
   // or something like that.
-  public copyPasteGettingState :social.GettingState = social.GettingState.NONE;
-  public copyPasteSharingState :social.SharingState = social.SharingState.NONE;
-  public copyPasteBytesSent :number = 0;
-  public copyPasteBytesReceived :number = 0;
+  public copyPasteState :uproxy_core_api.ConnectionState;
 
   public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
   public copyPasteGettingMessage :string = '';
@@ -217,13 +214,10 @@ export class UserInterface implements ui_constants.UiApi {
       // only react to updates to globalSettings and not reassignments.
       model.globalSettings = state.globalSettings;
 
-      this.copyPasteGettingState = state.copyPasteState.localGettingFromRemote;
-      this.copyPasteSharingState = state.copyPasteState.localSharingWithRemote;
-      this.copyPasteBytesSent = state.copyPasteState.bytesSent;
-      this.copyPasteBytesReceived = state.copyPasteState.bytesReceived;
+      this.copyPasteState.copyPasteState;
       this.copyPastePendingEndpoint = state.copyPastePendingEndpoint;
-      if (this.copyPasteGettingState !== social.GettingState.NONE ||
-          this.copyPasteSharingState !== social.SharingState.NONE) {
+      if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
+          this.copyPasteState.localSharingFromRemote !== social.SharingState.NONE) {
         this.view = ui_constants.View.COPYPASTE;
       }
 
@@ -329,7 +323,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // indicates we just stopped offering access through copy+paste
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING, () => {
-      this.copyPasteSharingState = social.SharingState.NONE;
+      this.copyPasteState.localSharingFromRemote = social.SharingState.NONE;
       if (!this.isGivingAccess()) {
         this.stopGivingInUi();
       }
@@ -337,10 +331,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // status of the current copy+paste connection
     core.onUpdate(uproxy_core_api.Update.STATE, (state :uproxy_core_api.ConnectionState) => {
-      this.copyPasteGettingState = state.localGettingFromRemote;
-      this.copyPasteSharingState = state.localSharingWithRemote;
-      this.copyPasteBytesSent = state.bytesSent;
-      this.copyPasteBytesReceived = state.bytesReceived;
+      this.copyPasteState = state;
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
@@ -523,7 +514,7 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
 
-    if (social.SharingState.NONE !== this.copyPasteSharingState) {
+    if (social.SharingState.NONE !== this.copyPasteState.localSharingFromRemote) {
       console.info('should not be processing a URL while in the middle of sharing');
       this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
       return;
@@ -538,7 +529,8 @@ export class UserInterface implements ui_constants.UiApi {
         break;
       case 'offer':
         expectedType = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
-        if (social.GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
+        if (social.GettingState.TRYING_TO_GET_ACCESS
+            !== this.copyPasteState.localGettingFromRemote) {
           console.warn('currently not expecting any information, aborting');
           this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
           return;
@@ -712,7 +704,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public isGivingAccess = () => {
     return Object.keys(this.instancesGivingAccessTo).length > 0 ||
-           this.copyPasteSharingState === social.SharingState.SHARING_ACCESS;
+           this.copyPasteState.localSharingFromRemote === social.SharingState.SHARING_ACCESS;
   }
 
   /**
