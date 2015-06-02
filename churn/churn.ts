@@ -201,8 +201,6 @@ var log :logging.Log = new logging.Log('churn');
    */
   export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
-    public pcState :peerconnection.State;
-    public dataChannels :{[channelLabel:string] : peerconnection.DataChannel};
     public peerOpenedChannelQueue :handler.QueueHandler<peerconnection.DataChannel, void>;
     public signalForPeerQueue :handler.Queue<ChurnSignallingMessage, void>;
     public peerName :string;
@@ -290,17 +288,10 @@ var log :logging.Log = new logging.Log('churn');
         this.configurePipe_(answers[0], answers[1], answers[2], answers[3]);
       });
 
-      // Handle |pcState| and related promises.
-      this.pcState = peerconnection.State.WAITING;
-      this.onceConnecting = this.obfuscatedConnection_.onceConnecting.then(
-          () => {
-        this.pcState = peerconnection.State.CONNECTING;
-      });
-      this.onceConnected = this.obfuscatedConnection_.onceConnected.then(() => {
-        this.pcState = peerconnection.State.CONNECTED;
-      });
-      this.onceClosed = this.obfuscatedConnection_.onceClosed.then(
-          () => { this.pcState = peerconnection.State.CLOSED; });
+      // Forward onceXxx promises.
+      this.onceConnecting = this.obfuscatedConnection_.onceConnecting;
+      this.onceConnected = this.obfuscatedConnection_.onceConnected;
+      this.onceClosed = this.obfuscatedConnection_.onceClosed;
 
       // Debugging.
       this.onceProbingComplete_.then((endpoint:NatPair) => {

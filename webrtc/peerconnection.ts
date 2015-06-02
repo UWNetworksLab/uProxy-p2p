@@ -108,11 +108,12 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // are in Freedom.
   public static peerConnections :{ [name:string] : PeerConnection<signals.Message> } = {};
 
-  // All WebRtc data channels associated with this data peer.
-  public dataChannels     :{[channelLabel:string] : DataChannel};
+  // All open data channels associated with this peerconnection.
+  private channels_ :{[channelLabel:string]:DataChannel} = {};
 
-  // The current state of the data peer;
-  public pcState :State;
+  // Current state of this peer.
+  private state_ = State.WAITING;
+
   // Promise if fulfilled once we are starting to try to connect, either
   // because a peer sent us the appropriate signalling message (an offer) or
   // because we called negotiateConnection. Will be fulfilled before
@@ -198,12 +199,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     this.fromPeerCandidateQueue =
         new handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>();
 
-    // This state variable is an abstraction of the PeerConnection state that
-    // simplifies usage and management of state.
-    this.pcState = State.WAITING;
-
-    this.dataChannels = {};
-
     // Add basic event handlers.
     this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
       if(candidate.candidate) {
@@ -230,11 +225,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   public close = () : Promise<void> => {
     log.debug('%1: close', this.peerName_);
 
-    if (this.pcState === State.CONNECTING) {
+    if (this.state_ === State.CONNECTING) {
       this.rejectConnected_(new Error('close was called while connecting.'));
     }
 
-    this.pcState = State.CLOSED;
+    this.state_ = State.CLOSED;
     this.fulfillClosed_();
 
     return this.pc_.getSignalingState().then((state:string) => {
@@ -246,10 +241,10 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   }
 
   private closeWithError_ = (s:string) : void => {
-    if (this.pcState === State.CONNECTING) {
+    if (this.state_ === State.CONNECTING) {
       this.rejectConnected_(new Error(s));
     }
-    this.pcState = State.CLOSED;
+    this.state_ = State.CLOSED;
     this.fulfillClosed_();
     this.pc_.getSignalingState().then((state:string) => {
       if (state !== 'closed') {
@@ -272,7 +267,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         return;
       }
 
-      if (state === 'stable' && this.pcState === State.CONNECTED) {
+      if (state === 'stable' && this.state_ === State.CONNECTED) {
         // This happens when new data channels are created. TODO: file an issue
         // in Chrome; unclear that this should happen when creating new data
         // channels.
@@ -285,11 +280,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       // Right now in chrome in state CONNECTED, re-negotiation can happen and
       // it will trigger non-close signalling state change. Till this behavior
       // changes, include CONNECTED state as well.
-      if (this.pcState !== State.CONNECTING &&
-          this.pcState !== State.CONNECTED) {
+      if (this.state_ !== State.CONNECTING &&
+          this.state_ !== State.CONNECTED) {
         // Something unexpected happened, better close down properly.
         this.closeWithError_('Unexpected onSignallingStateChange in state: ' +
-            State[this.pcState]);
+            State[this.state_]);
         return;
       }
     });
@@ -310,7 +305,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
       // No action is needed when the state reaches 'connected', because
       // |this.completeConnection_| is called by the datachannel's |onopen|.
-      if (state === 'failed' && this.pcState !== State.CLOSED) {
+      if (state === 'failed' && this.state_ !== State.CLOSED) {
         this.closeWithError_('Connection lost: ' + state);
       }
     });
@@ -319,7 +314,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Once we have connected, we need to fulfill the connection promise and set
   // the state.
   private completeConnection_ = () : void => {
-    this.pcState = State.CONNECTED;
+    this.state_ = State.CONNECTED;
     this.fulfillConnected_();
   }
 
@@ -344,8 +339,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // CONSIDER: might we ever need to re-create an onAnswer? Exactly how/when
     // do onnegotiation events get raised? Do they get raised on both sides?
     // Or only for the initiator?
-    if (this.pcState === State.WAITING || this.pcState === State.CONNECTED) {
-      this.pcState = State.CONNECTING;
+    if (this.state_ === State.WAITING || this.state_ === State.CONNECTED) {
+      this.state_ = State.CONNECTING;
       this.fulfillConnecting_();
       this.pc_.createOffer().then(
           (d:freedom_RTCPeerConnection.RTCSessionDescription) => {
@@ -367,7 +362,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       });
     } else {
       this.closeWithError_('onnegotiationneeded fired in unexpected state ' +
-          State[this.pcState]);
+          State[this.state_]);
     }
   }
 
@@ -397,7 +392,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       (description:freedom_RTCPeerConnection.RTCSessionDescription) : void => {
     this.breakOfferTie_(description)
       .then(() => {
-        this.pcState = State.CONNECTING;
+        this.state_ = State.CONNECTING;
         this.fulfillConnecting_();
         // initial offer from peer
         return this.pc_.setRemoteDescription(description)
@@ -528,14 +523,14 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     return datachannel.createFromFreedomId(id)
         .then((dataChannel:DataChannel) => {
       var label = dataChannel.getLabel();
-      this.dataChannels[label] = dataChannel;
+      this.channels_[label] = dataChannel;
       dataChannel.onceClosed.then(() => {
-        delete this.dataChannels[label];
+        delete this.channels_[label];
         if (label === '') {
           log.debug('%1: discarded control channel', this.peerName_);
         } else {
           log.debug('%1: discarded channel %2 (%3 remaining)',
-              this.peerName_, label, Object.keys(this.dataChannels).length);
+              this.peerName_, label, Object.keys(this.channels_).length);
         }
       });
       return dataChannel;
@@ -599,9 +594,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   public toString = () : string => {
     var s :string = this.peerName_ + ': { \n';
     var channelLabel :string;
-    for (channelLabel in this.dataChannels) {
+    for (channelLabel in this.channels_) {
       s += '  ' + channelLabel + ': ' +
-          this.dataChannels[channelLabel].toString() + '\n';
+          this.channels_[channelLabel].toString() + '\n';
     }
     s += '}';
     return s;
