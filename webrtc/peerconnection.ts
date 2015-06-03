@@ -479,7 +479,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // Listen for heartbeats from the other side.
     var lastPingTimestamp :number = Date.now();
     channel.dataFromPeerQueue.setSyncHandler((data:Data) => {
-      if (data.str && data.str === HEARTBEAT_MESSAGE_) {
+      if (data.str === HEARTBEAT_MESSAGE_) {
         lastPingTimestamp = Date.now();
       } else {
         log.warn('%1: unexpected data on control channel: %2',
