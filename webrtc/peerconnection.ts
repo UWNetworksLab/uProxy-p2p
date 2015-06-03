@@ -144,22 +144,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       public peerName_ ?:string) {
     this.peerName_ = this.peerName_ || ('unnamed-' + (++automaticNameIndex_));
 
-    // Add basic event handlers.
-    this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
-      if(candidate.candidate) {
-        log.debug('%1: local ice candidate: %2',
-            this.peerName_, candidate.candidate);
-        this.emitSignalForPeer_({
-          type: signals.Type.CANDIDATE,
-          candidate: candidate.candidate
-        });
-      } else {
-        log.debug('%1: no more ice candidates', this.peerName_);
-        this.emitSignalForPeer_({
-          type: signals.Type.NO_MORE_CANDIDATES
-        });
-      }
-    });
+    this.pc_.on('onicecandidate', this.onIceCandidate_);
     this.pc_.on('onnegotiationneeded', this.onNegotiationNeeded_);
     this.pc_.on('ondatachannel', this.onPeerStartedDataChannel_);
     this.pc_.on('onsignalingstatechange', this.onSignallingStateChange_);
@@ -330,6 +315,22 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         return Promise.resolve();
       }
     });
+  }
+
+  private onIceCandidate_ = (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
+    if(candidate.candidate) {
+      log.debug('%1: local ice candidate: %2',
+          this.peerName_, candidate.candidate);
+      this.emitSignalForPeer_({
+        type: signals.Type.CANDIDATE,
+        candidate: candidate.candidate
+      });
+    } else {
+      log.debug('%1: no more ice candidates', this.peerName_);
+      this.emitSignalForPeer_({
+        type: signals.Type.NO_MORE_CANDIDATES
+      });
+    }
   }
 
   private handleOfferSignalMessage_ =
