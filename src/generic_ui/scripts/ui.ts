@@ -133,7 +133,12 @@ export class UserInterface implements ui_constants.UiApi {
 
   // TODO: refactor this to make fields on copy paste state
   // or something like that.
-  public copyPasteState :uproxy_core_api.ConnectionState;
+  public copyPasteState :uproxy_core_api.ConnectionState = {
+    localGettingFromRemote: social.GettingState.NONE,
+    localSharingWithRemote: social.SharingState.NONE,
+    bytesSent: 0,
+    bytesReceived: 0
+  };
 
   public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
   public copyPasteGettingMessage :string = '';
