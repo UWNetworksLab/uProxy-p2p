@@ -48,10 +48,11 @@
     .nameRow:hover core-icon.expand {
       opacity: 1;
     }
-    .avatar {
+    uproxy-avatar {
       width: 40px; height: 40px;
       min-width: 40px;
-      border: none; border-radius: 50%;
+      border: none;
+      border-radius: 50%;
       background-color: #eee;
       vertical-align: middle;
       box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.12);
@@ -110,7 +111,7 @@
     <div on-tap='{{ toggle }}' tabindex='-1'
         class='nameRow frame {{ isOnline ? "online" : "offline" }}'
         center horizontal layout>
-      <img class='avatar' src='{{ contact.imageData }}' />
+      <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}'></uproxy-avatar>
       <div class='name'>{{ contact.name }}</div>
 
       <div flex class="iconWrapper">

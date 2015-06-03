@@ -8,6 +8,7 @@
 <link rel='import' href='link.html'>
 <link rel='import' href='network-in-settings.html'>
 <link rel='import' href='name-for-network.html'>
+<link rel='import' href='avatar.html'>
 
 <polymer-element name='uproxy-settings'>
 
@@ -50,22 +51,18 @@
     #pictures {
       height: 64px;
     }
-    .userImage {
-      border-radius: 50%;
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
+    uproxy-avatar {
       width: 40px;
       height: 40px;
     }
-    #pictures :nth-child(2) {
+    #pictures>:nth-child(2) {
       flex: 1;
     }
-    #pictures :nth-child(2) .userImage {
+    #pictures>:nth-child(2) uproxy-avatar {
       width: 64px;
       height: 64px;
     }
-    #pictures :not(:nth-child(2)) {
+    #pictures>:not(:nth-child(2)) {
       padding-left: 3px;
       padding-right: 3px;
     }
@@ -148,15 +145,13 @@
 
     <div hidden?='{{ !model.onlineNetworks.length }}' vertical layout>
       <div class='userInfo'>
-        <div id='pictures' horizontal layout>
+        <div id='pictures' horizontal layout hidden?='{{ model.onlineNetworks.length === 1 && !model.onlineNetworks[0].imageData }}'>
           <template repeat='{{network in model.onlineNetworks}}'>
             <!-- this currently breaks with more than 4 logged-in networks -->
             <div>
-              <div class='userImage' hidden?='{{network.imageData==null}}'
-                style='background-image: url({{network.imageData}});'
-                ></div>
+              <uproxy-avatar src='{{ network.imageData }}' network='{{ network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}'></uproxy-avatar>
             </div>
-            </template>
+          </template>
         </div>
 
         <div class='clickable currentAccountInfo' on-tap='{{ toggleAccountChooser }}'>
