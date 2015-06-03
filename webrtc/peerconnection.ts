@@ -127,13 +127,12 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     this.fulfillClosed_ = F;
   });
 
-  // Queue of channels opened up by the remote peer.
-  public peerOpenedChannelQueue :handler.Queue<DataChannel,void>;
+  public peerOpenedChannelQueue = new handler.Queue<DataChannel,void>();
 
-  // Signals to be send to the remote peer by this peer.
-  public signalForPeerQueue :handler.Queue<signals.Message,void>;
-  public fromPeerCandidateQueue :
-      handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>;
+  public signalForPeerQueue = new handler.Queue<signals.Message,void>();
+
+  public fromPeerCandidateQueue =
+      new handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>();
 
   // Data channel that acts as a control for if the peer connection should be
   // open or closed. Created during connection start up.
@@ -147,17 +146,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       // interface
       public peerName_ ?:string) {
     this.peerName_ = this.peerName_ || ('unnamed-' + (++automaticNameIndex_));
-
-    // New data channels from the peer.
-    this.peerOpenedChannelQueue = new handler.Queue<DataChannel,void>();
-
-    // Messages to send to the peer.
-    this.signalForPeerQueue = new handler.Queue<signals.Message,void>();
-
-    // candidates form the peer; need to be queued until after remote
-    // descrption has been set.
-    this.fromPeerCandidateQueue =
-        new handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>();
 
     // Add basic event handlers.
     this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
