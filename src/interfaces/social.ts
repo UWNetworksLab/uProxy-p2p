@@ -113,7 +113,7 @@ export interface PeerMessage {
   type :PeerMessageType;
   // TODO: Add a comment to explain the types that data can take and their
   // relationship to MessageType.
-  data: Object;
+  data: any;
 }
 
 // Actual type sent over the wire; version is added immediately before

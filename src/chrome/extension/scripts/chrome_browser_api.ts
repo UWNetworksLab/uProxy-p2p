@@ -217,13 +217,13 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public emit = (name :string, ...args :Object[]) => {
-    if (name in this.events_) {
-      this.bringUproxyToFront().then(() => {
+    this.bringUproxyToFront().then(() => {
+      if (name in this.events_) {
         this.events_[name].apply(null, args);
-      });
-    } else {
-      console.error('Attempted to trigger an unknown event', name);
-    }
+      } else {
+        console.error('Attempted to trigger an unknown event', name);
+      }
+    });
   }
 
   public frontedPost = (data :any,

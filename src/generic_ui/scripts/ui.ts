@@ -213,11 +213,15 @@ export class UserInterface implements ui_constants.UiApi {
       model.globalSettings = state.globalSettings;
 
       this.copyPasteState = state.copyPasteState;
+      this.copyPasteGettingMessage = state.copyPasteGettingMessage;
+      this.copyPasteSharingMessage = state.copyPasteSharingMessage;
       this.copyPastePendingEndpoint = state.copyPastePendingEndpoint;
       if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
           this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
         this.view = ui_constants.View.COPYPASTE;
       }
+
+      this.browserApi.fulfillLaunched();
 
       if (state['onlineNetwork'] === null) {
         return;
@@ -243,7 +247,6 @@ export class UserInterface implements ui_constants.UiApi {
         this.syncUser(state['onlineNetwork'].roster[userId]);
       }
       this.updateSharingStatusBar_();
-      this.browserApi.fulfillLaunched();
 
     });
 
@@ -278,32 +281,13 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.SIGNALLING_MESSAGE, (message :social.PeerMessage) => {
-      var data :social.PeerMessage[] = [], str = '';
 
       switch (message.type) {
         case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          str = this.copyPasteGettingMessage;
+          this.copyPasteGettingMessage = message.data;
           break;
         case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          str = this.copyPasteSharingMessage;
-          break;
-      }
-
-      if (str) {
-        data = JSON.parse(atob(decodeURIComponent(str)));
-      }
-
-      data.push(message);
-
-      str = encodeURIComponent(btoa(JSON.stringify(data)));
-
-      // reverse of above switch (since I can't just use a reference)
-      switch (message.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          this.copyPasteGettingMessage = str;
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          this.copyPasteSharingMessage = str;
+          this.copyPasteSharingMessage = message.data;
           break;
       }
     });

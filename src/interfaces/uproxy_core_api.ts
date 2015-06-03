@@ -32,7 +32,9 @@ export interface InitialState {
   globalSettings :GlobalSettings;
   onlineNetwork: social.NetworkState;
   copyPasteState: ConnectionState;
-  copyPastePendingEndpoint :net.Endpoint
+  copyPastePendingEndpoint :net.Endpoint;
+  copyPasteGettingMessage :string;
+  copyPasteSharingMessage :string;
 }
 
 export interface ConnectionState {
