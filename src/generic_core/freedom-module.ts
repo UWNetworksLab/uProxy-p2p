@@ -53,8 +53,12 @@ var exported = {
 export = exported;
 
 ui_connector.onCommand(
-    uproxy_core_api.Command.GET_INITIAL_STATE,
-    ui_connector.sendInitialState);
+    uproxy_core_api.Command.GET_INITIAL_STATE_DEPRECATED_0_8_9,
+    () => {
+      core.getFullState().then((state :uproxy_core_api.InitialState) => {
+        ui_connector.update(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_9, state);
+      });
+    });
 
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.LOGIN,
@@ -109,6 +113,10 @@ ui_connector.onPromiseCommand(
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_NAT_TYPE,
     core.getNatType);
+
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.GET_FULL_STATE,
+    core.getFullState);
 
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
     globals.metrics, globals.storage,

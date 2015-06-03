@@ -23,6 +23,9 @@ describe('UI.UserInterface', () => {
         'core',
         ['reset', 'onUpdate', 'sendCommand', 'on', 'connect']);
 
+    // assume connect always resolves immediately
+    (<jasmine.Spy>mockCore.connect).and.returnValue(Promise.resolve());
+
     // Store all the handlers for Updates from core in a map.
     // These functions will be called directly from tests
     // instead of being triggered by events emitted from the core.

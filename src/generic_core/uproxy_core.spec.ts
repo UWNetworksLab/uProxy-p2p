@@ -95,25 +95,23 @@ describe('Core', () => {
       network.myInstance = new local_instance.LocalInstance(network, 'fakeUser');
       return network;
     });
-    expect(Object.keys(social_network.pendingNetworks).length).toEqual(0);
-    expect(Object.keys(social_network.networks['mockNetwork']).length).toEqual(0);
 
     // Login promise is not resolved so network object stays in pending logins
-    var loginSpy = spyOn(network, 'login').and.returnValue(
-        new Promise((F, R) => {}));
+    var loginSpy = spyOn(network, 'login');
+    loginSpy.and.returnValue(new Promise(() => {}));
+
     core.login('mockNetwork');
-    expect(Object.keys(social_network.pendingNetworks).length).toEqual(1);
-    expect(Object.keys(social_network.networks['mockNetwork']).length).toEqual(0);
+    expect(loginSpy).toHaveBeenCalled();
 
     // Core login will envoke login method on the same network object
     // This time it succeeds, so network object is moved from pending logins
     // to social_network.networks.
-    (<any>loginSpy).and.callFake(() => {
-      return Promise.resolve();
-    });
+    loginSpy.and.returnValue(Promise.resolve());
     core.login('mockNetwork').then(() => {
-      expect(Object.keys(social_network.pendingNetworks).length).toEqual(0);
-      expect(Object.keys(social_network.networks['mockNetwork']).length).toEqual(1);
+      // should have called login on the same spy twice and only constructed
+      // one network
+      expect(loginSpy.calls.count()).toEqual(2);
+      expect((<any>(social_network.FreedomNetwork)).calls.count()).toEqual(1);
     }).then(done);
   });
 });

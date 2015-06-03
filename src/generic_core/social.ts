@@ -35,8 +35,6 @@ import storage = globals.storage;
 
 import ui = ui_connector.connector;
 
-
-
   export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
@@ -70,15 +68,13 @@ import ui = ui_connector.connector;
   // TODO: rather than make this global, this should be a parameter of the core.
   // This simplified Social to being a SocialNetwork and removes the need for
   // this module. `initializeNetworks` becomes part of the core constructor.
-  // TODO(salomegeo): Change structure of network
   export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
-  export var pendingNetworks:{[networkName:string]:social.Network} = {};
 
   export function removeNetwork(networkName :string, userId :string) :void {
     if (networkName !== MANUAL_NETWORK_ID) {
       delete networks[networkName][userId];
     }
-    notifyUI(networkName);
+    notifyUI(networkName, userId);
   }
 
   /**
@@ -121,32 +117,34 @@ import ui = ui_connector.connector;
     return networks[networkName][userId];
   }
 
-  export function getOnlineNetwork() :social.NetworkState {
-    for (var network in networks) {
-      if (Object.keys(networks[network]).length > 0) {
-        var userId = Object.keys(networks[network])[0];
-        return networks[network][userId].getNetworkState();
-      }
+
+export function getOnlineNetworks() :social.NetworkState[] {
+  var networkStates :social.NetworkState[] = [];
+  for (var networkName in networks) {
+    for (var userId in networks[networkName]) {
+      networkStates.push(networks[networkName][userId].getNetworkState());
     }
-    return null;
+  }
+  return networkStates;
+}
+
+export function notifyUI(networkName :string, userId :string) {
+  var online = false;
+  if (typeof networks[networkName] === 'undefined') {
+    throw Error('Trying to update UI with unknown network ' + networkName);
   }
 
-  export function notifyUI(networkName :string) {
-    var userId = '';
-    var online = false;
-    if (Object.keys(networks[networkName]).length > 0) {
-      online = true;
-      // Hack. Once we have a support for multiple networks in ui
-      // we'll change this.
-      userId = (Object.keys(networks[networkName]))[0];
-    };
-    var payload :social.NetworkMessage = {
-      name: networkName,
-      online: online,
-      userId: userId
-    };
-    ui.update(uproxy_core_api.Update.NETWORK, payload);
+  if (typeof networks[networkName][userId] !== 'undefined') {
+    online = true;
   }
+
+  var payload :social.NetworkMessage = {
+    name: networkName,
+    online: online,
+    userId: userId
+  };
+  ui.update(uproxy_core_api.Update.NETWORK, payload);
+}
 
   // Implements those portions of the Network interface for which the logic is
   // common to multiple Network implementations. Essentially an abstract base
@@ -303,8 +301,6 @@ import ui = ui_connector.connector;
       this.onceLoggedIn_ = null;
       this.freedomApi_ = this.provider_();
 
-      // TODO: Update these event name-strings when freedom updates to
-      // typescript and Enums.
       this.freedomApi_.on('onUserProfile',
                           this.delayForLogin_(this.handleUserProfile));
       this.freedomApi_.on('onClientState',
@@ -504,22 +500,26 @@ import ui = ui_connector.connector;
           rememberLogin: remember
         };
       }
+
       this.onceLoggedIn_ = this.freedomApi_.login(request)
           .then((freedomClient :freedom_Social.ClientState) => {
+            var userId = freedomClient.userId;
+            if (userId in networks[this.name]) {
+              // If user is already logged in with the same (network, userId)
+              // log out from existing network before replacing it.
+              networks[this.name][userId].logout();
+            }
+            networks[this.name][userId] = this;
+
             // Upon successful login, save local client information.
             this.startMonitor_();
             log.info('logged into network', this.name);
-            return this.prepareLocalInstance_(freedomClient.userId).then(() => {
+            return this.prepareLocalInstance_(userId).then(() => {
               this.myInstance.clientId = freedomClient.clientId;
               // Notify UI that this network is online before we fulfill
               // the onceLoggedIn_ promise.  This ensures that the UI knows
               // that the network is online before we send user updates.
-              var payload :social.NetworkMessage = {
-                name: this.name,
-                online: true,
-                userId: freedomClient.userId
-              };
-              ui.update(uproxy_core_api.Update.NETWORK, payload);
+              notifyUI(this.name, userId);
             });
           });
       return this.onceLoggedIn_
@@ -540,7 +540,7 @@ import ui = ui_connector.connector;
           })
           .catch((e) => {
             log.error('Could not login to network');
-            throw Error('Could not login');
+            throw e;
           });
     }
 
@@ -625,8 +625,8 @@ import ui = ui_connector.connector;
       return options ? options.enableMonitoring === true : true;
     }
 
-    public getNetworkState = () : social.NetworkState => {
-      var rosterState : {[userId :string] :social.UserData} = {};
+    public getNetworkState = () :social.NetworkState => {
+      var rosterState :{[userId :string] :social.UserData} = {};
       for (var userId in this.roster) {
         var userState = this.roster[userId].currentStateForUI()
         if (userState !== null) {
