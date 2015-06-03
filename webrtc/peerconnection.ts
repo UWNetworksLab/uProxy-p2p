@@ -232,13 +232,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     });
   }
 
-  // Once we have connected, we need to fulfill the connection promise and set
-  // the state.
-  private completeConnection_ = () : void => {
-    this.state_ = State.CONNECTED;
-    this.fulfillConnected_();
-  }
-
   public negotiateConnection = () : Promise<void> => {
     log.debug('%1: negotiateConnection', this.peerName_);
 
@@ -466,8 +459,10 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // connection. The appropriate callbacks for opening, closing, and
   // initiating a heartbeat is are registered here.
   private registerControlChannel_ = (channel:DataChannel) : void => {
-    channel.onceOpened.then(this.completeConnection_).then(() => {
+    channel.onceOpened.then().then(() => {
       this.initiateHeartbeat_(channel);
+      this.state_ = State.CONNECTED;
+      this.fulfillConnected_();
     });
     channel.onceClosed.then(this.close);
   }
