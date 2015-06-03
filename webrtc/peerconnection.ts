@@ -62,9 +62,6 @@ export interface PeerConnection<TSignallingMessage> {
 // non-empty channel labels.
 var CONTROL_CHANNEL_LABEL = '';
 
-// Number of automatically generated names generated so far.
-var automaticNameIndex_ = 0;
-
 // Interval, in milliseconds, after which the peerconnection will
 // terminate if no heartbeat is received from the peer.
 var HEARTBEAT_TIMEOUT_MS_ = 30000;
@@ -108,6 +105,8 @@ var HEARTBEAT_MESSAGE_ = 'heartbeat';
 //   3. (callback) -> controlDataChannel_.onceOpened
 //      3.1. completeConnection_ -> [Fulfill onceConnected]
 export class PeerConnectionClass implements PeerConnection<signals.Message> {
+  // Count of instances created to date.
+  private static numCreations_ :number = 0;
 
   // All open data channels associated with this peerconnection.
   private channels_ :{[channelLabel:string]:DataChannel} = {};
@@ -139,10 +138,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   constructor(
       private pc_:freedom_RTCPeerConnection.RTCPeerConnection,
-      // Public for debugging; note this is not part of the peer connection
-      // interface
-      public peerName_ ?:string) {
-    this.peerName_ = this.peerName_ || ('unnamed-' + (++automaticNameIndex_));
+      private peerName_ = ('unnamed-' + PeerConnectionClass.numCreations_)) {
+    PeerConnectionClass.numCreations_++;
 
     this.pc_.on('onicecandidate', this.onIceCandidate_);
     this.pc_.on('onnegotiationneeded', this.onNegotiationNeeded_);
