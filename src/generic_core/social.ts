@@ -243,7 +243,7 @@ import ui = ui_connector.connector;
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
-    public login = (remember :boolean) :Promise<void> => {
+    public login = (reconnect :boolean) :Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
@@ -476,7 +476,7 @@ import ui = ui_connector.connector;
 
     //===================== Social.Network implementation ====================//
 
-    public login = (remember :boolean) : Promise<void> => {
+    public login = (reconnect :boolean) : Promise<void> => {
       var request :freedom_Social.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
@@ -498,16 +498,16 @@ import ui = ui_connector.connector;
           agent: agent,
           version: '0.1',
           url: 'https://popping-heat-4874.firebaseio.com/',
-          interactive: true,
-          rememberLogin: remember
+          interactive: !reconnect,
+          rememberLogin: !reconnect
         };
       } else {
         request = {
           agent: 'uproxy',
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
-          interactive: true,
-          rememberLogin: remember
+          interactive: !reconnect,
+          rememberLogin: !reconnect
         };
       }
       this.onceLoggedIn_ = this.freedomApi_.login(request)
@@ -671,7 +671,7 @@ import ui = ui_connector.connector;
 
     //===================== Social.Network implementation ====================//
 
-    public login = (remember :boolean) : Promise<void> => {
+    public login = (reconnect :boolean) : Promise<void> => {
       return Promise.resolve<void>();
     }
 

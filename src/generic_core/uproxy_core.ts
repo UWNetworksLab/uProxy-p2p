@@ -62,10 +62,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   /**
    * Access various social networks using the Social API.
    */
-  public login = (networkName :string) :Promise<void> => {
+   // TODO: take reconnect param
+  public login = (loginArgs :uproxy_core_api.LoginArgs) :Promise<void> => {
+    var networkName = loginArgs.network;
     if (networkName === social_network.MANUAL_NETWORK_ID) {
       var network = social_network.getNetwork(networkName, '');
-      var loginPromise = network.login(true);
+      var loginPromise = network.login(loginArgs.reconnect);
       loginPromise.then(() => {
         social_network.notifyUI(networkName);
         log.info('Logged in to manual network');
@@ -82,7 +84,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       network = new social_network.FreedomNetwork(networkName);
       social_network.pendingNetworks[networkName] = network;
     }
-    var loginPromise = network.login(true);
+    var loginPromise = network.login(loginArgs.reconnect);
     loginPromise.then(() => {
       var userId :string = network.myInstance.userId;
       if (userId in social_network.networks[networkName]) {

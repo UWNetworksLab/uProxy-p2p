@@ -187,8 +187,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   //   this.sendCommand(uproxy_core_api.Command.CHANGE_OPTION, option);
   // }
 
-  login = (network :string) : Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.LOGIN, network);
+  login = (loginArgs :uproxy_core_api.LoginArgs) : Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.LOGIN, loginArgs);
   }
 
   logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {

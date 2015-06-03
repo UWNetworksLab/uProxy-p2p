@@ -17,18 +17,11 @@ import background = require('./background');
 //   success.
 class ChromeTabAuth {
 
-  // last OAuth reponse URL.
-  private lastOAuthURL_ :string;
-
   constructor() {
   }
 
   public login = (oauthInfo :chromeInterface.OAuthInfo) : void => {
-    if (user_interface.model.reconnecting && this.lastOAuthURL_) {
-      this.sendCredentials_(this.lastOAuthURL_);
-    } else {
-      this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
-    }
+    this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
   }
 
 
@@ -37,7 +30,6 @@ class ChromeTabAuth {
       if (tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.remove(tabId);
-        this.lastOAuthURL_ = tab.url;
         this.sendCredentials_(tab.url);
       }
     };

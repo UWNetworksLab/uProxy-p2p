@@ -131,6 +131,11 @@ export interface CloudfrontPostData {
   cloudfrontPath :string;
 }
 
+export interface LoginArgs {
+  network :string;
+  reconnect :boolean;
+}
+
 /**
  * The primary interface to the uProxy Core.
  *
@@ -181,7 +186,7 @@ export interface CoreApi {
   // TODO: Implement this or remove it.
   // changeOption(option :string) : void;
 
-  login(network :string) : Promise<void>;
+  login(loginArgs :LoginArgs) : Promise<void>;
   logout(networkInfo :social.SocialNetworkInfo) : Promise<void>;
 
   // TODO: use Event instead of attaching manual handler. This allows event

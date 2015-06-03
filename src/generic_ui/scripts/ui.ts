@@ -712,7 +712,7 @@ export class UserInterface implements ui_constants.UiApi {
       model.onlineNetwork = null;
 
       if (!this.isLogoutExpected_ && !network.online &&
-          this.browser == 'chrome' && !this.disconnectedWhileProxying &&
+          !this.disconnectedWhileProxying &&
           this.instanceGettingAccessFrom_ == null) {
         console.warn('Unexpected logout, reconnecting to ' + network.name);
         this.reconnect(network.name);
@@ -823,7 +823,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public login = (network :string) : Promise<void> => {
     this.isLogoutExpected_ = false;
-    return this.core.login(network);
+    return this.core.login({network: network, reconnect: false});
   }
 
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
@@ -832,13 +832,6 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public reconnect = (network :string) => {
-    // TODO: this reconnect logic has some issues:
-    // 1. It only attempts to re-use the last access_token, and doesn't
-    //    use refresh_tokens to get a new access_token when they expire.
-    // 2. It only works for Chrome, as only Chrome has a custom OAuth provider
-    //    that supports the model.reconnecting variable
-    // See https://docs.google.com/document/d/1COT5YcXWg-jUnD59v0JHcYepMdQCIanKO_xfuq2bY48
-    // for a proposed design on making this better
     model.reconnecting = true;
 
     var ping = () : Promise<void> => {
@@ -847,25 +840,36 @@ export class UserInterface implements ui_constants.UiApi {
       return new Promise<void>(function(F, R) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', pingUrl);
+        xhr.onreadystatechange = function() {
+          console.error('onreadystatechange ' + xhr.status + ', ' + xhr.response);
+        };
         xhr.onload = function() { F(); };
-        xhr.onerror = function() { R(new Error('Ping failed')); };
+        xhr.onerror = function(e) {
+          console.error('xhr.onerror: ' + xhr.status);
+          R(new Error('Ping failed'));
+        };
         xhr.send();
       });
     }
 
     var loginCalled = false;
     var attemptReconnect = () => {
+      console.error('calling ping');  // TODO: remove
       ping().then(() => {
+        console.error('ping fulfilled');  // TODO: remove
         // Ensure that we only call login once.  This is needed in case
         // either login or the ping takes too long and we accidentally
         // call login twice.  Doing so would cause one of the login
         // calls to fail, resulting in the user seeing the splash page.
         if (!loginCalled) {
           loginCalled = true;
-          this.core.login(network).then(() => {
+          console.error('calling core.login');  // TODO: remove
+          this.core.login({network: network, reconnect: true}).then(() => {
             // Successfully reconnected, stop additional reconnect attempts.
+            console.error('stopping reconnect');  // TODO: remove
             this.stopReconnect();
           }).catch((e) => {
+            console.error('login with reconnect failed');  // TODO: remove
             // Login with last oauth token failed, give up on reconnect.
             this.stopReconnect();
             this.showNotification('You have been logged out of ' + network);
@@ -874,6 +878,7 @@ export class UserInterface implements ui_constants.UiApi {
         }
       }).catch((e) => {
         // Ping failed, we will try again on the next interval.
+        console.error('ping failed');  // TODO: remove
       });
     };
 

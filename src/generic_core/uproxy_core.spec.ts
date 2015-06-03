@@ -22,7 +22,7 @@ describe('Core', () => {
   var network = <social.Network><any>jasmine.createSpy('network');
   network.getUser = null;
   network.getStorePath = function() { return 'network-store-path'; };
-  network['login'] = (remember:boolean) => { return Promise.resolve<void>() };
+  network['login'] = (reconnect :boolean) => { return Promise.resolve<void>() };
   var user = new remote_user.User(network, 'fake-login');
   user.getInstance = null;
   user.notifyUI = () => {};
@@ -82,7 +82,7 @@ describe('Core', () => {
   });
 
   it('login fails for invalid network', (done) => {
-    core.login('nothing').catch(() => {
+    core.login({network: 'nothing', reconnect: false}).catch(() => {
       done();
     });
   });
@@ -99,7 +99,7 @@ describe('Core', () => {
     // Login promise is not resolved so network object stays in pending logins
     var loginSpy = spyOn(network, 'login').and.returnValue(
         new Promise((F, R) => {}));
-    core.login('mockNetwork');
+    core.login({network: 'mockNetwork', reconnect: false});
     expect(Object.keys(social_network.pendingNetworks).length).toEqual(1);
     expect(Object.keys(social_network.networks['mockNetwork']).length).toEqual(0);
 
@@ -109,7 +109,7 @@ describe('Core', () => {
     (<any>loginSpy).and.callFake(() => {
       return Promise.resolve();
     });
-    core.login('mockNetwork').then(() => {
+    core.login({network: 'mockNetwork', reconnect: false}).then(() => {
       expect(Object.keys(social_network.pendingNetworks).length).toEqual(0);
       expect(Object.keys(social_network.networks['mockNetwork']).length).toEqual(1);
     }).then(done);
