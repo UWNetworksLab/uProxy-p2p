@@ -9,6 +9,7 @@ import consent = require('./consent');
 
 import globals = require('./globals');
 import storage = globals.storage;
+import local_instance = require('./local-instance');
 
 describe('remote_user.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.
@@ -19,6 +20,8 @@ describe('remote_user.User', () => {
   ]);
   network['getLocalInstanceId'] = function() { return 'dummyInstanceId'; };
   network['send'] = () => { return Promise.resolve(); };
+  network['myInstance'] =
+      new local_instance.LocalInstance(network, 'localUserId');
 
   var user :remote_user.User;
   var instance :remote_instance.RemoteInstance;
@@ -147,7 +150,8 @@ describe('remote_user.User', () => {
         data: {
           instanceId: 'instanceId', description: '', keyHash: '',
           consent: {isOffering: false, isRequesting: false}
-        }
+        },
+        version: globals.MESSAGE_VERSION
       });
       expect(user.syncInstance_).toHaveBeenCalled();
     });
@@ -158,7 +162,8 @@ describe('remote_user.User', () => {
       spyOn(user, 'getInstance').and.returnValue(instance);
       user.handleMessage('fakeclient', {
         type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
-        data: {}
+        data: {},
+        version: globals.MESSAGE_VERSION
       });
       expect(instance.handleSignal).toHaveBeenCalled();
     });
@@ -184,7 +189,8 @@ describe('remote_user.User', () => {
       };
       expect(user.instanceToClient('fakeinstance')).toBeUndefined();
       expect(user.clientToInstance('fakeclient')).toBeUndefined();
-      user.syncInstance_('fakeclient', instanceHandshake).then(() => {
+      user.syncInstance_('fakeclient', instanceHandshake,
+          globals.MESSAGE_VERSION).then(() => {
         expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
         expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
         instance = user.getInstance('fakeinstance');
@@ -205,14 +211,15 @@ describe('remote_user.User', () => {
       // Add the new client.
       user.handleClient(clientState);
       // Pretend a valid instance message has been sent from the new client.
-      user.syncInstance_('fakeclient2', instanceHandshake);
+      user.syncInstance_('fakeclient2', instanceHandshake,
+          globals.MESSAGE_VERSION);
       expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient2');
       expect(user.clientToInstance('fakeclient')).toEqual(null);
       expect(user.clientToInstance('fakeclient2')).toEqual('fakeinstance');
     });
 
     it('syncs UI after updating instance', () => {
-      user.syncInstance_('fakeclient', instanceHandshake);
+      user.syncInstance_('fakeclient', instanceHandshake, globals.MESSAGE_VERSION);
     });
 
     it('Sets user name if pending', () => {
@@ -222,7 +229,8 @@ describe('remote_user.User', () => {
         status: social.ClientStatus.ONLINE, timestamp: 12345
       });
       expect(pendingUser.name).toEqual('pending');
-      pendingUser.syncInstance_('fakeclient', instanceHandshake);
+      pendingUser.syncInstance_('fakeclient', instanceHandshake,
+          globals.MESSAGE_VERSION);
       expect(pendingUser.name).toEqual(instanceHandshake.name);
     });
 
@@ -237,7 +245,7 @@ describe('remote_user.User', () => {
         instanceId: 'fakeinstance', keyHash: <string>null, description: 'x',
         consent: {isRequesting: false, isOffering: false},
         name: '', userId: 'userIdFromInstance'
-      });
+      }, globals.MESSAGE_VERSION);
       expect(pendingUser.name).toEqual('userIdFromInstance');
     });
 
@@ -248,7 +256,8 @@ describe('remote_user.User', () => {
         status: social.ClientStatus.ONLINE, timestamp: 12345
       });
       namedUser.update({name: 'Henry', userId: 'userId', timestamp: 42});
-      namedUser.syncInstance_('fakeclient', instanceHandshake);
+      namedUser.syncInstance_('fakeclient', instanceHandshake,
+          globals.MESSAGE_VERSION);
       expect(namedUser.name).toEqual('Henry');
     });
 
@@ -295,9 +304,9 @@ describe('remote_user.User', () => {
     });
 
     it('invalid proxy transitions do not modify consent', (done) => {
-      var emptyConsent = new consent.State();
+      var emptyConsent = new consent.State(false);
 
-      user.consent = new consent.State();
+      user.consent = new consent.State(false);
       user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_REQUEST).then(() => {
         expect(user.consent).toEqual(emptyConsent);
         user.modifyConsent(uproxy_core_api.ConsentUserAction.UNIGNORE_OFFER).then(() => {
@@ -371,9 +380,9 @@ describe('remote_user.User', () => {
     });
 
     it('invalid client transitions do not modify consent', (done) => {
-      var emptyConsent = new consent.State();
+      var emptyConsent = new consent.State(false);
 
-      user.consent = new consent.State();
+      user.consent = new consent.State(false);
       user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_OFFER).then(() => {
         expect(user.consent).toEqual(emptyConsent);
         user.modifyConsent(
@@ -385,6 +394,20 @@ describe('remote_user.User', () => {
         });
       });
     });
+  });
+
+  it('Initializes with consent for local user', () => {
+    user = new remote_user.User(network, network.myInstance.userId);
+    expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
+    expect(user.consent.localGrantsAccessToRemote).toEqual(true);
+    expect(user.consent.remoteRequestsAccessFromLocal).toEqual(true);
+  });
+
+  it('Initializes without consent for other users', () => {
+    user = new remote_user.User(network, 'otherUser');
+    expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
+    expect(user.consent.localGrantsAccessToRemote).toEqual(false);
+    expect(user.consent.remoteRequestsAccessFromLocal).toEqual(false);
   });
 
 });  // uProxy.User

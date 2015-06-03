@@ -75,14 +75,10 @@ describe('UI.UserInterface', () => {
       ui.syncUser(getUserAndInstance('testUserId', 'Alice', 'instance1'));
       var user :User = user_interface.model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
-      expect(user_interface.model.contacts.getAccessContacts.onlineTrustedUproxy.length).toEqual(0);
-      expect(user_interface.model.contacts.getAccessContacts.offlineTrustedUproxy.length).toEqual(0);
-      expect(user_interface.model.contacts.getAccessContacts.onlineUntrustedUproxy.length).toEqual(1);
-      expect(user_interface.model.contacts.getAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
-      expect(user_interface.model.contacts.shareAccessContacts.onlineTrustedUproxy.length).toEqual(0);
-      expect(user_interface.model.contacts.shareAccessContacts.offlineTrustedUproxy.length).toEqual(0);
-      expect(user_interface.model.contacts.shareAccessContacts.onlineUntrustedUproxy.length).toEqual(1);
-      expect(user_interface.model.contacts.shareAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.getAccessContacts.trustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.getAccessContacts.untrustedUproxy.length).toEqual(1);
+      expect(user_interface.model.contacts.shareAccessContacts.trustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.shareAccessContacts.untrustedUproxy.length).toEqual(1);
     });
 
     it('Sets correct flags for uProxy users', () => {

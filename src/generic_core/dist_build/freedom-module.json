@@ -1,0 +1,43 @@
+{
+  "name": "uProxy",
+  "description": "The uProxy backend provides a mesh web proxy. Access the web through your social connections.",
+  "app": {
+    "script": [
+      "freedom-module.static.js"
+    ]
+  },
+  "dependencies": {
+    "SOCIAL-Google": {
+      "url": "../freedom-social-xmpp/social.google.json",
+      "api": "social"
+    },
+    "SOCIAL-Facebook": {
+      "url": "../freedom-social-firebase/social.firebase-facebook.json",
+      "api": "social"
+    },
+    "loggingcontroller": {
+      "url": "../uproxy-lib/loggingprovider/freedom-module.json",
+      "api": "loggingcontroller"
+    },
+    "logginglistener": {
+      "url": "../uproxy-lib/loggingprovider/freedom-module.json",
+      "api": "logginglistener"
+    },
+    "metrics": {
+      "url": "../freedomjs-anonymized-metrics/anonmetrics.json",
+      "api": "metrics"
+    },
+    "churnPipe": {
+      "url": "../uproxy-lib/churn-pipe/freedom-module.json",
+      "api": "churnPipe"
+    }
+  },
+  "permissions": [
+    "core.rtcpeerconnection",
+    "core.rtcdatachannel",
+    "core.storage",
+    "core.tcpsocket",
+    "core.udpsocket",
+    "core.xhr"
+  ]
+}

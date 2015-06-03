@@ -1,5 +1,6 @@
 import local_storage = require('./storage');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import metrics_module = require('./metrics');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
@@ -9,16 +10,19 @@ var log :logging.Log = new logging.Log('globals');
 export var storage = new local_storage.Storage();
 
 export var STORAGE_VERSION = 1;
-export var MESSAGE_VERSION = 1;
+
+// 1: initial release
+// 2: uproxy-lib v27, move to bridge but no obfuscation yet
+export var MESSAGE_VERSION = 2;
 
 export var DEFAULT_STUN_SERVERS = [
-  {urls: ['stun:stun.services.mozilla.com']},
-  {urls: ['stun:stun.stunprotocol.org']},
   {urls: ['stun:stun.l.google.com:19302']},
   {urls: ['stun:stun1.l.google.com:19302']},
   {urls: ['stun:stun2.l.google.com:19302']},
   {urls: ['stun:stun3.l.google.com:19302']},
   {urls: ['stun:stun4.l.google.com:19302']},
+  {urls: ['stun:stun.services.mozilla.com']},
+  {urls: ['stun:stun.stunprotocol.org']}
 ];
 
   // Initially, the STUN servers are a copy of the default.
@@ -32,7 +36,8 @@ export var settings :uproxy_core_api.GlobalSettings = {
   allowNonUnicast: false,
   mode: user_interface.Mode.GET,
   version: STORAGE_VERSION,
-  statsReportingEnabled: false
+  statsReportingEnabled: false,
+  consoleFilter: loggingTypes.Level.warn
 };
 
 export var natType :string = '';

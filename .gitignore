@@ -20,6 +20,7 @@
 .sass-cache
 .tscache
 build
+.build
 editor_support/*/*.sublime-workspace
 node_modules
 npm-debug.log

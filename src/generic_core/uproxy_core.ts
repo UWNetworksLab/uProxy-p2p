@@ -170,6 +170,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     globals.settings.allowNonUnicast = newSettings.allowNonUnicast;
     globals.settings.mode = newSettings.mode;
     globals.settings.statsReportingEnabled = newSettings.statsReportingEnabled;
+    globals.settings.consoleFilter = newSettings.consoleFilter;
+    loggingController.setDefaultFilter(
+      loggingTypes.Destination.console,
+      globals.settings.consoleFilter);
   }
 
   /**
@@ -196,7 +200,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       remoteProxyInstance = null;
     }
 
-    return copyPasteConnection.startGet();
+    return copyPasteConnection.startGet(globals.MESSAGE_VERSION);
   }
 
   public stopCopyPasteGet = () :Promise<void> => {
@@ -204,7 +208,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public startCopyPasteShare = () => {
-    copyPasteConnection.startShare();
+    copyPasteConnection.startShare(globals.MESSAGE_VERSION);
   }
 
   public stopCopyPasteShare = () :Promise<void> => {
