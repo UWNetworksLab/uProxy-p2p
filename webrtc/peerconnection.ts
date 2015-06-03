@@ -131,9 +131,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   public signalForPeerQueue = new handler.Queue<signals.Message,void>();
 
-  public fromPeerCandidateQueue =
-      new handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>();
-
   // Data channel that acts as a control for if the peer connection should be
   // open or closed. Created during connection start up.
   // i.e. this connection's onceConnected is true once this data channel is
@@ -357,9 +354,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         });
         this.pc_.setLocalDescription(d);
       })
-      .then(() => {
-        this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
-      })
       .catch((e) => {
         this.closeWithError_('Failed to connect to offer:' +
             e.toString());
@@ -368,26 +362,20 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   private handleAnswerSignalMessage_ =
       (description:freedom_RTCPeerConnection.RTCSessionDescription) : void => {
-    this.pc_.setRemoteDescription(description)
-      .then(() => {
-        this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
-      })
-      .catch((e) => {
-        this.closeWithError_('Failed to set remote description: ' +
-          JSON.stringify(description) + '; Error: ' + e.toString());
-      });
+    this.pc_.setRemoteDescription(description).catch((e) => {
+      this.closeWithError_('Failed to set remote description: ' +
+        JSON.stringify(description) + '; Error: ' + e.toString());
+    });
   }
 
-  private handleCandidateSignalMessage_ =
-    (candidate:freedom_RTCPeerConnection.RTCIceCandidate) : void => {
+  private handleCandidateSignalMessage_ = (
+      candidate:freedom_RTCPeerConnection.RTCIceCandidate) : void => {
     // CONSIDER: Should we be passing/getting the SDP line index?
     // e.g. https://code.google.com/p/webrtc/source/browse/stable/samples/js/apprtc/js/main.js#331
-    try {
-      this.fromPeerCandidateQueue.handle(candidate);
-    } catch(e) {
+    this.pc_.addIceCandidate(candidate).catch((e: Error) => {
       log.error('%1: addIceCandidate: %2; Error: %3', this.peerName_, candidate,
         e.toString());
-    }
+    });
   }
 
   // Adds a signalling message to this.signalForPeerQueue.
