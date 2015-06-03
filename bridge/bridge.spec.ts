@@ -158,27 +158,6 @@ describe('BridgingPeerConnection', function() {
     });
   });
 
-  it('onceConnecting fulfills when negotiateConnection called', (done) => {
-    var bob = bridge.best();
-    bob.negotiateConnection();
-    bob.onceConnecting.then(done);
-  });
-
-  it('onceConnecting fulfills when valid offer received', (done) => {
-    var bob = bridge.best();
-    bob.handleSignalMessage({
-      type: 'OFFER',
-      signals: {
-        'PLAIN': [
-          offerSignal,
-          candidateSignal1,
-          noMoreCandidatesSignal
-        ]
-      }
-    });
-    bob.onceConnecting.then(done);
-  });
-
   it('rejects offer from unknown provider', (done) => {
     var bob = bridge.best();
     bob.handleSignalMessage({

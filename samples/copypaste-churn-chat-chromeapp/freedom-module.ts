@@ -36,9 +36,6 @@ freedomParentModule.on('handleSignalMessage', (message:ChurnSignallingMessage) =
   pc.handleSignalMessage(message);
 });
 
-pc.onceConnecting.then(() => { log.info('connecting...'); });
-
-
 export var connectDataChannel = (channel:peerconnection.DataChannel) => {
 	// Send messages over the datachannel, in response to events from the UI,
 	// and forward messages received on the datachannel to the UI.

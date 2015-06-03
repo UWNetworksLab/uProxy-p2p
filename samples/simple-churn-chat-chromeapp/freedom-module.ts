@@ -55,7 +55,6 @@ function makePeerConnection(name:string) {
   var pc :PeerConnection<churn_types.ChurnSignallingMessage> =
       new churn.Connection(freedom['core.rtcpeerconnection'](pcConfig),
       'churn-' + name);
-  pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
     log.info(name + ' connected');
   }, (e:Error) => {

@@ -117,17 +117,6 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
-  // This is hazily defined by the superclass: roughly, it fulfills when the
-  // peer has made or received an offer -- and there are several cases in which
-  // it never fulfills, e.g. close is called before connection is established.
-  // Here, it fulfills once a provider has been created, i.e.:
-  //  1. negotiateConnection is called
-  //  2. a *valid* offer is received
-  private connecting_ :() => void;
-  public onceConnecting: Promise<void> = new Promise<void>((F, R) => {
-    this.connecting_ = F;
-  });
-
   // Equivalent to the negotiated provider's onceConnected field unless close
   // is called before negotiation happens, in which case it rejects immediately.
   private connected_ :() => void;
@@ -166,12 +155,6 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       private name_ :string = 'unnamed-bridge-' + BridgingPeerConnection.id_,
       private config_ ?:freedom_RTCPeerConnection.RTCConfiguration) {
     BridgingPeerConnection.id_++;
-
-    // Some logging niceties.
-    this.onceConnecting.then(() => {
-      log.debug('%1: now bridging with %2 provider',
-          this.name_, ProviderType[this.providerType_]);
-    });
   }
 
   public negotiateConnection = () : Promise<void> => {
@@ -212,8 +195,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     return new churn.Connection(pc, this.name_);
   }
 
-  // Configures the bridge with this provider by establishing queue
-  // forwarding and fulfilling onceConnecting_.
+  // Configures the bridge with this provider by forwarding the provider's
+  // handler queues and promises.
   private bridgeWith_ = (
       providerType:ProviderType,
       provider:peerconnection.PeerConnection<Object>) : void => {
@@ -232,7 +215,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     this.providerType_ = providerType;
     this.provider_ = provider;
 
-    this.connecting_();
+    log.debug('%1: now bridging with %2 provider',
+        this.name_, ProviderType[this.providerType_]);
   }
 
   private wrapSignal_ = (signal:Object) : SignallingMessage => {

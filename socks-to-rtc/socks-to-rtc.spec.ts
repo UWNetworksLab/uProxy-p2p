@@ -76,7 +76,6 @@ describe('SOCKS server', function() {
       peerOpenedChannelQueue: new handler.Queue<signals.Message, void>(),
       signalForPeerQueue: new handler.Queue<signals.Message, void>(),
       negotiateConnection: jasmine.createSpy('negotiateConnection'),
-      onceConnecting: noopPromise,
       onceConnected: noopPromise,
       onceClosed: noopPromise,
       close: jasmine.createSpy('close')

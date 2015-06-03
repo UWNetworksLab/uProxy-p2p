@@ -54,7 +54,6 @@ function makePeerConnection(name:string) {
   };
   var pc :PeerConnection<signals.Message> =
     peerconnection.createPeerConnection(pcConfig, name);
-  pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
     log.info(name + ' connected');
   }, (e:Error) => {
