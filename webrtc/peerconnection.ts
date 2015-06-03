@@ -56,10 +56,6 @@ export interface PeerConnection<TSignallingMessage> {
   close: () => Promise<void>;
 }
 
-// Global listing of active peer connections. Helpful for debugging when you
-// are in Freedom.
-export var peerConnections :{ [name:string] : PeerConnection<signals.Message> } = {};
-
 // Label for the control data channel. Because channel labels must be
 // unique, the empty string was chosen to create a simple naming
 // restriction for new data channels--all other data channels must have
@@ -151,18 +147,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       // interface
       public peerName_ ?:string) {
     this.peerName_ = this.peerName_ || ('unnamed-' + (++automaticNameIndex_));
-
-    // Once connected, add to global listing. Helpful for debugging.
-    // Once disconnected, remove from global listing.
-    this.onceConnected.then(() => {
-      peerConnections[this.peerName_] = this;
-      this.onceClosed.then(() => {
-        delete peerConnections[this.peerName_];
-      });
-    }, (e:Error) => {
-      log.debug('%1: failed to connect, not available for ' +
-          ' debugging in peerConnections', this.peerName_);
-    });
 
     // New data channels from the peer.
     this.peerOpenedChannelQueue = new handler.Queue<DataChannel,void>();
