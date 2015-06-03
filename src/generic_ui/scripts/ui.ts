@@ -822,7 +822,10 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string) : Promise<void> => {
-    return this.core.login(network);
+    return this.core.login(network).catch((e :Error) => {
+      this.showNotification('There was a problem signing in to ' + network + '.  Please try again.');
+      throw e;
+    });
   }
 
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
