@@ -56,6 +56,29 @@ export interface PeerConnection<TSignallingMessage> {
   close: () => Promise<void>;
 }
 
+// Global listing of active peer connections. Helpful for debugging when you
+// are in Freedom.
+export var peerConnections :{ [name:string] : PeerConnection<signals.Message> } = {};
+
+// Label for the control data channel. Because channel labels must be
+// unique, the empty string was chosen to create a simple naming
+// restriction for new data channels--all other data channels must have
+// non-empty channel labels.
+var CONTROL_CHANNEL_LABEL = '';
+
+// Number of automatically generated names generated so far.
+var automaticNameIndex_ = 0;
+
+// Interval, in milliseconds, after which the peerconnection will
+// terminate if no heartbeat is received from the peer.
+var HEARTBEAT_TIMEOUT_MS_ = 30000;
+
+// Interval, in milliseconds, at which heartbeats are sent to the peer.
+var HEARTBEAT_INTERVAL_MS_ = 5000;
+
+// Message which is sent for heartbeats.
+var HEARTBEAT_MESSAGE_ = 'heartbeat';
+
 // A wrapper for peer-connection and it's associated data channels.
 // The most important diagram is this one:
 // http://dev.w3.org/2011/webrtc/editor/webrtc.html#idl-def-RTCSignalingState
@@ -90,20 +113,6 @@ export interface PeerConnection<TSignallingMessage> {
 //      3.1. completeConnection_ -> [Fulfill onceConnected]
 export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
-  // Interval, in milliseconds, after which the peerconnection will
-  // terminate if no heartbeat is received from the peer.
-  private static HEARTBEAT_TIMEOUT_MS_ = 30000;
-
-  // Interval, in milliseconds, at which heartbeats are sent to the peer.
-  private static HEARTBEAT_INTERVAL_MS_ = 5000;
-
-  // Message which is sent for heartbeats.
-  private static HEARTBEAT_MESSAGE_ = 'heartbeat';
-
-  // Global listing of active peer connections. Helpful for debugging when you
-  // are in Freedom.
-  public static peerConnections :{ [name:string] : PeerConnection<signals.Message> } = {};
-
   // All open data channels associated with this peerconnection.
   private channels_ :{[channelLabel:string]:DataChannel} = {};
 
@@ -135,29 +144,20 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // i.e. this connection's onceConnected is true once this data channel is
   // ready and the connection is closed if this data channel is closed.
   private controlDataChannel_ :DataChannel;
-  // Label for the control data channel. Because channel labels must be
-  // unique, the empty string was chosen to create a simple naming
-  // restriction for new data channels--all other data channels must have
-  // non-empty channel labels.
-  private static CONTROL_CHANNEL_LABEL = '';
-
-  // Number of automatically generated names generated so far.
-  private static automaticNameIndex_ = 0;
 
   constructor(
       private pc_:freedom_RTCPeerConnection.RTCPeerConnection,
       // Public for debugging; note this is not part of the peer connection
       // interface
       public peerName_ ?:string) {
-    this.peerName_ = this.peerName_ ||
-        ('unnamed-' + (++PeerConnectionClass.automaticNameIndex_));
+    this.peerName_ = this.peerName_ || ('unnamed-' + (++automaticNameIndex_));
 
     // Once connected, add to global listing. Helpful for debugging.
     // Once disconnected, remove from global listing.
     this.onceConnected.then(() => {
-      PeerConnectionClass.peerConnections[this.peerName_] = this;
+      peerConnections[this.peerName_] = this;
       this.onceClosed.then(() => {
-        delete PeerConnectionClass.peerConnections[this.peerName_];
+        delete peerConnections[this.peerName_];
       });
     }, (e:Error) => {
       log.debug('%1: failed to connect, not available for ' +
@@ -301,7 +301,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // data channels (without it, we would have to re-negotiate SDP after the
     // PC is established), we start negotaition by openning a data channel to
     // the peer, this triggers the negotiation needed event.
-    return this.openDataChannel(PeerConnectionClass.CONTROL_CHANNEL_LABEL)
+    return this.openDataChannel(CONTROL_CHANNEL_LABEL)
         .then(this.registerControlChannel_)
         .then(() => {
           return this.onceConnected;
@@ -479,7 +479,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       this.addRtcDataChannel_(channelInfo.channel).then((dc:DataChannel) => {
         var label :string = dc.getLabel();
         log.debug('%1: peer created channel %2', this.peerName_, label);
-        if (label === PeerConnectionClass.CONTROL_CHANNEL_LABEL) {
+        if (label === CONTROL_CHANNEL_LABEL) {
           // If the peer has started the control channel, register it
           // as this user's control channel as well.
           this.registerControlChannel_(dc);
@@ -536,7 +536,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // Listen for heartbeats from the other side.
     var lastPingTimestamp :number = Date.now();
     channel.dataFromPeerQueue.setSyncHandler((data:Data) => {
-      if (data.str && data.str === PeerConnectionClass.HEARTBEAT_MESSAGE_) {
+      if (data.str && data.str === HEARTBEAT_MESSAGE_) {
         lastPingTimestamp = Date.now();
       } else {
         log.warn('%1: unexpected data on control channel: %2',
@@ -547,20 +547,19 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // Send and monitors heartbeats.
     var loop = setInterval(() => {
       channel.send({
-        str: PeerConnectionClass.HEARTBEAT_MESSAGE_
+        str: HEARTBEAT_MESSAGE_
       }).catch((e:Error) => {
         log.error('%1: error sending heartbeat: %2',
             this.peerName_, e.message);
       });
 
-      if (Date.now() - lastPingTimestamp >
-          PeerConnectionClass.HEARTBEAT_TIMEOUT_MS_) {
+      if (Date.now() - lastPingTimestamp > HEARTBEAT_TIMEOUT_MS_) {
         log.debug('%1: heartbeat timeout, terminating', this.peerName_);
         this.closeWithError_('no heartbeat received for >' +
-            PeerConnectionClass.HEARTBEAT_TIMEOUT_MS_ + 'ms');
+            HEARTBEAT_TIMEOUT_MS_ + 'ms');
         clearInterval(loop);
       }
-    }, PeerConnectionClass.HEARTBEAT_INTERVAL_MS_);
+    }, HEARTBEAT_INTERVAL_MS_);
   }
 
   // For debugging: prints the state of the peer connection including all
