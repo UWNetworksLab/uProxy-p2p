@@ -130,12 +130,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   public signalForPeerQueue = new handler.Queue<signals.Message,void>();
 
-  // Data channel that acts as a control for if the peer connection should be
-  // open or closed. Created during connection start up.
-  // i.e. this connection's onceConnected is true once this data channel is
-  // ready and the connection is closed if this data channel is closed.
-  private controlDataChannel_ :DataChannel;
-
   constructor(
       private pc_:freedom_RTCPeerConnection.RTCPeerConnection,
       private peerName_ = ('unnamed-' + PeerConnectionClass.numCreations_)) {
@@ -252,9 +246,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // data channels (without it, we would have to re-negotiate SDP after the
     // PC is established), we start negotaition by openning a data channel to
     // the peer, this triggers the negotiation needed event.
-    return this.openDataChannel(CONTROL_CHANNEL_LABEL)
-        .then(this.registerControlChannel_)
-        .then(() => {
+    return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, undefined).then(
+        this.addRtcDataChannel_).then(
+        this.registerControlChannel_).then(() => {
           return this.onceConnected;
         });
   }
@@ -414,18 +408,17 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Open a new data channel with the peer.
   public openDataChannel = (channelLabel:string,
-                            options?:freedom_RTCPeerConnection.RTCDataChannelInit)
+      options?:freedom_RTCPeerConnection.RTCDataChannelInit)
       : Promise<DataChannel> => {
+    if (channelLabel === '') {
+      throw new Error('label cannot be an empty string');
+    }
+
     log.debug('%1: creating channel %2 with options: %3',
         this.peerName_, channelLabel, options);
 
-    // Only the control data channel can have an empty channel label.
-    if (this.controlDataChannel_ != null && channelLabel === '') {
-      throw new Error('Channel label can not be an empty string.');
-    }
-
-    return this.pc_.createDataChannel(channelLabel, options)
-        .then(this.addRtcDataChannel_);
+    return this.pc_.createDataChannel(channelLabel, options).then(
+        this.addRtcDataChannel_);
   }
 
   // When a peer creates a data channel, this function is called with the
@@ -472,14 +465,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Saves the given data channel as the control channel for this peer
   // connection. The appropriate callbacks for opening, closing, and
   // initiating a heartbeat is are registered here.
-  private registerControlChannel_ = (controlChannel:DataChannel)
-      : Promise<void> => {
-    this.controlDataChannel_ = controlChannel;
-    this.controlDataChannel_.onceClosed.then(this.close);
-    return this.controlDataChannel_.onceOpened.then(
-          this.completeConnection_).then(() => {
-      this.initiateHeartbeat_(controlChannel);
+  private registerControlChannel_ = (channel:DataChannel) : void => {
+    channel.onceOpened.then(this.completeConnection_).then(() => {
+      this.initiateHeartbeat_(channel);
     });
+    channel.onceClosed.then(this.close);
   }
 
   // Heartbeats take the form of a string message sent over the control
