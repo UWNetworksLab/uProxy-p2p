@@ -607,22 +607,6 @@
     "message": "انتخاب زبان",
     "description": "Instruction to select language used by the application."
   },
-  "english": {
-    "description": "English language.",
-    "message": "English"
-  },
-  "farsi": {
-    "description": "Farsi language.",
-    "message": "فارسی"
-  },
-  "arabic": {
-    "description": "Arabic language.",
-    "message": "العربية"
-  },
-  "french": {
-    "description": "French language.",
-    "message": "Français"
-  },
   "extMissingTitle": {
     "message": "شما تقریبا آماده برای استفاده uProxy هستید!",
     "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."

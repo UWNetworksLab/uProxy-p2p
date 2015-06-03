@@ -4,6 +4,15 @@
  * Script for the introductory splash screen.
  */
 
+declare var require :(path :string) => Object;
+
+interface Language {
+  description :string;
+  language :string;
+  languageCode :string;
+}
+var languages :Language[] = <Language[]>require('../locales/all/languages.json');
+
 var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
@@ -42,5 +51,6 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = model;
+    this.languages = languages;
   }
 });

@@ -129,18 +129,11 @@
           <paper-dropdown-menu label="{{ 'language' | $$ }}">
             <paper-dropdown class="dropdown">
                 <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
-                    <paper-item languageCode='en-US'>
-                      <bdi>{{ 'english' | $$ }}</bdi>
-                    </paper-item>
-                    <paper-item languageCode='fa'>
-                      <bdi>{{ 'farsi' | $$ }}</bdi>
-                    </paper-item>
-                    <paper-item languageCode='ar'>
-                      <bdi>{{ 'arabic' | $$ }}</bdi>
-                    </paper-item>
-                    <paper-item languageCode='fr'>
-                      <bdi>{{ 'french' | $$ }}</bdi>
-                    </paper-item>
+                    <template repeat='{{ l in languages }}'>
+                      <paper-item languageCode='{{ l.languageCode }}'>
+                        <bdi>{{ l.language }}</bdi>
+                      </paper-item>
+                    </template>
                 </core-menu>
             </paper-dropdown>
           </paper-dropdown-menu>

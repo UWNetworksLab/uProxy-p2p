@@ -36,7 +36,7 @@ i18n.init({
   resStore: window.i18nResources
 });
 
-i18n.addResources('en-US', 'translation', createI18nDictionary(english_source));
+i18n.addResources('en', 'translation', createI18nDictionary(english_source));
 i18n.addResources('fr', 'translation', createI18nDictionary(french_source));
 i18n.addResources('ar', 'translation', createI18nDictionary(arabic_source));
 i18n.addResources('fa', 'translation', createI18nDictionary(farsi_source));
