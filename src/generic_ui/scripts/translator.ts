@@ -6,10 +6,10 @@
 // addResources(language: string, namespace: string, resources :IResourceStoreKey): void;
 // addResourceBundle(language: string, namespace: string, resources :IResourceStoreKey): void;
 
-import i18n = require('i18next');
+import i18n = require('i18next-client');
 
 declare var window: I18nWindow;
-declare var require :(path :string) => Object;
+declare var require :(path :string) => MessageResource;
 
 interface I18nWindow extends Window { i18nResources: any; }
 interface MessageResource { [key: string]: Message }
@@ -18,10 +18,10 @@ interface Message {
   message :string;
 }
 
-var english_source :MessageResource = <MessageResource>require('../locales/en/messages.json');
-var french_source :MessageResource = <MessageResource>require('../locales/fr/messages.json');
-var arabic_source :MessageResource = <MessageResource>require('../locales/ar/messages.json');
-var farsi_source :MessageResource = <MessageResource>require('../locales/fa/messages.json');
+var english_source = require('../locales/en/messages.json');
+var french_source = require('../locales/fr/messages.json');
+var arabic_source = require('../locales/ar/messages.json');
+var farsi_source = require('../locales/fa/messages.json');
 
 function createI18nDictionary(sourceFile :MessageResource) : IResourceStoreKey {
   var i18nDictionary :IResourceStoreKey = {};
