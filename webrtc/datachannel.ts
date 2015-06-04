@@ -14,8 +14,8 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 var log :logging.Log = new logging.Log('DataChannel');
 
-// Messages are limited to a 16KB length by SCTP; we use 15k for safety.
-// TODO: test if we can up this to 16k; test the edge-cases!
+// Messages are limited to a 16KB length by SCTP. For maximum efficiency,
+// this size should match the buffer size used by Freedom's TCP connection.
 // http://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-07#section-6.6
 export var CHUNK_SIZE = 1024 * 16;
 
