@@ -430,11 +430,11 @@ export class Connection {
   }
 
   public pause = () => {
-    this.counter_.wrap(this.connectionSocket_.pause);
+    this.connectionSocket_.pause.reckless();
   }
 
   public resume = () => {
-    this.counter_.wrap(this.connectionSocket_.resume);
+    this.connectionSocket_.resume.reckless();
   }
 
   // This is called to close the underlying socket. This fulfills the
