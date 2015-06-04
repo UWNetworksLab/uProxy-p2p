@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM digitallyseamless/nodejs-bower-grunt
 
 MAINTAINER Lally Singh <lally.singh@gmail.com>
 
@@ -14,7 +14,7 @@ RUN apt-get update -qq -y && apt-get install -qq -y \
   unzip \
   nodejs nodejs-dev npm \
   git \
-  default-jre vnc4server aptitude  
+  default-jre vnc4server aptitude
 
 
 # Install Chrome Beta
@@ -27,6 +27,10 @@ RUN wget -q https://chromedriver.storage.googleapis.com/$(wget -qO- https://chro
 RUN unzip -qq chromedriver_linux64.zip -d /usr/bin && rm chromedriver_linux64.zip
 RUN chromedriver --version
 
+RUN apt-get install net-tools
 
-EXPOSE 9000
+RUN mkdir /test
+COPY test /test
+
+EXPOSE 9000 5900
 
