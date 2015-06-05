@@ -8,7 +8,6 @@ ENV DEBCONF_NONINTERACTIVE_SEEN true
 
 RUN apt-get update -qq -y && apt-get install -qq -y \
   wget \
-  x11vnc \
   libav-tools \
   xvfb \
   unzip \
@@ -27,10 +26,12 @@ RUN wget -q https://chromedriver.storage.googleapis.com/$(wget -qO- https://chro
 RUN unzip -qq chromedriver_linux64.zip -d /usr/bin && rm chromedriver_linux64.zip
 RUN chromedriver --version
 
-RUN apt-get install net-tools
+RUN apt-get install -qq -y net-tools x11vnc fvwm 
 
 RUN mkdir /test
 COPY test /test
 
-EXPOSE 9000 5900
+EXPOSE 9000 
+EXPOSE 9999
+EXPOSE 5900
 
