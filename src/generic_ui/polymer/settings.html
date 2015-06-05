@@ -134,12 +134,18 @@
         <div class='networkName'>{{ 'connectedWith' | $$({ network: model.onlineNetwork.name }) }}</div>
         <!-- show userName and userId if both are available -->
         <div hidden?='{{!model.onlineNetwork.userName}}'>
-          <div class='userInfoName' dir='auto'>{{model.onlineNetwork.userName}}</div>
-          <div class='userInfoID' dir='auto'>{{model.onlineNetwork.userId}}</div>
+          <div class='userInfoName'>
+            <bdi>{{model.onlineNetwork.userName}}</bdi>
+          </div>
+          <div class='userInfoID'>
+            <bdi>{{model.onlineNetwork.userId}}</bdi>
+          </div>
         </div>
         <!-- otherwise show only userId -->
-        <div hidden?='{{model.onlineNetwork.userName}}' horizontal layout>
-          <div class='userInfoIDWithoutName' dir='auto'>{{model.onlineNetwork.userId}}</div>
+        <div hidden?='{{model.onlineNetwork.userName}}'>
+          <div class='userInfoIDWithoutName'>
+            <bdi>{{model.onlineNetwork.userId}}</bdi>
+          </div>
         </div>
       </div>
 
