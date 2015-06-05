@@ -62,10 +62,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   /**
    * Access various social networks using the Social API.
    */
-  public login = (networkName :string) :Promise<void> => {
+  public login = (loginArgs :uproxy_core_api.LoginArgs) :Promise<void> => {
+    var networkName = loginArgs.network;
     if (networkName === social_network.MANUAL_NETWORK_ID) {
       var network = social_network.getNetwork(networkName, '');
-      var loginPromise = network.login(true);
+      var loginPromise = network.login(loginArgs.reconnect);
       loginPromise.then(() => {
         social_network.notifyUI(networkName);
         log.info('Logged in to manual network');
@@ -82,7 +83,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       network = new social_network.FreedomNetwork(networkName);
       social_network.pendingNetworks[networkName] = network;
     }
-    var loginPromise = network.login(true);
+    var loginPromise = network.login(loginArgs.reconnect);
     loginPromise.then(() => {
       var userId :string = network.myInstance.userId;
       if (userId in social_network.networks[networkName]) {
@@ -422,5 +423,31 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     text = text.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/ig,
                         'EMAIL_ADDRESS');
     return text;
+  }
+
+  public pingUntilOnline = (pingUrl :string) : Promise<void> => {
+    var ping = () : Promise<void> => {
+      return new Promise<void>(function(fulfill, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', pingUrl);
+        xhr.onload = function() { fulfill(); };
+        xhr.onerror = function(e) { reject(new Error('Ping failed')); };
+        xhr.send();
+      });
+    }
+
+    return new Promise<void>((fulfill, reject) => {
+      var checkIfOnline = () => {
+        ping().then(() => {
+          clearInterval(intervalId);
+          fulfill();
+        }).catch((e) => {
+          // Ping failed (may be because the internet is disconnected),
+          // we will try again on the next interval.
+        });
+      };
+      var intervalId = setInterval(checkIfOnline, 5000);
+      checkIfOnline();
+    });
   }
 }  // class uProxyCore

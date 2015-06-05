@@ -25,6 +25,7 @@
     "freedom-for-chrome": "^0.4.11",
     "freedom-for-firefox": "^0.6.13",
     "freedom-social-firebase": "^1.0.1",
+    "freedom-social-xmpp": "^0.4.0",
     "freedom-social-xmpp": "^0.3.6",
     "freedomjs-anonymized-metrics": "~0.1.0",
     "fs-extra": "^0.12.0",

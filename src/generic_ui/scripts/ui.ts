@@ -166,7 +166,6 @@ export class UserInterface implements ui_constants.UiApi {
   public unableToShare :boolean = false;
 
   private isLogoutExpected_ :boolean = false;
-  private reconnectInterval_ :number;
 
   // is a proxy currently set
   private proxySet_ :boolean = false;
@@ -741,7 +740,8 @@ export class UserInterface implements ui_constants.UiApi {
       model.onlineNetwork = null;
 
       if (!this.isLogoutExpected_ && !network.online &&
-          this.browser == 'chrome' && !this.disconnectedWhileProxying &&
+          // TODO: support reconnect for all networks
+          network.name == 'Google' && !this.disconnectedWhileProxying &&
           this.instanceGettingAccessFrom_ == null) {
         console.warn('Unexpected logout, reconnecting to ' + network.name);
         this.reconnect(network.name);
@@ -853,7 +853,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public login = (network :string) : Promise<void> => {
     this.isLogoutExpected_ = false;
-    return this.core.login(network);
+    return this.core.login({network: network, reconnect: false});
   }
 
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
@@ -862,64 +862,28 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public reconnect = (network :string) => {
-    // TODO: this reconnect logic has some issues:
-    // 1. It only attempts to re-use the last access_token, and doesn't
-    //    use refresh_tokens to get a new access_token when they expire.
-    // 2. It only works for Chrome, as only Chrome has a custom OAuth provider
-    //    that supports the model.reconnecting variable
-    // See https://docs.google.com/document/d/1COT5YcXWg-jUnD59v0JHcYepMdQCIanKO_xfuq2bY48
-    // for a proposed design on making this better
     model.reconnecting = true;
-
-    var ping = () : Promise<void> => {
-      var pingUrl = network == 'Facebook'
-          ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
-      return new Promise<void>(function(F, R) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', pingUrl);
-        xhr.onload = function() { F(); };
-        xhr.onerror = function() { R(new Error('Ping failed')); };
-        xhr.send();
-      });
-    }
-
-    var loginCalled = false;
-    var attemptReconnect = () => {
-      ping().then(() => {
-        // Ensure that we only call login once.  This is needed in case
-        // either login or the ping takes too long and we accidentally
-        // call login twice.  Doing so would cause one of the login
-        // calls to fail, resulting in the user seeing the splash page.
-        if (!loginCalled) {
-          loginCalled = true;
-          this.core.login(network).then(() => {
-            // Successfully reconnected, stop additional reconnect attempts.
-            this.stopReconnect();
-          }).catch((e) => {
-            // Login with last oauth token failed, give up on reconnect.
-            this.stopReconnect();
-            this.showNotification(
-                this.i18n_t('loggedOut', { network: network }));
-            this.view = ui_constants.View.SPLASH;
-          });
-        }
-      }).catch((e) => {
-        // Ping failed, we will try again on the next interval.
-      });
-    };
-
-    // Call attemptReconnect immediately and every 10 seconds afterwards
-    // until it is successful.
-    this.reconnectInterval_ = setInterval(attemptReconnect, 10000);
-    attemptReconnect();
+    var pingUrl = network == 'Facebook'
+        ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
+    this.core.pingUntilOnline(pingUrl).then(() => {
+      // Ensure that the user is still attempting to reconnect (i.e. they
+      // haven't clicked to stop reconnecting while we were waiting for the
+      // ping response).
+      if (model.reconnecting) {
+        this.core.login({network: network, reconnect: true}).then(() => {
+          this.stopReconnect();
+        }).catch((e) => {
+          // Reconnect failed, give up.
+          this.stopReconnect();
+          this.showNotification('You have been logged out of ' + network);
+          this.view = ui_constants.View.SPLASH;
+        });
+      }
+    });
   }
 
   public stopReconnect = () => {
     model.reconnecting = false;
-    if (this.reconnectInterval_) {
-      clearInterval(this.reconnectInterval_);
-      this.reconnectInterval_ = null;
-    }
   }
 
   private cloudfrontDomains_ = [
