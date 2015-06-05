@@ -285,28 +285,18 @@ export class DataChannelClass implements DataChannel {
   }
 
   // Assumes data is chunked.
-  private handleSendDataToPeer_ = (data:Data) : Promise<void> => {
-    try {
-      if(typeof data.str === 'string') {
-        this.rtcDataChannel_.send(data.str);
-      } else if(data.buffer) {
-        this.toPeerDataBytes_ -= data.buffer.byteLength;
-        this.rtcDataChannel_.sendBuffer(data.buffer);
-        this.lastBrowserBufferedAmount_ += data.buffer.byteLength;
-      } else {
-        // Data is good when it meets the type expected of the Data. If type-
-        // saftey is ensured at compile time, this should never happen.
-        return Promise.reject(new Error(
-            'Bad data: ' + JSON.stringify(data)));
-      }
-    // Can raise NetworkError if channel died, for example.
-    } catch (e) {
-      log.debug('Error in send' + e.toString());
-      return Promise.reject(new Error(
-          'Error in send: ' + JSON.stringify(e)));
+  private handleSendDataToPeer_ = (data:Data) : void => {
+    if (typeof data.str === 'string') {
+      this.rtcDataChannel_.send.reckless(data.str);
+    } else if (data.buffer) {
+      this.toPeerDataBytes_ -= data.buffer.byteLength;
+      this.rtcDataChannel_.sendBuffer.reckless(data.buffer);
+      this.lastBrowserBufferedAmount_ += data.buffer.byteLength;
+    } else {
+      // If type-safety is ensured at compile time, this should never happen.
+      throw new Error('Bad data: ' + JSON.stringify(data));
     }
     this.sendNext_();
-    return Promise.resolve<void>();
   }
 
   // Sets the overflow state, and calls the listener if it has changed.
@@ -335,7 +325,7 @@ export class DataChannelClass implements DataChannel {
       this.close();
       return;
     }
-    this.toPeerDataQueue_.setNextHandler(this.handleSendDataToPeer_);
+    this.toPeerDataQueue_.setSyncNextHandler(this.handleSendDataToPeer_);
   }
 
   private waitForOverflowToClear_ = () : void => {

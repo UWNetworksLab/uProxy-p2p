@@ -455,21 +455,18 @@ module SocksToRtc {
 
     // Sends a packet over the data channel.
     // Invoked when a packet is received over the TCP socket.
-    private sendOnChannel_ = (data:ArrayBuffer) : Promise<void> => {
-      return this.dataChannel_.send({buffer: data});
+    private sendOnChannel_ = (data:ArrayBuffer) : void => {
+      this.dataChannel_.send({buffer: data});
     }
 
     // Sends a packet over the TCP socket.
     // Invoked when a packet is received over the data channel.
-    private sendOnSocket_ = (data:peerconnection.Data)
-        : Promise<freedom_TcpSocket.WriteInfo> => {
+    private sendOnSocket_ = (data:peerconnection.Data) : void => {
       if (!data.buffer) {
-        return Promise.reject(new Error(
-            'received non-buffer data from datachannel'));
+        throw new Error('received non-buffer data from datachannel');
       }
       this.bytesReceivedFromPeer_.handle(data.buffer.byteLength);
-
-      return this.tcpConnection_.send(data.buffer);
+      this.tcpConnection_.send(data.buffer);
     }
 
     // Configures forwarding of data from the TCP socket over the data channel
@@ -478,13 +475,8 @@ module SocksToRtc {
     private linkSocketAndChannel_ = () : void => {
       log.info('%1: linking socket and channel', this.longId());
       var socketReader = (data:ArrayBuffer) => {
-        this.sendOnChannel_(data).then(() => {
-          this.bytesSentToPeer_.handle(data.byteLength);
-        }, (e:Error) => {
-          log.error('%1: failed to send data on datachannel: %2',
-              this.longId(),
-              e.message);
-        });
+        this.sendOnChannel_(data);
+        this.bytesSentToPeer_.handle(data.byteLength);
       };
       this.tcpConnection_.dataFromSocketQueue.setSyncHandler(socketReader);
 
@@ -501,22 +493,7 @@ module SocksToRtc {
       });
 
       var channelReader = (data:peerconnection.Data) : void => {
-        this.sendOnSocket_(data).catch((e:{ errcode: string }) => {
-          // TODO: e is actually a freedom.Error (uproxy-lib 20+)
-          // errcode values are defined here:
-          //   https://github.com/freedomjs/freedom/blob/master/interface/core.tcpsocket.json
-          if (e.errcode === 'NOT_CONNECTED') {
-            // This can happen if, for example, there was still data to be
-            // read on the datachannel's queue when the socket closed.
-            log.warn('%1: tried to send data on closed socket: %2', [
-                this.longId(),
-                e.errcode]);
-          } else {
-            log.error('%1: failed to send data on socket: %2', [
-                this.longId(),
-                e]);
-          }
-        });
+        this.sendOnSocket_(data);
       };
       this.dataChannel_.dataFromPeerQueue.setSyncHandler(channelReader);
 

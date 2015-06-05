@@ -271,7 +271,7 @@ export class Connection {
   // Queue of data to be handled, and the capacity to set a handler and
   // handle the data.
   public dataFromSocketQueue :handler.Queue<ArrayBuffer,void>;
-  public dataToSocketQueue :handler.Queue<ArrayBuffer, freedom_TcpSocket.WriteInfo>;
+  public dataToSocketQueue :handler.Queue<ArrayBuffer,void>;
 
   // Public unique connectionId.
   public connectionId :string;
@@ -294,8 +294,7 @@ export class Connection {
     this.connectionId = 'N' + Connection.globalConnectionId_++;
 
     this.dataFromSocketQueue = new handler.Queue<ArrayBuffer,void>();
-    this.dataToSocketQueue =
-        new handler.Queue<ArrayBuffer,freedom_TcpSocket.WriteInfo>();
+    this.dataToSocketQueue = new handler.Queue<ArrayBuffer,void>();
 
     if(Object.keys(connectionKind).length !== 1) {
       //log.error(this.connectionId + ': Bad New Tcp Connection Kind:' +
@@ -369,10 +368,8 @@ export class Connection {
     // |dataToSocketQueue| allows a class using this connection to start
     // queuing data to be send to the socket.
     this.onceConnected.then(() => {
-      this.dataToSocketQueue.setHandler((buffer:ArrayBuffer) => {
-        return this.counter_.wrap(this.connectionSocket_.write.bind(
-                this.connectionSocket_, buffer));
-      });
+      this.dataToSocketQueue.setSyncHandler(
+          this.connectionSocket_.write.reckless);
     });
     this.onceConnected.catch((e:Error) => {
       this.fulfillClosed_(SocketCloseKind.NEVER_CONNECTED);
@@ -432,11 +429,11 @@ export class Connection {
   }
 
   public pause = () => {
-    this.counter_.wrap(this.connectionSocket_.pause);
+    this.connectionSocket_.pause.reckless();
   }
 
   public resume = () => {
-    this.counter_.wrap(this.connectionSocket_.resume);
+    this.connectionSocket_.resume.reckless();
   }
 
   // This is called to close the underlying socket. This fulfills the
@@ -475,7 +472,9 @@ export class Connection {
   /**
    * Sends a message that is pre-formatted as an arrayBuffer.
    */
-  public send = (msg :ArrayBuffer) : Promise<freedom_TcpSocket.WriteInfo> => {
+  public send = (msg :ArrayBuffer) : Promise<void> => {
+    // This will reject if the socket is closed before the
+    // data can be sent.
     return this.dataToSocketQueue.handle(msg);
   }
 

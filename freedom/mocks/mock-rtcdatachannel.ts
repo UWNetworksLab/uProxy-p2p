@@ -13,6 +13,14 @@ import RTCDataChannel = freedom_RTCDataChannel.RTCDataChannel;
 
 import MockEventHandler = require('./mock-eventhandler');
 
+function makeMockSend<T>() : freedom.Method1<T,void> {
+  var f : any = (x:T) => {
+    return Promise.resolve<void>();
+  };
+  f.reckless = (x:T) => {};
+  return f;
+}
+
 class MockFreedomRtcDataChannel extends MockEventHandler
     implements RTCDataChannel {
   constructor() {
@@ -47,14 +55,9 @@ class MockFreedomRtcDataChannel extends MockEventHandler
     return Promise.resolve<void>();
   }
 
-  public send(message:string) : Promise<void> {
-    return Promise.resolve<void>();
-  }
+  public send = makeMockSend<string>()
 
-  public sendBuffer(message:ArrayBuffer) : Promise<void> {
-    return Promise.resolve<void>();
-  }
-
+  public sendBuffer = makeMockSend<ArrayBuffer>()
 }
 
 export = MockFreedomRtcDataChannel;

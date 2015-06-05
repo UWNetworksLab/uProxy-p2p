@@ -38,7 +38,7 @@ describe('DataChannel', function() {
     getBufferedAmountSpy.and.returnValue(
         Promise.resolve(datachannel.PC_QUEUE_LIMIT));
 
-    var sendBufferSpy = spyOn(mockRtcDataChannel, 'sendBuffer');
+    var sendBufferSpy = spyOn(mockRtcDataChannel.sendBuffer, 'reckless');
 
     datachannel.createFromRtcDataChannel(mockRtcDataChannel).then(
         (channel:datachannel.DataChannel) => {
