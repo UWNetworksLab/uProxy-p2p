@@ -368,9 +368,8 @@ export class Connection {
     // |dataToSocketQueue| allows a class using this connection to start
     // queuing data to be send to the socket.
     this.onceConnected.then(() => {
-      this.dataToSocketQueue.setSyncHandler((buffer:ArrayBuffer) : void => {
-        this.connectionSocket_.write.reckless(buffer);
-      });
+      this.dataToSocketQueue.setSyncHandler(
+          this.connectionSocket_.write.reckless);
     });
     this.onceConnected.catch((e:Error) => {
       this.fulfillClosed_(SocketCloseKind.NEVER_CONNECTED);
@@ -474,6 +473,8 @@ export class Connection {
    * Sends a message that is pre-formatted as an arrayBuffer.
    */
   public send = (msg :ArrayBuffer) : Promise<void> => {
+    // This will reject if the socket is closed before the
+    // data can be sent.
     return this.dataToSocketQueue.handle(msg);
   }
 
