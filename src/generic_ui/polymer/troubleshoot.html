@@ -102,7 +102,7 @@
 
       <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
-        {{ 'analysisResults' | $$({natType: natType, natImpact: natImpact}) }}
+        {{ 'analysisResults' | $$({ natType: natType, natImpact: natImpact }) }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
           <span class='linkText'>{{ 'moreInfo' | $$ }}</span>
         </uproxy-faq-link><br><br>

@@ -18,6 +18,5 @@ Polymer({
     this.model = ui_context.model;
     this.editing = false;
     this.descriptionInput = '';
-    this.descriptionPlaceholder = ui.i18n_t('nameThisDevice');
   }
 });

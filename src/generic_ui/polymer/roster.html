@@ -74,7 +74,7 @@
         <paper-progress indeterminate='true'></paper-progress>
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
-        {{ 'noFriendsOnline' | $$({network: model.onlineNetwork.name}) }}
+        {{ 'noFriendsOnline' | $$({ network: model.onlineNetwork.name }) }}
         <p id='inviteFriends'>{{ 'toInviteFriends' | $$ }}</p>
       </div>
     </div>

@@ -295,7 +295,7 @@
     "message": "تلاش برای اتصال مجدد.",
     "description": "uProxy was disconnected from the social network and is trying to reconnect."
   },
-  "cantOpenOneTimeTitle": {
+  "cannotOpenOneTimeTitle": {
     "message": "آیا می توانم یک بار اتصال باز نشد",
     "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
   },
@@ -365,7 +365,7 @@
   },
   "noThanks": {
     "message": "نه ممنون",
-    "description": ""
+    "description": "Do not agree to submitting anonymous metrics to uProxy."
   },
   "disconnectedTitle": {
     "message": "وای! شما از دوستان خود قطع شده است.",
@@ -433,7 +433,7 @@
   },
   "description": {
     "message": "شرح",
-    "description": ""
+    "description": "Placeholder for the input field for the name of the user's device."
   },
   "save": {
     "message": "ذخیره",
@@ -445,11 +445,11 @@
   },
   "advancedSettings": {
     "message": "تنظیمات پیشرفته",
-    "description": ""
+    "description": "Clickable text from the Settings menu. Clicking this opens the advanced settings screen."
   },
   "advancedSettings_sentenceCase": {
     "message": "تنظیمات پیشرفته",
-    "description": ""
+    "description": "Title for the advanced settings screen."
   },
   "editAdvancedSettings": {
     "message": "تنظیمات خود را در زیر ویرایش",
@@ -521,7 +521,7 @@
   },
   "moreInfo": {
     "message": "اطلاعات بیشتر",
-    "description": ""
+    "description": "Link to 'Does uProxy log data about me?' question in the FAQ."
   },
   "askToSubmitAnalysis": {
     "message": "آیا می خواهید برای ارسال نوع NAT خود را به تیم uProxy، برای کمک به ما را بهتر درک شبکه های کاربران ما در؟",

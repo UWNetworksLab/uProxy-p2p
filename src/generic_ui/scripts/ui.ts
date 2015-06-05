@@ -353,8 +353,8 @@ export class UserInterface implements ui_constants.UiApi {
 
       var user = this.mapInstanceIdToUser_[instanceId];
       user.isGettingFromMe = true;
-      this.showNotification(this.i18n_t('startedProxying', {name: user.name}),
-          { mode: 'share', user: user.userId });
+      this.showNotification(this.i18n_t('startedProxying',
+          { name: user.name }), { mode: 'share', user: user.userId });
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND,
@@ -364,8 +364,8 @@ export class UserInterface implements ui_constants.UiApi {
 
       // only show a notification if we knew we were prokying
       if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-        this.showNotification(this.i18n_t('stoppedProxying', {name: user.name}),
-            { mode: 'share', user: user.userId });
+        this.showNotification(this.i18n_t('stoppedProxying',
+          { name: user.name }), { mode: 'share', user: user.userId });
       }
       delete this.instancesGivingAccessTo[instanceId];
       if (!this.isGivingAccess()) {
@@ -387,7 +387,8 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (nameOfFriend :string) => {
       // Setting this variable will toggle a paper-toast (in root.html)
       // to open.
-      this.toastMessage = this.i18n_t('unableToShareWith', {name: nameOfFriend});
+      this.toastMessage =
+          this.i18n_t('unableToShareWith', { name: nameOfFriend });
       this.unableToShare = true;
     });
 
@@ -619,7 +620,7 @@ export class UserInterface implements ui_constants.UiApi {
         return;
       }
 
-      this.toastMessage = this.i18n_t('unableToGetFrom', {name: user.name});
+      this.toastMessage = this.i18n_t('unableToGetFrom', { name: user.name });
       this.unableToGet = true;
       this.bringUproxyToFront();
       return Promise.reject(e);
@@ -748,7 +749,8 @@ export class UserInterface implements ui_constants.UiApi {
         if (this.instanceGettingAccessFrom_ != null) {
           this.stopGettingInUiAndConfig(true);
         }
-        this.showNotification(this.i18n_t('loggedOut', {network: network.name}));
+        this.showNotification(
+          this.i18n_t('loggedOut', { network: network.name }));
         this.view = ui_constants.View.SPLASH;
       }
     }
@@ -896,7 +898,8 @@ export class UserInterface implements ui_constants.UiApi {
           }).catch((e) => {
             // Login with last oauth token failed, give up on reconnect.
             this.stopReconnect();
-            this.showNotification(this.i18n_t('loggedOut', {network: network}));
+            this.showNotification(
+                this.i18n_t('loggedOut', { network: network }));
             this.view = ui_constants.View.SPLASH;
           });
         }

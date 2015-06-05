@@ -295,7 +295,7 @@
     "description": "uProxy was disconnected from the social network and is trying to reconnect.",
     "message": "Attempting to re-connect."
   },
-  "cantOpenOneTimeTitle": {
+  "cannotOpenOneTimeTitle": {
     "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network.",
     "message": "Cannot open one-time connection"
   },
@@ -364,7 +364,7 @@
     "message": "I'm in"
   },
   "noThanks": {
-    "description": "",
+    "description": "Do not agree to submitting anonymous metrics to uProxy.",
     "message": "No thanks"
   },
   "disconnectedTitle": {
@@ -432,7 +432,7 @@
     "message": "Device description"
   },
   "description": {
-    "description": "",
+    "description": "Placeholder for the input field for the name of the user's device.",
     "message": "Description"
   },
   "save": {
@@ -444,11 +444,11 @@
     "message": "Restart"
   },
   "advancedSettings": {
-    "description": "",
+    "description": "Clickable text from the Settings menu. Clicking this opens the advanced settings screen.",
     "message": "Advanced Settings"
   },
   "advancedSettings_sentenceCase": {
-    "description": "",
+    "description": "Title for the advanced settings screen.",
     "message": "Advanced settings"
   },
   "editAdvancedSettings": {
@@ -520,7 +520,7 @@
     "message": "It looks like you are on a __natType__, which is __natImpact__ interfering with your ability to connect to friends."
   },
   "moreInfo": {
-    "description": "",
+    "description": "Link to 'Does uProxy log data about me?' question in the FAQ.",
     "message": "More info"
   },
   "askToSubmitAnalysis": {
