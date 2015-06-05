@@ -25,6 +25,7 @@ export interface GlobalSettings {
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
   consoleFilter    :loggingTypes.Level;
+  language         :string;
 }
 
 export interface InitialState {

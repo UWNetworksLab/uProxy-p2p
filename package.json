@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -22,11 +22,15 @@
     "circular-json": "^0.1.6",
     "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
-    "freedomjs-anonymized-metrics": "~0.1.0",
     "freedom-for-chrome": "^0.4.11",
-    "freedom-for-firefox": "0.6.10",
+    "freedom-for-firefox": "^0.6.13",
     "freedom-social-firebase": "^1.0.1",
+<<<<<<< HEAD
     "freedom-social-xmpp": "^0.4.0",
+=======
+    "freedom-social-xmpp": "^0.3.6",
+    "freedomjs-anonymized-metrics": "~0.1.0",
+>>>>>>> 7c9b834a05852243a09ee4bbedadea4ecbe6f38e
     "fs-extra": "^0.12.0",
     "grunt": "^0.4.2",
     "grunt-browserify": "^3.3.1",
@@ -41,12 +45,14 @@
     "grunt-ts": "^4.0.0",
     "grunt-verbosity": "^0.2.2",
     "grunt-vulcanize": "^0.6.0",
+    "i18next-client": "^1.8.2",
     "ipaddr.js": "^0.1.3",
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.5.7",
-    "uproxy-lib": "^26.0.0",
-    "utransformers": "^0.2.1"
+    "uproxy-lib": "^27.2.0",
+    "utransformers": "^0.2.1",
+    "xregexp": "^2.0.0"
   },
   "peerDependencies": {
     "freedom": "^0.6.18"

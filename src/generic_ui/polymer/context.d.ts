@@ -5,6 +5,7 @@ interface UiGlobals {
   ui :any;
   core :any;
   model :any;
+  browserConnector :any
 }
 
 declare var ui_context :UiGlobals;

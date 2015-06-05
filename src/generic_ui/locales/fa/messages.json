@@ -1,0 +1,626 @@
+{
+  "done": {
+    "message": "انجام شده",
+    "description": "Button label that suggests acknowledgement and that closes a popup."
+  },
+  "yes": {
+    "message": "بله",
+    "description": "Button label."
+  },
+  "no": {
+    "message": "بدون",
+    "description": "Button label."
+  },
+  "ok": {
+    "message": "باشه",
+    "description": "Button label."
+  },
+  "close": {
+    "message": "نزدیک",
+    "description": "Button label to close a popup."
+  },
+  "cancel": {
+    "message": "لغو کردن",
+    "description": "Button label that rejects a proposed action."
+  },
+  "startGetting": {
+    "message": "شروع به گرفتن دسترسی",
+    "description": "Start accessing the Internet through a friend's connection."
+  },
+  "stopGetting": {
+    "message": "توقف گرفتن دسترسی",
+    "description": "Stop accessing the Internet through a friend's connection."
+  },
+  "submitFeedback": {
+    "message": "ارسال ها",
+    "description": "Submit feedback to the uProxy team."
+  },
+  "getHelp": {
+    "message": "کمک بگیر",
+    "description": "Get help from the frequently asked questions page."
+  },
+  "logout": {
+    "message": "ورود از uProxy",
+    "description": "Log-out of uProxy."
+  },
+  "grantedYouAccess": {
+    "message": "__name__ دسترسی شما اعطا",
+    "description": "The user's friend has allowed the user to use the friend's Internet connection."
+  },
+  "tryingToConnect": {
+    "message": "تلاش برای اتصال به __name__",
+    "description": "The user is trying to connect to the Internet through their friend."
+  },
+  "askingForAccess": {
+    "message": "در خواست دسترسی",
+    "description": "The user is asking for permission to access the Internet through their friend; user is waiting for the friend's reply."
+  },
+  "waitingForAccess": {
+    "message": "شما می توانید برای دسترسی هنگامی که __name__ را قبول خواهد بود.",
+    "description": "User will be able to access the Internet through their friend, once that friend gives the user permission."
+  },
+  "cancelRequest": {
+    "message": "لغو درخواست",
+    "description": "Label for button which will take back a request to get Internet access through a friend."
+  },
+  "offeredYouAccess": {
+    "message": "آنها دسترسی شما ارائه شده است.",
+    "description": "A friend has offered their Internet access to the user."
+  },
+  "acceptOffer": {
+    "message": "شرایط پیشنهاد",
+    "description": "Accept a friend's offer that would allow the user to access the Internet through their friend."
+  },
+  "ignore": {
+    "message": "نادیده گرفتن",
+    "description": "Button label that ignores an offer or request."
+  },
+  "stopIgnoringOffers": {
+    "message": "توقف نادیده گرفتن پیشنهادات",
+    "description": "Button label for if the user wants to stop ignoring offers."
+  },
+  "askForAccess": {
+    "message": "برای دسترسی بپرسید",
+    "description": "Button label that sends a request to the user's friend, asking if the user can access the Internet through them."
+  },
+  "friendOffline": {
+    "message": "__name__ آنلاین نیست.",
+    "description": "Message shown when trying to get access from a friend who is offline."
+  },
+  "grantedFriendAccess": {
+    "message": "شما به آنها اجازه دسترسی داده ام.",
+    "description": "The user has agreed to let their friend access the Internet through the user."
+  },
+  "revokeAccess": {
+    "message": "لغو دسترسی",
+    "description": "Label for button that takes back an offer to a friend who has already accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
+  },
+  "cancelOffer": {
+    "message": "لغو پیشنهاد",
+    "description": "Label for button that takes back an offer to a friend who has not yet accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
+  },
+  "friendRequestsAccess": {
+    "message": "__name__ درخواست دسترسی از شما است.",
+    "description": "A friend has requested to access the Internet through the user."
+  },
+  "grant": {
+    "message": "گرانت",
+    "description": "Label for button that accepts a friend's request to access the Internet through the user."
+  },
+  "friendRequestedAccess": {
+    "message": "آنها دسترسی از طریق شما درخواست شده است.",
+    "description": "A friend has requested to access the Internet through the user."
+  },
+  "stopIgnoringRequests": {
+    "message": "توقف نادیده گرفتن درخواست",
+    "description": "Button label for if the user wants to stop ignoring requests."
+  },
+  "accessNotGranted": {
+    "message": "شما آنها را دسترسی به داده نمی شود.",
+    "description": "The user has not permissioned a friend to access the Internet through the user."
+  },
+  "offerAccess": {
+    "message": "ارائه دسترسی",
+    "description": "Label for button that will offer a friend access to the Internet through the user, even though the friend has not requested access."
+  },
+  "shareOneTime": {
+    "message": "به اشتراک گذاشتن یک اتصال یک بار",
+    "description": "Share access to the user's Internet using a link that will only work once."
+  },
+  "requestOneTime": {
+    "message": "درخواست اتصال یک بار",
+    "description": "Request access to the user's friend's Internet using a link that will only work once."
+  },
+  "startOneTime": {
+    "message": "شروع یک ارتباط یک بار",
+    "description": "Start an Internet connection using a link that will only work once."
+  },
+  "errorParsingLink": {
+    "message": "خطا در تجزیه لینک ارتباط uproxy، لطفا رفتن به لینک دوباره و یا درخواست دوستان خود را برای یک لینک جدید را امتحان کنید وجود دارد.",
+    "description": "Error shown if a one-time connection link did not work."
+  },
+  "noLongerGetting": {
+    "message": "شما در حال گرفتن دیگر دسترسی داشته باشید. برای درخواست یک اتصال، زیر کلیک بر روی دکمه.",
+    "description": "Message shown when a one-time connection ends."
+  },
+  "startNewConnection": {
+    "message": "شروع به گرفتن یک اتصال جدید",
+    "description": "Label for button that takes user back to the 'Start a one-time connection' page."
+  },
+  "errorStartingConnection": {
+    "message": "خطا در شروع ارتباط وجود دارد و آن تا به حال به خاتمه داده شود. لطفا با شروع اتصال دیگری را امتحان کنید.",
+    "description": "Error shown if a one-time connection failed to start."
+  },
+  "sendConnectionLink": {
+    "message": "به اشتراک گذاشتن اتصال خود، لطفا به دوستان خود بخواهید که شما را لینک خود را ارسال کنید.",
+    "description": "Instructions for the user to share their connection with a one-time link."
+  },
+  "copyConnectionLink": {
+    "message": "برای درخواست دسترسی از یک دوست، کپی کرده و URL را به آنها بیش از یک کانال امن رب",
+    "description": "Instructions for the user to request access from a friend with a one-time link."
+  },
+  "loading": {
+    "message": "در حال بارگذاری ...",
+    "description": "Message show when something is taking time to load."
+  },
+  "friendNeedsToClick": {
+    "message": "به پایان رساندن ایجاد اتصال، دوست شما نیاز به کلیک بر روی لینک و به شما یک لینک ارسال از مشتری uProxy خود را. هنگامی که شما بر روی آن کلیک کنید، شما آماده برای شروع گرفتن دسترسی باشد.",
+    "description": "Instructions telling the user that starting a one-time connection is waiting for action from their friend."
+  },
+  "oneTimeSuccess": {
+    "message": "موفقیت! اتصال یک بار تاسیس شده است.",
+    "description": "Inform the user that a one-time connection was successfully established."
+  },
+  "startOneTimeInstruction": {
+    "message": "برای شروع گرفتن دسترسی از دوستان خود، زیر کلیک بر روی دکمه.",
+    "description": ""
+  },
+  "stopOneTimeInstruction": {
+    "message": "برای جلوگیری از دسترسی از دوستان خود، زیر کلیک بر روی دکمه.",
+    "description": ""
+  },
+  "oneTimeGetting": {
+    "message": "شما در حال حاضر دسترسی.",
+    "description": "The user is connected to the Internet through their friend."
+  },
+  "stopOneTimeGettingBeforeNew": {
+    "message": "اگر شما می خواهم برای شروع یک ارتباط یک بار جدید، دکمه \"توقف دسترسی\" برای اولین بار.",
+    "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
+  },
+  "friendRequestedOneTime": {
+    "message": "دوست شما درخواست کرده است که از اتصال اینترنت شما.",
+    "description": "A friend has requested to access the Internet through the user."
+  },
+  "howToOfferOneTime": {
+    "message": "اگر شما می خواهم به آنها اجازه دسترسی بدهید، کپی و چسباندن URL این به آنها.",
+    "description": "Instructions for user if they'd like to share their Internet connection with a one-time link."
+  },
+  "getOneTimeInstead": {
+    "message": "دسترسی به جای",
+    "description": "Label for a link to the 'Start a one-time connection' page."
+  },
+  "tryingToShareOneTime": {
+    "message": "شما در حال حاضر در روند تلاش برای به اشتراک گذاشتن دسترسی داشته باشید. اگر شما می خواهم به جای به دست آوردن دسترسی، لینک بالا کلیک کنید.",
+    "description": "Instructions for user if they want to get access instead, while attempting to share access."
+  },
+  "getOneTimeInsteadInstruction": {
+    "message": "اگر شما می خواهم برای شروع یک ارتباط یک بار با فرد دیگری، دکمه \"بازگشت\" را فشار دهید و سپس \"شروع یک ارتباط یک بار\" برای شروع یک جلسه جدید.",
+    "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection."
+  },
+  "oneTimeSharing": {
+    "message": "شما در حال حاضر به اشتراک گذاری دسترسی داشته باشید.",
+    "description": "The user is sharing their Internet access with a friend."
+  },
+  "stopOneTimeSharing": {
+    "message": "توقف اشتراک گذاری دسترسی",
+    "description": "Label for button to terminate your connection to a friend who is accessing the Internet through you."
+  },
+  "stopOneTimeSharingBeforeNew": {
+    "message": "اگر شما می خواهم برای شروع یک ارتباط جدید یک بار، دکمه \"متوقف کردن اشتراک گذاری دسترسی\" برای اولین بار.",
+    "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
+  },
+  "goBack": {
+    "message": "برگرد؟",
+    "description": "Go back to the main page from the one-time connection page."
+  },
+  "areYouSure": {
+    "message": "آیا شما مطمئن هستید که میخواهید برای پایان دادن به این رابطه یک بار؟",
+    "description": "Question confirming if the user wants to end an active connection to a friend."
+  },
+  "submitFeedback_sentenceCase": {
+    "message": "ارسال بازخورد",
+    "description": "Submit feedback to the uProxy team."
+  },
+  "emailTitle": {
+    "message": "پست الکترونیک (اختیاری)",
+    "description": ""
+  },
+  "emailPlaceholder": {
+    "message": "آدرس ایمیل",
+    "description": ""
+  },
+  "feedbackTitle": {
+    "message": "بازخورد خود را در زیر وارد کنید",
+    "description": "Label for textbox for user's to submit feedback and comments to uProxy."
+  },
+  "feedbackPlaceholder": {
+    "message": "ارسال نظرات شما",
+    "description": "The default text that appears in the user feedback textbox."
+  },
+  "networkAndLogs": {
+    "message": "تجزیه و تحلیل شبکه و شامل سیاهههای مربوط",
+    "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team."
+  },
+  "PIIMessage": {
+    "message": "بازخورد و آدرس ایمیل خود را به uProxy.org ارسال می شود. سیاهههای مربوط، اطلاعات شبکه و ایمیل ممکن است اطلاعات شناسایی شخصی باشد.",
+    "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy."
+  },
+  "thankYou": {
+    "message": "متشکرم!",
+    "description": ""
+  },
+  "feedbackSubmitted": {
+    "message": "بازخورد شما به تیم توسعه uProxy کنید.",
+    "description": "User feedback was successfully submitted."
+  },
+  "emailInsteadTitle": {
+    "message": "بازخورد ایمیل به جای؟",
+    "description": "Title for error that appears if feedback submission failed."
+  },
+  "emailInsteadMessage": {
+    "message": "وای! ما قادر به ارائه بازخورد خود را به uproxy.org بودند. لطفا کپی کنید و نظرات خود را یک ایمیل به info@uproxy.org در پیست کنید.",
+    "description": "Seen if feedback submission through uProxy fails. Message asks users to email their feedback instead."
+  },
+  "logsTitle": {
+    "message": "گزارش ها و تجزیه و تحلیل شبکه",
+    "description": "Title for the page that displays a user's network information and uProxy logs."
+  },
+  "toSendLogs": {
+    "message": "برای ارسال سیاهههای مربوط خود را به تیم uProxy برای کمک:",
+    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 1)."
+  },
+  "openFeedback": {
+    "message": "باز uProxy و بر روی \"ارسال ها '",
+    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 2). This text is clickable and will open uProxy."
+  },
+  "retrievingLogs": {
+    "message": "بازیابی سیاهههای مربوط و تجزیه و تحلیل شبکه خود را ...",
+    "description": "Message shown while uProxy is analyzing the user's network settings."
+  },
+  "errorSigningIn": {
+    "message": "یک مشکل در ورود به __network__ وجود دارد. لطفا دوباره تلاش کنید.",
+    "description": "Notification for when the user could not be signed in to a social network."
+  },
+  "attemptingReconnect": {
+    "message": "تلاش برای اتصال مجدد.",
+    "description": "uProxy was disconnected from the social network and is trying to reconnect."
+  },
+  "cannotOpenOneTimeTitle": {
+    "message": "آیا می توانم یک بار اتصال باز نشد",
+    "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
+  },
+  "cantOpenOneTimeMessage": {
+    "message": "در حال حاضر امکان پذیر نیست برای باز کردن یک ارتباط تجاری را در همان زمان به عنوان به یک شبکه اجتماعی را امضا کردند. برای راه اندازی یک اتصال کتابچه راهنمای کاربر، لطفا ورود به سیستم از طریق منوی تنظیمات و دوباره خمیر را لینک کنید.",
+    "description": "Text for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
+  },
+  "statsEnabledTitle": {
+    "message": "آمار ناشناس فعال",
+    "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team."
+  },
+  "statsEnabledMessage": {
+    "message": "این نماد معنی است که شما در به اشتراک گذاری آمار ناشناس با تیم uProxy تصمیم گرفتند. برای تنظیم تنظیمات کلیک کنید.",
+    "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
+  },
+  "statsEnabledTooltip": {
+    "message": "شما به اشتراک گذاشتن آمار ناشناس.",
+    "description": "Text that appears in a tooltip when the user hovers over the 'anonymous stats enabled' icon."
+  },
+  "sharingEnabledTitle": {
+    "message": "به اشتراک گذاری فعال",
+    "description": "Title for popup that points to the sharing icon in uProxy's top toolbar. The popup appears when the user first grants access to one of their friends. The sharing icon is visible as long as there are friends who can get access to the user's Internet."
+  },
+  "sharingEnabledMessage": {
+    "message": "این نماد معنی است که شما در دسترس برای به اشتراک گذاری با دوستان دسترسی شما برای دسترسی به ارائه کردهاید.",
+    "description": "Text in a popup that explains what the sharing icon (on the toolbar) is."
+  },
+  "sharingEnabledTooltip": {
+    "message": "شما در دسترس برای به اشتراک گذاری می باشد.",
+    "description": "Text that appears in a tooltip when the user hovers over the sharing icon."
+  },
+  "getAccess": {
+    "message": "دسترسی",
+    "description": "Text for the tab on the toolbar. When the user is on the 'Get Access' tab, they are looking to get access to the Internet through a friend."
+  },
+  "shareAccess": {
+    "message": "به اشتراک گذاشتن دسترسی",
+    "description": "Text for the tab on the toolbar. When the user is on the 'Share Access' tab, they are looking to share access to their Internet with a friend."
+  },
+  "welcome": {
+    "message": "به uProxy خوش آمدید",
+    "description": ""
+  },
+  "welcomeMessage": {
+    "message": "برای شروع، گزینه «دریافت دسترسی\" و یا \"به اشتراک گذاشتن دسترسی\" و سپس با کلیک بر روی یکی از دوستان برای اتصال.",
+    "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately."
+  },
+  "alphaMessage": {
+    "message": "این یک نسخه آلفا از uProxy است. شما می توانید به ما کمک uProxy بهبود با به اشتراک گذاشتن معیارهای ناشناس با تیم توسعه. اطلاعات گزارش شده است توسط مشتری بینام و انتقال ایمن.",
+    "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
+  },
+  "moreInformation": {
+    "message": "اطلاعات بیشتر.",
+    "description": ""
+  },
+  "changeStatsChoice": {
+    "message": "شما می توانید انتخاب خود را در هر زمان از منوی تنظیمات تغییر دهید.",
+    "description": "Informs the user that they can opt in and out of sending anonymous statistics at any time they choose, from the Settings menu."
+  },
+  "enableMetrics": {
+    "message": "آیا می خواهید به فعال کردن مجموعه معیارهای ناشناس؟",
+    "description": "Asks the user if they want to send anonymous metrics about their uProxy usage."
+  },
+  "imIn": {
+    "message": "من هستم",
+    "description": "Agree to submitting anonymous metrics to uProxy."
+  },
+  "noThanks": {
+    "message": "نه ممنون",
+    "description": "Do not agree to submitting anonymous metrics to uProxy."
+  },
+  "disconnectedTitle": {
+    "message": "وای! شما از دوستان خود قطع شده است.",
+    "description": "Title for error that appears when the user was getting access to the Internet through their friend, but that connection was terminated."
+  },
+  "disconnectedMessage": {
+    "message": "لطفا با احتیاط ادامه دهید. ترافیک وب شما دیگر از طریق دوست شما روت. شما ممکن است بخواهید برای بستن هر پنجره حساس شما باز، قبل از ادامه.",
+    "description": "Instruction informing the user that to continue browsing the Internet, the user will need to use their local (potentially unsafe and/or censored) connection."
+  },
+  "continueBrowsing": {
+    "message": "ادامه مرور بدون uProxy",
+    "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."
+  },
+  "sharingUnavailableTitle": {
+    "message": "به اشتراک گذاری در دسترس نیست",
+    "description": "Title for error that appears when the user can not share their Internet access with friends."
+  },
+  "sharingUnavailableMessage": {
+    "message": "وای! شما با استفاده از فایرفاکس 37، که دارای یک اشکال است که مانع از به اشتراک گذاری از کار (git.io/vf5x1 را ببینید). این اشکال در فایرفاکس 38 ثابت، بنابراین شما می توانید به اشتراک گذاری با ارتقاء Firefox یا تعویض به کروم را فعال کنید.",
+    "description": "Text for error that appears when the user can not share their Internet access with friends."
+  },
+  "loadingFriends": {
+    "message": "در حال بارگیری دوستان uProxy",
+    "description": "User's friends are being loaded from a social network."
+  },
+  "noFriendsOnline": {
+    "message": "هیچ کدام از دوستان خود را در __network__ به uProxy در این زمان به امضا رساند.",
+    "description": "None of the user's friends are currently signed in to the social network the user selected."
+  },
+  "toInviteFriends": {
+    "message": "به دعوت دوستان به uProxy، آنها یک لینک ارسال به https://www.uproxy.org",
+    "description": "Instruction informing the user how to invite their friends to uProxy."
+  },
+  "offers": {
+    "message": "پیشنهادات",
+    "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted."
+  },
+  "requests": {
+    "message": "درخواست",
+    "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
+  },
+  "friendsWhoShare": {
+    "message": "دوستان شما می توانید دسترسی از دریافت",
+    "description": "Title for the group of friends who the user can get Internet access from."
+  },
+  "friendsWhoCanGet": {
+    "message": "دوستان که می تواند دسترسی از شما",
+    "description": "Title for the group of friends who can access the Internet through the user."
+  },
+  "uproxyFriends": {
+    "message": "دوستان که uProxy",
+    "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups."
+  },
+  "connectedWith": {
+    "message": "ارتباط با __network__",
+    "description": "Text in settings that informs the user which social network they're connected to."
+  },
+  "nameThisDevice": {
+    "message": "نام و نام خانوادگی این دستگاه",
+    "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel."
+  },
+  "deviceDescription": {
+    "message": "توضیحات دستگاه",
+    "description": "Title for the section in Settings where the user can edit the name of their device."
+  },
+  "description": {
+    "message": "شرح",
+    "description": "Placeholder for the input field for the name of the user's device."
+  },
+  "save": {
+    "message": "ذخیره",
+    "description": "Label for button that saves the user's text input."
+  },
+  "restart": {
+    "message": "شروع دوباره",
+    "description": "Restart uProxy completely."
+  },
+  "advancedSettings": {
+    "message": "تنظیمات پیشرفته",
+    "description": "Clickable text from the Settings menu. Clicking this opens the advanced settings screen."
+  },
+  "advancedSettings_sentenceCase": {
+    "message": "تنظیمات پیشرفته",
+    "description": "Title for the advanced settings screen."
+  },
+  "editAdvancedSettings": {
+    "message": "تنظیمات خود را در زیر ویرایش",
+    "description": "Instruction for the user to edit their advanced settings (by typing JSON in a textbox)."
+  },
+  "editAdvancedSettingsPlaceholder": {
+    "message": "ویرایش تنظیمات شما",
+    "description": "Default text in the advanced settings textbox."
+  },
+  "settingsSaved": {
+    "message": "تنظیمات ذخیره شده",
+    "description": "Message that confirms to the user that their advanced settings were saved."
+  },
+  "settingsBadFormatError": {
+    "message": "می تواند تنظیم نشده: فرمت بد",
+    "description": "Error shown to the user if their input for advanced settings is badly formed JSON."
+  },
+  "settingsJsonError": {
+    "message": "می تواند تنظیم نشده: JSON ارزش عدم تطابق",
+    "description": "Error shown to the user if their input for advanced settings is incomplete or incompatible with expected settings configurations."
+  },
+  "set": {
+    "message": "SET",
+    "description": "Label for button that saves the user's advanced settings."
+  },
+  "aboutUproxy": {
+    "message": "uProxy شما کمک می کند دسترسی شما به اینترنت به اشتراک بگذارید و یا دسترسی به اینترنت از دوستان",
+    "description": "Description on uProxy's introduction screen explaining what uProxy is."
+  },
+  "next": {
+    "message": "بعد",
+    "description": "Label for button that proceeds from the introduction page to the login page."
+  },
+  "learnMoreUproxy": {
+    "message": "اطلاعات بیشتر در مورد uProxy بدانید",
+    "description": "Label for button that brings user to more information about uProxy."
+  },
+  "whichSocialNetwork": {
+    "message": "از کجا می توانم مخاطبین خود را سریعترین را پیدا کردید؟",
+    "description": "Question seen at the top of uProxy's login page. Asks which social network should be used to find the user's friends."
+  },
+  "whySocialNetwork": {
+    "message": "uProxy با استفاده از شبکه های اجتماعی برای کمک به شما در تنظیم ارتباطات با دوستان خود",
+    "description": "Explains why uProxy needs social networks. (Friends need to login with the same social network on uProxy for friends to see each other.)"
+  },
+  "setUpOneTime": {
+    "message": "راه اندازی یک اتصال یک بار",
+    "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link."
+  },
+  "weWontPost": {
+    "message": "ما داده ها و یا پست شما بدون رضایت شما را به اشتراک بگذارید عمومی",
+    "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user."
+  },
+  "learnMoreSocial": {
+    "message": "اطلاعات بیشتر در مورد شبکه های اجتماعی بیشتر بدانید",
+    "description": "Label for button that brings user to more information about why social networks are used for uProxy."
+  },
+  "askToAnalyze": {
+    "message": "این می تواند باشد که نوع شبکه خود را NAT با uProxy ناسازگار است. آیا می خواهید uProxy به تجزیه و تحلیل شبکه شما؟",
+    "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails."
+  },
+  "analyzingNetwork": {
+    "message": "شبکه تجزیه و تحلیل",
+    "description": "Message shown when the user's network is being analyzed."
+  },
+  "analysisResults": {
+    "message": "به نظر میرسد شما در __natType__، که __natImpact__ تداخل با توانایی خود را برای اتصال به دوست هستند.",
+    "description": "A summary of the user's network analysis."
+  },
+  "moreInfo": {
+    "message": "اطلاعات بیشتر",
+    "description": "Link to 'Does uProxy log data about me?' question in the FAQ."
+  },
+  "askToSubmitAnalysis": {
+    "message": "آیا می خواهید برای ارسال نوع NAT خود را به تیم uProxy، برای کمک به ما را بهتر درک شبکه های کاربران ما در؟",
+    "description": "Asks the user if they are willing to share their network analysis results with uProxy, to help the development of uProxy."
+  },
+  "veryLikely": {
+    "message": "به احتمال بسیار زیاد",
+    "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established."
+  },
+  "possibly": {
+    "message": "احتمالا",
+    "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established."
+  },
+  "unlikely": {
+    "message": "بعید",
+    "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established."
+  },
+  "privacyPolicy": {
+    "message": "سیاست حفظ حریم خصوصی",
+    "description": "Link to uProxy's privacy policy."
+  },
+  "startedProxying": {
+    "message": "__name__ وکالتی از طریق شما آغاز شده",
+    "description": "Notification for when a friend has started accessing the Internet through the user."
+  },
+  "stoppedProxying": {
+    "message": "__name__ وکالتی از طریق شما متوقف",
+    "description": "Notification for when a friend has stopped accessing the Internet through the user."
+  },
+  "unableToShareWith": {
+    "message": "قادر به اشتراک گذاشتن دسترسی با __name__",
+    "description": "Error message seen in uProxy when a friend failed to get access to the Internet through the user."
+  },
+  "unableToGetFrom": {
+    "message": "قادر به دسترسی از __name__",
+    "description": "Error message seen in uProxy when the user failed to get access to the Internet through a friend."
+  },
+  "gettingAccessFrom": {
+    "message": "گرفتن دسترسی از __name__",
+    "description": "Message in a status bar that is visible when the user is getting access from a friend."
+  },
+  "sharingAccessWith_one": {
+    "message": "به اشتراک گذاری دسترسی با __name__",
+    "description": "Message in a status bar that is visible when one friend is getting access through the user."
+  },
+  "sharingAccessWith_two": {
+    "message": "به اشتراک گذاری دسترسی با __name1__ و __name2__",
+    "description": "Message in a status bar that is visible when two friends are getting access through the user."
+  },
+  "sharingAccessWith_many": {
+    "message": "به اشتراک گذاری دسترسی با __name__ و __numOthers__ دیگران",
+    "description": "Message in a status bar that is visible when three or more friends are getting access through the user."
+  },
+  "loggedOut": {
+    "message": "شما از __network__ به ثبت رسیده است",
+    "description": "Notification for when the user has been logged out of the social network."
+  },
+  "grantedAccessNotification": {
+    "message": "__name__ دسترسی شما اعطا",
+    "description": "Notification for when a user's request to access the Internet through a friend has been accepted by that friend."
+  },
+  "offeredAccessNotification": {
+    "message": "__name__ دسترسی شما ارائه",
+    "description": "Notification for when the user receives an offer from a friend to access the Internet through them."
+  },
+  "acceptedOfferNotification": {
+    "message": "__name__ پیشنهاد خود را برای دسترسی پذیرفته است",
+    "description": "Notification for when a friend has accepted the user's offer to share their Internet with that friend."
+  },
+  "requestingAccessNotification": {
+    "message": "__name__ درخواست دسترسی",
+    "description": "Notification for when a friend sends a request to access the Internet through the user."
+  },
+  "descriptionDefault": {
+    "message": "__number__ کامپیوتر",
+    "description": "If a friend has more than one computer, the computers are given this default name (with increasing numbers) to differentiate them."
+  },
+  "language": {
+    "message": "زبان",
+    "description": "Language used by the application."
+  },
+  "selectLanguage": {
+    "message": "انتخاب زبان",
+    "description": "Instruction to select language used by the application."
+  },
+  "extMissingTitle": {
+    "message": "شما تقریبا آماده برای استفاده uProxy هستید!",
+    "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
+  },
+  "extMissingMessage": {
+    "message": "دانلود و فعال کردن قسمت 1 از uProxy برای شروع.",
+    "description": "Shown in Chrome to instruct the user to install part 1 of uProxy."
+  },
+  "appMissingTitle": {
+    "message": "شما تقریبا آماده برای استفاده uProxy هستید!",
+    "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
+  },
+  "appMissingMessage": {
+    "message": "دانلود و فعال کردن قسمت 2 از uProxy برای شروع.",
+    "description": "Shown in Chrome to instruct the user to install part 2 of uProxy."
+  }
+}

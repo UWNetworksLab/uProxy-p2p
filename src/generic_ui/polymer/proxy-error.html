@@ -1,0 +1,49 @@
+<polymer-element name='uproxy-proxy-error'>
+  <template>
+    <style>
+      :host {
+        text-align: center;
+      }
+
+      core-icon.close {
+        float: right;
+        color: grey;
+        opacity: .6;
+      }
+      core-icon.close:hover {
+        opacity: 1;
+      }
+
+      core-icon.button {
+        cursor: pointer;
+      }
+
+      p {
+        color: rgba(0, 0, 0, .55);
+      }
+    </style>
+
+    <core-signals on-core-signal-open-proxy-error='{{ openWithError }}'></core-signals>
+
+    <uproxy-dialog id='dialog' backdrop layered='false'>
+      <core-icon class="close button" icon="clear" on-tap='{{ close }}'></core-icon>
+      <h2>Unable to get access</h2>
+
+      <p hidden?='{{ !wasError }}'>
+        Your active proxying session has been disconnected as we are no longer
+        able to control the browser proxy settings.
+      </p>
+
+      <p hidden?='{{ wasError }}'>
+        We are currently unable to set up a proxy due to another extension.
+      </p>
+
+      <p>
+        Please disable any other extensions which may be affecting your proxy
+        settings before trying to get access.
+      </p>
+    </uproxy-dialog>
+  </template>
+
+  <script src='proxy-error.js'></script>
+</polymer-element>

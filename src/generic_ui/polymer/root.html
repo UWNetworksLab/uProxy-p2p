@@ -7,6 +7,7 @@
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
+<link rel="import" href="i18n-filter.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
@@ -20,6 +21,7 @@
 <link rel='import' href='dialog.html'>
 <link rel='import' href='browser-elements.html'>
 <link rel='import' href='icons.html'>
+<link rel='import' href='proxy-error.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}' on-open-dialog='{{ openDialog }}'>
 
@@ -27,7 +29,7 @@
     <style>
       :host {
         font-family: Roboto, sans-serif;
-        text-align: left;
+        text-align: start;
         color: rgb(112, 112, 112);
       }
       paper-tabs::shadow #selectionBar {
@@ -89,7 +91,7 @@
         height: 60px;
       }
       core-toolbar core-icon[icon="menu"] {
-        margin: 0px 0px 0px 16px;
+        margin: 0px 16px;
         opacity: 0.6;
         -webkit-transition: all 0.23s !important;
         -moz-transition: all 0.23s !important;
@@ -101,14 +103,14 @@
       }
       core-toolbar #title {
         font-size: 20px;
-        margin: 0px 0px 0px 36px;
+        margin: 0px 36px;
       }
       core-toolbar core-icon.status {
         cursor: pointer;
         color: #006A5A;
       }
       core-toolbar #sharingEnabledIcon {
-        margin: 0px 15px 0px  0px;
+        margin: 0px 15px;
       }
       #settings {
         top: 0;
@@ -134,14 +136,22 @@
         padding-left: 20px;
         padding-right: 20px;
         padding-top: 19px;
-        text-overflow: ellipsis;
         white-space: nowrap;
-        overflow: hidden;
         font-size: 14px;
+      }
+      .statusText, .statusText [flex] {
+        /* cut off the statusText itself, or any contained flex-grow element */
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
       .statusRow core-icon {
         padding-right: 20px;
+      }
+      .statusRow a, .statusRow core-icon {
         color: #0EC5AF;
+      }
+      .statusRow.error core-icon {
+        color: #DD2D2D;
       }
       uproxy-bubble {
         z-index: 1;
@@ -175,7 +185,7 @@
         width: 50px;
       }
       #disconnectDialog #disconnectDialogText {
-        text-align: left;
+        text-align: start;
       }
       #disconnectDialog paper-button {
         font-size: 12px;
@@ -189,6 +199,7 @@
         font-size: 12px;
       }
       paper-toast #toastHelpLink {
+        text-transform: uppercase;
         color: #47B5AA;
       }
     </style>
@@ -208,7 +219,7 @@
     </uproxy-splash>
 
     <core-drawer-panel id='mainPanel' forceNarrow='true' drawerWidth='300px'
-        hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
+        hidden?='{{ ui.view !== ui_constants.View.ROSTER }}' rightDrawer='{{ dir == "rtl" ? true : false }}'>
       <core-header-panel drawer>
         <div class='content' fit>
           <uproxy-settings id='settings'></uproxy-settings>
@@ -223,47 +234,44 @@
           <div id='title' flex>uProxy</div>
 
           <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
-            <h3>Cannot open manual connection</h3>
+            <h3>{{ 'cannotOpenOneTimeTitle' | $$ }}</h3>
             <p>
-              It is not currently possible to open a manual connection at the
-              same time as being signed in to a social network.  To launch a
-              manual connection, please log out through the settings menu and
-              re-paste the link.
+              {{ 'cantOpenOneTimeMessage' | $$ }}
             </p>
           </uproxy-bubble>
 
-          <core-tooltip id='statsTooltip' label='You are sharing anonymous stats.' position='left'>
+          <core-tooltip id='statsTooltip' label='{{ "statsEnabledTooltip" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
               hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
-            <h3>Anonymous stats enabled</h3>
-            <p>This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings.</p>
+            <h3>{{ 'statsEnabledTitle' | $$ }}</h3>
+            <p>{{ 'statsEnabledMessage' | $$ }}</p>
           </uproxy-bubble>
 
-          <core-tooltip label='You are available for sharing.' position='left'>
+          <core-tooltip label='{{ "sharingEnabledTooltip" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
-              hidden?='{{ model.contacts.shareAccessContacts.trustedUproxy.length === 0 }}'
+              hidden?='{{ !isSharingEnabledWithOthers }}'
               on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
-          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && model.contacts.shareAccessContacts.trustedUproxy.length > 0 }}'>
-            <h3>Sharing Enabled</h3>
-            <p>This icon means you're available for sharing access with friends you've offered access to.</p>
+          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && isSharingEnabledWithOthers }}'>
+            <h3>{{ 'sharingEnabledTitle' | $$ }}</h3>
+            <p>{{ 'sharingEnabledMessage' | $$ }}</p>
           </uproxy-bubble>
 
-          <div class='bottom fit'>
+          <div class='bottom fit' dir="ltr">
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>Get Access</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ 'getAccess' | $$ }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.getAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.getAccessContacts.pending.length }}
                 </span>
               </paper-tab>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>Share Access</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ 'shareAccess' | $$ }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.shareAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.shareAccessContacts.pending.length }}
@@ -279,10 +287,9 @@
           https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
         -->
         <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
-          <h3>Welcome to uProxy!</h3>
+          <h3>{{ 'welcome' | $$ }}</h3>
           <p>
-            To get started, choose "Get access" or "Share access" and then click
-            on a friend to connect.
+            {{ 'welcomeMessage' | $$ }}
           </p>
         </uproxy-bubble>
 
@@ -303,6 +310,15 @@
             </div>
 
             <div id='status'>
+              <div class='statusRow error' hidden?='{{ ui.browserApi.canProxy }}'>
+                <div class='statusText' horizontal layout>
+                  <core-icon icon='warning'></core-icon>
+                  <span flex>
+                    Other proxy settings in use
+                  </span>
+                  <a href='#' on-tap='{{ openProxyError }}'>GET HELP</a>
+                </div>
+              </div>
               <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
                 <div class='statusText'>
                   <core-icon icon='uproxy-icons:receive'></core-icon>
@@ -334,38 +350,40 @@
       </template>
     </uproxy-action-dialog>
 
-    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy">
+    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="{{ 'welcome' | $$ }}">
       <p>
-        This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely.
+        {{ 'alphaMessage' | $$ }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>More information.</span>
-        </uproxy-faq-link> You can change your choice at any time, from the Settings menu.
+          <span class='linkText'>{{ 'moreInformation' | $$ }}</span>
+        </uproxy-faq-link>{{ 'changeStatsChoice' | $$ }}
       </p>
-      <p>Would you like to enable anonymous metrics collection?</p>
-      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>I'm in</paper-button>
-      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>No thanks</paper-button>
+      <p>{{ 'enableMetrics' | $$ }}</p>
+      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ 'imIn' | $$ }}</paper-button>
+      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ 'noThanks' | $$ }}</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ ui.disconnectedWhileProxying }}" autoCloseDisabled>
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
-        <h1>Oops! You've been disconnected from your friend.</h1>
+        <h1>{{ 'disconnectedTitle' | $$ }}</h1>
         <p>
-          Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding.
+          {{ 'disconnectedMessage' | $$ }}
         </p>
       </div>
-      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>Continue Browsing Without uProxy</paper-button>
+      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ 'continueBrowsing' | $$ }}</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
 
+    <uproxy-proxy-error id='proxyError'></uproxy-proxy-error>
+
     <paper-toast id='toast'
         text='{{ toastMessage }}' responsiveWidth='320px'
-        style='bottom: {{ topOfStatuses([ui.gettingStatus, ui.sharingStatus], ui.view == ui_constants.View.ROSTER && !$.feedback.opened && !$.advancedSettings.opened) }}px;'
++        style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !stringMatches(toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(toastMessage, user_interface.SHARE_FAILED_MSG) }}'>GET HELP
+          hidden?='{{ !unableToShare && !unableToGet }}'>{{ 'getHelp' | $$ }}
       </div>
     </paper-toast>
 

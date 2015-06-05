@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 
 // Describes the interface for functions that have different implications
@@ -16,6 +18,8 @@ export interface BrowserAPI {
   bringUproxyToFront() :void;
   // TODO: write comment to explain what browserSpecificElement is.
   browserSpecificElement :string;
+
+  canProxy :boolean;
 
   /*
    * tag is used to uniquely identify notifications.  If it is a json-encoded
@@ -37,4 +41,5 @@ export interface BrowserAPI {
   on(name :string, callback :Function) :void;
   on(name :'urlData', callback :(url :string) => void) :void;
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
+  on(name :'proxyDisconnected', callback :Function) :void;
 }

@@ -35,7 +35,7 @@
     <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
          hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'>
 
-      <p id='description' hidden?='{{ !instance.description }}'>
+      <p id='description' hidden?='{{ !instance.description }}' dir='auto'>
         {{ instance.description }}
       </p>
 
@@ -44,22 +44,22 @@
 
       <!-- not getting or trying to get access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
-        <paper-button raised on-tap='{{ start }}'>
-          Start getting access
+        <paper-button raised on-tap='{{ start }}' disabled?='{{ !ui.browserApi.canProxy }}'>
+          {{ 'startGetting' | $$ }}
         </paper-button>
       </div>
 
       <!-- trying to get access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
         <paper-button class='grey' raised on-tap='{{ stop }}'>
-          Cancel
+          {{ 'cancel' | $$ }}
         </paper-button>
       </div>
 
       <!-- currently getting access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
         <paper-button class='grey' raised on-tap='{{ stop }}'>
-          Stop getting access
+          {{ 'stopGetting' | $$ }}
         </paper-button>
       </div>
 

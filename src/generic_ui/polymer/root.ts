@@ -1,13 +1,24 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../../third_party/typings/xregexp/xregexp.d.ts' />
+/// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
 
 import social = require('../../interfaces/social');
 import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
+import user_module = require('../scripts/user');
+import regEx = require('xregexp');
+import XRegExp = regEx.XRegExp;
 
+// Example usage of these tests:
+// isRightToLeft.test('hi') --> false
+// isRightToLeft.test('لك الوص') --> true
+var isRightToLeft = XRegExp('[\\p{Arabic}\\p{Hebrew}]');
+var isCommonUnicode = XRegExp('[\\p{Common}]');
 var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
+var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 
 interface button_description {
   text :string;
@@ -28,6 +39,8 @@ Polymer({
     buttons: []
   },
   toastMessage: '',
+  unableToGet: '',
+  unableToShare: '',
   updateView: function(e :Event, detail :{ view :ui_types.View }) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
@@ -92,6 +105,9 @@ Polymer({
       this.$.dialog.open();
     });
   },
+  openProxyError: function() {
+    this.$.proxyError.open();
+  },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     var signal = target.getAttribute('data-signal');
     if (signal) {
@@ -113,6 +129,7 @@ Polymer({
       this.statsDialogOrBubbleOpen = true;
       this.$.statsDialog.open();
     }
+    this.updateDirectionality();
   },
   closeStatsBubble: function() {
     this.statsDialogOrBubbleOpen = false;
@@ -132,9 +149,9 @@ Polymer({
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
       this.fire('open-dialog', {
-        heading: 'Sharing Unavailable',
-        message: 'Oops! You\'re using Firefox 37, which has a bug that prevents sharing from working (see git.io/vf5x1). This bug is fixed in Firefox 38, so you can enable sharing by upgrading Firefox or switching to Chrome.',
-        buttons: [{text: 'Close', dismissive: true}]
+        heading: ui.i18n_t('sharingUnavailableTitle'),
+        message: ui.i18n_t('sharingUnavailableMessage'),
+        buttons: [{text: ui.i18n_t('close'), dismissive: true}]
       });
     } else {
       // setting the value is taken care of in the polymer binding, we just need
@@ -143,7 +160,7 @@ Polymer({
     }
   },
   signalToFireChanged: function() {
-    if (ui.signalToFire != '') {
+    if (ui.signalToFire) {
       this.fire('core-signal', {name: ui.signalToFire});
       ui.signalToFire = '';
     }
@@ -154,52 +171,27 @@ Polymer({
   toastMessageChanged: function(oldVal :string, newVal :string) {
     if (newVal) {
       this.toastMessage = newVal;
+      this.unableToShare = ui.unableToShare;
+      this.unableToGet = ui.unableToGet;
       this.$.toast.show();
 
       // clear the message so we can pick up on other changes
       ui.toastMessage = null;
+      ui.unableToShare = false;
+      ui.unableToGet = false;
     }
   },
   openTroubleshoot: function() {
-    if (this.stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG)) {
-      this.troubleshootTitle = "Unable to get access";
+    if (this.ui.unableToGet) {
+      this.troubleshootTitle = ui.i18n_t('unableToGet');
     } else {
-      this.troubleshootTitle = "Unable to share access";
+      this.troubleshootTitle = ui.i18n_t('unableToShare');
     }
     this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
-  stringMatches: function(str1 :string, str2 :string) {
-    // Determine if the error in the toast is a getter or sharer error
-    // by comparing the error string to getter/sharer error constants.
-    if (str1) {
-      return str1.indexOf(str2) > -1;
-    }
-    return false;
-  },
-  topOfStatuses: function(statuses: string[], visible :boolean) {
-    // Returns number of pixels from the bottom of the window a toast
-    // can be positioned without interfering with the getting or sharing
-    // status bars.
-    // Since the toast always looks for the bottom of the window, not the
-    // bottom of its parent element, this function is needed to control toast
-    // placement rather than a simpler solution such as moving the toast
-    // inside the roster element.
-    var height = 10; // should start 10px up
-    var statusRowHeight = 58; // From style of the statusRow divs.
-
-    if (!visible) {
-      // if the statuses are not on the screen, we don't need to do anything
-      return height;
-    }
-
-    for (var i in statuses) {
-      if (statuses[i]) {
-        height += statusRowHeight;
-      }
-    }
-
-    return height;
+  topOfStatuses: function(statusHeight: number, visible :boolean) {
+    return 10 + (visible ? statusHeight : 0);
   },
   // mainPanel.selected can be either "drawer" or "main"
   // Our "drawer" is the settings panel. When the settings panel is open,
@@ -213,8 +205,42 @@ Polymer({
       this.$.statsTooltip.disabled = false;
     }
   },
+  isSharingEnabledWithOthers: false,
+  updateIsSharingEnabledWithOthers: function() {
+    var trustedContacts = model.contacts.shareAccessContacts.trustedUproxy;
+    if (trustedContacts.length === 1) {
+      this.isSharingEnabledWithOthers =
+          trustedContacts[0].userId !== model.onlineNetwork.userId;
+    } else {
+      this.isSharingEnabledWithOthers = trustedContacts.length > 0;
+    }
+  },
+  updateDirectionality: function() {
+    // Update the directionality of the UI.
+    for (var i = 0; i < RTL_LANGUAGES.length; i++) {
+      if (RTL_LANGUAGES[i] == model.globalSettings.language.substring(0,2)) {
+        this.dir = 'rtl';
+        return;
+      }
+    }
+    this.dir = 'ltr';
+  },
+  languageChanged: function(oldLanguage :string, newLanguage :string) {
+    if (typeof oldLanguage != 'undefined') {
+      window.location.reload();
+    }
+  },
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',
+    // Use an observer on model.contacts.shareAccessContacts.trustedUproxy
+    // so that we can detect any time elements are added or removed from this
+    // array.  Unfortunately if we try doing
+    //   someMethod(model.contacts.shareAccessContacts.trustedUproxy)
+    // in root.html, someMethod is not invoked when items are added or removed.
+    'model.contacts.shareAccessContacts.trustedUproxy':
+        'updateIsSharingEnabledWithOthers',
+    'ui.signalToFire': 'signalToFireChanged',
+    'model.globalSettings.language': 'languageChanged'
   }
 });
