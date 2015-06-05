@@ -424,4 +424,30 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
                         'EMAIL_ADDRESS');
     return text;
   }
+
+  public pingUntilOnline = (pingUrl :string) : Promise<void> => {
+    var ping = () : Promise<void> => {
+      return new Promise<void>(function(fulfill, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', pingUrl);
+        xhr.onload = function() { fulfill(); };
+        xhr.onerror = function(e) { reject(new Error('Ping failed')); };
+        xhr.send();
+      });
+    }
+
+    return new Promise<void>((fulfill, reject) => {
+      var checkIfOnline = () => {
+        ping().then(() => {
+          clearInterval(intervalId);
+          fulfill();
+        }).catch((e) => {
+          // Ping failed (may be because the internet is disconnected),
+          // we will try again on the next interval.
+        });
+      };
+      var intervalId = setInterval(checkIfOnline, 5000);
+      checkIfOnline();
+    });
+  }
 }  // class uProxyCore

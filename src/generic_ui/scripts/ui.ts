@@ -163,7 +163,6 @@ export class UserInterface implements ui_constants.UiApi {
   public toastMessage :string = null;
 
   private isLogoutExpected_ :boolean = false;
-  private reconnectInterval_ :number;
 
   // is a proxy currently set
   private proxySet_ :boolean = false;
@@ -712,7 +711,8 @@ export class UserInterface implements ui_constants.UiApi {
       model.onlineNetwork = null;
 
       if (!this.isLogoutExpected_ && !network.online &&
-          !this.disconnectedWhileProxying &&
+          // TODO: support reconnect for all networks
+          network.name == 'Google' && !this.disconnectedWhileProxying &&
           this.instanceGettingAccessFrom_ == null) {
         console.warn('Unexpected logout, reconnecting to ' + network.name);
         this.reconnect(network.name);
@@ -833,67 +833,27 @@ export class UserInterface implements ui_constants.UiApi {
 
   public reconnect = (network :string) => {
     model.reconnecting = true;
-
-    var ping = () : Promise<void> => {
-      var pingUrl = network == 'Facebook'
-          ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
-      return new Promise<void>(function(F, R) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', pingUrl);
-        xhr.onreadystatechange = function() {
-          console.error('onreadystatechange ' + xhr.status + ', ' + xhr.response);
-        };
-        xhr.onload = function() { F(); };
-        xhr.onerror = function(e) {
-          console.error('xhr.onerror: ' + xhr.status);
-          R(new Error('Ping failed'));
-        };
-        xhr.send();
-      });
-    }
-
-    var loginCalled = false;
-    var attemptReconnect = () => {
-      console.error('calling ping');  // TODO: remove
-      ping().then(() => {
-        console.error('ping fulfilled');  // TODO: remove
-        // Ensure that we only call login once.  This is needed in case
-        // either login or the ping takes too long and we accidentally
-        // call login twice.  Doing so would cause one of the login
-        // calls to fail, resulting in the user seeing the splash page.
-        if (!loginCalled) {
-          loginCalled = true;
-          console.error('calling core.login');  // TODO: remove
-          this.core.login({network: network, reconnect: true}).then(() => {
-            // Successfully reconnected, stop additional reconnect attempts.
-            console.error('stopping reconnect');  // TODO: remove
-            this.stopReconnect();
-          }).catch((e) => {
-            console.error('login with reconnect failed');  // TODO: remove
-            // Login with last oauth token failed, give up on reconnect.
-            this.stopReconnect();
-            this.showNotification('You have been logged out of ' + network);
-            this.view = ui_constants.View.SPLASH;
-          });
-        }
-      }).catch((e) => {
-        // Ping failed, we will try again on the next interval.
-        console.error('ping failed');  // TODO: remove
-      });
-    };
-
-    // Call attemptReconnect immediately and every 10 seconds afterwards
-    // until it is successful.
-    this.reconnectInterval_ = setInterval(attemptReconnect, 10000);
-    attemptReconnect();
+    var pingUrl = network == 'Facebook'
+        ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
+    this.core.pingUntilOnline(pingUrl).then(() => {
+      // Ensure that the user is still attempting to reconnect (i.e. they
+      // haven't clicked to stop reconnecting while we were waiting for the
+      // ping response).
+      if (model.reconnecting) {
+        this.core.login({network: network, reconnect: true}).then(() => {
+          this.stopReconnect();
+        }).catch((e) => {
+          // Reconnect failed, give up.
+          this.stopReconnect();
+          this.showNotification('You have been logged out of ' + network);
+          this.view = ui_constants.View.SPLASH;
+        });
+      }
+    });
   }
 
   public stopReconnect = () => {
     model.reconnecting = false;
-    if (this.reconnectInterval_) {
-      clearInterval(this.reconnectInterval_);
-      this.reconnectInterval_ = null;
-    }
   }
 
   private cloudfrontDomains_ = [

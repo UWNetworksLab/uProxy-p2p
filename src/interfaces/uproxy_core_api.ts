@@ -69,7 +69,8 @@ export enum Command {
   SEND_CREDENTIALS,
   UPDATE_GLOBAL_SETTINGS,
   GET_LOGS,
-  GET_NAT_TYPE
+  GET_NAT_TYPE,
+  PING_UNTIL_ONLINE
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -192,5 +193,7 @@ export interface CoreApi {
   // TODO: use Event instead of attaching manual handler. This allows event
   // removal, etc.
   onUpdate(update :Update, handler :Function) :void;
+
+  pingUntilOnline(pingUrl :string) : Promise<void>;
 }
 
