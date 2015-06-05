@@ -63,13 +63,13 @@ Polymer({
     }
 
     this.fire('open-dialog', {
-      heading: 'Go back?',
-      message: 'Are you sure you want to end this one-time connection?',
+      heading: ui.i18n_t('goBack'),
+      message: ui.i18n_t('areYouSure'),
       buttons: [{
-        text: 'Yes',
+        text: ui.i18n_t('yes'),
         signal: 'copypaste-back'
       }, {
-        text: 'No',
+        text: ui.i18n_t('no'),
         dismissive: true
       }]
     });

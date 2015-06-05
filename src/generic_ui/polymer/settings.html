@@ -92,6 +92,9 @@
       margin-top: 1px;
       margin-left: 1px;
     }
+    paper-checkbox::shadow #checkboxLabel {
+      padding: 0px 8px;
+    }
     #metricsCheckbox core-icon[icon='help']{
       height: 15px;
       color: grey;
@@ -111,7 +114,9 @@
     #settingsLinks core-icon {
       height: 20px;
       width: 20px;
-      margin-right: 5px;
+    }
+    #settingsLinks .label {
+      margin: 0px 5px;
     }
     hr {
       border: 0;
@@ -126,43 +131,50 @@
         <div class='userImage' hidden?='{{model.onlineNetwork.imageData==null}}'
           style='background-image: url({{model.onlineNetwork.imageData}});'
           ></div>
-        <div class='networkName'>Connected with {{model.onlineNetwork.name}}</div>
+        <div class='networkName'>{{ 'connectedWith' | $$({ network: model.onlineNetwork.name }) }}</div>
         <!-- show userName and userId if both are available -->
         <div hidden?='{{!model.onlineNetwork.userName}}'>
-          <div class='userInfoName'>{{model.onlineNetwork.userName}}</div>
-          <div class='userInfoID'>{{model.onlineNetwork.userId}}</div>
+          <div class='userInfoName'>
+            <bdi>{{model.onlineNetwork.userName}}</bdi>
+          </div>
+          <div class='userInfoID'>
+            <bdi>{{model.onlineNetwork.userId}}</bdi>
+          </div>
         </div>
         <!-- otherwise show only userId -->
         <div hidden?='{{model.onlineNetwork.userName}}'>
-          <div class='userInfoIDWithoutName'>{{model.onlineNetwork.userId}}</div>
+          <div class='userInfoIDWithoutName'>
+            <bdi>{{model.onlineNetwork.userId}}</bdi>
+          </div>
         </div>
       </div>
 
       <div id='settingsLinks'>
         <div id='descriptionWrapper'>
-          Device description
+          {{ 'deviceDescription' | $$ }}
           <uproxy-description></uproxy-description>
         </div>
 
         <hr>
 
         <uproxy-link on-tap='{{ openFeedbackForm }}' role='button'>
-          <core-icon icon='announcement'></core-icon>
-          Submit Feedback
+          <core-icon icon="announcement"></core-icon>
+          <!-- try taking out these .label spans and see what happens. -->
+          <span class='label'>{{ 'submitFeedback' | $$ }}</span>
         </uproxy-link>
 
         <uproxy-faq-link>
-          <core-icon icon='help'></core-icon>
-          Get Help
+          <core-icon icon="help"></core-icon>
+          <span class='label'>{{ 'getHelp' | $$ }}</span>
         </uproxy-faq-link>
 
         <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
-          <core-icon icon='settings'></core-icon>
-          Advanced Settings
+          <core-icon icon="settings"></core-icon>
+          <span class='label'>{{ 'advancedSettings' | $$ }}</span>
         </uproxy-link>
 
         <div id='metricsCheckbox'>
-          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='Anonymous stats enabled'></paper-checkbox>
+          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "statsEnabledTitle" | $$ }}'></paper-checkbox>
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
           </uproxy-faq-link>
@@ -172,12 +184,12 @@
 
         <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
           <core-icon icon='refresh'></core-icon>
-          Restart
+          {{ 'restart' | $$ }}
         </uproxy-link>
 
         <uproxy-link on-tap='{{ logOut }}' role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
-          Log-out of uProxy
+          {{ 'logout' | $$ }}
         </uproxy-link>
       </div>
     </div>
