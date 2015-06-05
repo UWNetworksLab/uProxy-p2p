@@ -61,9 +61,9 @@ var rtcNet:rtc_to_net.RtcToNet;
 var tcpServer:tcp.Server;
 
 var localhostControlEndpoints:[net.Endpoint] = [
-  { address: '127.0.0.1', port: 9000 },
-  { address: '127.0.0.1', port: 9010 },
-  { address: '127.0.0.1', port: 9020 }];
+  { address: '0.0.0.0', port: 9000 },
+  { address: '0.0.0.0', port: 9010 },
+  { address: '0.0.0.0', port: 9020 }];
 
 function setupServer(endpoint:net.Endpoint) {
   tcpServer = new tcp.Server(endpoint);
