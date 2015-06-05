@@ -8,6 +8,7 @@
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import globals = require('./globals');
 import social = require('../interfaces/social');
 import social_network = require('./social');
 import remote_user = require('./remote-user');
@@ -66,12 +67,13 @@ describe('Core', () => {
     spyOn(manualNetwork, 'receive');
 
     var senderClientId = 'dummy_sender';
-    var message :social.PeerMessage = {
+    var message :social.VersionedPeerMessage = {
       type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
       data: {
         elephants: 'have trunks',
         birds: 'do not'
-      }
+      },
+      version: globals.MESSAGE_VERSION
     };
     var command :social.HandleManualNetworkInboundMessageCommand = {
       senderClientId: senderClientId,

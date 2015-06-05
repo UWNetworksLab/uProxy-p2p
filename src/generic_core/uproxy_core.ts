@@ -201,7 +201,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       remoteProxyInstance = null;
     }
 
-    return copyPasteConnection.startGet();
+    return copyPasteConnection.startGet(globals.MESSAGE_VERSION);
   }
 
   public stopCopyPasteGet = () :Promise<void> => {
@@ -209,7 +209,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public startCopyPasteShare = () => {
-    copyPasteConnection.startShare();
+    copyPasteConnection.startShare(globals.MESSAGE_VERSION);
   }
 
   public stopCopyPasteShare = () :Promise<void> => {

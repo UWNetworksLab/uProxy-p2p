@@ -150,7 +150,8 @@ describe('remote_user.User', () => {
         data: {
           instanceId: 'instanceId', description: '', keyHash: '',
           consent: {isOffering: false, isRequesting: false}
-        }
+        },
+        version: globals.MESSAGE_VERSION
       });
       expect(user.syncInstance_).toHaveBeenCalled();
     });
@@ -161,7 +162,8 @@ describe('remote_user.User', () => {
       spyOn(user, 'getInstance').and.returnValue(instance);
       user.handleMessage('fakeclient', {
         type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
-        data: {}
+        data: {},
+        version: globals.MESSAGE_VERSION
       });
       expect(instance.handleSignal).toHaveBeenCalled();
     });
@@ -187,7 +189,8 @@ describe('remote_user.User', () => {
       };
       expect(user.instanceToClient('fakeinstance')).toBeUndefined();
       expect(user.clientToInstance('fakeclient')).toBeUndefined();
-      user.syncInstance_('fakeclient', instanceHandshake).then(() => {
+      user.syncInstance_('fakeclient', instanceHandshake,
+          globals.MESSAGE_VERSION).then(() => {
         expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
         expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
         instance = user.getInstance('fakeinstance');
@@ -208,14 +211,15 @@ describe('remote_user.User', () => {
       // Add the new client.
       user.handleClient(clientState);
       // Pretend a valid instance message has been sent from the new client.
-      user.syncInstance_('fakeclient2', instanceHandshake);
+      user.syncInstance_('fakeclient2', instanceHandshake,
+          globals.MESSAGE_VERSION);
       expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient2');
       expect(user.clientToInstance('fakeclient')).toEqual(null);
       expect(user.clientToInstance('fakeclient2')).toEqual('fakeinstance');
     });
 
     it('syncs UI after updating instance', () => {
-      user.syncInstance_('fakeclient', instanceHandshake);
+      user.syncInstance_('fakeclient', instanceHandshake, globals.MESSAGE_VERSION);
     });
 
     it('Sets user name if pending', () => {
@@ -225,7 +229,8 @@ describe('remote_user.User', () => {
         status: social.ClientStatus.ONLINE, timestamp: 12345
       });
       expect(pendingUser.name).toEqual('pending');
-      pendingUser.syncInstance_('fakeclient', instanceHandshake);
+      pendingUser.syncInstance_('fakeclient', instanceHandshake,
+          globals.MESSAGE_VERSION);
       expect(pendingUser.name).toEqual(instanceHandshake.name);
     });
 
@@ -240,7 +245,7 @@ describe('remote_user.User', () => {
         instanceId: 'fakeinstance', keyHash: <string>null, description: 'x',
         consent: {isRequesting: false, isOffering: false},
         name: '', userId: 'userIdFromInstance'
-      });
+      }, globals.MESSAGE_VERSION);
       expect(pendingUser.name).toEqual('userIdFromInstance');
     });
 
@@ -251,7 +256,8 @@ describe('remote_user.User', () => {
         status: social.ClientStatus.ONLINE, timestamp: 12345
       });
       namedUser.update({name: 'Henry', userId: 'userId', timestamp: 42});
-      namedUser.syncInstance_('fakeclient', instanceHandshake);
+      namedUser.syncInstance_('fakeclient', instanceHandshake,
+          globals.MESSAGE_VERSION);
       expect(namedUser.name).toEqual('Henry');
     });
 

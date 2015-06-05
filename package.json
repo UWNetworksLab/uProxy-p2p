@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -46,7 +46,7 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.5.7",
-    "uproxy-lib": "^26.0.0",
+    "uproxy-lib": "^27.2.0",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
   },
