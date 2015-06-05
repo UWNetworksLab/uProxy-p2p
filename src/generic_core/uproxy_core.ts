@@ -62,7 +62,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   /**
    * Access various social networks using the Social API.
    */
-   // TODO: take reconnect param
   public login = (loginArgs :uproxy_core_api.LoginArgs) :Promise<void> => {
     var networkName = loginArgs.network;
     if (networkName === social_network.MANUAL_NETWORK_ID) {
