@@ -1,6 +1,7 @@
 /// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import user_interface = require('./ui');
+import ui_constants = require('../../interfaces/ui');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import browser_connector = require('../../interfaces/browser_connector');
@@ -20,10 +21,18 @@ describe('UI.UserInterface', () => {
     // Create a fresh UI object before each test.
     mockCore = jasmine.createSpyObj(
         'core',
-        ['reset', 'onUpdate', 'sendCommand', 'on', 'connect']);
+        ['reset', 'onUpdate', 'sendCommand', 'on', 'connect', 'getFullState']);
 
     // assume connect always resolves immediately
     (<jasmine.Spy>mockCore.connect).and.returnValue(Promise.resolve());
+
+    (<jasmine.Spy>mockCore.getFullState).and.returnValue(Promise.resolve({
+      networkNames: [
+        'testNetwork'
+      ],
+      globalSettings: {
+      }
+    }));
 
     // Store all the handlers for Updates from core in a map.
     // These functions will be called directly from tests
@@ -284,3 +293,67 @@ describe('UI.UserInterface', () => {
     });
   });  // Update giving and/or getting state in UI
 });  // UI.UserInterface
+
+describe('user_interface.model', () => {
+  var model :user_interface.Model;
+
+  beforeEach(() => {
+    model = new user_interface.Model();
+  });
+
+  it('Updating global settings correctly updates description', () => {
+    // description is chosen here as just some arbitrary simple value
+    var newDescription = 'Test description';
+
+    model.updateGlobalSettings({
+      description: newDescription
+    });
+
+    expect(model.globalSettings.description).toEqual(newDescription);
+  });
+
+  it('Updating one field of global settings does not change any other fields', () => {
+    var constantString = 'some arbitrary string';
+
+    model.updateGlobalSettings({
+      description: constantString
+    });
+
+    model.updateGlobalSettings({
+      mode: ui_constants.Mode.SHARE
+    });
+
+    expect(model.globalSettings.description).toEqual(constantString);
+  });
+
+  it('Syncing arrays in global settings works fine', () => {
+    var newStunServers = [
+      {
+        urls: ['something.net:5']
+      },
+      {
+        urls: ['else.net:7']
+      }
+    ];
+
+    model.updateGlobalSettings({
+      stunServers: newStunServers
+    });
+
+    expect(model.globalSettings.stunServers.length).toEqual(newStunServers.length);
+
+    for (var i in newStunServers) {
+      expect(newStunServers[i]).toEqual(model.globalSettings.stunServers[i]);
+    }
+  });
+
+  it('Updating global settings does not reassign', () => {
+    var a = model.globalSettings;
+
+    model.updateGlobalSettings({
+      mode: ui_constants.Mode.SHARE
+    });
+
+    expect(model.globalSettings).toEqual(a);
+  });
+});

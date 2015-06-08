@@ -90,6 +90,16 @@ export class Model {
 
     return null;
   }
+
+  public updateGlobalSettings = (settings :Object) => {
+    _.merge(this.globalSettings, settings, (a :any, b :any) => {
+      if (_.isArray(a) && _.isArray(b)) {
+        return b;
+      }
+
+      return undefined;
+    });
+  }
 }
 
 // Singleton model for data bindings.
@@ -948,12 +958,6 @@ export class UserInterface implements ui_constants.UiApi {
       this.i18n_setLng(state.globalSettings.language);
     }
 
-    // TODO: Do not allow reassignment of globalSettings. Instead
-    // write a 'syncGlobalSettings' function that iterates through
-    // the values in state[globalSettings] and assigns the
-    // individual values to model.globalSettings. This is required
-    // because Polymer elements bound to globalSettings' values can
-    // only react to updates to globalSettings and not reassignments.
-    model.globalSettings = state.globalSettings;
+    model.updateGlobalSettings(state.globalSettings);
   }
 }  // class UserInterface
