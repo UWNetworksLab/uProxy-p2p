@@ -200,6 +200,7 @@ Polymer({
     if (this.$.mainPanel.selected == 'drawer') {
       // Drawer was opened.
       this.$.statsTooltip.disabled = true;
+      this.$.settings.accountChooserOpen = false;
     } else {
       // Drawer was closed.
       this.$.statsTooltip.disabled = false;

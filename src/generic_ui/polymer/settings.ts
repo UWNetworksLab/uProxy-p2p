@@ -1,10 +1,16 @@
 /// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
+import _ = require('lodash');
+import user_interface = require('../scripts/ui');
+
 Polymer({
+  accountChooserOpen: false,
+  connectedNetworks: '',
   logOut: function() {
     // logout all networks asynchronously
     for (var i in model.onlineNetworks) {
@@ -25,11 +31,25 @@ Polymer({
   openAdvancedSettingsForm: function() {
     this.fire('core-signal', {name: 'open-advanced-settings'});
   },
-  observe: {
-    'model.globalSettings.statsReportingEnabled' : 'saveGlobalSettings'
+  networksChanged: function() {
+    if (!model.onlineNetworks) {
+      return;
+    }
+
+    if (model.onlineNetworks.length === 1) {
+      this.connectedNetworks = ui.i18n_t('connectedWith', {name: this.onlineNetworks[0].name});
+    } else {
+      this.connectedNetworks = ui.i18n_t('connectedWithNumber', {number: 3});
+    }
+  },
+  toggleAccountChooser: function() {
+    this.accountChooserOpen = !this.accountChooserOpen;
   },
   ready: function() {
     this.ui = ui;
     this.model = model;
+  },
+  observe: {
+    'model.onlineNetworks': 'networksChanged'
   }
 });

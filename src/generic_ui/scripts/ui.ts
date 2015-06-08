@@ -833,7 +833,10 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string) : Promise<void> => {
-    return this.core.login({network: network, reconnect: false});
+    return this.core.login({ network : network, reconnect: false }).catch((e :Error) => {
+      this.showNotification(this.i18n_t('errorSigningIn', {network: network}));
+      throw e;
+    });
   }
 
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {

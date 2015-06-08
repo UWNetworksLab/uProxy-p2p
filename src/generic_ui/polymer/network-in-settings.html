@@ -1,0 +1,49 @@
+<link rel='import' href='name-for-network.html'>
+
+<polymer-element name='uproxy-network-in-settings' attributes='name'>
+  <template>
+    <style>
+      :host {
+        font-weight: 400;
+      }
+      .networkLine {
+        line-height: 24px;
+      }
+      .networkName {
+        font-size: 15px;
+      }
+      .userId {
+        font-size: 13px;
+        color: rgba(0, 0, 0, .34);
+      }
+      .action {
+        text-transform: uppercase;
+      }
+      a {
+        font-size: 14px;
+      }
+    </style>
+
+    <div>
+      <div horizontal layout class='networkLine'>
+        <span class='networkName' flex><bdi>{{name}}</bdi></span>
+
+        <span class='action'>
+          <a hidden?='{{ !signedIn }}' href='#' on-tap='{{ logout }}'>
+            {{ 'disconnect' | $$ }}
+          </a>
+
+          <a hidden?='{{ signedIn }}' href='#' on-tap='{{ connect }}'>
+            {{ 'connect' | $$ }}
+          </a>
+        </span>
+      </div>
+
+      <div class='userId' hidden?='{{ !signedIn }}'>
+        <uproxy-name-for-network network='{{ networkInfo }}'></uproxy-name-for-network>
+      </div>
+    </div>
+  </template>
+
+  <script src='network-in-settings.js'></script>
+</polymer-element>
