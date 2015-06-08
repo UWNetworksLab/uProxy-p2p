@@ -392,8 +392,8 @@
     "description": "User's friends are being loaded from a social network."
   },
   "noFriendsOnline": {
-    "message": "يتم توقيع أي من أصدقائك على __network__ إلى uProxy في هذا الوقت.",
-    "description": "None of the user's friends are currently signed in to the social network the user selected."
+    "message": "يتم توقيع أي من أصدقائك في uProxy في هذا الوقت.",
+    "description": "None of the user's friends are currently signed in."
   },
   "toInviteFriends": {
     "message": "إلى دعوة الأصدقاء للuProxy، وإرسالها وصلة لhttps://www.uproxy.org",

@@ -6,14 +6,15 @@ var model = ui_context.model;
 
 Polymer({
   logOut: function() {
-    ui.logout({name: model.onlineNetwork.name,
-                                   userId: model.onlineNetwork.userId}).then(() => {
-      // Nothing to do here - the UI should receive a NETWORK update
-      // saying that the network is offline, and will update the display
-      // as result of that.
-    }).catch((e :Error) => {
-      console.error('logout returned error: ', e);
-    });
+    // logout all networks asynchronously
+    for (var i in model.onlineNetworks) {
+      ui.logout({
+        name: model.onlineNetworks[i].name,
+        userId: model.onlineNetworks[i].userId
+      }).catch((e :Error) => {
+        console.error('logout returned error: ', e);
+      });
+    }
   },
   restart: function() {
     core.restart();

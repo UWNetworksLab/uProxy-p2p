@@ -392,8 +392,8 @@
     "message": "Loading uProxy friends"
   },
   "noFriendsOnline": {
-    "description": "None of the user's friends are currently signed in to the social network the user selected.",
-    "message": "None of your friends on __network__ are signed into uProxy at this time."
+    "description": "None of the user's friends are currently signed in.",
+    "message": "None of your friends are signed into uProxy at this time."
   },
   "toInviteFriends": {
     "description": "Instruction informing the user how to invite their friends to uProxy.",

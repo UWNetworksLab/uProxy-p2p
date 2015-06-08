@@ -210,7 +210,7 @@ Polymer({
     var trustedContacts = model.contacts.shareAccessContacts.trustedUproxy;
     if (trustedContacts.length === 1) {
       this.isSharingEnabledWithOthers =
-          trustedContacts[0].userId !== model.onlineNetwork.userId;
+          trustedContacts[0].userId !== trustedContacts[0].network.userId;
     } else {
       this.isSharingEnabledWithOthers = trustedContacts.length > 0;
     }
