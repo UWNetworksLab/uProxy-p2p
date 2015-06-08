@@ -52,14 +52,14 @@
     </style>
 
     <div id='container'>
-      <h1>{{ 'logsTitle' | $$ }}</h1>
-      <p>{{ 'toSendLogs' | $$ }}
-        <span id='openUproxy' on-tap='{{ openUproxy }}'>{{ 'openFeedback' | $$ }}
+      <h1>Logs & Network Analysis</h1>
+      <p>To send your logs to the uProxy team for help:
+        <span id='openUproxy' on-tap='{{ openUproxy }}'>open uProxy and click 'Submit Feedback'
         </span>
       </p>
       <div id='logs'>
         <div id="loadingLogs" hidden?="{{ !loadingLogs }}">
-          <p>{{ 'retrievingLogs' | $$ }}</p>
+          <p>Retrieving logs and analyzing your network...</p>
           <paper-progress indeterminate='true'></paper-progress>
         </div>
         <pre>{{ logs }}</pre>
