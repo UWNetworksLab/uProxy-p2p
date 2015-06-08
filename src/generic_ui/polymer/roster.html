@@ -70,12 +70,12 @@
     <div id='loadContacts' hidden?='{{ model.onlineNetwork.hasContacts }}'>
       <core-icon icon="social:person" class="no-friends"></core-icon>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
-        Loading uProxy friends<br>
+        {{ 'loadingFriends' | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
-        None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time.
-        <p id='inviteFriends'>To invite friends to uProxy, send them a link to <a href="https://www.uproxy.org" target="_blank">www.uproxy.org</a></p>
+        {{ 'noFriendsOnline' | $$({ network: model.onlineNetwork.name }) }}
+        <p id='inviteFriends'>{{ 'toInviteFriends' | $$ }}</p>
       </div>
     </div>
 
@@ -85,7 +85,7 @@
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{mode==ui_constants.Mode.GET ? "Offers" : "Requests"}}'
+          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "offers" : "requests") | $$ }}'
           contacts='{{ contacts.pending }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
@@ -96,7 +96,7 @@
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{mode==ui_constants.Mode.GET ? "Friends you can get access from" : "Friends who can get access from you"}}'
+          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "friendsWhoShare" : "friendsWhoCanGet") | $$ }}'
           contacts='{{ contacts.trustedUproxy }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
@@ -107,7 +107,7 @@
 
       <!-- untrusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='Friends who have uProxy'
+          groupTitle='{{ "uproxyFriends" | $$ }}'
           contacts='{{ contacts.untrustedUproxy }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
