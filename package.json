@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.8.9",
+  "version": "0.8.10",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -38,7 +38,7 @@
     "grunt-mozilla-addon-sdk": "^0.4.0",
     "grunt-string-replace": "^1.0.0",
     "grunt-template-jasmine-istanbul": "^0.3.0",
-    "grunt-ts": "^4.0.0",
+    "grunt-ts": "~4.1.0",
     "grunt-verbosity": "^0.2.2",
     "grunt-vulcanize": "^0.6.0",
     "i18next-client": "^1.8.2",
@@ -46,7 +46,7 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.5.7",
-    "uproxy-lib": "^27.2.0",
+    "uproxy-lib": "27.2.0",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
   },
