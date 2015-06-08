@@ -1,0 +1,35 @@
+<link rel='import' href='../../bower/core-icons/core-icons.html'>
+
+<polymer-element name='uproxy-avatar' attributes='src, network, showIcon' noscript>
+  <template>
+    <style>
+      #image {
+        border-radius: 50%;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: inherit;
+        height: inherit;
+        position: relative;
+      }
+
+      #image core-icon {
+        /* network icon */
+        position: absolute;
+        right: 0px;
+        bottom: 0px;
+        height: 30%;
+        width: 30%;
+      }
+
+      #image core-icon.full {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+
+    <div id='image' style='background-image: url({{ src }});'>
+      <core-icon icon='uproxy-icons:{{ network }}' hidden?='{{ !showIcon }}' class='{{ {full: !src} | tokenList }}' ></core-icon>
+    </div>
+  </template>
+</polymer-element>
