@@ -20,7 +20,7 @@ Polymer({
   },
   start: function() {
     if (!this.instance.isOnline) {
-      this.ui.toastMessage = this.user.name + ' is offline';
+      this.ui.toastMessage = ui.i18n_t('friendOffline', { name: this.user.name });
       return;
     }
 

@@ -23,8 +23,8 @@ Polymer({
     }).then(() => {
       // Reset the placeholders, which seem to be cleared after the
       // user types input in the input fields.
-      this.$.emailInput.placeholder = 'Email address';
-      this.$.feedbackInput.placeholder = 'Write your feedback';
+      this.$.emailInput.placeholder = ui.i18n_t('emailPlaceholder');
+      this.$.feedbackInput.placeholder = ui.i18n_t('feedbackPlaceholder');
       // Clear the form.
       this.email = '';
       this.feedback = '';
@@ -33,10 +33,10 @@ Polymer({
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
       this.fire('open-dialog', {
-        heading: 'Thank you!',
-        message: 'Your feedback has been submitted to the uProxy development team.',
+        heading: ui.i18n_t('thankYou'),
+        message: ui.i18n_t('feedbackSubmitted'),
         buttons: [{
-          text: 'Done',
+          text: ui.i18n_t('done'),
           signal: 'close-settings'
         }]
       });
@@ -44,10 +44,10 @@ Polymer({
       this.$.sendingFeedbackDialog.close();
     }).catch((e :Error) => {
       this.fire('open-dialog', {
-        heading: 'Email feedback instead?',
-        message: 'Oops! We were unable to submit your feedback to uproxy.org. Please copy and paste your feedback in an email to info@uproxy.org.',
+        heading: ui.i18n_t('emailInsteadTitle'),
+        message: ui.i18n_t('emailInsteadMessage'),
         buttons: [{
-          text: 'OK'
+          text: ui.i18n_t('ok')
         }]
       });
       this.$.sendingFeedbackDialog.close();

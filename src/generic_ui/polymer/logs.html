@@ -53,7 +53,10 @@
 
     <div id='container'>
       <h1>Logs & Network Analysis</h1>
-      <p>To send your logs to the uProxy team for help, <span id='openUproxy' on-tap='{{ openUproxy }}'>open uProxy</span> and click 'Submit Feedback'</p>
+      <p>To send your logs to the uProxy team for help:
+        <span id='openUproxy' on-tap='{{ openUproxy }}'>open uProxy and click 'Submit Feedback'
+        </span>
+      </p>
       <div id='logs'>
         <div id="loadingLogs" hidden?="{{ !loadingLogs }}">
           <p>Retrieving logs and analyzing your network...</p>

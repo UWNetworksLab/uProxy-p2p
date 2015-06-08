@@ -119,3 +119,7 @@ var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
             {payload: payload, cloudfrontPath: 'submit-rappor-stats'});
       }
     });
+
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.PING_UNTIL_ONLINE,
+    core.pingUntilOnline);
