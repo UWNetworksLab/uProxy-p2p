@@ -49,7 +49,7 @@
       <paper-button raised on-tap="{{ cancelEditing }}">{{ 'cancel' | $$ }}</paper-button>
     </div>
     <div id='savedDescription' hidden?='{{ editing }}' on-tap='{{ editDescription }}'>
-      {{ model.globalSettings.description || ('nameThisDevice' | $$) }}
+      {{ showDescription(model.globalSettings.description) }}
       <core-icon icon='create'></core-icon>
     </div>
   </template>
