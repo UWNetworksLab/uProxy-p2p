@@ -1,5 +1,9 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-item/paper-item.html'>
+<link rel="import" href="../../bower/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../../bower/core-menu/core-menu.html">
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='network.html'>
 
@@ -93,6 +97,17 @@
     #intro1, #networks {
       height: 100%;
     }
+    #languageLink core-icon {
+      height: 20px;
+      width: 20px;
+    }
+    #languageLink paper-item {
+      font-size: 13px;
+      line-height: 14px;
+    }
+    #languageLink paper-item::shadow .button-content {
+      padding: 0;
+    }
     </style>
 
     <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
@@ -103,39 +118,52 @@
         <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
         <p>
-          uProxy helps you share your access to the internet or get internet
-          access from friends
+          {{ 'aboutUproxy' | $$ }}
         </p>
 
         <div id='nextWrapper'>
-          <paper-button raised on-tap='{{next}}'>Next</paper-button>
+          <paper-button raised on-tap='{{next}}'>{{ 'next' | $$ }}</paper-button>
+        </div>
+        <div id='languageLink'>
+          <core-icon icon='language'></core-icon>
+          <paper-dropdown-menu label="{{ 'language' | $$ }}">
+            <paper-dropdown class="dropdown">
+                <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
+                    <template repeat='{{ l in languages }}'>
+                      <paper-item languageCode='{{ l.languageCode }}'>
+                        <bdi>{{ l.language }}</bdi>
+                      </paper-item>
+                    </template>
+                </core-menu>
+            </paper-dropdown>
+          </paper-dropdown-menu>
         </div>
       </div>
 
       <uproxy-faq-link anchor='whatIsUproxy'>
-        Learn more about uProxy
+        {{ 'learnMoreUproxy' | $$ }}
       </uproxy-faq-link>
     </div>
 
     <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
       <div class='view' flex>
-        <h1 class='sub'>Where can you find your contacts the quickest?</h1>
-        <p>uProxy uses social networks to help you set up connections with your friends</p>
+        <h1 class='sub'>{{ 'whichSocialNetwork' | $$ }}</h1>
+        <p>{{ 'whySocialNetwork' | $$ }}</p>
         <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
         <p id='oneTimeConnection'>
-          <a href='#' on-tap='{{ copypaste }}'>Set up a one-time connection</a>
+          <a href='#' on-tap='{{ copypaste }}'>{{ 'setUpOneTime' | $$ }}</a>
         </p>
         <p>
-          We won't share your data or post publicly without your consent
+          {{ 'weWontPost' | $$ }}
         </p>
         <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-          Submit Feedback
+          {{ 'submitFeedback' | $$ }}
         </span>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
-        Learn more about social networks
+        {{ 'learnMoreSocial' | $$ }}
       </uproxy-faq-link>
     </div>
 

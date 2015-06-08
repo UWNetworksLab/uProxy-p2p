@@ -20,11 +20,11 @@ Polymer({
     ui_context.core.getNatType().then((natType :string) => {
       this.natType = natType;
       if (natType === 'SymmetricNAT') {
-        this.natImpact = 'very likely';
+        this.natImpact = ui.i18n_t('veryLikely');
       } else if (natType === 'PortRestrictedCone') {
-        this.natImpact = 'possibly'
+        this.natImpact = ui.i18n_t('possibly');
       } else {
-        this.natImpact = 'unlikely'
+        this.natImpact = ui.i18n_t('unlikely');
       }
       this.analyzingNetwork = false;
       this.analyzedNetwork = true;
