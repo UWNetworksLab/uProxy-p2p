@@ -3,20 +3,5 @@
     "description": "English language.",
     "language": "English",
     "languageCode": "en"
-  },
-  {
-    "description": "Farsi language.",
-    "language": "فارسی",
-    "languageCode": "fa"
-  },
-  {
-    "description": "Arabic language.",
-    "language": "العربية",
-    "languageCode": "ar"
-  },
-  {
-    "description": "French language.",
-    "language": "Français",
-    "languageCode": "fr"
   }
 ]
