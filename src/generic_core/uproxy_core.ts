@@ -279,7 +279,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         <social_network.ManualNetwork> social_network.getNetwork(
             social_network.MANUAL_NETWORK_ID, '');
     if (!manualNetwork) {
-      log.error('Manual network does not exist, discanding inbound message',
+      log.error('Manual network does not exist, discarding inbound message',
                 command);
       return;
     }
@@ -314,7 +314,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // there is at most one timeout at a time.
   private natResetTimeout_ :number;
 
-  public getNatType = () : Promise<string> => {
+  public getNatType = () :Promise<string> => {
     if (globals.natType === '') {
       // Function that returns a promise which fulfills
       // in a given time.
@@ -351,13 +351,58 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
-  public getNetworkInfo = () : Promise<string> => {
-    return this.getNatType().then((natType) => {
-      return 'NAT Type: ' + natType + '\n';
+  // List of popular router default IPs
+  // http://www.techspot.com/guides/287-default-router-ip-addresses/
+  private routerIPs = ['192.168.1.1', '192.168.2.1', '192.168.11.1',
+    '192.168.0.1', '192.168.0.30', '192.168.0.50', '192.168.20.1',
+    '192.168.30.1', '192.168.62.1', '192.168.100.1', '192.168.102.1',
+    '192.168.1.254', '192.168.10.1', '192.168.123.254', '192.168.4.1',
+    '10.0.1.1', '10.1.1.1', '10.0.0.138', '10.0.0.2', '10.0.0.138'];
+
+  // Probe the NAT for NAT-PMP support
+  public probePMP = () :Promise<string> => {
+    return new Promise((F, R) => {
+      // Test if any of the router IPs support NAT-PMP
+      Promise.all(this.routerIPs.map(diagnose_nat.probePMPSupport))
+      .then((results) => {
+        for (var i = 0; i < results.length; i++) {
+          if (results[i] === 'Supported') { F('Supported'); }
+        }
+        F('Not supported');
+      });
     });
   }
 
-  public getLogs = () : Promise<string> => {
+  // Probe the NAT for PCP support
+  public probePCP = () :Promise<string> => {
+    return new Promise((F, R) => {
+      // Probe for PCP support for all the router IPs
+      Promise.all(this.routerIPs.map(diagnose_nat.probePCPSupport))
+      .then((results) => {
+        for (var i = 0; i < results.length; i++) {
+          if (results[i] === 'Supported') { F('Supported'); }
+        }
+        F('Not supported');
+      });
+    });
+  }
+
+  // Probe the NAT for UPnP support
+  public probeUPnP = () :Promise<string> => {
+    return diagnose_nat.probeUPnPSupport();
+  }
+
+  public getNetworkInfo = () :Promise<string> => {
+    return Promise.all([this.getNatType(), this.probePMP(),
+      this.probePCP(), this.probeUPnP()]).then((natInfo) => {
+      return 'NAT Type: ' + natInfo[0] + '\n' +
+             'NAT-PMP: ' + natInfo[1] + '\n' +
+             'PCP: ' + natInfo[2] + '\n' +
+             'UPnP IGD: ' + natInfo[3] + '\n';
+    });
+  }
+
+  public getLogs = () :Promise<string> => {
     return loggingController.getLogs().then((rawLogs:string[]) => {
         var formattedLogsWithVersionInfo =
             'Version: ' + JSON.stringify(version.UPROXY_VERSION) + '\n\n';
@@ -366,7 +411,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       });
   }
 
-  public getLogsAndNetworkInfo = () : Promise<string> => {
+  public getLogsAndNetworkInfo = () :Promise<string> => {
     return Promise.all([this.getNetworkInfo(),
                         this.getLogs()])
       .then((natAndLogs) => {
