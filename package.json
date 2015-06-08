@@ -38,7 +38,7 @@
     "grunt-mozilla-addon-sdk": "^0.4.0",
     "grunt-string-replace": "^1.0.0",
     "grunt-template-jasmine-istanbul": "^0.3.0",
-    "grunt-ts": "^4.0.0",
+    "grunt-ts": "~4.1.0",
     "grunt-verbosity": "^0.2.2",
     "grunt-vulcanize": "^0.6.0",
     "i18next-client": "^1.8.2",
