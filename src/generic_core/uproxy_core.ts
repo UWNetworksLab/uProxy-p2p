@@ -376,11 +376,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   // Probe the NAT for PCP support
-  public probePCP = () :Promise<string> => {
+  public probePCP = (privateIP :string) :Promise<string> => {
     return new Promise((F, R) => {
       // Probe for PCP support for all the router IPs
-      Promise.all(this.routerIPs.map(diagnose_nat.probePCPSupport))
-      .then((results) => {
+      Promise.all(this.routerIPs.map((ip) => {
+        return diagnose_nat.probePCPSupport(ip, privateIP);
+      }))
+      .then((results :string[]) => {
         for (var i = 0; i < results.length; i++) {
           if (results[i] === 'Supported') { F('Supported'); }
         }
@@ -390,18 +392,22 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   // Probe the NAT for UPnP support
-  public probeUPnP = () :Promise<string> => {
-    return diagnose_nat.probeUPnPSupport();
+  public probeUPnP = (privateIP :string) :Promise<string> => {
+    return diagnose_nat.probeUPnPSupport(privateIP);
   }
 
   public getNetworkInfo = () :Promise<string> => {
-    return Promise.all([this.getNatType(), this.probePMP(),
-      this.probePCP(), this.probeUPnP()]).then((natInfo) => {
-      return 'NAT Type: ' + natInfo[0] + '\n' +
-             'NAT-PMP: ' + natInfo[1] + '\n' +
-             'PCP: ' + natInfo[2] + '\n' +
-             'UPnP IGD: ' + natInfo[3] + '\n';
-    });
+    return diagnose_nat.getInternalIP()
+    .then((privateIP :string) => {
+      return Promise.all([this.getNatType(), this.probePMP(),
+      this.probePCP(privateIP), this.probeUPnP(privateIP)])
+      .then((natInfo) => {
+        return 'NAT Type: ' + natInfo[0] + '\n' +
+               'NAT-PMP: ' + natInfo[1] + '\n' +
+               'PCP: ' + natInfo[2] + '\n' +
+               'UPnP IGD: ' + natInfo[3] + '\n';
+      });
+    })
   }
 
   public getLogs = () :Promise<string> => {

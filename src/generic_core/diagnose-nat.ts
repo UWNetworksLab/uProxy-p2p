@@ -11,6 +11,8 @@ import _ = require('lodash');
 import globals = require('./globals');
 import sha1 = require('crypto/sha1');
 
+import peerconnection = require('../../../third_party/uproxy-lib/webrtc/peerconnection');
+
 // Both Ping and NAT type detection need help from a server. The following
 // ip/port is the instance we run on EC2.
 var TEST_SERVER = '54.68.73.184';
@@ -857,8 +859,6 @@ export function doNatProvoking() :Promise<string> {
   });
 }
 
-// TODO: Try several potential router IPs
-
 // Test if NAT-PMP is supported by the router
 export function probePMPSupport(routerIP :string) :Promise<string> {
   function _probePMPSupport(routerIP :string) :Promise<string> {
@@ -867,7 +867,6 @@ export function probePMPSupport(routerIP :string) :Promise<string> {
 
       // Fulfill when we get any reply (failure is on timeout in wrapper function)
       socket.on('onData', function (PMPResponse: freedom_UdpSocket.RecvFromInfo) {
-        // F(PMPResponse);
         F('Supported');
       });
 
@@ -905,8 +904,8 @@ export function probePMPSupport(routerIP :string) :Promise<string> {
 }
 
 // Test if PCP is supported by the router
-export function probePCPSupport(routerIP :string) :Promise<string> {
-  function _probePCPSupport(routerIP :string) :Promise<string> {
+export function probePCPSupport(routerIP :string, privateIP :string) :Promise<string> {
+  function _probePCPSupport(routerIP :string, privateIP :string) :Promise<string> {
     return new Promise((F, R) => {
       var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
 
@@ -938,11 +937,14 @@ export function probePCPSupport(routerIP :string) :Promise<string> {
         PCPView.setFloat64(8, 0, false);
         PCPView.setInt16(16, 0, false);
         PCPView.setInt16(18, 0xffff, false);
-        // TODO: Get internal IP
-        PCPView.setInt8(20, 192); // Start of IPv4 octets
-        PCPView.setInt8(21, 168);
-        PCPView.setInt8(22, 1);
-        PCPView.setInt8(23, 44);
+        // Start of IPv4 octets of the client's private IP
+        var privateIPOctets = privateIP.split('.').map((oct) => {
+          return parseInt(oct, 10)
+        });
+        PCPView.setInt8(20, privateIPOctets[0]);
+        PCPView.setInt8(21, privateIPOctets[1]);
+        PCPView.setInt8(22, privateIPOctets[2]);
+        PCPView.setInt8(23, privateIPOctets[3]);
         // Mapping Nonce (12 bytes)
         PCPView.setInt32(24, randInt(0, 0xffffffff), false);
         PCPView.setInt32(28, randInt(0, 0xffffffff), false);
@@ -961,7 +963,7 @@ export function probePCPSupport(routerIP :string) :Promise<string> {
         PCPView.setInt16(54, 0xffff, false);
         PCPView.setInt32(56, 0, false);
 
-        socket.sendTo(PCPBuffer, '192.168.1.1', 5351);
+        socket.sendTo(PCPBuffer, routerIP, 5351);
       });
     });
   }
@@ -969,17 +971,19 @@ export function probePCPSupport(routerIP :string) :Promise<string> {
   // Give _probePCPSupport() 2 seconds before timing out
   return Promise.race([
     countdownFulfill(2000, 'Not supported'),
-    _probePCPSupport(routerIP)
+    _probePCPSupport(routerIP, privateIP)
   ]);
 }
 
 // Send if UPnP AddPortMapping is supported by the router
-export function probeUPnPSupport() :Promise<string> {
+export function probeUPnPSupport(privateIP :string) :Promise<string> {
   return new Promise((F, R) => {
     sendSSDPRequest()
     .then(getControlURL)
-    .then(sendAddPortMapping)
-    .then((msg :string) => F(msg))  // Success and error messages
+    .then((controlURL :string) => {
+      return sendAddPortMapping(controlURL, privateIP);
+    })
+    .then((msg :string) => F(msg))         // Success and error messages
     .catch((err :Error) => F(err.message)) // are both fulfilled
   })
 }
@@ -1008,7 +1012,7 @@ function sendSSDPRequest() :Promise<ArrayBuffer> {
                       'MAN: ssdp:discover\r\n' +
                       'MX: 10\r\n' +
                       'ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1';
-        var SSDPBuffer = strToBuffer(SSDPStr);
+        var SSDPBuffer = arraybuffers.stringToArrayBuffer(SSDPStr);
         socket.sendTo(SSDPBuffer, '239.255.255.250', 1900);
       });
     });
@@ -1026,7 +1030,7 @@ function getControlURL(SSDPResponse :ArrayBuffer) :Promise<string> {
   function _getControlURL(SSDPResponse :ArrayBuffer) :Promise<string> {
     return new Promise((F, R) => {
       // Get UPnP device profile URL from the LOCATION header
-      var SSDPStr = bufferToStr(SSDPResponse);
+      var SSDPStr = arraybuffers.arrayBufferToString(SSDPResponse);
       var startIndex = SSDPStr.indexOf("LOCATION: ") + 10;
       var endIndex = SSDPStr.indexOf("\n", startIndex);
       var locationURL = SSDPStr.substring(startIndex, endIndex);
@@ -1075,12 +1079,11 @@ function getControlURL(SSDPResponse :ArrayBuffer) :Promise<string> {
 }
 
 // Send a UPnP AddPortMapping request
-function sendAddPortMapping(controlURL :string) :Promise<string> {
-  function _sendAddPortMapping(controlURL :string) :Promise<string> {
+function sendAddPortMapping(controlURL :string, privateIP :string) :Promise<string> {
+  function _sendAddPortMapping(controlURL :string, privateIP :string) :Promise<string> {
     return new Promise((F, R) => {
       var internalPort = 55557;
       var externalPort = 55557;
-      var internalIP = '192.168.1.44' // TODO: Get actual internal IP
       var leaseDuration = 120; // Note: Some routers may not support a non-zero duration
 
       // Create the AddPortMapping SOAP request string
@@ -1091,7 +1094,7 @@ function sendAddPortMapping(controlURL :string) :Promise<string> {
                       '<NewExternalPort>' + externalPort + '</NewExternalPort>' +
                       '<NewProtocol>UDP</NewProtocol>' +
                       '<NewInternalPort>' + internalPort + '</NewInternalPort>' +
-                      '<NewInternalClient>' + internalIP + '</NewInternalClient>' +
+                      '<NewInternalClient>' + privateIP + '</NewInternalClient>' +
                       '<NewEnabled>1</NewEnabled>' +
                       '<NewPortMappingDescription>uProxy UPnP probe</NewPortMappingDescription>' +
                       '<NewLeaseDuration>' + leaseDuration + '</NewLeaseDuration>' +
@@ -1118,45 +1121,29 @@ function sendAddPortMapping(controlURL :string) :Promise<string> {
   // Give _sendAddPortMapping 1 second to run before timing out
   return Promise.race([
     countdownReject(1000, 'Not supported (AddPortMapping timed out)'),
-    _sendAddPortMapping(controlURL)
+    _sendAddPortMapping(controlURL, privateIP)
   ]);
 }
 
-// TODO: Below
-// function getInternalIP() :string {
-//   var servSocket :freedom_TcpSocket.Socket = freedom['core.tcpsocket']();
-//   var clientSocket :freedom_TcpSocket.Socket = freedom['core.tcpsocket']();
+// Returns the internal IP address of the computer
+export function getInternalIP() :Promise<string> {
+  return new Promise((F, R) => {
+    var pc = freedom['core.rtcpeerconnection']({iceServers: globals.settings.stunServers});
 
-//   console.log(servSocket);
-//   console.log(servSocket.getInfo());
+    pc.on('onicecandidate', (candidate? :freedom_RTCPeerConnection.OnIceCandidateEvent) => {
+      if (candidate.candidate) {
+        var cand = candidate.candidate.candidate;
+        if (cand.indexOf('typ host') > -1) {
+          var internalIP = cand.match(/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/)[0];
+          F(internalIP);
+        }
+      }
+    });
 
-//   servSocket.listen('0.0.0.0', '65432')
-//     .then(() => {
-//       console.log("then1");
-//       console.log(servSocket.getInfo());
-//       return clientSocket.connect('127.0.0.1', '65432');
-//     })
-//     .then(() => {
-//       console.log("then2");
-//       console.log(clientSocket.getInfo());
-//     })
-// }
-
-// Converts string to ArrayBuffer with UTF-8 encoding
-// http://updates.html5rocks.com/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
-function strToBuffer(str :string) :ArrayBuffer {
-  var buffer = new ArrayBuffer(str.length);
-  var bufView = new Uint8Array(buffer);
-  for (var i = 0; i < str.length; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buffer;
-}
-
-// Converts ArrayBuffer to string with UTF-8 encoding
-// http://updates.html5rocks.com/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
-function bufferToStr(buffer :ArrayBuffer) :string {
-  return String.fromCharCode.apply(null, new Uint8Array(buffer));
+    pc.createDataChannel('dummy data channel')
+    .then(pc.createOffer)
+    .then(pc.setLocalDescription);
+  })
 }
 
 // Generate a random integer between min and max
