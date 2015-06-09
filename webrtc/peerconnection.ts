@@ -378,7 +378,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   }
 
   // Handle a signalling message from the remote peer.
-  public handleSignalMessage = (message:signals.Message) : void => {
+  // Return type is for testing.
+  // TODO: consider adding return type to PeerConnection interface
+  public handleSignalMessage = (message:signals.Message) : Promise<void> => {
     log.debug('%1: handling signal from peer: %2', this.peerName_, message);
 
     // If we are offering and they are also offering at the same time, pick
@@ -389,25 +391,26 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     //       is guaranteed to be unique for 2 peers.
     switch(message.type) {
       case signals.Type.OFFER:
-        this.handleOfferSignalMessage_(message.description).then(
+        return this.handleOfferSignalMessage_(message.description).then(
             this.fulfillHaveRemoteDescription_);
         break;
       // Answer to an offer we sent
       case signals.Type.ANSWER:
-        this.handleAnswerSignalMessage_(message.description).then(
+        return this.handleAnswerSignalMessage_(message.description).then(
             this.fulfillHaveRemoteDescription_);
         break;
       // Add remote ice candidate.
       case signals.Type.CANDIDATE:
-        this.onceHaveRemoteDescription_.then(() => {
-          this.handleCandidateSignalMessage_(message.candidate);
+        return this.onceHaveRemoteDescription_.then(() => {
+          return this.handleCandidateSignalMessage_(message.candidate);
         });
         break;
       case signals.Type.NO_MORE_CANDIDATES:
+        return Promise.resolve<void>();
         break;
       default:
-        log.error('%1: unexpected signalling message type %2',
-            this.peerName_, message.type);
+        return Promise.reject(new Error(
+            'unexpected signalling message type ' + message.type));
     }
   }
 

@@ -10,9 +10,6 @@ import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
 import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
-freedom = freedomMocker.makeMockFreedomInModuleEnv({
-  'rtcdatachannel': () => { return new MockFreedomRtcDataChannel(); }
-});
 
 import signals = require('./signals');
 import peerconnection = require('./peerconnection');
@@ -20,32 +17,34 @@ import datachannel = require('./datachannel');
 
 describe('PeerConnection', function() {
   var mockRtcPeerConnection :MockFreedomRtcPeerConnection;
+  var mockRtcDataChannel :MockFreedomRtcDataChannel;
 
   beforeEach(function() {
     mockRtcPeerConnection = new MockFreedomRtcPeerConnection();
+    mockRtcDataChannel = new MockFreedomRtcDataChannel();
+    freedom = freedomMocker.makeMockFreedomInModuleEnv({
+      'core.rtcdatachannel': () => { return mockRtcDataChannel; },
+      'core.rtcpeerconnection': () => { return mockRtcPeerConnection; }
+    });
   });
 
   // Check that early onmessage events are received and processed.
   it('early onmessage works', (done) => {
-    var rtcDc :MockFreedomRtcDataChannel;
-    var onSpy :any;
-    freedom['core.rtcdatachannel'] = <any>((id:string) => {
-      expect(id).toEqual('theChannelId');
-      rtcDc = new MockFreedomRtcDataChannel();
-      onSpy = spyOn(rtcDc, 'on').and.callThrough();
-      return rtcDc;
-    });
+    spyOn(mockRtcDataChannel, 'on').and.callThrough();
+
     var pc = new peerconnection.PeerConnectionClass(
         mockRtcPeerConnection, 'test');
-    mockRtcPeerConnection.handleEvent('ondatachannel', {channel: 'theChannelId'});
-    expect(rtcDc).not.toBeUndefined();
+    mockRtcPeerConnection.handleEvent('ondatachannel', {
+      channel: 'theChannelId'
+    });
 
-    // The data channel message event listener should be registered synchronously
-    // after receiving the ondatachannel event.
-    expect(onSpy).toHaveBeenCalledWith('onmessage', jasmine.any(Function));
+    // The data channel message event listener should be registered
+    // synchronously after receiving the ondatachannel event.
+    expect(mockRtcDataChannel.on).toHaveBeenCalledWith('onmessage',
+        jasmine.any(Function));
 
     // Mock synchronously emit onmessage immediately after ondatachannel.
-    rtcDc.handleEvent('onmessage', {text: 'foo'});
+    mockRtcDataChannel.handleEvent('onmessage', {text: 'foo'});
     
     pc.peerOpenedChannelQueue.setSyncNextHandler((dc:datachannel.DataChannel) => {
       dc.dataFromPeerQueue.setSyncNextHandler((data:datachannel.Data) => {
@@ -106,12 +105,13 @@ describe('PeerConnection', function() {
     };
     createOfferSpy.and.returnValue(Promise.resolve(mockOffer));
 
-    spyOn(mockRtcPeerConnection, 'addIceCandidate').and.callThrough();
+    spyOn(mockRtcPeerConnection, 'addIceCandidate').and.returnValue(
+        Promise.resolve());
 
-    // Have setRemoteDescription() set a candidate *before it has resolved*.
     var setRemoteDescriptionSpy = spyOn(mockRtcPeerConnection,
         'setRemoteDescription').and.callFake(
         (desc:freedom_RTCPeerConnection.RTCSessionDescription) => {
+      // Set a candidate *before* setRemoteDescription() has resolved.
       pc.handleSignalMessage({
         type: signals.Type.CANDIDATE,
         candidate: {
@@ -119,7 +119,7 @@ describe('PeerConnection', function() {
         }
       });
       expect(mockRtcPeerConnection.addIceCandidate).not.toHaveBeenCalled();
-      done();
+      return Promise.resolve();
     });
 
     var pc = new peerconnection.PeerConnectionClass(mockRtcPeerConnection);
@@ -130,6 +130,9 @@ describe('PeerConnection', function() {
         type: 'fakeType',
         sdp: 'fakeSdp'
       }
+    }).then(() => {
+      expect(mockRtcPeerConnection.addIceCandidate).toHaveBeenCalled();
+      done();
     });
   });
 });
