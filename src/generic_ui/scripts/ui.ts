@@ -581,6 +581,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.disconnectedWhileProxying = false;
     this.proxySet_ = false;
+    this.updateIcon_();
     this.browserApi.stopUsingProxy();
   }
 
