@@ -52,11 +52,8 @@
     </style>
 
     <div id='container'>
-      <h1>{{ 'logsTitle' | $$ }}</h1>
-      <p>{{ 'toSendLogs' | $$ }}
-        <span id='openUproxy' on-tap='{{ openUproxy }}'>{{ 'openFeedback' | $$ }}
-        </span>
-      </p>
+      <h1><bdi>{{ 'logsTitle' | $$ }}</bdi></h1>
+      <p><bdi>{{ 'toSendLogs' | $$ }}</bdi></p>
       <div id='logs'>
         <div id="loadingLogs" hidden?="{{ !loadingLogs }}">
           <p>{{ 'retrievingLogs' | $$ }}</p>

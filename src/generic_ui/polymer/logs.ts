@@ -11,6 +11,7 @@ Polymer({
   logs: '',
   loadingLogs: true,
   openUproxy: function() {
+    // TODO: add a pop-out icon that calls this function.
     bringUproxyToFront();
   },
   created: function() {
