@@ -32,8 +32,8 @@ pgp.setup('', 'uProxy user <noreply@uproxy.org>');
 
 var parentModule = freedom();
 
-pgp.exportKey().then((publicKey:string) => {
-  parentModule.emit('publicKeyExport', publicKey);
+pgp.exportKey().then((publicKey:PublicKey) => {
+  parentModule.emit('publicKeyExport', publicKey.key);
 });
 
 var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
