@@ -276,12 +276,8 @@
     "description": "Title for the page that displays a user's network information and uProxy logs."
   },
   "toSendLogs": {
-    "message": "Pour envoyer vos journaux à l'équipe uProxy de l'aide:",
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 1)."
-  },
-  "openFeedback": {
-    "message": "ouvrir uProxy et cliquez sur «Soumettre Commentaires '",
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 2). This text is clickable and will open uProxy."
+    "message": "Pour envoyer vos journaux à l'équipe uProxy de l'aide, ouvert uProxy et cliquez sur \"Envoyer des commentaires\"",
+    "description": "Instructions guiding the user through how to submit their logs to uProxy."
   },
   "retrievingLogs": {
     "message": "Récupération des logs et d'analyser votre réseau ...",

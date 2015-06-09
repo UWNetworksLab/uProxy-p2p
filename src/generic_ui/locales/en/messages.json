@@ -276,12 +276,8 @@
     "message": "Logs & Network Analysis"
   },
   "toSendLogs": {
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 1).",
-    "message": "To send your logs to the uProxy team for help:"
-  },
-  "openFeedback": {
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 2). This text is clickable and will open uProxy.",
-    "message": "open uProxy and click 'Submit Feedback'"
+    "description": "Instructions guiding the user through how to submit their logs to uProxy.",
+    "message": "To send your logs to the uProxy team for help, open uProxy and click 'Submit Feedback'"
   },
   "retrievingLogs": {
     "description": "Message shown while uProxy is analyzing the user's network settings.",

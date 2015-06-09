@@ -276,12 +276,8 @@
     "description": "Title for the page that displays a user's network information and uProxy logs."
   },
   "toSendLogs": {
-    "message": "برای ارسال سیاهههای مربوط خود را به تیم uProxy برای کمک:",
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 1)."
-  },
-  "openFeedback": {
-    "message": "باز uProxy و بر روی \"ارسال ها '",
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 2). This text is clickable and will open uProxy."
+    "message": "برای ارسال سیاهههای مربوط خود را به تیم uProxy برای کمک، باز uProxy و بر روی \"ارسال بازخورد\"",
+    "description": "Instructions guiding the user through how to submit their logs to uProxy."
   },
   "retrievingLogs": {
     "message": "بازیابی سیاهههای مربوط و تجزیه و تحلیل شبکه خود را ...",
