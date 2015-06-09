@@ -54,7 +54,7 @@ Polymer({
     });
   },
   viewLogs: function() {
-    this.ui.openTab('generic_ui/view-logs.html');
+    this.ui.openTab('generic_ui/view-logs.html?lang=' + model.globalSettings.language);
   },
   ready: function() {
     this.ui = ui_context.ui;

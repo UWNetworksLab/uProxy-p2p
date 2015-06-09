@@ -276,12 +276,8 @@
     "description": "Title for the page that displays a user's network information and uProxy logs."
   },
   "toSendLogs": {
-    "message": "Pour envoyer vos journaux à l'équipe uProxy de l'aide:",
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 1)."
-  },
-  "openFeedback": {
-    "message": "ouvrir uProxy et cliquez sur «Soumettre Commentaires '",
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 2). This text is clickable and will open uProxy."
+    "message": "Pour envoyer vos journaux à l'équipe uProxy de l'aide, ouvert uProxy et cliquez sur \"Envoyer des commentaires\"",
+    "description": "Instructions guiding the user through how to submit their logs to uProxy."
   },
   "retrievingLogs": {
     "message": "Récupération des logs et d'analyser votre réseau ...",
@@ -392,8 +388,8 @@
     "description": "User's friends are being loaded from a social network."
   },
   "noFriendsOnline": {
-    "message": "Aucun de vos amis sur __network__ sont signés dans uProxy à cette époque.",
-    "description": "None of the user's friends are currently signed in to the social network the user selected."
+    "message": "Aucun de vos amis sont signés dans uProxy à cette époque.",
+    "description": "None of the user's friends are currently signed in."
   },
   "toInviteFriends": {
     "message": "Pour inviter des amis à uProxy, leur envoyer un lien vers https://www.uproxy.org",
@@ -423,6 +419,10 @@
     "message": "Connecté avec __network__",
     "description": "Text in settings that informs the user which social network they're connected to."
   },
+  "connectedWithNumber": {
+    "message": "Connecté avec __number__ réseaux",
+    "description": "Text in settings informing the user of how many networks they're connected to."
+  },
   "nameThisDevice": {
     "message": "Nommez ce dispositif",
     "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel."
@@ -434,6 +434,14 @@
   "description": {
     "message": "Description",
     "description": "Placeholder for the input field for the name of the user's device."
+  },
+  "connect": {
+    "message": "relier",
+    "description": "User clicks this to connect to a network"
+  },
+  "disconnect": {
+    "message": "couper",
+    "description": "User clicks this to disconnect from a network"
   },
   "save": {
     "message": "Sauvegarder",

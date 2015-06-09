@@ -276,12 +276,8 @@
     "description": "Title for the page that displays a user's network information and uProxy logs."
   },
   "toSendLogs": {
-    "message": "لإرسال السجلات الخاصة بك للفريق uProxy للمساعدة:",
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 1)."
-  },
-  "openFeedback": {
-    "message": "فتح uProxy وانقر فوق \"إرسال ملاحظات\"",
-    "description": "Instructions guiding the user through how to submit their logs to uProxy (part 2). This text is clickable and will open uProxy."
+    "message": "لإرسال السجلات الخاصة بك للفريق uProxy للحصول على المساعدة، وفتح uProxy وانقر على زر \"إرسال ملاحظات\"",
+    "description": "Instructions guiding the user through how to submit their logs to uProxy."
   },
   "retrievingLogs": {
     "message": "استرجاع السجلات وتحليل الشبكة ...",
@@ -392,8 +388,8 @@
     "description": "User's friends are being loaded from a social network."
   },
   "noFriendsOnline": {
-    "message": "يتم توقيع أي من أصدقائك على __network__ إلى uProxy في هذا الوقت.",
-    "description": "None of the user's friends are currently signed in to the social network the user selected."
+    "message": "يتم توقيع أي من أصدقائك في uProxy في هذا الوقت.",
+    "description": "None of the user's friends are currently signed in."
   },
   "toInviteFriends": {
     "message": "إلى دعوة الأصدقاء للuProxy، وإرسالها وصلة لhttps://www.uproxy.org",
@@ -423,6 +419,10 @@
     "message": "اتصال مع __network__",
     "description": "Text in settings that informs the user which social network they're connected to."
   },
+  "connectedWithNumber": {
+    "message": "اتصال مع __number__ شبكات",
+    "description": "Text in settings informing the user of how many networks they're connected to."
+  },
   "nameThisDevice": {
     "message": "اسم هذا الجهاز",
     "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel."
@@ -434,6 +434,14 @@
   "description": {
     "message": "وصف",
     "description": "Placeholder for the input field for the name of the user's device."
+  },
+  "connect": {
+    "message": "ربط",
+    "description": "User clicks this to connect to a network"
+  },
+  "disconnect": {
+    "message": "قطع",
+    "description": "User clicks this to disconnect from a network"
   },
   "save": {
     "message": "حفظ",

@@ -200,6 +200,7 @@ Polymer({
     if (this.$.mainPanel.selected == 'drawer') {
       // Drawer was opened.
       this.$.statsTooltip.disabled = true;
+      this.$.settings.accountChooserOpen = false;
     } else {
       // Drawer was closed.
       this.$.statsTooltip.disabled = false;
@@ -210,7 +211,7 @@ Polymer({
     var trustedContacts = model.contacts.shareAccessContacts.trustedUproxy;
     if (trustedContacts.length === 1) {
       this.isSharingEnabledWithOthers =
-          trustedContacts[0].userId !== model.onlineNetwork.userId;
+          trustedContacts[0].userId !== trustedContacts[0].network.userId;
     } else {
       this.isSharingEnabledWithOthers = trustedContacts.length > 0;
     }

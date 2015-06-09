@@ -19,39 +19,7 @@ import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
 import translator_module = require('./translator');
-
-// Singleton model for data bindings.
-export var model :Model = {
-  networkNames: [],
-  onlineNetwork: null,
-  contacts: {
-    getAccessContacts: {
-      pending: [],
-      trustedUproxy: [],
-      untrustedUproxy: [],
-    },
-    shareAccessContacts: {
-      pending: [],
-      trustedUproxy: [],
-      untrustedUproxy: [],
-    }
-  },
-  // It would be nice to initialize this in shared code, but these settings
-  // will be overwritten by a message from the core.
-  globalSettings: {
-    version: 0,
-    description: '',
-    stunServers: [],
-    hasSeenSharingEnabledScreen: false,
-    hasSeenWelcome: false,
-    mode : ui_constants.Mode.GET,
-    allowNonUnicast: false,
-    statsReportingEnabled: false,
-    consoleFilter: 2, // loggingTypes.Level.warn
-    language: 'en-US'
-  },
-  reconnecting: false
-};
+import _ = require('lodash');
 
 // Filenames for icons.
 // Two important things about using these strings:
@@ -71,6 +39,72 @@ export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
 
 export var DEFAULT_USER_IMG = 'icons/contact-default.png';
 
+export class Model {
+  public networkNames :string[] = [];
+
+  public onlineNetworks :Network[] = [];
+
+  public contacts :Contacts = {
+    getAccessContacts: {
+      pending: [],
+      trustedUproxy: [],
+      untrustedUproxy: [],
+    },
+    shareAccessContacts: {
+      pending: [],
+      trustedUproxy: [],
+      untrustedUproxy: [],
+    }
+  };
+
+  public globalSettings :uproxy_core_api.GlobalSettings = {
+    version: 0,
+    description: '',
+    stunServers: [],
+    hasSeenSharingEnabledScreen: false,
+    hasSeenWelcome: false,
+    mode : ui_constants.Mode.GET,
+    allowNonUnicast: false,
+    statsReportingEnabled: false,
+    consoleFilter: 2, // loggingTypes.Level.warn
+    language: 'en'
+  };
+
+  public reconnecting = false;
+
+  // userId is included as an optional parameter because we will eventually
+  // want to use it to get an accurate network.  For now, it is ignored and
+  // serves to remind us of where we still need to add the info
+  public getNetwork = (networkName :string, userId?:string) :Network => {
+    return _.find(this.onlineNetworks, { name: networkName });
+  }
+
+  public removeNetwork = (networkName :string) => {
+    _.remove(this.onlineNetworks, { name: networkName });
+  }
+
+  public getUser = (network :Network, userId :string) :User => {
+    if (network.roster[userId]) {
+      return network.roster[userId];
+    }
+
+    return null;
+  }
+
+  public updateGlobalSettings = (settings :Object) => {
+    _.merge(this.globalSettings, settings, (a :any, b :any) => {
+      if (_.isArray(a) && _.isArray(b)) {
+        return b;
+      }
+
+      return undefined;
+    });
+  }
+}
+
+// Singleton model for data bindings.
+export var model = new Model();
+
 export interface ContactCategory {
   [type :string] :User[];
   pending :User[];
@@ -81,14 +115,6 @@ export interface ContactCategory {
 export interface Contacts {
   getAccessContacts :ContactCategory;
   shareAccessContacts :ContactCategory;
-}
-
-export interface Model {
-  networkNames :string[];
-  onlineNetwork :Network;
-  contacts :Contacts;
-  globalSettings :uproxy_core_api.GlobalSettings;
-  reconnecting :boolean;
 }
 
  export interface UserCategories {
@@ -105,12 +131,13 @@ export interface Network {
   userId :string;
   imageData ?:string;
   userName ?:string;
+  logoutExpected: boolean;
   roster :{ [userId:string] :User };
-  hasContacts ?:boolean;
 }
 
 export interface NotificationData {
   mode :string;
+  network :string;
   user :string;
   unique ?:string;
 }
@@ -165,8 +192,6 @@ export class UserInterface implements ui_constants.UiApi {
   public unableToGet :boolean = false;
   public unableToShare :boolean = false;
 
-  private isLogoutExpected_ :boolean = false;
-
   // is a proxy currently set
   private proxySet_ :boolean = false;
   // Must be included in Chrome extension manifest's list of permissions.
@@ -206,6 +231,9 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.on('core_connect', () => {
       this.view = ui_constants.View.SPLASH;
+
+      core.getFullState()
+          .then(this.updateInitialState);
     });
 
     core.on('core_disconnect', () => {
@@ -220,49 +248,15 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.connect();
 
-    // Attach handlers for UPDATES received from core.
-    // TODO: Implement the rest of the fine-grained state updates.
-    // (We begin with the simplest, total state update, above.)
-    core.onUpdate(uproxy_core_api.Update.INITIAL_STATE, (state :uproxy_core_api.InitialState) => {
-      console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
-      model.networkNames = state.networkNames;
-
-      // Update language in UI if necessary.
-      if (state.globalSettings.language != model.globalSettings.language) {
-        this.i18n_setLng(state.globalSettings.language);
-      }
-
-      // TODO: Do not allow reassignment of globalSettings. Instead
-      // write a 'syncGlobalSettings' function that iterates through
-      // the values in state[globalSettings] and assigns the
-      // individual values to model.globalSettings. This is required
-      // because Polymer elements bound to globalSettings' values can
-      // only react to updates to globalSettings and not reassignments.
-      model.globalSettings = state.globalSettings;
-    });
+    core.onUpdate(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_10, this.updateInitialState);
 
     // Add or update the online status of a network.
     core.onUpdate(uproxy_core_api.Update.NETWORK, this.syncNetwork_);
 
     // Attach handlers for USER updates.
-    core.onUpdate(uproxy_core_api.Update.USER_SELF, (payload :social.UserData) => {
-      // Instead of adding to the roster, update the local user information.
-      console.log('uproxy_core_api.Update.USER_SELF:', payload);
-      if (!model.onlineNetwork ||
-          payload.network != model.onlineNetwork.name) {
-        console.error('uproxy_core_api.Update.USER_SELF message for invalid network',
-            payload.network);
-        return;
-      }
-      var profile :social.UserProfileMessage = payload.user;
-      model.onlineNetwork.userId = profile.userId;
-      model.onlineNetwork.imageData = profile.imageData;
-      model.onlineNetwork.userName = profile.name;
-    });
-    core.onUpdate(uproxy_core_api.Update.USER_FRIEND, (payload :social.UserData) => {
-      console.log('uproxy_core_api.Update.USER_FRIEND:', payload);
-      this.syncUser(payload);
-    });
+    core.onUpdate(uproxy_core_api.Update.USER_SELF, this.syncUserSelf_);
+
+    core.onUpdate(uproxy_core_api.Update.USER_FRIEND, this.syncUser);
 
     core.onUpdate(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
                   (message :social.PeerMessage) => {
@@ -353,7 +347,7 @@ export class UserInterface implements ui_constants.UiApi {
       var user = this.mapInstanceIdToUser_[instanceId];
       user.isGettingFromMe = true;
       this.showNotification(this.i18n_t('startedProxying',
-          { name: user.name }), { mode: 'share', user: user.userId });
+          { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND,
@@ -364,7 +358,7 @@ export class UserInterface implements ui_constants.UiApi {
       // only show a notification if we knew we were prokying
       if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
         this.showNotification(this.i18n_t('stoppedProxying',
-          { name: user.name }), { mode: 'share', user: user.userId });
+          { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
       }
       delete this.instancesGivingAccessTo[instanceId];
       if (!this.isGivingAccess()) {
@@ -410,7 +404,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
-    data = data ? data : { mode: '', user: '' };
+    data = data ? data : { mode: '', network: '', user: '' };
     // non-uniqu but existing tags prevent the notification from displaying in some cases
     data.unique = Math.floor(Math.random() * 1E10).toString();
 
@@ -431,8 +425,11 @@ export class UserInterface implements ui_constants.UiApi {
     try {
       var data = JSON.parse(tag);
 
-      if (data.user) {
-        var contact = model.onlineNetwork.roster[data.user];
+      if (data.network && data.user) {
+        var network = model.getNetwork(data.network);
+        if (network) {
+          var contact = model.getUser(network, data.user);
+        }
       }
 
       if (data.mode === 'get') {
@@ -492,7 +489,7 @@ export class UserInterface implements ui_constants.UiApi {
     var expectedType :social.PeerMessageType;
     console.log('received url data from browser');
 
-    if (model.onlineNetwork) {
+    if (model.onlineNetworks.length > 0) {
       console.log('Ignoring URL since we have an active network');
       this.copyPasteError = ui_constants.CopyPasteError.LOGGED_IN;
       return;
@@ -568,14 +565,7 @@ export class UserInterface implements ui_constants.UiApi {
     var instanceId = this.instanceGettingAccessFrom_;
     this.instanceGettingAccessFrom_ = null;
 
-    if (this.isGivingAccess()) {
-      this.browserApi.setIcon(SHARING_ICON);
-    } else if (model.onlineNetwork) {
-      this.browserApi.setIcon(DEFAULT_ICON);
-    } else {
-      this.setOfflineIcon();
-    }
-
+    this.updateIcon_();
     this.updateGettingStatusBar_();
 
     if (instanceId) {
@@ -583,14 +573,15 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     if (askUser) {
-      this.browserApi.setIcon(ERROR_ICON);
-      this.bringUproxyToFront();
       this.disconnectedWhileProxying = true;
+      this.updateIcon_();
+      this.bringUproxyToFront();
       return;
     }
 
     this.disconnectedWhileProxying = false;
     this.proxySet_ = false;
+    this.updateIcon_();
     this.browserApi.stopUsingProxy();
   }
 
@@ -641,11 +632,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public startGettingInUi = () => {
-    if (this.isGivingAccess()) {
-      this.browserApi.setIcon(GETTING_SHARING_ICON);
-    } else {
-      this.browserApi.setIcon(GETTING_ICON);
-    }
+    this.updateIcon_(true);
   }
 
   /**
@@ -676,10 +663,30 @@ export class UserInterface implements ui_constants.UiApi {
     * Set extension icon to the 'giving' icon.
     */
   public startGivingInUi = () => {
-    if (this.isGettingAccess()) {
+    this.updateIcon_(null, true);
+  }
+
+  private updateIcon_ = (isGetting?:boolean, isGiving?:boolean) => {
+    if (isGetting === null || typeof isGetting === 'undefined') {
+      isGetting = this.isGettingAccess();
+    }
+
+    if (isGiving === null || typeof isGiving === 'undefined') {
+      isGiving = this.isGivingAccess();
+    }
+
+    if (this.disconnectedWhileProxying) {
+      this.browserApi.setIcon(ERROR_ICON);
+    } else if (isGetting && isGiving) {
       this.browserApi.setIcon(GETTING_SHARING_ICON);
-    } else {
+    } else if (isGetting) {
+      this.browserApi.setIcon(GETTING_ICON);
+    } else if (isGiving) {
       this.browserApi.setIcon(SHARING_ICON);
+    } else if (model.onlineNetworks.length > 0) {
+      this.browserApi.setIcon(DEFAULT_ICON);
+    } else {
+      this.browserApi.setIcon(LOGGED_OUT_ICON);
     }
   }
 
@@ -687,17 +694,7 @@ export class UserInterface implements ui_constants.UiApi {
     * Set extension icon to the default icon.
     */
   public stopGivingInUi = () => {
-    if (this.isGettingAccess()) {
-      this.browserApi.setIcon(GETTING_ICON);
-    } else if (model.onlineNetwork) {
-      this.browserApi.setIcon(DEFAULT_ICON);
-    } else {
-      this.setOfflineIcon();
-    }
-  }
-
-  public setOfflineIcon = () => {
-    this.browserApi.setIcon(LOGGED_OUT_ICON);
+    this.updateIcon_(null, false);
   }
 
   public isGettingAccess = () => {
@@ -712,75 +709,71 @@ export class UserInterface implements ui_constants.UiApi {
   /**
    * Synchronize a new network to be visible on this UI.
    */
-  private syncNetwork_ = (network :social.NetworkMessage) => {
-    console.log('uproxy_core_api.Update.NETWORK', network);
-    console.log('model: ', model);
+  private syncNetwork_ = (networkMsg :social.NetworkMessage) => {
+    var existingNetwork = model.getNetwork(networkMsg.name, networkMsg.userId);
 
-    // If you are now online (on a non-manual network), and were
-    // previously offline, show the default (logo) icon.
-    if (network.online && network.name != 'Manual'
-        && model.onlineNetwork == null) {
-      this.browserApi.setIcon(DEFAULT_ICON);
-    }
-
-    if (model.onlineNetwork &&
-        (network.online && network.name != model.onlineNetwork.name) ||
-        (!network.online && network.name == model.onlineNetwork.name)) {
-      // onlineNetwork exists and has either been changed or logged out.
-      // Clear roster and option user info from offline network.
-      for (var userId in model.onlineNetwork.roster) {
-        var user = model.onlineNetwork.roster[userId];
-        var userCategories = user.getCategories();
-        this.categorizeUser_(user, model.contacts.getAccessContacts,
-            userCategories.getTab, null);
-        this.categorizeUser_(user, model.contacts.shareAccessContacts,
-            userCategories.shareTab, null);
+    if (networkMsg.online) {
+      if (!existingNetwork) {
+        existingNetwork = {
+          name: networkMsg.name,
+          userId: networkMsg.userId,
+          roster: {},
+          logoutExpected: false
+        };
+        model.onlineNetworks.push(existingNetwork);
       }
-      this.setOfflineIcon();
-      model.onlineNetwork = null;
-
-      if (!this.isLogoutExpected_ && !network.online &&
-          // TODO: support reconnect for all networks
-          network.name == 'Google' && !this.disconnectedWhileProxying &&
-          this.instanceGettingAccessFrom_ == null) {
-        console.warn('Unexpected logout, reconnecting to ' + network.name);
-        this.reconnect(network.name);
-      } else {
-        if (this.instanceGettingAccessFrom_ != null) {
-          this.stopGettingInUiAndConfig(true);
+    } else {
+      if (existingNetwork) {
+        for (var userId in existingNetwork.roster) {
+          var user = existingNetwork.roster[userId];
+          var userCategories = user.getCategories();
+          this.categorizeUser_(user, model.contacts.getAccessContacts,
+                               userCategories.getTab, null);
+          this.categorizeUser_(user, model.contacts.shareAccessContacts,
+                               userCategories.shareTab, null);
         }
-        this.showNotification(
-          this.i18n_t('loggedOut', { network: network.name }));
-        this.view = ui_constants.View.SPLASH;
+        model.removeNetwork(networkMsg.name);
+
+        if (!existingNetwork.logoutExpected && networkMsg.name === 'Google' &&
+            !this.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
+          console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
+          this.reconnect(networkMsg.name);
+        } else {
+          if (this.instanceGettingAccessFrom_) {
+            this.stopGettingInUiAndConfig(true);
+          }
+          this.showNotification(this.i18n_t('loggedOut', {network: networkMsg.name}));
+
+          if (!model.onlineNetworks.length) {
+            this.view = ui_constants.View.SPLASH;
+          }
+        }
       }
     }
 
-    if (network.online && !model.onlineNetwork) {
-      model.onlineNetwork = {
-        name:   network.name,
-        userId: network.userId,
-        roster: {},
-        hasContacts: false
-      };
-    }
+    this.updateIcon_();
   }
 
-  // Synchronize the data about the current user.
-  // TODO: Be able to sync local instance, per network.
+  private syncUserSelf_ = (payload :social.UserData) => {
+    var network = model.getNetwork(payload.network);
+    if (!network) {
+      console.error('uproxy_core_api.Update.USER_SELF message for invalid network',
+          payload.network);
+      return;
+    }
+    var profile :social.UserProfileMessage = payload.user;
+    network.userId = profile.userId;
+    network.imageData = profile.imageData;
+    network.userName = profile.name;
+  }
 
   /**
    * Synchronize data about some friend.
    */
   public syncUser = (payload :social.UserData) => {
-    if (!model.onlineNetwork || model.onlineNetwork.name != payload.network) {
-      // Ignore all user updates when the network is offline.
-      // These user updates may come in asynchrously after logging out of a
-      // network, e.g. if the UI logs out of Google while we are getting
-      // access, we will first completely logout and then asynchronously
-      // get an update for the user when the peerconnection has closed - in
-      // this case the user should already have been removed from the roster
-      // in the UI and stay removed.
-      return;
+    var network = model.getNetwork(payload.network);
+    if (!network) {
+       return;
     }
 
     // Construct a UI-specific user object.
@@ -788,7 +781,7 @@ export class UserInterface implements ui_constants.UiApi {
     // Update / create if necessary a user, both in the network-specific
     // roster and the global roster.
     var user :User;
-    user = model.onlineNetwork.roster[profile.userId];
+    user = model.getUser(network, profile.userId);
     var oldUserCategories :UserCategories = {
       getTab: null,
       shareTab: null
@@ -796,9 +789,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (!user) {
       // New user.
-      user = new User(profile.userId, model.onlineNetwork, this);
-      model.onlineNetwork.roster[profile.userId] = user;
-      model.onlineNetwork.hasContacts = true;
+      user = new User(profile.userId, network, this);
+      network.roster[profile.userId] = user;
     } else {
       // Existing user, get the category before modifying any properties.
       oldUserCategories = user.getCategories();
@@ -852,12 +844,23 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string) : Promise<void> => {
-    this.isLogoutExpected_ = false;
-    return this.core.login({network: network, reconnect: false});
+    return this.core.login({ network : network, reconnect: false }).catch((e :Error) => {
+      this.showNotification(this.i18n_t('errorSigningIn', {network: network}));
+      throw e;
+    });
   }
 
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
-    this.isLogoutExpected_ = true;
+    var network = model.getNetwork(networkInfo.name);
+    if (network) {
+      // if we know about the network, record that we expect this logout to
+      // happen
+      network.logoutExpected = true;
+    } else {
+      console.warn('User is trying to log out of not-logged-in-network ' +
+                   networkInfo.name);
+    }
+
     return this.core.logout(networkInfo);
   }
 
@@ -875,8 +878,12 @@ export class UserInterface implements ui_constants.UiApi {
         }).catch((e) => {
           // Reconnect failed, give up.
           this.stopReconnect();
-          this.showNotification('You have been logged out of ' + network);
-          this.view = ui_constants.View.SPLASH;
+          this.showNotification(
+              this.i18n_t('loggedOut', { network: network }));
+
+          if (!model.onlineNetworks.length) {
+            this.view = ui_constants.View.SPLASH;
+          }
         });
       }
     });
@@ -943,5 +950,15 @@ export class UserInterface implements ui_constants.UiApi {
     model.globalSettings.language = newLanguage;
     this.core.updateGlobalSettings(model.globalSettings);
     this.i18n_setLng(newLanguage);
+  }
+
+  private updateInitialState = (state :uproxy_core_api.InitialState) => {
+    model.networkNames = state.networkNames;
+
+    if (state.globalSettings.language !== model.globalSettings.language) {
+      this.i18n_setLng(state.globalSettings.language);
+    }
+
+    model.updateGlobalSettings(state.globalSettings);
   }
 }  // class UserInterface
