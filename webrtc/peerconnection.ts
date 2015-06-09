@@ -126,6 +126,14 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     this.fulfillClosed_ = F;
   });
 
+  // Fulfills once the remote description has been set.
+  // Used to delay setting of remote ICE candidates until the call to
+  // setRemoteDescription has resolved, which can cause timing issues.
+  private fulfillHaveRemoteDescription_ :() => void;
+  private onceHaveRemoteDescription_ = new Promise<void>((F, R) => {
+    this.fulfillHaveRemoteDescription_ = F;
+  });
+
   public peerOpenedChannelQueue = new handler.Queue<DataChannel,void>();
 
   public signalForPeerQueue = new handler.Queue<signals.Message,void>();
@@ -317,47 +325,47 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     }
   }
 
-  private handleOfferSignalMessage_ =
-      (description:freedom_RTCPeerConnection.RTCSessionDescription) : void => {
-    this.breakOfferTie_(description)
-      .then(() => {
-        this.state_ = State.CONNECTING;
-        // initial offer from peer
-        return this.pc_.setRemoteDescription(description)
-      })
-      .then(this.pc_.createAnswer)
-      .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
-        // As with the offer, we must emit the signal before
-        // setting the local description to ensure that we send the
-        // ANSWER before any ICE candidates.
-        this.emitSignalForPeer_({
-          type: signals.Type.ANSWER,
-          description: {
-            type: d.type,
-            sdp: d.sdp
-          }
-        });
-        this.pc_.setLocalDescription(d);
-      })
-      .catch((e) => {
-        this.closeWithError_('Failed to connect to offer:' +
-            e.toString());
+  private handleOfferSignalMessage_ = (
+      description:freedom_RTCPeerConnection.RTCSessionDescription)
+      : Promise<void> => {
+    return this.breakOfferTie_(description).then(() => {
+      this.state_ = State.CONNECTING;
+      // initial offer from peer
+      return this.pc_.setRemoteDescription(description)
+    }).then(this.pc_.createAnswer).then(
+        (d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+      // As with the offer, we must emit the signal before
+      // setting the local description to ensure that we send the
+      // ANSWER before any ICE candidates.
+      this.emitSignalForPeer_({
+        type: signals.Type.ANSWER,
+        description: {
+          type: d.type,
+          sdp: d.sdp
+        }
       });
+      return this.pc_.setLocalDescription(d);
+    }).catch((e) => {
+      this.closeWithError_('Failed to connect to offer:' +
+          e.toString());
+    });
   }
 
-  private handleAnswerSignalMessage_ =
-      (description:freedom_RTCPeerConnection.RTCSessionDescription) : void => {
-    this.pc_.setRemoteDescription(description).catch((e) => {
+  private handleAnswerSignalMessage_ = (
+      description:freedom_RTCPeerConnection.RTCSessionDescription)
+      : Promise<void> => {
+    return this.pc_.setRemoteDescription(description).catch((e) => {
       this.closeWithError_('Failed to set remote description: ' +
         JSON.stringify(description) + '; Error: ' + e.toString());
     });
   }
 
   private handleCandidateSignalMessage_ = (
-      candidate:freedom_RTCPeerConnection.RTCIceCandidate) : void => {
+      candidate:freedom_RTCPeerConnection.RTCIceCandidate)
+      : Promise<void> => {
     // CONSIDER: Should we be passing/getting the SDP line index?
     // e.g. https://code.google.com/p/webrtc/source/browse/stable/samples/js/apprtc/js/main.js#331
-    this.pc_.addIceCandidate(candidate).catch((e: Error) => {
+    return this.pc_.addIceCandidate(candidate).catch((e: Error) => {
       log.error('%1: addIceCandidate: %2; Error: %3', this.peerName_, candidate,
         e.toString());
     });
@@ -381,21 +389,25 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     //       is guaranteed to be unique for 2 peers.
     switch(message.type) {
       case signals.Type.OFFER:
-        this.handleOfferSignalMessage_(message.description);
+        this.handleOfferSignalMessage_(message.description).then(
+            this.fulfillHaveRemoteDescription_);
         break;
       // Answer to an offer we sent
       case signals.Type.ANSWER:
-        this.handleAnswerSignalMessage_(message.description);
+        this.handleAnswerSignalMessage_(message.description).then(
+            this.fulfillHaveRemoteDescription_);
         break;
       // Add remote ice candidate.
       case signals.Type.CANDIDATE:
-        this.handleCandidateSignalMessage_(message.candidate);
+        this.onceHaveRemoteDescription_.then(() => {
+          this.handleCandidateSignalMessage_(message.candidate);
+        });
         break;
       case signals.Type.NO_MORE_CANDIDATES:
         break;
-    default:
-      log.error('%1: unexpected signalling message type %2',
-          this.peerName_, message.type);
+      default:
+        log.error('%1: unexpected signalling message type %2',
+            this.peerName_, message.type);
     }
   }
 
