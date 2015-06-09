@@ -98,12 +98,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         console.log('Connecting listener for', JSON.stringify(payload));
         this.send(payload);
       }
-      var ready :browser_connector.Payload = {
-        cmd: 'emit',
-        type: uproxy_core_api.Command.GET_INITIAL_STATE,
-        promiseId: 0
-      }
-      this.send(ready);
+
       this.emit('core_connect');
     });
   }

@@ -392,8 +392,8 @@
     "message": "Loading uProxy friends"
   },
   "noFriendsOnline": {
-    "description": "None of the user's friends are currently signed in to the social network the user selected.",
-    "message": "None of your friends on __network__ are signed into uProxy at this time."
+    "description": "None of the user's friends are currently signed in.",
+    "message": "None of your friends are signed into uProxy at this time."
   },
   "toInviteFriends": {
     "description": "Instruction informing the user how to invite their friends to uProxy.",
@@ -423,6 +423,10 @@
     "description": "Text in settings that informs the user which social network they're connected to.",
     "message": "Connected with __network__"
   },
+  "connectedWithNumber": {
+    "description": "Text in settings informing the user of how many networks they're connected to.",
+    "message": "Connected with __number__ networks"
+  },
   "nameThisDevice": {
     "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel.",
     "message": "Name this device"
@@ -434,6 +438,14 @@
   "description": {
     "description": "Placeholder for the input field for the name of the user's device.",
     "message": "Description"
+  },
+  "connect": {
+    "description": "User clicks this to connect to a network",
+    "message": "Connect"
+  },
+  "disconnect": {
+    "description": "User clicks this to disconnect from a network",
+    "message": "Disconnect"
   },
   "save": {
     "description": "Label for button that saves the user's text input.",
