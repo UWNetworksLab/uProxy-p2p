@@ -1,5 +1,4 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../scripts/ui.ts' />
 /// <reference path='./context.d.ts' />
 
 import ui_constants = require('../../interfaces/ui');
@@ -16,7 +15,6 @@ Polymer({
       this.fire('update-view', { view: ui_constants.View.ROSTER });
       ui.bringUproxyToFront();
     }).catch((e :Error) => {
-      ui.showNotification(ui.i18n_t('errorSigningIn', { network: this.networkName }));
       console.warn('Did not log in ', e);
     });
   },

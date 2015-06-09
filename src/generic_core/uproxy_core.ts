@@ -59,51 +59,37 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // TODO: implement options.
   }
 
+  private pendingNetworks_ :{[name :string] :social.Network} = {};
+
   /**
    * Access various social networks using the Social API.
    */
   public login = (loginArgs :uproxy_core_api.LoginArgs) :Promise<void> => {
     var networkName = loginArgs.network;
-    if (networkName === social_network.MANUAL_NETWORK_ID) {
-      var network = social_network.getNetwork(networkName, '');
-      var loginPromise = network.login(loginArgs.reconnect);
-      loginPromise.then(() => {
-        social_network.notifyUI(networkName);
-        log.info('Logged in to manual network');
-      });
-      return loginPromise;
-    }
 
     if (!(networkName in social_network.networks)) {
       log.warn('Network does not exist', networkName);
       return Promise.reject(new Error('Network does not exist (' + networkName + ')'));
     }
-    var network = social_network.pendingNetworks[networkName];
+
+    var network = this.pendingNetworks_[networkName];
     if (typeof network === 'undefined') {
       network = new social_network.FreedomNetwork(networkName);
-      social_network.pendingNetworks[networkName] = network;
+      this.pendingNetworks_[networkName] = network;
     }
-    var loginPromise = network.login(loginArgs.reconnect);
-    loginPromise.then(() => {
-      var userId :string = network.myInstance.userId;
-      if (userId in social_network.networks[networkName]) {
-        // If user is already logged in with the same (network, userId)
-        // log out from existing network before replacing it.
-        social_network.networks[networkName][userId].logout();
-      }
-      social_network.networks[networkName][userId] = network;
-      delete social_network.pendingNetworks[networkName];
+
+    // TODO: save the auto-login default
+
+    return network.login(loginArgs.reconnect).then(() => {
+      delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,
-        userId: userId
+        userId: network.myInstance.userId
       });
     }).catch((e) => {
-      log.error('Could not log in to network', e.stack);
-      delete social_network.pendingNetworks[networkName];
+      delete this.pendingNetworks_[networkName];
+      throw e;
     });
-
-    // TODO: save the auto-login default.
-    return loginPromise;
   }
 
   /**
@@ -176,6 +162,16 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       loggingTypes.Destination.console,
       globals.settings.consoleFilter);
     globals.settings.language = newSettings.language;
+  }
+
+  public getFullState = () :Promise<uproxy_core_api.InitialState> => {
+    return globals.loadSettings.then(() => {
+      return {
+        networkNames: Object.keys(social_network.networks),
+        globalSettings: globals.settings,
+        onlineNetworks: social_network.getOnlineNetworks()
+      };
+    });
   }
 
   /**

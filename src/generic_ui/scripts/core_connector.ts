@@ -133,6 +133,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
 
   // --- CoreApi interface requirements (sending COMMANDS) ---
 
+  public getFullState = () :Promise<uproxy_core_api.InitialState> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_FULL_STATE);
+  }
+
   // TODO: Reconnect this hook, which while we're testing, sends a new instance
   // message anytime we click on the user in the UI.
   sendInstance = (clientId :string) => {
