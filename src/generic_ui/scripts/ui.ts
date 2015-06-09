@@ -48,7 +48,7 @@ export var model :Model = {
     allowNonUnicast: false,
     statsReportingEnabled: false,
     consoleFilter: 2, // loggingTypes.Level.warn
-    language: 'en-US'
+    language: 'en'
   },
   reconnecting: false
 };

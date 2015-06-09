@@ -38,7 +38,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   version: STORAGE_VERSION,
   statsReportingEnabled: false,
   consoleFilter: loggingTypes.Level.warn,
-  language: 'en-US'
+  language: 'en'
 };
 
 export var natType :string = '';
@@ -73,7 +73,7 @@ export var loadSettings :Promise<void> =
         settings.statsReportingEnabled = false;
       }
       if (settings.language == null) {
-        settings.language = 'en-US';
+        settings.language = 'en';
       }
     }).catch((e) => {
       log.info('No global settings loaded', e.message);
