@@ -366,20 +366,23 @@ var log :logging.Log = new logging.Log('churn');
           freedomPc, obfPeerName);
       this.obfuscatedConnection_.signalForPeerQueue.setSyncHandler(
           (message:signals.Message) => {
-        // Super-paranoid check: remove candidates from SDP messages.
-        // This can happen if a connection is re-negotiated.
-        // TODO: We can safely remove this once we can reliably interrogate
-        //       peerconnection endpoints.
         if (message.type === signals.Type.OFFER ||
             message.type === signals.Type.ANSWER) {
+          // Super-paranoid check: remove candidates from SDP messages.
+          // This can happen if a connection is re-negotiated.
+          // TODO: We can safely remove this once we can reliably interrogate
+          //       peerconnection endpoints.
           message.description.sdp =
               filterCandidatesFromSdp(message.description.sdp);
-        }
-        if (message.type === signals.Type.CANDIDATE) {
+          var churnSignal :ChurnSignallingMessage = {
+            webrtcMessage: message
+          };
+          this.signalForPeerQueue.handle(churnSignal);
+        } else if (message.type === signals.Type.CANDIDATE) {
           // This will tell us on which port webrtc is operating.
-          // Record it and inject a fake endpoint, to be sure the remote
-          // side never knows the real address (can be an issue when both
-          // hosts are on the same network).
+          // There's no need to send this to the peer because it can
+          // trivially formulate a candidate line with the address of
+          // its pipe.
           try {
             if (!message.candidate || !message.candidate.candidate) {
               throw new Error('no candidate line');
@@ -392,12 +395,6 @@ var log :logging.Log = new logging.Log('churn');
               throw new Error('ipv6 unsupported');
             }
             this.haveWebRtcEndpoint_(address);
-            message.candidate.candidate =
-              setCandidateLineEndpoint(
-                message.candidate.candidate, {
-                  address: '0.0.0.0',
-                  port: 0
-                });
           } catch (e) {
             log.debug('%1: ignoring candidate line %2: %3',
                 this.peerName,
@@ -405,10 +402,6 @@ var log :logging.Log = new logging.Log('churn');
                 e.message);
           }
         }
-        var churnSignal :ChurnSignallingMessage = {
-          webrtcMessage: message
-        };
-        this.signalForPeerQueue.handle(churnSignal);
       });
       this.peerOpenedChannelQueue =
           this.obfuscatedConnection_.peerOpenedChannelQueue;
@@ -439,22 +432,30 @@ var log :logging.Log = new logging.Log('churn');
       }
       if (churnMessage.webrtcMessage) {
         var message = churnMessage.webrtcMessage;
-        if (message.type === signals.Type.CANDIDATE) {
-          this.onceHaveForwardingSocketEndpoint_.then(
-              (forwardingSocketEndpoint:net.Endpoint) => {
-            message.candidate.candidate =
-                setCandidateLineEndpoint(
-                    message.candidate.candidate, forwardingSocketEndpoint);
-            this.obfuscatedConnection_.handleSignalMessage(message);
-          });
-        } else if (message.type == signals.Type.OFFER ||
-                   message.type == signals.Type.ANSWER) {
+        if (message.type == signals.Type.OFFER ||
+            message.type == signals.Type.ANSWER) {
           // Remove candidates from the SDP.  This is redundant, but ensures
           // that a bug in the remote client won't cause us to send
           // unobfuscated traffic.
-          message.description.sdp =
-              filterCandidatesFromSdp(message.description.sdp);
+          message.description.sdp = filterCandidatesFromSdp(
+              message.description.sdp);
           this.obfuscatedConnection_.handleSignalMessage(message);
+
+          // Send a candidate to the peerconnection.
+          // Its address is the socket on which the pipe is listening.
+          this.onceHaveForwardingSocketEndpoint_.then(
+              (forwardingSocketEndpoint:net.Endpoint) => {
+            this.obfuscatedConnection_.handleSignalMessage({
+              type: 2,
+              candidate: {
+                candidate: setCandidateLineEndpoint(
+                    'candidate:0 1 UDP 2130379007 0.0.0.0 0 typ host',
+                    forwardingSocketEndpoint),
+                sdpMid: '',
+                sdpMLineIndex: 0
+              }
+            });
+          });
         }
       }
     }
