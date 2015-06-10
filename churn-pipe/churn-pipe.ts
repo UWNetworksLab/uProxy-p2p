@@ -164,7 +164,11 @@ class Pipe {
 
     var mirrorSocket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
     this.mirrorSockets_[key] = mirrorSocket;
-    return mirrorSocket.bind('127.0.0.1', 0).then((resultCode:number)
+    // Bind to INADDR_ANY owing to restrictions on localhost candidates
+    // in Firefox:
+    //   https://github.com/uProxy/uproxy/issues/1597
+    // TODO: bind to an actual, non-localhost address (see the issue)
+    return mirrorSocket.bind('0.0.0.0', 0).then((resultCode:number)
         : freedom_UdpSocket.Socket => {
       if (resultCode != 0) {
         throw new Error('bindRemote failed with result code ' + resultCode);
