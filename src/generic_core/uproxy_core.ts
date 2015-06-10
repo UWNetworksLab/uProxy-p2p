@@ -357,37 +357,46 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     '192.168.1.254', '192.168.10.1', '192.168.123.254', '192.168.4.1',
     '10.0.1.1', '10.1.1.1', '10.0.0.138', '10.0.0.2', '10.0.0.138'];
 
-  // Probe the NAT for NAT-PMP support
+  // Probe the NAT for NAT-PMP support, returns a status string
   public probePMP = () :Promise<string> => {
     // Test if any of the router IPs support NAT-PMP
     return Promise.all(this.routerIPs.map(diagnose_nat.probePMPSupport))
-    .then((results :string[]) => {
-      for (var i = 0; i < results.length; i++) {
-        if (results[i] === 'Supported') { return 'Supported'; }
-      }
+    .then((results :boolean[]) => {
+      if (results.some(el => el)) { return 'Supported'; }
       return 'Not supported';
+    })
+    .catch((err :Error) => {
+      return 'Not supported ' + err.message;
     });
   }
 
-  // Probe the NAT for PCP support
+  // Probe the NAT for PCP support, returns a status string
   public probePCP = (privateIP :string) :Promise<string> => {
     // Test if any of the router IPs support PCP
     return Promise.all(this.routerIPs.map((ip) => {
       return diagnose_nat.probePCPSupport(ip, privateIP);
     }))
-    .then((results :string[]) => {
-      for (var i = 0; i < results.length; i++) {
-        if (results[i] === 'Supported') { return 'Supported'; }
-      }
+    .then((results :boolean[]) => {
+      if (results.some(el => el)) { return 'Supported'; }
       return 'Not supported';
+    })
+    .catch((err :Error) => {
+      return 'Not supported ' + err.message;
     });
   }
 
-  // Probe the NAT for UPnP support
+  // Probe the NAT for UPnP support, returns a status string
   public probeUPnP = (privateIP :string) :Promise<string> => {
-    return diagnose_nat.probeUPnPSupport(privateIP);
+    return diagnose_nat.probeUPnPSupport(privateIP)
+    .then((result :boolean) => {
+      if (result) { return 'Supported'; }
+    })
+    .catch((err :Error) => {
+      return 'Not supported ' + err.message;
+    });
   }
 
+  // Probe the NAT type and support for port control protocols
   public getNetworkInfo = () :Promise<string> => {
     return diagnose_nat.getInternalIP()
     .then((privateIP :string) => {
