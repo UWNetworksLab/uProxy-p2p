@@ -416,6 +416,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public handleNotificationClick = (tag :string) => {
     // we want to bring uProxy to the front regardless of the info
+    this.bringUproxyToFront();
+
     try {
       var data = JSON.parse(tag);
 
@@ -539,6 +541,7 @@ export class UserInterface implements ui_constants.UiApi {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
       this.fireSignal('open-proxy-error');
+      this.bringUproxyToFront();
     }
   }
 
@@ -791,21 +794,20 @@ export class UserInterface implements ui_constants.UiApi {
       this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
     }
 
-      for (var i = 0; i < payload.offeringInstances.length; i++) {
-        if (payload.offeringInstances[i].localGettingFromRemote ===
-            social.GettingState.GETTING_ACCESS) {
-          this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
-          user.isSharingWithMe = true;
-          this.updateGettingStatusBar_();
-          break;
-        }
+    for (var i = 0; i < payload.offeringInstances.length; i++) {
+      if (payload.offeringInstances[i].localGettingFromRemote ===
+          social.GettingState.GETTING_ACCESS) {
+        this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+        user.isSharingWithMe = true;
+        this.updateGettingStatusBar_();
+        break;
       }
+    }
 
-      for (var i = 0; i < payload.gettingInstanceIds.length; i++) {
-        this.instancesGivingAccessTo[payload.gettingInstanceIds[i]] = true;
-        user.isGettingFromMe = true;
-      }
-
+    for (var i = 0; i < payload.gettingInstanceIds.length; i++) {
+      this.instancesGivingAccessTo[payload.gettingInstanceIds[i]] = true;
+      user.isGettingFromMe = true;
+    }
 
     var newUserCategories = user.getCategories();
     // Update the user's category in both get and share tabs.

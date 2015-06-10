@@ -246,7 +246,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public stopCopyPasteGet = () :Promise<void> => {
-    this.copyPasteGettingMessage_ = '';
     return copyPasteConnection.stopGet();
   }
 
@@ -256,7 +255,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public stopCopyPasteShare = () :Promise<void> => {
-    this.copyPasteSharingMessage_ = '';
     return copyPasteConnection.stopShare();
   }
 
@@ -477,7 +475,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
             networkNames: Object.keys(social_network.networks),
             globalSettings: globals.settings,
             onlineNetwork: social_network.getOnlineNetwork(),
-            copyPasteState: copyPasteConnection.currentStateForUI(),
+            copyPasteState: copyPasteConnection.getCurrentState(),
             copyPastePendingEndpoint: copyPasteConnection.activeEndpoint,
             copyPasteGettingMessage: this.copyPasteGettingMessage_,
             copyPasteSharingMessage: this.copyPasteSharingMessage_,

@@ -136,7 +136,6 @@ describe('UI.UserInterface', () => {
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.SHARING_ICON);
-
     });
 
     it('Extension icon doesnt change if you stop giving to 1 of several ' +

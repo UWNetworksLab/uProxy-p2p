@@ -192,11 +192,11 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
     var type = '' + update;
     var alreadyHooked = typeof this.listeners_[type] !== 'undefined';
     this.listeners_[type] = handler;
-    var payload = {
-      cmd: 'on',
-      type: update
-    };
     if (!alreadyHooked) {
+      var payload = {
+        cmd: 'on',
+        type: update
+      };
       // This log floods the console during testing. Uncomment for debugging.
       // console.log('UI onUpdate for', JSON.stringify(payload));
       this.send(payload, true);

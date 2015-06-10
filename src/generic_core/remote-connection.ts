@@ -200,6 +200,7 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
         this.bytesReceived_ = 0;
         this.stateRefresh_();
         this.socksToRtc_ = null;
+        this.activeEndpoint = null;
       });
 
       this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
@@ -249,7 +250,6 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
 
       this.localGettingFromRemote = social.GettingState.NONE;
       this.stateRefresh_();
-      this.activeEndpoint = null;
       return this.socksToRtc_.stop();
     }
 
@@ -280,10 +280,10 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
     }
 
     private stateRefresh_ = () => {
-      this.sendUpdate_(uproxy_core_api.Update.STATE, this.currentStateForUI());
+      this.sendUpdate_(uproxy_core_api.Update.STATE, this.getCurrentState());
     }
 
-    public currentStateForUI = () => {
+    public getCurrentState = () => {
       return {
         bytesSent: this.bytesSent_,
         bytesReceived: this.bytesReceived_,
