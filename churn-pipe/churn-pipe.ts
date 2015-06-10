@@ -174,7 +174,24 @@ class Pipe {
         throw new Error('bindRemote failed with result code ' + resultCode);
       }
       mirrorSocket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
-        this.sendTo_(recvFromInfo.data, remoteEndpoint);
+        // Ignore packets that do not originate from the browser, for a
+        // theoretical security benefit.
+        if (!this.browserEndpoint_) {
+          log.warn('browser endpoint not set, mirror socket for %1 ignoring ' +
+              'incoming packet from %2', remoteEndpoint, {
+                address: recvFromInfo.address,
+                port: recvFromInfo.port
+              });
+        } else if (recvFromInfo.address !== this.browserEndpoint_.address ||
+            recvFromInfo.port !== this.browserEndpoint_.port) {
+          log.warn('mirror socket for %1 ignoring incoming packet from %2',
+              remoteEndpoint, {
+                address: recvFromInfo.address,
+                port: recvFromInfo.port
+              });
+        } else {
+          this.sendTo_(recvFromInfo.data, remoteEndpoint);
+        }
       });
       return mirrorSocket;
     });
