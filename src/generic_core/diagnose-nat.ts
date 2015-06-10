@@ -11,8 +11,6 @@ import _ = require('lodash');
 import globals = require('./globals');
 import sha1 = require('crypto/sha1');
 
-import peerconnection = require('../../../third_party/uproxy-lib/webrtc/peerconnection');
-
 // Both Ping and NAT type detection need help from a server. The following
 // ip/port is the instance we run on EC2.
 var TEST_SERVER = '54.68.73.184';
@@ -994,7 +992,7 @@ function sendSSDPRequest() :Promise<ArrayBuffer> {
     return new Promise((F, R) => {
       var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
 
-      // Fulfill when we get any reply (failure is on timeout in wrapper function)
+      // Fulfill when we get any reply (failure is on timeout or invalid parsing)
       socket.on('onData', function (SSDPResponse: freedom_UdpSocket.RecvFromInfo) {
         F(SSDPResponse.data);
       });
@@ -1035,7 +1033,7 @@ function getControlURL(SSDPResponse :ArrayBuffer) :Promise<string> {
       var endIndex = SSDPStr.indexOf("\n", startIndex);
       var locationURL = SSDPStr.substring(startIndex, endIndex);
 
-      // Reject if there is no locationURL
+      // Reject if there is no LOCATION header
       if (startIndex == -1) {
         R(new Error("Not supported (No LOCATION header for UPnP device)"));
       }
@@ -1046,8 +1044,8 @@ function getControlURL(SSDPResponse :ArrayBuffer) :Promise<string> {
       xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
           // Get control URL from XML file
-          // Ideally we would want to parse and traverse the XML tree for this,
-          // but DOMParser is not available in this context
+          // Ideally we would parse and traverse the XML tree for this,
+          // but DOMParser is not available here
           var XMLDoc = xhr.responseText;
           var preIndex = XMLDoc.indexOf('WANIPConnection');
           var startIndex = XMLDoc.indexOf('<controlURL>', preIndex) + 13;
@@ -1066,7 +1064,6 @@ function getControlURL(SSDPResponse :ArrayBuffer) :Promise<string> {
           F(controlURL);
         }
       }
-
       xhr.send();
     })
   }
@@ -1088,19 +1085,19 @@ function sendAddPortMapping(controlURL :string, privateIP :string) :Promise<stri
 
       // Create the AddPortMapping SOAP request string
       var apm = '<?xml version="1.0"?>' +
-               '<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' +
+                '<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' +
                  '<s:Body>' +
-                   '<u:AddPortMapping xmlns:u="urn:schemas-upnp-org:service:WANIPConnection:1">' +
-                      '<NewExternalPort>' + externalPort + '</NewExternalPort>' +
-                      '<NewProtocol>UDP</NewProtocol>' +
-                      '<NewInternalPort>' + internalPort + '</NewInternalPort>' +
-                      '<NewInternalClient>' + privateIP + '</NewInternalClient>' +
-                      '<NewEnabled>1</NewEnabled>' +
-                      '<NewPortMappingDescription>uProxy UPnP probe</NewPortMappingDescription>' +
-                      '<NewLeaseDuration>' + leaseDuration + '</NewLeaseDuration>' +
-                   '</u:AddPortMapping>' +
-                 '</s:Body>' +
-               '</s:Envelope>';
+                    '<u:AddPortMapping xmlns:u="urn:schemas-upnp-org:service:WANIPConnection:1">' +
+                       '<NewExternalPort>' + externalPort + '</NewExternalPort>' +
+                       '<NewProtocol>UDP</NewProtocol>' +
+                       '<NewInternalPort>' + internalPort + '</NewInternalPort>' +
+                       '<NewInternalClient>' + privateIP + '</NewInternalClient>' +
+                       '<NewEnabled>1</NewEnabled>' +
+                       '<NewPortMappingDescription>uProxy UPnP probe</NewPortMappingDescription>' +
+                       '<NewLeaseDuration>' + leaseDuration + '</NewLeaseDuration>' +
+                    '</u:AddPortMapping>' +
+                  '</s:Body>' +
+                '</s:Envelope>';
 
       // Create an XMLHttpRequest that encapsulates the SOAP string
       var xhr = new XMLHttpRequest();
@@ -1110,7 +1107,7 @@ function sendAddPortMapping(controlURL :string, privateIP :string) :Promise<stri
 
       // Send the AddPortMapping request
       xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
+        if (xhr.readyState == 4) {
           F("Supported");
         }
       }
@@ -1125,11 +1122,12 @@ function sendAddPortMapping(controlURL :string, privateIP :string) :Promise<stri
   ]);
 }
 
-// Returns the internal IP address of the computer
+// Returns a promise for the internal IP address of the computer
 export function getInternalIP() :Promise<string> {
   return new Promise((F, R) => {
     var pc = freedom['core.rtcpeerconnection']({iceServers: globals.settings.stunServers});
 
+    // One of the ICE candidates is the internal host IP; return it
     pc.on('onicecandidate', (candidate? :freedom_RTCPeerConnection.OnIceCandidateEvent) => {
       if (candidate.candidate) {
         var cand = candidate.candidate.candidate;
@@ -1140,6 +1138,7 @@ export function getInternalIP() :Promise<string> {
       }
     });
 
+    // Set up the PeerConnection to start generating ICE candidates
     pc.createDataChannel('dummy data channel')
     .then(pc.createOffer)
     .then(pc.setLocalDescription);
@@ -1158,7 +1157,7 @@ function countdownFulfill(time :number, msg :string) :Promise<string> {
   });
 }
 
-// Return a promise that rejects in a given time with a message
+// Return a promise that rejects in a given time with an Error message
 function countdownReject(time :number, msg :string) :Promise<any> {
   return new Promise<any>((F, R) => {
     setTimeout(() => R(new Error(msg)), time);
