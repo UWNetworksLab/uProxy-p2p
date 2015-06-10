@@ -294,20 +294,21 @@ var log :logging.Log = new logging.Log('churn');
       // Debugging.
       this.onceProbingComplete_.then((endpoint:NatPair) => {
         log.debug('%1: NAT endpoints of probe connection are %2',
-            this.peerName,
-            JSON.stringify(endpoint));
+          this.peerName, endpoint);
       });
       this.onceHaveWebRtcEndpoint_.then((endpoint:net.Endpoint) => {
         log.debug('%1: obfuscated connection is bound to %2',
-            this.peerName,
-            JSON.stringify(endpoint));
+          this.peerName, endpoint);
       });
       this.onceHaveRemoteEndpoint_.then((endpoint:net.Endpoint) => {
         log.debug('%1: remote peer is contactable at %2',
-            this.peerName,
-            JSON.stringify(endpoint));
+          this.peerName, endpoint);
       });
-      this.onceHaveCaesarKey_.then((key:number) => {
+      this.onceHaveForwardingSocketEndpoint_.then((endpoint: net.Endpoint) => {
+        log.debug('%1: forwarding socket is at %2',
+          this.peerName, endpoint);
+      });
+      this.onceHaveCaesarKey_.then((key: number) => {
         log.debug('%1: caesar key is %2', this.peerName, key);
       });
     }
