@@ -472,12 +472,15 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Saves the given data channel as the control channel for this peer
   // connection. The appropriate callbacks for opening, closing, and
-  // initiating a heartbeat is are registered here.
+  // initiating a heartbeat are registered here.
   private registerControlChannel_ = (channel:DataChannel) : void => {
-    channel.onceOpened.then().then(() => {
+    channel.onceOpened.then(() => {
       this.initiateHeartbeat_(channel);
       this.state_ = State.CONNECTED;
       this.fulfillConnected_();
+    }).catch((e: Error) => {
+      log.debug('%1: control channel failed to open: %2',
+          this.peerName_, e.message);
     });
     channel.onceClosed.then(this.close);
   }

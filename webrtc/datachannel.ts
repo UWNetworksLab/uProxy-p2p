@@ -185,6 +185,8 @@ export class DataChannelClass implements DataChannel {
     this.onceOpened.then(() => {
       this.isOpen_ = true;
       this.sendNext_();
+    }, (e:Error) => {
+      log.debug('failed to open');
     });
     this.onceClosed.then(() => {
         if(!this.isOpen_) {
