@@ -297,11 +297,11 @@ var log :logging.Log = new logging.Log('churn');
           this.peerName, endpoint);
       });
       this.onceHaveWebRtcEndpoint_.then((endpoint:net.Endpoint) => {
-        log.debug('%1: obfuscated connection is bound to %2',
+        log.info('%1: obfuscated connection is bound to %2',
           this.peerName, endpoint);
       });
       this.onceHaveRemoteEndpoint_.then((endpoint:net.Endpoint) => {
-        log.debug('%1: remote peer is contactable at %2',
+        log.info('%1: remote peer is contactable at %2',
           this.peerName, endpoint);
       });
       this.onceHaveForwardingSocketEndpoint_.then((endpoint: net.Endpoint) => {
@@ -359,8 +359,8 @@ var log :logging.Log = new logging.Log('churn');
           this.pipe_.bindLocal(natEndpoints.internal),
           this.pipe_.setBrowserEndpoint(webRtcEndpoint),
           bindRemote]).then((answers:any[]) => {
-        log.info('%1: initial mirror socket for remote peer at %2 on %3',
-            this.peerName, remoteEndpoint, answers[2]);
+        log.info('%1: created initial mirror socket at %2',
+            this.peerName, answers[2]);
       });
     }
 
