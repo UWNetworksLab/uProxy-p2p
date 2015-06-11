@@ -265,6 +265,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       this.state_ = State.CONNECTING;
       this.pc_.createOffer().then(
           (d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+        log.debug('%1: created offer: %2', this.peerName_, d);
+
         // Emit the offer signal before calling setLocalDescription, which
         // initiates ICE candidate gathering. If we did the reverse then
         // we may emit ICE candidate signals before the offer, confusing
@@ -334,6 +336,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       return this.pc_.setRemoteDescription(description)
     }).then(this.pc_.createAnswer).then(
         (d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+      log.debug('%1: created answer: %2', this.peerName_, d);
+
       // As with the offer, we must emit the signal before
       // setting the local description to ensure that we send the
       // ANSWER before any ICE candidates.
@@ -373,7 +377,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Adds a signalling message to this.signalForPeerQueue.
   private emitSignalForPeer_ = (message:signals.Message) : void => {
-    log.debug('%1: signal for peer: %2', this.peerName_, message);
     this.signalForPeerQueue.handle(message);
   }
 
@@ -381,7 +384,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Return type is for testing.
   // TODO: consider adding return type to PeerConnection interface
   public handleSignalMessage = (message:signals.Message) : Promise<void> => {
-    log.debug('%1: handling signal from peer: %2', this.peerName_, message);
+    log.info('%1: handling signal from peer: %2', this.peerName_, message);
 
     // If we are offering and they are also offering at the same time, pick
     // the one who has the lower hash value for their description: this is
