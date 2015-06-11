@@ -158,7 +158,7 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   }
 
   public negotiateConnection = () : Promise<void> => {
-    log.debug('%1: negotiating, offering %2 provider',
+    log.info('%1: negotiating, offering %2 provider',
         this.name_, ProviderType[this.preferredProviderType_]);
     this.bridgeWith_(
         this.preferredProviderType_,
