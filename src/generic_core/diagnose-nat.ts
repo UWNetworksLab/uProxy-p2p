@@ -11,7 +11,6 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import _ = require('lodash');
 import globals = require('./globals');
 import sha1 = require('crypto/sha1');
-
 import ipaddr = require('ipaddr.js');
 
 // Both Ping and NAT type detection need help from a server. The following
@@ -861,42 +860,43 @@ export function doNatProvoking() :Promise<string> {
 }
 
 // Test if NAT-PMP is supported by the router, returns a boolean
-export function probePMPSupport(routerIP :string) :Promise<boolean> {
+export function probePMPSupport(routerIP:string, privateIP:string) :Promise<boolean> {
   // Promise that sends a NAT-PMP request to the router
   var _probePMPSupport = new Promise((F, R) => {
     var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
 
     // Fulfill when we get any reply (failure is on timeout in wrapper function)
-    socket.on('onData', function (pmpResponse: freedom_UdpSocket.RecvFromInfo) {
+    socket.on('onData', (pmpResponse:freedom_UdpSocket.RecvFromInfo) => {
+      socket.destroy(() => freedom['core.udpsocket'].close(socket));
       F(true);
     });
 
     // Bind a UDP port and send a NAT-PMP request
-    socket.bind('0.0.0.0', 0)
-    .then((result: number) => {
-      if (result != 0) {
-        R(new Error('Failed to bind to a port: Err= ' + result));
-      }
+    socket.bind(privateIP, 0).
+        then((result:number) => {
+          if (result != 0) {
+            R(new Error('Failed to bind to a port: Err= ' + result));
+          }
 
-      // Construct the NAT-PMP map request as an ArrayBuffer
-      // Map internal port 55555 to external port 55555 w/ 120 sec lifetime
-      var pmpBuffer = new ArrayBuffer(12);
-      var pmpView = new DataView(pmpBuffer);
-      // Version and OP fields (1 byte each)
-      pmpView.setInt8(0, 0);
-      pmpView.setInt8(1, 1);
-      // Reserved, internal port, external port fields (2 bytes each)
-      pmpView.setInt16(2, 0, false);
-      pmpView.setInt16(4, 55555, false);
-      pmpView.setInt16(6, 55555, false);
-      // Mapping lifetime field (4 bytes)
-      pmpView.setInt32(8, 120, false);
+          // Construct the NAT-PMP map request as an ArrayBuffer
+          // Map internal port 55555 to external port 55555 w/ 120 sec lifetime
+          var pmpBuffer = new ArrayBuffer(12);
+          var pmpView = new DataView(pmpBuffer);
+          // Version and OP fields (1 byte each)
+          pmpView.setInt8(0, 0);
+          pmpView.setInt8(1, 1);
+          // Reserved, internal port, external port fields (2 bytes each)
+          pmpView.setInt16(2, 0, false);
+          pmpView.setInt16(4, 55555, false);
+          pmpView.setInt16(6, 55555, false);
+          // Mapping lifetime field (4 bytes)
+          pmpView.setInt32(8, 120, false);
 
-      socket.sendTo(pmpBuffer, routerIP, 5351);
-    });
+          socket.sendTo(pmpBuffer, routerIP, 5351);
+        });
   });
 
-  // Give _probePMPSupport() 2 seconds before timing out
+  // Give _probePMPSupport 2 seconds before timing out
   return Promise.race([
     countdownFulfill(2000, false),
     _probePMPSupport
@@ -904,68 +904,69 @@ export function probePMPSupport(routerIP :string) :Promise<boolean> {
 }
 
 // Test if PCP is supported by the router, returns a boolean
-export function probePCPSupport(routerIP :string, privateIP :string) :Promise<boolean> {
+export function probePCPSupport(routerIP:string, privateIP:string) :Promise<boolean> {
   var _probePCPSupport = new Promise((F, R) => {
     var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
 
     // Fulfill when we get any reply (failure is on timeout in wrapper function)
-    socket.on('onData', function (pcpResponse: freedom_UdpSocket.RecvFromInfo) {
+    socket.on('onData', (pcpResponse:freedom_UdpSocket.RecvFromInfo) => {
+      socket.destroy(() => freedom['core.udpsocket'].close(socket));
       F(true);
     });
 
     // Bind a UDP port and send a PCP request
-    socket.bind('0.0.0.0', 0)
-    .then((result: number) => {
-      if (result != 0) {
-        R(new Error('Failed to bind to a port: Err= ' + result));
-      }
+    socket.bind(privateIP, 0).
+        then((result:number) => {
+          if (result != 0) {
+            R(new Error('Failed to bind to a port: Err= ' + result));
+          }
 
-      // Create the PCP MAP request as an ArrayBuffer
-      // Map internal port 55556 to external port 55556 w/ 120 sec lifetime
-      var pcpBuffer = new ArrayBuffer(60);
-      var pcpView = new DataView(pcpBuffer);
-      // Version field (1 byte)
-      pcpView.setInt8(0, 0b00000010);
-      // R and Opcode fields (1 bit + 7 bits)
-      pcpView.setInt8(1, 0b00000001);
-      // Reserved field (2 bytes)
-      pcpView.setInt16(2, 0, false);
-      // Requested lifetime (4 bytes)
-      pcpView.setInt32(4, 120, false);
-      // Client IP address (128 bytes; we use the IPv4 -> IPv6 mapping)
-      pcpView.setInt32(8, 0, false);
-      pcpView.setInt32(12, 0, false);
-      pcpView.setInt16(16, 0, false);
-      pcpView.setInt16(18, 0xffff, false);
-      // Start of IPv4 octets of the client's private IP
-      var ipOctets = ipaddr.IPv4.parse(privateIP).octets;
-      pcpView.setInt8(20, ipOctets[0]);
-      pcpView.setInt8(21, ipOctets[1]);
-      pcpView.setInt8(22, ipOctets[2]);
-      pcpView.setInt8(23, ipOctets[3]);
-      // Mapping Nonce (12 bytes)
-      pcpView.setInt32(24, randInt(0, 0xffffffff), false);
-      pcpView.setInt32(28, randInt(0, 0xffffffff), false);
-      pcpView.setInt32(32, randInt(0, 0xffffffff), false);
-      // Protocol (1 byte)
-      pcpView.setInt8(36, 17);
-      // Reserved (3 bytes)
-      pcpView.setInt16(37, 0, false);
-      pcpView.setInt8(39, 0);
-      // Internal and external ports
-      pcpView.setInt16(40, 55556, false);
-      pcpView.setInt16(42, 55556, false);
-      // External IP address (128 bytes; we use the all-zero IPv4 -> IPv6 mapping)
-      pcpView.setFloat64(44, 0, false);
-      pcpView.setInt16(52, 0, false);
-      pcpView.setInt16(54, 0xffff, false);
-      pcpView.setInt32(56, 0, false);
+          // Create the PCP MAP request as an ArrayBuffer
+          // Map internal port 55556 to external port 55556 w/ 120 sec lifetime
+          var pcpBuffer = new ArrayBuffer(60);
+          var pcpView = new DataView(pcpBuffer);
+          // Version field (1 byte)
+          pcpView.setInt8(0, 0b00000010);
+          // R and Opcode fields (1 bit + 7 bits)
+          pcpView.setInt8(1, 0b00000001);
+          // Reserved field (2 bytes)
+          pcpView.setInt16(2, 0, false);
+          // Requested lifetime (4 bytes)
+          pcpView.setInt32(4, 120, false);
+          // Client IP address (128 bytes; we use the IPv4 -> IPv6 mapping)
+          pcpView.setInt32(8, 0, false);
+          pcpView.setInt32(12, 0, false);
+          pcpView.setInt16(16, 0, false);
+          pcpView.setInt16(18, 0xffff, false);
+          // Start of IPv4 octets of the client's private IP
+          var ipOctets = ipaddr.IPv4.parse(privateIP).octets;
+          pcpView.setInt8(20, ipOctets[0]);
+          pcpView.setInt8(21, ipOctets[1]);
+          pcpView.setInt8(22, ipOctets[2]);
+          pcpView.setInt8(23, ipOctets[3]);
+          // Mapping Nonce (12 bytes)
+          pcpView.setInt32(24, randInt(0, 0xffffffff), false);
+          pcpView.setInt32(28, randInt(0, 0xffffffff), false);
+          pcpView.setInt32(32, randInt(0, 0xffffffff), false);
+          // Protocol (1 byte)
+          pcpView.setInt8(36, 17);
+          // Reserved (3 bytes)
+          pcpView.setInt16(37, 0, false);
+          pcpView.setInt8(39, 0);
+          // Internal and external ports
+          pcpView.setInt16(40, 55556, false);
+          pcpView.setInt16(42, 55556, false);
+          // External IP address (128 bytes; we use the all-zero IPv4 -> IPv6 mapping)
+          pcpView.setFloat64(44, 0, false);
+          pcpView.setInt16(52, 0, false);
+          pcpView.setInt16(54, 0xffff, false);
+          pcpView.setInt32(56, 0, false);
 
-      socket.sendTo(pcpBuffer, routerIP, 5351);
-    });
+          socket.sendTo(pcpBuffer, routerIP, 5351);
+        });
   });
 
-  // Give _probePCPSupport() 2 seconds before timing out
+  // Give _probePCPSupport 2 seconds before timing out
   return Promise.race([
     countdownFulfill(2000, false),
     _probePCPSupport
@@ -975,45 +976,46 @@ export function probePCPSupport(routerIP :string, privateIP :string) :Promise<bo
 // Send if UPnP AddPortMapping is supported by the router
 // Returns a 'true' boolean if UPnP is supported
 // Errors with a message if something breaks or times out (not supported)
-export function probeUPnPSupport(privateIP :string) :Promise<boolean> {
+export function probeUPnPSupport(privateIP:string) :Promise<boolean> {
   return new Promise((F, R) => {
-    sendSSDPRequest()
-    .then(fetchControlURL)
-    .then((controlURL :string) => sendAddPortMapping(controlURL, privateIP))
-    .then((result :boolean) => F(result))
-    .catch((err :Error) => R(err))
-  })
+    sendSSDPRequest(privateIP).
+        then(fetchControlURL).
+        then((controlURL:string) => sendAddPortMapping(controlURL, privateIP)).
+        then((result:boolean) => F(result)).
+        catch((err:Error) => R(err));
+  });
 }
 
 // Send a UPnP SSDP request to discover UPnP devices on the network
-function sendSSDPRequest() :Promise<ArrayBuffer> {
+function sendSSDPRequest(privateIP:string) :Promise<ArrayBuffer> {
   var _sendSSDPRequest = new Promise((F, R) => {
     var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
 
     // Fulfill when we get any reply (failure is on timeout or invalid parsing)
-    socket.on('onData', function (ssdpResponse: freedom_UdpSocket.RecvFromInfo) {
+    socket.on('onData', (ssdpResponse:freedom_UdpSocket.RecvFromInfo) => {
+      socket.destroy(() => freedom['core.udpsocket'].close(socket));
       F(ssdpResponse.data);
     });
 
     // Bind a socket and send the SSDP request
-    socket.bind('0.0.0.0', 0)
-    .then((result: number) => {
-      if (result != 0) {
-        R(new Error('Failed to bind to a port: Err= ' + result));
-      }
+    socket.bind(privateIP, 0).
+        then((result:number) => {
+          if (result != 0) {
+            R(new Error('Failed to bind to a port: Err= ' + result));
+          }
 
-      // Construct and send a UPnP SSDP message
-      var ssdpStr = 'M-SEARCH * HTTP/1.1\r\n' +
-                    'HOST: 239.255.255.250:1900\r\n' +
-                    'MAN: ssdp:discover\r\n' +
-                    'MX: 10\r\n' +
-                    'ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1';
-      var ssdpBuffer = arraybuffers.stringToArrayBuffer(ssdpStr);
-      socket.sendTo(ssdpBuffer, '239.255.255.250', 1900);
-    });
+          // Construct and send a UPnP SSDP message
+          var ssdpStr = 'M-SEARCH * HTTP/1.1\r\n' +
+                        'HOST: 239.255.255.250:1900\r\n' +
+                        'MAN: ssdp:discover\r\n' +
+                        'MX: 10\r\n' +
+                        'ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1';
+          var ssdpBuffer = arraybuffers.stringToArrayBuffer(ssdpStr);
+          socket.sendTo(ssdpBuffer, '239.255.255.250', 1900);
+        });
   });
 
-  // Give _sendSSDPRequest() 1 second before timing out
+  // Give _sendSSDPRequest 1 second before timing out
   return Promise.race([
     countdownReject(1000, '(SSDP timed out)'),
     _sendSSDPRequest
@@ -1021,7 +1023,7 @@ function sendSSDPRequest() :Promise<ArrayBuffer> {
 }
 
 // Get the UPnP control URL from SSDP response
-function fetchControlURL(ssdpResponse :ArrayBuffer) :Promise<string> {
+function fetchControlURL(ssdpResponse:ArrayBuffer) :Promise<string> {
   var _fetchControlURL = new Promise((F, R) => {
     // Get UPnP device profile URL from the LOCATION header
     var ssdpStr = arraybuffers.arrayBufferToString(ssdpResponse);
@@ -1030,7 +1032,7 @@ function fetchControlURL(ssdpResponse :ArrayBuffer) :Promise<string> {
     var locationURL = ssdpStr.substring(startIndex, endIndex);
 
     // Reject if there is no LOCATION header
-    if (startIndex == -1) {
+    if (startIndex === -1) {
       R(new Error('(No LOCATION header for UPnP device)'));
     }
 
@@ -1038,7 +1040,7 @@ function fetchControlURL(ssdpResponse :ArrayBuffer) :Promise<string> {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', locationURL, true);
     xhr.onreadystatechange = () => {
-      if (xhr.readyState == 4) {
+      if (xhr.readyState === 4) {
         // Get control URL from XML file
         // Ideally we would parse and traverse the XML tree for this,
         // but DOMParser is not available here
@@ -1048,14 +1050,15 @@ function fetchControlURL(ssdpResponse :ArrayBuffer) :Promise<string> {
         var endIndex = xmlDoc.indexOf('</controlURL>', startIndex);
 
         // Reject if there is no controlURL
-        if (preIndex == -1 || startIndex == -1) {
+        if (preIndex === -1 || startIndex === -1) {
           R(new Error('(Could not parse control URL)'));
         }
 
         // Combine the controlURL path with the locationURL
         var controlURLPath = xmlDoc.substring(startIndex, endIndex);
         var locationURLParser = new URL(locationURL);
-        var controlURL = 'http://' + locationURLParser.host + '/' + controlURLPath;
+        var controlURL = 'http://' + locationURLParser.host +
+                         '/' + controlURLPath;
 
         F(controlURL);
       }
@@ -1063,7 +1066,7 @@ function fetchControlURL(ssdpResponse :ArrayBuffer) :Promise<string> {
     xhr.send();
   });
 
-  // Give _fetchControlURL() 1 second before timing out
+  // Give _fetchControlURL 1 second before timing out
   return Promise.race([
     countdownReject(1000, '(Timed out when retrieving description XML)'),
     _fetchControlURL
@@ -1071,11 +1074,11 @@ function fetchControlURL(ssdpResponse :ArrayBuffer) :Promise<string> {
 }
 
 // Send a UPnP AddPortMapping request
-function sendAddPortMapping(controlURL :string, privateIP :string) :Promise<boolean> {
+function sendAddPortMapping(controlURL:string, privateIP:string) :Promise<boolean> {
   var _sendAddPortMapping = new Promise((F, R) => {
     var internalPort = 55557;
     var externalPort = 55557;
-    var leaseDuration = 120; // Note: Some routers may not support a non-zero duration
+    var leaseDuration = 120;  // Note: Some routers may not support a non-zero duration
 
     // Create the AddPortMapping SOAP request string
     var apm = '<?xml version="1.0"?>' +
@@ -1101,7 +1104,7 @@ function sendAddPortMapping(controlURL :string, privateIP :string) :Promise<bool
 
     // Send the AddPortMapping request
     xhr.onreadystatechange = () => {
-      if (xhr.readyState == 4) { F(true); }
+      if (xhr.readyState === 4) { F(true); }
     }
     xhr.send(apm);
   });
@@ -1114,18 +1117,19 @@ function sendAddPortMapping(controlURL :string, privateIP :string) :Promise<bool
 }
 
 // Returns a promise for the internal IP address of the computer
-// TODO(kennysong): make timeout for getInternalIP(), handle timeout
 export function getInternalIP() :Promise<string> {
-  return new Promise((F, R) => {
-    var pc = freedom['core.rtcpeerconnection']({iceServers: globals.settings.stunServers});
+  var _getInternalIP = new Promise((F, R) => {
+    var pc = freedom['core.rtcpeerconnection']({
+      iceServers: globals.settings.stunServers
+    });
 
     // One of the ICE candidates is the internal host IP; return it
-    pc.on('onicecandidate', (candidate? :freedom_RTCPeerConnection.OnIceCandidateEvent) => {
+    pc.on('onicecandidate',
+      (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
       if (candidate.candidate) {
         var cand = candidate.candidate.candidate.split(' ');
-        var hostIndex = cand.indexOf('host');
-        if (hostIndex > -1) {
-          var internalIP = cand[hostIndex - 3];
+        if (cand[7] === 'host') {
+          var internalIP = cand[4];
           if (ipaddr.IPv4.isValid(internalIP)) {
             F(internalIP);
           }
@@ -1134,26 +1138,32 @@ export function getInternalIP() :Promise<string> {
     });
 
     // Set up the PeerConnection to start generating ICE candidates
-    pc.createDataChannel('dummy data channel')
-    .then(pc.createOffer)
-    .then(pc.setLocalDescription);
-  })
+    pc.createDataChannel('dummy data channel').
+      then(pc.createOffer).
+      then(pc.setLocalDescription);
+  });
+
+  // Give _getInternalIP 2 seconds to run before timing out
+  return Promise.race([
+    countdownReject(2000, 'Error: Cannot find your private IP address'),
+    _getInternalIP
+  ]);
 }
 
 // Generate a random integer between min and max
-function randInt(min :number, max :number) :number {
+function randInt(min:number, max:number) :number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 // Return a promise that fulfills in a given time with a boolean
-function countdownFulfill(time :number, bool :boolean) :Promise<boolean> {
+function countdownFulfill(time:number, bool:boolean) :Promise<boolean> {
   return new Promise<boolean>((F, R) => {
     setTimeout(() => F(bool), time);
   });
 }
 
 // Return a promise that rejects in a given time with an Error message
-function countdownReject(time :number, msg :string) :Promise<any> {
+function countdownReject(time:number, msg:string) :Promise<any> {
   return new Promise<any>((F, R) => {
     setTimeout(() => R(new Error(msg)), time);
   });
