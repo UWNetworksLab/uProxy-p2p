@@ -301,7 +301,7 @@ var log :logging.Log = new logging.Log('churn');
           this.peerName, endpoint);
       });
       this.onceHaveRemoteEndpoint_.then((endpoint:net.Endpoint) => {
-        log.info('%1: remote peer is contactable at %2',
+        log.debug('%1: remote peer is contactable at %2',
           this.peerName, endpoint);
       });
       this.onceHaveForwardingSocketEndpoint_.then((endpoint: net.Endpoint) => {
@@ -358,7 +358,11 @@ var log :logging.Log = new logging.Log('churn');
       Promise.all<any>([
           this.pipe_.bindLocal(natEndpoints.internal),
           this.pipe_.setBrowserEndpoint(webRtcEndpoint),
-          bindRemote]).then((answers:any[]) => {
+          bindRemote]).then(
+          (answers:any[]) => {
+        log.info('%1: pipe bound to %2, forwarding packets to ' +
+            'remote peer at %3', this.peerName, natEndpoints.internal,
+            remoteEndpoint);
         log.info('%1: created initial mirror socket at %2',
             this.peerName, answers[2]);
       });
