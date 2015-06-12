@@ -23,9 +23,9 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   var testerFactoryManager
         :freedom_types.FreedomModuleFactoryManager<ProxyIntegrationTester>;
-  var createTestModule = function(denyLocalhost?:boolean)
-      :ProxyIntegrationTester {
-    return testerFactoryManager(denyLocalhost, useChurn);
+  var createTestModule = function(denyLocalhost?:boolean,
+      sessionLimit?:number) : ProxyIntegrationTester {
+    return testerFactoryManager(denyLocalhost, useChurn, sessionLimit);
   };
 
   beforeEach((done) => {
@@ -67,12 +67,11 @@ export function socksEchoTestDescription(useChurn:boolean) {
       return testModule.echo(connectionId, input);
     }).then((output:ArrayBuffer) => {
       expect(arraybuffers.byteEquality(input, output)).toBe(true);
-      testModule.notifyClose(connId).then(() => {
-        testModule.on('sockClosed', (cnnid:string) => {
-          expect(cnnid).toBe(connId);
-          done();
-        });
-        testModule.closeEchoConnections();});
+      testModule.on('sockClosed', (cnnid:string) => {
+        expect(cnnid).toBe(connId);
+        done();
+      });
+      testModule.closeEchoConnections();
     });
   });
 
@@ -344,5 +343,24 @@ export function socksEchoTestDescription(useChurn:boolean) {
     }).catch((e:any) => {
       expect(e.reply).toEqual(socks.Reply.HOST_UNREACHABLE);
     }).then(done);
+  });
+
+  it('Hit the session limit', (done) => {
+    var limit = 4;
+    var testModule = createTestModule(false, limit);
+
+    testModule.startEchoServer().then((port:number) => {
+      for (var i = 0; i < limit; ++i) {
+        // Connections up to the limit are allowed.
+        testModule.connect(port).catch((e) => {
+          // These should not fail.
+          expect(e).toBeUndefined();
+        });
+      }
+      // This one is over the limit so it should fail to open.
+      testModule.connect(port).catch((e) => {
+        done();
+      });
+    });
   });
 };

@@ -313,20 +313,18 @@ module SocksToRtc {
       // Once the handshakes have completed, start forwarding data between the
       // socket and channel and listen for socket and channel termination.
       // If handshake fails, shutdown.
-      this.onceReady.then(() => {
-        this.linkSocketAndChannel_();
+      this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
 
-        // Shutdown once the data channel terminates.
-        this.dataChannel_.onceClosed.then(() => {
-          if (this.dataChannel_.dataFromPeerQueue.getLength() > 0) {
-            log.warn('%1: channel closed with %2 unprocessed incoming messages',
-                this.longId(), this.dataChannel_.dataFromPeerQueue.getLength());
-          } else {
-            log.info('%1: channel closed', this.longId());
-          }
-          this.fulfillStopping_();
-        });
-      }, this.fulfillStopping_);
+      // Shutdown once the data channel terminates.
+      this.dataChannel_.onceClosed.then(() => {
+        if (this.dataChannel_.dataFromPeerQueue.getLength() > 0) {
+          log.warn('%1: channel closed with %2 unprocessed incoming messages',
+              this.longId(), this.dataChannel_.dataFromPeerQueue.getLength());
+        } else {
+          log.info('%1: channel closed', this.longId());
+        }
+        this.fulfillStopping_();
+      });
 
       // Once shutdown has been requested, free resources.
       // TODO: This promise is only used for logging, so we should probably

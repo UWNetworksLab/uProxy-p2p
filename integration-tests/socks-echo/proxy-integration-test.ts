@@ -28,9 +28,11 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   private repeat_ :number = 1;
 
   constructor(private dispatchEvent_:(name:string, args:any) => void,
-                                      denyLocalhost?:boolean,
-                                      obfuscate?:boolean) {
-    this.socksEndpoint_ = this.startSocksPair_(denyLocalhost, obfuscate);
+              denyLocalhost?:boolean,
+              obfuscate?:boolean,
+              sessionLimit?:number) {
+    this.socksEndpoint_ = this.startSocksPair_(denyLocalhost, obfuscate,
+        sessionLimit);
   }
 
   public startEchoServer = () : Promise<number> => {
@@ -60,7 +62,8 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     return Promise.resolve<void>();
   };
 
-  private startSocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean) : Promise<net.Endpoint> => {
+  private startSocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean,
+      sessionLimit?:number) : Promise<net.Endpoint> => {
     var socksToRtcEndpoint :net.Endpoint = {
       address: this.localhost_,
       port: 0
@@ -72,8 +75,12 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       allowNonUnicast: !denyLocalhost  // Allow RtcToNet to contact the localhost server.
     };
 
+    if (typeof sessionLimit === 'number') {
+      (<any>(rtc_to_net.RtcToNet)).SESSION_LIMIT = sessionLimit;
+    }
+
     this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
-    this.rtcToNet_ = new rtc_to_net.RtcToNet();
+    this.rtcToNet_ = new rtc_to_net.RtcToNet('the user id');
     this.rtcToNet_.startFromConfig(rtcToNetProxyConfig, rtcPcConfig);
     this.rtcToNet_.signalsForPeer.setSyncHandler(this.socksToRtc_.handleSignalFromPeer);
     this.socksToRtc_.on('signalForPeer', this.rtcToNet_.handleSignalFromPeer);
@@ -83,6 +90,11 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   // Assumes webEndpoint is IPv4.
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
     var connection = new tcp.Connection({endpoint: socksEndpoint});
+    connection.onceClosed.then(() => {
+      console.log('Socket ' + connection.connectionId + ' has closed');
+      this.dispatchEvent_('sockClosed', connection.connectionId);
+    });
+
     var authRequest = socks.composeAuthHandshakeBuffer([socks.Auth.NOAUTH]);
     connection.send(authRequest);
     var connected = new Promise<tcp.ConnectionInfo>((F, R) => {
@@ -127,6 +139,12 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       }).then((connection:tcp.Connection) => {
         this.connections_[connection.connectionId] = connection;
         return connection.connectionId;
+      }, (e:any) : any => {
+        // We only want to preserve the reject value if it is a Socks.Response.
+        return Promise.reject({
+          reply: e.reply,
+          endpoint: e.endpoint,
+        });
       });
     } catch (e) {
       return Promise.reject(e);
@@ -142,15 +160,6 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     return Promise.all(allPromises).then(() => {
       console.log('closeEchoConnections complete.');
     });
-  }
-
-  public notifyClose = (connectionId:string) : Promise<void> => {
-    var connection = this.connections_[connectionId];
-    connection.onceClosed.then(() => {
-      console.log('notifyClose: Closing ' + connectionId);
-      this.dispatchEvent_('sockClosed', connection.connectionId);
-    });
-    return Promise.resolve<void>();
   }
 
   public echo = (connectionId:string, content:ArrayBuffer) : Promise<ArrayBuffer> => {

@@ -14,6 +14,5 @@ export interface ProxyIntegrationTester {
   sendData(connectionId:string, content:ArrayBuffer) :Promise<void>;
   on(name:'receivedData', listener:(event:ReceivedDataEvent) => void) :void;
   on(name:string, listener:(event:Object) => void) :void;
-  notifyClose(connectionId:string) : Promise<void>;
   closeEchoConnections() : Promise<void>;
 }
