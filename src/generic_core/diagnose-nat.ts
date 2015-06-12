@@ -859,15 +859,20 @@ export function doNatProvoking() :Promise<string> {
   });
 }
 
+// Closes the OS-level sockets and discards its Freedom object
+function closeSocket(socket:freedom_UdpSocket.Socket) {
+  socket.destroy(() => freedom['core.udpsocket'].close(socket));
+}
+
 // Test if NAT-PMP is supported by the router, returns a boolean
 export function probePMPSupport(routerIP:string, privateIP:string) :Promise<boolean> {
-  // Promise that sends a NAT-PMP request to the router
+  var socket :freedom_UdpSocket.Socket;
   var _probePMPSupport = new Promise((F, R) => {
-    var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
+    socket = freedom['core.udpsocket']();
 
     // Fulfill when we get any reply (failure is on timeout in wrapper function)
     socket.on('onData', (pmpResponse:freedom_UdpSocket.RecvFromInfo) => {
-      socket.destroy(() => freedom['core.udpsocket'].close(socket));
+      closeSocket(socket);
       F(true);
     });
 
@@ -898,19 +903,20 @@ export function probePMPSupport(routerIP:string, privateIP:string) :Promise<bool
 
   // Give _probePMPSupport 2 seconds before timing out
   return Promise.race([
-    countdownFulfill(2000, false),
+    countdownFulfill(2000, false, () => { closeSocket(socket); }),
     _probePMPSupport
   ]);
 }
 
 // Test if PCP is supported by the router, returns a boolean
 export function probePCPSupport(routerIP:string, privateIP:string) :Promise<boolean> {
+  var socket :freedom_UdpSocket.Socket;
   var _probePCPSupport = new Promise((F, R) => {
-    var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
+    socket = freedom['core.udpsocket']();
 
     // Fulfill when we get any reply (failure is on timeout in wrapper function)
     socket.on('onData', (pcpResponse:freedom_UdpSocket.RecvFromInfo) => {
-      socket.destroy(() => freedom['core.udpsocket'].close(socket));
+      closeSocket(socket);
       F(true);
     });
 
@@ -968,7 +974,7 @@ export function probePCPSupport(routerIP:string, privateIP:string) :Promise<bool
 
   // Give _probePCPSupport 2 seconds before timing out
   return Promise.race([
-    countdownFulfill(2000, false),
+    countdownFulfill(2000, false, () => { closeSocket(socket); }),
     _probePCPSupport
   ]);
 }
@@ -988,12 +994,13 @@ export function probeUPnPSupport(privateIP:string) :Promise<boolean> {
 
 // Send a UPnP SSDP request to discover UPnP devices on the network
 function sendSSDPRequest(privateIP:string) :Promise<ArrayBuffer> {
+  var socket :freedom_UdpSocket.Socket;
   var _sendSSDPRequest = new Promise((F, R) => {
-    var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
+    socket = freedom['core.udpsocket']();
 
     // Fulfill when we get any reply (failure is on timeout or invalid parsing)
     socket.on('onData', (ssdpResponse:freedom_UdpSocket.RecvFromInfo) => {
-      socket.destroy(() => freedom['core.udpsocket'].close(socket));
+      closeSocket(socket);
       F(ssdpResponse.data);
     });
 
@@ -1017,7 +1024,7 @@ function sendSSDPRequest(privateIP:string) :Promise<ArrayBuffer> {
 
   // Give _sendSSDPRequest 1 second before timing out
   return Promise.race([
-    countdownReject(1000, '(SSDP timed out)'),
+    countdownReject(1000, '(SSDP timed out)', () => { closeSocket(socket); }),
     _sendSSDPRequest
   ]);
 }
@@ -1139,13 +1146,13 @@ export function getInternalIP() :Promise<string> {
 
     // Set up the PeerConnection to start generating ICE candidates
     pc.createDataChannel('dummy data channel').
-      then(pc.createOffer).
-      then(pc.setLocalDescription);
+        then(pc.createOffer).
+        then(pc.setLocalDescription);
   });
 
   // Give _getInternalIP 2 seconds to run before timing out
   return Promise.race([
-    countdownReject(2000, 'Error: Cannot find your private IP address'),
+    countdownReject(2, 'Error: Cannot find your private IP address'),
     _getInternalIP
   ]);
 }
@@ -1156,15 +1163,25 @@ function randInt(min:number, max:number) :number {
 }
 
 // Return a promise that fulfills in a given time with a boolean
-function countdownFulfill(time:number, bool:boolean) :Promise<boolean> {
+// Can run a callback function before fulfilling
+function countdownFulfill(time:number, bool:boolean,
+                          callback?:Function) :Promise<boolean> {
   return new Promise<boolean>((F, R) => {
-    setTimeout(() => F(bool), time);
+    setTimeout(() => {
+      if (callback !== undefined) { callback(); }
+      F(bool);
+    }, time);
   });
 }
 
 // Return a promise that rejects in a given time with an Error message
-function countdownReject(time:number, msg:string) :Promise<any> {
+// Can call a callback function before rejecting
+function countdownReject(time:number, msg:string,
+                         callback?:Function) :Promise<any> {
   return new Promise<any>((F, R) => {
-    setTimeout(() => R(new Error(msg)), time);
+    setTimeout(() => {
+      if (callback !== undefined) { callback(); }
+      R(new Error(msg));
+    }, time);
   });
 }

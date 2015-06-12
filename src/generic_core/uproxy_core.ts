@@ -388,26 +388,28 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // Probe the NAT type and support for port control protocols
   public getNetworkInfo = () :Promise<string> => {
-    return diagnose_nat.getInternalIP().
-        then((privateIP:string) => {
-          return Promise.all([this.getNatType(), this.probePMCP(privateIP, 'PMP'),
-                    this.probePMCP(privateIP, 'PCP'), this.probeUPnP(privateIP)]);
-        }).
-        then((natInfo:string[]) => {
-          return 'NAT Type: ' + natInfo[0] + '\n' +
-                 'NAT-PMP: ' + natInfo[1] + '\n' +
-                 'PCP: ' + natInfo[2] + '\n' +
-                 'UPnP IGD: ' + natInfo[3] + '\n';
-        }).
-        catch((err:Error) => {
-          // Should only catch the error when getInternalIP() times out
-          return this.getNatType().then((natType:string) => {
-            return 'NAT Type: ' + natType + '\n' +
-                   'NAT-PMP: ' + err.message + '\n' +
-                   'PCP: ' + err.message + '\n' +
-                   'UPnP IGD: ' + err.message + '\n';
-          });
-        });
+    return diagnose_nat.getInternalIP().then((privateIP:string) => {
+      var natInfo = '';
+      return this.getNatType().then((natType:string) => {
+        natInfo += 'NAT Type: ' + natType + '\n';
+        return this.probePMCP(privateIP, 'PMP');
+      }).then((pmpStatus:string) => {
+        natInfo += 'NAT-PMP: ' + pmpStatus + '\n';
+        return this.probePMCP(privateIP, 'PCP');
+      }).then((pcpStatus:string) => {
+        natInfo += 'PCP: ' + pcpStatus + '\n';
+        return this.probeUPnP(privateIP);
+      }).then((upnpStatus:string) => {
+        natInfo += 'UPnP IGD: ' + upnpStatus + '\n';
+        return natInfo;
+      });
+    }).catch((err:Error) => {
+      // Should only catch the error when getInternalIP() times out
+      return this.getNatType().then((natType:string) => {
+        return 'NAT Type: ' + natType + '\n' +
+               'Could not probe for port control protocols: getInternalIP() failed. \n'
+      });
+    });
   }
 
   public getLogs = () :Promise<string> => {
