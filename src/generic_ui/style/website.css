@@ -1,0 +1,344 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+  font-weight: 300;
+  color: #909090;
+  text-align: center;
+}
+
+div#wrapper {
+  min-height: 100%;
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
+}
+
+article {
+  /* make sure this pushes the footer to the bottom */
+  flex: 1;
+  -webkit-flex: 1;
+}
+
+div.content {
+  max-width: 1165px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+section {
+  padding: 100px 20px 0;
+}
+
+section .intro {
+  /* intro to a section, center and make narrow */
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 560px;
+  margin-bottom: 48px;
+}
+
+.left {
+  text-align: left;
+}
+
+/* headings */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  color: #191818;
+  font-family: "Quicksand", sans-serif;
+}
+
+h1 {
+  font-size: 40px;
+  padding-top: 12px;
+  margin-bottom: 17px;
+}
+
+h1.uproxy-title {
+  letter-spacing: -1px
+}
+
+h2 {
+  font-size: 38px;
+  font-weight: 400;
+}
+
+h3 {
+  font-size: 22px;
+  line-height: 24px;
+  font-weight: 200;
+}
+
+h5 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 11px;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+
+/* normal text and links */
+p {
+  font-size: 17px;
+  line-height: 25px;
+}
+
+a {
+  color: #2a2a2a;
+  border-bottom: 1px dotted #ccc;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #00AC9B;
+}
+
+p a {
+  color: #808080;
+}
+
+/* pre */
+pre {
+  font-family: monospace;
+}
+
+/* buttons */
+.btn {
+  background: #10c9b1;
+  color: #fff;
+  padding: 0 20px;
+  line-height: 44px;
+  margin: 20px 0;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 15px;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.btn:hover {
+  text-decoration: none;
+  color: #fff;
+  background: #00AC9B;
+}
+
+/* "logo" stuff */
+.uproxy-title {
+  color: #10aa9b;
+}
+
+.uproxy-title .light {
+  color: #10c9b1;
+}
+
+.uproxy-title .version-tag {
+  background: #10c9b1;
+  font-size: 10px;
+
+  /* create box */
+  padding: 3px 4px;
+  letter-spacing: 1px;
+  border-radius: 4px;
+
+  display: inline-block;
+  margin-left: 2px;
+  line-height: 10px;
+  position: relative;
+  top: -7px;
+}
+
+.uproxy-title .version-tag * {
+  text-transform: uppercase;
+  color: #fff;
+  border-bottom: none;
+}
+
+.uproxy-title .version-tag:hover {
+  background: #00AC9B;
+}
+
+/* header */
+section#header {
+  padding-top: 75px;
+}
+
+#nav-links {
+  font-family: "Quicksand", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: center;
+  -webkit-justify-content: center;
+  margin-bottom: 70px;
+}
+
+#nav-links a {
+  color: #808080;
+  border-bottom: none;
+}
+
+#nav-links a:hover {
+  color: #333332;
+}
+
+#nav-links * {
+  flex: 0 1 90px;
+  -webkit-flex: 0 1 90px;
+}
+
+#header p {
+  font-size: 24px;
+}
+
+/* footer */
+footer {
+  background-color: black;
+  margin-top: 100px;
+  padding-top: 25px;
+  padding-bottom: 25px;
+}
+
+footer h5 {
+  font-family: "Lato", sans-serif;
+  color: #666666;
+}
+
+footer ul.links {
+  margin-top: 0px;
+  font-size: 18px;
+}
+
+footer ul.links li {
+  margin-bottom: 0px;
+}
+
+footer ul.links a {
+  color: #bbbbbb;
+  border-bottom: none;
+}
+
+footer ul.links a:hover {
+  color: white;
+}
+
+/* credit */
+#developed-by p {
+  text-transform: uppercase;
+  font-size: 11px;
+  line-height: 21px;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+/* faq page */
+section.faq {
+  max-width: 750px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+section.faq p {
+  text-align: left;
+}
+
+/* list of links */
+ul.links {
+  list-style: none;
+  padding-left: 0px;
+}
+
+ul.links li {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* rows of columns */
+.row>* {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.row img {
+  max-width: 100%;
+  height: auto;
+}
+
+.row p {
+  font-size: 15px;
+  text-align: left;
+}
+
+.imgwrap {
+  /* same background colour as the images we are using it for */
+  background: #f8f8f8;
+  width: 100%;
+}
+
+/* row_n denotes row with x columns */
+.row_2>* {
+  width: 43%;
+  margin-left: 3.4%;
+  margin-right: 3.4%;
+}
+
+.row_3>* {
+  width: 28%;
+  margin-left: 2.5%;
+  margin-right: 2.5%;
+}
+
+.row_4>* {
+  width: 21%;
+  margin-left: 1.5%;
+  margin-right: 1.5%;
+}
+
+/* styling for error pages (resembling in-app errors) */
+.alert-container {
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 350px;
+  max-width: 600px;
+}
+
+.alert-container h2 {
+  font-size: 26px;
+  line-height: 26px;
+  font-weight: bold;
+  padding-top: 40px;
+}
+
+@media screen and (max-width: 720px) {
+  section {
+    padding-top: 50px;
+  }
+
+  /* TODO image widths */
+  .row_3>*,
+  .row_2>* {
+    max-width: 90%;
+    width: 90%;
+    padding-bottom: 50px;
+  }
+
+  .row_4>* {
+    width: 43%;
+    margin-left: 2.5%;
+    margin-right: 2.5%;
+  }
+}

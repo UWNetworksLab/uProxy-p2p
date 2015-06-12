@@ -3,11 +3,8 @@
   <meta charset="UTF-8">
   <title>uProxy FAQ</title>
   <link href='fonts/Roboto.css' rel='stylesheet' type='text/css'>
+  <link href='style/website.css' rel='stylesheet' type='text/css'>
   <style type='text/css'>
-    body {
-      width: 60%;
-      margin: 100px auto;
-    }
     @font-face {
       font-family: Quicksand;
       src: url(fonts/Quicksand-Regular.ttf);
@@ -22,145 +19,128 @@
       src: url(fonts/Lato-Light.ttf);
       font-weight: 300;
     }
-    section {
-      padding-top: 100px;
-    }
-    h2 {
-      font-family: "Quicksand", sans-serif;
-      font-weight: 400;
-      color: #191818;
-      width: 70%;
-      margin: 0 auto;
-      font-size: 36px;
-      line-height: 50px;
-      margin-bottom: 10px;
-      text-align: center;
-      padding: 0 0 30px;
-    }
-    h4 {
-      font-family: "Quicksand", sans-serif;
-      text-align: center;
-      color: #909090;
-      font-size: 15px;
-      line-height: 25px;
-      font-weight: 400;
-      text-transform: none;
-      letter-spacing: 0;
-      margin: 0 0 25px;
-      padding: 0;
-    }
-    h4 a {
-      font-size: 12px;
-      border-bottom: 1px dotted #ccc;
-      text-transform: uppercase;
-      color: #8080AB;
-      text-decoration: none;
-    }
-    h4 a:hover {
-      color: #333332;
-    }
-    p {
-      text-align: left;
-      color: #909090;
-      font-size: 21px;
-      line-height: 32px;
-      padding: 10px 0 0;
-      font-family: "Lato", sans-serif;
-      font-weight: 300;
-    }
-    p b {
-      color: #10c9b1;
-    }
-    a {
-      color: #2a2a2a;
-      text-decoration: none;
-    }
-    a:hover {
-      color: #00AC9B
-    }
   </style>
   </head>
 
   <body>
+    <div id="wrapper">
+      <header>
+        <div class="content">
+          <section id="header">
+            <img src="icons/uproxy_logo.svg" alt="uProxy Logo" height="140" width="140" />
 
-    <center>
-      <img src="icons/128_online.png" style="height: 140px; width: 140px">
-      <h2 style="padding-top: 12px; color: #10c9b1; font-weight: 700; letter-spacing: -1px; font-size: 40px;">u<span style="color: #19aa9b">Proxy FAQ</span></h2>
-    </center>
+            <h1 class="uproxy-title"><span class="light">u</span>Proxy FAQ</h1>
+          </section>
+        </div>
+      </header>
 
-    <p style="font-family: 'Quicksand'; font-size: 18px; line-height: 32px; text-align: left; color: black;">
-      <a href="#whatIsUproxy">What is uProxy?</a><br>
-      <a href="#whatDoGetAccess">What do "get access" and "share access" mean?</a><br>
-      <a href="#whenIAmSharingAccess">When I am sharing access, what does the other party have access to?</a><br>
-      <a href="#whyDoesUproxyConnect">Why does uProxy connect to social networks?</a><br>
-      <a href="#howDoesUproxyHelp">How does uProxy help protect my Internet connection?</a><br>
-      <a href="#whyIsItImportant">Why is it important that I trust the people I am connecting to?</a><br>
-      <a href="#doesUproxyLogData">Does uProxy log data about me?</a><br>
-      <a href="#doesUproxyGiveMe">Does uProxy give me anonymity online?</a><br>
-      <a href="#whatIsntProxied">What isn't proxied, and can uProxy leak information about the sites I visit?</a><br>
-      <a href="#whoMadeUproxy">Who made uProxy?</a><br>
-    </p>
+      <article>
+        <div class='content'>
+          <section class="faq" id="links">
+            <ul class='links left'>
+              <li><a href="#whatIsUproxy">What is uProxy?</a></li>
+              <li><a href="#whatDoGetAccess">What do "get access" and "share access" mean?</a></li>
+              <li><a href="#whenIAmSharingAccess">When I am sharing access, what does the other party have access to?</a></li>
+              <li><a href="#whyDoesUproxyConnect">Why does uProxy connect to social networks?</a></li>
+              <li><a href="#willUproxyWork">Where does uProxy work?</a></li>
+              <li><a href="#howDoesUproxyHelp">How does uProxy help protect my Internet connection?</a></li>
+              <li><a href="#whyIsItImportant">Why is it important that I trust the people I am connecting to?</a></li>
+              <li><a href="#doesUproxyLogData">Does uProxy log data about me, and what is uProxy's privacy policy?</a></li>
+              <li><a href="#doesUproxyGiveMe">Does uProxy give me anonymity online?</a></li>
+              <li><a href="#whatIsntProxied">What isn't proxied, and can uProxy leak information about the sites I visit?</a></li>
+              <li><a href="#whoMadeUproxy">Who made uProxy?</a></li>
+              <li><a href="#whatIsAlpha">What is an alpha release?</a></li>
+            </ul>
+          </section>
 
-    <section id="whatIsUproxy">
-      <h2>What is uProxy?</h2>
-      <p>uProxy is an open source browser extension for Chrome and Firefox that lets users share their route to the Internet with each other. uProxy can make it much harder for a third party to monitor or interfere with the traffic of the user who is getting access. It's like a personalised VPN service that you can use to provide secure access to friends and family, and to yourself when you travel.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+          <section class="faq" id="whatIsUproxy">
+            <h2>What is uProxy?</h2>
+            <p>uProxy is an open source browser extension for Chrome and Firefox that lets users share their route to the Internet with each other. uProxy can make it much harder for a third party to monitor or interfere with the traffic of the user who is getting access. It's like a personalized VPN service that you can use to provide secure access to friends and family, and to yourself when you travel.</p>
 
-    <section id="whatDoGetAccess">
-      <h2>What do "get access" and "share access" mean?</h2>
-      <p>When you are <b>getting access</b> from a friend, all the web traffic from your browser first travels encrypted to your friend's computer and from there, to the Internet. This means that, to most websites, the request will appear to be coming from your friend's computer, and someone monitoring your connection will only see that you have a secure connection to your friend.</p>
-      <p>When you are <b>sharing access</b>, authorized friends will be able to send their web traffic to your computer and from there to the Internet. Your friend can only connect through a computer if you authorize them on that computer, and you can revoke their authorization at any time.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
 
-    <section id="whenIAmSharingAccess">
-      <h2>When I am sharing access, what does the other party have access to?</h2>
-      <p>Users who are getting access from your machine are only able to access the Internet. They cannot look at files on your computer, see what you're doing on the Internet, or log into websites using your identity. They also cannot access devices on your local home or work network.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+          <section class="faq" id="whatDoGetAccess">
+            <h2>What do "get access" and "share access" mean?</h2>
+            <p>When you are <em>getting access</em> from a friend, all the web traffic from your browser first travels encrypted to your friend's computer and from there, to the Internet. This means that, to most websites, the request will appear to be coming from your friend's computer, and someone monitoring your connection will only see that you have a secure connection to your friend.</p>
+            <p>When you are <em>sharing access</em>, authorized friends will be able to send their web traffic to your computer and from there to the Internet. Your friend can only connect through a computer if you authorize them on that computer, and you can revoke their authorization at any time.</p>
 
-    <section id="whyDoesUproxyConnect">
-      <h2>Why does uProxy connect to social networks?</h2>
-      <p>uProxy needs a way to see when your friends are online, and it needs to exchange information to know how to connect with them. Instead of running a central service that could be easily blocked, uProxy uses social networks that you and your friends are already using. <b>uProxy will never post publicly on your behalf.</b> It only exchanges private messages with friends of yours who are also running uProxy.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
 
-    <section id="howDoesUproxyHelp">
-      <h2>How does uProxy help protect my Internet connection?</h2>
-      <p>The connection between a user and their friend is encrypted and secure from interference. For example, if Bob is getting access from Alice, and they're in different countries, then Bob's ISP (or anyone else who can monitor his connection) will not be able to see which websites Bob is browsing or modify their content. However, if Alice's computer is in an insecure location, Bob will not necessarily be making his Internet connection any more private or secure by connecting through her.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+          <section class="faq" id="whenIAmSharingAccess">
+            <h2>When I am sharing access, what does the other party have access to?</h2>
+            <p>Users who are getting access from your machine are only able to access the Internet. They cannot look at files on your computer, see what you're doing on the Internet, or log into websites using your identity. They also cannot access devices on your local home or work network.</p>
 
-    <section id="whyIsItImportant">
-      <h2>Why is it important that I trust the people I am connecting to?</h2>
-      <p>uProxy is designed to help friends get and share internet access, and there are risks to both getters and sharers if they connect to people they don't trust. If you get access from a sharer who is malicious, they may be able to spy on your web browsing or attempt a man-in-the-middle attack on your connections to secure sites. If you share access with someone you don't know, they may be able to use your connection to engage in illegal activity, and depending on the laws in your country, you may be legally responsible for facilitating that activity. Also, if you are using uProxy to get access to the Internet from a friend, it is important to trust that your friend's Internet connection is secure.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
 
-    <section id="doesUproxyLogData">
-      <h2>Does uProxy log data about me?</h2>
-      <p>We ask users if they would like to opt-in to report usage metrics. If they do, all metrics are anonymized on the client (before they are submitted) using <a href="https://github.com/google/rappor/blob/master/README.md">Rappor</a>. In addition, when users manually use the Submit Feedback tool in the settings menu, they have the option to include logs from their recent uProxy activity. Logs may contain personally identifiable information (PII). PII is never shared outside the uProxy team, and the logs that contain it are retained for at most three months before being deleted. All reports are submitted in a way that makes it hard for an adversary to detect uProxy users. More details about our data collection policy is available <a href="https://github.com/uProxy/uproxy/wiki/Data-Collection">here</a>.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+          <section class="faq" id="whyDoesUproxyConnect">
+            <h2>Why does uProxy connect to social networks?</h2>
+            <p>uProxy needs a way to see when your friends are online, and it needs to exchange information to know how to connect with them. Instead of running a central service that could be easily blocked, uProxy uses social networks that you and your friends are already using. <em>uProxy will never post publicly on your behalf.</em> It only exchanges private messages with friends of yours who are also running uProxy.</p>
 
-    <section id="doesUproxyGiveMe">
-      <h2>Does uProxy give me anonymity online?</h2>
-      <p>uProxy is not an anonymity service; it is useful for concealing your browsing from your ISP, but not for hiding your identity from the sites you visit. A website visited by someone who is getting access via uProxy will see the IP address of the person who is sharing access, and the website may be able to discover the IP address of the uProxy user who is getting access.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
 
-    <section id="whatIsntProxied">
-      <h2>What isn't proxied, and can uProxy leak information about the sites I visit?</h2>
-      <p>uProxy only proxies traffic for the web browser it is running in, not for other applications, like email programs. In addition, some web pages may not use uProxy for all their traffic. Flash is the most common example of this, and users who are concerned about Flash leaking the identity of the sites they visit should disable Flash in their browser (<a href="https://support.google.com/chrome/answer/108086?hl=en">Chrome</a> or <a href="http://kb.mozillazine.org/Flash#Enabling_and_disabling_Flash">Firefox</a>).  WebRTC is also not proxied.  (WebRTC is relatively rare; it's used mostly for videochat). In addition, some DNS requests may not be proxied, which could leak information about which websites a user is trying to visit, or allow a hostile website to determine the user's IP address.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+          <section class="faq" id="willUproxyWork">
+            <h2>Where does uProxy work?</h2>
+            <p>If access is blocked to all of the social networks that uProxy supports, then you will not be able to use a social network to help you set up a connection with your friends. You can still set up a one-time connection manually, by exchanging links generated by uProxy via a secure channel, but you'll have to repeat this exchange every time you want to connect to your friend. The advantage of using social networks is that connection establishment is seamless, once authorization is granted.</p>
 
-    <section id="whoMadeUproxy">
-      <h2>Who made uProxy?</h2>
-      <p>uProxy is being developed by the University of Washington. The project was seeded by Google Ideas and has received contributions from Google, Brave New Software, and the open source community.</p>
-      <br><br><h4><a href="#">Back to top</a></h4>
-    </section>
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
 
+          <section class="faq" id="howDoesUproxyHelp">
+            <h2>How does uProxy help protect my Internet connection?</h2>
+            <p>The connection between a user and their friend is encrypted and secure from interference. For example, if Bob is getting access from Alice, and they're in different countries, then Bob's ISP (or anyone else who can monitor his connection) will not be able to see which websites Bob is browsing or modify their content. However, if Alice's computer is in an insecure location, Bob will not necessarily be making his Internet connection any more private or secure by connecting through her.</p>
+
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
+
+          <section class="faq" id="whyIsItImportant">
+            <h2>Why is it important that I trust the people I am connecting to?</h2>
+            <p>uProxy is designed to help friends get and share internet access, and there are risks to both getters and sharers if they connect to people they don't trust. If you get access from a sharer who is malicious, they may be able to spy on your web browsing or attempt a man-in-the-middle attack on your connections to secure sites. If you share access with someone you don't know, they may be able to use your connection to engage in illegal activity, and depending on the laws in your country, you may be legally responsible for facilitating that activity. Also, if you are using uProxy to get access to the Internet from a friend, it is important to trust that your friend's Internet connection is secure.</p>
+
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
+
+          <section class="faq" id="doesUproxyLogData">
+
+              <h2>Does uProxy log data about me, and what is uProxy's privacy policy?</h2>
+              <p>We ask users if they would like to opt-in to report usage metrics. If they do, all metrics are anonymized on the client (before they are submitted) using <a href="https://github.com/google/rappor/blob/master/README.md">Rappor</a>. In addition, when users manually use the Submit Feedback tool in the settings menu, they have the option to include logs from their recent uProxy activity. Logs may contain personally identifiable information (PII). PII is never shared outside the uProxy team, and the logs that contain it are retained for at most three months before being deleted. All reports are submitted in a way that makes it hard for an adversary to detect uProxy users.</p>
+              <p>There is more information on the team's development site about <a href="https://github.com/uProxy/uproxy/wiki/Data-Collection">our data collection policy</a> and <a href="https://github.com/uProxy/uproxy/wiki/Trust">trusting social networks</a>.</p>
+
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
+
+          <section class="faq" id="doesUproxyGiveMe">
+            <h2>Does uProxy give me anonymity online?</h2>
+            <p>uProxy is not an anonymity service; it is useful for concealing your browsing from your ISP, but not for hiding your identity from the sites you visit. A website visited by someone who is getting access via uProxy will see the IP address of the person who is sharing access, and the website may be able to discover the IP address of the uProxy user who is getting access.</p>
+
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
+
+          <section class="faq" id="whatIsntProxied">
+            <h2>What isn't proxied, and can uProxy leak information about the sites I visit?</h2>
+            <p>uProxy only proxies traffic for the web browser it is running in, not for other applications, like email programs. In addition, some web pages may not use uProxy for all their traffic. Flash is the most common example of this, and users who are concerned about Flash leaking the identity of the sites they visit should disable Flash in their browser (<a href="https://support.google.com/chrome/answer/108086?hl=en">Chrome</a> or <a href="http://kb.mozillazine.org/Flash#Enabling_and_disabling_Flash">Firefox</a>).  WebRTC is also not proxied.  (WebRTC is relatively rare; it's used mostly for videochat). In addition, some DNS requests may not be proxied, which could leak information about which websites a user is trying to visit, or allow a hostile website to determine the user's IP address.</p>
+
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
+
+          <section class="faq" id="whoMadeUproxy">
+            <h2>Who made uProxy?</h2>
+            <p>uProxy is being developed by the University of Washington. The project was seeded by Google Ideas and has received contributions from Google, Brave New Software, and the open source community.</p>
+
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
+
+          <section class="faq" id="whatIsAlpha">
+            <h2>What is an alpha release?</h2>
+            <p>This alpha version of uProxy is still under development and may be unstable at times; some features are not complete, and there's a <a href="https://github.com/uProxy/uproxy/issues">list of open issues</a> on GitHub. We'd love for you to try it and help us make improvements, by giving us feedback. To submit feedback, click on the menu icon ( &equiv; ) and then on "Submit Feedback," or email us at <a href="mailto:info@uproxy.org">info@uproxy.org</a>.</p>
+
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
+        </div>
+      </article>
+    </div>
   </body>
 </html>
