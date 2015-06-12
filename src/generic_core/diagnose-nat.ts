@@ -861,7 +861,9 @@ export function doNatProvoking() :Promise<string> {
 
 // Closes the OS-level sockets and discards its Freedom object
 function closeSocket(socket:freedom_UdpSocket.Socket) {
-  socket.destroy(() => freedom['core.udpsocket'].close(socket));
+  socket.destroy().then(() => {
+    freedom['core.udpsocket'].close(socket);
+  });
 }
 
 // Test if NAT-PMP is supported by the router, returns a boolean
@@ -1152,7 +1154,7 @@ export function getInternalIP() :Promise<string> {
 
   // Give _getInternalIP 2 seconds to run before timing out
   return Promise.race([
-    countdownReject(2, 'Error: Cannot find your private IP address'),
+    countdownReject(2000, 'Error: Cannot find your private IP address'),
     _getInternalIP
   ]);
 }
