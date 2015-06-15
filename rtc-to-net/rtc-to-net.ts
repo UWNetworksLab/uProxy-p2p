@@ -58,10 +58,41 @@ import logging = require('../logging/logging');
     private static SNAPSHOTTING_INTERVAL_MS = 5000;
 
     // Limit the number of live sessions that each user can have.
-    private static SESSION_LIMIT = 10000;
+    // Public for tests.
+    public static SESSION_LIMIT = 10000;
 
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
+
+    // Returns true if the addition was successful.
+    private static addUserSession_ = (userId:string) : boolean => {
+      if (!userId) {
+        return true;
+      }
+
+      if (!(userId in RtcToNet.numSessions_)) {
+        RtcToNet.numSessions_[userId] = 1;
+        return true;
+      }
+
+      if (RtcToNet.numSessions_[userId] < RtcToNet.SESSION_LIMIT) {
+        ++RtcToNet.numSessions_[userId];
+        return true;
+      }
+
+      return false;
+    }
+
+    private static removeUserSession_ = (userId:string) : void => {
+      if (!userId) {
+        return;
+      }
+
+      --RtcToNet.numSessions_[userId];
+      if (RtcToNet.numSessions_[userId] === 0) {
+        delete RtcToNet.numSessions_[userId];
+      }
+    }
 
     // Configuration for the proxy endpoint. Note: all sessions share the same
     // (externally provided) proxyconfig.
@@ -203,14 +234,13 @@ import logging = require('../logging/logging');
       var channelLabel = channel.getLabel();
       log.info('associating session %1 with new datachannel', [channelLabel]);
 
-      if (!this.userSessionAllowed_()) {
-        log.warn('User %1 hit overload; closing channel %2', [
-            this.userId_, channelLabel]);
+      if (!RtcToNet.addUserSession_(this.userId_)) {
+        log.warn('User %1 hit overload; closing channel %2',
+            this.userId_, channelLabel);
         channel.close();
         return;
       }
 
-      this.userSessionAdded_();
       var session = new Session(
           channel,
           this.proxyConfig,
@@ -224,7 +254,7 @@ import logging = require('../logging/logging');
 
       var discard = () => {
         delete this.sessions_[channelLabel];
-        this.userSessionRemoved_();
+        RtcToNet.removeUserSession_(this.userId_);
         log.info('discarded session %1 (%2 remaining)', [
             channelLabel, Object.keys(this.sessions_).length]);
         };
@@ -233,42 +263,6 @@ import logging = require('../logging/logging');
             channelLabel, e.message]);
         discard();
       });
-    }
-
-    private userSessionAdded_ = () => {
-      if (!this.userId_) {
-        return;
-      }
-
-      if (this.userId_ in RtcToNet.numSessions_) {
-        ++RtcToNet.numSessions_[this.userId_];
-      } else {
-        RtcToNet.numSessions_[this.userId_] = 1;
-      }
-    }
-
-    private userSessionRemoved_ = () => {
-      if (!this.userId_) {
-        return;
-      }
-
-      --RtcToNet.numSessions_[this.userId_];
-      if (RtcToNet.numSessions_[this.userId_] === 0) {
-        delete RtcToNet.numSessions_[this.userId_];
-      }
-    }
-
-    private userSessionAllowed_ = () : boolean => {
-      if (!this.userId_) {
-        return true;
-      }
-
-      if (this.userId_ in RtcToNet.numSessions_) {
-        return RtcToNet.numSessions_[this.userId_] < RtcToNet.SESSION_LIMIT;
-      } else {
-        // numSessions is zero.
-        return true;
-      }
     }
 
     // Initiates shutdown of the peerconnection.

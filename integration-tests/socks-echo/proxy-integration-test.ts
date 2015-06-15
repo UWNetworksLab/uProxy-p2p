@@ -76,7 +76,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     };
 
     if (typeof sessionLimit === 'number') {
-      (<any>(rtc_to_net.RtcToNet)).SESSION_LIMIT = sessionLimit;
+      rtc_to_net.RtcToNet.SESSION_LIMIT = sessionLimit;
     }
 
     this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
