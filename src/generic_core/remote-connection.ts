@@ -213,14 +213,17 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
       };
 
       var pc: peerconnection.PeerConnection<Object>;
-      if (remoteVersion < 2) {
+      if (remoteVersion === 1) {
         log.debug('peer is running client version 1, using old peerconnection');
         pc = new peerconnection.PeerConnectionClass(
           freedom['core.rtcpeerconnection'](config),
           'sockstortc');
-      } else {
-        log.debug('peer is running client version >1, using bridge');
+      } else if (remoteVersion === 2) {
+        log.debug('peer is running client version 2, using bridge without obfuscation');
         pc = bridge.preObfuscation('sockstortc', config);
+      } else {
+        log.debug('peer is running client version >2, using bridge with basicObfuscation');
+        pc = bridge.basicObfuscation('sockstortc', config);
       }
 
       return this.socksToRtc_.start(tcpServer, pc).then(
