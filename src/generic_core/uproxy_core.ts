@@ -365,14 +365,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       } else if (protocol === 'PMP') {
         return diagnose_nat.probePMPSupport(ip, privateIP);
       }
-    })).
-        then((results:boolean[]) => {
-          if (results.some(el => el)) { return 'Supported'; }
-          return 'Not supported';
-        }).
-        catch((err:Error) => {
-          return 'Not supported ' + err.message;
-        });
+    })).then((results:boolean[]) => {
+      if (results.some(el => el)) { return 'Supported'; }
+      return 'Not supported';
+    }).catch((err:Error) => {
+      return 'Not supported ' + err.message;
+    });
   }
 
   // Probe the NAT for UPnP support, returns a status string
@@ -380,34 +378,32 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return diagnose_nat.probeUPnPSupport(privateIP).
         then((result:boolean) => {
           if (result) { return 'Supported'; }
-        }).
-        catch((err:Error) => {
+        }).catch((err:Error) => {
           return 'Not supported ' + err.message;
         });
   }
 
   // Probe the NAT type and support for port control protocols
   public getNetworkInfo = () :Promise<string> => {
-    return diagnose_nat.getInternalIP().then((privateIP:string) => {
-      var natInfo = '';
-      return this.getNatType().then((natType:string) => {
-        natInfo += 'NAT Type: ' + natType + '\n';
-        return this.probePMCP(privateIP, 'PMP');
-      }).then((pmpStatus:string) => {
-        natInfo += 'NAT-PMP: ' + pmpStatus + '\n';
-        return this.probePMCP(privateIP, 'PCP');
-      }).then((pcpStatus:string) => {
-        natInfo += 'PCP: ' + pcpStatus + '\n';
-        return this.probeUPnP(privateIP);
-      }).then((upnpStatus:string) => {
-        natInfo += 'UPnP IGD: ' + upnpStatus + '\n';
+    var natInfo = '';
+    return this.getNatType().then((natType:string) => {
+      natInfo += 'NAT Type: ' + natType + '\n';
+
+      return diagnose_nat.getInternalIP().then((privateIP:string) => {
+        return this.probePMCP(privateIP, 'PMP').then((pmpStatus:string) => {
+          natInfo += 'NAT-PMP: ' + pmpStatus + '\n';
+          return this.probePMCP(privateIP, 'PCP');
+        }).then((pcpStatus:string) => {
+          natInfo += 'PCP: ' + pcpStatus + '\n';
+          return this.probeUPnP(privateIP);
+        }).then((upnpStatus:string) => {
+          natInfo += 'UPnP IGD: ' + upnpStatus + '\n';
+          return natInfo;
+        });
+      }).catch((err:Error) => {
+        // Should only catch the error when getInternalIP() times out
+        natInfo += 'Could not probe for port control protocols: getInternalIP() failed.\n';
         return natInfo;
-      });
-    }).catch((err:Error) => {
-      // Should only catch the error when getInternalIP() times out
-      return this.getNatType().then((natType:string) => {
-        return 'NAT Type: ' + natType + '\n' +
-               'Could not probe for port control protocols: getInternalIP() failed. \n'
       });
     });
   }
