@@ -277,7 +277,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         <social_network.ManualNetwork> social_network.getNetwork(
             social_network.MANUAL_NETWORK_ID, '');
     if (!manualNetwork) {
-      log.error('Manual network does not exist, discanding inbound message',
+      log.error('Manual network does not exist, discarding inbound message',
                 command);
       return;
     }
@@ -312,7 +312,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // there is at most one timeout at a time.
   private natResetTimeout_ :number;
 
-  public getNatType = () : Promise<string> => {
+  public getNatType = () :Promise<string> => {
     if (globals.natType === '') {
       // Function that returns a promise which fulfills
       // in a given time.
@@ -349,13 +349,66 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
-  public getNetworkInfo = () : Promise<string> => {
-    return this.getNatType().then((natType) => {
-      return 'NAT Type: ' + natType + '\n';
+  // List of popular router default IPs
+  // http://www.techspot.com/guides/287-default-router-ip-addresses/
+  private routerIps = ['192.168.1.1', '192.168.2.1', '192.168.11.1',
+    '192.168.0.1', '192.168.0.30', '192.168.0.50', '192.168.20.1',
+    '192.168.30.1', '192.168.62.1', '192.168.100.1', '192.168.102.1',
+    '192.168.1.254', '192.168.10.1', '192.168.123.254', '192.168.4.1',
+    '10.0.1.1', '10.1.1.1', '10.0.0.138', '10.0.0.2', '10.0.0.138'];
+
+  // Probes the NAT for either NAT-PMP or PCP support
+  public probePmcp = (privateIp:string, protocol:string) :Promise<string> => {
+    return Promise.all(this.routerIps.map((ip:string) => {
+      if (protocol === 'PCP') {
+        return diagnose_nat.probePcpSupport(ip, privateIp);
+      } else if (protocol === 'PMP') {
+        return diagnose_nat.probePmpSupport(ip, privateIp);
+      }
+    })).then((results:boolean[]) => {
+      if (results.some(el => el)) { return 'Supported'; }
+      return 'Not supported';
+    }).catch((err:Error) => {
+      return 'Not supported ' + err.message;
     });
   }
 
-  public getLogs = () : Promise<string> => {
+  // Probe the NAT for UPnP support, returns a status string
+  public probeUpnp = (privateIp:string) :Promise<string> => {
+    return diagnose_nat.probeUpnpSupport(privateIp).
+        then((result:boolean) => {
+          if (result) { return 'Supported'; }
+        }).catch((err:Error) => {
+          return 'Not supported ' + err.message;
+        });
+  }
+
+  // Probe the NAT type and support for port control protocols
+  public getNetworkInfo = () :Promise<string> => {
+    var natInfo = '';
+    return this.getNatType().then((natType:string) => {
+      natInfo += 'NAT Type: ' + natType + '\n';
+
+      return diagnose_nat.getInternalIp().then((privateIp:string) => {
+        return this.probePmcp(privateIp, 'PMP').then((pmpStatus:string) => {
+          natInfo += 'NAT-PMP: ' + pmpStatus + '\n';
+          return this.probePmcp(privateIp, 'PCP');
+        }).then((pcpStatus:string) => {
+          natInfo += 'PCP: ' + pcpStatus + '\n';
+          return this.probeUpnp(privateIp);
+        }).then((upnpStatus:string) => {
+          natInfo += 'UPnP IGD: ' + upnpStatus + '\n';
+          return natInfo;
+        });
+      }).catch((err:Error) => {
+        // Should only catch the error when getInternalIp() times out
+        natInfo += 'Could not probe for port control protocols: ' + err.message + '\n';
+        return natInfo;
+      });
+    });
+  }
+
+  public getLogs = () :Promise<string> => {
     return loggingController.getLogs().then((rawLogs:string[]) => {
         var formattedLogsWithVersionInfo =
             'Version: ' + JSON.stringify(version.UPROXY_VERSION) + '\n\n';
@@ -364,7 +417,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       });
   }
 
-  public getLogsAndNetworkInfo = () : Promise<string> => {
+  public getLogsAndNetworkInfo = () :Promise<string> => {
     return Promise.all([this.getNetworkInfo(),
                         this.getLogs()])
       .then((natAndLogs) => {
