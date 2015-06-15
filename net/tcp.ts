@@ -385,19 +385,15 @@ export class Connection {
 
   // Receive returns a promise for exactly the next |ArrayBuffer| of data.
   public receiveNext = () : Promise<ArrayBuffer> => {
-    var gotNextData = new Promise((F,R) => {
+    return new Promise((F,R) => {
       this.dataFromSocketQueue.setSyncNextHandler(F).catch(R);
-    });
 
-    var rejectOnClose = new Promise((F,R) => {
       this.onceClosed.then((reason:SocketCloseKind) => {
         if (this.dataFromSocketQueue.getLength() === 0) {
           R(new Error('Receive aborted due to socket close (' + reason + ')'));
         }
       });
     });
-
-    return Promise.race<ArrayBuffer>([gotNextData, rejectOnClose]);
   }
 
   // Invoked when the socket is closed for any reason.
