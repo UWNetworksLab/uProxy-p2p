@@ -13,7 +13,8 @@ export var STORAGE_VERSION = 1;
 
 // 1: initial release
 // 2: uproxy-lib v27, move to bridge but no obfuscation yet
-export var MESSAGE_VERSION = 2;
+// 3: offer basicObfuscation
+export var MESSAGE_VERSION = 3;
 
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
