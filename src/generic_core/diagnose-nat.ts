@@ -1154,7 +1154,7 @@ export function getInternalIp() :Promise<string> {
 
   // Give _getInternalIp 2 seconds to run before timing out
   return Promise.race([
-    countdownReject(2, 'getInternalIp() failed'),
+    countdownReject(2000, 'getInternalIp() failed'),
     _getInternalIp
   ]);
 }
