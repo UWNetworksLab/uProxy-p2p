@@ -46,13 +46,9 @@
 
     <copypaste-start id='start' hidden?='{{ model.givingOrGetting !== null }}'></copypaste-start>
 
-    <template if='{{ model.givingOrGetting === "giving" }}'>
-      <copypaste-giver id='giver'></copypaste-giver>
-    </template>
+    <copypaste-giver id='giver' hidden?='{{ model.givingOrGetting !== "giving" }}'></copypaste-giver>
 
-    <template if='{{ model.givingOrGetting === "getting" }}'>
-      <copypaste-getter id='getter'></copypaste-getter>
-    </template>
+    <copypaste-getter id='getter' hidden?='{{ model.givingOrGetting !== "getting" }}'></copypaste-getter>
   </template>
 
   <script src='../i18n-util.js'>
