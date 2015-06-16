@@ -1,18 +1,18 @@
-/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/pgp.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import arraybuffers = require('../../arraybuffers/arraybuffers');
-import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
-import net = require('../../net/net.types');
-import tcp = require('../../net/tcp');
-import signals = require('../../webrtc/signals');
-import bridge = require('../../bridge/bridge');
+import arraybuffers = require('../arraybuffers/arraybuffers');
+import rtc_to_net = require('../rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
+import net = require('../net/net.types');
+import tcp = require('../net/tcp');
+import signals = require('../webrtc/signals');
+import bridge = require('../bridge/bridge');
 
-import logging = require('../../logging/logging');
-import loggingTypes = require('../../loggingprovider/loggingprovider.types');
+import logging = require('../logging/logging');
+import loggingTypes = require('../loggingprovider/loggingprovider.types');
 
 // Set each module to info, warn, error, or debug depending on which module
 // you're debugging. Since the proxy outputs quite a lot of messages, show only

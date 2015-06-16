@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/i18n/i18n.d.ts' />
+/// <reference path='../../../third_party/i18n/i18n.d.ts' />
 
 // A little utility library for managing translation strings.
 
@@ -35,7 +35,7 @@ module i18nUtil {
   export function changeLanguage(language:string) : void {
     clearTranslatedStrings();
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'locales/' + language + '/messages.json', true);
+    xhr.open('GET', 'uproxy-lib/copypaste-socks/locales/' + language + '/messages.json', true);
 
     xhr.onload = function() {
       if (this.readyState != 4) {

@@ -1,24 +1,22 @@
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/pgp.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 
-import arraybuffers = require('../../arraybuffers/arraybuffers');
-import signals = require('../../webrtc/signals');
+import arraybuffers = require('../arraybuffers/arraybuffers');
+import signals = require('../webrtc/signals');
 import freedom_types = require('freedom.types');
-import net = require('../../net/net.types');
-import copypaste_api = require('./copypaste-api');
+import net = require('../net/net.types');
+import copypaste_api = require('../copypaste-socks/copypaste-api');
+
+// Platform-specific function to load the freedomjs module.
+declare var loadModule: () => Promise<freedom_types.OnAndEmit<any, any>>;
 
 module copypaste_module {
 
   export var onceReady :Promise<freedom_types.OnAndEmit<any,any>> =
-      freedom('freedom-module.json', {
-          'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
-          'debug': 'debug'
-      }).then((copypasteSocksFactory:() => freedom_types.OnAndEmit<any,any>) => {
-    var copypaste :freedom_types.OnAndEmit<any,any> = copypasteSocksFactory();
-
+      loadModule().then((copypaste:freedom_types.OnAndEmit<any,any>) => {
     copypaste.on('signalForPeer', (message:signals.Message) => {
       model.readyForStep2 = true;
 
