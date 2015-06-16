@@ -16,9 +16,12 @@ Polymer({
   loadContacts: function() {
     // If no contacts have loaded, show the animation for a total of 5 seconds,
     // and then display the "no online friends" message.
-    if (!ui_context.model.onlineNetwork.hasContacts) {
+    if (!this.hasContacts) {
       this.loadingContacts = true;
       setTimeout(function(){ this.loadingContacts = false; }.bind(this), 5000);
     }
+  },
+  computed: {
+    'hasContacts': '(model.contacts.getAccessContacts.pending.length + model.contacts.getAccessContacts.trustedUproxy.length + model.contacts.getAccessContacts.untrustedUproxy.length + model.contacts.shareAccessContacts.pending.length + model.contacts.shareAccessContacts.trustedUproxy.length + model.contacts.shareAccessContacts.untrustedUproxy.length) > 0',
   }
 });

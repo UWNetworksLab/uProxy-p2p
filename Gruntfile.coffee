@@ -44,7 +44,9 @@ taskManager.add 'build_chrome_ext', [
   'browserify:chromeExtMain'
   'browserify:chromeContext'
   'browserify:chromeVulcanized'
+  'browserify:chromeLogsVulcanized'
   'string-replace:chromeExtVulcanized'
+  'string-replace:chromeExtLogsVulcanized'
 ]
 
 taskManager.add 'build_chrome', [
@@ -63,8 +65,10 @@ taskManager.add 'build_firefox', [
   'vulcanize:firefoxViewLogsInline'
   'vulcanize:firefoxViewLogsCsp'
   'string-replace:firefoxVulcanized'
+  'string-replace:firefoxLogsVulcanized'
   'browserify:firefoxContext'
   'browserify:firefoxVulcanized'
+  'browserify:firefoxLogsVulcanized'
 ]
 
 # --- Testing tasks ---
@@ -220,17 +224,17 @@ FILES =
   ]
 
 #------------------------------------------------------------------------------
-finishVulcanized = (basePath) ->
+finishVulcanized = (basePath, baseFilename) ->
   files: [
     {
-      src: path.join(basePath, '/polymer/vulcanized.html')
-      dest: path.join(basePath, '/polymer/vulcanized.html')
+      src: path.join(basePath, '/polymer/' + baseFilename + '.html')
+      dest: path.join(basePath, '/polymer/' + baseFilename + '.html')
     }
   ]
   options:
     replacements: [{
-      pattern: /vulcanized\.js/
-      replacement: 'vulcanized.static.js'
+      pattern: baseFilename + '.js'
+      replacement: baseFilename + '.static.js'
     }, {
       pattern: /<script src=\"[a-zA-Z_./]+third_party\/bower\/([^"]+)"><\/script>/
       replacement: '<script src="../lib/$1"></script>'
@@ -655,10 +659,16 @@ module.exports = (grunt) ->
               'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
           }]
       chromeExtVulcanized:
-        finishVulcanized(chromeExtDevPath + '/generic_ui')
-      firefoxVulcanized:
-        finishVulcanized(firefoxDevPath + '/data/generic_ui')
+        finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized')
 
+      firefoxVulcanized:
+        finishVulcanized(firefoxDevPath + '/data/generic_ui', 'vulcanized')
+
+      chromeExtLogsVulcanized:
+        finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized-view-logs')
+
+      firefoxLogsVulcanized:
+        finishVulcanized(firefoxDevPath + '/data/generic_ui', 'vulcanized-view-logs')
 
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
@@ -712,6 +722,7 @@ module.exports = (grunt) ->
       )
 
       chromeVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized', {})# no exports from this
+      chromeLogsVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized-view-logs', {})
       firefoxContext:
         src: [
           firefoxDevPath + '/data/scripts/background.js'
@@ -721,6 +732,7 @@ module.exports = (grunt) ->
           browserifyOptions:
             standalone: 'ui_context'
       firefoxVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized', {})# no exports from this
+      firefoxLogsVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized-view-logs', {})
 
       chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
       chromeExtensionCoreConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core_connector'

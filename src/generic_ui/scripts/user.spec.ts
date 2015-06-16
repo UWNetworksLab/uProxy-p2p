@@ -12,9 +12,10 @@ describe('UI.User', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     ui = jasmine.createSpyObj<user_interface.UserInterface>('UserInterface', ['showNotification']);
-    user_interface.model.onlineNetwork =
-        {name: 'testNetwork', userId: 'localUserId', roster: {}};
-    sampleUser = new user.User('fakeuser', null, ui);
+    var testNetwork :user_interface.Network = {name: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
+    user_interface.model.onlineNetworks = [testNetwork];
+
+    sampleUser = new user.User('fakeuser', testNetwork, ui);
     sampleUser.update(makeUpdateMessage({}));
   });
 
@@ -108,7 +109,7 @@ describe('UI.User', () => {
     }));
 
     expect(ui.showNotification).toHaveBeenCalledWith(
-        sampleUser.name + ' offered you access', { mode: 'get', user: 'fakeuser' })
+        sampleUser.name + ' offered you access', { mode: 'get', user: 'fakeuser', network: 'testNetwork' })
   });
 
   it('does not show notification if isOffering changes when ignoring', () => {
@@ -141,7 +142,7 @@ describe('UI.User', () => {
       }
     }));
     expect(ui.showNotification).toHaveBeenCalledWith(
-        sampleUser.name + ' is requesting access', { mode: 'share', user: 'fakeuser' });
+        sampleUser.name + ' is requesting access', { mode: 'share', user: 'fakeuser', network: 'testNetwork' });
   });
 
   it('does not show notificaion if isRequesting changes when ignoring', () => {

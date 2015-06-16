@@ -99,6 +99,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         console.log('Connecting listener for', JSON.stringify(payload));
         this.send(payload);
       }
+
       this.emit('core_connect');
     });
   }

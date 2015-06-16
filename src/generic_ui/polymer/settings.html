@@ -6,6 +6,9 @@
 <link rel='import' href='description.html'>
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='link.html'>
+<link rel='import' href='network-in-settings.html'>
+<link rel='import' href='name-for-network.html'>
+<link rel='import' href='avatar.html'>
 
 <polymer-element name='uproxy-settings'>
 
@@ -23,43 +26,63 @@
       background-color: #ffffff;
       font-size: 14px;
     }
+    .clickable {
+      cursor: pointer;
+    }
     .userInfo {
       background-color: #009688;  /* dark green */
       color: white;
       padding: 28px;
       line-height: 24px;
-    }
-    .userInfoName, .userInfoIDWithoutName {
-      font-size: 16px;
-    }
-    .userInfoID {
       font-size: 14px;
+      font-weight: 400;
+    }
+    .userInfo .subdued::first-line {
+      line-height: 24px;
+    }
+    .userInfo .subdued {
       opacity: 0.54;
+      font-size: 13px;
+      line-height: normal;
     }
-    .networkName {
-      padding-top: 0.5em;
-      opacity: 0.54;
+    .currentAccountInfo {
+      margin-top: 18px;
     }
-    .userImage {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      margin-left: -6px;
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
+    #pictures {
+      height: 64px;
     }
-    #settingsLinks {
+    uproxy-avatar {
+      width: 40px;
+      height: 40px;
+    }
+    #pictures>:nth-child(2) {
+      flex: 1;
+    }
+    #pictures>:nth-child(2) uproxy-avatar {
+      width: 64px;
+      height: 64px;
+    }
+    #pictures>:not(:nth-child(2)) {
+      padding-left: 3px;
+      padding-right: 3px;
+    }
+    .settingsContent {
       padding: 24px 28px;
       color: rgb(112, 112, 112);
       background-color: #fff;
     }
+    .settingsContent core-icon {
+      height: 20px;
+      width: 20px;
+      margin-right: 5px;
+    }
+
     uproxy-link,
     uproxy-faq-link {
       display: block;
       padding: 10px 0px;
     }
-    #descriptionWrapper {
+    .smalltext {
       font-size: 12px;
       padding: 0;
       color: rgb(180, 180, 180);
@@ -92,6 +115,9 @@
       margin-top: 1px;
       margin-left: 1px;
     }
+    paper-checkbox::shadow #checkboxLabel {
+      padding: 0px 8px;
+    }
     #metricsCheckbox core-icon[icon='help']{
       height: 15px;
       color: grey;
@@ -108,10 +134,8 @@
     #metricsCheckbox paper-checkbox, uproxy-faq-link {
       display: table-cell;
     }
-    #settingsLinks core-icon {
-      height: 20px;
-      width: 20px;
-      margin-right: 5px;
+    #settingsLinks .label {
+      margin: 0px 5px;
     }
     hr {
       border: 0;
@@ -119,50 +143,66 @@
       border-bottom: solid 1px;
       border-color: rgb(238, 238, 238);
     }
+
+    #accountChooser div {
+      margin-top: 30px;
+    }
     </style>
 
-    <div hidden?='{{model.onlineNetwork==null}}' vertical layout>
+    <div hidden?='{{ !model.onlineNetworks.length }}' vertical layout>
       <div class='userInfo'>
-        <div class='userImage' hidden?='{{model.onlineNetwork.imageData==null}}'
-          style='background-image: url({{model.onlineNetwork.imageData}});'
-          ></div>
-        <div class='networkName'>Connected with {{model.onlineNetwork.name}}</div>
-        <!-- show userName and userId if both are available -->
-        <div hidden?='{{!model.onlineNetwork.userName}}'>
-          <div class='userInfoName'>{{model.onlineNetwork.userName}}</div>
-          <div class='userInfoID'>{{model.onlineNetwork.userId}}</div>
+        <div id='pictures' horizontal layout hidden?='{{ model.onlineNetworks.length === 1 && !model.onlineNetworks[0].imageData }}'>
+          <template repeat='{{network in model.onlineNetworks}}'>
+            <!-- this currently breaks with more than 4 logged-in networks -->
+            <div>
+              <uproxy-avatar src='{{ network.imageData }}' network='{{ network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}'></uproxy-avatar>
+            </div>
+          </template>
         </div>
-        <!-- otherwise show only userId -->
-        <div hidden?='{{model.onlineNetwork.userName}}'>
-          <div class='userInfoIDWithoutName'>{{model.onlineNetwork.userId}}</div>
+
+        <div class='clickable currentAccountInfo' on-tap='{{ toggleAccountChooser }}'>
+          <div horizontal layout>
+            <span class='subdued' flex>{{ connectedNetworks }}</span>
+            <span hidden?='{{ model.onlineNetworks.length === 1 }}'>
+              <core-icon icon='arrow-drop-down' hidden?='{{ accountChooserOpen }}'></core-icon>
+              <core-icon icon='arrow-drop-up' hidden?='{{ !accountChooserOpen }}'></core-icon>
+            </span>
+          </div>
+
+          <div horizontal layout hidden?='{{ model.onlineNetworks.length !== 1 }}'>
+            <span flex><uproxy-name-for-network network='{{ model.onlineNetworks[0] }}'></uproxy-name-for-network></span>
+            <core-icon icon='arrow-drop-down' hidden?='{{ accountChooserOpen }}'></core-icon>
+            <core-icon icon='arrow-drop-up' hidden?='{{ !accountChooserOpen }}'></core-icon>
+          </div>
         </div>
       </div>
 
-      <div id='settingsLinks'>
-        <div id='descriptionWrapper'>
-          Device description
+      <div id='mainSettings' class='settingsContent' hidden?='{{ accountChooserOpen }}'>
+        <div class='smalltext'>
+          {{ 'deviceDescription' | $$ }}
           <uproxy-description></uproxy-description>
         </div>
 
         <hr>
 
         <uproxy-link on-tap='{{ openFeedbackForm }}' role='button'>
-          <core-icon icon='announcement'></core-icon>
-          Submit Feedback
+          <core-icon icon="announcement"></core-icon>
+          <!-- try taking out these .label spans and see what happens. -->
+          <span class='label'>{{ 'submitFeedback' | $$ }}</span>
         </uproxy-link>
 
         <uproxy-faq-link>
-          <core-icon icon='help'></core-icon>
-          Get Help
+          <core-icon icon="help"></core-icon>
+          <span class='label'>{{ 'getHelp' | $$ }}</span>
         </uproxy-faq-link>
 
         <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
-          <core-icon icon='settings'></core-icon>
-          Advanced Settings
+          <core-icon icon="settings"></core-icon>
+          <span class='label'>{{ 'advancedSettings' | $$ }}</span>
         </uproxy-link>
 
         <div id='metricsCheckbox'>
-          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='Anonymous stats enabled'></paper-checkbox>
+          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "statsEnabledTitle" | $$ }}'></paper-checkbox>
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
           </uproxy-faq-link>
@@ -172,13 +212,22 @@
 
         <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
           <core-icon icon='refresh'></core-icon>
-          Restart
+          {{ 'restart' | $$ }}
         </uproxy-link>
 
         <uproxy-link on-tap='{{ logOut }}' role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
-          Log-out of uProxy
+          {{ 'logout' | $$ }}
         </uproxy-link>
+      </div>
+
+      <div id='accountChooser' class='settingsContent' hidden?='{{ !accountChooserOpen }}'>
+        <span class='smalltext'>Connected Accounts</span>
+        <template repeat='{{ name in model.networkNames }}'>
+          <div>
+            <uproxy-network-in-settings name='{{ name }}'></uproxy-network-in-settings>
+          </div>
+        </template>
       </div>
     </div>
 

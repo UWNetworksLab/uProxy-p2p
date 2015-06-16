@@ -17,6 +17,6 @@ export var model :user_interface.Model = user_interface.model;
 
 ui.browser = 'chrome';
 
-core.getInitialState();
+core.getFullState().then(ui.updateInitialState);
 
 console.log('Loaded dependencies for Chrome Extension.');

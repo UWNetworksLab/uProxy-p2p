@@ -96,22 +96,30 @@
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          Advanced settings
+          {{ 'advancedSettings_sentenceCase' | $$ }}
         </uproxy-app-bar>
         <div id='formContainer' flex>
-          <p class='inputLabel'>Edit your settings below</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='Edit your settings'>
+          <p class='inputLabel'>{{ 'editAdvancedSettings' | $$ }}</p>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "editAdvancedSettingsPlaceholder" | $$ }}'>
             <paper-autogrow-textarea id='advancedSettingsPaperTextarea' class='font::inherit'>
               <textarea id='advancedSettingsInput'
                      value='{{ settings }}'>
               </textarea>
             </paper-autogrow-textarea>
           </paper-input-decorator>
-          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>Settings saved</p>
-          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>Could not set: bad format</p>
-          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>Could not set: JSON value mismatch</p>
+          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>
+            {{ 'settingsSaved' | $$ }}
+          </p>
+          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>
+            {{ 'settingsBadFormatError' | $$ }}
+          </p>
+          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>
+            {{ 'settingsJsonError' | $$ }}
+          </p>
         </div> <!-- end of form container -->
-        <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>SET</div>
+        <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
+          {{ 'set' | $$ }}
+        </div>
       </div>
     </core-overlay>
   </template>

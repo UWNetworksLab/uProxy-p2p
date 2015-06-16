@@ -13,7 +13,8 @@ export var STORAGE_VERSION = 1;
 
 // 1: initial release
 // 2: uproxy-lib v27, move to bridge but no obfuscation yet
-export var MESSAGE_VERSION = 2;
+// 3: offer basicObfuscation
+export var MESSAGE_VERSION = 3;
 
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
@@ -38,7 +39,8 @@ export var settings :uproxy_core_api.GlobalSettings = {
   version: STORAGE_VERSION,
   splashState: 0,
   statsReportingEnabled: false,
-  consoleFilter: loggingTypes.Level.warn
+  consoleFilter: loggingTypes.Level.warn,
+  language: 'en'
 };
 
 export var natType :string = '';
@@ -74,6 +76,9 @@ export var loadSettings :Promise<void> =
       }
       if (settings.statsReportingEnabled == null) {
         settings.statsReportingEnabled = false;
+      }
+      if (settings.language == null) {
+        settings.language = 'en';
       }
     }).catch((e) => {
       log.info('No global settings loaded', e.message);

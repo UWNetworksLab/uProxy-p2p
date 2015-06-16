@@ -8,8 +8,11 @@
 
 import social = require('../../interfaces/social');
 import user_interface = require('./ui');
+import translator_module = require('./translator');
 import _ = require('lodash');
 import Constants = require('./constants');
+
+var i18n_t = translator_module.i18n_t;
 
 export enum GettingConsentState {
   LOCAL_REQUESTED_REMOTE_GRANTED = 100,
@@ -75,16 +78,16 @@ export class User implements social.BaseUser {
     // if we do not have stored state, no use in checking for changes
     if (this.consent_ &&
         // Don't show notifications for other instances of yourself
-        this.userId !== user_interface.model.onlineNetwork.userId) {
+        this.userId !== this.network.userId) {
       // notifications for get mode
       if (!payload.consent.ignoringRemoteUserOffer) {
         if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {
           if (payload.consent.localRequestsAccessFromRemote) {
-            this.ui_.showNotification(profile.name + ' granted you access',
-                         { mode: 'get', user: this.userId });
+            this.ui_.showNotification(i18n_t('grantedAccessNotification', {name: profile.name}),
+                         { mode: 'get', network: this.network.name, user: this.userId });
           } else {
-            this.ui_.showNotification(profile.name + ' offered you access',
-                         { mode: 'get', user: this.userId });
+            this.ui_.showNotification(i18n_t('offeredAccessNotification', {name: profile.name}),
+                         { mode: 'get', network: this.network.name, user: this.userId });
           }
         }
       }
@@ -93,11 +96,11 @@ export class User implements social.BaseUser {
       if (!payload.consent.ignoringRemoteUserRequest) {
         if (!this.consent_.remoteRequestsAccessFromLocal && payload.consent.remoteRequestsAccessFromLocal) {
           if (payload.consent.localGrantsAccessToRemote) {
-            this.ui_.showNotification(profile.name + ' has accepted your offer for access',
-                         { mode: 'share', user: this.userId });
+            this.ui_.showNotification(i18n_t('acceptedOfferNotification', {name: profile.name}),
+                         { mode: 'share', network: this.network.name, user: this.userId });
           } else {
-            this.ui_.showNotification(profile.name + ' is requesting access',
-                         { mode: 'share', user: this.userId });
+            this.ui_.showNotification(i18n_t('requestingAccessNotification', {name: profile.name}),
+                         { mode: 'share', network: this.network.name, user: this.userId });
           }
         }
       }
@@ -254,7 +257,7 @@ export class User implements social.BaseUser {
       var instance = this.offeringInstances[i];
       if (!instance.description) {
         // Set description to "Computer 1", "Computer 2", etc.
-        instance.description = 'Computer ' + (i + 1);
+        instance.description = i18n_t('descriptionDefault', {number: i + 1});
       }
     }
   }

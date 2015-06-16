@@ -71,10 +71,6 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     this.browserConnector_.send(payload);
   }
 
-  public getInitialState = () => {
-    this.sendCommand(uproxy_core_api.Command.GET_INITIAL_STATE);
-  }
-
   /**
    * Send a Command from the UI to the Core, as a result of some user
    * interaction.  Command returns a promise that fulfills/rejects upon
@@ -139,6 +135,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
 
   // --- CoreApi interface requirements (sending COMMANDS) ---
 
+  public getFullState = () :Promise<uproxy_core_api.InitialState> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_FULL_STATE);
+  }
+
   // TODO: Reconnect this hook, which while we're testing, sends a new instance
   // message anytime we click on the user in the UI.
   sendInstance = (clientId :string) => {
@@ -193,8 +193,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   //   this.sendCommand(uproxy_core_api.Command.CHANGE_OPTION, option);
   // }
 
-  login = (network :string) : Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.LOGIN, network);
+  login = (loginArgs :uproxy_core_api.LoginArgs) : Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.LOGIN, loginArgs);
   }
 
   logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
@@ -211,6 +211,11 @@ class CoreConnector implements uproxy_core_api.CoreApi {
 
   getNatType = () : Promise<string> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_NAT_TYPE);
+  }
+
+  pingUntilOnline = (pingUrl :string) : Promise<void> => {
+    return this.promiseCommand(
+        uproxy_core_api.Command.PING_UNTIL_ONLINE, pingUrl);
   }
 }  // class CoreConnector
 
