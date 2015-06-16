@@ -31,11 +31,8 @@ export interface GlobalSettings {
 export interface InitialState {
   networkNames :string[];
   globalSettings :GlobalSettings;
-  onlineNetworks: social.NetworkState[];
-  copyPasteState: ConnectionState;
-  copyPastePendingEndpoint :net.Endpoint;
-  copyPasteGettingMessage :string;
-  copyPasteSharingMessage :string;
+  onlineNetworks :social.NetworkState[];
+  copyPasteState :CopyPasteState;
 }
 
 export interface ConnectionState {
@@ -43,6 +40,13 @@ export interface ConnectionState {
   localSharingWithRemote :social.SharingState;
   bytesSent :number;
   bytesReceived :number;
+}
+
+export interface CopyPasteState {
+  connectionState :ConnectionState;
+  endpoint :net.Endpoint;
+  gettingMessage :string;
+  sharingMessage :string;
 }
 
 // --- Communications ---

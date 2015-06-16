@@ -30,16 +30,6 @@ import _ = require('lodash');
 // different sizes of icons, the actual filenames have the dimension
 // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
 
-// Icons for browser bar, also used for notifications.
-export var DEFAULT_ICON :string = 'online.gif';
-export var LOGGED_OUT_ICON :string = 'offline.gif';
-export var SHARING_ICON :string = 'sharing.gif';
-export var GETTING_ICON :string = 'getting.gif';
-export var ERROR_ICON :string = 'error.gif';
-export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
-
-export var DEFAULT_USER_IMG = 'icons/contact-default.png';
-
 export class Model {
   public networkNames :string[] = [];
 
@@ -73,9 +63,6 @@ export class Model {
   };
 
   public reconnecting = false;
-
-//export var SHARE_FAILED_MSG :string = 'Unable to share access with ';
-//export var GET_FAILED_MSG :string = 'Unable to get access from ';
 
   // userId is included as an optional parameter because we will eventually
   // want to use it to get an accurate network.  For now, it is ignored and
@@ -654,17 +641,17 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     if (this.core.disconnectedWhileProxying) {
-      this.browserApi.setIcon(ERROR_ICON);
+      this.browserApi.setIcon(Constants.ERROR_ICON);
     } else if (isGetting && isGiving) {
-      this.browserApi.setIcon(GETTING_SHARING_ICON);
+      this.browserApi.setIcon(Constants.GETTING_SHARING_ICON);
     } else if (isGetting) {
-      this.browserApi.setIcon(GETTING_ICON);
+      this.browserApi.setIcon(Constants.GETTING_ICON);
     } else if (isGiving) {
-      this.browserApi.setIcon(SHARING_ICON);
+      this.browserApi.setIcon(Constants.SHARING_ICON);
     } else if (model.onlineNetworks.length > 0) {
-      this.browserApi.setIcon(DEFAULT_ICON);
+      this.browserApi.setIcon(Constants.DEFAULT_ICON);
     } else {
-      this.browserApi.setIcon(LOGGED_OUT_ICON);
+      this.browserApi.setIcon(Constants.LOGGED_OUT_ICON);
     }
   }
 
@@ -953,10 +940,10 @@ export class UserInterface implements ui_constants.UiApi {
     }
     model.updateGlobalSettings(state.globalSettings);
 
-    this.copyPasteState = state.copyPasteState;
-    this.copyPasteGettingMessage = state.copyPasteGettingMessage;
-    this.copyPasteSharingMessage = state.copyPasteSharingMessage;
-    this.copyPastePendingEndpoint = state.copyPastePendingEndpoint;
+    this.copyPasteState = state.copyPasteState.connectionState;
+    this.copyPasteGettingMessage = state.copyPasteState.gettingMessage;
+    this.copyPasteSharingMessage = state.copyPasteState.sharingMessage;
+    this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
     if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
         this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
       this.view = ui_constants.View.COPYPASTE;

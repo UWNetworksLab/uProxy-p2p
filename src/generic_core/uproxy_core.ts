@@ -211,10 +211,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         networkNames: Object.keys(social_network.networks),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
-        copyPasteState: copyPasteConnection.getCurrentState(),
-        copyPastePendingEndpoint: copyPasteConnection.activeEndpoint,
-        copyPasteGettingMessage: this.copyPasteGettingMessage_,
-        copyPasteSharingMessage: this.copyPasteSharingMessage_,
+        copyPasteState: {
+          connectionState: copyPasteConnection.getCurrentState(),
+          endpoint: copyPasteConnection.activeEndpoint,
+          gettingMessage: this.copyPasteGettingMessage_,
+          sharingMessage: this.copyPasteSharingMessage_
+        }
       };
     });
   }

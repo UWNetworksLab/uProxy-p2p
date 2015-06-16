@@ -209,7 +209,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect((<jasmine.Spy>mockBrowserApi.setIcon).calls.mostRecent().args[0])
-          .toEqual(user_interface.SHARING_ICON);
+          .toEqual(Constants.SHARING_ICON);
     });
 
     it('Extension icon changes if you stop giving to all getters',
@@ -227,7 +227,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       expect((<jasmine.Spy>mockBrowserApi.setIcon).calls.mostRecent().args[0])
-          .toEqual(user_interface.DEFAULT_ICON);
+          .toEqual(Constants.DEFAULT_ICON);
     });
 
     it('Extension icon changes when you start getting access', () => {
