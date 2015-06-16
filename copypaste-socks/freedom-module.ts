@@ -98,8 +98,7 @@ function setupServer(endpoint:net.Endpoint) {
 
 setupServer(localhostControlEndpoints[0]);
 
-parentModule.on('giveSendBack', (data:ArrayBuffer) => {
-  log.info('giveSendBack: with arraybuf of ' + data.byteLength);
+parentModule.on('giveSendBack', (message:string) => {
   var conn:tcp.Connection = null;
   var all_conns = tcpServer.connections();
   if (all_conns.length < 1) {
@@ -107,14 +106,13 @@ parentModule.on('giveSendBack', (data:ArrayBuffer) => {
     return;
   }
   conn = all_conns[0];
-  conn.send(data);
+  conn.send(arraybuffers.stringToArrayBuffer(message));
   conn.close();
 })
 
 // Invokd from main.core-env.ts, upon 'gatherMessage', which comes
 // back with our connection ID and the SDP, as a utf-8 string.
-parentModule.on('getSendBack', (data:ArrayBuffer) => {
-  log.info('getSendBack: with arraybuf of ' + data.byteLength);
+parentModule.on('getSendBack', (message:string) => {
   var conn:tcp.Connection = null;
   var all_conns = tcpServer.connections();
   if (all_conns.length < 1) {
@@ -122,7 +120,7 @@ parentModule.on('getSendBack', (data:ArrayBuffer) => {
     return;
   }
   conn = all_conns[0];
-  conn.send(data);
+  conn.send(arraybuffers.stringToArrayBuffer(message));
   conn.dataFromSocketQueue.setNextHandler((buf:ArrayBuffer) => {
     var sdp = arraybuffers.arrayBufferToString(buf);
     log.info('got sdp ' + sdp);

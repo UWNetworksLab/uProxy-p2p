@@ -44,8 +44,7 @@ module copypaste_module {
       console.log('gatherMessage invoked.');
       console.log('gatherMessage: sending back:' + model.outboundMessageValue);
 
-      copypaste.emit('getSendBack',
-                     arraybuffers.stringToArrayBuffer(model.outboundMessageValue));
+      copypaste.emit('getSendBack', model.outboundMessageValue);
     });
 
     copypaste.on('giveWithSDP', (sdp:string) => {
@@ -53,8 +52,7 @@ module copypaste_module {
       consumeInboundMessage();
       setTimeout(() => {
         console.log("Emitting giveSendback with SDP: " + model.outboundMessageValue);
-        copypaste.emit('giveSendBack',
-                       arraybuffers.stringToArrayBuffer(model.outboundMessageValue));
+        copypaste.emit('giveSendBack', model.outboundMessageValue);
       }, 500);
     });
 
