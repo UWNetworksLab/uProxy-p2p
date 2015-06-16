@@ -24,3 +24,7 @@ body /deep/ a {
   font-weight: 500;
   color: #009688;
 }
+
+html /deep/ [dir='rtl'] /deep/ [layout][horizontal] /deep/ core-icon[icon='arrow-back'] {
+  transform: rotate(180deg);
+}

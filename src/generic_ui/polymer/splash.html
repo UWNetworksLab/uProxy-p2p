@@ -89,10 +89,11 @@
     }
     .prevArrow {
       position: absolute;
-      left: 8px;
       top: 8px;
       cursor: pointer;
       z-index: 11; /* Must be greater than z-index of .view */
+      margin-left: 8px;
+      margin-right: 8px;
     }
     #intro1, #networks {
       height: 100%;
@@ -110,8 +111,10 @@
     }
     </style>
 
-    <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
-        hidden?='{{SPLASH_STATES.INTRO==model.globalSettings.splashState}}'></core-icon>
+    <div horizontal layout>
+      <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
+          hidden?='{{SPLASH_STATES.INTRO==model.globalSettings.splashState}}'></core-icon>
+    </div>
 
     <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==model.globalSettings.splashState}}'>
       <div class='view' flex>
