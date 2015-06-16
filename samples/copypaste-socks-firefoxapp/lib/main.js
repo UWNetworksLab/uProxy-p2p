@@ -6,18 +6,6 @@ var panels = require("sdk/panel");
 
 Cu.import(self.data.url("freedom-for-firefox/freedom-for-firefox.jsm"));
 
-var button = buttons.ActionButton({
-  id: "copypaste-button",
-  label: "copy/paste SOCKS",
-  icon: {
-    "18": "./icons/19_offline.gif",
-    "36": "./icons/38_offline.gif"
-  },
-  onClick: start
-});
-
-var panel;
-
 var manifest = self.data.url("uproxy-lib/copypaste-socks/freedom-module.json");
 var loggingProviderManifest = self.data.url("uproxy-lib/loggingprovider/freedom-module.json");
 freedom(manifest, {
@@ -26,12 +14,24 @@ freedom(manifest, {
 }).then(function(moduleFactory) {
   var module = moduleFactory();
 
-  panel = panels.Panel({
+  var panel = panels.Panel({
     width: 450,
     height: 625,
     contentURL: self.data.url("main.html")
   })
-  panel.show();
+
+  var button = buttons.ActionButton({
+    id: "copypaste-button",
+    label: "copy/paste SOCKS",
+    icon: {
+      "18": "./button.png"
+    },
+    onClick: function() {
+      panel.show({
+        position: button,
+      });
+    }
+  });
 
   var moduleSignalNames = [
     'signalForPeer',
@@ -79,9 +79,3 @@ freedom(manifest, {
 }, function(e) {
   console.error('could not load freedom module: ' + e.message);
 });
-
-function start(state) {
-  panel.show({
-    position: button,
-  });
-}
