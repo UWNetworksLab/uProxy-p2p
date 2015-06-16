@@ -44,7 +44,8 @@ freedom(manifest, {
     'bytesReceived',
     'bytesSent',
     'proxyingStarted',
-    'proxyingStopped'];
+    'proxyingStopped'
+  ];
   moduleSignalNames.forEach(function(signalName) {
     module.on(signalName, function(data) {
       panel.port.emit(signalName, data);
@@ -70,7 +71,8 @@ freedom(manifest, {
     'proxyingStopped',
     'proxyingStarted',
     'ciphertext',
-    'verifyDecryptResult'];
+    'verifyDecryptResult'
+  ];
   uiSignalNames.forEach(function(signalName) {
     panel.port.on(signalName, function(data) {
       module.emit(signalName, data);
