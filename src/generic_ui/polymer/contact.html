@@ -110,7 +110,7 @@
         class='nameRow frame {{ isOnline ? "online" : "offline" }}'
         center horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}'></uproxy-avatar>
-      <div class='name' dir='auto'>{{ contact.name }}</div>
+      <div class='name'><bdi>{{ contact.name }}</bdi></div>
 
       <div flex class="iconWrapper">
         <core-icon icon="open-in-new"
