@@ -1,6 +1,6 @@
 {
-  "name": "socks-rtc-net",
-  "description": "Sample socks over rtc to net Freedom manifest",
+  "name": "copypaste-socks",
+  "description": "SOCKS server with copy/paste-based signalling channel.",
   "app": {
     "script": [
       "freedom-module.static.js"
