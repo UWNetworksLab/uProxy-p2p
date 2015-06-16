@@ -72,7 +72,8 @@ export enum Command {
   GET_LOGS = 1016,
   GET_NAT_TYPE = 1017,
   PING_UNTIL_ONLINE = 1018,
-  GET_FULL_STATE = 1019
+  GET_FULL_STATE = 1019,
+  GET_NETWORK_INFO = 1020
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -152,6 +153,8 @@ export interface CoreApi {
   modifyConsent(command :ConsentCommand) :void;
 
   getLogs() :Promise<string>;
+
+  getNetworkInfo() :Promise<string>;
 
   // CopyPaste interactions
 

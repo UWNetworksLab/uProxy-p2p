@@ -5,19 +5,27 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import storage = require('../interfaces/storage');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
+import uproxy_core = require('./uproxy_core');
+
 var log :logging.Log = new logging.Log('metrics');
 
 export interface MetricsData {
   version :number;
   success :number;  // Number of successes for getting access only.
   failure :number;  // Number of failures for getting access only.
+  natType :string;
+  pmpSupport :string;  // Either 'Supported' or 'Not supported'
+  pcpSupport :string;
+  upnpSupport :string;
 };
 
 export class Metrics {
   public onceLoaded_ :Promise<void>;  // Only public for tests
   private metricsProvider_ :freedom_AnonymizedMetrics;
   // data_ should be private except for tests.
-  public data_ :MetricsData = {version: 1, success: 0, failure: 0};
+  public data_ :MetricsData = {version: 1, success: 0, failure: 0,
+                               natType: '', pmpSupport: '',
+                               pcpSupport: '', upnpSupport: ''};
 
   constructor(private storage_ :storage.Storage) {
     var counterMetric = {
@@ -25,9 +33,21 @@ export class Metrics {
       num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
+    var binaryStringMetric = {
+      type: 'string', num_bloombits: 8, num_hashes: 2,
+      num_cohorts: 2, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
+      flag_oneprr: true
+    };
+    var natTypeMetric = {
+      type: 'string', num_bloombits: 8, num_hashes: 2,
+      num_cohorts: 4, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
+      flag_oneprr: true
+    }
     this.metricsProvider_ = freedom['metrics']({
       name: 'uProxyMetrics',
-      definition: {'success-v1': counterMetric, 'failure-v1': counterMetric}
+      definition: {'success-v1': counterMetric, 'failure-v1': counterMetric,
+                   'nat-type-v1': natTypeMetric, 'pmp-v1': binaryStringMetric,
+                   'pcp-v1': binaryStringMetric, 'upnp-v1': binaryStringMetric}
     });
 
     this.onceLoaded_ = this.storage_.load('metrics').then(
@@ -56,7 +76,7 @@ export class Metrics {
     }
   }
 
-  public getReport = () : Promise<Object> => {
+  public getReport = (getNetworkInfo:Function) :Promise<Object> => {
     try {
       crypto.randomUint32();
     } catch (e) {
@@ -64,15 +84,39 @@ export class Metrics {
           'Unable to getReport, crypto.randomUint32 not available'));
     }
 
-    // Don't catch any Promise rejections here so that they can be handled
-    // by the caller instead.
-    return this.onceLoaded_.then(() => {
-      var successReport =
-          this.metricsProvider_.report('success-v1', this.data_.success);
-      var failureReport =
-          this.metricsProvider_.report('failure-v1', this.data_.failure);
-      return Promise.all([successReport, failureReport]).then(() => {
-        return this.metricsProvider_.retrieve();
+    return getNetworkInfo().then((natInfo:string) => {
+      console.log('DEBUG Pre data:');
+      console.log(JSON.stringify(this.data_));
+
+      var natInfoLines = natInfo.split('\n');
+      this.data_.natType = natInfoLines[0].substring(10);
+      this.data_.pmpSupport = natInfoLines[1].substring(9);
+      this.data_.pcpSupport = natInfoLines[2].substring(5);
+      this.data_.upnpSupport = natInfoLines[3].substring(10);
+
+      console.log('DEBUG Post data:');
+      console.log(JSON.stringify(this.data_));
+
+      // Don't catch any Promise rejections here so that they can be handled
+      // by the caller instead.
+      return this.onceLoaded_.then(() => {
+        var successReport =
+            this.metricsProvider_.report('success-v1', this.data_.success);
+        var failureReport =
+            this.metricsProvider_.report('failure-v1', this.data_.failure);
+        var natTypeReport =
+            this.metricsProvider_.report('nat-type-v1', this.data_.natType);
+        var pmpReport =
+            this.metricsProvider_.report('pmp-v1', this.data_.pmpSupport);
+        var pcpReport =
+            this.metricsProvider_.report('pcp-v1', this.data_.pcpSupport);
+        var upnpReport =
+            this.metricsProvider_.report('upnp-v1', this.data_.upnpSupport);
+
+        return Promise.all([successReport, failureReport, natTypeReport,
+                            pmpReport, pcpReport, upnpReport]).then(() => {
+          return this.metricsProvider_.retrieve();
+        });
       });
     });
   }
@@ -80,6 +124,10 @@ export class Metrics {
   public reset = () => {
     this.data_.success = 0;
     this.data_.failure = 0;
+    this.data_.natType = '';
+    this.data_.pmpSupport = '';
+    this.data_.pcpSupport = '';
+    this.data_.upnpSupport = '';
     this.save_();
   }
 
@@ -98,14 +146,19 @@ export interface DailyMetricsReporterData {
 
 export class DailyMetricsReporter {
   // 5 days in milliseconds.
-  public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;
+  // public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;
+  public static MAX_TIMEOUT = 60000;
 
   public onceLoaded_ :Promise<void>;  // Only public for tests
 
   private data_ :DailyMetricsReporterData;
 
   constructor(private metrics_ :Metrics, private storage_ :storage.Storage,
+              private getNetworkInfo_ :Function,
               private onReportCallback_ :Function) {
+
+    console.log("DEBUG In constructor for DailyMetricsReporter");
+
     this.onceLoaded_ = this.storage_.load('metrics-report-timestamp').then(
         (data :DailyMetricsReporterData) => {
       log.info('Loaded metrics-report-timestamp from storage', data);
@@ -125,7 +178,9 @@ export class DailyMetricsReporter {
   }
 
   private report_ = () => {
-    this.metrics_.getReport().then((payload :Object) => {
+    this.metrics_.getReport(this.getNetworkInfo_).then((payload :Object) => {
+      console.log('DEBUG payload:');
+      console.log(payload);
       this.onReportCallback_(payload);
     }).catch((e :Error) => {
       log.error('Error getting report', e);
