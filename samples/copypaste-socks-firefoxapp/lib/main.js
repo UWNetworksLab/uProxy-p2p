@@ -16,7 +16,7 @@ freedom(manifest, {
 
   var panel = panels.Panel({
     width: 450,
-    height: 625,
+    height: 750,
     contentURL: self.data.url("main.html")
   })
 
