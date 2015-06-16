@@ -105,7 +105,7 @@ describe('core-connector', () => {
   };
 
   it('connects to App when present.', (done) => {
-    spyOn(core, 'getInitialState');
+    spyOn(core, 'getFullState').and.returnValue(Promise.resolve());
     var acker :Function;
     // A 'valid' chrome.runtime.Port indicates successful connection.
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
