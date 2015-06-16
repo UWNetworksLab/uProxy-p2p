@@ -611,6 +611,7 @@ export class UserInterface implements ui_constants.UiApi {
       }
 
       this.toastMessage = this.i18n_t('unableToGetFrom', { name: user.name });
+      this.instanceTryingToGetAccessFrom = null;
       this.unableToGet = true;
       this.bringUproxyToFront();
       return Promise.reject(e);
