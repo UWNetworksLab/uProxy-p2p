@@ -22,7 +22,7 @@ export class Metrics {
   // data_ should be private except for tests.
   public data_ :MetricsData = {version: 1, success: 0, failure: 0,
                                natType: '', pmpSupport: '',
-                               gpcpSupport: '', upnpSupport: ''};
+                               pcpSupport: '', upnpSupport: ''};
 
   constructor(private storage_ :storage.Storage) {
     var counterMetric = {
