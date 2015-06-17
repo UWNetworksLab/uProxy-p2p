@@ -129,19 +129,26 @@ export function getOnlineNetworks() :social.NetworkState[] {
 }
 
 export function notifyUI(networkName :string, userId :string) {
-  var online = false;
   if (typeof networks[networkName] === 'undefined') {
     throw Error('Trying to update UI with unknown network ' + networkName);
   }
 
-  if (typeof networks[networkName][userId] !== 'undefined') {
+  var network = getNetwork(networkName, userId);
+  var online = false;
+  var userName = '';
+  var imageData = '';
+  if (network !== null) {
     online = true;
+    userName = network.myInstance.name;
+    imageData = network.myInstance.imageData;
   }
 
   var payload :social.NetworkMessage = {
     name: networkName,
     online: online,
-    userId: userId
+    userId: userId,
+    userName: userName,
+    imageData: imageData
   };
   ui.update(uproxy_core_api.Update.NETWORK, payload);
 }
@@ -174,18 +181,14 @@ export function notifyUI(networkName :string, userId :string) {
      */
     protected prepareLocalInstance_ = (userId :string) :Promise<void> => {
       var key = this.name + userId;
-      return storage.load<social.BaseInstance>(key).then((result) => {
+      return storage.load<social.LocalInstanceState>(key).then((result) => {
         this.myInstance = new local_instance.LocalInstance(this, userId, result);
         log.info('loaded local instance from storage',
                  result, this.myInstance.instanceId);
       }, (e) => {
         this.myInstance = new local_instance.LocalInstance(this, userId);
         log.info('generating new local instance', this.myInstance.instanceId);
-        return storage.save<social.BaseInstance>(key, this.myInstance.currentState())
-            .catch((e:Error) => {
-          log.error('Could not save new LocalInstance: ',
-              this.myInstance.instanceId, e.toString());
-        });
+        return this.myInstance.saveToStorage();
       });
     }
 
