@@ -1,3 +1,4 @@
+/// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
@@ -19,6 +20,9 @@ import CaesarCipher = require('../simple-transformers/caesar');
 import logging = require('../logging/logging');
 
 import net = require('../net/net.types');
+import ipaddr = require('ipaddr.js');
+
+import Socket = freedom_UdpSocket.Socket;
 
 var log :logging.Log = new logging.Log('churn-pipe');
 
@@ -33,7 +37,7 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
     }
     return new Promise<T>((F, R) => {
       setTimeout(() => {
-        this.retry_(func, delayMs).then(F, R);
+        retry_(func, delayMs).then(F, R);
       }, delayMs);
     });
   });
@@ -70,6 +74,17 @@ var makeTransformer_ = (
   return transformer;
 }
 
+interface MirrorSet {
+  // If true, these mirrors represent a remote endpoint that has been
+  // explicitly signaled to us.
+  signaled: boolean;
+
+  // This array may be transiently sparse for signaled mirrors, and
+  // persistently sparse for non-signaled mirrors (i.e. peer-reflexive).
+  // Taking its length is therefore likely to be unhelpful.
+  sockets: Promise<Socket>[];
+}
+
 /**
  * A Churn Pipe is a transparent obfuscator/deobfuscator for transforming the
  * apparent type of browser-generated UDP datagrams.
@@ -80,7 +95,16 @@ class Pipe {
   // port is intended to be publicly routable (possibly thanks to NAT), and is
   // used only for sending and receiving obfuscated traffic with the remote
   // endpoints.
-  private publicSocket_ :freedom_UdpSocket.Socket;
+  private publicSockets_ :{ [address:string]: Socket[] } = {};
+
+  // Promises to track the progress of binding any public port.  This is used
+  // to return the appropriate Promise when there is a redundant call to
+  // |bindLocal|.
+  private publicPorts_ : { [address:string]: { [port:number]: Promise<void> } } =
+      {};
+
+  // The maximum number of bound remote ports on any single interface.
+  private maxSocketsPerInterface_ :number = 0;
 
   // Each mirror socket is bound to a port on localhost, and corresponds to a
   // specific remote endpoint.  When the public socket receives an obfuscated
@@ -89,16 +113,20 @@ class Pipe {
   // when a mirror socket receives a (unobfuscated) message from the browser
   // endpoint, the public socket sends the corresponding obfuscated packet to
   // that mirror socket's remote endpoint.
-  private mirrorSockets_ : { [k: string]: freedom_UdpSocket.Socket } = {};
+  private mirrorSockets_ : { [address:string]: { [port:number]: MirrorSet } } =
+      {};
 
   // Obfuscates and deobfuscates messages.
   private transformer_ :Transformer = makeTransformer_('none');
 
-  // Endpoint to which all incoming obfuscated messages are forwarded.
-  private browserEndpoint_ :net.Endpoint;
+  // Endpoint to which incoming obfuscated messages are forwarded on each
+  // interface.  The key is the interface, and the value is the port.
+  // This requires the simplifying assumption that the browser allocates at
+  // most one port on each interface.
+  private browserEndpoints_ : { [address:string]: number } = {};
 
   // TODO: define a type for event dispatcher in freedom-typescript-api
-  constructor (dispatchEvent_:(name:string, args:Object) => void) {
+  constructor (private dispatchEvent_:(name:string, args:Object) => void) {
   }
 
   // Set the current transformer parameters.  The default is no transformation.
@@ -120,104 +148,212 @@ class Pipe {
    * browser endpoint.
    */
   public bindLocal = (publicEndpoint:net.Endpoint) :Promise<void> => {
-    if (this.publicSocket_) {
-      return Promise.reject(new Error('Churn Pipe cannot rebind the local endpoint'));
+    if (!this.publicPorts_[publicEndpoint.address]) {
+      this.publicPorts_[publicEndpoint.address] = {};
+    }
+    var portPromise =
+        this.publicPorts_[publicEndpoint.address][publicEndpoint.port];
+    if (portPromise) {
+      log.debug('Redundant public endpoint: %1', publicEndpoint);
+      return portPromise;
     }
 
-    this.publicSocket_ = freedom['core.udpsocket']();
+    log.debug('Binding public endpoint: %1', publicEndpoint);
+    var socket = freedom['core.udpsocket']();
+    var index = this.addPublicSocket_(socket, publicEndpoint);
     // This retry is needed because the browser releases the UDP port
     // asynchronously after we call close() on the RTCPeerConnection, so
     // this call to bind() may initially fail, until the port is released.
-    return retry_(() => {
-      return this.publicSocket_.bind(publicEndpoint.address, publicEndpoint.port);
-    }).then((resultCode:number) => {
-      if (resultCode != 0) {
-        return Promise.reject(new Error(
-          'bindLocal failed with result code ' + resultCode));
+    portPromise = retry_(() => {
+      return socket.bind(publicEndpoint.address, publicEndpoint.port).
+          then((resultCode:number) => {
+        if (resultCode != 0) {
+          return Promise.reject(new Error(
+            'bindLocal failed with result code ' + resultCode));
+        }
+      });
+    }).then(() => {
+      socket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
+        this.onIncomingData_(recvFromInfo, publicEndpoint.address, index);
+      });
+    });
+    
+    this.publicPorts_[publicEndpoint.address][publicEndpoint.port] = portPromise;
+    return portPromise;
+  }
+
+  // Given a socket, and the endpoint to which it is bound, this function adds
+  // the endpoint to the set of sockets for that interface, performs any
+  // updates necessary to make the new socket functional, and returns an index
+  // that identifies the socket within its interface.
+  private addPublicSocket_ = (socket:Socket, endpoint:net.Endpoint)
+      : number => {
+    if (!(endpoint.address in this.publicSockets_)) {
+      this.publicSockets_[endpoint.address] = [];
+    }
+    this.publicSockets_[endpoint.address].push(socket);
+    if (this.publicSockets_[endpoint.address].length >
+        this.maxSocketsPerInterface_) {
+      this.increaseReplication_();
+    }
+    return this.publicSockets_[endpoint.address].length - 1;
+  }
+
+  // Some interface has broken the record for the number of bound local sockets.
+  // Add another mirror socket for every signaled remote candidate, to represent
+  // the routes through this newly bound local socket.
+  private increaseReplication_ = () => {
+    for (var remoteAddress in this.mirrorSockets_) {
+      for (var port in this.mirrorSockets_[remoteAddress]) {
+        var mirrorSet = this.mirrorSockets_[remoteAddress][port];
+        if (mirrorSet.signaled) {
+          var endpoint :net.Endpoint = {
+            address: remoteAddress,
+            port: port
+          };
+          this.getMirrorSocket_(endpoint, this.maxSocketsPerInterface_).
+              then((socket) => {
+            this.emitMirror_(endpoint, socket)
+          });
+        }
       }
-      this.publicSocket_.on('onData', this.onIncomingData_);
+    }
+    ++this.maxSocketsPerInterface_;
+  }
+
+  // A new mirror port has been allocated for a signaled remote endpoint. Report
+  // it to the client.
+  private emitMirror_ = (remoteEndpoint:net.Endpoint, socket:Socket) => {
+    socket.getInfo().then(Pipe.endpointFromInfo_).then((localEndpoint) => {
+      log.debug('Emitting mirror for %1: %2', remoteEndpoint, localEndpoint);
+      this.dispatchEvent_('mappingAdded', {
+        local: localEndpoint,
+        remote: remoteEndpoint
+      });
     });
   }
 
-  public setBrowserEndpoint = (browserEndpoint:net.Endpoint) :Promise<void> => {
-    this.browserEndpoint_ = browserEndpoint;
+  // Informs this module about the existence of a browser endpoint.
+  public addBrowserEndpoint = (browserEndpoint:net.Endpoint) :Promise<void> => {
+    log.debug('Adding browser endpoint: %1', browserEndpoint);
+    if (this.browserEndpoints_[browserEndpoint.address]) {
+      log.warn('Port %1 is already open on this interface',
+          this.browserEndpoints_[browserEndpoint.address])
+    }
+    this.browserEndpoints_[browserEndpoint.address] = browserEndpoint.port;
     return Promise.resolve<void>();
+  }
+
+  // Establishes an empty data structure to hold mirror sockets for this remote
+  // endpoint, if necessary.  If |signaled| is true, the structure will be
+  // marked as signaled, whether or not it already existed.
+  private ensureRemoteEndpoint_ = (endpoint:net.Endpoint, signaled:boolean)
+      : MirrorSet => {
+    if (!(endpoint.address in this.mirrorSockets_)) {
+      this.mirrorSockets_[endpoint.address] = {};
+    }
+    if (!(endpoint.port in this.mirrorSockets_[endpoint.address])) {
+      this.mirrorSockets_[endpoint.address][endpoint.port] = {
+        signaled: false,
+        sockets: []
+      };
+    }
+    if (signaled) {
+      this.mirrorSockets_[endpoint.address][endpoint.port].signaled = true;
+    }
+    return this.mirrorSockets_[endpoint.address][endpoint.port];
   }
 
   /**
    * Given an endpoint from which obfuscated datagrams may arrive, this method
    * constructs a corresponding mirror socket, and returns its endpoint.
    */
-  public bindRemote = (remoteEndpoint:net.Endpoint) : Promise<net.Endpoint> => {
-    return this.getMirrorSocket_(remoteEndpoint).then(
-        (mirrorSocket:freedom_UdpSocket.Socket) => {
-      return mirrorSocket.getInfo();
-    }).then(Pipe.endpointFromInfo_);
+  public bindRemote = (remoteEndpoint:net.Endpoint) : Promise<void> => {
+    this.ensureRemoteEndpoint_(remoteEndpoint, true);
+    var promises :any[] = [];
+    for (var i = 0; i < this.maxSocketsPerInterface_; ++i) {
+      promises.push(this.getMirrorSocket_(remoteEndpoint, i).then((socket) => {
+        this.emitMirror_(remoteEndpoint, socket);
+      }));
+    }
+    return Promise.all(promises).then((fulfills:any[]) : void => {});
   }
 
-  private getMirrorSocket_ = (remoteEndpoint:net.Endpoint)
-      : Promise<freedom_UdpSocket.Socket> => {
-    var key = Pipe.makeEndpointKey_(remoteEndpoint);
-    if (key in this.mirrorSockets_) {
-      return Promise.resolve(this.mirrorSockets_[key]);
+  private getMirrorSocket_ = (remoteEndpoint:net.Endpoint, index:number)
+      : Promise<Socket> => {
+    var mirrorSet = this.ensureRemoteEndpoint_(remoteEndpoint, false);
+    var socketPromise :Promise<Socket> = mirrorSet.sockets[index];
+    if (socketPromise) {
+      return socketPromise;
     }
 
-    var mirrorSocket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
-    this.mirrorSockets_[key] = mirrorSocket;
+    var mirrorSocket = freedom['core.udpsocket']();
+     mirrorSocket;
     // Bind to INADDR_ANY owing to restrictions on localhost candidates
     // in Firefox:
     //   https://github.com/uProxy/uproxy/issues/1597
     // TODO: bind to an actual, non-localhost address (see the issue)
-    return mirrorSocket.bind('0.0.0.0', 0).then((resultCode:number)
-        : freedom_UdpSocket.Socket => {
+    var anyInterface = ipaddr.IPv6.isValid(remoteEndpoint.address) ?
+        '::' : '0.0.0.0';
+    socketPromise = mirrorSocket.bind(anyInterface, 0).then((resultCode:number)
+        : Socket => {
       if (resultCode != 0) {
         throw new Error('bindRemote failed with result code ' + resultCode);
       }
       mirrorSocket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
         // Ignore packets that do not originate from the browser, for a
         // theoretical security benefit.
-        if (!this.browserEndpoint_) {
-          log.warn('browser endpoint not set, mirror socket for %1 ignoring ' +
-              'incoming packet from %2', remoteEndpoint, {
-                address: recvFromInfo.address,
-                port: recvFromInfo.port
-              });
-        } else if (recvFromInfo.address !== this.browserEndpoint_.address ||
-            recvFromInfo.port !== this.browserEndpoint_.port) {
-          log.warn('mirror socket for %1 ignoring incoming packet from %2',
+        if (recvFromInfo.port !==
+            this.browserEndpoints_[recvFromInfo.address]) {
+          log.warn('mirror socket for %1 ignoring incoming packet from %2 ' +
+              'which should have had source port %3',
               remoteEndpoint, {
                 address: recvFromInfo.address,
                 port: recvFromInfo.port
-              });
+              },
+              this.browserEndpoints_[recvFromInfo.address]);
         } else {
-          this.sendTo_(recvFromInfo.data, remoteEndpoint);
+          var publicSocket = this.publicSockets_[recvFromInfo.address] &&
+              this.publicSockets_[recvFromInfo.address][index];
+          // Public socket may be null, especially if the index is too great.
+          // Drop the packet in that case.
+          if (publicSocket) {
+            this.sendTo_(publicSocket, recvFromInfo.data, remoteEndpoint);
+          }
         }
       });
       return mirrorSocket;
     });
+    mirrorSet.sockets[index] = socketPromise;
+    return socketPromise;
   }
 
   private static endpointFromInfo_ = (socketInfo:freedom_UdpSocket.SocketInfo) => {
-    return {
-      // freedom-for-firefox currently reports the bound address as 'localhost',
-      // which is unsupported in candidate lines by Firefox:
-      //   https://github.com/freedomjs/freedom-for-firefox/issues/62
-      address: '127.0.0.1',
-      port: socketInfo.localPort
+    if (!socketInfo.localAddress) {
+      throw new Error('Cannot process incomplete info: ' +
+          JSON.stringify(socketInfo));
     }
+    // freedom-for-firefox currently reports the bound address as 'localhost',
+    // which is unsupported in candidate lines by Firefox:
+    //   https://github.com/freedomjs/freedom-for-firefox/issues/62
+    // This will result in |fakeLocalAddress| being IPv4 localhost, so this
+    // issue is blocking IPv6 Churn support on Firefox.
+    var fakeLocalAddress = ipaddr.IPv6.isValid(socketInfo.localAddress) ?
+        '::1' : '127.0.0.1';
+    return {
+      address: fakeLocalAddress,
+      port: socketInfo.localPort
+    };
   }
-
-  private static makeEndpointKey_ = (endpoint:net.Endpoint) : string => {
-    return endpoint.address + ':' + endpoint.port;
-  };
 
   /**
    * Sends a message over the network to the specified destination.
    * The message is obfuscated before it hits the wire.
    */
-  private sendTo_ = (buffer:ArrayBuffer, to:net.Endpoint) : void => {
+  private sendTo_ = (publicSocket:Socket, buffer:ArrayBuffer, to:net.Endpoint)
+      : void => {
     var transformedBuffer = this.transformer_.transform(buffer);
-    this.publicSocket_.sendTo.reckless(
+    publicSocket.sendTo.reckless(
       transformedBuffer,
       to.address,
       to.port);
@@ -228,19 +364,25 @@ class Pipe {
    * The message is de-obfuscated before being passed to the browser endpoint
    * via a corresponding mirror socket.
    */
-  private onIncomingData_ = (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
+  private onIncomingData_ = (recvFromInfo:freedom_UdpSocket.RecvFromInfo,
+      iface:string, index:number) => {
+    var browserPort = this.browserEndpoints_[iface];
+    if (!browserPort) {
+      // There's no browser port for this interface, so drop the packet.
+      return;
+    }
     var transformedBuffer = recvFromInfo.data;
     var buffer = this.transformer_.restore(transformedBuffer);
-    var source :net.Endpoint = {
-      address: recvFromInfo.address,
-      port: recvFromInfo.port
-    };
-    this.getMirrorSocket_(source).then((mirrorSocket:freedom_UdpSocket.Socket) => {
+    this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
       mirrorSocket.sendTo.reckless(
           buffer,
-          this.browserEndpoint_.address,
-          this.browserEndpoint_.port);
+          iface,
+          browserPort);
     });
+  }
+
+  public on = (name:string, listener:(event:any) => void) : void => {
+    throw new Error('Placeholder function to keep Typescript happy');
   }
 }
 
