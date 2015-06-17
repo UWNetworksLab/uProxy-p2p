@@ -3,6 +3,7 @@
 import crypto = require('../../../third_party/uproxy-lib/crypto/random');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import storage = require('../interfaces/storage');
+import uproxy_core = require('./uproxy_core');
 
 var log :logging.Log = new logging.Log('metrics');
 
@@ -10,19 +11,13 @@ export interface MetricsData {
   version :number;
   success :number;  // Number of successes for getting access only.
   failure :number;  // Number of failures for getting access only.
-  natType :string;
-  pmpSupport :string;  // Either 'Supported' or 'Not supported'
-  pcpSupport :string;
-  upnpSupport :string;
 };
 
 export class Metrics {
   public onceLoaded_ :Promise<void>;  // Only public for tests
   private metricsProvider_ :freedom_AnonymizedMetrics;
   // data_ should be private except for tests.
-  public data_ :MetricsData = {version: 1, success: 0, failure: 0,
-                               natType: '', pmpSupport: '',
-                               pcpSupport: '', upnpSupport: ''};
+  public data_ :MetricsData = {version: 1, success: 0, failure: 0};
 
   constructor(private storage_ :storage.Storage) {
     var counterMetric = {
@@ -30,7 +25,7 @@ export class Metrics {
       num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
-    var stringMetric = {
+    var natMetric = {
       type: 'string', num_bloombits: 8, num_hashes: 2,
       num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
@@ -38,8 +33,8 @@ export class Metrics {
     this.metricsProvider_ = freedom['metrics']({
       name: 'uProxyMetrics',
       definition: {'success-v1': counterMetric, 'failure-v1': counterMetric,
-                   'nat-type-v1': stringMetric, 'pmp-v1': stringMetric,
-                   'pcp-v1': stringMetric, 'upnp-v1': stringMetric}
+                   'nat-type-v1': natMetric, 'pmp-v1': natMetric,
+                   'pcp-v1': natMetric, 'upnp-v1': natMetric}
     });
 
     this.onceLoaded_ = this.storage_.load('metrics').then(
@@ -68,7 +63,7 @@ export class Metrics {
     }
   }
 
-  public getReport = (getNetworkInfo:Function) :Promise<Object> => {
+  public getReport = (natInfo:uproxy_core.NetworkInfo) :Promise<Object> => {
     try {
       crypto.randomUint32();
     } catch (e) {
@@ -76,37 +71,29 @@ export class Metrics {
           'Unable to getReport, crypto.randomUint32 not available'));
     }
 
-    return getNetworkInfo().then((natInfo:string) => {
-      var natInfoLines = natInfo.split('\n');
-      if (natInfoLines.length < 4) {
-        return Promise.reject(new Error('getNetworkInfo() failed.'));
-      }
+    if (natInfo.errorMsg) {
+      return Promise.reject(new Error('getNetworkInfo() failed.'));
+    }
 
-      this.data_.natType = natInfoLines[0].substring(10);
-      this.data_.pmpSupport = natInfoLines[1].substring(9);
-      this.data_.pcpSupport = natInfoLines[2].substring(5);
-      this.data_.upnpSupport = natInfoLines[3].substring(10);
+    // Don't catch any Promise rejections here so that they can be handled
+    // by the caller instead.
+    return this.onceLoaded_.then(() => {
+      var successReport =
+          this.metricsProvider_.report('success-v1', this.data_.success);
+      var failureReport =
+          this.metricsProvider_.report('failure-v1', this.data_.failure);
+      var natTypeReport =
+          this.metricsProvider_.report('nat-type-v1', natInfo.natType);
+      var pmpReport =
+          this.metricsProvider_.report('pmp-v1', natInfo.pmpSupport);
+      var pcpReport =
+          this.metricsProvider_.report('pcp-v1', natInfo.pcpSupport);
+      var upnpReport =
+          this.metricsProvider_.report('upnp-v1', natInfo.upnpSupport);
 
-      // Don't catch any Promise rejections here so that they can be handled
-      // by the caller instead.
-      return this.onceLoaded_.then(() => {
-        var successReport =
-            this.metricsProvider_.report('success-v1', this.data_.success);
-        var failureReport =
-            this.metricsProvider_.report('failure-v1', this.data_.failure);
-        var natTypeReport =
-            this.metricsProvider_.report('nat-type-v1', this.data_.natType);
-        var pmpReport =
-            this.metricsProvider_.report('pmp-v1', this.data_.pmpSupport);
-        var pcpReport =
-            this.metricsProvider_.report('pcp-v1', this.data_.pcpSupport);
-        var upnpReport =
-            this.metricsProvider_.report('upnp-v1', this.data_.upnpSupport);
-
-        return Promise.all([successReport, failureReport, natTypeReport,
-                            pmpReport, pcpReport, upnpReport]).then(() => {
-          return this.metricsProvider_.retrieve();
-        });
+      return Promise.all([successReport, failureReport, natTypeReport,
+                          pmpReport, pcpReport, upnpReport]).then(() => {
+        return this.metricsProvider_.retrieve();
       });
     });
   }
@@ -114,10 +101,6 @@ export class Metrics {
   public reset = () => {
     this.data_.success = 0;
     this.data_.failure = 0;
-    this.data_.natType = '';
-    this.data_.pmpSupport = '';
-    this.data_.pcpSupport = '';
-    this.data_.upnpSupport = '';
     this.save_();
   }
 
@@ -143,9 +126,8 @@ export class DailyMetricsReporter {
   private data_ :DailyMetricsReporterData;
 
   constructor(private metrics_ :Metrics, private storage_ :storage.Storage,
-              private getNetworkInfo_ :Function,
+              private getNetworkInfoObj_ :Function,
               private onReportCallback_ :Function) {
-
     this.onceLoaded_ = this.storage_.load('metrics-report-timestamp').then(
         (data :DailyMetricsReporterData) => {
       log.info('Loaded metrics-report-timestamp from storage', data);
@@ -165,7 +147,9 @@ export class DailyMetricsReporter {
   }
 
   private report_ = () => {
-    this.metrics_.getReport(this.getNetworkInfo_).then((payload :Object) => {
+    this.getNetworkInfoObj_().then((natInfo:uproxy_core.NetworkInfo) => {
+      return this.metrics_.getReport(natInfo);
+    }).then((payload:Object) => {
       this.onReportCallback_(payload);
     }).catch((e :Error) => {
       log.error('Error getting report', e);

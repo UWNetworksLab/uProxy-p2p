@@ -4,12 +4,16 @@ import metrics_module = require('./metrics');
 import mock_storage = require('../mocks/mock-storage');
 var MockStorage = mock_storage.MockStorage;
 
-var getNetworkInfo = () => {
+var networkInfo = {
+  natType: 'SymmetricNAT',
+  pmpSupport: 'Supported',
+  pcpSupport: 'Supported',
+  upnpSupport: 'Not supported'
+};
+
+var getNetworkInfoObj = () => {
   return new Promise((F, R) => {
-    F('NAT Type: SymmetricNAT\n' +
-    'NAT-PMP: Supported\n' +
-    'PCP: Supported\n' +
-    'UPnP IGD: Not supported');
+    F(networkInfo);
   })
 };
 
@@ -51,7 +55,7 @@ describe('metrics_module.Metrics', () => {
   it('getReport reports obfuscated metric values', (done) => {
     var storage = new MockStorage({metrics: {success: 1, failure: 2}});
     var metrics = new metrics_module.Metrics(storage);
-    metrics.getReport(getNetworkInfo).then((payload :any) => {
+    metrics.getReport(networkInfo).then((payload :any) => {
       expect(payload['success-v1']).toBeDefined();
       expect(payload['success-v1']).not.toEqual(1);
       expect(payload['failure-v1']).toBeDefined();
@@ -76,8 +80,6 @@ describe('metrics_module.DailyMetricsReporter', () => {
   beforeEach(() => {
     jasmine.clock().install();
     mockedMetrics = new metrics_module.Metrics(emptyStorage);
-    spyOn(mockedMetrics, 'getReport').and.returnValue(
-        Promise.resolve({success: 'obfuscated', failure: 'obfuscated'}));
   });
 
   afterEach(() => {
@@ -93,11 +95,14 @@ describe('metrics_module.DailyMetricsReporter', () => {
   // it is invoked via setTimeout.
 
   it('Invokes on report callback immediately if stored time has passed', (done) => {
+    spyOn(mockedMetrics, 'getReport').and.returnValue(
+        Promise.resolve({success: 'obfuscated', failure: 'obfuscated'}));
+
     var storage = new MockStorage(
         {'metrics-report-timestamp': {nextSendTimestamp: Date.now() - 1000}});
     var onReportCallback = jasmine.createSpy('onReportCallback');
     var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
-        mockedMetrics, storage, getNetworkInfo, onReportCallback);
+        mockedMetrics, storage, getNetworkInfoObj, onReportCallback);
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).toHaveBeenCalled();
       done();
@@ -106,32 +111,32 @@ describe('metrics_module.DailyMetricsReporter', () => {
   });
 
   it('Invokes on report callback at stored time if in the future', (done) => {
+    spyOn(mockedMetrics, 'getReport').and.callFake(() => { done(); });
+
     var MS_INTO_FUTURE = 10;
     var timestamp = Date.now() + MS_INTO_FUTURE;
     var storage = new MockStorage(
         {'metrics-report-timestamp': {nextSendTimestamp: timestamp}});
     var onReportCallback = jasmine.createSpy('onReportCallback');
     var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
-        mockedMetrics, storage, getNetworkInfo, onReportCallback);
+        mockedMetrics, storage, getNetworkInfoObj, onReportCallback);
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).not.toHaveBeenCalled();
       jasmine.clock().tick(MS_INTO_FUTURE);
-      expect(mockedMetrics.getReport).toHaveBeenCalled();
-      done();
     });
     jasmine.clock().tick(1);  // Needed to make onceLoaded_ fulfill
   });
 
   it('Emits report within MAX_TIMEOUT if no data in storage', (done) => {
+    spyOn(mockedMetrics, 'getReport').and.callFake(() => { done(); });
+
     var onReportCallback = jasmine.createSpy('onReportCallback');
     var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
-        mockedMetrics, emptyStorage, getNetworkInfo, onReportCallback);
+        mockedMetrics, emptyStorage, getNetworkInfoObj, onReportCallback);
     expect(mockedMetrics.getReport).not.toHaveBeenCalled();
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).not.toHaveBeenCalled();
       jasmine.clock().tick(metrics_module.DailyMetricsReporter.MAX_TIMEOUT);
-      expect(mockedMetrics.getReport).toHaveBeenCalled();
-      done();
     });
     jasmine.clock().tick(1);  // Needed to make onceLoaded_ fulfill
   });
