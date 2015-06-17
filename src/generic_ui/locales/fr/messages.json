@@ -435,6 +435,10 @@
     "message": "Description",
     "description": "Placeholder for the input field for the name of the user's device."
   },
+  "connectedAccounts": {
+    "description": "In settings, title for the social networks you can connect to.",
+    "message": "Comptes connectés"
+  },
   "connect": {
     "message": "relier",
     "description": "User clicks this to connect to a network"
@@ -518,6 +522,14 @@
   "askToAnalyze": {
     "message": "Il se pourrait que le type de NAT de votre réseau est incompatible avec uProxy. Aimeriez-vous uProxy pour analyser votre réseau?",
     "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails."
+  },
+  "unableToGet": {
+    "description": "Title for popup that appears when an attempt to access the Internet through a friend fails.",
+    "message": "Impossible d'obtenir l'accès"
+  },
+  "unableToShare": {
+    "description": "Title for popup that appears when an attempt to share the Internet with a friend fails.",
+    "message": "Impossible de partager l'accès"
   },
   "analyzingNetwork": {
     "message": "réseau Analyse",
