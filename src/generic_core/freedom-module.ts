@@ -118,10 +118,6 @@ ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_FULL_STATE,
     core.getFullState);
 
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GET_NETWORK_INFO,
-    core.getNetworkInfo);
-
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
     globals.metrics, globals.storage, core.getNetworkInfo,
     (payload :any) => {

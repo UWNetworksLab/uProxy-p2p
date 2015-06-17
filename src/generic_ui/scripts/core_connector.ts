@@ -211,10 +211,6 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_NAT_TYPE);
   }
 
-  getNetworkInfo = () : Promise<string> => {
-    return this.promiseCommand(uproxy_core_api.Command.GET_NETWORK_INFO);
-  }
-
   pingUntilOnline = (pingUrl :string) : Promise<void> => {
     return this.promiseCommand(
         uproxy_core_api.Command.PING_UNTIL_ONLINE, pingUrl);

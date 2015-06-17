@@ -3,9 +3,6 @@
 import crypto = require('../../../third_party/uproxy-lib/crypto/random');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import storage = require('../interfaces/storage');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-
-import uproxy_core = require('./uproxy_core');
 
 var log :logging.Log = new logging.Log('metrics');
 
@@ -25,7 +22,7 @@ export class Metrics {
   // data_ should be private except for tests.
   public data_ :MetricsData = {version: 1, success: 0, failure: 0,
                                natType: '', pmpSupport: '',
-                               pcpSupport: '', upnpSupport: ''};
+                               gpcpSupport: '', upnpSupport: ''};
 
   constructor(private storage_ :storage.Storage) {
     var counterMetric = {
@@ -33,21 +30,16 @@ export class Metrics {
       num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
-    var binaryStringMetric = {
+    var stringMetric = {
       type: 'string', num_bloombits: 8, num_hashes: 2,
-      num_cohorts: 2, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
+      num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
-    var natTypeMetric = {
-      type: 'string', num_bloombits: 8, num_hashes: 2,
-      num_cohorts: 4, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
-      flag_oneprr: true
-    }
     this.metricsProvider_ = freedom['metrics']({
       name: 'uProxyMetrics',
       definition: {'success-v1': counterMetric, 'failure-v1': counterMetric,
-                   'nat-type-v1': natTypeMetric, 'pmp-v1': binaryStringMetric,
-                   'pcp-v1': binaryStringMetric, 'upnp-v1': binaryStringMetric}
+                   'nat-type-v1': stringMetric, 'pmp-v1': stringMetric,
+                   'pcp-v1': stringMetric, 'upnp-v1': stringMetric}
     });
 
     this.onceLoaded_ = this.storage_.load('metrics').then(
@@ -144,8 +136,7 @@ export interface DailyMetricsReporterData {
 
 export class DailyMetricsReporter {
   // 5 days in milliseconds.
-  // public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;
-  public static MAX_TIMEOUT = 10000;
+  public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;
 
   public onceLoaded_ :Promise<void>;  // Only public for tests
 
@@ -154,8 +145,6 @@ export class DailyMetricsReporter {
   constructor(private metrics_ :Metrics, private storage_ :storage.Storage,
               private getNetworkInfo_ :Function,
               private onReportCallback_ :Function) {
-
-    console.log("DEBUG In constructor for DailyMetricsReporter");
 
     this.onceLoaded_ = this.storage_.load('metrics-report-timestamp').then(
         (data :DailyMetricsReporterData) => {
@@ -177,8 +166,6 @@ export class DailyMetricsReporter {
 
   private report_ = () => {
     this.metrics_.getReport(this.getNetworkInfo_).then((payload :Object) => {
-      console.log('DEBUG payload:');
-      console.log(payload);
       this.onReportCallback_(payload);
     }).catch((e :Error) => {
       log.error('Error getting report', e);
