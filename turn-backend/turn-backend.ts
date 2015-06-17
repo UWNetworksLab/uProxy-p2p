@@ -66,7 +66,8 @@ class Backend {
 
     if (request.method == messages.MessageMethod.ALLOCATE) {
       this.makeAllocation_(clientEndpoint).then((allocation:Allocation) => {
-        allocation.socket.getInfo().then((socketInfo:freedom_UdpSocket.SocketInfo) => {
+        return allocation.socket.getInfo().then(
+            (socketInfo:freedom_UdpSocket.SocketInfo) => {
           this.emitIpc_({
             method: messages.MessageMethod.ALLOCATE,
             clazz: messages.MessageClass.SUCCESS_RESPONSE,
@@ -92,7 +93,7 @@ class Backend {
             }]
           }, clientEndpoint);
         });
-      }, (e) => {
+      }).catch((e:Error) => {
         // Send error response (failed to make allocation).
         this.emitIpc_({
           method: messages.MessageMethod.ALLOCATE,
