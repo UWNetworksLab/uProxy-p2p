@@ -729,7 +729,7 @@ export function doNatProvoking() :Promise<string> {
       var rsp = JSON.parse(rspStr);
 
       if (rsp['answer'] == 'FullCone') {
-        F('FullCone');
+        F('full-cone NAT');
       } else if (rsp['answer'] == 'RestrictedConePrepare') {
         var peer_addr: string[] = rsp['prepare_peer'].split(':');
         var req: ArrayBuffer = arraybuffers.stringToArrayBuffer('{"ask":""}');
@@ -737,7 +737,7 @@ export function doNatProvoking() :Promise<string> {
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
       } else if (rsp['answer'] == 'RestrictedCone') {
-        F('RestrictedCone');
+        F('restricted-cone NAT');
       } else if (rsp['answer'] == 'PortRestrictedConePrepare') {
         var peer_addr: string[] = rsp['prepare_peer'].split(':');
         var req: ArrayBuffer = arraybuffers.stringToArrayBuffer('{"ask":""}');
@@ -745,7 +745,7 @@ export function doNatProvoking() :Promise<string> {
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
       } else if (rsp['answer'] == 'PortRestrictedCone') {
-        F('PortRestrictedCone');
+        F('port-restricted cone NAT');
       } else if (rsp['answer'] == 'SymmetricNATPrepare') {
         var peer_addr: string[] = rsp['prepare_peer'].split(':');
         var reqStr: string = JSON.stringify({ 'ask': 'AmISymmetricNAT' });
@@ -753,7 +753,7 @@ export function doNatProvoking() :Promise<string> {
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
       } else if (rsp['answer'] == 'SymmetricNAT') {
-        F('SymmetricNAT');
+        F('symmetric NAT');
       } else {
         return;
       }
