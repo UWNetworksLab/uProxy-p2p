@@ -4,6 +4,15 @@ import metrics_module = require('./metrics');
 import mock_storage = require('../mocks/mock-storage');
 var MockStorage = mock_storage.MockStorage;
 
+var getNetworkInfo = () => {
+  return new Promise((F, R) => {
+    F('NAT Type: SymmetricNAT\n' +
+    'NAT-PMP: Supported\n' +
+    'PCP: Supported\n' +
+    'UPnP IGD: Not supported');
+  })
+};
+
 describe('metrics_module.Metrics', () => {
   it('Loads data from storage', (done) => {
     var storage = new MockStorage({metrics: {success: 1, failure: 2}});
@@ -39,14 +48,22 @@ describe('metrics_module.Metrics', () => {
     metrics.increment('failure');
   });
 
-  it('getReport reports obfuscated success and failure values', (done) => {
+  it('getReport reports obfuscated metric values', (done) => {
     var storage = new MockStorage({metrics: {success: 1, failure: 2}});
     var metrics = new metrics_module.Metrics(storage);
-    metrics.getReport().then((payload :any) => {
+    metrics.getReport(getNetworkInfo).then((payload :any) => {
       expect(payload['success-v1']).toBeDefined();
       expect(payload['success-v1']).not.toEqual(1);
       expect(payload['failure-v1']).toBeDefined();
       expect(payload['failure-v1']).not.toEqual(2);
+      expect(payload['nat-type-v1']).toBeDefined();
+      expect(payload['nat-type-v1']).not.toEqual('SymmetricNAT');
+      expect(payload['pmp-v1']).toBeDefined();
+      expect(payload['pmp-v1']).not.toEqual('Supported');
+      expect(payload['pcp-v1']).toBeDefined();
+      expect(payload['pcp-v1']).not.toEqual('Supported');
+      expect(payload['upnp-v1']).toBeDefined();
+      expect(payload['upnp-v1']).not.toEqual('Not supported');
       done();
     });
   });
@@ -80,7 +97,7 @@ describe('metrics_module.DailyMetricsReporter', () => {
         {'metrics-report-timestamp': {nextSendTimestamp: Date.now() - 1000}});
     var onReportCallback = jasmine.createSpy('onReportCallback');
     var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
-        mockedMetrics, storage, onReportCallback);
+        mockedMetrics, storage, getNetworkInfo, onReportCallback);
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).toHaveBeenCalled();
       done();
@@ -95,7 +112,7 @@ describe('metrics_module.DailyMetricsReporter', () => {
         {'metrics-report-timestamp': {nextSendTimestamp: timestamp}});
     var onReportCallback = jasmine.createSpy('onReportCallback');
     var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
-        mockedMetrics, storage, onReportCallback);
+        mockedMetrics, storage, getNetworkInfo, onReportCallback);
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).not.toHaveBeenCalled();
       jasmine.clock().tick(MS_INTO_FUTURE);
@@ -108,7 +125,7 @@ describe('metrics_module.DailyMetricsReporter', () => {
   it('Emits report within MAX_TIMEOUT if no data in storage', (done) => {
     var onReportCallback = jasmine.createSpy('onReportCallback');
     var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
-        mockedMetrics, emptyStorage, onReportCallback);
+        mockedMetrics, emptyStorage, getNetworkInfo, onReportCallback);
     expect(mockedMetrics.getReport).not.toHaveBeenCalled();
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).not.toHaveBeenCalled();

@@ -85,17 +85,15 @@ export class Metrics {
     }
 
     return getNetworkInfo().then((natInfo:string) => {
-      console.log('DEBUG Pre data:');
-      console.log(JSON.stringify(this.data_));
-
       var natInfoLines = natInfo.split('\n');
+      if (natInfoLines.length < 4) {
+        return Promise.reject(new Error('getNetworkInfo() failed.'));
+      }
+
       this.data_.natType = natInfoLines[0].substring(10);
       this.data_.pmpSupport = natInfoLines[1].substring(9);
       this.data_.pcpSupport = natInfoLines[2].substring(5);
       this.data_.upnpSupport = natInfoLines[3].substring(10);
-
-      console.log('DEBUG Post data:');
-      console.log(JSON.stringify(this.data_));
 
       // Don't catch any Promise rejections here so that they can be handled
       // by the caller instead.
@@ -147,7 +145,7 @@ export interface DailyMetricsReporterData {
 export class DailyMetricsReporter {
   // 5 days in milliseconds.
   // public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;
-  public static MAX_TIMEOUT = 60000;
+  public static MAX_TIMEOUT = 10000;
 
   public onceLoaded_ :Promise<void>;  // Only public for tests
 
