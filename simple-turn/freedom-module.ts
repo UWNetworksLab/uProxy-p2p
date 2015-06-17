@@ -1,19 +1,19 @@
-/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import turn_frontend = require('../../turn-frontend/freedom-module.interface');
-import turn_backend = require('../../turn-backend/freedom-module.interface');
+import turn_frontend = require('../turn-frontend/freedom-module.interface');
+import turn_backend = require('../turn-backend/freedom-module.interface');
 
-import net = require('../../net/net.types');
-import logging = require('../../logging/logging');
-import loggingTypes = require('../../loggingprovider/loggingprovider.types');
+import net = require('../net/net.types');
+import logging = require('../logging/logging');
+import loggingTypes = require('../loggingprovider/loggingprovider.types');
 
 var loggingController = freedom['loggingcontroller']();
 loggingController = loggingController.setDefaultFilter(
     loggingTypes.Destination.console,
-    loggingTypes.Level.info);
+    loggingTypes.Level.debug);
 
 var log :logging.Log = new logging.Log('simple TURN');
 

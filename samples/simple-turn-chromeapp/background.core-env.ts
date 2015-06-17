@@ -13,7 +13,7 @@ document.head.appendChild(script);
 export var simpleTurn :OnEmitModule;
 
 script.onload = () => {
-  freedom('freedom-module.json', {
+  freedom('uproxy-lib/simple-turn/freedom-module.json', {
       'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
       'debug': 'debug'
   }).then(function(simpleTurnFactory:OnEmitModuleFactory) {
