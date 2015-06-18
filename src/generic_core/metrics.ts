@@ -147,6 +147,10 @@ export class DailyMetricsReporter {
   }
 
   private report_ = () => {
+    // TODO(kennysong): Ideally we want to call getNetworkInfoObj_() as a static
+    // method of uproxy_core.uProxyCore, instead of passing the function in
+    // as a parameter. This can be done after the circular dependency is fixed.
+    // See: https://github.com/uProxy/uproxy/issues/1660
     this.getNetworkInfoObj_().then((natInfo:uproxy_core.NetworkInfo) => {
       return this.metrics_.getReport(natInfo);
     }).then((payload:Object) => {
