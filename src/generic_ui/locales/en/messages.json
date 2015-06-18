@@ -548,16 +548,16 @@
     "message": "Would you like to submit your NAT type to the uProxy team, to help us better understand the networks our users are on?"
   },
   "veryLikely": {
-    "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established.",
-    "message": "very likely"
+    "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
+    "message": "most likely"
   },
   "possibly": {
-    "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established.",
-    "message": "possibly"
+    "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
+    "message": "probably"
   },
   "unlikely": {
-    "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established.",
-    "message": "unlikely"
+    "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
+    "message": "probably not"
   },
   "privacyPolicy": {
     "description": "Link to uProxy's privacy policy.",
