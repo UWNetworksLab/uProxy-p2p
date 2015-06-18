@@ -120,11 +120,11 @@ export class ConsoleLoggingDestination extends AbstractLoggingDestination {
   }
 
   // Exports the date and message fields, yielding something like:
-  //   [Apr 23 15:07:12.586] listening on port 9999
+  //   [2015-04-23T15:07:12.586Z] listening on port 9999
   // Since the Chrome and Firefox consoles provide some metadata support,
   // this ultimately results in something like this in the JavaScript
   // console:
-  //   (i) simple-socks [Apr 23 15:07:12.586] listening on port 9999
+  //   (i) simple-socks [2015-04-23T15:07:12.586Z] listening on port 9999
   // (where (i) is a cute little symbol indicating the level and the
   // tag, simple-socks is in red.
   private formatMessage_ = (l:logging.Message) : string => {
@@ -151,16 +151,8 @@ loggingDestinations[logging.Destination.console] =
 loggingDestinations[logging.Destination.buffered] =
   new BufferedLoggingDestination();
 
-var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-// Generates current timestamp in form "M d H:m:s.S"
 function dateToString_(d:Date) : string {
-  return MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ' ' +
-      (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' +
-      (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + ':' +
-      (d.getSeconds() < 10 ? '0' : '') + d.getSeconds() + '.' +
-      d.getMilliseconds();
+  return d.toISOString();
 }
 
 // Interface for accumulating log messages.
@@ -253,7 +245,7 @@ export class LoggingController implements logging.Controller  {
   }
 
   // Exports all message fields, yielding something like:
-  //   simple-socks I [Apr 23 15:07:12.586] listening on port 9999
+  //   simple-socks I [2015-04-23T15:07:12.586Z] listening on port 9999
   private formatMessage_(l:logging.Message) : string {
     return l.tag + ' ' + logging.Level[l.level][0].toUpperCase() +
         ' [' + dateToString_(l.timestamp) + '] ' + l.message;
