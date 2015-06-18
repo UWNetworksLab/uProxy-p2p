@@ -192,6 +192,8 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
   public onUpdate = (update :uproxy_core_api.Update, handler :Function) => {
     var type = '' + update;
     var alreadyHooked = typeof this.listeners_[type] !== 'undefined';
+    // This is called every time we open a popup in chrome.
+    // New handlers need to replace old handlers.
     this.listeners_[type] = handler;
     if (!alreadyHooked) {
       var payload = {

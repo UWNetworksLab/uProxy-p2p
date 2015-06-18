@@ -252,13 +252,44 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.SIGNALLING_MESSAGE, (message :social.PeerMessage) => {
+      var data :social.PeerMessage[] = [], str = '';
 
       switch (message.type) {
         case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          this.copyPasteGettingMessage = message.data;
+          str = this.copyPasteGettingMessage;
           break;
         case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          this.copyPasteSharingMessage = message.data;
+          str = this.copyPasteSharingMessage;
+          break;
+      }
+
+      if (str) {
+        data = JSON.parse(atob(decodeURIComponent(str)));
+      }
+
+      data.push(message);
+
+      str = encodeURIComponent(btoa(JSON.stringify(data)));
+
+      // reverse of above switch (since I can't just use a reference)
+      switch (message.type) {
+        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
+          this.copyPasteGettingMessage = str;
+          break;
+        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
+          this.copyPasteSharingMessage = str;
+          break;
+      }
+    });
+
+    core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE, (message :social.PeerMessage) => {
+
+      switch (message.type) {
+        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
+          this.copyPasteGettingMessage = <string>message.data;
+          break;
+        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
+          this.copyPasteSharingMessage = <string>message.data;
           break;
       }
     });
@@ -358,6 +389,8 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
+
+    core.getFullState().then(this.updateInitialState);
   }
 
   // Because of an observer (in root.ts) watching the value of
@@ -941,26 +974,34 @@ export class UserInterface implements ui_constants.UiApi {
     }
     model.updateGlobalSettings(state.globalSettings);
 
+    // Maybe refactor this to be copyPasteState.
     this.copyPasteState = state.copyPasteState.connectionState;
     this.copyPasteGettingMessage = state.copyPasteState.gettingMessage;
     this.copyPasteSharingMessage = state.copyPasteState.sharingMessage;
     this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
     if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
         this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
+      // This means we had active copy-paste flow.
       this.view = ui_constants.View.COPYPASTE;
     }
 
     this.browserApi.fulfillLaunched();
+
+    while(model.onlineNetworks.length > 0) {
+      model.onlineNetworks.pop();
+    }
 
     for (var network in state.onlineNetworks) {
       this.addOnlineNetwork_(state.onlineNetworks[network]);
     }
 
     if (state.onlineNetworks.length > 0) {
+      // Check that we dont' have copy paste connection
       if (this.view === ui_constants.View.COPYPASTE) {
         console.error(
             'User cannot be online while having a copy-paste connection');
       }
+      // Set view to roster, user is online.
       this.view = ui_constants.View.ROSTER;
       this.updateSharingStatusBar_();
     }

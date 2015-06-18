@@ -110,7 +110,8 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FRIEND_FAILED_TO_GET = 2020,
-  POST_TO_CLOUDFRONT = 2021
+  POST_TO_CLOUDFRONT = 2021,
+  COPYPASTE_MESSAGE = 2022
 }
 
 // Action taken by the user. These values are not on the wire. They are passed

@@ -47,10 +47,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   constructor() {
     log.debug('Preparing uProxy Core');
     copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
-      if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
-        ui.update(update, message);
-        return;
-      }
+      // TODO send this update only when
+      // update !== uproxy_core_api.Update.SIGNALLING_MESSAGE
+      ui.update(update, message);
+
       var data :social.PeerMessage[] = [], str = '';
 
       switch (message.type) {
@@ -79,7 +79,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           this.copyPasteSharingMessage_ = str;
           break;
       }
-      ui.update(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
+      ui.update(uproxy_core_api.Update.COPYPASTE_MESSAGE, {
         type: message.type,
         data: str
       });
