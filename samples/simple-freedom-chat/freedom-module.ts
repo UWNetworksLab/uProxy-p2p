@@ -10,8 +10,6 @@ import PeerConnection = peerconnection.PeerConnection;
 import DataChannel = peerconnection.DataChannel;
 import Data = peerconnection.Data;
 
-import Message = require('./message.types');
-
 export var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
     loggingTypes.Level.debug);
@@ -35,13 +33,11 @@ function connectDataChannel(name:string, d:DataChannel) {
     d.dataFromPeerQueue.setSyncHandler((data:Data) => {
       log.info('%1: dataFromPeer: %2', name, data);
       // Handle messages received on the datachannel(s).
-      parentFreedomModule.emit('receive' + name, {
-        message: data.str
-      });
+      parentFreedomModule.emit('receive' + name, data.str);
     });
 
-  parentFreedomModule.on('send' + name, (message:Message) => {
-    d.send({str: message.message})
+  parentFreedomModule.on('send' + name, (message:string) => {
+    d.send({str: message})
   });
 }
 

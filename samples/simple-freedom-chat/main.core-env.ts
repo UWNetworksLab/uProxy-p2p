@@ -1,8 +1,6 @@
 /// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 
-import Message = require('./message.types');
-
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
 
@@ -32,15 +30,13 @@ freedom('freedom-module.json', {
   });
 
   function send(suffix:string, textArea:HTMLInputElement) {
-    chat.emit('send' + suffix, {
-      message: textArea.value || '(empty message)'
-    });
+    chat.emit('send' + suffix, textArea.value || '(empty message)');
   }
   sendButtonA.onclick = send.bind(null, 'A', sendAreaA);
   sendButtonB.onclick = send.bind(null, 'B', sendAreaB);
 
-  function receive(textArea:HTMLInputElement, msg:Message) {
-    textArea.value = msg.message;
+  function receive(textArea:HTMLInputElement, msg:string) {
+    textArea.value = msg;
   }
   chat.on('receiveA', receive.bind(null, receiveAreaA));
   chat.on('receiveB', receive.bind(null, receiveAreaB));
