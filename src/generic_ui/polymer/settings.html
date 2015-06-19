@@ -37,9 +37,6 @@
       font-size: 14px;
       font-weight: 400;
     }
-    .userInfo .subdued::first-line {
-      line-height: 24px;
-    }
     .userInfo .subdued {
       opacity: 0.54;
       font-size: 13px;
@@ -163,11 +160,10 @@
         </div>
 
         <div class='clickable currentAccountInfo' on-tap='{{ toggleAccountChooser }}'>
-          <div horizontal layout>
+          <div horizontal center layout>
             <span class='subdued' flex>{{ connectedNetworks }}</span>
-            <span hidden?='{{ model.onlineNetworks.length === 1 }}'>
-              <core-icon icon='arrow-drop-down' hidden?='{{ accountChooserOpen }}'></core-icon>
-              <core-icon icon='arrow-drop-up' hidden?='{{ !accountChooserOpen }}'></core-icon>
+            <core-icon icon='arrow-drop-down' hidden?='{{ model.onlineNetworks.length === 1 || accountChooserOpen }}'></core-icon>
+            <core-icon icon='arrow-drop-up' hidden?='{{ model.onlineNetworks.length === 1 || !accountChooserOpen }}'></core-icon>
             </span>
           </div>
 
