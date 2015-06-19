@@ -37,7 +37,9 @@ class ChromeTabAuth {
     var isActive = !user_interface.model.reconnecting;
     chrome.tabs.create({url: url, active: isActive},
                        function(tab: chrome.tabs.Tab) {
-      chrome.windows.update(tab.windowId, {focused: isActive});
+      if (isActive) {
+        chrome.windows.update(tab.windowId, {focused: true});
+      }
       chrome.tabs.onUpdated.addListener(onTabChange);
     }.bind(this));
   }
