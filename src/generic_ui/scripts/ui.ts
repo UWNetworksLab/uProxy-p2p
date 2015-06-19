@@ -251,37 +251,6 @@ export class UserInterface implements ui_constants.UiApi {
       // TODO: Display the message in the 'manual network' UI.
     });
 
-    core.onUpdate(uproxy_core_api.Update.SIGNALLING_MESSAGE, (message :social.PeerMessage) => {
-      var data :social.PeerMessage[] = [], str = '';
-
-      switch (message.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          str = this.copyPasteGettingMessage;
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          str = this.copyPasteSharingMessage;
-          break;
-      }
-
-      if (str) {
-        data = JSON.parse(atob(decodeURIComponent(str)));
-      }
-
-      data.push(message);
-
-      str = encodeURIComponent(btoa(JSON.stringify(data)));
-
-      // reverse of above switch (since I can't just use a reference)
-      switch (message.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          this.copyPasteGettingMessage = str;
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          this.copyPasteSharingMessage = str;
-          break;
-      }
-    });
-
     core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE, (message :social.PeerMessage) => {
 
       switch (message.type) {
@@ -811,8 +780,8 @@ export class UserInterface implements ui_constants.UiApi {
       }
     }
 
-    for (var i = 0; i < payload.gettingInstanceIds.length; i++) {
-      this.instancesGivingAccessTo[payload.gettingInstanceIds[i]] = true;
+    for (var i = 0; i < payload.instancesSharingWithLocal.length; i++) {
+      this.instancesGivingAccessTo[payload.instancesSharingWithLocal[i]] = true;
       user.isGettingFromMe = true;
     }
 

@@ -50,6 +50,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       // TODO send this update only when
       // update !== uproxy_core_api.Update.SIGNALLING_MESSAGE
       ui.update(update, message);
+      if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
+        return;
+      }
 
       var data :social.PeerMessage[] = [], str = '';
 

@@ -73,7 +73,7 @@ export interface UserData {
   isOnline            :boolean;
   network             :string;
   offeringInstances   ?:InstanceData[];
-  gettingInstanceIds  :string[];
+  instancesSharingWithLocal  :string[];
   user                :UserProfileMessage;
 }
 

@@ -348,7 +348,7 @@ var log :logging.Log = new logging.Log('remote-user');
       var isOnline = false;
       var offeringInstanceStatesForUi :social.InstanceData[] = [];
       var allInstanceIds :string[] = [];
-      var gettingInstanceIds :string[] = [];
+      var instancesSharingWithLocal :string[] = [];
 
       for (var instanceId in this.instances_) {
         allInstanceIds.push(instanceId);
@@ -360,7 +360,7 @@ var log :logging.Log = new logging.Log('remote-user');
           isOnline = true;
         }
         if (instance.isSharing()) {
-          gettingInstanceIds.push(instanceId);
+          instancesSharingWithLocal.push(instanceId);
         }
       }
 
@@ -385,7 +385,7 @@ var log :logging.Log = new logging.Log('remote-user');
         },
         consent: this.consent,
         offeringInstances: offeringInstanceStatesForUi,
-        gettingInstanceIds: gettingInstanceIds,
+        instancesSharingWithLocal: instancesSharingWithLocal,
         allInstanceIds: allInstanceIds,
         isOnline: isOnline
       };

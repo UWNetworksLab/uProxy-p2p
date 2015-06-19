@@ -68,7 +68,7 @@ describe('UI.UserInterface', () => {
         ignoringRemoteUserOffer: false
       },
       isOnline: true,
-      gettingInstanceIds: []
+      instancesSharingWithLocal: []
     };
   }
 
