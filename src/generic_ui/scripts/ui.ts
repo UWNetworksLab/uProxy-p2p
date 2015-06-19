@@ -735,7 +735,8 @@ export class UserInterface implements ui_constants.UiApi {
         }
         model.removeNetwork(networkMsg.name);
 
-        if (!existingNetwork.logoutExpected && networkMsg.name === 'Google' &&
+        if (!existingNetwork.logoutExpected &&
+            (networkMsg.name === 'Google' || networkMsg.name === 'Facebook') &&
             !this.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
