@@ -14,10 +14,8 @@ var stopButton = document.getElementById("stopButton");
 freedom('freedom-module.json', {
     'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
-  }).then(
-    (simpleChatFactory:() => freedom.OnAndEmit<any,any>) => {
-  // TODO: typings for the freedom module
-  var chat :freedom.OnAndEmit<any,any> = simpleChatFactory();
+  }).then((chatFactory:() => freedom.OnAndEmit<any,any>) => {
+  var chat :freedom.OnAndEmit<any,any> = chatFactory();
 
   chat.on('ready', function() {
     sendAreaA.disabled = false;
@@ -45,5 +43,5 @@ freedom('freedom-module.json', {
     chat.emit('stop');
   };
 }, (e:Error) => {
-  console.error('could not load freedom: ' + e.message);
+  console.error('could not load freedom module: ' + e.message);
 });
