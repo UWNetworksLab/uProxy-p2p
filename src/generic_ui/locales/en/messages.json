@@ -435,6 +435,10 @@
     "description": "Placeholder for the input field for the name of the user's device.",
     "message": "Description"
   },
+  "connectedAccounts": {
+    "description": "In settings, title for the social networks you can connect to.",
+    "message": "Connected Accounts"
+  },
   "connect": {
     "description": "User clicks this to connect to a network",
     "message": "Connect"
@@ -519,6 +523,14 @@
     "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails.",
     "message": "It could be that your network's NAT type is incompatible with uProxy. Would you like uProxy to analyze your network?"
   },
+  "unableToGet": {
+    "description": "Title for popup that appears when an attempt to access the Internet through a friend fails.",
+    "message": "Unable to get access"
+  },
+  "unableToShare": {
+    "description": "Title for popup that appears when an attempt to share the Internet with a friend fails.",
+    "message": "Unable to share access"
+  },
   "analyzingNetwork": {
     "description": "Message shown when the user's network is being analyzed.",
     "message": "Analyzing network"
@@ -536,16 +548,16 @@
     "message": "Would you like to submit your NAT type to the uProxy team, to help us better understand the networks our users are on?"
   },
   "veryLikely": {
-    "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established.",
-    "message": "very likely"
+    "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
+    "message": "most likely"
   },
   "possibly": {
-    "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established.",
+    "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
     "message": "possibly"
   },
   "unlikely": {
-    "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established.",
-    "message": "unlikely"
+    "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
+    "message": "probably not"
   },
   "privacyPolicy": {
     "description": "Link to uProxy's privacy policy.",

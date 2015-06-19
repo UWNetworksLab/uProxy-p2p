@@ -35,6 +35,14 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
 
+export interface NetworkInfo {
+  natType :string;
+  pmpSupport :string;
+  pcpSupport :string;
+  upnpSupport :string;
+  errorMsg ?:string;
+};
+
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updates to the UI, and handles commands from the UI.
@@ -436,27 +444,48 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   // Probe the NAT type and support for port control protocols
-  public getNetworkInfo = () :Promise<string> => {
-    var natInfo = '';
-    return this.getNatType().then((natType:string) => {
-      natInfo += 'NAT Type: ' + natType + '\n';
+  // Returns an object with the NAT configuration as keys
+  public getNetworkInfoObj = () :Promise<NetworkInfo> => {
+    var natInfo :NetworkInfo = {
+      natType: '',
+      pmpSupport: '',
+      pcpSupport: '',
+      upnpSupport: ''
+    };
 
+    return this.getNatType().then((natType:string) => {
+      natInfo.natType = natType;
       return diagnose_nat.getInternalIp().then((privateIp:string) => {
-        return this.probePmcp(privateIp, 'PMP').then((pmpStatus:string) => {
-          natInfo += 'NAT-PMP: ' + pmpStatus + '\n';
+        return this.probePmcp(privateIp, 'PMP').then((pmpSupport:string) => {
+          natInfo.pmpSupport = pmpSupport;
           return this.probePmcp(privateIp, 'PCP');
-        }).then((pcpStatus:string) => {
-          natInfo += 'PCP: ' + pcpStatus + '\n';
+        }).then((pcpSupport:string) => {
+          natInfo.pcpSupport = pcpSupport;
           return this.probeUpnp(privateIp);
-        }).then((upnpStatus:string) => {
-          natInfo += 'UPnP IGD: ' + upnpStatus + '\n';
+        }).then((upnpSupport:string) => {
+          natInfo.upnpSupport = upnpSupport;
           return natInfo;
         });
       }).catch((err:Error) => {
         // Should only catch the error when getInternalIp() times out
-        natInfo += 'Could not probe for port control protocols: ' + err.message + '\n';
+        natInfo.errorMsg = 'Could not probe for port control protocols: ' + err.message;
         return natInfo;
       });
+    });
+  }
+
+  // Returns a string of the NAT type and support for port control protocols
+  public getNetworkInfo = () :Promise<string> => {
+    return this.getNetworkInfoObj().then((natInfo:NetworkInfo) => {
+      var natInfoStr = 'NAT Type: ' + natInfo.natType + '\n';
+      if (natInfo.errorMsg) {
+        natInfoStr += natInfo.errorMsg + '\n';
+      } else {
+        natInfoStr += 'NAT-PMP: ' + natInfo.pmpSupport + '\n';
+        natInfoStr += 'PCP: ' + natInfo.pcpSupport + '\n';
+        natInfoStr += 'UPnP IGD: ' + natInfo.upnpSupport + '\n';
+      }
+      return natInfoStr;
     });
   }
 
