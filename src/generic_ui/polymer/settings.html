@@ -74,9 +74,11 @@
     .settingsContent core-icon {
       height: 20px;
       width: 20px;
-      margin-right: 5px;
     }
-
+    .label {
+      text-indent: 5px;
+      display: inline-block;
+    }
     uproxy-link,
     uproxy-faq-link {
       display: block;
@@ -212,12 +214,12 @@
 
         <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
           <core-icon icon='refresh'></core-icon>
-          {{ 'restart' | $$ }}
+          <span class='label'>{{ 'restart' | $$ }}</span>
         </uproxy-link>
 
         <uproxy-link on-tap='{{ logOut }}' role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
-          {{ 'logout' | $$ }}
+          <span class='label'>{{ 'logout' | $$ }}</span>
         </uproxy-link>
       </div>
 
