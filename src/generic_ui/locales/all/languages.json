@@ -3,5 +3,25 @@
     "description": "English language.",
     "language": "English",
     "languageCode": "en"
+  },
+  {
+    "description": "Farsi language.",
+    "language": "فارسی‬‎",
+    "languageCode": "fa"
+  },
+  {
+    "description": "Arabic language.",
+    "language": "العربية‬‎",
+    "languageCode": "ar"
+  },
+  {
+    "description": "Turkish language.",
+    "language": "Türkçe",
+    "languageCode": "tr"
+  },
+  {
+    "description": "Vietnamese language.",
+    "language": "Tiếng Việt",
+    "languageCode": "vi"
   }
 ]

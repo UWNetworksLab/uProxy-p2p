@@ -37,9 +37,6 @@
       font-size: 14px;
       font-weight: 400;
     }
-    .userInfo .subdued::first-line {
-      line-height: 24px;
-    }
     .userInfo .subdued {
       opacity: 0.54;
       font-size: 13px;
@@ -74,9 +71,11 @@
     .settingsContent core-icon {
       height: 20px;
       width: 20px;
-      margin-right: 5px;
     }
-
+    .label {
+      text-indent: 5px;
+      display: inline-block;
+    }
     uproxy-link,
     uproxy-faq-link {
       display: block;
@@ -161,11 +160,12 @@
         </div>
 
         <div class='clickable currentAccountInfo' on-tap='{{ toggleAccountChooser }}'>
-          <div horizontal layout>
+          <div horizontal center layout>
             <span class='subdued' flex>{{ connectedNetworks }}</span>
             <span hidden?='{{ model.onlineNetworks.length === 1 }}'>
               <core-icon icon='arrow-drop-down' hidden?='{{ accountChooserOpen }}'></core-icon>
               <core-icon icon='arrow-drop-up' hidden?='{{ !accountChooserOpen }}'></core-icon>
+            </span>
             </span>
           </div>
 
@@ -212,12 +212,12 @@
 
         <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
           <core-icon icon='refresh'></core-icon>
-          {{ 'restart' | $$ }}
+          <span class='label'>{{ 'restart' | $$ }}</span>
         </uproxy-link>
 
         <uproxy-link on-tap='{{ logOut }}' role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
-          {{ 'logout' | $$ }}
+          <span class='label'>{{ 'logout' | $$ }}</span>
         </uproxy-link>
       </div>
 

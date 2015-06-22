@@ -332,6 +332,12 @@ var log :logging.Log = new logging.Log('remote-user');
       delete this.clientToInstanceMap_[clientId];
     }
 
+    private ignoreUser_ = () => {
+      return Object.keys(this.instances_).length === 0 &&
+             (!this.network.areAllContactsUproxy() ||
+               this.userId === this.network.myInstance.userId)
+    }
+
     public currentStateForUI = () : social.UserData => {
       if ('pending' == this.name) {
         log.warn('Not showing UI without profile');
@@ -364,9 +370,7 @@ var log :logging.Log = new logging.Log('remote-user');
         }
       }
 
-      if (allInstanceIds.length === 0 &&
-          (!this.network.areAllContactsUproxy() ||
-           this.userId === this.network.myInstance.userId)) {
+      if (this.ignoreUser_()) {
         // Don't send users with no instances to the UI if either the network
         // gives us non-uProxy contacts, or it is the user we are logged in
         // with.
@@ -442,7 +446,7 @@ var log :logging.Log = new logging.Log('remote-user');
 
     public saveToStorage = () : void => {
       this.onceLoaded.then(() => {
-        if (Object.keys(this.instances_).length > 0) {
+        if (!this.ignoreUser_()) {
           var state = this.currentState();
           storage.save<social.UserState>(this.getStorePath(), state).catch(() => {
             log.error('Could not save user to storage');

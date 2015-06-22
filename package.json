@@ -30,6 +30,7 @@
     "fs-extra": "^0.12.0",
     "grunt": "^0.4.2",
     "grunt-browserify": "^3.3.1",
+    "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-jasmine": "^0.8.0",
@@ -52,9 +53,6 @@
   },
   "peerDependencies": {
     "freedom": "^0.6.18"
-  },
-  "scripts": {
-    "install": "./node_modules/.bin/bower install"
   },
   "private": true
 }

@@ -4,6 +4,7 @@
 # allows script to be run from different directories but always act on the
 # directory of the project (which is where this script is located).
 ROOT_DIR="$(cd "$(dirname $0)"; pwd)";
+NPM_BIN_DIR="$ROOT_DIR/node_modules/.bin"
 
 # A simple bash script to run commands to setup and install all dev dependencies
 # (including non-npm ones)
@@ -27,7 +28,7 @@ function runCmd ()
 
 function clean ()
 {
-  runCmd "rm -r $ROOT_DIR/node_modules $ROOT_DIR/build $ROOT_DIR/.tscache"
+  runCmd "rm -rf $ROOT_DIR/node_modules $ROOT_DIR/build $ROOT_DIR/.tscache"
 }
 
 function installTools ()
@@ -38,9 +39,9 @@ function installTools ()
 
 function installThirdParty ()
 {
-  runAndAssertCmd "bower install --allow-root"
-  runAndAssertCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
-  runAndAssertCmd "grunt copy:thirdParty"
+  runAndAssertCmd "$NPM_BIN_DIR/bower install --allow-root"
+  runAndAssertCmd "$NPM_BIN_DIR/tsd reinstall --config ./third_party/tsd.json"
+  runAndAssertCmd "$NPM_BIN_DIR/grunt copy:thirdParty"
 }
 
 function installDevDependencies ()
