@@ -37,6 +37,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   allowNonUnicast: false,
   mode: user_interface.Mode.GET,
   version: STORAGE_VERSION,
+  splashState: 0,
   statsReportingEnabled: false,
   consoleFilter: loggingTypes.Level.warn,
   language: 'en'
@@ -69,6 +70,9 @@ export var loadSettings :Promise<void> =
       }
       if (typeof settings.mode == 'undefined') {
         settings.mode = user_interface.Mode.GET;
+      }
+      if (typeof settings.splashState === 'undefined') {
+        settings.splashState = 0;
       }
       if (settings.statsReportingEnabled == null) {
         settings.statsReportingEnabled = false;

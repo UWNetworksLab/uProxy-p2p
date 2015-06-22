@@ -10,6 +10,7 @@ import social = require('../../interfaces/social');
 import user_interface = require('./ui');
 import translator_module = require('./translator');
 import _ = require('lodash');
+import Constants = require('./constants');
 
 var i18n_t = translator_module.i18n_t;
 
@@ -106,7 +107,7 @@ export class User implements social.BaseUser {
     }
 
     this.name = profile.name;
-    this.imageData = profile.imageData || user_interface.DEFAULT_USER_IMG;
+    this.imageData = profile.imageData || Constants.DEFAULT_USER_IMG;
     this.url = profile.url;
 
     // iterate backwards to allow removing elements

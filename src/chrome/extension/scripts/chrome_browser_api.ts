@@ -8,6 +8,7 @@ import browser_api = require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../../third_party/uproxy-lib/net/net.types');
 import UI = require('../../../generic_ui/scripts/ui');
+import Constants = require('../../../generic_ui/scripts/constants');
 
 /// <reference path='../../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../../networking-typings/communications.d.ts' />
@@ -55,6 +56,9 @@ class ChromeBrowserApi implements BrowserAPI {
   private popupCreationStartTime_ = Date.now();
 
   private popupState_ = PopupState.NOT_LAUNCHED;
+
+  public fulfillLaunched : () => void;
+  private onceLaunched_ :Promise<void>;
 
   constructor() {
     // use localhost
@@ -157,22 +161,27 @@ class ChromeBrowserApi implements BrowserAPI {
     });
   }
 
-  public bringUproxyToFront = () => {
+  public bringUproxyToFront = () : Promise<void> => {
     if (this.popupState_ == PopupState.NOT_LAUNCHED) {
       this.popupState_ = PopupState.LAUNCHING;
       this.popupCreationStartTime_ = Date.now();
       // If neither popup nor Chrome window are open (e.g. if uProxy is launched
       // after webstore installation), then allow the popup to open at a default
       // location.
+      this.onceLaunched_ = new Promise<void>((F, R) => {
+        this.fulfillLaunched = F;
+      });
       chrome.windows.create({url: this.POPUP_URL,
                      type: "popup",
                      width: 371,
                      height: 600}, this.newPopupCreated_);
-
+      return this.onceLaunched_;
     } else if (this.popupState_ == PopupState.LAUNCHED) {
       // If the popup is already open, simply focus on it.
       chrome.windows.update(this.popupWindowId_, {focused: true});
+      return Promise.resolve<void>();
     } else {
+      return this.onceLaunched_;
       console.log("Waiting for popup to launch...");
     }
   }
@@ -191,7 +200,7 @@ class ChromeBrowserApi implements BrowserAPI {
     var notification =
         new Notification('uProxy', {
           body: text,
-          icon: 'icons/38_' + UI.DEFAULT_ICON,
+          icon: 'icons/38_' + Constants.DEFAULT_ICON,
           tag: tag
         });
     notification.onclick = () => {
@@ -209,11 +218,13 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public emit = (name :string, ...args :Object[]) => {
-    if (name in this.events_) {
-      this.events_[name].apply(null, args);
-    } else {
-      console.error('Attempted to trigger an unknown event', name);
-    }
+    this.bringUproxyToFront().then(() => {
+      if (name in this.events_) {
+        this.events_[name].apply(null, args);
+      } else {
+        console.error('Attempted to trigger an unknown event', name);
+      }
+    });
   }
 
   public frontedPost = (data :any,

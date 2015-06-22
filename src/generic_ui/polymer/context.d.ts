@@ -5,6 +5,7 @@ interface UiGlobals {
   ui :any;
   core :any;
   model :any;
+  browserApi :any;
   browserConnector :any
 }
 

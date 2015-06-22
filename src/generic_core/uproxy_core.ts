@@ -49,9 +49,52 @@ export interface NetworkInfo {
  */
 export class uProxyCore implements uproxy_core_api.CoreApi {
 
+  private copyPasteSharingMessage_ :string = '';
+  private copyPasteGettingMessage_ :string = '';
+
   constructor() {
     log.debug('Preparing uProxy Core');
-    copyPasteConnection = new remote_connection.RemoteConnection(ui.update);
+    copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
+      // TODO send this update only when
+      // update !== uproxy_core_api.Update.SIGNALLING_MESSAGE
+      ui.update(update, message);
+      if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
+        return;
+      }
+
+      var data :social.PeerMessage[] = [], str = '';
+
+      switch (message.type) {
+        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
+          str = this.copyPasteGettingMessage_;
+          break;
+        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
+          str = this.copyPasteSharingMessage_;
+          break;
+      }
+
+      if (str) {
+        data = JSON.parse(atob(decodeURIComponent(str)));
+      }
+
+      data.push(message);
+
+      str = encodeURIComponent(btoa(JSON.stringify(data)));
+
+      // reverse of above switch (since I can't just use a reference)
+      switch (message.type) {
+        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
+          this.copyPasteGettingMessage_ = str;
+          break;
+        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
+          this.copyPasteSharingMessage_ = str;
+          break;
+      }
+      ui.update(uproxy_core_api.Update.COPYPASTE_MESSAGE, {
+        type: message.type,
+        data: str
+      });
+    });
   }
 
   // sendInstanceHandshakeMessage = (clientId :string) => {
@@ -165,6 +208,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     globals.settings.allowNonUnicast = newSettings.allowNonUnicast;
     globals.settings.mode = newSettings.mode;
     globals.settings.statsReportingEnabled = newSettings.statsReportingEnabled;
+    globals.settings.splashState = newSettings.splashState;
     globals.settings.consoleFilter = newSettings.consoleFilter;
     loggingController.setDefaultFilter(
       loggingTypes.Destination.console,
@@ -177,7 +221,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       return {
         networkNames: Object.keys(social_network.networks),
         globalSettings: globals.settings,
-        onlineNetworks: social_network.getOnlineNetworks()
+        onlineNetworks: social_network.getOnlineNetworks(),
+        copyPasteState: {
+          connectionState: copyPasteConnection.getCurrentState(),
+          endpoint: copyPasteConnection.activeEndpoint,
+          gettingMessage: this.copyPasteGettingMessage_,
+          sharingMessage: this.copyPasteSharingMessage_
+        }
       };
     });
   }
@@ -200,6 +250,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
+    this.copyPasteGettingMessage_ = '';
     if (remoteProxyInstance) {
       log.warn('Existing proxying session, terminating');
       remoteProxyInstance.stop();
@@ -214,6 +265,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public startCopyPasteShare = () => {
+    this.copyPasteSharingMessage_ = '';
     copyPasteConnection.startShare(globals.MESSAGE_VERSION);
   }
 
