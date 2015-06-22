@@ -162,8 +162,10 @@
         <div class='clickable currentAccountInfo' on-tap='{{ toggleAccountChooser }}'>
           <div horizontal center layout>
             <span class='subdued' flex>{{ connectedNetworks }}</span>
-            <core-icon icon='arrow-drop-down' hidden?='{{ model.onlineNetworks.length === 1 || accountChooserOpen }}'></core-icon>
-            <core-icon icon='arrow-drop-up' hidden?='{{ model.onlineNetworks.length === 1 || !accountChooserOpen }}'></core-icon>
+            <span hidden?='{{ model.onlineNetworks.length === 1 }}'>
+              <core-icon icon='arrow-drop-down' hidden?='{{ accountChooserOpen }}'></core-icon>
+              <core-icon icon='arrow-drop-up' hidden?='{{ !accountChooserOpen }}'></core-icon>
+            </span>
             </span>
           </div>
 
