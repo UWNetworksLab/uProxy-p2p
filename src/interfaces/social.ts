@@ -199,6 +199,17 @@ export interface UserState {
   consent     :ConsentState;
 }
 
+// One possible payload of SIGNAL_FROM_CLIENT_PEER and SIGNAL_FROM_SERVER_PEER
+// messages. Multiple fields may be present.
+export interface SignallingMetadata {
+  // If present, indicates a new batch of signalling messages.
+  first ?:boolean;
+
+  // Random ID associated with this proxying attempt.
+  // USed for logging purposes.
+  proxyingId ?:string;
+}
+
 /**
  *
  */

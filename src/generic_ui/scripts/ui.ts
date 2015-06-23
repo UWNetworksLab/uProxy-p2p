@@ -341,11 +341,14 @@ export class UserInterface implements ui_constants.UiApi {
       this.updateSharingStatusBar_();
     });
 
-    core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (nameOfFriend :string) => {
+    // TODO: grab logs now, lest they be lost in time...like tears in rain
+    core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (info:uproxy_core_api.FriendFailedToGet) => {
+      console.log('proxying attempt ' + info.proxyingId + ' failed!!!');
       // Setting this variable will toggle a paper-toast (in root.html)
       // to open.
-      this.toastMessage =
-          this.i18n_t('unableToShareWith', { name: nameOfFriend });
+      this.toastMessage = this.i18n_t('unableToShareWith', {
+        name: info.name
+      });
       this.unableToShare = true;
     });
 

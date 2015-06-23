@@ -93,6 +93,9 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
+    // Unique ID of the most recent proxying attempt with this instance.
+    private proxyingId_: string;
+
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -123,7 +126,6 @@ export var remoteProxyInstance :RemoteInstance = null;
       log.debug('connection update %1: %2', uproxy_core_api.Update[update], data);
       switch (update) {
         case uproxy_core_api.Update.SIGNALLING_MESSAGE:
-        case uproxy_core_api.Update.PROXYING_SESSION_ID:
           var clientId = this.user.instanceToClient(this.instanceId);
           if (!clientId) {
             log.error('Could not find clientId for instance', this);
@@ -172,16 +174,39 @@ export var remoteProxyInstance :RemoteInstance = null;
       return this.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
     }
 
-    /**
-     * Handle signals sent along the signalling channel from the remote
-     * instance, and pass it along to the relevant socks-rtc module.
-     * TODO: spec
-     * TODO: assuming that signal is valid, should we remove signal?
-     * TODO: return a boolean on success/failure
-     */
-    public handleSignal = (type:social.PeerMessageType,
-                           signalFromRemote:bridge.SignallingMessage,
-                           messageVersion:number) :Promise<void> => {
+    public handleSignal = (
+        type:social.PeerMessageType,
+        message:Object,
+        messageVersion:number)
+        :Promise<void> => {
+      // TODO: forward messages from pre-bridge clients
+      if ((<any>message).signals !== undefined) {
+        return this.forwardSignal_(type, message, messageVersion);
+      } else {
+        return this.handleMetadataSignal_(<social.SignallingMetadata>message);
+      }
+    }
+
+    private handleMetadataSignal_ = (
+        message:social.SignallingMetadata) : Promise<void> => {
+      if (message.first) {
+        log.info('remote side has initiated a new proxying session');
+        this.connection_.resetSharerCreated();
+        this.startShare_();
+      }
+      if (message.proxyingId) {
+        log.info('unique ID for proxying session is %1', message.proxyingId);
+        this.proxyingId_ = message.proxyingId;
+      }
+      return Promise.resolve<void>();
+    }
+
+    // Forwards a signalling message to the RemoteConnection.
+    private forwardSignal_ = (
+        type:social.PeerMessageType,
+        signalFromRemote: Object,
+        messageVersion: number)
+        :Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -189,17 +214,7 @@ export var remoteProxyInstance :RemoteInstance = null;
           return Promise.resolve<void>();
         }
 
-// TREV: need to check for session id?
-
-        // Create a new RtcToNet instance each time a new round of client peer
-        // messages begins. The type field check is so pre-bridge,
-        // MESSAGE_VERSION = 1, clients can initiate.
-        // TODO: remove the OFFER check once ancient clients are deprecated
-        if (signalFromRemote.first ||
-            ((<signals.Message>signalFromRemote).type === signals.Type.OFFER)) {
-          this.connection_.resetSharerCreated();
-          this.startShare_();
-        }
+        // TODO: handle old clients
 
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
@@ -253,7 +268,10 @@ export var remoteProxyInstance :RemoteInstance = null;
         // assumption that our peer failed to start getting access.
         this.startRtcToNetTimeout_ = setTimeout(() => {
           log.warn('Timing out rtcToNet_ connection');
-          ui.update(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, this.user.name);
+          ui.update(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, {
+            name: this.user.name,
+            proxyingId: this.proxyingId_
+          });
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
 
