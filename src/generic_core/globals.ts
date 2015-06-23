@@ -4,6 +4,7 @@ import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/l
 import metrics_module = require('./metrics');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
+import _ = require('lodash');
 
 var log :logging.Log = new logging.Log('globals');
 
@@ -47,39 +48,26 @@ export var natType :string = '';
 
 export var loadSettings :Promise<void> =
   storage.load<uproxy_core_api.GlobalSettings>('globalSettings')
-    .then((settingsObj :uproxy_core_api.GlobalSettings) => {
-      log.info('Loaded global settings', settingsObj);
-      settings = settingsObj;
-      // If no custom STUN servers were found in storage, use the default
-      // servers.
-      if (!settings.stunServers
-          || settings.stunServers.length == 0) {
-        settings.stunServers = DEFAULT_STUN_SERVERS.slice(0);
-      }
-      // If storage does not know if this user has seen a specific overlay
-      // yet, assume the user has not seen it so that they will not miss any
-      // onboarding information.
-      if (settings.hasSeenSharingEnabledScreen == null) {
-        settings.hasSeenSharingEnabledScreen = false;
-      }
-      if (settings.hasSeenWelcome == null) {
-        settings.hasSeenWelcome = false;
-      }
-      if (settings.allowNonUnicast == null) {
-        settings.allowNonUnicast = false;
-      }
-      if (typeof settings.mode == 'undefined') {
-        settings.mode = user_interface.Mode.GET;
-      }
-      if (typeof settings.splashState === 'undefined') {
-        settings.splashState = 0;
-      }
-      if (settings.statsReportingEnabled == null) {
-        settings.statsReportingEnabled = false;
-      }
-      if (settings.language == null) {
-        settings.language = 'en';
-      }
+    .then((settingsFromStorage :uproxy_core_api.GlobalSettings) => {
+      log.info('Loaded global settings', settingsFromStorage);
+
+      // Use the setting values loaded from storage unless the value was not
+      // set in storage in which case we should use the default value (set
+      // above)
+      _.merge(settings, settingsFromStorage, (a :Object, b :Object) => {
+        if (_.isArray(a) && _.isArray(b)) {
+          // arrays should be replaced instead of combined
+          return b;
+        }
+
+        if (_.isNull(b)) {
+          // treat null the same as undefined to make sure support does not break
+          return a;
+        }
+
+        // this causes us to fall back to the default merge behaviour
+        return undefined;
+      });
     }).catch((e) => {
       log.info('No global settings loaded', e.message);
     });
