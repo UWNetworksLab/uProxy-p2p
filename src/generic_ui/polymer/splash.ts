@@ -27,13 +27,14 @@ Polymer({
       console.error('Invalid call to setState: ' + state);
       return;
     }
-    ui.splashState = state;
+    model.globalSettings.splashState = state;
+    core.updateGlobalSettings(model.globalSettings);
   },
   next: function() {
-    this.setState(ui.splashState + 1);
+    this.setState(model.globalSettings.splashState + 1);
   },
   prev: function() {
-    this.setState(ui.splashState - 1);
+    this.setState(model.globalSettings.splashState - 1);
   },
   copypaste: function() {
     this.fire('core-signal', { name: 'copypaste-init' });
@@ -49,7 +50,6 @@ Polymer({
     }
   },
   ready: function() {
-    this.ui = ui;
     this.model = model;
     this.languages = languages;
   }

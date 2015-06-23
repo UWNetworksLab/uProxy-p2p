@@ -64,7 +64,6 @@
     }
     #nextWrapper {
       margin-top: 50px;
-      margin-bottom: 15px;
     }
     #oneTimeConnection {
       margin-bottom: 1.5em;
@@ -89,10 +88,11 @@
     }
     .prevArrow {
       position: absolute;
-      left: 8px;
       top: 8px;
       cursor: pointer;
       z-index: 11; /* Must be greater than z-index of .view */
+      margin-left: 8px;
+      margin-right: 8px;
     }
     #intro1, #networks {
       height: 100%;
@@ -110,10 +110,12 @@
     }
     </style>
 
-    <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
-        hidden?='{{SPLASH_STATES.INTRO==ui.splashState}}'></core-icon>
+    <div horizontal layout>
+      <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
+          hidden?='{{SPLASH_STATES.INTRO==model.globalSettings.splashState}}'></core-icon>
+    </div>
 
-    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==ui.splashState}}'>
+    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==model.globalSettings.splashState}}'>
       <div class='view' flex>
         <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
@@ -145,7 +147,7 @@
       </uproxy-faq-link>
     </div>
 
-    <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
+    <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==model.globalSettings.splashState}}'>
       <div class='view' flex>
         <h1 class='sub'>{{ 'whichSocialNetwork' | $$ }}</h1>
         <p>{{ 'whySocialNetwork' | $$ }}</p>

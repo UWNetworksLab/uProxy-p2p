@@ -45,6 +45,7 @@ describe('UI.User', () => {
         timestamp: Date.now()
       },
       offeringInstances: [],
+      gettingInstanceIds: [],
       allInstanceIds: [],
       isOnline: true,
       consent: {

@@ -3,7 +3,7 @@
   "name": "__MSG_appName__",
   "description": "__MSG_appDescription__",
   "minimum_chrome_version": "41.0.2272.63",
-  "version": "0.8.11",
+  "version": "0.8.12",
   "default_locale": "en",
   "icons": {
       "128": "icons/128_online.png"
@@ -14,7 +14,8 @@
     }
   },
   "permissions": [
-    "storage"
+    "storage",
+    "http://*/"
   ],
   "sockets": {
     "tcp": { "connect" : "" },

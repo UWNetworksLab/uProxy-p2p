@@ -44,6 +44,8 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
     // TODO: set up a better type for this
     private sendUpdate_ :(x :uproxy_core_api.Update, data?:Object) => void;
 
+    public activeEndpoint :net.Endpoint = null;
+
     constructor(
       sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void
     ) {
@@ -198,6 +200,7 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
         this.bytesReceived_ = 0;
         this.stateRefresh_();
         this.socksToRtc_ = null;
+        this.activeEndpoint = null;
       });
 
       this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
@@ -213,14 +216,17 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
       };
 
       var pc: peerconnection.PeerConnection<Object>;
-      if (remoteVersion < 2) {
+      if (remoteVersion === 1) {
         log.debug('peer is running client version 1, using old peerconnection');
         pc = new peerconnection.PeerConnectionClass(
           freedom['core.rtcpeerconnection'](config),
           'sockstortc');
-      } else {
-        log.debug('peer is running client version >1, using bridge');
+      } else if (remoteVersion === 2) {
+        log.debug('peer is running client version 2, using bridge without obfuscation');
         pc = bridge.preObfuscation('sockstortc', config);
+      } else {
+        log.debug('peer is running client version >2, using bridge with basicObfuscation');
+        pc = bridge.basicObfuscation('sockstortc', config);
       }
 
       return this.socksToRtc_.start(tcpServer, pc).then(
@@ -229,6 +235,7 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
         this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
         globals.metrics.increment('success');
         this.stateRefresh_();
+        this.activeEndpoint = endpoint;
         return endpoint;
       }).catch((e :Error) => {
         this.localGettingFromRemote = social.GettingState.NONE;
@@ -276,12 +283,16 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
     }
 
     private stateRefresh_ = () => {
-      this.sendUpdate_(uproxy_core_api.Update.STATE, {
+      this.sendUpdate_(uproxy_core_api.Update.STATE, this.getCurrentState());
+    }
+
+    public getCurrentState = () => {
+      return {
         bytesSent: this.bytesSent_,
         bytesReceived: this.bytesReceived_,
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote
-      });
+      };
     }
   }
 // }

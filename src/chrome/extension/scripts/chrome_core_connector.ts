@@ -9,6 +9,7 @@ import browser_connector = require('../../../interfaces/browser_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import chrome_api = require('../../../interfaces/chrome');
 import ChromeMessage = chrome_api.ChromeMessage;
+import Constants = require('../../../generic_ui/scripts/constants');
 
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
@@ -45,7 +46,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
   // A freedom-type indexed object where each key provides a list of listener
   // callbacks: e.g. { type1 :[listener1_for_type1, ...], ... }
   // TODO: Replace with Core -> UI specified update API.
-  private listeners_ :{[type :string] : Function[]};
+  private listeners_ :{[type :string] : Function};
 
   // Whether waiting for app installation is blocking the extension-app
   // connection. If this is true, the uProxy popup should automatically
@@ -141,8 +142,8 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         // Once connected, the extension popup should show its start page.
         chrome.browserAction.setIcon({
           path: {
-            "19": "icons/19_" + user_interface.LOGGED_OUT_ICON,
-            "38": "icons/38_" + user_interface.LOGGED_OUT_ICON
+            "19": "icons/19_" + Constants.LOGGED_OUT_ICON,
+            "38": "icons/38_" + Constants.LOGGED_OUT_ICON
           }
         });
         this.fulfillConnect_();
@@ -190,17 +191,19 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
    */
   public onUpdate = (update :uproxy_core_api.Update, handler :Function) => {
     var type = '' + update;
-    if (!(type in this.listeners_)) {
-      this.listeners_[type] = [];
+    var alreadyHooked = typeof this.listeners_[type] !== 'undefined';
+    // This is called every time we open a popup in chrome.
+    // New handlers need to replace old handlers.
+    this.listeners_[type] = handler;
+    if (!alreadyHooked) {
+      var payload = {
+        cmd: 'on',
+        type: update
+      };
+      // This log floods the console during testing. Uncomment for debugging.
+      // console.log('UI onUpdate for', JSON.stringify(payload));
+      this.send(payload, true);
     }
-    this.listeners_[type].push(handler);
-    var payload = {
-      cmd: 'on',
-      type: update
-    };
-    // This log floods the console during testing. Uncomment for debugging.
-    // console.log('UI onUpdate for', JSON.stringify(payload));
-    this.send(payload, true);
   }
 
   /**
@@ -231,8 +234,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
    */
   private receive_ = (msg :{type :string; data :any}) => {
     if (msg.type in this.listeners_) {
-      var handlers :Function[] = this.listeners_[msg.type].slice(0);
-      handlers.forEach((handler) => { handler(msg.data); });
+      this.listeners_[msg.type](msg.data);
       // TODO: Fire a DOM update? Decide if this should happen here or during a
       // ui.sync call.
     }
