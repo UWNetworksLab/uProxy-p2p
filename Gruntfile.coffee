@@ -552,6 +552,11 @@ module.exports = (grunt) ->
               src: ['**']
               dest: chromeAppDevPath + '/freedom-social-firebase'
             },
+            {
+              expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
+              src: ['**']
+              dest: chromeAppDevPath + '/freedom-pgp-e2e'
+            },
             { # uProxy Icons and fonts
               expand: true, cwd: 'src/'
               src: ['icons/128_online.png', 'fonts/*']
