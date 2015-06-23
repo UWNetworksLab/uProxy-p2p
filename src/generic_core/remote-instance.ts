@@ -120,9 +120,10 @@ export var remoteProxyInstance :RemoteInstance = null;
     }
 
     private handleConnectionUpdate_ = (update :uproxy_core_api.Update, data?:any) => {
-      log.debug('connection update: %1', uproxy_core_api.Update[update]);
+      log.debug('connection update %1: %2', uproxy_core_api.Update[update], data);
       switch (update) {
         case uproxy_core_api.Update.SIGNALLING_MESSAGE:
+        case uproxy_core_api.Update.PROXYING_SESSION_ID:
           var clientId = this.user.instanceToClient(this.instanceId);
           if (!clientId) {
             log.error('Could not find clientId for instance', this);
@@ -187,6 +188,8 @@ export var remoteProxyInstance :RemoteInstance = null;
           log.warn('Remote side attempted access without permission');
           return Promise.resolve<void>();
         }
+
+// TREV: need to check for session id?
 
         // Create a new RtcToNet instance each time a new round of client peer
         // messages begins. The type field check is so pre-bridge,

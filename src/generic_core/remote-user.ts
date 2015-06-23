@@ -212,6 +212,10 @@ var log :logging.Log = new logging.Log('remote-user');
               msg.version);
           return;
 
+        case social.PeerMessageType.
+        
+          return;
+
         case social.PeerMessageType.INSTANCE_REQUEST:
           log.debug('received instance request', clientId);
           this.sendInstanceHandshake(clientId);

@@ -53,6 +53,7 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
       this.resetSharerCreated();
     }
 
+// TREV: generate ID on first message.
     private createSender_ = (type :social.PeerMessageType) => {
       return (signal :bridge.SignallingMessage) => {
         this.sendUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {

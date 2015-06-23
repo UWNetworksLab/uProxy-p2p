@@ -111,7 +111,13 @@ export enum Update {
   STATE = 2019,
   FRIEND_FAILED_TO_GET = 2020,
   POST_TO_CLOUDFRONT = 2021,
-  COPYPASTE_MESSAGE = 2022
+  COPYPASTE_MESSAGE = 2022,
+
+  // Specfies the unique ID associated with this proxying session.
+  // The ID is used for feedback purposes. This also signifies a
+  // new a attempt to proxying or, in other words, delimits proxying
+  // attempts.
+  PROXYING_SESSION_ID = 2023
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
