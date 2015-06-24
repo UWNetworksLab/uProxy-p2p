@@ -167,8 +167,8 @@ export class UserInterface implements ui_constants.UiApi {
   };
 
   public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
-  public copyPasteGettingMessage :string = '';
-  public copyPasteSharingMessage :string = '';
+  public copyPasteGettingMessages :social.PeerMessage[] = [];
+  public copyPasteSharingMessages :social.PeerMessage[] = [];
 
   public browser :string = '';
 
@@ -251,14 +251,14 @@ export class UserInterface implements ui_constants.UiApi {
       // TODO: Display the message in the 'manual network' UI.
     });
 
-    core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE, (message :social.PeerMessage) => {
-
+    core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE,
+        (message :uproxy_core_api.CopyPasteMessages) => {
       switch (message.type) {
         case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          this.copyPasteGettingMessage = <string>message.data;
+          this.copyPasteGettingMessages = message.data;
           break;
         case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          this.copyPasteSharingMessage = <string>message.data;
+          this.copyPasteSharingMessages = message.data;
           break;
       }
     });
@@ -489,7 +489,7 @@ export class UserInterface implements ui_constants.UiApi {
     switch (match[1]) {
       case 'request':
         expectedType = social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER;
-        this.copyPasteSharingMessage = '';
+        this.copyPasteSharingMessages = [];
         this.core.startCopyPasteShare();
         break;
       case 'offer':
@@ -686,7 +686,9 @@ export class UserInterface implements ui_constants.UiApi {
           name: networkMsg.name,
           userId: networkMsg.userId,
           roster: {},
-          logoutExpected: false
+          logoutExpected: false,
+          userName: networkMsg.userName,
+          imageData: networkMsg.imageData
         };
         model.onlineNetworks.push(existingNetwork);
       }
@@ -946,8 +948,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     // Maybe refactor this to be copyPasteState.
     this.copyPasteState = state.copyPasteState.connectionState;
-    this.copyPasteGettingMessage = state.copyPasteState.gettingMessage;
-    this.copyPasteSharingMessage = state.copyPasteState.sharingMessage;
+    this.copyPasteGettingMessages = state.copyPasteState.gettingMessages;
+    this.copyPasteSharingMessages = state.copyPasteState.sharingMessages;
     this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
     if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
         this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
