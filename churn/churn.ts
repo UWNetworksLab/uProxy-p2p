@@ -66,10 +66,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   export var selectBestPublicAddress = (candidates:Candidate[])
       : NatPair => {
     var score = (c:Candidate) : boolean[] => {
-      var addr = ipaddr.process(c.connectionAddress);
+      var addr = ipaddr.process(c.ip);
       // List of selection criteria, from most important to least.
       return [
-        c.transport === 'udp',
+        c.protocol === 'udp',
         addr.kind() === 'ipv4',
         c.type === 'host' && addr.range() === 'unicast',
         c.type === 'srflx'
@@ -91,18 +91,18 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     if (best.type === 'srflx') {
       return {
         internal: {
-          address: best.relAddress,
-          port: best.relPort
+          address: best.relatedAddress,
+          port: best.relatedPort
         },
         external: {
-          address: best.connectionAddress,
-          port: best.connectionPort
+          address: best.ip,
+          port: best.port
         }
       };
     } else if (best.type === 'host') {
       var endpoint = {
-          address: best.connectionAddress,
-          port: best.connectionPort
+          address: best.ip,
+          port: best.port
       };
       return {
         internal: endpoint,
@@ -210,7 +210,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           (message:signals.Message) => {
         if (message.type === signals.Type.CANDIDATE) {
           var c = Candidate.fromRTCIceCandidate(message.candidate);
-          if (c.transport === 'udp') {
+          if (c.protocol === 'udp') {
             // It's immediately safe to send each candidate to the remote peer,
             // because the remote peer will retry for several seconds, and the
             // probe connection will not respond to any pings because it doesn't
@@ -270,8 +270,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
       var c = Candidate.fromRTCIceCandidate(iceCandidate);
       var remoteEndpoint = {
-        address: c.connectionAddress,
-        port: c.connectionPort
+        address: c.ip,
+        port: c.port
       };
       if (!this.remoteCandidates_[remoteEndpoint.address]) {
         this.remoteCandidates_[remoteEndpoint.address] = {};
@@ -291,8 +291,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       var original = this.getRemoteCandidate_(mapping.remote);
       if (original) {
         var copy = original.clone();
-        copy.connectionAddress = mapping.local.address;
-        copy.connectionPort = mapping.local.port;
+        copy.ip = mapping.local.address;
+        copy.port = mapping.local.port;
         this.obfuscatedConnection_.handleSignalMessage({
           type: signals.Type.CANDIDATE,
           candidate: copy.toRTCIceCandidate()
@@ -335,8 +335,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
               throw new Error('no candidate line');
             }
             var c = Candidate.fromRTCIceCandidate(message.candidate);
-            if (c.transport !== 'udp') {
-              throw new Error('Wrong transport: ' + c.transport);
+            if (c.protocol !== 'udp') {
+              throw new Error('Wrong transport: ' + c.protocol);
             }
             var browserEndpoint = c.getLocalEndpoint();
             this.onceHavePipe_.then(() => {
@@ -373,8 +373,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         sdpMid: '',
         sdpMLineIndex: 0
       });
-      c.connectionAddress = endpoint.address;
-      c.connectionPort = endpoint.port;
+      c.ip = endpoint.address;
+      c.port = endpoint.port;
       return c.toRTCIceCandidate();
     }
 

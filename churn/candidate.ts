@@ -3,6 +3,9 @@
 
 import net = require('../net/net.types');
 
+// Throughout this file "RTCIceCandidate" refers to the JSON structure
+// produced and consumed by Freedom, not an actual browser
+// RTCIceCandidate object.
 import RTCIceCandidate = freedom_RTCPeerConnection.RTCIceCandidate;
 
 export interface IceExtension {
@@ -10,16 +13,24 @@ export interface IceExtension {
   value: string;
 }
 
+// Represents an RTCIceCandidate object from the WebRTC spec:
+//   http://www.w3.org/TR/webrtc/#rtcicecandidate-type
+// This encapsulates a candidate as described in section 15.1 of the ICE RFC
+//   (http://tools.ietf.org/html/rfc5245#section-15.1) like
+//   "candidate:9097 1 udp 4175 127.0.0.1 50840 typ relay raddr 172.26.108.25 rport 56635"
+// Names based on ORTC's latest version of RTCIceCandidate:
+//   http://ortc.org/wp-content/uploads/2015/06/ortc.html#rtcicecandidate*
 export class Candidate {
-  public foundation: string;
   public component: number;
-  public transport: string;
+
+  public foundation: string;
   public priority: number;
-  public connectionAddress: string;
-  public connectionPort: number;
+  public ip: string;
+  public protocol: string;
+  public port: number;
   public type: string;
-  public relAddress: string;
-  public relPort: number;
+  public relatedAddress: string;
+  public relatedPort: number;
 
   public extensions: IceExtension[] = [];
 
@@ -28,14 +39,18 @@ export class Candidate {
 
   public getLocalEndpoint() : net.Endpoint {
     if (this.type === 'host') {
+      // The local endpoint of a host candidate is the same as its
+      // public endpoint.
       return {
-        address: this.connectionAddress,
-        port: this.connectionPort
+        address: this.ip,
+        port: this.port
       };
     } else if (this.type === 'srflx') {
+      // The local endpoint of a server-reflexive candidate is the
+      // local port that was used to contact the STUN server.
       return {
-        address: this.relAddress,
-        port: this.relPort
+        address: this.relatedAddress,
+        port: this.relatedPort
       };
     } else {
       throw new Error('Unknown candidate type ' + this.type);
@@ -44,15 +59,15 @@ export class Candidate {
 
   public clone() : Candidate {
     var c = new Candidate();
-    c.foundation = this.foundation;
     c.component = this.component;
-    c.transport = this.transport;
+    c.foundation = this.foundation;
     c.priority = this.priority;
-    c.connectionAddress = this.connectionAddress;
-    c.connectionPort = this.connectionPort;
+    c.ip = this.ip;
+    c.protocol = this.protocol;
+    c.port = this.port;
     c.type = this.type;
-    c.relAddress = this.relAddress;
-    c.relPort = this.relPort;
+    c.relatedAddress = this.relatedAddress;
+    c.relatedPort = this.relatedPort;
     c.extensions = this.extensions.slice();
     c.sdpMid = this.sdpMid;
     c.sdpMLineIndex = this.sdpMLineIndex;
@@ -63,16 +78,16 @@ export class Candidate {
     var candidateLine =
         'candidate:' + this.foundation +
         ' ' + this.component +
-        ' ' + this.transport +
+        ' ' + this.protocol +
         ' ' + this.priority +
-        ' ' + this.connectionAddress +
-        ' ' + this.connectionPort +
+        ' ' + this.ip +
+        ' ' + this.port +
         ' typ ' + this.type;
 
-    if (typeof this.relAddress === 'string') {
+    if (typeof this.relatedAddress === 'string') {
       candidateLine +=
-          ' raddr ' + this.relAddress +
-          ' rport ' + this.relPort;
+          ' raddr ' + this.relatedAddress +
+          ' rport ' + this.relatedPort;
     }
     for (var ext in this.extensions) {
       candidateLine += ' ' + ext.key + ' ' + ext.value;
@@ -87,7 +102,7 @@ export class Candidate {
 
   public static fromRTCIceCandidate(rtcIceCandidate:RTCIceCandidate)
       : Candidate {
-    var makeNumber = (s:string) : number => {
+    var stringToNumber = (s:string) : number => {
       var ret = Number(s);
       if (isNaN(ret)) {
         throw new Error(s + ' is not a number');
@@ -102,19 +117,19 @@ export class Candidate {
 
     var c = new Candidate();
     c.foundation = tokens[0].split(':')[1];
-    c.component = makeNumber(tokens[1]);
-    c.transport = tokens[2].toLowerCase();
-    c.priority = makeNumber(tokens[3]);
-    c.connectionAddress = tokens[4];
-    c.connectionPort = makeNumber(tokens[5]);
+    c.component = stringToNumber(tokens[1]);
+    c.protocol = tokens[2].toLowerCase();
+    c.priority = stringToNumber(tokens[3]);
+    c.ip = tokens[4];
+    c.port = stringToNumber(tokens[5]);
     c.type = tokens[7];
 
     if (tokens[8] === 'raddr') {
-      c.relAddress = tokens[9];
+      c.relatedAddress = tokens[9];
       if (tokens[10] !== 'rport') {
         throw new Error('Missing rport: ' + rtcIceCandidate);
       }
-      c.relPort = makeNumber(tokens[11]);
+      c.relatedPort = stringToNumber(tokens[11]);
     }
 
     for (var i = 12; i < tokens.length; i += 2) {

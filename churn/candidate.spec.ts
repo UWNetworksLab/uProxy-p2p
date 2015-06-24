@@ -27,13 +27,13 @@ describe("extractEndpointFromCandidateLine", function() {
     var c = Candidate.fromRTCIceCandidate(rtcIceCandidate);
     expect(c.foundation).toEqual('129713316');
     expect(c.component).toEqual(2);
-    expect(c.transport).toEqual('udp');
+    expect(c.protocol).toEqual('udp');
     expect(c.priority).toEqual(2122129151);
-    expect(c.connectionAddress).toEqual('172.26.108.25');
-    expect(c.connectionPort).toEqual(40762);
+    expect(c.ip).toEqual('172.26.108.25');
+    expect(c.port).toEqual(40762);
     expect(c.type).toEqual('host');
-    expect(c.relAddress).toBeUndefined();
-    expect(c.relPort).toBeUndefined();
+    expect(c.relatedAddress).toBeUndefined();
+    expect(c.relatedPort).toBeUndefined();
     expect(c.extensions[0]).toEqual({key: 'generation', value: '0'});
 
     expect(c.getLocalEndpoint()).toEqual({
@@ -54,10 +54,10 @@ describe("extractEndpointFromCandidateLine", function() {
     var c = Candidate.fromRTCIceCandidate(rtcIceCandidate);
     expect(c.foundation).toEqual('9097');
     expect(c.component).toEqual(1);
-    expect(c.transport).toEqual('udp');
+    expect(c.protocol).toEqual('udp');
     expect(c.priority).toEqual(4175);
-    expect(c.connectionAddress).toEqual('::1');
-    expect(c.connectionPort).toEqual(50840);
+    expect(c.ip).toEqual('::1');
+    expect(c.port).toEqual(50840);
     expect(c.type).toEqual('srflx');
     expect(c.extensions).toEqual([]);
 
@@ -89,10 +89,10 @@ describe("extractEndpointFromCandidateLine", function() {
     var c = Candidate.fromRTCIceCandidate(rtcIceCandidate);
     expect(c.foundation).toEqual('1302982778');
     expect(c.component).toEqual(1);
-    expect(c.transport).toEqual('tcp');
+    expect(c.protocol).toEqual('tcp');
     expect(c.priority).toEqual(1518214911);
-    expect(c.connectionAddress).toEqual('172.29.18.131');
-    expect(c.connectionPort).toEqual(0);
+    expect(c.ip).toEqual('172.29.18.131');
+    expect(c.port).toEqual(0);
     expect(c.type).toEqual('host');
     expect(c.extensions[0]).toEqual({key: 'tcptype', value: 'active'});
     expect(c.extensions[1]).toEqual({key: 'generation', value: '0'});
