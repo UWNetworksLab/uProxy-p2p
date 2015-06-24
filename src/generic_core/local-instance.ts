@@ -25,7 +25,7 @@ import storage = globals.storage;
     public instanceId  :string;
     public keyHash     :string;
     public clientId    :string;
-    public name        :string;
+    public userName        :string;
     public imageData :string;
 
     /**
@@ -74,7 +74,7 @@ import storage = globals.storage;
     }
 
     public updateProfile = (profile :social.UserProfileMessage) :void => {
-      this.name = profile.name;
+      this.userName = profile.name;
       this.imageData = profile.imageData;
       this.saveToStorage();
     }
@@ -82,7 +82,7 @@ import storage = globals.storage;
     public getUserProfile = () :social.UserProfileMessage => {
       return {
         userId: this.userId,
-        name: this.name,
+        name: this.userName,
         imageData: this.imageData
       };
     }
@@ -94,7 +94,7 @@ import storage = globals.storage;
       return {
         instanceId:  this.instanceId,
         userId:      this.userId,
-        name:        this.name,
+        userName:        this.userName,
         imageData:   this.imageData,
         keyHash:     this.keyHash,
       };
@@ -102,8 +102,8 @@ import storage = globals.storage;
     public restoreState = (state:social.LocalInstanceState) :void => {
       this.instanceId = state.instanceId;
       this.keyHash = state.keyHash;
-      if (typeof this.name === 'undefined') {
-        this.name = state.name;
+      if (typeof this.userName === 'undefined') {
+        this.userName = state.userName;
         this.imageData = state.imageData;
       }
     }

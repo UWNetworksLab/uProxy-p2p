@@ -26,13 +26,10 @@ export interface BaseUser {
   name :string;
 }
 
-/**
- * Base interface for all Instances.
- */
 export interface LocalInstanceState {
   instanceId  :string;
   userId      :string;
-  name        :string;
+  userName        :string;
   imageData   :string;
   keyHash     :string;
 }

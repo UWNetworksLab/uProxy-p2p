@@ -139,7 +139,7 @@ export function notifyUI(networkName :string, userId :string) {
   var imageData = '';
   if (network !== null) {
     online = true;
-    userName = network.myInstance.name;
+    userName = network.myInstance.userName;
     imageData = network.myInstance.imageData;
   }
 

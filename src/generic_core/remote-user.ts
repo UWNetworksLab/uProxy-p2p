@@ -521,7 +521,7 @@ var log :logging.Log = new logging.Log('remote-user');
               isRequesting: this.consent.localRequestsAccessFromRemote,
               isOffering: this.consent.localGrantsAccessToRemote
             },
-            name: myInstance.name,
+            name: myInstance.userName,
             userId: myInstance.userId
           }
         };
