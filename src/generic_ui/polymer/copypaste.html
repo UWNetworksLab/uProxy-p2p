@@ -33,14 +33,14 @@
     <core-signals on-core-signal-copypaste-back='{{ exitMode }}'></core-signals>
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
-    <uproxy-app-bar disableback='{{ ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
-      <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>
+    <uproxy-app-bar disableback='{{ ui.copyPasteState.localGettingFromRemote === GettingState.GETTING_ACCESS || ui.copyPasteState.localSharingWithRemote === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
+      <span hidden?='{{ SharingState.NONE === ui.copyPasteState.localSharingWithRemote }}'>
         {{ 'shareOneTime' | $$ }}
       </span>
-      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState }}'>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteState.localSharingWithRemote || GettingState.NONE === ui.copyPasteState.localGettingFromRemote }}'>
         {{ 'requestOneTime' | $$ }}
       </span>
-      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || !(SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState) }}'>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteState.localSharingWithRemote || !(SharingState.NONE !== ui.copyPasteState.localSharingWithRemote || GettingState.NONE === ui.copyPasteState.localGettingFromRemote) }}'>
         {{ 'startOneTime' | $$ }}
       </span>
     </uproxy-app-bar>
@@ -49,7 +49,7 @@
       {{ 'errorParsingLink' | $$ }}
     </uproxy-bubble>
 
-    <div id='nothing' hidden?='{{ ui.copyPasteGettingState !== GettingState.NONE || ui.copyPasteSharingState !== SharingState.NONE }}'>
+    <div id='nothing' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.NONE || ui.copyPasteState.localSharingWithRemote !== SharingState.NONE }}'>
       <p>
         {{ 'noLongerGetting' | $$ }}
       </p>
@@ -67,23 +67,23 @@
       <p>{{ 'sendConnectionLink' | $$ }}</p>
     </div>
 
-    <div id='getting' hidden?='{{ ui.copyPasteGettingState === GettingState.NONE || ui.copyPasteSharingState !== SharingState.NONE }}'>
-      <div class='link' hidden?='{{ ui.copyPasteGettingState !== GettingState.TRYING_TO_GET_ACCESS }}'>
+    <div id='getting' hidden?='{{ ui.copyPasteState.localGettingFromRemote === GettingState.NONE || ui.copyPasteState.localSharingWithRemote !== SharingState.NONE }}'>
+      <div class='link' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.TRYING_TO_GET_ACCESS }}'>
         <p>
           {{ 'copyConnectionLink' | $$ }}
         </p>
 
-        <textarea readonly hidden?='{{ !ui.copyPasteGettingMessage.length }}'
-          class='message' on-tap='{{ select }}'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessage }}</textarea>
+        <textarea readonly hidden?='{{ !ui.copyPasteGettingMessages.length }}'
+          class='message' on-tap='{{ select }}'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessages | encodeMessage }}</textarea>
 
-        <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessage.length }}'>{{ 'loading' | $$ }}</span>
+        <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessages.length }}'>{{ 'loading' | $$ }}</span>
 
         <p>
           {{ 'friendNeedsToClick' | $$ }}
         </p>
       </div>
 
-      <div class='connected' hidden?='{{ ui.copyPasteGettingState !== GettingState.GETTING_ACCESS }}'>
+      <div class='connected' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.GETTING_ACCESS }}'>
         <p>{{ 'oneTimeSuccess' | $$ }}</p>
 
         <p>
@@ -114,18 +114,18 @@
       </div>
     </div>
 
-    <div id='sharing' hidden?='{{ ui.copyPasteSharingState === SharingState.NONE }}'>
-      <div class='link' hidden?='{{ ui.copyPasteSharingState !== SharingState.TRYING_TO_SHARE_ACCESS }}'>
+    <div id='sharing' hidden?='{{ ui.copyPasteState.localSharingWithRemote === SharingState.NONE }}'>
+      <div class='link' hidden?='{{ ui.copyPasteState.localSharingWithRemote !== SharingState.TRYING_TO_SHARE_ACCESS }}'>
         <p>{{ 'friendRequestedOneTime' | $$ }}</p>
 
         <p>
           {{ 'howToOfferOneTime' | $$ }}
         </p>
 
-        <textarea readonly hidden?='{{ !ui.copyPasteSharingMessage.length }}'
-          class='message' on-tap='{{ select }}'>https://www.uproxy.org/offer/{{ ui.copyPasteSharingMessage }}</textarea>
+        <textarea readonly hidden?='{{ !ui.copyPasteSharingMessages.length }}'
+          class='message' on-tap='{{ select }}'>https://www.uproxy.org/offer/{{ ui.copyPasteSharingMessages | encodeMessage }}</textarea>
 
-        <span class='message-loading' hidden?='{{ ui.copyPasteSharingMessage.length }}'>{{ 'loading' | $$ }}Loading...</span>
+        <span class='message-loading' hidden?='{{ ui.copyPasteSharingMessages.length }}'>{{ 'loading' | $$ }}Loading...</span>
 
         <div>
           <a href='#' on-tap='{{ switchToGetting }}'>{{ 'getOneTimeInstead' | $$ }}</a>
@@ -143,7 +143,7 @@
 
       </div>
 
-      <div class='connected' hidden?='{{ ui.copyPasteSharingState !== SharingState.SHARING_ACCESS }}'>
+      <div class='connected' hidden?='{{ ui.copyPasteState.localSharingWithRemote !== SharingState.SHARING_ACCESS }}'>
         <p>{{ 'oneTimeSuccess' | $$ }}</p>
 
         <paper-button raised class='grey' on-tap='{{ stopSharing }}'>{{ 'stopOneTimeSharing' | $$ }}</paper-button>

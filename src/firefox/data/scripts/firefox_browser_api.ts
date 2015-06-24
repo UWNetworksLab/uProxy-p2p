@@ -33,6 +33,11 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.on('emitRejected', this.handleEmitRejected_);
   }
 
+  // Firefox doesn't ever need to wait for popup to open,
+  // We don't have onceLaunched promise, so fulfillLaunched is empty.
+  public fulfillLaunched = () => {
+  }
+
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon',
         {

@@ -8,6 +8,7 @@ import chrome_api = require('../../../interfaces/chrome');
 import ChromeMessage = chrome_api.ChromeMessage;
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import browser_connector = require('../../../interfaces/browser_connector');
+import Constants = require('../../../generic_ui/scripts/constants');
 
 var ui :UI.UserInterface;
 
@@ -29,6 +30,8 @@ var mockAppPort = () => {
 };
 
 var chromeBrowserApi :ChromeBrowserApi;
+var chromeCoreConnector = new ChromeCoreConnector();
+var core = new CoreConnector(chromeCoreConnector);
 
 // The ordering of the specs matter, as they provide a connect / disconnect
 // sequence on the chromeCoreConnector object.
@@ -38,10 +41,7 @@ describe('core-connector', () => {
      'showNotification',
      'on']);
 
-  var chromeCoreConnector :ChromeCoreConnector;
-  chromeCoreConnector = new ChromeCoreConnector();
 
-  var core = new CoreConnector(chromeCoreConnector);
 
   var connectPromise :Promise<void>;
 
@@ -105,6 +105,7 @@ describe('core-connector', () => {
   };
 
   it('connects to App when present.', (done) => {
+    spyOn(core, 'getFullState').and.returnValue(Promise.resolve());
     var acker :Function;
     // A 'valid' chrome.runtime.Port indicates successful connection.
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
@@ -147,8 +148,8 @@ describe('core-connector', () => {
       expect(chrome.browserAction['setIcon']).toHaveBeenCalledWith(
         {
           path: {
-            "19": "icons/19_" + UI.LOGGED_OUT_ICON,
-            "38": "icons/38_" + UI.LOGGED_OUT_ICON,
+            "19": "icons/19_" + Constants.LOGGED_OUT_ICON,
+            "38": "icons/38_" + Constants.LOGGED_OUT_ICON,
           }
         });
     }).then(done);
@@ -194,6 +195,7 @@ describe('core-connector', () => {
     var payload = { cmd: 'test1', type: 1 };
     chromeCoreConnector['send'](payload);
     expect(chromeCoreConnector['queue_']).toEqual([
+        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
         { cmd: 'test1', type: 1 }
     ]);
   });
@@ -202,7 +204,9 @@ describe('core-connector', () => {
     var payload = { cmd: 'test2', type: 2 };
     chromeCoreConnector['send'](payload);
     expect(chromeCoreConnector['queue_']).toEqual([
+        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
         { cmd: 'test1', type: 1 },
+        { cmd: 'emit', type: 1019, data: undefined, promiseId: 11},
         { cmd: 'test2', type: 2 }
     ]);
   });
@@ -246,8 +250,11 @@ describe('core-connector', () => {
     chromeCoreConnector.flushQueue();
     expect(chromeCoreConnector['queue_']).toEqual([]);
     expect(flushed).toEqual([
+        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
         { cmd: 'test1', type: 1 },
-        { cmd: 'test2', type: 2 }
+        { cmd: 'emit', type: 1019, data: undefined, promiseId: 11},
+        { cmd: 'test2', type: 2 },
+        { cmd: 'emit', type: 1019, data: undefined, promiseId: 12}
     ]);
   });
 

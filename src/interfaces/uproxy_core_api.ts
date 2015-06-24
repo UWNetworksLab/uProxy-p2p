@@ -24,14 +24,15 @@ export interface GlobalSettings {
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
+  splashState : number;
   consoleFilter    :loggingTypes.Level;
   language         :string;
 }
-
 export interface InitialState {
   networkNames :string[];
   globalSettings :GlobalSettings;
-  onlineNetworks: social.NetworkState[];
+  onlineNetworks :social.NetworkState[];
+  copyPasteState :CopyPasteState;
 }
 
 export interface ConnectionState {
@@ -39,6 +40,18 @@ export interface ConnectionState {
   localSharingWithRemote :social.SharingState;
   bytesSent :number;
   bytesReceived :number;
+}
+
+export interface CopyPasteState {
+  connectionState :ConnectionState;
+  endpoint :net.Endpoint;
+  gettingMessages :social.PeerMessage[];
+  sharingMessages :social.PeerMessage[];
+}
+
+export interface CopyPasteMessages {
+  type :social.PeerMessageType;
+  data :social.PeerMessage[];
 }
 
 // --- Communications ---
@@ -102,7 +115,8 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FRIEND_FAILED_TO_GET = 2020,
-  POST_TO_CLOUDFRONT = 2021
+  POST_TO_CLOUDFRONT = 2021,
+  COPYPASTE_MESSAGE = 2022
 }
 
 // Action taken by the user. These values are not on the wire. They are passed

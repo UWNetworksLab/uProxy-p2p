@@ -119,7 +119,7 @@ ui_connector.onPromiseCommand(
     core.getFullState);
 
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
-    globals.metrics, globals.storage,
+    globals.metrics, globals.storage, core.getNetworkInfoObj,
     (payload :any) => {
       if (globals.settings.statsReportingEnabled) {
         ui_connector.update(

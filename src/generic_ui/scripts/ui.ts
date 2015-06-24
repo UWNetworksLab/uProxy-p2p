@@ -18,6 +18,7 @@ import noreConnector = require('./core_connector');
 import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
+import Constants = require('./constants');
 import translator_module = require('./translator');
 import _ = require('lodash');
 
@@ -28,16 +29,6 @@ import _ = require('lodash');
 // 2) These are only the suffixes of the icon names. Because we have
 // different sizes of icons, the actual filenames have the dimension
 // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
-
-// Icons for browser bar, also used for notifications.
-export var DEFAULT_ICON :string = 'online.gif';
-export var LOGGED_OUT_ICON :string = 'offline.gif';
-export var SHARING_ICON :string = 'sharing.gif';
-export var GETTING_ICON :string = 'getting.gif';
-export var ERROR_ICON :string = 'error.gif';
-export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
-
-export var DEFAULT_USER_IMG = 'icons/contact-default.png';
 
 export class Model {
   public networkNames :string[] = [];
@@ -63,6 +54,7 @@ export class Model {
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
     hasSeenWelcome: false,
+    splashState : 0,
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
     statsReportingEnabled: false,
@@ -151,13 +143,7 @@ export interface NotificationData {
  * Any COMMANDs from the UI should be directly called from the 'core' object.
  */
 export class UserInterface implements ui_constants.UiApi {
-  public DEBUG = false;  // Set to true to show the model in the UI.
-
   public view :ui_constants.View;
-
-  // Current state within the splash (onboarding).  Needs to be part
-  // of the ui object so it can be saved/restored when popup closes and opens.
-  public splashState :number = 0;
 
   // Instance you are getting access from.
   // Null if you are not getting access.
@@ -173,14 +159,16 @@ export class UserInterface implements ui_constants.UiApi {
   public gettingStatus :string = null;
   public sharingStatus :string = null;
 
-  public copyPasteGettingState :social.GettingState = social.GettingState.NONE;
-  public copyPasteSharingState :social.SharingState = social.SharingState.NONE;
-  public copyPasteBytesSent :number = 0;
-  public copyPasteBytesReceived :number = 0;
+  public copyPasteState :uproxy_core_api.ConnectionState = {
+    localGettingFromRemote: social.GettingState.NONE,
+    localSharingWithRemote: social.SharingState.NONE,
+    bytesSent: 0,
+    bytesReceived: 0
+  };
 
   public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
-  public copyPasteGettingMessage :string = '';
-  public copyPasteSharingMessage :string = '';
+  public copyPasteGettingMessages :social.PeerMessage[] = [];
+  public copyPasteSharingMessages :social.PeerMessage[] = [];
 
   public browser :string = '';
 
@@ -205,8 +193,6 @@ export class UserInterface implements ui_constants.UiApi {
   public copyPastePendingEndpoint :net.Endpoint = null;
 
   public isSharingDisabled = false;
-
-  public disconnectedWhileProxying = false;
 
   public i18n_t :Function = translator_module.i18n_t;
   public i18n_setLng :Function = translator_module.i18n_setLng;
@@ -265,33 +251,14 @@ export class UserInterface implements ui_constants.UiApi {
       // TODO: Display the message in the 'manual network' UI.
     });
 
-    core.onUpdate(uproxy_core_api.Update.SIGNALLING_MESSAGE, (message :social.PeerMessage) => {
-      var data :social.PeerMessage[] = [], str = '';
-
+    core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE,
+        (message :uproxy_core_api.CopyPasteMessages) => {
       switch (message.type) {
         case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          str = this.copyPasteGettingMessage;
+          this.copyPasteGettingMessages = message.data;
           break;
         case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          str = this.copyPasteSharingMessage;
-          break;
-      }
-
-      if (str) {
-        data = JSON.parse(atob(decodeURIComponent(str)));
-      }
-
-      data.push(message);
-
-      str = encodeURIComponent(btoa(JSON.stringify(data)));
-
-      // reverse of above switch (since I can't just use a reference)
-      switch (message.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          this.copyPasteGettingMessage = str;
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          this.copyPasteSharingMessage = str;
+          this.copyPasteSharingMessages = message.data;
           break;
       }
     });
@@ -310,7 +277,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // indicates we just stopped offering access through copy+paste
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING, () => {
-      this.copyPasteSharingState = social.SharingState.NONE;
+      this.copyPasteState.localSharingWithRemote = social.SharingState.NONE;
       if (!this.isGivingAccess()) {
         this.stopGivingInUi();
       }
@@ -318,10 +285,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // status of the current copy+paste connection
     core.onUpdate(uproxy_core_api.Update.STATE, (state :uproxy_core_api.ConnectionState) => {
-      this.copyPasteGettingState = state.localGettingFromRemote;
-      this.copyPasteSharingState = state.localSharingWithRemote;
-      this.copyPasteBytesSent = state.bytesSent;
-      this.copyPasteBytesReceived = state.bytesReceived;
+      this.copyPasteState = state;
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
@@ -394,6 +358,8 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
+
+    core.getFullState().then(this.updateInitialState);
   }
 
   // Because of an observer (in root.ts) watching the value of
@@ -420,7 +386,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public handleNotificationClick = (tag :string) => {
     // we want to bring uProxy to the front regardless of the info
-    this.browserApi.bringUproxyToFront();
+    this.bringUproxyToFront();
 
     try {
       var data = JSON.parse(tag);
@@ -513,7 +479,7 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
 
-    if (social.SharingState.NONE !== this.copyPasteSharingState) {
+    if (social.SharingState.NONE !== this.copyPasteState.localSharingWithRemote) {
       console.info('should not be processing a URL while in the middle of sharing');
       this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
       return;
@@ -523,12 +489,13 @@ export class UserInterface implements ui_constants.UiApi {
     switch (match[1]) {
       case 'request':
         expectedType = social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER;
-        this.copyPasteSharingMessage = '';
+        this.copyPasteSharingMessages = [];
         this.core.startCopyPasteShare();
         break;
       case 'offer':
         expectedType = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
-        if (social.GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
+        if (social.GettingState.TRYING_TO_GET_ACCESS
+            !== this.copyPasteState.localGettingFromRemote) {
           console.warn('currently not expecting any information, aborting');
           this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
           return;
@@ -573,13 +540,13 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     if (askUser) {
-      this.disconnectedWhileProxying = true;
-      this.updateIcon_();
       this.bringUproxyToFront();
+      this.core.disconnectedWhileProxying = true;
+      this.updateIcon_();
       return;
     }
 
-    this.disconnectedWhileProxying = false;
+    this.core.disconnectedWhileProxying = false;
     this.proxySet_ = false;
     this.updateIcon_();
     this.browserApi.stopUsingProxy();
@@ -676,18 +643,18 @@ export class UserInterface implements ui_constants.UiApi {
       isGiving = this.isGivingAccess();
     }
 
-    if (this.disconnectedWhileProxying) {
-      this.browserApi.setIcon(ERROR_ICON);
+    if (this.core.disconnectedWhileProxying) {
+      this.browserApi.setIcon(Constants.ERROR_ICON);
     } else if (isGetting && isGiving) {
-      this.browserApi.setIcon(GETTING_SHARING_ICON);
+      this.browserApi.setIcon(Constants.GETTING_SHARING_ICON);
     } else if (isGetting) {
-      this.browserApi.setIcon(GETTING_ICON);
+      this.browserApi.setIcon(Constants.GETTING_ICON);
     } else if (isGiving) {
-      this.browserApi.setIcon(SHARING_ICON);
+      this.browserApi.setIcon(Constants.SHARING_ICON);
     } else if (model.onlineNetworks.length > 0) {
-      this.browserApi.setIcon(DEFAULT_ICON);
+      this.browserApi.setIcon(Constants.DEFAULT_ICON);
     } else {
-      this.browserApi.setIcon(LOGGED_OUT_ICON);
+      this.browserApi.setIcon(Constants.LOGGED_OUT_ICON);
     }
   }
 
@@ -704,7 +671,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public isGivingAccess = () => {
     return Object.keys(this.instancesGivingAccessTo).length > 0 ||
-           this.copyPasteSharingState === social.SharingState.SHARING_ACCESS;
+           this.copyPasteState.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
   }
 
   /**
@@ -737,8 +704,9 @@ export class UserInterface implements ui_constants.UiApi {
         }
         model.removeNetwork(networkMsg.name);
 
-        if (!existingNetwork.logoutExpected && networkMsg.name === 'Google' &&
-            !this.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
+        if (!existingNetwork.logoutExpected &&
+            (networkMsg.name === 'Google' || networkMsg.name === 'Facebook') &&
+            !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
         } else {
@@ -803,6 +771,21 @@ export class UserInterface implements ui_constants.UiApi {
 
     for (var i = 0; i < payload.allInstanceIds.length; ++i) {
       this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
+    }
+
+    for (var i = 0; i < payload.offeringInstances.length; i++) {
+      if (payload.offeringInstances[i].localGettingFromRemote ===
+          social.GettingState.GETTING_ACCESS) {
+        this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+        user.isSharingWithMe = true;
+        this.updateGettingStatusBar_();
+        break;
+      }
+    }
+
+    for (var i = 0; i < payload.instancesSharingWithLocal.length; i++) {
+      this.instancesGivingAccessTo[payload.instancesSharingWithLocal[i]] = true;
+      user.isGettingFromMe = true;
     }
 
     var newUserCategories = user.getCategories();
@@ -955,13 +938,59 @@ export class UserInterface implements ui_constants.UiApi {
     this.i18n_setLng(newLanguage);
   }
 
-  private updateInitialState = (state :uproxy_core_api.InitialState) => {
+  public updateInitialState = (state :uproxy_core_api.InitialState) => {
+    console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
     model.networkNames = state.networkNames;
-
     if (state.globalSettings.language !== model.globalSettings.language) {
       this.i18n_setLng(state.globalSettings.language);
     }
-
     model.updateGlobalSettings(state.globalSettings);
+
+    // Maybe refactor this to be copyPasteState.
+    this.copyPasteState = state.copyPasteState.connectionState;
+    this.copyPasteGettingMessages = state.copyPasteState.gettingMessages;
+    this.copyPasteSharingMessages = state.copyPasteState.sharingMessages;
+    this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
+    if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
+        this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
+      // This means we had active copy-paste flow.
+      this.view = ui_constants.View.COPYPASTE;
+    }
+
+    this.browserApi.fulfillLaunched();
+
+    while(model.onlineNetworks.length > 0) {
+      model.onlineNetworks.pop();
+    }
+
+    for (var network in state.onlineNetworks) {
+      this.addOnlineNetwork_(state.onlineNetworks[network]);
+    }
+
+    if (state.onlineNetworks.length > 0) {
+      // Check that we dont' have copy paste connection
+      if (this.view === ui_constants.View.COPYPASTE) {
+        console.error(
+            'User cannot be online while having a copy-paste connection');
+      }
+      // Set view to roster, user is online.
+      this.view = ui_constants.View.ROSTER;
+      this.updateSharingStatusBar_();
+    }
+  }
+
+  private addOnlineNetwork_ = (networkState :social.NetworkState) => {
+    model.onlineNetworks.push({
+      name:   networkState.name,
+      userId: networkState.profile.userId,
+      userName: networkState.profile.name,
+      imageData: networkState.profile.imageData,
+      logoutExpected: false,
+      roster: {}
+    });
+
+    for (var userId in networkState.roster) {
+      this.syncUser(networkState.roster[userId]);
+    }
   }
 }  // class UserInterface

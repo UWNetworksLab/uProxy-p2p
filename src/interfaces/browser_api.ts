@@ -42,4 +42,6 @@ export interface BrowserAPI {
   on(name :'urlData', callback :(url :string) => void) :void;
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
   on(name :'proxyDisconnected', callback :Function) :void;
+
+  fulfillLaunched() :void;
 }
