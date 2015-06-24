@@ -288,7 +288,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }).then(() => {
       var remote = this.getInstance(command.instancePath);
       if (!remote) {
-        log.error('Instance does not exist for proxying', command.instancePath.instanceId);
+        log.error('Instance does not exist for proxying',
+            command.instancePath.instanceId);
         return Promise.reject(new Error('Instance does not exist for proxying (' +
             command.instancePath.instanceId + ')'));
       }

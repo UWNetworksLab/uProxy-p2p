@@ -25,7 +25,7 @@ Polymer({
     }
 
     ui.startGettingFromInstance(this.instance.instanceId).catch((e: Error) => {
-      console.error('TREV: could not proxy');
+      console.error('could not get access: ' + e.message);
     });
   },
   stop: function() {

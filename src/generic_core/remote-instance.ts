@@ -81,11 +81,11 @@ export var remoteProxyInstance :RemoteInstance = null;
     private isUIUpdatePending = false;
 
     // Number of milliseconds before timing out socksToRtc_.start
-    public SOCKS_TO_RTC_TIMEOUT :number = 5000;
+    public SOCKS_TO_RTC_TIMEOUT :number = 30000;
     // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
     // trying to connect) by timing out rtcToNet_.start 15 seconds later than
     // socksToRtc_.start
-    public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 5000;
+    public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
     // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
     // TODO: why are these not in remote-connection?
     private startSocksToRtcTimeout_ :number = null;
@@ -125,7 +125,7 @@ export var remoteProxyInstance :RemoteInstance = null;
     }
 
     private handleConnectionUpdate_ = (update :uproxy_core_api.Update, data?:any) => {
-      log.debug('connection update %1: %2', uproxy_core_api.Update[update], data);
+      log.debug('connection update: %1', uproxy_core_api.Update[update]);
       switch (update) {
         case uproxy_core_api.Update.SIGNALLING_MESSAGE:
           var clientId = this.user.instanceToClient(this.instanceId);
@@ -176,6 +176,7 @@ export var remoteProxyInstance :RemoteInstance = null;
       return this.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
     }
 
+    // Handles signals received on the signalling channel from the remote peer.
     public handleSignal = (
         type:social.PeerMessageType,
         message:Object,
@@ -190,14 +191,9 @@ export var remoteProxyInstance :RemoteInstance = null;
     }
 
     private handleMetadataSignal_ = (
-        message:social.SignallingMetadata) : Promise<void> => {
-      if (message.first) {
-        log.info('remote side has initiated a new proxying session');
-        this.connection_.resetSharerCreated();
-        this.startShare_();
-      }
+        message:social.SignallingMetadata) :Promise<void> => {
       if (message.proxyingId) {
-        log.info('unique ID for proxying session is %1', message.proxyingId);
+        log.info('proxying session %1 initiated by remote peer', message.proxyingId);
         this.proxyingId_ = message.proxyingId;
       }
       return Promise.resolve<void>();
@@ -206,7 +202,7 @@ export var remoteProxyInstance :RemoteInstance = null;
     // Forwards a signalling message to the RemoteConnection.
     private forwardSignal_ = (
         type:social.PeerMessageType,
-        signalFromRemote: Object,
+        signalFromRemote:Object,
         messageVersion: number)
         :Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
@@ -216,7 +212,7 @@ export var remoteProxyInstance :RemoteInstance = null;
           return Promise.resolve<void>();
         }
 
-        // TODO: handle old clients
+        // TODO: handle old clients that don't send signalling metadata
 
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
@@ -304,6 +300,7 @@ export var remoteProxyInstance :RemoteInstance = null;
      * currently granted.
      */
     public start = (proxyingId:string) :Promise<net.Endpoint> => {
+      log.info('proxying session %1 initiated by this user', proxyingId);
       if (!this.wireConsentFromRemote.isOffering) {
         log.warn('Lacking permission to proxy');
         return Promise.reject(Error('Lacking permission to proxy'));
