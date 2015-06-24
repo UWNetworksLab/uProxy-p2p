@@ -219,7 +219,7 @@ export interface LocalUserInstance extends BaseInstance {
 }
 
 export interface RemoteUserInstance extends BaseInstance {
-  start() :Promise<net.Endpoint>;
+  start(proxyingId:string) :Promise<net.Endpoint>;
   stop() :Promise<void>;
 }
 

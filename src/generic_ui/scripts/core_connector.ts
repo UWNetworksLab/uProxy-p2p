@@ -171,9 +171,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     this.sendCommand(uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE, signal);
   }
 
-  start = (path :social.InstancePath) : Promise<net.Endpoint> => {
-    console.log('Starting to proxy through ' + path);
-    return this.promiseCommand(uproxy_core_api.Command.START_PROXYING, path);
+  start = (command:uproxy_core_api.StartCommand) : Promise<net.Endpoint> => {
+    console.log('Starting proxying session ' + command.proxyingId +
+        ' through ' + command.instancePath);
+    return this.promiseCommand(uproxy_core_api.Command.START_PROXYING, command);
   }
 
   stop = () => {

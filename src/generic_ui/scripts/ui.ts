@@ -341,9 +341,8 @@ export class UserInterface implements ui_constants.UiApi {
       this.updateSharingStatusBar_();
     });
 
-    // TODO: grab logs now, lest they be lost in time...like tears in rain
     core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (info:uproxy_core_api.FriendFailedToGet) => {
-      console.log('proxying attempt ' + info.proxyingId + ' failed!!!');
+      // TODO: grab logs now or they may be lost in time...like tears in rain
       // Setting this variable will toggle a paper-toast (in root.html)
       // to open.
       this.toastMessage = this.i18n_t('unableToShareWith', {
@@ -569,7 +568,13 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.instanceTryingToGetAccessFrom = instanceId;
 
-    return this.core.start(path).then((endpoint :net.Endpoint) => {
+    // TODO: generate a random ID
+    var proxyingId = 'abc123';
+
+    return this.core.start({
+      instancePath: path,
+      proxyingId: proxyingId
+    }).then((endpoint :net.Endpoint) => {
       this.instanceTryingToGetAccessFrom = null;
 
       this.startGettingInUiAndConfig(instanceId, endpoint);
@@ -579,6 +584,9 @@ export class UserInterface implements ui_constants.UiApi {
       if (this.instanceTryingToGetAccessFrom !== instanceId) {
         return;
       }
+
+      // TODO: fetch logs now
+      console.log('proxying attempt ' + proxyingId + ' failed (getting)');
 
       this.toastMessage = this.i18n_t('unableToGetFrom', { name: user.name });
       this.instanceTryingToGetAccessFrom = null;

@@ -24,7 +24,9 @@ Polymer({
       return;
     }
 
-    ui.startGettingFromInstance(this.instance.instanceId);
+    ui.startGettingFromInstance(this.instance.instanceId).catch((e: Error) => {
+      console.error('TREV: could not proxy');
+    });
   },
   stop: function() {
     ui.stopGettingFromInstance(this.instance.instanceId);

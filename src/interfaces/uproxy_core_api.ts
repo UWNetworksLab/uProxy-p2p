@@ -114,6 +114,7 @@ export enum Update {
   START_GIVING = 2017,
   STOP_GIVING = 2018,
   STATE = 2019,
+  // TODO: rename to FAILED_TO_SHARE
   FRIEND_FAILED_TO_GET = 2020,
   POST_TO_CLOUDFRONT = 2021,
   COPYPASTE_MESSAGE = 2022
@@ -154,6 +155,12 @@ export interface CloudfrontPostData {
 export interface LoginArgs {
   network :string;
   reconnect :boolean;
+}
+
+// Start getting access from a friend.
+export interface StartCommand {
+  instancePath: social.InstancePath;
+  proxyingId: string;
 }
 
 /**
@@ -198,7 +205,7 @@ export interface CoreApi {
   sendCopyPasteSignal(signal :social.PeerMessage) :void;
 
   // Using peer as a proxy.
-  start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
+  start(command:StartCommand) : Promise<net.Endpoint>;
   stop () : void;
 
   updateGlobalSettings(newSettings :GlobalSettings) :void;
