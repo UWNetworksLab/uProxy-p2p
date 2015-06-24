@@ -31,7 +31,7 @@ Polymer({
     }
 
     doneStopping.then(() => {
-      ui.copyPasteGettingMessage = '';
+      ui.copyPasteGettingMessages = [];
       ui.copyPasteError = ui_constants.CopyPasteError.NONE;
       ui.copyPastePendingEndpoint = null;
 
@@ -133,6 +133,9 @@ Polymer({
       // stopped the connection
       ui.view = ui_constants.View.SPLASH;
     })
+  },
+  encodeMessage: function(message :social.PeerMessageType) {
+    return encodeURIComponent(btoa(JSON.stringify(message)));
   },
   ready: function() {
     this.ui = ui;

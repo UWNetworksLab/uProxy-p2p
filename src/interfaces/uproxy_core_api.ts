@@ -45,8 +45,13 @@ export interface ConnectionState {
 export interface CopyPasteState {
   connectionState :ConnectionState;
   endpoint :net.Endpoint;
-  gettingMessage :string;
-  sharingMessage :string;
+  gettingMessages :social.PeerMessage[];
+  sharingMessages :social.PeerMessage[];
+}
+
+export interface CopyPasteMessages {
+  type :social.PeerMessageType;
+  data :social.PeerMessage[];
 }
 
 // --- Communications ---

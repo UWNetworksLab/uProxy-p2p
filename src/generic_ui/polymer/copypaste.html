@@ -73,10 +73,10 @@
           {{ 'copyConnectionLink' | $$ }}
         </p>
 
-        <textarea readonly hidden?='{{ !ui.copyPasteGettingMessage.length }}'
-          class='message' on-tap='{{ select }}'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessage }}</textarea>
+        <textarea readonly hidden?='{{ !ui.copyPasteGettingMessages.length }}'
+          class='message' on-tap='{{ select }}'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessages | encodeMessage }}</textarea>
 
-        <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessage.length }}'>{{ 'loading' | $$ }}</span>
+        <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessages.length }}'>{{ 'loading' | $$ }}</span>
 
         <p>
           {{ 'friendNeedsToClick' | $$ }}
@@ -122,10 +122,10 @@
           {{ 'howToOfferOneTime' | $$ }}
         </p>
 
-        <textarea readonly hidden?='{{ !ui.copyPasteSharingMessage.length }}'
-          class='message' on-tap='{{ select }}'>https://www.uproxy.org/offer/{{ ui.copyPasteSharingMessage }}</textarea>
+        <textarea readonly hidden?='{{ !ui.copyPasteSharingMessages.length }}'
+          class='message' on-tap='{{ select }}'>https://www.uproxy.org/offer/{{ ui.copyPasteSharingMessages | encodeMessage }}</textarea>
 
-        <span class='message-loading' hidden?='{{ ui.copyPasteSharingMessage.length }}'>{{ 'loading' | $$ }}Loading...</span>
+        <span class='message-loading' hidden?='{{ ui.copyPasteSharingMessages.length }}'>{{ 'loading' | $$ }}Loading...</span>
 
         <div>
           <a href='#' on-tap='{{ switchToGetting }}'>{{ 'getOneTimeInstead' | $$ }}</a>
