@@ -266,7 +266,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
    * RemoteInstance exists.
    */
-  public start = (command:uproxy_core_api.StartCommand) : Promise<net.Endpoint> => {
+  public start = (path :social.InstancePath) : Promise<net.Endpoint> => {
     // Disable any previous proxying session.
     var stoppedGetting :Promise<void>[] = [];
     if (remoteProxyInstance) {
@@ -286,17 +286,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       // connect with the new one, do not propogate this error
       log.error('Could not clean up old connections', e);
     }).then(() => {
-      var remote = this.getInstance(command.instancePath);
+      var remote = this.getInstance(path);
       if (!remote) {
-        log.error('Instance does not exist for proxying',
-            command.instancePath.instanceId);
-        return Promise.reject(new Error('Instance does not exist for proxying (' +
-            command.instancePath.instanceId + ')'));
+        log.error('Instance does not exist for proxying', path.instanceId);
+        return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
       }
       // Remember this instance as our proxy.  Set this before start fulfills
       // in case the user decides to cancel the proxy before it begins.
       remoteProxyInstance = remote;
-      return remote.start(command.proxyingId);
+      return remote.start();
     }).catch((e) => {
       remoteProxyInstance = null; // make sure to clean up any state
       log.error('Could not start remote proxying session', e.stack);

@@ -157,12 +157,6 @@ export interface LoginArgs {
   reconnect :boolean;
 }
 
-// Start getting access from a friend.
-export interface StartCommand {
-  instancePath: social.InstancePath;
-  proxyingId: string;
-}
-
 /**
  * The primary interface to the uProxy Core.
  *
@@ -205,7 +199,7 @@ export interface CoreApi {
   sendCopyPasteSignal(signal :social.PeerMessage) :void;
 
   // Using peer as a proxy.
-  start(command:StartCommand) : Promise<net.Endpoint>;
+  start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
   stop () : void;
 
   updateGlobalSettings(newSettings :GlobalSettings) :void;

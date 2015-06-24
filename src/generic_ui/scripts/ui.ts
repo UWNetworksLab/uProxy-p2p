@@ -134,25 +134,6 @@ export interface NotificationData {
   unique ?:string;
 }
 
-var PROXYING_SESSION_ID_LENGTH = 16;
-
-// Generates a string of random letters suitable for use a proxying session ID.
-var generateProxyingSessionId_ = (): string => {
-  // Generates a random number between 97 and 122 inclusive, corresponding
-  // to lowercase a and z:
-  //  http://unicode.org/charts/PDF/U0000.pdf
-  var a = 97, b = 122;
-  var randomCharCode = (): number => {
-    // TODO: use crypto, but that requires vulcanize to play with third_party
-    return a + (Math.floor(Math.random() * (b - a)));
-  };
-  var letters: string[] = [];
-  for (var i = 0; i < PROXYING_SESSION_ID_LENGTH; i++) {
-    letters.push(String.fromCharCode(randomCharCode()));
-  }
-  return letters.join('');
-}
-
 /**
  * The User Interface class.
  *
@@ -588,13 +569,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.instanceTryingToGetAccessFrom = instanceId;
 
-    // TODO: generate a random ID
-    var proxyingId = generateProxyingSessionId_();
-
-    return this.core.start({
-      instancePath: path,
-      proxyingId: proxyingId
-    }).then((endpoint :net.Endpoint) => {
+    return this.core.start(path).then((endpoint :net.Endpoint) => {
       this.instanceTryingToGetAccessFrom = null;
 
       this.startGettingInUiAndConfig(instanceId, endpoint);
@@ -604,9 +579,6 @@ export class UserInterface implements ui_constants.UiApi {
       if (this.instanceTryingToGetAccessFrom !== instanceId) {
         return;
       }
-
-      // TODO: fetch logs now
-      console.error('proxying attempt ' + proxyingId + ' failed (getting)');
 
       this.toastMessage = this.i18n_t('unableToGetFrom', { name: user.name });
       this.instanceTryingToGetAccessFrom = null;
