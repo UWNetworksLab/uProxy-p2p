@@ -143,7 +143,7 @@ var generateProxyingSessionId_ = (): string => {
   //  http://unicode.org/charts/PDF/U0000.pdf
   var a = 97, b = 122;
   var randomCharCode = (): number => {
-    // TODO: vulcanize, though that requires crpyto from third_party
+    // TODO: use crypto, but that requires vulcanize to play with third_party
     return a + (Math.floor(Math.random() * (b - a)));
   };
   var letters: string[] = [];
