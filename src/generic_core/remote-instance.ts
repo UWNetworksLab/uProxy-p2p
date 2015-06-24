@@ -14,7 +14,6 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
@@ -212,7 +211,17 @@ export var remoteProxyInstance :RemoteInstance = null;
           return Promise.resolve<void>();
         }
 
-        // TODO: handle old clients that don't send signalling metadata
+        // Handle old, pre-signalling metadata clients:
+        //  - the bridge adds a field named "first" (do this for
+        //    MESSAGE_VERSIONs 2 and 3)
+        //  - for ancient clients (MESSAGE_VERSION 1), we need to inspect
+        //    the SDP (!)
+        if (messageVersion < 4) {
+          if ((<any>signalFromRemote).first ||
+             ((<any>signalFromRemote).type === signals.Type.OFFER)) {
+            this.startShare_();
+          }
+        }
 
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
@@ -248,6 +257,8 @@ export var remoteProxyInstance :RemoteInstance = null;
       * we should try to start sharing.
       */
     private startShare_ = () : void => {
+      this.connection_.resetSharerCreated();
+
       var sharingStopped :Promise<void>;
       if (this.localSharingWithRemote === social.SharingState.NONE) {
         // Stop any existing sharing attempts with this instance.
