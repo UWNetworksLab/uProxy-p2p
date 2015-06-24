@@ -321,7 +321,6 @@ export var remoteProxyInstance :RemoteInstance = null;
 
       // Tell the remote peer to get ready...we want access.
       var signal :social.SignallingMetadata = {
-        first: true,
         proxyingId: proxyingId
       }
       this.handleConnectionUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
