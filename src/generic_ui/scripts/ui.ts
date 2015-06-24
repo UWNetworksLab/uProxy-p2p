@@ -134,6 +134,25 @@ export interface NotificationData {
   unique ?:string;
 }
 
+var PROXYING_SESSION_ID_LENGTH = 16;
+
+// Generates a string of random letters suitable for use a proxying session ID.
+var generateProxyingSessionId_ = (): string => {
+  // Generates a random number between 97 and 122 inclusive, corresponding
+  // to lowercase a and z:
+  //  http://unicode.org/charts/PDF/U0000.pdf
+  var a = 97, b = 122;
+  var randomCharCode = (): number => {
+    // TODO: vulcanize, though that requires crpyto from third_party
+    return a + (Math.floor(Math.random() * (b - a)));
+  };
+  var letters: string[] = [];
+  for (var i = 0; i < PROXYING_SESSION_ID_LENGTH; i++) {
+    letters.push(String.fromCharCode(randomCharCode()));
+  }
+  return letters.join('');
+}
+
 /**
  * The User Interface class.
  *
@@ -570,7 +589,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.instanceTryingToGetAccessFrom = instanceId;
 
     // TODO: generate a random ID
-    var proxyingId = 'abc123';
+    var proxyingId = generateProxyingSessionId_();
 
     return this.core.start({
       instancePath: path,
