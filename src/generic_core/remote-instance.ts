@@ -194,6 +194,7 @@ export var remoteProxyInstance :RemoteInstance = null;
       if (message.proxyingId) {
         log.info('proxying session %1 initiated by remote peer', message.proxyingId);
         this.proxyingId_ = message.proxyingId;
+        this.startShare_();
       }
       return Promise.resolve<void>();
     }
