@@ -177,7 +177,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private static internalConnectionId_ = 0;
 
     constructor(probeRtcPc:freedom_RTCPeerConnection.RTCPeerConnection,
-                peerName?:string) {
+                peerName?:string,
+                private skipPublicEndpoint_?:boolean) {
       this.peerName = peerName || 'churn-connection-' +
           (++Connection.internalConnectionId_);
 
@@ -240,10 +241,12 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         });
 
         // For backwards compatibility.
-        var bestEndpointPair = selectBestPublicAddress(candidates);
-        this.signalForPeerQueue.handle({
-          publicEndpoint: bestEndpointPair.external
-        });
+        if (!this.skipPublicEndpoint_) {
+          var bestEndpointPair = selectBestPublicAddress(candidates);
+          this.signalForPeerQueue.handle({
+            publicEndpoint: bestEndpointPair.external
+          });
+        }
       });
     }
 
