@@ -341,15 +341,26 @@ export class UserInterface implements ui_constants.UiApi {
       this.updateSharingStatusBar_();
     });
 
-    core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET,
-        (info:uproxy_core_api.FriendFailedToGet) => {
-      // TODO: grab logs now or they may be lost in time...like tears in rain
+    core.onUpdate(uproxy_core_api.Update.FAILED_TO_GIVE,
+        (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (giving)');
 
       this.toastMessage = this.i18n_t('unableToShareWith', {
         name: info.name
       });
       this.unableToShare = true;
+    });
+
+    core.onUpdate(uproxy_core_api.Update.FAILED_TO_GET,
+        (info:uproxy_core_api.FailedToGetOrGive) => {
+      console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
+
+      this.toastMessage = this.i18n_t('unableToGetFrom', {
+        name: info.name
+      });
+      this.instanceTryingToGetAccessFrom = null;
+      this.unableToGet = true;
+      this.bringUproxyToFront();
     });
 
     core.onUpdate(
@@ -571,20 +582,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     return this.core.start(path).then((endpoint :net.Endpoint) => {
       this.instanceTryingToGetAccessFrom = null;
-
       this.startGettingInUiAndConfig(instanceId, endpoint);
-    }).catch((e :Error) => {
-      // this is only an error if we are still trying to get access from the
-      // instance
-      if (this.instanceTryingToGetAccessFrom !== instanceId) {
-        return;
-      }
-
-      this.toastMessage = this.i18n_t('unableToGetFrom', { name: user.name });
-      this.instanceTryingToGetAccessFrom = null;
-      this.unableToGet = true;
-      this.bringUproxyToFront();
-      return Promise.reject(e);
     });
   }
 

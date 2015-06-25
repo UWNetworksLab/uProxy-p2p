@@ -252,9 +252,9 @@ export var remoteProxyInstance :RemoteInstance = null;
           log.warn('Timing out rtcToNet_ connection');
           // Tell the UI that sharing failed. It will show a toast.
           // TODO: have RemoteConnection do this
-          ui.update(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, {
+          ui.update(uproxy_core_api.Update.FAILED_TO_GIVE, {
             name: this.user.name,
-            proxyingId: this.connection_.getProxyingId();
+            proxyingId: this.connection_.getProxyingId()
           });
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
@@ -293,6 +293,12 @@ export var remoteProxyInstance :RemoteInstance = null;
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
       this.startSocksToRtcTimeout_ = setTimeout(() => {
         log.warn('Timing out socksToRtc_ connection');
+        // Tell the UI that sharing failed. It will show a toast.
+        // TODO: have RemoteConnection do this
+        ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
+          name: this.user.name,
+          proxyingId: this.connection_.getProxyingId()
+        });
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 

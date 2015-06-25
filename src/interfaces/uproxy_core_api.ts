@@ -114,10 +114,10 @@ export enum Update {
   START_GIVING = 2017,
   STOP_GIVING = 2018,
   STATE = 2019,
-  // TODO: rename to FAILED_TO_SHARE
-  FRIEND_FAILED_TO_GET = 2020,
+  FAILED_TO_GIVE = 2020,
   POST_TO_CLOUDFRONT = 2021,
-  COPYPASTE_MESSAGE = 2022
+  COPYPASTE_MESSAGE = 2022,
+  FAILED_TO_GET = 2023
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -130,8 +130,8 @@ export enum ConsentUserAction {
   OFFER = 5100, CANCEL_OFFER, IGNORE_REQUEST, UNIGNORE_REQUEST,
 }
 
-// Payload of FRIEND_FAILED_TO_GET messages.
-export interface FriendFailedToGet {
+// Payload of FAILED_TO_GET and FAILED_TO_GIVE messages.
+export interface FailedToGetOrGive {
   name: string;
   proxyingId: string;
 }
