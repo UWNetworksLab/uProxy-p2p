@@ -34,8 +34,8 @@
       overflow: auto;
     }
     .inputLabel {
-      font-weight: bold;
       margin: 0;
+      font-weight: 600;
     }
     #emailInput {
       margin: 0;
@@ -54,6 +54,8 @@
     #moreInfo {
       color: grey;
       margin-top: 1em;
+      font-size: 12px;
+      line-height: 20px;
     }
     #sendFeedback {
       width: 100%;
@@ -96,8 +98,19 @@
       /* Remove the underline from the Feedback textbox. */
       height: 0px;
     }
+    paper-input-decorator[id=emailDecorator] {
+      padding: 13px 0px 32px 0px;
+    }
+    paper-input-decorator[id=feedbackDecorator] {
+      padding: 13px 0px 24px 0px;
+    }
+
     paper-input-decorator {
-      font-size: 1.4em;
+      font-size: 16px;
+    }
+    paper-input-decorator::shadow .input-body {
+      color: #707070;
+      padding-bottom: 4px;
     }
     paper-checkbox::shadow #ink[checked] {
       color: white;
@@ -127,6 +140,8 @@
     paper-autogrow-textarea::shadow .textarea-container {
       padding: 0.25em;
       background-color: rgb(240,240,240);
+      border-radius: 2px;
+      color: #707070;
     }
     paper-autogrow-textarea::shadow .mirror-text {
       white-space: pre-wrap; /* css-3 */
@@ -170,9 +185,6 @@
           </div>
           <p id='moreInfo'>
             {{ 'PIIMessage' | $$ }}
-            <uproxy-faq-link anchor='doesUproxyLogData'>
-              <core-icon icon="help"></core-icon>
-            </uproxy-faq-link>
           </p>
         </div> <!-- end of form container -->
         <div id='sendFeedback' on-tap='{{ sendFeedback }}'>{{ 'submitFeedback' | $$ }}</div>
