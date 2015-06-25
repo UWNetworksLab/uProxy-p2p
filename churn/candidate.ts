@@ -37,6 +37,7 @@ export class Candidate {
   public sdpMid: string;
   public sdpMLineIndex: number;
 
+  // Returns this candidate's bound address on a physical interface.
   public getLocalEndpoint() : net.Endpoint {
     if (this.type === 'host') {
       // The local endpoint of a host candidate is the same as its

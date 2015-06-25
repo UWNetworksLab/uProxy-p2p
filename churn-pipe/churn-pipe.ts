@@ -88,11 +88,17 @@ interface MirrorSet {
 /**
  * A Churn Pipe is a transparent obfuscator/deobfuscator for transforming the
  * apparent type of browser-generated UDP datagrams.
+ *
+ * This implementation makes the simplifying assumption that the browser only
+ * allocates one endpoint per interface.  Relaxing this assumption would allow
+ * us to achieve the same performance while allocating fewer ports, at the cost
+ * of slightly more complex logic.
  */
 class Pipe {
 
-  // A socket that is bound to a port on a physical network interface.  This
-  // port is intended to be publicly routable (possibly thanks to NAT), and is
+  // For each physical network interface, this provides a list of the open
+  // public sockets on that interface.  Each socket corresponds to a port that
+  // is intended to be publicly routable (possibly thanks to NAT), and is
   // used only for sending and receiving obfuscated traffic with the remote
   // endpoints.
   private publicSockets_ :{ [address:string]: Socket[] } = {};
@@ -103,7 +109,9 @@ class Pipe {
   private publicPorts_ : { [address:string]: { [port:number]: Promise<void> } } =
       {};
 
-  // The maximum number of bound remote ports on any single interface.
+  // The maximum number of bound remote ports on any single interface.  This is
+  // also the number of mirror sockets that are needed for each signaled remote
+  // port.
   private maxSocketsPerInterface_ :number = 0;
 
   // Each mirror socket is bound to a port on localhost, and corresponds to a
@@ -147,6 +155,9 @@ class Pipe {
    * start listening for datagrams, which will be deobfuscated and forwarded to the
    * browser endpoint.
    */
+  // TODO: Clarify naming between bindLocal (binds local public obfuscated
+  // candidate) and bindRemote (set up private local bindings to allow
+  // sending to that remote candidate).
   public bindLocal = (publicEndpoint:net.Endpoint) :Promise<void> => {
     if (!this.publicPorts_[publicEndpoint.address]) {
       this.publicPorts_[publicEndpoint.address] = {};

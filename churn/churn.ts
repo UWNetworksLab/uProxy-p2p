@@ -282,11 +282,19 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       });
     }
 
+    // Returns the remote side Candidate that advertises this endpoint.
+    // This is used to recover the entire candidate when a new mapping is
+    // added, in order to convey the right candidate metadata (priority,
+    // generation, etc.) to the obfuscated connection.
     private getRemoteCandidate_ = (endpoint:net.Endpoint) : Candidate => {
       return this.remoteCandidates_[endpoint.address] &&
           this.remoteCandidates_[endpoint.address][endpoint.port];
     }
 
+    // A new mirror socket has been created.  (Each call to churn-pipe's
+    // bindLocal and bindRemote methods may trigger the creation of one
+    // or more mirror sockets.)  Wrap it into a virtual remote ICE candidate
+    // and signal it to the obfuscated connection.
     private onMappingAdded_ = (mapping:MirrorMapping) => {
       var original = this.getRemoteCandidate_(mapping.remote);
       if (original) {
