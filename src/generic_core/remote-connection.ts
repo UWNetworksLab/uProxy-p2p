@@ -214,6 +214,7 @@ var generateProxyingSessionId_ = (): string => {
       }
 
       this.proxyingId_ = generateProxyingSessionId_();
+      log.info('initiating proxying session %1', this.proxyingId_);
 
       // Send the proxying session ID to the remote peer.
       var signal :social.SignallingMetadata = {
