@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
+
 import local_storage = require('./storage');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
@@ -15,7 +17,7 @@ export var STORAGE_VERSION = 1;
 // 1: initial release
 // 2: uproxy-lib v27, move to bridge but no obfuscation yet
 // 3: offer basicObfuscation
-export var MESSAGE_VERSION = 3;
+export var MESSAGE_VERSION = 4;
 
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
@@ -73,3 +75,13 @@ export var loadSettings :Promise<void> =
     });
 
 export var metrics = new metrics_module.Metrics(storage);
+
+export var pgp :PgpProvider = freedom['pgp']();
+pgp.setup('', '<uproxy>');
+
+export var publicKey :string;
+
+pgp.exportKey().then((key :PublicKey) => {
+  publicKey = key.key;
+})
+

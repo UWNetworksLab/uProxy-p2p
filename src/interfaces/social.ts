@@ -29,9 +29,8 @@ export interface BaseUser {
 export interface LocalInstanceState {
   instanceId  :string;
   userId      :string;
-  userName        :string;
+  userName    :string;
   imageData   :string;
-  keyHash     :string;
 }
 
 export interface NetworkMessage {
@@ -145,7 +144,7 @@ export interface ConsentWireState {
  */
 export interface InstanceHandshake {
   instanceId  :string;
-  keyHash     :string;
+  publicKey   :string;
   consent     :ConsentWireState;
   description ?:string;
   name        :string;
