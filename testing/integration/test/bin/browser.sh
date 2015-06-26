@@ -1,0 +1,28 @@
+#!/bin/bash
+# load BROWSER
+. /etc/test.conf
+
+if [ $# -lt 1 ]
+then
+    echo "usage: ext-path where ext-path-XXXapp indicates the proper path."
+    exit 1
+fi
+
+BASENAME=$1
+
+case $BROWSER in
+    chrome)
+        mkdir /tmp/chrome-data
+        EXTDIR=${BASENAME}-chromeapp
+        google-chrome --user-data-dir=/tmp/chrome-data --load-and-launch-app=${BASENAME} --no-default-browser-check --no-first-run >/dev/null 2>&1 &
+        ;;
+    firefox)
+        EXTDIR=${BASENAME}-firefoxapp
+        cd $EXTDIR
+        cfx run
+        ;;
+    *)
+        echo "No BROWSER variable set in /etc/test.conf."
+        exit 1
+        ;;
+esac

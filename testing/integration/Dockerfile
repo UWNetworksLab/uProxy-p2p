@@ -15,6 +15,7 @@ RUN apt-get update -qq -y && apt-get install -qq -y \
   git \
   default-jre vnc4server aptitude
 
+RUN apt-get install -qq -y net-tools x11vnc fvwm vim
 
 # Install Chrome Beta
 RUN wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -25,8 +26,6 @@ RUN apt-get install -qq -y google-chrome-beta
 RUN wget -q https://chromedriver.storage.googleapis.com/$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
 RUN unzip -qq chromedriver_linux64.zip -d /usr/bin && rm chromedriver_linux64.zip
 RUN chromedriver --version
-
-RUN apt-get install -qq -y net-tools x11vnc fvwm 
 
 RUN mkdir /test
 COPY test /test

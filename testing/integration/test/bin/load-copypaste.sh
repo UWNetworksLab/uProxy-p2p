@@ -49,10 +49,7 @@ cd uproxy-lib
 grunt
 grunt samples
 
-mkdir /tmp/chrome-data
-
-google-chrome --user-data-dir=/tmp/chrome-data --load-and-launch-app=/test/src/uproxy-lib/build/dev/uproxy-lib/samples/copypaste-socks-chromeapp --no-default-browser-check --no-first-run >/dev/null 2>&1 &
-
+/test/bin/browser.sh /test/src/uproxy-lib/build/dev/uproxy-lib/samples/copypaste-socks
 
 # Wait for the control port (9000) to open.
 echo -n "Waiting for control port to come up"
