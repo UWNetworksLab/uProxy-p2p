@@ -3,7 +3,6 @@
 import core_connector = require('../../../generic_ui/scripts/core_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import user_interface = require('../../../generic_ui/scripts/ui');
 import chromeInterface = require('../../../interfaces/chrome');
 import background = require('./background');
 
@@ -21,11 +20,13 @@ class ChromeTabAuth {
   }
 
   public login = (oauthInfo :chromeInterface.OAuthInfo) : void => {
-    this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
+    this.launchAuthTab_(
+        oauthInfo.url, oauthInfo.redirect, oauthInfo.interactive);
   }
 
 
-  private launchAuthTab_ = (url :string, redirectUrl :string) : void => {
+  private launchAuthTab_ = (url :string, redirectUrl :string, interactive :boolean) : void => {
+    console.log('launchAuthTab_: interactive ' + interactive);  // TODO: remove
     var onTabChange = (tabId :number, changeInfo :chrome.tabs.TabChangeInfo, tab :chrome.tabs.Tab) => {
       if (tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
@@ -34,10 +35,9 @@ class ChromeTabAuth {
       }
     };
 
-    var isActive = !user_interface.model.reconnecting;
-    chrome.tabs.create({url: url, active: isActive},
+    chrome.tabs.create({url: url, active: interactive},
                        function(tab: chrome.tabs.Tab) {
-      if (isActive) {
+      if (interactive) {
         chrome.windows.update(tab.windowId, {focused: true});
       }
       chrome.tabs.onUpdated.addListener(onTabChange);
