@@ -24,7 +24,9 @@ Polymer({
       return;
     }
 
-    ui.startGettingFromInstance(this.instance.instanceId);
+    ui.startGettingFromInstance(this.instance.instanceId).catch((e: Error) => {
+      console.error('could not get access: ' + e.message);
+    });
   },
   stop: function() {
     ui.stopGettingFromInstance(this.instance.instanceId);

@@ -191,7 +191,7 @@ export var remoteProxyInstance :RemoteInstance = null;
         // Create a new RtcToNet instance each time a new round of client peer
         // messages begins. The type field check is so pre-bridge,
         // MESSAGE_VERSION = 1, clients can initiate.
-        // TODO: remove the OFFER check once ancient clients are deprecated
+        // TODO: have RemoteConnection do this, based on SignallingMetadata 
         if (signalFromRemote.first ||
             ((<signals.Message>signalFromRemote).type === signals.Type.OFFER)) {
           this.connection_.resetSharerCreated();
@@ -250,7 +250,12 @@ export var remoteProxyInstance :RemoteInstance = null;
         // assumption that our peer failed to start getting access.
         this.startRtcToNetTimeout_ = setTimeout(() => {
           log.warn('Timing out rtcToNet_ connection');
-          ui.update(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, this.user.name);
+          // Tell the UI that sharing failed. It will show a toast.
+          // TODO: have RemoteConnection do this
+          ui.update(uproxy_core_api.Update.FAILED_TO_GIVE, {
+            name: this.user.name,
+            proxyingId: this.connection_.getProxyingId()
+          });
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
 
@@ -288,6 +293,12 @@ export var remoteProxyInstance :RemoteInstance = null;
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
       this.startSocksToRtcTimeout_ = setTimeout(() => {
         log.warn('Timing out socksToRtc_ connection');
+        // Tell the UI that sharing failed. It will show a toast.
+        // TODO: have RemoteConnection do this
+        ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
+          name: this.user.name,
+          proxyingId: this.connection_.getProxyingId()
+        });
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 

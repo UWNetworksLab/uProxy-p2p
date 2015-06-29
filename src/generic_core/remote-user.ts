@@ -208,8 +208,7 @@ var log :logging.Log = new logging.Log('remote-user');
             log.error('failed to get instance', clientId);
             return;
           }
-          instance.handleSignal(msg.type, <bridge.SignallingMessage>msg.data,
-              msg.version);
+          instance.handleSignal(msg.type, msg.data, msg.version);
           return;
 
         case social.PeerMessageType.INSTANCE_REQUEST:
