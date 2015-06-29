@@ -373,7 +373,9 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
-    core.getFullState().then(this.updateInitialState);
+    core.getFullState()
+        .then(this.updateInitialState)
+        .then(this.browserApi.handlePopupLaunch);
   }
 
   // Because of an observer (in root.ts) watching the value of
@@ -957,8 +959,6 @@ export class UserInterface implements ui_constants.UiApi {
       // This means we had active copy-paste flow.
       this.view = ui_constants.View.COPYPASTE;
     }
-
-    this.browserApi.fulfillLaunched();
 
     while(model.onlineNetworks.length > 0) {
       model.onlineNetworks.pop();
