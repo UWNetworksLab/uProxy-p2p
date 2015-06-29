@@ -224,9 +224,12 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
       } else if (remoteVersion === 2) {
         log.debug('peer is running client version 2, using bridge without obfuscation');
         pc = bridge.preObfuscation('sockstortc', config);
-      } else {
-        log.debug('peer is running client version >2, using bridge with basicObfuscation');
+      } else if (remoteVersion === 3) {
+        log.debug('peer is running client version 3, using bridge with basicObfuscation');
         pc = bridge.basicObfuscation('sockstortc', config);
+      } else {
+        log.debug('peer is running client version >=4, using holographic ICE');
+        pc = bridge.best('sockstortc', config);
       }
 
       return this.socksToRtc_.start(tcpServer, pc).then(
