@@ -1,19 +1,18 @@
 /// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
 
+import arraybuffers = require('../../arraybuffers/arraybuffers');
+import bridge = require('../../bridge/bridge');
+import net = require('../../net/net.types');
 import peerconnection = require('../../webrtc/peerconnection');
+import proxyintegrationtesttypes = require('./proxy-integration-test.types');
+import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
+import socks = require('../../socks-common/socks-headers');
+import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
+import tcp = require('../../net/tcp');
 
 import ProxyConfig = require('../../rtc-to-net/proxyconfig');
-import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
-import net = require('../../net/net.types');
-import tcp = require('../../net/tcp');
-import socks = require('../../socks-common/socks-headers');
-
-import proxyintegrationtesttypes = require('./proxy-integration-test.types');
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
-
-import arraybuffers = require('../../arraybuffers/arraybuffers');
 
 // This abstract class is converted into a real class by Freedom, which
 // fills in the unimplemented on(...) method in the process of
@@ -84,7 +83,8 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     this.rtcToNet_.startFromConfig(rtcToNetProxyConfig, rtcPcConfig);
     this.rtcToNet_.signalsForPeer.setSyncHandler(this.socksToRtc_.handleSignalFromPeer);
     this.socksToRtc_.on('signalForPeer', this.rtcToNet_.handleSignalFromPeer);
-    return this.socksToRtc_.startFromConfig(socksToRtcEndpoint, rtcPcConfig, obfuscate);
+    return this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint),
+        bridge.best('sockstortc', rtcPcConfig));
   }
 
   // Assumes webEndpoint is IPv4.
