@@ -14,7 +14,7 @@ case $BROWSER in
     chrome)
         mkdir /tmp/chrome-data
         EXTDIR=${BASENAME}-chromeapp
-        google-chrome --user-data-dir=/tmp/chrome-data --load-and-launch-app=${BASENAME} --no-default-browser-check --no-first-run >/dev/null 2>&1 &
+        google-chrome --user-data-dir=/tmp/chrome-data --load-and-launch-app=${EXTDIR} --no-default-browser-check --no-first-run &
         ;;
     firefox)
         EXTDIR=${BASENAME}-firefoxapp

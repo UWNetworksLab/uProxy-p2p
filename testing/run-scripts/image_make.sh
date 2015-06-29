@@ -14,10 +14,11 @@ VERSION=$2
 
 case $BROWSER in
     chr|chrome)
+        BROWSER=chrome
         case $VERSION in
-            dev|DEV) ;;
-            rel|release|REL|RELEASE) ;;
-            canary|CANARY) ;;
+            dev|DEV) VERSION=dev ;;
+            rel|release|REL|RELEASE) VERSION=rel ;;
+            canary|CANARY) VERSION=canary ;;
             *)
                 echo "Unknown version of chrome: $2.   Options are dev, rel(ease), and canary."
                 exit 1;
@@ -25,10 +26,11 @@ case $BROWSER in
         esac
         ;;
     ff|firefox)
+        BROWSER=firefox
         case $VERSION in
-            aurora) ;;
-            beta) ;;
-            rel|release) ;;
+            aur|aurora|AUR|AURORA) VERSION=aurora ;;
+            beta|BETA) VERSION=beta ;;
+            rel|release|REL|RELEASE) VERSION=rel ;;
             *)
                 echo "Unknown version of firefox: $2.  Options are aurora, beta, and rel(ease)."
                 exit 1;
