@@ -1,12 +1,13 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import rtc_to_net = require('../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
-import net = require('../net/net.types');
-
+import bridge = require('../bridge/bridge');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
+import net = require('../net/net.types');
+import rtc_to_net = require('../rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
+import tcp = require('../net/tcp');
 
 export var moduleName = 'simple-socks';
 export var log :logging.Log = new logging.Log(moduleName);
@@ -38,18 +39,15 @@ rtcNet.startFromConfig({ allowNonUnicast: true }, pcConfig);
 //-----------------------------------------------------------------------------
 export var socksRtc = new socks_to_rtc.SocksToRtc();
 socksRtc.on('signalForPeer', rtcNet.handleSignalFromPeer);
-socksRtc.startFromConfig(
-    localhostEndpoint,
-    pcConfig,
-    true) // initiate with obfuscation
-  .then((endpoint:net.Endpoint) => {
-    log.info('SocksToRtc listening on: ' + JSON.stringify(endpoint));
-    log.info('curl -x socks5h://' + endpoint.address + ':' + endpoint.port +
-        ' www.example.com')
-  }, (e:Error) => {
-    log.error('failed to start SocksToRtc: ' + e.message);
-  });
-
+socksRtc.start(new tcp.Server(localhostEndpoint),
+    bridge.best('sockstortc', pcConfig)).then(
+    (endpoint:net.Endpoint) => {
+  log.info('SocksToRtc listening on %1', endpoint);
+  log.info('curl -x socks5h://%1:%2 www.example.com',
+      endpoint.address, endpoint.port);
+}, (e:Error) => {
+  log.error('failed to start SocksToRtc: %1', e.message);
+});
 
 //-----------------------------------------------------------------------------
 
