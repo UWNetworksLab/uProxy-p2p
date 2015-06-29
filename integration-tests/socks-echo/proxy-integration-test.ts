@@ -80,7 +80,8 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
 
     this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
     this.rtcToNet_ = new rtc_to_net.RtcToNet('the user id');
-    this.rtcToNet_.startFromConfig(rtcToNetProxyConfig, rtcPcConfig);
+    this.rtcToNet_.start(rtcToNetProxyConfig,
+        bridge.best('sockstortc', rtcPcConfig));
     this.rtcToNet_.signalsForPeer.setSyncHandler(this.socksToRtc_.handleSignalFromPeer);
     this.socksToRtc_.on('signalForPeer', this.rtcToNet_.handleSignalFromPeer);
     return this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint),

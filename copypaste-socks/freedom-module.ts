@@ -178,9 +178,9 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
   } else {
     if (rtcNet === undefined) {
       rtcNet = new rtc_to_net.RtcToNet();
-      rtcNet.startFromConfig({
-        allowNonUnicast:true
-      }, pcConfig);
+      rtcNet.start({
+        allowNonUnicast: true
+      }, bridge.best('rtctonet', pcConfig));
       log.info('created rtc-to-net');
 
       // Forward signalling channel messages to the UI.
