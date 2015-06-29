@@ -26,20 +26,20 @@ export interface BaseUser {
   name :string;
 }
 
-/**
- * Base interface for all Instances.
- */
-export interface BaseInstance {
+export interface LocalInstanceState {
   instanceId  :string;
+  userId      :string;
+  userName        :string;
+  imageData   :string;
   keyHash     :string;
-  status      ?:string; // Status on social network e.g. online or offline.
-  notify      ?:boolean;   // TODO: replace with better notications
 }
 
 export interface NetworkMessage {
-  name    :string;
-  online  :boolean;
-  userId  :string;
+  name       :string;
+  online     :boolean;
+  userId     :string;
+  userName   :string;
+  imageData  :string
 }
 
 export interface UserProfileMessage {
@@ -199,25 +199,18 @@ export interface UserState {
   consent     :ConsentState;
 }
 
+
+export interface RemoteUserInstance {
+  start() :Promise<net.Endpoint>;
+  stop() :Promise<void>;
+}
+
 // Payload for SIGNAL_FROM_CLIENT_PEER and SIGNAL_FROM_SERVER_PEER messages.
 // Other payload types exist, e.g. bridging peerconnection signals.
 export interface SignallingMetadata {
   // Random ID associated with this proxying attempt.
   // Used for logging purposes and implicitly delimits proxying attempts.
   proxyingId ?:string;
-}
-
-/**
- *
- */
-export interface LocalUserInstance extends BaseInstance {
-  userId :string;
-  name   :string;
-}
-
-export interface RemoteUserInstance extends BaseInstance {
-  start() :Promise<net.Endpoint>;
-  stop() :Promise<void>;
 }
 
 /**
@@ -246,7 +239,7 @@ export interface Network {
   roster     :{[userId:string]:RemoteUser};
   // TODO: Make this private. Have other objects use getLocalInstance
   // instead.
-  myInstance :LocalUserInstance;
+  myInstance :LocalInstanceState;
 
   /**
    * Logs in to the network. Updates the local client information, as

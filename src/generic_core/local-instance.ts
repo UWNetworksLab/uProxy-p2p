@@ -10,6 +10,9 @@ import social = require('../interfaces/social');
 
 import Persistent = require('../interfaces/persistent');
 
+import globals = require('./globals');
+import storage = globals.storage;
+
 // module Core {
   var log :logging.Log = new logging.Log('local-instance');
 
@@ -17,13 +20,13 @@ import Persistent = require('../interfaces/persistent');
   //
   // TODO: gather up uses of random and put them into a common directory in
   // uproxy-lib, or directly use end-to-end implementation.
-  export class LocalInstance implements social.BaseInstance, Persistent {
+  export class LocalInstance implements social.LocalInstanceState, Persistent {
 
     public instanceId  :string;
     public keyHash     :string;
     public clientId    :string;
-    public name        :string;
-    private imageData_ :string;
+    public userName        :string;
+    public imageData :string;
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -35,7 +38,7 @@ import Persistent = require('../interfaces/persistent');
      */
     public constructor(public network :social.Network,
                        public userId :string,
-                       load ?:social.BaseInstance) {
+                       load ?:social.LocalInstanceState) {
       if (load) {
         this.restoreState(load);
         return;
@@ -71,30 +74,46 @@ import Persistent = require('../interfaces/persistent');
     }
 
     public updateProfile = (profile :social.UserProfileMessage) :void => {
-      this.name = profile.name;
-      this.imageData_ = profile.imageData;
+      this.userName = profile.name;
+      this.imageData = profile.imageData;
+      this.saveToStorage();
     }
 
     public getUserProfile = () :social.UserProfileMessage => {
       return {
         userId: this.userId,
-        name: this.name,
-        imageData: this.imageData_
+        name: this.userName,
+        imageData: this.imageData
       };
     }
 
     /**
      * TODO: Come up with a better typing for this.
      */
-    public currentState = () :social.BaseInstance => {
+    public currentState = () :social.LocalInstanceState => {
       return {
         instanceId:  this.instanceId,
+        userId:      this.userId,
+        userName:        this.userName,
+        imageData:   this.imageData,
         keyHash:     this.keyHash,
       };
     }
-    public restoreState = (state:social.BaseInstance) :void => {
+    public restoreState = (state:social.LocalInstanceState) :void => {
       this.instanceId = state.instanceId;
       this.keyHash = state.keyHash;
+      if (typeof this.userName === 'undefined') {
+        this.userName = state.userName;
+        this.imageData = state.imageData;
+      }
+    }
+
+    public saveToStorage = () :Promise<void> => {
+      return storage.save<social.LocalInstanceState>(this.getStorePath(), this.currentState())
+          .catch((e:Error) => {
+        log.error('Could not save new LocalInstance: ',
+            this.instanceId, e.toString());
+      });
     }
 
   }  // class local_instance.LocalInstance

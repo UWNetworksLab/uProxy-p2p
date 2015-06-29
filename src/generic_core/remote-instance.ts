@@ -46,7 +46,7 @@ export var remoteProxyInstance :RemoteInstance = null;
    * - Locally, via a user command from the UI.
    * - Remotely, via consent bits sent over the wire by a friend.
    */
-  export class RemoteInstance implements social.BaseInstance, Persistent {
+  export class RemoteInstance implements Persistent {
 
     public keyHash     :string;
     public description :string;

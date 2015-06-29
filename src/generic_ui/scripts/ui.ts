@@ -687,7 +687,9 @@ export class UserInterface implements ui_constants.UiApi {
           name: networkMsg.name,
           userId: networkMsg.userId,
           roster: {},
-          logoutExpected: false
+          logoutExpected: false,
+          userName: networkMsg.userName,
+          imageData: networkMsg.imageData
         };
         model.onlineNetworks.push(existingNetwork);
       }
