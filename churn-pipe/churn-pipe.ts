@@ -172,11 +172,17 @@ class Pipe {
     log.debug('Binding public endpoint: %1', publicEndpoint);
     var socket = freedom['core.udpsocket']();
     var index = this.addPublicSocket_(socket, publicEndpoint);
+    // Firefox only supports binding to ANY and localhost, so bind to ANY.
+    // TODO: Figure out how to behave correctly when we are instructed
+    // to bind the same port on two different interfaces.  Currently, this
+    // code will bind the port twice, probably duplicating all incoming
+    // packets (but this is not verified).
+    var anyInterface = Pipe.anyInterface_(publicEndpoint.address);
     // This retry is needed because the browser releases the UDP port
     // asynchronously after we call close() on the RTCPeerConnection, so
     // this call to bind() may initially fail, until the port is released.
     portPromise = retry_(() => {
-      return socket.bind(publicEndpoint.address, publicEndpoint.port).
+      return socket.bind(anyInterface, publicEndpoint.port).
           then((resultCode:number) => {
         if (resultCode != 0) {
           return Promise.reject(new Error(
@@ -290,6 +296,10 @@ class Pipe {
     return Promise.all(promises).then((fulfills:any[]) : void => {});
   }
 
+  private static anyInterface_ = (address:string) => {
+    return ipaddr.IPv6.isValid(address) ? '::' : '0.0.0.0';
+  }
+
   private getMirrorSocket_ = (remoteEndpoint:net.Endpoint, index:number)
       : Promise<Socket> => {
     var mirrorSet = this.ensureRemoteEndpoint_(remoteEndpoint, false);
@@ -304,8 +314,7 @@ class Pipe {
     // in Firefox:
     //   https://github.com/uProxy/uproxy/issues/1597
     // TODO: bind to an actual, non-localhost address (see the issue)
-    var anyInterface = ipaddr.IPv6.isValid(remoteEndpoint.address) ?
-        '::' : '0.0.0.0';
+    var anyInterface = Pipe.anyInterface_(remoteEndpoint.address);
     socketPromise = mirrorSocket.bind(anyInterface, 0).then((resultCode:number)
         : Socket => {
       if (resultCode != 0) {
