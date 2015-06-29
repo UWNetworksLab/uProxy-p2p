@@ -296,6 +296,8 @@ class Pipe {
     return Promise.all(promises).then((fulfills:any[]) : void => {});
   }
 
+  // Returns the "any" interface with the same address family (IPv4 or IPv6) as
+  // |address|.
   private static anyInterface_ = (address:string) => {
     return ipaddr.IPv6.isValid(address) ? '::' : '0.0.0.0';
   }
