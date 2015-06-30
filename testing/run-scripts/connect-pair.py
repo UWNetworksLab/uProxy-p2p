@@ -6,20 +6,20 @@
 import socket
 import time
 
-first = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-first.connect(("localhost", 9000))
+getter = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+getter.connect(("localhost", 9000))
 
-second = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-second.connect(("localhost", 9010))
+giver = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+giver.connect(("localhost", 9010))
 
-print "Connecting to 9000"
-first.send("GET\n")
+print "connecting to getter"
+getter.send("GET\n")
 time.sleep(1.0)
-first_sdp = first.recv(4096)
-print "Connecting to 9010, sending " + first_sdp
-second.send("GIVE " + first_sdp + "\n")
+offer_sdp = getter.recv(4096)
+print "connecting to giver, sending " + offer_sdp
+giver.send("GIVE " + offer_sdp + "\n")
 time.sleep(1.0)
-second_sdp = second.recv(4096)
-print "From second, got " + second_sdp
-first.send(second_sdp)
-print "Sent to first."
+answer_sdp = giver.recv(4096)
+print "from giver, got " + answer_sdp
+getter.send(answer_sdp)
+print "sent to getter"

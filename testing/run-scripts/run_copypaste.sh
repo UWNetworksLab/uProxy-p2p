@@ -96,17 +96,18 @@ function run_docker () {
 }
 
 run_docker copypaste-getter $1 $VNCOPTS1 -p 9000:9000 -p 9999:9999
-run_docker copypaste-giver $2 $VNCOPTS2 -p 9010:9000 # -p 9998:9999
+run_docker copypaste-giver $2 $VNCOPTS2 -p 9010:9000
 
-echo "Waiting 2 minutes, as it'll take at least that long."
-sleep 120
-
-echo -n "Waiting for control port 9000 to come up"
-while netstat -lt | grep 9000 >/dev/null; do echo -n .;  sleep 1; done
+echo -n "Waiting for getter to come up"
+while ! (echo ping | nc -q 1 localhost 9000 | grep ping) > /dev/null; do echo -n .; sleep 0.5; done
 echo
 
-echo -n "Waiting for control port 9010 to come up"
-while netstat -lt | grep 9010 >/dev/null; do echo -n .;  sleep 1; done
+echo -n "Waiting for giver to come up"
+while ! (echo ping | nc -q 1 localhost 9010 | grep ping) > /dev/null; do echo -n .; sleep 0.5; done
 echo
 
+echo "Connecting pair..."
+sleep 2 # make sure nc is shutdown
 ./connect-pair.py
+
+echo "All done!"
