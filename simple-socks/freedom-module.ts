@@ -23,7 +23,7 @@ loggingController.setDefaultFilter(loggingTypes.Destination.console,
                                    loggingTypes.Level.debug);
 
 //-----------------------------------------------------------------------------
-var localhostEndpoint:net.Endpoint = { address: '127.0.0.1', port:9999 };
+var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port:9999 };
 
 //-----------------------------------------------------------------------------
 // Don't specify STUN servers because they aren't needed and can, in fact,
