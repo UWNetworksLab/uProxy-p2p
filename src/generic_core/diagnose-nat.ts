@@ -613,13 +613,6 @@ export function doUdpTest() {
   }
 
   socket.bind('0.0.0.0', 0)
-      .then((result :number) => {
-        if (result != 0) {
-          return Promise.reject(new Error('listen failed to bind :5758' +
-              ' with result code ' + result));
-        }
-        return Promise.resolve(result);
-      })
       .then(socket.getInfo)
       .then((socketInfo: freedom_UdpSocket.SocketInfo) => {
         log.debug('listening on %1:%2',
@@ -694,13 +687,7 @@ function pingStunServer(serverAddr: string) {
 
     var bytes = Turn.formatStunMessage(bindRequest);
     socket.bind('0.0.0.0', 0)
-        .then((result: number) => {
-          if (result != 0) {
-            return Promise.reject(new Error('listen failed to bind :5758' +
-                ' with result code ' + result));
-          }
-          return Promise.resolve(result);
-        }).then(() => {
+        .then(() => {
           return socket.sendTo(bytes.buffer, parts[1], parseInt(parts[2]));
         }).then((written: number) => {
             log.debug('%1 bytes sent correctly', [written]);
@@ -769,12 +756,6 @@ export function doNatProvoking() :Promise<string> {
     socket.on('onData', onUdpData);
 
     socket.bind('0.0.0.0', 0)
-        .then((result: number) => {
-          if (result != 0) {
-            return Promise.reject(new Error('failed to bind to a port: err=' + result));
-          }
-          return Promise.resolve(result);
-        })
         .then(socket.getInfo)
         .then((socketInfo: freedom_UdpSocket.SocketInfo) => {
           log.debug('listening on %1:%2',
