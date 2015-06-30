@@ -67,7 +67,7 @@ function run_docker () {
 }
 
 run_docker copypaste-getter $1 -p 5900:5900 -p 9000:9000 -p 9999:9999
-run_docker copypaste-giver $2 -p 5901:5900 -p 9010:9000 -p 9998:9999
+run_docker copypaste-giver $2 -p 5901:5900 -p 9010:9000
 
 echo "Waiting 2 minutes, as it'll take at least that long."
 sleep 120
