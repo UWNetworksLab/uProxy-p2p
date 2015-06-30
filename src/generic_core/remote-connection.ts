@@ -69,7 +69,8 @@ var generateProxyingSessionId_ = (): string => {
     private proxyingId_: string;
 
     constructor(
-      sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void
+      sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void,
+      private userId_?:string
     ) {
       this.sendUpdate_ = sendUpdate;
       this.resetSharerCreated();
@@ -142,7 +143,7 @@ var generateProxyingSessionId_ = (): string => {
         pc = bridge.best('rtctonet', config);
       }
 
-      this.rtcToNet_ = new rtc_to_net.RtcToNet();
+      this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
       this.rtcToNet_.start({
         allowNonUnicast: globals.settings.allowNonUnicast
       }, pc);
