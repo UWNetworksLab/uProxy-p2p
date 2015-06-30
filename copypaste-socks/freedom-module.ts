@@ -75,13 +75,21 @@ function setupServer(endpoint:net.Endpoint) {
         setTimeout(() => {
           parentModule.emit('gatherMessage');
         }, 500);
+
+        // Listen for the reply from the giver.
+        conn.dataFromSocketQueue.setSyncNextHandler((buf:ArrayBuffer) => {
+          var sdp = arraybuffers.arrayBufferToString(buf);
+          parentModule.emit('gotPeerSDP', sdp);
+        });
       } else if (str.substr(0,4).toUpperCase() == "GIVE") {
         log.info("GIVE found.");
         // skip past space, and then read SDP.
         var sdp = str.substr(5);
         parentModule.emit('giveWithSDP', sdp);
+      } else if (str.substr(0, 4).toUpperCase() == "PING") {
+        sendControlPortReply('ping');
       } else {
-        log.info("I don't understand that command. (" + str + ")");
+        log.info('I don\'t understand that command: %1', str);
       }
     });
   });
@@ -98,37 +106,16 @@ function setupServer(endpoint:net.Endpoint) {
 
 setupServer(localhostControlEndpoints[0]);
 
-parentModule.on('giveSendBack', (message:string) => {
-  var conn:tcp.Connection = null;
-  var all_conns = tcpServer.connections();
-  if (all_conns.length < 1) {
-    log.info("'giveSendBack': Weird, didn't find a connection.");
+function sendControlPortReply(message:string) {
+  var connections = tcpServer.connections();
+  if (connections.length < 1) {
+    log.error('weird, no connection to send reply to');
     return;
   }
-  conn = all_conns[0];
-  conn.send(arraybuffers.stringToArrayBuffer(message));
-  conn.close();
-})
+  connections[0].send(arraybuffers.stringToArrayBuffer(message));
+}
 
-// Invokd from main.core-env.ts, upon 'gatherMessage', which comes
-// back with our connection ID and the SDP, as a utf-8 string.
-parentModule.on('getSendBack', (message:string) => {
-  var conn:tcp.Connection = null;
-  var all_conns = tcpServer.connections();
-  if (all_conns.length < 1) {
-    log.info("'getSendBack': Weird, didn't find a connection.");
-    return;
-  }
-  conn = all_conns[0];
-  conn.send(arraybuffers.stringToArrayBuffer(message));
-  conn.dataFromSocketQueue.setNextHandler((buf:ArrayBuffer) => {
-    var sdp = arraybuffers.arrayBufferToString(buf);
-    log.info('got sdp ' + sdp);
-    parentModule.emit('gotPeerSDP', sdp);
-    conn.close();
-    return Promise.resolve<void>();
-  });
-});
+parentModule.on('controlPortCallback', sendControlPortReply);
 
 var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '127.0.0.1', port: 9999 };
