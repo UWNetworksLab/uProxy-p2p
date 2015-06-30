@@ -167,38 +167,33 @@ class Backend {
       return this.allocations_[tag];
     }
 
-    var socket = freedom['core.udpsocket']();
-    var promise = socket.bind('127.0.0.1', 0)
-        .then((resultCode:number) => {
-          if (resultCode != 0) {
-            return Promise.reject(new Error(
-                'could not create socket -- error code ' + resultCode));
-          }
-          socket.getInfo().then((socketInfo:freedom_UdpSocket.SocketInfo) => {
-            log.info('allocated socket for ' + tag + ' on ' +
-                socketInfo.localAddress + ':' + socketInfo.localPort);
-          });
-          return Promise.resolve({
-            socket: socket
-          });
-        });
-
-      socket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
-        this.emitIpc_({
-          method: messages.MessageMethod.DATA,
-          clazz: messages.MessageClass.INDICATION,
-          transactionId: Backend.getRandomTransactionId_(),
-          attributes: [{
-            type: messages.MessageAttribute.XOR_PEER_ADDRESS,
-            value: messages.formatXorMappedAddressAttribute(
-                recvFromInfo.address,
-                recvFromInfo.port)
-          }, {
-            type: messages.MessageAttribute.DATA,
-            value: new Uint8Array(recvFromInfo.data)
-          }]
-        }, clientEndpoint);
+    var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
+    var promise = socket.bind('127.0.0.1', 0).then(() => {
+      socket.getInfo().then((socketInfo:freedom_UdpSocket.SocketInfo) => {
+        log.info('allocated socket for ' + tag + ' on ' +
+            socketInfo.localAddress + ':' + socketInfo.localPort);
       });
+      return Promise.resolve({
+        socket: socket
+      });
+    });
+
+    socket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
+      this.emitIpc_({
+        method: messages.MessageMethod.DATA,
+        clazz: messages.MessageClass.INDICATION,
+        transactionId: Backend.getRandomTransactionId_(),
+        attributes: [{
+          type: messages.MessageAttribute.XOR_PEER_ADDRESS,
+          value: messages.formatXorMappedAddressAttribute(
+              recvFromInfo.address,
+              recvFromInfo.port)
+        }, {
+          type: messages.MessageAttribute.DATA,
+          value: new Uint8Array(recvFromInfo.data)
+        }]
+      }, clientEndpoint);
+    });
 
     this.allocations_[tag] = promise;
     return promise;

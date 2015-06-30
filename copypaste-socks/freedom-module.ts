@@ -4,15 +4,14 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
-import rtc_to_net = require('../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
-import net = require('../net/net.types');
-import tcp = require('../net/tcp');
-import signals = require('../webrtc/signals');
 import bridge = require('../bridge/bridge');
-
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
+import net = require('../net/net.types');
+import rtc_to_net = require('../rtc-to-net/rtc-to-net');
+import signals = require('../webrtc/signals');
+import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
+import tcp = require('../net/tcp');
 
 // Set each module to info, warn, error, or debug depending on which module
 // you're debugging. Since the proxy outputs quite a lot of messages, show only
@@ -38,7 +37,8 @@ pgp.exportKey().then((publicKey:PublicKey) => {
 
 var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
   iceServers: [{urls: ['stun:stun.l.google.com:19302']},
-               {urls: ['stun:stun1.l.google.com:19302']}]
+               {urls: ['stun:stun1.l.google.com:19302']},
+               {urls: ['stun:stun.services.mozilla.com']}]
 };
 
 // These two modules together comprise a SOCKS server:
@@ -155,19 +155,15 @@ var doStart = () => {
     parentModule.emit('proxyingStopped');
   });
 
-  socksRtc.startFromConfig(
-      localhostEndpoint,
-      pcConfig,
-      true) // initiate with obfuscation
-    .then((endpoint:net.Endpoint) => {
-      log.info('socksRtc ready. listening to SOCKS5 on: ' + JSON.stringify(endpoint));
-      log.info('` curl -x socks5h://localhost:9999 www.google.com `')
-      parentModule.emit('proxyingStarted', endpoint);
-    })
-    .catch((e) => {
-      console.error('socksRtc Error: ' + e + '; ' + socksRtc.toString());
-    });
-  log.info('created socks-to-rtc');
+  socksRtc.start(new tcp.Server(localhostEndpoint),
+      bridge.best('sockstortc', pcConfig)).then(
+      (endpoint:net.Endpoint) => {
+    log.info('SocksToRtc listening on %1', endpoint);
+    log.info('curl -x socks5h://%1:%2 www.example.com',
+        endpoint.address, endpoint.port);
+  }, (e:Error) => {
+    log.error('failed to start SocksToRtc: %1', e.message);
+  });
 }
 
 parentModule.on('start', doStart);
@@ -182,9 +178,9 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
   } else {
     if (rtcNet === undefined) {
       rtcNet = new rtc_to_net.RtcToNet();
-      rtcNet.startFromConfig({
-        allowNonUnicast:true
-      }, pcConfig);
+      rtcNet.start({
+        allowNonUnicast: true
+      }, bridge.best('rtctonet', pcConfig));
       log.info('created rtc-to-net');
 
       // Forward signalling channel messages to the UI.

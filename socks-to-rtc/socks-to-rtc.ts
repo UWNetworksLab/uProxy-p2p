@@ -3,16 +3,13 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
-import peerconnection = require('../webrtc/peerconnection');
 import handler = require('../handler/queue');
-
-import bridge = require('../bridge/bridge');
 import net = require('../net/net.types');
-import tcp = require('../net/tcp');
-import socks = require('../socks-common/socks-headers');
-import Pool = require('../pool/pool');
-
 import logging = require('../logging/logging');
+import peerconnection = require('../webrtc/peerconnection');
+import Pool = require('../pool/pool');
+import socks = require('../socks-common/socks-headers');
+import tcp = require('../net/tcp');
 
 // SocksToRtc passes socks requests over WebRTC datachannels.
 module SocksToRtc {
@@ -91,30 +88,8 @@ module SocksToRtc {
       }
     }
 
-    // Handles creation of a TCP server and bridging peerconnection. Returns
-    // the endpoint it ended up listening on (if |localSocksServerEndpoint|
-    // has port set to 0 then a dynamic port is allocated and this port is
-    // returned within the promise's endpoint).
-    // NOTE: Users of this class MUST add on-event listeners before calling
-    //       this method.
-    // NOTE: The arguments here are likely to change as more PeerConnection
-    //       providers and options are added; for now, setting obfuscate to
-    //       true implies the basicObfuscation bridge while false implies
-    //       preObfuscation.
-    public startFromConfig = (
-        localSocksServerEndpoint:net.Endpoint,
-        config:freedom_RTCPeerConnection.RTCConfiguration,
-        obfuscate?:boolean) : Promise<net.Endpoint> => {
-      return this.start(
-          new tcp.Server(localSocksServerEndpoint),
-          obfuscate ?
-            bridge.basicObfuscation('sockstortc', config) :
-            bridge.preObfuscation('sockstortc', config));
-    }
-
     // Starts the SOCKS server with the supplied TCP server and peerconnection.
-    // Returns a promise that resolves when the server is ready to use. This
-    // method is public only for testing purposes.
+    // Returns a promise that resolves when the server is ready to use.
     public start = (
         tcpServer:tcp.Server,
         peerconnection:peerconnection.PeerConnection<Object>)

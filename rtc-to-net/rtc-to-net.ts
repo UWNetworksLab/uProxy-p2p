@@ -5,22 +5,18 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
-import freedom_types = require('freedom.types');
-import ipaddr = require('ipaddr.js');
-
 import arraybuffers = require('../arraybuffers/arraybuffers');
-import peerconnection = require('../webrtc/peerconnection');
+import freedom_types = require('freedom.types');
 import handler = require('../handler/queue');
-
-import ProxyConfig = require('./proxyconfig');
-
-import bridge = require('../bridge/bridge');
-import net = require('../net/net.types');
-import tcp = require('../net/tcp');
-import socks = require('../socks-common/socks-headers');
-import Pool = require('../pool/pool');
-
+import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
+import net = require('../net/net.types');
+import peerconnection = require('../webrtc/peerconnection');
+import socks = require('../socks-common/socks-headers');
+import tcp = require('../net/tcp');
+
+import Pool = require('../pool/pool');
+import ProxyConfig = require('./proxyconfig');
 
 // module RtcToNet {
 
@@ -156,13 +152,6 @@ import logging = require('../logging/logging');
 
     // |userId_| is used to enforce user-wide resource limits.
     public constructor(private userId_?:string) {}
-
-    // As start() but handles creation of a bridging peerconnection.
-    public startFromConfig = (
-        proxyConfig:ProxyConfig,
-        config:freedom_RTCPeerConnection.RTCConfiguration) => {
-      return this.start(proxyConfig, bridge.best('rtctonet', config));
-    }
 
     // Starts with the supplied peerconnection.
     // Returns this.onceReady.
