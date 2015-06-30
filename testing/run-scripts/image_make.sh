@@ -13,7 +13,7 @@ BROWSER=$1
 VERSION=$2
 
 case $BROWSER in
-    chr|chrome)
+    chr|chrome|CHROME)
         BROWSER=chrome
         case $VERSION in
             dev|DEV) VERSION=dev ;;
@@ -25,7 +25,7 @@ case $BROWSER in
                 ;;
         esac
         ;;
-    ff|firefox)
+    ff|firefox|FF|FIREFOX)
         BROWSER=firefox
         case $VERSION in
             aur|aurora|AUR|AURORA) VERSION=aurora ;;
