@@ -131,7 +131,7 @@ parentModule.on('getSendBack', (message:string) => {
 });
 
 var doStart = () => {
-  var localhostEndpoint:net.Endpoint = { address: '127.0.0.1', port: 9999 };
+  var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
 
   socksRtc = new socks_to_rtc.SocksToRtc();
 
