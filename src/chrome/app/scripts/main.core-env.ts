@@ -12,6 +12,7 @@ import freedom_types = require('freedom.types');
 
 import Chrome_oauth = require('./chrome_oauth');
 import ChromeUIConnector = require('./chrome_ui_connector');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 export interface OnEmitModule extends freedom_types.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
@@ -24,6 +25,25 @@ var oauthOptions :{connector:ChromeUIConnector;} = {
 export var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
 export var moduleName = 'uProxy App Top Level';
 
+var needToSendInstalledMsgToUi = false;
+
+// When the app is installed, inform the extension.
+chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails) => {
+  if (details.reason !== 'install') {
+    return;
+  }
+  if (oauthOptions.connector) {
+    oauthOptions.connector.onceConnected.then(() => {
+      oauthOptions.connector.sendToUI(uproxy_core_api.Update.APP_INSTALLED);
+    });
+  } else {
+    // If the ui connector has not been initialized yet, set a flag so that
+    // the installed message is sent once the connector is ready.
+    needToSendInstalledMsgToUi = true;
+  }
+
+});
+
 freedom('generic_core/freedom-module.json', {
   'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
@@ -32,6 +52,12 @@ freedom('generic_core/freedom-module.json', {
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   uProxyAppChannel = uProxyModuleFactory();
   oauthOptions.connector = new ChromeUIConnector(uProxyAppChannel);
+  if (needToSendInstalledMsgToUi) {
+    oauthOptions.connector.onceConnected.then(() => {
+      oauthOptions.connector.sendToUI(uproxy_core_api.Update.APP_INSTALLED);
+      needToSendInstalledMsgToUi = false;
+    });
+  }
 });
 
 // Reply to pings from the uproxy website that are checking if the

@@ -17,6 +17,10 @@ class ChromeUIConnector {
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
   private onCredentials_ :(credentials:Object) => void;
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
+  private fulfillConnect_ :Function;
+  public onceConnected :Promise<void> = new Promise<void>((F, R) => {
+    this.fulfillConnect_ = F;
+  });
 
   constructor(private uProxyAppChannel_ :freedom_types.OnAndEmit<any,any>) {
     this.extPort_ = null;
@@ -74,11 +78,13 @@ class ChromeUIConnector {
     // is complete.
     chrome.app.runtime.onLaunched.removeListener(this.launchInstallIncompletePage_);
     chrome.app.runtime.onLaunched.addListener(this.launchUproxy_);
+    this.fulfillConnect_();
     this.extPort_.onDisconnect.addListener(function(){
       // If the extension disconnects, we should show an error
       // page.
       chrome.app.runtime.onLaunched.removeListener(this.launchUproxy_);
       chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
+      this.onceConnected = new Promise<void>((F, R) => { this.fulfillConnect_ = F; });
     }.bind(this));
   }
 
