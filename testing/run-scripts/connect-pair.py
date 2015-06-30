@@ -14,11 +14,11 @@ giver.connect(("localhost", 9010))
 
 print "connecting to getter"
 getter.send("GET\n")
-time.sleep(1.0)
+time.sleep(3.0)
 offer_sdp = getter.recv(4096)
 print "connecting to giver, sending " + offer_sdp
 giver.send("GIVE " + offer_sdp + "\n")
-time.sleep(1.0)
+time.sleep(3.0)
 answer_sdp = giver.recv(4096)
 print "from giver, got " + answer_sdp
 getter.send(answer_sdp)
