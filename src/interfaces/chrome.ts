@@ -14,5 +14,5 @@ export interface OAuthInfo {
 export module ChromeMessage {
   export var CONNECT :string = 'connect';
   export var ACK :string = 'ack';
-  export var APP_INSTALLED :string ='appInstalled';
+  export var APP_INSTALLED :string = 'appInstalled';
 }

@@ -117,7 +117,7 @@ export enum Update {
   FAILED_TO_GIVE = 2020,
   POST_TO_CLOUDFRONT = 2021,
   COPYPASTE_MESSAGE = 2022,
-  FAILED_TO_GET = 2023,
+  FAILED_TO_GET = 2023
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
