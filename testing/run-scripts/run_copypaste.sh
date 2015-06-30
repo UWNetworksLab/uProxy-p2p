@@ -95,8 +95,8 @@ function run_docker () {
     sudo docker run $HOSTARGS $* --name $NAME -d $IMAGENAME /test/bin/load-copypaste.sh $REPO $BRANCH $RUNARGS -w
 }
 
-run_docker copypaste-getter $1 -p 5900:5900 -p 9000:9000 -p 9999:9999
-run_docker copypaste-giver $2 -p 5901:5900 -p 9010:9000
+run_docker copypaste-getter $1 $VNCOPTS1 -p 9000:9000 -p 9999:9999
+run_docker copypaste-giver $2 $VNCOPTS2 -p 9010:9000
 
 echo -n "Waiting for getter to come up"
 while ! (echo ping | nc -q 1 localhost 9000 | grep ping) > /dev/null; do echo -n .; sleep 0.5; done
