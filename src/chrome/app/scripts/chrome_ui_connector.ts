@@ -119,6 +119,14 @@ class ChromeUIConnector {
     }
   }
 
+  public sendInstalledMsgToUI = () => {
+    this.extPort_.postMessage({
+      cmd: 'fired',
+      type: uproxy_chrome.ChromeMessage.APP_INSTALLED,
+      data: null
+    });
+  }
+
   public sendToUI = (type :uproxy_core_api.Update, data?:Object) => {
     this.extPort_.postMessage({
         cmd: 'fired',

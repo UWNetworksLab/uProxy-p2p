@@ -12,7 +12,6 @@ import freedom_types = require('freedom.types');
 
 import Chrome_oauth = require('./chrome_oauth');
 import ChromeUIConnector = require('./chrome_ui_connector');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 export interface OnEmitModule extends freedom_types.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
@@ -34,7 +33,7 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
   }
   if (oauthOptions.connector) {
     oauthOptions.connector.onceConnected.then(() => {
-      oauthOptions.connector.sendToUI(uproxy_core_api.Update.APP_INSTALLED);
+      oauthOptions.connector.sendInstalledMsgToUI();
     });
   } else {
     // If the ui connector has not been initialized yet, set a flag so that
@@ -54,7 +53,7 @@ freedom('generic_core/freedom-module.json', {
   oauthOptions.connector = new ChromeUIConnector(uProxyAppChannel);
   if (needToSendInstalledMsgToUi) {
     oauthOptions.connector.onceConnected.then(() => {
-      oauthOptions.connector.sendToUI(uproxy_core_api.Update.APP_INSTALLED);
+      oauthOptions.connector.sendInstalledMsgToUI();
       needToSendInstalledMsgToUi = false;
     });
   }

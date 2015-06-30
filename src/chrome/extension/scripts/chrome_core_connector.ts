@@ -237,7 +237,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
       this.listeners_[msg.type](msg.data);
       // TODO: Fire a DOM update? Decide if this should happen here or during a
       // ui.sync call.
-    } else if (msg.type == '' + uproxy_core_api.Update.APP_INSTALLED) {
+    } else if (msg.type == ChromeMessage.APP_INSTALLED) {
       // If the app was just installed, set the icon to the online icon
       // to make it more noticeable for first time users.
       chrome.browserAction.setIcon({

@@ -118,7 +118,6 @@ export enum Update {
   POST_TO_CLOUDFRONT = 2021,
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
-  APP_INSTALLED = 2024,
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
