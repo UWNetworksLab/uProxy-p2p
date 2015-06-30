@@ -53,7 +53,7 @@ module copypaste_module {
       setTimeout(() => {
         console.log("Emitting giveSendback with SDP: " + model.outboundMessageValue);
         copypaste.emit('controlPortCallback', model.outboundMessageValue);
-      }, 500);
+      }, 2000);
     });
 
     copypaste.on('publicKeyExport', (publicKey:string) => {

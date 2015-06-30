@@ -74,7 +74,7 @@ function setupServer(endpoint:net.Endpoint) {
         doStart();
         setTimeout(() => {
           parentModule.emit('gatherMessage');
-        }, 500);
+        }, 2000);
 
         // Listen for the reply from the giver.
         conn.dataFromSocketQueue.setSyncNextHandler((buf:ArrayBuffer) => {
