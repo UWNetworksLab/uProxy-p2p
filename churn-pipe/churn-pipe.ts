@@ -170,7 +170,7 @@ class Pipe {
     }
 
     log.debug('Binding public endpoint: %1', publicEndpoint);
-    var socket = freedom['core.udpsocket']();
+    var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
     var index = this.addPublicSocket_(socket, publicEndpoint);
     // Firefox only supports binding to ANY and localhost, so bind to ANY.
     // TODO: Figure out how to behave correctly when we are instructed
@@ -182,13 +182,9 @@ class Pipe {
     // asynchronously after we call close() on the RTCPeerConnection, so
     // this call to bind() may initially fail, until the port is released.
     portPromise = retry_(() => {
-      return socket.bind(anyInterface, publicEndpoint.port).
-          then((resultCode:number) => {
-        if (resultCode != 0) {
-          return Promise.reject(new Error(
-            'bindLocal failed with result code ' + resultCode));
-        }
-      });
+      // TODO: Once https://github.com/freedomjs/freedom/issues/283 is
+      // fixed, catch here, and only retry on an ALREADY_BOUND error.
+      return socket.bind(anyInterface, publicEndpoint.port);
     }).then(() => {
       socket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
         this.onIncomingData_(recvFromInfo, publicEndpoint.address, index);
@@ -310,18 +306,14 @@ class Pipe {
       return socketPromise;
     }
 
-    var mirrorSocket = freedom['core.udpsocket']();
+    var mirrorSocket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
      mirrorSocket;
     // Bind to INADDR_ANY owing to restrictions on localhost candidates
     // in Firefox:
     //   https://github.com/uProxy/uproxy/issues/1597
     // TODO: bind to an actual, non-localhost address (see the issue)
     var anyInterface = Pipe.anyInterface_(remoteEndpoint.address);
-    socketPromise = mirrorSocket.bind(anyInterface, 0).then((resultCode:number)
-        : Socket => {
-      if (resultCode != 0) {
-        throw new Error('bindRemote failed with result code ' + resultCode);
-      }
+    socketPromise = mirrorSocket.bind(anyInterface, 0).then(() : Socket => {
       mirrorSocket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
         // Ignore packets that do not originate from the browser, for a
         // theoretical security benefit.
