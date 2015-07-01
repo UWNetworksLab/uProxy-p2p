@@ -67,6 +67,7 @@ RUN echo BROWSER=firefox >/etc/test.conf
 RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 --no-parent -A '$PATTERN' $URL
 RUN cd /usr/share ; tar xf /tmp/ff/*/*/*/*/*/*/*/*/*.bz2
 RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
+RUN mkdir -p /tmp/jetpack ; cd /tmp/jetpack ; wget https://ftp.mozilla.org/pub/mozilla.org/labs/jetpack/jetpack-sdk-latest.tar.gz ; tar xvzf jetpack-sdk-latest.tar.gz
 EOF
 
 }
