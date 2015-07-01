@@ -18,6 +18,8 @@ case $BROWSER in
         ;;
     firefox)
         EXTDIR=${BASENAME}-firefoxapp
+        cd /tmp/jetpack/addon-sdk-*
+        source bin/activate
         cd $EXTDIR
         cfx run
         ;;
