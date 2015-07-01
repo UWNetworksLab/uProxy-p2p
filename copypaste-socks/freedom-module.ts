@@ -108,8 +108,8 @@ setupServer(localhostControlEndpoints[0]);
 
 function sendControlPortReply(message:string) {
   var connections = tcpServer.connections();
-  if (connections.length < 1) {
-    log.error('weird, no connection to send reply to');
+  if (connections.length !== 1) {
+    log.error('weird, there are multiple connections');
     return;
   }
   connections[0].send(arraybuffers.stringToArrayBuffer(message));
