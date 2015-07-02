@@ -193,7 +193,7 @@ export interface CoreApi {
 
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
-  stop () : void;
+  stop (path :social.InstancePath) : void;
 
   updateGlobalSettings(newSettings :GlobalSettings) :void;
   // TODO: rename toggle-option and/or replace with real configuration system.

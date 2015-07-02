@@ -180,8 +180,6 @@ export class UserInterface implements ui_constants.UiApi {
   public unableToGet :boolean = false;
   public unableToShare :boolean = false;
 
-  // is a proxy currently set
-  private proxySet_ :boolean = false;
   // Must be included in Chrome extension manifest's list of permissions.
   public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
 
@@ -228,7 +226,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.BROWSER_ERROR;
 
       if (this.isGettingAccess()) {
-        this.stopGettingInUiAndConfig(true);
+        this.stopGettingInUiAndConfig({instanceId: null, error: true});
       }
     });
 
@@ -265,7 +263,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // indicates the current getting connection has ended
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
-      this.stopGettingInUiAndConfig(error);
+      this.stopGettingInUiAndConfig({instanceId: null, error: error});
     });
 
     // indicates we just started offering access through copy+paste
@@ -289,13 +287,8 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
-        (data :any) => { // TODO better type
-      if (data.instanceId === this.instanceGettingAccessFrom_) {
-        this.stopGettingInUiAndConfig(data.error);
-      } else {
-        console.warn('Can\'t stop getting access from friend you were not ' +
-            'already getting access from.');
-      }
+        (data :social.StopProxyInfo) => { // TODO better type
+        this.stopGettingInUiAndConfig(data);
     });
 
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
@@ -528,34 +521,33 @@ export class UserInterface implements ui_constants.UiApi {
    * If user didn't end proxying, so if proxy session ended because of some
    * unexpected reason, user should be asked before reverting proxy settings.
    */
-  public stopGettingInUiAndConfig = (askUser :boolean) => {
-    var instanceId = this.instanceGettingAccessFrom_;
-    this.instanceGettingAccessFrom_ = null;
-
-    this.updateIcon_();
-    this.updateGettingStatusBar_();
-
-    if (instanceId) {
-      this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
+  public stopGettingInUiAndConfig = (data :social.StopProxyInfo) => {
+    if (data.instanceId) {
+      this.mapInstanceIdToUser_[data.instanceId].isSharingWithMe = false;
+    } else if (this.instanceGettingAccessFrom_) {
+      this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].isSharingWithMe = false;
     }
 
-    if (askUser) {
+    if (data.error) {
       this.bringUproxyToFront();
       this.core.disconnectedWhileProxying = true;
-      this.updateIcon_();
-      return;
+    } else {
+      this.core.disconnectedWhileProxying = false;
+      if (data.instanceId === null ||
+          data.instanceId === this.instanceGettingAccessFrom_) {
+        this.instanceGettingAccessFrom_ = null;
+        this.browserApi.stopUsingProxy();
+      }
     }
 
-    this.core.disconnectedWhileProxying = false;
-    this.proxySet_ = false;
+    this.updateGettingStatusBar_();
     this.updateIcon_();
-    this.browserApi.stopUsingProxy();
   }
 
-  public startGettingFromInstance = (instanceId :string) :Promise<void> => {
+  private getInstancePath_ = (instanceId :string) => {
     var user = this.mapInstanceIdToUser_[instanceId];
 
-    var path = <social.InstancePath>{
+    return <social.InstancePath>{
       network: {
         name: user.network.name,
         userId: user.network.userId
@@ -563,12 +555,24 @@ export class UserInterface implements ui_constants.UiApi {
       userId: user.userId,
       instanceId: instanceId
     };
+  }
 
+  public restartProxying = () => {
+    this.startGettingFromInstance(this.instanceGettingAccessFrom_);
+  }
+
+  public startGettingFromInstance = (instanceId :string) :Promise<void> => {
     this.instanceTryingToGetAccessFrom = instanceId;
 
-    return this.core.start(path).then((endpoint :net.Endpoint) => {
+    return this.core.start(this.getInstancePath_(instanceId))
+        .then((endpoint :net.Endpoint) => {
       this.instanceTryingToGetAccessFrom = null;
-
+      // If we were getting access from some other instance
+      // turn down the connection.
+      if (this.instanceGettingAccessFrom_ &&
+          this.instanceGettingAccessFrom_ != instanceId) {
+        this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
+      }
       this.startGettingInUiAndConfig(instanceId, endpoint);
     }).catch((e :Error) => {
       // this is only an error if we are still trying to get access from the
@@ -576,8 +580,8 @@ export class UserInterface implements ui_constants.UiApi {
       if (this.instanceTryingToGetAccessFrom !== instanceId) {
         return;
       }
-
-      this.toastMessage = this.i18n_t('unableToGetFrom', { name: user.name });
+      var userName = this.mapInstanceIdToUser_[instanceId].name;
+      this.toastMessage = this.i18n_t('unableToGetFrom', { name: name });
       this.instanceTryingToGetAccessFrom = null;
       this.unableToGet = true;
       this.bringUproxyToFront();
@@ -596,7 +600,7 @@ export class UserInterface implements ui_constants.UiApi {
       console.error('Attempting to stop getting from unknown instance');
     }
 
-    this.core.stop();
+    this.core.stop(this.getInstancePath_(instanceId));
   }
 
   public startGettingInUi = () => {
@@ -613,17 +617,12 @@ export class UserInterface implements ui_constants.UiApi {
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
     }
 
+    this.core.disconnectedWhileProxying = false;
+
     this.startGettingInUi();
 
     this.updateGettingStatusBar_();
 
-    if (this.proxySet_) {
-      // this handles the case where the user starts proxying again before
-      // confirming the disconnect
-      this.stopGettingInUiAndConfig(false);
-    }
-
-    this.proxySet_ = true;
     this.browserApi.startUsingProxy(endpoint);
   }
 
@@ -711,7 +710,7 @@ export class UserInterface implements ui_constants.UiApi {
           this.reconnect(networkMsg.name);
         } else {
           if (this.instanceGettingAccessFrom_) {
-            this.stopGettingInUiAndConfig(true);
+            this.stopGettingInUiAndConfig({instanceId :null, error: true});
           }
           this.showNotification(this.i18n_t('loggedOut', {network: networkMsg.name}));
 

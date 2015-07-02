@@ -26,11 +26,9 @@ var filter = {
 
 var proxyConfig = {
   startUsingProxy: function(endpoint) {
-    if (!running) {
-      running = true;
-      proxyinfo = pps.newProxyInfo('socks', endpoint.address, endpoint.port, 0, 0, null);
-      pps.registerFilter(filter, 0);
-    }
+    running = true;
+    proxyinfo = pps.newProxyInfo('socks', endpoint.address, endpoint.port, 0, 0, null);
+    pps.registerFilter(filter, 0);
   },
   stopUsingProxy: function() {
     if (running) {
