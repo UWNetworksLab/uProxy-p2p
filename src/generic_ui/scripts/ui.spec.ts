@@ -49,7 +49,9 @@ describe('UI.UserInterface', () => {
          'openTab',
          'showNotification',
          'on',
-         'bringUproxyToFront']);
+         'handlePopupLaunch',
+         'bringUproxyToFront'
+         ]);
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
   });

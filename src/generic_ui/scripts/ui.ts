@@ -334,12 +334,26 @@ export class UserInterface implements ui_constants.UiApi {
       this.updateSharingStatusBar_();
     });
 
-    core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (nameOfFriend :string) => {
-      // Setting this variable will toggle a paper-toast (in root.html)
-      // to open.
-      this.toastMessage =
-          this.i18n_t('unableToShareWith', { name: nameOfFriend });
+    core.onUpdate(uproxy_core_api.Update.FAILED_TO_GIVE,
+        (info:uproxy_core_api.FailedToGetOrGive) => {
+      console.error('proxying attempt ' + info.proxyingId + ' failed (giving)');
+
+      this.toastMessage = this.i18n_t('unableToShareWith', {
+        name: info.name
+      });
       this.unableToShare = true;
+    });
+
+    core.onUpdate(uproxy_core_api.Update.FAILED_TO_GET,
+        (info:uproxy_core_api.FailedToGetOrGive) => {
+      console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
+
+      this.toastMessage = this.i18n_t('unableToGetFrom', {
+        name: info.name
+      });
+      this.instanceTryingToGetAccessFrom = null;
+      this.unableToGet = true;
+      this.bringUproxyToFront();
     });
 
     core.onUpdate(
@@ -352,7 +366,9 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
-    core.getFullState().then(this.updateInitialState);
+    core.getFullState()
+        .then(this.updateInitialState)
+        .then(this.browserApi.handlePopupLaunch);
   }
 
   // Because of an observer (in root.ts) watching the value of
@@ -574,18 +590,6 @@ export class UserInterface implements ui_constants.UiApi {
         this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
       }
       this.startGettingInUiAndConfig(instanceId, endpoint);
-    }).catch((e :Error) => {
-      // this is only an error if we are still trying to get access from the
-      // instance
-      if (this.instanceTryingToGetAccessFrom !== instanceId) {
-        return;
-      }
-      var userName = this.mapInstanceIdToUser_[instanceId].name;
-      this.toastMessage = this.i18n_t('unableToGetFrom', { name: name });
-      this.instanceTryingToGetAccessFrom = null;
-      this.unableToGet = true;
-      this.bringUproxyToFront();
-      return Promise.reject(e);
     });
   }
 
@@ -955,8 +959,6 @@ export class UserInterface implements ui_constants.UiApi {
       // This means we had active copy-paste flow.
       this.view = ui_constants.View.COPYPASTE;
     }
-
-    this.browserApi.fulfillLaunched();
 
     while(model.onlineNetworks.length > 0) {
       model.onlineNetworks.pop();

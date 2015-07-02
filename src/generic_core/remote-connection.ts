@@ -16,6 +16,25 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import peerconnection = require('../../../third_party/uproxy-lib/webrtc/peerconnection');
 import tcp = require('../../../third_party/uproxy-lib/net/tcp');
 
+var PROXYING_SESSION_ID_LENGTH = 16;
+
+// Generates a string of random letters suitable for use a proxying session ID.
+var generateProxyingSessionId_ = (): string => {
+  // Generates a random number between 97 and 122 inclusive, corresponding
+  // to lowercase a and z:
+  //  http://unicode.org/charts/PDF/U0000.pdf
+  var a = 97, b = 122;
+  var randomCharCode = (): number => {
+    // TODO: use crypto, but that requires vulcanize to play with third_party
+    return a + (Math.floor(Math.random() * (b - a)));
+  };
+  var letters: string[] = [];
+  for (var i = 0; i < PROXYING_SESSION_ID_LENGTH; i++) {
+    letters.push(String.fromCharCode(randomCharCode()));
+  }
+  return letters.join('');
+}
+
 // module Core {
   var log :logging.Log = new logging.Log('remote-connection');
 
@@ -46,8 +65,12 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
 
     public activeEndpoint :net.Endpoint = null;
 
+    // Unique ID of the most recent proxying attempt.
+    private proxyingId_: string;
+
     constructor(
-      sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void
+      sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void,
+      private userId_?:string
     ) {
       this.sendUpdate_ = sendUpdate;
       this.resetSharerCreated();
@@ -62,16 +85,39 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
       }
     }
 
-    // TODO: should probably either return something or throw errors
-    public handleSignal = (message :social.PeerMessage) => {
-      if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === message.type
-          && this.rtcToNet_) {
-        this.rtcToNet_.handleSignalFromPeer(<bridge.SignallingMessage>message.data);
-      } else if (social.PeerMessageType.SIGNAL_FROM_SERVER_PEER === message.type
-                 && this.socksToRtc_) {
-        this.socksToRtc_.handleSignalFromPeer(<bridge.SignallingMessage>message.data);
+    // Handles signals received on the signalling channel from the remote peer.
+    public handleSignal = (message:social.PeerMessage) :Promise<void> => {
+      // TODO: forward messages from pre-bridge clients
+      if ((<any>message.data).signals !== undefined) {
+        return this.forwardSignal_(message.type, message.data);
       } else {
-        log.warn('Invalid signal: ', social.PeerMessageType[message.type]);
+        return this.handleMetadataSignal_(
+            <social.SignallingMetadata>message.data);
+      }
+    }
+
+    private handleMetadataSignal_ = (
+        message:social.SignallingMetadata) :Promise<void> => {
+      if (message.proxyingId) {
+        log.info('proxying session %1 initiated by remote peer', message.proxyingId);
+        this.proxyingId_ = message.proxyingId;
+      }
+      return Promise.resolve<void>();
+    }
+
+    // Forwards a signalling message to the RemoteConnection.
+    private forwardSignal_ = (
+        type:social.PeerMessageType,
+        signal:Object)
+        :Promise<void> => {
+      if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type
+          && this.rtcToNet_) {
+        this.rtcToNet_.handleSignalFromPeer(signal);
+      } else if (social.PeerMessageType.SIGNAL_FROM_SERVER_PEER === type
+                 && this.socksToRtc_) {
+        this.socksToRtc_.handleSignalFromPeer(signal);
+      } else {
+        log.warn('Invalid signal: ', social.PeerMessageType[type]);
         return;
       }
     };
@@ -97,7 +143,7 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
         pc = bridge.best('rtctonet', config);
       }
 
-      this.rtcToNet_ = new rtc_to_net.RtcToNet();
+      this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
       this.rtcToNet_.start({
         allowNonUnicast: globals.settings.allowNonUnicast
       }, pc);
@@ -168,6 +214,18 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
         throw new Error('socksToRtc_ already exists');
       }
 
+      this.proxyingId_ = generateProxyingSessionId_();
+      log.info('initiating proxying session %1', this.proxyingId_);
+
+      // Send the proxying session ID to the remote peer.
+      var signal :social.SignallingMetadata = {
+        proxyingId: this.proxyingId_
+      }
+      this.sendUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
+        type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
+        data: signal
+      });
+
       this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
 
       // set up basic handlers
@@ -224,9 +282,12 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
       } else if (remoteVersion === 2) {
         log.debug('peer is running client version 2, using bridge without obfuscation');
         pc = bridge.preObfuscation('sockstortc', config);
-      } else {
-        log.debug('peer is running client version >2, using bridge with basicObfuscation');
+      } else if (remoteVersion === 3) {
+        log.debug('peer is running client version 3, using bridge with basicObfuscation');
         pc = bridge.basicObfuscation('sockstortc', config);
+      } else {
+        log.debug('peer is running client version >=4, using holographic ICE');
+        pc = bridge.best('sockstortc', config);
       }
 
       return this.socksToRtc_.start(tcpServer, pc).then(
@@ -293,6 +354,10 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote
       };
+    }
+
+    public getProxyingId = () : string => {
+      return this.proxyingId_;
     }
   }
 // }

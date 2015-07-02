@@ -57,7 +57,7 @@ class ChromeBrowserApi implements BrowserAPI {
 
   private popupState_ = PopupState.NOT_LAUNCHED;
 
-  public fulfillLaunched : () => void;
+  public handlePopupLaunch :() => void;
   private onceLaunched_ :Promise<void>;
 
   constructor() {
@@ -167,7 +167,7 @@ class ChromeBrowserApi implements BrowserAPI {
       // after webstore installation), then allow the popup to open at a default
       // location.
       this.onceLaunched_ = new Promise<void>((F, R) => {
-        this.fulfillLaunched = F;
+        this.handlePopupLaunch = F;
       });
       chrome.windows.create({url: this.POPUP_URL,
                      type: "popup",

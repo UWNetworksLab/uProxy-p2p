@@ -39,7 +39,8 @@ describe('core-connector', () => {
   chromeBrowserApi = jasmine.createSpyObj('ChromeBrowserApi',
     ['bringUproxyToFront',
      'showNotification',
-     'on']);
+     'on',
+    'handlePopupLaunch']);
 
 
 

@@ -243,8 +243,8 @@ describe('remote_instance.RemoteInstance', () => {
       'start': () => {}
     };
     var fakeSignallingMessage :bridge.SignallingMessage = {
-      providers: {
-        'FAKE': {}
+      signals: {
+        'FAKE': []
       },
       first: true
     };

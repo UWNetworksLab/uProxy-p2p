@@ -210,6 +210,14 @@ export interface RemoteUserInstance {
   stop() :Promise<void>;
 }
 
+// Payload for SIGNAL_FROM_CLIENT_PEER and SIGNAL_FROM_SERVER_PEER messages.
+// Other payload types exist, e.g. bridging peerconnection signals.
+export interface SignallingMetadata {
+  // Random ID associated with this proxying attempt.
+  // Used for logging purposes and implicitly delimits proxying attempts.
+  proxyingId ?:string;
+}
+
 /**
  *
  */
