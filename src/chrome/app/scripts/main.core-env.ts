@@ -24,25 +24,6 @@ var oauthOptions :{connector:ChromeUIConnector;} = {
 export var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
 export var moduleName = 'uProxy App Top Level';
 
-var needToSendInstalledMsgToUi = false;
-
-// When the app is installed, inform the extension.
-chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails) => {
-  if (details.reason !== 'install') {
-    return;
-  }
-  if (oauthOptions.connector) {
-    oauthOptions.connector.onceConnected.then(() => {
-      oauthOptions.connector.sendInstalledMsgToUI();
-    });
-  } else {
-    // If the ui connector has not been initialized yet, set a flag so that
-    // the installed message is sent once the connector is ready.
-    needToSendInstalledMsgToUi = true;
-  }
-
-});
-
 freedom('generic_core/freedom-module.json', {
   'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
@@ -51,12 +32,6 @@ freedom('generic_core/freedom-module.json', {
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   uProxyAppChannel = uProxyModuleFactory();
   oauthOptions.connector = new ChromeUIConnector(uProxyAppChannel);
-  if (needToSendInstalledMsgToUi) {
-    oauthOptions.connector.onceConnected.then(() => {
-      oauthOptions.connector.sendInstalledMsgToUI();
-      needToSendInstalledMsgToUi = false;
-    });
-  }
 });
 
 // Reply to pings from the uproxy website that are checking if the

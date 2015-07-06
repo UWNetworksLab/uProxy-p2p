@@ -63,6 +63,12 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
  * updates from the Chrome App side propogate to the UI.
  */
 browserApi = new ChromeBrowserApi();
+
+var fulfillCoreInitAndConnected_ :Function;
+var onceCoreInitAndConnected :Promise<void> = new Promise<void>((F, R) => {
+  this.fulfillCoreInitAndConnected_ = F;
+});
+
 // TODO (lucyhe): Make sure that the "install" event isn't missed if we
 // are adding the listener after the event is fired.
 chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails) => {
@@ -70,6 +76,14 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
     // we only want to launch the window on the first install
     return;
   }
+  onceCoreInitAndConnected.then(() => {
+    chrome.browserAction.setIcon({
+      path: {
+        "19" : "icons/19_" + Constants.DEFAULT_ICON,
+        "38" : "icons/38_" + Constants.DEFAULT_ICON,
+      }
+    });
+  });
 
   chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
       // Do not open the extension when it's installed if the user is
@@ -88,6 +102,9 @@ chrome.browserAction.onClicked.addListener((tab) => {
 browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
 browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
                           browserApi.bringUproxyToFront);
+browserConnector.onceConnected.then(() => {
+  fulfillCoreInitAndConnected_();
+});
 
 core = new CoreConnector(browserConnector);
 var oAuth = new ChromeTabAuth();
