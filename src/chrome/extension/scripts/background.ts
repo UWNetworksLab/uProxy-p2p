@@ -15,6 +15,7 @@ import UiApi = require('../../../interfaces/ui');
 import user_interface = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import Constants = require('../../../generic_ui/scripts/constants');
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
@@ -66,7 +67,7 @@ browserApi = new ChromeBrowserApi();
 
 var fulfillCoreInitAndConnected_ :Function;
 var onceCoreInitAndConnected :Promise<void> = new Promise<void>((F, R) => {
-  this.fulfillCoreInitAndConnected_ = F;
+  fulfillCoreInitAndConnected_ = F;
 });
 
 // TODO (lucyhe): Make sure that the "install" event isn't missed if we
