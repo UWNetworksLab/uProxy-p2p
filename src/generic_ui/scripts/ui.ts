@@ -180,6 +180,9 @@ export class UserInterface implements ui_constants.UiApi {
   public unableToGet :boolean = false;
   public unableToShare :boolean = false;
 
+  // ID of the most recent failed proxying attempt.
+  public proxyingId: string;
+
   // is a proxy currently set
   private proxySet_ :boolean = false;
   // Must be included in Chrome extension manifest's list of permissions.
@@ -349,6 +352,7 @@ export class UserInterface implements ui_constants.UiApi {
         name: info.name
       });
       this.unableToShare = true;
+      this.proxyingId = info.proxyingId;
     });
 
     core.onUpdate(uproxy_core_api.Update.FAILED_TO_GET,
@@ -360,6 +364,7 @@ export class UserInterface implements ui_constants.UiApi {
       });
       this.instanceTryingToGetAccessFrom = null;
       this.unableToGet = true;
+      this.proxyingId = info.proxyingId;
       this.bringUproxyToFront();
     });
 
@@ -921,11 +926,18 @@ export class UserInterface implements ui_constants.UiApi {
       logsPromise = Promise.resolve('');
     }
     return logsPromise.then((logs) => {
-      var payload = {
+      var payload :uproxy_core_api.UserFeedback = {
         email: feedback.email,
         feedback: feedback.feedback,
-        logs: logs
+        logs: logs,
+        feedbackType: feedback.feedbackType
       };
+
+      if (payload.feedbackType ===
+          uproxy_core_api.UserFeedbackType.PROXYING_FAILURE) {
+        payload.proxyingId = this.proxyingId;
+      }
+
       return this.postToCloudfrontSite(payload, 'submit-feedback');
     });
   }
