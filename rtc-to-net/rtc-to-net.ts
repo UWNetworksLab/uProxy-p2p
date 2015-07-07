@@ -494,6 +494,8 @@ import ProxyConfig = require('./proxyconfig');
         reply = socks.Reply.TTL_EXPIRED;
       } else if (e.errcode == 'NETWORK_CHANGED') {
         reply = socks.Reply.NETWORK_UNREACHABLE;
+      } else if (e.errcode == 'NAME_NOT_RESOLVED') {
+        reply = socks.Reply.HOST_UNREACHABLE;
       } else if (e.errcode == 'CONNECTION_RESET' ||
                  e.errcode == 'CONNECTION_REFUSED') {
         // Due to port-scanning concerns, we return a generic error if the user

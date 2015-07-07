@@ -224,10 +224,7 @@ class Pipe {
             address: remoteAddress,
             port: port
           };
-          this.getMirrorSocket_(endpoint, this.maxSocketsPerInterface_).
-              then((socket) => {
-            this.emitMirror_(endpoint, socket)
-          });
+          this.getMirrorSocketAndEmit_(endpoint, this.maxSocketsPerInterface_);
         }
       }
     }
@@ -282,12 +279,12 @@ class Pipe {
    * constructs a corresponding mirror socket, and returns its endpoint.
    */
   public bindRemote = (remoteEndpoint:net.Endpoint) : Promise<void> => {
+    log.debug('Binding %1 mirror(s) for remote endpoint: %2',
+        this.maxSocketsPerInterface_, remoteEndpoint);
     this.ensureRemoteEndpoint_(remoteEndpoint, true);
     var promises :any[] = [];
     for (var i = 0; i < this.maxSocketsPerInterface_; ++i) {
-      promises.push(this.getMirrorSocket_(remoteEndpoint, i).then((socket) => {
-        this.emitMirror_(remoteEndpoint, socket);
-      }));
+      promises.push(this.getMirrorSocketAndEmit_(remoteEndpoint, i));
     }
     return Promise.all(promises).then((fulfills:any[]) : void => {});
   }
@@ -340,6 +337,15 @@ class Pipe {
     });
     mirrorSet.sockets[index] = socketPromise;
     return socketPromise;
+  }
+
+  private getMirrorSocketAndEmit_ = (remoteEndpoint:net.Endpoint, index:number)
+      : Promise<void> => {
+    return this.getMirrorSocket_(remoteEndpoint, index).then((socket) => {
+      this.emitMirror_(remoteEndpoint, socket)
+    }, (e) => {
+      log.error('Error while getting mirror socket: %1', e);
+    });
   }
 
   private static endpointFromInfo_ = (socketInfo:freedom_UdpSocket.SocketInfo) => {

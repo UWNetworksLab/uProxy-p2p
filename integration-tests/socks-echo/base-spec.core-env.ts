@@ -24,8 +24,8 @@ export function socksEchoTestDescription(useChurn:boolean) {
   var testerFactoryManager
         :freedom_types.FreedomModuleFactoryManager<ProxyIntegrationTester>;
   var createTestModule = function(denyLocalhost?:boolean,
-      sessionLimit?:number) : ProxyIntegrationTester {
-    return testerFactoryManager(denyLocalhost, useChurn, sessionLimit);
+      sessionLimit?:number, ipv6Only?:boolean) : ProxyIntegrationTester {
+        return testerFactoryManager(denyLocalhost, useChurn, sessionLimit, ipv6Only);
   };
 
   beforeEach((done) => {
@@ -237,11 +237,11 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // On many networks, www.127.0.0.1.xip.io is non-resolvable, because
       // corporate DNS can drop responses that resolve to local network
       // addresses.  Accordingly, the error code may either indicate
-      // a generic failure (if resolution fails) or NOT_ALLOWED if name
+      // HOST_UNREACHABLE (if resolution fails) or NOT_ALLOWED if name
       // resolution succeeds.  However, to avoid portscanning leaks
-      // (https://github.com/uProxy/uproxy/issues/809) both will be reported
+      // (https://github.com/uProxy/uproxy/issues/809) NOT_ALLOWED will be reported
       // as FAILURE
-      expect(e.reply).toEqual(socks.Reply.FAILURE);
+      expect([socks.Reply.HOST_UNREACHABLE, socks.Reply.FAILURE]).toContain(e.reply);
     }).then(done);
   });
 
@@ -332,10 +332,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
     }).then(done);
   });
 
-  // Disabled because HOST_UNREACHABLE is not yet exposed in freedom-for-chrome's
-  // implementation of the core.tcpsocket API.
-  //  https://github.com/freedomjs/freedom-for-chrome/issues/73
-  xit('attempt to connect to a nonexistent DNS name', (done) => {
+  it('attempt to connect to a nonexistent DNS name', (done) => {
     var testModule = createTestModule(true);
     testModule.connect(80, 'www.nonexistentdomain.gov').then((connectionId:string) => {
       // This code should not run, because there is no such DNS name.
@@ -349,18 +346,37 @@ export function socksEchoTestDescription(useChurn:boolean) {
     var limit = 4;
     var testModule = createTestModule(false, limit);
 
+    var workingConnections : Promise<void>[] = [];
+
     testModule.startEchoServer().then((port:number) => {
       for (var i = 0; i < limit; ++i) {
         // Connections up to the limit are allowed.
-        testModule.connect(port).catch((e) => {
+        workingConnections.push(testModule.connect(port).catch((e) => {
           // These should not fail.
           expect(e).toBeUndefined();
-        });
+        }));
       }
       // This one is over the limit so it should fail to open.
       testModule.connect(port).catch((e) => {
-        done();
+        // Wait for the working connections to succeed.
+        Promise.all(workingConnections).then(done);
       });
     });
+  });
+
+  // TODO: Enable this test once https://code.google.com/p/webrtc/issues/detail?id=4823
+  // is fixed.
+  xit('run a simple echo test but force IPv6 transport', (done) => {
+    var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
+    var testModule = createTestModule(undefined, undefined, true);
+    testModule.startEchoServer().then((port:number) => {
+      return testModule.connect(port);
+    }).then((connectionId:string) => {
+      return testModule.echo(connectionId, input);
+    }).then((output:ArrayBuffer) => {
+      expect(arraybuffers.byteEquality(input, output)).toBe(true);
+    }).catch((e:any) => {
+      expect(e).toBeUndefined();
+    }).then(done);
   });
 };
