@@ -17,7 +17,6 @@ class ChromeUIConnector {
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
   private onCredentials_ :(credentials:Object) => void;
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
-  private fulfillConnect_ :Function;
 
   constructor(private uProxyAppChannel_ :freedom_types.OnAndEmit<any,any>) {
     this.extPort_ = null;
