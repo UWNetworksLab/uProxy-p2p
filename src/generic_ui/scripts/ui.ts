@@ -940,7 +940,9 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     while (this.model.onlineNetworks.length > 0) {
-      this.model.onlineNetworks.pop();
+      var toRemove = this.model.onlineNetworks[0];
+
+      this.model.removeNetwork(toRemove.name, toRemove.userId);
     }
 
     for (var network in state.onlineNetworks) {
