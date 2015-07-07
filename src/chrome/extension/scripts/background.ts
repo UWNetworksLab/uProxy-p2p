@@ -68,11 +68,6 @@ browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port
 browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
                           browserApi.bringUproxyToFront);
 
-var fulfillCoreInitAndConnected_ :Function;
-var onceCoreInitAndConnected :Promise<void> = new Promise<void>((F, R) => {
-  fulfillCoreInitAndConnected_ = F;
-});
-
 // TODO (lucyhe): Make sure that the "install" event isn't missed if we
 // are adding the listener after the event is fired.
 chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails) => {
