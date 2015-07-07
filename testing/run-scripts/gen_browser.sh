@@ -16,6 +16,13 @@
 #        - beta
 #        - release
 
+if [ ! -x "${BASH_SOURCE%/*}/utils.sh" ]
+then
+    echo "Script called incorrectly, or improperly installed."
+    exit 1
+fi
+
+source "${BASH_SOURCE%/*}/utils.sh"
 
 # $1 is the version
 function get_chrome () {
@@ -32,8 +39,9 @@ function get_chrome () {
           URL=https://dl.google.com/linux/direct/google-chrome-unstable_current_amd64.deb
           ;;
       *)
-          echo "Unknown chrome version $1. Options are dev, rel(ease), and canary."
+          log "Unknown chrome version $1. Options are dev, rel(ease), and canary."
           exit 1
+          ;;
   esac
           cat <<EOF
 RUN echo BROWSER=chrome >/etc/test.conf
@@ -41,6 +49,15 @@ ADD $DRIVERURL /tmp/driver.zip
 RUN unzip -qq /tmp/driver.zip -d /usr/bin
 RUN wget $URL -O /tmp/chrome.deb
 RUN dpkg -i /tmp/chrome.deb
+EOF
+}
+
+function get_localchrome () {
+    # localchrome is an additional mount at runtime, into
+    # /test/chrome.  Just generate a wrapper script here.
+        cat <<EOF
+RUN echo BROWSER=chrome >/etc/test.conf
+RUN echo '#!/bin/bash' >/usr/bin/google-chrome; echo 'pushd /test/chrome; ./chrome --no-sandbox \$@' >>/usr/bin/google-chrome ; chmod +x /usr/bin/google-chrome
 EOF
 }
 
@@ -59,7 +76,7 @@ function get_firefox () {
             PATTERN='*.tar.bz2'
             ;;
         *)
-            echo "Unknown firefox version $1.  Options are aurora, beta, and rel(ease)."
+            log "Unknown firefox version $1.  Options are aurora, beta, and rel(ease)."
             ;;
     esac
     cat <<EOF
@@ -78,7 +95,10 @@ case $1 in
     ff|firefox|FIREFOX|Firefox|FireFox)
         get_firefox $2
         ;;
+    lcr|lchrome|localchrome|LCR|LCHROME|LOCALCHROME)
+        get_localchrome $2 $3
+        ;;
     *)
-        echo "Unknown browser $1.  Options are chrome and firefox."
+        log "Unknown browser $1.  Options are chrome, localchrome, and firefox."
         exit 1
 esac

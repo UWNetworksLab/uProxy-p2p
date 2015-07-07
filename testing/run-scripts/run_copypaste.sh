@@ -7,7 +7,14 @@
 #  Runs two instances running the dev version of chrome, connects them
 #  together, and runs a proxy.
 
-# TODO: put in honest arg mapping.
+if [ ! -x "${BASH_SOURCE%/*}/utils.sh" ]
+then
+    echo "Script called incorrectly, or improperly installed."
+    exit 1
+fi
+
+source "${BASH_SOURCE%/*}/utils.sh"
+
 
 BRANCH="-b dev"
 REPO=
@@ -77,7 +84,7 @@ fi
 
 # $1 is the name of the resulting container.
 # $2 is the image to run, and the rest are flags.
-# TODO: Take a -b BRANCH arg and pass it to load-copypaste.sh
+# Reads the REPO, BRANCH, RUNARGS, and HOSTARGS variables.  Not great.
 function run_docker () {
     # echo "run_docker " $*
     HOSTARGS=
@@ -92,7 +99,8 @@ function run_docker () {
     else
         HOSTARGS="$HOSTARGS"
     fi
-    sudo docker run $HOSTARGS $* --name $NAME -d $IMAGENAME /test/bin/load-copypaste.sh $REPO $BRANCH $RUNARGS -w
+    echo RUNNING: docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-copypaste.sh $REPO $BRANCH $RUNARGS -w
+    sudo docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-copypaste.sh $REPO $BRANCH $RUNARGS -w
 }
 
 run_docker copypaste-getter $1 $VNCOPTS1 -p 9000:9000 -p 9999:9999
