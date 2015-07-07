@@ -42,7 +42,8 @@ export var settings :uproxy_core_api.GlobalSettings = {
   splashState: 0,
   statsReportingEnabled: false,
   consoleFilter: loggingTypes.Level.warn,
-  language: 'en'
+  language: 'en',
+  force_message_version: 0 // zero means "don't override"
 };
 
 export var natType :string = '';
