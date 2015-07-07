@@ -64,6 +64,9 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
  * updates from the Chrome App side propogate to the UI.
  */
 browserApi = new ChromeBrowserApi();
+browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
+browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
+                          browserApi.bringUproxyToFront);
 
 var fulfillCoreInitAndConnected_ :Function;
 var onceCoreInitAndConnected :Promise<void> = new Promise<void>((F, R) => {
@@ -77,7 +80,7 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
     // we only want to launch the window on the first install
     return;
   }
-  onceCoreInitAndConnected.then(() => {
+  browserConnector.onceConnected.then(() => {
     chrome.browserAction.setIcon({
       path: {
         "19" : "icons/19_" + Constants.DEFAULT_ICON,
@@ -98,13 +101,6 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
 chrome.browserAction.onClicked.addListener((tab) => {
   // When the extension icon is clicked, open uProxy.
   browserApi.bringUproxyToFront();
-});
-
-browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
-                          browserApi.bringUproxyToFront);
-browserConnector.onceConnected.then(() => {
-  fulfillCoreInitAndConnected_();
 });
 
 core = new CoreConnector(browserConnector);
