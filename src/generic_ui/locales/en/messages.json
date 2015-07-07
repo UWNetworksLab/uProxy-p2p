@@ -642,5 +642,9 @@
   "appMissingMessage": {
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
+  },
+  "restartProxying": {
+    "description": "If proxy connection gets disconnected restart the connection",
+    "message": "Reconnect"
   }
 }
