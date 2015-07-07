@@ -699,9 +699,9 @@ export class UserInterface implements ui_constants.UiApi {
         for (var userId in existingNetwork.roster) {
           var user = existingNetwork.roster[userId];
           var userCategories = user.getCategories();
-          this.categorizeUser_(user, this.model.contacts.getAccessContacts,
+          categorizeUser(user, this.model.contacts.getAccessContacts,
                                userCategories.getTab, null);
-          this.categorizeUser_(user, this.model.contacts.shareAccessContacts,
+          categorizeUser(user, this.model.contacts.shareAccessContacts,
                                userCategories.shareTab, null);
         }
         this.model.removeNetwork(networkMsg.name);
@@ -792,36 +792,13 @@ export class UserInterface implements ui_constants.UiApi {
 
     var newUserCategories = user.getCategories();
     // Update the user's category in both get and share tabs.
-    this.categorizeUser_(user, this.model.contacts.getAccessContacts,
+    categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-    this.categorizeUser_(user, this.model.contacts.shareAccessContacts,
+    categorizeUser(user, this.model.contacts.shareAccessContacts,
         oldUserCategories.shareTab, newUserCategories.shareTab);
 
     console.log('Synchronized user.', user);
   };
-
-  private categorizeUser_ = (user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) => {
-    if (oldCategory === newCategory) {
-      // no need to do any work if nothing changed
-      return;
-    }
-
-    if (oldCategory) {
-      // remove user from old category
-      var oldCategoryArray = contacts[oldCategory];
-      for (var i = 0; i < oldCategoryArray.length; ++i) {
-        if (oldCategoryArray[i] == user) {
-          oldCategoryArray.splice(i, 1);
-          break;
-        }
-      }
-    }
-
-    if (newCategory) {
-      // add user to new category
-      contacts[newCategory].push(user);
-    }
-  }
 
   public openTab = (url :string) => {
     this.browserApi.openTab(url);
@@ -994,3 +971,27 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 }  // class UserInterface
+
+// non-exported method to handle categorizing users
+var categorizeUser = (user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) => {
+  if (oldCategory === newCategory) {
+    // no need to do any work if nothing changed
+    return;
+  }
+
+  if (oldCategory) {
+    // remove user from old category
+    var oldCategoryArray = contacts[oldCategory];
+    for (var i = 0; i < oldCategoryArray.length; ++i) {
+      if (oldCategoryArray[i] == user) {
+        oldCategoryArray.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  if (newCategory) {
+    // add user to new category
+    contacts[newCategory].push(user);
+  }
+}
