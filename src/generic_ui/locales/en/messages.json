@@ -35,6 +35,10 @@
     "description": "Submit feedback to the uProxy team.",
     "message": "Submit Feedback"
   },
+  "sendingFeedback": {
+    "description": "Message in dialog indicating feedback is being sent to the uProxy team.",
+    "message": "Sending feedback"
+  },
   "getHelp": {
     "description": "Get help from the frequently asked questions page.",
     "message": "Get Help"
