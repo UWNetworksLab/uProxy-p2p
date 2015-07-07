@@ -71,7 +71,18 @@ export class Model {
     return _.find(this.onlineNetworks, { name: networkName });
   }
 
-  public removeNetwork = (networkName :string) => {
+  public removeNetwork = (networkName :string, userId :string) => {
+    var network = this.getNetwork(networkName, userId);
+
+    for (var otherUserId in network.roster) {
+      var user = this.getUser(network, otherUserId);
+      var userCategories = user.getCategories();
+      categorizeUser(user, this.contacts.getAccessContacts,
+                     userCategories.getTab, null);
+      categorizeUser(user, this.contacts.shareAccessContacts,
+                     userCategories.shareTab, null);
+    }
+
     _.remove(this.onlineNetworks, { name: networkName });
   }
 
@@ -696,15 +707,7 @@ export class UserInterface implements ui_constants.UiApi {
       }
     } else {
       if (existingNetwork) {
-        for (var userId in existingNetwork.roster) {
-          var user = existingNetwork.roster[userId];
-          var userCategories = user.getCategories();
-          categorizeUser(user, this.model.contacts.getAccessContacts,
-                               userCategories.getTab, null);
-          categorizeUser(user, this.model.contacts.shareAccessContacts,
-                               userCategories.shareTab, null);
-        }
-        this.model.removeNetwork(networkMsg.name);
+        this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
             (networkMsg.name === 'Google' || networkMsg.name === 'Facebook') &&
@@ -970,7 +973,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.syncUser(networkState.roster[userId]);
     }
   }
-}  // class UserInterface
+} // class UserInterface
 
 // non-exported method to handle categorizing users
 function categorizeUser(user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) {
