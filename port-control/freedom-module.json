@@ -1,18 +1,17 @@
 {
-  "name": "port-control",
+  "name": "Port Control",
   "description": "Freedom port control manifest",
   "app": {
-    "script": "port-control.js"
+    "script": "freedom-module.static.js"
   },
   "constraints": {
     "isolation": "never"
   },
   "provides" : [
-    "port-control"
+    "portControl"
   ],
-  "default": "port-control",
   "api": {
-    "port-control": {
+    "portControl": {
       "addMapping": {
         "type": "method",
         "value": ["number", "number", "number"],
