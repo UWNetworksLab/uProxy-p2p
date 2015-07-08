@@ -34,7 +34,7 @@ class ChromeTabAuth {
       }
     };
 
-    var isActive = !user_interface.model.reconnecting;
+    var isActive = true; //TODO use actual value
     chrome.tabs.create({url: url, active: isActive},
                        function(tab: chrome.tabs.Tab) {
       if (isActive) {
