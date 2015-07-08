@@ -8,10 +8,17 @@ import ui = require('./ui');
 // --- Core <--> UI Interfaces ---
 
 export interface UserFeedback {
-  email     :string;
-  feedback  :string;
-  logs      :boolean;
-  browserInfo :string;
+  email        :string;
+  feedback     :string;
+  logs         :string;
+  browserInfo  ?:string;
+  proxyingId   ?:string;
+  feedbackType ?:UserFeedbackType;
+}
+
+export enum UserFeedbackType {
+  USER_INITIATED = 0,
+  PROXYING_FAILURE = 1
 }
 
 // Object containing description so it can be saved to storage.

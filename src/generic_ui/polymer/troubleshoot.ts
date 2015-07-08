@@ -1,3 +1,5 @@
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+
 Polymer({
   analyzingNetwork: false,
   analyzedNetwork: false,
@@ -12,7 +14,12 @@ Polymer({
     this.$.troubleshootDialog.open();
   },
   submitFeedback: function() {
-    this.fire('core-signal', {name: 'open-feedback', data: {includeLogs: this.analyzedNetwork}});
+    this.fire('core-signal', {
+      name: 'open-feedback', data: {
+        includeLogs: this.analyzedNetwork,
+        feedbackType: uproxy_core_api.UserFeedbackType.PROXYING_FAILURE
+      }
+    });
     this.close();
   },
   getNatType: function() {
