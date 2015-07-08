@@ -26,11 +26,12 @@ class ChromeTabAuth {
 
 
   private launchAuthTab_ = (url :string, redirectUrl :string, interactive :boolean) : void => {
-    console.log('launchAuthTab_: interactive ' + interactive);  // TODO: remove
+    var gotCredentials = false;
     var onTabChange = (tabId :number, changeInfo :chrome.tabs.TabChangeInfo, tab :chrome.tabs.Tab) => {
       if (tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.remove(tabId);
+        gotCredentials = true;
         this.sendCredentials_(tab.url);
       }
     };
@@ -39,17 +40,28 @@ class ChromeTabAuth {
                        function(tab: chrome.tabs.Tab) {
       if (interactive) {
         chrome.windows.update(tab.windowId, {focused: true});
+      } else {
+        // For non-interactive login, close tab and reject if we don't have
+        // credentials within 5 seconds.
+        setTimeout(() => {
+          if (!gotCredentials) {
+            chrome.tabs.remove(tab.id);
+            this.onError_('Error reconnecting');
+          }
+        }, 5000);
       }
       chrome.tabs.onUpdated.addListener(onTabChange);
     }.bind(this));
   }
 
   private onError_ = (errorText :string) : void => {
-    background.core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, errorText);
+    background.core.sendCommand(
+        uproxy_core_api.Command.CREDENTIALS_ERROR, errorText);
   }
 
   private sendCredentials_ = (url :string) : void => {
-    background.core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, url);
+    background.core.sendCommand(
+        uproxy_core_api.Command.SEND_CREDENTIALS, url);
   }
 }
 
