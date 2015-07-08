@@ -333,6 +333,14 @@
                   {{ui.sharingStatus}}
                 </div>
               </div>
+              <div class='statusRow' hidden?='{{!ui.availableVersion}}'>
+                <div class='statusText' horizontal layout>
+                  <span flex>
+                    {{ 'updateAvailable' | $$ }}
+                  </span>
+                  <a href='#' on-tap='{{ restart }}'>{{ 'restartUproxyUpdate' | $$ }}</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
