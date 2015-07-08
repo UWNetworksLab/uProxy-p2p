@@ -565,8 +565,7 @@ export function notifyUI(networkName :string, userId :string) {
       var versionedMessage :social.VersionedPeerMessage = {
         type: message.type,
         data: message.data,
-        version: globals.settings.force_message_version ||
-            globals.MESSAGE_VERSION
+        version: globals.effectiveMessageVersion()
       };
       var messageString = JSON.stringify(versionedMessage);
       log.info('sending message', {
@@ -686,8 +685,7 @@ export function notifyUI(networkName :string, userId :string) {
       var versionedMessage :social.VersionedPeerMessage = {
         type: message.type,
         data: message.data,
-        version: globals.settings.force_message_version ||
-            globals.MESSAGE_VERSION
+        version: globals.effectiveMessageVersion()
       };
       ui.update(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
           versionedMessage);

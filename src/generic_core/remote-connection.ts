@@ -275,8 +275,7 @@ var generateProxyingSessionId_ = (): string => {
 
       var pc: peerconnection.PeerConnection<Object>;
 
-      var localVersion = globals.settings.force_message_version ||
-          globals.MESSAGE_VERSION;
+      var localVersion = globals.effectiveMessageVersion();
       var commonVersion = Math.min(localVersion, remoteVersion);
       log.info('lowest shared client version is %1 (me: %2, peer: %3)',
           commonVersion, localVersion, remoteVersion);

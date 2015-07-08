@@ -242,8 +242,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       remoteProxyInstance = null;
     }
 
-    return copyPasteConnection.startGet(globals.settings.force_message_version ||
-        globals.MESSAGE_VERSION);
+    return copyPasteConnection.startGet(globals.effectiveMessageVersion());
   }
 
   public stopCopyPasteGet = () :Promise<void> => {
@@ -252,8 +251,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteShare = () => {
     this.copyPasteSharingMessages_ = [];
-    copyPasteConnection.startShare(globals.settings.force_message_version ||
-        globals.MESSAGE_VERSION);
+    copyPasteConnection.startShare(globals.effectiveMessageVersion());
   }
 
   public stopCopyPasteShare = () :Promise<void> => {
