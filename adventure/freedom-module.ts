@@ -84,12 +84,12 @@ function serveConnection(connection: tcp.Connection): void {
         sendReply('ping', connection);
         connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
         break;
-      case 'quit':
-        connection.close();
-        break;
       case 'xyzzy':
         sendReply('Nothing happens.', connection);
         connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+        break;
+      case 'quit':
+        connection.close();
         break;
       default:
         if (verb.length > 0) {
