@@ -182,7 +182,6 @@ class PoolChannel implements datachannel.DataChannel {
   // dc_.onceOpened must already have resolved
   constructor(private dc_:datachannel.DataChannel) {
     this.reset();
-    this.dc_.dataFromPeerQueue.setSyncHandler(this.onDataFromPeer_);
 
     this.dc_.onceClosed.then(() => {
       this.state_ = State.PERMANENTLY_CLOSED;
@@ -203,17 +202,7 @@ class PoolChannel implements datachannel.DataChannel {
     this.onceClosed = new Promise<void>((F, R) => {
       this.fulfillClosed_ = F;
     });
-
-    this.onceOpened.then(() => {
-      if (this.state_ === State.CLOSED) {
-        this.state_ = State.OPEN;
-      }
-    });
-    this.onceClosed.then(() => {
-      if (this.state_ !== State.PERMANENTLY_CLOSED) {
-        this.state_ = State.CLOSED;
-      }
-    });
+    this.dc_.dataFromPeerQueue.setSyncHandler(this.onDataFromPeer_);
 
     return true;
   }
@@ -274,22 +263,55 @@ class PoolChannel implements datachannel.DataChannel {
     log.debug('%1: received control message: %2',
               this.getLabel(), controlMessage);
     if (controlMessage === ControlMessage[ControlMessage.OPEN]) {
+      if (this.state_ === State.CLOSING) {
+        log.warn('%1: Got OPEN while closing (should be queued!)',
+            this.getLabel());
+        this.onceClosed.then(() => {
+          log.debug('%1: Immediately reopening after close', this.getLabel());
+          this.state_ = State.OPEN;
+          this.fulfillOpened_();
+        });
+        return;
+      } else if (this.state_ === State.PERMANENTLY_CLOSED) {
+        log.warn('%1: Got open message on permanently closed channel',
+            this.getLabel());
+        return;
+      }
       if (this.state_ === State.OPEN) {
         log.warn('%1: Got redundant open message', this.getLabel());
       }
+      log.debug('%1: Changing state from CLOSED to OPEN', this.getLabel());
+      this.state_ = State.OPEN;
       this.fulfillOpened_();
     } else if (controlMessage === ControlMessage[ControlMessage.CLOSE]) {
+      // Stop handling messages immediately, so that a pending OPEN is not
+      // processed until after a call to reset().
+      this.dc_.dataFromPeerQueue.stopHandling();
       if (this.state_ === State.OPEN) {
+        log.debug('%1: Changing state from OPEN to CLOSING', this.getLabel());
         this.state_ = State.CLOSING;
         // Drain messages, then ack the close.
         this.lastDataFromPeerHandled_.then(() => {
           return this.sendControlMessage_(ControlMessage.CLOSE);
-        }).then(this.fulfillClosed_);
+        }).then(() => {
+          if (this.state_ !== State.PERMANENTLY_CLOSED) {
+            log.debug('%1: Changing state to CLOSED after draining ' +
+                'messages', this.getLabel());
+            this.state_ = State.CLOSED;
+          }
+          this.fulfillClosed_();
+        });
       } else if (this.state_ === State.CLOSING) {
         // We both sent a "close" command at the same time.
+        log.debug('%1: Changing state from CLOSING to CLOSED',
+            this.getLabel());
+        this.state_ = State.CLOSED;
         this.fulfillClosed_();
       } else if (this.state_ === State.CLOSED) {
         log.warn('%1: Got redundant close message', this.getLabel());
+      } else if (this.state_ === State.PERMANENTLY_CLOSED) {
+        log.warn('%1: Got close message on permanently closed channel',
+            this.getLabel());
       }
     } else {
       log.error('%1: unknown control message: %2',
@@ -322,6 +344,7 @@ class PoolChannel implements datachannel.DataChannel {
 
     this.sendControlMessage_(ControlMessage.OPEN);
     // Immediate open; there is no open-ack
+    this.state_ = State.OPEN;
     this.fulfillOpened_();
 
     return this.onceOpened;
@@ -330,6 +353,8 @@ class PoolChannel implements datachannel.DataChannel {
   public close = () : Promise<void> => {
     log.debug('%1: close', this.getLabel());
     if (this.state_ !== State.OPEN) {
+      log.warn('%1: Ignoring close in %2 state', this.getLabel(),
+          State[this.state_]);
       return;
     }
     this.state_ = State.CLOSING;
