@@ -7,6 +7,8 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
+/// <reference path='../../../../../third_party/typings/compare-version/compare-version.d.ts'/>
+
 import ChromeBrowserApi = require('./chrome_browser_api');
 import ChromeCoreConnector = require('./chrome_core_connector');
 import ChromeTabAuth = require('./chrome_tab_auth');
@@ -16,6 +18,7 @@ import user_interface = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import Constants = require('../../../generic_ui/scripts/constants');
+import compareVersion = require('compare-version');
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
@@ -55,6 +58,29 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
     sendResponse({ message: 'Extension installed.' });
   }
   return true;
+});
+
+chrome.runtime.onUpdateAvailable.addListener((details) => {
+  console.log('Update available');
+
+  core.getVersion().then(function(version :string) {
+    if (compareVersion(details.version, version) > 0) {
+      // Only update if the new version is the same as or older than the app
+      // version.  If we are not able to update now, this will be taken care of
+      // by restarting at the same time as the core update.
+      return;
+    }
+
+    chrome.proxy.settings.get({}, (details) => {
+      if (details.levelOfControl === 'controlled_by_this_extension') {
+        return;
+      }
+
+      // At this point, the core supports the update and we are not currently
+      // proxying, let's do the update!
+      chrome.runtime.reload();
+    });
+  });
 });
 
 /**
