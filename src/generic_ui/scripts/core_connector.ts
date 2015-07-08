@@ -217,6 +217,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(
         uproxy_core_api.Command.PING_UNTIL_ONLINE, pingUrl);
   }
+
+  getVersion = () :Promise<string> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
+  }
 }  // class CoreConnector
 
 export = CoreConnector;
