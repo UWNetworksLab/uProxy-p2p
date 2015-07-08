@@ -4,7 +4,6 @@
  * ui.ts
  *
  * Common User Interface state holder and changer.
- * TODO: firefox bindings.
  */
 
 import ui_constants = require('../../interfaces/ui');
@@ -207,6 +206,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public model = new Model();
 
+  public availableVersion :string = null;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -378,6 +379,8 @@ export class UserInterface implements ui_constants.UiApi {
         (data :uproxy_core_api.CloudfrontPostData) => {
       this.postToCloudfrontSite(data.payload, data.cloudfrontPath);
     });
+
+    core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
@@ -923,6 +926,7 @@ export class UserInterface implements ui_constants.UiApi {
   public updateInitialState = (state :uproxy_core_api.InitialState) => {
     console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
     this.model.networkNames = state.networkNames;
+    this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.i18n_setLng(state.globalSettings.language);
     }
@@ -974,6 +978,10 @@ export class UserInterface implements ui_constants.UiApi {
     for (var userId in networkState.roster) {
       this.syncUser(networkState.roster[userId]);
     }
+  }
+
+  private coreUpdateAvailable_ = (data :{version :string}) => {
+    this.availableVersion = data.version;
   }
 } // class UserInterface
 

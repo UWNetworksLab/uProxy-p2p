@@ -49,6 +49,9 @@
     },
     "i18next/i18next.d.ts": {
       "commit": "dbf51fe545993d6c8ef06601edd65555b669a566"
+    },
+    "compare-version/compare-version.d.ts": {
+      "commit": "I will add this later once it actually makes it into the repo"
     }
   }
 }
