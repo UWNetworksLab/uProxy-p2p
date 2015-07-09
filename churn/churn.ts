@@ -1,6 +1,7 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 // TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
@@ -19,7 +20,6 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
-import port_control_types = require('../port-control/freedom-module.interface');
 import churn_types = require('./churn.types');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
@@ -32,8 +32,6 @@ import signals = require('../webrtc/signals');
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
 import MirrorMapping = churn_pipe_types.MirrorMapping;
-
-import PortControl = port_control_types.PortControl;
 
 import Candidate = candidate.Candidate;
 import RTCIceCandidate = freedom_RTCPeerConnection.RTCIceCandidate;
@@ -177,7 +175,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.havePipe_ = F;
     });
 
-    private portControl_ :PortControl;
+    private portControl_ :freedom_PortControl.PortControl;
 
     private static internalConnectionId_ = 0;
 

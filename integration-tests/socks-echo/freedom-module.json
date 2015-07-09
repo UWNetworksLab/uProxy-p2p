@@ -19,7 +19,7 @@
       "api": "churnPipe"
     },
     "portControl": {
-      "url": "uproxy-lib/port-control/freedom-module.json",
+      "url": "freedom-port-control/dist/port-control.json",
       "api": "portControl"
     }
   },
