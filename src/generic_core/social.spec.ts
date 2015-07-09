@@ -105,8 +105,8 @@ describe('social_network.FreedomNetwork', () => {
         })
       });
 
-      var promises :Promise<void>[] = [];
-      promises.push(<any>storage.save<social.InstanceData>('mockmockmyself', {
+      var savedToStorage :Promise<void>[] = [];
+      savedToStorage.push(storage.save('mockmockmyself', {
           instanceId: 'dummy-instance-id',
           keyHash: '',
           bytesReceived: 0,
@@ -116,10 +116,10 @@ describe('social_network.FreedomNetwork', () => {
           localGettingFromRemote: social.GettingState.NONE,
           localSharingWithRemote: social.SharingState.NONE
       }));
-      promises.push(<any>storage.save<string>(
+      savedToStorage.push(storage.save(
           'dummy-instance-id/roster/somefriend', ''));
 
-      Promise.all(promises).then(() => {
+      Promise.all(savedToStorage).then(() => {
         var loginPromise = network.login(false);
         return loginPromise;
       }).then(() => {

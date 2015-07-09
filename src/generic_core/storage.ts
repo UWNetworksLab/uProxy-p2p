@@ -56,8 +56,7 @@ export class Storage {
    * Promise saving a key-value pair to storage, fulfilled with the previous
    * value of |key| if it existed (according to the freedom interface.)
    */
-  // TODO: should not return a value in the promise. Should be Promise<void>
-  public save<T>(key :string, val :T) : Promise<T> {
+  public save(key :string, val :Object) :Promise<void> {
     log.debug('Saving to storage', {
       key: key,
       newVal: val
@@ -67,13 +66,9 @@ export class Storage {
         key: key,
         oldVal: prev
       });
-      if (!prev) {
-        return undefined;
-      }
-      return <T>JSON.parse(prev);
     }).catch((e) => {
       log.error('Save operation failed', e.message);
-      return <T>{};
+      return Promise.reject(e);
     });
   }
 

@@ -162,7 +162,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     if (newSettings.stunServers.length === 0) {
       newSettings.stunServers = globals.DEFAULT_STUN_SERVERS;
     }
-    globals.storage.save<uproxy_core_api.GlobalSettings>('globalSettings', newSettings)
+    globals.storage.save('globalSettings', newSettings)
       .catch((e) => {
         log.error('Could not save globalSettings to storage', e.stack);
       });
