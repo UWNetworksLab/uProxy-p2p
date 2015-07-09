@@ -17,13 +17,13 @@ This is a repository of stock docker images for our use, and scripts that build/
 
 # Script Directory
  There are lots more scripts in here, but some of those are (a) in-progress or (b) components used by the scripts listed here:
- * `testing/integration/run_copypaste.sh` - Makes docker images and launches them in a full copy-paste example.  Run this by itself and it'll do everything else you need. Example Use:
-> run_copypaste.sh chrome-dev chrome-dev
+ * `testing/run-scripts/run_pair.sh` - Makes docker images and launches a full proxy example.  Run this by itself and it'll do everything else you need. Example Use:
+> run_pair.sh chrome-dev chrome-dev
 
- * `testing/integration/image_make.sh` - Make a docker image with the specified browser and version.  Example use:
+ * `testing/run-scripts/image_make.sh` - Make a docker image with the specified browser and version.  Example use:
 > image_make.sh chrome-dev
 
- * `testing/integration/connect-pair.py` - Connect two running copies of the uproxy copy-paste examples together.  They should be listening to their default ports of 9000 and 9010.
+ * `testing/run-scripts/connect-pair.py` - Connect two running copies of the uproxy adventure examples together.  They should be listening to their default ports of 9000 and 9010.
  
 # Footnotes: Lies I've just told you
  1. Docker doesn't create actual VMs.  They're regular linux processes, but with their filesystem and networking access heavily modified.  Super, super light weight.

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Loads the copy-paste example app.
+# Loads the adventure example app.
 RUNVNC=false
 FOREVER=false
 LISTEN=false
