@@ -184,7 +184,7 @@ class PoolChannel implements datachannel.DataChannel {
     this.reset();
 
     this.dc_.onceClosed.then(() => {
-      this.state_ = State.PERMANENTLY_CLOSED;
+      this.changeState_(State.PERMANENTLY_CLOSED);
       this.fulfillClosed_();
     });
   }
@@ -207,17 +207,19 @@ class PoolChannel implements datachannel.DataChannel {
     return true;
   }
 
+  private changeState_ = (state:State) : void => {
+    log.debug('%1: Changing state from %2 to %3',
+        this.getLabel(), State[this.state_], State[state]);
+    this.state_ = state;
+  }
+
   private doOpen_ = () : void => {
-    log.debug('%1: Changing state from %2 to OPEN',
-        this.getLabel(), State[this.state_]);
-    this.state_ = State.OPEN;
+    this.changeState_(State.OPEN);
     this.fulfillOpened_();
   }
 
   private doClose_ = () : void => {
-    log.debug('%1: Changing state from %2 to CLOSED',
-        this.getLabel(), State[this.state_]);
-    this.state_ = State.CLOSED;
+    this.changeState_(State.CLOSED);
     this.fulfillClosed_();
   }
 
@@ -298,8 +300,7 @@ class PoolChannel implements datachannel.DataChannel {
       // processed until after a call to reset().
       this.dc_.dataFromPeerQueue.stopHandling();
       if (this.state_ === State.OPEN) {
-        log.debug('%1: Changing state from OPEN to CLOSING', this.getLabel());
-        this.state_ = State.CLOSING;
+        this.changeState_(State.CLOSING);
         // Drain messages, then ack the close.
         this.lastDataFromPeerHandled_.then(() => {
           return this.sendControlMessage_(ControlMessage.CLOSE);
@@ -365,7 +366,7 @@ class PoolChannel implements datachannel.DataChannel {
           State[this.state_]);
       return;
     }
-    this.state_ = State.CLOSING;
+    this.changeState_(State.CLOSING);
 
     this.sendControlMessage_(ControlMessage.CLOSE);
     return this.onceClosed;
