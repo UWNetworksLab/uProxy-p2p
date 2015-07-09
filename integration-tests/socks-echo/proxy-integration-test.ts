@@ -29,9 +29,10 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   constructor(private dispatchEvent_:(name:string, args:any) => void,
               denyLocalhost?:boolean,
               obfuscate?:boolean,
-              sessionLimit?:number) {
+              sessionLimit?:number,
+              ipv6Only?:boolean) {
     this.socksEndpoint_ = this.startSocksPair_(denyLocalhost, obfuscate,
-        sessionLimit);
+        sessionLimit, ipv6Only);
   }
 
   public startEchoServer = () : Promise<number> => {
@@ -61,8 +62,20 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     return Promise.resolve<void>();
   };
 
+  private static stripIPv4_ = (obj:any) : void => {
+    for (var key in obj) {
+      var value = obj[key];
+      if (typeof value === 'string') {
+        // 192.0.2.1 is a reserved address that is always unassigned.
+        obj[key] = value.replace(/\d+\.\d+\.\d+\.\d+/g, '192.0.2.1');
+      } else if (typeof value === 'object') {
+        AbstractProxyIntegrationTest.stripIPv4_(value);
+      }
+    }
+  }
+
   private startSocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean,
-      sessionLimit?:number) : Promise<net.Endpoint> => {
+      sessionLimit?:number, ipv6Only?:boolean) : Promise<net.Endpoint> => {
     var socksToRtcEndpoint :net.Endpoint = {
       address: this.localhost_,
       port: 0
@@ -78,17 +91,28 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       rtc_to_net.RtcToNet.SESSION_LIMIT = sessionLimit;
     }
 
+    var bridger = obfuscate ? bridge.best : bridge.preObfuscation;
+
     this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
     this.rtcToNet_ = new rtc_to_net.RtcToNet('the user id');
     this.rtcToNet_.start(rtcToNetProxyConfig,
-        bridge.best('sockstortc', rtcPcConfig));
-    this.rtcToNet_.signalsForPeer.setSyncHandler(this.socksToRtc_.handleSignalFromPeer);
-    this.socksToRtc_.on('signalForPeer', this.rtcToNet_.handleSignalFromPeer);
+        bridger('rtctonet', rtcPcConfig));
+    this.rtcToNet_.signalsForPeer.setSyncHandler((msg:Object) => {
+      if (ipv6Only) {
+        AbstractProxyIntegrationTest.stripIPv4_(msg);
+      }
+      this.socksToRtc_.handleSignalFromPeer(msg);
+    });
+    this.socksToRtc_.on('signalForPeer', (msg:Object) => {
+      if (ipv6Only) {
+        AbstractProxyIntegrationTest.stripIPv4_(msg);
+      }
+      this.rtcToNet_.handleSignalFromPeer(msg);
+    });
     return this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint),
-        bridge.best('sockstortc', rtcPcConfig));
+        bridger('sockstortc', rtcPcConfig));
   }
 
-  // Assumes webEndpoint is IPv4.
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
     var connection = new tcp.Connection({endpoint: socksEndpoint});
     connection.onceClosed.then(() => {

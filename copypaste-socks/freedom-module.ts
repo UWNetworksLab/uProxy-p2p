@@ -112,7 +112,7 @@ function sendControlPortReply(message:string) {
     log.error('weird, there are multiple connections');
     return;
   }
-  connections[0].send(arraybuffers.stringToArrayBuffer(message));
+  connections[0].send(arraybuffers.stringToArrayBuffer(message+"\n"));
 }
 
 parentModule.on('controlPortCallback', sendControlPortReply);
