@@ -34,5 +34,3 @@ while getterOpen and giverOpen:
           giver.sendall(signal + '\n')
         else:
           getter.sendall(signal + '\n')
-
-print 'all done!'
