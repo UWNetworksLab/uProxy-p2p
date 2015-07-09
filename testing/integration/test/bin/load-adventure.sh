@@ -52,8 +52,7 @@ echo git clone $CLONEARGS $CLONESRC
 git clone $CLONEARGS $CLONESRC
 cd uproxy-lib
 ./setup.sh install
-grunt
-grunt samples
+grunt adventure
 
 /test/bin/browser.sh /test/src/uproxy-lib/build/dev/uproxy-lib/samples/adventure
 
