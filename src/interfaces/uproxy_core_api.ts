@@ -34,6 +34,7 @@ export interface GlobalSettings {
   splashState : number;
   consoleFilter    :loggingTypes.Level;
   language         :string;
+  force_message_version :number;
 }
 export interface InitialState {
   networkNames :string[];

@@ -59,7 +59,8 @@ export class Model {
     allowNonUnicast: false,
     statsReportingEnabled: false,
     consoleFilter: 2, // loggingTypes.Level.warn
-    language: 'en'
+    language: 'en',
+    force_message_version: 0
   };
 
   public reconnecting = false;
