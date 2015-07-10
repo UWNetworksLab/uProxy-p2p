@@ -55,68 +55,6 @@ var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
 var socksRtc:socks_to_rtc.SocksToRtc;
 var rtcNet:rtc_to_net.RtcToNet;
 
-
-// Listen for GET/GIVE requests, to control the app without user
-// interaction.
-var tcpServer:tcp.Server;
-
-var localhostControlEndpoints:[net.Endpoint] = [
-  { address: '0.0.0.0', port: 9000 },
-  { address: '0.0.0.0', port: 9010 },
-  { address: '0.0.0.0', port: 9020 }];
-
-function setupServer(endpoint:net.Endpoint) {
-  tcpServer = new tcp.Server(endpoint);
-  tcpServer.connectionsQueue.setSyncHandler((conn:tcp.Connection) => {
-    conn.dataFromSocketQueue.setSyncHandler((buf:ArrayBuffer) => {
-      var str = arraybuffers.arrayBufferToString(buf);
-      if (str.substr(0,3).toUpperCase() == "GET") {
-        doStart();
-        setTimeout(() => {
-          parentModule.emit('gatherMessage');
-        }, 2000);
-
-        // Listen for the reply from the giver.
-        conn.dataFromSocketQueue.setSyncNextHandler((buf:ArrayBuffer) => {
-          var sdp = arraybuffers.arrayBufferToString(buf);
-          parentModule.emit('gotPeerSDP', sdp);
-        });
-      } else if (str.substr(0,4).toUpperCase() == "GIVE") {
-        log.info("GIVE found.");
-        // skip past space, and then read SDP.
-        var sdp = str.substr(5);
-        parentModule.emit('giveWithSDP', sdp);
-      } else if (str.substr(0, 4).toUpperCase() == "PING") {
-        sendControlPortReply('ping');
-      } else {
-        log.info('I don\'t understand that command: %1', str);
-      }
-    });
-  });
-
-  tcpServer.listen().then((endpoint) => {
-    log.info('Remote-commands available on %1', endpoint);
-  }).catch((e:Error) => {
-    log.error('Failed to listen on remote-command socket: %1', e.message);
-    if (localhostControlEndpoints.length > 1) {
-      setupServer(localhostControlEndpoints.shift());
-    }
-  });
-}
-
-setupServer(localhostControlEndpoints[0]);
-
-function sendControlPortReply(message:string) {
-  var connections = tcpServer.connections();
-  if (connections.length !== 1) {
-    log.error('weird, there are multiple connections');
-    return;
-  }
-  connections[0].send(arraybuffers.stringToArrayBuffer(message+"\n"));
-}
-
-parentModule.on('controlPortCallback', sendControlPortReply);
-
 var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
 
