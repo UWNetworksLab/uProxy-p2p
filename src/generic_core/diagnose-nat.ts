@@ -879,7 +879,7 @@ export function probePmpSupport(routerIp:string, privateIp:string) :Promise<bool
     });
 
     // Bind a UDP port and send a NAT-PMP request
-    socket.bind(privateIp, 0).
+    socket.bind('0.0.0.0', 0).
         then((result:number) => {
           if (result != 0) {
             R(new Error('Failed to bind to a port: Err= ' + result));
@@ -923,7 +923,7 @@ export function probePcpSupport(routerIp:string, privateIp:string) :Promise<bool
     });
 
     // Bind a UDP port and send a PCP request
-    socket.bind(privateIp, 0).
+    socket.bind('0.0.0.0', 0).
         then((result:number) => {
           if (result != 0) {
             R(new Error('Failed to bind to a port: Err= ' + result));
@@ -1007,7 +1007,7 @@ function sendSsdpRequest(privateIp:string) :Promise<ArrayBuffer> {
     });
 
     // Bind a socket and send the SSDP request
-    socket.bind(privateIp, 0).
+    socket.bind('0.0.0.0', 0).
         then((result:number) => {
           if (result != 0) {
             R(new Error('Failed to bind to a port: Err= ' + result));
