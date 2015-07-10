@@ -6,6 +6,7 @@ import FirefoxBrowserApi = require('./firefox_browser_api');
 export var ui   :user_interface.UserInterface;
 export var core :CoreConnector;
 export var browserConnector: FirefoxCoreConnector;
+export var model :user_interface.Model;
 function initUI() {
     browserConnector = new FirefoxCoreConnector();
     core = new CoreConnector(browserConnector);
@@ -16,6 +17,7 @@ function initUI() {
 
 if (undefined === ui) {
     ui = initUI();
+    model = ui.model;
 }
 
 ui.browser = 'firefox';
