@@ -219,7 +219,14 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           if (c.protocol === 'udp') {
             // Try to make a port mapping for a srflx candidate for 24 hours
             if (c.type === 'srflx') {
-              this.portControl_.addMapping(c.relatedPort, c.port, 24*60*60);
+              this.portControl_.addMapping(c.relatedPort, c.port, 24*60*60).
+                  then((mapping:freedom_PortControl.Mapping) => {
+                    if (mapping.externalPort === -1) {
+                      console.log("addMapping() failed.");
+                    } else {
+                      console.log("addMapping() success: ", mapping);
+                    }
+                  });
             }
 
             // It's immediately safe to send each candidate to the remote peer,
