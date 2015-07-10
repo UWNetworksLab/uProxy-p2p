@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Loads the copy-paste example app.
+# Loads the adventure example app.
 RUNVNC=false
 FOREVER=false
 LISTEN=false
@@ -52,10 +52,9 @@ echo git clone $CLONEARGS $CLONESRC
 git clone $CLONEARGS $CLONESRC
 cd uproxy-lib
 ./setup.sh install
-grunt
-grunt samples
+grunt adventure
 
-/test/bin/browser.sh /test/src/uproxy-lib/build/dev/uproxy-lib/samples/copypaste-socks
+/test/bin/browser.sh /test/src/uproxy-lib/build/dev/uproxy-lib/samples/adventure
 
 
 if $LISTEN; then
