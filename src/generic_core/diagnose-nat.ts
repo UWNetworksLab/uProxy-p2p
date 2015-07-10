@@ -613,13 +613,6 @@ export function doUdpTest() {
   }
 
   socket.bind('0.0.0.0', 0)
-      .then((result :number) => {
-        if (result != 0) {
-          return Promise.reject(new Error('listen failed to bind :5758' +
-              ' with result code ' + result));
-        }
-        return Promise.resolve(result);
-      })
       .then(socket.getInfo)
       .then((socketInfo: freedom_UdpSocket.SocketInfo) => {
         log.debug('listening on %1:%2',
@@ -634,6 +627,9 @@ export function doUdpTest() {
         });
         var req = arraybuffers.stringToArrayBuffer(reqStr);
         socket.sendTo(req, TEST_SERVER, TEST_PORT);
+      }).catch((err) => {
+        return Promise.reject(new Error('listen failed to bind :5758' +
+              ' with error ' + err.message));
       });
 }
 
@@ -694,20 +690,14 @@ function pingStunServer(serverAddr: string) {
 
     var bytes = Turn.formatStunMessage(bindRequest);
     socket.bind('0.0.0.0', 0)
-        .then((result: number) => {
-          if (result != 0) {
-            return Promise.reject(new Error('listen failed to bind :5758' +
-                ' with result code ' + result));
-          }
-          return Promise.resolve(result);
-        }).then(() => {
+        .then(() => {
           return socket.sendTo(bytes.buffer, parts[1], parseInt(parts[2]));
         }).then((written: number) => {
             log.debug('%1 bytes sent correctly', [written]);
         }).catch((e: Error) => {
             log.debug(JSON.stringify(e));
             R(e);
-        })
+        });
   });
 }
 
@@ -769,12 +759,6 @@ export function doNatProvoking() :Promise<string> {
     socket.on('onData', onUdpData);
 
     socket.bind('0.0.0.0', 0)
-        .then((result: number) => {
-          if (result != 0) {
-            return Promise.reject(new Error('failed to bind to a port: err=' + result));
-          }
-          return Promise.resolve(result);
-        })
         .then(socket.getInfo)
         .then((socketInfo: freedom_UdpSocket.SocketInfo) => {
           log.debug('listening on %1:%2',
@@ -880,11 +864,7 @@ export function probePmpSupport(routerIp:string, privateIp:string) :Promise<bool
 
     // Bind a UDP port and send a NAT-PMP request
     socket.bind('0.0.0.0', 0).
-        then((result:number) => {
-          if (result != 0) {
-            R(new Error('Failed to bind to a port: Err= ' + result));
-          }
-
+        then(() => {
           // Construct the NAT-PMP map request as an ArrayBuffer
           // Map internal port 55555 to external port 55555 w/ 120 sec lifetime
           var pmpBuffer = new ArrayBuffer(12);
@@ -900,6 +880,8 @@ export function probePmpSupport(routerIp:string, privateIp:string) :Promise<bool
           pmpView.setInt32(8, 120, false);
 
           socket.sendTo(pmpBuffer, routerIp, 5351);
+        }).catch((err) => {
+          R(new Error('Failed to bind to a port: ' + err.message));
         });
   });
 
@@ -924,11 +906,7 @@ export function probePcpSupport(routerIp:string, privateIp:string) :Promise<bool
 
     // Bind a UDP port and send a PCP request
     socket.bind('0.0.0.0', 0).
-        then((result:number) => {
-          if (result != 0) {
-            R(new Error('Failed to bind to a port: Err= ' + result));
-          }
-
+        then(() => {
           // Create the PCP MAP request as an ArrayBuffer
           // Map internal port 55556 to external port 55556 w/ 120 sec lifetime
           var pcpBuffer = new ArrayBuffer(60);
@@ -971,6 +949,8 @@ export function probePcpSupport(routerIp:string, privateIp:string) :Promise<bool
           pcpView.setInt32(56, 0, false);
 
           socket.sendTo(pcpBuffer, routerIp, 5351);
+        }).catch((err) => {
+          R(new Error('Failed to bind to a port: ' + err.message));
         });
   });
 
@@ -1008,11 +988,7 @@ function sendSsdpRequest(privateIp:string) :Promise<ArrayBuffer> {
 
     // Bind a socket and send the SSDP request
     socket.bind('0.0.0.0', 0).
-        then((result:number) => {
-          if (result != 0) {
-            R(new Error('Failed to bind to a port: Err= ' + result));
-          }
-
+        then(() => {
           // Construct and send a UPnP SSDP message
           var ssdpStr = 'M-SEARCH * HTTP/1.1\r\n' +
                         'HOST: 239.255.255.250:1900\r\n' +
@@ -1021,6 +997,8 @@ function sendSsdpRequest(privateIp:string) :Promise<ArrayBuffer> {
                         'ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1';
           var ssdpBuffer = arraybuffers.stringToArrayBuffer(ssdpStr);
           socket.sendTo(ssdpBuffer, '239.255.255.250', 1900);
+        }).catch((err) => {
+          R(new Error('Failed to bind to a port: ' + err.message));
         });
   });
 
