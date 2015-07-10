@@ -7,13 +7,8 @@ if [ $# -lt 2 ]
 then
     echo "Two arguments needed: browser and version."
     exit 1
-elif [ ! -x "${BASH_SOURCE%/*}/utils.sh" ]
-then
-    echo "Scripted called incorrectly, or improperly installed."
-    exit 1
 fi
-
-source "${BASH_SOURCE%/*}/utils.sh"
+source "${BASE_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
 
 
 BROWSER=$1

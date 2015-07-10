@@ -7,14 +7,7 @@
 #  Runs two instances running the dev version of chrome, connects them
 #  together, and runs a proxy.
 
-if [ ! -x "${BASH_SOURCE%/*}/utils.sh" ]
-then
-    echo "Script called incorrectly, or improperly installed."
-    exit 1
-fi
-
-source "${BASH_SOURCE%/*}/utils.sh"
-
+source "${BASE_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
 
 BRANCH="-b dev"
 REPO=

@@ -16,13 +16,7 @@
 #        - beta
 #        - release
 
-if [ ! -x "${BASH_SOURCE%/*}/utils.sh" ]
-then
-    echo "Script called incorrectly, or improperly installed."
-    exit 1
-fi
-
-source "${BASH_SOURCE%/*}/utils.sh"
+source "${BASE_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
 
 # $1 is the version
 function get_chrome () {
