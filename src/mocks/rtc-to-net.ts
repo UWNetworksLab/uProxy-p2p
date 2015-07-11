@@ -34,6 +34,4 @@ export class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
 
   public toString = () => {
   }
-
-  public startFromConfig = () => {}
 }
