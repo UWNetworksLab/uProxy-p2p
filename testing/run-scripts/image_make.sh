@@ -8,7 +8,7 @@ then
     echo "Two arguments needed: browser and version."
     exit 1
 fi
-source "${BASE_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
+source "${BASH_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
 
 
 BROWSER=$1

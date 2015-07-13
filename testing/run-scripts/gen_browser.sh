@@ -16,7 +16,7 @@
 #        - beta
 #        - release
 
-source "${BASE_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
+source "${BASH_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
 
 # $1 is the version
 function get_chrome () {

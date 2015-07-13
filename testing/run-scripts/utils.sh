@@ -51,3 +51,21 @@ function docker_run_args () {
     fi
     echo $RUNARGS
 }
+
+function prepare_docker_pid () {
+    pid=$(docker inspect -f '{{.State.Pid}}' $1)
+    if [ ! -L /var/run/netns/$pid ]
+    then
+        echo "[Making network namespace for $pid accessible]"
+        sudo mkdir -p /var/run/netns
+        sudo ln -s /proc/$pid/ns/net /var/run/netns/$pid
+        echo "[Created /var/run/netns $pid]"
+    fi
+}
+
+
+# Given a docker container ID in $1, returns a PID for it.
+function docker_pid () {
+    docker inspect -f '{{.State.Pid}}' $1
+}
+

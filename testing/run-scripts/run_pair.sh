@@ -7,7 +7,7 @@
 #  Runs two instances running the dev version of chrome, connects them
 #  together, and runs a proxy.
 
-source "${BASE_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
+source "${BASH_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
 
 BRANCH="-b dev"
 REPO=
