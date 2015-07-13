@@ -871,7 +871,7 @@ export class UserInterface implements ui_constants.UiApi {
     "d1wtwocg4wx1ih.cloudfront.net"
   ]
 
-  public postToCloudfrontSite = (payload :any, cloudfrontPath :string,
+  public postToCloudfrontSite = (payload :Object, cloudfrontPath :string,
                                  maxAttempts ?:number)
       : Promise<void> => {
     console.log('postToCloudfrontSite: ', payload, cloudfrontPath);
