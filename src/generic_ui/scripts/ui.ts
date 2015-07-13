@@ -714,7 +714,7 @@ export class UserInterface implements ui_constants.UiApi {
           this.reconnect(networkMsg.name);
         } else {
           if (this.instanceGettingAccessFrom_) {
-            this.stopGettingInUiAndConfig({instanceId :null, error: true});
+            this.stopGettingInUiAndConfig({instanceId: null, error: true});
           }
           this.showNotification(this.i18n_t('loggedOut', {network: networkMsg.name}));
 
