@@ -906,14 +906,14 @@ export class UserInterface implements ui_constants.UiApi {
       logsPromise = Promise.resolve('');
     }
     return logsPromise.then((logs) => {
-      var payload :uproxy_core_api.UserFeedback = {
+      var payload :any = {
         email: feedback.email,
         feedback: feedback.feedback,
         logs: logs,
-        feedbackType: feedback.feedbackType
+        feedbackType: uproxy_core_api.UserFeedbackType[feedback.feedbackType],
       };
 
-      if (payload.feedbackType ===
+      if (feedback.feedbackType ===
           uproxy_core_api.UserFeedbackType.PROXYING_FAILURE) {
         payload.proxyingId = this.proxyingId;
       }
