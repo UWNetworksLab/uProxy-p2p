@@ -906,17 +906,13 @@ export class UserInterface implements ui_constants.UiApi {
       logsPromise = Promise.resolve('');
     }
     return logsPromise.then((logs) => {
-      var payload :any = {
+      var payload = {
         email: feedback.email,
         feedback: feedback.feedback,
         logs: logs,
         feedbackType: uproxy_core_api.UserFeedbackType[feedback.feedbackType],
+        proxyingId: this.proxyingId
       };
-
-      if (feedback.feedbackType ===
-          uproxy_core_api.UserFeedbackType.PROXYING_FAILURE) {
-        payload.proxyingId = this.proxyingId;
-      }
 
       return this.postToCloudfrontSite(payload, 'submit-feedback');
     });
