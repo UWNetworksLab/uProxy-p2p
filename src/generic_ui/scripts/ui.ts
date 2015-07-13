@@ -871,7 +871,7 @@ export class UserInterface implements ui_constants.UiApi {
     "d1wtwocg4wx1ih.cloudfront.net"
   ]
 
-  public postToCloudfrontSite = (payload :any, cloudfrontPath :string,
+  public postToCloudfrontSite = (payload :Object, cloudfrontPath :string,
                                  maxAttempts ?:number)
       : Promise<void> => {
     console.log('postToCloudfrontSite: ', payload, cloudfrontPath);
@@ -906,17 +906,13 @@ export class UserInterface implements ui_constants.UiApi {
       logsPromise = Promise.resolve('');
     }
     return logsPromise.then((logs) => {
-      var payload :uproxy_core_api.UserFeedback = {
+      var payload = {
         email: feedback.email,
         feedback: feedback.feedback,
         logs: logs,
-        feedbackType: feedback.feedbackType
+        feedbackType: uproxy_core_api.UserFeedbackType[feedback.feedbackType],
+        proxyingId: this.proxyingId
       };
-
-      if (payload.feedbackType ===
-          uproxy_core_api.UserFeedbackType.PROXYING_FAILURE) {
-        payload.proxyingId = this.proxyingId;
-      }
 
       return this.postToCloudfrontSite(payload, 'submit-feedback');
     });
