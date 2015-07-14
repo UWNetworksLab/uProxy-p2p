@@ -227,7 +227,7 @@ export interface CoreApi {
   onUpdate(update :Update, handler :Function) :void;
 
   pingUntilOnline(pingUrl :string) : Promise<void>;
-  getVersion() :Promise<string>;
+  getVersion() :Promise<{ version :string }>;
 
 }
 

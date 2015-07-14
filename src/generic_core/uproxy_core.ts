@@ -570,7 +570,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     });
   }
 
-  public getVersion = () :Promise<string> => {
+  public getVersion = () :Promise<{ version :string }> => {
     return Promise.resolve(version.UPROXY_VERSION);
   }
 

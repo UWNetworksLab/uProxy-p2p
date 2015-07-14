@@ -63,8 +63,8 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
 chrome.runtime.onUpdateAvailable.addListener((details) => {
   console.log('Update available');
 
-  core.getVersion().then(function(version :string) {
-    if (compareVersion(details.version, version) > 0) {
+  core.getVersion().then(function(versions) {
+    if (compareVersion(details.version, versions.version) > 0) {
       // Only update if the new version is the same as or older than the app
       // version.  If we are not able to update now, this will be taken care of
       // by restarting at the same time as the core update.
