@@ -217,14 +217,15 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         if (message.type === signals.Type.CANDIDATE) {
           var c = Candidate.fromRTCIceCandidate(message.candidate);
           if (c.protocol === 'udp') {
-            // Try to make a port mapping for a srflx candidate for 24 hours
+            // Try to make port mappings for all srflx candidates
+            var MAP_LIFETIME = 24 * 60 * 60;  // 24 hours in seconds
             if (c.type === 'srflx') {
-              this.portControl_.addMapping(c.relatedPort, c.port, 24*60*60).
+              this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom_PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      console.log("addMapping() failed.");
+                      log.debug("addMapping() failed.");
                     } else {
-                      console.log("addMapping() success: ", mapping);
+                      log.debug("addMapping() success: ", mapping);
                     }
                   });
             }
