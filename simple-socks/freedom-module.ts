@@ -36,7 +36,7 @@ var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
 export var rtcNet = new rtc_to_net.RtcToNet();
 rtcNet.start({
   allowNonUnicast: true
-}, bridge.best('sockstortc', pcConfig));
+}, bridge.best('rtctonet', pcConfig));
 
 //-----------------------------------------------------------------------------
 export var socksRtc = new socks_to_rtc.SocksToRtc();
