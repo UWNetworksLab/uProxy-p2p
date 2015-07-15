@@ -26,7 +26,7 @@ class ChromeUIConnector {
     chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
 
     chrome.runtime.onUpdateAvailable.addListener((details) => {
-      this.sendToCore_(uproxy_core_api.Command.HANDLE_UPDATE,
+      this.sendToCore_(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
                        {version: details.version});
     });
   }

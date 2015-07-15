@@ -118,7 +118,7 @@ ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_FULL_STATE,
     core.getFullState);
 
-ui_connector.onCommand(uproxy_core_api.Command.HANDLE_UPDATE,
+ui_connector.onCommand(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
     core.handleUpdate);
 
 ui_connector.onPromiseCommand(uproxy_core_api.Command.GET_VERSION,

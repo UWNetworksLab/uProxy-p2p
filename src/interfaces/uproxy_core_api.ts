@@ -96,7 +96,7 @@ export enum Command {
   PING_UNTIL_ONLINE = 1018,
   GET_FULL_STATE = 1019,
   GET_VERSION = 1020,
-  HANDLE_UPDATE = 1021,
+  HANDLE_CORE_UPDATE = 1021,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
