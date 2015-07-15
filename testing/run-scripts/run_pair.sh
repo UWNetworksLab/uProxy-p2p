@@ -92,7 +92,7 @@ function run_docker () {
     else
         HOSTARGS="$HOSTARGS"
     fi
-    sudo docker run $HOSTARGS $* --name $NAME -d $IMAGENAME /test/bin/load-adventure.sh $REPO $BRANCH $RUNARGS -w
+    docker run $HOSTARGS $* --name $NAME -d $IMAGENAME /test/bin/load-adventure.sh $REPO $BRANCH $RUNARGS -w
 }
 
 run_docker uproxy-getter $1 $VNCOPTS1 -p 9000:9000 -p 9999:9999

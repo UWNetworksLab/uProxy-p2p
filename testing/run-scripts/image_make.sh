@@ -48,4 +48,4 @@ rm -rf $DIR
 mkdir $DIR
 ./gen_image.sh $BROWSER $VERSION >$DIR/Dockerfile
 cp -R $(pwd)/../integration/test $DIR/test
-sudo docker build -t uproxy/$BROWSER-$VERSION $DIR
+docker build -t uproxy/$BROWSER-$VERSION $DIR
