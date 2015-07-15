@@ -1,16 +1,24 @@
 /// <reference path='./context.d.ts' />
 
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+
 Polymer({
   email: '',
   feedback: '',
   logs: '',
+  feedbackType: '',
   close: function() {
     this.$.feedbackPanel.close();
   },
-  open: function(e :Event, detail :{ includeLogs: boolean }) {
-    if (detail && detail.includeLogs) {
+  open: function(e:Event, data?:{
+    includeLogs: boolean;
+    feedbackType: uproxy_core_api.UserFeedbackType;
+   }) {
+    if (data && data.includeLogs) {
       this.$.logCheckbox.checked = true;
     }
+    this.feedbackType = (data && data.feedbackType) ? data.feedbackType :
+        uproxy_core_api.UserFeedbackType.USER_INITIATED;
     this.$.feedbackPanel.open();
   },
   sendFeedback: function() {
@@ -19,7 +27,8 @@ Polymer({
       email: this.email,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,
-      browserInfo: navigator.userAgent
+      browserInfo: navigator.userAgent,
+      feedbackType: this.feedbackType
     }).then(() => {
       // Reset the placeholders, which seem to be cleared after the
       // user types input in the input fields.

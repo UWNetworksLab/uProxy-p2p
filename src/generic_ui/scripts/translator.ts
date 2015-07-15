@@ -34,7 +34,8 @@ function createI18nDictionary(sourceFile :MessageResource) : IResourceStoreKey {
 
 window.i18nResources = {};
 i18n.init({
-  resStore: window.i18nResources
+  resStore: window.i18nResources,
+  fallbackLng: 'en'
 });
 
 i18n.addResources('en', 'translation', createI18nDictionary(english_source));
