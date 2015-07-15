@@ -251,7 +251,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     private configurePipe_ = (key:number) : void => {
-      this.pipe_ = freedom['churnPipe']();
+      this.pipe_ = freedom['churnPipe'](this.peerName);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
       this.pipe_.setTransformer('caesar',
           new Uint8Array([key]).buffer,

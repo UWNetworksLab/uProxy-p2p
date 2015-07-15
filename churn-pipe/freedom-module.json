@@ -11,6 +11,11 @@
   ],
   "api": {
     "churnPipe": {
+      "constructor": {
+        "value": [
+          "string"
+        ]
+      },
       "setTransformer": {
         "type": "method",
         "value": [

@@ -95,6 +95,8 @@ interface MirrorSet {
  * of slightly more complex logic.
  */
 class Pipe {
+  // Number of instances created, for logging purposes.
+  private static id_ = 0;
 
   // For each physical network interface, this provides a list of the open
   // public sockets on that interface.  Each socket corresponds to a port that
@@ -134,7 +136,10 @@ class Pipe {
   private browserEndpoints_ : { [address:string]: number } = {};
 
   // TODO: define a type for event dispatcher in freedom-typescript-api
-  constructor (private dispatchEvent_:(name:string, args:Object) => void) {
+  constructor(
+      private dispatchEvent_:(name:string, args:Object) => void,
+      private name_:string = 'unnamed-pipe-' + Pipe.id_) {
+    Pipe.id_++;
   }
 
   // Set the current transformer parameters.  The default is no transformation.
@@ -165,11 +170,11 @@ class Pipe {
     var portPromise =
         this.publicPorts_[publicEndpoint.address][publicEndpoint.port];
     if (portPromise) {
-      log.debug('Redundant public endpoint: %1', publicEndpoint);
+      log.debug('%1: redundant public endpoint: %2', this.name_, publicEndpoint);
       return portPromise;
     }
 
-    log.debug('Binding public endpoint: %1', publicEndpoint);
+    log.debug('%1: binding public endpoint: %2', this.name_, publicEndpoint);
     var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
     var index = this.addPublicSocket_(socket, publicEndpoint);
     // Firefox only supports binding to ANY and localhost, so bind to ANY.
@@ -235,7 +240,7 @@ class Pipe {
   // it to the client.
   private emitMirror_ = (remoteEndpoint:net.Endpoint, socket:Socket) => {
     socket.getInfo().then(Pipe.endpointFromInfo_).then((localEndpoint) => {
-      log.debug('Emitting mirror for %1: %2', remoteEndpoint, localEndpoint);
+      log.debug('%1: emitting mirror for %2: %3', this.name_, remoteEndpoint, localEndpoint);
       this.dispatchEvent_('mappingAdded', {
         local: localEndpoint,
         remote: remoteEndpoint
@@ -245,10 +250,10 @@ class Pipe {
 
   // Informs this module about the existence of a browser endpoint.
   public addBrowserEndpoint = (browserEndpoint:net.Endpoint) :Promise<void> => {
-    log.debug('Adding browser endpoint: %1', browserEndpoint);
+    log.debug('%1: adding browser endpoint: %2', this.name_, browserEndpoint);
     if (this.browserEndpoints_[browserEndpoint.address]) {
-      log.warn('Port %1 is already open on this interface',
-          this.browserEndpoints_[browserEndpoint.address])
+      log.warn('%1: port %2 is already open on this interface',
+          this.name_, this.browserEndpoints_[browserEndpoint.address])
     }
     this.browserEndpoints_[browserEndpoint.address] = browserEndpoint.port;
     return Promise.resolve<void>();
@@ -279,8 +284,8 @@ class Pipe {
    * constructs a corresponding mirror socket, and returns its endpoint.
    */
   public bindRemote = (remoteEndpoint:net.Endpoint) : Promise<void> => {
-    log.debug('Binding %1 mirror(s) for remote endpoint: %2',
-        this.maxSocketsPerInterface_, remoteEndpoint);
+    log.debug('%1: binding %2 mirror(s) for remote endpoint: %3',
+        this.name_, this.maxSocketsPerInterface_, remoteEndpoint);
     this.ensureRemoteEndpoint_(remoteEndpoint, true);
     var promises :any[] = [];
     for (var i = 0; i < this.maxSocketsPerInterface_; ++i) {
@@ -316,8 +321,9 @@ class Pipe {
         // theoretical security benefit.
         if (recvFromInfo.port !==
             this.browserEndpoints_[recvFromInfo.address]) {
-          log.warn('mirror socket for %1 ignoring incoming packet from %2 ' +
-              'which should have had source port %3',
+          log.warn('%1: mirror socket for %2 ignoring incoming packet from %3 ' +
+              'which should have had source port %4',
+              this.name_,
               remoteEndpoint, {
                 address: recvFromInfo.address,
                 port: recvFromInfo.port
@@ -344,7 +350,7 @@ class Pipe {
     return this.getMirrorSocket_(remoteEndpoint, index).then((socket) => {
       this.emitMirror_(remoteEndpoint, socket)
     }, (e) => {
-      log.error('Error while getting mirror socket: %1', e);
+      log.error('%1: error while getting mirror socket: %2', this.name_, e);
     });
   }
 
