@@ -169,7 +169,6 @@ class Pipe {
       return portPromise;
     }
 
-    log.debug('Binding public endpoint: %1', publicEndpoint);
     var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
     var index = this.addPublicSocket_(socket, publicEndpoint);
     // Firefox only supports binding to ANY and localhost, so bind to ANY.
@@ -182,10 +181,12 @@ class Pipe {
     // asynchronously after we call close() on the RTCPeerConnection, so
     // this call to bind() may initially fail, until the port is released.
     portPromise = retry_(() => {
+      log.debug('Trying to bind public endpoint: %1', publicEndpoint);
       // TODO: Once https://github.com/freedomjs/freedom/issues/283 is
       // fixed, catch here, and only retry on an ALREADY_BOUND error.
       return socket.bind(anyInterface, publicEndpoint.port);
     }).then(() => {
+      log.debug('Successfully bound public endpoint: %1', publicEndpoint);
       socket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
         this.onIncomingData_(recvFromInfo, publicEndpoint.address, index);
       });
@@ -216,6 +217,8 @@ class Pipe {
   // Add another mirror socket for every signaled remote candidate, to represent
   // the routes through this newly bound local socket.
   private increaseReplication_ = () => {
+    log.debug('Increasing replication (currently %1)',
+        this.maxSocketsPerInterface_);
     for (var remoteAddress in this.mirrorSockets_) {
       for (var port in this.mirrorSockets_[remoteAddress]) {
         var mirrorSet = this.mirrorSockets_[remoteAddress][port];
