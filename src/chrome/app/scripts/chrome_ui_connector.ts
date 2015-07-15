@@ -24,6 +24,11 @@ class ChromeUIConnector {
     // Until the extension is connected, we assume uProxy installation is
     // incomplete.
     chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
+
+    chrome.runtime.onUpdateAvailable.addListener((details) => {
+      this.sendToCore_(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
+                       {version: details.version});
+    });
   }
 
   // Launch a popup instructing the user to install the extension.
@@ -86,7 +91,6 @@ class ChromeUIConnector {
   // This usually installs freedom handlers.
   private onExtMsg_ = (msg :browser_connector.Payload) => {
     console.log('[chrome ui connector] Extension message: ', uproxy_core_api.Command[msg.type]);
-    var msgType = '' + msg.type;
     // Pass 'emit's from the UI to Core.
     if ('emit' == msg.cmd) {
       if (msg.type == uproxy_core_api.Command.SEND_CREDENTIALS) {
@@ -95,25 +99,40 @@ class ChromeUIConnector {
       if (msg.type == uproxy_core_api.Command.RESTART) {
         chrome.runtime.reload();
       }
-      this.uProxyAppChannel_.emit(msgType,
-          {data: msg.data, promiseId: msg.promiseId});
+      this.sendToCore_(msg.type, msg.data, msg.promiseId);
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {
       if (installedFreedomHooks.indexOf(msg.type) >= 0) {
-        console.error('[chrome ui connector] Freedom already has a hook for ' +
+        console.warn('[chrome ui connector] Freedom already has a hook for ' +
             uproxy_core_api.Command[msg.type]);
         return;
       }
       installedFreedomHooks.push(msg.type);
       // When it fires, send data back over Chrome App -> Extension port.
-      this.uProxyAppChannel_.on(msgType, (ret :string) => {
+      this.uProxyAppChannel_.on(msg.type.toString(), (ret :string) => {
         this.sendToUI(msg.type, ret);
       });
     }
   }
 
+  private sendToCore_ = (msgType :uproxy_core_api.Command, data :Object,
+                         promiseId?:Number) => {
+    if (typeof promiseId === 'undefined') {
+      // promiseId of 0 is used for commands with no associated promise
+      promiseId = 0;
+    }
+
+    this.uProxyAppChannel_.emit(msgType.toString(),
+                                {data: data, promiseId: promiseId});
+  }
+
   public sendToUI = (type :uproxy_core_api.Update, data?:Object) => {
+    if (!this.extPort_) {
+      console.error('Trying to send a message without the UI being connected');
+      return;
+    }
+
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,

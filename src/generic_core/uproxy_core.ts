@@ -52,6 +52,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   private copyPasteSharingMessages_ :social.PeerMessage[] = [];
   private copyPasteGettingMessages_ :social.PeerMessage[] = [];
 
+  // this should be set iff an update to the core is available
+  private availableVersion_ :string = null;
+
   constructor() {
     log.debug('Preparing uProxy Core');
     copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
@@ -207,6 +210,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         networkNames: Object.keys(social_network.networks),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
+        availableVersion: this.availableVersion_,
         copyPasteState: {
           connectionState: copyPasteConnection.getCurrentState(),
           endpoint: copyPasteConnection.activeEndpoint,
@@ -564,5 +568,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       var intervalId = setInterval(checkIfOnline, 5000);
       checkIfOnline();
     });
+  }
+
+  public getVersion = () :Promise<{ version :string }> => {
+    return Promise.resolve(version.UPROXY_VERSION);
+  }
+
+  public handleUpdate = (details :{version :string}) => {
+    this.availableVersion_ = details.version;
+    ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 }  // class uProxyCore
