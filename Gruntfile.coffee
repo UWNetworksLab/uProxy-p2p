@@ -284,8 +284,8 @@ module.exports = (grunt) ->
       freedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
       freedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
       freedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
-      freedomGitHub: grunt.file.readJSON('node_modules/freedom-social-github/package.json')
       freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
+      freedomGitHub: grunt.file.readJSON('node_modules/freedom-social-github/package.json')
 
     clean: ['build/dev', 'build/dist', '.tscache']
 
@@ -404,17 +404,23 @@ module.exports = (grunt) ->
               # actual scripts that run things
               'freedomjs-anonymized-metrics/anonmetrics.json'
               'freedomjs-anonymized-metrics/metric.js'
+
               'freedom-for-chrome/freedom-for-chrome.js'
+
               'freedom-social-xmpp/social.google.json'
               'freedom-social-xmpp/socialprovider.js'
               'freedom-social-xmpp/vcardstore.js'
               'freedom-social-xmpp/node-xmpp-browser.js'
               'freedom-social-xmpp/google-auth.js'
+
               'freedom-social-firebase/social.firebase-facebook.json'
               'freedom-social-firebase/firebase-shims.js'
               'freedom-social-firebase/firebase.js'
               'freedom-social-firebase/firebase-social-provider.js'
               'freedom-social-firebase/facebook-social-provider.js'
+
+              'freedom-social-github/social.github.json'
+              'freedom-social-github/github-social-provider.js'
 
               '**/freedom-module.json'
               '!generic_core/freedom-module.json'
@@ -445,16 +451,21 @@ module.exports = (grunt) ->
               'data/freedomjs-anonymized-metrics/anonmetrics.json'
               'data/freedomjs-anonymized-metrics/metric.js'
               'data/freedom-for-firefox/freedom-for-firefox.jsm'
+
               'data/freedom-social-xmpp/social.google.json'
               'data/freedom-social-xmpp/socialprovider.js'
               'data/freedom-social-xmpp/vcardstore.js'
               'data/freedom-social-xmpp/node-xmpp-browser.js'
               'data/freedom-social-xmpp/google-auth.js'
+
               'data/freedom-social-firebase/social.firebase-facebook.json'
               'data/freedom-social-firebase/firebase-shims.js'
               'data/freedom-social-firebase/firebase.js'
               'data/freedom-social-firebase/firebase-social-provider.js'
               'data/freedom-social-firebase/facebook-social-provider.js'
+
+              'data/freedom-social-github/social.github.json'
+              'data/freedom-social-github/github-social-provider.js'
 
               'data/**/freedom-module.json'
               '!generic_core/freedom-module.json'
@@ -553,6 +564,11 @@ module.exports = (grunt) ->
               src: ['**']
               dest: chromeAppDevPath + '/freedom-social-firebase'
             },
+            {
+              expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+              src: ['**']
+              dest: chromeAppDevPath + '/freedom-social-github'
+            },
             { # uProxy Icons and fonts
               expand: true, cwd: 'src/'
               src: ['icons/128_online.png', 'fonts/*']
@@ -609,6 +625,11 @@ module.exports = (grunt) ->
               expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
               src: ['**']
               dest: firefoxDevPath + '/data/freedom-social-firebase'
+            },
+            {
+              expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+              src: ['**']
+              dest: firefoxDevPath + '/data/freedom-social-github'
             },
             { # lib
               expand: true, cwd: devBuildPath

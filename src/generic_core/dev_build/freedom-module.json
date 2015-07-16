@@ -20,7 +20,7 @@
       "api": "social"
     },
     "SOCIAL-GitHub": {
-      "url": "../freedom-social-github/social.gitub.json",
+      "url": "../freedom-social-github/social.github.json",
       "api": "social2"
     },
     "loggingcontroller": {
