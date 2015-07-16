@@ -15,7 +15,8 @@
   },
   "permissions": [
     "storage",
-    "http://*/"
+    "http://*/",
+    "https://github.com/login/oauth/access_token"
   ],
   "sockets": {
     "tcp": { "connect" : "" },
