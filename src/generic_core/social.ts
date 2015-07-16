@@ -89,7 +89,8 @@ import ui = ui_connector.connector;
     for (var dependency in freedom) {
       if (freedom.hasOwnProperty(dependency)) {
         if (dependency.indexOf(PREFIX) !== 0 ||
-            'social' !== freedom[dependency].api) {
+            ('social' !== freedom[dependency].api &&
+             'social2' !== freedom[dependency].api)) {
           continue;
         }
 
