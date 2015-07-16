@@ -61,13 +61,11 @@ describe('remote_instance.RemoteInstance', () => {
   });
   describe('storage', () => {
     var realStorage = new local_storage.Storage;
-    var saved :Promise<Object>;
     var instance0 :remote_instance.RemoteInstance;
 
    it('fresh instance has no state', (done) => {
       globals.storage.save = function(key :string, value :Object) {
-        saved = realStorage.save(key, value);
-        return saved;
+        return realStorage.save(key, value);
       };
       instance0 = new remote_instance.RemoteInstance(user, 'instanceId');
       instance0.onceLoaded.then(() => {
@@ -242,8 +240,8 @@ describe('remote_instance.RemoteInstance', () => {
       'start': () => {}
     };
     var fakeSignallingMessage :bridge.SignallingMessage = {
-      providers: {
-        'FAKE': {}
+      signals: {
+        'FAKE': []
       },
       first: true
     };

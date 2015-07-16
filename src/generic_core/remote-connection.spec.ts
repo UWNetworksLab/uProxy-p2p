@@ -38,7 +38,8 @@ describe('remote_connection.RemoteConnection', () => {
     spyOn(rtc_to_net, 'RtcToNet').and.returnValue(rtcToNet);
 
     updateSpy = jasmine.createSpy('updateSpy');
-    connection = new remote_connection.RemoteConnection(updateSpy);
+    connection = new remote_connection.RemoteConnection(updateSpy,
+        'the userId');
   });
 
   describe('client setup', () => {

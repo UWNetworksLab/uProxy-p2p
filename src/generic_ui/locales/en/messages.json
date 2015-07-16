@@ -35,6 +35,10 @@
     "description": "Submit feedback to the uProxy team.",
     "message": "Submit Feedback"
   },
+  "sendingFeedback": {
+    "description": "Message in dialog indicating feedback is being sent to the uProxy team.",
+    "message": "Sending feedback"
+  },
   "getHelp": {
     "description": "Get help from the frequently asked questions page.",
     "message": "Get Help"
@@ -642,5 +646,13 @@
   "appMissingMessage": {
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
+  },
+  "updateAvailable": {
+    "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",
+    "message": "An update is available"
+  },
+  "restartUproxyUpdate": {
+    "description": "A link the user can click on to restart uProxy and permorm an update",
+    "message": "Restart to update"
   }
 }

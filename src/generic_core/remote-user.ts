@@ -447,7 +447,7 @@ var log :logging.Log = new logging.Log('remote-user');
       this.onceLoaded.then(() => {
         if (!this.ignoreUser_()) {
           var state = this.currentState();
-          storage.save<social.UserState>(this.getStorePath(), state).catch(() => {
+          storage.save(this.getStorePath(), state).catch(() => {
             log.error('Could not save user to storage');
           });
         }

@@ -43,7 +43,7 @@ describe('UI.UserInterface', () => {
     });
 
     mockBrowserApi = jasmine.createSpyObj('browserApi',
-        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification', 'on']);
+        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification', 'on', 'handlePopupLaunch']);
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
   });
@@ -99,11 +99,11 @@ describe('UI.UserInterface', () => {
 
     it('Adding a user with no information is categorized as untrusted', () => {
       ui.syncUser(getUserAndInstance('testUserId', 'Alice', 'instance1'));
-      var network = user_interface.model.getNetwork('testNetwork');
-      var user = user_interface.model.getUser(network, 'testUsedId');
+      var network = ui.model.getNetwork('testNetwork');
+      var user = ui.model.getUser(network, 'testUsedId');
 
       expect(user).toBeDefined();
-      var contacts = user_interface.model.contacts;
+      var contacts = ui.model.contacts;
 
       expect(contacts.getAccessContacts.trustedUproxy.length).toEqual(0);
       expect(contacts.getAccessContacts.untrustedUproxy.length).toEqual(1);
@@ -118,9 +118,9 @@ describe('UI.UserInterface', () => {
     afterEach(logout);
 
     it('Network visible in model', () => {
-      expect(user_interface.model.onlineNetworks.length).toEqual(1);
+      expect(ui.model.onlineNetworks.length).toEqual(1);
 
-      var network = user_interface.model.getNetwork('testNetwork');
+      var network = ui.model.getNetwork('testNetwork');
       expect(network.name).toEqual('testNetwork');
       expect(network.userId).toEqual('fakeUser');
     });
@@ -138,7 +138,7 @@ describe('UI.UserInterface', () => {
                   }
                 });
 
-      var network = user_interface.model.getNetwork('testNetwork');
+      var network = ui.model.getNetwork('testNetwork');
 
       expect(network.userName).toEqual('testName');
       expect(network.imageData).toEqual('imageData');
@@ -151,7 +151,7 @@ describe('UI.UserInterface', () => {
     it('Clears fields when network goes offline', () => {
       logout();
 
-      expect(user_interface.model.onlineNetworks.length).toEqual(0);
+      expect(ui.model.onlineNetworks.length).toEqual(0);
     });
   });
 

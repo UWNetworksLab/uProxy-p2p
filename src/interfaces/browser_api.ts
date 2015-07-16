@@ -43,5 +43,6 @@ export interface BrowserAPI {
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
   on(name :'proxyDisconnected', callback :Function) :void;
 
-  fulfillLaunched() :void;
+  // should be called when popup is launched and ready for use
+  handlePopupLaunch() :void;
 }

@@ -182,11 +182,10 @@ describe('remote_user.User', () => {
   describe('client <---> instance', () => {
     it('syncs clientId <--> instanceId mapping', (done) => {
       var realStorage = new local_storage.Storage;
-      var saved :Promise<Object>;
       storage.save = function(key :string, value :Object) {
-        saved = realStorage.save(key, value);
-        return saved;
+        return realStorage.save(key, value);
       };
+      spyOn(storage, 'save').and.callThrough();
       expect(user.instanceToClient('fakeinstance')).toBeUndefined();
       expect(user.clientToInstance('fakeclient')).toBeUndefined();
       user.syncInstance_('fakeclient', instanceHandshake,
@@ -195,7 +194,7 @@ describe('remote_user.User', () => {
         expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
         instance = user.getInstance('fakeinstance');
         expect(instance).toBeDefined();
-        expect(saved).toBeDefined();
+        expect(storage.save).toHaveBeenCalled();
         done();
       });
     });

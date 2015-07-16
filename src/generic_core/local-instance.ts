@@ -105,7 +105,7 @@ import storage = globals.storage;
     }
 
     public saveToStorage = () :Promise<void> => {
-      return storage.save<social.LocalInstanceState>(this.getStorePath(), this.currentState())
+      return storage.save(this.getStorePath(), this.currentState())
           .catch((e:Error) => {
         log.error('Could not save new LocalInstance: ',
             this.instanceId, e.toString());

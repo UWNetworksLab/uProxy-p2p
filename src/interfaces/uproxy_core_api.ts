@@ -8,10 +8,17 @@ import ui = require('./ui');
 // --- Core <--> UI Interfaces ---
 
 export interface UserFeedback {
-  email     :string;
-  feedback  :string;
-  logs      :boolean;
-  browserInfo :string;
+  email        :string;
+  feedback     :string;
+  logs         :string;
+  browserInfo  ?:string;
+  proxyingId   ?:string;
+  feedbackType ?:UserFeedbackType;
+}
+
+export enum UserFeedbackType {
+  USER_INITIATED = 0,
+  PROXYING_FAILURE = 1
 }
 
 // Object containing description so it can be saved to storage.
@@ -27,11 +34,13 @@ export interface GlobalSettings {
   splashState : number;
   consoleFilter    :loggingTypes.Level;
   language         :string;
+  force_message_version :number;
 }
 export interface InitialState {
   networkNames :string[];
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
+  availableVersion :string;
   copyPasteState :CopyPasteState;
 }
 
@@ -85,7 +94,9 @@ export enum Command {
   GET_LOGS = 1016,
   GET_NAT_TYPE = 1017,
   PING_UNTIL_ONLINE = 1018,
-  GET_FULL_STATE = 1019
+  GET_FULL_STATE = 1019,
+  GET_VERSION = 1020,
+  HANDLE_CORE_UPDATE = 1021,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -114,9 +125,11 @@ export enum Update {
   START_GIVING = 2017,
   STOP_GIVING = 2018,
   STATE = 2019,
-  FRIEND_FAILED_TO_GET = 2020,
+  FAILED_TO_GIVE = 2020,
   POST_TO_CLOUDFRONT = 2021,
-  COPYPASTE_MESSAGE = 2022
+  COPYPASTE_MESSAGE = 2022,
+  FAILED_TO_GET = 2023,
+  CORE_UPDATE_AVAILABLE = 2024,
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -127,6 +140,12 @@ export enum ConsentUserAction {
   REQUEST = 5000, CANCEL_REQUEST, IGNORE_OFFER, UNIGNORE_OFFER,
   // Actions made by user w.r.t. remote as a client
   OFFER = 5100, CANCEL_OFFER, IGNORE_REQUEST, UNIGNORE_REQUEST,
+}
+
+// Payload of FAILED_TO_GET and FAILED_TO_GIVE messages.
+export interface FailedToGetOrGive {
+  name: string;
+  proxyingId: string;
 }
 
 /**
@@ -208,5 +227,7 @@ export interface CoreApi {
   onUpdate(update :Update, handler :Function) :void;
 
   pingUntilOnline(pingUrl :string) : Promise<void>;
+  getVersion() :Promise<{ version :string }>;
+
 }
 
