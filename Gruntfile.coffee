@@ -625,8 +625,6 @@ module.exports = (grunt) ->
           }
         ]
 
-
-
       integration:
         files: [ {
           # Copy compiled Chrome App code, required for integration tests
@@ -635,6 +633,16 @@ module.exports = (grunt) ->
           dest: devBuildPath + '/integration'
         }]
     }  # copy
+
+    # Only currently used for "./setup.sh third_party" because npm package is
+    # not official yet.
+    subgrunt: {
+      freedomSocialGitHub: {
+        projects: {
+          'node_modules/freedom-social-github': 'default',
+        }
+      }
+    }
 
     #-------------------------------------------------------------------------
     'string-replace':
@@ -657,6 +665,7 @@ module.exports = (grunt) ->
               'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
               'freedom-social-xmpp': '<%= pkgs.freedomxmpp.version %>'
               'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
+              'freedom-social-github': '<%= pkgs.freedomGitHub.version %>'
           }]
       chromeExtVulcanized:
         finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized')
@@ -845,6 +854,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
   grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
   grunt.loadNpmTasks 'grunt-string-replace'
+  grunt.loadNpmTasks 'grunt-subgrunt'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-vulcanize'
 
