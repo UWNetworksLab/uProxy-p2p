@@ -98,16 +98,22 @@ function run_docker () {
 run_docker uproxy-getter $1 $VNCOPTS1 -p 9000:9000 -p 9999:9999
 run_docker uproxy-giver $2 $VNCOPTS2 -p 9010:9000
 
+CONTAINER_IP=localhost
+if uname|grep Darwin > /dev/null
+then
+    CONTAINER_IP=`boot2docker ip`
+fi
+
 echo -n "Waiting for getter to come up"
-while ! (echo ping | nc -q 1 localhost 9000 | grep ping) > /dev/null; do echo -n .; sleep 0.5; done
+while ! ((echo ping ; sleep 0.5) | nc -w 1 $CONTAINER_IP 9000 | grep ping) > /dev/null; do echo -n .; done
 echo
 
 echo -n "Waiting for giver to come up"
-while ! (echo ping | nc -q 1 localhost 9010 | grep ping) > /dev/null; do echo -n .; sleep 0.5; done
+while ! ((echo ping ; sleep 0.5) | nc -w 1 $CONTAINER_IP 9010 | grep ping) > /dev/null; do echo -n .; done
 echo
 
 echo "Connecting pair..."
 sleep 2 # make sure nc is shutdown
-./connect-pair.py
+./connect-pair.py $CONTAINER_IP 9000 $CONTAINER_IP 9010
 
 echo "All done!"
