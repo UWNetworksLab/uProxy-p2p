@@ -284,6 +284,7 @@ module.exports = (grunt) ->
       freedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
       freedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
       freedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
+      freedomGitHub: grunt.file.readJSON('node_modules/freedom-social-github/package.json')
       freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
 
     clean: ['build/dev', 'build/dist', '.tscache']

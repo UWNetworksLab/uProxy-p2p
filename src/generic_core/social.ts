@@ -51,10 +51,10 @@ import ui = ui_connector.connector;
       enableMonitoring: true,
       areAllContactsUproxy: false
     },
-+   'GitHub': {
-+     isFirebase: false,
-+     enableMonitoring: false,
-+     areAllContactsUproxy: true
+    'GitHub': {
+      isFirebase: false,
+      enableMonitoring: false,
+      areAllContactsUproxy: true
     }
   }
 
