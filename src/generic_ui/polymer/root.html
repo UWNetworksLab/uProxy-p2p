@@ -4,8 +4,8 @@
 <link rel="import" href="../../bower/core-drawer-panel/core-drawer-panel.html">
 <link rel="import" href="../../bower/core-toolbar/core-toolbar.html">
 <link rel="import" href="../../bower/core-icon-button/core-icon-button.html">
-<link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
 <link rel="import" href="i18n-filter.html">
 <link rel="import" href='splash.html'>
@@ -212,6 +212,9 @@
 
     <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
+
+    <uproxy-inviteuser id='inviteuser' hidden?='{{ ui.view !== ui_constants.View.INVITE_USER }}'>
+    </uproxy-inviteuser>
 
     <uproxy-feedback id='feedback'></uproxy-feedback>
 
