@@ -201,8 +201,11 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
-  inviteUser = (userId: string): Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.INVITE_USER, userId);
+  addUser = (networkId: string, userId: string): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.ADD_USER,
+      { networkId: networkId, userId: userId });
+    console.log('addUser:' +
+      JSON.stringify({ networkId: networkId, userId: userId }));
   }
 
   restart = () => {

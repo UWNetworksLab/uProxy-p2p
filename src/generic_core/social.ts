@@ -263,6 +263,10 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
+    public addUserRequest = (userId: string): void => {
+      throw new Error('Operation not implemented');
+    }
+
     public getNetworkState = () :social.NetworkState => {
       throw new Error('Operation not implemented');
     }
@@ -561,6 +565,13 @@ export function notifyUI(networkName :string, userId :string) {
         log.error('Error while logging out:', e.message);
         return Promise.reject(e);
       });
+    }
+
+    public addUserRequest = (userId: string): void => {
+      this.freedomApi_.inviteUser(userId)
+        .catch((e) => {
+          log.error('Error while inviting user: ' + userId, e.message);
+        });
     }
 
     /**

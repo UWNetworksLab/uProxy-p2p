@@ -13,9 +13,6 @@ Polymer({
     this.ui_constants = ui_constants;
     this.model = ui_context.model;
   },
-  inviteUser: function() {
-    this.fire('core-signal', { name: 'open-feedback' });
-  },
   loadContacts: function() {
     // If no contacts have loaded, show the animation for a total of 5 seconds,
     // and then display the "no online friends" message.

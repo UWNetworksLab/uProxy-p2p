@@ -253,7 +253,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return copyPasteConnection.stopGet();
   }
 
-  public startCopyPasteShare = () => {
+  public startCopyPasteShare = () : void => {
     this.copyPasteSharingMessages_ = [];
     copyPasteConnection.startShare(globals.effectiveMessageVersion());
   }
@@ -262,8 +262,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return copyPasteConnection.stopShare();
   }
 
-  public sendCopyPasteSignal = (signal :social.PeerMessage) => {
+  public sendCopyPasteSignal = (signal :social.PeerMessage) :void => {
     copyPasteConnection.handleSignal(signal);
+  }
+
+  public addUser = (user: { networkId: string; userId:string })
+    : void => {
+    this.pendingNetworks_[user.networkId].addUserRequest(user.userId);
   }
 
   /**
