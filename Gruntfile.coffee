@@ -177,6 +177,7 @@ browserifyIntegrationTest = (path) ->
 #-------------------------------------------------------------------------
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
+freedomSocialGitHubPath = path.dirname(require.resolve('freedom-social-github/package.json'))
 
 #ipaddrjsPath = path.dirname(require.resolve('ipaddr.js/package.json'))
 # TODO(ldixon): update utransformers package to uproxy-obfuscators
@@ -315,6 +316,15 @@ module.exports = (grunt) ->
               cwd: path.join(uproxyLibPath, 'build/dist'),
               src: ['**/*'],
               dest: path.join(thirdPartyBuildPath, 'uproxy-lib/'),
+          },
+          # Copy the freedom-social-github to third_party as we use typescript
+          # definition from that repo.
+          {
+              nonull: true,
+              expand: true,
+              cwd: path.join(freedomSocialGitHubPath, 'dist'),
+              src: ['**/*'],
+              dest: path.join(thirdPartyBuildPath, 'freedom-social-github/'),
           },
           # Use the third_party definitions from uproxy-lib. Copied to the same
           # location relative to their compiled location in uproxy-lib so they
@@ -566,7 +576,7 @@ module.exports = (grunt) ->
             },
             {
               expand: true, cwd: 'node_modules/freedom-social-github/dist/',
-              src: ['**']
+              src: ['**/*.js', '**/*.json']
               dest: chromeAppDevPath + '/freedom-social-github'
             },
             { # uProxy Icons and fonts
@@ -628,7 +638,7 @@ module.exports = (grunt) ->
             },
             {
               expand: true, cwd: 'node_modules/freedom-social-github/dist/',
-              src: ['**']
+              src: ['**/*.js', '**/*.json']
               dest: firefoxDevPath + '/data/freedom-social-github'
             },
             { # lib

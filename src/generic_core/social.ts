@@ -20,7 +20,6 @@
 
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
 
 import firewall = require('./firewall');
 import local_instance = require('./local-instance');
@@ -32,6 +31,8 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import globals = require('./globals');
 import storage = globals.storage;
+
+import freedom_social = require('../../../third_party/freedom-social-github/social2');
 
 import ui = ui_connector.connector;
 
@@ -161,8 +162,8 @@ export function notifyUI(networkName :string, userId :string) {
 
   // Implements those portions of the Network interface for which the logic is
   // common to multiple Network implementations. Essentially an abstract base
-  // class for Network implementations, except that TypeScript does not allow
-  // abstract classes.
+  // class for Network implementations. TODO: with typescript 1.5, there are now
+  // abstract classes, use them?
   export class AbstractNetwork implements social.Network {
 
     public roster     :{[userId:string] :remote_user.User};
@@ -282,7 +283,7 @@ export function notifyUI(networkName :string, userId :string) {
   // events are passed on to the relevant user (provided the user exists).
   export class FreedomNetwork extends AbstractNetwork {
 
-    private freedomApi_ :freedom_Social;
+    private freedomApi_: freedom_social.FreedomSocialProvider;
     // TODO: give real typing to provider_. Ask Freedom not to use overloaded
     // types.
     private provider_ :any;  // Special freedom object which is both a function
@@ -349,7 +350,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom_Social.UserProfile) : void => {
+    public handleUserProfile = (profile :freedom_social.UserProfile) : void => {
       var userId = profile.userId;
       if (!firewall.isValidUserProfile(profile, null)) {
         log.error('Firewall: invalid user profile', profile);
@@ -390,7 +391,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom_Social.ClientState) : void => {
+    public handleClientState = (freedomClient :freedom_social.ClientState) : void => {
       if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
         return;
@@ -427,7 +428,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
+    public handleMessage = (incoming :freedom_social.IncomingMessage) : void => {
       if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
@@ -511,7 +512,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       this.onceLoggedIn_ = this.freedomApi_.login(request)
-          .then((freedomClient :freedom_Social.ClientState) => {
+          .then((freedomClient :freedom_social.ClientState) => {
             var userId = freedomClient.userId;
             if (userId in networks[this.name]) {
               // If user is already logged in with the same (network, userId)
@@ -722,7 +723,7 @@ export function notifyUI(networkName :string, userId :string) {
 
 
 export function freedomClientToUproxyClient(
-  freedomClientState :freedom_Social.ClientState) :social.ClientState {
+  freedomClientState :freedom_social.ClientState) :social.ClientState {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
   // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',
   // 'OFFLINE': 4001, 4001: 'OFFLINE'} value.
