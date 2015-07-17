@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat <<EOF
-FROM digitallyseamless/nodejs-bower-grunt
+FROM library/ubuntu:trusty
 # From setup_image.sh $@
 MAINTAINER Lally Singh <lally@google.com>
 
@@ -13,8 +13,10 @@ ENV DISPLAY :10
 RUN apt-get update -qq -y && apt-get install -qq -y \
   wget libav-tools xvfb unzip nodejs nodejs-dev npm \
   git default-jre vnc4server aptitude net-tools x11vnc \
-  fvwm vim libpango1.0-0 libappindicator1 xdg-utils
-
+  fvwm vim libpango1.0-0 libappindicator1 xdg-utils \
+  libcurl3 libgcrypt11
+RUN npm install -g bower grunt-cli
+RUN ln -s /usr/bin/nodejs /usr/bin/node
 LABEL date=$(date +%F)
 EOF
 

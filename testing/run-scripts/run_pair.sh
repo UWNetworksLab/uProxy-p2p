@@ -7,7 +7,7 @@
 #  Runs two instances running the dev version of chrome, connects them
 #  together, and runs a proxy.
 
-# TODO: put in honest arg mapping.
+source "${BASH_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
 
 BRANCH="-b dev"
 REPO=
@@ -92,7 +92,7 @@ function run_docker () {
     else
         HOSTARGS="$HOSTARGS"
     fi
-    docker run $HOSTARGS $* --name $NAME -d $IMAGENAME /test/bin/load-adventure.sh $REPO $BRANCH $RUNARGS -w
+    docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-adventure.sh $REPO $BRANCH $RUNARGS -w
 }
 
 run_docker uproxy-getter $1 $VNCOPTS1 -p 9000:9000 -p 9999:9999
