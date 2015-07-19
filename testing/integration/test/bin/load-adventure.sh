@@ -56,14 +56,6 @@ grunt adventure
 
 /test/bin/browser.sh /test/src/uproxy-lib/build/dev/uproxy-lib/samples/adventure
 
-
-if $LISTEN; then
-    # Wait for the control port (9000) to open.
-    echo -n "Waiting for control port to come up"
-    while ! netstat -lt | grep 9000 >/dev/null; do echo -n .;  sleep 1; done
-    echo
-fi
-
 while $FOREVER; do
     sleep 1
 done

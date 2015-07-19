@@ -8,8 +8,7 @@ then
     echo "Two arguments needed: browser and version."
     exit 1
 fi
-source "${BASH_SOURCE%/*}/utils.sh" || echo "cannot find utils.sh" && exit 1
-
+source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
 BROWSER=$1
 VERSION=$2
@@ -69,4 +68,4 @@ rm -rf $DIR
 mkdir $DIR
 ./gen_image.sh $BROWSER $VERSION $DIR >$DIR/Dockerfile
 cp -R ${BASH_SOURCE%/*}/../integration/test $DIR/test
-sudo docker build -t uproxy/$BROWSER-$VERSION $DIR
+docker build -t uproxy/$BROWSER-$VERSION $DIR

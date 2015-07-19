@@ -1,17 +1,26 @@
 #!/usr/bin/python
 
-# Connects two SOCKS adventure instances running on localhost.
-# TODO: add host/port args.
-
+import argparse
 import select
 import socket
 
+parser = argparse.ArgumentParser(description='Connect two SOCKS adventure instances.')
+parser.add_argument('getter_address', default='localhost',
+                    help='getter address, e.g. localhost')
+parser.add_argument('getter_port', type=int,
+                    help='getter port, e.g. 9000')
+parser.add_argument('giver_address', default='localhost',
+                    help='getter address, e.g. localhost')
+parser.add_argument('giver_port', type=int, default=9000,
+                    help='getter port, e.g. 9010')
+args = parser.parse_args()
+
 getter = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-getter.connect_ex(('localhost', 9000))
+getter.connect_ex((args.getter_address, args.getter_port))
 getter.setblocking(False)
 
 giver = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-giver.connect(('localhost', 9010))
+giver.connect((args.giver_address, args.giver_port))
 giver.setblocking(False)
 
 getter.sendall('get\n')
