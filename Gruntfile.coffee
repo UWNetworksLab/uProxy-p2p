@@ -614,6 +614,11 @@ module.exports = (grunt) ->
               src: ['**']
               dest: firefoxDevPath + '/data/freedom-social-firebase'
             },
+            {
+              expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
+              src: ['**']
+              dest: firefoxDevPath + '/data/freedom-pgp-e2e'
+            },
             { # lib
               expand: true, cwd: devBuildPath
               src: ['interfaces/*.js']
