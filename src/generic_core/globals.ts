@@ -85,11 +85,11 @@ export var effectiveMessageVersion = () : number => {
 export var metrics = new metrics_module.Metrics(storage);
 
 export var pgp :PgpProvider = freedom['pgp']();
-pgp.setup('', '<uproxy>');
+pgp.setup('', '<uproxy>').then(() => {
+  pgp.exportKey().then((key :PublicKey) => {
+    publicKey = key.key;
+  });
+});
 
 export var publicKey :string;
-
-pgp.exportKey().then((key :PublicKey) => {
-  publicKey = key.key;
-})
 
