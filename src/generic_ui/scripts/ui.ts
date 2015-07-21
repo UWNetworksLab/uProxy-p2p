@@ -976,6 +976,9 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.ROSTER;
       this.updateSharingStatusBar_();
     }
+
+    // state of online networks may have changed, update it
+    this.updateIcon_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
