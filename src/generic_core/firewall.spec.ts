@@ -12,6 +12,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
     'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); }
 });
 
+
 import firewall = require('./firewall');
 
 class MockPolicy implements firewall.ResponsePolicy {

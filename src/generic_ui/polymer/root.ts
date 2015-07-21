@@ -235,6 +235,9 @@ Polymer({
       window.location.reload();
     }
   },
+  restart: function() {
+    core.restart();
+  },
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',

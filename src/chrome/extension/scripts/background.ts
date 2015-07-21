@@ -7,6 +7,8 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
+/// <reference path='../../../../../third_party/typings/compare-version/compare-version.d.ts'/>
+
 import ChromeBrowserApi = require('./chrome_browser_api');
 import ChromeCoreConnector = require('./chrome_core_connector');
 import ChromeTabAuth = require('./chrome_tab_auth');
@@ -15,11 +17,11 @@ import UiApi = require('../../../interfaces/ui');
 import user_interface = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import Constants = require('../../../generic_ui/scripts/constants');
+import compareVersion = require('compare-version');
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-
-export import model = user_interface.model;
 
 // --------------------- Communicating with the App ----------------------------
 export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
@@ -58,11 +60,38 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
   return true;
 });
 
+chrome.runtime.onUpdateAvailable.addListener((details) => {
+  console.log('Update available');
+
+  core.getVersion().then(function(versions) {
+    if (compareVersion(details.version, versions.version) > 0) {
+      // Only update if the new version is the same as or older than the app
+      // version.  If we are not able to update now, this will be taken care of
+      // by restarting at the same time as the core update.
+      return;
+    }
+
+    chrome.proxy.settings.get({}, (details) => {
+      if (details.levelOfControl === 'controlled_by_this_extension') {
+        return;
+      }
+
+      // At this point, the core supports the update and we are not currently
+      // proxying, let's do the update!
+      chrome.runtime.reload();
+    });
+  });
+});
+
 /**
  * Primary initialization of the Chrome Extension. Installs hooks so that
  * updates from the Chrome App side propogate to the UI.
  */
 browserApi = new ChromeBrowserApi();
+browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
+browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
+                          browserApi.bringUproxyToFront);
+
 // TODO (lucyhe): Make sure that the "install" event isn't missed if we
 // are adding the listener after the event is fired.
 chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails) => {
@@ -70,6 +99,14 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
     // we only want to launch the window on the first install
     return;
   }
+  browserConnector.onceConnected.then(() => {
+    chrome.browserAction.setIcon({
+      path: {
+        "19" : "icons/19_" + Constants.DEFAULT_ICON,
+        "38" : "icons/38_" + Constants.DEFAULT_ICON,
+      }
+    });
+  });
 
   chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
       // Do not open the extension when it's installed if the user is
@@ -84,10 +121,6 @@ chrome.browserAction.onClicked.addListener((tab) => {
   // When the extension icon is clicked, open uProxy.
   browserApi.bringUproxyToFront();
 });
-
-browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
-                          browserApi.bringUproxyToFront);
 
 core = new CoreConnector(browserConnector);
 var oAuth = new ChromeTabAuth();

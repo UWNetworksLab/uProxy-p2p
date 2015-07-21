@@ -42,7 +42,8 @@ export var settings :uproxy_core_api.GlobalSettings = {
   splashState: 0,
   statsReportingEnabled: false,
   consoleFilter: loggingTypes.Level.warn,
-  language: 'en'
+  language: 'en',
+  force_message_version: 0 // zero means "don't override"
 };
 
 export var natType :string = '';
@@ -72,5 +73,11 @@ export var loadSettings :Promise<void> =
     }).catch((e) => {
       log.info('No global settings loaded', e.message);
     });
+
+// Client version to run as, which is globals.MESSAGE_VERSION unless
+// overridden in advanced settings.
+export var effectiveMessageVersion = () : number => {
+  return settings.force_message_version || MESSAGE_VERSION;
+}
 
 export var metrics = new metrics_module.Metrics(storage);
