@@ -25,6 +25,7 @@
     "es6-promise": "^2.0.0",
     "freedom-for-chrome": "^0.4.11",
     "freedom-for-firefox": "^0.6.13",
+    "freedom-port-control": "^0.9.0",
     "freedom-social-firebase": "^1.0.1",
     "freedom-social-xmpp": "^0.4.0",
     "freedomjs-anonymized-metrics": "~0.1.0",
