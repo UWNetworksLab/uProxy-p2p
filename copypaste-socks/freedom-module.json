@@ -22,6 +22,10 @@
     "pgp": {
       "url": "../../freedom-pgp-e2e/dist/pgpapi.json",
       "api": "crypto"
+    },
+    "portControl": {
+      "url": "../../freedom-port-control/dist/port-control.json",
+      "api": "portControl"
     }
   },
   "permissions": [

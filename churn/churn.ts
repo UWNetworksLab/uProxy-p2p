@@ -1,6 +1,7 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 // TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
@@ -174,6 +175,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.havePipe_ = F;
     });
 
+    private portControl_ :freedom_PortControl.PortControl;
+
     private static internalConnectionId_ = 0;
 
     constructor(probeRtcPc:freedom_RTCPeerConnection.RTCPeerConnection,
@@ -183,6 +186,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           (++Connection.internalConnectionId_);
 
       this.signalForPeerQueue = new handler.Queue<ChurnSignallingMessage,void>();
+
+      this.portControl_ = freedom['portControl']();
 
       this.configureObfuscatedConnection_();
       this.configureProbeConnection_(probeRtcPc);
@@ -212,6 +217,19 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         if (message.type === signals.Type.CANDIDATE) {
           var c = Candidate.fromRTCIceCandidate(message.candidate);
           if (c.protocol === 'udp') {
+            // Try to make port mappings for all srflx candidates
+            var MAP_LIFETIME = 24 * 60 * 60;  // 24 hours in seconds
+            if (c.type === 'srflx') {
+              this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
+                  then((mapping:freedom_PortControl.Mapping) => {
+                    if (mapping.externalPort === -1) {
+                      log.debug("addMapping() failed.");
+                    } else {
+                      log.debug("addMapping() success: ", mapping);
+                    }
+                  });
+            }
+
             // It's immediately safe to send each candidate to the remote peer,
             // because the remote peer will retry for several seconds, and the
             // probe connection will not respond to any pings because it doesn't
