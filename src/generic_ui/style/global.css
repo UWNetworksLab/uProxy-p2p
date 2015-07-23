@@ -32,3 +32,8 @@ html /deep/ [dir='rtl'] /deep/ [layout][horizontal] /deep/ core-icon[icon='arrow
 body /deep/ paper-input-decorator /deep/ .underline div {
   background-color: #009688;
 }
+
+body /deep/ core-toolbar {
+  background-color: #009688;
+  color: white;
+}
