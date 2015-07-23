@@ -485,32 +485,38 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public handleUrlData = (url :string) => {
+  public parseUrlData = (url :string) :{ type :social.PeerMessageType; messages :social.PeerMessage[]; } => {
     var payload :social.PeerMessage[];
-    var expectedType :social.PeerMessageType;
+    var type :social.PeerMessageType;
+
+    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
+    if (!match) {
+      return null;
+    }
+
+    try {
+      payload = JSON.parse(atob(decodeURIComponent(match[2])));
+    } catch (e) {
+      return null;
+    }
+
+    if (match[1] === 'request') {
+      type = social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER;
+    } else if (match[1] === 'offer') {
+      type = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
+    } else {
+      return null;
+    }
+
+    return {type: type, messages: payload};
+  }
+
+  public handleUrlData = (url :string) => {
     console.log('received url data from browser');
 
     if (this.model.onlineNetworks.length > 0) {
       console.log('Ignoring URL since we have an active network');
       this.copyPasteError = ui_constants.CopyPasteError.LOGGED_IN;
-      return;
-    }
-
-    this.view = ui_constants.View.COPYPASTE;
-
-    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
-    if (!match) {
-      console.error('parsed url that did not match');
-      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
-      return;
-    }
-
-    this.copyPasteError = ui_constants.CopyPasteError.NONE;
-    try {
-      payload = JSON.parse(atob(decodeURIComponent(match[2])));
-    } catch (e) {
-      console.error('malformed string from browser');
-      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
       return;
     }
 
@@ -520,15 +526,23 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
 
+    this.view = ui_constants.View.COPYPASTE;
+    this.copyPasteError = ui_constants.CopyPasteError.NONE;
+
+    var parsed = this.parseUrlData(url);
+    if (parsed === null) {
+      console.error('Tried to use invalid copy+paste URL');
+      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
+      return;
+    }
+
     // at this point, we assume everything is good, so let's check state
-    switch (match[1]) {
-      case 'request':
-        expectedType = social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER;
+    switch (parsed.type) {
+      case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
         this.copyPasteSharingMessages = [];
         this.core.startCopyPasteShare();
         break;
-      case 'offer':
-        expectedType = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
+      case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
         if (social.GettingState.TRYING_TO_GET_ACCESS
             !== this.copyPasteState.localGettingFromRemote) {
           console.warn('currently not expecting any information, aborting');
@@ -539,13 +553,13 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     console.log('Sending messages from url to app');
-    for (var i in payload) {
-      if (payload[i].type !== expectedType) {
+    for (var i in parsed.messages) {
+      if (parsed.messages[i].type !== parsed.type) {
         this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
         return;
       }
 
-      this.core.sendCopyPasteSignal(payload[i]);
+      this.core.sendCopyPasteSignal(parsed.messages[i]);
     }
   }
 
