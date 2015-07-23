@@ -654,5 +654,13 @@
   "restartUproxyUpdate": {
     "description": "A link the user can click on to restart uProxy and permorm an update",
     "message": "Restart to update"
+  },
+  "portControlSupported": {
+    "description": "NAT-PMP, PCP, or UPnP is supported on the router",
+    "message": "Port control supported"
+  },
+  "portControlNotSupported": {
+    "description": "NAT-PMP, PCP, and UPnP are not supported on the router",
+    "message": "Port control not supported"
   }
 }

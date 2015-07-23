@@ -1,0 +1,1 @@
+"/Users/kennysong/Dropbox/Work/Google/uproxy/build/dev/uproxy/generic_core/uproxy_core.ts" --declaration --noImplicitAny --target ES5 --module commonjs

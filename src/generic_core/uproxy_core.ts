@@ -37,14 +37,6 @@ loggingController.setDefaultFilter(
 
 var portControl = freedom['portControl']();
 
-export interface NetworkInfo {
-  natType :string;
-  pmpSupport :string;
-  pcpSupport :string;
-  upnpSupport :string;
-  errorMsg ?:string;
-};
-
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updates to the UI, and handles commands from the UI.
@@ -100,6 +92,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   private pendingNetworks_ :{[name :string] :social.Network} = {};
+  private portControlSupport = false;  // Set on login and from UI probes 
 
   /**
    * Access various social networks using the Social API.
@@ -126,6 +119,21 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         network: networkName,
         userId: network.myInstance.userId
       });
+    }).then(() => {
+      console.log('Login succeeded. Running refreshPortControlSupport()...')
+      // TODO(kennysong): Run probePortControl when user logs into the first social network
+      if (true) {
+        this.refreshPortControlSupport().then((probe) => {
+          if (probe.pmpSupport || probe.pcpSupport || probe.upnpSupport) {
+            console.log('Port control is supported');
+            ui.update(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, true);
+          } else {
+            console.log('Port control is not supported');
+            ui.update(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, false);
+          }
+        })
+      }
+
     }).catch((e) => {
       delete this.pendingNetworks_[networkName];
       throw e;
@@ -218,7 +226,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           endpoint: copyPasteConnection.activeEndpoint,
           gettingMessages: this.copyPasteGettingMessages_,
           sharingMessages: this.copyPasteSharingMessages_
-        }
+        },
+        portControlSupport: this.portControlSupport,
       };
     });
   }
@@ -400,10 +409,26 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
+  // Probe the NAT for NAT-PMP, PCP, and UPnP support and store result 
+  public refreshPortControlSupport = () :Promise<uproxy_core_api.NetworkInfo> => {
+    return portControl.probeProtocolSupport().then((probe:any) => {
+      this.portControlSupport = probe.natPmp || probe.pcp || probe.upnp;
+
+      console.log(this);
+      console.log(this.portControlSupport);
+
+      return {
+        pmpSupport: probe.natPmp,
+        pcpSupport: probe.pcp,
+        upnpSupport: probe.upnp
+      };
+    });
+  }
+
   // Probe the NAT type and support for port control protocols
   // Returns an object with the NAT configuration as keys
-  public getNetworkInfoObj = () :Promise<NetworkInfo> => {
-    var natInfo :NetworkInfo = {
+  public getNetworkInfoObj = () :Promise<uproxy_core_api.NetworkInfo> => {
+    var natInfo :uproxy_core_api.NetworkInfo = {
       natType: '',
       pmpSupport: '',
       pcpSupport: '',
@@ -427,7 +452,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // Returns a string of the NAT type and support for port control protocols
   public getNetworkInfo = () :Promise<string> => {
-    return this.getNetworkInfoObj().then((natInfo:NetworkInfo) => {
+    return this.getNetworkInfoObj().then((natInfo:uproxy_core_api.NetworkInfo) => {
       var natInfoStr = 'NAT Type: ' + natInfo.natType + '\n';
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';

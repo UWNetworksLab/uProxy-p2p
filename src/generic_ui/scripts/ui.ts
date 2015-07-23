@@ -212,6 +212,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public availableVersion :string = null;
 
+  public portControlSupport :boolean = false;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -232,6 +234,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.on('core_connect', () => {
       this.view = ui_constants.View.SPLASH;
+
+      debugger;
 
       core.getFullState()
           .then(this.updateInitialState);
@@ -391,6 +395,9 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
+
+    core.onUpdate(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, 
+                  this.setPortControlSupport_);
 
     core.getFullState()
         .then(this.updateInitialState)
@@ -956,6 +963,10 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.COPYPASTE;
     }
 
+    console.log(state);
+
+    this.portControlSupport = state.portControlSupport;
+
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];
 
@@ -998,6 +1009,10 @@ export class UserInterface implements ui_constants.UiApi {
 
   private coreUpdateAvailable_ = (data :{version :string}) => {
     this.availableVersion = data.version;
+  }
+
+  private setPortControlSupport_ = (supported:boolean) => {
+    this.portControlSupport = supported;
   }
 } // class UserInterface
 

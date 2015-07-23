@@ -117,7 +117,9 @@
     paper-checkbox::shadow #checkboxLabel {
       padding: 0px 8px;
     }
-    #metricsCheckbox core-icon[icon='help']{
+    #portControlBox core-icon[icon='help'],
+    #portControlBox core-icon[icon='refresh'],
+    #metricsCheckbox core-icon[icon='help'] {
       height: 15px;
       color: grey;
       opacity: 0.6;
@@ -127,10 +129,15 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
+    #portControlBox core-icon[icon='help']:hover,
+    #portControlBox core-icon[icon='refresh']:hover,
     #metricsCheckbox core-icon[icon='help']:hover {
       opacity: 1;
     }
     #metricsCheckbox paper-checkbox, uproxy-faq-link {
+      display: table-cell;
+    }
+    #portControlBox span, #portControlBox uproxy-link {
       display: table-cell;
     }
     #settingsLinks .label {
@@ -206,6 +213,22 @@
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
           </uproxy-faq-link>
+        </div>
+
+        <div id='portControlBox'>
+          <span class='label' hidden?='{{ !ui.portControlSupport }}'>
+            {{ 'portControlSupported' | $$ }}
+          </span>
+          <span class='label' hidden?='{{ ui.portControlSupport }}'>
+            {{ 'portControlNotSupported' | $$ }}
+          </span>
+          <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
+            <core-icon icon='refresh'></core-icon>
+          </uproxy-link>
+          <uproxy-link>
+            <!-- TODO(kennysong): Make this open some info text -->
+            <core-icon icon='help'></core-icon>
+          </uproxy-link>
         </div>
 
         <hr>

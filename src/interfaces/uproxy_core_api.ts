@@ -42,6 +42,7 @@ export interface InitialState {
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
   copyPasteState :CopyPasteState;
+  portControlSupport :boolean;
 }
 
 export interface ConnectionState {
@@ -97,6 +98,7 @@ export enum Command {
   GET_FULL_STATE = 1019,
   GET_VERSION = 1020,
   HANDLE_CORE_UPDATE = 1021,
+  REFRESH_PORT_CONTROL = 1022,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -130,6 +132,7 @@ export enum Update {
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
+  LOGIN_PORT_CONTROL_STATUS = 2025,
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -168,6 +171,14 @@ export interface LoginArgs {
   network :string;
   reconnect :boolean;
 }
+
+export interface NetworkInfo {
+  natType ?:string;
+  pmpSupport :string;
+  pcpSupport :string;
+  upnpSupport :string;
+  errorMsg ?:string;
+};
 
 /**
  * The primary interface to the uProxy Core.
