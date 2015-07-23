@@ -478,7 +478,7 @@ export class UserInterface implements ui_constants.UiApi {
         name2: this.mapInstanceIdToUser_[instanceIds[1]].name
       });
     } else {
-      this.sharingStatus = this.i18n_t('sharingAccessWith_two', {
+      this.sharingStatus = this.i18n_t('sharingAccessWith_many', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name,
         numOthers: (instanceIds.length - 1)
       });
