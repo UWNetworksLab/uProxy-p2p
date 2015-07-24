@@ -212,7 +212,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public availableVersion :string = null;
 
-  public portControlSupport :boolean = false;
+  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -1007,8 +1007,8 @@ export class UserInterface implements ui_constants.UiApi {
     this.availableVersion = data.version;
   }
 
-  private setPortControlSupport_ = (supported:boolean) => {
-    this.portControlSupport = supported;
+  private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
+    this.portControlSupport = support;
   }
 } // class UserInterface
 

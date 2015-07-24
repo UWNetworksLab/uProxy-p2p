@@ -68,14 +68,15 @@ Polymer({
   },
   ready: function() {
     this.ui = ui;
+    this.uproxy_core_api = uproxy_core_api;
   },
   refreshPortControl: function() {
+    ui.portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
     core.refreshPortControlSupport().then((probe: uproxy_core_api.NetworkInfo) => {
-      if (probe.pmpSupport || probe.pcpSupport || probe.upnpSupport) {
-        ui.portControlSupport = true;
-      } else {
-        ui.portControlSupport = false;
-      }
+      ui.portControlSupport = 
+                   (probe.pmpSupport || probe.pcpSupport || probe.upnpSupport) ?
+                   uproxy_core_api.PortControlSupport.TRUE :
+                   uproxy_core_api.PortControlSupport.FALSE;
     });
   },
   computed: {

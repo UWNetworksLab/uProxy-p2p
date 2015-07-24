@@ -655,12 +655,20 @@
     "description": "A link the user can click on to restart uProxy and permorm an update",
     "message": "Restart to update"
   },
+  "portControlTitle": {
+    "description": "Title for the port control section in advanced settings",
+    "message": "Port control status"
+  },
   "portControlSupported": {
     "description": "NAT-PMP, PCP, or UPnP is supported in the router",
-    "message": "Port control supported"
+    "message": "Port control is available"
   },
   "portControlNotSupported": {
     "description": "NAT-PMP, PCP, and UPnP are not supported in the router",
-    "message": "Port control not supported"
+    "message": "Port control is not available"
+  },
+  "portControlPending": {
+    "description": "uProxy is currently probing router for port control support",
+    "message": "Probing router for port control support..."
   }
 }

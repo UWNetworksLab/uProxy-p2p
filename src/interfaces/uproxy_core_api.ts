@@ -42,7 +42,7 @@ export interface InitialState {
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
   copyPasteState :CopyPasteState;
-  portControlSupport :boolean;
+  portControlSupport :PortControlSupport;
 }
 
 export interface ConnectionState {
@@ -179,6 +179,8 @@ export interface NetworkInfo {
   upnpSupport :string;
   errorMsg ?:string;
 };
+
+export enum PortControlSupport {PENDING, TRUE, FALSE};
 
 /**
  * The primary interface to the uProxy Core.
