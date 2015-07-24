@@ -69,15 +69,10 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.uproxy_core_api = uproxy_core_api;
+    this.refreshPortControl();
   },
   refreshPortControl: function() {
-    ui.portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
-    core.refreshPortControlSupport().then((probe: uproxy_core_api.NetworkInfo) => {
-      ui.portControlSupport = 
-                   (probe.pmpSupport || probe.pcpSupport || probe.upnpSupport) ?
-                   uproxy_core_api.PortControlSupport.TRUE :
-                   uproxy_core_api.PortControlSupport.FALSE;
-    });
+    core.refreshPortControlSupport();
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'

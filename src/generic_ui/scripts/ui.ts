@@ -390,7 +390,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
-    core.onUpdate(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, 
+    core.onUpdate(uproxy_core_api.Update.REFRESH_PORT_CONTROL, 
                   this.setPortControlSupport_);
 
     browserApi.on('urlData', this.handleUrlData);
@@ -960,8 +960,6 @@ export class UserInterface implements ui_constants.UiApi {
       // This means we had active copy-paste flow.
       this.view = ui_constants.View.COPYPASTE;
     }
-
-    this.portControlSupport = state.portControlSupport;
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];

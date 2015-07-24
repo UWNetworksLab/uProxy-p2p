@@ -64,6 +64,12 @@
     }
     paper-input-decorator {
       font-size: 1.4em;
+      background-color: rgb(240,240,240);
+      padding-left: 10px;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-bottom: 0.75em;
+      margin-top: 0.75em;
     }
     #advancedSettingsDecorator {
       height: 340px;
@@ -71,14 +77,6 @@
     #advancedSettingsPaperTextarea {
       height: 340px;
       margin: 0em;
-    }
-    paper-autogrow-textarea::shadow .textarea-container {
-      padding: 0.25em;
-      background-color: rgb(240,240,240);
-    }
-    paper-autogrow-textarea::shadow .mirror-text {
-      white-space: pre-wrap; /* css-3 */
-      white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
     }
     .advancedSettingsText {
       font-size: 12px;
@@ -95,8 +93,7 @@
       color: #009688;
       overflow: auto;
     }
-    #portControlBox core-icon[icon='help'],
-    #portControlBox core-icon[icon='refresh'] {
+    #portControlBox core-icon {
       height: 15px;
       color: grey;
       opacity: 0.6;
@@ -106,16 +103,17 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
-    #portControlBox core-icon[icon='help']:hover,
-    #portControlBox core-icon[icon='refresh']:hover {
+    #portControlBox core-icon:hover {
       opacity: 1;
     }
-    #portControlBox span, #portControlBox uproxy-link,
-    #portControlBox uproxy-faq-link {
-      display: inline;
-    }
-    #portControlBox span {
+    #portControlBox .label {
       color: rgb(112, 112, 112);
+    }
+    #portControlBox uproxy-faq-link {
+      color: rgb(0, 150, 136);
+    }
+    #portControlBox .info {
+      margin-bottom: 0px;
     }
     </style>
 
@@ -132,7 +130,7 @@
             {{ 'portControlTitle' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>
               <core-icon icon='help'></core-icon>
-            </uproxy-link>
+            </uproxy-faq-link>
           </p>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.TRUE }}'>
             {{ 'portControlSupported' | $$ }}
@@ -146,15 +144,18 @@
           <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
             <core-icon icon='refresh'></core-icon>
           </uproxy-link>
+          <p class='label info' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
+            {{ 'portControlNotSupportedInfo' | $$ }}
+            <uproxy-faq-link anchor='whatIsPortControl'>
+              {{ 'portControlNotSupportedInfoLink' | $$ }}
+            </uproxy-faq-link>
+          </p>
         </div>
-        <div id='formContainer' flex>
+        <div id='formContainer' flex vertical layout>
           <p class='inputLabel'>{{ 'editAdvancedSettings' | $$ }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "editAdvancedSettingsPlaceholder" | $$ }}'>
-            <paper-autogrow-textarea id='advancedSettingsPaperTextarea' class='font::inherit'>
-              <textarea id='advancedSettingsInput'
-                     value='{{ settings }}'>
-              </textarea>
-            </paper-autogrow-textarea>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "editAdvancedSettingsPlaceholder" | $$ }}' flex>
+            <textarea id='advancedSettingsInput' value='{{ settings }}' fit>
+            </textarea>
           </paper-input-decorator>
           <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>
             {{ 'settingsSaved' | $$ }}

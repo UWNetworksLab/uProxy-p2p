@@ -661,14 +661,22 @@
   },
   "portControlSupported": {
     "description": "NAT-PMP, PCP, or UPnP is supported in the router",
-    "message": "Port control is available"
+    "message": "Your router has port control enabled."
   },
   "portControlNotSupported": {
     "description": "NAT-PMP, PCP, and UPnP are not supported in the router",
-    "message": "Port control is not available"
+    "message": "Your router does not have port control enabled."
   },
   "portControlPending": {
     "description": "uProxy is currently probing router for port control support",
     "message": "Probing router for port control support..."
+  },
+  "portControlNotSupportedInfo": {
+    "description": "Extra information displayed when port control is not supported",
+    "message": "You may be able to enable port control to make uProxy more reliable."
+  },
+  "portControlNotSupportedInfoLink": {
+    "description": "Link text right after the portControlNotSupportedInfo text",
+    "message": "More info."
   }
 }
