@@ -92,7 +92,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   private pendingNetworks_ :{[name :string] :social.Network} = {};
-  private portControlSupport = false;  // Set on login and from UI probes 
+  private portControlSupport = false;
 
   /**
    * Access various social networks using the Social API.
@@ -119,22 +119,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         network: networkName,
         userId: network.myInstance.userId
       });
-    }).then(() => {
-      console.log('Login succeeded. Running refreshPortControlSupport()...')
-      // TODO(kennysong): Run probePortControl when user logs into the first social network
-      if (true) {
-        this.refreshPortControlSupport().then((probe) => {
-          if (probe.pmpSupport || probe.pcpSupport || probe.upnpSupport) {
-            console.log('Port control is supported');
-            ui.update(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, true);
-          } else {
-            console.log('Port control is not supported');
-            ui.update(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, false);
-          }
-        })
-      }
-
-    }).catch((e) => {
+    }).then(this.loginRefreshPortControl)
+      .catch((e) => {
       delete this.pendingNetworks_[networkName];
       throw e;
     });
@@ -409,13 +395,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
-  // Probe the NAT for NAT-PMP, PCP, and UPnP support and store result 
+  // Probe for NAT-PMP, PCP, and UPnP support and set this.portControlSupport
   public refreshPortControlSupport = () :Promise<uproxy_core_api.NetworkInfo> => {
     return portControl.probeProtocolSupport().then((probe:any) => {
       this.portControlSupport = probe.natPmp || probe.pcp || probe.upnp;
-
-      console.log(this);
-      console.log(this.portControlSupport);
 
       return {
         pmpSupport: probe.natPmp,
@@ -423,6 +406,30 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         upnpSupport: probe.upnp
       };
     });
+  }
+
+  // Runs refreshPortControl when the user logs in to the first social network
+  // Sets this.portControlSupport and sends update message to UI
+  private loginRefreshPortControl = () :void => {
+    // Check that the user just signed in to the first social network
+    var networkNames = Object.keys(social_network.networks);
+    var numNetworks = 0;
+    networkNames.forEach((name) => {
+      if (Object.keys(social_network.networks[name]).length > 0) {
+        numNetworks++;
+      }
+    });
+
+    // Run refreshPortControl() and update status in core and UI
+    if (numNetworks === 1) {
+      this.refreshPortControlSupport().then((probe) => {
+        if (probe.pmpSupport || probe.pcpSupport || probe.upnpSupport) {
+          ui.update(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, true);
+        } else {
+          ui.update(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, false);
+        }
+      });
+    }
   }
 
   // Probe the NAT type and support for port control protocols

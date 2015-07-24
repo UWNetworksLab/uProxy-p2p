@@ -235,8 +235,6 @@ export class UserInterface implements ui_constants.UiApi {
     core.on('core_connect', () => {
       this.view = ui_constants.View.SPLASH;
 
-      debugger;
-
       core.getFullState()
           .then(this.updateInitialState);
     });
@@ -392,12 +390,12 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
+    core.onUpdate(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, 
+                  this.setPortControlSupport_);
+
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
-
-    core.onUpdate(uproxy_core_api.Update.LOGIN_PORT_CONTROL_STATUS, 
-                  this.setPortControlSupport_);
 
     core.getFullState()
         .then(this.updateInitialState)
@@ -962,8 +960,6 @@ export class UserInterface implements ui_constants.UiApi {
       // This means we had active copy-paste flow.
       this.view = ui_constants.View.COPYPASTE;
     }
-
-    console.log(state);
 
     this.portControlSupport = state.portControlSupport;
 

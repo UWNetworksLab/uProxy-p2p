@@ -7,7 +7,6 @@ var model = ui_context.model;
 
 import _ = require('lodash');
 import user_interface = require('../scripts/ui');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 Polymer({
   accountChooserOpen: false,
@@ -42,18 +41,6 @@ Polymer({
     } else {
       this.connectedNetworks = ui.i18n_t('connectedWithNumber', {number: model.onlineNetworks.length});
     }
-  },
-  refreshPortControl: function() {
-    console.log("refreshPortControl() called.");
-    core.refreshPortControlSupport().then((probe: uproxy_core_api.NetworkInfo) => {
-      if (probe.pmpSupport || probe.pcpSupport || probe.upnpSupport) {
-        console.log("A protocol is supported");
-        ui.portControlSupport = true;
-      } else {
-        console.log("A protocol is not supported");
-        ui.portControlSupport = false;
-      }
-    });
   },
   toggleAccountChooser: function() {
     this.accountChooserOpen = !this.accountChooserOpen;
