@@ -268,7 +268,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public addUser = (user: { networkId: string; userId:string })
     : void => {
-    this.pendingNetworks_[user.networkId].addUserRequest(user.userId);
+    var networks = social_network.networks['GitHub'];
+    networks[Object.keys(networks)[0]].addUserRequest(user.networkId);
   }
 
   /**
