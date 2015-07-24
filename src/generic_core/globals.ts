@@ -18,7 +18,7 @@ export var STORAGE_VERSION = 1;
 // 2: uproxy-lib v27, move to bridge but no obfuscation yet
 // 3: offer basicObfuscation
 // 4: holographic ICE
-export var MESSAGE_VERSION = 4;
+export var MESSAGE_VERSION = 5;
 
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
@@ -84,12 +84,15 @@ export var effectiveMessageVersion = () : number => {
 
 export var metrics = new metrics_module.Metrics(storage);
 
+export var publicKey :string;
 export var pgp :PgpProvider = freedom['pgp']();
+
 pgp.setup('', '<uproxy>').then(() => {
   pgp.exportKey().then((key :PublicKey) => {
     publicKey = key.key;
   });
+}).catch((e) => {
+  log.error('Error setting up pgp ', e);
 });
 
-export var publicKey :string;
 

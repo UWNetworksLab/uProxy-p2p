@@ -197,7 +197,7 @@ export var remoteProxyInstance :RemoteInstance = null;
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
 
-      if (msg.version < 4) {
+      if (msg.version < 5) {
         return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
       } else {
         return pgp.dearmor(<string>msg.data).then((cipherData :ArrayBuffer) => {
