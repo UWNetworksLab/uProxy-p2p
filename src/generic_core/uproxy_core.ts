@@ -35,6 +35,8 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
 
+var portControl = freedom['portControl']();
+
 export interface NetworkInfo {
   natType :string;
   pmpSupport :string;
@@ -398,40 +400,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
-  // List of popular router default IPs
-  // http://www.techspot.com/guides/287-default-router-ip-addresses/
-  private routerIps = ['192.168.1.1', '192.168.2.1', '192.168.11.1',
-    '192.168.0.1', '192.168.0.30', '192.168.0.50', '192.168.20.1',
-    '192.168.30.1', '192.168.62.1', '192.168.100.1', '192.168.102.1',
-    '192.168.1.254', '192.168.10.1', '192.168.123.254', '192.168.4.1',
-    '10.0.1.1', '10.1.1.1', '10.0.0.138', '10.0.0.2', '10.0.0.138'];
-
-  // Probes the NAT for either NAT-PMP or PCP support
-  public probePmcp = (privateIp:string, protocol:string) :Promise<string> => {
-    return Promise.all(this.routerIps.map((ip:string) => {
-      if (protocol === 'PCP') {
-        return diagnose_nat.probePcpSupport(ip, privateIp);
-      } else if (protocol === 'PMP') {
-        return diagnose_nat.probePmpSupport(ip, privateIp);
-      }
-    })).then((results:boolean[]) => {
-      if (results.some(el => el)) { return 'Supported'; }
-      return 'Not supported';
-    }).catch((err:Error) => {
-      return 'Not supported ' + err.message;
-    });
-  }
-
-  // Probe the NAT for UPnP support, returns a status string
-  public probeUpnp = (privateIp:string) :Promise<string> => {
-    return diagnose_nat.probeUpnpSupport(privateIp).
-        then((result:boolean) => {
-          if (result) { return 'Supported'; }
-        }).catch((err:Error) => {
-          return 'Not supported ' + err.message;
-        });
-  }
-
   // Probe the NAT type and support for port control protocols
   // Returns an object with the NAT configuration as keys
   public getNetworkInfoObj = () :Promise<NetworkInfo> => {
@@ -444,17 +412,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
-      return diagnose_nat.getInternalIp().then((privateIp:string) => {
-        return this.probePmcp(privateIp, 'PMP').then((pmpSupport:string) => {
-          natInfo.pmpSupport = pmpSupport;
-          return this.probePmcp(privateIp, 'PCP');
-        }).then((pcpSupport:string) => {
-          natInfo.pcpSupport = pcpSupport;
-          return this.probeUpnp(privateIp);
-        }).then((upnpSupport:string) => {
-          natInfo.upnpSupport = upnpSupport;
+      return portControl.probeProtocolSupport().then((protocolSupport:any) => {
+          natInfo.pmpSupport = protocolSupport.natPmp;
+          natInfo.pcpSupport = protocolSupport.pcp;
+          natInfo.upnpSupport = protocolSupport.upnp;
           return natInfo;
-        });
       }).catch((err:Error) => {
         // Should only catch the error when getInternalIp() times out
         natInfo.errorMsg = 'Could not probe for port control protocols: ' + err.message;
@@ -470,9 +432,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';
       } else {
-        natInfoStr += 'NAT-PMP: ' + natInfo.pmpSupport + '\n';
-        natInfoStr += 'PCP: ' + natInfo.pcpSupport + '\n';
-        natInfoStr += 'UPnP IGD: ' + natInfo.upnpSupport + '\n';
+        natInfoStr += 'NAT-PMP: ' + 
+                  (natInfo.pmpSupport ? 'Supported' : 'Not supported') + '\n';
+        natInfoStr += 'PCP: ' + 
+                  (natInfo.pcpSupport ? 'Supported' : 'Not supported') + '\n';
+        natInfoStr += 'UPnP IGD: ' + 
+                  (natInfo.upnpSupport ? 'Supported' : 'Not supported') + '\n';
       }
       return natInfoStr;
     });
