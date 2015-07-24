@@ -170,6 +170,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     });
 
     private pipe_ :ChurnPipe;
+    // |onceHavePipe_| resolves once the churn pipe has been created and the
+    // probe candidates have been added to the pipe.
     private havePipe_ :() => void;
     private onceHavePipe_ = new Promise((F,R) => {
       this.havePipe_ = F;
@@ -191,7 +193,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
       this.configureObfuscatedConnection_();
       this.configureProbeConnection_(probeRtcPc);
-      this.onceHaveCaesarKey_.then(this.configurePipe_);
+      // When the probe connection is complete, it will trigger the
+      // creation of the churn pipe.
 
       // Forward onceXxx promises.
       this.onceConnected = this.obfuscatedConnection_.onceConnected;
@@ -245,7 +248,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           }
         } else if (message.type === signals.Type.NO_MORE_CANDIDATES) {
           this.probeConnection_.close().then(() => {
+            return this.onceHaveCaesarKey_;
+          }).then(this.configurePipe_).then(() => {
             this.processProbeCandidates_(candidates);
+            this.havePipe_();
           });
         }
       });
@@ -253,19 +259,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     private processProbeCandidates_ = (candidates:Candidate[]) => {
-      this.onceHavePipe_.then(() => {
-        candidates.forEach((c) => {
-          this.pipe_.bindLocal(c.getLocalEndpoint());
-        });
-
-        // For backwards compatibility.
-        if (!this.skipPublicEndpoint_) {
-          var bestEndpointPair = selectBestPublicAddress(candidates);
-          this.signalForPeerQueue.handle({
-            publicEndpoint: bestEndpointPair.external
-          });
-        }
+      candidates.forEach((c) => {
+        this.pipe_.bindLocal(c.getLocalEndpoint());
       });
+
+      // For backwards compatibility.
+      if (!this.skipPublicEndpoint_) {
+        var bestEndpointPair = selectBestPublicAddress(candidates);
+        this.signalForPeerQueue.handle({
+          publicEndpoint: bestEndpointPair.external
+        });
+      }
     }
 
     private configurePipe_ = (key:number) : void => {
@@ -284,8 +288,6 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //       'ciphertext_dfa': regex2dfa('^.*$'),
       //       'ciphertext_max_len': 1450
       //     }
-
-      this.havePipe_();
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {

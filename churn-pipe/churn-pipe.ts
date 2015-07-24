@@ -135,6 +135,10 @@ class Pipe {
   // most one port on each interface.
   private browserEndpoints_ : { [address:string]: number } = {};
 
+  // The most recently set public interface for IPv6 and IPv4.  Used to
+  // report mirror endpoints.
+  private lastInterface_ : {v6?:string; v4?:string;} = {};
+
   // TODO: define a type for event dispatcher in freedom-typescript-api
   constructor(
       private dispatchEvent_:(name:string, args:Object) => void,
@@ -164,6 +168,15 @@ class Pipe {
   // candidate) and bindRemote (set up private local bindings to allow
   // sending to that remote candidate).
   public bindLocal = (publicEndpoint:net.Endpoint) :Promise<void> => {
+    if (ipaddr.IPv6.isValid(publicEndpoint.address)) {
+      this.lastInterface_.v6 = publicEndpoint.address;
+    } else if (ipaddr.IPv4.isValid(publicEndpoint.address)) {
+      this.lastInterface_.v4 = publicEndpoint.address;
+    } else {
+      return Promise.reject(
+          new Error('Invalid address: ' + publicEndpoint.address));
+    }
+
     if (!this.publicPorts_[publicEndpoint.address]) {
       this.publicPorts_[publicEndpoint.address] = {};
     }
@@ -244,7 +257,7 @@ class Pipe {
   // A new mirror port has been allocated for a signaled remote endpoint. Report
   // it to the client.
   private emitMirror_ = (remoteEndpoint:net.Endpoint, socket:Socket) => {
-    socket.getInfo().then(Pipe.endpointFromInfo_).then((localEndpoint) => {
+    socket.getInfo().then(this.endpointFromInfo_).then((localEndpoint) => {
       log.debug('%1: emitting mirror for %2: %3', this.name_, remoteEndpoint, localEndpoint);
       this.dispatchEvent_('mappingAdded', {
         local: localEndpoint,
@@ -289,6 +302,11 @@ class Pipe {
    * constructs a corresponding mirror socket, and returns its endpoint.
    */
   public bindRemote = (remoteEndpoint:net.Endpoint) : Promise<void> => {
+    try {
+      var dummyAddress = this.getLocalInterface_(remoteEndpoint.address);
+    } catch (e) {
+      return Promise.reject('You must call bindLocal before bindRemote');
+    }
     log.debug('%1: binding %2 mirror(s) for remote endpoint: %3',
         this.name_, this.maxSocketsPerInterface_, remoteEndpoint);
     this.ensureRemoteEndpoint_(remoteEndpoint, true);
@@ -359,7 +377,16 @@ class Pipe {
     });
   }
 
-  private static endpointFromInfo_ = (socketInfo:freedom_UdpSocket.SocketInfo) => {
+  private getLocalInterface_ = (anyAddress:string) : string => {
+    var isIPv6 = ipaddr.IPv6.isValid(anyAddress);
+    var address = isIPv6 ? this.lastInterface_.v6 : this.lastInterface_.v4;
+    if (!address) {
+      throw new Error('No known interface to match ' + anyAddress);
+    }
+    return address;
+  }
+
+  private endpointFromInfo_ = (socketInfo:freedom_UdpSocket.SocketInfo) => {
     if (!socketInfo.localAddress) {
       throw new Error('Cannot process incomplete info: ' +
           JSON.stringify(socketInfo));
@@ -367,12 +394,11 @@ class Pipe {
     // freedom-for-firefox currently reports the bound address as 'localhost',
     // which is unsupported in candidate lines by Firefox:
     //   https://github.com/freedomjs/freedom-for-firefox/issues/62
-    // This will result in |fakeLocalAddress| being IPv4 localhost, so this
+    // This will result in |localAddress| being IPv4, so this
     // issue is blocking IPv6 Churn support on Firefox.
-    var fakeLocalAddress = ipaddr.IPv6.isValid(socketInfo.localAddress) ?
-        '::1' : '127.0.0.1';
+    var localAddress = this.getLocalInterface_(socketInfo.localAddress);
     return {
-      address: fakeLocalAddress,
+      address: localAddress,
       port: socketInfo.localPort
     };
   }
