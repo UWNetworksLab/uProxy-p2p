@@ -558,6 +558,7 @@ export class UserInterface implements ui_constants.UiApi {
    * (e.g. chrome.proxy settings).
    * If user didn't end proxying, so if proxy session ended because of some
    * unexpected reason, user should be asked before reverting proxy settings.
+   * if data.instanceId is null, it means to stop active proxying.
    */
   public stopGettingInUiAndConfig = (data :social.StopProxyInfo) => {
     if (data.instanceId) {
