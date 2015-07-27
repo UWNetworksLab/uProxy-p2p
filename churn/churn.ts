@@ -170,9 +170,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     });
 
     private pipe_ :ChurnPipe;
+    private havePipe_ :() => void;
     // |onceHavePipe_| resolves once the churn pipe has been created and the
     // probe candidates have been added to the pipe.
-    private havePipe_ :() => void;
     private onceHavePipe_ = new Promise((F,R) => {
       this.havePipe_ = F;
     });
@@ -192,9 +192,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.portControl_ = freedom['portControl']();
 
       this.configureObfuscatedConnection_();
-      this.configureProbeConnection_(probeRtcPc);
       // When the probe connection is complete, it will trigger the
       // creation of the churn pipe.
+      this.configureProbeConnection_(probeRtcPc);
 
       // Forward onceXxx promises.
       this.onceConnected = this.obfuscatedConnection_.onceConnected;

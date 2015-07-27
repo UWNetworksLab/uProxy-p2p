@@ -310,11 +310,11 @@ class Pipe {
     log.debug('%1: binding %2 mirror(s) for remote endpoint: %3',
         this.name_, this.maxSocketsPerInterface_, remoteEndpoint);
     this.ensureRemoteEndpoint_(remoteEndpoint, true);
-    var promises :any[] = [];
+    var promises :Promise<void>[] = [];
     for (var i = 0; i < this.maxSocketsPerInterface_; ++i) {
       promises.push(this.getMirrorSocketAndEmit_(remoteEndpoint, i));
     }
-    return Promise.all(promises).then((fulfills:any[]) : void => {});
+    return Promise.all(promises).then((fulfills:void[]) : void => {});
   }
 
   // Returns the "any" interface with the same address family (IPv4 or IPv6) as
@@ -378,9 +378,12 @@ class Pipe {
   }
 
   private getLocalInterface_ = (anyAddress:string) : string => {
+    // This method will not work until bindLocal populates |lastInterface_|.
     var isIPv6 = ipaddr.IPv6.isValid(anyAddress);
     var address = isIPv6 ? this.lastInterface_.v6 : this.lastInterface_.v4;
     if (!address) {
+      // This error would only occur if this method were called (from
+      // bindRemote) before bindLocal was called.
       throw new Error('No known interface to match ' + anyAddress);
     }
     return address;
