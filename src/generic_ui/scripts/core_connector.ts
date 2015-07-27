@@ -213,7 +213,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_NAT_TYPE);
   }
 
-  refreshPortControlSupport = () : Promise<uproxy_core_api.NetworkInfo> => {
+  refreshPortControlSupport = () : Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.REFRESH_PORT_CONTROL);
   }
 

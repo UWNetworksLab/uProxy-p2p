@@ -397,9 +397,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // Probe for NAT-PMP, PCP, and UPnP support
   // Sets this.portControlSupport_ and sends update message to UI
-  public refreshPortControlSupport = () :Promise<uproxy_core_api.NetworkInfo> => {
+  public refreshPortControlSupport = () :Promise<void> => {
     this.portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
-    ui.update(uproxy_core_api.Update.REFRESH_PORT_CONTROL, 
+    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
               uproxy_core_api.PortControlSupport.PENDING);
 
     return portControl.probeProtocolSupport().then(
@@ -407,14 +407,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
                                    uproxy_core_api.PortControlSupport.TRUE :
                                    uproxy_core_api.PortControlSupport.FALSE;
-        ui.update(uproxy_core_api.Update.REFRESH_PORT_CONTROL, 
+        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
                   this.portControlSupport_);
-
-        return {
-          pmpSupport: probe.natPmp,
-          pcpSupport: probe.pcp,
-          upnpSupport: probe.upnp
-        };
     });
   }
 

@@ -390,7 +390,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
-    core.onUpdate(uproxy_core_api.Update.REFRESH_PORT_CONTROL, 
+    core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
                   this.setPortControlSupport_);
 
     browserApi.on('urlData', this.handleUrlData);

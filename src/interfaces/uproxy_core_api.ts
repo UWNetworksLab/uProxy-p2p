@@ -131,7 +131,7 @@ export enum Update {
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
-  REFRESH_PORT_CONTROL = 2025,
+  PORT_CONTROL_STATUS = 2025,
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
