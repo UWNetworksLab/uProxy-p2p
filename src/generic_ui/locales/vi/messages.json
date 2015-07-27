@@ -1,645 +1,645 @@
 {
-    "friendOffline": {
+    "FRIEND_OFFLINE": {
         "message": "__name__ đang ngoại tuyến",
         "description": "Message shown when trying to get access from a friend who is offline."
     },
-    "sendConnectionLink": {
+    "SEND_CONNECTION_LINK": {
         "message": "Để chia sẻ kết nối của bạn, hãy nhờ bạn bè gửi cho bạn liên kết của họ.",
         "description": "Instructions for the user to share their connection with a one-time link."
     },
-    "welcome": {
+    "WELCOME": {
         "message": "Chào mừng đến với uProxy",
         "description": ""
     },
-    "oneTimeSharing": {
+    "ONE_TIME_SHARING": {
         "message": "Bạn hiện đang chia sẻ truy cập.",
         "description": "The user is sharing their Internet access with a friend."
     },
-    "requestingAccessNotification": {
+    "REQUESTING_ACCESS_NOTIFICATION": {
         "message": "__name__ đang yêu cầu truy cập",
         "description": "Notification for when a friend sends a request to access the Internet through the user."
     },
-    "changeStatsChoice": {
+    "CHANGE_STATS_CHOICE": {
         "message": "Bạn có thể thay đổi lựa chọn của mình bất cứ lúc nào, từ trình đơn Cài đặt.",
         "description": "Informs the user that they can opt in and out of sending anonymous statistics at any time they choose, from the Settings menu."
     },
-    "sharingAccessWith_two": {
+    "SHARING_ACCESS_WITH_TWO": {
         "message": "Đang chia sẻ truy cập với __name1__ và __name2__",
         "description": "Message in a status bar that is visible when two friends are getting access through the user."
     },
-    "emailInsteadMessage": {
+    "EMAIL_INSTEAD_MESSAGE": {
         "message": "Rất tiếc! Chúng tôi không thể gửi phản hồi của bạn đến uproxy.org. Vui lòng sao chép và dán phản hồi của bạn vào email gửi đến info@uproxy.org.",
         "description": "Seen if feedback submission through uProxy fails. Message asks users to email their feedback instead."
     },
-    "weWontPost": {
+    "WE_WONT_POST": {
         "message": "Chúng tôi sẽ không chia sẻ công khai dữ liệu hoặc bài viết của bạn mà không có sự đồng ý của bạn",
         "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user."
     },
-    "imIn": {
+    "IM_IN": {
         "message": "Tôi sẽ tham gia",
         "description": "Agree to submitting anonymous metrics to uProxy."
     },
-    "stopOneTimeInstruction": {
+    "STOP_ONE_TIME_INSTRUCTION": {
         "message": "Để ngưng truy cập từ bạn bè, hãy nhấn vào nút bên dưới.",
         "description": ""
     },
-    "thankYou": {
+    "THANK_YOU": {
         "message": "Cảm ơn!",
         "description": ""
     },
-    "emailInsteadTitle": {
+    "EMAIL_INSTEAD_TITLE": {
         "message": "Thay vào đó thì gửi email phản hồi?",
         "description": "Title for error that appears if feedback submission failed."
     },
-    "selectLanguage": {
+    "SELECT_LANGUAGE": {
         "message": "Chọn ngôn ngữ",
         "description": "Instruction to select language used by the application."
     },
-    "getHelp": {
+    "GET_HELP": {
         "message": "Nhận Trợ Giúp",
         "description": "Get help from the frequently asked questions page."
     },
-    "yes": {
+    "YES": {
         "message": "Có",
         "description": "Button label."
     },
-    "submitFeedback_sentenceCase": {
+    "SUBMIT_FEEDBACK_SENTENCE_CASE": {
         "message": "Gửi phản hồi",
         "description": "Submit feedback to the uProxy team."
     },
-    "getOneTimeInsteadInstruction": {
+    "GET_ONE_TIME_INSTEAD_INSTRUCTION": {
         "message": "Nếu bạn muốn bắt đầu một kết nối dùng một lần với người khác, hãy nhấn nút \"Quay lại\" và sau đó \"Bắt đầu kết nối dùng một lần\" để bắt đầu phiên làm việc mới.",
         "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection."
     },
-    "errorParsingLink": {
+    "ERROR_PARSING_LINK": {
         "message": "Có lỗi khi phân tích liên kết kết nối uproxy, vui lòng thử điều hướng lại đến liên kết hoặc yêu cầu bạn bè của bạn cấp một liên kết mới.",
         "description": "Error shown if a one-time connection link did not work."
     },
-    "feedbackTitle": {
+    "FEEDBACK_TITLE": {
         "message": "Nhập phản hồi của bạn dưới đây",
         "description": "Label for textbox for user's to submit feedback and comments to uProxy."
     },
-    "howToOfferOneTime": {
+    "HOW_TO_OFFER_ONE_TIME": {
         "message": "Nếu bạn muốn cấp cho họ quyền truy cập, hãy sao chép và dán liên kết này cho họ.",
         "description": "Instructions for user if they'd like to share their Internet connection with a one-time link."
     },
-    "loadingFriends": {
+    "LOADING_FRIENDS": {
         "message": "Đang tải bạn bè trên uProxy",
         "description": "User's friends are being loaded from a social network."
     },
-    "acceptOffer": {
+    "ACCEPT_OFFER": {
         "message": "Chấp Nhận Đề Nghị",
         "description": "Accept a friend's offer that would allow the user to access the Internet through their friend."
     },
-    "sharingAccessWith_one": {
+    "SHARING_ACCESS_WITH_ONE": {
         "message": "Đang chia sẻ truy cập với __name__",
         "description": "Message in a status bar that is visible when one friend is getting access through the user."
     },
-    "statsEnabledMessage": {
+    "STATS_ENABLED_MESSAGE": {
         "message": "Biểu tượng này có nghĩa là bạn đã chọn tham gia chia sẻ thống kê ẩn danh với đội ngũ uProxy. Hãy nhấn vào đây để điều chỉnh cài đặt.",
         "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
     },
-    "requests": {
+    "REQUESTS": {
         "message": "Yêu cầu",
         "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
     },
-    "startGetting": {
+    "START_GETTING": {
         "message": "Bắt đầu truy cập",
         "description": "Start accessing the Internet through a friend's connection."
     },
-    "stopGetting": {
+    "STOP_GETTING": {
         "message": "Ngưng truy cập",
         "description": "Stop accessing the Internet through a friend's connection."
     },
-    "advancedSettings_sentenceCase": {
+    "ADVANCED_SETTINGS_SENTENCE_CASE": {
         "message": "Cài đặt nâng cao",
         "description": "Title for the advanced settings screen."
     },
-    "enableMetrics": {
+    "ENABLE_METRICS": {
         "message": "Bạn có muốn cho phép thu thập các số liệu ẩn danh không?",
         "description": "Asks the user if they want to send anonymous metrics about their uProxy usage."
     },
-    "tryingToShareOneTime": {
+    "TRYING_TO_SHARE_ONE_TIME": {
         "message": "Bạn hiện đang cố gắng chia sẻ truy cập. Thay vì vậy nếu bạn muốn được cấp quyền truy cập, hãy nhấn vào liên kết ở trên.",
         "description": "Instructions for user if they want to get access instead, while attempting to share access."
     },
-    "language": {
+    "LANGUAGE": {
         "message": "Ngôn ngữ",
         "description": "Language used by the application."
     },
-    "unlikely": {
+    "UNLIKELY": {
         "message": "có lẽ là không",
         "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
     },
-    "alphaMessage": {
+    "ALPHA_MESSAGE": {
         "message": "Đây là phiên bản alpha của uProxy. Bạn có thể giúp chúng tôi cải thiện uProxy bằng cách chia sẻ các số liệu ẩn danh với nhóm phát triển. Dữ liệu báo cáo sẽ được máy khách ẩn danh và được truyền đi một cách bảo mật.",
         "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
     },
-    "moreInformation": {
+    "MORE_INFORMATION": {
         "message": "Thêm thông tin.",
         "description": ""
     },
-    "possibly": {
+    "POSSIBLY": {
         "message": "có thể",
         "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
     },
-    "friendRequestsAccess": {
+    "FRIEND_REQUESTS_ACCESS": {
         "message": "__name__ yêu cầu truy cập từ bạn.",
         "description": "A friend has requested to access the Internet through the user."
     },
-    "getOneTimeInstead": {
+    "GET_ONE_TIME_INSTEAD": {
         "message": "Thay vào đó nhận được quyền truy cập ",
         "description": "Label for a link to the 'Start a one-time connection' page."
     },
-    "setUpOneTime": {
+    "SET_UP_ONE_TIME": {
         "message": "Thiết lập kết nối dùng một lần",
         "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link."
     },
-    "friendRequestedOneTime": {
+    "FRIEND_REQUESTED_ONE_TIME": {
         "message": "Bạn bè của bạn đã yêu cầu sử dụng kết nối Internet của bạn.",
         "description": "A friend has requested to access the Internet through the user."
     },
-    "no": {
+    "NO": {
         "message": "Không",
         "description": "Button label."
     },
-    "areYouSure": {
+    "ARE_YOU_SURE": {
         "message": "Bạn có chắc là bạn muốn chấm dứt kết nối dùng một lần này không?",
         "description": "Question confirming if the user wants to end an active connection to a friend."
     },
-    "acceptedOfferNotification": {
+    "ACCEPTED_OFFER_NOTIFICATION": {
         "message": "__name__ đã chấp nhận đề nghị truy cập của bạn",
         "description": "Notification for when a friend has accepted the user's offer to share their Internet with that friend."
     },
-    "sharingUnavailableTitle": {
+    "SHARING_UNAVAILABLE_TITLE": {
         "message": "Không Thể Chia Sẻ",
         "description": "Title for error that appears when the user can not share their Internet access with friends."
     },
-    "learnMoreUproxy": {
+    "LEARN_MORE_UPROXY": {
         "message": "Tìm hiểu thêm về uProxy",
         "description": "Label for button that brings user to more information about uProxy."
     },
-    "startOneTimeInstruction": {
+    "START_ONE_TIME_INSTRUCTION": {
         "message": "Để bắt đầu nhận truy cập từ bạn bè của bạn, hãy nhấn vào nút dưới đây.",
         "description": ""
     },
-    "noFriendsOnline": {
+    "NO_FRIENDS_ONLINE": {
         "message": "Không ai trong số bạn bè của bạn đăng nhập vào uProxy ngay lúc này.",
         "description": "None of the user's friends are currently signed in."
     },
-    "continueBrowsing": {
+    "CONTINUE_BROWSING": {
         "message": "Tiếp Tục Duyệt Web Mà Không Dùng uProxy",
         "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."
     },
-    "grantedAccessNotification": {
+    "GRANTED_ACCESS_NOTIFICATION": {
         "message": "__name__ đã cho phép bạn truy cập",
         "description": "Notification for when a user's request to access the Internet through a friend has been accepted by that friend."
     },
-    "emailTitle": {
+    "EMAIL_TITLE": {
         "message": "Email (tùy chọn)",
         "description": ""
     },
-    "askToAnalyze": {
+    "ASK_TO_ANALYZE": {
         "message": "Có thể là loại NAT cho mạng của bạn không tương thích với uProxy. Bạn có muốn uProxy phân tích mạng của mình không?",
         "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails."
     },
-    "shareOneTime": {
+    "SHARE_ONE_TIME": {
         "message": "Chia sẻ kết nối dùng một lần",
         "description": "Share access to the user's Internet using a link that will only work once."
     },
-    "askToSubmitAnalysis": {
+    "ASK_TO_SUBMIT_ANALYSIS": {
         "message": "Bạn có muốn gửi loại NAT của mình đến đội ngũ uProxy, để giúp chúng tôi hiểu rõ hơn về mạng lưới mà người sử dụng của chúng tôi đang dùng không?",
         "description": "Asks the user if they are willing to share their network analysis results with uProxy, to help the development of uProxy."
     },
-    "getAccess": {
+    "GET_ACCESS": {
         "message": "Truy Cập",
         "description": "Text for the tab on the toolbar. When the user is on the 'Get Access' tab, they are looking to get access to the Internet through a friend."
     },
-    "retrievingLogs": {
+    "RETRIEVING_LOGS": {
         "message": "Đang lấy bản ghi và phân tích mạng của bạn...",
         "description": "Message shown while uProxy is analyzing the user's network settings."
     },
-    "learnMoreSocial": {
+    "LEARN_MORE_SOCIAL": {
         "message": "Tìm hiểu thêm về mạng xã hội",
         "description": "Label for button that brings user to more information about why social networks are used for uProxy."
     },
-    "waitingForAccess": {
+    "WAITING_FOR_ACCESS": {
         "message": "Bạn sẽ có thể truy cập khi __name__ chấp nhận.",
         "description": "User will be able to access the Internet through their friend, once that friend gives the user permission."
     },
-    "connectedWith": {
+    "CONNECTED_WITH": {
         "message": "Đã kết nối với __network__",
         "description": "Text in settings that informs the user which social network they're connected to."
     },
-    "requestOneTime": {
+    "REQUEST_ONE_TIME": {
         "message": "Yêu cầu kết nối dùng một lần",
         "description": "Request access to the user's friend's Internet using a link that will only work once."
     },
-    "connect": {
+    "CONNECT": {
         "message": "Kết nối",
         "description": "User clicks this to connect to a network"
     },
-    "close": {
+    "CLOSE": {
         "message": "Đóng",
         "description": "Button label to close a popup."
     },
-    "deviceDescription": {
+    "DEVICE_DESCRIPTION": {
         "message": "Mô tả thiết bị",
         "description": "Title for the section in Settings where the user can edit the name of their device."
     },
-    "logout": {
+    "LOGOUT": {
         "message": "Thoát khỏi uProxy",
         "description": "Log-out of uProxy."
     },
-    "editAdvancedSettings": {
+    "EDIT_ADVANCED_SETTINGS": {
         "message": "Chỉnh sửa cài đặt của bạn dưới đây",
         "description": "Instruction for the user to edit their advanced settings (by typing JSON in a textbox)."
     },
-    "revokeAccess": {
+    "REVOKE_ACCESS": {
         "message": "Rút Lại Quyền Truy Cập",
         "description": "Label for button that takes back an offer to a friend who has already accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
     },
-    "unableToGetFrom": {
+    "UNABLE_TO_GET_FROM": {
         "message": "Không thể truy cập từ __name__",
         "description": "Error message seen in uProxy when the user failed to get access to the Internet through a friend."
     },
-    "friendsWhoCanGet": {
+    "FRIENDS_WHO_CAN_GET": {
         "message": "Bạn bè có quyền truy cập từ bạn",
         "description": "Title for the group of friends who can access the Internet through the user."
     },
-    "submitFeedback": {
+    "SUBMIT_FEEDBACK": {
         "message": "Gửi Phản Hồi",
         "description": "Submit feedback to the uProxy team."
     },
-    "askingForAccess": {
+    "ASKING_FOR_ACCESS": {
         "message": "Đang yêu cầu truy cập",
         "description": "The user is asking for permission to access the Internet through their friend; user is waiting for the friend's reply."
     },
-    "analyzingNetwork": {
+    "ANALYZING_NETWORK": {
         "message": "Đang phân tích mạng",
         "description": "Message shown when the user's network is being analyzed."
     },
-    "stopOneTimeGettingBeforeNew": {
+    "STOP_ONE_TIME_GETTING_BEFORE_NEW": {
         "message": "Nếu bạn muốn khởi chạy kết nối dùng một lần mới, trước tiên hãy nhấn \"Ngưng Truy Cập\".",
         "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
     },
-    "moreInfo": {
+    "MORE_INFO": {
         "message": "Thêm thông tin",
         "description": "Link to 'Does uProxy log data about me?' question in the FAQ."
     },
-    "privacyPolicy": {
+    "PRIVACY_POLICY": {
         "message": "Chính sách bảo mật",
         "description": "Link to uProxy's privacy policy."
     },
-    "stopIgnoringOffers": {
+    "STOP_IGNORING_OFFERS": {
         "message": "Ngưng bỏ qua đề nghị",
         "description": "Button label for if the user wants to stop ignoring offers."
     },
-    "errorSigningIn": {
+    "ERROR_SIGNING_IN": {
         "message": "Có vấn đề khi đăng nhập vào __network__. Vui lòng thử lại.",
         "description": "Notification for when the user could not be signed in to a social network."
     },
-    "unableToGet": {
+    "UNABLE_TO_GET": {
         "message": "Không thể truy cập",
         "description": "Title for popup that appears when an attempt to access the Internet through a friend fails."
     },
-    "sharingEnabledMessage": {
+    "SHARING_ENABLED_MESSAGE": {
         "message": "Biểu tượng này có nghĩa là bạn sẵn sàng chia sẻ truy cập với bạn bè mà bạn đã cấp quyền truy cập.",
         "description": "Text in a popup that explains what the sharing icon (on the toolbar) is."
     },
-    "stopOneTimeSharingBeforeNew": {
+    "STOP_ONE_TIME_SHARING_BEFORE_NEW": {
         "message": "Nếu bạn muốn bắt đầu một kết nối một lần mới, trước tiên hãy nhấn \"Ngưng Chia Sẻ Truy Cập\".",
         "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
     },
-    "ignore": {
+    "IGNORE": {
         "message": "Bỏ qua",
         "description": "Button label that ignores an offer or request."
     },
-    "logsTitle": {
+    "LOGS_TITLE": {
         "message": "Phân Tích Bản Ghi & Mạng",
         "description": "Title for the page that displays a user's network information and uProxy logs."
     },
-    "friendRequestedAccess": {
+    "FRIEND_REQUESTED_ACCESS": {
         "message": "Họ đã yêu cầu truy cập thông qua bạn.",
         "description": "A friend has requested to access the Internet through the user."
     },
-    "goBack": {
+    "GO_BACK": {
         "message": "Quay lại?",
         "description": "Go back to the main page from the one-time connection page."
     },
-    "accessNotGranted": {
+    "ACCESS_NOT_GRANTED": {
         "message": "Bạn chưa cấp cho họ quyền truy cập.",
         "description": "The user has not permissioned a friend to access the Internet through the user."
     },
-    "networkAndLogs": {
+    "NETWORK_AND_LOGS": {
         "message": "Phân tích mạng và kể cả các bản ghi",
         "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team."
     },
-    "welcomeMessage": {
+    "WELCOME_MESSAGE": {
         "message": "Để bắt đầu, hãy chọn \"Truy cập\" hoặc \"Chia sẻ truy cập\" và sau đó nhấn vào một người bạn để kết nối.",
         "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately."
     },
-    "noThanks": {
+    "NO_THANKS": {
         "message": "Không, cảm ơn",
         "description": "Do not agree to submitting anonymous metrics to uProxy."
     },
-    "friendsWhoShare": {
+    "FRIENDS_WHO_SHARE": {
         "message": "Bạn bè mà bạn có thể có quyền truy cập",
         "description": "Title for the group of friends who the user can get Internet access from."
     },
-    "unableToShareWith": {
+    "UNABLE_TO_SHARE_WITH": {
         "message": "Không thể chia sẻ truy cập với __name__",
         "description": "Error message seen in uProxy when a friend failed to get access to the Internet through the user."
     },
-    "settingsJsonError": {
+    "SETTINGS_JSON_ERROR": {
         "message": "Không thể thiết lập: giá trị JSON không khớp",
         "description": "Error shown to the user if their input for advanced settings is incomplete or incompatible with expected settings configurations."
     },
-    "offerAccess": {
+    "OFFER_ACCESS": {
         "message": "Đề Nghị Truy Cập",
         "description": "Label for button that will offer a friend access to the Internet through the user, even though the friend has not requested access."
     },
-    "next": {
+    "NEXT": {
         "message": "Kế tiếp",
         "description": "Label for button that proceeds from the introduction page to the login page."
     },
-    "sharingUnavailableMessage": {
+    "SHARING_UNAVAILABLE_MESSAGE": {
         "message": "Rất tiếc! Bạn đang sử dụng Firefox 37, trong đó có một lỗi ngăn chặn chia sẻ làm việc (xem git.io/vf5x1). Lỗi này đã được sửa trong Firefox 38, vì vậy bạn có thể cho phép chia sẻ bằng cách nâng cấp Firefox hoặc chuyển sang Chrome.",
         "description": "Text for error that appears when the user can not share their Internet access with friends."
     },
-    "analysisResults": {
+    "ANALYSIS_RESULTS": {
         "message": "Có vẻ như bạn đang sử dụng __natType__, bị __natImpact__ can thiệp vào khả năng kết nối với bạn bè của bạn.",
         "description": "A summary of the user's network analysis."
     },
-    "sharingEnabledTitle": {
+    "SHARING_ENABLED_TITLE": {
         "message": "Đã Kích Hoạt Chia Sẻ",
         "description": "Title for popup that points to the sharing icon in uProxy's top toolbar. The popup appears when the user first grants access to one of their friends. The sharing icon is visible as long as there are friends who can get access to the user's Internet."
     },
-    "startNewConnection": {
+    "START_NEW_CONNECTION": {
         "message": "Bắt đầu nhận kết nối mới",
         "description": "Label for button that takes user back to the 'Start a one-time connection' page."
     },
-    "appMissingTitle": {
+    "APP_MISSING_TITLE": {
         "message": "Bạn gần như đã sẵn sàng để sử dụng uProxy!",
         "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
     },
-    "cancelRequest": {
+    "CANCEL_REQUEST": {
         "message": "Hủy Yêu Cầu",
         "description": "Label for button which will take back a request to get Internet access through a friend."
     },
-    "sharingAccessWith_many": {
+    "SHARING_ACCESS_WITH_MANY": {
         "message": "Đang chia sẻ truy cập với __name__ và __numOthers__ người khác",
         "description": "Message in a status bar that is visible when three or more friends are getting access through the user."
     },
-    "cannotOpenOneTimeTitle": {
+    "CANNOT_OPEN_ONE_TIME_TITLE": {
         "message": "Không thể mở kết nối dùng một lần",
         "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
     },
-    "loggedOut": {
+    "LOGGED_OUT": {
         "message": "Bạn đã thoát khỏi __network__",
         "description": "Notification for when the user has been logged out of the social network."
     },
-    "restart": {
+    "RESTART": {
         "message": "Khởi động lại",
         "description": "Restart uProxy completely."
     },
-    "startOneTime": {
+    "START_ONE_TIME": {
         "message": "Khởi chạy kết nối dùng một lần",
         "description": "Start an Internet connection using a link that will only work once."
     },
-    "stoppedProxying": {
+    "STOPPED_PROXYING": {
         "message": "__name__ ngừng proxy thông qua bạn",
         "description": "Notification for when a friend has stopped accessing the Internet through the user."
     },
-    "disconnectedTitle": {
+    "DISCONNECTED_TITLE": {
         "message": "Rất tiếc! Bạn đã ngưng kết nối với bạn bè.",
         "description": "Title for error that appears when the user was getting access to the Internet through their friend, but that connection was terminated."
     },
-    "connectedWithNumber": {
+    "CONNECTED_WITH_NUMBER": {
         "message": "Đã kết nối với __number__ mạng",
         "description": "Text in settings informing the user of how many networks they're connected to."
     },
-    "attemptingReconnect": {
+    "ATTEMPTING_RECONNECT": {
         "message": "Đang cố gắng kết nối lại.",
         "description": "uProxy was disconnected from the social network and is trying to reconnect."
     },
-    "whichSocialNetwork": {
+    "WHICH_SOCIAL_NETWORK": {
         "message": "Bạn có thể tìm danh bạ của mình nhanh nhất ở đâu?",
         "description": "Question seen at the top of uProxy's login page. Asks which social network should be used to find the user's friends."
     },
-    "tryingToConnect": {
+    "TRYING_TO_CONNECT": {
         "message": "Đang cố gắng kết nối với __name__",
         "description": "The user is trying to connect to the Internet through their friend."
     },
-    "emailPlaceholder": {
+    "EMAIL_PLACEHOLDER": {
         "message": "Địa chỉ email",
         "description": ""
     },
-    "save": {
+    "SAVE": {
         "message": "Lưu",
         "description": "Label for button that saves the user's text input."
     },
-    "offeredYouAccess": {
+    "OFFERED_YOU_ACCESS": {
         "message": "Họ đã cho phép bạn truy cập.",
         "description": "A friend has offered their Internet access to the user."
     },
-    "sharingEnabledTooltip": {
+    "SHARING_ENABLED_TOOLTIP": {
         "message": "Bạn sẵn sàng chia sẻ.",
         "description": "Text that appears in a tooltip when the user hovers over the sharing icon."
     },
-    "shareAccess": {
+    "SHARE_ACCESS": {
         "message": "Chia Sẻ Truy Cập",
         "description": "Text for the tab on the toolbar. When the user is on the 'Share Access' tab, they are looking to share access to their Internet with a friend."
     },
-    "disconnect": {
+    "DISCONNECT": {
         "message": "Ngưng kết nối",
         "description": "User clicks this to disconnect from a network"
     },
-    "unableToShare": {
+    "UNABLE_TO_SHARE": {
         "message": "Không thể chia sẻ truy cập",
         "description": "Title for popup that appears when an attempt to share the Internet with a friend fails."
     },
-    "disconnectedMessage": {
+    "DISCONNECTED_MESSAGE": {
         "message": "Vui lòng tiến hành một cách thận trọng. Lưu lượng truy cập web của bạn sẽ không còn được định tuyến thông qua bạn bè của mình nữa. Bạn có thể muốn đóng bất kỳ cửa sổ nhạy cảm nào mà bạn đã mở, trước khi tiếp tục.",
         "description": "Instruction informing the user that to continue browsing the Internet, the user will need to use their local (potentially unsafe and/or censored) connection."
     },
-    "whySocialNetwork": {
+    "WHY_SOCIAL_NETWORK": {
         "message": "uProxy sử dụng mạng xã hội để giúp bạn thiết lập kết nối với bạn bè của mình",
         "description": "Explains why uProxy needs social networks. (Friends need to login with the same social network on uProxy for friends to see each other.)"
     },
-    "toSendLogs": {
+    "TO_SEND_LOGS": {
         "message": "Để gửi các bản ghi của bạn đến đội ngũ uProxy để được trợ giúp, hãy mở uProxy và nhấn vào 'Gửi phản hồi'",
         "description": "Instructions guiding the user through how to submit their logs to uProxy."
     },
-    "cancel": {
+    "CANCEL": {
         "message": "Hủy bỏ",
         "description": "Button label that rejects a proposed action."
     },
-    "feedbackSubmitted": {
+    "FEEDBACK_SUBMITTED": {
         "message": "Phản hồi của bạn đã được gửi đến nhóm phát triển uProxy.",
         "description": "User feedback was successfully submitted."
     },
-    "aboutUproxy": {
+    "ABOUT_UPROXY": {
         "message": "uProxy giúp bạn chia sẻ truy cập internet của mình hoặc truy cập internet từ bạn bè",
         "description": "Description on uProxy's introduction screen explaining what uProxy is."
     },
-    "editAdvancedSettingsPlaceholder": {
+    "EDIT_ADVANCED_SETTINGS_PLACEHOLDER": {
         "message": "Chỉnh sửa cài đặt của bạn",
         "description": "Default text in the advanced settings textbox."
     },
-    "statsEnabledTooltip": {
+    "STATS_ENABLED_TOOLTIP": {
         "message": "Bạn đang chia sẻ thống kê ẩn danh.",
         "description": "Text that appears in a tooltip when the user hovers over the 'anonymous stats enabled' icon."
     },
-    "descriptionDefault": {
+    "DESCRIPTION_DEFAULT": {
         "message": "Máy tính __number__",
         "description": "If a friend has more than one computer, the computers are given this default name (with increasing numbers) to differentiate them."
     },
-    "friendNeedsToClick": {
+    "FRIEND_NEEDS_TO_CLICK": {
         "message": "Để hoàn tất việc thiết lập kết nối, bạn bè của bạn cần phải nhấn vào liên kết và gửi cho bạn liên kết từ máy khách uProxy của họ. Khi bạn nhấn vào nó, bạn sẽ sẵn sàng để bắt đầu truy cập.",
         "description": "Instructions telling the user that starting a one-time connection is waiting for action from their friend."
     },
-    "offers": {
+    "OFFERS": {
         "message": "Đề nghị",
         "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted."
     },
-    "done": {
+    "DONE": {
         "message": "Hoàn tất",
         "description": "Button label that suggests acknowledgement and that closes a popup."
     },
-    "extMissingMessage": {
+    "EXT_MISSING_MESSAGE": {
         "message": "Tải về và kích hoạt phần 1 của uProxy để bắt đầu.",
         "description": "Shown in Chrome to instruct the user to install part 1 of uProxy."
     },
-    "cancelOffer": {
+    "CANCEL_OFFER": {
         "message": "Hủy Đề Nghị",
         "description": "Label for button that takes back an offer to a friend who has not yet accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
     },
-    "copyConnectionLink": {
+    "COPY_CONNECTION_LINK": {
         "message": "Để yêu cầu truy cập từ một người bạn, hãy sao chép và dán liên kết này cho họ thông qua một kênh bảo mật",
         "description": "Instructions for the user to request access from a friend with a one-time link."
     },
-    "loading": {
+    "LOADING": {
         "message": "Đang tải...",
         "description": "Message show when something is taking time to load."
     },
-    "askForAccess": {
+    "ASK_FOR_ACCESS": {
         "message": "Yêu cầu truy cập",
         "description": "Button label that sends a request to the user's friend, asking if the user can access the Internet through them."
     },
-    "grantedYouAccess": {
+    "GRANTED_YOU_ACCESS": {
         "message": "__name__ đã cho phép bạn truy cập.",
         "description": "The user's friend has allowed the user to use the friend's Internet connection."
     },
-    "cantOpenOneTimeMessage": {
+    "CANT_OPEN_ONE_TIME_MESSAGE": {
         "message": "Hiện không thể mở kết nối thủ công đồng thời với khi đăng nhập vào mạng xã hội. Để khởi chạy kết nối thủ công, vui lòng đăng nhập thông qua trình đơn cài đặt và dán lại liên kết.",
         "description": "Text for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
     },
-    "extMissingTitle": {
+    "EXT_MISSING_TITLE": {
         "message": "Bạn gần như đã sẵn sàng sử dụng uProxy!",
         "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
     },
-    "oneTimeSuccess": {
+    "ONE_TIME_SUCCESS": {
         "message": "Thành công! Kết nối dùng một lần đã được thiết lập.",
         "description": "Inform the user that a one-time connection was successfully established."
     },
-    "oneTimeGetting": {
+    "ONE_TIME_GETTING": {
         "message": "Bạn hiện đang truy cập.",
         "description": "The user is connected to the Internet through their friend."
     },
-    "set": {
+    "SET": {
         "message": "THIẾT LẬP",
         "description": "Label for button that saves the user's advanced settings."
     },
-    "gettingAccessFrom": {
+    "GETTING_ACCESS_FROM": {
         "message": "Nhận truy cập từ __name__",
         "description": "Message in a status bar that is visible when the user is getting access from a friend."
     },
-    "startedProxying": {
+    "STARTED_PROXYING": {
         "message": "__name__ bắt đầu proxy thông qua bạn",
         "description": "Notification for when a friend has started accessing the Internet through the user."
     },
-    "toInviteFriends": {
+    "TO_INVITE_FRIENDS": {
         "message": "Để mời bạn bè đến với uProxy, hãy gửi cho họ một liên kết đến https://www.uproxy.org",
         "description": "Instruction informing the user how to invite their friends to uProxy."
     },
-    "veryLikely": {
+    "VERY_LIKELY": {
         "message": "nhiều khả năng",
         "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
     },
-    "statsEnabledTitle": {
+    "STATS_ENABLED_TITLE": {
         "message": "Đã kích hoạt thống kê ẩn danh",
         "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team."
     },
-    "appMissingMessage": {
+    "APP_MISSING_MESSAGE": {
         "message": "Tải về và kích hoạt phần 2 của uProxy để bắt đầu.",
         "description": "Shown in Chrome to instruct the user to install part 2 of uProxy."
     },
-    "uproxyFriends": {
+    "UPROXY_FRIENDS": {
         "message": "Bạn bè có uProxy",
         "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups."
     },
-    "stopIgnoringRequests": {
+    "STOP_IGNORING_REQUESTS": {
         "message": "Ngưng bỏ qua yêu cầu",
         "description": "Button label for if the user wants to stop ignoring requests."
     },
-    "stopOneTimeSharing": {
+    "STOP_ONE_TIME_SHARING": {
         "message": "Ngưng chia sẻ truy cập",
         "description": "Label for button to terminate your connection to a friend who is accessing the Internet through you."
     },
-    "settingsBadFormatError": {
+    "SETTINGS_BAD_FORMAT_ERROR": {
         "message": "Không thể thiết lập: định dạng xấu",
         "description": "Error shown to the user if their input for advanced settings is badly formed JSON."
     },
-    "PIIMessage": {
+    "P_I_I_MESSAGE": {
         "message": "Phản hồi và địa chỉ email của bạn sẽ được gửi đến uProxy.org. Bản ghi, thông tin về mạng và email của bạn có thể bao gồm thông tin cá nhân.",
         "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy."
     },
-    "settingsSaved": {
+    "SETTINGS_SAVED": {
         "message": "Đã lưu cài đặt",
         "description": "Message that confirms to the user that their advanced settings were saved."
     },
-    "ok": {
+    "OK": {
         "message": "OK",
         "description": "Button label."
     },
-    "grantedFriendAccess": {
+    "GRANTED_FRIEND_ACCESS": {
         "message": "Bạn đã cho phép họ truy cập.",
         "description": "The user has agreed to let their friend access the Internet through the user."
     },
-    "offeredAccessNotification": {
+    "OFFERED_ACCESS_NOTIFICATION": {
         "message": "__name__ đã cho phép bạn truy cập",
         "description": "Notification for when the user receives an offer from a friend to access the Internet through them."
     },
-    "grant": {
+    "GRANT": {
         "message": "Cấp quyền",
         "description": "Label for button that accepts a friend's request to access the Internet through the user."
     },
-    "noLongerGetting": {
+    "NO_LONGER_GETTING": {
         "message": "Bạn không còn quyền được truy cập. Để yêu cầu kết nối, hãy nhấn vào nút dưới đây.",
         "description": "Message shown when a one-time connection ends."
     },
-    "nameThisDevice": {
+    "NAME_THIS_DEVICE": {
         "message": "Đặt tên cho thiết bị này",
         "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel."
     },
-    "feedbackPlaceholder": {
+    "FEEDBACK_PLACEHOLDER": {
         "message": "Viết phản hồi của bạn",
         "description": "The default text that appears in the user feedback textbox."
     },
-    "connectedAccounts": {
+    "CONNECTED_ACCOUNTS": {
         "message": "Tài Khoản Đã Kết Nối",
         "description": "In settings, title for the social networks you can connect to."
     },
-    "description": {
+    "DESCRIPTION": {
         "message": "Mô tả",
         "description": "Placeholder for the input field for the name of the user's device."
     },
-    "advancedSettings": {
+    "ADVANCED_SETTINGS": {
         "message": "Cài Đặt Nâng Cao",
         "description": "Clickable text from the Settings menu. Clicking this opens the advanced settings screen."
     },
-    "errorStartingConnection": {
+    "ERROR_STARTING_CONNECTION": {
         "message": "Có lỗi khi khởi chạy kết nối và nó phải được chấm dứt. Hãy thử khởi chạy một kết nối khác.",
         "description": "Error shown if a one-time connection failed to start."
     }
