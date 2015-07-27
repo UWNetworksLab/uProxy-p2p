@@ -414,6 +414,8 @@ module.exports = (grunt) ->
               'freedom-social-firebase/firebase.js'
               'freedom-social-firebase/firebase-social-provider.js'
               'freedom-social-firebase/facebook-social-provider.js'
+              'freedom-port-control/port-control.js'
+              'freedom-port-control/port-control.json'
 
               '**/freedom-module.json'
               '!generic_core/freedom-module.json'
@@ -454,6 +456,8 @@ module.exports = (grunt) ->
               'data/freedom-social-firebase/firebase.js'
               'data/freedom-social-firebase/firebase-social-provider.js'
               'data/freedom-social-firebase/facebook-social-provider.js'
+              'data/freedom-port-control/port-control.js'
+              'data/freedom-port-control/port-control.json'
 
               'data/**/freedom-module.json'
               '!generic_core/freedom-module.json'
@@ -552,6 +556,11 @@ module.exports = (grunt) ->
               src: ['**']
               dest: chromeAppDevPath + '/freedom-social-firebase'
             },
+            {
+              expand: true, cwd: 'node_modules/freedom-port-control/dist/',
+              src: ['**']
+              dest: chromeAppDevPath + '/freedom-port-control'
+            },
             { # uProxy Icons and fonts
               expand: true, cwd: 'src/'
               src: ['icons/128_online.png', 'fonts/*']
@@ -608,6 +617,11 @@ module.exports = (grunt) ->
               expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
               src: ['**']
               dest: firefoxDevPath + '/data/freedom-social-firebase'
+            },
+            {
+              expand: true, cwd: 'node_modules/freedom-port-control/dist/',
+              src: ['**']
+              dest: firefoxDevPath + '/data/freedom-port-control'
             },
             { # lib
               expand: true, cwd: devBuildPath
