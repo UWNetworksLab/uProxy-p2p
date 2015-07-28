@@ -128,9 +128,18 @@ taskManager.add 'build', [
   'build_firefox'
 ]
 
+taskManager.add 'rc', [
+  'build'
+  'copy:dist'
+  'copy:dist_candidate'
+  'mozilla-addon-sdk'
+  'mozilla-cfx-xpi:dist'
+]
+
 taskManager.add 'dist', [
   'build'
   'copy:dist'
+  'copy:dist_release'
   'mozilla-addon-sdk'
   'mozilla-cfx-xpi:dist'
 ]
@@ -338,7 +347,11 @@ module.exports = (grunt) ->
               src: [
                 '**/*',
                 '!generic_core/dist_build/*',
-                '!generic_core/dev_build/*'
+                '!generic_core/dev_build/*',
+                '!chrome/app/dist_build/**',
+                '!chrome/app/dev_build/**',
+                '!chrome/extension/dist_build/**',
+                '!chrome/extension/dev_build/**'
               ],
               dest: devBuildPath,
               onlyIf: 'modified'
@@ -350,6 +363,57 @@ module.exports = (grunt) ->
               src: ['*'],
               dest: devBuildPath + '/generic_core',
               onlyIf: 'modified'
+          }
+          {
+              nonull: true,
+              expand: true,
+              cwd: 'src/chrome/app/dev_build/',
+              src: ['**/*'],
+              dest: devBuildPath + '/chrome/app',
+              onlyIf: 'modified'
+          }
+          {
+              nonull: true,
+              expand: true,
+              cwd: 'src/chrome/extension/dev_build/',
+              src: ['**/*'],
+              dest: devBuildPath + '/chrome/extension',
+              onlyIf: 'modified'
+          }
+        ]
+
+
+      # Copy releveant files for distribution.
+      dist_candidate:
+        files: [
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/chrome/app/dist_build/'
+            src: ['*']
+            dest: 'build/dist/chrome/app'
+          }
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/chrome/extension/dist_build/'
+            src: ['*']
+            dest: 'build/dist/chrome/extension/generic_core'
+          }
+        ]
+
+      # Copy releveant files for distribution.
+      dist_release:
+        files: [
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/chrome/app/dist_build/'
+            src: ['*']
+            dest: 'build/dist/chrome/app'
+          }
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/chrome/extension/dist_build/'
+            src: ['*']
+            dest: 'build/dist/chrome/extension/generic_core'
           }
         ]
 
