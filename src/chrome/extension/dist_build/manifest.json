@@ -1,0 +1,42 @@
+{
+  "name": "__MSG_extName__",
+  "version": "0.8.15",
+  "manifest_version": 2,
+  "description": "__MSG_extDescription__",
+  "minimum_chrome_version": "41.0.2272.63",
+  "icons": {
+    "128": "icons/128_online.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "persistent": true,
+    "scripts": [
+      "scripts/background.static.js"
+    ]
+  },
+  "browser_action": {
+    "default_icon": {
+      "19": "icons/19_offline.gif",
+      "38": "icons/19_offline.gif"
+    },
+    "default_title": "__MSG_extTitle__"
+  },
+  "permissions": [
+    "tabs",
+    "proxy",
+    "notifications",
+    "https://www.uproxy.org/oauth-redirect-uri*",
+    "webRequest",
+    "https://uproxy.org/request/*",
+    "https://uproxy.org/offer/*",
+    "https://a0.awsstatic.com/",
+    "webRequestBlocking"
+  ],
+  "web_accessible_resources": [
+    "copypaste.html"
+  ],
+  "externally_connectable": {
+    "ids" : ["fmdppkkepalnkeommjadgbhiohihdhii"],
+    "matches" : ["*://*.uproxy.org/*", "*://uproxysite.appspot.com/*", "*://test-dot-uproxysite.appspot.com/*", "*://beta-dot-uproxysite.appspot.com/*"]
+  }
+}
