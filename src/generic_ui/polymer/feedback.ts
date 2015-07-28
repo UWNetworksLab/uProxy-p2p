@@ -32,8 +32,8 @@ Polymer({
     }).then(() => {
       // Reset the placeholders, which seem to be cleared after the
       // user types input in the input fields.
-      this.$.emailInput.placeholder = ui.i18n_t('emailPlaceholder');
-      this.$.feedbackInput.placeholder = ui.i18n_t('feedbackPlaceholder');
+      this.$.emailInput.placeholder = ui.i18n_t("EMAIL_PLACEHOLDER");
+      this.$.feedbackInput.placeholder = ui.i18n_t("FEEDBACK_PLACEHOLDER");
       // Clear the form.
       this.email = '';
       this.feedback = '';
@@ -42,10 +42,10 @@ Polymer({
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
       this.fire('open-dialog', {
-        heading: ui.i18n_t('thankYou'),
-        message: ui.i18n_t('feedbackSubmitted'),
+        heading: ui.i18n_t("THANK_YOU"),
+        message: ui.i18n_t("FEEDBACK_SUBMITTED"),
         buttons: [{
-          text: ui.i18n_t('done'),
+          text: ui.i18n_t("DONE"),
           signal: 'close-settings'
         }]
       });
@@ -53,10 +53,10 @@ Polymer({
       this.$.sendingFeedbackDialog.close();
     }).catch((e :Error) => {
       this.fire('open-dialog', {
-        heading: ui.i18n_t('emailInsteadTitle'),
-        message: ui.i18n_t('emailInsteadMessage'),
+        heading: ui.i18n_t("EMAIL_INSTEAD_TITLE"),
+        message: ui.i18n_t("EMAIL_INSTEAD_MESSAGE"),
         buttons: [{
-          text: ui.i18n_t('ok')
+          text: ui.i18n_t("OK")
         }]
       });
       this.$.sendingFeedbackDialog.close();
