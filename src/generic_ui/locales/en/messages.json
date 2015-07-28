@@ -557,7 +557,7 @@
   },
   "POSSIBLY": {
     "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
-    "message": "POSSIBLY"
+    "message": "possibly"
   },
   "UNLIKELY": {
     "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
