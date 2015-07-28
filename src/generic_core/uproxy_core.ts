@@ -214,6 +214,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           gettingMessages: this.copyPasteGettingMessages_,
           sharingMessages: this.copyPasteSharingMessages_
         },
+        portControlSupport: this.portControlSupport_,
       };
     });
   }

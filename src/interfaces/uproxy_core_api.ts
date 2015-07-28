@@ -42,6 +42,7 @@ export interface InitialState {
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
   copyPasteState :CopyPasteState;
+  portControlSupport :PortControlSupport;
 }
 
 export interface ConnectionState {

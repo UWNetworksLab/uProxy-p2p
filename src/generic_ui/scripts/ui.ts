@@ -982,6 +982,8 @@ export class UserInterface implements ui_constants.UiApi {
       this.updateSharingStatusBar_();
     }
 
+    this.portControlSupport = state.portControlSupport;
+
     // state of online networks may have changed, update it
     this.updateIcon_();
   }
