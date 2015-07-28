@@ -380,8 +380,6 @@ module.exports = (grunt) ->
             expand: true
             cwd: chromeExtDevPath
             src: [
-              'manifest.json'
-
               'bower/webcomponentsjs/webcomponents.min.js'
               'bower/polymer/polymer.js'
 
@@ -402,7 +400,6 @@ module.exports = (grunt) ->
               'generic_ui/fonts/*'
               'generic_ui/icons/*'
               'icons/*'
-              '_locales/**'
             ]
             dest: 'build/dist/chrome/extension'
           }
@@ -410,7 +407,6 @@ module.exports = (grunt) ->
             expand: true
             cwd: chromeAppDevPath
             src: [
-              'manifest.json'
               '*.html'
 
               'bower/webcomponentsjs/webcomponents.min.js'
@@ -444,7 +440,6 @@ module.exports = (grunt) ->
 
               'icons/*'
               'fonts/*'
-              '_locales/**'
             ]
             dest: 'build/dist/chrome/app'
           }
@@ -457,14 +452,14 @@ module.exports = (grunt) ->
           { # Chrome app freedom-module
             expand: true
             cwd: 'src/chrome/app/dist_build/'
-            src: ['*']
+            src: ['**/*']
             dest: 'build/dist/chrome/app'
           }
           { # Chrome app freedom-module
             expand: true
             cwd: 'src/chrome/extension/dist_build/'
-            src: ['*']
-            dest: 'build/dist/chrome/extension/generic_core'
+            src: ['**/*']
+            dest: 'build/dist/chrome/extension'
           }
           { # Firefox
             expand: true
