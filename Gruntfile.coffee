@@ -128,18 +128,9 @@ taskManager.add 'build', [
   'build_firefox'
 ]
 
-taskManager.add 'rc', [
-  'build'
-  'copy:dist'
-  'copy:dist_candidate'
-  'mozilla-addon-sdk'
-  'mozilla-cfx-xpi:dist'
-]
-
 taskManager.add 'dist', [
   'build'
   'copy:dist'
-  'copy:dist_release'
   'mozilla-addon-sdk'
   'mozilla-cfx-xpi:dist'
 ]
@@ -382,41 +373,6 @@ module.exports = (grunt) ->
           }
         ]
 
-
-      # Copy releveant files for distribution.
-      dist_candidate:
-        files: [
-          { # Chrome app freedom-module
-            expand: true
-            cwd: 'src/chrome/app/dist_build/'
-            src: ['*']
-            dest: 'build/dist/chrome/app'
-          }
-          { # Chrome app freedom-module
-            expand: true
-            cwd: 'src/chrome/extension/dist_build/'
-            src: ['*']
-            dest: 'build/dist/chrome/extension/generic_core'
-          }
-        ]
-
-      # Copy releveant files for distribution.
-      dist_release:
-        files: [
-          { # Chrome app freedom-module
-            expand: true
-            cwd: 'src/chrome/app/dist_build/'
-            src: ['*']
-            dest: 'build/dist/chrome/app'
-          }
-          { # Chrome app freedom-module
-            expand: true
-            cwd: 'src/chrome/extension/dist_build/'
-            src: ['*']
-            dest: 'build/dist/chrome/extension/generic_core'
-          }
-        ]
-
       # Copy releveant files for distribution.
       dist:
         files: [
@@ -497,6 +453,18 @@ module.exports = (grunt) ->
             cwd: 'src/generic_core/dist_build/'
             src: ['*']
             dest: 'build/dist/chrome/app/generic_core'
+          }
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/chrome/app/dist_build/'
+            src: ['*']
+            dest: 'build/dist/chrome/app'
+          }
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/chrome/extension/dist_build/'
+            src: ['*']
+            dest: 'build/dist/chrome/extension/generic_core'
           }
           { # Firefox
             expand: true
@@ -780,11 +748,11 @@ module.exports = (grunt) ->
       ]
 
       integration_specs: compileTypescript [
-      	devBuildPath + '/integration/*.ts'
-      	'!' + devBuildPath + '/integration/test_connection.ts'
+        devBuildPath + '/integration/*.ts'
+        '!' + devBuildPath + '/integration/test_connection.ts'
       ]
       integration_freedom_module: compileTypescript [
-      	devBuildPath + '/integration/test_connection.ts'
+        devBuildPath + '/integration/test_connection.ts'
       ]
 
 
