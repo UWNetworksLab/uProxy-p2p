@@ -11,7 +11,6 @@ manifest_files = [
                  ]
 
 for filename in manifest_files:
-  print filename
   with open(filename) as manifest:
     manifest_data = json.load(manifest)
     del manifest_data['key']
