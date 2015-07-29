@@ -1,4 +1,4 @@
-FROM ubuntu:15.04
+FROM ubuntu:trusty
 MAINTAINER Trevor Johnston <trevj@google.com>
 
 RUN apt-get update -qq
