@@ -1,5 +1,5 @@
 {
-  "name": "__MSG_extName__",
+  "name": "__MSG_extNameDev__",
   "version": "0.8.15",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
