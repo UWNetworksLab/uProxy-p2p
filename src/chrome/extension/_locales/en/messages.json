@@ -3,6 +3,10 @@
     "message": "uProxy, part 1 of 2",
     "description": "The title that appears in the Chrome Extensions listing"
   },
+  "extNameDev": {
+    "message": "uProxy Dev, part 1 of 2",
+    "description": "The title that appears for the development version of uProxy"
+  },
   "extDescription": {
     "message": "(Alpha version) uProxy, part 1 of 2.  You will also need part 2 of 2 to use uProxy.",
     "description": "The description that appears in the Chrome Extensions listing"
@@ -10,33 +14,5 @@
   "extTitle": {
     "message": "uProxy",
     "description": "The title that appears in the Chrome Extensions tooltip"
-  },
-  "giveAccess": {
-    "message": "Give Access",
-    "description": "Button label"
-  },
-  "getAccess": {
-    "message": "Get Access",
-    "description": "Button label"
-  },
-  "accept": {
-    "message": "Accept",
-    "description": "Button label"
-  },
-  "decline": {
-    "message": "Decline",
-    "description": "Button label"
-  },
-  "options": {
-    "message": "uProxy Options",
-    "description": "Header for the options page"
-  },
-  "advanced": {
-    "message": "Advanced",
-    "description": "Summary for the advanced options"
-  },
-  "allowNonRoutableAddresses": {
-    "message": "Allow non-routable addresses",
-    "description": "Label for a checkbox option"
   }
 }

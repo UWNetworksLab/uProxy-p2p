@@ -3,6 +3,10 @@
     "message": "uProxy, part 2 of 2",
     "description": "The title that appears in the Chrome Extensions listing"
   },
+  "appNameDev": {
+    "message": "uProxy Dev, part 2 of 2",
+    "description": "The title that appears for the development version of uProxy"
+  },
   "appDescription": {
     "message": "(Alpha version) uProxy, part 2 of 2.  You will also need part 1 of 2 to use uProxy.",
     "description": "The description that appears in the Chrome Extensions listing"

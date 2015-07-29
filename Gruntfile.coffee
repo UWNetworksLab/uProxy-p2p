@@ -338,7 +338,11 @@ module.exports = (grunt) ->
               src: [
                 '**/*',
                 '!generic_core/dist_build/*',
-                '!generic_core/dev_build/*'
+                '!generic_core/dev_build/*',
+                '!chrome/app/dist_build/**',
+                '!chrome/app/dev_build/**',
+                '!chrome/extension/dist_build/**',
+                '!chrome/extension/dev_build/**'
               ],
               dest: devBuildPath,
               onlyIf: 'modified'
@@ -351,6 +355,22 @@ module.exports = (grunt) ->
               dest: devBuildPath + '/generic_core',
               onlyIf: 'modified'
           }
+          {
+              nonull: true,
+              expand: true,
+              cwd: 'src/chrome/app/dev_build/',
+              src: ['**/*'],
+              dest: devBuildPath + '/chrome/app',
+              onlyIf: 'modified'
+          }
+          {
+              nonull: true,
+              expand: true,
+              cwd: 'src/chrome/extension/dev_build/',
+              src: ['**/*'],
+              dest: devBuildPath + '/chrome/extension',
+              onlyIf: 'modified'
+          }
         ]
 
       # Copy releveant files for distribution.
@@ -360,8 +380,6 @@ module.exports = (grunt) ->
             expand: true
             cwd: chromeExtDevPath
             src: [
-              'manifest.json'
-
               'bower/webcomponentsjs/webcomponents.min.js'
               'bower/polymer/polymer.js'
 
@@ -382,7 +400,6 @@ module.exports = (grunt) ->
               'generic_ui/fonts/*'
               'generic_ui/icons/*'
               'icons/*'
-              '_locales/**'
             ]
             dest: 'build/dist/chrome/extension'
           }
@@ -390,7 +407,6 @@ module.exports = (grunt) ->
             expand: true
             cwd: chromeAppDevPath
             src: [
-              'manifest.json'
               '*.html'
 
               'bower/webcomponentsjs/webcomponents.min.js'
@@ -424,7 +440,6 @@ module.exports = (grunt) ->
 
               'icons/*'
               'fonts/*'
-              '_locales/**'
             ]
             dest: 'build/dist/chrome/app'
           }
@@ -433,6 +448,18 @@ module.exports = (grunt) ->
             cwd: 'src/generic_core/dist_build/'
             src: ['*']
             dest: 'build/dist/chrome/app/generic_core'
+          }
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/chrome/app/dist_build/'
+            src: ['**/*']
+            dest: 'build/dist/chrome/app'
+          }
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/chrome/extension/dist_build/'
+            src: ['**/*']
+            dest: 'build/dist/chrome/extension'
           }
           { # Firefox
             expand: true
@@ -716,11 +743,11 @@ module.exports = (grunt) ->
       ]
 
       integration_specs: compileTypescript [
-      	devBuildPath + '/integration/*.ts'
-      	'!' + devBuildPath + '/integration/test_connection.ts'
+        devBuildPath + '/integration/*.ts'
+        '!' + devBuildPath + '/integration/test_connection.ts'
       ]
       integration_freedom_module: compileTypescript [
-      	devBuildPath + '/integration/test_connection.ts'
+        devBuildPath + '/integration/test_connection.ts'
       ]
 
 
