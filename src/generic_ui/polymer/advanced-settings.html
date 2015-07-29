@@ -96,11 +96,11 @@
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ 'advancedSettings_sentenceCase' | $$ }}
+          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
         <div id='formContainer' flex>
-          <p class='inputLabel'>{{ 'editAdvancedSettings' | $$ }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "editAdvancedSettingsPlaceholder" | $$ }}'>
+          <p class='inputLabel'>{{ "EDIT_ADVANCED_SETTINGS" | $$ }}</p>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}'>
             <paper-autogrow-textarea id='advancedSettingsPaperTextarea' class='font::inherit'>
               <textarea id='advancedSettingsInput'
                      value='{{ settings }}'>
@@ -108,17 +108,17 @@
             </paper-autogrow-textarea>
           </paper-input-decorator>
           <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>
-            {{ 'settingsSaved' | $$ }}
+            {{ "SETTINGS_SAVED" | $$ }}
           </p>
           <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>
-            {{ 'settingsBadFormatError' | $$ }}
+            {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
           </p>
           <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>
-            {{ 'settingsJsonError' | $$ }}
+            {{ "SETTINGS_JSON_ERROR" | $$ }}
           </p>
         </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
-          {{ 'set' | $$ }}
+          {{ "SET" | $$ }}
         </div>
       </div>
     </core-overlay>
