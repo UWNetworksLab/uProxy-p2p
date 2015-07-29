@@ -325,7 +325,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       var user = this.mapInstanceIdToUser_[instanceId];
       user.isGettingFromMe = true;
-      this.showNotification(this.i18n_t('startedProxying',
+      this.showNotification(this.i18n_t("STARTED_PROXYING",
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
     });
 
@@ -336,7 +336,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       // only show a notification if we knew we were prokying
       if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-        this.showNotification(this.i18n_t('stoppedProxying',
+        this.showNotification(this.i18n_t("STOPPED_PROXYING",
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
       }
       delete this.instancesGivingAccessTo[instanceId];
@@ -360,7 +360,7 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (giving)');
 
-      this.toastMessage = this.i18n_t('unableToShareWith', {
+      this.toastMessage = this.i18n_t("UNABLE_TO_SHARE_WITH", {
         name: info.name
       });
       this.unableToShare = true;
@@ -371,7 +371,7 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
 
-      this.toastMessage = this.i18n_t('unableToGetFrom', {
+      this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
         name: info.name
       });
       this.instanceTryingToGetAccessFrom = null;
@@ -454,7 +454,7 @@ export class UserInterface implements ui_constants.UiApi {
   private updateGettingStatusBar_ = () => {
     // TODO: localize this.
     if (this.instanceGettingAccessFrom_) {
-      this.gettingStatus = this.i18n_t('gettingAccessFrom', {
+      this.gettingStatus = this.i18n_t("GETTING_ACCESS_FROM", {
         name: this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].name
       });
     } else {
@@ -469,16 +469,16 @@ export class UserInterface implements ui_constants.UiApi {
     if (instanceIds.length === 0) {
       this.sharingStatus = null;
     } else if (instanceIds.length === 1) {
-      this.sharingStatus = this.i18n_t('sharingAccessWith_one', {
+      this.sharingStatus = this.i18n_t("SHARING_ACCESS_WITH_ONE", {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name
       });
     } else if (instanceIds.length === 2) {
-      this.sharingStatus = this.i18n_t('sharingAccessWith_two', {
+      this.sharingStatus = this.i18n_t("SHARING_ACCESS_WITH_TWO", {
         name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
         name2: this.mapInstanceIdToUser_[instanceIds[1]].name
       });
     } else {
-      this.sharingStatus = this.i18n_t('sharingAccessWith_two', {
+      this.sharingStatus = this.i18n_t("SHARING_ACCESS_WITH_MANY", {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name,
         numOthers: (instanceIds.length - 1)
       });
@@ -741,7 +741,7 @@ export class UserInterface implements ui_constants.UiApi {
           if (this.instanceGettingAccessFrom_) {
             this.stopGettingInUiAndConfig(true);
           }
-          this.showNotification(this.i18n_t('loggedOut', {network: networkMsg.name}));
+          this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
 
           if (!this.model.onlineNetworks.length) {
             this.view = ui_constants.View.SPLASH;
@@ -836,7 +836,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public login = (network :string) : Promise<void> => {
     return this.core.login({ network : network, reconnect: false }).catch((e :Error) => {
-      this.showNotification(this.i18n_t('errorSigningIn', {network: network}));
+      this.showNotification(this.i18n_t("ERROR_SIGNING_IN", {network: network}));
       throw e;
     });
   }
@@ -870,7 +870,7 @@ export class UserInterface implements ui_constants.UiApi {
           // Reconnect failed, give up.
           this.stopReconnect();
           this.showNotification(
-              this.i18n_t('loggedOut', { network: network }));
+              this.i18n_t("LOGGED_OUT", { network: network }));
 
           if (!this.model.onlineNetworks.length) {
             this.view = ui_constants.View.SPLASH;
@@ -888,7 +888,7 @@ export class UserInterface implements ui_constants.UiApi {
     "d1wtwocg4wx1ih.cloudfront.net"
   ]
 
-  public postToCloudfrontSite = (payload :any, cloudfrontPath :string,
+  public postToCloudfrontSite = (payload :Object, cloudfrontPath :string,
                                  maxAttempts ?:number)
       : Promise<void> => {
     console.log('postToCloudfrontSite: ', payload, cloudfrontPath);
@@ -923,17 +923,13 @@ export class UserInterface implements ui_constants.UiApi {
       logsPromise = Promise.resolve('');
     }
     return logsPromise.then((logs) => {
-      var payload :uproxy_core_api.UserFeedback = {
+      var payload = {
         email: feedback.email,
         feedback: feedback.feedback,
         logs: logs,
-        feedbackType: feedback.feedbackType
+        feedbackType: uproxy_core_api.UserFeedbackType[feedback.feedbackType],
+        proxyingId: this.proxyingId
       };
-
-      if (payload.feedbackType ===
-          uproxy_core_api.UserFeedbackType.PROXYING_FAILURE) {
-        payload.proxyingId = this.proxyingId;
-      }
 
       return this.postToCloudfrontSite(payload, 'submit-feedback');
     });
@@ -990,6 +986,9 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.ROSTER;
       this.updateSharingStatusBar_();
     }
+
+    // state of online networks may have changed, update it
+    this.updateIcon_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
