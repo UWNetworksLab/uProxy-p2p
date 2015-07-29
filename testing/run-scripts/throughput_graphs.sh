@@ -5,7 +5,7 @@
 
 set -e
 
-FLOOD_SIZE_MB=25M
+FLOOD_SIZE_MB=25
 FLOOD_MAX_SPEED=5M
 
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
