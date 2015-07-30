@@ -6,9 +6,6 @@
 <polymer-element name='uproxy-copypaste' attributes='' fit>
   <template>
     <style>
-    :host {
-      /*text-align: center;*/
-    }
     p {
       text-align: left;
     }
@@ -51,6 +48,9 @@
     uproxy-app-bar + uproxy-bubble {
       top: 0px !important;
     }
+    .centered {
+      text-align: center;
+    }
     </style>
 
     <core-signals on-core-signal-copypaste-back='{{ exitMode }}'></core-signals>
@@ -81,7 +81,7 @@
                 {{ 'NO_LONGER_GETTING' | $$ }}
               </p>
 
-              <div style="text-align: center;">
+              <div class='centered'>
                 <paper-button on-tap='{{ startGetting }}'>
                   {{ 'START_NEW_CONNECTION' | $$ }}
                 </paper-button>
@@ -136,7 +136,7 @@
                   </span>
                 </p>
 
-                <div style='text-align: center;'>
+                <div class='centered'>
                   <paper-button raised on-tap='{{ startProxying }}'
                       hidden?='{{ ui.copyPastePendingEndpoint === null }}'>
                     {{ 'START_GETTING' | $$ }}
