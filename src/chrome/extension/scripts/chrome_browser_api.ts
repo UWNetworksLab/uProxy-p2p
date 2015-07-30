@@ -100,6 +100,8 @@ class ChromeBrowserApi implements BrowserAPI {
         this.popupState_ = PopupState.NOT_LAUNCHED;
       }
     });
+
+    chrome.browserAction.setBadgeBackgroundColor({color: "#009968"});
   }
 
   private canControlProxy_ = (level :string) :boolean => {
