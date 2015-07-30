@@ -50,7 +50,7 @@ do
     /usr/bin/time -f %e --output /tmp/compare nc -X 5 -x localhost:9999 $FLOOD_IP 1224
     ELAPSED_SEC=`cat /tmp/compare`
     MB_PER_SEC=`echo "$(($FLOOD_SIZE_MB * 1024)) / $ELAPSED_SEC"|bc`
-    log "throughput (K/sec) for $browser $rel: $MB_PER_SEC"
+    log "throughput (K/sec) for $browser $ver: $MB_PER_SEC"
   done
 done
 
