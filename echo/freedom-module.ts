@@ -16,9 +16,6 @@ var requestedEndpoint: net.Endpoint = {
 // When received, we close the connection.
 var CTRL_D_HEX_STR_CODE = '4';
 
-// The parent freedom module which can send us events.
-var parentModule = freedom();
-
 var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
                                    loggingTypes.Level.debug);
