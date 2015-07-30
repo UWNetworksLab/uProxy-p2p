@@ -38,6 +38,10 @@ server.listen().then((actualEndpoint) => {
     var id = numConnections++;
     log.info('%1: open', id);
 
+    connection.onceClosed.then((kind:tcp.SocketCloseKind) => {
+      log.info('%1: closed (%2)', id, tcp.SocketCloseKind[kind]);
+    });
+
     connection.dataFromSocketQueue.setSyncHandler((data:ArrayBuffer): void => {
 			log.info('%1: received %2 bytes', id, data.byteLength);
 			if (arraybuffers.arrayBufferToHexString(data) === CTRL_D_HEX_STR_CODE) {
