@@ -54,9 +54,6 @@
          tooltip, it appears off center. */
       left: -64px !important;
     }
-    paper-input-decorator /deep/ .cursor {
-      background-color: #009688;
-    }
     paper-input-decorator[id=advancedSettingsDecorator] /deep/ .unfocused-underline,
     paper-input-decorator[id=advancedSettingsDecorator] /deep/ .focused-underline {
       /* Remove the underline from the advanced settings textbox. */
@@ -123,52 +120,52 @@
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ 'advancedSettings_sentenceCase' | $$ }}
+          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
         <div id='portControlBox'>
           <p class='inputLabel'>
-            {{ 'portControlTitle' | $$ }}
+            {{ 'PORT_CONTROL_TITLE' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>
               <core-icon icon='help'></core-icon>
             </uproxy-faq-link>
           </p>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.TRUE }}'>
-            {{ 'portControlSupported' | $$ }}
+            {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
           </span>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
-            {{ 'portControlNotSupported' | $$ }}
+            {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
           </span>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.PENDING }}'>
-            {{ 'portControlPending' | $$ }}
+            {{ 'PORT_CONTROL_PENDING' | $$ }}
           </span>
           <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
             <core-icon icon='refresh'></core-icon>
           </uproxy-link>
           <p class='label info' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
-            {{ 'portControlNotSupportedInfo' | $$ }}
+            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>
-              {{ 'portControlNotSupportedInfoLink' | $$ }}
+              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$ }}
             </uproxy-faq-link>
           </p>
         </div>
         <div id='formContainer' flex vertical layout>
-          <p class='inputLabel'>{{ 'editAdvancedSettings' | $$ }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "editAdvancedSettingsPlaceholder" | $$ }}' flex>
+          <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}' flex>
             <textarea id='advancedSettingsInput' value='{{ settings }}' fit>
             </textarea>
           </paper-input-decorator>
           <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>
-            {{ 'settingsSaved' | $$ }}
+            {{ "SETTINGS_SAVED" | $$ }}
           </p>
           <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>
-            {{ 'settingsBadFormatError' | $$ }}
+            {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
           </p>
           <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>
-            {{ 'settingsJsonError' | $$ }}
+            {{ "SETTINGS_JSON_ERROR" | $$ }}
           </p>
         </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
-          {{ 'set' | $$ }}
+          {{ "SET" | $$ }}
         </div>
       </div>
     </core-overlay>

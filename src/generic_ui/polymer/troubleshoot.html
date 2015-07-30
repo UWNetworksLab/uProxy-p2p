@@ -81,42 +81,42 @@
       <!-- First screen in the dialog asks user if they want to diagnose their network. -->
       <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
-          {{ 'askToAnalyze' | $$ }}
+          {{ "ASK_TO_ANALYZE" | $$ }}
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link><br>
         </p>
         <paper-button on-tap='{{ getNatType }}'>
-          {{ 'yes' | $$ }}
+          {{ "YES" | $$ }}
         </paper-button>
         <paper-button on-tap='{{ close }}'>
-          {{ 'no' | $$ }}
+          {{ "NO" | $$ }}
         </paper-button>
       </div>
 
       <!-- Second screen in dialog shows a loading bar as we get NAT type. -->
       <div id='analyzeNetwork' hidden?='{{ !analyzingNetwork }}'>
-        {{ 'analyzingNetwork' | $$ }}<br>
+        {{ "ANALYZING_NETWORK" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
 
       <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
-        {{ 'analysisResults' | $$({ natType: natType, natImpact: natImpact }) }}
+        {{ "ANALYSIS_RESULTS" | $$({ natType: natType, natImpact: natImpact }) }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>{{ 'moreInfo' | $$ }}</span>
+          <span class='linkText'>{{ "MORE_INFO" | $$ }}</span>
         </uproxy-faq-link><br><br>
-        {{ 'askToSubmitAnalysis' | $$ }}
+        {{ "ASK_TO_SUBMIT_ANALYSIS" | $$ }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>{{ 'privacyPolicy' | $$ }}</span>
+          <span class='linkText'>{{ "PRIVACY_POLICY" | $$ }}</span>
         </uproxy-faq-link>
         <br>
         <div id='analyzedNetworkButtons'>
           <paper-button on-tap='{{ submitFeedback }}'>
-            {{ 'yes' | $$ }}
+            {{ "YES" | $$ }}
           </paper-button>
           <paper-button on-tap='{{ close }}'>
-            {{ 'no' | $$ }}
+            {{ "NO" | $$ }}
           </paper-button>
         </div>
       </div>
