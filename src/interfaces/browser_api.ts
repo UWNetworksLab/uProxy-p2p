@@ -45,4 +45,5 @@ export interface BrowserAPI {
 
   // should be called when popup is launched and ready for use
   handlePopupLaunch() :void;
+  setBadgeNotification(notification :string) :void;
 }

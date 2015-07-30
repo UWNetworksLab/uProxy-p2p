@@ -235,6 +235,15 @@ Polymer({
   restart: function() {
     core.restart();
   },
+  setBadgeNotification: function() {
+    var numOfNotifications = model.contacts.getAccessContacts.pending.length +
+        model.contacts.shareAccessContacts.pending.length;
+    if (numOfNotifications === 0) {
+      ui.browserApi.setBadgeNotification('');
+    } else {
+      ui.browserApi.setBadgeNotification(numOfNotifications.toString());
+    }
+  },
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',
@@ -246,6 +255,8 @@ Polymer({
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
     'ui.signalToFire': 'signalToFireChanged',
-    'model.globalSettings.language': 'languageChanged'
+    'model.globalSettings.language': 'languageChanged',
+    'model.contacts.getAccessContacts.pending.length' : 'setBadgeNotification',
+    'model.contacts.shareAccessContacts.pending.length' : 'setBadgeNotification'
   }
 });

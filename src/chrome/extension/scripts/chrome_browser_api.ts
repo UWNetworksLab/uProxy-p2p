@@ -271,6 +271,10 @@ class ChromeBrowserApi implements BrowserAPI {
       xhr.send(params);
     }).then(removeSendHeaderListener, removeSendHeaderListener);
   }
+
+  public setBadgeNotification = (notification :string) => {
+    chrome.browserAction.setBadgeText({text: notification});
+  }
 }
 
 export = ChromeBrowserApi;
