@@ -704,7 +704,7 @@
     "message": "You may be able to enable port control to make uProxy more reliable."
   },
   "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
-    "description": "Link text right after the portControlNotSupportedInfo text",
+    "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
     "message": "More info."
   }
 }
