@@ -116,6 +116,10 @@ ui_connector.onPromiseCommand(
     core.getNatType);
 
 ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.REFRESH_PORT_CONTROL,
+    core.refreshPortControlSupport);
+
+ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_FULL_STATE,
     core.getFullState);
 

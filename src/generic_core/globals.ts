@@ -22,10 +22,6 @@ export var MESSAGE_VERSION = 5;
 
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
-  {urls: ['stun:stun1.l.google.com:19302']},
-  {urls: ['stun:stun2.l.google.com:19302']},
-  {urls: ['stun:stun3.l.google.com:19302']},
-  {urls: ['stun:stun4.l.google.com:19302']},
   {urls: ['stun:stun.services.mozilla.com']},
   {urls: ['stun:stun.stunprotocol.org']}
 ];

@@ -32,7 +32,6 @@ import Persistent = require('../interfaces/persistent');
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
-export var remoteProxyInstance :RemoteInstance = null;
 
 // module Core {
   var log :logging.Log = new logging.Log('remote-instance');
@@ -161,7 +160,6 @@ export var remoteProxyInstance :RemoteInstance = null;
             instanceId: this.instanceId,
             error: data
           });
-          remoteProxyInstance = null;
           break;
         case uproxy_core_api.Update.STATE:
           this.bytesSent = data.bytesSent;

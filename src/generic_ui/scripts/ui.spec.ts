@@ -43,7 +43,15 @@ describe('UI.UserInterface', () => {
     });
 
     mockBrowserApi = jasmine.createSpyObj('browserApi',
-        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification', 'on', 'handlePopupLaunch']);
+        ['setIcon',
+         'startUsingProxy',
+         'stopUsingProxy',
+         'openTab',
+         'showNotification',
+         'on',
+         'handlePopupLaunch',
+         'bringUproxyToFront'
+         ]);
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
   });
@@ -239,7 +247,7 @@ describe('UI.UserInterface', () => {
           'testInstanceId', { address : 'testAddress' , port : 0 });
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
-      ui.stopGettingInUiAndConfig(false);
+      ui.stopGettingInUiAndConfig({instanceId: null, error: false});
     });
 
     it('Extension icon changes when you stop getting access', () => {

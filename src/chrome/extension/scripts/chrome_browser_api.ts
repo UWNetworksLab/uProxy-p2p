@@ -108,20 +108,18 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public startUsingProxy = (endpoint:net.Endpoint) => {
-    if (this.running_ == false) {
-      this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
-      this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
-      console.log('Directing Chrome proxy settings to uProxy');
-      this.running_ = true;
-      chrome.proxy.settings.get({incognito:false},
-        (details) => {
-          this.preUproxyConfig_ = details.value;
-          chrome.proxy.settings.set({
-              value: this.uproxyConfig_,
-              scope: 'regular'
-            }, () => {console.log('Successfully set proxy');});
-        });
-    }
+    this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
+    this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
+    console.log('Directing Chrome proxy settings to uProxy');
+    this.running_ = true;
+    chrome.proxy.settings.get({incognito:false},
+      (details) => {
+        this.preUproxyConfig_ = details.value;
+        chrome.proxy.settings.set({
+            value: this.uproxyConfig_,
+            scope: 'regular'
+          }, () => {console.log('Successfully set proxy');});
+      });
   };
 
   public stopUsingProxy = () => {
