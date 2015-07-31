@@ -24,10 +24,9 @@ function usage () {
     echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
     echo "  -h, -?: this help message."
     echo
-    echo " browserspec is a pair of browser and version. Valid browsers are firefox and chrome."
-    echo "   Valid versions depend on the browser.  These are valid pairs:"
-    echo "     chrome-dev, chrome-rel, chrome-canary,"
-    echo "     firefox-aur, firefox-beta, firefox-rel"
+    echo "browserspec is a pair of browser-version."
+    echo "  Valid browsers are firefox and chrome, valid versions "
+    echo "  stable, beta, and canary, e.g. chrome-stable and firefox-beta."
     exit 1
 }
 

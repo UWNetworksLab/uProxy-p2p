@@ -6,15 +6,7 @@
 # Usage:
 #   setup_browser.sh type version
 #    - Type: 'chrome' or 'firefox'
-#    - Version:
-#      - For Chrome:
-#        - dev
-#        - release
-#        - canary
-#      - For Firefox:
-#        - aurora
-#        - beta
-#        - release
+#    - Version: 'stable' or 'beta' or 'canary'
 
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
@@ -23,17 +15,17 @@ function get_chrome () {
   DRIVERURL=https://chromedriver.storage.googleapis.com/$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
   
   case $1 in
-      dev|DEV)
-          URL=https://dl.google.com/linux/direct/google-chrome-beta_current_amd64.deb
-          ;;
-      rel|release|REL|RELEASE)
+      stable)
           URL=https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           ;;
-      canary|CANARY)
+      beta)
+          URL=https://dl.google.com/linux/direct/google-chrome-beta_current_amd64.deb
+          ;;
+      canary)
           URL=https://dl.google.com/linux/direct/google-chrome-unstable_current_amd64.deb
           ;;
       *)
-          log "Unknown chrome version $1. Options are dev, rel(ease), and canary."
+          log "Unknown chrome version $1. Options are stable, beta, and canary."
           exit 1
           ;;
   esac
@@ -57,20 +49,20 @@ EOF
 
 function get_firefox () {
     case $1 in
-        aurora)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/$(date +%Y/%m/%Y-%m-%e-mozilla-aurora-debug)
-            PATTERN='*linux-x86_64.tar.bz2'
+        stable)
+            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-x86_64/en-US/
+            PATTERN='*.tar.bz2'
             ;;
         beta)
             URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/$(date +%Y/%m/%Y-%m-%e-mozilla-beta-debug)
             PATTERN='*linux-x86_64.tar.bz2'
             ;;
-        rel|release)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-x86_64/en-US/
-            PATTERN='*.tar.bz2'
+        canary)
+            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/$(date +%Y/%m/%Y-%m-%e-mozilla-aurora-debug)
+            PATTERN='*linux-x86_64.tar.bz2'
             ;;
         *)
-            log "Unknown firefox version $1.  Options are aurora, beta, and rel(ease)."
+            log "Unknown firefox version $1. Options are stable, beta, and canary."
             ;;
     esac
     cat <<EOF
@@ -83,13 +75,13 @@ EOF
 
 }
 case $1 in
-    chr|chrome|CHROME|Chrome)
+    chrome)
         get_chrome $2
         ;;
-    ff|firefox|FIREFOX|Firefox|FireFox)
+    firefox)
         get_firefox $2
         ;;
-    lcr|lchrome|localchrome|LCR|LCHROME|LOCALCHROME)
+    localchrome)
         get_localchrome $2 $3
         ;;
     *)
