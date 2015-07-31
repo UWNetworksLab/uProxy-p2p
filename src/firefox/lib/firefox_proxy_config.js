@@ -24,10 +24,12 @@ var filter = {
   }
 }
 
+var flags = Ci.nsIProxyInfo.TRANSPARENT_PROXY_RESOLVES_HOST;
+
 var proxyConfig = {
   startUsingProxy: function(endpoint) {
     running = true;
-    proxyinfo = pps.newProxyInfo('socks', endpoint.address, endpoint.port, 0, 0, null);
+    proxyinfo = pps.newProxyInfo('socks', endpoint.address, endpoint.port, flags, 0, null);
     pps.registerFilter(filter, 0);
   },
   stopUsingProxy: function() {

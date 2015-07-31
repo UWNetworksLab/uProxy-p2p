@@ -88,11 +88,6 @@
          tooltip, it appears off center. */
       left: -64px !important;
     }
-    paper-input-decorator[id=emailDecorator] /deep/ .unfocused-underline,
-    paper-input-decorator[id=emailDecorator] /deep/ .focused-underline,
-    paper-input-decorator /deep/ .cursor {
-      background-color: #009688;
-    }
     paper-input-decorator[id=feedbackDecorator] /deep/ .unfocused-underline,
     paper-input-decorator[id=feedbackDecorator] /deep/ .focused-underline {
       /* Remove the underline from the Feedback textbox. */
@@ -155,19 +150,19 @@
     <core-overlay id='feedbackPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ 'submitFeedback_sentenceCase' | $$ }}
+          {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
         <div id='formContainer' flex>
-          <p class='inputLabel'>{{ 'emailTitle' | $$ }}</p>
+          <p class='inputLabel'>{{ "EMAIL_TITLE" | $$ }}</p>
           <paper-input-decorator id='emailDecorator'
-              label="{{ 'emailPlaceholder' | $$ }}">
+              label='{{ "EMAIL_PLACEHOLDER" | $$ }}'>
             <input id="emailInput"
                    is="core-input"
                    value='{{ email }}'>
           </paper-input-decorator>
-          <p class='inputLabel'>{{ 'feedbackTitle' | $$ }}</p>
+          <p class='inputLabel'>{{ "FEEDBACK_TITLE" | $$ }}</p>
           <paper-input-decorator id='feedbackDecorator'
-              label="{{ 'feedbackPlaceholder' | $$ }}">
+              label='{{ "FEEDBACK_PLACEHOLDER" | $$ }}'>
             <paper-autogrow-textarea id="feedbackPaperTextarea">
               <textarea id="feedbackInput"
                      value='{{ feedback }}'>
@@ -177,22 +172,22 @@
           <div id='logCheckboxContainer'>
             <paper-checkbox for id='logCheckbox'></paper-checkbox>
             <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
-              {{ 'networkAndLogs' | $$ }}
+              {{ "NETWORK_AND_LOGS" | $$ }}
             </span>
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>
           </div>
           <p id='moreInfo'>
-            {{ 'PIIMessage' | $$ }}
+            {{ "P_I_I_MESSAGE" | $$ }}
           </p>
         </div> <!-- end of form container -->
-        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>{{ 'submitFeedback' | $$ }}</div>
+        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>{{ "SUBMIT_FEEDBACK" | $$ }}</div>
       </div>
     </core-overlay>
     <uproxy-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
-      <div id='sendingFeedback'>
-        {{ 'sendingFeedback' | $$ }}<br>
+      <div id="SENDING_FEEDBACK">
+        {{ "SENDING_FEEDBACK" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
     </uproxy-action-dialog>

@@ -1,16 +1,24 @@
 /// <reference path='./context.d.ts' />
 
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+
 Polymer({
   email: '',
   feedback: '',
   logs: '',
+  feedbackType: '',
   close: function() {
     this.$.feedbackPanel.close();
   },
-  open: function(e :Event, detail :{ includeLogs: boolean }) {
-    if (detail && detail.includeLogs) {
+  open: function(e:Event, data?:{
+    includeLogs: boolean;
+    feedbackType: uproxy_core_api.UserFeedbackType;
+   }) {
+    if (data && data.includeLogs) {
       this.$.logCheckbox.checked = true;
     }
+    this.feedbackType = (data && data.feedbackType) ? data.feedbackType :
+        uproxy_core_api.UserFeedbackType.USER_INITIATED;
     this.$.feedbackPanel.open();
   },
   sendFeedback: function() {
@@ -19,12 +27,13 @@ Polymer({
       email: this.email,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,
-      browserInfo: navigator.userAgent
+      browserInfo: navigator.userAgent,
+      feedbackType: this.feedbackType
     }).then(() => {
       // Reset the placeholders, which seem to be cleared after the
       // user types input in the input fields.
-      this.$.emailInput.placeholder = ui.i18n_t('emailPlaceholder');
-      this.$.feedbackInput.placeholder = ui.i18n_t('feedbackPlaceholder');
+      this.$.emailInput.placeholder = ui.i18n_t("EMAIL_PLACEHOLDER");
+      this.$.feedbackInput.placeholder = ui.i18n_t("FEEDBACK_PLACEHOLDER");
       // Clear the form.
       this.email = '';
       this.feedback = '';
@@ -33,10 +42,10 @@ Polymer({
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
       this.fire('open-dialog', {
-        heading: ui.i18n_t('thankYou'),
-        message: ui.i18n_t('feedbackSubmitted'),
+        heading: ui.i18n_t("THANK_YOU"),
+        message: ui.i18n_t("FEEDBACK_SUBMITTED"),
         buttons: [{
-          text: ui.i18n_t('done'),
+          text: ui.i18n_t("DONE"),
           signal: 'close-settings'
         }]
       });
@@ -44,10 +53,10 @@ Polymer({
       this.$.sendingFeedbackDialog.close();
     }).catch((e :Error) => {
       this.fire('open-dialog', {
-        heading: ui.i18n_t('emailInsteadTitle'),
-        message: ui.i18n_t('emailInsteadMessage'),
+        heading: ui.i18n_t("EMAIL_INSTEAD_TITLE"),
+        message: ui.i18n_t("EMAIL_INSTEAD_MESSAGE"),
         buttons: [{
-          text: ui.i18n_t('ok')
+          text: ui.i18n_t("OK")
         }]
       });
       this.$.sendingFeedbackDialog.close();

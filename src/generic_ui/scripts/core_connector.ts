@@ -213,9 +213,17 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_NAT_TYPE);
   }
 
+  refreshPortControlSupport = () : Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.REFRESH_PORT_CONTROL);
+  }
+
   pingUntilOnline = (pingUrl :string) : Promise<void> => {
     return this.promiseCommand(
         uproxy_core_api.Command.PING_UNTIL_ONLINE, pingUrl);
+  }
+
+  getVersion = () :Promise<{ version :string }> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
   }
 }  // class CoreConnector
 

@@ -342,8 +342,8 @@ import Persistent = require('../interfaces/persistent');
     private saveToStorage = () => {
       return this.onceLoaded.then(() => {
         var state = this.currentState();
-        return storage.save<RemoteInstanceState>(this.getStorePath(), state)
-        .then((old) => {
+        return storage.save(this.getStorePath(), state)
+        .then(() => {
           log.debug('Saved instance to storage', this.instanceId);
         }).catch((e) => {
           log.error('Failed saving instance to storage', this.instanceId, e.stack);

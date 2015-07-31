@@ -1,3 +1,5 @@
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+
 Polymer({
   analyzingNetwork: false,
   analyzedNetwork: false,
@@ -12,7 +14,12 @@ Polymer({
     this.$.troubleshootDialog.open();
   },
   submitFeedback: function() {
-    this.fire('core-signal', {name: 'open-feedback', data: {includeLogs: this.analyzedNetwork}});
+    this.fire('core-signal', {
+      name: 'open-feedback', data: {
+        includeLogs: this.analyzedNetwork,
+        feedbackType: uproxy_core_api.UserFeedbackType.PROXYING_FAILURE
+      }
+    });
     this.close();
   },
   getNatType: function() {
@@ -20,11 +27,11 @@ Polymer({
     ui_context.core.getNatType().then((natType :string) => {
       this.natType = natType;
       if (natType === 'symmetric NAT') {
-        this.natImpact = ui.i18n_t('veryLikely');
+        this.natImpact = ui.i18n_t("VERY_LIKELY");
       } else if (natType === 'port-restricted cone NAT') {
-        this.natImpact = ui.i18n_t('possibly');
+        this.natImpact = ui.i18n_t("POSSIBLY");
       } else {
-        this.natImpact = ui.i18n_t('unlikely');
+        this.natImpact = ui.i18n_t("UNLIKELY");
       }
       this.analyzingNetwork = false;
       this.analyzedNetwork = true;

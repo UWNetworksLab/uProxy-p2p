@@ -6,11 +6,6 @@
 <polymer-element name='uproxy-description' attributes=''>
   <template>
     <style>
-      paper-input-decorator /deep/ .unfocused-underline,
-      paper-input-decorator /deep/ .focused-underline,
-      paper-input-decorator /deep/ .cursor {
-          background-color: #009688;
-      }
       paper-input-decorator {
         font-size: 14px;
         padding: 0;
@@ -42,11 +37,11 @@
     </style>
 
     <div id='editingDescription' hidden?='{{ !editing }}'>
-      <paper-input-decorator label="{{ 'description' | $$ }}">
+      <paper-input-decorator label='{{ "DESCRIPTION" | $$ }}'>
         <input is="core-input" value='{{ descriptionInput }}'>
       </paper-input-decorator>
-      <paper-button raised on-tap="{{ saveDescription }}">{{ 'save' | $$ }}</paper-button>
-      <paper-button raised on-tap="{{ cancelEditing }}">{{ 'cancel' | $$ }}</paper-button>
+      <paper-button raised on-tap="{{ saveDescription }}">{{ "SAVE" | $$ }}</paper-button>
+      <paper-button raised on-tap="{{ cancelEditing }}">{{ "CANCEL" | $$ }}</paper-button>
     </div>
     <div id='savedDescription' hidden?='{{ editing }}' on-tap='{{ editDescription }}'>
       {{ showDescription(model.globalSettings.description) }}

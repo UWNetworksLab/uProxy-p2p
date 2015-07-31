@@ -90,11 +90,6 @@
       padding: 0;
       margin-bottom: 5px;
     }
-    paper-input-decorator /deep/ .unfocused-underline,
-    paper-input-decorator /deep/ .focused-underline,
-    paper-input-decorator /deep/ .cursor {
-        background-color: #009688;
-    }
     paper-button {
       width: 70px;
       margin-left: 0px;
@@ -179,7 +174,7 @@
 
       <div id='mainSettings' class='settingsContent' hidden?='{{ accountChooserOpen }}'>
         <div class='smalltext'>
-          {{ 'deviceDescription' | $$ }}
+          {{ "DEVICE_DESCRIPTION" | $$ }}
           <uproxy-description></uproxy-description>
         </div>
 
@@ -188,21 +183,21 @@
         <uproxy-link on-tap='{{ openFeedbackForm }}' role='button'>
           <core-icon icon="announcement"></core-icon>
           <!-- try taking out these .label spans and see what happens. -->
-          <span class='label'>{{ 'submitFeedback' | $$ }}</span>
+          <span class='label'>{{ "SUBMIT_FEEDBACK" | $$ }}</span>
         </uproxy-link>
 
         <uproxy-faq-link>
           <core-icon icon="help"></core-icon>
-          <span class='label'>{{ 'getHelp' | $$ }}</span>
+          <span class='label'>{{ "GET_HELP" | $$ }}</span>
         </uproxy-faq-link>
 
         <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
           <core-icon icon="settings"></core-icon>
-          <span class='label'>{{ 'advancedSettings' | $$ }}</span>
+          <span class='label'>{{ "ADVANCED_SETTINGS" | $$ }}</span>
         </uproxy-link>
 
         <div id='metricsCheckbox'>
-          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "statsEnabledTitle" | $$ }}'></paper-checkbox>
+          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "STATS_ENABLED_TITLE" | $$ }}'></paper-checkbox>
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
           </uproxy-faq-link>
@@ -212,17 +207,17 @@
 
         <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
           <core-icon icon='refresh'></core-icon>
-          <span class='label'>{{ 'restart' | $$ }}</span>
+          <span class='label'>{{ "RESTART" | $$ }}</span>
         </uproxy-link>
 
         <uproxy-link on-tap='{{ logOut }}' role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
-          <span class='label'>{{ 'logout' | $$ }}</span>
+          <span class='label'>{{ "LOGOUT" | $$ }}</span>
         </uproxy-link>
       </div>
 
       <div id='accountChooser' class='settingsContent' hidden?='{{ !accountChooserOpen }}'>
-        <span class='smalltext'>{{ 'connectedAccounts' | $$ }}</span>
+        <span class='smalltext'>{{ "CONNECTED_ACCOUNTS" | $$ }}</span>
         <template repeat='{{ name in model.networkNames }}'>
           <div>
             <uproxy-network-in-settings name='{{ name }}'></uproxy-network-in-settings>

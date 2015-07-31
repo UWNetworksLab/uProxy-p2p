@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+
 import diagnose_nat = require('./diagnose-nat');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
@@ -33,13 +35,7 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
 
-export interface NetworkInfo {
-  natType :string;
-  pmpSupport :string;
-  pcpSupport :string;
-  upnpSupport :string;
-  errorMsg ?:string;
-};
+var portControl = freedom['portControl']();
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
@@ -49,6 +45,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private copyPasteSharingMessages_ :social.PeerMessage[] = [];
   private copyPasteGettingMessages_ :social.PeerMessage[] = [];
+
+  // this should be set iff an update to the core is available
+  private availableVersion_ :string = null;
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -93,6 +92,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   private pendingNetworks_ :{[name :string] :social.Network} = {};
+  private portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
 
   /**
    * Access various social networks using the Social API.
@@ -160,7 +160,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     if (newSettings.stunServers.length === 0) {
       newSettings.stunServers = globals.DEFAULT_STUN_SERVERS;
     }
-    globals.storage.save<uproxy_core_api.GlobalSettings>('globalSettings', newSettings)
+    globals.storage.save('globalSettings', newSettings)
       .catch((e) => {
         log.error('Could not save globalSettings to storage', e.stack);
       });
@@ -196,6 +196,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       loggingTypes.Destination.console,
       globals.settings.consoleFilter);
     globals.settings.language = newSettings.language;
+    globals.settings.force_message_version = newSettings.force_message_version;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
@@ -204,12 +205,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         networkNames: Object.keys(social_network.networks),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
+        availableVersion: this.availableVersion_,
         copyPasteState: {
           connectionState: copyPasteConnection.getCurrentState(),
           endpoint: copyPasteConnection.activeEndpoint,
           gettingMessages: this.copyPasteGettingMessages_,
           sharingMessages: this.copyPasteSharingMessages_
-        }
+        },
+        portControlSupport: this.portControlSupport_,
       };
     });
   }
@@ -233,7 +236,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
     this.copyPasteGettingMessages_ = [];
-    return copyPasteConnection.startGet(globals.MESSAGE_VERSION);
+    return copyPasteConnection.startGet(globals.effectiveMessageVersion());
   }
 
   public stopCopyPasteGet = () :Promise<void> => {
@@ -242,7 +245,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteShare = () => {
     this.copyPasteSharingMessages_ = [];
-    copyPasteConnection.startShare(globals.MESSAGE_VERSION);
+    copyPasteConnection.startShare(globals.effectiveMessageVersion());
   }
 
   public stopCopyPasteShare = () :Promise<void> => {
@@ -360,44 +363,27 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
-  // List of popular router default IPs
-  // http://www.techspot.com/guides/287-default-router-ip-addresses/
-  private routerIps = ['192.168.1.1', '192.168.2.1', '192.168.11.1',
-    '192.168.0.1', '192.168.0.30', '192.168.0.50', '192.168.20.1',
-    '192.168.30.1', '192.168.62.1', '192.168.100.1', '192.168.102.1',
-    '192.168.1.254', '192.168.10.1', '192.168.123.254', '192.168.4.1',
-    '10.0.1.1', '10.1.1.1', '10.0.0.138', '10.0.0.2', '10.0.0.138'];
+  // Probe for NAT-PMP, PCP, and UPnP support
+  // Sets this.portControlSupport_ and sends update message to UI
+  public refreshPortControlSupport = () :Promise<void> => {
+    this.portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
+    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+              uproxy_core_api.PortControlSupport.PENDING);
 
-  // Probes the NAT for either NAT-PMP or PCP support
-  public probePmcp = (privateIp:string, protocol:string) :Promise<string> => {
-    return Promise.all(this.routerIps.map((ip:string) => {
-      if (protocol === 'PCP') {
-        return diagnose_nat.probePcpSupport(ip, privateIp);
-      } else if (protocol === 'PMP') {
-        return diagnose_nat.probePmpSupport(ip, privateIp);
-      }
-    })).then((results:boolean[]) => {
-      if (results.some(el => el)) { return 'Supported'; }
-      return 'Not supported';
-    }).catch((err:Error) => {
-      return 'Not supported ' + err.message;
+    return portControl.probeProtocolSupport().then(
+      (probe:freedom_PortControl.ProtocolSupport) => {
+        this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
+                                   uproxy_core_api.PortControlSupport.TRUE :
+                                   uproxy_core_api.PortControlSupport.FALSE;
+        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+                  this.portControlSupport_);
     });
-  }
-
-  // Probe the NAT for UPnP support, returns a status string
-  public probeUpnp = (privateIp:string) :Promise<string> => {
-    return diagnose_nat.probeUpnpSupport(privateIp).
-        then((result:boolean) => {
-          if (result) { return 'Supported'; }
-        }).catch((err:Error) => {
-          return 'Not supported ' + err.message;
-        });
   }
 
   // Probe the NAT type and support for port control protocols
   // Returns an object with the NAT configuration as keys
-  public getNetworkInfoObj = () :Promise<NetworkInfo> => {
-    var natInfo :NetworkInfo = {
+  public getNetworkInfoObj = () :Promise<uproxy_core_api.NetworkInfo> => {
+    var natInfo :uproxy_core_api.NetworkInfo = {
       natType: '',
       pmpSupport: '',
       pcpSupport: '',
@@ -406,17 +392,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
-      return diagnose_nat.getInternalIp().then((privateIp:string) => {
-        return this.probePmcp(privateIp, 'PMP').then((pmpSupport:string) => {
-          natInfo.pmpSupport = pmpSupport;
-          return this.probePmcp(privateIp, 'PCP');
-        }).then((pcpSupport:string) => {
-          natInfo.pcpSupport = pcpSupport;
-          return this.probeUpnp(privateIp);
-        }).then((upnpSupport:string) => {
-          natInfo.upnpSupport = upnpSupport;
+      return portControl.probeProtocolSupport().then((protocolSupport:any) => {
+          natInfo.pmpSupport = protocolSupport.natPmp;
+          natInfo.pcpSupport = protocolSupport.pcp;
+          natInfo.upnpSupport = protocolSupport.upnp;
           return natInfo;
-        });
       }).catch((err:Error) => {
         // Should only catch the error when getInternalIp() times out
         natInfo.errorMsg = 'Could not probe for port control protocols: ' + err.message;
@@ -427,14 +407,17 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // Returns a string of the NAT type and support for port control protocols
   public getNetworkInfo = () :Promise<string> => {
-    return this.getNetworkInfoObj().then((natInfo:NetworkInfo) => {
+    return this.getNetworkInfoObj().then((natInfo:uproxy_core_api.NetworkInfo) => {
       var natInfoStr = 'NAT Type: ' + natInfo.natType + '\n';
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';
       } else {
-        natInfoStr += 'NAT-PMP: ' + natInfo.pmpSupport + '\n';
-        natInfoStr += 'PCP: ' + natInfo.pcpSupport + '\n';
-        natInfoStr += 'UPnP IGD: ' + natInfo.upnpSupport + '\n';
+        natInfoStr += 'NAT-PMP: ' + 
+                  (natInfo.pmpSupport ? 'Supported' : 'Not supported') + '\n';
+        natInfoStr += 'PCP: ' + 
+                  (natInfo.pcpSupport ? 'Supported' : 'Not supported') + '\n';
+        natInfoStr += 'UPnP IGD: ' + 
+                  (natInfo.upnpSupport ? 'Supported' : 'Not supported') + '\n';
       }
       return natInfoStr;
     });
@@ -530,5 +513,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       var intervalId = setInterval(checkIfOnline, 5000);
       checkIfOnline();
     });
+  }
+
+  public getVersion = () :Promise<{ version :string }> => {
+    return Promise.resolve(version.UPROXY_VERSION);
+  }
+
+  public handleUpdate = (details :{version :string}) => {
+    this.availableVersion_ = details.version;
+    ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 }  // class uProxyCore

@@ -6,6 +6,11 @@
 // a message from the core that overwrites while this window is open, and the
 // user clicks set, we will overwrite the core change.
 
+var ui = ui_context.ui;
+var core = ui_context.core;
+
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+
 export enum StatusState {
   EMPTY,
   SET,
@@ -60,6 +65,14 @@ Polymer({
     } catch (e) {
       this.status = StatusState.PARSE_ERROR;
     }
+  },
+  ready: function() {
+    this.ui = ui;
+    this.uproxy_core_api = uproxy_core_api;
+    this.refreshPortControl();
+  },
+  refreshPortControl: function() {
+    core.refreshPortControlSupport();
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'

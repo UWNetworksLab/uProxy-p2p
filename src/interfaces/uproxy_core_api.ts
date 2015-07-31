@@ -8,10 +8,17 @@ import ui = require('./ui');
 // --- Core <--> UI Interfaces ---
 
 export interface UserFeedback {
-  email     :string;
-  feedback  :string;
-  logs      :boolean;
-  browserInfo :string;
+  email        :string;
+  feedback     :string;
+  logs         :string;
+  browserInfo  ?:string;
+  proxyingId   ?:string;
+  feedbackType ?:UserFeedbackType;
+}
+
+export enum UserFeedbackType {
+  USER_INITIATED = 0,
+  PROXYING_FAILURE = 1
 }
 
 // Object containing description so it can be saved to storage.
@@ -27,12 +34,15 @@ export interface GlobalSettings {
   splashState : number;
   consoleFilter    :loggingTypes.Level;
   language         :string;
+  force_message_version :number;
 }
 export interface InitialState {
   networkNames :string[];
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
+  availableVersion :string;
   copyPasteState :CopyPasteState;
+  portControlSupport :PortControlSupport;
 }
 
 export interface ConnectionState {
@@ -85,7 +95,10 @@ export enum Command {
   GET_LOGS = 1016,
   GET_NAT_TYPE = 1017,
   PING_UNTIL_ONLINE = 1018,
-  GET_FULL_STATE = 1019
+  GET_FULL_STATE = 1019,
+  GET_VERSION = 1020,
+  HANDLE_CORE_UPDATE = 1021,
+  REFRESH_PORT_CONTROL = 1022,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -117,7 +130,9 @@ export enum Update {
   FAILED_TO_GIVE = 2020,
   POST_TO_CLOUDFRONT = 2021,
   COPYPASTE_MESSAGE = 2022,
-  FAILED_TO_GET = 2023
+  FAILED_TO_GET = 2023,
+  CORE_UPDATE_AVAILABLE = 2024,
+  PORT_CONTROL_STATUS = 2025,
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -156,6 +171,16 @@ export interface LoginArgs {
   network :string;
   reconnect :boolean;
 }
+
+export interface NetworkInfo {
+  natType ?:string;
+  pmpSupport :string;
+  pcpSupport :string;
+  upnpSupport :string;
+  errorMsg ?:string;
+};
+
+export enum PortControlSupport {PENDING, TRUE, FALSE};
 
 /**
  * The primary interface to the uProxy Core.
@@ -215,5 +240,7 @@ export interface CoreApi {
   onUpdate(update :Update, handler :Function) :void;
 
   pingUntilOnline(pingUrl :string) : Promise<void>;
+  getVersion() :Promise<{ version :string }>;
+
 }
 

@@ -115,8 +115,18 @@ ui_connector.onPromiseCommand(
     core.getNatType);
 
 ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.REFRESH_PORT_CONTROL,
+    core.refreshPortControlSupport);
+
+ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_FULL_STATE,
     core.getFullState);
+
+ui_connector.onCommand(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
+    core.handleUpdate);
+
+ui_connector.onPromiseCommand(uproxy_core_api.Command.GET_VERSION,
+    core.getVersion);
 
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
     globals.metrics, globals.storage, core.getNetworkInfoObj,
