@@ -577,6 +577,7 @@ export class UserInterface implements ui_constants.UiApi {
    * (e.g. chrome.proxy settings).
    * If user didn't end proxying, so if proxy session ended because of some
    * unexpected reason, user should be asked before reverting proxy settings.
+   * if data.instanceId is null, it means to stop active proxying.
    */
   public stopGettingInUiAndConfig = (data :social.StopProxyInfo) => {
     if (data.instanceId) {
@@ -747,7 +748,7 @@ export class UserInterface implements ui_constants.UiApi {
           this.reconnect(networkMsg.name);
         } else {
           if (this.instanceGettingAccessFrom_) {
-            this.stopGettingInUiAndConfig({instanceId :null, error: true});
+            this.stopGettingInUiAndConfig({instanceId: null, error: true});
           }
           this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
 
