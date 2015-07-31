@@ -1,9 +1,11 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/paper-item/paper-item.html'>
 <link rel="import" href="../../bower/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../bower/paper-dropdown/paper-dropdown.html">
 <link rel="import" href="../../bower/core-menu/core-menu.html">
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='network.html'>
 
@@ -97,7 +99,7 @@
       margin-left: 8px;
       margin-right: 8px;
     }
-    #intro1, #networks {
+    #intro1, #networks, #emailLogin {
       height: 100%;
     }
     #languageLink core-icon {
@@ -169,6 +171,25 @@
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
         {{ "LEARN_MORE_SOCIAL" | $$ }}
+      </uproxy-faq-link>
+    </div>
+
+    <!-- TODO: should this be in root to work with settings login? -->
+    <core-signals on-core-signal-show-email-login="{{ showEmailLogin }}"></core-signals>
+    <div vertical layout id='emailLogin' hidden?='{{SPLASH_STATES.EMAIL_LOGIN!==model.globalSettings.splashState}}'>
+       <!-- TODO: translate all text here -->
+      <div class='view' flex>
+        Sign in to uProxy
+        <paper-input-decorator label="name" layout vertical>
+          <input is='core-input' value='{{ userId }}' />
+        </paper-input-decorator>
+        <paper-input-decorator label="password" layout vertical>
+          <input is='core-input' type="password" value='{{ password }}' />
+        </paper-input-decorator>
+        <paper-button raised on-tap='{{ loginToEmail }}'>Sign in</paper-button>
+      </div>
+      <uproxy-faq-link anchor='emailLogin'>
+        Learn more
       </uproxy-faq-link>
     </div>
 

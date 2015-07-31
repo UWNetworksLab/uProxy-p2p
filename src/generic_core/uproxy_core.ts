@@ -120,13 +120,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     // TODO: save the auto-login default
 
-    return network.login(loginArgs.reconnect).then(() => {
+    return network.login(loginArgs.reconnect, loginArgs.userId, loginArgs.password).then(() => {
       delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,
         userId: network.myInstance.userId
       });
-    }).catch((e) => {
+    }).catch((e :Error) => {
       delete this.pendingNetworks_[networkName];
       throw e;
     });
@@ -432,11 +432,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';
       } else {
-        natInfoStr += 'NAT-PMP: ' + 
+        natInfoStr += 'NAT-PMP: ' +
                   (natInfo.pmpSupport ? 'Supported' : 'Not supported') + '\n';
-        natInfoStr += 'PCP: ' + 
+        natInfoStr += 'PCP: ' +
                   (natInfo.pcpSupport ? 'Supported' : 'Not supported') + '\n';
-        natInfoStr += 'UPnP IGD: ' + 
+        natInfoStr += 'UPnP IGD: ' +
                   (natInfo.upnpSupport ? 'Supported' : 'Not supported') + '\n';
       }
       return natInfoStr;

@@ -1,10 +1,13 @@
 /// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 /**
  * Script for the introductory splash screen.
  */
 
 declare var require :(path :string) => Object;
+
+import ui_constants = require('../../interfaces/ui');
 
 interface Language {
   description :string;
@@ -20,7 +23,8 @@ var model = ui_context.model;
 Polymer({
   SPLASH_STATES: {
     INTRO: 0,
-    NETWORKS: 1
+    NETWORKS: 1,
+    EMAIL_LOGIN: 2
   },
   setState: function(state :Number) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
@@ -49,6 +53,21 @@ Polymer({
       window.location.reload();
     }
   },
+  showEmailLogin: function() {
+    model.globalSettings.splashState = this.SPLASH_STATES.EMAIL_LOGIN;
+  },
+  loginToEmail: function() {
+    console.log('loginToEmail called, ' + this.userId + ', ' + this.password);
+    ui.login('Email', this.userId, this.password).then(() => {
+      // Fire an update-view event, which root.ts listens for.
+      this.fire('update-view', { view: ui_constants.View.ROSTER });
+      ui.bringUproxyToFront();
+    }).catch((e :Error) => {
+      console.warn('Did not log in ', e);
+    });
+  },
+  userId: '',
+  password: '',
   ready: function() {
     this.model = model;
     this.languages = languages;
