@@ -15,7 +15,7 @@ VNC=false
 KEEP=false
 
 function usage () {
-    echo "$0 [-v] [-k] [-b branch] [-r repo] [-l path] browserspec browserspec"
+    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] browserspec browserspec"
     echo "  -b BRANCH: have containers check out this BRANCH.  Default is dev."
     echo "  -r REPO: have containers clone this REPO.  "
     echo "           Default is https://github.com/uProxy/uproxy-lib.git."
