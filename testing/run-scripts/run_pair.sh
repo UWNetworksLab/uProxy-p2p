@@ -15,10 +15,11 @@ VNC=false
 KEEP=false
 
 function usage () {
-    echo "$0 [-v] [-k] [-b branch] [-r repo] browserspec browserspec"
+    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] browserspec browserspec"
     echo "  -b BRANCH: have containers check out this BRANCH.  Default is dev."
     echo "  -r REPO: have containers clone this REPO.  "
     echo "           Default is https://github.com/uProxy/uproxy-lib.git."
+    echo "  -p: path to pre-built uproxy-lib repository (overrides -b and -r)."
     echo "  -v: enable VNC on containers.  They will be ports 5900 and 5901."
     echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
     echo "  -h, -?: this help message."
@@ -30,12 +31,13 @@ function usage () {
     exit 1
 }
 
-while getopts kvb:r:h? opt; do
+while getopts kvb:r:p:h? opt; do
     case $opt in
         k) KEEP=true ;;
         v) VNC=true ;;
         b) BRANCH="-b $OPTARG" ;;
         r) REPO="-r $OPTARG" ;;
+        p) PREBUILT="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -50,6 +52,13 @@ if $VNC; then
     VNCOPTS1="-p 5900:5900"
     VNCOPTS2="-p 5901:5900"
     RUNARGS="$RUNARGS -v"
+fi
+
+if [ "$PREBUILT" ]
+then
+    RUNARGS="$RUNARGS -p"
+else
+    RUNARGS="$RUNARGS $REPO $BRANCH"
 fi
 
 function make_image () {
@@ -79,20 +88,20 @@ fi
 # $2 is the image to run, and the rest are flags.
 # TODO: Take a -b BRANCH arg and pass it to load-adventure.sh
 function run_docker () {
-    # echo "run_docker " $*
-    HOSTARGS=
-    # "--add-host stun1.l.google.com:0.0.0.0 --add-host stun.l.google.com:0.0.0.0"
-    NAME=$1
-    IMAGE=$2
-    IMAGENAME=uproxy/$IMAGE
+    local NAME=$1
+    local IMAGE=$2
     shift; shift
+    IMAGENAME=uproxy/$IMAGE
+    local HOSTARGS=
     if $KEEP
     then
         HOSTARGS="$HOSTARGS --rm=false"
-    else
-        HOSTARGS="$HOSTARGS"
     fi
-    docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-adventure.sh $REPO $BRANCH $RUNARGS -w
+    if [ ! -z "$PREBUILT" ]
+    then
+        HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy-lib"
+    fi
+    docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-adventure.sh $RUNARGS -w
 }
 
 run_docker uproxy-getter $1 $VNCOPTS1 -p 9000:9000 -p 9999:9999

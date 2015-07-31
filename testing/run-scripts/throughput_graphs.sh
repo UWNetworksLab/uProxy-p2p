@@ -8,6 +8,17 @@ set -e
 FLOOD_SIZE_MB=25
 FLOOD_MAX_SPEED=5M
 
+function usage () {
+    echo "$0 path"
+    echo "  path is the path to a pre-built uproxy-lib repo"
+    exit 1
+}
+
+if [ $# -lt 1 ]
+then
+    usage
+fi
+
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
 # Where is flood server?
@@ -39,7 +50,7 @@ do
     done
 
     pushd ${BASH_SOURCE%/*} > /dev/null
-    ./run_pair.sh -v -b dev $browser-$ver $browser-$ver
+    ./run_pair.sh -p $1 $browser-$ver $browser-$ver
     popd > /dev/null
 
     # TODO: make this work on Mac...approximate code below
