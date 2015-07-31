@@ -40,14 +40,14 @@ server.listen().then((actualEndpoint) => {
     });
 
     connection.dataFromSocketQueue.setSyncHandler((data:ArrayBuffer): void => {
-			log.info('%1: received %2 bytes', id, data.byteLength);
-			if (arraybuffers.arrayBufferToHexString(data) === CTRL_D_HEX_STR_CODE) {
-				connection.close();
-			} else {
-				connection.send(data);
-			}
-  	});
-	});
+      log.info('%1: received %2 bytes', id, data.byteLength);
+      if (arraybuffers.arrayBufferToHexString(data) === CTRL_D_HEX_STR_CODE) {
+        connection.close();
+      } else {
+        connection.send(data);
+      }
+    });
+  });
 }).catch((e:Error) => {
   log.error('failed to listen: %2', e.message);
 });
