@@ -142,7 +142,9 @@ export var remoteProxyInstance :RemoteInstance = null;
                 }).then((cipherText :string) => {
                   data.data = cipherText;
                   this.user.network.send(this.user, clientId, data);
-                })
+                }).catch((e) => {
+                  log.error('Error encrypting message ', e);
+                });
           } else {
             this.user.network.send(this.user, clientId, data);
           }
@@ -206,7 +208,9 @@ export var remoteProxyInstance :RemoteInstance = null;
           var decryptedSignal =
               JSON.parse(arraybuffers.arrayBufferToString(result.data));
           return this.handleDecryptedSignal_(msg.type, msg.version, decryptedSignal);
-        })
+        }).catch((e) => {
+          log.error('Error decrypting message ', e);
+        });
       }
     }
 
@@ -224,7 +228,7 @@ export var remoteProxyInstance :RemoteInstance = null;
         // Create a new RtcToNet instance each time a new round of client peer
         // messages begins. The type field check is so pre-bridge,
         // MESSAGE_VERSION = 1, clients can initiate.
-        // TODO: have RemoteConnection do this, based on SignallingMetadata 
+        // TODO: have RemoteConnection do this, based on SignallingMetadata
         if (signalFromRemote.first ||
             ((<signals.Message>signalFromRemote).type === signals.Type.OFFER)) {
           this.connection_.resetSharerCreated();
