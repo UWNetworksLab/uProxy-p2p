@@ -212,6 +212,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public availableVersion :string = null;
 
+  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -387,6 +389,9 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
+
+    core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+                  this.setPortControlSupport_);
 
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
@@ -987,6 +992,8 @@ export class UserInterface implements ui_constants.UiApi {
       this.updateSharingStatusBar_();
     }
 
+    this.portControlSupport = state.portControlSupport;
+
     // state of online networks may have changed, update it
     this.updateIcon_();
   }
@@ -1008,6 +1015,10 @@ export class UserInterface implements ui_constants.UiApi {
 
   private coreUpdateAvailable_ = (data :{version :string}) => {
     this.availableVersion = data.version;
+  }
+
+  private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
+    this.portControlSupport = support;
   }
 } // class UserInterface
 
