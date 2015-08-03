@@ -698,7 +698,8 @@ export class UserInterface implements ui_constants.UiApi {
       this.browserApi.setIcon(Constants.GETTING_ICON);
     } else if (isGiving) {
       this.browserApi.setIcon(Constants.SHARING_ICON);
-    } else if (this.model.onlineNetworks.length > 0) {
+    } else if (this.model.onlineNetworks.length > 0 ||
+        !this.browserApi.hasLoggedInAfterInstall) {
       this.browserApi.setIcon(Constants.DEFAULT_ICON);
     } else {
       this.browserApi.setIcon(Constants.LOGGED_OUT_ICON);
@@ -847,7 +848,9 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string) : Promise<void> => {
-    return this.core.login({ network : network, reconnect: false }).catch((e :Error) => {
+    return this.core.login({ network : network, reconnect: false }).then(() => {
+      this.browserApi.hasLoggedInAfterInstall = true;
+    }).catch((e :Error) => {
       this.showNotification(this.i18n_t("ERROR_SIGNING_IN", {network: network}));
       throw e;
     });
