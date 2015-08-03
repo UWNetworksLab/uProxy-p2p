@@ -28,11 +28,9 @@ var flags = Ci.nsIProxyInfo.TRANSPARENT_PROXY_RESOLVES_HOST;
 
 var proxyConfig = {
   startUsingProxy: function(endpoint) {
-    if (!running) {
-      running = true;
-      proxyinfo = pps.newProxyInfo('socks', endpoint.address, endpoint.port, flags, 0, null);
-      pps.registerFilter(filter, 0);
-    }
+    running = true;
+    proxyinfo = pps.newProxyInfo('socks', endpoint.address, endpoint.port, flags, 0, null);
+    pps.registerFilter(filter, 0);
   },
   stopUsingProxy: function() {
     if (running) {
