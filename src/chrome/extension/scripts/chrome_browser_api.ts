@@ -100,6 +100,8 @@ class ChromeBrowserApi implements BrowserAPI {
         this.popupState_ = PopupState.NOT_LAUNCHED;
       }
     });
+
+    chrome.browserAction.setBadgeBackgroundColor({color: "#009968"});
   }
 
   private canControlProxy_ = (level :string) :boolean => {
@@ -268,6 +270,10 @@ class ChromeBrowserApi implements BrowserAPI {
       xhr.open('POST', externalDomain + cloudfrontPath, true);
       xhr.send(params);
     }).then(removeSendHeaderListener, removeSendHeaderListener);
+  }
+
+  public setBadgeNotification = (notification :string) => {
+    chrome.browserAction.setBadgeText({text: notification});
   }
 }
 

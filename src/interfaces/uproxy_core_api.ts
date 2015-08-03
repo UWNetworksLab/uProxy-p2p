@@ -99,6 +99,7 @@ export enum Command {
   GET_VERSION = 1020,
   HANDLE_CORE_UPDATE = 1021,
   REFRESH_PORT_CONTROL = 1022,
+  CREDENTIALS_ERROR = 1023
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
