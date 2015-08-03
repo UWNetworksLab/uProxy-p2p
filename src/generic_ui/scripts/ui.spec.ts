@@ -50,7 +50,8 @@ describe('UI.UserInterface', () => {
          'showNotification',
          'on',
          'handlePopupLaunch',
-         'bringUproxyToFront'
+         'bringUproxyToFront',
+         'setBadgeNotification'
          ]);
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');

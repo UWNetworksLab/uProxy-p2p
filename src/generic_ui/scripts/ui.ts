@@ -386,7 +386,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
-    core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+    core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.setPortControlSupport_);
 
     browserApi.on('urlData', this.handleUrlData);
@@ -651,6 +651,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public startGettingInUi = () => {
     this.updateIcon_(true);
+    this.updateBadgeNotification_();
   }
 
   /**
@@ -677,6 +678,7 @@ export class UserInterface implements ui_constants.UiApi {
     */
   public startGivingInUi = () => {
     this.updateIcon_(null, true);
+    this.updateBadgeNotification_();
   }
 
   private updateIcon_ = (isGetting?:boolean, isGiving?:boolean) => {
@@ -831,6 +833,7 @@ export class UserInterface implements ui_constants.UiApi {
         oldUserCategories.getTab, newUserCategories.getTab);
     categorizeUser(user, this.model.contacts.shareAccessContacts,
         oldUserCategories.shareTab, newUserCategories.shareTab);
+    this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
   };
@@ -1019,6 +1022,22 @@ export class UserInterface implements ui_constants.UiApi {
 
   private coreUpdateAvailable_ = (data :{version :string}) => {
     this.availableVersion = data.version;
+  }
+
+  private updateBadgeNotification_ = () => {
+    // Don't show notifications if the user is giving or getting access.
+    if (this.isGivingAccess() || this.isGettingAccess()) {
+      this.browserApi.setBadgeNotification('');
+      return;
+    }
+
+    var numOfNotifications = this.model.contacts.getAccessContacts.pending.length +
+        this.model.contacts.shareAccessContacts.pending.length;
+    if (numOfNotifications === 0) {
+      this.browserApi.setBadgeNotification('');
+    } else {
+      this.browserApi.setBadgeNotification(numOfNotifications.toString());
+    }
   }
 
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
