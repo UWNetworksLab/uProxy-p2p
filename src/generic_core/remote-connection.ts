@@ -69,7 +69,8 @@ var generateProxyingSessionId_ = (): string => {
     private proxyingId_: string;
 
     constructor(
-      sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void
+      sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void,
+      private userId_?:string
     ) {
       this.sendUpdate_ = sendUpdate;
       this.resetSharerCreated();
@@ -142,7 +143,7 @@ var generateProxyingSessionId_ = (): string => {
         pc = bridge.best('rtctonet', config);
       }
 
-      this.rtcToNet_ = new rtc_to_net.RtcToNet();
+      this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
       this.rtcToNet_.start({
         allowNonUnicast: globals.settings.allowNonUnicast
       }, pc);
@@ -273,21 +274,30 @@ var generateProxyingSessionId_ = (): string => {
       };
 
       var pc: peerconnection.PeerConnection<Object>;
-      if (remoteVersion === 1) {
-        log.debug('peer is running client version 1, using old peerconnection');
-        pc = new peerconnection.PeerConnectionClass(
-          freedom['core.rtcpeerconnection'](config),
-          'sockstortc');
-      } else if (remoteVersion === 2) {
-        log.debug('peer is running client version 2, using bridge without obfuscation');
-        pc = bridge.preObfuscation('sockstortc', config);
-      } else if (remoteVersion === 3) {
-        log.debug('peer is running client version 3, using bridge with basicObfuscation');
-        pc = bridge.basicObfuscation('sockstortc', config);
-      } else {
-        log.debug('peer is running client version >=4, using holographic ICE');
-        pc = bridge.best('sockstortc', config);
-      }
+
+      var localVersion = globals.effectiveMessageVersion();
+      var commonVersion = Math.min(localVersion, remoteVersion);
+      log.info('lowest shared client version is %1 (me: %2, peer: %3)',
+          commonVersion, localVersion, remoteVersion);
+      switch (commonVersion) {
+        case 1:
+          log.debug('using old peerconnection');
+          pc = new peerconnection.PeerConnectionClass(
+            freedom['core.rtcpeerconnection'](config),
+            'sockstortc');
+          break;
+        case 2:
+          log.debug('using bridge without obfuscation');
+          pc = bridge.preObfuscation('sockstortc', config);
+          break;
+        case 3:
+          log.debug('using bridge with basicObfuscation');
+          pc = bridge.basicObfuscation('sockstortc', config);
+          break;
+        default:
+          log.debug('using holographic ICE');
+          pc = bridge.best('sockstortc', config);
+        }
 
       return this.socksToRtc_.start(tcpServer, pc).then(
           (endpoint :net.Endpoint) => {

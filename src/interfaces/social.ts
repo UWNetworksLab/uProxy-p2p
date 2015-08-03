@@ -26,10 +26,15 @@ export interface BaseUser {
   name :string;
 }
 
+export interface StopProxyInfo {
+  instanceId :string;
+  error      :boolean;
+}
+
 export interface LocalInstanceState {
   instanceId  :string;
   userId      :string;
-  userName        :string;
+  userName    :string;
   imageData   :string;
   keyHash     :string;
 }

@@ -31,7 +31,9 @@ freedom('generic_core/freedom-module.json', {
   'oauth': [() => { return new Chrome_oauth(oauthOptions); }]
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   uProxyAppChannel = uProxyModuleFactory();
-  oauthOptions.connector = new ChromeUIConnector(uProxyAppChannel);
+  var chromeUIConnector = new ChromeUIConnector(uProxyAppChannel);
+
+  oauthOptions.connector = chromeUIConnector;
 });
 
 // Reply to pings from the uproxy website that are checking if the

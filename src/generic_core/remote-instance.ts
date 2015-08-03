@@ -29,7 +29,6 @@ import Persistent = require('../interfaces/persistent');
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
-export var remoteProxyInstance :RemoteInstance = null;
 
 // module Core {
   var log :logging.Log = new logging.Log('remote-instance');
@@ -105,7 +104,8 @@ export var remoteProxyInstance :RemoteInstance = null;
         // The User which this instance belongs to.
         public user :remote_user.User,
         public instanceId :string) {
-      this.connection_ = new remote_connection.RemoteConnection(this.handleConnectionUpdate_);
+      this.connection_ = new remote_connection.RemoteConnection(
+          this.handleConnectionUpdate_, this.user.userId);
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state:RemoteInstanceState) => {
@@ -142,7 +142,6 @@ export var remoteProxyInstance :RemoteInstance = null;
             instanceId: this.instanceId,
             error: data
           });
-          remoteProxyInstance = null;
           break;
         case uproxy_core_api.Update.STATE:
           this.bytesSent = data.bytesSent;
@@ -343,8 +342,8 @@ export var remoteProxyInstance :RemoteInstance = null;
     private saveToStorage = () => {
       return this.onceLoaded.then(() => {
         var state = this.currentState();
-        return storage.save<RemoteInstanceState>(this.getStorePath(), state)
-        .then((old) => {
+        return storage.save(this.getStorePath(), state)
+        .then(() => {
           log.debug('Saved instance to storage', this.instanceId);
         }).catch((e) => {
           log.error('Failed saving instance to storage', this.instanceId, e.stack);

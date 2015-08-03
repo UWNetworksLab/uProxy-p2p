@@ -86,6 +86,10 @@ function setUpConnection(freedom, panel, button) {
     });
   });
 
+  panel.port.on('setBadgeNotification', function(notification) {
+    button.badge = notification;
+  });
+
   /**
    * Install a handler for promise emits received from the panel.
    * Promise emits return an ack or error to the panel.

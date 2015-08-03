@@ -27,9 +27,9 @@
     <uproxy-dialog backdrop opened='{{ model.reconnecting }}'
         layered='false' id='reconnectDialog' autoCloseDisabled='true'>
       <div>
-        <p>{{ 'attemptingReconnect' | $$ }}</p>
+        <p>{{ "ATTEMPTING_RECONNECT" | $$ }}</p>
         <paper-progress indeterminate='true'></paper-progress>
-        <paper-button on-tap='{{ logout }}'>{{ 'logout' | $$ }}</paper-button>
+        <paper-button on-tap='{{ logout }}'>{{ "LOGOUT" | $$ }}</paper-button>
       </div>
     </uproxy-dialog>
 

@@ -43,5 +43,10 @@ export interface BrowserAPI {
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
   on(name :'proxyDisconnected', callback :Function) :void;
 
-  fulfillLaunched() :void;
+  // should be called when popup is launched and ready for use
+  handlePopupLaunch() :void;
+
+  // Overlay the given text as a "badge" over the uProxy extension icon.
+  // The notification can be up to 4 characters.
+  setBadgeNotification(notification :string) :void;
 }
