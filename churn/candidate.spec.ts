@@ -71,11 +71,10 @@ describe("extractEndpointFromCandidateLine", function() {
   });
 
   it('relay candidate', () => {
-    expect(function() {
-      Candidate.fromRTCIceCandidate({
-        candidate: 'candidate:9097 1 udp 4175 127.0.0.1 50840 typ relay raddr 172.26.108.25 rport 56635'
-      });
-    }).toThrow();
+    var c = Candidate.fromRTCIceCandidate({
+      candidate: 'candidate:9097 1 udp 4175 127.0.0.1 50840 typ relay raddr 172.26.108.25 rport 56635'
+    });
+    expect(c.getLocalEndpoint).toThrow();
   });
 
   // Ensure TCP candidates don't cause a problem. See:
@@ -97,7 +96,7 @@ describe("extractEndpointFromCandidateLine", function() {
     expect(c.extensions[0]).toEqual({key: 'tcptype', value: 'active'});
     expect(c.extensions[1]).toEqual({key: 'generation', value: '0'});
 
-    expect(c.getLocalEndpoint()).toThrow();
+    expect(c.getLocalEndpoint).toThrow();
 
     // Roundtrip
     expect(c.toRTCIceCandidate()).toEqual(rtcIceCandidate);
