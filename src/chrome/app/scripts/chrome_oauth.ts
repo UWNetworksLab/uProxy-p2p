@@ -39,10 +39,11 @@ class Chrome_oauth {
   public launchAuthFlow(
       authUrl:string,
       stateObj:{redirect:string},
+      interactive:boolean,
       continuation:(credentials:Object)=> void) {
     this.options_.connector.sendToUI(
         uproxy_core_api.Update.GET_CREDENTIALS,
-        {url :authUrl, redirect :stateObj.redirect});
+        {url: authUrl, redirect: stateObj.redirect, interactive: interactive});
     this.options_.connector.setOnCredentials(continuation);
   }
 
