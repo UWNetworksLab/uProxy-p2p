@@ -1038,6 +1038,7 @@ export class UserInterface implements ui_constants.UiApi {
     } else {
       this.browserApi.setBadgeNotification(numOfNotifications.toString());
     }
+  }
 
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
     this.portControlSupport = support;
