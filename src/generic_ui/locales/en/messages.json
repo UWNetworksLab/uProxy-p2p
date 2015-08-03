@@ -161,19 +161,27 @@
   },
   "COPY_CONNECTION_LINK": {
     "description": "Instructions for the user to request access from a friend with a one-time link.",
-    "message": "To request access from a friend, copy and paste this URL to them over a secure channel"
+    "message": "To request access from a friend, copy and paste this link to them over a channel you trust."
   },
   "LOADING": {
     "description": "Message show when something is taking time to load.",
     "message": "Loading..."
   },
   "FRIEND_NEEDS_TO_CLICK": {
-    "description": "Instructions telling the user that starting a one-time connection is waiting for action from their friend.",
-    "message": "To finish setting up the connection, your friend needs to click on the link and send you a link from their uProxy client.  When you click on it, you'll be ready to start getting access."
+    "description": "Instructions telling the user their friend needs to take an action to finish setting up the one-time connection and then their friend will send back a link.",
+    "message": "After your friend has opened the link, they'll send a link to you in return. Click on the link or paste it below."
   },
-  "ONE_TIME_SUCCESS": {
-    "description": "Inform the user that a one-time connection was successfully established.",
-    "message": "Success! A one-time connection has been established."
+  "ONE_TIME_SHARING_SUCCESS": {
+    "description": "Inform the user that they are now successfully sharing access through a one-time connection",
+    "message": "You are now sharing access with your friend."
+  },
+  "ONE_TIME_SHARING_STOP_DIRECTIONS": {
+    "description": "Directions for how to stop sharing access; should refer to the act of clicking the button below which should also have a fairly obvious label.",
+    "message": "To stop sharing access, click the button below."
+  },
+  "ONE_TIME_GETTING_SUCCESS": {
+    "description": "Inform the user that they have now successfully set up a connection through which they can get access.  This message should in no way imply that they are actually getting access (there will be another message prompting them to start using the connection).",
+    "message": "Success! A one time connection has been set up successfully."
   },
   "START_ONE_TIME_INSTRUCTION": {
     "description": "",
@@ -222,6 +230,18 @@
   "STOP_ONE_TIME_SHARING_BEFORE_NEW": {
     "description": "Instruction for the user to stop a current one-time connection if they want to start a new one.",
     "message": "If you would like to start a new one-time connection, press \"Stop Sharing Access\" first."
+  },
+  "ONE_TIME_LINK_INPUT_DESCRIPTION": {
+    "description": "Text (appearing within the input box) informing the user that they can paste the one-time connection link they get back from their friend here.  It should be clear that it is the link from the friend and not the link they just copied above.",
+    "message": "Link from your friend"
+  },
+  "ONE_TIME_LINK_INPUT_ERROR": {
+    "description": "Error message to show the user if they paste a poorly-formatted link into a texbox.  Should prompt them to try pasting the link again.",
+    "message": "Unable to recognize this link. Please check for accuracy and try again."
+  },
+  "SUBMIT_ONE_TIME_LINK": {
+    "description": "Text for a button the user may click after pasting in a (probably valid) one-time connection link into a textbox above the button.",
+    "message": "Submit"
   },
   "GO_BACK": {
     "description": "Go back to the main page from the one-time connection page.",
@@ -587,6 +607,10 @@
     "description": "Message in a status bar that is visible when the user is getting access from a friend.",
     "message": "Getting access from __name__"
   },
+  "GETTING_ACCESS_FROM_FRIEND": {
+    "description": "Message in a status bar that is visible when the user is getting access from a nameless friend",
+    "message": "Currently getting access from a friend"
+  },
   "SHARING_ACCESS_WITH_ONE": {
     "description": "Message in a status bar that is visible when one friend is getting access through the user.",
     "message": "Sharing access with __name__"
@@ -598,6 +622,10 @@
   "SHARING_ACCESS_WITH_MANY": {
     "description": "Message in a status bar that is visible when three or more friends are getting access through the user.",
     "message": "Sharing access with __name__ and __numOthers__ others"
+  },
+  "SHARING_ACCESS_WITH_FRIEND": {
+    "description": "Message in a status bar that is visible when the user is sharing access with a nameless friend",
+    "message": "Currently sharing access with a friend"
   },
   "LOGGED_OUT": {
     "description": "Notification for when the user has been logged out of the social network.",
@@ -647,6 +675,10 @@
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
   },
+  "RESTART_PROXYING": {
+    "description": "If proxy connection gets disconnected restart the connection",
+    "message": "Reconnect"
+  },
   "UPDATE_AVAILABLE": {
     "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",
     "message": "An update is available"
@@ -654,5 +686,29 @@
   "RESTART_UPROXY_UPDATE": {
     "description": "A link the user can click on to restart uProxy and permorm an update",
     "message": "Restart to update"
+  },
+  "PORT_CONTROL_TITLE": {
+    "description": "Title for the port control section in advanced settings",
+    "message": "Port control status"
+  },
+  "PORT_CONTROL_SUPPORTED": {
+    "description": "NAT-PMP, PCP, or UPnP is supported in the router",
+    "message": "Your router has port control enabled."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED": {
+    "description": "NAT-PMP, PCP, and UPnP are not supported in the router",
+    "message": "Your router does not have port control enabled."
+  },
+  "PORT_CONTROL_PENDING": {
+    "description": "uProxy is currently probing router for port control support",
+    "message": "Probing router for port control support..."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO": {
+    "description": "Extra information displayed when port control is not supported",
+    "message": "You may be able to enable port control to make uProxy more reliable."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
+    "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
+    "message": "More info."
   }
 }

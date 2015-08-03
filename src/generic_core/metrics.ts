@@ -3,7 +3,7 @@
 import crypto = require('../../../third_party/uproxy-lib/crypto/random');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import storage = require('../interfaces/storage');
-import uproxy_core = require('./uproxy_core');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 var log :logging.Log = new logging.Log('metrics');
 
@@ -63,7 +63,7 @@ export class Metrics {
     }
   }
 
-  public getReport = (natInfo:uproxy_core.NetworkInfo) :Promise<Object> => {
+  public getReport = (natInfo:uproxy_core_api.NetworkInfo) :Promise<Object> => {
     try {
       crypto.randomUint32();
     } catch (e) {
@@ -151,7 +151,7 @@ export class DailyMetricsReporter {
     // method of uproxy_core.uProxyCore, instead of passing the function in
     // as a parameter. This can be done after the circular dependency is fixed.
     // See: https://github.com/uProxy/uproxy/issues/1660
-    this.getNetworkInfoObj_().then((natInfo:uproxy_core.NetworkInfo) => {
+    this.getNetworkInfoObj_().then((natInfo:uproxy_core_api.NetworkInfo) => {
       return this.metrics_.getReport(natInfo);
     }).then((payload:Object) => {
       this.onReportCallback_(payload);
