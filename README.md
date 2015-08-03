@@ -61,7 +61,7 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
  1. In the root uProxy directory, run:
    * In OS X or Linux, run `./setup.sh install` - this will set up build tools and third-party dependencies.
-   * In Windows, run `setup.cmd install` instead.
+   * In Windows, run `.\setup.cmd install` instead (in cmd or PowerShell).
    * Then run `grunt` - this will build everything, including uProxy for Chrome and Firefox.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `./setup.sh install` to update these dependencies, then rerun `grunt`
