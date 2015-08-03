@@ -651,7 +651,6 @@ export class UserInterface implements ui_constants.UiApi {
 
   public startGettingInUi = () => {
     this.updateIcon_(true);
-    this.updateBadgeNotification_();
   }
 
   /**
@@ -678,7 +677,6 @@ export class UserInterface implements ui_constants.UiApi {
     */
   public startGivingInUi = () => {
     this.updateIcon_(null, true);
-    this.updateBadgeNotification_();
   }
 
   private updateIcon_ = (isGetting?:boolean, isGiving?:boolean) => {
@@ -701,9 +699,14 @@ export class UserInterface implements ui_constants.UiApi {
     } else if (this.model.onlineNetworks.length > 0 ||
         !this.browserApi.hasLoggedInAfterInstall) {
       this.browserApi.setIcon(Constants.DEFAULT_ICON);
+      this.updateBadgeNotification_();
+      return;
     } else {
       this.browserApi.setIcon(Constants.LOGGED_OUT_ICON);
     }
+
+    // For all icons except the default icon, do not show notifications.
+    this.browserApi.setBadgeNotification('');
   }
 
   /**
