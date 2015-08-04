@@ -175,9 +175,9 @@ export interface LoginArgs {
 
 export interface NetworkInfo {
   natType ?:string;
-  pmpSupport :string;
-  pcpSupport :string;
-  upnpSupport :string;
+  pmpSupport :boolean;
+  pcpSupport :boolean;
+  upnpSupport :boolean;
   errorMsg ?:string;
 };
 
