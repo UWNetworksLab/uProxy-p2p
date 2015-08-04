@@ -8,7 +8,7 @@ import sys
 import time
 import urllib.parse
 
-FLOOD_SIZE_MB = 50
+FLOOD_SIZE_MB = 64
 FLOOD_MAX_SPEED = '5M'
 
 parser = argparse.ArgumentParser(
