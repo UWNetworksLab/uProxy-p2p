@@ -54,11 +54,11 @@ function get_firefox () {
             PATTERN='*.tar.bz2'
             ;;
         beta)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/$(date +%Y/%m/%Y-%m-%e-mozilla-beta-debug)
-            PATTERN='*linux-x86_64.tar.bz2'
+            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest-beta/linux-x86_64/en-US/
+            PATTERN='*.tar.bz2'
             ;;
         canary)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/$(date +%Y/%m/%Y-%m-%e-mozilla-aurora-debug)
+            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-aurora/
             PATTERN='*linux-x86_64.tar.bz2'
             ;;
         *)
@@ -67,8 +67,8 @@ function get_firefox () {
     esac
     cat <<EOF
 RUN echo BROWSER=firefox >/etc/test.conf
-RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 --no-parent -A '$PATTERN' $URL
-RUN cd /usr/share ; tar xf /tmp/ff/*/*/*/*/*/*/*/*/*.bz2
+RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 -np -nd -A '$PATTERN' $URL
+RUN cd /usr/share ; tar xf /tmp/ff/*.bz2
 RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
 RUN mkdir -p /tmp/jetpack ; cd /tmp/jetpack ; wget https://ftp.mozilla.org/pub/mozilla.org/labs/jetpack/jetpack-sdk-latest.tar.gz ; tar xvzf jetpack-sdk-latest.tar.gz
 EOF
