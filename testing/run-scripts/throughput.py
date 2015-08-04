@@ -60,19 +60,17 @@ for browser in browsers:
 print('** raw numbers: ' + str(throughput))
 
 # CSV, e.g.:
-#   throughput,chrome,firefox
-#   stable,200,500
-#   beta,250,600
-#   canary,250,700
-# Group by version because Datacopia doesn't like <3 groups.
+#   throughput,stable,beta,canary
+#   chrome,200,250,400
+#   firefox,500,500,600
 stringio = io.StringIO()
 writer = csv.writer(stringio)
 headers = ['throughput']
-headers.extend(browsers)
+headers.extend(versions)
 writer.writerow(headers)
-for version in versions:
-  row = [version]
-  for browser in browsers:
+for browser in browsers:
+  row = [browser]
+  for version in versions:
     row.append(throughput[browser, version])
   writer.writerow(row)
 print('** CSV')
