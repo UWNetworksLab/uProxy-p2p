@@ -33,8 +33,8 @@ export class Metrics {
     this.metricsProvider_ = freedom['metrics']({
       name: 'uProxyMetrics',
       definition: {'success-v1': counterMetric, 'failure-v1': counterMetric,
-                   'nat-type-v1': natMetric, 'pmp-v1': natMetric,
-                   'pcp-v1': natMetric, 'upnp-v1': natMetric}
+                   'nat-type-v2': natMetric, 'pmp-v2': natMetric,
+                   'pcp-v2': natMetric, 'upnp-v2': natMetric}
     });
 
     this.onceLoaded_ = this.storage_.load('metrics').then(
@@ -83,13 +83,13 @@ export class Metrics {
       var failureReport =
         this.metricsProvider_.report('failure-v1', this.data_.failure);
       var natTypeReport =
-        this.metricsProvider_.report('nat-type-v1', natInfo.natType);
+        this.metricsProvider_.report('nat-type-v2', natInfo.natType);
       var pmpReport =
-        this.metricsProvider_.report('pmp-v1', natInfo.pmpSupport.toString());
+        this.metricsProvider_.report('pmp-v2', natInfo.pmpSupport.toString());
       var pcpReport =
-        this.metricsProvider_.report('pcp-v1', natInfo.pcpSupport.toString());
+        this.metricsProvider_.report('pcp-v2', natInfo.pcpSupport.toString());
       var upnpReport =
-        this.metricsProvider_.report('upnp-v1', natInfo.upnpSupport.toString());
+        this.metricsProvider_.report('upnp-v2', natInfo.upnpSupport.toString());
 
       return Promise.all([successReport, failureReport, natTypeReport,
                           pmpReport, pcpReport, upnpReport]).then(() => {
