@@ -33,3 +33,7 @@ window.addEventListener('message', function(event) {
     self.port.emit('getLogs', event.data);
   }
 }, false);
+
+// Let the page which has loaded this content script know that uProxy is
+// installed.
+window.postMessage({ installed : true, data: false }, '*');

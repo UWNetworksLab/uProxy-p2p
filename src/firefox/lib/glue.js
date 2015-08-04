@@ -136,7 +136,7 @@ function setUpConnection(freedom, panel, button) {
 
   /* Allow any pages in the addon to send messages to the UI or the core */
   pagemod.PageMod({
-    include: self.data.url('*'),
+    include: ["https://test-dot-uproxysite.appspot.com/*", self.data.url('*')],
     contentScriptFile: self.data.url('scripts/content-proxy.js'),
     onAttach: function(worker) {
       worker.port.on('update', function(data) {
