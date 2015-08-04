@@ -65,7 +65,7 @@ goto:eof
 
 :installThirdParty
 	call :runAndAssertCmd "%NPM_BIN_DIR%bower install --allow-root"
-	call :runAndAssertCmd "%NPM_BIN_DIR%tsd reinstall --config ./third_party/tsd.json"
+	call :runAndAssertCmd "%NPM_BIN_DIR%tsd reinstall --config .\third_party\tsd.json"
 	call :runAndAssertCmd "%NPM_BIN_DIR%grunt copy:thirdParty"
 goto:eof
 
