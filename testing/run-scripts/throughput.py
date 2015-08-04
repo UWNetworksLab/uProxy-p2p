@@ -8,15 +8,17 @@ import sys
 import time
 import urllib.parse
 
-FLOOD_SIZE_MB = 20
+FLOOD_SIZE_MB = 50
 FLOOD_MAX_SPEED = '5M'
 
-parser = argparse.ArgumentParser(description='Measure SOCKS proxy throughput across browser versions.')
+parser = argparse.ArgumentParser(
+    description='Measure SOCKS proxy throughput across browser versions.')
 parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
 args = parser.parse_args()
 
 # Where is flood server?
-flood_ip = subprocess.check_output('./flood.sh ' + str(FLOOD_SIZE_MB) + ' ' + FLOOD_MAX_SPEED, shell=True, universal_newlines=True).strip()
+flood_ip = subprocess.check_output('./flood.sh ' + str(FLOOD_SIZE_MB) + ' ' +
+    FLOOD_MAX_SPEED, shell=True, universal_newlines=True).strip()
 print('** using flood server at ' + str(flood_ip))
 
 browsers = ['chrome', 'firefox']
@@ -34,18 +36,21 @@ for browser in browsers:
       # TODO: check first if running, to avoid spurious warnings
       subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
       spec = browser + '-' + version
-      subprocess.call('./run_pair.sh -p ' + args.clone_path + ' ' + spec + ' ' + spec, shell=True, timeout=15)
+      subprocess.call('./run_pair.sh -p ' + args.clone_path + ' ' +
+          spec + ' ' + spec, shell=True, timeout=15)
 
       # time.time is good for Unix-like systems.
       start = time.time()
-      if subprocess.call(['nc', '-X', '5', '-x', 'localhost:9999', flood_ip, '1224']) != 0:
+      if subprocess.call(['nc', '-X', '5', '-x', 'localhost:9999',
+          flood_ip, '1224']) != 0:
         raise Exception('nc failed, proxy probably did not start')
       end = time.time()
 
       elapsed = round(end - start, 2)
       result = int((FLOOD_SIZE_MB / elapsed) * 1000)
 
-      print('** throughput for ' + browser + '/' + version + ': ' + str(result) + 'K/sec')
+      print('** throughput for ' + browser + '/' + version + ': ' +
+          str(result) + 'K/sec')
     except Exception as e:
       print('** failed to test ' + browser + '/' + version + ': ' + str(e))
 
@@ -74,4 +79,5 @@ print('** CSV')
 print(stringio.getvalue())
 
 # URL which uses Datacopia's oh-so-simple GET-based API:
-print('** http://www.datacopia.com/?data=' + urllib.parse.quote(stringio.getvalue()))
+print('** http://www.datacopia.com/?data=' + urllib.parse.quote(
+    stringio.getvalue()))
