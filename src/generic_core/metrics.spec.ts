@@ -6,9 +6,9 @@ var MockStorage = mock_storage.MockStorage;
 
 var networkInfo = {
   natType: 'SymmetricNAT',
-  pmpSupport: 'Supported',
-  pcpSupport: 'Supported',
-  upnpSupport: 'Not supported'
+  pmpSupport: true,
+  pcpSupport: true,
+  upnpSupport: false
 };
 
 var getNetworkInfoObj = () => {
@@ -63,11 +63,11 @@ describe('metrics_module.Metrics', () => {
       expect(payload['nat-type-v1']).toBeDefined();
       expect(payload['nat-type-v1']).not.toEqual('SymmetricNAT');
       expect(payload['pmp-v1']).toBeDefined();
-      expect(payload['pmp-v1']).not.toEqual('Supported');
+      expect(payload['pmp-v1']).not.toEqual(true);
       expect(payload['pcp-v1']).toBeDefined();
-      expect(payload['pcp-v1']).not.toEqual('Supported');
+      expect(payload['pcp-v1']).not.toEqual(true);
       expect(payload['upnp-v1']).toBeDefined();
-      expect(payload['upnp-v1']).not.toEqual('Not supported');
+      expect(payload['upnp-v1']).not.toEqual(false);
       done();
     });
   });
