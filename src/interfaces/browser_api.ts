@@ -45,4 +45,8 @@ export interface BrowserAPI {
 
   // should be called when popup is launched and ready for use
   handlePopupLaunch() :void;
+
+  // Overlay the given text as a "badge" over the uProxy extension icon.
+  // The notification can be up to 4 characters.
+  setBadgeNotification(notification :string) :void;
 }

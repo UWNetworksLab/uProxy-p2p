@@ -18,8 +18,6 @@ import _ = require('lodash');
 
 import ui = ui_connector.connector;
 
-export var remoteProxyInstance :social.RemoteUserInstance = null;
-
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.
 // without an instance)
@@ -238,12 +236,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
     this.copyPasteGettingMessages_ = [];
-    if (remoteProxyInstance) {
-      log.warn('Existing proxying session, terminating');
-      remoteProxyInstance.stop();
-      remoteProxyInstance = null;
-    }
-
     return copyPasteConnection.startGet(globals.effectiveMessageVersion());
   }
 
@@ -270,51 +262,26 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    * RemoteInstance exists.
    */
   public start = (path :social.InstancePath) : Promise<net.Endpoint> => {
-    // Disable any previous proxying session.
-    var stoppedGetting :Promise<void>[] = [];
-    if (remoteProxyInstance) {
-      log.warn('Existing proxying session, terminating');
-      // Stop proxy, don't notify UI since UI request a new proxy.
-      stoppedGetting.push(remoteProxyInstance.stop());
-      remoteProxyInstance = null;
+    var remote = this.getInstance(path);
+    if (!remote) {
+      log.error('Instance does not exist for proxying', path.instanceId);
+      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-
-    if (social.GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
-      log.warn('Existing proxying session, terminating');
-      stoppedGetting.push(copyPasteConnection.stopGet());
-    }
-
-    return Promise.all(stoppedGetting).catch((e) => {
-      // if there was an error stopping the old connection we still want to
-      // connect with the new one, do not propogate this error
-      log.error('Could not clean up old connections', e);
-    }).then(() => {
-      var remote = this.getInstance(path);
-      if (!remote) {
-        log.error('Instance does not exist for proxying', path.instanceId);
-        return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
-      }
-      // Remember this instance as our proxy.  Set this before start fulfills
-      // in case the user decides to cancel the proxy before it begins.
-      remoteProxyInstance = remote;
-      return remote.start();
-    }).catch((e) => {
-      remoteProxyInstance = null; // make sure to clean up any state
-      log.error('Could not start remote proxying session', e.stack);
-      return Promise.reject(e);
-    });
+    // Remember this instance as our proxy.  Set this before start fulfills
+    // in case the user decides to cancel the proxy before it begins.
+    return remote.start();
   }
 
   /**
    * Stop proxying with the current instance, if it exists.
    */
-  public stop = () => {
-    if (!remoteProxyInstance) {
-      log.error('Cannot stop proxying when there is no proxy');
-      return;
+  public stop = (path :social.InstancePath) => {
+    var remote = this.getInstance(path);
+    if (!remote) {
+      log.error('Instance does not exist for proxying', path.instanceId);
+      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-    remoteProxyInstance.stop();
-    remoteProxyInstance = null;
+    remote.stop();
     // TODO: Handle revoked permissions notifications.
   }
 

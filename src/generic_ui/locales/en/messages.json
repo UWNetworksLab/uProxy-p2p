@@ -675,6 +675,10 @@
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
   },
+  "RESTART_PROXYING": {
+    "description": "If proxy connection gets disconnected restart the connection",
+    "message": "Reconnect"
+  },
   "UPDATE_AVAILABLE": {
     "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",
     "message": "An update is available"
