@@ -75,7 +75,28 @@ describe('pool', function() {
       realChannel.dataFromPeerQueue.handle({str: JSON.stringify({control: 'CLOSE'})});
     });
   });
-  
+
+  it('check a super-fast reopen', (done) => {
+    pool.openDataChannel().then((poolChannel:peerconnection.DataChannel) => {
+      var realChannel = <any>(mockDataChannels[0]);
+
+      poolChannel.close();
+      expect(realChannel.send).toHaveBeenCalledWith({
+        str: JSON.stringify({control: 'CLOSE'})
+      });
+      realChannel.send.calls.reset();
+
+      // Send the ACK and immediately reopen and send data
+      realChannel.dataFromPeerQueue.handle({str: JSON.stringify({control: 'CLOSE'})});
+      realChannel.dataFromPeerQueue.handle({str: JSON.stringify({control: 'OPEN'})});
+      realChannel.dataFromPeerQueue.handle({str: JSON.stringify({data: 'foo'})});
+
+      // The new message should go to the post-reset queue, not the current queue.
+      expect(poolChannel.dataFromPeerQueue.getLength()).toEqual(0);
+      done();
+    });
+  });
+
   it('check that an underlying close propagates', (done) => {
     pool.openDataChannel().then((poolChannel:peerconnection.DataChannel) => {
       poolChannel.onceClosed.then(done);

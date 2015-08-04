@@ -65,12 +65,6 @@ class Frontend {
    */
   public bind(address:string, port:number) : Promise<net.Endpoint> {
     return this.socket_.bind(address, port)
-        .then((resultCode:number) => {
-          if (resultCode != 0) {
-            throw new Error('listen failed with result code ' + resultCode);
-          }
-          return resultCode;
-        })
         .then(this.socket_.getInfo)
         .then((socketInfo:freedom_UdpSocket.SocketInfo) => {
           log.info('listening on ' + socketInfo.localAddress + ':' +

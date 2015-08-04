@@ -31,10 +31,19 @@ export var basicObfuscation = (
   return new BridgingPeerConnection(ProviderType.CHURN, name, config);
 }
 
+// Use this if you think the remote peer supports holographic ICE.
+export var holographicIceOnly = (
+    name?:string,
+    config?:freedom_RTCPeerConnection.RTCConfiguration)
+    :BridgingPeerConnection => {
+  return new BridgingPeerConnection(ProviderType.HOLO_ICE,
+      name, config);
+}
+
 // Creates a bridge which initiates with the best provider and can
 // accept an offer from any of the provider types known to this
 // bridge. Use this for convenience or or when you will not be initiating.
-export var best = basicObfuscation;
+export var best = holographicIceOnly;
 
 ////////
 // Signalling messages (wire protocol).
@@ -81,7 +90,9 @@ export var makeSingleProviderMessage = (
 // Public for testing.
 export var pickBestProviderType = (
     signals ?:{[providerName:string] : Object[]}) : ProviderType => {
-  if (ProviderType[ProviderType.CHURN] in signals) {
+  if (ProviderType[ProviderType.HOLO_ICE] in signals) {
+    return ProviderType.HOLO_ICE;
+  } else if (ProviderType[ProviderType.CHURN] in signals) {
     return ProviderType.CHURN;
   } else if (ProviderType[ProviderType.PLAIN] in signals) {
     return ProviderType.PLAIN;
@@ -94,9 +105,11 @@ export var pickBestProviderType = (
 ////////
 
 // Exported for constructor of exported class.
+// Keep these short to help reduce the length of signalling channel messages.
 export enum ProviderType {
   PLAIN,
-  CHURN
+  CHURN,
+  HOLO_ICE
 }
 
 // Establishes connectivity with the help of a variety of peerconnection
@@ -168,15 +181,18 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
   private makeFromProviderType_ = (
       type:ProviderType) : peerconnection.PeerConnection<any> => {
-    if (type !== ProviderType.PLAIN && type !== ProviderType.CHURN) {
-      throw new Error('unknown provider type ' + type);
-    }
-
     var pc :freedom_RTCPeerConnection.RTCPeerConnection =
         freedom['core.rtcpeerconnection'](this.config_);
-    return type === ProviderType.CHURN ?
-        this.makeChurn_(pc) :
-        this.makePlain_(pc);
+    switch (type) {
+      case ProviderType.PLAIN:
+        return this.makePlain_(pc);
+      case ProviderType.CHURN:
+        return this.makeChurn_(pc);
+      case ProviderType.HOLO_ICE:
+        return this.makeHolographicIceOnly_(pc);
+      default:
+        throw new Error('unknown provider type ' + type);
+    }
   }
 
   // Factored out for mocking purposes.
@@ -190,9 +206,17 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   // Factored out for mocking purposes.
   private makeChurn_ = (
       pc:freedom_RTCPeerConnection.RTCPeerConnection)
-      : peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
+      :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
     log.debug('%1: constructing churn peerconnection', this.name_);
     return new churn.Connection(pc, this.name_);
+  }
+
+  // Factored out for mocking purposes.
+  private makeHolographicIceOnly_ = (
+      pc:freedom_RTCPeerConnection.RTCPeerConnection)
+      :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
+    log.debug('%1: constructing holographic ICE peerconnection', this.name_);
+    return new churn.Connection(pc, this.name_, true);
   }
 
   // Configures the bridge with this provider by forwarding the provider's

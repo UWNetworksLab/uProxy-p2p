@@ -11,6 +11,11 @@
   ],
   "api": {
     "churnPipe": {
+      "constructor": {
+        "value": [
+          "string"
+        ]
+      },
       "setTransformer": {
         "type": "method",
         "value": [
@@ -26,7 +31,7 @@
           "port": "number"
         }]
       },
-      "setBrowserEndpoint": {
+      "addBrowserEndpoint": {
         "type": "method",
         "value": [{
           "address": "string",
@@ -38,10 +43,19 @@
         "value": [{
           "address": "string",
           "port": "number"
-        }],
-        "ret": {
-          "address": "string",
-          "port": "number"
+        }]
+      },
+      "mappingAdded": {
+        "type": "event",
+        "value": {
+          "remote": {
+            "address": "string",
+            "port": "number"
+          },
+          "local": {
+            "address": "string",
+            "port": "number"
+          }
         }
       }
     }

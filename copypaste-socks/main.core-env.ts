@@ -34,28 +34,6 @@ module copypaste_module {
       model.outboundMessageValue = base64Encode(newConcatenatedJson);
     });
 
-    copypaste.on('gotPeerSDP', (peerSDP:string) => {
-      console.log('gotPeerSDP of length ' + peerSDP.length);
-      parseInboundMessages(peerSDP);
-      consumeInboundMessage();
-    });
-
-    copypaste.on('gatherMessage', () => {
-      console.log('gatherMessage invoked.');
-      console.log('gatherMessage: sending back:' + model.outboundMessageValue);
-
-      copypaste.emit('getSendBack', model.outboundMessageValue);
-    });
-
-    copypaste.on('giveWithSDP', (sdp:string) => {
-      parseInboundMessages(sdp);
-      consumeInboundMessage();
-      setTimeout(() => {
-        console.log("Emitting giveSendback with SDP: " + model.outboundMessageValue);
-        copypaste.emit('giveSendBack', model.outboundMessageValue);
-      }, 500);
-    });
-
     copypaste.on('publicKeyExport', (publicKey:string) => {
       model.userPublicKey = publicKey;
     });

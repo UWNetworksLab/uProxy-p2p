@@ -182,10 +182,9 @@ class PoolChannel implements datachannel.DataChannel {
   // dc_.onceOpened must already have resolved
   constructor(private dc_:datachannel.DataChannel) {
     this.reset();
-    this.dc_.dataFromPeerQueue.setSyncHandler(this.onDataFromPeer_);
 
     this.dc_.onceClosed.then(() => {
-      this.state_ = State.PERMANENTLY_CLOSED;
+      this.changeState_(State.PERMANENTLY_CLOSED);
       this.fulfillClosed_();
     });
   }
@@ -203,19 +202,25 @@ class PoolChannel implements datachannel.DataChannel {
     this.onceClosed = new Promise<void>((F, R) => {
       this.fulfillClosed_ = F;
     });
-
-    this.onceOpened.then(() => {
-      if (this.state_ === State.CLOSED) {
-        this.state_ = State.OPEN;
-      }
-    });
-    this.onceClosed.then(() => {
-      if (this.state_ !== State.PERMANENTLY_CLOSED) {
-        this.state_ = State.CLOSED;
-      }
-    });
+    this.dc_.dataFromPeerQueue.setSyncHandler(this.onDataFromPeer_);
 
     return true;
+  }
+
+  private changeState_ = (state:State) : void => {
+    log.debug('%1: Changing state from %2 to %3',
+        this.getLabel(), State[this.state_], State[state]);
+    this.state_ = state;
+  }
+
+  private doOpen_ = () : void => {
+    this.changeState_(State.OPEN);
+    this.fulfillOpened_();
+  }
+
+  private doClose_ = () : void => {
+    this.changeState_(State.CLOSED);
+    this.fulfillClosed_();
   }
 
   public getLabel = () : string => {
@@ -274,22 +279,49 @@ class PoolChannel implements datachannel.DataChannel {
     log.debug('%1: received control message: %2',
               this.getLabel(), controlMessage);
     if (controlMessage === ControlMessage[ControlMessage.OPEN]) {
-      if (this.state_ === State.OPEN) {
-        log.warn('%1: Got redundant open message', this.getLabel());
+      if (this.state_ === State.CLOSING) {
+        log.warn('%1: Got OPEN while closing (should be queued!)',
+            this.getLabel());
+        this.onceClosed.then(() => {
+          log.debug('%1: Immediately reopening after close', this.getLabel());
+          this.doOpen_();
+        });
+      } else if (this.state_ === State.PERMANENTLY_CLOSED) {
+        log.warn('%1: Got open message on permanently closed channel',
+            this.getLabel());
+      } else {
+        if (this.state_ === State.OPEN) {
+          log.warn('%1: Got redundant open message', this.getLabel());
+        }
+        this.doOpen_();
       }
-      this.fulfillOpened_();
     } else if (controlMessage === ControlMessage[ControlMessage.CLOSE]) {
+      // Stop handling messages immediately, so that a pending OPEN is not
+      // processed until after a call to reset().
+      this.dc_.dataFromPeerQueue.stopHandling();
       if (this.state_ === State.OPEN) {
-        this.state_ = State.CLOSING;
+        this.changeState_(State.CLOSING);
         // Drain messages, then ack the close.
         this.lastDataFromPeerHandled_.then(() => {
           return this.sendControlMessage_(ControlMessage.CLOSE);
-        }).then(this.fulfillClosed_);
+        }).then(() => {
+          if (this.state_ === State.PERMANENTLY_CLOSED) {
+            log.warn('%1: Underlying channel closed while draining',
+                this.getLabel());
+            return;
+          }
+          log.debug('%1: Changing state to CLOSED after draining ' +
+              'messages', this.getLabel());
+          this.doClose_();
+        });
       } else if (this.state_ === State.CLOSING) {
         // We both sent a "close" command at the same time.
-        this.fulfillClosed_();
+        this.doClose_();
       } else if (this.state_ === State.CLOSED) {
         log.warn('%1: Got redundant close message', this.getLabel());
+      } else if (this.state_ === State.PERMANENTLY_CLOSED) {
+        log.warn('%1: Got close message on permanently closed channel',
+            this.getLabel());
       }
     } else {
       log.error('%1: unknown control message: %2',
@@ -322,7 +354,7 @@ class PoolChannel implements datachannel.DataChannel {
 
     this.sendControlMessage_(ControlMessage.OPEN);
     // Immediate open; there is no open-ack
-    this.fulfillOpened_();
+    this.doOpen_();
 
     return this.onceOpened;
   }
@@ -330,9 +362,11 @@ class PoolChannel implements datachannel.DataChannel {
   public close = () : Promise<void> => {
     log.debug('%1: close', this.getLabel());
     if (this.state_ !== State.OPEN) {
+      log.warn('%1: Ignoring close in %2 state', this.getLabel(),
+          State[this.state_]);
       return;
     }
-    this.state_ = State.CLOSING;
+    this.changeState_(State.CLOSING);
 
     this.sendControlMessage_(ControlMessage.CLOSE);
     return this.onceClosed;

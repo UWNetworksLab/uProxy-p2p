@@ -1,19 +1,18 @@
 /// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
 
+import arraybuffers = require('../../arraybuffers/arraybuffers');
+import bridge = require('../../bridge/bridge');
+import net = require('../../net/net.types');
 import peerconnection = require('../../webrtc/peerconnection');
+import proxyintegrationtesttypes = require('./proxy-integration-test.types');
+import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
+import socks = require('../../socks-common/socks-headers');
+import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
+import tcp = require('../../net/tcp');
 
 import ProxyConfig = require('../../rtc-to-net/proxyconfig');
-import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
-import net = require('../../net/net.types');
-import tcp = require('../../net/tcp');
-import socks = require('../../socks-common/socks-headers');
-
-import proxyintegrationtesttypes = require('./proxy-integration-test.types');
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
-
-import arraybuffers = require('../../arraybuffers/arraybuffers');
 
 // This abstract class is converted into a real class by Freedom, which
 // fills in the unimplemented on(...) method in the process of
@@ -30,9 +29,10 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   constructor(private dispatchEvent_:(name:string, args:any) => void,
               denyLocalhost?:boolean,
               obfuscate?:boolean,
-              sessionLimit?:number) {
+              sessionLimit?:number,
+              ipv6Only?:boolean) {
     this.socksEndpoint_ = this.startSocksPair_(denyLocalhost, obfuscate,
-        sessionLimit);
+        sessionLimit, ipv6Only);
   }
 
   public startEchoServer = () : Promise<number> => {
@@ -62,8 +62,20 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     return Promise.resolve<void>();
   };
 
+  private static stripIPv4_ = (obj:any) : void => {
+    for (var key in obj) {
+      var value = obj[key];
+      if (typeof value === 'string') {
+        // 192.0.2.1 is a reserved address that is always unassigned.
+        obj[key] = value.replace(/\d+\.\d+\.\d+\.\d+/g, '192.0.2.1');
+      } else if (typeof value === 'object') {
+        AbstractProxyIntegrationTest.stripIPv4_(value);
+      }
+    }
+  }
+
   private startSocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean,
-      sessionLimit?:number) : Promise<net.Endpoint> => {
+      sessionLimit?:number, ipv6Only?:boolean) : Promise<net.Endpoint> => {
     var socksToRtcEndpoint :net.Endpoint = {
       address: this.localhost_,
       port: 0
@@ -79,15 +91,28 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       rtc_to_net.RtcToNet.SESSION_LIMIT = sessionLimit;
     }
 
+    var bridger = obfuscate ? bridge.best : bridge.preObfuscation;
+
     this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
     this.rtcToNet_ = new rtc_to_net.RtcToNet('the user id');
-    this.rtcToNet_.startFromConfig(rtcToNetProxyConfig, rtcPcConfig);
-    this.rtcToNet_.signalsForPeer.setSyncHandler(this.socksToRtc_.handleSignalFromPeer);
-    this.socksToRtc_.on('signalForPeer', this.rtcToNet_.handleSignalFromPeer);
-    return this.socksToRtc_.startFromConfig(socksToRtcEndpoint, rtcPcConfig, obfuscate);
+    this.rtcToNet_.start(rtcToNetProxyConfig,
+        bridger('rtctonet', rtcPcConfig));
+    this.rtcToNet_.signalsForPeer.setSyncHandler((msg:Object) => {
+      if (ipv6Only) {
+        AbstractProxyIntegrationTest.stripIPv4_(msg);
+      }
+      this.socksToRtc_.handleSignalFromPeer(msg);
+    });
+    this.socksToRtc_.on('signalForPeer', (msg:Object) => {
+      if (ipv6Only) {
+        AbstractProxyIntegrationTest.stripIPv4_(msg);
+      }
+      this.rtcToNet_.handleSignalFromPeer(msg);
+    });
+    return this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint),
+        bridger('sockstortc', rtcPcConfig));
   }
 
-  // Assumes webEndpoint is IPv4.
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
     var connection = new tcp.Connection({endpoint: socksEndpoint});
     connection.onceClosed.then(() => {
