@@ -79,17 +79,17 @@ export class Metrics {
     // by the caller instead.
     return this.onceLoaded_.then(() => {
       var successReport =
-          this.metricsProvider_.report('success-v1', this.data_.success);
+        this.metricsProvider_.report('success-v1', this.data_.success);
       var failureReport =
-          this.metricsProvider_.report('failure-v1', this.data_.failure);
+        this.metricsProvider_.report('failure-v1', this.data_.failure);
       var natTypeReport =
-          this.metricsProvider_.report('nat-type-v1', natInfo.natType);
+        this.metricsProvider_.report('nat-type-v1', natInfo.natType);
       var pmpReport =
-          this.metricsProvider_.report('pmp-v1', natInfo.pmpSupport);
+        this.metricsProvider_.report('pmp-v1', natInfo.pmpSupport.toString());
       var pcpReport =
-          this.metricsProvider_.report('pcp-v1', natInfo.pcpSupport);
+        this.metricsProvider_.report('pcp-v1', natInfo.pcpSupport.toString());
       var upnpReport =
-          this.metricsProvider_.report('upnp-v1', natInfo.upnpSupport);
+        this.metricsProvider_.report('upnp-v1', natInfo.upnpSupport.toString());
 
       return Promise.all([successReport, failureReport, natTypeReport,
                           pmpReport, pcpReport, upnpReport]).then(() => {
