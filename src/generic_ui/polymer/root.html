@@ -84,9 +84,7 @@
       }
       core-toolbar {
         height: 105px;
-        background-color: #009688;
         width: 100%;
-        color: #FFFFFF;
       }
       core-toolbar::shadow #topBar {
         padding: 0px 16px;
@@ -382,6 +380,7 @@
         </p>
       </div>
       <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$ }}</paper-button>
+      <paper-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>

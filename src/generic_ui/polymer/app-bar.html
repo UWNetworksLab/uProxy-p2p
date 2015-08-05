@@ -1,18 +1,16 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 
-<polymer-element name='uproxy-app-bar' attributes='disableback' center horizontal layout>
+<polymer-element name='uproxy-app-bar' attributes='disableback'>
   <template>
     <style>
-    :host {
-      display: block;
+    core-toolbar {
       height: 60px;
-      line-height: 60px;
-      background: #009688;
-      color: white;
-      font-size: 20px;
-      font-weight: 400;
-      text-align: left;
-      box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.13);
+    }
+    #title {
+      font-size: 18px;
+      margin-left: 36px;
+      white-space: nowrap;
+      overflow: hidden;
     }
     core-icon.back {
       cursor: pointer;
@@ -30,18 +28,14 @@
       cursor: not-allowed;
       opacity: .4;
     }
-    #title {
-      margin-left: 36px;
-      white-space: nowrap;
-      overflow: hidden;
-    }
     </style>
 
-    <core-icon class='back {{ { disabled: disableback } | tokenList }}' icon="arrow-back" on-tap='{{ back }}'></core-icon>
-
-    <span id='title' flex>
-      <content></content>
-    </span>
+    <core-toolbar>
+      <core-icon class='back {{ { disabled: disableback } | tokenList }}' icon="arrow-back" on-tap='{{ back }}'></core-icon>
+      <div id='title' flex>
+        <content></content>
+      </div>
+    </core-toolbar>
   </template>
   <script src='app-bar.js'></script>
 </polymer-element>

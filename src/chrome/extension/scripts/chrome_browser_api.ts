@@ -100,6 +100,8 @@ class ChromeBrowserApi implements BrowserAPI {
         this.popupState_ = PopupState.NOT_LAUNCHED;
       }
     });
+
+    chrome.browserAction.setBadgeBackgroundColor({color: "#009968"});
   }
 
   private canControlProxy_ = (level :string) :boolean => {
@@ -108,20 +110,18 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public startUsingProxy = (endpoint:net.Endpoint) => {
-    if (this.running_ == false) {
-      this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
-      this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
-      console.log('Directing Chrome proxy settings to uProxy');
-      this.running_ = true;
-      chrome.proxy.settings.get({incognito:false},
-        (details) => {
-          this.preUproxyConfig_ = details.value;
-          chrome.proxy.settings.set({
-              value: this.uproxyConfig_,
-              scope: 'regular'
-            }, () => {console.log('Successfully set proxy');});
-        });
-    }
+    this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
+    this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
+    console.log('Directing Chrome proxy settings to uProxy');
+    this.running_ = true;
+    chrome.proxy.settings.get({incognito:false},
+      (details) => {
+        this.preUproxyConfig_ = details.value;
+        chrome.proxy.settings.set({
+            value: this.uproxyConfig_,
+            scope: 'regular'
+          }, () => {console.log('Successfully set proxy');});
+      });
   };
 
   public stopUsingProxy = () => {
@@ -270,6 +270,10 @@ class ChromeBrowserApi implements BrowserAPI {
       xhr.open('POST', externalDomain + cloudfrontPath, true);
       xhr.send(params);
     }).then(removeSendHeaderListener, removeSendHeaderListener);
+  }
+
+  public setBadgeNotification = (notification :string) => {
+    chrome.browserAction.setBadgeText({text: notification});
   }
 }
 
