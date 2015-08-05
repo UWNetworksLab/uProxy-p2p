@@ -20,7 +20,6 @@
 
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
 
 import firewall = require('./firewall');
 import local_instance = require('./local-instance');
@@ -32,6 +31,8 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import globals = require('./globals');
 import storage = globals.storage;
+
+import freedom_social = require('../interfaces/social2');   // TODO: rename?  move?
 
 import ui = ui_connector.connector;
 
@@ -89,7 +90,8 @@ import ui = ui_connector.connector;
     for (var dependency in freedom) {
       if (freedom.hasOwnProperty(dependency)) {
         if (dependency.indexOf(PREFIX) !== 0 ||
-            'social' !== freedom[dependency].api) {
+            ('social' !== freedom[dependency].api &&
+             'social2' !== freedom[dependency].api)) {
           continue;
         }
 
@@ -261,6 +263,14 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
+    public addUserRequest = (token: string): Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+
+    public generateInviteToken = () : Promise<string> => {
+      throw new Error('Operation not implemented');
+    }
+
     public getNetworkState = () :social.NetworkState => {
       throw new Error('Operation not implemented');
     }
@@ -281,7 +291,7 @@ export function notifyUI(networkName :string, userId :string) {
   // events are passed on to the relevant user (provided the user exists).
   export class FreedomNetwork extends AbstractNetwork {
 
-    private freedomApi_ :freedom_Social;
+    private freedomApi_ :freedom_social.FreedomSocialProvider;
     // TODO: give real typing to provider_. Ask Freedom not to use overloaded
     // types.
     private provider_ :any;  // Special freedom object which is both a function
@@ -348,7 +358,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom_Social.UserProfile) : void => {
+    public handleUserProfile = (profile :freedom_social.UserProfile) : void => {
       var userId = profile.userId;
       if (!firewall.isValidUserProfile(profile, null)) {
         log.error('Firewall: invalid user profile', profile);
@@ -389,7 +399,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom_Social.ClientState) : void => {
+    public handleClientState = (freedomClient :freedom_social.ClientState) : void => {
       if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
         return;
@@ -426,7 +436,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
+    public handleMessage = (incoming :freedom_social.IncomingMessage) : void => {
       if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
@@ -475,7 +485,7 @@ export function notifyUI(networkName :string, userId :string) {
     //===================== Social.Network implementation ====================//
 
     public login = (reconnect :boolean, userId ?:string, password ?:string) : Promise<void> => {
-      var request :freedom_Social.LoginRequest = null;
+      var request :freedom_social.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
         // TODO: ideally we should use the instanceId for the agent string,
@@ -511,7 +521,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       this.onceLoggedIn_ = this.freedomApi_.login(request)
-          .then((freedomClient :freedom_Social.ClientState) => {
+          .then((freedomClient :freedom_social.ClientState) => {
             var userId = freedomClient.userId;
             if (userId in networks[this.name]) {
               // If user is already logged in with the same (network, userId)
@@ -561,6 +571,23 @@ export function notifyUI(networkName :string, userId :string) {
         return Promise.reject(e);
       });
     }
+
+    public addUserRequest = (token: string): Promise<void> => {
+      if (token.lastIndexOf('/') >= 0) {
+        // Remove prefix url.
+        token = token.substr(token.lastIndexOf('/') + 1);
+      }
+      return this.freedomApi_.addContact(token).catch((e) => {
+        log.error('Error calling addContact: ' + token, e.message);
+      });
+    }
+
+    public generateInviteToken = () : Promise<string> => {
+      return this.freedomApi_.getIntroductionToken().then((token) => {
+        return 'https://uproxy.org/invite/' + this.name + '/' + token;
+      })
+    }
+
 
     /**
      * Promise the sending of |msg| to a client with id |clientId|.
@@ -722,7 +749,7 @@ export function notifyUI(networkName :string, userId :string) {
 
 
 export function freedomClientToUproxyClient(
-  freedomClientState :freedom_Social.ClientState) :social.ClientState {
+  freedomClientState :freedom_social.ClientState) :social.ClientState {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
   // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',
   // 'OFFLINE': 4001, 4001: 'OFFLINE'} value.

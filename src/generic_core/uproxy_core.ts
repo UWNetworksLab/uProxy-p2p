@@ -268,6 +268,26 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     copyPasteConnection.handleSignal(signal);
   }
 
+  public addUser = (data: { networkId: string; token :string }) : Promise<void> => {
+    // TODO: clean this up - hack to find the one network
+    var network :social.Network;
+    for (var userId in social_network.networks[data.networkId]) {
+      network = social_network.networks[data.networkId][userId];
+      break;
+    }
+    return network.addUserRequest(data.token);
+  }
+
+  public generateInviteToken = (data: { networkId: string }) : Promise<string> => {
+    // TODO: clean this up - hack to find the one network
+    var network :social.Network;
+    for (var userId in social_network.networks[data.networkId]) {
+      network = social_network.networks[data.networkId][userId];
+      break;
+    }
+    return network.generateInviteToken();
+  }
+
   /**
    * Begin using a peer as a proxy server.
    * Starts SDP negotiations with a remote peer. Assumes |path| to the

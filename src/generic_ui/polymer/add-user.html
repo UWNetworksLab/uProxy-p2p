@@ -1,0 +1,51 @@
+<link rel='import' href='../../bower/paper-dialog/paper-action-dialog.html'>
+<link rel='import' href='../../bower/core-icons/core-icons.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+
+<polymer-element name='uproxy-adduser'>
+  <template>
+    <style>
+
+    </style>
+    <!-- TODO: localization -->
+    <paper-fab mini icon='add' style='color: white; position:absolute; bottom:10px; right:10px;' on-tap='{{ openAddUserDialog }}'></paper-fab>
+
+    <paper-action-dialog id='addUserDialog' backdrop heading='' layered='true'>
+
+      <p>How would you like uProxy connect to this friend?</p>
+
+      <paper-dropdown-menu label='Send them messages via...'>
+        <paper-dropdown class='dropdown'>
+          <core-menu class='menu'>
+            <paper-item>Email</paper-item>
+            <paper-item>GTalk</paper-item>
+            <paper-item>Facebook</paper-item>
+            <paper-item>GitHub</paper-item>
+            <paper-item>I will copy/paste it to them</paper-item>
+          </core-menu>
+        </paper-dropdown>
+      </paper-dropdown-menu>
+
+      <paper-button on-tap='{{ generateInvite }}'>Generate Invite</paper-button>
+
+      <!-- TODO: hide this until ready -->
+      <paper-input-decorator label="{{ 'LOADING' | $$ }}" layout vertical>
+        <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+      </paper-input-decorator>
+
+      <div id='addFriend'>
+        <paper-input-decorator label="Add friend by URL">
+          <input is='core-input' value='{{ userIdInput }}'>
+        </paper-input-decorator>
+        <paper-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</paper-button>
+      </div>
+
+      <paper-button affirmative>Cancel</paper-button>
+
+    </paper-action-dialog>
+  </template>
+  <script src='add-user.js'></script>
+</polymer-element>

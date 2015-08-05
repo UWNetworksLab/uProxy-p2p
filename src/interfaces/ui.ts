@@ -7,7 +7,8 @@ export enum View {
   SPLASH = 0,
   COPYPASTE,
   ROSTER,
-  BROWSER_ERROR
+  BROWSER_ERROR,
+  INVITE_USER
 }
 
 /**

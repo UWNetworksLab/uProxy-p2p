@@ -266,6 +266,16 @@ export interface Network {
   getUser :(userId :string) => RemoteUser;
 
   /**
+   * Ask the social network to add the user.
+   */
+  addUserRequest: (token: string) => Promise<void>;
+
+  /**
+   * Generates an invite token
+   */
+  generateInviteToken: () => Promise<string>;
+
+  /**
     * Resends the instance handeshake to all uProxy instances.
     */
   resendInstanceHandshakes :() => void;

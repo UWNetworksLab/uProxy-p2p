@@ -97,6 +97,8 @@ export enum Command {
   GET_FULL_STATE = 1019,
   GET_VERSION = 1020,
   HANDLE_CORE_UPDATE = 1021,
+  ADD_USER = 1022,
+  GENERATE_INVITE_TOKEN = 1023
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must

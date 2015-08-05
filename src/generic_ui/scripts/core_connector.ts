@@ -201,6 +201,17 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
+  // TODO: should not be promise command
+  addUser = (networkId: string, token: string): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.ADD_USER,
+      { networkId: networkId, token: token });
+  }
+
+  generateInviteToken = (networkId: string): Promise<string> => {
+    return this.promiseCommand(uproxy_core_api.Command.GENERATE_INVITE_TOKEN,
+      { networkId: networkId });
+  }
+
   restart = () => {
     this.browserConnector_.restart();
   }
