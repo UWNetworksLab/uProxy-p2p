@@ -1,6 +1,5 @@
 {
   "name": "simple freedom chat",
-  "description": "top-level freedom manifest",
   "app": {
     "script": [
       "freedom-module.static.js"

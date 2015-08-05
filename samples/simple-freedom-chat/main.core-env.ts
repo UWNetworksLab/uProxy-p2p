@@ -1,8 +1,6 @@
 /// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 
-import Message = require('./message.types');
-
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
 
@@ -16,10 +14,8 @@ var stopButton = document.getElementById("stopButton");
 freedom('freedom-module.json', {
     'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
-  }).then(
-    (simpleChatFactory:() => freedom.OnAndEmit<any,any>) => {
-  // TODO: typings for the freedom module
-  var chat :freedom.OnAndEmit<any,any> = simpleChatFactory();
+  }).then((chatFactory:() => freedom.OnAndEmit<any,any>) => {
+  var chat :freedom.OnAndEmit<any,any> = chatFactory();
 
   chat.on('ready', function() {
     sendAreaA.disabled = false;
@@ -32,15 +28,13 @@ freedom('freedom-module.json', {
   });
 
   function send(suffix:string, textArea:HTMLInputElement) {
-    chat.emit('send' + suffix, {
-      message: textArea.value || '(empty message)'
-    });
+    chat.emit('send' + suffix, textArea.value || '(empty message)');
   }
   sendButtonA.onclick = send.bind(null, 'A', sendAreaA);
   sendButtonB.onclick = send.bind(null, 'B', sendAreaB);
 
-  function receive(textArea:HTMLInputElement, msg:Message) {
-    textArea.value = msg.message;
+  function receive(textArea:HTMLInputElement, msg:string) {
+    textArea.value = msg;
   }
   chat.on('receiveA', receive.bind(null, receiveAreaA));
   chat.on('receiveB', receive.bind(null, receiveAreaB));
@@ -49,5 +43,5 @@ freedom('freedom-module.json', {
     chat.emit('stop');
   };
 }, (e:Error) => {
-  console.error('could not load freedom: ' + e.message);
+  console.error('could not load freedom module: ' + e.message);
 });

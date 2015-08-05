@@ -22,10 +22,9 @@ script.onload = () => {
   freedom('uproxy-lib/echo/freedom-module.json', {
       'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
       'debug': 'debug'
-  }).then((echoFactory:OnEmitModuleFactory) => {
-    echo = echoFactory();
-    echo.emit('start', { address: '127.0.0.1', port: 9998 });
+  }).then((moduleFactory:OnEmitModuleFactory) => {
+    moduleFactory();
   }, (e:Error) => {
-    console.error('could not load freedom: ' + e.message);
+    console.error('could not load freedomjs module: ' + e.message);
   });
 }

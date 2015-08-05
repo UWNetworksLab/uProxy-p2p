@@ -3,106 +3,92 @@
 
 import logging = require('../../logging/logging');
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');
-
-import signals = require('../../webrtc/signals');
 import peerconnection = require('../../webrtc/peerconnection');
-import PeerConnection = peerconnection.PeerConnection;
-import DataChannel = peerconnection.DataChannel;
-import Data = peerconnection.Data;
-
-import Message = require('./message.types');
+import signals = require('../../webrtc/signals');
 
 export var loggingController = freedom['loggingcontroller']();
-loggingController.setDefaultFilter(loggingTypes.Destination.console,
-    loggingTypes.Level.debug);
-loggingController.setDefaultFilter(loggingTypes.Destination.buffered,
+loggingController.setDefaultFilter(
+    loggingTypes.Destination.console,
     loggingTypes.Level.debug);
 
-export var moduleName = 'freedom-chat';
-export var log :logging.Log = new logging.Log(moduleName);
+export var log :logging.Log = new logging.Log('freedom-chat');
 
 var parentFreedomModule = freedom();
 
-function connectDataChannel(name:string, d:DataChannel) {
-    d.onceOpened.then(() => {
-      log.info(name + ': onceOpened: ' +
-          d.toString());
-    });
-    d.onceClosed.then(() => {
-      log.info(name + ': onceClosed: ' +
-          d.toString());
-    });
-    d.dataFromPeerQueue.setSyncHandler((data:Data) => {
-      log.info('%1: dataFromPeer: %2', name, data);
-      // Handle messages received on the datachannel(s).
-      parentFreedomModule.emit('receive' + name, {
-        message: data.str
-      });
-    });
+function connectDataChannel(name:string,
+    channel:peerconnection.DataChannel) :void {
+  channel.onceOpened.then(() => {
+    log.info('%1: channel opened', name);
+  });
+  channel.onceClosed.then(() => {
+    log.info('%1: channel closed', name);
+  });
 
-  parentFreedomModule.on('send' + name, (message:Message) => {
-    d.send({str: message.message})
+  // Forward messages from the remote peer to the UI.
+  channel.dataFromPeerQueue.setSyncHandler((data:peerconnection.Data) => {
+    log.info('%1: received data from peer: %2', name, data);
+    parentFreedomModule.emit('receive' + name, data.str);
+  });
+
+  // Forward messages from the UI to the remote peer.
+  parentFreedomModule.on('send' + name, (message:string) => {
+    channel.send({
+      str: message
+    });
   });
 }
 
-// Make a peer connection which logs stuff that happens.
-function makePeerConnection(name:string) {
-  var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+function makePeerConnection(name:string)
+    :peerconnection.PeerConnection<signals.Message> {
+  var config :freedom_RTCPeerConnection.RTCConfiguration = {
     iceServers: [{
       urls: ['stun:stun.l.google.com:19302']},
       {urls: ['stun:stun1.l.google.com:19302']}]
   };
-  var pc :PeerConnection<signals.Message> =
-    peerconnection.createPeerConnection(pcConfig, name);
+  var pc = peerconnection.createPeerConnection(config, name);
   pc.onceConnected.then(() => {
-    log.info(name + ' connected');
+    log.info('%1: connected', name);
   }, (e:Error) => {
-    log.error('%1 failed to connect: %2', name, e.message);
+    log.error('%1: failed to connect: %2', name, e.message);
   });
   pc.onceClosed.then(() => {
-    log.info(name + ': onceClosed');
+    log.info('%1: closed', name);
   });
-  pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
-    log.info(name + ': peerOpenedChannelQueue: ' + d.toString());
-    connectDataChannel(name, d);
+  pc.peerOpenedChannelQueue.setSyncHandler(
+      (channel:peerconnection.DataChannel) => {
+    log.info('%1: peer opened new channel: %2', name, channel.getLabel());
+    connectDataChannel(name, channel);
   });
-
   return pc;
 }
 
-var a :PeerConnection<signals.Message> = makePeerConnection('A');
-var b :PeerConnection<signals.Message> = makePeerConnection('B')
+// Create our two peers, A and B.
+var a = makePeerConnection('A');
+var b = makePeerConnection('B')
 
 // Connect the two signalling channels. Normally, these messages would be sent
 // over the internet.
-a.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
-  log.info('a: sending signalling message to b.');
-  b.handleSignalMessage(message);
-});
-b.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
-  log.info('b: sending signalling message to a.');
-  a.handleSignalMessage(message);
-});
+a.signalForPeerQueue.setSyncHandler(b.handleSignalMessage);
+b.signalForPeerQueue.setSyncHandler(a.handleSignalMessage);
 
-// Negotiate a peerconnection. Once negotiated, enable the UI and add
+// Have |a| negotiate a connection. Once negotiated, enable the UI and add
 // send/receive handlers.
-a.negotiateConnection()
-  .then(() => {
-    log.info('a: negotiated connection');
-  }, (e:any) => {
-    log.error('could not negotiate peerconnection: ' + e.message);
-    parentFreedomModule.emit('error', {})
-  })
-  .then(() => { return a.openDataChannel('text'); })
-  .then((aTextDataChannel:DataChannel) => {
-    connectDataChannel('A', aTextDataChannel);
-    parentFreedomModule.emit('ready', {});
-
-    parentFreedomModule.on('stop', () => {
-      a.close();
-    });
-  })
-  .catch((e:any) => {
-    log.error('error while opening datachannel: ' + e.message);
-    parentFreedomModule.emit('error', {})
+a.negotiateConnection().then(() => {
+  log.info('a: negotiated connection');
+}, (e:Error) => {
+  log.error('could not negotiate peerconnection: ' + e.message);
+  parentFreedomModule.emit('error', {})
+}).then(() => {
+  // Close the connection when the UI tells us.
+  parentFreedomModule.on('stop', () => {
+    a.close();
   });
+
+  return a.openDataChannel('text');
+}).then((channel:peerconnection.DataChannel) => {
+  connectDataChannel('A', channel);
+  parentFreedomModule.emit('ready', {});
+}).catch((e:Error) => {
+  log.error('error while opening datachannel: ' + e.message);
+  parentFreedomModule.emit('error', {})
+});
