@@ -284,7 +284,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         this.closeWithError_('failed to set local description: ' + e.message);
       });
     } else {
-      this.closeWithError_('onnegotiationneeded fired in unexpected state ' +
+      // This should never happen, but in Firefox 40+, we get a redundant
+      // event because both the browser and the polyfill generate one.
+      // TODO: Remove the polyfill, and make this warning an error, once
+      // Firefox <40 is no longer supported.
+      log.warn('onnegotiationneeded fired in unexpected state ' +
           State[this.state_]);
     }
   }
