@@ -4,9 +4,12 @@
 # python version.py <new version>
 # e.g. python version.py 0.8.10
 
+import json
+import collections
 import sys
+import re
 
-files = [
+manifest_files = [
           'src/chrome/app/dist_build/manifest.json',
           'src/chrome/app/dev_build/manifest.json',
           'src/chrome/extension/dist_build/manifest.json',
@@ -16,15 +19,16 @@ files = [
           'bower.json',
         ]
 
-for filename in files:
-  lines = []
-  with open(filename) as infile:
-    for line in infile:
-        versionPos = line.find("\"version\":")
-        versionLen = len("\"version\":")
-        if versionPos != -1:
-            line = line[:versionPos+versionLen] + " \"" + sys.argv[1] + "\",\n"
-        lines.append(line)
-  with open(filename, 'w') as outfile:
-    for line in lines:
-      outfile.write(line)
+validVersion = re.match('[0-9]+\.[0-9]+\.[0-9]+', sys.argv[1])
+if validVersion == None:
+  print 'Please enter a valid version number.'
+  sys.exit()
+
+for filename in manifest_files:
+  print filename
+  with open(filename) as manifest:
+    manifest_data = json.load(manifest, object_pairs_hook=collections.OrderedDict)
+    manifest_data['version'] = sys.argv[1]
+  with open(filename, 'w') as dist_manifest:
+    json.dump(manifest_data, dist_manifest, indent=2, separators=(',', ': '))
+    dist_manifest.write('\n');
