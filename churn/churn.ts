@@ -137,6 +137,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
    * Right now, CaesarCipher is used with a key which is randomly generated
    * each time a new connection is negotiated.
    */
+  // TODO: The increasing number of calls gated on the probe connection
+  //       strongly suggests that factoring out the NAT hole-punching code
+  //       as suggested here would greatly help readability and
+  //       maintainability:
+  //         https://github.com/uProxy/uproxy/issues/585
   export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
     public peerOpenedChannelQueue :handler.QueueHandler<peerconnection.DataChannel, void>;
@@ -426,12 +431,19 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         var message = churnMessage.webrtcMessage;
         if (message.type == signals.Type.OFFER ||
             message.type == signals.Type.ANSWER) {
-          // Remove candidates from the SDP.  This is redundant, but ensures
-          // that a bug in the remote client won't cause us to send
-          // unobfuscated traffic.
-          message.description.sdp = filterCandidatesFromSdp(
+          // Do not forward the signalling message until the probe connection
+          // has been torn down. This is important because Firefox will give
+          // up if no candidates are received within five seconds of having
+          // received the offer and this can easily happen if candidate
+          // gathering is slow due to slow STUN servers.
+          this.onceHavePipe_.then(() => {
+            // Remove candidates from the SDP.  This is redundant, but ensures
+            // that a bug in the remote client won't cause us to send
+            // unobfuscated traffic.
+            message.description.sdp = filterCandidatesFromSdp(
               message.description.sdp);
-          this.obfuscatedConnection_.handleSignalMessage(message);
+            this.obfuscatedConnection_.handleSignalMessage(message);
+          });
         } else if (message.type === signals.Type.CANDIDATE) {
           this.addRemoteCandidate_(message.candidate);
         }

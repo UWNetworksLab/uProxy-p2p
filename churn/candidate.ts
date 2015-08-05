@@ -90,9 +90,9 @@ export class Candidate {
           ' raddr ' + this.relatedAddress +
           ' rport ' + this.relatedPort;
     }
-    for (var ext in this.extensions) {
+    this.extensions.forEach((ext:IceExtension) => {
       candidateLine += ' ' + ext.key + ' ' + ext.value;
-    }
+    });
 
     return {
       candidate: candidateLine,
@@ -125,20 +125,26 @@ export class Candidate {
     c.port = stringToNumber(tokens[5]);
     c.type = tokens[7];
 
+    var i = 8;
     if (tokens[8] === 'raddr') {
       c.relatedAddress = tokens[9];
       if (tokens[10] !== 'rport') {
         throw new Error('Missing rport: ' + rtcIceCandidate);
       }
+      
       c.relatedPort = stringToNumber(tokens[11]);
+      i = 12;
     }
 
-    for (var i = 12; i < tokens.length; i += 2) {
+    for (; i < tokens.length; i += 2) {
       c.extensions.push({
         key: tokens[i],
         value: tokens[i + 1]
       });
     }
+
+    c.sdpMid = rtcIceCandidate.sdpMid;
+    c.sdpMLineIndex = rtcIceCandidate.sdpMLineIndex;
 
     return c;
   }

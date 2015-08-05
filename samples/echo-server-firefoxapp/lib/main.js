@@ -9,9 +9,8 @@ var loggingProviderManifest = self.data.url("uproxy-lib/loggingprovider/freedom-
 freedom(manifest, {
   'logger': loggingProviderManifest,
   'debug': 'debug'
-}).then(function(echoFactory) {
-  var echo = echoFactory();
-  echo.emit('start', { address: '127.0.0.1', port: 9998 });
-}, function() {
-  console.error('could not load freedom');
+}).then(function(moduleFactory) {
+  moduleFactory();
+}, function(e) {
+  console.error('could not load freedomjs module: ' + e.message);
 });
