@@ -17,10 +17,14 @@ manifest_files = [
           'bower.json',
         ]
 
-validVersion = re.match('[0-9]+\.[0-9]+\.[0-9]+', sys.argv[1])
-if validVersion == None:
-  print 'Please enter a valid version number.'
+if len(sys.argv) < 2:
+  print 'Missing version number. Usage: python version.py <new version>'
   sys.exit()
+else:
+  validVersion = re.match('[0-9]+\.[0-9]+\.[0-9]+', sys.argv[1])
+  if validVersion == None:
+    print 'Please enter a valid version number.'
+    sys.exit()
 
 for filename in manifest_files:
   print filename
