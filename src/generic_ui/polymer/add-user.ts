@@ -4,16 +4,15 @@
 Polymer({
   openAddUserDialog: function() {
     this.$.addUserDialog.open();
+    // TODO: pick network based on dropdown.
+    console.log('generating invite token');  // TODO: does this run each time we show the popup?  or just once?
+    ui_context.core.generateInviteToken('Email').then((token :string) => {
+      this.inviteUrl = token;
+    });
   },
   addUser: function() {
     // TODO: pick network based on dropdown.
     ui_context.core.addUser('Email', this.userIdInput);
-  },
-  generateInvite: function() {
-    // TODO: pick network based on dropdown.
-    ui_context.core.generateInviteToken('Email').then((token :string) => {
-      this.inviteUrl = token;
-    });
   },
   select: function(e :Event, d :Object, element :HTMLInputElement) {
     element.focus();

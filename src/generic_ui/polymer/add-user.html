@@ -5,36 +5,24 @@
 <link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 
-<polymer-element name='uproxy-adduser'>
+<polymer-element name='uproxy-add-user'>
   <template>
     <style>
 
     </style>
     <!-- TODO: localization -->
-    <paper-fab mini icon='add' style='color: white; position:absolute; bottom:10px; right:10px;' on-tap='{{ openAddUserDialog }}'></paper-fab>
+    <paper-fab mini icon='add' style='color: white; position:absolute; bottom:1.5em; right:1.5em;' on-tap='{{ openAddUserDialog }}'></paper-fab>
 
     <paper-action-dialog id='addUserDialog' backdrop heading='' layered='true'>
 
-      <p>How would you like uProxy connect to this friend?</p>
+      <p>To invite a friend to use uProxy with you, share this link with them.</p>
 
-      <paper-dropdown-menu label='Send them messages via...'>
-        <paper-dropdown class='dropdown'>
-          <core-menu class='menu'>
-            <paper-item>Email</paper-item>
-            <paper-item>GTalk</paper-item>
-            <paper-item>Facebook</paper-item>
-            <paper-item>GitHub</paper-item>
-            <paper-item>I will copy/paste it to them</paper-item>
-          </core-menu>
-        </paper-dropdown>
-      </paper-dropdown-menu>
-
-      <paper-button on-tap='{{ generateInvite }}'>Generate Invite</paper-button>
-
-      <!-- TODO: hide this until ready -->
+      <!-- TODO: hide this until ready? -->
       <paper-input-decorator label="{{ 'LOADING' | $$ }}" layout vertical>
         <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
       </paper-input-decorator>
+
+      <p>If you have a uProxy link from your friend, you can paste it below to add them.</p>
 
       <div id='addFriend'>
         <paper-input-decorator label="Add friend by URL">
