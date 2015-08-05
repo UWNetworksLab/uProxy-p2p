@@ -248,7 +248,7 @@ export function notifyUI(networkName :string, userId :string) {
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
-    public login = (reconnect :boolean, userId ?:string, password ?:string) :Promise<void> => {
+    public login = (reconnect :boolean, userId ?:string, password ?:string, createAccount ?:boolean) :Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
@@ -484,7 +484,7 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (reconnect :boolean, userId ?:string, password ?:string) : Promise<void> => {
+    public login = (reconnect :boolean, userId ?:string, password ?:string, createAccount ?:boolean) : Promise<void> => {
       var request :freedom_social.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
@@ -505,7 +505,7 @@ export function notifyUI(networkName :string, userId :string) {
         // TODO: remove this crazy hack of passing userId and pw in the version
         request = {
           agent: agent,
-          version: JSON.stringify({userId: userId, password: password}),
+          version: JSON.stringify({userId: userId, password: password, createAccount: createAccount}),
           url: 'https://popping-heat-4874.firebaseio.com/',
           interactive: !reconnect,
           rememberLogin: !reconnect
@@ -702,7 +702,7 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (reconnect :boolean, userId ?:string, password ?:string) : Promise<void> => {
+    public login = (reconnect :boolean, userId ?:string, password ?:string, createAccount ?:boolean) : Promise<void> => {
       return Promise.resolve<void>();
     }
 

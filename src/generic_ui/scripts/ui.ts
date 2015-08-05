@@ -834,10 +834,14 @@ export class UserInterface implements ui_constants.UiApi {
     this.browserApi.bringUproxyToFront();
   }
 
-  public login = (network :string, userId ?:string, password ?:string) : Promise<void> => {
-    return this.core.login(
-          { network : network, reconnect: false, userId: userId, password: password }
-    ).catch((e :Error) => {
+  public login = (network :string, userId ?:string, password ?:string, createAccount ?:boolean) : Promise<void> => {
+    return this.core.login({
+      network: network,
+      reconnect: false,
+      userId: userId,
+      password: password,
+      createAccount: createAccount
+    }).catch((e :Error) => {
       this.showNotification(this.i18n_t("ERROR_SIGNING_IN", {network: network}));
       throw e;
     });

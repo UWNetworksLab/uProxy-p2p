@@ -58,7 +58,8 @@ Polymer({
   },
   loginToEmail: function() {
     console.log('loginToEmail called, ' + this.userId + ', ' + this.password);
-    ui.login('Email', this.userId, this.password).then(() => {
+    // TODO: userId isn't really the right name for this.
+    ui.login('Email', this.userId, this.password, true).then(() => {  // TODO: set create flag correctly
       // Fire an update-view event, which root.ts listens for.
       this.fire('update-view', { view: ui_constants.View.ROSTER });
       ui.bringUproxyToFront();

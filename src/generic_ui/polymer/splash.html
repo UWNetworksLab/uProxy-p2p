@@ -179,12 +179,11 @@
     <div vertical layout id='emailLogin' hidden?='{{SPLASH_STATES.EMAIL_LOGIN!==model.globalSettings.splashState}}'>
        <!-- TODO: translate all text here -->
       <div class='view' flex>
-        <p>Sign in to uProxy with your name or email address.</p>
-        <p>If you do not provide an email address, password recovery will not be possible.</p>
-        <paper-input-decorator label="Name or email" layout vertical>
+        <p>Sign in to uProxy.</p>
+        <paper-input-decorator label="name" layout vertical>
           <input is='core-input' value='{{ userId }}' />
         </paper-input-decorator>
-        <paper-input-decorator label="Password" layout vertical>
+        <paper-input-decorator label="password" layout vertical>
           <input is='core-input' type="password" value='{{ password }}' />
         </paper-input-decorator>
         <paper-button raised on-tap='{{ loginToEmail }}'>Sign in</paper-button>
