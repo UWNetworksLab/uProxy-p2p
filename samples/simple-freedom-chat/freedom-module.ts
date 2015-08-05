@@ -24,13 +24,13 @@ function connectDataChannel(name:string,
     log.info('%1: channel closed', name);
   });
 
-  // Forward messages from the UI to the remote peer.
+  // Forward messages from the remote peer to the UI.
   channel.dataFromPeerQueue.setSyncHandler((data:peerconnection.Data) => {
     log.info('%1: received data from peer: %2', name, data);
     parentFreedomModule.emit('receive' + name, data.str);
   });
 
-  // Forward messages from the remote peer to the UI.
+  // Forward messages from the UI to the remote peer.
   parentFreedomModule.on('send' + name, (message:string) => {
     channel.send({
       str: message
