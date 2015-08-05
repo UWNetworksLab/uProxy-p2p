@@ -71,7 +71,7 @@ var b = makePeerConnection('B')
 a.signalForPeerQueue.setSyncHandler(b.handleSignalMessage);
 b.signalForPeerQueue.setSyncHandler(a.handleSignalMessage);
 
-// Have a negotiate a connection. Once negotiated, enable the UI and add
+// Have |a| negotiate a connection. Once negotiated, enable the UI and add
 // send/receive handlers.
 a.negotiateConnection().then(() => {
   log.info('a: negotiated connection');
