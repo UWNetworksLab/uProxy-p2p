@@ -10,10 +10,8 @@ import sys
 import re
 
 manifest_files = [
-          'src/chrome/app/dist_build/manifest.json',
-          'src/chrome/app/dev_build/manifest.json',
-          'src/chrome/extension/dist_build/manifest.json',
-          'src/chrome/extension/dev_build/manifest.json',
+          'src/chrome/app/manifest.json',
+          'src/chrome/extension/manifest.json',
           'src/firefox/package.json',
           'package.json',
           'bower.json',
