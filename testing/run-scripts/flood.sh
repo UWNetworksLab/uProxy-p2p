@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # Prints the IP of a flood server, starting one if necessary.
 # TODO: restart the running container if the args differ
