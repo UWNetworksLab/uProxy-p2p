@@ -68,6 +68,7 @@ Polymer({
       // Fire an update-view event, which root.ts listens for.
       this.fire('update-view', { view: ui_constants.View.ROSTER });
       ui.bringUproxyToFront();
+      this.toggleCreateNewUser();
     }).catch((e :Error) => {
       // TODO: why does this result in an error popup?
       console.warn('Did not log in ', e);
