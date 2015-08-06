@@ -1,7 +1,8 @@
 #!/bin/bash
 
+set -e
+
 # Prints the IP of a flood server, starting one if necessary.
-# TODO: restart the running container if the args differ
 
 if [ "$#" -ne 2 ]; then
   echo "Usage: flood.sh <size of download> <max. transfer rate>"
@@ -11,10 +12,16 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
-if ! docker ps | grep uproxy-flood >/dev/null; then
-  if ! docker images | grep uproxy/flood >/dev/null; then
-    docker build -t uproxy/flood ${BASH_SOURCE%/*}/../../flood
-  fi
-  docker run -d -p 1224:1224 --name uproxy-flood uproxy/flood "$1"M $2
+# Build an image if none already exists.
+if ! docker images | grep uproxy/flood >/dev/null; then
+  docker build -t uproxy/flood ${BASH_SOURCE%/*}/../../flood
 fi
+
+# Kill the current container, if any.
+# TODO: Skip this if the running container's args match.
+if docker ps | grep uproxy-flood >/dev/null; then
+  docker rm -f uproxy-flood > /dev/null
+fi
+
+docker run -d -p 1224:1224 --name uproxy-flood uproxy/flood "$1"M $2
 docker inspect --format '{{ .NetworkSettings.IPAddress }}' uproxy-flood
