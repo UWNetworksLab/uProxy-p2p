@@ -134,4 +134,5 @@ echo "Connecting pair..."
 sleep 2 # make sure nc is shutdown
 ./connect-pair.py $CONTAINER_IP 9000 $CONTAINER_IP 9010
 
-echo "All done!"
+echo "SOCKS proxy should be available, sample command:"
+echo "  curl -x socks5h://localhost:9999 www.example.com"
