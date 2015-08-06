@@ -7,6 +7,8 @@
 #  Runs two instances running the dev version of chrome, connects them
 #  together, and runs a proxy.
 
+set -e
+
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
 BRANCH="-b dev"
@@ -61,7 +63,7 @@ else
 fi
 
 function make_image () {
-    if docker images | grep uproxy/$1 >/dev/null
+    if [ $(docker images | tail -n +2 | awk '{print $1}' | /bin/grep uproxy/$1) == "uproxy/$1" ]
     then
         echo "Reusing existing image uproxy/$1"
     else

@@ -39,6 +39,21 @@ EOF
 }
 
 function get_localchrome () {
+    # validate the path.   
+    case $1 in
+        stable)
+            VERSION=release    
+            chrome_build_path Release
+            ;;
+        debug)
+            VERSION=debug
+            chrome_build_path Debug
+            ;;
+        *)
+            log "Unknown localchrome version $1. Options are stable and debug."
+            exit 1
+            ;;
+    esac
     # localchrome is an additional mount at runtime, into
     # /test/chrome.  Just generate a wrapper script here.
         cat <<EOF
