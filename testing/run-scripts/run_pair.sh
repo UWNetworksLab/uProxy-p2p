@@ -62,6 +62,14 @@ else
     RUNARGS="$RUNARGS $REPO $BRANCH"
 fi
 
+# Kill any running giver and getter containers.
+for role in getter giver; do
+  if docker ps | grep uproxy-$role >/dev/null; then
+    echo "Stopping running uproxy-$role..."
+    docker rm -f uproxy-$role > /dev/null
+  fi
+done
+
 function make_image () {
     if [ $(docker images | tail -n +2 | awk '{print $1}' | /bin/grep uproxy/$1) == "uproxy/$1" ]
     then

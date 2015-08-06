@@ -32,10 +32,8 @@ for browser in browsers:
 
     result = 0
     try:
-      # Start the relevant config, stopping the previous one if necessary.
-      # TODO: check first if running, to avoid spurious warnings
-      subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
       spec = browser + '-' + version
+      # Start the relevant config.
       subprocess.call(['./run_pair.sh', '-p', args.clone_path, spec, spec],
           timeout=15)
 

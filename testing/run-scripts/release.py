@@ -55,8 +55,7 @@ for getter_spec, giver_spec in itertools.product(combos, combos):
 
   passed = False
   try:
-    # Start the relevant config, stopping the previous one if necessary.
-    # TODO: check first if running, to avoid spurious warnings
+    # Start the relevant config.
     subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
     subprocess.call(['./run_pair.sh', '-p', args.clone_path,
         getter_spec, giver_spec], timeout=15)
