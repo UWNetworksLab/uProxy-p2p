@@ -4,16 +4,15 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 
-// Both Ping and NAT type detection need help from a server. The following
-// ip/port is the instance we run on EC2.
+// NAT detection needs the help of an external server.
+// We keep this running on Amazon EC2 and the source
+// may be found here:
+//   https://github.com/uProxy/uproxy-probe/blob/master/python-src/probe-server.py
 var TEST_SERVER = '54.68.73.184';
 var TEST_PORT = 6666;
 
 var log :logging.Log = new logging.Log('probe');
 
-// The following code needs the help from a server to do its job. The server
-// code can be found jsonserv.py in the same repository. One instance is
-// running in EC2.
 export function probe() : Promise<string> {
   return new Promise((F, R) => {
     var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
