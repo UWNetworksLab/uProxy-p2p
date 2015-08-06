@@ -23,5 +23,5 @@ if docker ps | grep uproxy-flood >/dev/null; then
   docker rm -f uproxy-flood > /dev/null
 fi
 
-docker run -d -p 1224:1224 --name uproxy-flood uproxy/flood "$1"M $2
+docker run -d -p 1224:1224 --name uproxy-flood uproxy/flood "$1"M $2 > /dev/null
 docker inspect --format '{{ .NetworkSettings.IPAddress }}' uproxy-flood
