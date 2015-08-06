@@ -132,12 +132,28 @@ var lastUrl = '';
 var lastUrlTime = 0;
 
 chrome.webRequest.onBeforeRequest.addListener(
-  function() {
-    return {cancel: true};
-  },
-  {urls: ['https://www.uproxy.org/oauth-redirect-uri*']},
-  ['blocking']
-);
+    function(details) {
+      // TODO: add try catch and such in case of bad urls
+      var url = details.url;
+      var network = url.match(/invite\/(\w+)/)[1];
+      core.addUser(network, url);
+      // TODO: show something meaningful in the tab
+      return {
+          redirectUrl: chrome.extension.getURL('generic_ui/invite-received.html')
+      };
+    },
+    // TODO: need to do this for Firefox too
+    { urls: ['https://www.uproxy.org/invite/*'] },
+    ['blocking']
+    );
+
+chrome.webRequest.onBeforeRequest.addListener(
+    function() {
+        return { cancel: true };
+    },
+    { urls: ['https://www.uproxy.org/oauth-redirect-uri*'] },
+    ['blocking']
+    );
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {

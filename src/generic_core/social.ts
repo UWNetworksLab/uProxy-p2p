@@ -584,7 +584,7 @@ export function notifyUI(networkName :string, userId :string) {
 
     public generateInviteToken = () : Promise<string> => {
       return this.freedomApi_.getIntroductionToken().then((token) => {
-        return 'https://uproxy.org/invite/' + this.name + '/' + token;
+        return 'https://www.uproxy.org/invite/' + this.name + '/' + token;
       })
     }
 
