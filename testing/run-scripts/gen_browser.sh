@@ -6,15 +6,7 @@
 # Usage:
 #   setup_browser.sh type version
 #    - Type: 'chrome' or 'firefox'
-#    - Version:
-#      - For Chrome:
-#        - dev
-#        - release
-#        - canary
-#      - For Firefox:
-#        - aurora
-#        - beta
-#        - release
+#    - Version: 'stable' or 'beta' or 'canary'
 
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
@@ -23,17 +15,17 @@ function get_chrome () {
   DRIVERURL=https://chromedriver.storage.googleapis.com/$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
   
   case $1 in
-      dev|DEV)
-          URL=https://dl.google.com/linux/direct/google-chrome-beta_current_amd64.deb
-          ;;
-      rel|release|REL|RELEASE)
+      stable)
           URL=https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           ;;
-      canary|CANARY)
+      beta)
+          URL=https://dl.google.com/linux/direct/google-chrome-beta_current_amd64.deb
+          ;;
+      canary)
           URL=https://dl.google.com/linux/direct/google-chrome-unstable_current_amd64.deb
           ;;
       *)
-          log "Unknown chrome version $1. Options are dev, rel(ease), and canary."
+          log "Unknown chrome version $1. Options are stable, beta, and canary."
           exit 1
           ;;
   esac
@@ -47,6 +39,21 @@ EOF
 }
 
 function get_localchrome () {
+    # validate the path.   
+    case $1 in
+        stable)
+            VERSION=release    
+            chrome_build_path Release
+            ;;
+        debug)
+            VERSION=debug
+            chrome_build_path Debug
+            ;;
+        *)
+            log "Unknown localchrome version $1. Options are stable and debug."
+            exit 1
+            ;;
+    esac
     # localchrome is an additional mount at runtime, into
     # /test/chrome.  Just generate a wrapper script here.
         cat <<EOF
@@ -57,39 +64,39 @@ EOF
 
 function get_firefox () {
     case $1 in
-        aurora)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/$(date +%Y/%m/%Y-%m-%e-mozilla-aurora-debug)
-            PATTERN='*linux-x86_64.tar.bz2'
-            ;;
-        beta)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/$(date +%Y/%m/%Y-%m-%e-mozilla-beta-debug)
-            PATTERN='*linux-x86_64.tar.bz2'
-            ;;
-        rel|release)
+        stable)
             URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-x86_64/en-US/
             PATTERN='*.tar.bz2'
             ;;
+        beta)
+            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest-beta/linux-x86_64/en-US/
+            PATTERN='*.tar.bz2'
+            ;;
+        canary)
+            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-aurora/
+            PATTERN='*linux-x86_64.tar.bz2'
+            ;;
         *)
-            log "Unknown firefox version $1.  Options are aurora, beta, and rel(ease)."
+            log "Unknown firefox version $1. Options are stable, beta, and canary."
             ;;
     esac
     cat <<EOF
 RUN echo BROWSER=firefox >/etc/test.conf
-RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 --no-parent -A '$PATTERN' $URL
-RUN cd /usr/share ; tar xf /tmp/ff/*/*/*/*/*/*/*/*/*.bz2
+RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 -np -nd -A '$PATTERN' $URL
+RUN cd /usr/share ; tar xf /tmp/ff/*.bz2
 RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
 RUN mkdir -p /tmp/jetpack ; cd /tmp/jetpack ; wget https://ftp.mozilla.org/pub/mozilla.org/labs/jetpack/jetpack-sdk-latest.tar.gz ; tar xvzf jetpack-sdk-latest.tar.gz
 EOF
 
 }
 case $1 in
-    chr|chrome|CHROME|Chrome)
+    chrome)
         get_chrome $2
         ;;
-    ff|firefox|FIREFOX|Firefox|FireFox)
+    firefox)
         get_firefox $2
         ;;
-    lcr|lchrome|localchrome|LCR|LCHROME|LOCALCHROME)
+    localchrome)
         get_localchrome $2 $3
         ;;
     *)

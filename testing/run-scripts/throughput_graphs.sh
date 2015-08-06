@@ -34,10 +34,9 @@ fi
 FLOOD_IP=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' uproxy-flood`
 log "using flood server at $FLOOD_IP"
 
-# TODO: add firefox
-for browser in chrome
+for browser in chrome firefox
 do
-  for ver in rel dev canary
+  for ver in stable beta canary
   do
     log "benchmarking $browser $ver..."
 
