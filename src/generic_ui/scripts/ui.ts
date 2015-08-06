@@ -869,11 +869,14 @@ export class UserInterface implements ui_constants.UiApi {
       // Ensure that the user is still attempting to reconnect (i.e. they
       // haven't clicked to stop reconnecting while we were waiting for the
       // ping response).
+      // TODO: this doesn't work quite right if the user is signed into multiple social networks
       if (this.model.reconnecting) {
         this.core.login({network: network, reconnect: true}).then(() => {
+          // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
           this.stopReconnect();
         }).catch((e) => {
           // Reconnect failed, give up.
+          // TODO: this may have only failed for 1 of multiple networks
           this.stopReconnect();
           this.showNotification(
               this.i18n_t("LOGGED_OUT", { network: network }));
