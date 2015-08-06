@@ -24,4 +24,10 @@ if docker ps | grep uproxy-flood >/dev/null; then
 fi
 
 docker run -d -p 1224:1224 --name uproxy-flood uproxy/flood "$1"M $2 > /dev/null
-docker inspect --format '{{ .NetworkSettings.IPAddress }}' uproxy-flood
+FLOOD_IP=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' uproxy-flood`
+
+# Wait until the service is actually up; because we use -d, docker wait
+# is unavailable and we must probe the port manually.
+while ! nc -z $FLOOD_IP 1224; do sleep 0.1; done
+
+echo "$FLOOD_IP"
