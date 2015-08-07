@@ -29,31 +29,31 @@ export function probe() : Promise<string> {
 
       var rsp = JSON.parse(rspStr);
 
-      if (rsp['answer'] == 'FullCone') {
+      if (rsp['answer'] === 'FullCone') {
         F('FullCone');
-      } else if (rsp['answer'] == 'RestrictedConePrepare') {
+      } else if (rsp['answer'] === 'RestrictedConePrepare') {
         var peer_addr: string[] = rsp['prepare_peer'].split(':');
         var req: ArrayBuffer = arraybuffers.stringToArrayBuffer('{"ask":""}');
         log.debug('reply to RestrictedConePrepare');
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
-      } else if (rsp['answer'] == 'RestrictedCone') {
+      } else if (rsp['answer'] === 'RestrictedCone') {
         F('RestrictedCone');
-      } else if (rsp['answer'] == 'PortRestrictedConePrepare') {
+      } else if (rsp['answer'] === 'PortRestrictedConePrepare') {
         var peer_addr: string[] = rsp['prepare_peer'].split(':');
         var req: ArrayBuffer = arraybuffers.stringToArrayBuffer('{"ask":""}');
         log.debug('reply to PortRestrictedConePrepare');
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
-      } else if (rsp['answer'] == 'PortRestrictedCone') {
+      } else if (rsp['answer'] === 'PortRestrictedCone') {
         F('PortRestrictedCone');
-      } else if (rsp['answer'] == 'SymmetricNATPrepare') {
+      } else if (rsp['answer'] === 'SymmetricNATPrepare') {
         var peer_addr: string[] = rsp['prepare_peer'].split(':');
         var reqStr: string = JSON.stringify({ 'ask': 'AmISymmetricNAT' });
         var req: ArrayBuffer = arraybuffers.stringToArrayBuffer(reqStr);
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
-      } else if (rsp['answer'] == 'SymmetricNAT') {
+      } else if (rsp['answer'] === 'SymmetricNAT') {
         F('SymmetricNAT');
       } else {
         return;
@@ -132,7 +132,7 @@ export function probe() : Promise<string> {
         }, 3000);
       });
     }).catch((e: Error) => {
-      if (e.message != 'shortCircuit') {
+      if (e.message !== 'shortCircuit') {
         log.error('something wrong: ' + e.message);
         R(e);
       } else {
