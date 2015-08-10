@@ -20,8 +20,6 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
   // Status object indicating whether we're connected to the app.
   public status :browser_connector.StatusObject;
 
-  public waitingForAppInstall :boolean = false;
-
   private fulfillConnect_ :Function;
   public onceConnected :Promise<void> = new Promise<void>((F, R) => {
     this.fulfillConnect_ = F;
