@@ -52,8 +52,6 @@ class CordovaBrowserApi implements BrowserAPI {
   public stopUsingProxy = () => {
   };
 
-  // Other.
-
   public openTab = (url :string) => {
     // TODO: Figure out what this means in Cordova.
   }
@@ -63,7 +61,10 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public bringUproxyToFront = () : Promise<void> => {
-    if (this.popupState_ == PopupState.NOT_LAUNCHED) {
+    // In Cordova, this function is badly misnamed.  Rather than bringing the
+    // window to front, it actually creates the window the first time it is
+    // called, and otherwise has no effect.
+    if (this.popupState_ === PopupState.NOT_LAUNCHED) {
       this.popupState_ = PopupState.LAUNCHING;
       this.popupCreationStartTime_ = Date.now();
       // If neither popup nor Chrome window are open (e.g. if uProxy is launched
@@ -76,11 +77,9 @@ class CordovaBrowserApi implements BrowserAPI {
       chrome.app.window.create(this.POPUP_URL, {}, 
           this.newPopupCreated_);
       return this.onceLaunched_;
-    } else if (this.popupState_ == PopupState.LAUNCHED) {
-      // If the popup is already open, simply focus on it.
-      //chrome.windows.update(this.popupWindowId_, {focused: true});
-      return Promise.resolve<void>();
     } else {
+      // Once the app has started, all subsequent calls to bringUproxyToFront
+      // are no-ops.
       return this.onceLaunched_;
       console.log("Waiting for popup to launch...");
     }
