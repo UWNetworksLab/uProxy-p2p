@@ -30,8 +30,6 @@ class CordovaBrowserApi implements BrowserAPI {
   public setIcon = (iconFile :string) : void => {
   }
 
-  public ui :chrome.app.window.AppWindow;
-
   // The URL for the page that renders the UI.  For terminological consistency,
   // the UI is referred to as the "popup", even though it is persistent and
   // full-screen.
@@ -94,7 +92,6 @@ class CordovaBrowserApi implements BrowserAPI {
   private newPopupCreated_ = (popup :chrome.app.window.AppWindow) => {
     console.log("Time between browser icon click and popup launch (ms): " +
         (Date.now() - this.popupCreationStartTime_));
-    this.ui = popup;
     this.popupState_ = PopupState.LAUNCHED;
     this.handlePopupLaunch();
   }
