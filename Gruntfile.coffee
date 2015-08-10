@@ -80,7 +80,6 @@ taskManager.add 'build_cca', [
   'copy:cca_additional'
   'vulcanize:ccaInline'
   'vulcanize:ccaCsp'
-  'copy:cca'
   'browserify:ccaMain'
   'browserify:ccaContext'
   'browserify:ccaVulcanized'
@@ -590,10 +589,7 @@ module.exports = (grunt) ->
               # extra components we use
               'generic_ui/fonts/*'
               'generic_ui/icons/*'
-              'icons/*'
-              '_locales/**'
 
-              # UI for not-connected
               # This is not browserified so we use .js instead of .static.js
               'polymer/vulcanized.{html,js}'
 
