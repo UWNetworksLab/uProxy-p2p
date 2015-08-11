@@ -232,6 +232,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                   then((mapping:freedom_PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
                       log.debug("addMapping() failed.");
+                      log.debug("Failed UPnP mapping object: ", mapping);
                     } else {
                       log.debug("addMapping() success: ", mapping);
                     }
