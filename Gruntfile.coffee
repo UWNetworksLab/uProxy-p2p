@@ -580,8 +580,6 @@ module.exports = (grunt) ->
 
               'generic_ui/scripts/copypaste.js'
               'generic_ui/scripts/get_logs.js'
-              'scripts/context.static.js'
-              'scripts/background.static.js'
               '!**/*spec*'
 
               'generic_ui/style/*.css'
@@ -613,11 +611,9 @@ module.exports = (grunt) ->
               '**/freedom-module.json'
               '!generic_core/freedom-module.json'
               '**/*.static.js'
-              '!**/*spec*'
 
               'icons/*'
               'fonts/*'
-              '_locales/**'
             ]
             dest: 'build/dist/cca'
           }
