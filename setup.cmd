@@ -5,7 +5,7 @@
 :: directory of the project (which is where this script is located).
 for %%F in (%0) do set ROOT_DIR=%%~dpF
 set NPM_BIN_DIR=%ROOT_DIR%node_modules\.bin\
-cd %ROOT_DIR%
+cd "%ROOT_DIR%"
 
 if "%1" == "install" (
 	call :installDevDependencies
@@ -39,13 +39,21 @@ if "%1" NEQ "third_party" if "%1" NEQ "clean" (
 	%~1
 goto:eof
 
-:: On Windows, npm, bower, tsd, and grunt are batch files
-:: So we have to explicitly call then with "call"
+:: On Windows, npm, bower, tsd, and grunt are batch files,
+:: so we have to explicitly call them with "call"
 :: These also happen to be the commands that we want to assert, 
 :: or exit on failure for, so there is an additional "exit /b"
 :runAndAssertCmd
 	echo Running: %1
 	call %~1 || exit /b
+goto:eof
+
+:: Same as runAndAssertCmd, but takes in an arbitrary number of
+:: arguments, and calls them without stripping the double quotes
+:: This is used for commands where the path may have spaces
+:runAndAssertCmdArgs
+	echo Running: %*
+	call %* || exit /b
 goto:eof
 
 :: We use robocopy to delete these folders since they (esp. node_modules)
@@ -64,9 +72,9 @@ goto:eof
 goto:eof
 
 :installThirdParty
-	call :runAndAssertCmd "%NPM_BIN_DIR%bower install --allow-root"
-	call :runAndAssertCmd "%NPM_BIN_DIR%tsd reinstall --config .\third_party\tsd.json"
-	call :runAndAssertCmd "%NPM_BIN_DIR%grunt copy:thirdParty"
+	call :runAndAssertCmdArgs "%NPM_BIN_DIR%bower" install --allow-root
+	call :runAndAssertCmdArgs "%NPM_BIN_DIR%tsd" reinstall --config .\third_party\tsd.json
+	call :runAndAssertCmdArgs "%NPM_BIN_DIR%grunt" copy:thirdParty
 goto:eof
 
 :installDevDependencies
