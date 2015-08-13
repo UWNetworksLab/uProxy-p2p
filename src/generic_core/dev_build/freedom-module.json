@@ -17,10 +17,6 @@
     },
     "SOCIAL-Google+": {
       "url": "../freedom-social-firebase/social.firebase-google.json",
-      "api": "social"
-    },
-    "SOCIAL-Email": {
-      "url": "../freedom-social-firebase/social.firebase-email.json",
       "api": "social2"
     },
     "loggingcontroller": {

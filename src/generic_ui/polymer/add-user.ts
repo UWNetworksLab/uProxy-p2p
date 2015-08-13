@@ -1,8 +1,6 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-declare var chrome: any;  // TODO:
-
 Polymer({
   openAddUserDialog: function() {
     this.$.addUserDialog.open();
