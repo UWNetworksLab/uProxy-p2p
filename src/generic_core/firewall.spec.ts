@@ -1,6 +1,5 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
-
 import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
 import mockFreedomRtcPeerConnection = require('../../../third_party/uproxy-lib/freedom/mocks/mock-rtcpeerconnection');
 
