@@ -35,8 +35,6 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
 
-var portControl = freedom['portControl']();
-
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updates to the UI, and handles commands from the UI.
@@ -48,6 +46,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
+
+  public portControl :freedom_PortControl.PortControl;
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -76,6 +76,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         data: data
       });
     });
+    this.portControl = freedom['portControl']();
+    this.refreshPortControlSupport();
   }
 
   // sendInstanceHandshakeMessage = (clientId :string) => {
@@ -370,7 +372,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
               uproxy_core_api.PortControlSupport.PENDING);
 
-    return portControl.probeProtocolSupport().then(
+    return this.portControl.probeProtocolSupport().then(
       (probe:freedom_PortControl.ProtocolSupport) => {
         this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
                                    uproxy_core_api.PortControlSupport.TRUE :
@@ -392,7 +394,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
-      return portControl.probeProtocolSupport().then(
+      return this.portControl.probeProtocolSupport().then(
         (probe:freedom_PortControl.ProtocolSupport) => {
           natInfo.pmpSupport = probe.natPmp;
           natInfo.pcpSupport = probe.pcp;
