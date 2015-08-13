@@ -13,7 +13,7 @@
     },
     "SOCIAL-Facebook": {
       "url": "../freedom-social-firebase/social.firebase-facebook.json",
-      "api": "social"
+      "api": "social2"
     },
     "SOCIAL-Google+": {
       "url": "../freedom-social-firebase/social.firebase-google.json",

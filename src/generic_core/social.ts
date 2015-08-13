@@ -267,7 +267,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public generateInviteToken = () : Promise<string> => {
+    public sendInviteToken = (userId :string) : Promise<string> => {
       throw new Error('Operation not implemented');
     }
 
@@ -582,8 +582,8 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public generateInviteToken = () : Promise<string> => {
-      return this.freedomApi_.getIntroductionToken().then((token) => {
+    public sendInviteToken = (userId: string): Promise<string> => {
+      return this.freedomApi_.sendIntroductionToken(userId).then((token) => {
         return 'https://www.uproxy.org/invite/' + this.name + '/' + token;
       })
     }

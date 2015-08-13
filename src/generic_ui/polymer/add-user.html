@@ -18,9 +18,11 @@
       <p>To invite a friend to use uProxy with you, share this link with them.</p>
 
       <!-- TODO: hide this until ready? -->
-      <paper-input-decorator label="{{ 'LOADING' | $$ }}" layout vertical>
-        <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+      <paper-input-decorator label="Friend's email address" layout vertical>
+        <input is='core-input' value='{{ inviteUserId }}' />
       </paper-input-decorator>
+
+      <paper-button affirmative on-tap='{{ sendToGoogleFriend }}'>Send to Google Friend</paper-button>
 
       <p>If you have a uProxy link from your friend, you can paste it below to add them.</p>
 

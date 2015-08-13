@@ -100,8 +100,8 @@ ui_connector.onPromiseCommand(
     core.addUser);
 
 ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GENERATE_INVITE_TOKEN,
-    core.generateInviteToken);
+    uproxy_core_api.Command.SEND_INVITE_TOKEN,
+    core.sendInviteToken);
 
 ui_connector.onCommand(uproxy_core_api.Command.STOP_PROXYING,
     core.stop);
@@ -121,6 +121,10 @@ ui_connector.onPromiseCommand(
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_NAT_TYPE,
     core.getNatType);
+
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.REFRESH_PORT_CONTROL,
+    core.refreshPortControlSupport);
 
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_FULL_STATE,

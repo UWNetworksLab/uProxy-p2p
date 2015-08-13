@@ -3,7 +3,6 @@
 import core_connector = require('../../../generic_ui/scripts/core_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import user_interface = require('../../../generic_ui/scripts/ui');
 import chromeInterface = require('../../../interfaces/chrome');
 import background = require('./background');
 
@@ -21,35 +20,48 @@ class ChromeTabAuth {
   }
 
   public login = (oauthInfo :chromeInterface.OAuthInfo) : void => {
-    this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
+    this.launchAuthTab_(
+        oauthInfo.url, oauthInfo.redirect, oauthInfo.interactive);
   }
 
 
-  private launchAuthTab_ = (url :string, redirectUrl :string) : void => {
+  private launchAuthTab_ = (url :string, redirectUrl :string, interactive :boolean) : void => {
+    var gotCredentials = false;
     var onTabChange = (tabId :number, changeInfo :chrome.tabs.TabChangeInfo, tab :chrome.tabs.Tab) => {
       if (tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.remove(tabId);
+        gotCredentials = true;
         this.sendCredentials_(tab.url);
       }
     };
 
-    var isActive = true; //TODO use actual value
-    chrome.tabs.create({url: url, active: isActive},
+    chrome.tabs.create({url: url, active: interactive},
                        function(tab: chrome.tabs.Tab) {
-      if (isActive) {
+      if (interactive) {
         chrome.windows.update(tab.windowId, {focused: true});
+      } else {
+        // For non-interactive login, close tab and reject if we don't have
+        // credentials within 5 seconds.
+        setTimeout(() => {
+          if (!gotCredentials) {
+            chrome.tabs.remove(tab.id);
+            this.onError_('Error reconnecting');
+          }
+        }, 5000);
       }
       chrome.tabs.onUpdated.addListener(onTabChange);
     }.bind(this));
   }
 
   private onError_ = (errorText :string) : void => {
-    background.core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, errorText);
+    background.core.sendCommand(
+        uproxy_core_api.Command.CREDENTIALS_ERROR, errorText);
   }
 
   private sendCredentials_ = (url :string) : void => {
-    background.core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, url);
+    background.core.sendCommand(
+        uproxy_core_api.Command.SEND_CREDENTIALS, url);
   }
 }
 

@@ -48,6 +48,7 @@
               <li><a href="#doesUproxyLogData">Does uProxy log data about me, and what is uProxy's privacy policy?</a></li>
               <li><a href="#doesUproxyGiveMe">Does uProxy give me anonymity online?</a></li>
               <li><a href="#whatIsntProxied">What isn't proxied, and can uProxy leak information about the sites I visit?</a></li>
+              <li><a href="#whatIsPortControl">What does "port control" mean?</a></li>
               <li><a href="#whoMadeUproxy">Who made uProxy?</a></li>
               <li><a href="#whatIsAlpha">What is an alpha release?</a></li>
             </ul>
@@ -122,6 +123,13 @@
           <section class="faq" id="whatIsntProxied">
             <h2>What isn't proxied, and can uProxy leak information about the sites I visit?</h2>
             <p>uProxy only proxies traffic for the web browser it is running in, not for other applications, like email programs. In addition, some web pages may not use uProxy for all their traffic. Flash is the most common example of this, and users who are concerned about Flash leaking the identity of the sites they visit should disable Flash in their browser (<a href="https://support.google.com/chrome/answer/108086?hl=en">Chrome</a> or <a href="http://kb.mozillazine.org/Flash#Enabling_and_disabling_Flash">Firefox</a>).  WebRTC is also not proxied.  (WebRTC is relatively rare; it's used mostly for videochat). In addition, some DNS requests may not be proxied, which could leak information about which websites a user is trying to visit, or allow a hostile website to determine the user's IP address.</p>
+
+            <a class='top' href="faq.html#">Back to top</a>
+          </section>
+
+          <section class="faq" id="whatIsPortControl">
+            <h2>What does "port control" mean?</h2>
+            <p>If your router has port control enabled (UPnP, NAT-PMP, or PCP), uProxy can talk to your router to specifically allow incoming connections from other uProxy users. If either side of a uProxy connection has port control, sharing/getting internet access will almost always be successful. (However, successful connections can be made without port control.) To learn how to enable port control on your router, check your router manual or Google "your router name" + "enable UPnP".</p>
 
             <a class='top' href="faq.html#">Back to top</a>
           </section>

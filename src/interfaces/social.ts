@@ -26,10 +26,15 @@ export interface BaseUser {
   name :string;
 }
 
+export interface StopProxyInfo {
+  instanceId :string;
+  error      :boolean;
+}
+
 export interface LocalInstanceState {
   instanceId  :string;
   userId      :string;
-  userName        :string;
+  userName    :string;
   imageData   :string;
   keyHash     :string;
 }
@@ -273,7 +278,7 @@ export interface Network {
   /**
    * Generates an invite token
    */
-  generateInviteToken: () => Promise<string>;
+  sendInviteToken: (userId :string) => Promise<string>;
 
   /**
     * Resends the instance handeshake to all uProxy instances.

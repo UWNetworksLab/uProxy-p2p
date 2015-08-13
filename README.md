@@ -51,6 +51,8 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - To run binaries from globally-installed npm packages without
       fully-qualifying paths, make sure you have added your npm bin directory to your path (e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`).
 
+    - On Windows, you can download the installer from the [NodeJS Website](http://nodejs.org/).
+
 - [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
 
 ### Building uProxy from source
@@ -58,8 +60,9 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
  1. Clone uProxy and its submodules (and its submodules' submodules...): `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
 
  1. In the root uProxy directory, run:
-   * `./setup.sh install` - this will set up build tools and third-party dependencies.
-   * `grunt` - this will build everything, including uProxy for Chrome and Firefox.
+   * In OS X or Linux, run `./setup.sh install` - this will set up build tools and third-party dependencies.
+   * In Windows, run `.\setup.cmd install` instead (in cmd or PowerShell).
+   * Then run `grunt` - this will build everything, including uProxy for Chrome and Firefox.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `./setup.sh install` to update these dependencies, then rerun `grunt`
 
