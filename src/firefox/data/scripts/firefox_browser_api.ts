@@ -141,6 +141,10 @@ class FirefoxBrowserApi implements BrowserAPI {
       console.warn('Firefox promise reject not found ' + promiseId);
     }
   }
+
+  public setBadgeNotification = (notification :string) => {
+    port.emit('setBadgeNotification', notification);
+  }
 }
 
 export = FirefoxBrowserApi;

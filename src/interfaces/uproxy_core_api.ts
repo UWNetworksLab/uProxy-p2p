@@ -42,6 +42,7 @@ export interface InitialState {
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
   copyPasteState :CopyPasteState;
+  portControlSupport :PortControlSupport;
 }
 
 export interface ConnectionState {
@@ -97,8 +98,10 @@ export enum Command {
   GET_FULL_STATE = 1019,
   GET_VERSION = 1020,
   HANDLE_CORE_UPDATE = 1021,
-  ADD_USER = 1022,
-  GENERATE_INVITE_TOKEN = 1023
+  REFRESH_PORT_CONTROL = 1022,
+  CREDENTIALS_ERROR = 1023,
+  ADD_USER = 1024,
+  GENERATE_INVITE_TOKEN = 1025
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -132,6 +135,7 @@ export enum Update {
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
+  PORT_CONTROL_STATUS = 2025,
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -173,6 +177,16 @@ export interface LoginArgs {
   password       ?:string;
   createAccount  ?:boolean;
 }
+
+export interface NetworkInfo {
+  natType ?:string;
+  pmpSupport :boolean;
+  pcpSupport :boolean;
+  upnpSupport :boolean;
+  errorMsg ?:string;
+};
+
+export enum PortControlSupport {PENDING, TRUE, FALSE};
 
 /**
  * The primary interface to the uProxy Core.
@@ -217,7 +231,7 @@ export interface CoreApi {
 
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
-  stop () : void;
+  stop (path :social.InstancePath) : void;
 
   updateGlobalSettings(newSettings :GlobalSettings) :void;
   // TODO: rename toggle-option and/or replace with real configuration system.

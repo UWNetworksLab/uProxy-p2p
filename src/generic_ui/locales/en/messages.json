@@ -675,6 +675,10 @@
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
   },
+  "RESTART_PROXYING": {
+    "description": "If proxy connection gets disconnected restart the connection",
+    "message": "Reconnect"
+  },
   "UPDATE_AVAILABLE": {
     "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",
     "message": "An update is available"
@@ -682,5 +686,29 @@
   "RESTART_UPROXY_UPDATE": {
     "description": "A link the user can click on to restart uProxy and permorm an update",
     "message": "Restart to update"
+  },
+  "PORT_CONTROL_TITLE": {
+    "description": "Title for the port control section in advanced settings",
+    "message": "Port control status"
+  },
+  "PORT_CONTROL_SUPPORTED": {
+    "description": "NAT-PMP, PCP, or UPnP is supported in the router",
+    "message": "Your router has port control enabled."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED": {
+    "description": "NAT-PMP, PCP, and UPnP are not supported in the router",
+    "message": "Your router does not have port control enabled."
+  },
+  "PORT_CONTROL_PENDING": {
+    "description": "uProxy is currently probing router for port control support",
+    "message": "Probing router for port control support..."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO": {
+    "description": "Extra information displayed when port control is not supported",
+    "message": "You may be able to enable port control to make uProxy more reliable."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
+    "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
+    "message": "More info."
   }
 }

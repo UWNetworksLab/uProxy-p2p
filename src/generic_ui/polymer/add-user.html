@@ -22,6 +22,8 @@
         <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
       </paper-input-decorator>
 
+      <paper-button affirmative on-tap='{{ sendToFacebookFriend }}'>Send to Facebook Friend</paper-button>
+
       <p>If you have a uProxy link from your friend, you can paste it below to add them.</p>
 
       <div id='addFriend'>
