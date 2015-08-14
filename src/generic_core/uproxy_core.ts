@@ -52,11 +52,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   constructor() {
     log.debug('Preparing uProxy Core');
     copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
-      // TODO send this update only when
-      // update !== uproxy_core_api.Update.SIGNALLING_MESSAGE
-      // (after v0.8.13)
-      ui.update(update, message);
       if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
+        ui.update(update, message);
         return;
       }
 

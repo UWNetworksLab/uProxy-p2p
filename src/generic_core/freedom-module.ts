@@ -53,14 +53,6 @@ var exported = {
 };
 export = exported;
 
-ui_connector.onCommand(
-    uproxy_core_api.Command.GET_INITIAL_STATE_DEPRECATED_0_8_10,
-    () => {
-      core.getFullState().then((state :uproxy_core_api.InitialState) => {
-        ui_connector.update(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_10, state);
-      });
-    });
-
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.LOGIN,
     core.login);
