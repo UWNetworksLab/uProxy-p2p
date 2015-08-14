@@ -252,8 +252,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.connect();
 
-    core.onUpdate(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_10, this.updateInitialState);
-
     // Add or update the online status of a network.
     core.onUpdate(uproxy_core_api.Update.NETWORK, this.syncNetwork_);
 
