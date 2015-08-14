@@ -20,8 +20,10 @@ var config :freedom_RTCPeerConnection.RTCConfiguration = {
                {urls: ['stun:stun1.l.google.com:19302']}]
 };
 
+var portControl = freedom['portControl']();
+
 export var freedomPc = freedom['core.rtcpeerconnection'](config);
-export var pc = new churn.Connection(freedomPc);
+export var pc = new churn.Connection(freedomPc, undefined, undefined, portControl);
 export var freedomParentModule = freedom();
 
 // Forward signalling channel messages to the UI.
