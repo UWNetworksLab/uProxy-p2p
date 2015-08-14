@@ -182,19 +182,16 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.havePipe_ = F;
     });
 
-    private portControl_ :freedom_PortControl.PortControl;
-
     private static internalConnectionId_ = 0;
 
     constructor(probeRtcPc:freedom_RTCPeerConnection.RTCPeerConnection,
                 peerName?:string,
-                private skipPublicEndpoint_?:boolean) {
+                private skipPublicEndpoint_?:boolean,
+                private portControl_?:freedom_PortControl.PortControl) {
       this.peerName = peerName || 'churn-connection-' +
           (++Connection.internalConnectionId_);
 
       this.signalForPeerQueue = new handler.Queue<ChurnSignallingMessage,void>();
-
-      this.portControl_ = freedom['portControl']();
 
       this.configureObfuscatedConnection_();
       // When the probe connection is complete, it will trigger the
@@ -228,14 +225,18 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             // Try to make port mappings for all srflx candidates
             var MAP_LIFETIME = 24 * 60 * 60;  // 24 hours in seconds
             if (c.type === 'srflx') {
-              this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
+              if (this.portControl_ === undefined) {
+                log.debug('Port control not available in churn');
+              } else {
+                this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom_PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
                       log.debug("addMapping() failed.");
                     } else {
                       log.debug("addMapping() success: ", mapping);
                     }
-                  });
+                });
+              }
             }
 
             // It's immediately safe to send each candidate to the remote peer,
