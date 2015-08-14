@@ -231,7 +231,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom_PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed.");
+                      log.debug("addMapping() failed. Mapping object: ", 
+                                mapping);
                     } else {
                       log.debug("addMapping() success: ", mapping);
                     }
