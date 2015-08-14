@@ -56,6 +56,8 @@ var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
 var socksRtc:socks_to_rtc.SocksToRtc;
 var rtcNet:rtc_to_net.RtcToNet;
 
+var portControl = freedom['portControl']();
+
 var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
 
@@ -82,7 +84,7 @@ var doStart = () => {
   });
 
   socksRtc.start(new tcp.Server(localhostEndpoint),
-      bridge.best('sockstortc', pcConfig)).then(
+      bridge.best('sockstortc', pcConfig, portControl)).then(
       (endpoint:net.Endpoint) => {
     log.info('SocksToRtc listening on %1', endpoint);
     log.info('curl -x socks5h://%1:%2 www.example.com',
@@ -106,7 +108,7 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
       rtcNet = new rtc_to_net.RtcToNet();
       rtcNet.start({
         allowNonUnicast: true
-      }, bridge.best('rtctonet', pcConfig));
+      }, bridge.best('rtctonet', pcConfig, portControl));
       log.info('created rtc-to-net');
 
       // Forward signalling channel messages to the UI.
