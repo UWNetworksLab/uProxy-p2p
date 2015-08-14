@@ -222,7 +222,6 @@ export class UserInterface implements ui_constants.UiApi {
   constructor(
       public core   :CoreConnector,
       public browserApi :BrowserAPI) {
-    // TODO: Determine the best way to describe view transitions.
     this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
     this.i18n_setLng(this.model.globalSettings.language);
 
@@ -249,8 +248,6 @@ export class UserInterface implements ui_constants.UiApi {
         this.stopGettingInUiAndConfig({instanceId: null, error: true});
       }
     });
-
-    core.connect();
 
     // Add or update the online status of a network.
     core.onUpdate(uproxy_core_api.Update.NETWORK, this.syncNetwork_);
