@@ -222,7 +222,7 @@ export class UserInterface implements ui_constants.UiApi {
   constructor(
       public core   :CoreConnector,
       public browserApi :BrowserAPI) {
-    this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
+    this.updateView_();
     this.i18n_setLng(this.model.globalSettings.language);
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
@@ -233,7 +233,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     core.on('core_connect', () => {
-      this.view = ui_constants.View.SPLASH;
+      this.updateView_();
 
       core.getFullState()
           .then(this.updateInitialState);
@@ -522,6 +522,8 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
 
+    // do not use the updateView function here, actual state may not have been
+    // processed yet
     this.view = ui_constants.View.COPYPASTE;
     this.copyPasteError = ui_constants.CopyPasteError.NONE;
 
@@ -752,14 +754,11 @@ export class UserInterface implements ui_constants.UiApi {
             this.stopGettingInUiAndConfig({instanceId: null, error: true});
           }
           this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
-
-          if (!this.model.onlineNetworks.length) {
-            this.view = ui_constants.View.SPLASH;
-          }
         }
       }
     }
 
+    this.updateView_();
     this.updateIcon_();
   }
 
@@ -885,9 +884,7 @@ export class UserInterface implements ui_constants.UiApi {
           this.showNotification(
               this.i18n_t("LOGGED_OUT", { network: network }));
 
-          if (!this.model.onlineNetworks.length) {
-            this.view = ui_constants.View.SPLASH;
-          }
+          this.updateView_();
         });
       }
     });
@@ -973,11 +970,6 @@ export class UserInterface implements ui_constants.UiApi {
     this.copyPasteGettingMessages = state.copyPasteState.gettingMessages;
     this.copyPasteSharingMessages = state.copyPasteState.sharingMessages;
     this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
-    if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
-        this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
-      // This means we had active copy-paste flow.
-      this.view = ui_constants.View.COPYPASTE;
-    }
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];
@@ -991,18 +983,18 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (state.onlineNetworks.length > 0) {
       // Check that we dont' have copy paste connection
-      if (this.view === ui_constants.View.COPYPASTE) {
+      if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
+          this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
         console.error(
             'User cannot be online while having a copy-paste connection');
       }
-      // Set view to roster, user is online.
-      this.view = ui_constants.View.ROSTER;
-      this.updateSharingStatusBar_();
     }
 
     this.portControlSupport = state.portControlSupport;
 
-    // state of online networks may have changed, update it
+    // plenty of state may have changed, update it
+    this.updateView_();
+    this.updateSharingStatusBar_();
     this.updateIcon_();
   }
 
@@ -1043,6 +1035,19 @@ export class UserInterface implements ui_constants.UiApi {
 
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
     this.portControlSupport = support;
+  }
+
+  // this takes care of updating the view (given the assumuption that we are
+  // connected to the core)
+  private updateView_ = () => {
+    if (this.model.onlineNetworks.length > 0) {
+      this.view = ui_constants.View.ROSTER;
+    } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
+               this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
+      this.view = ui_constants.View.COPYPASTE;
+    } else {
+      this.view = ui_constants.View.SPLASH;
+    }
   }
 } // class UserInterface
 
