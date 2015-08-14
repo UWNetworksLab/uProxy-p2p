@@ -5,6 +5,8 @@
  * It handles the signaling channel between two peers, regardless of permission.
  */
 
+/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
@@ -70,7 +72,8 @@ var generateProxyingSessionId_ = (): string => {
 
     constructor(
       sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void,
-      private userId_?:string
+      private userId_?:string,
+      private portControl_?:freedom_PortControl.PortControl
     ) {
       this.sendUpdate_ = sendUpdate;
       this.resetSharerCreated();
@@ -140,7 +143,7 @@ var generateProxyingSessionId_ = (): string => {
           'rtctonet');
       } else {
         log.debug('peer is running client version >1, using bridge');
-        pc = bridge.best('rtctonet', config);
+        pc = bridge.best('rtctonet', config, this.portControl_);
       }
 
       this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
@@ -288,15 +291,15 @@ var generateProxyingSessionId_ = (): string => {
           break;
         case 2:
           log.debug('using bridge without obfuscation');
-          pc = bridge.preObfuscation('sockstortc', config);
+          pc = bridge.preObfuscation('sockstortc', config, this.portControl_);
           break;
         case 3:
           log.debug('using bridge with basicObfuscation');
-          pc = bridge.basicObfuscation('sockstortc', config);
+          pc = bridge.basicObfuscation('sockstortc', config, this.portControl_);
           break;
         default:
           log.debug('using holographic ICE');
-          pc = bridge.best('sockstortc', config);
+          pc = bridge.best('sockstortc', config, this.portControl_);
         }
 
       return this.socksToRtc_.start(tcpServer, pc).then(

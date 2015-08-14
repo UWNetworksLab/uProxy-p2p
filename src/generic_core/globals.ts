@@ -77,3 +77,5 @@ export var effectiveMessageVersion = () : number => {
 }
 
 export var metrics = new metrics_module.Metrics(storage);
+
+export var portControl = freedom['portControl']();
