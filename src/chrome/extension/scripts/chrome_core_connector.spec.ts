@@ -196,7 +196,7 @@ describe('core-connector', () => {
     var payload = { cmd: 'test1', type: 1 };
     chromeCoreConnector['send'](payload);
     expect(chromeCoreConnector['queue_']).toEqual([
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test1', type: 1 }
     ]);
   });
@@ -205,9 +205,9 @@ describe('core-connector', () => {
     var payload = { cmd: 'test2', type: 2 };
     chromeCoreConnector['send'](payload);
     expect(chromeCoreConnector['queue_']).toEqual([
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test1', type: 1 },
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 11},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test2', type: 2 }
     ]);
   });
@@ -251,11 +251,11 @@ describe('core-connector', () => {
     chromeCoreConnector.flushQueue();
     expect(chromeCoreConnector['queue_']).toEqual([]);
     expect(flushed).toEqual([
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test1', type: 1 },
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 11},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test2', type: 2 },
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 12}
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
     ]);
   });
 
