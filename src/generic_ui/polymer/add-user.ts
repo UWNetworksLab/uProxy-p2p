@@ -1,32 +1,41 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
+var ui = ui_context.ui;
+var model = ui_context.model;
+
 Polymer({
   openAddUserDialog: function() {
+    // Clear networkNames (can't re-assign due to Polymer bindings)
+    for (var i = 0; i < this.networkNames.length; ++i) {
+      this.networkNames.pop();
+    }
+    for (i = 0; i < model.onlineNetworks.length; ++i) {
+      this.networkNames.push(model.onlineNetworks[i].name);
+    }
     this.$.addUserDialog.open();
   },
   addUser: function() {
     // TODO: pick network based on dropdown.
-    ui_context.core.addUser('Google+', this.userIdInput);
-  },
-  select: function(e :Event, d :Object, element :HTMLInputElement) {
-    element.focus();
-    element.select();
+    ui_context.core.addUser('Google+', this.receivedInviteToken);
   },
   sendToGoogleFriend: function() {
-      // var facebookUrl = 'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link=' +
-      //     this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
-      // chrome.tabs.create({ url: facebookUrl });  // TODO: make work with Firefox
-
-      // TODO: pick network based on dropdown.
-      console.log('generating invite token');  // TODO: does this run each time we show the popup?  or just once?
-      ui_context.core.sendInviteToken('Google+', this.inviteUserId).then((token: string) => {
-        this.inviteUrl = token;
-      });
+    ui_context.core.sendInviteToken('Google+', this.inviteUserEmail);
+  },
+  sendToFacebookFriend: function() {
+    // TODO: get invite token
+    var facebookUrl = 'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link=' +
+        this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
+    ui.openTab(facebookUrl);
+  },
+  onNetworkSelect: function(e :any, details :any) {
+    // TODO: does this need to be initialized?
+    this.selectedNetwork = details.item.getAttribute('label');
   },
   ready: function() {
-    this.userIdInput = '';  // TODO: terrible name.  this is the token input
-    this.inviteUrl = '';
-    this.inviteUserId = '';
+    this.receivedInviteToken = '';
+    this.inviteUserEmail = '';
+    this.selectedNetwork = '';
+    this.networkNames = [];
   }
 });

@@ -15,23 +15,41 @@
 
     <paper-action-dialog id='addUserDialog' backdrop heading='' layered='true'>
 
-      <p>To invite a friend to use uProxy with you, share this link with them.</p>
+      <div hidden?='{{ networkNames.length <= 1}}'>
+        <p>How would you like to invite to your friends?</p>
+        <paper-dropdown-menu>
+          <paper-dropdown class='dropdown'>
+            <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}'>
+              <template repeat="{{ networkName in networkNames }}">
+                <paper-item label='{{ networkName }}'>{{ networkName }}</paper-item>
+              </template>
+            </core-menu>
+          </paper-dropdown>
+        </paper-dropdown-menu>
+      </div>
 
-      <div>
-        <!-- TODO: hide this until ready? -->
+      <div hidden?='{{ selectedNetwork != "Facebook"}}'>
+        <paper-button affirmative on-tap='{{ sendToFacebookFriend }}'>
+          Send to Facebook Friend
+        </paper-button>
+      </div>
+
+      <div hidden?='{{ selectedNetwork != "Google+"}}'>
         <paper-input-decorator label="Friend's email address" layout vertical>
-          <input is='core-input' value='{{ inviteUserId }}' />
+          <input is='core-input' value='{{ inviteUserEmail }}' />
         </paper-input-decorator>
 
-        <paper-button affirmative on-tap='{{ sendToGoogleFriend }}'>Send to Google Friend</paper-button>
+        <paper-button affirmative on-tap='{{ sendToGoogleFriend }}'>
+          Send to Google Friend
+        </paper-button>
       </div>
 
       <div>
-        <p>If you have a uProxy link from your friend, you can paste it below to add them.</p>
+        <p>If you have a uProxy token or link from your friend, you can paste it below to add them.</p>
 
         <div id='addFriend'>
           <paper-input-decorator label="Add friend by URL">
-            <input is='core-input' value='{{ userIdInput }}'>
+            <input is='core-input' value='{{ receivedInviteToken }}'>
           </paper-input-decorator>
           <paper-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</paper-button>
         </div>
