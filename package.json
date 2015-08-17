@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.8.17",
+  "version": "0.8.18",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -19,6 +19,7 @@
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
     "bower": "^1.4.1",
+    "cca": "^0.7.1",
     "circular-json": "^0.1.6",
     "compare-version": "^0.1.2",
     "crypto": "^0.0.3",
@@ -36,6 +37,7 @@
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-jasmine": "^0.8.0",
+    "grunt-exec": "^0.4.6",
     "grunt-gitinfo": "^0.1.7",
     "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",
     "grunt-mozilla-addon-sdk": "^0.4.0",
