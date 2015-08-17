@@ -69,8 +69,8 @@ for getter_spec, giver_spec in itertools.product(combos, combos):
     passed = (small_md5sum == known_small_md5sum)
 
     # large (non-HTTP) transfer.
-    if subprocess.call(['nc', '-X', '5', '-x', 'localhost:9999',
-        flood_ip, '1224']) != 0:
+    if subprocess.call('nc -X 5 -x localhost:9999 ' + flood_ip + ' 1224 > /tmp/nc',
+        shell=True) != 0:
       raise Exception('nc failed, proxy probably did not start')
     large_md5sum = subprocess.check_output(
         'cat /tmp/nc|md5sum -|cut -d\' \' -f1',
