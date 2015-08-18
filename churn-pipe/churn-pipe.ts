@@ -211,7 +211,7 @@ class Pipe {
         this.onIncomingData_(recvFromInfo, publicEndpoint.address, index);
       });
     });
-    
+
     this.publicPorts_[publicEndpoint.address][publicEndpoint.port] = portPromise;
     return portPromise;
   }
@@ -411,12 +411,14 @@ class Pipe {
    * The message is obfuscated before it hits the wire.
    */
   private sendTo_ = (publicSocket:Socket, buffer:ArrayBuffer, to:net.Endpoint)
-      : void => {
-    var transformedBuffer = this.transformer_.transform(buffer);
-    publicSocket.sendTo.reckless(
-      transformedBuffer,
-      to.address,
-      to.port);
+      :void => {
+    var transformedBuffers = this.transformer_.transform(buffer);
+    for(var i=0; i<transformedBuffers.length; i++) {
+      publicSocket.sendTo.reckless(
+        transformedBuffers[i],
+        to.address,
+        to.port);
+    }
   }
 
   /**
@@ -432,12 +434,14 @@ class Pipe {
       return;
     }
     var transformedBuffer = recvFromInfo.data;
-    var buffer = this.transformer_.restore(transformedBuffer);
+    var buffers = this.transformer_.restore(transformedBuffer);
     this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
-      mirrorSocket.sendTo.reckless(
-          buffer,
-          iface,
-          browserPort);
+      for(var i=0; i<buffers.length; i++) {
+        mirrorSocket.sendTo.reckless(
+            buffers[i],
+            iface,
+            browserPort);
+      }
     });
   }
 
