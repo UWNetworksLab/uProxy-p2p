@@ -91,4 +91,4 @@ pgp.setup('', '<uproxy>').then(() => {
   log.error('Error setting up pgp ', e);
 });
 
-
+export var portControl = freedom['portControl']();

@@ -35,7 +35,7 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
 
-var portControl = freedom['portControl']();
+var portControl = globals.portControl;
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
@@ -75,7 +75,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         type: message.type,
         data: data
       });
-    });
+    }, undefined, portControl);
+    this.refreshPortControlSupport();
   }
 
   // sendInstanceHandshakeMessage = (clientId :string) => {
