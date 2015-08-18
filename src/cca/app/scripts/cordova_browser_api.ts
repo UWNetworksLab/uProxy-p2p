@@ -27,6 +27,10 @@ class CordovaBrowserApi implements BrowserAPI {
 
   public canProxy = true;
 
+  // TODO: Set this to false if we detect that uProxy has just been installed.
+  // https://github.com/uProxy/uproxy/issues/1832
+  public hasInstalledThenLoggedIn = true;
+
   public setIcon = (iconFile :string) : void => {
   }
 
@@ -74,7 +78,7 @@ class CordovaBrowserApi implements BrowserAPI {
         this.handlePopupLaunch = F;
       });
       console.log('Creating window');
-      chrome.app.window.create(this.POPUP_URL, {}, 
+      chrome.app.window.create(this.POPUP_URL, {},
           this.newPopupCreated_);
       return this.onceLaunched_;
     } else {

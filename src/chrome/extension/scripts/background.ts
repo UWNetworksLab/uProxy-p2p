@@ -100,6 +100,7 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
     return;
   }
   browserConnector.onceConnected.then(() => {
+    browserApi.hasInstalledThenLoggedIn = false;
     chrome.browserAction.setIcon({
       path: {
         "19" : "icons/19_" + Constants.DEFAULT_ICON,

@@ -20,6 +20,8 @@ export interface BrowserAPI {
   browserSpecificElement :string;
 
   canProxy :boolean;
+  // Whether user has installed and logged into uProxy.
+  hasInstalledThenLoggedIn :boolean;
 
   /*
    * tag is used to uniquely identify notifications.  If it is a json-encoded
