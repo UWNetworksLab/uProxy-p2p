@@ -79,7 +79,8 @@ export class MockTcpSocket extends MockEventHandler {
 }
 
 export class PgpProvider {
-  public setup = (passphrase :string, userId :string) => {
+  public setup = (passphrase :string, userId :string) :Promise<void>=> {
+    return Promise.resolve<void>();
   }
 
   public exportKey = () : Promise<Object> => {

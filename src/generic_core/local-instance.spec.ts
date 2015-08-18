@@ -10,7 +10,8 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
     'metrics': () => { return new freedom_mocks.MockMetrics(); },
     'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
     'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); },
-    'pgp': () => { return new freedom_mocks.PgpProvider() }
+    'pgp': () => { return new freedom_mocks.PgpProvider() },
+    'portControl': () => { return new Object }
 });
 
 
