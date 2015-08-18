@@ -100,7 +100,7 @@ ui_connector.onPromiseCommand(
     core.addUser);
 
 ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GET_INVITE_TOKEN,
+    uproxy_core_api.Command.GET_INVITE_URL,
     core.getInviteUrl);
 
 ui_connector.onCommand(uproxy_core_api.Command.SEND_EMAIL,
