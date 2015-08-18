@@ -254,7 +254,7 @@ export interface Network {
    * appropriate, and sends an update to the UI upon success. Does nothing if
    * already logged in.
    */
-  login :(reconnect :boolean, userId ?:string, password ?:string, createAccount ?:boolean) => Promise<void>;
+  login :(reconnect :boolean) => Promise<void>;
 
   getStorePath :() => string;
 
