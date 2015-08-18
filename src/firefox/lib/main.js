@@ -13,7 +13,8 @@ var button = buttons.ActionButton({
     "18": "./icons/19_offline.gif",
     "36": "./icons/38_offline.gif"
   },
-  onClick: start
+  onClick: start,
+  badgeColor: "#009968"
 });
 
 var panel;

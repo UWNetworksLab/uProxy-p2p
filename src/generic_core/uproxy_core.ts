@@ -384,18 +384,19 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // Returns an object with the NAT configuration as keys
   public getNetworkInfoObj = () :Promise<uproxy_core_api.NetworkInfo> => {
     var natInfo :uproxy_core_api.NetworkInfo = {
-      natType: '',
-      pmpSupport: '',
-      pcpSupport: '',
-      upnpSupport: ''
+      natType: undefined,
+      pmpSupport: undefined,
+      pcpSupport: undefined,
+      upnpSupport: undefined
     };
 
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
-      return portControl.probeProtocolSupport().then((protocolSupport:any) => {
-          natInfo.pmpSupport = protocolSupport.natPmp;
-          natInfo.pcpSupport = protocolSupport.pcp;
-          natInfo.upnpSupport = protocolSupport.upnp;
+      return portControl.probeProtocolSupport().then(
+        (probe:freedom_PortControl.ProtocolSupport) => {
+          natInfo.pmpSupport = probe.natPmp;
+          natInfo.pcpSupport = probe.pcp;
+          natInfo.upnpSupport = probe.upnp;
           return natInfo;
       }).catch((err:Error) => {
         // Should only catch the error when getInternalIp() times out
