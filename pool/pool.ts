@@ -90,12 +90,14 @@ class LocalPool {
 
   // Creates and returns a new channel, wrapping it.
   private openNewChannel_ = () : Promise<PoolChannel> => {
-    return this.pc_.openDataChannel('p' + this.numChannels_++).
-        then((dc:datachannel.DataChannel) => {
-          return dc.onceOpened.then(() => {
-            return new PoolChannel(dc);
-          });
-        });
+    this.numChannels_++;
+    return this.pc_.openDataChannel('p' + this.numChannels_, {
+      id: this.numChannels_
+    }).then((dc:datachannel.DataChannel) => {
+      return dc.onceOpened.then(() => {
+        return new PoolChannel(dc);
+      });
+    });
   }
 
   // Resets the channel, making it ready for use again, and adds it
