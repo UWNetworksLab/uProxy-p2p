@@ -70,23 +70,22 @@ describe('remote_instance.RemoteInstance', () => {
       instance0 = new remote_instance.RemoteInstance(user, 'instanceId');
       instance0.onceLoaded.then(() => {
         expect(instance0.description).not.toBeDefined();
-        expect(instance0.keyHash).not.toBeDefined();
         done();
       });
     });
 
     it ('update waits for loading to complete', (done) => {
       instance0.update({
-        instanceId : 'newInstanceId', keyHash : 'key', description: 'desc',
+        instanceId : 'newInstanceId', publicKey : 'key', description: 'desc',
         consent: {isRequesting: true, isOffering: true},
         name: 'name', userId: 'userId'
       }, globals.MESSAGE_VERSION).then(() => {
-        expect(instance0.keyHash).toEqual('key');
+        expect(instance0.publicKey).toEqual('key');
         expect(instance0.description).toEqual('desc');
         expect(instance0.wireConsentFromRemote.isOffering).toEqual(true);
         expect(instance0.wireConsentFromRemote.isRequesting).toEqual(true);
       }).then(done);
-      expect(instance0.keyHash).not.toBeDefined();
+      expect(instance0.publicKey).not.toBeDefined();
       expect(instance0.description).not.toBeDefined();
       expect(instance0.wireConsentFromRemote.isOffering).toEqual(false);
       expect(instance0.wireConsentFromRemote.isRequesting).toEqual(false);
@@ -121,7 +120,7 @@ describe('remote_instance.RemoteInstance', () => {
       expect(instance.wireConsentFromRemote.isRequesting).toEqual(false);
       expect(userConsent.remoteRequestsAccessFromLocal).toEqual(false);
       instance.update({
-        instanceId: INSTANCE_ID, description: '', keyHash: '',
+        instanceId: INSTANCE_ID, description: '', publicKey: '',
         consent: {isOffering: true, isRequesting: true},
         name: 'name', userId: 'userId'
       }, globals.MESSAGE_VERSION).then(() => {
@@ -257,8 +256,10 @@ describe('remote_instance.RemoteInstance', () => {
     });
 
     it('handles OFFER signal from client peer as server', (done) => {
-      alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
-          fakeSignallingMessage, globals.MESSAGE_VERSION).then(() => {
+      alice.handleSignal({
+          type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
+          data: JSON.stringify(fakeSignallingMessage),
+          version: globals.MESSAGE_VERSION}).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(
             fakeSignallingMessage);
@@ -269,8 +270,10 @@ describe('remote_instance.RemoteInstance', () => {
     it('handles signal from server peer as client', (done) => {
       alice.wireConsentFromRemote.isOffering = true;
       alice.start().then(() => {
-        alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
-            fakeSignallingMessage, globals.MESSAGE_VERSION).then(() => {
+        alice.handleSignal({
+            type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
+            data: JSON.stringify(fakeSignallingMessage),
+            version: globals.MESSAGE_VERSION}).then(() => {
           expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(
               fakeSignallingMessage);
           expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
@@ -280,8 +283,10 @@ describe('remote_instance.RemoteInstance', () => {
     });
 
     it('rejects invalid signals', (done) => {
-      alice.handleSignal(social.PeerMessageType.INSTANCE, fakeSignallingMessage,
-          globals.MESSAGE_VERSION).then(() => {
+      alice.handleSignal({
+          type: social.PeerMessageType.INSTANCE,
+          data: JSON.stringify(fakeSignallingMessage),
+          version: globals.MESSAGE_VERSION}).then(() => {
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         done();
@@ -290,8 +295,10 @@ describe('remote_instance.RemoteInstance', () => {
 
     it('rejects message from client if consent has not been granted', (done) => {
       alice.user.consent.localGrantsAccessToRemote = false;
-      alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
-          fakeSignallingMessage, globals.MESSAGE_VERSION).then(() => {
+      alice.handleSignal({
+          type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
+          data: JSON.stringify(fakeSignallingMessage),
+          version: globals.MESSAGE_VERSION}).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         done();
