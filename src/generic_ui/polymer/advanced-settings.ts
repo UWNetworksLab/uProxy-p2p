@@ -69,7 +69,6 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.uproxy_core_api = uproxy_core_api;
-    this.refreshPortControl();
   },
   refreshPortControl: function() {
     core.refreshPortControlSupport();

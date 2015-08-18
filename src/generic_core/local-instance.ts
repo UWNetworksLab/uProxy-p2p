@@ -23,7 +23,6 @@ import storage = globals.storage;
   export class LocalInstance implements social.LocalInstanceState, Persistent {
 
     public instanceId  :string;
-    public keyHash     :string;
     public clientId    :string;
     public userName        :string;
     public imageData :string;
@@ -44,7 +43,6 @@ import storage = globals.storage;
         return;
       }
       this.instanceId = LocalInstance.generateInstanceID();
-      this.keyHash = '';
     }
 
     /**
@@ -96,12 +94,10 @@ import storage = globals.storage;
         userId:      this.userId,
         userName:        this.userName,
         imageData:   this.imageData,
-        keyHash:     this.keyHash,
       };
     }
     public restoreState = (state:social.LocalInstanceState) :void => {
       this.instanceId = state.instanceId;
-      this.keyHash = state.keyHash;
       if (typeof this.userName === 'undefined') {
         this.userName = state.userName;
         this.imageData = state.imageData;
