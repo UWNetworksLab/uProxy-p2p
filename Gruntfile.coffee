@@ -691,6 +691,11 @@ module.exports = (grunt) ->
               dest: chromeAppDevPath + '/freedom-social-firebase'
             },
             {
+              expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
+              src: ['**']
+              dest: chromeAppDevPath + '/freedom-pgp-e2e'
+            },
+            {
               expand: true, cwd: 'node_modules/freedom-port-control/dist/',
               src: ['**']
               dest: chromeAppDevPath + '/freedom-port-control'
@@ -751,6 +756,11 @@ module.exports = (grunt) ->
               expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
               src: ['**']
               dest: firefoxDevPath + '/data/freedom-social-firebase'
+            },
+            {
+              expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
+              src: ['**']
+              dest: firefoxDevPath + '/data/freedom-pgp-e2e'
             },
             {
               expand: true, cwd: 'node_modules/freedom-port-control/dist/',
