@@ -42,12 +42,10 @@ function get_localchrome () {
     # validate the path.   
     case $1 in
         stable)
-            VERSION=release    
-            chrome_build_path Release
+            local v=$(chrome_build_path Release)
             ;;
         debug)
-            VERSION=debug
-            chrome_build_path Debug
+            local v=$(chrome_build_path Debug)
             ;;
         *)
             log "Unknown localchrome version $1. Options are stable and debug."
