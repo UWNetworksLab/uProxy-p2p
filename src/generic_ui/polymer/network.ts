@@ -9,13 +9,6 @@ var model = ui_context.model;
 
 Polymer({
   connect: function() {
-    // TODO: clean this up, make generic!
-    // also make this work if you click Email connect in Settings (for multiple social networks)
-    if (this.networkName == 'Email') {
-      this.fire('core-signal', {name: 'show-email-login'});
-      return;
-    }
-
     ui.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
       // Fire an update-view event, which root.ts listens for.
@@ -25,5 +18,7 @@ Polymer({
       console.warn('Did not log in ', e);
     });
   },
-  ready: function() {},
+  ready: function() {
+    this.displayName = ui.getNetworkDisplayName(this.networkName);
+  },
 });

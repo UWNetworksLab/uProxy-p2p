@@ -126,7 +126,8 @@ export interface Contacts {
  * Specific to one particular Social network.
  */
 export interface Network {
-  name   :string;
+  name :string;
+  displayName :string;
   // TODO(salomegeo): Add more information about the user.
   userId :string;
   imageData ?:string;
@@ -731,6 +732,7 @@ export class UserInterface implements ui_constants.UiApi {
       if (!existingNetwork) {
         existingNetwork = {
           name: networkMsg.name,
+          displayName: networkMsg.displayName,
           userId: networkMsg.userId,
           roster: {},
           logoutExpected: false,
@@ -744,7 +746,8 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
-            (networkMsg.name === 'Google' || networkMsg.name === 'Facebook') &&
+            // TODO: fix this mess of name vs displayName
+            (networkMsg.name === 'Google' || networkMsg.displayName === 'Facebook') &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
@@ -752,7 +755,8 @@ export class UserInterface implements ui_constants.UiApi {
           if (this.instanceGettingAccessFrom_) {
             this.stopGettingInUiAndConfig({instanceId: null, error: true});
           }
-          this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
+          this.showNotification(
+            this.i18n_t("LOGGED_OUT", { network: networkMsg.displayName }));
 
           if (!this.model.onlineNetworks.length) {
             this.view = ui_constants.View.SPLASH;
@@ -1016,7 +1020,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
     this.model.onlineNetworks.push({
-      name:   networkState.name,
+      name: networkState.name,
+      displayName: networkState.displayName,
       userId: networkState.profile.userId,
       userName: networkState.profile.name,
       imageData: networkState.profile.imageData,
@@ -1052,6 +1057,12 @@ export class UserInterface implements ui_constants.UiApi {
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
     this.portControlSupport = support;
   }
+
+   public getNetworkDisplayName = (networkName :string) => {
+     // TODO: unhack this...  use same json..  ugg fuck all this
+     // TODO: stop passing displayName from core to UI
+     return networkName == 'Facebook-Firebase-V2' ? 'Facebook' : networkName;
+   }
 } // class UserInterface
 
 // non-exported method to handle categorizing users

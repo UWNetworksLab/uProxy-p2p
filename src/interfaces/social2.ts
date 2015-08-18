@@ -107,7 +107,8 @@ export interface FreedomSocialProvider {
   removeUser(userId: string): void;
 
   addContact(token: string): Promise<void>;
-  sendIntroductionToken(userId :string): Promise<string>;
+  getInviteToken(): Promise<string>;
+  sendEmail(toEmailAddress: string, subject: string, body: string): Promise<void>;
 
   // Send a message to user on your network
   // If the message is sent to a userId, it is sent to all clients

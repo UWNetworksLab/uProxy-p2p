@@ -266,15 +266,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.addUserRequest(data.token);
   }
 
-  // TODO: this is confusing.  userId is the destination userId, not the user logged into the network
-  public sendInviteToken = (data: { networkId: string; userId :string }) : Promise<string> => {
-    // TODO: clean this up - hack to find the one network
-    var network :social.Network;
-    for (var userId in social_network.networks[data.networkId]) {
-      network = social_network.networks[data.networkId][userId];
-      break;
-    }
-    return network.sendInviteToken(data.userId);
+  public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    return network.getInviteUrl();
+  }
+
+  public sendEmail = (data :uproxy_core_api.EmailData) : void => {
+    var networkInfo = data.networkInfo;
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    network.sendEmail(data.to, data.subject, data.body);
   }
 
   /**

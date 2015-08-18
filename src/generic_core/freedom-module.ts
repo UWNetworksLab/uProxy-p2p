@@ -100,8 +100,11 @@ ui_connector.onPromiseCommand(
     core.addUser);
 
 ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.SEND_INVITE_TOKEN,
-    core.sendInviteToken);
+    uproxy_core_api.Command.GET_INVITE_TOKEN,
+    core.getInviteUrl);
+
+ui_connector.onCommand(uproxy_core_api.Command.SEND_EMAIL,
+    core.sendEmail);
 
 ui_connector.onCommand(uproxy_core_api.Command.STOP_PROXYING,
     core.stop);

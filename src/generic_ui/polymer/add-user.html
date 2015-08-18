@@ -15,32 +15,34 @@
 
     <paper-action-dialog id='addUserDialog' backdrop heading='' layered='true'>
 
-      <div hidden?='{{ networkNames.length <= 1}}'>
+      <div hidden?='{{ model.onlineNetworks.length <= 1}}'>
         <p>How would you like to invite to your friends?</p>
         <paper-dropdown-menu>
           <paper-dropdown class='dropdown'>
-            <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}'>
-              <template repeat="{{ networkName in networkNames }}">
-                <paper-item label='{{ networkName }}'>{{ networkName }}</paper-item>
+            <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
+              <template repeat="{{ network in model.onlineNetworks }}">
+                <paper-item label='{{ network.name }}'>{{ network.displayName }}</paper-item>
               </template>
             </core-menu>
           </paper-dropdown>
         </paper-dropdown-menu>
       </div>
 
-      <div hidden?='{{ selectedNetwork != "Facebook"}}'>
+      <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
+        <p>Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
         <paper-button affirmative on-tap='{{ sendToFacebookFriend }}'>
           Send to Facebook Friend
         </paper-button>
       </div>
 
-      <div hidden?='{{ selectedNetwork != "Google+"}}'>
+      <div hidden?='{{ selectedNetworkName != "GMail"}}'>
+        <p>Enter the email address of your friend.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
         <paper-input-decorator label="Friend's email address" layout vertical>
           <input is='core-input' value='{{ inviteUserEmail }}' />
         </paper-input-decorator>
 
-        <paper-button affirmative on-tap='{{ sendToGoogleFriend }}'>
-          Send to Google Friend
+        <paper-button affirmative on-tap='{{ sendToGMailFriend }}'>
+          Send to GMail Friend
         </paper-button>
       </div>
 

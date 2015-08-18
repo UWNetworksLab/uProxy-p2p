@@ -47,15 +47,16 @@ import ui = ui_connector.connector;
       enableMonitoring: true,
       areAllContactsUproxy: true
     },
-    'Google+': {
-      isFirebase: true,
-      enableMonitoring: true,
-      areAllContactsUproxy: false
-    },
-    'Email': {
+    'Facebook-Firebase-V2': {
+      displayName: 'Facebook',
       isFirebase: true,
       enableMonitoring: true,
       areAllContactsUproxy: true
+    },
+    'GMail': {
+      isFirebase: true,
+      enableMonitoring: true,
+      areAllContactsUproxy: false
     }
   }
 
@@ -152,12 +153,17 @@ export function notifyUI(networkName :string, userId :string) {
 
   var payload :social.NetworkMessage = {
     name: networkName,
+    displayName: getNetworkDisplayName(networkName),
     online: online,
     userId: userId,
     userName: userName,
     imageData: imageData
   };
   ui.update(uproxy_core_api.Update.NETWORK, payload);
+}
+
+export function getNetworkDisplayName(networkName :string) : string {
+  return NETWORK_OPTIONS[networkName].displayName || networkName;
 }
 
   // Implements those portions of the Network interface for which the logic is
@@ -267,8 +273,12 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public sendInviteToken = (userId :string) : Promise<string> => {
+    public getInviteUrl = () : Promise<string> => {
       throw new Error('Operation not implemented');
+    }
+
+    public sendEmail = (to: string, subject: string, body: string) : void => {
+      throw new Error('Operation not implemented'); 
     }
 
     public getNetworkState = () :social.NetworkState => {
@@ -582,10 +592,16 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public sendInviteToken = (userId: string): Promise<string> => {
-      return this.freedomApi_.sendIntroductionToken(userId).then((token) => {
+    public getInviteUrl = () : Promise<string> => {
+      return this.freedomApi_.getInviteToken().then((token :string) => {
         return 'https://www.uproxy.org/invite/' + this.name + '/' + token;
       })
+    }
+
+    public sendEmail = (to: string, subject: string, body: string): void => {
+      this.freedomApi_.sendEmail(to, subject, body).catch((e :Error) => {
+        log.error('Error sending email', e);
+      });
     }
 
 
@@ -673,6 +689,7 @@ export function notifyUI(networkName :string, userId :string) {
 
       return {
         name: this.name,
+        displayName: getNetworkDisplayName(this.name),
         profile: this.myInstance.getUserProfile(),
         roster: rosterState
       };

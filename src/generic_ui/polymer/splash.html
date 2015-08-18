@@ -177,34 +177,6 @@
       </uproxy-faq-link>
     </div>
 
-    <!-- TODO: should this be in root to work with settings login? -->
-    <core-signals on-core-signal-show-email-login="{{ showEmailLogin }}"></core-signals>
-    <div vertical layout id='emailLogin' hidden?='{{SPLASH_STATES.EMAIL_LOGIN!==model.globalSettings.splashState}}'>
-       <!-- TODO: translate all text here -->
-      <div class='view' flex>
-
-        <h1 hidden?='{{ !createNewUser }}'>Create a new account with uProxy</h1>
-        <h1 hidden?='{{ createNewUser }}'>Sign in with an existing uProxy account</h1>
-
-        <paper-input-decorator label="name" layout vertical>
-          <input is='core-input' value='{{ userId }}' />
-        </paper-input-decorator>
-        <paper-input-decorator label="password" layout vertical>
-          <input is='core-input' type="password" value='{{ password }}' />
-        </paper-input-decorator>
-
-        <paper-button hidden?='{{ !createNewUser }}' raised on-tap='{{ loginToEmail }}'>Create Account</paper-button>
-        <paper-button hidden?='{{ createNewUser }}' raised on-tap='{{ loginToEmail }}'>Sign In</paper-button>
-
-        <p class="toggleCreateNewUser" hidden?='{{ !createNewUser }}' on-tap='{{ toggleCreateNewUser }}'>Already have an account?</p>
-        <p class="toggleCreateNewUser" hidden?='{{ createNewUser }}' on-tap='{{ toggleCreateNewUser }}'>Create an account</p>
-
-      </div>
-      <uproxy-faq-link anchor='emailLogin'>
-        Learn more
-      </uproxy-faq-link>
-    </div>
-
   </template>
   <script src='splash.js'></script>
 </polymer-element>

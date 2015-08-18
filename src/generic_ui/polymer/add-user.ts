@@ -3,39 +3,57 @@
 
 var ui = ui_context.ui;
 var model = ui_context.model;
+var core = ui_context.core;
 
 Polymer({
   openAddUserDialog: function() {
-    // Clear networkNames (can't re-assign due to Polymer bindings)
-    for (var i = 0; i < this.networkNames.length; ++i) {
-      this.networkNames.pop();
-    }
-    for (i = 0; i < model.onlineNetworks.length; ++i) {
-      this.networkNames.push(model.onlineNetworks[i].name);
-    }
     this.$.addUserDialog.open();
   },
   addUser: function() {
     // TODO: pick network based on dropdown.
-    ui_context.core.addUser('Google+', this.receivedInviteToken);
+    core.addUser('GMail', this.receivedInviteToken);
   },
-  sendToGoogleFriend: function() {
-    ui_context.core.sendInviteToken('Google+', this.inviteUserEmail);
+  sendToGMailFriend: function() {
+    // TODO: how to get userId of logged in  user?
+    var selectedNetwork =
+        model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
+    var selectedNetworkInfo = {
+      name: selectedNetwork.name,
+      userId: selectedNetwork.userId
+    };
+    core.getInviteUrl(selectedNetworkInfo).then((inviteUrl: string) => {
+      core.sendEmail({
+          networkInfo: selectedNetworkInfo,
+          to: this.inviteUserEmail,
+          subject: 'Join me on uProxy',
+          body: 'click here ' + inviteUrl
+      });
+    });
   },
   sendToFacebookFriend: function() {
-    // TODO: get invite token
-    var facebookUrl = 'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link=' +
-        this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
-    ui.openTab(facebookUrl);
+    var selectedNetwork =
+      model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
+    var selectedNetworkInfo = {
+      name: selectedNetwork.name,
+      userId: selectedNetwork.userId
+    };
+    // TODO: should getInviteUrl be getInviteUrl?
+    core.getInviteUrl(selectedNetworkInfo).then((inviteUrl: string) => {
+      // TODO: need to format URL
+      var facebookUrl = 'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link=' +
+        inviteUrl + '&redirect_uri=https://www.uproxy.org/';
+      ui.openTab(facebookUrl);
+    });
   },
   onNetworkSelect: function(e :any, details :any) {
     // TODO: does this need to be initialized?
-    this.selectedNetwork = details.item.getAttribute('label');
+    console.log('onNetworkSelect: ', details);
+    this.selectedNetworkName = details.item.getAttribute('label');
   },
   ready: function() {
     this.receivedInviteToken = '';
     this.inviteUserEmail = '';
-    this.selectedNetwork = '';
-    this.networkNames = [];
+    this.selectedNetworkName = '';
+    this.model = model;
   }
 });
