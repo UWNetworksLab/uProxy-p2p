@@ -34,14 +34,14 @@ class CaesarCipher implements Transformer {
   /** Nothing to configure -- all this transformer needs is a key. */
   public configure = (json:string) : void => {}
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer => {
+  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
     this.map_(buffer, this.transformByte);
-    return buffer;
+    return [buffer];
   }
 
-  public restore = (buffer:ArrayBuffer) : ArrayBuffer => {
+  public restore = (buffer:ArrayBuffer) : ArrayBuffer[] => {
     this.map_(buffer, this.restoreByte);
-    return buffer;
+    return [buffer];
   }
 
   // No-op (we have no state or any resources to dispose).

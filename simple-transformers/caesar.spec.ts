@@ -37,7 +37,7 @@ describe("caesar cipher", function() {
   it('transform buffer', function() {
     setKey(1);
     var bytes = new Uint8Array([4, 1, 255]);
-    var result = new Uint8Array(transformer.transform(bytes.buffer));
+    var result = new Uint8Array(transformer.transform(bytes.buffer)[0]);
     // toEquals() doesn't work for Uint8Array.
     expect(result[0]).toEqual(5);
     expect(result[1]).toEqual(2);
@@ -49,7 +49,7 @@ describe("caesar cipher", function() {
 
     setKey(1);
     var output = new Uint8Array(transformer.restore(
-        transformer.transform(new Uint8Array([4, 1, 255]).buffer)));
+        transformer.transform(new Uint8Array([4, 1, 255]).buffer)[0])[0]);
 
     for (var i = 0; i < output.length; i++) {
       expect(output[i]).toEqual(input[i]);
