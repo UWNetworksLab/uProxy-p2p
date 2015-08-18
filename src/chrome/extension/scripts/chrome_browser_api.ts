@@ -26,7 +26,7 @@ class ChromeBrowserApi implements BrowserAPI {
   public browserSpecificElement = "uproxy-app-missing";
 
   public canProxy = true;
-  public hasLoggedInAfterInstall = true;
+  public hasInstalledThenLoggedIn = true;
 
   // For browser action.
 

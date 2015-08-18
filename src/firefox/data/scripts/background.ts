@@ -26,5 +26,5 @@ if (undefined === ui) {
 ui.browser = 'firefox';
 
 port.on('newlyInstalled', function() {
-  firefoxBrowserApi.hasLoggedInAfterInstall = false;
+  firefoxBrowserApi.hasInstalledThenLoggedIn = false;
 });
