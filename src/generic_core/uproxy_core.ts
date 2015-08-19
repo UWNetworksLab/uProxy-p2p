@@ -256,14 +256,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     copyPasteConnection.handleSignal(signal);
   }
 
-  public addUser = (data: { networkId: string; token :string }) : Promise<void> => {
-    // TODO: clean this up - hack to find the one network
-    var network :social.Network;
-    for (var userId in social_network.networks[data.networkId]) {
-      network = social_network.networks[data.networkId][userId];
+  public addUser = (inviteUrl :string) : void => {
+    // TODO: error checking
+    var networkName = inviteUrl.match(/invite\/(\S+)\//)[1];
+    // This code assumes the user is only signed in once to any given network.
+    for (var userId in social_network.networks[networkName]) {
+      social_network.networks[networkName][userId].addUserRequest(inviteUrl);
       break;
     }
-    return network.addUserRequest(data.token);
   }
 
   public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {

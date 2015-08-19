@@ -134,9 +134,7 @@ var lastUrlTime = 0;
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
       // TODO: add try catch and such in case of bad urls
-      var url = details.url;
-      var network = url.match(/invite\/(\S+)\//)[1];
-      core.addUser(network, url);
+      core.addUser(details.url);
       // TODO: show something meaningful in the tab
       return {
           redirectUrl: chrome.extension.getURL('generic_ui/invite-received.html')

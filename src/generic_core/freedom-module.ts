@@ -95,7 +95,7 @@ ui_connector.onPromiseCommand(
     uproxy_core_api.Command.START_PROXYING,
     core.start);
 
-ui_connector.onPromiseCommand(
+ui_connector.onCommand(
     uproxy_core_api.Command.ADD_USER,
     core.addUser);
 

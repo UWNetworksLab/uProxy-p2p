@@ -276,7 +276,7 @@ export interface Network {
   /**
    * Ask the social network to add the user.
    */
-  addUserRequest: (token: string) => Promise<void>;
+  addUserRequest: (inviteUrl :string) => void;
 
   /**
    * Generates an invite token

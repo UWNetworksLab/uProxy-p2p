@@ -269,7 +269,7 @@ export function getNetworkDisplayName(networkName :string) : string {
       throw new Error('Operation not implemented');
     }
 
-    public addUserRequest = (token: string): Promise<void> => {
+    public addUserRequest = (inviteUrl :string): void => {
       throw new Error('Operation not implemented');
     }
 
@@ -581,12 +581,10 @@ export function getNetworkDisplayName(networkName :string) : string {
       });
     }
 
-    public addUserRequest = (token: string): Promise<void> => {
-      if (token.lastIndexOf('/') >= 0) {
-        // Remove prefix url.
-        token = token.substr(token.lastIndexOf('/') + 1);
-      }
-      return this.freedomApi_.addContact(token).catch((e) => {
+    public addUserRequest = (inviteUrl :string): void => {
+      // Token is the part of the invite URL after the last '/'.
+      var token :string = inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1);
+      this.freedomApi_.addContact(token).catch((e) => {
         log.error('Error calling addContact: ' + token, e.message);
       });
     }
