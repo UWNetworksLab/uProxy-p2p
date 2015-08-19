@@ -413,7 +413,7 @@ class Pipe {
   private sendTo_ = (publicSocket:Socket, buffer:ArrayBuffer, to:net.Endpoint)
       :void => {
     var transformedBuffers = this.transformer_.transform(buffer);
-    for(var i=0; i<transformedBuffers.length; i++) {
+    for(var i = 0; i < transformedBuffers.length; i++) {
       publicSocket.sendTo.reckless(
         transformedBuffers[i],
         to.address,
@@ -436,7 +436,7 @@ class Pipe {
     var transformedBuffer = recvFromInfo.data;
     var buffers = this.transformer_.restore(transformedBuffer);
     this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
-      for(var i=0; i<buffers.length; i++) {
+      for(var i = 0; i < buffers.length; i++) {
         mirrorSocket.sendTo.reckless(
             buffers[i],
             iface,
