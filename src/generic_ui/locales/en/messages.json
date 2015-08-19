@@ -389,11 +389,11 @@
   },
   "DISCONNECTED_TITLE": {
     "description": "Title for error that appears when the user was getting access to the Internet through their friend, but that connection was terminated.",
-    "message": "Oops! You've been disconnected from your friend."
+    "message": "Oops! You've been disconnected from your friend.  Reconnecting..."
   },
   "DISCONNECTED_MESSAGE": {
-    "description": "Instruction informing the user that to continue browsing the Internet, the user will need to use their local (potentially unsafe and/or censored) connection.",
-    "message": "Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding."
+    "description": "Instruction informing the user that if they want to browse the Internet and stop waiting for reconnection, the user will need to use their local (potentially unsafe and/or censored) connection.",
+    "message": "If you disable the proxy, your web traffic will no longer be routed through your friend. You may want to close any sensitive pages you have open, before proceeding."
   },
   "CONTINUE_BROWSING": {
     "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet).",
@@ -674,10 +674,6 @@
   "APP_MISSING_MESSAGE": {
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
-  },
-  "RESTART_PROXYING": {
-    "description": "If proxy connection gets disconnected restart the connection",
-    "message": "Reconnect"
   },
   "UPDATE_AVAILABLE": {
     "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",

@@ -589,6 +589,10 @@ export class UserInterface implements ui_constants.UiApi {
     if (data.error) {
       this.bringUproxyToFront();
       this.core.disconnectedWhileProxying = true;
+      if (this.instanceGettingAccessFrom_) {
+        // Auto-retry.
+        this.restartProxying();
+      }
     } else {
       this.core.disconnectedWhileProxying = false;
       if (data.instanceId === null ||
