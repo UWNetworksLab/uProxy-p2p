@@ -118,3 +118,60 @@ export function stringToUtf8EncodedArrayBuffer(str:string) :ArrayBuffer {
   }
   return ab.buffer;
 }
+
+// A pair of ArrayBuffers for split
+export interface ArrayBufferPair {
+  first:ArrayBuffer;
+  last:ArrayBuffer;
+}
+
+// Splits an ArrayBuffer into two at a given offset
+export function split(buffer:ArrayBuffer, firstLen:number) :ArrayBufferPair {
+  var bytes=new Uint8Array(buffer)
+  var lastLen :number = buffer.byteLength-firstLen;
+  var first = new Uint8Array(firstLen);
+  var last = new Uint8Array(lastLen);
+  var fromIndex :number = 0;
+  var toIndex :number = 0;
+  while(toIndex < first.length) {
+    first[toIndex] = bytes[fromIndex];
+    toIndex=toIndex+1;
+    fromIndex=fromIndex+1;
+  }
+
+  toIndex=0;
+  while(toIndex < last.length) {
+    last[toIndex] = bytes[fromIndex];
+    toIndex=toIndex+1;
+    fromIndex=fromIndex+1;
+  }
+
+  return {first: first.buffer, last: last.buffer};
+}
+
+// Returns an ArrayBuffer containing everything before the given offset
+export function take(buffer:ArrayBuffer, firstLen:number) :ArrayBuffer {
+  return split(buffer, firstLen).first;
+}
+
+// Returns an ArrayBuffer containing everything after the given offset
+export function drop(buffer:ArrayBuffer, firstLen:number) :ArrayBuffer {
+  return split(buffer, firstLen).last;
+}
+
+// Takes a number and returns a two byte (network byte order) representation
+// of this number.
+export function encodeShort(len:number) :ArrayBuffer {
+  var bytes = new Uint8Array(2);
+  bytes[0] = Math.floor(len >> 8);
+  bytes[1] = Math.floor((len << 8) >> 8);
+  return bytes.buffer;
+}
+
+ // Takes a two byte (network byte order) representation of a number and returns
+ // the number.
+ export function decodeShort(buffer:ArrayBuffer) :number {
+  var bytes = new Uint8Array(buffer);
+  var result = (bytes[0] << 8) | bytes[1];
+  return result;
+}
