@@ -19,7 +19,7 @@ fi
 
 # Kill the current container, if any.
 # TODO: Skip this if the running container's args match.
-if docker ps | grep uproxy-flood >/dev/null; then
+if docker ps -a | grep uproxy-flood >/dev/null; then
   docker rm -f uproxy-flood > /dev/null
 fi
 
