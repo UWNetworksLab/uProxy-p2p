@@ -82,10 +82,10 @@ function get_firefox () {
     esac
     cat <<EOF
 RUN echo BROWSER=firefox >/etc/test.conf
+RUN npm install jpm -g
 RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 -np -nd -A '$PATTERN' $URL
 RUN cd /usr/share ; tar xf /tmp/ff/*.bz2
 RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
-RUN npm install jpm -g
 EOF
 
 }
