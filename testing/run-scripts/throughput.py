@@ -17,7 +17,7 @@ parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
 args = parser.parse_args()
 
 # Where is flood server?
-flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB),
+flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M',
     FLOOD_MAX_SPEED], universal_newlines=True).strip()
 print('** using flood server at ' + str(flood_ip))
 

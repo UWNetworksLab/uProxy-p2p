@@ -36,7 +36,7 @@ print('** small download known md5sum: ' + known_small_md5sum)
 # Where is flood server?
 FLOOD_SIZE_MB = 16
 FLOOD_MAX_SPEED = '5M'
-flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB),
+flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M',
     FLOOD_MAX_SPEED], universal_newlines=True).strip()
 print('** using flood server at ' + str(flood_ip))
 
