@@ -119,14 +119,8 @@ export function stringToUtf8EncodedArrayBuffer(str:string) :ArrayBuffer {
   return ab.buffer;
 }
 
-// A pair of ArrayBuffers for split
-export interface ArrayBufferPair {
-  first:ArrayBuffer;
-  last:ArrayBuffer;
-}
-
 // Splits an ArrayBuffer into two at a given offset
-export function split(buffer:ArrayBuffer, firstLen:number) :ArrayBufferPair {
+export function split(buffer:ArrayBuffer, firstLen:number) :[ArrayBuffer, ArrayBuffer] {
   var bytes=new Uint8Array(buffer)
   var lastLen :number = buffer.byteLength-firstLen;
   var first = new Uint8Array(firstLen);
@@ -146,17 +140,17 @@ export function split(buffer:ArrayBuffer, firstLen:number) :ArrayBufferPair {
     fromIndex=fromIndex+1;
   }
 
-  return {first: first.buffer, last: last.buffer};
+  return [first.buffer, last.buffer];
 }
 
 // Returns an ArrayBuffer containing everything before the given offset
 export function take(buffer:ArrayBuffer, firstLen:number) :ArrayBuffer {
-  return split(buffer, firstLen).first;
+  return split(buffer, firstLen)[0];
 }
 
 // Returns an ArrayBuffer containing everything after the given offset
 export function drop(buffer:ArrayBuffer, firstLen:number) :ArrayBuffer {
-  return split(buffer, firstLen).last;
+  return split(buffer, firstLen)[1];
 }
 
 // Takes a number and returns a two byte (network byte order) representation
