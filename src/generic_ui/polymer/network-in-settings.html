@@ -30,11 +30,11 @@
 
         <span class='action'>
           <a hidden?='{{ !signedIn }}' href='#' on-tap='{{ logout }}'>
-            {{ 'disconnect' | $$ }}
+            {{ "DISCONNECT" | $$ }}
           </a>
 
           <a hidden?='{{ signedIn }}' href='#' on-tap='{{ connect }}'>
-            {{ 'connect' | $$ }}
+            {{ "CONNECT" | $$ }}
           </a>
         </span>
       </div>

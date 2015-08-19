@@ -49,6 +49,7 @@ var exported = {
   logging_types: logging_types,
   socks_to_rtc: socks_to_rtc,
   rtc_to_net: rtc_to_net,
+  globals: globals
 };
 export = exported;
 
@@ -117,6 +118,10 @@ ui_connector.onPromiseCommand(
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_NAT_TYPE,
     core.getNatType);
+
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.REFRESH_PORT_CONTROL,
+    core.refreshPortControlSupport);
 
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_FULL_STATE,

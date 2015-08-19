@@ -61,7 +61,7 @@ elif [ "$1" == 'third_party' ]; then
 elif [ "$1" == 'clean' ]; then
   clean
 else
-  echo "Useage: setup.sh [install|tools|third_party|clean]"
+  echo "Usage: setup.sh [install|tools|third_party|clean]"
   echo "  install       Installs 'node_modules' and 'build/third_party'"
   echo "  tools         Installs build tools into 'build/tools'"
   echo "  third_party   Installs 'build/third_party'"

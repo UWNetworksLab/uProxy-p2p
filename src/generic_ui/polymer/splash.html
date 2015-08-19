@@ -123,15 +123,15 @@
         <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
         <p>
-          {{ 'aboutUproxy' | $$ }}
+          {{ "ABOUT_UPROXY" | $$ }}
         </p>
 
         <div id='nextWrapper'>
-          <paper-button raised on-tap='{{next}}'>{{ 'next' | $$ }}</paper-button>
+          <paper-button raised on-tap='{{next}}'>{{ "NEXT" | $$ }}</paper-button>
         </div>
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>
-          <paper-dropdown-menu label="{{ 'language' | $$ }}">
+          <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
             <paper-dropdown class="dropdown">
                 <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
                     <template repeat='{{ l in languages }}'>
@@ -146,29 +146,29 @@
       </div>
 
       <uproxy-faq-link anchor='whatIsUproxy'>
-        {{ 'learnMoreUproxy' | $$ }}
+        {{ "LEARN_MORE_UPROXY" | $$ }}
       </uproxy-faq-link>
     </div>
 
     <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==model.globalSettings.splashState}}'>
       <div class='view' flex>
-        <h1 class='sub'>{{ 'whichSocialNetwork' | $$ }}</h1>
-        <p>{{ 'whySocialNetwork' | $$ }}</p>
+        <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$ }}</h1>
+        <p>{{ "WHY_SOCIAL_NETWORK" | $$ }}</p>
         <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
         <p id='oneTimeConnection'>
-          <a href='#' on-tap='{{ copypaste }}'>{{ 'setUpOneTime' | $$ }}</a>
+          <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$ }}</a>
         </p>
         <p>
-          {{ 'weWontPost' | $$ }}
+          {{ "WE_WONT_POST" | $$ }}
         </p>
         <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-          {{ 'submitFeedback' | $$ }}
+          {{ "SUBMIT_FEEDBACK" | $$ }}
         </span>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
-        {{ 'learnMoreSocial' | $$ }}
+        {{ "LEARN_MORE_SOCIAL" | $$ }}
       </uproxy-faq-link>
     </div>
 

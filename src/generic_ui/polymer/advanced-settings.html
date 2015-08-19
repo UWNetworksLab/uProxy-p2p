@@ -1,6 +1,5 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
-<link rel='import' href='../../bower/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../../bower/core-label/core-label.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
@@ -25,7 +24,7 @@
       height: 100%;
     }
     #formContainer {
-      padding: 30px;
+      padding: 20px 30px 0px;
       text-align: start;
       color: #009688;
       overflow: auto;
@@ -54,9 +53,6 @@
          tooltip, it appears off center. */
       left: -64px !important;
     }
-    paper-input-decorator /deep/ .cursor {
-      background-color: #009688;
-    }
     paper-input-decorator[id=advancedSettingsDecorator] /deep/ .unfocused-underline,
     paper-input-decorator[id=advancedSettingsDecorator] /deep/ .focused-underline {
       /* Remove the underline from the advanced settings textbox. */
@@ -64,21 +60,15 @@
     }
     paper-input-decorator {
       font-size: 1.4em;
-    }
-    #advancedSettingsDecorator {
-      height: 350px;
-    }
-    #advancedSettingsPaperTextarea {
-      height: 350px;
-      margin: 0em;
-    }
-    paper-autogrow-textarea::shadow .textarea-container {
-      padding: 0.25em;
       background-color: rgb(240,240,240);
+      padding-left: 10px;
+      padding-top: 0;
+      margin-bottom: 0.75em;
+      margin-top: 0.75em;
     }
-    paper-autogrow-textarea::shadow .mirror-text {
-      white-space: pre-wrap; /* css-3 */
-      white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    textarea[fit] {
+      /* fit does not properly size textareas on Firefox */
+      height: 100%;
     }
     .advancedSettingsText {
       font-size: 12px;
@@ -88,6 +78,35 @@
     .error {
       color: rgb(200, 112, 112);
     }
+    #portControlBox {
+      border-bottom: 1px solid rgb(221, 221, 221);
+      padding: 20px 30px;
+      text-align: start;
+      color: #009688;
+      overflow: auto;
+    }
+    #portControlBox core-icon {
+      height: 15px;
+      color: grey;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      margin-right: 0px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    #portControlBox core-icon:hover {
+      opacity: 1;
+    }
+    #portControlBox .label {
+      color: rgb(112, 112, 112);
+    }
+    #portControlBox uproxy-faq-link {
+      color: rgb(0, 150, 136);
+    }
+    #portControlBox .info {
+      margin-bottom: 0px;
+    }
     </style>
 
     <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
@@ -96,29 +115,52 @@
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ 'advancedSettings_sentenceCase' | $$ }}
+          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
-        <div id='formContainer' flex>
-          <p class='inputLabel'>{{ 'editAdvancedSettings' | $$ }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "editAdvancedSettingsPlaceholder" | $$ }}'>
-            <paper-autogrow-textarea id='advancedSettingsPaperTextarea' class='font::inherit'>
-              <textarea id='advancedSettingsInput'
-                     value='{{ settings }}'>
-              </textarea>
-            </paper-autogrow-textarea>
+        <div id='portControlBox'>
+          <p class='inputLabel'>
+            {{ 'PORT_CONTROL_TITLE' | $$ }}
+            <uproxy-faq-link anchor='whatIsPortControl'>
+              <core-icon icon='help'></core-icon>
+            </uproxy-faq-link>
+          </p>
+          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.TRUE }}'>
+            {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
+          </span>
+          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
+            {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
+          </span>
+          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.PENDING }}'>
+            {{ 'PORT_CONTROL_PENDING' | $$ }}
+          </span>
+          <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
+            <core-icon icon='refresh'></core-icon>
+          </uproxy-link>
+          <p class='label info' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
+            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
+            <uproxy-faq-link anchor='whatIsPortControl'>
+              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$ }}
+            </uproxy-faq-link>
+          </p>
+        </div>
+        <div id='formContainer' flex vertical layout>
+          <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}' flex>
+            <textarea value='{{ settings }}' fit>
+            </textarea>
           </paper-input-decorator>
           <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>
-            {{ 'settingsSaved' | $$ }}
+            {{ "SETTINGS_SAVED" | $$ }}
           </p>
           <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>
-            {{ 'settingsBadFormatError' | $$ }}
+            {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
           </p>
           <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>
-            {{ 'settingsJsonError' | $$ }}
+            {{ "SETTINGS_JSON_ERROR" | $$ }}
           </p>
         </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
-          {{ 'set' | $$ }}
+          {{ "SET" | $$ }}
         </div>
       </div>
     </core-overlay>

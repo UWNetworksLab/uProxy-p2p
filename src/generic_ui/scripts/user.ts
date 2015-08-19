@@ -83,10 +83,10 @@ export class User implements social.BaseUser {
       if (!payload.consent.ignoringRemoteUserOffer) {
         if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {
           if (payload.consent.localRequestsAccessFromRemote) {
-            this.ui_.showNotification(i18n_t('grantedAccessNotification', {name: profile.name}),
+            this.ui_.showNotification(i18n_t("GRANTED_ACCESS_NOTIFICATION", {name: profile.name}),
                          { mode: 'get', network: this.network.name, user: this.userId });
           } else {
-            this.ui_.showNotification(i18n_t('offeredAccessNotification', {name: profile.name}),
+            this.ui_.showNotification(i18n_t("OFFERED_ACCESS_NOTIFICATION", {name: profile.name}),
                          { mode: 'get', network: this.network.name, user: this.userId });
           }
         }
@@ -96,10 +96,10 @@ export class User implements social.BaseUser {
       if (!payload.consent.ignoringRemoteUserRequest) {
         if (!this.consent_.remoteRequestsAccessFromLocal && payload.consent.remoteRequestsAccessFromLocal) {
           if (payload.consent.localGrantsAccessToRemote) {
-            this.ui_.showNotification(i18n_t('acceptedOfferNotification', {name: profile.name}),
+            this.ui_.showNotification(i18n_t("ACCEPTED_OFFER_NOTIFICATION", {name: profile.name}),
                          { mode: 'share', network: this.network.name, user: this.userId });
           } else {
-            this.ui_.showNotification(i18n_t('requestingAccessNotification', {name: profile.name}),
+            this.ui_.showNotification(i18n_t("REQUESTING_ACCESS_NOTIFICATION", {name: profile.name}),
                          { mode: 'share', network: this.network.name, user: this.userId });
           }
         }
@@ -257,7 +257,7 @@ export class User implements social.BaseUser {
       var instance = this.offeringInstances[i];
       if (!instance.description) {
         // Set description to "Computer 1", "Computer 2", etc.
-        instance.description = i18n_t('descriptionDefault', {number: i + 1});
+        instance.description = i18n_t("DESCRIPTION_DEFAULT", {number: i + 1});
       }
     }
   }

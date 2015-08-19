@@ -150,9 +150,9 @@ Polymer({
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
       this.fire('open-dialog', {
-        heading: ui.i18n_t('sharingUnavailableTitle'),
-        message: ui.i18n_t('sharingUnavailableMessage'),
-        buttons: [{text: ui.i18n_t('close'), dismissive: true}]
+        heading: ui.i18n_t("SHARING_UNAVAILABLE_TITLE"),
+        message: ui.i18n_t("SHARING_UNAVAILABLE_MESSAGE"),
+        buttons: [{text: ui.i18n_t("CLOSE"), dismissive: true}]
       });
     } else {
       // setting the value is taken care of in the polymer binding, we just need
@@ -167,7 +167,10 @@ Polymer({
     }
   },
   revertProxySettings: function() {
-    this.ui.stopGettingInUiAndConfig(false);
+    this.ui.stopGettingInUiAndConfig({instanceId: null, error: false});
+  },
+  restartProxying: function() {
+    this.ui.restartProxying();
   },
   toastMessageChanged: function(oldVal :string, newVal :string) {
     if (newVal) {
@@ -184,9 +187,9 @@ Polymer({
   },
   openTroubleshoot: function() {
     if (this.ui.unableToGet) {
-      this.troubleshootTitle = ui.i18n_t('unableToGet');
+      this.troubleshootTitle = ui.i18n_t("UNABLE_TO_GET");
     } else {
-      this.troubleshootTitle = ui.i18n_t('unableToShare');
+      this.troubleshootTitle = ui.i18n_t("UNABLE_TO_SHARE");
     }
     this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});

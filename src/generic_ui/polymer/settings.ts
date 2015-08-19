@@ -37,9 +37,9 @@ Polymer({
     }
 
     if (model.onlineNetworks.length === 1) {
-      this.connectedNetworks = ui.i18n_t('connectedWith', {network: model.onlineNetworks[0].name});
+      this.connectedNetworks = ui.i18n_t("CONNECTED_WITH", {network: model.onlineNetworks[0].name});
     } else {
-      this.connectedNetworks = ui.i18n_t('connectedWithNumber', {number: model.onlineNetworks.length});
+      this.connectedNetworks = ui.i18n_t("CONNECTED_WITH_NUMBER", {number: model.onlineNetworks.length});
     }
   },
   toggleAccountChooser: function() {

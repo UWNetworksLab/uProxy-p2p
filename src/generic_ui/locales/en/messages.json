@@ -1,658 +1,714 @@
 {
-  "done": {
+  "DONE": {
     "description": "Button label that suggests acknowledgement and that closes a popup.",
     "message": "Done"
   },
-  "yes": {
+  "YES": {
     "description": "Button label.",
     "message": "Yes"
   },
-  "no": {
+  "NO": {
     "description": "Button label.",
     "message": "No"
   },
-  "ok": {
+  "OK": {
     "description": "Button label.",
     "message": "OK"
   },
-  "close": {
+  "CLOSE": {
     "description": "Button label to close a popup.",
     "message": "Close"
   },
-  "cancel": {
+  "CANCEL": {
     "description": "Button label that rejects a proposed action.",
     "message": "Cancel"
   },
-  "startGetting": {
+  "START_GETTING": {
     "description": "Start accessing the Internet through a friend's connection.",
     "message": "Start getting access"
   },
-  "stopGetting": {
+  "STOP_GETTING": {
     "description": "Stop accessing the Internet through a friend's connection.",
     "message": "Stop getting access"
   },
-  "submitFeedback": {
+  "SUBMIT_FEEDBACK": {
     "description": "Submit feedback to the uProxy team.",
     "message": "Submit Feedback"
   },
-  "sendingFeedback": {
+  "SENDING_FEEDBACK": {
     "description": "Message in dialog indicating feedback is being sent to the uProxy team.",
     "message": "Sending feedback"
   },
-  "getHelp": {
+  "GET_HELP": {
     "description": "Get help from the frequently asked questions page.",
     "message": "Get Help"
   },
-  "logout": {
+  "LOGOUT": {
     "description": "Log-out of uProxy.",
     "message": "Log-out of uProxy"
   },
-  "grantedYouAccess": {
+  "GRANTED_YOU_ACCESS": {
     "description": "The user's friend has allowed the user to use the friend's Internet connection.",
     "message": "__name__ has granted you access"
   },
-  "tryingToConnect": {
+  "TRYING_TO_CONNECT": {
     "description": "The user is trying to connect to the Internet through their friend.",
     "message": "Trying to connect to __name__"
   },
-  "askingForAccess": {
+  "ASKING_FOR_ACCESS": {
     "description": "The user is asking for permission to access the Internet through their friend; user is waiting for the friend's reply.",
     "message": "Asking for access"
   },
-  "waitingForAccess": {
+  "WAITING_FOR_ACCESS": {
     "description": "User will be able to access the Internet through their friend, once that friend gives the user permission.",
     "message": "You will be able to get access when __name__ accepts."
   },
-  "cancelRequest": {
+  "CANCEL_REQUEST": {
     "description": "Label for button which will take back a request to get Internet access through a friend.",
     "message": "Cancel Request"
   },
-  "offeredYouAccess": {
+  "OFFERED_YOU_ACCESS": {
     "description": "A friend has offered their Internet access to the user.",
     "message": "They've offered you access."
   },
-  "acceptOffer": {
+  "ACCEPT_OFFER": {
     "description": "Accept a friend's offer that would allow the user to access the Internet through their friend.",
     "message": "Accept Offer"
   },
-  "ignore": {
+  "IGNORE": {
     "description": "Button label that ignores an offer or request.",
     "message": "Ignore"
   },
-  "stopIgnoringOffers": {
+  "STOP_IGNORING_OFFERS": {
     "description": "Button label for if the user wants to stop ignoring offers.",
     "message": "Stop ignoring offers"
   },
-  "askForAccess": {
+  "ASK_FOR_ACCESS": {
     "description": "Button label that sends a request to the user's friend, asking if the user can access the Internet through them.",
     "message": "Ask for access"
   },
-  "friendOffline": {
+  "FRIEND_OFFLINE": {
     "description": "Message shown when trying to get access from a friend who is offline.",
     "message": "__name__ is offline"
   },
-  "grantedFriendAccess": {
+  "GRANTED_FRIEND_ACCESS": {
     "description": "The user has agreed to let their friend access the Internet through the user.",
     "message": "You've given them access."
   },
-  "revokeAccess": {
+  "REVOKE_ACCESS": {
     "description": "Label for button that takes back an offer to a friend who has already accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user.",
     "message": "Revoke Access"
   },
-  "cancelOffer": {
+  "CANCEL_OFFER": {
     "description": "Label for button that takes back an offer to a friend who has not yet accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user.",
     "message": "Cancel Offer"
   },
-  "friendRequestsAccess": {
+  "FRIEND_REQUESTS_ACCESS": {
     "description": "A friend has requested to access the Internet through the user.",
     "message": "__name__ requests access from you."
   },
-  "grant": {
+  "GRANT": {
     "description": "Label for button that accepts a friend's request to access the Internet through the user.",
     "message": "Grant"
   },
-  "friendRequestedAccess": {
+  "FRIEND_REQUESTED_ACCESS": {
     "description": "A friend has requested to access the Internet through the user.",
     "message": "They requested access through you."
   },
-  "stopIgnoringRequests": {
+  "STOP_IGNORING_REQUESTS": {
     "description": "Button label for if the user wants to stop ignoring requests.",
     "message": "Stop ignoring requests"
   },
-  "accessNotGranted": {
+  "ACCESS_NOT_GRANTED": {
     "description": "The user has not permissioned a friend to access the Internet through the user.",
     "message": "You have not granted them access."
   },
-  "offerAccess": {
+  "OFFER_ACCESS": {
     "description": "Label for button that will offer a friend access to the Internet through the user, even though the friend has not requested access.",
     "message": "Offer Access"
   },
-  "shareOneTime": {
+  "SHARE_ONE_TIME": {
     "description": "Share access to the user's Internet using a link that will only work once.",
     "message": "Share a one-time connection"
   },
-  "requestOneTime": {
+  "REQUEST_ONE_TIME": {
     "description": "Request access to the user's friend's Internet using a link that will only work once.",
     "message": "Request a one-time connection"
   },
-  "startOneTime": {
+  "START_ONE_TIME": {
     "description": "Start an Internet connection using a link that will only work once.",
     "message": "Start a one-time connection"
   },
-  "errorParsingLink": {
+  "ERROR_PARSING_LINK": {
     "description": "Error shown if a one-time connection link did not work.",
     "message": "There was an error parsing the uproxy connection link, please try navigating to the link again or asking your friend for a new link."
   },
-  "noLongerGetting": {
+  "NO_LONGER_GETTING": {
     "description": "Message shown when a one-time connection ends.",
     "message": "You are no longer getting access. To request a connection, click the button below."
   },
-  "startNewConnection": {
+  "START_NEW_CONNECTION": {
     "description": "Label for button that takes user back to the 'Start a one-time connection' page.",
     "message": "Start getting a new connection"
   },
-  "errorStartingConnection": {
+  "ERROR_STARTING_CONNECTION": {
     "description": "Error shown if a one-time connection failed to start.",
     "message": "There was an error starting the connection and it had to be terminated. Please try starting another connection."
   },
-  "sendConnectionLink": {
+  "SEND_CONNECTION_LINK": {
     "description": "Instructions for the user to share their connection with a one-time link.",
     "message": "To share your connection, please ask your friend to send you their link."
   },
-  "copyConnectionLink": {
+  "COPY_CONNECTION_LINK": {
     "description": "Instructions for the user to request access from a friend with a one-time link.",
-    "message": "To request access from a friend, copy and paste this URL to them over a secure channel"
+    "message": "To request access from a friend, copy and paste this link to them over a channel you trust."
   },
-  "loading": {
+  "LOADING": {
     "description": "Message show when something is taking time to load.",
     "message": "Loading..."
   },
-  "friendNeedsToClick": {
-    "description": "Instructions telling the user that starting a one-time connection is waiting for action from their friend.",
-    "message": "To finish setting up the connection, your friend needs to click on the link and send you a link from their uProxy client.  When you click on it, you'll be ready to start getting access."
+  "FRIEND_NEEDS_TO_CLICK": {
+    "description": "Instructions telling the user their friend needs to take an action to finish setting up the one-time connection and then their friend will send back a link.",
+    "message": "After your friend has opened the link, they'll send a link to you in return. Click on the link or paste it below."
   },
-  "oneTimeSuccess": {
-    "description": "Inform the user that a one-time connection was successfully established.",
-    "message": "Success! A one-time connection has been established."
+  "ONE_TIME_SHARING_SUCCESS": {
+    "description": "Inform the user that they are now successfully sharing access through a one-time connection",
+    "message": "You are now sharing access with your friend."
   },
-  "startOneTimeInstruction": {
+  "ONE_TIME_SHARING_STOP_DIRECTIONS": {
+    "description": "Directions for how to stop sharing access; should refer to the act of clicking the button below which should also have a fairly obvious label.",
+    "message": "To stop sharing access, click the button below."
+  },
+  "ONE_TIME_GETTING_SUCCESS": {
+    "description": "Inform the user that they have now successfully set up a connection through which they can get access.  This message should in no way imply that they are actually getting access (there will be another message prompting them to start using the connection).",
+    "message": "Success! A one time connection has been set up successfully."
+  },
+  "START_ONE_TIME_INSTRUCTION": {
     "description": "",
     "message": "To start getting access from your friend, click the button below."
   },
-  "stopOneTimeInstruction": {
+  "STOP_ONE_TIME_INSTRUCTION": {
     "description": "",
     "message": "To stop getting access from your friend, click the button below."
   },
-  "oneTimeGetting": {
+  "ONE_TIME_GETTING": {
     "description": "The user is connected to the Internet through their friend.",
     "message": "You are currently getting access."
   },
-  "stopOneTimeGettingBeforeNew": {
+  "STOP_ONE_TIME_GETTING_BEFORE_NEW": {
     "description": "Instruction for the user to stop a current one-time connection if they want to start a new one.",
     "message": "If you would like to start a new one-time connection, press \"Stop Getting Access\" first."
   },
-  "friendRequestedOneTime": {
+  "FRIEND_REQUESTED_ONE_TIME": {
     "description": "A friend has requested to access the Internet through the user.",
     "message": "Your friend has requested to use your Internet connection."
   },
-  "howToOfferOneTime": {
+  "HOW_TO_OFFER_ONE_TIME": {
     "description": "Instructions for user if they'd like to share their Internet connection with a one-time link.",
     "message": "If you'd like to give them access, copy and paste this URL back to them."
   },
-  "getOneTimeInstead": {
+  "GET_ONE_TIME_INSTEAD": {
     "description": "Label for a link to the 'Start a one-time connection' page.",
     "message": "Get access instead"
   },
-  "tryingToShareOneTime": {
+  "TRYING_TO_SHARE_ONE_TIME": {
     "description": "Instructions for user if they want to get access instead, while attempting to share access.",
     "message": "You are currently in the process of trying to share access. If you would like to get access instead, click the link above."
   },
-  "getOneTimeInsteadInstruction": {
+  "GET_ONE_TIME_INSTEAD_INSTRUCTION": {
     "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection.",
     "message": "If you would like to start a one-time connection with someone else, press the \"Back\" button and then \"Start a one-time connection\" to start a new session."
   },
-  "oneTimeSharing": {
+  "ONE_TIME_SHARING": {
     "description": "The user is sharing their Internet access with a friend.",
     "message": "You are currently sharing access."
   },
-  "stopOneTimeSharing": {
+  "STOP_ONE_TIME_SHARING": {
     "description": "Label for button to terminate your connection to a friend who is accessing the Internet through you.",
     "message": "Stop sharing access"
   },
-  "stopOneTimeSharingBeforeNew": {
+  "STOP_ONE_TIME_SHARING_BEFORE_NEW": {
     "description": "Instruction for the user to stop a current one-time connection if they want to start a new one.",
     "message": "If you would like to start a new one-time connection, press \"Stop Sharing Access\" first."
   },
-  "goBack": {
+  "ONE_TIME_LINK_INPUT_DESCRIPTION": {
+    "description": "Text (appearing within the input box) informing the user that they can paste the one-time connection link they get back from their friend here.  It should be clear that it is the link from the friend and not the link they just copied above.",
+    "message": "Link from your friend"
+  },
+  "ONE_TIME_LINK_INPUT_ERROR": {
+    "description": "Error message to show the user if they paste a poorly-formatted link into a texbox.  Should prompt them to try pasting the link again.",
+    "message": "Unable to recognize this link. Please check for accuracy and try again."
+  },
+  "SUBMIT_ONE_TIME_LINK": {
+    "description": "Text for a button the user may click after pasting in a (probably valid) one-time connection link into a textbox above the button.",
+    "message": "Submit"
+  },
+  "GO_BACK": {
     "description": "Go back to the main page from the one-time connection page.",
     "message": "Go back?"
   },
-  "areYouSure": {
+  "ARE_YOU_SURE": {
     "description": "Question confirming if the user wants to end an active connection to a friend.",
     "message": "Are you sure you want to end this one-time connection?"
   },
-  "submitFeedback_sentenceCase": {
+  "SUBMIT_FEEDBACK_SENTENCE_CASE": {
     "description": "Submit feedback to the uProxy team.",
     "message": "Submit feedback"
   },
-  "emailTitle": {
+  "EMAIL_TITLE": {
     "description": "",
     "message": "Email (optional)"
   },
-  "emailPlaceholder": {
+  "EMAIL_PLACEHOLDER": {
     "description": "",
     "message": "Email address"
   },
-  "feedbackTitle": {
+  "FEEDBACK_TITLE": {
     "description": "Label for textbox for user's to submit feedback and comments to uProxy.",
     "message": "Enter your feedback below"
   },
-  "feedbackPlaceholder": {
+  "FEEDBACK_PLACEHOLDER": {
     "description": "The default text that appears in the user feedback textbox.",
     "message": "Write your feedback"
   },
-  "networkAndLogs": {
+  "NETWORK_AND_LOGS": {
     "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team.",
     "message": "Analyze network and include logs"
   },
-  "PIIMessage": {
+  "P_I_I_MESSAGE": {
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
     "message": "Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information."
   },
-  "thankYou": {
+  "THANK_YOU": {
     "description": "",
     "message": "Thank you!"
   },
-  "feedbackSubmitted": {
+  "FEEDBACK_SUBMITTED": {
     "description": "User feedback was successfully submitted.",
     "message": "Your feedback has been submitted to the uProxy development team."
   },
-  "emailInsteadTitle": {
+  "EMAIL_INSTEAD_TITLE": {
     "description": "Title for error that appears if feedback submission failed.",
     "message": "Email feedback instead?"
   },
-  "emailInsteadMessage": {
+  "EMAIL_INSTEAD_MESSAGE": {
     "description": "Seen if feedback submission through uProxy fails. Message asks users to email their feedback instead.",
     "message": "Oops! We were unable to submit your feedback to uproxy.org. Please copy and paste your feedback in an email to info@uproxy.org."
   },
-  "logsTitle": {
+  "LOGS_TITLE": {
     "description": "Title for the page that displays a user's network information and uProxy logs.",
     "message": "Logs & Network Analysis"
   },
-  "toSendLogs": {
+  "TO_SEND_LOGS": {
     "description": "Instructions guiding the user through how to submit their logs to uProxy.",
     "message": "To send your logs to the uProxy team for help, open uProxy and click 'Submit Feedback'"
   },
-  "retrievingLogs": {
+  "RETRIEVING_LOGS": {
     "description": "Message shown while uProxy is analyzing the user's network settings.",
     "message": "Retrieving logs and analyzing your network..."
   },
-  "errorSigningIn": {
+  "ERROR_SIGNING_IN": {
     "description": "Notification for when the user could not be signed in to a social network.",
     "message": "There was a problem signing in to __network__.  Please try again."
   },
-  "attemptingReconnect": {
+  "ATTEMPTING_RECONNECT": {
     "description": "uProxy was disconnected from the social network and is trying to reconnect.",
     "message": "Attempting to re-connect."
   },
-  "cannotOpenOneTimeTitle": {
+  "CANNOT_OPEN_ONE_TIME_TITLE": {
     "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network.",
     "message": "Cannot open one-time connection"
   },
-  "cantOpenOneTimeMessage": {
+  "CANT_OPEN_ONE_TIME_MESSAGE": {
     "description": "Text for an error popup that appears if the user tries to open a one-time link while signed in to a social network.",
     "message": "It is not currently possible to open a manual connection at the same time as being signed in to a social network.  To launch a manual connection, please log out through the settings menu and re-paste the link."
   },
-  "statsEnabledTitle": {
+  "STATS_ENABLED_TITLE": {
     "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team.",
     "message": "Anonymous stats enabled"
   },
-  "statsEnabledMessage": {
+  "STATS_ENABLED_MESSAGE": {
     "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon.",
     "message": "This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings."
   },
-  "statsEnabledTooltip": {
+  "STATS_ENABLED_TOOLTIP": {
     "description": "Text that appears in a tooltip when the user hovers over the 'anonymous stats enabled' icon.",
     "message": "You are sharing anonymous stats."
   },
-  "sharingEnabledTitle": {
+  "SHARING_ENABLED_TITLE": {
     "description": "Title for popup that points to the sharing icon in uProxy's top toolbar. The popup appears when the user first grants access to one of their friends. The sharing icon is visible as long as there are friends who can get access to the user's Internet.",
     "message": "Sharing Enabled"
   },
-  "sharingEnabledMessage": {
+  "SHARING_ENABLED_MESSAGE": {
     "description": "Text in a popup that explains what the sharing icon (on the toolbar) is.",
     "message": "This icon means you're available for sharing access with friends you've offered access to."
   },
-  "sharingEnabledTooltip": {
+  "SHARING_ENABLED_TOOLTIP": {
     "description": "Text that appears in a tooltip when the user hovers over the sharing icon.",
     "message": "You are available for sharing."
   },
-  "getAccess": {
+  "GET_ACCESS": {
     "description": "Text for the tab on the toolbar. When the user is on the 'Get Access' tab, they are looking to get access to the Internet through a friend.",
     "message": "Get Access"
   },
-  "shareAccess": {
+  "SHARE_ACCESS": {
     "description": "Text for the tab on the toolbar. When the user is on the 'Share Access' tab, they are looking to share access to their Internet with a friend.",
     "message": "Share Access"
   },
-  "welcome": {
+  "WELCOME": {
     "description": "",
     "message": "Welcome to uProxy"
   },
-  "welcomeMessage": {
+  "WELCOME_MESSAGE": {
     "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately.",
     "message": "To get started, choose \"Get access\" or \"Share access\" and then click on a friend to connect."
   },
-  "alphaMessage": {
+  "ALPHA_MESSAGE": {
     "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development.",
     "message": "This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely."
   },
-  "moreInformation": {
+  "MORE_INFORMATION": {
     "description": "",
     "message": "More information."
   },
-  "changeStatsChoice": {
+  "CHANGE_STATS_CHOICE": {
     "description": "Informs the user that they can opt in and out of sending anonymous statistics at any time they choose, from the Settings menu.",
     "message": "You can change your choice at any time, from the Settings menu."
   },
-  "enableMetrics": {
+  "ENABLE_METRICS": {
     "description": "Asks the user if they want to send anonymous metrics about their uProxy usage.",
     "message": "Would you like to enable anonymous metrics collection?"
   },
-  "imIn": {
+  "IM_IN": {
     "description": "Agree to submitting anonymous metrics to uProxy.",
     "message": "I'm in"
   },
-  "noThanks": {
+  "NO_THANKS": {
     "description": "Do not agree to submitting anonymous metrics to uProxy.",
     "message": "No thanks"
   },
-  "disconnectedTitle": {
+  "DISCONNECTED_TITLE": {
     "description": "Title for error that appears when the user was getting access to the Internet through their friend, but that connection was terminated.",
     "message": "Oops! You've been disconnected from your friend."
   },
-  "disconnectedMessage": {
+  "DISCONNECTED_MESSAGE": {
     "description": "Instruction informing the user that to continue browsing the Internet, the user will need to use their local (potentially unsafe and/or censored) connection.",
     "message": "Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding."
   },
-  "continueBrowsing": {
+  "CONTINUE_BROWSING": {
     "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet).",
     "message": "Continue Browsing Without uProxy"
   },
-  "sharingUnavailableTitle": {
+  "SHARING_UNAVAILABLE_TITLE": {
     "description": "Title for error that appears when the user can not share their Internet access with friends.",
     "message": "Sharing Unavailable"
   },
-  "sharingUnavailableMessage": {
+  "SHARING_UNAVAILABLE_MESSAGE": {
     "description": "Text for error that appears when the user can not share their Internet access with friends.",
     "message": "Oops! You're using Firefox 37, which has a bug that prevents sharing from working (see git.io/vf5x1). This bug is fixed in Firefox 38, so you can enable sharing by upgrading Firefox or switching to Chrome."
   },
-  "loadingFriends": {
+  "LOADING_FRIENDS": {
     "description": "User's friends are being loaded from a social network.",
     "message": "Loading uProxy friends"
   },
-  "noFriendsOnline": {
+  "NO_FRIENDS_ONLINE": {
     "description": "None of the user's friends are currently signed in.",
     "message": "None of your friends are signed into uProxy at this time."
   },
-  "toInviteFriends": {
+  "TO_INVITE_FRIENDS": {
     "description": "Instruction informing the user how to invite their friends to uProxy.",
     "message": "To invite friends to uProxy, send them a link to https://www.uproxy.org"
   },
-  "offers": {
+  "OFFERS": {
     "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted.",
     "message": "Offers"
   },
-  "requests": {
+  "REQUESTS": {
     "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted.",
     "message": "Requests"
   },
-  "friendsWhoShare": {
+  "FRIENDS_WHO_SHARE": {
     "description": "Title for the group of friends who the user can get Internet access from.",
     "message": "Friends you can get access from"
   },
-  "friendsWhoCanGet": {
+  "FRIENDS_WHO_CAN_GET": {
     "description": "Title for the group of friends who can access the Internet through the user.",
     "message": "Friends who can get access from you"
   },
-  "uproxyFriends": {
+  "UPROXY_FRIENDS": {
     "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups.",
     "message": "Friends who have uProxy"
   },
-  "connectedWith": {
+  "CONNECTED_WITH": {
     "description": "Text in settings that informs the user which social network they're connected to.",
     "message": "Connected with __network__"
   },
-  "connectedWithNumber": {
+  "CONNECTED_WITH_NUMBER": {
     "description": "Text in settings informing the user of how many networks they're connected to.",
     "message": "Connected with __number__ networks"
   },
-  "nameThisDevice": {
+  "NAME_THIS_DEVICE": {
     "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel.",
     "message": "Name this device"
   },
-  "deviceDescription": {
+  "DEVICE_DESCRIPTION": {
     "description": "Title for the section in Settings where the user can edit the name of their device.",
     "message": "Device description"
   },
-  "description": {
+  "DESCRIPTION": {
     "description": "Placeholder for the input field for the name of the user's device.",
     "message": "Description"
   },
-  "connectedAccounts": {
+  "CONNECTED_ACCOUNTS": {
     "description": "In settings, title for the social networks you can connect to.",
     "message": "Connected Accounts"
   },
-  "connect": {
+  "CONNECT": {
     "description": "User clicks this to connect to a network",
     "message": "Connect"
   },
-  "disconnect": {
+  "DISCONNECT": {
     "description": "User clicks this to disconnect from a network",
     "message": "Disconnect"
   },
-  "save": {
+  "SAVE": {
     "description": "Label for button that saves the user's text input.",
     "message": "Save"
   },
-  "restart": {
+  "RESTART": {
     "description": "Restart uProxy completely.",
     "message": "Restart"
   },
-  "advancedSettings": {
+  "ADVANCED_SETTINGS": {
     "description": "Clickable text from the Settings menu. Clicking this opens the advanced settings screen.",
     "message": "Advanced Settings"
   },
-  "advancedSettings_sentenceCase": {
+  "ADVANCED_SETTINGS_SENTENCE_CASE": {
     "description": "Title for the advanced settings screen.",
     "message": "Advanced settings"
   },
-  "editAdvancedSettings": {
+  "EDIT_ADVANCED_SETTINGS": {
     "description": "Instruction for the user to edit their advanced settings (by typing JSON in a textbox).",
     "message": "Edit your settings below"
   },
-  "editAdvancedSettingsPlaceholder": {
+  "EDIT_ADVANCED_SETTINGS_PLACEHOLDER": {
     "description": "Default text in the advanced settings textbox.",
     "message": "Edit your settings"
   },
-  "settingsSaved": {
+  "SETTINGS_SAVED": {
     "description": "Message that confirms to the user that their advanced settings were saved.",
     "message": "Settings saved"
   },
-  "settingsBadFormatError": {
+  "SETTINGS_BAD_FORMAT_ERROR": {
     "description": "Error shown to the user if their input for advanced settings is badly formed JSON.",
     "message": "Could not set: bad format"
   },
-  "settingsJsonError": {
+  "SETTINGS_JSON_ERROR": {
     "description": "Error shown to the user if their input for advanced settings is incomplete or incompatible with expected settings configurations.",
     "message": "Could not set: JSON value mismatch"
   },
-  "set": {
+  "SET": {
     "description": "Label for button that saves the user's advanced settings.",
     "message": "SET"
   },
-  "aboutUproxy": {
+  "ABOUT_UPROXY": {
     "description": "Description on uProxy's introduction screen explaining what uProxy is.",
     "message": "uProxy helps you share your access to the internet or get internet access from friends"
   },
-  "next": {
+  "NEXT": {
     "description": "Label for button that proceeds from the introduction page to the login page.",
     "message": "Next"
   },
-  "learnMoreUproxy": {
+  "LEARN_MORE_UPROXY": {
     "description": "Label for button that brings user to more information about uProxy.",
     "message": "Learn more about uProxy"
   },
-  "whichSocialNetwork": {
+  "WHICH_SOCIAL_NETWORK": {
     "description": "Question seen at the top of uProxy's login page. Asks which social network should be used to find the user's friends.",
     "message": "Where can you find your contacts the quickest?"
   },
-  "whySocialNetwork": {
+  "WHY_SOCIAL_NETWORK": {
     "description": "Explains why uProxy needs social networks. (Friends need to login with the same social network on uProxy for friends to see each other.)",
     "message": "uProxy uses social networks to help you set up connections with your friends"
   },
-  "setUpOneTime": {
+  "SET_UP_ONE_TIME": {
     "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link.",
     "message": "Set up a one-time connection"
   },
-  "weWontPost": {
+  "WE_WONT_POST": {
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
     "message": "We won't share your data or post publicly without your consent"
   },
-  "learnMoreSocial": {
+  "LEARN_MORE_SOCIAL": {
     "description": "Label for button that brings user to more information about why social networks are used for uProxy.",
     "message": "Learn more about social networks"
   },
-  "askToAnalyze": {
+  "ASK_TO_ANALYZE": {
     "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails.",
     "message": "It could be that your network's NAT type is incompatible with uProxy. Would you like uProxy to analyze your network?"
   },
-  "unableToGet": {
+  "UNABLE_TO_GET": {
     "description": "Title for popup that appears when an attempt to access the Internet through a friend fails.",
     "message": "Unable to get access"
   },
-  "unableToShare": {
+  "UNABLE_TO_SHARE": {
     "description": "Title for popup that appears when an attempt to share the Internet with a friend fails.",
     "message": "Unable to share access"
   },
-  "analyzingNetwork": {
+  "ANALYZING_NETWORK": {
     "description": "Message shown when the user's network is being analyzed.",
     "message": "Analyzing network"
   },
-  "analysisResults": {
+  "ANALYSIS_RESULTS": {
     "description": "A summary of the user's network analysis.",
     "message": "It looks like you are on a __natType__, which is __natImpact__ interfering with your ability to connect to friends."
   },
-  "moreInfo": {
+  "MORE_INFO": {
     "description": "Link to 'Does uProxy log data about me?' question in the FAQ.",
     "message": "More info"
   },
-  "askToSubmitAnalysis": {
+  "ASK_TO_SUBMIT_ANALYSIS": {
     "description": "Asks the user if they are willing to share their network analysis results with uProxy, to help the development of uProxy.",
     "message": "Would you like to submit your NAT type to the uProxy team, to help us better understand the networks our users are on?"
   },
-  "veryLikely": {
+  "VERY_LIKELY": {
     "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
     "message": "most likely"
   },
-  "possibly": {
+  "POSSIBLY": {
     "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
     "message": "possibly"
   },
-  "unlikely": {
+  "UNLIKELY": {
     "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string.",
     "message": "probably not"
   },
-  "privacyPolicy": {
+  "PRIVACY_POLICY": {
     "description": "Link to uProxy's privacy policy.",
     "message": "Privacy policy"
   },
-  "startedProxying": {
+  "STARTED_PROXYING": {
     "description": "Notification for when a friend has started accessing the Internet through the user.",
     "message": "__name__ started proxying through you"
   },
-  "stoppedProxying": {
+  "STOPPED_PROXYING": {
     "description": "Notification for when a friend has stopped accessing the Internet through the user.",
     "message": "__name__ stopped proxying through you"
   },
-  "unableToShareWith": {
+  "UNABLE_TO_SHARE_WITH": {
     "description": "Error message seen in uProxy when a friend failed to get access to the Internet through the user.",
     "message": "Unable to share access with __name__"
   },
-  "unableToGetFrom": {
+  "UNABLE_TO_GET_FROM": {
     "description": "Error message seen in uProxy when the user failed to get access to the Internet through a friend.",
     "message": "Unable to get access from __name__"
   },
-  "gettingAccessFrom": {
+  "GETTING_ACCESS_FROM": {
     "description": "Message in a status bar that is visible when the user is getting access from a friend.",
     "message": "Getting access from __name__"
   },
-  "sharingAccessWith_one": {
+  "GETTING_ACCESS_FROM_FRIEND": {
+    "description": "Message in a status bar that is visible when the user is getting access from a nameless friend",
+    "message": "Currently getting access from a friend"
+  },
+  "SHARING_ACCESS_WITH_ONE": {
     "description": "Message in a status bar that is visible when one friend is getting access through the user.",
     "message": "Sharing access with __name__"
   },
-  "sharingAccessWith_two": {
+  "SHARING_ACCESS_WITH_TWO": {
     "description": "Message in a status bar that is visible when two friends are getting access through the user.",
     "message": "Sharing access with __name1__ and __name2__"
   },
-  "sharingAccessWith_many": {
+  "SHARING_ACCESS_WITH_MANY": {
     "description": "Message in a status bar that is visible when three or more friends are getting access through the user.",
     "message": "Sharing access with __name__ and __numOthers__ others"
   },
-  "loggedOut": {
+  "SHARING_ACCESS_WITH_FRIEND": {
+    "description": "Message in a status bar that is visible when the user is sharing access with a nameless friend",
+    "message": "Currently sharing access with a friend"
+  },
+  "LOGGED_OUT": {
     "description": "Notification for when the user has been logged out of the social network.",
     "message": "You have been logged out of __network__"
   },
-  "grantedAccessNotification": {
+  "GRANTED_ACCESS_NOTIFICATION": {
     "description": "Notification for when a user's request to access the Internet through a friend has been accepted by that friend.",
     "message": "__name__ granted you access"
   },
-  "offeredAccessNotification": {
+  "OFFERED_ACCESS_NOTIFICATION": {
     "description": "Notification for when the user receives an offer from a friend to access the Internet through them.",
     "message": "__name__ offered you access"
   },
-  "acceptedOfferNotification": {
+  "ACCEPTED_OFFER_NOTIFICATION": {
     "description": "Notification for when a friend has accepted the user's offer to share their Internet with that friend.",
     "message": "__name__ has accepted your offer for access"
   },
-  "requestingAccessNotification": {
+  "REQUESTING_ACCESS_NOTIFICATION": {
     "description": "Notification for when a friend sends a request to access the Internet through the user.",
     "message": "__name__ is requesting access"
   },
-  "descriptionDefault": {
+  "DESCRIPTION_DEFAULT": {
     "description": "If a friend has more than one computer, the computers are given this default name (with increasing numbers) to differentiate them.",
     "message": "Computer __number__"
   },
-  "language": {
+  "LANGUAGE": {
     "description": "Language used by the application.",
     "message": "Language"
   },
-  "selectLanguage": {
+  "SELECT_LANGUAGE": {
     "description": "Instruction to select language used by the application.",
     "message": "Select a language"
   },
-  "extMissingTitle": {
+  "EXT_MISSING_TITLE": {
     "description": "Shown in Chrome if the user has not finished installing both parts of uProxy.",
     "message": "You're almost ready to use uProxy!"
   },
-  "extMissingMessage": {
+  "EXT_MISSING_MESSAGE": {
     "description": "Shown in Chrome to instruct the user to install part 1 of uProxy.",
     "message": "Download and enable part 1 of uProxy to get started."
   },
-  "appMissingTitle": {
+  "APP_MISSING_TITLE": {
     "description": "Shown in Chrome if the user has not finished installing both parts of uProxy.",
     "message": "You're almost ready to use uProxy!"
   },
-  "appMissingMessage": {
+  "APP_MISSING_MESSAGE": {
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
   },
-  "updateAvailable": {
+  "RESTART_PROXYING": {
+    "description": "If proxy connection gets disconnected restart the connection",
+    "message": "Reconnect"
+  },
+  "UPDATE_AVAILABLE": {
     "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",
     "message": "An update is available"
   },
-  "restartUproxyUpdate": {
+  "RESTART_UPROXY_UPDATE": {
     "description": "A link the user can click on to restart uProxy and permorm an update",
     "message": "Restart to update"
+  },
+  "PORT_CONTROL_TITLE": {
+    "description": "Title for the port control section in advanced settings",
+    "message": "Port control status"
+  },
+  "PORT_CONTROL_SUPPORTED": {
+    "description": "NAT-PMP, PCP, or UPnP is supported in the router",
+    "message": "Your router has port control enabled."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED": {
+    "description": "NAT-PMP, PCP, and UPnP are not supported in the router",
+    "message": "Your router does not have port control enabled."
+  },
+  "PORT_CONTROL_PENDING": {
+    "description": "uProxy is currently probing router for port control support",
+    "message": "Probing router for port control support..."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO": {
+    "description": "Extra information displayed when port control is not supported",
+    "message": "You may be able to enable port control to make uProxy more reliable."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
+    "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
+    "message": "More info."
   }
 }

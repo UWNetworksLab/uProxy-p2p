@@ -1,6 +1,5 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
-
 import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
 import mockFreedomRtcPeerConnection = require('../../../third_party/uproxy-lib/freedom/mocks/mock-rtcpeerconnection');
 
@@ -10,7 +9,9 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
     'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); },
     'metrics': () => { return new freedom_mocks.MockMetrics(); },
     'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
-    'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); }
+    'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); },
+    'pgp': () => { return new freedom_mocks.PgpProvider() },
+    'portControl': () => { return new Object }
 });
 
 

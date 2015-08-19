@@ -1,3 +1,4 @@
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='./context.d.ts' />
 /*
  * copypaste.ts
@@ -22,6 +23,8 @@ Polymer({
     }
   },
   startGetting: function() {
+    this.gettingResponse = '';
+
     var doneStopping :Promise<void>;
     if (ui.copyPasteState.localGettingFromRemote !== social.GettingState.NONE) {
       console.warn('aborting previous copy+paste getting connection');
@@ -63,13 +66,13 @@ Polymer({
     }
 
     this.fire('open-dialog', {
-      heading: ui.i18n_t('goBack'),
-      message: ui.i18n_t('areYouSure'),
+      heading: ui.i18n_t("GO_BACK"),
+      message: ui.i18n_t("ARE_YOU_SURE"),
       buttons: [{
-        text: ui.i18n_t('yes'),
+        text: ui.i18n_t("YES"),
         signal: 'copypaste-back'
       }, {
-        text: ui.i18n_t('no'),
+        text: ui.i18n_t("NO"),
         dismissive: true
       }]
     });
@@ -136,6 +139,28 @@ Polymer({
   },
   encodeMessage: function(message :social.PeerMessageType) {
     return encodeURIComponent(btoa(JSON.stringify(message)));
+  },
+  gettingResponse: '',
+  gettingLinkError: false,
+  gettingResponseChanged: function(old :string, link :string) {
+    this.showGettingSubmit = false;
+    this.gettingLinkError = false;
+    if (!link || !link.length) {
+      // should have no buttor or error if there is just nothing there
+      return;
+    }
+
+    var res = ui.parseUrlData(link);
+    if (res === null || res.type !== social.PeerMessageType.SIGNAL_FROM_SERVER_PEER) {
+      this.gettingLinkError = true;
+      return;
+    }
+
+    // the link passes a casual inspection, show the submit button
+    this.showGettingSubmit = true;
+  },
+  submitGettingLink: function() {
+    ui.handleUrlData(this.gettingResponse);
   },
   ready: function() {
     this.ui = ui;

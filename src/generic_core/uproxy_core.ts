@@ -1,7 +1,9 @@
-import diagnose_nat = require('./diagnose-nat');
+/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
@@ -15,8 +17,6 @@ import version = require('../version/version');
 import _ = require('lodash');
 
 import ui = ui_connector.connector;
-
-export var remoteProxyInstance :social.RemoteUserInstance = null;
 
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.
@@ -35,13 +35,7 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
 
-export interface NetworkInfo {
-  natType :string;
-  pmpSupport :string;
-  pcpSupport :string;
-  upnpSupport :string;
-  errorMsg ?:string;
-};
+var portControl = globals.portControl;
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
@@ -81,7 +75,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         type: message.type,
         data: data
       });
-    });
+    }, undefined, portControl);
+    this.refreshPortControlSupport();
   }
 
   // sendInstanceHandshakeMessage = (clientId :string) => {
@@ -98,6 +93,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   private pendingNetworks_ :{[name :string] :social.Network} = {};
+  private portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
 
   /**
    * Access various social networks using the Social API.
@@ -216,7 +212,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           endpoint: copyPasteConnection.activeEndpoint,
           gettingMessages: this.copyPasteGettingMessages_,
           sharingMessages: this.copyPasteSharingMessages_
-        }
+        },
+        portControlSupport: this.portControlSupport_,
       };
     });
   }
@@ -240,12 +237,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
     this.copyPasteGettingMessages_ = [];
-    if (remoteProxyInstance) {
-      log.warn('Existing proxying session, terminating');
-      remoteProxyInstance.stop();
-      remoteProxyInstance = null;
-    }
-
     return copyPasteConnection.startGet(globals.effectiveMessageVersion());
   }
 
@@ -278,51 +269,26 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    * RemoteInstance exists.
    */
   public start = (path :social.InstancePath) : Promise<net.Endpoint> => {
-    // Disable any previous proxying session.
-    var stoppedGetting :Promise<void>[] = [];
-    if (remoteProxyInstance) {
-      log.warn('Existing proxying session, terminating');
-      // Stop proxy, don't notify UI since UI request a new proxy.
-      stoppedGetting.push(remoteProxyInstance.stop());
-      remoteProxyInstance = null;
+    var remote = this.getInstance(path);
+    if (!remote) {
+      log.error('Instance does not exist for proxying', path.instanceId);
+      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-
-    if (social.GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
-      log.warn('Existing proxying session, terminating');
-      stoppedGetting.push(copyPasteConnection.stopGet());
-    }
-
-    return Promise.all(stoppedGetting).catch((e) => {
-      // if there was an error stopping the old connection we still want to
-      // connect with the new one, do not propogate this error
-      log.error('Could not clean up old connections', e);
-    }).then(() => {
-      var remote = this.getInstance(path);
-      if (!remote) {
-        log.error('Instance does not exist for proxying', path.instanceId);
-        return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
-      }
-      // Remember this instance as our proxy.  Set this before start fulfills
-      // in case the user decides to cancel the proxy before it begins.
-      remoteProxyInstance = remote;
-      return remote.start();
-    }).catch((e) => {
-      remoteProxyInstance = null; // make sure to clean up any state
-      log.error('Could not start remote proxying session', e.stack);
-      return Promise.reject(e);
-    });
+    // Remember this instance as our proxy.  Set this before start fulfills
+    // in case the user decides to cancel the proxy before it begins.
+    return remote.start();
   }
 
   /**
    * Stop proxying with the current instance, if it exists.
    */
-  public stop = () => {
-    if (!remoteProxyInstance) {
-      log.error('Cannot stop proxying when there is no proxy');
-      return;
+  public stop = (path :social.InstancePath) => {
+    var remote = this.getInstance(path);
+    if (!remote) {
+      log.error('Instance does not exist for proxying', path.instanceId);
+      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-    remoteProxyInstance.stop();
-    remoteProxyInstance = null;
+    remote.stop();
     // TODO: Handle revoked permissions notifications.
   }
 
@@ -385,7 +351,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         [ countdown(30000).then(() => {
             return 'NAT classification timed out.';
           }),
-          diagnose_nat.doNatProvoking().then((natType:string) => {
+          nat_probe.probe().then((natType:string) => {
             globals.natType = natType;
             // Store NAT type for five minutes. This way, if the user previews
             // their logs, and then submits them shortly after, we do not need
@@ -404,63 +370,41 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
-  // List of popular router default IPs
-  // http://www.techspot.com/guides/287-default-router-ip-addresses/
-  private routerIps = ['192.168.1.1', '192.168.2.1', '192.168.11.1',
-    '192.168.0.1', '192.168.0.30', '192.168.0.50', '192.168.20.1',
-    '192.168.30.1', '192.168.62.1', '192.168.100.1', '192.168.102.1',
-    '192.168.1.254', '192.168.10.1', '192.168.123.254', '192.168.4.1',
-    '10.0.1.1', '10.1.1.1', '10.0.0.138', '10.0.0.2', '10.0.0.138'];
+  // Probe for NAT-PMP, PCP, and UPnP support
+  // Sets this.portControlSupport_ and sends update message to UI
+  public refreshPortControlSupport = () :Promise<void> => {
+    this.portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
+    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+              uproxy_core_api.PortControlSupport.PENDING);
 
-  // Probes the NAT for either NAT-PMP or PCP support
-  public probePmcp = (privateIp:string, protocol:string) :Promise<string> => {
-    return Promise.all(this.routerIps.map((ip:string) => {
-      if (protocol === 'PCP') {
-        return diagnose_nat.probePcpSupport(ip, privateIp);
-      } else if (protocol === 'PMP') {
-        return diagnose_nat.probePmpSupport(ip, privateIp);
-      }
-    })).then((results:boolean[]) => {
-      if (results.some(el => el)) { return 'Supported'; }
-      return 'Not supported';
-    }).catch((err:Error) => {
-      return 'Not supported ' + err.message;
+    return portControl.probeProtocolSupport().then(
+      (probe:freedom_PortControl.ProtocolSupport) => {
+        this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
+                                   uproxy_core_api.PortControlSupport.TRUE :
+                                   uproxy_core_api.PortControlSupport.FALSE;
+        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+                  this.portControlSupport_);
     });
-  }
-
-  // Probe the NAT for UPnP support, returns a status string
-  public probeUpnp = (privateIp:string) :Promise<string> => {
-    return diagnose_nat.probeUpnpSupport(privateIp).
-        then((result:boolean) => {
-          if (result) { return 'Supported'; }
-        }).catch((err:Error) => {
-          return 'Not supported ' + err.message;
-        });
   }
 
   // Probe the NAT type and support for port control protocols
   // Returns an object with the NAT configuration as keys
-  public getNetworkInfoObj = () :Promise<NetworkInfo> => {
-    var natInfo :NetworkInfo = {
-      natType: '',
-      pmpSupport: '',
-      pcpSupport: '',
-      upnpSupport: ''
+  public getNetworkInfoObj = () :Promise<uproxy_core_api.NetworkInfo> => {
+    var natInfo :uproxy_core_api.NetworkInfo = {
+      natType: undefined,
+      pmpSupport: undefined,
+      pcpSupport: undefined,
+      upnpSupport: undefined
     };
 
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
-      return diagnose_nat.getInternalIp().then((privateIp:string) => {
-        return this.probePmcp(privateIp, 'PMP').then((pmpSupport:string) => {
-          natInfo.pmpSupport = pmpSupport;
-          return this.probePmcp(privateIp, 'PCP');
-        }).then((pcpSupport:string) => {
-          natInfo.pcpSupport = pcpSupport;
-          return this.probeUpnp(privateIp);
-        }).then((upnpSupport:string) => {
-          natInfo.upnpSupport = upnpSupport;
+      return portControl.probeProtocolSupport().then(
+        (probe:freedom_PortControl.ProtocolSupport) => {
+          natInfo.pmpSupport = probe.natPmp;
+          natInfo.pcpSupport = probe.pcp;
+          natInfo.upnpSupport = probe.upnp;
           return natInfo;
-        });
       }).catch((err:Error) => {
         // Should only catch the error when getInternalIp() times out
         natInfo.errorMsg = 'Could not probe for port control protocols: ' + err.message;
@@ -471,14 +415,17 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // Returns a string of the NAT type and support for port control protocols
   public getNetworkInfo = () :Promise<string> => {
-    return this.getNetworkInfoObj().then((natInfo:NetworkInfo) => {
+    return this.getNetworkInfoObj().then((natInfo:uproxy_core_api.NetworkInfo) => {
       var natInfoStr = 'NAT Type: ' + natInfo.natType + '\n';
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';
       } else {
-        natInfoStr += 'NAT-PMP: ' + natInfo.pmpSupport + '\n';
-        natInfoStr += 'PCP: ' + natInfo.pcpSupport + '\n';
-        natInfoStr += 'UPnP IGD: ' + natInfo.upnpSupport + '\n';
+        natInfoStr += 'NAT-PMP: ' + 
+                  (natInfo.pmpSupport ? 'Supported' : 'Not supported') + '\n';
+        natInfoStr += 'PCP: ' + 
+                  (natInfo.pcpSupport ? 'Supported' : 'Not supported') + '\n';
+        natInfoStr += 'UPnP IGD: ' + 
+                  (natInfo.upnpSupport ? 'Supported' : 'Not supported') + '\n';
       }
       return natInfoStr;
     });

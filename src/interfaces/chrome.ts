@@ -2,7 +2,8 @@
 
 export interface OAuthInfo {
   url :string;
-  redirect :string
+  redirect :string;
+  interactive :boolean;
 }
 
 // Enums for Chrome App-Extension communication.

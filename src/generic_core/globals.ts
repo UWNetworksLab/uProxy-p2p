@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
+
 import local_storage = require('./storage');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
@@ -16,14 +18,10 @@ export var STORAGE_VERSION = 1;
 // 2: uproxy-lib v27, move to bridge but no obfuscation yet
 // 3: offer basicObfuscation
 // 4: holographic ICE
-export var MESSAGE_VERSION = 4;
+export var MESSAGE_VERSION = 5;
 
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
-  {urls: ['stun:stun1.l.google.com:19302']},
-  {urls: ['stun:stun2.l.google.com:19302']},
-  {urls: ['stun:stun3.l.google.com:19302']},
-  {urls: ['stun:stun4.l.google.com:19302']},
   {urls: ['stun:stun.services.mozilla.com']},
   {urls: ['stun:stun.stunprotocol.org']}
 ];
@@ -81,3 +79,16 @@ export var effectiveMessageVersion = () : number => {
 }
 
 export var metrics = new metrics_module.Metrics(storage);
+
+export var publicKey :string;
+export var pgp :PgpProvider = freedom['pgp']();
+
+pgp.setup('', '<uproxy>').then(() => {
+  pgp.exportKey().then((key :PublicKey) => {
+    publicKey = key.key;
+  });
+}).catch((e) => {
+  log.error('Error setting up pgp ', e);
+});
+
+export var portControl = freedom['portControl']();

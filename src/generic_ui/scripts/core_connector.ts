@@ -176,9 +176,9 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.START_PROXYING, path);
   }
 
-  stop = () => {
+  stop = (path :social.InstancePath) => {
     console.log('Stopping proxy session.');
-    this.sendCommand(uproxy_core_api.Command.STOP_PROXYING);
+    this.sendCommand(uproxy_core_api.Command.STOP_PROXYING, path);
   }
 
   updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
@@ -218,6 +218,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
 
   getNatType = () : Promise<string> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_NAT_TYPE);
+  }
+
+  refreshPortControlSupport = () : Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.REFRESH_PORT_CONTROL);
   }
 
   pingUntilOnline = (pingUrl :string) : Promise<void> => {

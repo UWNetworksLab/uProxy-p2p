@@ -84,9 +84,7 @@
       }
       core-toolbar {
         height: 105px;
-        background-color: #009688;
         width: 100%;
-        color: #FFFFFF;
       }
       core-toolbar::shadow #topBar {
         padding: 0px 16px;
@@ -236,44 +234,44 @@
           <div id='title' flex>uProxy</div>
 
           <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
-            <h3>{{ 'cannotOpenOneTimeTitle' | $$ }}</h3>
+            <h3>{{ "CANNOT_OPEN_ONE_TIME_TITLE" | $$ }}</h3>
             <p>
-              {{ 'cantOpenOneTimeMessage' | $$ }}
+              {{ "CANT_OPEN_ONE_TIME_MESSAGE" | $$ }}
             </p>
           </uproxy-bubble>
 
-          <core-tooltip id='statsTooltip' label='{{ "statsEnabledTooltip" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
+          <core-tooltip id='statsTooltip' label='{{ "STATS_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
               hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
-            <h3>{{ 'statsEnabledTitle' | $$ }}</h3>
-            <p>{{ 'statsEnabledMessage' | $$ }}</p>
+            <h3>{{ "STATS_ENABLED_TITLE" | $$ }}</h3>
+            <p>{{ "STATS_ENABLED_MESSAGE" | $$ }}</p>
           </uproxy-bubble>
 
-          <core-tooltip label='{{ "sharingEnabledTooltip" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
+          <core-tooltip label='{{ "SHARING_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
               hidden?='{{ !isSharingEnabledWithOthers }}'
               on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && isSharingEnabledWithOthers }}'>
-            <h3>{{ 'sharingEnabledTitle' | $$ }}</h3>
-            <p>{{ 'sharingEnabledMessage' | $$ }}</p>
+            <h3>{{ "SHARING_ENABLED_TITLE" | $$ }}</h3>
+            <p>{{ "SHARING_ENABLED_MESSAGE" | $$ }}</p>
           </uproxy-bubble>
 
           <div class='bottom fit' dir="ltr">
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ 'getAccess' | $$ }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$ }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.getAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.getAccessContacts.pending.length }}
                 </span>
               </paper-tab>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ 'shareAccess' | $$ }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ "SHARE_ACCESS" | $$ }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.shareAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.shareAccessContacts.pending.length }}
@@ -289,9 +287,9 @@
           https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
         -->
         <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
-          <h3>{{ 'welcome' | $$ }}</h3>
+          <h3>{{ "WELCOME" | $$ }}</h3>
           <p>
-            {{ 'welcomeMessage' | $$ }}
+            {{ "WELCOME_MESSAGE" | $$ }}
           </p>
         </uproxy-bubble>
 
@@ -336,9 +334,9 @@
               <div class='statusRow' hidden?='{{!ui.availableVersion}}'>
                 <div class='statusText' horizontal layout>
                   <span flex>
-                    {{ 'updateAvailable' | $$ }}
+                    {{ "UPDATE_AVAILABLE" | $$ }}
                   </span>
-                  <a href='#' on-tap='{{ restart }}'>{{ 'restartUproxyUpdate' | $$ }}</a>
+                  <a href='#' on-tap='{{ restart }}'>{{ "RESTART_UPROXY_UPDATE" | $$ }}</a>
                 </div>
               </div>
             </div>
@@ -360,28 +358,29 @@
       </template>
     </uproxy-action-dialog>
 
-    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="{{ 'welcome' | $$ }}">
+    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading='{{ "WELCOME" | $$ }}'>
       <p>
-        {{ 'alphaMessage' | $$ }}
+        {{ "ALPHA_MESSAGE" | $$ }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>{{ 'moreInformation' | $$ }}</span>
-        </uproxy-faq-link>{{ 'changeStatsChoice' | $$ }}
+          <span class='linkText'>{{ "MORE_INFORMATION" | $$ }}</span>
+        </uproxy-faq-link>{{ "CHANGE_STATS_CHOICE" | $$ }}
       </p>
-      <p>{{ 'enableMetrics' | $$ }}</p>
-      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ 'imIn' | $$ }}</paper-button>
-      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ 'noThanks' | $$ }}</paper-button>
+      <p>{{ "ENABLE_METRICS" | $$ }}</p>
+      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</paper-button>
+      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ core.disconnectedWhileProxying }}" autoCloseDisabled>
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
-        <h1>{{ 'disconnectedTitle' | $$ }}</h1>
+        <h1>{{ "DISCONNECTED_TITLE" | $$ }}</h1>
         <p>
-          {{ 'disconnectedMessage' | $$ }}
+          {{ "DISCONNECTED_MESSAGE" | $$ }}
         </p>
       </div>
-      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ 'continueBrowsing' | $$ }}</paper-button>
+      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$ }}</paper-button>
+      <paper-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
@@ -393,7 +392,7 @@
 +        style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !unableToShare && !unableToGet }}'>{{ 'getHelp' | $$ }}
+          hidden?='{{ !unableToShare && !unableToGet }}'>{{ "GET_HELP" | $$ }}
       </div>
     </paper-toast>
 
