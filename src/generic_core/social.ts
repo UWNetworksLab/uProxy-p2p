@@ -56,7 +56,7 @@ import ui = ui_connector.connector;
     'GMail': {
       isFirebase: true,
       enableMonitoring: true,
-      areAllContactsUproxy: false
+      areAllContactsUproxy: true
     }
   }
 
