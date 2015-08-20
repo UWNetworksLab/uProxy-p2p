@@ -6,9 +6,6 @@ var model = ui_context.model;
 var core = ui_context.core;
 
 Polymer({
-  openAddUserDialog: function() {
-    this.$.addUserDialog.open();
-  },
   addUser: function() {
     // TODO: pick network based on dropdown.
     core.addUser('GMail', this.receivedInviteToken);
@@ -49,6 +46,12 @@ Polymer({
     // TODO: does this need to be initialized?
     console.log('onNetworkSelect: ', details);
     this.selectedNetworkName = details.item.getAttribute('label');
+  },
+  openAddUserPanel: function() {
+    this.$.addUserPanel.open();
+  },
+  closeAddUserPanel: function() {
+    this.$.addUserPanel.close();
   },
   ready: function() {
     this.receivedInviteToken = '';

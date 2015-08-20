@@ -1,20 +1,32 @@
-<link rel='import' href='../../bower/paper-dialog/paper-action-dialog.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel="import" href="../../bower/core-signals/core-signals.html">
 <link rel='import' href='../../bower/paper-button/paper-button.html'>
-<link rel='import' href='../../bower/paper-fab/paper-fab.html'>
-<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 
 <polymer-element name='uproxy-add-user'>
   <template>
     <style>
-
+      #addUserPanel {
+        height: 100%;
+        width: 100%;
+        background-color: white;
+        text-align: center;
+      }
+      .section {
+        padding: 2em;
+      }
     </style>
     <!-- TODO: localization -->
-    <paper-fab mini icon='add' style='color: white; position:absolute; bottom:1.5em; right:1.5em;' on-tap='{{ openAddUserDialog }}'></paper-fab>
 
-    <paper-action-dialog id='addUserDialog' backdrop heading='' layered='true'>
+    <core-signals on-core-signal-open-add-user-dialog='{{ openAddUserPanel }}'></core-signals>
+
+    <core-overlay id='addUserPanel'>
+      <uproxy-app-bar on-go-back='{{ closeAddUserPanel }}'>
+        INVITE FRIEND
+      </uproxy-app-bar>
 
       <div hidden?='{{ model.onlineNetworks.length <= 1}}'>
         <p>How would you like to invite to your friends?</p>
@@ -29,25 +41,27 @@
         </paper-dropdown-menu>
       </div>
 
-      <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
-        <p>Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
-        <paper-button affirmative on-tap='{{ sendToFacebookFriend }}'>
-          Send to Facebook Friend
-        </paper-button>
+      <div class='section'>
+        <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
+          <p>Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
+          <paper-button affirmative on-tap='{{ sendToFacebookFriend }}'>
+            Send to Facebook Friend
+          </paper-button>
+        </div>
+
+        <div hidden?='{{ selectedNetworkName != "GMail"}}'>
+          <p>Enter the email address of your friend.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
+          <paper-input-decorator label="Friend's email address" layout vertical>
+            <input is='core-input' value='{{ inviteUserEmail }}' />
+          </paper-input-decorator>
+
+          <paper-button affirmative on-tap='{{ sendToGMailFriend }}'>
+            Send to GMail Friend
+          </paper-button>
+        </div>
       </div>
 
-      <div hidden?='{{ selectedNetworkName != "GMail"}}'>
-        <p>Enter the email address of your friend.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
-        <paper-input-decorator label="Friend's email address" layout vertical>
-          <input is='core-input' value='{{ inviteUserEmail }}' />
-        </paper-input-decorator>
-
-        <paper-button affirmative on-tap='{{ sendToGMailFriend }}'>
-          Send to GMail Friend
-        </paper-button>
-      </div>
-
-      <div>
+      <div class='section'>
         <p>If you have a uProxy token or link from your friend, you can paste it below to add them.</p>
 
         <div id='addFriend'>
@@ -58,9 +72,7 @@
         </div>
       </div>
 
-      <paper-button affirmative>Close</paper-button>
-
-    </paper-action-dialog>
+    </core-overlay>
   </template>
   <script src='add-user.js'></script>
 </polymer-element>

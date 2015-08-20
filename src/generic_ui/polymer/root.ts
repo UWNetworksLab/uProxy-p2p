@@ -238,6 +238,9 @@ Polymer({
   restart: function() {
     core.restart();
   },
+  fireOpenAddUserPanel: function() {
+    this.fire('core-signal', { name: 'open-add-user-dialog' });
+  },
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',
