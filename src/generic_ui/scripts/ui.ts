@@ -369,11 +369,13 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
 
-      this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
-        name: info.name
-      });
+      if (!this.proxySet_) {
+        this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
+          name: info.name
+        });
+        this.unableToGet = true;
+      }
       this.instanceTryingToGetAccessFrom = null;
-      this.unableToGet = true;
       this.proxyingId = info.proxyingId;
       this.bringUproxyToFront();
     });
@@ -582,6 +584,9 @@ export class UserInterface implements ui_constants.UiApi {
   public stopGettingInUiAndConfig = (data :social.StopProxyInfo) => {
     if (data.instanceId) {
       this.mapInstanceIdToUser_[data.instanceId].isSharingWithMe = false;
+
+      // Possibly redundant.
+      this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
     } else if (this.instanceGettingAccessFrom_) {
       this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].isSharingWithMe = false;
     }
@@ -593,17 +598,21 @@ export class UserInterface implements ui_constants.UiApi {
         // Auto-retry.
         this.restartProxying();
       }
-    } else {
-      this.core.disconnectedWhileProxying = false;
+    } else if (!this.proxySet_) {
       if (data.instanceId === null ||
           data.instanceId === this.instanceGettingAccessFrom_) {
         this.instanceGettingAccessFrom_ = null;
-        this.browserApi.stopUsingProxy();
+        this.core.disconnectedWhileProxying = false;
       }
     }
 
     this.updateGettingStatusBar_();
     this.updateIcon_();
+  }
+
+  public stopUsingProxy = () => {
+    this.browserApi.stopUsingProxy();
+    this.proxySet_ = false;
   }
 
   private getInstancePath_ = (instanceId :string) => {
@@ -636,6 +645,9 @@ export class UserInterface implements ui_constants.UiApi {
         this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
       }
       this.startGettingInUiAndConfig(instanceId, endpoint);
+    }, (err:Error) => {
+      this.instanceTryingToGetAccessFrom = null;
+      throw err;
     });
   }
 
@@ -675,6 +687,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateGettingStatusBar_();
 
     this.browserApi.startUsingProxy(endpoint);
+    this.proxySet_ = true;
   }
 
   /**

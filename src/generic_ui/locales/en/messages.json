@@ -389,7 +389,7 @@
   },
   "DISCONNECTED_TITLE": {
     "description": "Title for error that appears when the user was getting access to the Internet through their friend, but that connection was terminated.",
-    "message": "Oops! You've been disconnected from your friend.  Reconnecting..."
+    "message": "Oops! You've been disconnected from your friend."
   },
   "DISCONNECTED_MESSAGE": {
     "description": "Instruction informing the user that if they want to browse the Internet and stop waiting for reconnection, the user will need to use their local (potentially unsafe and/or censored) connection.",
@@ -674,6 +674,18 @@
   "APP_MISSING_MESSAGE": {
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
+  },
+  "RECONNECTING": {
+    "description": "Indicate that uProxy is attempting to reconnect automatically after a failure.  A progress indicator is also visible.",
+    "message": "Reconnecting..."
+  },
+  "RECONNECT_FAILED": {
+    "description": "Indicate that uProxy attempted to reconnect automatically but it failed.",
+    "message": "Reconnect failed"
+  },
+  "RESTART_PROXYING": {
+    "description": "Displayed on a button next to the RECONNECT_FAILED message",
+    "message": "Try again"
   },
   "UPDATE_AVAILABLE": {
     "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",

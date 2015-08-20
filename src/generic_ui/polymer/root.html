@@ -378,7 +378,16 @@
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
         <h1>{{ "DISCONNECTED_TITLE" | $$ }}</h1>
-        <div id='progressWrapper'><paper-progress indeterminate='true'></paper-progress></div>
+        <div id='progressWrapper'>
+          <div hidden?='{{ !ui.instanceTryingToGetAccessFrom }}'>
+            <h2>{{ 'RECONNECTING' | $$ }}</h2>
+            <paper-progress indeterminate='true'></paper-progress>
+          </div>
+          <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}' >
+            <strong>{{ 'RECONNECT_FAILED' | $$ }}</strong>
+            <paper-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</paper-button>
+          </div>
+        </div>
         <p>
           {{ "DISCONNECTED_MESSAGE" | $$ }}
         </p>
