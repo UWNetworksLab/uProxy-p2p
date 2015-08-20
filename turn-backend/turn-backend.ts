@@ -1,4 +1,3 @@
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
@@ -20,9 +19,9 @@ class Allocation {
 }
 
 /**
- * Freedom module which handles relay sockets for the TURN server.
+ * Handles relay sockets for the TURN server frontend.
  */
-class Backend {
+export class Backend {
   /**
    * All clients currently known to the server, indexed by tag.
    * Note that this map is essentially the (extremely inaccurately) named
@@ -31,8 +30,10 @@ class Backend {
    */
   private allocations_:{[s:string]:Promise<Allocation>} = {};
 
-  // TODO: define a type for event dispatcher in freedom-typescript-api
-  constructor (private dispatchEvent_ ?:(name:string, args:any) => void) {
+  /** Invoked when a message must be sent to the frontend. */
+  private ipcHandler_ : ((data:ArrayBuffer) => void);
+
+  constructor () {
     log.debug('TURN backend module created');
   }
 
@@ -141,7 +142,7 @@ class Backend {
   }
 
   /**
-   * Emits a Freedom message which should be relayed to the remote side.
+   * Emits a message which should be relayed to the remote side.
    * The message is a STUN message, as received from a TURN client but with
    * the addition of an IPC_TAG attribute identifying the TURN client.
    */
@@ -154,9 +155,11 @@ class Backend {
       value: messages.formatXorMappedAddressAttribute(
           clientEndpoint.address, clientEndpoint.port)
     });
-    this.dispatchEvent_('ipc', {
-      data: messages.formatStunMessage(stunMessage).buffer
-    });
+    if (this.ipcHandler_) {
+      this.ipcHandler_(messages.formatStunMessage(stunMessage).buffer);
+    } else {
+      log.warn('no handler set for outgoing messages!');
+    }
   }
 
   /** Promises to allocate a socket, wrapped in an Allocation. */
@@ -199,6 +202,11 @@ class Backend {
     return promise;
   }
 
+  /** Sets the function to call to send a message to the backend. */
+  public setIpcHandler = (ipcHandler:(data:ArrayBuffer) => void) : void => {
+    this.ipcHandler_ = ipcHandler;
+  }
+
   /**
    * Copies a Uint8Array into a new ArrayBuffer. Useful when the array
    * has been constructed from a subarray of the buffer, in which case
@@ -222,5 +230,3 @@ class Backend {
     return bytes;
   }
 }
-
-export = Backend;

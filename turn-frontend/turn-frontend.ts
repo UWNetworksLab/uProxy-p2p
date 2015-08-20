@@ -1,4 +1,3 @@
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
@@ -12,7 +11,7 @@ var log :logging.Log = new logging.Log('TURN frontend');
 
 /**
  * A TURN server which delegates the creation and operation of relay sockets
- * to a separate "net" Freedom module. The separation is intended to
+ * to a separate - possibly remote - backend. The separation is intended to
  * facilitate transformation of intra-process traffic, viz. obfuscation. The
  * intended use of this server is as a proxy for WebRTC traffic to provide,
  * when paired with a NAT-punching and obfuscated network transport, for
@@ -36,7 +35,7 @@ var log :logging.Log = new logging.Log('TURN frontend');
  *    attribute, it does not verify the client's signature
  *  - only the long-term credential mechanism is supported
  */
-class Frontend {
+export class Frontend {
   /** Socket on which the server is listening. */
   private socket_ :freedom_UdpSocket.Socket;
 
@@ -53,8 +52,10 @@ class Frontend {
    */
   private promises_:{[s:string]:Promise<messages.StunMessage>} = {};
 
-  // TODO: define a type for event dispatcher in freedom-typescript-api
-  constructor (private dispatchEvent_ ?:(name:string, args:any) => void) {
+  /** Invoked when a message must be sent to the frontend. */
+  private ipcHandler_ : ((data:ArrayBuffer) => void);
+
+  constructor () {
     this.socket_ = freedom['core.udpsocket']();
   }
 
@@ -267,13 +268,15 @@ class Frontend {
       value: messages.formatXorMappedAddressAttribute(
           clientEndpoint.address, clientEndpoint.port)
     });
-    this.dispatchEvent_('ipc', {
-      data: messages.formatStunMessage(stunMessage).buffer
-    });
+    if (this.ipcHandler_) {
+      this.ipcHandler_(messages.formatStunMessage(stunMessage).buffer);
+    } else {
+      log.warn('no handler set for outgoing messages!');
+    }
   }
 
   /**
-   * Handles a Freedom message from the remote side.
+   * Handles a message from the backend.
    */
   public handleIpc = (data :ArrayBuffer) : Promise<void> => {
     var stunMessage :messages.StunMessage;
@@ -323,6 +326,9 @@ class Frontend {
     }
     return Promise.resolve<void>();
   }
-}
 
-export = Frontend;
+  /** Sets the function to call to send a message to the frontend. */
+  public setIpcHandler = (ipcHandler:(data:ArrayBuffer) => void) : void => {
+    this.ipcHandler_ = ipcHandler;
+  }
+}

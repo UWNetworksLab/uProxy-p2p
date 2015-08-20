@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
-import TurnFrontend = require('./turn-frontend');
+import turn_frontend = require('../turn-frontend/turn-frontend');
 import messages = require('./messages');
 import net = require('../net/net.types');
 
@@ -15,11 +15,11 @@ describe("turn frontend", function() {
           0x31, 0x54, 0x46, 0x32, 0x36, 0x57]);
   }
 
-  var frontend:TurnFrontend;
+  var frontend:turn_frontend.Frontend;
   var endpoint:net.Endpoint;
 
   beforeEach(function() {
-    frontend = new TurnFrontend();
+    frontend = new turn_frontend.Frontend();
     endpoint = {
       address: '127.0.0.1',
       port: 10000
