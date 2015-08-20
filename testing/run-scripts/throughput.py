@@ -17,7 +17,7 @@ parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
 args = parser.parse_args()
 
 # Where is flood server?
-flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB),
+flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M',
     FLOOD_MAX_SPEED], universal_newlines=True).strip()
 print('** using flood server at ' + str(flood_ip))
 
@@ -32,10 +32,8 @@ for browser in browsers:
 
     result = 0
     try:
-      # Start the relevant config, stopping the previous one if necessary.
-      # TODO: check first if running, to avoid spurious warnings
-      subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
       spec = browser + '-' + version
+      # Start the relevant config.
       subprocess.call(['./run_pair.sh', '-p', args.clone_path, spec, spec],
           timeout=15)
 
