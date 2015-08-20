@@ -584,14 +584,14 @@ export function getNetworkDisplayName(networkName :string) : string {
     public addUserRequest = (inviteUrl :string): void => {
       // Token is the part of the invite URL after the last '/'.
       var token :string = inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1);
-      this.freedomApi_.addContact(token).catch((e) => {
-        log.error('Error calling addContact: ' + token, e.message);
+      this.freedomApi_.acceptUserInvitation(token).catch((e) => {
+        log.error('Error calling acceptUserInvitation: ' + token, e.message);
       });
     }
 
     public getInviteUrl = () : Promise<string> => {
-      return this.freedomApi_.getInviteToken().then((token :string) => {
-        return 'https://www.uproxy.org/invite/' + this.name + '/' + token;
+      return this.freedomApi_.inviteUser('').then((data :{ token :string }) => {
+        return 'https://www.uproxy.org/invite/' + this.name + '/' + data.token;
       })
     }
 
