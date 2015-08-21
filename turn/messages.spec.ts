@@ -3,7 +3,7 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import net = require('../net/net.types');
-import messages = require('../turn-frontend/messages');
+import messages = require('./messages');
 
 describe("stun messages", function() {
 

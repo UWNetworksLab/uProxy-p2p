@@ -3,8 +3,8 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import turn_frontend = require('../turn-frontend/turn-frontend');
-import turn_backend = require('../turn-backend/turn-backend');
+import turn_frontend = require('../turn/frontend');
+import turn_backend = require('../turn/backend');
 
 import net = require('../net/net.types');
 import logging = require('../logging/logging');

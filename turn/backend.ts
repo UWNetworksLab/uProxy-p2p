@@ -3,7 +3,7 @@
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 
-import messages = require('../turn-frontend/messages');
+import messages = require('./messages');
 import net = require('../net/net.types');
 
 import logging = require('../logging/logging');
