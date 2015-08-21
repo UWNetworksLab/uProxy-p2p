@@ -172,23 +172,23 @@ describe('core-connector', () => {
 
   it('show disconnect.html if user was proxying when app disconnects.', (done) => {
     var uiIsGettingAccessSpy = spyOn(ui, 'isGettingAccess');
-    var uiStopGettingInUiAndConfigSpy = spyOn(ui, 'stopGettingInUiAndConfig');
+    var uiStoppedGettingSpy = spyOn(ui, 'stoppedGetting');
     connectToApp().then(() => {
       spyOn(chromeCoreConnector, 'connect').and.callFake(() => { done(); });
       uiIsGettingAccessSpy.and.callFake(() => { return true; });
       disconnect();
-      expect(uiStopGettingInUiAndConfigSpy).toHaveBeenCalled();
+      expect(uiStoppedGettingSpy).toHaveBeenCalled();
     });
   });
 
   it('do not show disconnect.html if user was not proxying when app disconnects.', (done) => {
     var uiIsGettingAccessSpy = spyOn(ui, 'isGettingAccess');
-    var uiStopGettingInUiAndConfigSpy = spyOn(ui, 'stopGettingInUiAndConfig');
+    var uiStoppedGettingSpy = spyOn(ui, 'stoppedGetting');
     connectToApp().then(() => {
       spyOn(chromeCoreConnector, 'connect').and.callFake(() => { done(); });
       uiIsGettingAccessSpy.and.callFake(() => { return false; });
       disconnect();
-      expect(uiStopGettingInUiAndConfigSpy).not.toHaveBeenCalled();
+      expect(uiStoppedGettingSpy).not.toHaveBeenCalled();
     });
   });
 

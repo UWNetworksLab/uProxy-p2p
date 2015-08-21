@@ -246,7 +246,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.BROWSER_ERROR;
 
       if (this.isGettingAccess()) {
-        this.stopGettingInUiAndConfig({instanceId: null, error: true});
+        this.stoppedGetting({instanceId: null, error: true});
       }
     });
 
@@ -283,7 +283,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // indicates the current getting connection has ended
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
-      this.stopGettingInUiAndConfig({instanceId: null, error: error});
+      this.stoppedGetting({instanceId: null, error: error});
     });
 
     // indicates we just started offering access through copy+paste
@@ -308,7 +308,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
         (data :social.StopProxyInfo) => { // TODO better type
-        this.stopGettingInUiAndConfig(data);
+        this.stoppedGetting(data);
     });
 
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
@@ -370,6 +370,9 @@ export class UserInterface implements ui_constants.UiApi {
       console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
 
       if (!this.proxySet_) {
+        // This is an immediate failure, i.e. failure of a connection attempt
+        // that never connected.  It is not a retry.
+        // Show the error toast indicating that a get attempt failed.
         this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
           name: info.name
         });
@@ -575,18 +578,15 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   /**
-   * Removes proxy indicators from UI and undoes proxy configuration
-   * (e.g. chrome.proxy settings).
+   * Takes all actions required when getting stops, including removing proxy
+   * indicators from the UI, and retrying the connection if appropriate.
    * If user didn't end proxying, so if proxy session ended because of some
    * unexpected reason, user should be asked before reverting proxy settings.
    * if data.instanceId is null, it means to stop active proxying.
    */
-  public stopGettingInUiAndConfig = (data :social.StopProxyInfo) => {
+  public stoppedGetting = (data :social.StopProxyInfo) => {
     if (data.instanceId) {
       this.mapInstanceIdToUser_[data.instanceId].isSharingWithMe = false;
-
-      // Possibly redundant.
-      this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
     } else if (this.instanceGettingAccessFrom_) {
       this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].isSharingWithMe = false;
     }
@@ -602,7 +602,6 @@ export class UserInterface implements ui_constants.UiApi {
       if (data.instanceId === null ||
           data.instanceId === this.instanceGettingAccessFrom_) {
         this.instanceGettingAccessFrom_ = null;
-        this.core.disconnectedWhileProxying = false;
       }
     }
 
@@ -610,9 +609,21 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateIcon_();
   }
 
+  /**
+   * Undoes proxy configuration (e.g. chrome.proxy settings).
+   */
   public stopUsingProxy = () => {
     this.browserApi.stopUsingProxy();
     this.proxySet_ = false;
+    this.core.disconnectedWhileProxying = false;
+    this.updateIcon_();
+
+    // revertProxySettings might call stopUsingProxy while a reconnection is
+    // still being attempted.  In that case, we also want to terminate the
+    // in-progress connection.
+    if (this.instanceTryingToGetAccessFrom) {
+      this.stopGettingFromInstance(this.instanceTryingToGetAccessFrom);
+    }
   }
 
   private getInstancePath_ = (instanceId :string) => {
@@ -767,7 +778,7 @@ export class UserInterface implements ui_constants.UiApi {
           this.reconnect(networkMsg.name);
         } else {
           if (this.instanceGettingAccessFrom_) {
-            this.stopGettingInUiAndConfig({instanceId: null, error: true});
+            this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
           }
           this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
 

@@ -380,7 +380,7 @@
         <h1>{{ "DISCONNECTED_TITLE" | $$ }}</h1>
         <div id='progressWrapper'>
           <div hidden?='{{ !ui.instanceTryingToGetAccessFrom }}'>
-            <h2>{{ 'RECONNECTING' | $$ }}</h2>
+            <strong>{{ 'RECONNECTING' | $$ }}</strong>
             <paper-progress indeterminate='true'></paper-progress>
           </div>
           <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}' >
