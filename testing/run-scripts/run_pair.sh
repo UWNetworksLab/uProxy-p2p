@@ -64,7 +64,7 @@ fi
 
 # Kill any running giver and getter containers.
 for role in getter giver; do
-  if docker ps | grep uproxy-$role >/dev/null; then
+  if docker ps -a | grep uproxy-$role >/dev/null; then
     echo "Stopping running uproxy-$role..."
     docker rm -f uproxy-$role > /dev/null
   fi
