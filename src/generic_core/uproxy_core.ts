@@ -91,6 +91,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           // be logged in with just some accounts or still on the login screen
           return;
         }));
+
+        // at this point, clear all networks; those that successfully get logged
+        // in will be re-added
+        this.connectedNetworks_.set([]);
       }
 
       // this return is meaningless, but it may be useful in the future
