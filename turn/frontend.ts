@@ -2,11 +2,10 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
-
+import logging = require('../logging/logging');
 import messages = require('./messages');
 import net = require('../net/net.types');
 
-import logging = require('../logging/logging');
 var log :logging.Log = new logging.Log('TURN frontend');
 
 /**

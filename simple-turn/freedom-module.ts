@@ -3,12 +3,11 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import turn_frontend = require('../turn/frontend');
-import turn_backend = require('../turn/backend');
-
-import net = require('../net/net.types');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
+import net = require('../net/net.types');
+import turn_frontend = require('../turn/frontend');
+import turn_backend = require('../turn/backend');
 
 var loggingController = freedom['loggingcontroller']();
 loggingController = loggingController.setDefaultFilter(
