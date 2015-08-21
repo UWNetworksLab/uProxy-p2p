@@ -64,17 +64,16 @@ export class Frontend {
    * choose a free port.
    */
   public bind(address:string, port:number) : Promise<net.Endpoint> {
-    return this.socket_.bind(address, port)
-        .then(this.socket_.getInfo)
-        .then((socketInfo:freedom_UdpSocket.SocketInfo) => {
-          log.info('listening on ' + socketInfo.localAddress + ':' +
-              socketInfo.localPort);
-          this.socket_.on('onData', this.onData_);
-          return {
-            address: socketInfo.localAddress,
-            port: socketInfo.localPort
-          };
-        });
+    return this.socket_.bind(address, port).then(this.socket_.getInfo).then(
+        (socketInfo:freedom_UdpSocket.SocketInfo) => {
+      log.info('listening on ' + socketInfo.localAddress + ':' +
+          socketInfo.localPort);
+      this.socket_.on('onData', this.onData_);
+      return {
+        address: socketInfo.localAddress,
+        port: socketInfo.localPort
+      };
+    });
   }
 
   /**
@@ -91,18 +90,18 @@ export class Frontend {
         address: recvFromInfo.address,
         port: recvFromInfo.port
       };
-      this.handleStunMessage(stunMessage, clientEndpoint)
-          .then((response ?:messages.StunMessage) => {
-            if (response) {
-              var responseBytes = messages.formatStunMessageWithIntegrity(response);
-              this.socket_.sendTo(
-                  responseBytes.buffer,
-                  recvFromInfo.address,
-                  recvFromInfo.port);
-            }
-          }, (e) => {
-            log.error('error handling STUN message: ' + e.message);
-          });
+      this.handleStunMessage(stunMessage, clientEndpoint).then(
+          (response ?:messages.StunMessage) => {
+        if (response) {
+          var responseBytes = messages.formatStunMessageWithIntegrity(response);
+          this.socket_.sendTo(
+              responseBytes.buffer,
+              recvFromInfo.address,
+              recvFromInfo.port);
+        }
+      }, (e) => {
+        log.error('error handling STUN message: ' + e.message);
+      });
     } catch (e) {
       log.warn('failed to parse STUN message from ' +
           recvFromInfo.address  + ':' + recvFromInfo.port);
@@ -157,9 +156,9 @@ export class Frontend {
       clazz: messages.MessageClass.SUCCESS_RESPONSE,
       transactionId: request.transactionId,
       attributes: [{
-          type: messages.MessageAttribute.LIFETIME,
-          value: new Uint8Array([0x00, 0x00, 600 >> 8, 600 & 0xff]) // 600 = ten mins
-        }]
+        type: messages.MessageAttribute.LIFETIME,
+        value: new Uint8Array([0x00, 0x00, 600 >> 8, 600 & 0xff]) // 600 = ten mins
+      }]
     });
   }
 
@@ -316,9 +315,9 @@ export class Frontend {
       // Forward it to the relevant client.
       // TODO: consider removing the IPC_TAG attribute
       this.socket_.sendTo(
-        data,
-        clientEndpoint.address,
-        clientEndpoint.port);
+          data,
+          clientEndpoint.address,
+          clientEndpoint.port);
     } else {
       return Promise.reject(new Error(
           'unsupported IPC method: ' + stunMessage.method));
