@@ -14,7 +14,7 @@ exports.setup = function(panel, button) {
         return;
       }
 
-      panel.port.emit('urlData', url);
+      panel.port.emit('copyPasteUrlData', url);
       panel.show({
         position: button
       });

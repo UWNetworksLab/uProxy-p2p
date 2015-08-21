@@ -109,6 +109,7 @@ Polymer({
     this.$.proxyError.open();
   },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
+    // TODO: can I invoke a callback here rather than a signal?
     var signal = target.getAttribute('data-signal');
     if (signal) {
       this.fire('core-signal', { name: signal });
@@ -162,8 +163,7 @@ Polymer({
   },
   signalToFireChanged: function() {
     if (ui.signalToFire) {
-      this.fire('core-signal', {name: ui.signalToFire});
-      ui.signalToFire = '';
+      this.fire('core-signal', { name: ui.signalToFire.name, data: ui.signalToFire.data });
     }
   },
   revertProxySettings: function() {

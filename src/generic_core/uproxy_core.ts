@@ -258,10 +258,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public addUser = (inviteUrl :string) : void => {
     // TODO: error checking
-    var networkName = inviteUrl.match(/invite\/(\S+)\//)[1];
+    var token = inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1);
+    var jsonString = atob(token);
+    var tokenObj = JSON.parse(jsonString);
+    var networkName = tokenObj.networkName;
     // This code assumes the user is only signed in once to any given network.
     for (var userId in social_network.networks[networkName]) {
-      social_network.networks[networkName][userId].addUserRequest(inviteUrl);
+      social_network.networks[networkName][userId].addUserRequest(
+          tokenObj.networkData);
       break;
     }
   }

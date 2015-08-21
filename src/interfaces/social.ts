@@ -276,7 +276,7 @@ export interface Network {
   /**
    * Ask the social network to add the user.
    */
-  addUserRequest: (inviteUrl :string) => void;
+  addUserRequest: (networkData :string) => void;
 
   /**
    * Generates an invite token

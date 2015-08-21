@@ -160,7 +160,7 @@ Polymer({
     this.showGettingSubmit = true;
   },
   submitGettingLink: function() {
-    ui.handleUrlData(this.gettingResponse);
+    ui.handleCopyPasteUrlData(this.gettingResponse);
   },
   ready: function() {
     this.ui = ui;

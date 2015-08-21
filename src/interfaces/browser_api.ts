@@ -38,8 +38,9 @@ export interface BrowserAPI {
   frontedPost(data :any, externalDomain :string, cloudfrontDomain :string,
            cloudfrontPath ?:string) : Promise<void>;
 
-  on(name :string, callback :Function) :void;
-  on(name :'urlData', callback :(url :string) => void) :void;
+  on(name: string, callback: Function): void;
+  on(name: 'inviteUrlData', callback: (url: string) => void): void;
+  on(name: 'copyPasteUrlData', callback: (url: string) => void): void;
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
   on(name :'proxyDisconnected', callback :Function) :void;
 

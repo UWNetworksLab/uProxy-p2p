@@ -183,7 +183,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   // Changing this causes root.ts to fire a core-signal
   // with the new value.
-  public signalToFire :string = '';
+  public signalToFire :Object = null;
 
   public toastMessage :string = null;
   public unableToGet :boolean = false;
@@ -390,7 +390,8 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.setPortControlSupport_);
 
-    browserApi.on('urlData', this.handleUrlData);
+    browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
+    browserApi.on('inviteUrlData', this.handleInviteUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
@@ -402,8 +403,23 @@ export class UserInterface implements ui_constants.UiApi {
   // Because of an observer (in root.ts) watching the value of
   // signalToFire, this function simulates firing a core-signal
   // from the background page.
-  public fireSignal = (signal :string) => {
-    this.signalToFire = signal;
+  public fireSignal = (signalName :string, data ?:Object) => {
+    this.signalToFire = {name: signalName, data: data};
+  }
+
+  public getConfirmation = (text :string) => {
+    // TODO: translate everything
+    this.fireSignal('open-dialog', {
+      heading: 'some heading',
+      message: text,
+      buttons: [{
+        text: this.i18n_t("YES"),
+        signal: 'copypaste-back'
+      }, {
+          text: this.i18n_t("NO"),
+          dismissive: true
+        }]
+    }); 
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -513,7 +529,12 @@ export class UserInterface implements ui_constants.UiApi {
     return {type: type, messages: payload};
   }
 
-  public handleUrlData = (url :string) => {
+  public handleInviteUrlData = (url :string) => {
+    // TODO: add try catch and such in case of bad urls
+    this.core.addUser(url);
+  }
+
+  public handleCopyPasteUrlData = (url :string) => {
     console.log('received url data from browser');
 
     if (this.model.onlineNetworks.length > 0) {

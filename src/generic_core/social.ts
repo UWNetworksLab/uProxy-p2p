@@ -269,7 +269,7 @@ export function getNetworkDisplayName(networkName :string) : string {
       throw new Error('Operation not implemented');
     }
 
-    public addUserRequest = (inviteUrl :string): void => {
+    public addUserRequest = (networkData :string): void => {
       throw new Error('Operation not implemented');
     }
 
@@ -581,17 +581,16 @@ export function getNetworkDisplayName(networkName :string) : string {
       });
     }
 
-    public addUserRequest = (inviteUrl :string): void => {
-      // Token is the part of the invite URL after the last '/'.
-      var token :string = inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1);
-      this.freedomApi_.acceptUserInvitation(token).catch((e) => {
-        log.error('Error calling acceptUserInvitation: ' + token, e.message);
+    public addUserRequest = (networkData :string): void => {
+      this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
       });
     }
 
     public getInviteUrl = () : Promise<string> => {
-      return this.freedomApi_.inviteUser('').then((data :{ token :string }) => {
-        return 'https://www.uproxy.org/invite/' + this.name + '/' + data.token;
+      return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
+        var tokenObj = { networkName: this.name, networkData: data.networkData };
+        return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
       })
     }
 

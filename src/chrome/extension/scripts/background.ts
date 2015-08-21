@@ -133,8 +133,8 @@ var lastUrlTime = 0;
 
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
-      // TODO: add try catch and such in case of bad urls
-      core.addUser(details.url);
+      browserApi.emit('inviteUrlData', details.url);
+      // TODO: does this need the same timing logic as copy/paste?
       // TODO: show something meaningful in the tab
       return {
           redirectUrl: chrome.extension.getURL('generic_ui/invite-received.html')
@@ -163,7 +163,7 @@ chrome.webRequest.onBeforeRequest.addListener(
     // to allow a url to be pasted twice if there has been at least a second
     // delay in order to allow users to try connecting again.
     if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-      browserApi.emit('urlData', url);
+      browserApi.emit('copyPasteUrlData', url);
     } else {
       console.warn('Received duplicate url events', url);
     }
