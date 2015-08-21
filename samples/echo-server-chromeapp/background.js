@@ -15,7 +15,7 @@ script.onload = function() {
     'debug': 'debug'
   }).then(function(moduleFactory) {
     moduleFactory();
-  }, (e) => {
+  }, function(e) {
     console.error('could not load freedomjs module: ' + e.message);
   });
 }
