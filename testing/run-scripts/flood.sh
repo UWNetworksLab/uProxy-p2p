@@ -14,7 +14,7 @@ fi
 
 # Build an image if none already exists.
 if ! docker images | grep uproxy/flood >/dev/null; then
-  docker build -t uproxy/flood ${BASH_SOURCE%/*}/../../flood
+  docker build -t uproxy/flood ${BASH_SOURCE%/*}/../../flood > /dev/null
 fi
 
 # Kill the current container, if any.
