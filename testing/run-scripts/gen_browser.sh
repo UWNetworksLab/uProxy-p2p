@@ -34,7 +34,7 @@ RUN echo BROWSER=chrome >/etc/test.conf
 ADD $DRIVERURL /tmp/driver.zip
 RUN unzip -qq /tmp/driver.zip -d /usr/bin
 RUN wget $URL -O /tmp/chrome.deb
-RUN dpkg -i /tmp/chrome.deb
+RUN dpkg -i /tmp/chrome.deb || apt-get -f install -y
 EOF
 }
 
