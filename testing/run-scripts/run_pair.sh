@@ -15,15 +15,17 @@ BRANCH="-b dev"
 REPO=
 VNC=false
 KEEP=false
+MTU=
 
 function usage () {
-    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] browserspec browserspec"
+    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] [-m mtu] browserspec browserspec"
     echo "  -b BRANCH: have containers check out this BRANCH.  Default is dev."
     echo "  -r REPO: have containers clone this REPO.  "
     echo "           Default is https://github.com/uProxy/uproxy-lib.git."
     echo "  -p: path to pre-built uproxy-lib repository (overrides -b and -r)."
     echo "  -v: enable VNC on containers.  They will be ports 5900 and 5901."
     echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
+    echo "  -m MTU: set the MTU on the getter's network interface."
     echo "  -h, -?: this help message."
     echo
     echo "browserspec is a pair of browser-version."
@@ -32,13 +34,14 @@ function usage () {
     exit 1
 }
 
-while getopts kvb:r:p:h? opt; do
+while getopts kvb:r:p:m:h? opt; do
     case $opt in
         k) KEEP=true ;;
         v) VNC=true ;;
         b) BRANCH="-b $OPTARG" ;;
         r) REPO="-r $OPTARG" ;;
         p) PREBUILT="$OPTARG" ;;
+        m) MTU="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -125,6 +128,11 @@ fi
 echo -n "Waiting for getter to come up"
 while ! ((echo ping ; sleep 0.5) | nc -w 1 $CONTAINER_IP 9000 | grep ping) > /dev/null; do echo -n .; done
 echo
+
+if [ -n "$MTU" ]
+then
+    ./set-mtu.sh uproxy-getter $MTU
+fi
 
 echo -n "Waiting for giver to come up"
 while ! ((echo ping ; sleep 0.5) | nc -w 1 $CONTAINER_IP 9010 | grep ping) > /dev/null; do echo -n .; done
