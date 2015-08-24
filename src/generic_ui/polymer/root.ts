@@ -109,7 +109,11 @@ Polymer({
     this.$.proxyError.open();
   },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
-    // TODO: can I invoke a callback here rather than a signal?
+    // TODO: error checking, isNaN etc
+    var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
+    if (callbackIndex) {
+      ui.invokeConfirmationCallback(callbackIndex);
+    }
     var signal = target.getAttribute('data-signal');
     if (signal) {
       this.fire('core-signal', { name: signal });

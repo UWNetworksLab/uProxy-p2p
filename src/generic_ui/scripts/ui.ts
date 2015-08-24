@@ -407,19 +407,29 @@ export class UserInterface implements ui_constants.UiApi {
     this.signalToFire = {name: signalName, data: data};
   }
 
+  private confirmationCallbacks_ :Function[] = [];
   public getConfirmation = (text :string) => {
-    // TODO: translate everything
-    this.fireSignal('open-dialog', {
-      heading: 'some heading',
-      message: text,
-      buttons: [{
-        text: this.i18n_t("YES"),
-        signal: 'copypaste-back'
-      }, {
+    return new Promise((F, R) => {
+      this.confirmationCallbacks_.push(F);
+      this.confirmationCallbacks_.push(R);
+      this.fireSignal('open-dialog', {
+        heading: 'some heading',
+        message: text,
+        buttons: [{
+          text: this.i18n_t("YES"),
+          callbackIndex: this.confirmationCallbacks_.length - 2
+        }, {
           text: this.i18n_t("NO"),
+          callbackIndex: this.confirmationCallbacks_.length - 1,
           dismissive: true
         }]
-    }); 
+      });
+    });
+  }
+
+  public invokeConfirmationCallback = (index :number) => {
+    // TODO: this array grows infinitely, should cleanup
+    this.confirmationCallbacks_[index]();
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -531,7 +541,23 @@ export class UserInterface implements ui_constants.UiApi {
 
   public handleInviteUrlData = (url :string) => {
     // TODO: add try catch and such in case of bad urls
-    this.core.addUser(url);
+    var token = url.substr(url.lastIndexOf('/') + 1);
+    var tokenObj = JSON.parse(atob(token));
+    var networkName = tokenObj.networkName;
+    if (!this.model.getNetwork(networkName)) {
+      this.getConfirmation('You need to log into ' + this.getNetworkDisplayName(networkName)).then(() => {
+        this.login(networkName).then(() => {
+          // Fire an update-view event, which root.ts listens for.
+          // TODO: can this be done in ui.ts?
+          // this.fire('update-view', { view: ui_constants.View.ROSTER });
+          this.view = ui_constants.View.ROSTER;
+          this.bringUproxyToFront();
+          this.core.addUser(url);
+        });
+      });
+    } else {
+      this.core.addUser(url);
+    }
   }
 
   public handleCopyPasteUrlData = (url :string) => {

@@ -360,7 +360,7 @@
       <template repeat='{{ button in dialog.buttons }}'>
         <paper-button
           affirmative?='{{ !button.dismissive }}' dismissive?='{{ button.dismissive }}'
-          class='dialogButton' on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'>
+          class='dialogButton' on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}' data-callbackIndex='{{ button.callbackIndex }}'>
           {{button.text}}
         </paper-button>
       </template>
