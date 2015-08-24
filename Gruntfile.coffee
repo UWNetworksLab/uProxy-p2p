@@ -490,6 +490,10 @@ module.exports = (grunt) ->
               'freedom-social-firebase/facebook-social-provider.js'
               'freedom-port-control/port-control.js'
               'freedom-port-control/port-control.json'
+              'freedom-pgp-e2e/end-to-end.compiled.js'
+              'freedom-pgp-e2e/googstorage.js'
+              'freedom-pgp-e2e/e2e.js'
+              'freedom-pgp-e2e/pgpapi.json'
 
               '**/freedom-module.json'
               '!generic_core/freedom-module.json'
@@ -532,6 +536,10 @@ module.exports = (grunt) ->
               'data/freedom-social-firebase/facebook-social-provider.js'
               'data/freedom-port-control/port-control.js'
               'data/freedom-port-control/port-control.json'
+              'data/freedom-pgp-e2e/end-to-end.compiled.js'
+              'data/freedom-pgp-e2e/googstorage.js'
+              'data/freedom-pgp-e2e/e2e.js'
+              'data/freedom-pgp-e2e/pgpapi.json'
 
               'data/**/freedom-module.json'
               '!generic_core/freedom-module.json'
