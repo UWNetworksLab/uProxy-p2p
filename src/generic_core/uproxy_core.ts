@@ -1,9 +1,9 @@
 /// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
 
-import diagnose_nat = require('./diagnose-nat');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
@@ -35,7 +35,7 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
 
-var portControl = freedom['portControl']();
+var portControl = globals.portControl;
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
@@ -75,7 +75,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         type: message.type,
         data: data
       });
-    });
+    }, undefined, portControl);
+    this.refreshPortControlSupport();
   }
 
   // sendInstanceHandshakeMessage = (clientId :string) => {
@@ -344,7 +345,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         [ countdown(30000).then(() => {
             return 'NAT classification timed out.';
           }),
-          diagnose_nat.doNatProvoking().then((natType:string) => {
+          nat_probe.probe().then((natType:string) => {
             globals.natType = natType;
             // Store NAT type for five minutes. This way, if the user previews
             // their logs, and then submits them shortly after, we do not need

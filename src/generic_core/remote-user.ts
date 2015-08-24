@@ -208,7 +208,7 @@ var log :logging.Log = new logging.Log('remote-user');
             log.error('failed to get instance', clientId);
             return;
           }
-          instance.handleSignal(msg.type, msg.data, msg.version);
+          instance.handleSignal(msg);
           return;
 
         case social.PeerMessageType.INSTANCE_REQUEST:
@@ -530,7 +530,8 @@ var log :logging.Log = new logging.Log('remote-user');
               isOffering: this.consent.localGrantsAccessToRemote
             },
             name: myInstance.userName,
-            userId: myInstance.userId
+            userId: myInstance.userId,
+            publicKey: globals.publicKey
           }
         };
         return this.network.send(this, clientId, instanceMessage);

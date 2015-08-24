@@ -490,6 +490,10 @@ module.exports = (grunt) ->
               'freedom-social-firebase/facebook-social-provider.js'
               'freedom-port-control/port-control.js'
               'freedom-port-control/port-control.json'
+              'freedom-pgp-e2e/end-to-end.compiled.js'
+              'freedom-pgp-e2e/googstorage.js'
+              'freedom-pgp-e2e/e2e.js'
+              'freedom-pgp-e2e/pgpapi.json'
 
               '**/freedom-module.json'
               '!generic_core/freedom-module.json'
@@ -532,6 +536,10 @@ module.exports = (grunt) ->
               'data/freedom-social-firebase/facebook-social-provider.js'
               'data/freedom-port-control/port-control.js'
               'data/freedom-port-control/port-control.json'
+              'data/freedom-pgp-e2e/end-to-end.compiled.js'
+              'data/freedom-pgp-e2e/googstorage.js'
+              'data/freedom-pgp-e2e/e2e.js'
+              'data/freedom-pgp-e2e/pgpapi.json'
 
               'data/**/freedom-module.json'
               '!generic_core/freedom-module.json'
@@ -691,6 +699,11 @@ module.exports = (grunt) ->
               dest: chromeAppDevPath + '/freedom-social-firebase'
             },
             {
+              expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
+              src: ['**']
+              dest: chromeAppDevPath + '/freedom-pgp-e2e'
+            },
+            {
               expand: true, cwd: 'node_modules/freedom-port-control/dist/',
               src: ['**']
               dest: chromeAppDevPath + '/freedom-port-control'
@@ -751,6 +764,11 @@ module.exports = (grunt) ->
               expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
               src: ['**']
               dest: firefoxDevPath + '/data/freedom-social-firebase'
+            },
+            {
+              expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
+              src: ['**']
+              dest: firefoxDevPath + '/data/freedom-pgp-e2e'
             },
             {
               expand: true, cwd: 'node_modules/freedom-port-control/dist/',

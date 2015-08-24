@@ -22,6 +22,7 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public browserSpecificElement :string;
   public canProxy = true;
+  public hasInstalledThenLoggedIn = true;
 
   // Global unique promise ID.
   private promiseId_ :number = 1;

@@ -49,6 +49,7 @@ var exported = {
   logging_types: logging_types,
   socks_to_rtc: socks_to_rtc,
   rtc_to_net: rtc_to_net,
+  globals: globals
 };
 export = exported;
 
