@@ -144,6 +144,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   //         https://github.com/uProxy/uproxy/issues/585
   export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
+    // Maximum time to spend gathering ICE candidates:
+    //  https://github.com/uProxy/uproxy/issues/1795
+    private static PROBE_TIMEOUT_MS = 3000;
+
     public peerOpenedChannelQueue :handler.QueueHandler<peerconnection.DataChannel, void>;
     public signalForPeerQueue :handler.Queue<ChurnSignallingMessage, void>;
     public peerName :string;
@@ -180,6 +184,12 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     // probe candidates have been added to the pipe.
     private onceHavePipe_ = new Promise((F,R) => {
       this.havePipe_ = F;
+    });
+
+    // Fulfills once the probe connection has finished gathering candidates.
+    private probingComplete_ :() => void;
+    private onceProbingComplete_ = new Promise((F,R) => {
+      this.probingComplete_ = F;
     });
 
     private static internalConnectionId_ = 0;
@@ -254,14 +264,25 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             candidates.push(c);
           }
         } else if (message.type === signals.Type.NO_MORE_CANDIDATES) {
-          this.probeConnection_.close().then(() => {
-            return this.onceHaveCaesarKey_;
-          }).then(this.configurePipe_).then(() => {
-            this.processProbeCandidates_(candidates);
-            this.havePipe_();
-          });
+          this.probingComplete_();
         }
       });
+
+      setTimeout(() => {
+        log.warn('%1: probing timed out, closing probe connection',
+            this.peerName);
+        this.probingComplete_();
+      }, Connection.PROBE_TIMEOUT_MS);
+
+      this.onceProbingComplete_.then(() => {
+        this.probeConnection_.close().then(() => {
+          return this.onceHaveCaesarKey_;
+        }).then(this.configurePipe_).then(() => {
+          this.processProbeCandidates_(candidates);
+          this.havePipe_();
+        });
+      });
+
       this.probeConnection_.negotiateConnection();
     }
 
