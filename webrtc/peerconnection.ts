@@ -64,7 +64,7 @@ var CONTROL_CHANNEL_LABEL = '';
 
 // Interval, in milliseconds, after which the peerconnection will
 // terminate if no heartbeat is received from the peer.
-var HEARTBEAT_TIMEOUT_MS_ = 30000;
+var HEARTBEAT_TIMEOUT_MS_ = 15000;
 
 // Interval, in milliseconds, at which heartbeats are sent to the peer.
 var HEARTBEAT_INTERVAL_MS_ = 5000;
