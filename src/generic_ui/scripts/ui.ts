@@ -191,9 +191,6 @@ export class UserInterface implements ui_constants.UiApi {
   // ID of the most recent failed proxying attempt.
   public proxyingId: string;
 
-  // is a proxy currently set
-  private proxySet_ :boolean = false;
-
   // Must be included in Chrome extension manifest's list of permissions.
   public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
 
@@ -369,7 +366,7 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
 
-      if (!this.proxySet_) {
+      if (!this.core.disconnectedWhileProxying) {
         // This is an immediate failure, i.e. failure of a connection attempt
         // that never connected.  It is not a retry.
         // Show the error toast indicating that a get attempt failed.
@@ -585,23 +582,19 @@ export class UserInterface implements ui_constants.UiApi {
    * if data.instanceId is null, it means to stop active proxying.
    */
   public stoppedGetting = (data :social.StopProxyInfo) => {
-    if (data.instanceId) {
-      this.mapInstanceIdToUser_[data.instanceId].isSharingWithMe = false;
-    } else if (this.instanceGettingAccessFrom_) {
-      this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].isSharingWithMe = false;
+    var instanceId = data.instanceId || this.instanceGettingAccessFrom_;
+
+    if (instanceId === this.instanceGettingAccessFrom_) {
+      this.instanceGettingAccessFrom_ = null;
     }
 
-    if (data.error) {
-      this.bringUproxyToFront();
-      this.core.disconnectedWhileProxying = true;
-      if (this.instanceGettingAccessFrom_) {
+    if (instanceId) {
+      this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
+      if (data.error) {
+        this.bringUproxyToFront();
+        this.core.disconnectedWhileProxying = instanceId;
         // Auto-retry.
         this.restartProxying();
-      }
-    } else if (!this.proxySet_) {
-      if (data.instanceId === null ||
-          data.instanceId === this.instanceGettingAccessFrom_) {
-        this.instanceGettingAccessFrom_ = null;
       }
     }
 
@@ -614,8 +607,7 @@ export class UserInterface implements ui_constants.UiApi {
    */
   public stopUsingProxy = () => {
     this.browserApi.stopUsingProxy();
-    this.proxySet_ = false;
-    this.core.disconnectedWhileProxying = false;
+    this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
 
     // revertProxySettings might call stopUsingProxy while a reconnection is
@@ -640,7 +632,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public restartProxying = () => {
-    this.startGettingFromInstance(this.instanceGettingAccessFrom_);
+    this.startGettingFromInstance(this.core.disconnectedWhileProxying);
   }
 
   public startGettingFromInstance = (instanceId :string) :Promise<void> => {
@@ -691,14 +683,13 @@ export class UserInterface implements ui_constants.UiApi {
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
     }
 
-    this.core.disconnectedWhileProxying = false;
+    this.core.disconnectedWhileProxying = null;
 
     this.startGettingInUi();
 
     this.updateGettingStatusBar_();
 
     this.browserApi.startUsingProxy(endpoint);
-    this.proxySet_ = true;
   }
 
   /**
@@ -841,10 +832,15 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     for (var i = 0; i < payload.offeringInstances.length; i++) {
-      if (payload.offeringInstances[i].localGettingFromRemote ===
-          social.GettingState.GETTING_ACCESS) {
-        this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+      var gettingState = payload.offeringInstances[i].localGettingFromRemote;
+      var instanceId = payload.offeringInstances[i].instanceId;
+      if (gettingState === social.GettingState.GETTING_ACCESS) {
+        this.instanceGettingAccessFrom_ = instanceId;
         user.isSharingWithMe = true;
+        this.updateGettingStatusBar_();
+        break;
+      } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
+        this. instanceTryingToGetAccessFrom = instanceId;
         this.updateGettingStatusBar_();
         break;
       }
