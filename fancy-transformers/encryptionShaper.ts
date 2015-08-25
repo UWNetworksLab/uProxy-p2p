@@ -20,9 +20,7 @@ export interface SerializedEncryptionConfig {key:string}
 export class EncryptionShaper implements Transformer {
   private key_ :ArrayBuffer;
 
-  public constructor() {
-    log.info('Constructed encryption shaper');
-  }
+  public constructor() {}
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
