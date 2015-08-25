@@ -24,9 +24,7 @@ export class EncryptionShaper implements Transformer {
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key:ArrayBuffer) :void => {
-    // Do nothing.
-  }
+  public setKey = (key:ArrayBuffer) :void => {}
 
   public configure = (json:string) :void => {
     log.debug("Configuring encryption shaper");
