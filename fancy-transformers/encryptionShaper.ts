@@ -51,6 +51,10 @@ export class EncryptionShaper implements Transformer {
   }
 
   public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
+    // This transform performs the following steps:
+    // - Generate a new random 16-byte IV for every packet
+    // - Encrypt the packet contents with the random IV and symmetric key
+    // - Concatenate the IV and encrypted packet contents
     var iv :ArrayBuffer=this.makeIV_();
     var encrypted :ArrayBuffer=this.encrypt_(iv, buffer);
     var parts=[iv, encrypted]
@@ -58,6 +62,11 @@ export class EncryptionShaper implements Transformer {
   }
 
   public restore = (buffer:ArrayBuffer) :ArrayBuffer[] => {
+    // This restore performs the following steps:
+    // - Split the first 16 bytes from the rest of the packet
+    //     The two parts are the IV and the encrypted packet contents
+    // - Decrypt the encrypted packet contents with the IV and symmetric key
+    // - Return the decrypted packet contents
     var parts = arraybuffers.split(buffer, 16);
     var iv=parts[0];
     var ciphertext=parts[1];
