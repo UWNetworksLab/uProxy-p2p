@@ -14,6 +14,7 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import version = require('../version/version');
+import StoredValue = require('./stored_value');
 import _ = require('lodash');
 
 import ui = ui_connector.connector;
@@ -49,14 +50,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
 
+  private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
+
   constructor() {
     log.debug('Preparing uProxy Core');
     copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
-      // TODO send this update only when
-      // update !== uproxy_core_api.Update.SIGNALLING_MESSAGE
-      // (after v0.8.13)
-      ui.update(update, message);
       if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
+        ui.update(update, message);
         return;
       }
 
@@ -76,7 +76,32 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         data: data
       });
     }, undefined, portControl);
+
     this.refreshPortControlSupport();
+
+    this.connectedNetworks_.get().then((networks :string[]) => {
+      var logins :Promise<void>[] = [];
+
+      for (var i in networks) {
+        logins.push(this.login({
+          network: networks[i],
+          reconnect: true,
+        }).catch(() => {
+          // any failure to login should just be ignored - the user will either
+          // be logged in with just some accounts or still on the login screen
+          return;
+        }));
+
+        // at this point, clear all networks; those that successfully get logged
+        // in will be re-added
+        this.connectedNetworks_.set([]);
+      }
+
+      // this return is meaningless, but it may be useful in the future
+      return Promise.all(logins);
+    }).then(() => {
+      log.info('Finished handling reconnections');
+    });
   }
 
   // sendInstanceHandshakeMessage = (clientId :string) => {
@@ -112,15 +137,24 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       this.pendingNetworks_[networkName] = network;
     }
 
-    // TODO: save the auto-login default
-
     return network.login(loginArgs.reconnect).then(() => {
       delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,
         userId: network.myInstance.userId
       });
-    }).catch((e) => {
+
+      return this.connectedNetworks_.get().then((networks :string[]) => {
+        if (_.includes(networks, networkName)) {
+          return;
+        }
+
+        networks.push(networkName);
+        return this.connectedNetworks_.set(networks);
+      }).catch((e) => {
+        console.warn('Could not save connected networks', e);
+      });
+    }, (e) => {
       delete this.pendingNetworks_[networkName];
       throw e;
     });
@@ -138,11 +172,18 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.warn('Could not logout of network', networkName);
       return;
     }
+
     return network.logout().then(() => {
       log.info('Successfully logged out of network', networkName);
+
+      return this.connectedNetworks_.get().then((networks) => {
+        return this.connectedNetworks_.set(_.without(networks, networkName));
+      }).catch((e) => {
+        log.warn('Could not remove network from list of connected networks', e);
+        // we will probably not be able to log back in anyways, ignore this
+        return;
+      });
     });
-    // TODO: disable auto-login
-    // store.saveMeToStorage();
   }
 
   // onUpdate not needed in the real core.

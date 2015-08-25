@@ -39,6 +39,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
                                     this.handleRequestFulfilled_);
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_REJECTED,
                                     this.handleRequestRejected_);
+
+    this.connect();
   }
 
   public on = (name :string, callback :Function) => {
