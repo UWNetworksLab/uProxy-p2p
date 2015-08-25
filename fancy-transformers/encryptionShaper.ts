@@ -11,7 +11,7 @@ import aes = require('aes-js');
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 
-var log :logging.Log = new logging.Log('fancy-transformers');
+var log :logging.Log = new logging.Log('encryption-shaper');
 
 export interface EncryptionConfig {key:ArrayBuffer}
 export interface SerializedEncryptionConfig {key:string}
