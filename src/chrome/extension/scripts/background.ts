@@ -168,3 +168,4 @@ chrome.webRequest.onBeforeRequest.addListener(
   ['blocking']
 );
 
+core.connect();
