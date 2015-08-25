@@ -492,6 +492,34 @@ class Pipe {
   public on = (name:string, listener:(event:any) => void) :void => {
     throw new Error('Placeholder function to keep Typescript happy');
   }
+
+  private static closeSocket_(socket:Socket) : Promise<void> {
+    return socket.destroy().then(() => {
+      freedom['core.udpsocket'].close(socket);
+    });
+  }
+
+  public shutdown = () : Promise<void> => {
+    var shutdownPromises : Promise<void>[] = [];
+    var address:string;
+    var port:any;  // Typescript doesn't allow number in for...of loops.
+    for (address in this.publicSockets_) {
+      Array.prototype.push.apply(shutdownPromises,
+          this.publicSockets_[address].map(Pipe.closeSocket_));
+    }
+
+    for (address in this.mirrorSockets_) {
+      for (port in this.mirrorSockets_[address]) {
+        var mirrorPromises = this.mirrorSockets_[address][port].sockets;
+        mirrorPromises.forEach((mirrorPromise) => {
+          if (mirrorPromise) {
+            shutdownPromises.push(mirrorPromise.then(Pipe.closeSocket_));
+          }
+        });
+      }
+    }
+    return Promise.all(shutdownPromises).then((voids:void[]) => {});
+  }
 }
 
 export = Pipe;

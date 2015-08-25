@@ -45,6 +45,10 @@
           "port": "number"
         }]
       },
+      "shutdown": {
+        "type": "method",
+        "value": []
+      },
       "mappingAdded": {
         "type": "event",
         "value": {
