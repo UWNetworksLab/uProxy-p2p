@@ -1,8 +1,3 @@
-
-// TODO(bwiley): update uTransformers to be compatible with require
-// TODO(ldixon): update to a require-style inclusion.
-// e.g.
-//  import Transformer = require('uproxy-obfuscators/transformer');
 /// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
 /// <reference path='../../../third_party/typings/webcrypto/WebCrypto.d.ts' />
 /// <reference path='../../../third_party/aes-js/aes-js.d.ts' />
