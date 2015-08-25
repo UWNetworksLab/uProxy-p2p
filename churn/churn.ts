@@ -455,7 +455,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     public openDataChannel = (channelLabel:string,
         options?:freedom_RTCPeerConnection.RTCDataChannelInit)
         : Promise<peerconnection.DataChannel> => {
-      return this.obfuscatedConnection_.openDataChannel(channelLabel);
+          return this.obfuscatedConnection_.openDataChannel(channelLabel,
+              options);
     }
 
     public close = () : Promise<void> => {
