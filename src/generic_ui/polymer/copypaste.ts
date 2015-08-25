@@ -53,12 +53,6 @@ Polymer({
     });
   },
   handleBackClick: function() {
-    // do not let the user navigate away from this view if copypaste is active
-    if ((ui.copyPasteState.localGettingFromRemote === social.GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) ||
-        ui.copyPasteState.localSharingWithRemote === social.SharingState.SHARING_ACCESS) {
-      return;
-    }
-
     if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE &&
         ui.copyPasteState.localSharingWithRemote === social.SharingState.NONE) {
       ui.view = ui_constants.View.SPLASH;
@@ -118,7 +112,7 @@ Polymer({
     // if we are currently in the middle of setting up a connection, end it
     var doneStopping :Promise<void>;
     if (ui.copyPasteState.localGettingFromRemote !== social.GettingState.NONE) {
-      doneStopping = this.stopGetting()
+      doneStopping = this.stopGetting();
     } else {
       doneStopping = Promise.resolve<void>();
     }
