@@ -7,9 +7,9 @@
 /// <reference path='../../../third_party/typings/webcrypto/WebCrypto.d.ts' />
 /// <reference path='../../../third_party/aes-js/aes-js.d.ts' />
 
-import logging = require('../logging/logging');
-import arraybuffers = require('../arraybuffers/arraybuffers');
 import aes = require('aes-js');
+import arraybuffers = require('../arraybuffers/arraybuffers');
+import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
