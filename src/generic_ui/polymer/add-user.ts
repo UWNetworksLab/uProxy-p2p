@@ -7,8 +7,16 @@ var core = ui_context.core;
 
 Polymer({
   addUser: function() {
-    // TODO: pick network based on dropdown.
-    core.addUser('GMail', this.receivedInviteToken);
+    // TODO: handle errors
+    core.addUser(this.receivedInviteToken);
+    this.fire('open-dialog', {
+      heading: 'Friend Added', // TODO: translate
+      message: '',  // TODO:
+      buttons: [{
+        text: ui.i18n_t("OK")
+      }]
+    });
+    this.closeAddUserPanel();
   },
   sendToGMailFriend: function() {
     // TODO: how to get userId of logged in  user?
@@ -23,9 +31,18 @@ Polymer({
           networkInfo: selectedNetworkInfo,
           to: this.inviteUserEmail,
           subject: 'Join me on uProxy',
-          body: 'click here ' + inviteUrl
+          body: 'Click here to join me on uProxy' + inviteUrl
       });
+      this.fire('open-dialog', {
+        heading: 'Invitation Email sent', // TODO: translate
+        message: '',  // TODO:
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+      this.closeAddUserPanel();
     });
+
   },
   sendToFacebookFriend: function() {
     var selectedNetwork =
@@ -34,12 +51,19 @@ Polymer({
       name: selectedNetwork.name,
       userId: selectedNetwork.userId
     };
-    // TODO: should getInviteUrl be getInviteUrl?
     core.getInviteUrl(selectedNetworkInfo).then((inviteUrl: string) => {
-      // TODO: need to format URL
-      var facebookUrl = 'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link=' +
-        inviteUrl + '&redirect_uri=https://www.uproxy.org/';
+      var facebookUrl =
+          'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
+          + inviteUrl + '&redirect_uri=https://www.uproxy.org/';
       ui.openTab(facebookUrl);
+      this.fire('open-dialog', {
+        heading: '', // TODO:
+        message: 'Please complete invitation in Facebook',  // TODO:
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+      this.closeAddUserPanel();
     });
   },
   onNetworkSelect: function(e :any, details :any) {

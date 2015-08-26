@@ -407,20 +407,23 @@ export class UserInterface implements ui_constants.UiApi {
     this.signalToFire = {name: signalName, data: data};
   }
 
-  private confirmationCallbacks_ :Function[] = [];
-  public getConfirmation = (text :string) => {
+  private confirmationCallbacks_ :{[index :number] :Function} = {};
+  private confirmationCallbackIndex_ = 1;
+  public getConfirmation = (heading :string, text :string) => {
     return new Promise((F, R) => {
-      this.confirmationCallbacks_.push(F);
-      this.confirmationCallbacks_.push(R);
+      var fulfillIndex = ++this.confirmationCallbackIndex_;
+      var rejectIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[fulfillIndex] = F;
+      this.confirmationCallbacks_[rejectIndex] = R;
       this.fireSignal('open-dialog', {
-        heading: 'some heading',
+        heading: heading,
         message: text,
         buttons: [{
           text: this.i18n_t("YES"),
-          callbackIndex: this.confirmationCallbacks_.length - 2
+          callbackIndex: fulfillIndex
         }, {
           text: this.i18n_t("NO"),
-          callbackIndex: this.confirmationCallbacks_.length - 1,
+          callbackIndex: rejectIndex,
           dismissive: true
         }]
       });
@@ -428,8 +431,9 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public invokeConfirmationCallback = (index :number) => {
-    // TODO: this array grows infinitely, should cleanup
     this.confirmationCallbacks_[index]();
+    // TODO: also need to delete corresponding fulfill/reject
+    delete this.confirmationCallbacks_[index];
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -545,7 +549,9 @@ export class UserInterface implements ui_constants.UiApi {
     var tokenObj = JSON.parse(atob(token));
     var networkName = tokenObj.networkName;
     if (!this.model.getNetwork(networkName)) {
-      this.getConfirmation('You need to log into ' + this.getNetworkDisplayName(networkName)).then(() => {
+      this.getConfirmation('Login Required',
+          'You need to log into ' + this.getNetworkDisplayName(networkName))
+          .then(() => {
         this.login(networkName).then(() => {
           // Fire an update-view event, which root.ts listens for.
           // TODO: can this be done in ui.ts?
@@ -794,7 +800,7 @@ export class UserInterface implements ui_constants.UiApi {
 
         if (!existingNetwork.logoutExpected &&
             // TODO: fix this mess of name vs displayName
-            (networkMsg.name === 'Google' || networkMsg.displayName === 'Facebook') &&
+            (networkMsg.name === 'GMail' || networkMsg.displayName === 'Facebook') &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
