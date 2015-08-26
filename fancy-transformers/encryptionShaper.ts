@@ -35,7 +35,7 @@ export class EncryptionShaper implements Transformer {
         log.error(json);
         throw new Error("Encryption shaper requires key parameter");
       }
-    } catch(err) {
+    } catch(e) {
       // This is a common failure mode for transformers as any problem with the
       // configuration usually results in an exception.
       log.error("Transformer configure crashed");
