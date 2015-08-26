@@ -78,6 +78,7 @@ Polymer({
     });
   },
   stopGetting: function() {
+    ui.stopUsingProxy();
     return core.stopCopyPasteGet().then(() => {
       // clean up the pending endpoint in case we got here from going back
       ui.copyPastePendingEndpoint = null;
