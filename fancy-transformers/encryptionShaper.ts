@@ -21,27 +21,15 @@ export class EncryptionShaper implements Transformer {
   public setKey = (key:ArrayBuffer) :void => {}
 
   public configure = (json:string) :void => {
-    log.debug("Configuring encryption shaper");
+    var config = JSON.parse(json);
 
-    try {
-      var config = JSON.parse(json);
-
-      // Required parameter
-      if ('key' in config) {
-        var encryptionConfig = <EncryptionConfig>config;
-        this.key_ = arraybuffers.hexStringToArrayBuffer(encryptionConfig.key);
-      } else {
-        log.error('Bad JSON config file');
-        log.error(json);
-        throw new Error("Encryption shaper requires key parameter");
-      }
-    } catch(e) {
-      // This is a common failure mode for transformers as any problem with the
-      // configuration usually results in an exception.
-      log.error("Transformer configure crashed");
+    // Required parameter
+    if ('key' in config) {
+      var encryptionConfig = <EncryptionConfig>config;
+      this.key_ = arraybuffers.hexStringToArrayBuffer(encryptionConfig.key);
+    } else {
+      throw new Error("Encryption shaper requires key parameter");
     }
-
-    log.debug("Configured encryption shaper");
   }
 
   public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
