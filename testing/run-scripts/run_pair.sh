@@ -16,9 +16,10 @@ REPO=
 VNC=false
 KEEP=false
 MTU=
+LATENCY=
 
 function usage () {
-    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] [-m mtu] browserspec browserspec"
+    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] [-m mtu] [-l latency] browserspec browserspec"
     echo "  -b BRANCH: have containers check out this BRANCH.  Default is dev."
     echo "  -r REPO: have containers clone this REPO.  "
     echo "           Default is https://github.com/uProxy/uproxy-lib.git."
@@ -26,6 +27,7 @@ function usage () {
     echo "  -v: enable VNC on containers.  They will be ports 5900 and 5901."
     echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
     echo "  -m MTU: set the MTU on the getter's network interface."
+    echo "  -l latency: set latency (in ms) on the getter's network interface."
     echo "  -h, -?: this help message."
     echo
     echo "browserspec is a pair of browser-version."
@@ -34,7 +36,7 @@ function usage () {
     exit 1
 }
 
-while getopts kvb:r:p:m:h? opt; do
+while getopts kvb:r:p:m:l:h? opt; do
     case $opt in
         k) KEEP=true ;;
         v) VNC=true ;;
@@ -42,6 +44,7 @@ while getopts kvb:r:p:m:h? opt; do
         r) REPO="-r $OPTARG" ;;
         p) PREBUILT="$OPTARG" ;;
         m) MTU="$OPTARG" ;;
+        l) LATENCY="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -132,6 +135,11 @@ echo
 if [ -n "$MTU" ]
 then
     ./set-mtu.sh uproxy-getter $MTU
+fi
+
+if [ -n "$LATENCY" ]
+then
+    ./set-latency.sh uproxy-getter qdisc add dev eth0 root netem delay "$LATENCY"ms
 fi
 
 echo -n "Waiting for giver to come up"
