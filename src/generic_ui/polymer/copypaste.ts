@@ -13,7 +13,13 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
+enum STATE {
+  GETTING,
+  SHARING,
+};
+
 Polymer({
+  STATE: STATE,
   init: function() {
     /* bring copyPaste to the front in get mode */
     ui.view = ui_constants.View.COPYPASTE;
@@ -22,7 +28,9 @@ Polymer({
       this.startGetting();
     }
   },
+  lastState: STATE.SHARING,
   startGetting: function() {
+    this.lastState = STATE.GETTING;
     this.gettingResponse = '';
 
     var doneStopping :Promise<void>;
@@ -106,6 +114,7 @@ Polymer({
     });
   },
   stopSharing: function() {
+    this.lastState = STATE.SHARING;
     return core.stopCopyPasteShare();
   },
   select: function(e :Event, d :Object, sender :HTMLInputElement) {

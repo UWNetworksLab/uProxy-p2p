@@ -147,6 +147,10 @@
     "description": "Message shown when a one-time connection ends.",
     "message": "You are no longer getting access. To request a connection, click the button below."
   },
+  "NO_LONGER_SHARING": {
+    "description": "Message shown when a one-time connection ends and the user was sharing.",
+    "message": "You are no longer sharing access.  Click the button below to request a connection or paste a request link from a friend to share access again."
+  },
   "START_NEW_CONNECTION": {
     "description": "Label for button that takes user back to the 'Start a one-time connection' page.",
     "message": "Start getting a new connection"
