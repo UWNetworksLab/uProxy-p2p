@@ -49,7 +49,7 @@ export class EncryptionShaper implements Transformer {
     // - Generate a new random 16-byte IV for every packet
     // - Encrypt the packet contents with the random IV and symmetric key
     // - Concatenate the IV and encrypted packet contents
-    var iv :ArrayBuffer=this.makeIV_();
+    var iv :ArrayBuffer=EncryptionShaper.makeIV();
     var encrypted :ArrayBuffer=this.encrypt_(iv, buffer);
     var parts=[iv, encrypted]
     return [arraybuffers.concat(parts)];
@@ -70,7 +70,7 @@ export class EncryptionShaper implements Transformer {
   // No-op (we have no state or any resources to dispose).
   public dispose = () :void => {}
 
-  private makeIV_ = () :ArrayBuffer => {
+  static makeIV = () :ArrayBuffer => {
     var randomBytes=new Uint8Array(16);
     crypto.getRandomValues(randomBytes);
     return randomBytes.buffer;
