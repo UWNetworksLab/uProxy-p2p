@@ -8,8 +8,7 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('encryption-shaper');
 
-export interface EncryptionConfig {key:ArrayBuffer}
-export interface SerializedEncryptionConfig {key:string}
+export interface EncryptionConfig {key:string}
 
 // A packet shaper that encrypts the packets with AES CBC.
 export class EncryptionShaper implements Transformer {
@@ -29,8 +28,8 @@ export class EncryptionShaper implements Transformer {
 
       // Required parameter
       if('key' in config) {
-        var encryptionConfig=this.deserializeConfig_(<SerializedEncryptionConfig>config);
-        this.key_=encryptionConfig.key;
+        var encryptionConfig=<EncryptionConfig>config;
+        this.key_=arraybuffers.hexStringToArrayBuffer(encryptionConfig.key);
       } else {
         log.error('Bad JSON config file');
         log.error(json);
@@ -70,10 +69,6 @@ export class EncryptionShaper implements Transformer {
 
   // No-op (we have no state or any resources to dispose).
   public dispose = () :void => {}
-
-  private deserializeConfig_ = (config:SerializedEncryptionConfig) :EncryptionConfig => {
-    return {key:arraybuffers.hexStringToArrayBuffer(config.key)};
-  }
 
   private makeIV_ = () :ArrayBuffer => {
     var randomBytes=new Uint8Array(16);
