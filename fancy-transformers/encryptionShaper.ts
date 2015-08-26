@@ -27,7 +27,7 @@ export class EncryptionShaper implements Transformer {
       var config = JSON.parse(json);
 
       // Required parameter
-      if('key' in config) {
+      if ('key' in config) {
         var encryptionConfig = <EncryptionConfig>config;
         this.key_ = arraybuffers.hexStringToArrayBuffer(encryptionConfig.key);
       } else {
@@ -112,7 +112,7 @@ export class EncryptionShaper implements Transformer {
     var lengthBytes = parts[0];
     var length = arraybuffers.decodeShort(lengthBytes);
     var rest = parts[1];
-    if(rest.byteLength > length) {
+    if (rest.byteLength > length) {
       parts = arraybuffers.split(rest, length);
       return parts[0];
     } else {
