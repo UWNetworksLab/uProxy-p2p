@@ -3,6 +3,7 @@
 /// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
 import ui_constants = require('../../interfaces/ui');
+import social = require('../../interfaces/social');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import user = require('../scripts/user');
 import _ = require('lodash');
@@ -29,6 +30,17 @@ Polymer({
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
     event.stopPropagation();  // Don't toggle when link is clicked.
+  },
+  acceptInvitation: function() {
+    console.log(this.contact);
+    var path :social.UserPath = {
+      network : {
+       name: this.contact.network.name,
+       userId: this.contact.network.userId
+      },
+      userId: this.contact.userId
+    };
+    ui_context.core.acceptInvitation(path);
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
   modifyConsent: function(action :uproxy_core_api.ConsentUserAction) {

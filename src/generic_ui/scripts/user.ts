@@ -38,6 +38,7 @@ export class User implements social.BaseUser {
   public name              :string;
   public imageData         :string;
   public url               :string;
+  public status            :string = "whatever";
   public isGettingFromMe   :boolean = false;
   public isSharingWithMe   :boolean = false;
   // 'filter'-related flags which indicate whether the user should be
@@ -109,6 +110,7 @@ export class User implements social.BaseUser {
     this.name = profile.name;
     this.imageData = profile.imageData || Constants.DEFAULT_USER_IMG;
     this.url = profile.url;
+    this.status = profile.status;
 
     // iterate backwards to allow removing elements
     var i = this.offeringInstances.length;

@@ -184,6 +184,12 @@ export enum ClientStatus {
   ONLINE_WITH_OTHER_APP,
 }
 
+export enum UserStatus {
+  FRIEND,
+  INVITED_BY_USER,
+  USER_INVITED
+}
+
 // Status of a client connected to a social network.
 export interface ClientState {
   userId    :string;
@@ -201,6 +207,7 @@ export interface UserState {
   // be saved and loaded separately.
   instanceIds :string[];
   consent     :ConsentState;
+  status      :UserStatus
 }
 
 
@@ -273,6 +280,8 @@ export interface Network {
    * Ask the social network to add the user.
    */
   addUserRequest: (userId: string) => void;
+    
+  acceptInvitation: (userId: string) => void;
 
   /**
     * Resends the instance handeshake to all uProxy instances.

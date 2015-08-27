@@ -277,6 +277,9 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.areAllContactsUproxy === true : false;
     }
 
+    public acceptInvitation = (userId :string) => {
+    }
+
   }  // class AbstractNetwork
 
 
@@ -661,6 +664,10 @@ export function notifyUI(networkName :string, userId :string) {
         profile: this.myInstance.getUserProfile(),
         roster: rosterState
       };
+    }
+
+    public acceptInvitation = (userId :string) => {
+      this.freedomApi_.acceptUserInvitation(userId);
     }
 
   }  // class Social.FreedomNetwork

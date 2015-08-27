@@ -232,6 +232,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   getVersion = () :Promise<{ version :string }> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
   }
+
+  acceptInvitation = (userPath :social.UserPath) => {
+    this.sendCommand(uproxy_core_api.Command.ACCEPT_INVITATION, userPath);
+  }
 }  // class CoreConnector
 
 export = CoreConnector;

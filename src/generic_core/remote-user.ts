@@ -125,6 +125,7 @@ var log :logging.Log = new logging.Log('remote-user');
     }
 
     /**
+    status: this.profile.status
      * Handle 'onClientState' events from the social provider, which indicate
      * changes in status such as becoming online, offline.
      *  - Only adds uProxy clients to the clients table.
@@ -384,7 +385,8 @@ var log :logging.Log = new logging.Log('remote-user');
           userId: this.profile.userId,
           name: this.profile.name,
           imageData: this.profile.imageData,
-          url: this.profile.url
+          url: this.profile.url,
+          status: this.profile.status
         },
         consent: this.consent,
         offeringInstances: offeringInstanceStatesForUi,
@@ -471,6 +473,8 @@ var log :logging.Log = new logging.Log('remote-user');
         this.profile.url = state.url;
       }
 
+      this.profile.status = state.status;
+
       // Restore all instances.
       var onceLoadedPromises :Promise<void>[] = [];
       for (var i in state.instanceIds) {
@@ -498,7 +502,8 @@ var log :logging.Log = new logging.Log('remote-user');
         imageData: this.profile.imageData,
         url: this.profile.url,
         instanceIds: Object.keys(this.instances_),
-        consent: this.consent
+        consent: this.consent,
+        status: this.profile.status
       });
     }
 

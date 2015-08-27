@@ -135,6 +135,8 @@
         hidden?='{{ !(model.globalSettings.mode==ui_constants.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==ui_constants.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
       </core-icon>
     </div> <!-- end of #nameRow -->
+    <paper-button raised hidden?='{{contact.status!="1"}}'on-tap='{{ acceptInvitation }}'>Accept Invite
+        </paper-button>
 
     <core-collapse id='getControls' class='expandedControls'
       hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'

@@ -15,6 +15,7 @@
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import social = require('../interfaces/social');
 import social_network = require('./social');
 import version = require('../version/version');
 import browser_connector = require('../interfaces/browser_connector');
@@ -146,3 +147,12 @@ var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.PING_UNTIL_ONLINE,
     core.pingUntilOnline);
+
+ui_connector.onCommand(
+    uproxy_core_api.Command.ACCEPT_INVITATION,
+    (userPath :social.UserPath) => {
+      var network = social_network.getNetwork(userPath.network.name,
+                                              userPath.network.userId);
+      network.acceptInvitation(userPath.userId);
+    });
+
