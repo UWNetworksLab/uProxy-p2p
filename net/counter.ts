@@ -24,9 +24,7 @@ export class Counter {
     return f().then((result:T) => {
       this.after_();
       return result;
-    }, (e:Error) : any => {
-      // Explicitly declare return type any to workaround this bug:
-      //   https://github.com/Microsoft/TypeScript/issues/2010
+    }, (e:Error) => {
       this.after_();
       throw e;
     });
