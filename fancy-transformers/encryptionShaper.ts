@@ -1,5 +1,4 @@
 /// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-/// <reference path='../../../third_party/typings/webcrypto/WebCrypto.d.ts' />
 /// <reference path='../../../third_party/aes-js/aes-js.d.ts' />
 
 import aes = require('aes-js');
