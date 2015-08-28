@@ -386,6 +386,13 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                 JSON.stringify(message),
                 e.message);
           }
+        } else if (message.type === signals.Type.NO_MORE_CANDIDATES) {
+          // churn itself doesn't need this but it serves as an
+          // indication to features such as copy/paste that signalling
+          // is finished.
+          this.signalForPeerQueue.handle({
+            webrtcMessage: message
+          });
         }
       });
       this.peerOpenedChannelQueue =
