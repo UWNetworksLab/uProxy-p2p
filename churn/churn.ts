@@ -144,9 +144,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   //         https://github.com/uProxy/uproxy/issues/585
   export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
-    // Maximum time to spend gathering ICE candidates:
-    //  https://github.com/uProxy/uproxy/issues/1795
-    private static PROBE_TIMEOUT_MS = 3000;
+    // Maximum time to spend gathering ICE candidates.
+    // We cap this so that slow STUN servers, in the absence
+    // of trickle ICE, don't make the user wait unnecessarily.
+    private static PROBE_TIMEOUT_MS_ = 3000;
 
     public peerOpenedChannelQueue :handler.QueueHandler<peerconnection.DataChannel, void>;
     public signalForPeerQueue :handler.Queue<ChurnSignallingMessage, void>;
@@ -272,7 +273,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         log.warn('%1: probing timed out, closing probe connection',
             this.peerName);
         this.probingComplete_();
-      }, Connection.PROBE_TIMEOUT_MS);
+      }, Connection.PROBE_TIMEOUT_MS_);
 
       this.onceProbingComplete_.then(() => {
         this.probeConnection_.close().then(() => {
