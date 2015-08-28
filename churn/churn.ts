@@ -1,7 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 // TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
@@ -34,7 +32,7 @@ import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
 import MirrorMapping = churn_pipe_types.MirrorMapping;
 
 import Candidate = candidate.Candidate;
-import RTCIceCandidate = freedom_RTCPeerConnection.RTCIceCandidate;
+import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
 
 var log :logging.Log = new logging.Log('churn');
 
@@ -184,10 +182,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     private static internalConnectionId_ = 0;
 
-    constructor(probeRtcPc:freedom_RTCPeerConnection.RTCPeerConnection,
+    constructor(probeRtcPc:freedom.RTCPeerConnection.RTCPeerConnection,
                 peerName?:string,
                 private skipPublicEndpoint_?:boolean,
-                private portControl_?:freedom_PortControl.PortControl) {
+                private portControl_?:freedom.PortControl.PortControl) {
       this.peerName = peerName || 'churn-connection-' +
           (++Connection.internalConnectionId_);
 
@@ -209,7 +207,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     private configureProbeConnection_ = (
-        freedomPc:freedom_RTCPeerConnection.RTCPeerConnection) => {
+        freedomPc:freedom.RTCPeerConnection.RTCPeerConnection) => {
       var probePeerName = this.peerName + '-probe';
 
       // The list of all candidates returned by the probe connection.
@@ -229,7 +227,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                 log.debug('Port control not available in churn');
               } else {
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
-                  then((mapping:freedom_PortControl.Mapping) => {
+                  then((mapping:freedom.PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
                       log.debug("addMapping() failed. Mapping object: ", 
                                 mapping);
@@ -342,7 +340,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     private configureObfuscatedConnection_ = () => {
       // We use an empty configuration to ensure that no STUN servers are pinged.
-      var obfConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+      var obfConfig :freedom.RTCPeerConnection.RTCConfiguration = {
         iceServers: []
       };
       var obfPeerName = this.peerName + '-obfuscated';
@@ -453,7 +451,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     public openDataChannel = (channelLabel:string,
-        options?:freedom_RTCPeerConnection.RTCDataChannelInit)
+        options?:freedom.RTCPeerConnection.RTCDataChannelInit)
         : Promise<peerconnection.DataChannel> => {
           return this.obfuscatedConnection_.openDataChannel(channelLabel,
               options);

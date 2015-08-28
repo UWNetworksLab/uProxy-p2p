@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import peerconnection = require('../../webrtc/peerconnection');
 import signals = require('../../webrtc/signals');
@@ -15,7 +15,7 @@ loggingController.setDefaultFilter(loggingTypes.Destination.console,
 import logging = require('../../logging/logging');
 var log :logging.Log = new logging.Log('copypaste churn chat');
 
-var config :freedom_RTCPeerConnection.RTCConfiguration = {
+var config :freedom.RTCPeerConnection.RTCConfiguration = {
   iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                {urls: ['stun:stun1.l.google.com:19302']}]
 };

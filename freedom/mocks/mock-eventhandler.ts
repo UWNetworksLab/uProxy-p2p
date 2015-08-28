@@ -1,11 +1,9 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
-
-import freedomTypes = require('freedom.types');
+/// <reference path='../../../../third_party/freedom-typings/freedom.d.ts' />
 
 // A simple mock implementation of the freedom event handler that lets you cause
 // fake events. Useful for mocking out freedom freedom modules that will raise
 // events.
-class MockFreedomEventHandler implements freedomTypes.EventHandler {
+class MockFreedomEventHandler implements freedom.EventHandler {
   private onHandlerTable_ : {[eventName:string] : Function[]} = {};
   private onceHandlerTable_ : {[eventName:string] : Function[]} = {};
 

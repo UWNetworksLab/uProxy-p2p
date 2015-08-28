@@ -1,5 +1,4 @@
 /// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import logging = require('../../logging/logging');
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');
@@ -20,7 +19,7 @@ loggingController.setDefaultFilter(loggingTypes.Destination.buffered,
 export var moduleName = 'copypaste-socks';
 export var log :logging.Log = new logging.Log(moduleName);
 
-var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+var pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
     iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                  {urls: ['stun:stun1.l.google.com:19302']}]
 };

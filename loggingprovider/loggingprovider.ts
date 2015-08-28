@@ -1,11 +1,9 @@
-/// <reference path='../../../third_party/freedom-typings/console.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import logging = require('./loggingprovider.types');
 
 // The freedom console provider.
-export var freedomConsole :freedom_Console.Console = freedom['core.console']();
+export var freedomConsole = freedom['core.console']();
 
 // Besides output to console, log can also be buffered for later retrieval
 // through "getLogs". This is the maximum number of buffered log before it is

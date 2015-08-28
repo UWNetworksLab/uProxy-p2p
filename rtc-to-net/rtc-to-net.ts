@@ -6,7 +6,6 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
-import freedom_types = require('freedom.types');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
@@ -353,7 +352,7 @@ import ProxyConfig = require('./proxyconfig');
           this.tcpConnection_ = tcpConnection;
 
           return this.tcpConnection_.onceConnected
-            .catch((e:freedom_types.Error) => {
+            .catch((e:freedom.Error) => {
               log.info('%1: failed to connect to remote endpoint', [this.longId()]);
               this.replyToPeer_(this.getReplyFromError_(e));
               return Promise.reject(new Error(e.errcode));
