@@ -176,7 +176,8 @@ export function composeAuthHandshakeBuffer(auths:Auth[]) : ArrayBuffer {
   var handshakeBytes = new Uint8Array(auths.length + 2);
   handshakeBytes[0] = VERSION5;
   handshakeBytes[1] = auths.length;
-  handshakeBytes.set(auths, 2);
+  // https://github.com/Microsoft/TypeScript/issues/3979
+  (<any>handshakeBytes).set(auths, 2);
   return handshakeBytes.buffer;
 }
 
@@ -387,7 +388,8 @@ export function composeDestination(destination:Destination) : Uint8Array {
     case AddressType.IP_V4:
       addressSize = 4;
       var ipv4 = ipaddr.IPv4.parse(endpoint.address);
-      address.set(ipv4.octets, 1);
+      // https://github.com/Microsoft/TypeScript/issues/3979
+      (<any>address).set(ipv4.octets, 1);
       break;
     case AddressType.DNS:
       addressSize = endpoint.address.length + 1;
@@ -399,7 +401,8 @@ export function composeDestination(destination:Destination) : Uint8Array {
     case AddressType.IP_V6:
       addressSize = 16;
       var ipv6 = ipaddr.IPv6.parse(endpoint.address);
-      address.set(ipv6.toByteArray(), 1);
+      // https://github.com/Microsoft/TypeScript/issues/3979
+      (<any>address).set(ipv6.toByteArray(), 1);
       break;
     default:
       throw new Error(

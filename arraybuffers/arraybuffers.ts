@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/node/node.d.ts' />
+
 // Byte-wise equality check of array buffers by comparison of each byte's
 // value.
 export function byteEquality(b1 :ArrayBuffer, b2 :ArrayBuffer)
@@ -117,6 +119,26 @@ export function stringToUtf8EncodedArrayBuffer(str:string) :ArrayBuffer {
       ab[i] = strUtf8.charCodeAt(i);
   }
   return ab.buffer;
+}
+
+// Converts a node.js Buffer to an ArrayBuffer
+export function bufferToArrayBuffer(buffer:Buffer) :ArrayBuffer {
+    var ab = new ArrayBuffer(buffer.length);
+    var bytes = new Uint8Array(ab);
+    for (var i = 0; i < buffer.length; ++i) {
+        bytes[i] = buffer[i];
+    }
+    return bytes.buffer;
+}
+
+// Converts an ArrayBuffer to a node.js Buffer
+export function arrayBufferToBuffer(ab:ArrayBuffer) :Buffer {
+    var buffer = new Buffer(ab.byteLength);
+    var bytes = new Uint8Array(ab);
+    for (var i = 0; i < buffer.length; ++i) {
+        buffer[i] = bytes[i];
+    }
+    return buffer;
 }
 
 // Splits an ArrayBuffer into two at a given offset

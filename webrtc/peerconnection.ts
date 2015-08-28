@@ -64,7 +64,7 @@ var CONTROL_CHANNEL_LABEL = '';
 
 // Interval, in milliseconds, after which the peerconnection will
 // terminate if no heartbeat is received from the peer.
-var HEARTBEAT_TIMEOUT_MS_ = 30000;
+var HEARTBEAT_TIMEOUT_MS_ = 15000;
 
 // Interval, in milliseconds, at which heartbeats are sent to the peer.
 var HEARTBEAT_INTERVAL_MS_ = 5000;
@@ -247,7 +247,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // data channels (without it, we would have to re-negotiate SDP after the
     // PC is established), we start negotaition by openning a data channel to
     // the peer, this triggers the negotiation needed event.
-    return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, undefined).then(
+    return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, {id: 0}).then(
         this.addRtcDataChannel_).then(
         this.registerControlChannel_).then(() => {
           return this.onceConnected;
