@@ -332,12 +332,11 @@ import Persistent = require('../interfaces/persistent');
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      var startGetAttempt :Promise<net.Endpoint> = this.connection_
-          .startGet(this.messageVersion).then((endpoints :net.Endpoint) => {
+      return this.connection_.startGet(this.messageVersion)
+          .then((endpoints :net.Endpoint) => {
         clearTimeout(this.startSocksToRtcTimeout_);
         return endpoints;
-      });
-      startGetAttempt.catch((e) => {
+      }).catch((e) => {
         // Tell the UI that sharing failed. It will show a toast.
         // TODO: Send this update from remote-connection.ts
         //       https://github.com/uProxy/uproxy/issues/1861
@@ -345,8 +344,8 @@ import Persistent = require('../interfaces/persistent');
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()
         });
+        return Promise.reject(e);
       });
-      return startGetAttempt;
     }
 
     /**
