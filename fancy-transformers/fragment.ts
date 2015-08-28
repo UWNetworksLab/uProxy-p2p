@@ -1,12 +1,10 @@
-/// <reference path='../../../third_party/typings/webcrypto/WebCrypto.d.ts' />
-
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
 // A Fragment represents a piece of a packet when fragmentation has occurred.
-interface Fragment {
+export interface Fragment {
   length :number;
   id :ArrayBuffer;
   index :number;
@@ -35,7 +33,7 @@ export function makeRandomId() :ArrayBuffer {
 //   - padding, variable number of bytes, whatever is left after the payload
 export function decode(buffer:ArrayBuffer) :Fragment {
   var [lengthBytes, fragmentId, fragmentNumber, totalNumber, remaining] =
-    arraybuffers.parse([2, 32, 1, 1], buffer);
+    arraybuffers.parse(buffer, [2, 32, 1, 1]);
   var length = arraybuffers.decodeShort(lengthBytes);
 
   var payload :ArrayBuffer = null;
@@ -51,13 +49,13 @@ export function decode(buffer:ArrayBuffer) :Fragment {
     throw new Error("Fragment could not be decoded, shorter than length");
   }
 
-  return new Fragment(
-    length,
-    fragmentId,
-    decodeByte(fragmentNumber),
-    decodeByte(totalNumber),
-    payload,
-    padding);
+  return {
+    length: length,
+    id: fragmentId,
+    index: arraybuffers.decodeByte(fragmentNumber),
+    count: arraybuffers.decodeByte(totalNumber),
+    payload: payload,
+    padding: padding};
 }
 
 // Serialize a Fragment object so that it can be sent as a packet
@@ -72,8 +70,8 @@ export function encode(fragment:Fragment) :ArrayBuffer {
   return arraybuffers.concat([
     arraybuffers.encodeShort(fragment.length),
     fragment.id,
-    encodeByte_(fragment.index),
-    encodeByte_(fragment.count),
+    arraybuffers.encodeByte(fragment.index),
+    arraybuffers.encodeByte(fragment.count),
     fragment.payload,
     fragment.padding
   ]);
