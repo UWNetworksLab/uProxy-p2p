@@ -8,8 +8,8 @@ import bridge = require('../bridge/bridge');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
+import onetime = require('../bridge/onetime');
 import rtc_to_net = require('../rtc-to-net/rtc-to-net');
-import signals = require('../webrtc/signals');
 import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
 import tcp = require('../net/tcp');
 
@@ -58,15 +58,17 @@ var rtcNet:rtc_to_net.RtcToNet;
 
 var portControl = freedom['portControl']();
 
+var batcher = new onetime.SignalBatcher((signal:string) => {
+  parentModule.emit('signalForPeer', signal);
+});
+
 var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
 
   socksRtc = new socks_to_rtc.SocksToRtc();
 
   // Forward signalling channel messages to the UI.
-  socksRtc.on('signalForPeer', (signal:any) => {
-      parentModule.emit('signalForPeer', signal);
-  });
+  socksRtc.on('signalForPeer', batcher.addToBatch);
 
   // SocksToRtc adds the number of bytes it sends/receives to its respective
   // queue as it proxies. When new numbers (of bytes) are added to these queues,
@@ -100,7 +102,10 @@ parentModule.on('start', doStart);
 // Messages are dispatched to either the socks-to-rtc or rtc-to-net
 // modules depending on whether we're acting as the frontend or backend,
 // respectively.
-parentModule.on('handleSignalMessage', (message:signals.Message) => {
+parentModule.on('handleSignalMessage', (encodedMessage:Object) => {
+  // TODO: signal errors to the UI
+  var message = onetime.decode(encodedMessage.toString());
+
   if (socksRtc !== undefined) {
     socksRtc.handleSignalFromPeer(message);
   } else {
@@ -112,9 +117,7 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
       log.info('created rtc-to-net');
 
       // Forward signalling channel messages to the UI.
-      rtcNet.signalsForPeer.setSyncHandler((message:signals.Message) => {
-          parentModule.emit('signalForPeer', message);
-      });
+      rtcNet.signalsForPeer.setSyncHandler(batcher.addToBatch);
 
       // Similarly to with SocksToRtc, emit the number of bytes sent/received
       // in RtcToNet to the UI.

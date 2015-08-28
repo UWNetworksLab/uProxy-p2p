@@ -30,7 +30,7 @@
         <p><bdi i18n-content='pasteAndStartProxying'></bdi></p>
         <textarea id='inboundMessageNode' value='{{ model.inboundText }}' on-keyup='{{ parseInboundText }}'></textarea>
         <p>
-          <button id='consumeMessageButton' disabled?='{{ !model.inputIsWellFormed }}' on-click='{{ consumeInboundText }}'><bdi i18n-content='startProxying'></bdi></button>
+          <button id='consumeMessageButton' disabled?='{{ model.inboundText < 1 }}' on-click='{{ consumeInboundText }}'><bdi i18n-content='startProxying'></bdi></button>
         </p>
       </div>
 
