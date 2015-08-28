@@ -330,18 +330,22 @@ import Persistent = require('../interfaces/persistent');
         log.warn('Timing out socksToRtc_ connection');
         // Tell the UI that sharing failed. It will show a toast.
         // TODO: have RemoteConnection do this
+
+        this.connection_.stopGet();
+      }, this.SOCKS_TO_RTC_TIMEOUT);
+
+      var startGetAttempt :Promise<net.Endpoint> = this.connection_
+          .startGet(this.messageVersion).then((endpoints :net.Endpoint) => {
+        clearTimeout(this.startSocksToRtcTimeout_);
+        return endpoints;
+      });
+      startGetAttempt.catch((e) => {
         ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()
         });
-        this.connection_.stopGet();
-      }, this.SOCKS_TO_RTC_TIMEOUT);
-
-      return this.connection_.startGet(this.messageVersion).then(
-          (endpoints :net.Endpoint) => {
-        clearTimeout(this.startSocksToRtcTimeout_);
-        return endpoints;
       });
+      return startGetAttempt;
     }
 
     /**
