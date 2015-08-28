@@ -294,7 +294,8 @@ import Persistent = require('../interfaces/persistent');
           log.warn('Could not start sharing.');
           clearTimeout(this.startRtcToNetTimeout_);
           // Tell the UI that sharing failed. It will show a toast.
-          // TODO: have RemoteConnection do this
+          // TODO: Send this update from remote-connection.ts
+          //       https://github.com/uProxy/uproxy/issues/1861
           ui.update(uproxy_core_api.Update.FAILED_TO_GIVE, {
             name: this.user.name,
             proxyingId: this.connection_.getProxyingId()
@@ -338,7 +339,8 @@ import Persistent = require('../interfaces/persistent');
       });
       startGetAttempt.catch((e) => {
         // Tell the UI that sharing failed. It will show a toast.
-        // TODO: have RemoteConnection do this
+        // TODO: Send this update from remote-connection.ts
+        //       https://github.com/uProxy/uproxy/issues/1861
         ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()
