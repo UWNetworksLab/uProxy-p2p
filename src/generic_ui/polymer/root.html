@@ -190,6 +190,9 @@
       #disconnectDialog paper-button {
         font-size: 12px;
       }
+      #progressWrapper {
+        text-align: center;
+      }
       paper-toast {
         position: fixed;
         left: 12px;
@@ -371,10 +374,20 @@
     </uproxy-action-dialog>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
-        opened="{{ core.disconnectedWhileProxying }}" autoCloseDisabled>
+        opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
         <h1>{{ "DISCONNECTED_TITLE" | $$ }}</h1>
+        <div id='progressWrapper'>
+          <div hidden?='{{ !ui.instanceTryingToGetAccessFrom }}'>
+            <strong>{{ 'RECONNECTING' | $$ }}</strong>
+            <paper-progress indeterminate='true'></paper-progress>
+          </div>
+          <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}' >
+            <strong>{{ 'RECONNECT_FAILED' | $$ }}</strong>
+            <paper-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</paper-button>
+          </div>
+        </div>
         <p>
           {{ "DISCONNECTED_MESSAGE" | $$ }}
         </p>

@@ -22,6 +22,7 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public browserSpecificElement :string;
   public canProxy = true;
+  public hasInstalledThenLoggedIn = true;
 
   // Global unique promise ID.
   private promiseId_ :number = 1;
@@ -140,6 +141,10 @@ class FirefoxBrowserApi implements BrowserAPI {
     } else {
       console.warn('Firefox promise reject not found ' + promiseId);
     }
+  }
+
+  public setBadgeNotification = (notification :string) => {
+    port.emit('setBadgeNotification', notification);
   }
 }
 

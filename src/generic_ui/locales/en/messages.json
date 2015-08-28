@@ -392,8 +392,8 @@
     "message": "Oops! You've been disconnected from your friend."
   },
   "DISCONNECTED_MESSAGE": {
-    "description": "Instruction informing the user that to continue browsing the Internet, the user will need to use their local (potentially unsafe and/or censored) connection.",
-    "message": "Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding."
+    "description": "Instruction informing the user that if they want to browse the Internet and stop waiting for reconnection, the user will need to use their local (potentially unsafe and/or censored) connection.",
+    "message": "If you disable the proxy, your web traffic will no longer be routed through your friend. You may want to close any sensitive pages you have open, before proceeding."
   },
   "CONTINUE_BROWSING": {
     "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet).",
@@ -675,6 +675,18 @@
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
   },
+  "RECONNECTING": {
+    "description": "Indicate that uProxy is attempting to reconnect automatically after a failure.  A progress indicator is also visible.",
+    "message": "Reconnecting..."
+  },
+  "RECONNECT_FAILED": {
+    "description": "Indicate that uProxy attempted to reconnect automatically but it failed.",
+    "message": "Reconnect failed"
+  },
+  "RESTART_PROXYING": {
+    "description": "Displayed on a button next to the RECONNECT_FAILED message",
+    "message": "Try again"
+  },
   "UPDATE_AVAILABLE": {
     "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",
     "message": "An update is available"
@@ -682,5 +694,29 @@
   "RESTART_UPROXY_UPDATE": {
     "description": "A link the user can click on to restart uProxy and permorm an update",
     "message": "Restart to update"
+  },
+  "PORT_CONTROL_TITLE": {
+    "description": "Title for the port control section in advanced settings",
+    "message": "Port control status"
+  },
+  "PORT_CONTROL_SUPPORTED": {
+    "description": "NAT-PMP, PCP, or UPnP is supported in the router",
+    "message": "Your router has port control enabled."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED": {
+    "description": "NAT-PMP, PCP, and UPnP are not supported in the router",
+    "message": "Your router does not have port control enabled."
+  },
+  "PORT_CONTROL_PENDING": {
+    "description": "uProxy is currently probing router for port control support",
+    "message": "Probing router for port control support..."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO": {
+    "description": "Extra information displayed when port control is not supported",
+    "message": "You may be able to enable port control to make uProxy more reliable."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
+    "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
+    "message": "More info."
   }
 }

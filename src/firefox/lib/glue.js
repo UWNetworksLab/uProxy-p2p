@@ -86,6 +86,10 @@ function setUpConnection(freedom, panel, button) {
     });
   });
 
+  panel.port.on('setBadgeNotification', function(notification) {
+    button.badge = notification;
+  });
+
   /**
    * Install a handler for promise emits received from the panel.
    * Promise emits return an ack or error to the panel.
@@ -134,9 +138,11 @@ function setUpConnection(freedom, panel, button) {
   // when required by registering messages that initiate async behaviour.
   onPromiseEmit('frontedPost', post);
 
-  /* Allow any pages in the addon to send messages to the UI or the core */
+  /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
   pagemod.PageMod({
-    include: self.data.url('*'),
+    include: [ self.data.url('*'),
+               "https://www.uproxy.org/*",
+               "https://test-dot-uproxysite.appspot.com/*"],
     contentScriptFile: self.data.url('scripts/content-proxy.js'),
     onAttach: function(worker) {
       worker.port.on('update', function(data) {

@@ -1,7 +1,9 @@
-import diagnose_nat = require('./diagnose-nat');
+/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
@@ -12,11 +14,10 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import version = require('../version/version');
+import StoredValue = require('./stored_value');
 import _ = require('lodash');
 
 import ui = ui_connector.connector;
-
-export var remoteProxyInstance :social.RemoteUserInstance = null;
 
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.
@@ -35,15 +36,7 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
 
-var portControl = freedom['portControl']();
-
-export interface NetworkInfo {
-  natType :string;
-  pmpSupport :string;
-  pcpSupport :string;
-  upnpSupport :string;
-  errorMsg ?:string;
-};
+var portControl = globals.portControl;
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
@@ -57,14 +50,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
 
+  private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
+
   constructor() {
     log.debug('Preparing uProxy Core');
     copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
-      // TODO send this update only when
-      // update !== uproxy_core_api.Update.SIGNALLING_MESSAGE
-      // (after v0.8.13)
-      ui.update(update, message);
       if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
+        ui.update(update, message);
         return;
       }
 
@@ -83,6 +75,32 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         type: message.type,
         data: data
       });
+    }, undefined, portControl);
+
+    this.refreshPortControlSupport();
+
+    this.connectedNetworks_.get().then((networks :string[]) => {
+      var logins :Promise<void>[] = [];
+
+      for (var i in networks) {
+        logins.push(this.login({
+          network: networks[i],
+          reconnect: true,
+        }).catch(() => {
+          // any failure to login should just be ignored - the user will either
+          // be logged in with just some accounts or still on the login screen
+          return;
+        }));
+
+        // at this point, clear all networks; those that successfully get logged
+        // in will be re-added
+        this.connectedNetworks_.set([]);
+      }
+
+      // this return is meaningless, but it may be useful in the future
+      return Promise.all(logins);
+    }).then(() => {
+      log.info('Finished handling reconnections');
     });
   }
 
@@ -100,6 +118,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   private pendingNetworks_ :{[name :string] :social.Network} = {};
+  private portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
 
   /**
    * Access various social networks using the Social API.
@@ -118,15 +137,24 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       this.pendingNetworks_[networkName] = network;
     }
 
-    // TODO: save the auto-login default
-
     return network.login(loginArgs.reconnect).then(() => {
       delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,
         userId: network.myInstance.userId
       });
-    }).catch((e) => {
+
+      return this.connectedNetworks_.get().then((networks :string[]) => {
+        if (_.includes(networks, networkName)) {
+          return;
+        }
+
+        networks.push(networkName);
+        return this.connectedNetworks_.set(networks);
+      }).catch((e) => {
+        console.warn('Could not save connected networks', e);
+      });
+    }, (e) => {
       delete this.pendingNetworks_[networkName];
       throw e;
     });
@@ -144,11 +172,18 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.warn('Could not logout of network', networkName);
       return;
     }
+
     return network.logout().then(() => {
       log.info('Successfully logged out of network', networkName);
+
+      return this.connectedNetworks_.get().then((networks) => {
+        return this.connectedNetworks_.set(_.without(networks, networkName));
+      }).catch((e) => {
+        log.warn('Could not remove network from list of connected networks', e);
+        // we will probably not be able to log back in anyways, ignore this
+        return;
+      });
     });
-    // TODO: disable auto-login
-    // store.saveMeToStorage();
   }
 
   // onUpdate not needed in the real core.
@@ -218,7 +253,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           endpoint: copyPasteConnection.activeEndpoint,
           gettingMessages: this.copyPasteGettingMessages_,
           sharingMessages: this.copyPasteSharingMessages_
-        }
+        },
+        portControlSupport: this.portControlSupport_,
       };
     });
   }
@@ -242,12 +278,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
     this.copyPasteGettingMessages_ = [];
-    if (remoteProxyInstance) {
-      log.warn('Existing proxying session, terminating');
-      remoteProxyInstance.stop();
-      remoteProxyInstance = null;
-    }
-
     return copyPasteConnection.startGet(globals.effectiveMessageVersion());
   }
 
@@ -274,51 +304,26 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    * RemoteInstance exists.
    */
   public start = (path :social.InstancePath) : Promise<net.Endpoint> => {
-    // Disable any previous proxying session.
-    var stoppedGetting :Promise<void>[] = [];
-    if (remoteProxyInstance) {
-      log.warn('Existing proxying session, terminating');
-      // Stop proxy, don't notify UI since UI request a new proxy.
-      stoppedGetting.push(remoteProxyInstance.stop());
-      remoteProxyInstance = null;
+    var remote = this.getInstance(path);
+    if (!remote) {
+      log.error('Instance does not exist for proxying', path.instanceId);
+      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-
-    if (social.GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
-      log.warn('Existing proxying session, terminating');
-      stoppedGetting.push(copyPasteConnection.stopGet());
-    }
-
-    return Promise.all(stoppedGetting).catch((e) => {
-      // if there was an error stopping the old connection we still want to
-      // connect with the new one, do not propogate this error
-      log.error('Could not clean up old connections', e);
-    }).then(() => {
-      var remote = this.getInstance(path);
-      if (!remote) {
-        log.error('Instance does not exist for proxying', path.instanceId);
-        return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
-      }
-      // Remember this instance as our proxy.  Set this before start fulfills
-      // in case the user decides to cancel the proxy before it begins.
-      remoteProxyInstance = remote;
-      return remote.start();
-    }).catch((e) => {
-      remoteProxyInstance = null; // make sure to clean up any state
-      log.error('Could not start remote proxying session', e.stack);
-      return Promise.reject(e);
-    });
+    // Remember this instance as our proxy.  Set this before start fulfills
+    // in case the user decides to cancel the proxy before it begins.
+    return remote.start();
   }
 
   /**
    * Stop proxying with the current instance, if it exists.
    */
-  public stop = () => {
-    if (!remoteProxyInstance) {
-      log.error('Cannot stop proxying when there is no proxy');
-      return;
+  public stop = (path :social.InstancePath) => {
+    var remote = this.getInstance(path);
+    if (!remote) {
+      log.error('Instance does not exist for proxying', path.instanceId);
+      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-    remoteProxyInstance.stop();
-    remoteProxyInstance = null;
+    remote.stop();
     // TODO: Handle revoked permissions notifications.
   }
 
@@ -381,7 +386,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         [ countdown(30000).then(() => {
             return 'NAT classification timed out.';
           }),
-          diagnose_nat.doNatProvoking().then((natType:string) => {
+          nat_probe.probe().then((natType:string) => {
             globals.natType = natType;
             // Store NAT type for five minutes. This way, if the user previews
             // their logs, and then submits them shortly after, we do not need
@@ -400,22 +405,40 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
+  // Probe for NAT-PMP, PCP, and UPnP support
+  // Sets this.portControlSupport_ and sends update message to UI
+  public refreshPortControlSupport = () :Promise<void> => {
+    this.portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
+    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+              uproxy_core_api.PortControlSupport.PENDING);
+
+    return portControl.probeProtocolSupport().then(
+      (probe:freedom_PortControl.ProtocolSupport) => {
+        this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
+                                   uproxy_core_api.PortControlSupport.TRUE :
+                                   uproxy_core_api.PortControlSupport.FALSE;
+        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+                  this.portControlSupport_);
+    });
+  }
+
   // Probe the NAT type and support for port control protocols
   // Returns an object with the NAT configuration as keys
-  public getNetworkInfoObj = () :Promise<NetworkInfo> => {
-    var natInfo :NetworkInfo = {
-      natType: '',
-      pmpSupport: '',
-      pcpSupport: '',
-      upnpSupport: ''
+  public getNetworkInfoObj = () :Promise<uproxy_core_api.NetworkInfo> => {
+    var natInfo :uproxy_core_api.NetworkInfo = {
+      natType: undefined,
+      pmpSupport: undefined,
+      pcpSupport: undefined,
+      upnpSupport: undefined
     };
 
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
-      return portControl.probeProtocolSupport().then((protocolSupport:any) => {
-          natInfo.pmpSupport = protocolSupport.natPmp;
-          natInfo.pcpSupport = protocolSupport.pcp;
-          natInfo.upnpSupport = protocolSupport.upnp;
+      return portControl.probeProtocolSupport().then(
+        (probe:freedom_PortControl.ProtocolSupport) => {
+          natInfo.pmpSupport = probe.natPmp;
+          natInfo.pcpSupport = probe.pcp;
+          natInfo.upnpSupport = probe.upnp;
           return natInfo;
       }).catch((err:Error) => {
         // Should only catch the error when getInternalIp() times out
@@ -427,7 +450,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // Returns a string of the NAT type and support for port control protocols
   public getNetworkInfo = () :Promise<string> => {
-    return this.getNetworkInfoObj().then((natInfo:NetworkInfo) => {
+    return this.getNetworkInfoObj().then((natInfo:uproxy_core_api.NetworkInfo) => {
       var natInfoStr = 'NAT Type: ' + natInfo.natType + '\n';
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';

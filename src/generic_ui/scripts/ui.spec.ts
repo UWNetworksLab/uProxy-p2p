@@ -22,7 +22,15 @@ describe('UI.UserInterface', () => {
     // Create a fresh UI object before each test.
     mockCore = jasmine.createSpyObj(
         'core',
-        ['reset', 'onUpdate', 'sendCommand', 'on', 'connect', 'getFullState']);
+        [
+          'reset',
+          'onUpdate',
+          'sendCommand',
+          'on',
+          'connect',
+          'getFullState',
+          'stop'
+        ]);
 
     // assume connect always resolves immediately
     (<jasmine.Spy>mockCore.connect).and.returnValue(Promise.resolve());
@@ -43,7 +51,16 @@ describe('UI.UserInterface', () => {
     });
 
     mockBrowserApi = jasmine.createSpyObj('browserApi',
-        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification', 'on', 'handlePopupLaunch']);
+        ['setIcon',
+         'startUsingProxy',
+         'stopUsingProxy',
+         'openTab',
+         'showNotification',
+         'on',
+         'handlePopupLaunch',
+         'bringUproxyToFront',
+         'setBadgeNotification'
+         ]);
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
   });
@@ -239,7 +256,7 @@ describe('UI.UserInterface', () => {
           'testInstanceId', { address : 'testAddress' , port : 0 });
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
-      ui.stopGettingInUiAndConfig(false);
+      ui.stoppedGetting({instanceId: null, error: false});
     });
 
     it('Extension icon changes when you stop getting access', () => {

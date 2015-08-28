@@ -13,7 +13,8 @@ var button = buttons.ActionButton({
     "18": "./icons/19_offline.png",
     "36": "./icons/38_offline.png"
   },
-  onClick: start
+  onClick: start,
+  badgeColor: "#009968"
 });
 
 var panel;
@@ -21,7 +22,7 @@ var panel;
 // Load freedom.
 var manifest = self.data.url('generic_core/freedom-module.json');
 var loggingProviderManifest = self.data.url("uproxy-lib/loggingprovider/freedom-module.json");
-freedom(manifest, {
+var init = freedom(manifest, {
   'logger': loggingProviderManifest,
   'debug': 'debug'
 }).then(function(uproxy) {
@@ -43,3 +44,11 @@ function start(state) {
     position: button,
   });
 }
+
+exports.main = function(options, callbacks) {
+  init.then(function() {
+    if (options.loadReason === 'install') {
+      panel.port.emit('newlyInstalled');
+    }
+  }.bind(this));
+}.bind(this);

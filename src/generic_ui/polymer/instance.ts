@@ -29,6 +29,7 @@ Polymer({
     });
   },
   stop: function() {
+    ui.stopUsingProxy();
     ui.stopGettingFromInstance(this.instance.instanceId);
   }
 });

@@ -7,6 +7,7 @@
  */
 
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
 
 import consent = require('./consent');
 import globals = require('./globals');
@@ -21,15 +22,16 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
 import _ = require('lodash');
+import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 
 import storage = globals.storage;
 import ui = ui_connector.connector;
+import pgp = globals.pgp;
 
 import Persistent = require('../interfaces/persistent');
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
-export var remoteProxyInstance :RemoteInstance = null;
 
 // module Core {
   var log :logging.Log = new logging.Log('remote-instance');
@@ -48,7 +50,8 @@ export var remoteProxyInstance :RemoteInstance = null;
    */
   export class RemoteInstance implements Persistent {
 
-    public keyHash     :string;
+    public publicKey   :string;
+    public keyVerified :boolean = false;
     public description :string;
 
     // Client version of the remote peer.
@@ -106,7 +109,7 @@ export var remoteProxyInstance :RemoteInstance = null;
         public user :remote_user.User,
         public instanceId :string) {
       this.connection_ = new remote_connection.RemoteConnection(
-          this.handleConnectionUpdate_, this.user.userId);
+          this.handleConnectionUpdate_, this.user.userId, globals.portControl);
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state:RemoteInstanceState) => {
@@ -129,7 +132,21 @@ export var remoteProxyInstance :RemoteInstance = null;
             log.error('Could not find clientId for instance', this);
             return;
           }
-          this.user.network.send(this.user, clientId, data);
+          if (typeof this.publicKey !== 'undefined') {
+            var arrayBufferData =
+                arraybuffers.stringToArrayBuffer(JSON.stringify(data.data));
+            pgp.signEncrypt(arrayBufferData, this.publicKey)
+                .then((cipherData:ArrayBuffer) => {
+                  return pgp.armor(cipherData);
+                }).then((cipherText :string) => {
+                  data.data = cipherText;
+                  this.user.network.send(this.user, clientId, data);
+                }).catch((e) => {
+                  log.error('Error encrypting message ', e);
+                });
+          } else {
+            this.user.network.send(this.user, clientId, data);
+          }
           break;
         case uproxy_core_api.Update.STOP_GIVING:
           ui.update(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
@@ -143,7 +160,6 @@ export var remoteProxyInstance :RemoteInstance = null;
             instanceId: this.instanceId,
             error: data
           });
-          remoteProxyInstance = null;
           break;
         case uproxy_core_api.Update.STATE:
           this.bytesSent = data.bytesSent;
@@ -179,9 +195,27 @@ export var remoteProxyInstance :RemoteInstance = null;
      * TODO: assuming that signal is valid, should we remove signal?
      * TODO: return a boolean on success/failure
      */
-    public handleSignal = (type:social.PeerMessageType,
-                           signalFromRemote:bridge.SignallingMessage,
-                           messageVersion:number) :Promise<void> => {
+    public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
+
+      if (msg.version < 5) {
+        return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
+      } else {
+        return pgp.dearmor(<string>msg.data).then((cipherData :ArrayBuffer) => {
+          return pgp.verifyDecrypt(cipherData, this.publicKey);
+        }).then((result :VerifyDecryptResult) => {
+          var decryptedSignal =
+              JSON.parse(arraybuffers.arrayBufferToString(result.data));
+          return this.handleDecryptedSignal_(msg.type, msg.version, decryptedSignal);
+        }).catch((e) => {
+          log.error('Error decrypting message ', e);
+        });
+      }
+    }
+
+    private handleDecryptedSignal_ = (
+        type:social.PeerMessageType,
+        messageVersion:number,
+        signalFromRemote:bridge.SignallingMessage) : Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -192,7 +226,7 @@ export var remoteProxyInstance :RemoteInstance = null;
         // Create a new RtcToNet instance each time a new round of client peer
         // messages begins. The type field check is so pre-bridge,
         // MESSAGE_VERSION = 1, clients can initiate.
-        // TODO: have RemoteConnection do this, based on SignallingMetadata 
+        // TODO: have RemoteConnection do this, based on SignallingMetadata
         if (signalFromRemote.first ||
             ((<signals.Message>signalFromRemote).type === signals.Type.OFFER)) {
           this.connection_.resetSharerCreated();
@@ -325,7 +359,9 @@ export var remoteProxyInstance :RemoteInstance = null;
     public update = (data:social.InstanceHandshake,
         messageVersion:number) :Promise<void> => {
       return this.onceLoaded.then(() => {
-        this.keyHash = data.keyHash;
+        if (typeof this.publicKey === 'undefined' || !this.keyVerified) {
+          this.publicKey = data.publicKey;
+        }
         this.description = data.description;
         this.updateConsentFromWire_(data.consent);
         this.messageVersion = messageVersion;
@@ -361,7 +397,8 @@ export var remoteProxyInstance :RemoteInstance = null;
       return _.cloneDeep({
         wireConsentFromRemote: this.wireConsentFromRemote,
         description:           this.description,
-        keyHash:               this.keyHash
+        publicKey:             this.publicKey,
+        keyVerified:           this.keyVerified
       });
     }
 
@@ -372,7 +409,12 @@ export var remoteProxyInstance :RemoteInstance = null;
      */
     public restoreState = (state :RemoteInstanceState) => {
       this.description = state.description;
-      this.keyHash = state.keyHash;
+      if (typeof state.publicKey !== 'undefined') {
+        this.publicKey = state.publicKey;
+      }
+      if (typeof state.keyVerified !== 'undefined') {
+        this.keyVerified = state.keyVerified;
+      }
       if (state.wireConsentFromRemote) {
         this.wireConsentFromRemote = state.wireConsentFromRemote
       } else {
@@ -391,7 +433,6 @@ export var remoteProxyInstance :RemoteInstance = null;
       return {
         instanceId:             this.instanceId,
         description:            this.description,
-        keyHash:                this.keyHash,
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote,
         isOnline:               this.user.isInstanceOnline(this.instanceId),
@@ -417,7 +458,8 @@ export var remoteProxyInstance :RemoteInstance = null;
   export interface RemoteInstanceState {
     wireConsentFromRemote :social.ConsentWireState;
     description           :string;
-    keyHash               :string;
+    publicKey             :string;
+    keyVerified           :boolean
   }
 
   // TODO: Implement obfuscation.

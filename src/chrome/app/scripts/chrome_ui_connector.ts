@@ -15,7 +15,7 @@ var installedFreedomHooks :number[] = [];
 class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
-  private onCredentials_ :(credentials:Object) => void;
+  private onCredentials_ :(credentials?:Object, error?:Object) => void;
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
 
   constructor(private uProxyAppChannel_ :freedom_types.OnAndEmit<any,any>) {
@@ -95,8 +95,9 @@ class ChromeUIConnector {
     if ('emit' == msg.cmd) {
       if (msg.type == uproxy_core_api.Command.SEND_CREDENTIALS) {
         this.onCredentials_(msg.data);
-      }
-      if (msg.type == uproxy_core_api.Command.RESTART) {
+      } else if (msg.type == uproxy_core_api.Command.CREDENTIALS_ERROR) {
+        this.onCredentials_(undefined, msg.data);
+      } else if (msg.type == uproxy_core_api.Command.RESTART) {
         chrome.runtime.reload();
       }
       this.sendToCore_(msg.type, msg.data, msg.promiseId);

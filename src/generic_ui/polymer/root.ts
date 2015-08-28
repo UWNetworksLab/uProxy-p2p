@@ -167,7 +167,10 @@ Polymer({
     }
   },
   revertProxySettings: function() {
-    this.ui.stopGettingInUiAndConfig(false);
+    this.ui.stopUsingProxy();
+  },
+  restartProxying: function() {
+    this.ui.restartProxying();
   },
   toastMessageChanged: function(oldVal :string, newVal :string) {
     if (newVal) {

@@ -30,13 +30,17 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
 
-  public disconnectedWhileProxying = false;
+  // If non-null, the ID of the instance from which we are presently
+  // disconnected.
+  public disconnectedWhileProxying :string = null;
 
   constructor(private browserConnector_ :browser_connector.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_FULFILLED,
                                     this.handleRequestFulfilled_);
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_REJECTED,
                                     this.handleRequestRejected_);
+
+    this.connect();
   }
 
   public on = (name :string, callback :Function) => {
@@ -176,9 +180,9 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.START_PROXYING, path);
   }
 
-  stop = () => {
+  stop = (path :social.InstancePath) => {
     console.log('Stopping proxy session.');
-    this.sendCommand(uproxy_core_api.Command.STOP_PROXYING);
+    this.sendCommand(uproxy_core_api.Command.STOP_PROXYING, path);
   }
 
   updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
@@ -211,6 +215,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
 
   getNatType = () : Promise<string> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_NAT_TYPE);
+  }
+
+  refreshPortControlSupport = () : Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.REFRESH_PORT_CONTROL);
   }
 
   pingUntilOnline = (pingUrl :string) : Promise<void> => {

@@ -191,8 +191,6 @@ export class UserInterface implements ui_constants.UiApi {
   // ID of the most recent failed proxying attempt.
   public proxyingId: string;
 
-  // is a proxy currently set
-  private proxySet_ :boolean = false;
   // Must be included in Chrome extension manifest's list of permissions.
   public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
 
@@ -212,6 +210,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public availableVersion :string = null;
 
+  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -219,8 +219,7 @@ export class UserInterface implements ui_constants.UiApi {
   constructor(
       public core   :CoreConnector,
       public browserApi :BrowserAPI) {
-    // TODO: Determine the best way to describe view transitions.
-    this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
+    this.updateView_();
     this.i18n_setLng(this.model.globalSettings.language);
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
@@ -231,7 +230,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     core.on('core_connect', () => {
-      this.view = ui_constants.View.SPLASH;
+      this.updateView_();
 
       core.getFullState()
           .then(this.updateInitialState);
@@ -243,13 +242,9 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.BROWSER_ERROR;
 
       if (this.isGettingAccess()) {
-        this.stopGettingInUiAndConfig(true);
+        this.stoppedGetting({instanceId: null, error: true});
       }
     });
-
-    core.connect();
-
-    core.onUpdate(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_10, this.updateInitialState);
 
     // Add or update the online status of a network.
     core.onUpdate(uproxy_core_api.Update.NETWORK, this.syncNetwork_);
@@ -280,7 +275,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // indicates the current getting connection has ended
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
-      this.stopGettingInUiAndConfig(error);
+      this.stoppedGetting({instanceId: null, error: error});
     });
 
     // indicates we just started offering access through copy+paste
@@ -304,13 +299,8 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
-        (data :any) => { // TODO better type
-      if (data.instanceId === this.instanceGettingAccessFrom_) {
-        this.stopGettingInUiAndConfig(data.error);
-      } else {
-        console.warn('Can\'t stop getting access from friend you were not ' +
-            'already getting access from.');
-      }
+        (data :social.StopProxyInfo) => { // TODO better type
+        this.stoppedGetting(data);
     });
 
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
@@ -371,11 +361,16 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
 
-      this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
-        name: info.name
-      });
+      if (!this.core.disconnectedWhileProxying) {
+        // This is an immediate failure, i.e. failure of a connection attempt
+        // that never connected.  It is not a retry.
+        // Show the error toast indicating that a get attempt failed.
+        this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
+          name: info.name
+        });
+        this.unableToGet = true;
+      }
       this.instanceTryingToGetAccessFrom = null;
-      this.unableToGet = true;
       this.proxyingId = info.proxyingId;
       this.bringUproxyToFront();
     });
@@ -387,6 +382,9 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
+
+    core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
+                  this.setPortControlSupport_);
 
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
@@ -526,6 +524,8 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
 
+    // do not use the updateView function here, actual state may not have been
+    // processed yet
     this.view = ui_constants.View.COPYPASTE;
     this.copyPasteError = ui_constants.CopyPasteError.NONE;
 
@@ -572,39 +572,53 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   /**
-   * Removes proxy indicators from UI and undoes proxy configuration
-   * (e.g. chrome.proxy settings).
+   * Takes all actions required when getting stops, including removing proxy
+   * indicators from the UI, and retrying the connection if appropriate.
    * If user didn't end proxying, so if proxy session ended because of some
    * unexpected reason, user should be asked before reverting proxy settings.
+   * if data.instanceId is null, it means to stop active proxying.
    */
-  public stopGettingInUiAndConfig = (askUser :boolean) => {
-    var instanceId = this.instanceGettingAccessFrom_;
-    this.instanceGettingAccessFrom_ = null;
+  public stoppedGetting = (data :social.StopProxyInfo) => {
+    var instanceId = data.instanceId || this.instanceGettingAccessFrom_;
 
-    this.updateIcon_();
-    this.updateGettingStatusBar_();
+    if (instanceId === this.instanceGettingAccessFrom_) {
+      this.instanceGettingAccessFrom_ = null;
+    }
 
     if (instanceId) {
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
+      if (data.error) {
+        this.bringUproxyToFront();
+        this.core.disconnectedWhileProxying = instanceId;
+        // Auto-retry.
+        this.restartProxying();
+      }
     }
 
-    if (askUser) {
-      this.bringUproxyToFront();
-      this.core.disconnectedWhileProxying = true;
-      this.updateIcon_();
-      return;
-    }
-
-    this.core.disconnectedWhileProxying = false;
-    this.proxySet_ = false;
+    this.updateGettingStatusBar_();
     this.updateIcon_();
-    this.browserApi.stopUsingProxy();
   }
 
-  public startGettingFromInstance = (instanceId :string) :Promise<void> => {
+  /**
+   * Undoes proxy configuration (e.g. chrome.proxy settings).
+   */
+  public stopUsingProxy = () => {
+    this.browserApi.stopUsingProxy();
+    this.core.disconnectedWhileProxying = null;
+    this.updateIcon_();
+
+    // revertProxySettings might call stopUsingProxy while a reconnection is
+    // still being attempted.  In that case, we also want to terminate the
+    // in-progress connection.
+    if (this.instanceTryingToGetAccessFrom) {
+      this.stopGettingFromInstance(this.instanceTryingToGetAccessFrom);
+    }
+  }
+
+  private getInstancePath_ = (instanceId :string) => {
     var user = this.mapInstanceIdToUser_[instanceId];
 
-    var path = <social.InstancePath>{
+    return <social.InstancePath>{
       network: {
         name: user.network.name,
         userId: user.network.userId
@@ -612,12 +626,28 @@ export class UserInterface implements ui_constants.UiApi {
       userId: user.userId,
       instanceId: instanceId
     };
+  }
 
+  public restartProxying = () => {
+    this.startGettingFromInstance(this.core.disconnectedWhileProxying);
+  }
+
+  public startGettingFromInstance = (instanceId :string) :Promise<void> => {
     this.instanceTryingToGetAccessFrom = instanceId;
 
-    return this.core.start(path).then((endpoint :net.Endpoint) => {
+    return this.core.start(this.getInstancePath_(instanceId))
+        .then((endpoint :net.Endpoint) => {
       this.instanceTryingToGetAccessFrom = null;
+      // If we were getting access from some other instance
+      // turn down the connection.
+      if (this.instanceGettingAccessFrom_ &&
+          this.instanceGettingAccessFrom_ != instanceId) {
+        this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
+      }
       this.startGettingInUiAndConfig(instanceId, endpoint);
+    }, (err:Error) => {
+      this.instanceTryingToGetAccessFrom = null;
+      throw err;
     });
   }
 
@@ -632,7 +662,7 @@ export class UserInterface implements ui_constants.UiApi {
       console.error('Attempting to stop getting from unknown instance');
     }
 
-    this.core.stop();
+    this.core.stop(this.getInstancePath_(instanceId));
   }
 
   public startGettingInUi = () => {
@@ -649,17 +679,12 @@ export class UserInterface implements ui_constants.UiApi {
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
     }
 
+    this.core.disconnectedWhileProxying = null;
+
     this.startGettingInUi();
 
     this.updateGettingStatusBar_();
 
-    if (this.proxySet_) {
-      // this handles the case where the user starts proxying again before
-      // confirming the disconnect
-      this.stopGettingInUiAndConfig(false);
-    }
-
-    this.proxySet_ = true;
     this.browserApi.startUsingProxy(endpoint);
   }
 
@@ -687,11 +712,17 @@ export class UserInterface implements ui_constants.UiApi {
       this.browserApi.setIcon(Constants.GETTING_ICON);
     } else if (isGiving) {
       this.browserApi.setIcon(Constants.SHARING_ICON);
-    } else if (this.model.onlineNetworks.length > 0) {
+    } else if (this.model.onlineNetworks.length > 0 ||
+        !this.browserApi.hasInstalledThenLoggedIn) {
       this.browserApi.setIcon(Constants.DEFAULT_ICON);
+      this.updateBadgeNotification_();
+      return;
     } else {
       this.browserApi.setIcon(Constants.LOGGED_OUT_ICON);
     }
+
+    // For all icons except the default icon, do not show notifications.
+    this.browserApi.setBadgeNotification('');
   }
 
   /**
@@ -739,17 +770,14 @@ export class UserInterface implements ui_constants.UiApi {
           this.reconnect(networkMsg.name);
         } else {
           if (this.instanceGettingAccessFrom_) {
-            this.stopGettingInUiAndConfig(true);
+            this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
           }
           this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
-
-          if (!this.model.onlineNetworks.length) {
-            this.view = ui_constants.View.SPLASH;
-          }
         }
       }
     }
 
+    this.updateView_();
     this.updateIcon_();
   }
 
@@ -802,10 +830,15 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     for (var i = 0; i < payload.offeringInstances.length; i++) {
-      if (payload.offeringInstances[i].localGettingFromRemote ===
-          social.GettingState.GETTING_ACCESS) {
-        this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+      var gettingState = payload.offeringInstances[i].localGettingFromRemote;
+      var instanceId = payload.offeringInstances[i].instanceId;
+      if (gettingState === social.GettingState.GETTING_ACCESS) {
+        this.instanceGettingAccessFrom_ = instanceId;
         user.isSharingWithMe = true;
+        this.updateGettingStatusBar_();
+        break;
+      } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
+        this. instanceTryingToGetAccessFrom = instanceId;
         this.updateGettingStatusBar_();
         break;
       }
@@ -822,6 +855,7 @@ export class UserInterface implements ui_constants.UiApi {
         oldUserCategories.getTab, newUserCategories.getTab);
     categorizeUser(user, this.model.contacts.shareAccessContacts,
         oldUserCategories.shareTab, newUserCategories.shareTab);
+    this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
   };
@@ -835,7 +869,9 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string) : Promise<void> => {
-    return this.core.login({ network : network, reconnect: false }).catch((e :Error) => {
+    return this.core.login({ network : network, reconnect: false }).then(() => {
+      this.browserApi.hasInstalledThenLoggedIn = true;
+    }).catch((e :Error) => {
       this.showNotification(this.i18n_t("ERROR_SIGNING_IN", {network: network}));
       throw e;
     });
@@ -872,9 +908,7 @@ export class UserInterface implements ui_constants.UiApi {
           this.showNotification(
               this.i18n_t("LOGGED_OUT", { network: network }));
 
-          if (!this.model.onlineNetworks.length) {
-            this.view = ui_constants.View.SPLASH;
-          }
+          this.updateView_();
         });
       }
     });
@@ -960,11 +994,6 @@ export class UserInterface implements ui_constants.UiApi {
     this.copyPasteGettingMessages = state.copyPasteState.gettingMessages;
     this.copyPasteSharingMessages = state.copyPasteState.sharingMessages;
     this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
-    if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
-        this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
-      // This means we had active copy-paste flow.
-      this.view = ui_constants.View.COPYPASTE;
-    }
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];
@@ -978,16 +1007,18 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (state.onlineNetworks.length > 0) {
       // Check that we dont' have copy paste connection
-      if (this.view === ui_constants.View.COPYPASTE) {
+      if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
+          this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
         console.error(
             'User cannot be online while having a copy-paste connection');
       }
-      // Set view to roster, user is online.
-      this.view = ui_constants.View.ROSTER;
-      this.updateSharingStatusBar_();
     }
 
-    // state of online networks may have changed, update it
+    this.portControlSupport = state.portControlSupport;
+
+    // plenty of state may have changed, update it
+    this.updateView_();
+    this.updateSharingStatusBar_();
     this.updateIcon_();
   }
 
@@ -1008,6 +1039,39 @@ export class UserInterface implements ui_constants.UiApi {
 
   private coreUpdateAvailable_ = (data :{version :string}) => {
     this.availableVersion = data.version;
+  }
+
+  private updateBadgeNotification_ = () => {
+    // Don't show notifications if the user is giving or getting access.
+    if (this.isGivingAccess() || this.isGettingAccess()) {
+      this.browserApi.setBadgeNotification('');
+      return;
+    }
+
+    var numOfNotifications = this.model.contacts.getAccessContacts.pending.length +
+        this.model.contacts.shareAccessContacts.pending.length;
+    if (numOfNotifications === 0) {
+      this.browserApi.setBadgeNotification('');
+    } else {
+      this.browserApi.setBadgeNotification(numOfNotifications.toString());
+    }
+  }
+
+  private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
+    this.portControlSupport = support;
+  }
+
+  // this takes care of updating the view (given the assumuption that we are
+  // connected to the core)
+  private updateView_ = () => {
+    if (this.model.onlineNetworks.length > 0) {
+      this.view = ui_constants.View.ROSTER;
+    } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
+               this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
+      this.view = ui_constants.View.COPYPASTE;
+    } else {
+      this.view = ui_constants.View.SPLASH;
+    }
   }
 } // class UserInterface
 

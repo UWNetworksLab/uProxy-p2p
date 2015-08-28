@@ -3,7 +3,7 @@
 import crypto = require('../../../third_party/uproxy-lib/crypto/random');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import storage = require('../interfaces/storage');
-import uproxy_core = require('./uproxy_core');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 var log :logging.Log = new logging.Log('metrics');
 
@@ -33,8 +33,8 @@ export class Metrics {
     this.metricsProvider_ = freedom['metrics']({
       name: 'uProxyMetrics',
       definition: {'success-v1': counterMetric, 'failure-v1': counterMetric,
-                   'nat-type-v1': natMetric, 'pmp-v1': natMetric,
-                   'pcp-v1': natMetric, 'upnp-v1': natMetric}
+                   'nat-type-v2': natMetric, 'pmp-v2': natMetric,
+                   'pcp-v2': natMetric, 'upnp-v2': natMetric}
     });
 
     this.onceLoaded_ = this.storage_.load('metrics').then(
@@ -63,7 +63,7 @@ export class Metrics {
     }
   }
 
-  public getReport = (natInfo:uproxy_core.NetworkInfo) :Promise<Object> => {
+  public getReport = (natInfo:uproxy_core_api.NetworkInfo) :Promise<Object> => {
     try {
       crypto.randomUint32();
     } catch (e) {
@@ -79,17 +79,17 @@ export class Metrics {
     // by the caller instead.
     return this.onceLoaded_.then(() => {
       var successReport =
-          this.metricsProvider_.report('success-v1', this.data_.success);
+        this.metricsProvider_.report('success-v1', this.data_.success);
       var failureReport =
-          this.metricsProvider_.report('failure-v1', this.data_.failure);
+        this.metricsProvider_.report('failure-v1', this.data_.failure);
       var natTypeReport =
-          this.metricsProvider_.report('nat-type-v1', natInfo.natType);
+        this.metricsProvider_.report('nat-type-v2', natInfo.natType);
       var pmpReport =
-          this.metricsProvider_.report('pmp-v1', natInfo.pmpSupport);
+        this.metricsProvider_.report('pmp-v2', natInfo.pmpSupport.toString());
       var pcpReport =
-          this.metricsProvider_.report('pcp-v1', natInfo.pcpSupport);
+        this.metricsProvider_.report('pcp-v2', natInfo.pcpSupport.toString());
       var upnpReport =
-          this.metricsProvider_.report('upnp-v1', natInfo.upnpSupport);
+        this.metricsProvider_.report('upnp-v2', natInfo.upnpSupport.toString());
 
       return Promise.all([successReport, failureReport, natTypeReport,
                           pmpReport, pcpReport, upnpReport]).then(() => {
@@ -151,7 +151,7 @@ export class DailyMetricsReporter {
     // method of uproxy_core.uProxyCore, instead of passing the function in
     // as a parameter. This can be done after the circular dependency is fixed.
     // See: https://github.com/uProxy/uproxy/issues/1660
-    this.getNetworkInfoObj_().then((natInfo:uproxy_core.NetworkInfo) => {
+    this.getNetworkInfoObj_().then((natInfo:uproxy_core_api.NetworkInfo) => {
       return this.metrics_.getReport(natInfo);
     }).then((payload:Object) => {
       this.onReportCallback_(payload);

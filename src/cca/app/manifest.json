@@ -1,44 +1,34 @@
 {
   "manifest_version": 2,
-  "name": "__MSG_appName__",
-  "description": "__MSG_appDescription__",
+  "name": "uProxy for Sharers",
+  "description": "test",
   "minimum_chrome_version": "41.0.2272.63",
-  "version": "0.8.19",
-  "default_locale": "en",
+  "version": "0.0",
   "icons": {
-    "128": "icons/128_online.png"
+      "128": "icons/128_online.png"
   },
   "app": {
     "background": {
-      "page": "background.html"
+      "scripts": [
+        "freedom-for-chrome/freedom-for-chrome.js",
+        "scripts/main.core-env.static.js"
+      ]
     }
   },
   "permissions": [
+    "identity",
     "storage",
-    "http://*/"
+    "http://*/",
+    "https://*/",
+    "notifications"
   ],
   "sockets": {
-    "tcp": {
-      "connect": ""
-    },
-    "tcpServer": {
-      "listen": ""
-    },
-    "udp": {
-      "send": "",
-      "bind": ""
-    }
+    "tcp": { "connect" : "" },
+    "tcpServer": { "listen": "" },
+    "udp": { "send": "", "bind": "" }
   },
   "externally_connectable": {
-    "ids": [
-      "pjpcdnccaekokkkeheolmpkfifcbibnj"
-    ],
-    "matches": [
-      "*://*.uproxy.org/*",
-      "*://uproxysite.appspot.com/*",
-      "*://test-dot-uproxysite.appspot.com/*",
-      "*://beta-dot-uproxysite.appspot.com/*"
-    ]
+    "matches" : ["*://*.uproxy.org/*", "*://uproxysite.appspot.com/*", "*://test-dot-uproxysite.appspot.com/*", "*://beta-dot-uproxysite.appspot.com/*"]
   },
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk6KrQptZchMYwQN8CsbRVmhV/COoR0lxansERcz+OrkPctUBSTQVYJw3t17+6JyMPnKYR2DMKCTeYQGrmXzm2U0KpujEKN3WSTtZI4ynTzKbGhWIYo6exaHufcslJngEG91ua/q1fJz3e5Mla8+tIsT9bVdVf4NLfODNbky/Uo0M6KpOLO9r2zJoiO0yg4ThBH+TkNwH8icvHJbt2LzZVRSZtQ1Wl1uT15vnwJPOEYVQkpnEMY5yMBPxyOZ1AmUx714YAas80pSZ7+BlM9ReIirYB7lxeY6hAqs4u8iP5SDh5bg6YFXeYecwQyvnKglLdHq6djy9QyVLKUKxFzMH/wIDAQAB"
 }
