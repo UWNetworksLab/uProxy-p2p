@@ -247,7 +247,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // data channels (without it, we would have to re-negotiate SDP after the
     // PC is established), we start negotaition by openning a data channel to
     // the peer, this triggers the negotiation needed event.
-    return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, undefined).then(
+    return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, {id: 0}).then(
         this.addRtcDataChannel_).then(
         this.registerControlChannel_).then(() => {
           return this.onceConnected;
