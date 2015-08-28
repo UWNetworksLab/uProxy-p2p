@@ -408,6 +408,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private confirmationCallbacks_ :{[index :number] :Function} = {};
+  // Don't use index 0 as it may be treated as false in confirmation code.
   private confirmationCallbackIndex_ = 1;
   public getConfirmation = (heading :string, text :string) => {
     return new Promise((F, R) => {
@@ -543,6 +544,13 @@ export class UserInterface implements ui_constants.UiApi {
     return {type: type, messages: payload};
   }
 
+  private addUserWithConfirmation_ = (url: string) => {
+    // TODO: display friend name.
+    this.getConfirmation('', 'Would you like to add a friend').then(() => {
+      this.core.addUser(url);
+    });
+  }
+
   public handleInviteUrlData = (url :string) => {
     // TODO: add try catch and such in case of bad urls
     var token = url.substr(url.lastIndexOf('/') + 1);
@@ -558,11 +566,11 @@ export class UserInterface implements ui_constants.UiApi {
           // this.fire('update-view', { view: ui_constants.View.ROSTER });
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          this.core.addUser(url);
+          this.addUserWithConfirmation_(url);
         });
       });
     } else {
-      this.core.addUser(url);
+      this.addUserWithConfirmation_(url);
     }
   }
 

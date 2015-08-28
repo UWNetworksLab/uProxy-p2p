@@ -6,10 +6,10 @@
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 
-<polymer-element name='uproxy-add-user'>
+<polymer-element name='uproxy-invite-user'>
   <template>
     <style>
-      #addUserPanel {
+      #inviteUserPanel {
         height: 100%;
         width: 100%;
         background-color: white;
@@ -18,14 +18,17 @@
       .section {
         padding: 2em;
       }
+      a {
+        cursor: pointer;
+      }
     </style>
     <!-- TODO: localization -->
 
-    <core-signals on-core-signal-open-add-user-dialog='{{ openAddUserPanel }}'></core-signals>
+    <core-signals on-core-signal-open-invite-user-dialog='{{ openInviteUserPanel }}'></core-signals>
 
-    <core-overlay id='addUserPanel'>
-      <uproxy-app-bar on-go-back='{{ closeAddUserPanel }}'>
-        INVITE FRIEND
+    <core-overlay id='inviteUserPanel'>
+      <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
+        Invite a friend
       </uproxy-app-bar>
 
       <div hidden?='{{ model.onlineNetworks.length <= 1}}'>
@@ -50,8 +53,8 @@
         </div>
 
         <div hidden?='{{ selectedNetworkName != "GMail"}}'>
-          <p>Enter the email address of your friend.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
-          <paper-input-decorator label="Friend's email address" layout vertical>
+          <p>Enter your friend's GMail address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list.</p>
+          <paper-input-decorator label='GMail address' layout vertical>
             <input is='core-input' value='{{ inviteUserEmail }}' />
           </paper-input-decorator>
 
@@ -62,17 +65,11 @@
       </div>
 
       <div class='section'>
-        <p>If you have a uProxy token or link from your friend, you can paste it below to add them.</p>
-
-        <div id='addFriend'>
-          <paper-input-decorator label="Add friend by URL">
-            <input is='core-input' value='{{ receivedInviteToken }}'>
-          </paper-input-decorator>
-          <paper-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</paper-button>
-        </div>
+        If your friend has sent you an invitation, you can use it
+        <a on-tap='{{ showAcceptUserInvite }}'>here</a>
       </div>
 
     </core-overlay>
   </template>
-  <script src='add-user.js'></script>
+  <script src='invite-user.js'></script>
 </polymer-element>

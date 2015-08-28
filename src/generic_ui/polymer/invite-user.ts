@@ -6,18 +6,6 @@ var model = ui_context.model;
 var core = ui_context.core;
 
 Polymer({
-  addUser: function() {
-    // TODO: handle errors
-    core.addUser(this.receivedInviteToken);
-    this.fire('open-dialog', {
-      heading: 'Friend Added', // TODO: translate
-      message: '',  // TODO:
-      buttons: [{
-        text: ui.i18n_t("OK")
-      }]
-    });
-    this.closeAddUserPanel();
-  },
   sendToGMailFriend: function() {
     // TODO: how to get userId of logged in  user?
     var selectedNetwork =
@@ -40,7 +28,7 @@ Polymer({
           text: ui.i18n_t("OK")
         }]
       });
-      this.closeAddUserPanel();
+      this.closeInviteUserPanel();
     });
 
   },
@@ -63,22 +51,30 @@ Polymer({
           text: ui.i18n_t("OK")
         }]
       });
-      this.closeAddUserPanel();
+      this.closeInviteUserPanel();
     });
   },
   onNetworkSelect: function(e :any, details :any) {
     // TODO: does this need to be initialized?
     console.log('onNetworkSelect: ', details);
-    this.selectedNetworkName = details.item.getAttribute('label');
+    if (details.isSelected) {
+      this.selectedNetworkName = details.item.getAttribute('label');
+    }
   },
-  openAddUserPanel: function() {
-    this.$.addUserPanel.open();
+  openInviteUserPanel: function() {
+    // Reset selectedNetworkName in case it had been set and that network
+    // is no longer online.
+    // this.selectedNetworkName = model.onlineNetworks[0].name;
+    this.$.networkSelectMenu.selectIndex(0);
+    this.$.inviteUserPanel.open();
   },
-  closeAddUserPanel: function() {
-    this.$.addUserPanel.close();
+  closeInviteUserPanel: function() {
+    this.$.inviteUserPanel.close();
+  },
+  showAcceptUserInvite: function() {
+    this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
   },
   ready: function() {
-    this.receivedInviteToken = '';
     this.inviteUserEmail = '';
     this.selectedNetworkName = '';
     this.model = model;

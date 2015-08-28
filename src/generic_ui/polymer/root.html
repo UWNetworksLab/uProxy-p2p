@@ -8,7 +8,8 @@
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
-<link rel='import' href='add-user.html'>
+<link rel='import' href='invite-user.html'>
+<link rel='import' href='accept-user-invite.html'>
 <link rel="import" href="i18n-filter.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
@@ -219,7 +220,9 @@
 
     <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
 
-    <uproxy-add-user></uproxy-add-user>
+    <uproxy-invite-user></uproxy-invite-user>
+
+    <uproxy-accept-user-invite></uproxy-accept-user-invite>
 
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
@@ -301,7 +304,7 @@
 
         <div class='content' fit>
 
-          <paper-fab mini icon='add' style='color: white; position:absolute; bottom:1.5em; right:1.5em;' on-tap='{{ fireOpenAddUserPanel }}'></paper-fab>
+          <paper-fab mini icon='add' style='color: white; position:absolute; bottom:1.5em; right:1.5em;' on-tap='{{ fireOpenInviteUserPanel }}'></paper-fab>
 
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
