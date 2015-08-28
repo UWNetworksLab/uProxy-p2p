@@ -494,7 +494,9 @@ class Pipe {
   }
 
   private static closeSocket_(socket:Socket) : Promise<void> {
-    return socket.destroy().then(() => {
+    return socket.destroy().catch((e) => {
+      log.warn('Error while closing socket: %1', e);
+    }).then(() => {
       freedom['core.udpsocket'].close(socket);
     });
   }
@@ -502,19 +504,18 @@ class Pipe {
   public shutdown = () : Promise<void> => {
     var shutdownPromises : Promise<void>[] = [];
     var address:string;
-    var port:any;  // Typescript doesn't allow number in for...of loops.
+    var port:any;  // Typescript doesn't allow number in for...in loops.
     for (address in this.publicSockets_) {
-      Array.prototype.push.apply(shutdownPromises,
-          this.publicSockets_[address].map(Pipe.closeSocket_));
+      this.publicSockets_[address].forEach((publicSocket) => {
+        shutdownPromises.push(Pipe.closeSocket_(publicSocket));
+      });
     }
 
     for (address in this.mirrorSockets_) {
       for (port in this.mirrorSockets_[address]) {
         var mirrorPromises = this.mirrorSockets_[address][port].sockets;
         mirrorPromises.forEach((mirrorPromise) => {
-          if (mirrorPromise) {
-            shutdownPromises.push(mirrorPromise.then(Pipe.closeSocket_));
-          }
+          shutdownPromises.push(mirrorPromise.then(Pipe.closeSocket_));
         });
       }
     }
