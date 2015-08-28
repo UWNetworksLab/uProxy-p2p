@@ -286,7 +286,7 @@ export function notifyUI(networkName :string, userId :string) {
     private onceLoggedIn_   :Promise<void>;
 
     // ID returned by setInterval call for monitoring.
-    private monitorIntervalId_ :number = null;
+    private monitorIntervalId_ :NodeJS.Timer = null;
 
     private fulfillLogout_ : () => void;
     private onceLoggedOut_ : Promise<void>;

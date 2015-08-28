@@ -91,8 +91,8 @@ import Persistent = require('../interfaces/persistent');
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
     // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
     // TODO: why are these not in remote-connection?
-    private startSocksToRtcTimeout_ :number = null;
-    private startRtcToNetTimeout_ :number = null;
+    private startSocksToRtcTimeout_ :NodeJS.Timer = null;
+    private startRtcToNetTimeout_ :NodeJS.Timer = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
