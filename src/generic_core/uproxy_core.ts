@@ -366,7 +366,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // the then() block of doNatProvoking ends up being called twice.
   // We keep track of the timeout that resets the NAT type to make sure
   // there is at most one timeout at a time.
-  private natResetTimeout_ :number;
+  private natResetTimeout_ :NodeJS.Timer;
 
   public getNatType = () :Promise<string> => {
     if (globals.natType === '') {
@@ -409,7 +409,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // Sets this.portControlSupport_ and sends update message to UI
   public refreshPortControlSupport = () :Promise<void> => {
     this.portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
-    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
               uproxy_core_api.PortControlSupport.PENDING);
 
     return portControl.probeProtocolSupport().then(
@@ -417,7 +417,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
                                    uproxy_core_api.PortControlSupport.TRUE :
                                    uproxy_core_api.PortControlSupport.FALSE;
-        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.portControlSupport_);
     });
   }
@@ -455,11 +455,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';
       } else {
-        natInfoStr += 'NAT-PMP: ' + 
+        natInfoStr += 'NAT-PMP: ' +
                   (natInfo.pmpSupport ? 'Supported' : 'Not supported') + '\n';
-        natInfoStr += 'PCP: ' + 
+        natInfoStr += 'PCP: ' +
                   (natInfo.pcpSupport ? 'Supported' : 'Not supported') + '\n';
-        natInfoStr += 'UPnP IGD: ' + 
+        natInfoStr += 'UPnP IGD: ' +
                   (natInfo.upnpSupport ? 'Supported' : 'Not supported') + '\n';
       }
       return natInfoStr;
