@@ -68,9 +68,7 @@ module copypaste_module {
       model.proxyingState = 'stopped';
     });
     return copypaste;
-  }, (e:Error) : any => {
-    // Explicitly declare return type any to workaround this bug:
-    //   https://github.com/Microsoft/TypeScript/issues/2010
+  }, (e:Error) => {
     console.error('could not load freedom: ' + e.message);
   });
 

@@ -14,14 +14,14 @@ interface SignallingMessage {
 
 // Locate all nodes of interest up front here to avoid code clutter later on.
 var answerPanelNode = <HTMLElement>document.getElementById('answerPanel');
-var answerPanel_consumeInboundMessageButtonNode = <HTMLElement>document.getElementById('answerPanel_consumeInboundMessageButton');
-var answerPanel_generateIceCandidatesButton = <HTMLElement>document.getElementById('answerPanel_generateIceCandidatesButton');
+var answerPanel_consumeInboundMessageButtonNode = <HTMLButtonElement>document.getElementById('answerPanel_consumeInboundMessageButton');
+var answerPanel_generateIceCandidatesButton = <HTMLButtonElement>document.getElementById('answerPanel_generateIceCandidatesButton');
 var answerPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('answerPanel_inboundMessage');
 var answerPanel_outboundMessageNode = <HTMLInputElement>document.getElementById('answerPanel_outboundMessage');
 var answerPanel_step2ContainerNode = <HTMLElement>document.getElementById('answerPanel_step2Container');
 
 var offerPanelNode = <HTMLElement>document.getElementById('offerPanel');
-var offerPanel_consumeInboundMessageButtonNode = <HTMLElement>document.getElementById('offerPanel_consumeInboundMessageButton');
+var offerPanel_consumeInboundMessageButtonNode = <HTMLButtonElement>document.getElementById('offerPanel_consumeInboundMessageButton');
 var offerPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('offerPanel_inboundMessage');
 var offerPanel_outboundMessageNode = <HTMLInputElement>document.getElementById('offerPanel_outboundMessage');
 var offerPanel_step2ContainerNode = <HTMLElement>document.getElementById('offerPanel_step2Container');
@@ -32,7 +32,7 @@ var startPanel_answerLinkNode = <HTMLElement>document.getElementById('startPanel
 
 var chatPanelNode = <HTMLElement>document.getElementById('chatPanel');
 var chatPanel_outboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_outboundMessage');
-var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chatPanel_sendMessageButton');
+var chatPanel_sendMessageButtonNode = <HTMLButtonElement>document.getElementById('chatPanel_sendMessageButton');
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
 freedom('freedom-module.json', {
@@ -114,7 +114,7 @@ freedom('freedom-module.json', {
   // signalling messages. Enables/disables the corresponding form button, as
   // appropriate. Returns null if the field contents are malformed.
   function parseInboundMessages(inboundMessageField:HTMLInputElement,
-                                consumeMessageButton:HTMLElement)
+                                consumeMessageButton:HTMLButtonElement)
       : SignallingMessage[] {
     var signals :string[] = inboundMessageField.value.trim().split('\n');
 
