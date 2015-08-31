@@ -1,6 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/tcp-socket.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
@@ -10,7 +8,7 @@ import tcp = require('./tcp');
 
 describe('Tcp', function() {
   it('conversion of a connected endpoint info', () => {
-    var input :freedom_TcpSocket.SocketInfo = {
+    var input :freedom.TcpSocket.SocketInfo = {
       localAddress: '127.0.0.1',
       localPort: 1234,
       peerAddress: '192.0.2.111',
@@ -33,7 +31,7 @@ describe('Tcp', function() {
   });
 
   it('conversion of a closed endpoint info', () => {
-    var input :freedom_TcpSocket.SocketInfo = {
+    var input :freedom.TcpSocket.SocketInfo = {
       connected: false
     };
 

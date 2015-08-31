@@ -1,6 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/rtcdatachannel.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 // DataPeer - a class that wraps peer connections and data channels.
 //
@@ -152,7 +151,7 @@ export class DataChannelClass implements DataChannel {
 
   // |rtcDataChannel_| is the freedom rtc data channel.
   // |label_| is the rtcDataChannel_.getLabel() result
-  constructor(private rtcDataChannel_:freedom_RTCDataChannel.RTCDataChannel,
+  constructor(private rtcDataChannel_:freedom.RTCDataChannel.RTCDataChannel,
               private label_ = '') {
     this.dataFromPeerQueue = new handler.Queue<Data,void>();
     this.toPeerDataQueue_ = new handler.Queue<Data,void>();
@@ -206,7 +205,7 @@ export class DataChannelClass implements DataChannel {
 
   // Handle data we get from the peer by putting it, appropriately wrapped, on
   // the queue of data from the peer.
-  private onDataFromPeer_ = (message:freedom_RTCDataChannel.Message) : void => {
+  private onDataFromPeer_ = (message:freedom.RTCDataChannel.Message) : void => {
     if (typeof message.text === 'string') {
       this.dataFromPeerQueue.handle({str: message.text});
     } else if (message.buffer instanceof ArrayBuffer) {
@@ -438,7 +437,7 @@ export function createFromFreedomId(id:string) : Promise<DataChannel> {
 // Static constructor which constructs a core.rtcdatachannel instance
 // given a core.rtcdatachannel instance.
 export function createFromRtcDataChannel(
-    rtcDataChannel:freedom_RTCDataChannel.RTCDataChannel) : Promise<DataChannel> {
+    rtcDataChannel:freedom.RTCDataChannel.RTCDataChannel) : Promise<DataChannel> {
   // We need to construct the data channel synchronously to avoid missing any
   // early 'onmessage' events.
   var dc = new DataChannelClass(rtcDataChannel);

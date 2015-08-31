@@ -8,8 +8,6 @@ import proxyintegrationtesttypes = require('./proxy-integration-test.types');
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
 
-import freedom_types = require('freedom.types');
-
 // Integration test for the whole proxying system.
 // The real work is done in the Freedom module which performs each test.
 export function socksEchoTestDescription(useChurn:boolean) {
@@ -22,7 +20,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   ];
 
   var testerFactoryManager
-        :freedom_types.FreedomModuleFactoryManager<ProxyIntegrationTester>;
+        :freedom.FreedomModuleFactoryManager<ProxyIntegrationTester>;
   var createTestModule = function(denyLocalhost?:boolean,
       sessionLimit?:number, ipv6Only?:boolean) : ProxyIntegrationTester {
         return testerFactoryManager(denyLocalhost, useChurn, sessionLimit, ipv6Only);

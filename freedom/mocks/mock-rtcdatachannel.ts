@@ -1,15 +1,13 @@
 /// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/rtcdatachannel.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/freedom.d.ts' />
 
-import RTCConfiguration = freedom_RTCPeerConnection.RTCConfiguration;
-import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
-import RTCIceCandidate = freedom_RTCPeerConnection.RTCIceCandidate;
-import RTCOfferOptions = freedom_RTCPeerConnection.RTCOfferOptions;
-import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
-import RTCSessionDescription = freedom_RTCPeerConnection.RTCSessionDescription;
-import RTCDataChannel = freedom_RTCDataChannel.RTCDataChannel;
+import RTCConfiguration = freedom.RTCPeerConnection.RTCConfiguration;
+import RTCDataChannelInit = freedom.RTCPeerConnection.RTCDataChannelInit;
+import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
+import RTCOfferOptions = freedom.RTCPeerConnection.RTCOfferOptions;
+import RTCPeerConnection = freedom.RTCPeerConnection.RTCPeerConnection;
+import RTCSessionDescription = freedom.RTCPeerConnection.RTCSessionDescription;
+import RTCDataChannel = freedom.RTCDataChannel.RTCDataChannel;
 
 import MockEventHandler = require('./mock-eventhandler');
 

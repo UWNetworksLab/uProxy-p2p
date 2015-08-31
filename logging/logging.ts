@@ -2,7 +2,6 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/circular-json/circular-json.d.ts' />
 
-import freedomTypes = require('freedom.types');
 import loggingProviderTypes = require('../loggingprovider/loggingprovider.types');
 import CircularJSON = require('circular-json');
 
@@ -41,7 +40,7 @@ function formatStringMessageWithArgs_(args :Object[])
 }
 
 export class Log {
-  private logger :Promise<freedomTypes.Logger>;
+  private logger :Promise<freedom.Logger>;
 
   // the minimum level at which we will issue IPCs for logging statements
   private minLevel :loggingProviderTypes.Level = loggingProviderTypes.Level.debug;
@@ -82,7 +81,7 @@ export class Log {
 
     var message = formatStringMessageWithArgs_(args);
 
-    this.logger.then((logger :freedomTypes.Logger) => {
+    this.logger.then((logger :freedom.Logger) => {
       // essentially do logger[loggingProviderTypes.Level[level]](message) minus the type warning
       switch (level) {
         case loggingProviderTypes.Level.debug:

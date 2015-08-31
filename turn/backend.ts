@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
@@ -14,7 +14,7 @@ var log :logging.Log = new logging.Log('TURN backend');
  */
 class Allocation {
   /** Socket on which we are relaying datagrams for the client. */
-  socket:freedom_UdpSocket.Socket;
+  socket:freedom.UdpSocket.Socket;
 }
 
 /**
@@ -67,7 +67,7 @@ export class Backend {
     if (request.method == messages.MessageMethod.ALLOCATE) {
       this.makeAllocation_(clientEndpoint).then((allocation:Allocation) => {
         return allocation.socket.getInfo().then(
-            (socketInfo:freedom_UdpSocket.SocketInfo) => {
+            (socketInfo:freedom.UdpSocket.SocketInfo) => {
           this.emitIpc_({
             method: messages.MessageMethod.ALLOCATE,
             clazz: messages.MessageClass.SUCCESS_RESPONSE,
@@ -169,9 +169,9 @@ export class Backend {
       return this.allocations_[tag];
     }
 
-    var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
+    var socket :freedom.UdpSocket.Socket = freedom['core.udpsocket']();
     var promise = socket.bind('127.0.0.1', 0).then(() => {
-      socket.getInfo().then((socketInfo:freedom_UdpSocket.SocketInfo) => {
+      socket.getInfo().then((socketInfo:freedom.UdpSocket.SocketInfo) => {
         log.info('allocated socket for ' + tag + ' on ' +
             socketInfo.localAddress + ':' + socketInfo.localPort);
       });
@@ -180,7 +180,7 @@ export class Backend {
       });
     });
 
-    socket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
+    socket.on('onData', (recvFromInfo:freedom.UdpSocket.RecvFromInfo) => {
       this.emitIpc_({
         method: messages.MessageMethod.DATA,
         clazz: messages.MessageClass.INDICATION,

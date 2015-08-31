@@ -1,5 +1,4 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
@@ -18,7 +17,7 @@ loggingController.setDefaultFilter(
 
 var log :logging.Log = new logging.Log('adventure');
 
-var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+var pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
   iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                {urls: ['stun:stun1.l.google.com:19302']},
                {urls: ['stun:stun.services.mozilla.com']}]

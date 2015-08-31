@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/freedom.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import bridge = require('../../bridge/bridge');
@@ -80,7 +80,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       address: this.localhost_,
       port: 0
     };
-    var rtcPcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+    var rtcPcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
       iceServers: [],
     };
     var rtcToNetProxyConfig :ProxyConfig = {

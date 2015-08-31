@@ -1,5 +1,4 @@
 /// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import logging = require('../../logging/logging');
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');
@@ -49,7 +48,7 @@ function connectDataChannel(name:string, d:DataChannel) {
 
 // Make a peer connection which logs stuff that happens.
 function makePeerConnection(name:string) {
-  var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+  var pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
     iceServers: []
   };
   var pc :PeerConnection<churn_types.ChurnSignallingMessage> =

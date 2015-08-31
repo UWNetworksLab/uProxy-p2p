@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
@@ -36,7 +36,7 @@ var log :logging.Log = new logging.Log('TURN frontend');
  */
 export class Frontend {
   /** Socket on which the server is listening. */
-  private socket_ :freedom_UdpSocket.Socket;
+  private socket_ :freedom.UdpSocket.Socket;
 
   // TODO: the following two maps are a code smell...needs a re-think
 
@@ -65,7 +65,7 @@ export class Frontend {
    */
   public bind(address:string, port:number) : Promise<net.Endpoint> {
     return this.socket_.bind(address, port).then(this.socket_.getInfo).then(
-        (socketInfo:freedom_UdpSocket.SocketInfo) => {
+        (socketInfo:freedom.UdpSocket.SocketInfo) => {
       log.info('listening on ' + socketInfo.localAddress + ':' +
           socketInfo.localPort);
       this.socket_.on('onData', this.onData_);
@@ -83,7 +83,7 @@ export class Frontend {
    * message which cannot be handled or understood by the server should be
    * ignored.
    */
-  private onData_ = (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
+  private onData_ = (recvFromInfo:freedom.UdpSocket.RecvFromInfo) => {
     try {
       var stunMessage = messages.parseStunMessage(new Uint8Array(recvFromInfo.data));
       var clientEndpoint = {

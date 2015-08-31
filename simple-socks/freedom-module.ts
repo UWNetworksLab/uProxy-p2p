@@ -29,7 +29,7 @@ var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port:9999 };
 // Don't specify STUN servers because they aren't needed and can, in fact,
 // present a problem when Simple SOCKS is running on a system behind a NAT
 // without support for hair-pinning.
-var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+var pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
   iceServers: []
 };
 

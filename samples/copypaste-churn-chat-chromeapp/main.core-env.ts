@@ -1,13 +1,11 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 
 import churn_types = require('../../churn/churn.types');
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 
-import freedom_types = require('freedom.types');
-export interface OnEmitModule extends freedom_types.OnAndEmit<any,any> {};
+export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
-  freedom_types.FreedomModuleFactoryManager<OnEmitModule> {};
+  freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
 var startButton = document.getElementById("startButton");
 var copyTextarea = <HTMLInputElement>document.getElementById("copy");
