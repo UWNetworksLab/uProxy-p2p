@@ -150,6 +150,18 @@ export function split(buffer:ArrayBuffer, firstLen:number) :[ArrayBuffer, ArrayB
   return [first, last];
 }
 
+// Wrap a byte in an ArrayBuffer
+export function encodeByte(num:number) :ArrayBuffer {
+  var bytes = new Uint8Array(1);
+  bytes[0] = num;
+  return bytes.buffer;
+}
+
+// Convert an ArrayBuffer with one element to a byte
+export function decodeByte(buffer:ArrayBuffer) :number {
+  return new Uint8Array(buffer)[0];
+}
+
 // Takes a number and returns a two byte (network byte order) representation
 // of this number.
 export function encodeShort(len:number) :ArrayBuffer {
@@ -165,4 +177,28 @@ export function encodeShort(len:number) :ArrayBuffer {
   var bytes = new Uint8Array(buffer);
   var result = (bytes[0] << 8) | bytes[1];
   return result;
+}
+
+// Parse a buffer into parts using an array of lengths for each part.
+// Any remaining bytes left over after parsing are appending to the end.
+// This function is intended for using in parsing binary protocols with
+// fixed length fields.
+export function parse(buffer:ArrayBuffer, lengths:number[]) :ArrayBuffer[] {
+  var parts :ArrayBuffer[] = [];
+
+  var part :ArrayBuffer = null;
+  var remaining :ArrayBuffer = buffer;
+
+  lengths.forEach(length => {
+    if (remaining.byteLength >= length) {
+      [part, remaining] = split(remaining, length);
+      parts.push(part);
+    } else {
+      throw new Error("Not enough bytes to parse");
+    }
+  });
+
+  parts.push(remaining);
+
+  return parts;
 }
