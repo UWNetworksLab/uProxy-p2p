@@ -10,8 +10,10 @@ var button = buttons.ActionButton({
   id: "uProxy-button",
   label: "uProxy",
   icon: {
-    "18": "./icons/19_offline.gif",
-    "36": "./icons/38_offline.gif"
+    "18": "./icons/18_offline.png",
+    "36": "./icons/36_offline.png",
+    "32": "./icons/32_online.png",
+    "64": "./icons/64_online.png"
   },
   onClick: start,
   badgeColor: "#009968"
