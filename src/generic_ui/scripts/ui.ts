@@ -152,21 +152,36 @@ export interface NotificationData {
  */
 export class UserInterface implements ui_constants.UiApi {
   public view :ui_constants.View;
+  public model = new Model();
 
-  // Instance you are getting access from.
-  // Null if you are not getting access.
+  /* Instance management */
+  // Instance you are getting access from. Null if you are not getting access.
   public instanceTryingToGetAccessFrom :string = null;
   private instanceGettingAccessFrom_ :string = null;
-
   // The instances you are giving access to.
   // Remote instances to add to this set are received in messages from Core.
   public instancesGivingAccessTo :{[instanceId :string] :boolean} = {};
-
   private mapInstanceIdToUser_ :{[instanceId :string] :User} = {};
 
+  /* Getting and sharing */
   public gettingStatus :string = null;
   public sharingStatus :string = null;
+  public unableToGet :boolean = false;
+  public unableToShare :boolean = false;
+  public isSharingDisabled :boolean = false;
+  public proxyingId: string; // ID of the most recent failed proxying attempt.
+  private userCancelledGetAttempt_ :boolean = false;
 
+  /* Copypaste */
+  /*
+   * This is used to store the information for setting up a copy+paste
+   * connection between establishing the connection and the user confirming
+   * the start of proxying
+   */
+  public copyPastePendingEndpoint :net.Endpoint = null;
+  public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
+  public copyPasteGettingMessages :social.PeerMessage[] = [];
+  public copyPasteSharingMessages :social.PeerMessage[] = [];
   public copyPasteState :uproxy_core_api.ConnectionState = {
     localGettingFromRemote: social.GettingState.NONE,
     localSharingWithRemote: social.SharingState.NONE,
@@ -174,43 +189,24 @@ export class UserInterface implements ui_constants.UiApi {
     bytesReceived: 0
   };
 
-  public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
-  public copyPasteGettingMessages :social.PeerMessage[] = [];
-  public copyPasteSharingMessages :social.PeerMessage[] = [];
-
-  public browser :string = '';
-
-  // Changing this causes root.ts to fire a core-signal
-  // with the new value.
-  public signalToFire :string = '';
-
-  public toastMessage :string = null;
-  public unableToGet :boolean = false;
-  public unableToShare :boolean = false;
-
-  // ID of the most recent failed proxying attempt.
-  public proxyingId: string;
-
-  // Must be included in Chrome extension manifest's list of permissions.
-  public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
-
-  /*
-   * This is used to store the information for setting up a copy+paste
-   * connection between establishing the connection and the user confirming
-   * the start of proxying
-   */
-  public copyPastePendingEndpoint :net.Endpoint = null;
-
-  public isSharingDisabled = false;
-
+  /* Translation */
   public i18n_t :Function = translator_module.i18n_t;
   public i18n_setLng :Function = translator_module.i18n_setLng;
 
-  public model = new Model();
+  /* Constants */
+  // Must be included in Chrome extension manifest's list of permissions.
+  public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
 
+  /* About this uProxy installation */
+  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
+  public browser :string = '';
   public availableVersion :string = null;
 
-  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
+  // Changing this causes root.ts to fire a core-signal with the new value.
+  public signalToFire :string = '';
+
+  public toastMessage :string = null;
+
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -359,17 +355,24 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.FAILED_TO_GET,
         (info:uproxy_core_api.FailedToGetOrGive) => {
-      console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
-
-      if (!this.core.disconnectedWhileProxying) {
-        // This is an immediate failure, i.e. failure of a connection attempt
-        // that never connected.  It is not a retry.
-        // Show the error toast indicating that a get attempt failed.
-        this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
-          name: info.name
-        });
-        this.unableToGet = true;
+      if (this.userCancelledGetAttempt_) {
+        console.error('proxying attempt ' + info.proxyingId +
+            ' cancelled (getting)');
+        this.userCancelledGetAttempt_ = false; // Reset.
+      } else {
+        console.error('proxying attempt ' + info.proxyingId +
+            ' failed (getting)');
+        if (!this.core.disconnectedWhileProxying) {
+          // This is an immediate failure, i.e. failure of a connection attempt
+          // that never connected.  It is not a retry.
+          // Show the error toast indicating that a get attempt failed.
+          this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
+            name: info.name
+          });
+          this.unableToGet = true;
+        }
       }
+
       this.instanceTryingToGetAccessFrom = null;
       this.proxyingId = info.proxyingId;
       this.bringUproxyToFront();
@@ -602,7 +605,11 @@ export class UserInterface implements ui_constants.UiApi {
   /**
    * Undoes proxy configuration (e.g. chrome.proxy settings).
    */
-  public stopUsingProxy = () => {
+  public stopUsingProxy = (userCancelled ?:boolean) => {
+    if (userCancelled) {
+      this.userCancelledGetAttempt_ = true;
+    }
+
     this.browserApi.stopUsingProxy();
     this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
