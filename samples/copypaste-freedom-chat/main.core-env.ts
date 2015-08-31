@@ -1,7 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
-
-import freedomTypes = require('freedom.types');
 
 // This is an abstract type intended to abstract over the signalling messages.
 interface SignallingMessage {
@@ -39,9 +36,9 @@ freedom('freedom-module.json', {
     'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
   }).then(
-    (copypasteModuleFactory:() => freedomTypes.OnAndEmit<any,any>) => {
+    (copypasteModuleFactory:() => freedom.OnAndEmit<any,any>) => {
   // TODO: Make this have a freedom API.
-  var copypaste :freedomTypes.OnAndEmit<any,any> = copypasteModuleFactory();
+  var copypaste :freedom.OnAndEmit<any,any> = copypasteModuleFactory();
 
   // DOM nodes that we will choose from either the offer panel or the
   // answer panel once the user chooses whether to offer/answer.

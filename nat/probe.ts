@@ -1,5 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
@@ -15,7 +15,7 @@ var log :logging.Log = new logging.Log('probe');
 
 export function probe() : Promise<string> {
   return new Promise((F, R) => {
-    var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
+    var socket :freedom.UdpSocket.Socket = freedom['core.udpsocket']();
     // The weird-looking type is due to a DefinitelyTyped weirdness
     // mentioned here:
     //   https://github.com/Microsoft/TypeScript/issues/842
@@ -23,7 +23,7 @@ export function probe() : Promise<string> {
 
     var rejectShortcut: (e: any) => void = null;
 
-    function onUdpData(info: freedom_UdpSocket.RecvFromInfo) {
+    function onUdpData(info: freedom.UdpSocket.RecvFromInfo) {
       var rspStr: string = arraybuffers.arrayBufferToString(info.data);
       log.debug('receive response = ' + rspStr);
 
@@ -70,7 +70,7 @@ export function probe() : Promise<string> {
     socket.on('onData', onUdpData);
 
     socket.bind('0.0.0.0', 0).then(socket.getInfo).then(
-        (socketInfo:freedom_UdpSocket.SocketInfo) => {
+        (socketInfo:freedom.UdpSocket.SocketInfo) => {
       log.debug('listening on %1', socketInfo);
       var reqStr :string = JSON.stringify({ 'ask': 'AmIFullCone' });
       log.debug('send ' + reqStr);

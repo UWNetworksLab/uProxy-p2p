@@ -9,11 +9,9 @@ import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 
-import freedom_types = require('freedom.types');
-
 function slowTestDescription(useChurn:boolean) {
   var testerFactoryManager
-        :freedom_types.FreedomModuleFactoryManager<ProxyIntegrationTester>;
+        :freedom.FreedomModuleFactoryManager<ProxyIntegrationTester>;
   var createTestModule = function(denyLocalhost?:boolean)
       :ProxyIntegrationTester {
     return testerFactoryManager(denyLocalhost, useChurn);

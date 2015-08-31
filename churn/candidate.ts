@@ -1,12 +1,11 @@
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom.d.ts' />
 
 import net = require('../net/net.types');
 
 // Throughout this file "RTCIceCandidate" refers to the JSON structure
 // produced and consumed by Freedom, not an actual browser
 // RTCIceCandidate object.
-import RTCIceCandidate = freedom_RTCPeerConnection.RTCIceCandidate;
+import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
 
 export interface IceExtension {
   key: string;

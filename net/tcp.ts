@@ -1,7 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/tcp-socket.d.ts' />
 
 import logging = require('../logging/logging');
 import handler = require('../handler/queue');
@@ -27,7 +25,7 @@ export interface ConnectionInfo {
 var DEFAULT_MAX_CONNECTIONS = 1048576;
 
 // Public only for unit tests.
-export function endpointOfSocketInfo(info:freedom_TcpSocket.SocketInfo)
+export function endpointOfSocketInfo(info:freedom.TcpSocket.SocketInfo)
     : ConnectionInfo {
   var retval :ConnectionInfo = {};
   if (typeof info.localAddress == 'string' &&
@@ -51,7 +49,7 @@ export function endpointOfSocketInfo(info:freedom_TcpSocket.SocketInfo)
 // to "forget" about the instance, i.e.:
 //   freedom['core.tcpsocket'].close
 // This is different from calling close on the provider instance.
-function destroyFreedomSocket_(socket:freedom_TcpSocket.Socket) : void {
+function destroyFreedomSocket_(socket:freedom.TcpSocket.Socket) : void {
   freedom['core.tcpsocket'].close(socket);
 }
 
@@ -64,7 +62,7 @@ export class Server {
   // Unique ID, for logging purposes.
   private id_ :string;
 
-  private socket_ :freedom_TcpSocket.Socket;
+  private socket_ :freedom.TcpSocket.Socket;
 
   // Tracks calls to the socket, for safe destruction.
   private counter_ :counter.Counter;
@@ -107,7 +105,7 @@ export class Server {
   }
 
   // Invoked when the socket terminates.
-  private onDisconnectHandler_ = (info:freedom_TcpSocket.DisconnectInfo) : void => {
+  private onDisconnectHandler_ = (info:freedom.TcpSocket.DisconnectInfo) : void => {
     if (info) {
       log.debug('%1: onDisconnect: %2', this.id_, info);
     } else {
@@ -140,7 +138,7 @@ export class Server {
           this.endpoint_.port).then(() => {
         return this.socket_.getInfo();
       });
-    }).then((info:freedom_TcpSocket.SocketInfo) => {
+    }).then((info:freedom.TcpSocket.SocketInfo) => {
       this.endpoint_ = {
         address: info.localAddress,
         port: info.localPort
@@ -155,14 +153,14 @@ export class Server {
 
   // Invoked each time a new connection is established with the server.
   private onConnectionHandler_ = (
-      acceptValue:freedom_TcpSocket.ConnectInfo) : void => {
+      acceptValue:freedom.TcpSocket.ConnectInfo) : void => {
     log.debug('%1: new connection', this.id_);
     var socketId = acceptValue.socket;
 
     if (this.connectionsCount() >= this.maxConnections_) {
       log.warn('%1: hit maximum connections count, dropping new connection',
           this.id_);
-      var newConnection :freedom_TcpSocket.Socket =
+      var newConnection :freedom.TcpSocket.Socket =
           freedom['core.tcpsocket'](socketId);
       newConnection.close().then(() => {
         destroyFreedomSocket_(newConnection);
@@ -281,7 +279,7 @@ export class Connection {
   // fulfill/reject the onceClosed once.
   private state_ :Connection.State;
   // The underlying Freedom TCP socket.
-  private connectionSocket_ :freedom_TcpSocket.Socket;
+  private connectionSocket_ :freedom.TcpSocket.Socket;
 
   // Tracks calls to the socket, for safe destruction.
   private counter_ :counter.Counter;
@@ -335,7 +333,7 @@ export class Connection {
                        connectionKind.endpoint.port)
               .then(this.pause)
               .then(this.connectionSocket_.getInfo)
-              .then((info:freedom_TcpSocket.SocketInfo) => {
+              .then((info:freedom.TcpSocket.SocketInfo) => {
                 if (!this.startPaused_) {
                   this.resume();
                 }
@@ -379,7 +377,7 @@ export class Connection {
   }
 
   // Use the dataFromSocketQueue handler for data from the socket.
-  private onData_ = (readInfo:freedom_TcpSocket.ReadInfo) : void => {
+  private onData_ = (readInfo:freedom.TcpSocket.ReadInfo) : void => {
     this.dataFromSocketQueue.handle(readInfo.data);
   }
 
@@ -398,7 +396,7 @@ export class Connection {
 
   // Invoked when the socket is closed for any reason.
   // Fulfills onceClosed.
-  private onDisconnectHandler_ = (info:freedom_TcpSocket.DisconnectInfo) : void => {
+  private onDisconnectHandler_ = (info:freedom.TcpSocket.DisconnectInfo) : void => {
     if (info) {
       log.debug('%1: onDisconnect: %2', this.connectionId, info);
     } else {
