@@ -100,9 +100,9 @@ parentModule.on('start', doStart);
 // Messages are dispatched to either the socks-to-rtc or rtc-to-net
 // modules depending on whether we're acting as the frontend or backend,
 // respectively.
-parentModule.on('handleSignalMessage', (encodedMessage:Object) => {
+parentModule.on('handleSignalMessage', (encodedMessage:string) => {
   // TODO: signal errors to the UI
-  var message = onetime.decode(encodedMessage.toString());
+  var message = onetime.decode(encodedMessage);
 
   if (socksRtc !== undefined) {
     socksRtc.handleSignalFromPeer(message);
