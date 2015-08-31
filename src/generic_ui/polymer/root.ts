@@ -167,7 +167,7 @@ Polymer({
     }
   },
   revertProxySettings: function() {
-    this.ui.stopUsingProxy();
+    this.ui.stopUsingProxy(true);
   },
   restartProxying: function() {
     this.ui.restartProxying();
