@@ -36,7 +36,7 @@ var log :logging.Log = new logging.Log('TURN frontend');
  */
 export class Frontend {
   /** Socket on which the server is listening. */
-  private socket_ :freedom.UdpSocket.Socket;
+  private socket_ :freedom.UdpSocket.Socket = freedom['core.udpsocket']();
 
   // TODO: the following two maps are a code smell...needs a re-think
 
@@ -57,10 +57,6 @@ export class Frontend {
       clientEndpoint:net.Endpoint) : void => {
     log.warn('no handler set for outgoing messages!');
   };
-
-  constructor () {
-    this.socket_ = freedom['core.udpsocket']();
-  }
 
   /**
    * Returns a promise to create a socket, bind to the specified address, and

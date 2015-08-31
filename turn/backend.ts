@@ -36,10 +36,6 @@ export class Backend {
     log.warn('no handler set for outgoing messages!');
   };
 
-  constructor () {
-    log.debug('TURN backend module created');
-  }
-
   public handleIpc = (
       stunMessage:messages.StunMessage,
       clientEndpoint:net.Endpoint) : Promise<void> => {
