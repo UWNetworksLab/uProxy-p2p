@@ -1,7 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 // TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
@@ -34,7 +32,7 @@ import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
 import MirrorMapping = churn_pipe_types.MirrorMapping;
 
 import Candidate = candidate.Candidate;
-import RTCIceCandidate = freedom_RTCPeerConnection.RTCIceCandidate;
+import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
 
 var log :logging.Log = new logging.Log('churn');
 
@@ -144,6 +142,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   //         https://github.com/uProxy/uproxy/issues/585
   export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
+    // Maximum time to spend gathering ICE candidates.
+    // We cap this so that slow STUN servers, in the absence
+    // of trickle ICE, don't make the user wait unnecessarily.
+    private static PROBE_TIMEOUT_MS_ = 3000;
+
     public peerOpenedChannelQueue :handler.QueueHandler<peerconnection.DataChannel, void>;
     public signalForPeerQueue :handler.Queue<ChurnSignallingMessage, void>;
     public peerName :string;
@@ -182,12 +185,18 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.havePipe_ = F;
     });
 
+    // Fulfills once the probe connection has finished gathering candidates.
+    private probingComplete_ :() => void;
+    private onceProbingComplete_ = new Promise((F,R) => {
+      this.probingComplete_ = F;
+    });
+
     private static internalConnectionId_ = 0;
 
-    constructor(probeRtcPc:freedom_RTCPeerConnection.RTCPeerConnection,
+    constructor(probeRtcPc:freedom.RTCPeerConnection.RTCPeerConnection,
                 peerName?:string,
                 private skipPublicEndpoint_?:boolean,
-                private portControl_?:freedom_PortControl.PortControl) {
+                private portControl_?:freedom.PortControl.PortControl) {
       this.peerName = peerName || 'churn-connection-' +
           (++Connection.internalConnectionId_);
 
@@ -209,7 +218,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     private configureProbeConnection_ = (
-        freedomPc:freedom_RTCPeerConnection.RTCPeerConnection) => {
+        freedomPc:freedom.RTCPeerConnection.RTCPeerConnection) => {
       var probePeerName = this.peerName + '-probe';
 
       // The list of all candidates returned by the probe connection.
@@ -229,7 +238,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                 log.debug('Port control not available in churn');
               } else {
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
-                  then((mapping:freedom_PortControl.Mapping) => {
+                  then((mapping:freedom.PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
                       log.debug("addMapping() failed. Mapping object: ", 
                                 mapping);
@@ -254,14 +263,25 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             candidates.push(c);
           }
         } else if (message.type === signals.Type.NO_MORE_CANDIDATES) {
-          this.probeConnection_.close().then(() => {
-            return this.onceHaveCaesarKey_;
-          }).then(this.configurePipe_).then(() => {
-            this.processProbeCandidates_(candidates);
-            this.havePipe_();
-          });
+          this.probingComplete_();
         }
       });
+
+      setTimeout(() => {
+        log.warn('%1: probing timed out, closing probe connection',
+            this.peerName);
+        this.probingComplete_();
+      }, Connection.PROBE_TIMEOUT_MS_);
+
+      this.onceProbingComplete_.then(() => {
+        this.probeConnection_.close().then(() => {
+          return this.onceHaveCaesarKey_;
+        }).then(this.configurePipe_).then(() => {
+          this.processProbeCandidates_(candidates);
+          this.havePipe_();
+        });
+      });
+
       this.probeConnection_.negotiateConnection();
     }
 
@@ -342,7 +362,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     private configureObfuscatedConnection_ = () => {
       // We use an empty configuration to ensure that no STUN servers are pinged.
-      var obfConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+      var obfConfig :freedom.RTCPeerConnection.RTCConfiguration = {
         iceServers: []
       };
       var obfPeerName = this.peerName + '-obfuscated';
@@ -460,7 +480,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     public openDataChannel = (channelLabel:string,
-        options?:freedom_RTCPeerConnection.RTCDataChannelInit)
+        options?:freedom.RTCPeerConnection.RTCDataChannelInit)
         : Promise<peerconnection.DataChannel> => {
           return this.obfuscatedConnection_.openDataChannel(channelLabel,
               options);

@@ -1,13 +1,13 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path="../../../third_party/freedom-typings/rtcpeerconnection.d.ts" />
+/// <reference path="../../../third_party/freedom-typings/freedom.d.ts" />
 
 import MockFreedomRtcDataChannel =
   require('../freedom/mocks/mock-rtcdatachannel');
 import MockFreedomRtcPeerConnection =
   require('../freedom/mocks/mock-rtcpeerconnection');
-import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
-import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
+import RTCPeerConnection = freedom.RTCPeerConnection.RTCPeerConnection;
+import RTCDataChannelInit = freedom.RTCPeerConnection.RTCDataChannelInit;
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 
@@ -70,7 +70,7 @@ describe('PeerConnection', function() {
       return Promise.resolve('foo-channel-id');
     });
     var createOfferSpy = spyOn(mockRtcPeerConnection, 'createOffer');
-    var mockOffer :freedom_RTCPeerConnection.RTCSessionDescription = {
+    var mockOffer :freedom.RTCPeerConnection.RTCSessionDescription = {
       type: 'sdp',
       sdp: 'mock:sdp'
     };
@@ -99,7 +99,7 @@ describe('PeerConnection', function() {
     });
 
     var createOfferSpy = spyOn(mockRtcPeerConnection, 'createOffer');
-    var mockOffer :freedom_RTCPeerConnection.RTCSessionDescription = {
+    var mockOffer :freedom.RTCPeerConnection.RTCSessionDescription = {
       type: 'sdp',
       sdp: 'mock:sdp'
     };
@@ -110,7 +110,7 @@ describe('PeerConnection', function() {
 
     var setRemoteDescriptionSpy = spyOn(mockRtcPeerConnection,
         'setRemoteDescription').and.callFake(
-        (desc:freedom_RTCPeerConnection.RTCSessionDescription) => {
+        (desc:freedom.RTCPeerConnection.RTCSessionDescription) => {
       // Set a candidate *before* setRemoteDescription() has resolved.
       pc.handleSignalMessage({
         type: signals.Type.CANDIDATE,

@@ -1,10 +1,8 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 
-import freedom_types = require('freedom.types');
-export interface OnEmitModule extends freedom_types.OnAndEmit<any,any> {};
+export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
-  freedom_types.FreedomModuleFactoryManager<OnEmitModule> {};
+  freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
 var script = document.createElement('script');
 script.src = 'freedom-for-chrome/freedom-for-chrome.js';

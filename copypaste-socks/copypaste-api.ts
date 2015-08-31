@@ -1,6 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
-
-import freedom_types = require('freedom.types');
+/// <reference path='../../../third_party/freedom-typings/freedom.d.ts' />
 
 // 'model' object contains variables about the state of the application.
 // Polymer elements will bind to model so that the elements' style and
@@ -24,7 +22,7 @@ export interface Model {
 
 export interface CopypasteApi {
   // This is a promise for the freedom module stub.
-  onceReady :Promise<freedom_types.OnAndEmit<any,any>>;
+  onceReady :Promise<freedom.OnAndEmit<any,any>>;
   model :Model;
   consumeInboundMessage :() => void;
   verifyDecryptInboundMessage :(ciphertext:string) => void;

@@ -1,22 +1,19 @@
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import signals = require('../webrtc/signals');
-import freedom_types = require('freedom.types');
 import net = require('../net/net.types');
 import copypaste_api = require('../copypaste-socks/copypaste-api');
 
 // Platform-specific function to load the freedomjs module.
-declare var loadModule: () => Promise<freedom_types.OnAndEmit<any, any>>;
+declare var loadModule: () => Promise<freedom.OnAndEmit<any, any>>;
 
 module copypaste_module {
 
-  export var onceReady :Promise<freedom_types.OnAndEmit<any,any>> =
-      loadModule().then((copypaste:freedom_types.OnAndEmit<any,any>) => {
+  export var onceReady :Promise<freedom.OnAndEmit<any,any>> =
+      loadModule().then((copypaste:freedom.OnAndEmit<any,any>) => {
     copypaste.on('signalForPeer', (message:string) => {
       model.readyForStep2 = true;
       if (model.usingCrypto) {
@@ -34,7 +31,7 @@ module copypaste_module {
       model.outboundMessageValue = ciphertext;
     });
 
-    copypaste.on('verifyDecryptResult', (result:VerifyDecryptResult) => {
+    copypaste.on('verifyDecryptResult', (result:freedom.PgpProvider.VerifyDecryptResult) => {
       model.inputDecrypted = true;
       model.inputSigned = result.signedBy[0] == model.friendUserId;
       model.inboundText = arraybuffers.arrayBufferToString(result.data);

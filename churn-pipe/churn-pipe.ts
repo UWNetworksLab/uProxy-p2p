@@ -1,7 +1,6 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
 
 // TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
 // Ideal:
@@ -22,7 +21,7 @@ import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import ipaddr = require('ipaddr.js');
 
-import Socket = freedom_UdpSocket.Socket;
+import Socket = freedom.UdpSocket.Socket;
 
 var log :logging.Log = new logging.Log('churn-pipe');
 
@@ -187,7 +186,7 @@ class Pipe {
       return portPromise;
     }
 
-    var socket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
+    var socket :freedom.UdpSocket.Socket = freedom['core.udpsocket']();
     var index = this.addPublicSocket_(socket, publicEndpoint);
     // Firefox only supports binding to ANY and localhost, so bind to ANY.
     // TODO: Figure out how to behave correctly when we are instructed
@@ -207,7 +206,7 @@ class Pipe {
     }).then(() => {
       log.debug('%1: successfully bound public endpoint: %2',
           this.name_, publicEndpoint);
-      socket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
+      socket.on('onData', (recvFromInfo:freedom.UdpSocket.RecvFromInfo) => {
         this.onIncomingData_(recvFromInfo, publicEndpoint.address, index);
       });
     });
@@ -331,7 +330,7 @@ class Pipe {
       return socketPromise;
     }
 
-    var mirrorSocket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
+    var mirrorSocket :freedom.UdpSocket.Socket = freedom['core.udpsocket']();
      mirrorSocket;
     // Bind to INADDR_ANY owing to restrictions on localhost candidates
     // in Firefox:
@@ -339,7 +338,7 @@ class Pipe {
     // TODO: bind to an actual, non-localhost address (see the issue)
     var anyInterface = Pipe.anyInterface_(remoteEndpoint.address);
     socketPromise = mirrorSocket.bind(anyInterface, 0).then(() : Socket => {
-      mirrorSocket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
+      mirrorSocket.on('onData', (recvFromInfo:freedom.UdpSocket.RecvFromInfo) => {
         // Ignore packets that do not originate from the browser, for a
         // theoretical security benefit.
         if (recvFromInfo.port !==
@@ -389,7 +388,7 @@ class Pipe {
     return address;
   }
 
-  private endpointFromInfo_ = (socketInfo:freedom_UdpSocket.SocketInfo) => {
+  private endpointFromInfo_ = (socketInfo:freedom.UdpSocket.SocketInfo) => {
     if (!socketInfo.localAddress) {
       throw new Error('Cannot process incomplete info: ' +
           JSON.stringify(socketInfo));
@@ -426,7 +425,7 @@ class Pipe {
    * The message is de-obfuscated before being passed to the browser endpoint
    * via a corresponding mirror socket.
    */
-  private onIncomingData_ = (recvFromInfo:freedom_UdpSocket.RecvFromInfo,
+  private onIncomingData_ = (recvFromInfo:freedom.UdpSocket.RecvFromInfo,
       iface:string, index:number) => {
     var browserPort = this.browserEndpoints_[iface];
     if (!browserPort) {

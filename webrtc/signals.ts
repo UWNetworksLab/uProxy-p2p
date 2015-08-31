@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom.d.ts' />
 
 // This enum describes a simple signal message protocol for establishing P2P
 // connections. TODO: rename to more accurately describe the intended
@@ -19,8 +19,8 @@ export interface Message {
   // known by consumers of this type.
   type          :Type
   // The |candidate| parameter is set iff type === CANDIDATE
-  candidate     ?:freedom_RTCPeerConnection.RTCIceCandidate;
+  candidate     ?:freedom.RTCPeerConnection.RTCIceCandidate;
   // The |description| parameter is set iff type === OFFER or
   // type === ANSWER
-  description   ?:freedom_RTCPeerConnection.RTCSessionDescription;
+  description   ?:freedom.RTCPeerConnection.RTCSessionDescription;
 }

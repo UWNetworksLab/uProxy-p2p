@@ -1,6 +1,4 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
@@ -24,7 +22,7 @@ loggingController.setDefaultFilter(
 
 var log :logging.Log = new logging.Log('copypaste-socks');
 
-var pgp :PgpProvider = freedom['pgp']();
+var pgp :freedom.PgpProvider.PgpProvider = freedom['pgp']();
 var friendKey :string;
 
 var parentModule = freedom();
@@ -32,11 +30,11 @@ var parentModule = freedom();
 // TODO interactive setup w/real passphrase
 pgp.setup('', 'uProxy user <noreply@uproxy.org>')
   .then(pgp.exportKey)
-  .then((publicKey:PublicKey) => {
+  .then((publicKey:freedom.PgpProvider.PublicKey) => {
   parentModule.emit('publicKeyExport', publicKey.key);
 });
 
-var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+var pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
   iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                {urls: ['stun:stun1.l.google.com:19302']},
                {urls: ['stun:stun.services.mozilla.com']}]
@@ -162,7 +160,7 @@ parentModule.on('verifyDecrypt', (ciphertext:string) => {
     .then((cipherdata:ArrayBuffer) => {
       return pgp.verifyDecrypt(cipherdata, friendKey);
     })
-    .then((result:VerifyDecryptResult) => {
+    .then((result:freedom.PgpProvider.VerifyDecryptResult) => {
       parentModule.emit('verifyDecryptResult', result);
     });
 });

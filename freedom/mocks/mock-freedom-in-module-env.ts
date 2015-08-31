@@ -1,11 +1,7 @@
 /// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/console.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/freedom.d.ts' />
 
-import freedomTypes = require('freedom.types');
-
-
-export class MockModuleSelfConstructor implements freedomTypes.ModuleSelfConstructor {
+export class MockModuleSelfConstructor implements freedom.ModuleSelfConstructor {
   public provideSynchronous(classFn:Function) : void {}
   public provideAsynchronous(classFn:Function) : void {}
   public providePromises(classFn:Function) : void {}
@@ -13,20 +9,20 @@ export class MockModuleSelfConstructor implements freedomTypes.ModuleSelfConstru
 
 export class MockParentModuleThing
     extends MockModuleSelfConstructor
-    implements freedomTypes.ParentModuleThing {
+    implements freedom.ParentModuleThing {
   public on(t:string, f:Function) : void {}
   public emit(t:string, x:any) : void {}
 }
 
-export class MockFreedomCore implements freedomTypes.Core {
-  public getLogger(loggerName:string) : Promise<freedomTypes.Logger> {
-    return Promise.resolve<freedomTypes.Logger>(null);
+export class MockFreedomCore implements freedom.Core {
+  public getLogger(loggerName:string) : Promise<freedom.Logger> {
+    return Promise.resolve<freedom.Logger>(null);
   }
-  public createChannel() : Promise<freedomTypes.ChannelSpecifier>{
-    return Promise.resolve<freedomTypes.ChannelSpecifier>(null);
+  public createChannel() : Promise<freedom.ChannelSpecifier>{
+    return Promise.resolve<freedom.ChannelSpecifier>(null);
   }
-  public bindChannel(channelIdentifier:string) : Promise<freedomTypes.Channel> {
-    return Promise.resolve<freedomTypes.Channel>(null);
+  public bindChannel(channelIdentifier:string) : Promise<freedom.Channel> {
+    return Promise.resolve<freedom.Channel>(null);
   }
   public getId() : Promise<string[]> {
     return Promise.resolve<string[]>(null);
@@ -34,14 +30,14 @@ export class MockFreedomCore implements freedomTypes.Core {
 }
 
 function makeMockFreedomModuleFactory<T>(f:Function)
-    : freedomTypes.FreedomModuleFactoryManager<T> {
-  var factoryManager :freedomTypes.FreedomModuleFactoryManager<T>;
-  factoryManager = <freedomTypes.FreedomModuleFactoryManager<T>>f;
+    : freedom.FreedomModuleFactoryManager<T> {
+  var factoryManager :freedom.FreedomModuleFactoryManager<T>;
+  factoryManager = <freedom.FreedomModuleFactoryManager<T>>f;
   factoryManager.close = () => { return Promise.resolve<void>(); };
   return factoryManager;
 }
 
-export class MockFreedomConsole implements freedom_Console.Console {
+export class MockFreedomConsole implements freedom.Console.Console {
   public log(source:string, message:string) : Promise<void> {
     return Promise.resolve<void>();
   }
@@ -63,24 +59,24 @@ export class MockFreedomConsole implements freedom_Console.Console {
 // curious type of a freedom object. :)
 export function makeMockFreedomInModuleEnv(
     providerFactories ?: {[name:string] : Function})
-    : freedomTypes.FreedomInModuleEnv {
+    : freedom.FreedomInModuleEnv {
 
-  var freedom :freedomTypes.FreedomInModuleEnv;
+  var mockFreedom :freedom.FreedomInModuleEnv;
 
   var freeedomParentModuleThing_ = new MockParentModuleThing();
   var freedomFn = () => { return freeedomParentModuleThing_; }
-  freedom = <freedomTypes.FreedomInModuleEnv>freedomFn;
+  mockFreedom = <freedom.FreedomInModuleEnv>freedomFn;
 
-  freedom['THIS_IS_A_MOCK'] = makeMockFreedomModuleFactory(() => {});
+  mockFreedom['THIS_IS_A_MOCK'] = makeMockFreedomModuleFactory(() => {});
 
   var core_ = new MockFreedomCore();
-  freedom['core'] = makeMockFreedomModuleFactory<freedomTypes.Core>(
+  mockFreedom['core'] = makeMockFreedomModuleFactory<freedom.Core>(
       () => { return core_; });
 
   for(var providerName in providerFactories) {
-    freedom[providerName] =
+    mockFreedom[providerName] =
       makeMockFreedomModuleFactory(providerFactories[providerName]);
   }
 
-  return freedom;
+  return mockFreedom;
 }
