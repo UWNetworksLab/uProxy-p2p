@@ -44,6 +44,14 @@ export class SignalBatcher {
     throw new Error('no supported provider type found');
   }
 
+  // The flattening code here only works with simple messages.
+  private static isSupportedMessage_ = (
+      message:bridge.SignallingMessage) : boolean => {
+    return message.signals !== undefined &&
+        Object.keys(message.signals).length === 1 &&
+        message.signals[Object.keys(message.signals)[0]].length === 1;
+  }
+
   // "Flattens" the supplied signalling messages into one, batched, message, e.g.:
   //   {
   //     signals: {
@@ -84,16 +92,23 @@ export class SignalBatcher {
   // Public for testing.
   public static flatten_ = (
       messages:bridge.SignallingMessage[]) : bridge.SignallingMessage => {
-    var providerName = Object.keys(messages[0].signals)[0];
-
     var result :bridge.SignallingMessage = {
       signals: {},
       first: true
     };
-    result.signals[providerName] = messages.map(signal => {
-      return signal.signals[providerName][0];
-    });
-
+    if (messages.length > 0) {
+      var firstProviderName = Object.keys(messages[0].signals)[0];
+      result.signals[firstProviderName] = messages.map(message => {
+        if (!SignalBatcher.isSupportedMessage_(message)) {
+          throw new Error('messages must have one provider, with one message');
+        }
+        var providerName = Object.keys(message.signals)[0];
+        if (providerName !== firstProviderName) {
+          throw new Error('messages must all have same provider');
+        }
+        return message.signals[firstProviderName][0];
+      });
+    }
     return result;
   }
 
@@ -109,11 +124,8 @@ export class SignalBatcher {
   // "terminating" message, i.e. NO_MORE_CANDIDATES, then the emitBatch_
   // function will be invoked.
   public addToBatch = (message:bridge.SignallingMessage) : void => {
-    // check input: there should be exactly one provider, with exactly one signal
-    if (message.signals === undefined ||
-        Object.keys(message.signals).length != 1 ||
-        message.signals[Object.keys(message.signals)[0]].length != 1) {
-      throw new Error('messages must have only one provider, with only one message');
+    if (!SignalBatcher.isSupportedMessage_(message)) {
+      throw new Error('messages must have one provider, with one message');
     }
 
     // is this batchable?
