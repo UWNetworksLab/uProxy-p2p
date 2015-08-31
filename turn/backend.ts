@@ -30,48 +30,27 @@ export class Backend {
   private allocations_:{[s:string]:Promise<Allocation>} = {};
 
   /** Invoked when a message must be sent to the frontend. */
-  private ipcHandler_ : ((data:ArrayBuffer) => void);
+  private ipcHandler_ = (
+      stunMessage:messages.StunMessage,
+      clientEndpoint:net.Endpoint) : void => {
+    log.warn('no handler set for outgoing messages!');
+  };
 
   constructor () {
     log.debug('TURN backend module created');
   }
 
-  public handleIpc = (data :ArrayBuffer) : Promise<void> => {
-    var request :messages.StunMessage;
-    try {
-      request = messages.parseStunMessage(new Uint8Array(data));
-    } catch (e) {
-      return Promise.reject(new Error(
-          'failed to parse STUN message from IPC channel'));
-    }
-
-    // With which client is this message associated?
-    var clientEndpoint :net.Endpoint;
-    try {
-      var ipcAttribute = messages.findFirstAttributeWithType(
-          messages.MessageAttribute.IPC_TAG,
-          request.attributes);
-      try {
-        clientEndpoint = messages.parseXorMappedAddressAttribute(
-            ipcAttribute.value);
-      } catch (e) {
-        return Promise.reject(new Error(
-            'could not parse address in IPC_TAG attribute: ' + e.message));
-      }
-    } catch (e) {
-      return Promise.reject(new Error(
-          'message received on IPC channel without IPC_TAG attribute'));
-    }
-    var tag = clientEndpoint.address + ':' + clientEndpoint.port;
-
-    if (request.method == messages.MessageMethod.ALLOCATE) {
+  public handleIpc = (
+      stunMessage:messages.StunMessage,
+      clientEndpoint:net.Endpoint) : Promise<void> => {
+    if (stunMessage.method == messages.MessageMethod.ALLOCATE) {
       this.makeAllocation_(clientEndpoint).then((allocation:Allocation) => {
         return allocation.socket.getInfo().then(
             (socketInfo:freedom.UdpSocket.SocketInfo) => {
-          this.emitIpc_({
+          this.ipcHandler_({
             method: messages.MessageMethod.ALLOCATE,
             clazz: messages.MessageClass.SUCCESS_RESPONSE,
-            transactionId: request.transactionId,
+            transactionId: stunMessage.transactionId,
             attributes: [{
               // Endpoint on which the new socket is listening.
               // This is really the whole point of the thing.
@@ -95,24 +74,24 @@ export class Backend {
         });
       }).catch((e:Error) => {
         // Send error response (failed to make allocation).
-        this.emitIpc_({
+        this.ipcHandler_({
           method: messages.MessageMethod.ALLOCATE,
           clazz: messages.MessageClass.FAILURE_RESPONSE,
-          transactionId: request.transactionId,
+          transactionId: stunMessage.transactionId,
           attributes: []
         }, clientEndpoint);
       });
-    } else if (request.method == messages.MessageMethod.SEND) {
+    } else if (stunMessage.method == messages.MessageMethod.SEND) {
       // Extract the destination address and payload.
       var destinationAttribute :messages.StunAttribute;
       var dataAttribute :messages.StunAttribute;
       try {
         destinationAttribute = messages.findFirstAttributeWithType(
             messages.MessageAttribute.XOR_PEER_ADDRESS,
-            request.attributes);
+            stunMessage.attributes);
         dataAttribute = messages.findFirstAttributeWithType(
             messages.MessageAttribute.DATA,
-            request.attributes);
+            stunMessage.attributes);
       } catch (e) {
         return Promise.reject(new Error(
             'no address or data attribute in SEND indication'));
@@ -122,6 +101,7 @@ export class Backend {
           destinationAttribute.value);
       var payload = Backend.bytesToArrayBuffer_(dataAttribute.value);
 
+      var tag = clientEndpoint.address + ':' + clientEndpoint.port;
       if (!(tag in this.allocations_)) {
         return Promise.reject(new Error(
             'received SEND indication for client without allocation'));
@@ -135,30 +115,9 @@ export class Backend {
       });
     } else {
       return Promise.reject(new Error(
-          'unsupported IPC method: ' + request.method));
+          'unsupported IPC method: ' + stunMessage.method));
     }
     return Promise.resolve<void>();
-  }
-
-  /**
-   * Emits a message which should be relayed to the remote side.
-   * The message is a STUN message, as received from a TURN client but with
-   * the addition of an IPC_TAG attribute identifying the TURN client.
-   */
-  private emitIpc_ = (
-      stunMessage:messages.StunMessage,
-      clientEndpoint:net.Endpoint) : void => {
-    // Add an IPC_TAG attribute.
-    stunMessage.attributes.push({
-      type: messages.MessageAttribute.IPC_TAG,
-      value: messages.formatXorMappedAddressAttribute(
-          clientEndpoint.address, clientEndpoint.port)
-    });
-    if (this.ipcHandler_) {
-      this.ipcHandler_(messages.formatStunMessage(stunMessage).buffer);
-    } else {
-      log.warn('no handler set for outgoing messages!');
-    }
   }
 
   /** Promises to allocate a socket, wrapped in an Allocation. */
@@ -181,7 +140,7 @@ export class Backend {
     });
 
     socket.on('onData', (recvFromInfo:freedom.UdpSocket.RecvFromInfo) => {
-      this.emitIpc_({
+      this.ipcHandler_({
         method: messages.MessageMethod.DATA,
         clazz: messages.MessageClass.INDICATION,
         transactionId: Backend.getRandomTransactionId_(),
@@ -201,8 +160,10 @@ export class Backend {
     return promise;
   }
 
-  /** Sets the function to call to send a message to the backend. */
-  public setIpcHandler = (ipcHandler:(data:ArrayBuffer) => void) : void => {
+  /** Sets the function to call to send a message to the frontend. */
+  public setIpcHandler = (ipcHandler:(
+      stunMessage:messages.StunMessage,
+      clientEndpoint:net.Endpoint) => void) : void => {
     this.ipcHandler_ = ipcHandler;
   }
 
