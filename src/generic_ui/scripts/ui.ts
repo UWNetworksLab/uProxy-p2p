@@ -590,12 +590,20 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (instanceId) {
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
-      if (data.error) {
-        this.bringUproxyToFront();
-        this.core.disconnectedWhileProxying = instanceId;
+    }
+
+    if (data.error) {
+      if (instanceId) {
         // Auto-retry.
+        this.core.disconnectedWhileProxying = instanceId;
         this.restartProxying();
+      } else {
+        // this handles the case where it was a one-time connection
+        this.core.disconnectedWhileProxying = 'unknown';
       }
+
+      // regardless, let the user know
+      this.bringUproxyToFront();
     }
 
     this.updateGettingStatusBar_();
