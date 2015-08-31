@@ -127,8 +127,6 @@ export class SignalBatcher {
       var flattened = SignalBatcher.flatten_(this.batch_);
       log.debug('%1: batch ready: %2', this.name_, flattened);
 
-      this.batch_ = [];
-
       var flattenedJSON = JSON.stringify(flattened);
       var buffer = new Buffer(flattenedJSON);
       var compressedBuffer = zlib.gzipSync(buffer);
@@ -138,6 +136,9 @@ export class SignalBatcher {
           rawLength, flattenedJSON.length, compressedBuffer.length, encoded.length);
 
       this.emitBatch_(encoded);
+
+      // Prepare for the next batch if it happens, e.g. due to renegotiation.
+      this.batch_ = [];
     } else {
       log.debug('%1: adding signal to batch: %2', this.name_, message);
       this.batch_.push(message);
