@@ -31,6 +31,10 @@ module copypaste_module {
       model.outboundMessageValue = ciphertext;
     });
 
+    copypaste.on('signalMessageResult', (result:boolean) => {
+      model.inputIsWellFormed = result;
+    });
+
     copypaste.on('verifyDecryptResult', (result:freedom.PgpProvider.VerifyDecryptResult) => {
       model.inputDecrypted = true;
       model.inputSigned = result.signedBy[0] == model.friendUserId;
@@ -78,6 +82,14 @@ module copypaste_module {
     totalBytesReceived : 0,
     totalBytesSent : 0
   };
+
+  // Sends the contents of the paste box to the freedomjs module, which
+  // validates and sends back the results via a ''
+  export function parseInboundMessages() : void {
+    onceReady.then(function(copypaste) {
+      copypaste.emit('validateSignalMessage', model.inboundText.trim());
+    });
+  }
 
   // Forwards each line from the paste box to the Freedom app, which
   // interprets each as a signalling channel message. The Freedom app

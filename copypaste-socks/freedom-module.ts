@@ -96,12 +96,24 @@ var doStart = () => {
 
 parentModule.on('start', doStart);
 
+// Receive signalling channel messages from the UI and
+// reply with a signalMessageResult message indicating
+// whether it's well formed.
+parentModule.on('validateSignalMessage', (encodedMessage:string) => {
+  try {
+    onetime.decode(encodedMessage);
+    parentModule.emit('signalMessageResult', true);
+  } catch (e) {
+    log.warn('input is badly formed');
+    parentModule.emit('signalMessageResult', false);
+  }
+});
+
 // Receive signalling channel messages from the UI.
 // Messages are dispatched to either the socks-to-rtc or rtc-to-net
 // modules depending on whether we're acting as the frontend or backend,
 // respectively.
 parentModule.on('handleSignalMessage', (encodedMessage:string) => {
-  // TODO: signal errors to the UI
   var message = onetime.decode(encodedMessage);
 
   if (socksRtc !== undefined) {

@@ -18,6 +18,8 @@ Polymer({
   parseInboundText: function() {
     if (copypaste.model.usingCrypto && !copypaste.model.inputDecrypted) {
       copypaste.verifyDecryptInboundMessage(copypaste.model.inboundText);
+    } else {
+      copypaste.parseInboundMessages();
     }
   },
   consumeInboundText: function() {

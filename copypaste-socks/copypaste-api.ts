@@ -14,6 +14,7 @@ export interface Model {
   readyForStep2 : boolean;
   outboundMessageValue : string;
   inboundText: string;
+  inputIsWellFormed : boolean;
   proxyingState : string; // e.g. 'notYetAttempted',
   endpoint : string; // E.g., '127.0.0.1:9999'
   totalBytesReceived : number;
@@ -24,6 +25,7 @@ export interface CopypasteApi {
   // This is a promise for the freedom module stub.
   onceReady :Promise<freedom.OnAndEmit<any,any>>;
   model :Model;
+  parseInboundMessages :() => void;
   consumeInboundMessage :() => void;
   verifyDecryptInboundMessage :(ciphertext:string) => void;
 }
