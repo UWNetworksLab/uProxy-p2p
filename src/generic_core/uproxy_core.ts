@@ -14,6 +14,7 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import version = require('../version/version');
+import StoredValue = require('./stored_value');
 import _ = require('lodash');
 
 import ui = ui_connector.connector;
@@ -49,14 +50,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
 
+  private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
+
   constructor() {
     log.debug('Preparing uProxy Core');
     copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
-      // TODO send this update only when
-      // update !== uproxy_core_api.Update.SIGNALLING_MESSAGE
-      // (after v0.8.13)
-      ui.update(update, message);
       if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
+        ui.update(update, message);
         return;
       }
 
@@ -76,7 +76,32 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         data: data
       });
     }, undefined, portControl);
+
     this.refreshPortControlSupport();
+
+    this.connectedNetworks_.get().then((networks :string[]) => {
+      var logins :Promise<void>[] = [];
+
+      for (var i in networks) {
+        logins.push(this.login({
+          network: networks[i],
+          reconnect: true,
+        }).catch(() => {
+          // any failure to login should just be ignored - the user will either
+          // be logged in with just some accounts or still on the login screen
+          return;
+        }));
+
+        // at this point, clear all networks; those that successfully get logged
+        // in will be re-added
+        this.connectedNetworks_.set([]);
+      }
+
+      // this return is meaningless, but it may be useful in the future
+      return Promise.all(logins);
+    }).then(() => {
+      log.info('Finished handling reconnections');
+    });
   }
 
   // sendInstanceHandshakeMessage = (clientId :string) => {
@@ -112,15 +137,24 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       this.pendingNetworks_[networkName] = network;
     }
 
-    // TODO: save the auto-login default
-
     return network.login(loginArgs.reconnect).then(() => {
       delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,
         userId: network.myInstance.userId
       });
-    }).catch((e) => {
+
+      return this.connectedNetworks_.get().then((networks :string[]) => {
+        if (_.includes(networks, networkName)) {
+          return;
+        }
+
+        networks.push(networkName);
+        return this.connectedNetworks_.set(networks);
+      }).catch((e) => {
+        console.warn('Could not save connected networks', e);
+      });
+    }, (e) => {
       delete this.pendingNetworks_[networkName];
       throw e;
     });
@@ -138,11 +172,18 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.warn('Could not logout of network', networkName);
       return;
     }
+
     return network.logout().then(() => {
       log.info('Successfully logged out of network', networkName);
+
+      return this.connectedNetworks_.get().then((networks) => {
+        return this.connectedNetworks_.set(_.without(networks, networkName));
+      }).catch((e) => {
+        log.warn('Could not remove network from list of connected networks', e);
+        // we will probably not be able to log back in anyways, ignore this
+        return;
+      });
     });
-    // TODO: disable auto-login
-    // store.saveMeToStorage();
   }
 
   // onUpdate not needed in the real core.
@@ -325,7 +366,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // the then() block of doNatProvoking ends up being called twice.
   // We keep track of the timeout that resets the NAT type to make sure
   // there is at most one timeout at a time.
-  private natResetTimeout_ :number;
+  private natResetTimeout_ :NodeJS.Timer;
 
   public getNatType = () :Promise<string> => {
     if (globals.natType === '') {
@@ -368,7 +409,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // Sets this.portControlSupport_ and sends update message to UI
   public refreshPortControlSupport = () :Promise<void> => {
     this.portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
-    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
               uproxy_core_api.PortControlSupport.PENDING);
 
     return portControl.probeProtocolSupport().then(
@@ -376,7 +417,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
                                    uproxy_core_api.PortControlSupport.TRUE :
                                    uproxy_core_api.PortControlSupport.FALSE;
-        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.portControlSupport_);
     });
   }
@@ -414,11 +455,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';
       } else {
-        natInfoStr += 'NAT-PMP: ' + 
+        natInfoStr += 'NAT-PMP: ' +
                   (natInfo.pmpSupport ? 'Supported' : 'Not supported') + '\n';
-        natInfoStr += 'PCP: ' + 
+        natInfoStr += 'PCP: ' +
                   (natInfo.pcpSupport ? 'Supported' : 'Not supported') + '\n';
-        natInfoStr += 'UPnP IGD: ' + 
+        natInfoStr += 'UPnP IGD: ' +
                   (natInfo.upnpSupport ? 'Supported' : 'Not supported') + '\n';
       }
       return natInfoStr;
