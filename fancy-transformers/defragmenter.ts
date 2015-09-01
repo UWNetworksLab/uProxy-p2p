@@ -4,6 +4,9 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('defragmenter');
 
+// Cache expiration is set to 60 seconds.
+const CACHE_EXPIRATION_TIME :number = 60*1000;
+
 // Tracks the fragments for a single packet identifier
 interface PacketTracker {
   // Indexed lists of fragments for this packet
@@ -99,7 +102,7 @@ export class Defragmenter {
         // Store time the first fragment arrived, to set the cache expiration.
         // See RFC 815, section 7, paragraph 2 (p. 8)
         // Cache expiration is set to 60 seconds.
-        var timer = setTimeout(() => this.reap_(hexid), 60*1000);
+        var timer = setTimeout(() => this.reap_(hexid), CACHE_EXPIRATION_TIME);
 
         // Store the fragment information in the tracker
         this.tracker_[hexid] = {
