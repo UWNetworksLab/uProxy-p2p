@@ -5,6 +5,8 @@ import logging = require('../logging/logging');
 var log :logging.Log = new logging.Log('defragmenter');
 
 // The Defragmenter collects fragmented packets in a buffer and defragments them.
+// The cache expiration strategy is taken from RFC 815: IP Datagram Reassembly
+// Algorithms.
 export class Defragmenter {
   // tracker_ associates packet identifiers with indexed lists of fragments
   private tracker_ :{[index:string]:ArrayBuffer[]} = {};
