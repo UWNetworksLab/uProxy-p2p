@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import AbstractProxyIntegrationTest = require('./proxy-integration-test');
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');

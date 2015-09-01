@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
