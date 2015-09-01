@@ -29,7 +29,7 @@ export class Defragmenter {
   // The packet identifiers are converted from ArrayBuffers to hex strings so
   // that they can be used as map keys.
   private tracker_ :{[index:string]:PacketTracker} = {};
-    
+
   // Stores the packet identifiers for which we have all fragments
   private complete_:ArrayBuffer[][] = [];
 
@@ -122,7 +122,7 @@ export class Defragmenter {
   }
 
   // Return an ArrayBuffer for each packet where all fragments are available.
-  // At the end of this function, this.complete_ should be empty.
+  // Calling this clears the set of stored completed fragments.
   public getComplete = () :ArrayBuffer[] => {
     var packets :ArrayBuffer[]  =  [];
 
