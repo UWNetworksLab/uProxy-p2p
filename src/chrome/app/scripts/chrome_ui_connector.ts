@@ -1,9 +1,8 @@
-/// <reference path='../../../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../../third_party/typings/freedom/freedom.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
 import browser_connector = require('../../../interfaces/browser_connector');
-import freedom_types = require('freedom.types');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import uproxy_chrome = require('../../../interfaces/chrome');
 
@@ -18,7 +17,7 @@ class ChromeUIConnector {
   private onCredentials_ :(credentials?:Object, error?:Object) => void;
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
 
-  constructor(private uProxyAppChannel_ :freedom_types.OnAndEmit<any,any>) {
+  constructor(private uProxyAppChannel_ :freedom.OnAndEmit<any,any>) {
     this.extPort_ = null;
     chrome.runtime.onConnectExternal.addListener(this.onConnect_);
     // Until the extension is connected, we assume uProxy installation is

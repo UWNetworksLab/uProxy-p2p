@@ -3,7 +3,6 @@
  *
  * This is the UI-specific representation of a User.
  */
-/// <reference path='../../../../third_party/freedom-typings/social.d.ts' />
 /// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
 import social = require('../../interfaces/social');

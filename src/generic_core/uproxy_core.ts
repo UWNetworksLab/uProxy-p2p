@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
@@ -413,7 +413,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
               uproxy_core_api.PortControlSupport.PENDING);
 
     return portControl.probeProtocolSupport().then(
-      (probe:freedom_PortControl.ProtocolSupport) => {
+      (probe:freedom.PortControl.ProtocolSupport) => {
         this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
                                    uproxy_core_api.PortControlSupport.TRUE :
                                    uproxy_core_api.PortControlSupport.FALSE;
@@ -435,7 +435,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
       return portControl.probeProtocolSupport().then(
-        (probe:freedom_PortControl.ProtocolSupport) => {
+        (probe:freedom.PortControl.ProtocolSupport) => {
           natInfo.pmpSupport = probe.natPmp;
           natInfo.pcpSupport = probe.pcp;
           natInfo.upnpSupport = probe.upnp;
