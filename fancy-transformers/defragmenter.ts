@@ -11,9 +11,11 @@ const CACHE_EXPIRATION_TIME :number = 60*1000;
 interface PacketTracker {
   // Indexed lists of fragments for this packet
   pieces :ArrayBuffer[];
+
   // Counts of the number remaining
   // This is an optimization to avoid scanning pieces repeatedly for counts.
   counter :number;
+
   // Stores the Timer objects for expiring each identifier
   // See RFC 815, section 7, paragraph 2 (p. 8)
   timer :NodeJS.Timer
@@ -27,6 +29,7 @@ export class Defragmenter {
   // The packet identifiers are converted from ArrayBuffers to hex strings so
   // that they can be used as map keys.
   private tracker_ :{[index:string]:PacketTracker} = {};
+    
   // Stores the packet identifiers for which we have all fragments
   private complete_:ArrayBuffer[][] = [];
 
@@ -119,6 +122,7 @@ export class Defragmenter {
   }
 
   // Return an ArrayBuffer for each packet where all fragments are available.
+  // At the end of this function, this.complete_ should be empty.
   public getComplete = () :ArrayBuffer[] => {
     var packets :ArrayBuffer[]  =  [];
 
