@@ -8,14 +8,14 @@ var log :logging.Log = new logging.Log('defragmenter');
 // The cache expiration strategy is taken from RFC 815: IP Datagram Reassembly
 // Algorithms.
 export class Defragmenter {
-  // tracker_ associates packet identifiers with indexed lists of fragments
+  // Associates packet identifiers with indexed lists of fragments
   private tracker_ :{[index:string]:ArrayBuffer[]} = {};
-  // counter_ associates packet identifiers with counts of the number remaining
+  // Associates packet identifiers with counts of the number remaining
   // This is an optimization to avoid scanning tracker_ repeatedly for counts.
   private counter_ :{[index:string]:number} = {};
-  // complete_ stores the packet identifiers for which we have all fragments
+  // Stores the packet identifiers for which we have all fragments
   private complete_:string[] = [];
-  // timers_ stores the Timer objects for expiring each identifier
+  // Stores the Timer objects for expiring each identifier
   // See RFC 815, section 7, paragraph 2 (p. 8)
   private timers_ :{[index:string]:NodeJS.Timer};
 
