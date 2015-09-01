@@ -140,19 +140,19 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     }
     var sctpMap = lines[i].trim();
 
-    // // Verify the line is in a format we can understand.
-    // var fields = sctpMap.split(' ');
-    // if (fields.length !== 3) {
-    //   throw new Error('sctpmap line has wrong number of fields: ' + fields.join(' '));
-    // }
-    // if (fields[1] !== 'webrtc-datachannel') {
-    //   throw new Error('sctpmap has wrong protocol: ' + fields[1]);
-    // }
-    // var numChannels = parseInt(fields[2]);
-    // if (isNaN(numChannels)) {
-    //   throw new Error('could not parse number of channels: ' + fields[2]);
-    // }
-    // return numChannels;
+    // Verify the line is in a format we can understand.
+    var fields = sctpMap.split(' ');
+    if (fields.length !== 3) {
+      throw new Error('sctpmap line has wrong number of fields: ' + fields.join(' '));
+    }
+    if (fields[1] !== 'webrtc-datachannel') {
+      throw new Error('sctpmap has wrong protocol: ' + fields[1]);
+    }
+    var numChannels = parseInt(fields[2]);
+    if (isNaN(numChannels)) {
+      throw new Error('could not parse number of channels: ' + fields[2]);
+    }
+    return numChannels;
   }
 
   // All open data channels associated with this peerconnection.
