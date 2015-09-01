@@ -77,8 +77,12 @@
         <div vertical layout fit>
           <div id='wrapper' flex>
             <div id='nothing' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.NONE || ui.copyPasteState.localSharingWithRemote !== SharingState.NONE }}'>
-              <p>
+              <p hidden?='{{ lastState == STATE.SHARING }}'>
                 {{ 'NO_LONGER_GETTING' | $$ }}
+              </p>
+
+              <p hidden?='{{ lastState == STATE.GETTING }}'>
+                {{ 'NO_LONGER_SHARING' | $$ }}
               </p>
 
               <div class='centered'>
