@@ -4,7 +4,7 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('defragmenter');
 
-// The Defragmenter collects fragmented packets in a buffer and defragments them.
+// The Defragmenter gathers fragmented packets in a buffer and defragments them.
 // The cache expiration strategy is taken from RFC 815: IP Datagram Reassembly
 // Algorithms.
 export class Defragmenter {
@@ -44,7 +44,8 @@ export class Defragmenter {
         // Therefore, a duplicate is an error.
         // However, it might be a recoverable error.
         // So let's log it and continue.
-        log.warn('Duplicate fragment %1: %2 / %3', hexid, fragment.index, fragment.count);
+        log.warn('Duplicate fragment %1: %2 / %3', hexid, fragment.index,
+          fragment.count);
       } else {
         // New fragment for an existing packet
 
@@ -86,7 +87,7 @@ export class Defragmenter {
         // Deal with the case where there is only one fragment for this packet.
         this.complete_.push(hexid);
       } else {
-        // Store the time the first fragment arrived, to set the cache expiration.
+        // Store time the first fragment arrived, to set the cache expiration.
         // See RFC 815, section 7, paragraph 2 (p. 8)
         // Cache expiration is set to 60 seconds.
         this.timers_[hexid] = setTimeout(() => this.reap_(hexid), 60*1000);
