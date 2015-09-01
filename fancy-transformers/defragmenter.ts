@@ -4,20 +4,28 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('defragmenter');
 
+// Tracks the fragments for a single packet identifier
+interface PacketTracker {
+  // Indexed lists of fragments for this packet
+  pieces :ArrayBuffer[];
+  // Counts of the number remaining
+  // This is an optimization to avoid scanning pieces repeatedly for counts.
+  counter :number;
+  // Stores the Timer objects for expiring each identifier
+  // See RFC 815, section 7, paragraph 2 (p. 8)
+  timer :NodeJS.Timer
+}
+
 // The Defragmenter gathers fragmented packets in a buffer and defragments them.
 // The cache expiration strategy is taken from RFC 815: IP Datagram Reassembly
 // Algorithms.
 export class Defragmenter {
   // Associates packet identifiers with indexed lists of fragments
-  private tracker_ :{[index:string]:ArrayBuffer[]} = {};
-  // Associates packet identifiers with counts of the number remaining
-  // This is an optimization to avoid scanning tracker_ repeatedly for counts.
-  private counter_ :{[index:string]:number} = {};
+  // The packet identifiers are converted from ArrayBuffers to hex strings so
+  // that they can be used as map keys.
+  private tracker_ :{[index:string]:PacketTracker} = {};
   // Stores the packet identifiers for which we have all fragments
-  private complete_:string[] = [];
-  // Stores the Timer objects for expiring each identifier
-  // See RFC 815, section 7, paragraph 2 (p. 8)
-  private timers_ :{[index:string]:NodeJS.Timer};
+  private complete_:ArrayBuffer[][] = [];
 
   // Add a fragment that has been received from the network.
   // Fragments are processed according to the following logic:
@@ -36,7 +44,7 @@ export class Defragmenter {
       // A fragment for an existing packet
 
       // Get list of fragment contents for this packet identifier
-      var fragmentList :ArrayBuffer[] = this.tracker_[hexid];
+      var fragmentList :ArrayBuffer[] = this.tracker_[hexid].pieces;
       if (fragmentList[fragment.index] !== null) {
         // Duplicate fragment
 
@@ -52,18 +60,20 @@ export class Defragmenter {
         // Only the payload is stored explicitly.
         // The other information is stored implicitly in the data structure.
         fragmentList[fragment.index] = fragment.payload;
-        this.tracker_[hexid] = fragmentList;
+        this.tracker_[hexid].pieces = fragmentList;
 
-        // Decrement the count for this packet identifier
-        this.counter_[hexid] = this.counter_[hexid]-1;
+        // Decrement the counter for this packet identifier
+        this.tracker_[hexid].counter = this.tracker_[hexid].counter-1;
 
         // If we have all fragments for this packet identifier, it is complete.
-        if (this.counter_[hexid] === 0) {
-          this.complete_.push(hexid);
+        if (this.tracker_[hexid].counter === 0) {
+          // Extract the completed packet fragments from the tracker
+          this.complete_.push(this.tracker_[hexid].pieces);
 
-          // Delete the Timer now that the packet is complete
-          clearTimeout(this.timers_[hexid]);
-          delete this.timers_[hexid];
+          // Stop the Timer now that the packet is complete
+          clearTimeout(this.tracker_[hexid].timer);
+          // Delete the completed packet from the tracker
+          delete this.tracker_[hexid];
         }
       }
     } else {
@@ -77,20 +87,25 @@ export class Defragmenter {
 
       // Store this fragment in the fragment list.
       fragmentList[fragment.index] = fragment.payload;
-      this.tracker_[hexid] = fragmentList;
 
       // Set the counter to the total number of fragments expected.
       // The decrement it as we have already received one fragment.
-      this.counter_[hexid] = fragment.count-1;
+      var counter = fragment.count-1;
 
-      if (this.counter_[hexid] === 0) {
+      if (counter === 0) {
         // Deal with the case where there is only one fragment for this packet.
-        this.complete_.push(hexid);
+        this.complete_.push(fragmentList);
       } else {
         // Store time the first fragment arrived, to set the cache expiration.
         // See RFC 815, section 7, paragraph 2 (p. 8)
         // Cache expiration is set to 60 seconds.
-        this.timers_[hexid] = setTimeout(() => this.reap_(hexid), 60*1000);
+        var timer = setTimeout(() => this.reap_(hexid), 60*1000);
+
+        // Store the fragment information in the tracker
+        this.tracker_[hexid] = {
+          pieces: fragmentList,
+          counter: counter,
+          timer: timer};
       }
     }
   }
@@ -105,13 +120,8 @@ export class Defragmenter {
     var packets :ArrayBuffer[]  =  [];
 
     for(var i = 0; i < this.complete_.length; i++) {
-      // Obtain the packet identifier for the completed packet
-      var hexid = this.complete_.pop();
-      // Obtain the contents from the fragments with this identifier
-      var fragmentList = this.tracker_[hexid];
-      // Remove the fragments from the cache now that the packet is complete
-      delete this.tracker_[hexid];
-      delete this.counter_[hexid];
+      // Obtain the contents from the fragments for a completed packet
+      var fragmentList = this.complete_.pop();
 
       // Assemble the fragment contents into one ArrayBuffer per packet
       if (fragmentList !== null && fragmentList.length > 0) {
@@ -126,9 +136,5 @@ export class Defragmenter {
   private reap_ = (hexid:string) :void => {
     // Remove the fragments from the cache now that the packet has expired
     delete this.tracker_[hexid];
-    delete this.counter_[hexid];
-
-    // Delete the Timer now that it has been called.
-    delete this.timers_[hexid];
   }
 }
