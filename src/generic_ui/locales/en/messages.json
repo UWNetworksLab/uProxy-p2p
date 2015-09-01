@@ -361,19 +361,27 @@
   },
   "WELCOME_MESSAGE": {
     "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately.",
-    "message": "To get started, choose \"Get access\" or \"Share access\" and then click on a friend to connect."
+    "message": "uProxy allows you to get access from your friends, share access with them or do both at once! To get started, choose \"Get access\" or \"Share access.\""
+  },
+  "CONNECT_TO_FRIEND": {
+    "description": "Title above instructions that tell the user how to add a uProxy friend.",
+    "message": "Connect to a friend"
+  },
+  "CONNECT_TO_FRIEND_MESSAGE": {
+    "description": "Instructions that appears beside a big '+' button. Clicking the button opens a panel with options to add a uProxy friend.",
+    "message": "You don't yet have any uProxy friends. Use this button to send an invitation to a friend or paste an invitation you've received."
   },
   "ALPHA_MESSAGE": {
     "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development.",
-    "message": "This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely."
+    "message": "This is an alpha release of uProxy, and it may occasionally be unreliable."
   },
-  "MORE_INFORMATION": {
+  "MORE_ABOUT_METRICS": {
     "description": "",
-    "message": "More information."
+    "message": "Learn more about anonymous metrics"
   },
   "CHANGE_STATS_CHOICE": {
     "description": "Informs the user that they can opt in and out of sending anonymous statistics at any time they choose, from the Settings menu.",
-    "message": "You can change your choice at any time, from the Settings menu."
+    "message": "You can help us make uProxy better by sharing anonymous metrics. All data is anonymized by the client and transmitted securely."
   },
   "ENABLE_METRICS": {
     "description": "Asks the user if they want to send anonymous metrics about their uProxy usage.",

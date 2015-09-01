@@ -144,10 +144,12 @@ Polymer({
     // TODO: clean up the logic which controls which welcome dialog or bubble
     // is shown.
     this.model.globalSettings.statsReportingEnabled = true;
+    this.$.statsDialog.close();
   },
   disableStats: function() {
     this.model.globalSettings.statsReportingEnabled = false;
     this.statsDialogOrBubbleOpen = false;
+    this.$.statsDialog.close();
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&
@@ -257,5 +259,8 @@ Polymer({
         'updateIsSharingEnabledWithOthers',
     'ui.signalToFire': 'signalToFireChanged',
     'model.globalSettings.language': 'languageChanged'
+  },
+  computed: {
+    'hasContacts': '(model.contacts.getAccessContacts.pending.length + model.contacts.getAccessContacts.trustedUproxy.length + model.contacts.getAccessContacts.untrustedUproxy.length + model.contacts.shareAccessContacts.pending.length + model.contacts.shareAccessContacts.trustedUproxy.length + model.contacts.shareAccessContacts.untrustedUproxy.length) > 0',
   }
 });

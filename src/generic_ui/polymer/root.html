@@ -8,6 +8,7 @@
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
+<link rel="import" href="../../bower/core-overlay/core-overlay.html">
 <link rel='import' href='invite-user.html'>
 <link rel='import' href='accept-user-invite.html'>
 <link rel="import" href="i18n-filter.html">
@@ -193,6 +194,41 @@
       #disconnectDialog paper-button {
         font-size: 12px;
       }
+      #statsDialog {
+        height: 100%;
+        width: 100%;
+        background-color: white;
+      }
+      #statsDialog div {
+        padding: 30px;
+        margin-top: 175px;
+        overflow: hidden;
+      }
+      #statsDialog paper-button {
+        margin: 1.5em 0.75em;
+      }
+      #statsDialog uproxy-faq-link {
+        width: 100%;
+        padding-top: 1em;
+        padding-bottom: 1em;
+        border-top: 1px solid rgb(221, 221, 221);
+        text-transform: uppercase;
+        display: block;
+        text-align: center;
+        font-size: 1.1em;
+        line-height: 24px;
+        bottom: 0;
+        position: fixed;
+      }
+      #statsDialog p {
+        line-height: 19px;
+      }
+      #statsDialog #enableStatsButton {
+        float: left;
+      }
+      #statsDialog #disableStatsButton {
+        float: right;
+      }
       paper-toast {
         position: fixed;
         left: 12px;
@@ -204,6 +240,11 @@
       paper-toast #toastHelpLink {
         text-transform: uppercase;
         color: #47B5AA;
+      }
+      #connectWithFriendsInstruction {
+        margin: 20px 65px 20px 20px;
+        bottom: 0;
+        position: absolute;
       }
     </style>
 
@@ -295,8 +336,7 @@
           core-header-panel and it is positioned below the toolbar (see
           https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
         -->
-        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
-          <h3>{{ "WELCOME" | $$ }}</h3>
+        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}' noclear="true">
           <p>
             {{ "WELCOME_MESSAGE" | $$ }}
           </p>
@@ -318,6 +358,10 @@
                   contacts='{{model.contacts.shareAccessContacts}}'
                   mode='{{ui_constants.Mode.SHARE}}'>
               </uproxy-roster>
+              <div id='connectWithFriendsInstruction' hidden?='{{ hasContacts }}'>
+                <h2>{{ 'CONNECT_TO_FRIEND' | $$ }}</h2>
+                {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
+              </div>
             </div>
 
             <div id='status'>
@@ -369,17 +413,21 @@
       </template>
     </uproxy-action-dialog>
 
-    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading='{{ "WELCOME" | $$ }}'>
-      <p>
-        {{ "ALPHA_MESSAGE" | $$ }}
-        <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>{{ "MORE_INFORMATION" | $$ }}</span>
-        </uproxy-faq-link>{{ "CHANGE_STATS_CHOICE" | $$ }}
-      </p>
-      <p>{{ "ENABLE_METRICS" | $$ }}</p>
-      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</paper-button>
-      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</paper-button>
-    </uproxy-action-dialog>
+    <core-overlay id='statsDialog' backdrop layered="false" heading='{{ "WELCOME" | $$ }}'>
+      <div>
+        <h1>{{ "WELCOME" | $$ }}</h1>
+        <p>
+          {{ "ALPHA_MESSAGE" | $$ }}<br><br>
+          {{ "CHANGE_STATS_CHOICE" | $$ }}
+        </p>
+        <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>
+        <paper-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</paper-button>
+        <paper-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</paper-button>
+      </div>
+      <uproxy-faq-link anchor='doesUproxyLogData'>
+        {{ "MORE_ABOUT_METRICS" | $$ }}
+      </uproxy-faq-link>
+    </core-overlay>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ core.disconnectedWhileProxying }}" autoCloseDisabled>
