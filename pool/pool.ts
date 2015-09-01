@@ -53,6 +53,7 @@ class Pool {
 // Manages a pool of data channels opened by this peer.  The only public method
 // is openDataChannel.
 class LocalPool {
+  private nextChannelId_ = 0;
   private numChannels_ = 0;
 
   // Channels which have been closed, and may be re-opened.
@@ -89,13 +90,18 @@ class LocalPool {
 
   // Creates and returns a new channel, wrapping it.
   private openNewChannel_ = () : Promise<PoolChannel> => {
-    log.info('%1: opening channel %2', this.name_, this.numChannels_++);
-    return this.pc_.openDataChannel('p' + this.numChannels_, {
-      id: this.numChannels_
+    var newChannelId = ++this.nextChannelId_;
+    log.info('%1: opening channel (id %2)', this.name_, newChannelId);
+    return this.pc_.openDataChannel('p' + newChannelId, {
+      id: newChannelId
     }).then((dc:datachannel.DataChannel) => {
+      this.numChannels_++;
       return dc.onceOpened.then(() => {
         return new PoolChannel(dc);
       });
+    }, (e:Error) => {
+      this.nextChannelId_--;
+      throw e;
     });
   }
 
