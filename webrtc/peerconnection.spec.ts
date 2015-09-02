@@ -136,3 +136,29 @@ describe('PeerConnection', function() {
     });
   });
 });
+
+describe('extractMaxChannelsFromSdp_', function() {
+  it('simple example', () => {
+      expect(peerconnection.PeerConnectionClass.extractMaxChannelsFromSdp_(
+          'a=sctpmap:5000 webrtc-datachannel 256')).toEqual(256);
+  });
+
+  it('multiple lines', () => {
+      expect(peerconnection.PeerConnectionClass.extractMaxChannelsFromSdp_(
+          'v=0\na=sctpmap:5000 webrtc-datachannel 256\nt=0 0')).toEqual(256);
+  });
+
+  it('unknown protocol', () => {
+    expect(() => {
+      peerconnection.PeerConnectionClass.extractMaxChannelsFromSdp_(
+          'a=sctpmap:5000 banjo 256');
+    }).toThrow();
+  });
+
+  it('weird number', () => {
+    expect(() => {
+      peerconnection.PeerConnectionClass.extractMaxChannelsFromSdp_(
+          'a=sctpmap:5000 webrtc-datachannel a1');
+    }).toThrow();
+  });
+});

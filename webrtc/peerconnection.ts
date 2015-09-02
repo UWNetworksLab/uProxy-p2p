@@ -107,6 +107,54 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Count of instances created to date.
   private static numCreations_ :number = 0;
 
+  // Extracts the maximum number of supported channels from an SDP.
+  //
+  // The number of channels is taken from the sctpmap line, e.g.:
+  //   a=sctpmap:5000 webrtc-datachannel 1024
+  //
+  // sctpmap is described in older revisions of the "SCTP-Based Media\
+  // Transport in the SDP" draft RFC; though it has disappeared from
+  // recent drafts, both Chrome and Firefox still include it in offers
+  // and answers:
+  //   https://datatracker.ietf.org/doc/draft-ietf-mmusic-sctp-sdp/06
+  //
+  // This is intended to help us pro-actively prevent peerconnection
+  // weirdness when large number of channels are created, in the
+  // absence of an explicit error from the browser:
+  //   https://github.com/uProxy/uproxy/issues/1815
+  //
+  // Throws an error no sctpmap line is found or is not in the exact
+  // same format as the example above.
+  // Public for testing.
+  public static extractMaxChannelsFromSdp_ = (sdp:string) : number => {
+    // Search for the a=sctpmap line.
+    var lines = sdp.split('\n');
+    var i = 0;
+    for (i = 0; i < lines.length; i++) {
+      if (lines[i].indexOf('a=sctpmap') === 0) {
+        break;
+      }
+    }
+    if (i === lines.length) {
+      throw new Error('no sctpmap line found');
+    }
+    var sctpMap = lines[i].trim();
+
+    // Verify the line is in a format we can understand.
+    var fields = sctpMap.split(' ');
+    if (fields.length !== 3) {
+      throw new Error('sctpmap line has wrong number of fields: ' + fields.join(' '));
+    }
+    if (fields[1] !== 'webrtc-datachannel') {
+      throw new Error('sctpmap has wrong protocol: ' + fields[1]);
+    }
+    var numChannels = parseInt(fields[2]);
+    if (isNaN(numChannels)) {
+      throw new Error('could not parse number of channels: ' + fields[2]);
+    }
+    return numChannels;
+  }
+
   // All open data channels associated with this peerconnection.
   private channels_ :{[channelLabel:string]:DataChannel} = {};
 
@@ -136,6 +184,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   public peerOpenedChannelQueue = new handler.Queue<DataChannel,void>();
 
   public signalForPeerQueue = new handler.Queue<signals.Message,void>();
+
+  // Maximum number of channels.
+  private maxChannels_ = 65536;
 
   constructor(
       private pc_:freedom.RTCPeerConnection.RTCPeerConnection,
@@ -279,6 +330,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
           }
         });
         this.pc_.setLocalDescription(d);
+        this.updateMaxChannels_(d.sdp);
       }).catch((e:Error) => {
         this.closeWithError_('failed to set local description: ' + e.message);
       });
@@ -335,6 +387,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       : Promise<void> => {
     return this.breakOfferTie_(description).then(() => {
       this.state_ = State.CONNECTING;
+      this.updateMaxChannels_(description.sdp);
       // initial offer from peer
       return this.pc_.setRemoteDescription(description)
     }).then(this.pc_.createAnswer).then(
@@ -351,6 +404,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
           sdp: d.sdp
         }
       });
+      this.updateMaxChannels_(d.sdp);
       return this.pc_.setLocalDescription(d);
     }).catch((e) => {
       this.closeWithError_('Failed to connect to offer:' +
@@ -361,6 +415,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   private handleAnswerSignalMessage_ = (
       description:freedom.RTCPeerConnection.RTCSessionDescription)
       : Promise<void> => {
+    this.updateMaxChannels_(description.sdp);
     return this.pc_.setRemoteDescription(description).catch((e) => {
       this.closeWithError_('Failed to set remote description: ' +
         JSON.stringify(description) + '; Error: ' + e.toString());
@@ -426,6 +481,16 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       : Promise<DataChannel> => {
     if (channelLabel === '') {
       throw new Error('label cannot be an empty string');
+    }
+
+    if (Object.keys(this.channels_).length >= this.maxChannels_) {
+      return Promise.reject(new Error('maximum number of channels reached (' +
+          this.maxChannels_ + ')'));
+    }
+
+    if (options && options.id && options.id >= this.maxChannels_) {
+      return Promise.reject(new Error('requested channel id higher than ' +
+          'maximum (' + this.maxChannels_ + ')'));
     }
 
     log.debug('%1: creating channel %2 with options: %3',
@@ -527,6 +592,21 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         clearInterval(loop);
       }
     }, HEARTBEAT_INTERVAL_MS_);
+  }
+
+  // Sets maxChannels_ to Math.min(maxChannels_, the SDP's maximum
+  // number of channels). Does nothing if the SDP cannot be parsed.
+  private updateMaxChannels_ = (sdp:string) : void => {
+    try {
+      var max = PeerConnectionClass.extractMaxChannelsFromSdp_(sdp);
+      if (max < this.maxChannels_) {
+        log.info('%1: maximum number of channels now %2', this.peerName_, max);
+        this.maxChannels_ = max;
+      }
+    } catch (e) {
+      log.warn('%1: cannot extract max channels from SDP: %2 (%3)',
+          this.peerName_, sdp, e.message);
+    }
   }
 
   // For debugging: prints the state of the peer connection including all
