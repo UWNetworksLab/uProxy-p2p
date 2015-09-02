@@ -12,13 +12,25 @@
         height: 100%;
         width: 100%;
         background-color: white;
+      }
+      div {
         text-align: center;
+      }
+      p {
+        text-align: start;
       }
       .section {
         padding: 2em;
       }
       a {
         cursor: pointer;
+      }
+      paper-input-decorator, input {
+        width: 100% !important;
+        line-height: 20px;
+      }
+      paper-button {
+        margin-top: 1em;
       }
     </style>
     <!-- TODO: localization -->
@@ -31,10 +43,10 @@
       </uproxy-app-bar>
 
       <div class='section'>
-        <p>If you have a uProxy token or link from your friend, you can paste it below to add them.</p>
+        <p>If you've received an invitation from a friend you'd like to proxy with, enter it below.</p>
 
         <div id='addFriend'>
-          <paper-input-decorator label="Add friend by URL">
+          <paper-input-decorator label="Paste invitation link">
             <input is='core-input' value='{{ receivedInviteToken }}'>
           </paper-input-decorator>
           <paper-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</paper-button>

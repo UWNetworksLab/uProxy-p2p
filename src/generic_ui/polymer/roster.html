@@ -37,8 +37,8 @@
       font-size: 17px;
     }
     .no-friends {
-      width: 150px;
-      height: 150px;
+      width: 150px !important;
+      height: 150px !important;
       color: #cbcbcb;
     }
     #noContactsFound {
@@ -51,6 +51,11 @@
     }
     #loadingContacts {
       margin-top: 0.5em;
+    }
+    #connectWithFriendsInstruction {
+      margin: 20px 65px 20px 20px;
+      bottom: 0;
+      position: absolute;
     }
     paper-progress {
       margin-bottom: 1em;
@@ -73,10 +78,11 @@
         {{ "LOADING_FRIENDS" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
-      <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
-        {{ "NO_FRIENDS_ONLINE" | $$ }}
-        <p id='inviteFriends'>{{ "TO_INVITE_FRIENDS" | $$ }}</p>
-      </div>
+    </div>
+
+    <div id="connectWithFriendsInstruction" hidden?="{{ loadingContacts || hasContacts }}">
+      <h2>{{ 'CONNECT_TO_FRIEND' | $$ }}</h2>
+      {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
     </div>
 
     <div hidden?='{{ !hasContacts }}'>

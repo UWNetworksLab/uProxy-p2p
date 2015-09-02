@@ -86,8 +86,8 @@
     }
     #logo {
       margin-bottom: 1em;
-      width: 114px;
-      height: 114px;
+      width: 114px !important;
+      height: 114px !important;
     }
     .prevArrow {
       position: absolute;
@@ -100,13 +100,17 @@
     #intro1, #networks {
       height: 100%;
     }
+    #languageLink paper-dropdown-menu {
+      border-bottom: 0px;
+      font-size: 13px;
+      margin-top: 1.5em;
+    }
     #languageLink core-icon {
-      height: 20px;
-      width: 20px;
+      height: 18px !important;
+      width: 18px !important;
     }
     #languageLink paper-item {
       font-size: 13px;
-      line-height: 14px;
     }
     #languageLink paper-item::shadow .button-content {
       padding: 0;
@@ -132,7 +136,7 @@
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>
           <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
-            <paper-dropdown class="dropdown">
+            <paper-dropdown class="dropdown"  valign="bottom">
                 <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
                     <template repeat='{{ l in languages }}'>
                       <paper-item languageCode='{{ l.languageCode }}'>

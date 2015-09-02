@@ -54,6 +54,7 @@ import ui = ui_connector.connector;
       areAllContactsUproxy: true
     },
     'GMail': {
+      displayName: 'Gmail',
       isFirebase: true,
       enableMonitoring: true,
       areAllContactsUproxy: true
@@ -278,7 +279,7 @@ export function getNetworkDisplayName(networkName :string) : string {
     }
 
     public sendEmail = (to: string, subject: string, body: string) : void => {
-      throw new Error('Operation not implemented'); 
+      throw new Error('Operation not implemented');
     }
 
     public getNetworkState = () :social.NetworkState => {

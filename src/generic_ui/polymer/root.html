@@ -8,6 +8,7 @@
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
+<link rel="import" href="../../bower/core-overlay/core-overlay.html">
 <link rel='import' href='invite-user.html'>
 <link rel='import' href='accept-user-invite.html'>
 <link rel="import" href="i18n-filter.html">
@@ -125,7 +126,6 @@
         overflow: auto;
       }
       #rosterContainer uproxy-roster {
-        position: relative;
         overflow-y: auto;
         display: block;
       }
@@ -193,6 +193,41 @@
       #disconnectDialog paper-button {
         font-size: 12px;
       }
+      #statsDialog {
+        height: 100%;
+        width: 100%;
+        background-color: white;
+      }
+      #statsDialog div {
+        padding: 30px;
+        margin-top: 175px;
+        overflow: hidden;
+      }
+      #statsDialog paper-button {
+        margin: 1.5em 0.75em;
+      }
+      #statsDialog uproxy-faq-link {
+        width: 100%;
+        padding-top: 1em;
+        padding-bottom: 1em;
+        border-top: 1px solid rgb(221, 221, 221);
+        text-transform: uppercase;
+        display: block;
+        text-align: center;
+        font-size: 1.1em;
+        line-height: 24px;
+        bottom: 0;
+        position: fixed;
+      }
+      #statsDialog p {
+        line-height: 19px;
+      }
+      #statsDialog #enableStatsButton {
+        float: left;
+      }
+      #statsDialog #disableStatsButton {
+        float: right;
+      }
       #progressWrapper {
         text-align: center;
       }
@@ -208,11 +243,15 @@
         text-transform: uppercase;
         color: #47B5AA;
       }
+      paper-fab {
+        color: white;
+        position: absolute;
+        bottom: 1.5em;
+        right: 1.5em;
+      }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
-
-    <core-signals on-core-signal-open-dialog="{{ openDialog }}"></core-signals> <!-- TODO: why is this needed? -->
 
     <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
@@ -298,8 +337,7 @@
           core-header-panel and it is positioned below the toolbar (see
           https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
         -->
-        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
-          <h3>{{ "WELCOME" | $$ }}</h3>
+        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}' noclear="true">
           <p>
             {{ "WELCOME_MESSAGE" | $$ }}
           </p>
@@ -307,7 +345,7 @@
 
         <div class='content' fit>
 
-          <paper-fab mini icon='add' style='color: white; position:absolute; bottom:1.5em; right:1.5em;' on-tap='{{ fireOpenInviteUserPanel }}'></paper-fab>
+          <paper-fab mini icon='add' on-tap='{{ fireOpenInviteUserPanel }}'></paper-fab>
 
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
@@ -372,17 +410,21 @@
       </template>
     </uproxy-action-dialog>
 
-    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading='{{ "WELCOME" | $$ }}'>
-      <p>
-        {{ "ALPHA_MESSAGE" | $$ }}
-        <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>{{ "MORE_INFORMATION" | $$ }}</span>
-        </uproxy-faq-link>{{ "CHANGE_STATS_CHOICE" | $$ }}
-      </p>
-      <p>{{ "ENABLE_METRICS" | $$ }}</p>
-      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</paper-button>
-      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</paper-button>
-    </uproxy-action-dialog>
+    <core-overlay id='statsDialog' backdrop layered="false" heading='{{ "WELCOME" | $$ }}'>
+      <div>
+        <h1>{{ "WELCOME" | $$ }}</h1>
+        <p>
+          {{ "ALPHA_MESSAGE" | $$ }}<br><br>
+          {{ "CHANGE_STATS_CHOICE" | $$ }}
+        </p>
+        <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>
+        <paper-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</paper-button>
+        <paper-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</paper-button>
+      </div>
+      <uproxy-faq-link anchor='doesUproxyLogData'>
+        {{ "MORE_ABOUT_METRICS" | $$ }}
+      </uproxy-faq-link>
+    </core-overlay>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>

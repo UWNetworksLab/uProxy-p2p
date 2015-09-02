@@ -13,13 +13,25 @@
         height: 100%;
         width: 100%;
         background-color: white;
+      }
+      div {
         text-align: center;
+      }
+      p {
+        text-align: start;
       }
       .section {
         padding: 2em;
       }
       a {
         cursor: pointer;
+      }
+      paper-input-decorator, input {
+        width: 100% !important;
+        line-height: 20px;
+      }
+      paper-button {
+        margin-top: 1em;
       }
     </style>
     <!-- TODO: localization -->
@@ -28,7 +40,7 @@
 
     <core-overlay id='inviteUserPanel'>
       <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-        Invite a friend
+        Invite a friend on {{ getNetworkDisplayName(selectedNetworkName) }}
       </uproxy-app-bar>
 
       <div hidden?='{{ model.onlineNetworks.length <= 1}}'>
@@ -48,18 +60,18 @@
         <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
           <p>Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
           <paper-button affirmative on-tap='{{ sendToFacebookFriend }}'>
-            Send to Facebook Friend
+            Send Invitation
           </paper-button>
         </div>
 
         <div hidden?='{{ selectedNetworkName != "GMail"}}'>
-          <p>Enter your friend's GMail address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list.</p>
-          <paper-input-decorator label='GMail address' layout vertical>
+          <p>Enter your friend's Gmail address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list.</p>
+          <paper-input-decorator label='Gmail address'>
             <input is='core-input' value='{{ inviteUserEmail }}' />
           </paper-input-decorator>
 
           <paper-button affirmative on-tap='{{ sendToGMailFriend }}'>
-            Send to GMail Friend
+            Send Invitation
           </paper-button>
         </div>
       </div>

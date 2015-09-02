@@ -74,6 +74,9 @@ Polymer({
   showAcceptUserInvite: function() {
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
   },
+  getNetworkDisplayName: function(selectedNetworkName :string){
+    return ui.getNetworkDisplayName(selectedNetworkName);
+  },
   ready: function() {
     this.inviteUserEmail = '';
     this.selectedNetworkName = '';
