@@ -52,6 +52,11 @@
     #loadingContacts {
       margin-top: 0.5em;
     }
+    #connectWithFriendsInstruction {
+      margin: 20px 65px 20px 20px;
+      bottom: 0;
+      position: absolute;
+    }
     paper-progress {
       margin-bottom: 1em;
     }
@@ -73,6 +78,11 @@
         {{ "LOADING_FRIENDS" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
+    </div>
+
+    <div id="connectWithFriendsInstruction" hidden?="{{ loadingContacts || hasContacts }}">
+      <h2>{{ 'CONNECT_TO_FRIEND' | $$ }}</h2>
+      {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
     </div>
 
     <div hidden?='{{ !hasContacts }}'>

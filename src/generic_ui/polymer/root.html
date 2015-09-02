@@ -126,7 +126,6 @@
         overflow: auto;
       }
       #rosterContainer uproxy-roster {
-        position: relative;
         overflow-y: auto;
         display: block;
       }
@@ -244,11 +243,6 @@
         text-transform: uppercase;
         color: #47B5AA;
       }
-      #connectWithFriendsInstruction {
-        margin: 20px 65px 20px 20px;
-        bottom: 0;
-        position: absolute;
-      }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
@@ -361,10 +355,6 @@
                   contacts='{{model.contacts.shareAccessContacts}}'
                   mode='{{ui_constants.Mode.SHARE}}'>
               </uproxy-roster>
-              <div id='connectWithFriendsInstruction' hidden?='{{ hasContacts }}'>
-                <h2>{{ 'CONNECT_TO_FRIEND' | $$ }}</h2>
-                {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
-              </div>
             </div>
 
             <div id='status'>
