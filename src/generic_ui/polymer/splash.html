@@ -135,7 +135,7 @@
         </div>
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>
-          <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}' openedIcon='arrow-drop-down' closedIcon='arrow-drop-up'>
+          <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
             <paper-dropdown class="dropdown"  valign="bottom">
                 <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
                     <template repeat='{{ l in languages }}'>

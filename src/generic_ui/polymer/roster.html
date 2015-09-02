@@ -37,8 +37,8 @@
       font-size: 17px;
     }
     .no-friends {
-      width: 150px;
-      height: 150px;
+      width: 150px !important;
+      height: 150px !important;
       color: #cbcbcb;
     }
     #noContactsFound {
@@ -72,10 +72,6 @@
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
         {{ "LOADING_FRIENDS" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
-      </div>
-      <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
-        {{ "NO_FRIENDS_ONLINE" | $$ }}
-        <p id='inviteFriends'>{{ "TO_INVITE_FRIENDS" | $$ }}</p>
       </div>
     </div>
 
