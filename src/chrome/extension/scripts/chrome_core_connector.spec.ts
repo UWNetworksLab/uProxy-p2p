@@ -172,23 +172,23 @@ describe('core-connector', () => {
 
   it('show disconnect.html if user was proxying when app disconnects.', (done) => {
     var uiIsGettingAccessSpy = spyOn(ui, 'isGettingAccess');
-    var uiStopGettingInUiAndConfigSpy = spyOn(ui, 'stopGettingInUiAndConfig');
+    var uiStoppedGettingSpy = spyOn(ui, 'stoppedGetting');
     connectToApp().then(() => {
       spyOn(chromeCoreConnector, 'connect').and.callFake(() => { done(); });
       uiIsGettingAccessSpy.and.callFake(() => { return true; });
       disconnect();
-      expect(uiStopGettingInUiAndConfigSpy).toHaveBeenCalled();
+      expect(uiStoppedGettingSpy).toHaveBeenCalled();
     });
   });
 
   it('do not show disconnect.html if user was not proxying when app disconnects.', (done) => {
     var uiIsGettingAccessSpy = spyOn(ui, 'isGettingAccess');
-    var uiStopGettingInUiAndConfigSpy = spyOn(ui, 'stopGettingInUiAndConfig');
+    var uiStoppedGettingSpy = spyOn(ui, 'stoppedGetting');
     connectToApp().then(() => {
       spyOn(chromeCoreConnector, 'connect').and.callFake(() => { done(); });
       uiIsGettingAccessSpy.and.callFake(() => { return false; });
       disconnect();
-      expect(uiStopGettingInUiAndConfigSpy).not.toHaveBeenCalled();
+      expect(uiStoppedGettingSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -196,7 +196,7 @@ describe('core-connector', () => {
     var payload = { cmd: 'test1', type: 1 };
     chromeCoreConnector['send'](payload);
     expect(chromeCoreConnector['queue_']).toEqual([
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test1', type: 1 }
     ]);
   });
@@ -205,9 +205,9 @@ describe('core-connector', () => {
     var payload = { cmd: 'test2', type: 2 };
     chromeCoreConnector['send'](payload);
     expect(chromeCoreConnector['queue_']).toEqual([
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test1', type: 1 },
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 11},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test2', type: 2 }
     ]);
   });
@@ -251,11 +251,11 @@ describe('core-connector', () => {
     chromeCoreConnector.flushQueue();
     expect(chromeCoreConnector['queue_']).toEqual([]);
     expect(flushed).toEqual([
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 10},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test1', type: 1 },
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 11},
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test2', type: 2 },
-        { cmd: 'emit', type: 1019, data: undefined, promiseId: 12}
+        jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
     ]);
   });
 

@@ -7,6 +7,7 @@
  */
 
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
 
 import consent = require('./consent');
 import globals = require('./globals');
@@ -21,9 +22,11 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
 import _ = require('lodash');
+import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 
 import storage = globals.storage;
 import ui = ui_connector.connector;
+import pgp = globals.pgp;
 
 import Persistent = require('../interfaces/persistent');
 
@@ -47,7 +50,8 @@ import Persistent = require('../interfaces/persistent');
    */
   export class RemoteInstance implements Persistent {
 
-    public keyHash     :string;
+    public publicKey   :string;
+    public keyVerified :boolean = false;
     public description :string;
 
     // Client version of the remote peer.
@@ -87,8 +91,8 @@ import Persistent = require('../interfaces/persistent');
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
     // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
     // TODO: why are these not in remote-connection?
-    private startSocksToRtcTimeout_ :number = null;
-    private startRtcToNetTimeout_ :number = null;
+    private startSocksToRtcTimeout_ :NodeJS.Timer = null;
+    private startRtcToNetTimeout_ :NodeJS.Timer = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
@@ -105,7 +109,7 @@ import Persistent = require('../interfaces/persistent');
         public user :remote_user.User,
         public instanceId :string) {
       this.connection_ = new remote_connection.RemoteConnection(
-          this.handleConnectionUpdate_, this.user.userId);
+          this.handleConnectionUpdate_, this.user.userId, globals.portControl);
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state:RemoteInstanceState) => {
@@ -128,7 +132,21 @@ import Persistent = require('../interfaces/persistent');
             log.error('Could not find clientId for instance', this);
             return;
           }
-          this.user.network.send(this.user, clientId, data);
+          if (typeof this.publicKey !== 'undefined') {
+            var arrayBufferData =
+                arraybuffers.stringToArrayBuffer(JSON.stringify(data.data));
+            pgp.signEncrypt(arrayBufferData, this.publicKey)
+                .then((cipherData:ArrayBuffer) => {
+                  return pgp.armor(cipherData);
+                }).then((cipherText :string) => {
+                  data.data = cipherText;
+                  this.user.network.send(this.user, clientId, data);
+                }).catch((e) => {
+                  log.error('Error encrypting message ', e);
+                });
+          } else {
+            this.user.network.send(this.user, clientId, data);
+          }
           break;
         case uproxy_core_api.Update.STOP_GIVING:
           ui.update(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
@@ -177,9 +195,27 @@ import Persistent = require('../interfaces/persistent');
      * TODO: assuming that signal is valid, should we remove signal?
      * TODO: return a boolean on success/failure
      */
-    public handleSignal = (type:social.PeerMessageType,
-                           signalFromRemote:bridge.SignallingMessage,
-                           messageVersion:number) :Promise<void> => {
+    public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
+
+      if (msg.version < 5) {
+        return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
+      } else {
+        return pgp.dearmor(<string>msg.data).then((cipherData :ArrayBuffer) => {
+          return pgp.verifyDecrypt(cipherData, this.publicKey);
+        }).then((result :VerifyDecryptResult) => {
+          var decryptedSignal =
+              JSON.parse(arraybuffers.arrayBufferToString(result.data));
+          return this.handleDecryptedSignal_(msg.type, msg.version, decryptedSignal);
+        }).catch((e) => {
+          log.error('Error decrypting message ', e);
+        });
+      }
+    }
+
+    private handleDecryptedSignal_ = (
+        type:social.PeerMessageType,
+        messageVersion:number,
+        signalFromRemote:bridge.SignallingMessage) : Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -190,7 +226,7 @@ import Persistent = require('../interfaces/persistent');
         // Create a new RtcToNet instance each time a new round of client peer
         // messages begins. The type field check is so pre-bridge,
         // MESSAGE_VERSION = 1, clients can initiate.
-        // TODO: have RemoteConnection do this, based on SignallingMetadata 
+        // TODO: have RemoteConnection do this, based on SignallingMetadata
         if (signalFromRemote.first ||
             ((<signals.Message>signalFromRemote).type === signals.Type.OFFER)) {
           this.connection_.resetSharerCreated();
@@ -249,12 +285,6 @@ import Persistent = require('../interfaces/persistent');
         // assumption that our peer failed to start getting access.
         this.startRtcToNetTimeout_ = setTimeout(() => {
           log.warn('Timing out rtcToNet_ connection');
-          // Tell the UI that sharing failed. It will show a toast.
-          // TODO: have RemoteConnection do this
-          ui.update(uproxy_core_api.Update.FAILED_TO_GIVE, {
-            name: this.user.name,
-            proxyingId: this.connection_.getProxyingId()
-          });
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
 
@@ -263,6 +293,13 @@ import Persistent = require('../interfaces/persistent');
         }, () => {
           log.warn('Could not start sharing.');
           clearTimeout(this.startRtcToNetTimeout_);
+          // Tell the UI that sharing failed. It will show a toast.
+          // TODO: Send this update from remote-connection.ts
+          //       https://github.com/uProxy/uproxy/issues/1861
+          ui.update(uproxy_core_api.Update.FAILED_TO_GIVE, {
+            name: this.user.name,
+            proxyingId: this.connection_.getProxyingId()
+          });
         });
       });
     }
@@ -292,19 +329,22 @@ import Persistent = require('../interfaces/persistent');
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
       this.startSocksToRtcTimeout_ = setTimeout(() => {
         log.warn('Timing out socksToRtc_ connection');
+        this.connection_.stopGet();
+      }, this.SOCKS_TO_RTC_TIMEOUT);
+
+      return this.connection_.startGet(this.messageVersion)
+          .then((endpoints :net.Endpoint) => {
+        clearTimeout(this.startSocksToRtcTimeout_);
+        return endpoints;
+      }).catch((e) => {
         // Tell the UI that sharing failed. It will show a toast.
-        // TODO: have RemoteConnection do this
+        // TODO: Send this update from remote-connection.ts
+        //       https://github.com/uProxy/uproxy/issues/1861
         ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()
         });
-        this.connection_.stopGet();
-      }, this.SOCKS_TO_RTC_TIMEOUT);
-
-      return this.connection_.startGet(this.messageVersion).then(
-          (endpoints :net.Endpoint) => {
-        clearTimeout(this.startSocksToRtcTimeout_);
-        return endpoints;
+        return Promise.reject(e);
       });
     }
 
@@ -323,7 +363,9 @@ import Persistent = require('../interfaces/persistent');
     public update = (data:social.InstanceHandshake,
         messageVersion:number) :Promise<void> => {
       return this.onceLoaded.then(() => {
-        this.keyHash = data.keyHash;
+        if (typeof this.publicKey === 'undefined' || !this.keyVerified) {
+          this.publicKey = data.publicKey;
+        }
         this.description = data.description;
         this.updateConsentFromWire_(data.consent);
         this.messageVersion = messageVersion;
@@ -359,7 +401,8 @@ import Persistent = require('../interfaces/persistent');
       return _.cloneDeep({
         wireConsentFromRemote: this.wireConsentFromRemote,
         description:           this.description,
-        keyHash:               this.keyHash
+        publicKey:             this.publicKey,
+        keyVerified:           this.keyVerified
       });
     }
 
@@ -370,7 +413,12 @@ import Persistent = require('../interfaces/persistent');
      */
     public restoreState = (state :RemoteInstanceState) => {
       this.description = state.description;
-      this.keyHash = state.keyHash;
+      if (typeof state.publicKey !== 'undefined') {
+        this.publicKey = state.publicKey;
+      }
+      if (typeof state.keyVerified !== 'undefined') {
+        this.keyVerified = state.keyVerified;
+      }
       if (state.wireConsentFromRemote) {
         this.wireConsentFromRemote = state.wireConsentFromRemote
       } else {
@@ -389,7 +437,6 @@ import Persistent = require('../interfaces/persistent');
       return {
         instanceId:             this.instanceId,
         description:            this.description,
-        keyHash:                this.keyHash,
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote,
         isOnline:               this.user.isInstanceOnline(this.instanceId),
@@ -415,7 +462,8 @@ import Persistent = require('../interfaces/persistent');
   export interface RemoteInstanceState {
     wireConsentFromRemote :social.ConsentWireState;
     description           :string;
-    keyHash               :string;
+    publicKey             :string;
+    keyVerified           :boolean
   }
 
   // TODO: Implement obfuscation.

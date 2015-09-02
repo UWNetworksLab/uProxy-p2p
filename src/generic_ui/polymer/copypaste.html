@@ -57,7 +57,7 @@
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
     <core-header-panel fit>
-      <uproxy-app-bar class='core-header' disableback='{{ ui.copyPasteState.localGettingFromRemote === GettingState.GETTING_ACCESS || ui.copyPasteState.localSharingWithRemote === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
+      <uproxy-app-bar class='core-header' on-go-back='{{ handleBackClick }}'>
         <span hidden?='{{ SharingState.NONE === ui.copyPasteState.localSharingWithRemote }}'>
           {{ 'SHARE_ONE_TIME' | $$ }}
         </span>
@@ -77,8 +77,12 @@
         <div vertical layout fit>
           <div id='wrapper' flex>
             <div id='nothing' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.NONE || ui.copyPasteState.localSharingWithRemote !== SharingState.NONE }}'>
-              <p>
+              <p hidden?='{{ lastState == STATE.SHARING }}'>
                 {{ 'NO_LONGER_GETTING' | $$ }}
+              </p>
+
+              <p hidden?='{{ lastState == STATE.GETTING }}'>
+                {{ 'NO_LONGER_SHARING' | $$ }}
               </p>
 
               <div class='centered'>
