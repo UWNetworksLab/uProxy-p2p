@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom.d.ts' />
+/// <reference path='../../../../third_party/typings/freedom/freedom.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import bridge = require('../../bridge/bridge');
