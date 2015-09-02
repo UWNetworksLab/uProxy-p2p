@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import signals = require('../webrtc/signals');

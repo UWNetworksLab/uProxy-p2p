@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends

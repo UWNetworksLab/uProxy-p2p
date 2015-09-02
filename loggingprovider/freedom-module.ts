@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 export import logging_provider = require('./loggingprovider');
 export var moduleName = 'loggingprovider'
