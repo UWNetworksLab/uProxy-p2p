@@ -145,7 +145,7 @@ class Pipe {
   // CPU load, that IPC queue can grow very large.  This Active Queue Manager
   // drops packets when the queue gets too large, so that the browser slows
   // down its sending, which reduces CPU load.
-  private queueManager_ :aqm.AQM<[Socket, ArrayBuffer, net.Endpoint, boolean]>;
+  private queueManager_ :aqm.AQM<[Socket, ArrayBuffer, net.Endpoint]>;
 
   // TODO: define a type for event dispatcher in freedom-typescript-api
   constructor(
@@ -153,10 +153,15 @@ class Pipe {
       private name_:string = 'unnamed-pipe-' + Pipe.id_) {
     Pipe.id_++;
 
+    // Target 10 milliseconds maximum roundtrip delay to the core.
+    // This is twice 5 milliseconds, which is CoDel's recommended
+    // one-way delay.
     this.queueManager_ =
-        new aqm.REDSentinel<[Socket, ArrayBuffer, net.Endpoint, boolean]>(10);
-    this.queueManager_.fastSender = this.fastSendTo_;  // (not yet used)
-    this.queueManager_.tracedSender = this.tracedSendTo_;
+        new aqm.CoDelIsh<[Socket, ArrayBuffer, net.Endpoint]>(10);
+    this.queueManager_.fastSender = this.fastSender_;
+    this.queueManager_.tracedSender = this.tracedSender_;
+    // TODO: Tune the tracing fraction.  Higher should be more stable, but
+    // lower should be more efficient.
     this.queueManager_.tracingFraction = 1 / 5;
   }
 
@@ -372,9 +377,7 @@ class Pipe {
           // Public socket may be null, especially if the index is too great.
           // Drop the packet in that case.
           if (publicSocket) {
-            // 0 is the flow identifier for the outbound flow.
-            this.queueManager_.send(0,
-                [publicSocket, recvFromInfo.data, remoteEndpoint, true]);
+            this.sendTo_(publicSocket, recvFromInfo.data, remoteEndpoint);
           }
         }
       });
@@ -423,44 +426,43 @@ class Pipe {
   }
 
   /**
-   * Sends a message to the specified destination.
-   * The message is obfuscated or deobfuscated first.
+   * Sends a message over the network to the specified destination.
+   * The message is obfuscated before it hits the wire.
    */
-  private fastSendTo_ = (args:[Socket, ArrayBuffer, net.Endpoint, boolean])
-      : void => {
-    var [socket, buffer, to, forward] = args;
-    var transformedBuffers = forward ? this.transformer_.transform(buffer)
-        : this.transformer_.restore(buffer);
+  private sendTo_ = (publicSocket:Socket, buffer:ArrayBuffer, to:net.Endpoint)
+      :void => {
+    var transformedBuffers = this.transformer_.transform(buffer);
     for(var i = 0; i < transformedBuffers.length; i++) {
-      socket.sendTo.reckless(
-          transformedBuffers[i],
-          to.address,
-          to.port);
+      // 0 is the identifier for the outbound flow
+      this.queueManager_.send(0, [publicSocket, transformedBuffers[i], to]);
     }
   }
 
   /**
    * Sends a message to the specified destination.
-   * The message is obfuscated or deobfuscated first.
+   */
+  private fastSender_ = (args:[Socket, ArrayBuffer, net.Endpoint]) : void => {
+    var [socket, buffer, to] = args;
+    socket.sendTo.reckless(
+        buffer,
+        to.address,
+        to.port);
+  }
+
+  /**
+   * Sends a message to the specified destination.
    * This version also requests an Ack from the core, and returns a Promise
    * that resolves when the core has sent the message.
    */
-  private tracedSendTo_ = (args:[Socket, ArrayBuffer, net.Endpoint, boolean])
+  private tracedSender_ = (args:[Socket, ArrayBuffer, net.Endpoint])
       : Promise<void> => {
-    var [socket, buffer, to, forward] = args;
-    var transformedBuffers = forward ? this.transformer_.transform(buffer)
-        : this.transformer_.restore(buffer);
-    for(var i = 0; i < transformedBuffers.length - 1; i++) {
-      socket.sendTo.reckless(
-          transformedBuffers[i],
-          to.address,
-          to.port);
-    }
+    var [socket, buffer, to] = args;
+
     return socket.sendTo(
-        transformedBuffers[transformedBuffers.length],
+        buffer,
         to.address,
         to.port).then((bytesWritten:number) => {
-      if (bytesWritten !== transformedBuffer.byteLength) {
+      if (bytesWritten !== buffer.byteLength) {
         throw new Error('Incomplete UDP send should be impossible');
       }
     });
@@ -487,8 +489,7 @@ class Pipe {
       };
       for(var i = 0; i < buffers.length; i++) {
         // 1 is the identifier for the inbound flow
-        this.queueManager_.send(1,
-            [mirrorSocket, buffers[i], browserEndpoint, false]);
+        this.queueManager_.send(1, [mirrorSocket, buffers[i], browserEndpoint]);
       }
     });
   }

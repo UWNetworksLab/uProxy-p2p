@@ -5,8 +5,8 @@
 // The number of bytes per packet is not exposed, so all 
 // implementations of this interface must measure the queue
 // length in number of packets.  This seems appropriate for our
-// use case: managing an IPC queue whose cost appears to be
-// dominated by packet rate, not byte rate.
+// use case: managing an IPC queue whose CPU cost is proportional
+// to the packet rate, not the byte rate.
 export interface AQM<T> {
   // This function must be set by the user before calling send.
   // It should add a packet to the send queue, and also return
@@ -84,7 +84,7 @@ export class REDSentinel<T> implements AQM<T>{
 
   // When no packets are in the queue, the moving average
   // should decay toward zero.  This constant sets the
-  // decay rate from the approximation that at full speed
+  // decay rate, based on the approximation that at full speed
   // we would send about 1 packet per millisecond.
   private static SENDRATE_ = 1;
 
@@ -93,7 +93,7 @@ export class REDSentinel<T> implements AQM<T>{
   private emptyDate_ = new Date();
   private emptyAvg_ = 0;
 
-  private counter_ = 0|0;  // 32-bit int
+  private counter_ = 0|0;  // 32-bit int, asm.js style
 
   constructor(private dropThreshold_:number) {}
 
@@ -134,3 +134,99 @@ export class REDSentinel<T> implements AQM<T>{
     return true;
   }
 }  // class REDSentinel
+
+// This class implements something like the new CoDel AQM algorithm:
+//   https://tools.ietf.org/html/draft-ietf-aqm-codel-01
+// This implementation is different from true CoDel because
+//  (1) It uses fractional tracing
+//  (2) It uses tail drop (head drop is not possible in this model)
+//  (3) It does not have a byte counter
+export class CoDelIsh<T> implements AQM<T>{
+  public tracedSender:(args:T) => Promise<void>;
+  public fastSender:(args:T) => void;
+  public tracingFraction:number = 0.2;
+
+  // CoDel works by checking the minimum delay in each interval.
+  // If there is congestion at the end of the interval, the next
+  // packet is dropped.
+  // The duration of the interval starts at 100 milliseconds, but gets
+  // shorter when congestion is detected.
+  private static BASE_INTERVAL_ = 100;
+
+  // Drop level 1 means that we are in "good queue".
+  // Higher drop levels indicate the number of consecutive intervals
+  // that were judged bad.
+  private dropLevel_:number = 1;
+  // Whether to drop the next packet.
+  private dropNext_:boolean = false;
+
+  // The time at which the current interval will end.
+  // The initial value (0) corresponds to the epoch, so the first
+  // packet will cause the after-end-of-interval logic to run.
+  private deadline_:number = 0;
+  // The number of send calls so far in this interval.
+  private sent_:number = 0;
+  // The minimum delay observed so far in this interval.
+  private minDelay_:number = Infinity;
+
+  // Trace every nth packet, by adding this.tracingFraction modulo 1,
+  // and tracing after the value wraps.  Setting an initial value
+  // of 1 ensures that the first packet is traced.
+  private traceCounter_ = 1;
+
+  // Method to run at the end of an interval.
+  private endOfInterval_(now:number) {
+    if (this.sent_ <= 1 ||  // Substitutes for CoDel's MTU threshold
+        this.minDelay_ <= this.targetDelay_) {
+      // Good queue.  Reduce the drop level by 2.
+      this.dropLevel_ = Math.max(1, this.dropLevel_ - 2);
+      this.dropNext_ = false;
+    } else {
+      // Bad queue.  Drop a packet and shorten the interval.
+      this.dropNext_ = true;
+      ++this.dropLevel_;
+    }
+    this.minDelay_ = Infinity;
+    // Always trace the first packet of the next interval.
+    this.traceCounter_ = 1;
+    // In CoDel, the interval length is inversely proportional to
+    // the square root of the drop level.
+    this.deadline_ = now +
+        CoDelIsh.BASE_INTERVAL_ / Math.sqrt(this.dropLevel_);
+  }
+
+  // targetDelay_ is the target total queueing delay in milliseconds.
+  constructor(private targetDelay_:number) {}
+
+  public send(flow:number, args:T) : boolean {
+    ++this.sent_;
+    if (this.dropNext_) {
+      // Drop the first packet of the interval
+      this.dropNext_ = false;
+      return false;
+    }
+
+    if (this.traceCounter_ >= 1) {
+      this.traceCounter_ -= 1;
+
+      var enqueueTime = Date.now();
+      this.tracedSender(args).then(() => {
+        // This runs after a packet is dequeued and acked back from
+        // the core.
+        var endTime = Date.now();
+        var sojourn = endTime - enqueueTime;
+        this.minDelay_ = Math.min(this.minDelay_, sojourn);
+
+        if (enqueueTime > this.deadline_) {
+          this.endOfInterval_(endTime);
+        }
+      });
+    } else {
+      this.fastSender(args);
+    }
+    this.traceCounter_ += this.tracingFraction;
+
+    return true;
+  }
+
+}  // class CoDelIsh
