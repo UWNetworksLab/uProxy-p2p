@@ -3,12 +3,12 @@
 <polymer-element name='uproxy-app-bar' attributes='disableback'>
   <template>
     <style>
-    core-toolbar {
+    core-toolbar#app-bar-toolbar {
       height: 60px;
     }
-    #title {
+    #app-bar-title {
       font-size: 18px;
-      margin-left: 36px;
+      margin-left: 18px;
       white-space: nowrap;
       overflow: hidden;
     }
@@ -30,9 +30,9 @@
     }
     </style>
 
-    <core-toolbar>
+    <core-toolbar id='app-bar-toolbar'>
       <core-icon class='back {{ { disabled: disableback } | tokenList }}' icon="arrow-back" on-tap='{{ back }}'></core-icon>
-      <div id='title' flex>
+      <div id='app-bar-title' flex>
         <content></content>
       </div>
     </core-toolbar>

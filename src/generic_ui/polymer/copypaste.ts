@@ -13,7 +13,13 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
+enum STATE {
+  GETTING,
+  SHARING,
+};
+
 Polymer({
+  STATE: STATE,
   init: function() {
     /* bring copyPaste to the front in get mode */
     ui.view = ui_constants.View.COPYPASTE;
@@ -22,7 +28,9 @@ Polymer({
       this.startGetting();
     }
   },
+  lastState: STATE.SHARING,
   startGetting: function() {
+    this.lastState = STATE.GETTING;
     this.gettingResponse = '';
 
     var doneStopping :Promise<void>;
@@ -53,12 +61,6 @@ Polymer({
     });
   },
   handleBackClick: function() {
-    // do not let the user navigate away from this view if copypaste is active
-    if ((ui.copyPasteState.localGettingFromRemote === social.GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) ||
-        ui.copyPasteState.localSharingWithRemote === social.SharingState.SHARING_ACCESS) {
-      return;
-    }
-
     if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE &&
         ui.copyPasteState.localSharingWithRemote === social.SharingState.NONE) {
       ui.view = ui_constants.View.SPLASH;
@@ -78,6 +80,7 @@ Polymer({
     });
   },
   stopGetting: function() {
+    ui.stopUsingProxy();
     return core.stopCopyPasteGet().then(() => {
       // clean up the pending endpoint in case we got here from going back
       ui.copyPastePendingEndpoint = null;
@@ -105,6 +108,7 @@ Polymer({
     });
   },
   stopSharing: function() {
+    this.lastState = STATE.SHARING;
     return core.stopCopyPasteShare();
   },
   select: function(e :Event, d :Object, sender :HTMLInputElement) {
@@ -118,7 +122,7 @@ Polymer({
     // if we are currently in the middle of setting up a connection, end it
     var doneStopping :Promise<void>;
     if (ui.copyPasteState.localGettingFromRemote !== social.GettingState.NONE) {
-      doneStopping = this.stopGetting()
+      doneStopping = this.stopGetting();
     } else {
       doneStopping = Promise.resolve<void>();
     }
