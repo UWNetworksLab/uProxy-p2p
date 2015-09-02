@@ -488,6 +488,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
           this.maxChannels_ + ')'));
     }
 
+    if (options && options.id && options.id >= this.maxChannels_) {
+      return Promise.reject(new Error('requested channel id higher than ' +
+          'maximum (' + this.maxChannels_ + ')'));
+    }
+
     log.debug('%1: creating channel %2 with options: %3',
         this.peerName_, channelLabel, options);
 
