@@ -40,7 +40,7 @@
 
     <core-overlay id='inviteUserPanel'>
       <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-        Invite a friend on {{ networkToString(selectedNetworkName) }}
+        Invite a friend on {{ getNetworkDisplayName(selectedNetworkName) }}
       </uproxy-app-bar>
 
       <div hidden?='{{ model.onlineNetworks.length <= 1}}'>

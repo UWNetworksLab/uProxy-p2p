@@ -74,13 +74,8 @@ Polymer({
   showAcceptUserInvite: function() {
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
   },
-  networkToString: function(selectedNetworkName :string){
-    if (selectedNetworkName == "Facebook-Firebase-V2") {
-      return "Facebook";
-    } else if (selectedNetworkName == "GMail") {
-      return "Gmail";
-    }
-    return "";
+  getNetworkDisplayName: function(selectedNetworkName :string){
+    return ui.getNetworkDisplayName(selectedNetworkName);
   },
   ready: function() {
     this.inviteUserEmail = '';
