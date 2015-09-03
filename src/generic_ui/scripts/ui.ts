@@ -827,6 +827,7 @@ export class UserInterface implements ui_constants.UiApi {
    */
   private syncNetwork_ = (networkMsg :social.NetworkMessage) => {
     var existingNetwork = this.model.getNetwork(networkMsg.name, networkMsg.userId);
+    var networkApi = this.getNetworkApiFromKey_(networkMsg.name);
 
     if (networkMsg.online) {
       if (!existingNetwork) {
@@ -854,7 +855,7 @@ export class UserInterface implements ui_constants.UiApi {
             this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
           }
           this.showNotification(
-            this.i18n_t("LOGGED_OUT", { network: networkMsg.displayName }));
+            this.i18n_t("LOGGED_OUT", { network: networkApi.name }));
 
           if (!this.model.onlineNetworks.length) {
             this.view = ui_constants.View.SPLASH;
@@ -1071,7 +1072,11 @@ export class UserInterface implements ui_constants.UiApi {
 
   public updateInitialState = (state :uproxy_core_api.InitialState) => {
     console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
-    this.model.networkApis = this.getNetworkApisFromKeys_(state.networkKeys);
+    this.model.networkApis = [];
+    for (var i = 0; i < state.networkKeys.length; i++) {
+      this.model.networkApis.push(
+          this.getNetworkApiFromKey_(state.networkKeys[i]));
+    }
     this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.i18n_setLng(state.globalSettings.language);
@@ -1111,23 +1116,19 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateIcon_();
   }
 
-  private getNetworkApisFromKeys_ = (networkKeys :string[]) : NetworkApi[] => {
-    var networkApis :NetworkApi[] = [];
-    for (var i = 0; i < networkKeys.length; i++) {
-      var versionIndex = networkKeys[i].indexOf('-');
-      if (versionIndex > -1) {
-        networkApis.push({
-          name: networkKeys[i].substring(0, versionIndex),
-          version: networkKeys[i].substring(versionIndex + 1)
-        });
-      } else {
-        networkApis.push({
-          name: networkKeys[i],
-          version: null
-        });
-      }
+  private getNetworkApiFromKey_ = (networkKey :string) : NetworkApi => {
+    var versionIndex = networkKey.indexOf('-');
+    if (versionIndex > -1) {
+      return {
+        name: networkKey.substring(0, versionIndex),
+        version: networkKey.substring(versionIndex + 1)
+      };
+    } else {
+      return {
+        name: networkKey,
+        version: null
+      });
     }
-    return networkApis;
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
