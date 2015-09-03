@@ -244,7 +244,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
     return globals.loadSettings.then(() => {
       return {
-        networkNames: Object.keys(social_network.networks),
+        networkKeys: Object.keys(social_network.networks),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,

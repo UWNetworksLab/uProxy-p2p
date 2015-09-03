@@ -14,7 +14,12 @@ Polymer({
     this.networkInfo = network ? network : null;
   },
   connect: function() {
-    ui.login(this.name).catch((e :Error) => {
+    var networkApiStr = this.networkApi.name;
+    if (this.networkApi.version) {
+      networkApiStr = [networkApiStr, this.networkApi.version].join('-');
+    }
+    ui.login(networkApiStr)
+        .catch((e :Error) => {
       console.warn('Did not log in', e);
     });
   },
@@ -30,7 +35,6 @@ Polymer({
   },
   ready: function() {
     this.model = model;
-    this.displayName = ui.getNetworkDisplayName(this.name);
   },
   observe: {
     'model.onlineNetworks': 'updateSignedIn'

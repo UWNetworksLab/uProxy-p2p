@@ -1,7 +1,7 @@
 <link rel="import" href="../../bower/polymer/polymer.html">
 <link rel='import' href='../../bower/paper-button/paper-button.html'>
 
-<polymer-element name='uproxy-network' attributes='networkName'>
+<polymer-element name='uproxy-network' attributes='networkApi'>
   <template>
     <style>
       :host {
@@ -25,8 +25,8 @@
     <div class='network'>
       <span>
         <span>
-          <paper-button raised on-tap='{{connect}}' class='{{ displayName }}'>
-            {{ displayName }}
+          <paper-button raised on-tap='{{connect}}' class='{{ networkApi.name }}'>
+            {{ networkApi.name }}
           </button>
         </span>
       </span>

@@ -30,7 +30,7 @@ import _ = require('lodash');
 // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
 
 export class Model {
-  public networkNames :string[] = [];
+  public networkApis :NetworkApi[] = [];
 
   public onlineNetworks :Network[] = [];
 
@@ -117,17 +117,21 @@ export interface Contacts {
   shareAccessContacts :ContactCategory;
 }
 
- export interface UserCategories {
-   getTab :string;
-   shareTab :string;
- }
+export interface UserCategories {
+  getTab :string;
+  shareTab :string;
+}
+
+export interface NetworkApi {
+  name :string;
+  version :string;
+}
 
 /**
  * Specific to one particular Social network.
  */
 export interface Network {
   name :string;
-  displayName :string;
   // TODO(salomegeo): Add more information about the user.
   userId :string;
   imageData ?:string;
@@ -828,7 +832,6 @@ export class UserInterface implements ui_constants.UiApi {
       if (!existingNetwork) {
         existingNetwork = {
           name: networkMsg.name,
-          displayName: networkMsg.displayName,
           userId: networkMsg.userId,
           roster: {},
           logoutExpected: false,
@@ -842,8 +845,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
-            // TODO: fix this mess of name vs displayName
-            (networkMsg.name === 'GMail' || networkMsg.displayName === 'Facebook') &&
+            (networkMsg.name === 'GMail' || networkMsg.name === 'Facebook-Firebase-V2') &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
@@ -1069,7 +1071,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public updateInitialState = (state :uproxy_core_api.InitialState) => {
     console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
-    this.model.networkNames = state.networkNames;
+    this.model.networkApis = this.getNetworkApisFromKeys_(state.networkKeys);
     this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.i18n_setLng(state.globalSettings.language);
@@ -1109,10 +1111,28 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateIcon_();
   }
 
+  private getNetworkApisFromKeys_ = (networkKeys :string[]) : NetworkApi[] => {
+    var networkApis :NetworkApi[] = [];
+    for (var i = 0; i < networkKeys.length; i++) {
+      var versionIndex = networkKeys[i].indexOf('-');
+      if (versionIndex > -1) {
+        networkApis.push({
+          name: networkKeys[i].substring(0, versionIndex),
+          version: networkKeys[i].substring(versionIndex + 1)
+        });
+      } else {
+        networkApis.push({
+          name: networkKeys[i],
+          version: null
+        });
+      }
+    }
+    return networkApis;
+  }
+
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
     this.model.onlineNetworks.push({
       name: networkState.name,
-      displayName: networkState.displayName,
       userId: networkState.profile.userId,
       userName: networkState.profile.name,
       imageData: networkState.profile.imageData,

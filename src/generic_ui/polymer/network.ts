@@ -9,8 +9,12 @@ var model = ui_context.model;
 
 Polymer({
   connect: function() {
-    ui.login(this.networkName).then(() => {
-      console.log('connected to ' + this.networkName);
+    var networkApiStr = this.networkApi.name;
+    if (this.networkApi.version) {
+      networkApiStr = [networkApiStr, this.networkApi.version].join('-');
+    }
+    ui.login(networkApiStr).then(() => {
+      console.log('connected to ' + this.networkApi);
       // Fire an update-view event, which root.ts listens for.
       this.fire('update-view', { view: ui_constants.View.ROSTER });
       ui.bringUproxyToFront();
@@ -19,6 +23,5 @@ Polymer({
     });
   },
   ready: function() {
-    this.displayName = ui.getNetworkDisplayName(this.networkName);
   },
 });

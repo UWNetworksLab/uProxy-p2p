@@ -154,8 +154,8 @@
       <div class='view' flex>
         <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$ }}</h1>
         <p>{{ "WHY_SOCIAL_NETWORK" | $$ }}</p>
-        <template repeat='{{ n in model.networkNames }}' vertical layout>
-          <uproxy-network networkName='{{n}}'></uproxy-network>
+        <template repeat='{{ networkApi in model.networkApis }}' vertical layout>
+          <uproxy-network networkApi='{{ networkApi }}'></uproxy-network>
         </template>
         <p id='oneTimeConnection'>
           <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$ }}</a>
