@@ -111,8 +111,9 @@ Polymer({
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     // TODO: error checking, isNaN etc
     var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
+    var fulfill = (target.getAttribute('affirmative') != null);
     if (callbackIndex) {
-      ui.invokeConfirmationCallback(callbackIndex);
+      ui.invokeConfirmationCallback(callbackIndex, fulfill);
     }
     var signal = target.getAttribute('data-signal');
     if (signal) {

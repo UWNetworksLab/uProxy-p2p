@@ -435,10 +435,14 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public invokeConfirmationCallback = (index :number) => {
+  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
     this.confirmationCallbacks_[index]();
-    // TODO: also need to delete corresponding fulfill/reject
     delete this.confirmationCallbacks_[index];
+    if (fulfill) {
+      delete this.confirmationCallbacks_[index + 1];
+    } else {
+      delete this.confirmationCallbacks_[index - 1];
+    }
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
