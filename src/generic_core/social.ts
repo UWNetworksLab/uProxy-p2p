@@ -581,7 +581,11 @@ export function notifyUI(networkName :string, userId :string) {
 
     public getInviteUrl = () : Promise<string> => {
       return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
-        var tokenObj = { networkName: this.name, networkData: data.networkData };
+        var tokenObj = {
+          networkName: this.name,
+          userName: this.myInstance.userName,
+          networkData: data.networkData
+        };
         return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
       })
     }

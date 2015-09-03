@@ -549,8 +549,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private addUserWithConfirmation_ = (url: string) => {
-    // TODO: display friend name.
-    this.getConfirmation('', 'Would you like to add a friend').then(() => {
+    var token = url.substr(url.lastIndexOf('/') + 1);
+    var tokenObj = JSON.parse(atob(token));
+    var userName = tokenObj.userName;
+    this.getConfirmation('', 'Would you like to add ' + userName + '?')
+        .then(() => {
       this.core.addUser(url);
     });
   }
@@ -564,9 +567,6 @@ export class UserInterface implements ui_constants.UiApi {
       this.getConfirmation('Login Required', 'You need to log into ' +
           this.getNetworkApiFromKey_(networkName).name).then(() => {
         this.login(networkName).then(() => {
-          // Fire an update-view event, which root.ts listens for.
-          // TODO: can this be done in ui.ts?
-          // this.fire('update-view', { view: ui_constants.View.ROSTER });
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
           this.addUserWithConfirmation_(url);
@@ -1126,7 +1126,7 @@ export class UserInterface implements ui_constants.UiApi {
       return {
         name: networkKey,
         version: null
-      });
+      };
     }
   }
 
