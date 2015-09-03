@@ -153,16 +153,16 @@ class Pipe {
       private name_:string = 'unnamed-pipe-' + Pipe.id_) {
     Pipe.id_++;
 
-    // Target 10 milliseconds maximum roundtrip delay to the core.
+    // The delay target is 10 milliseconds maximum roundtrip delay to the core.
     // This is twice 5 milliseconds, which is CoDel's recommended
     // one-way delay.
-    this.queueManager_ =
-        new aqm.CoDelIsh<[Socket, ArrayBuffer, net.Endpoint]>(10);
-    this.queueManager_.fastSender = this.fastSender_;
-    this.queueManager_.tracedSender = this.tracedSender_;
-    // TODO: Tune the tracing fraction.  Higher should be more stable, but
-    // lower should be more efficient.
-    this.queueManager_.tracingFraction = 1 / 5;
+    // TODO: Tune the tracing fraction (1 / 5).  Higher should be more stable,
+    // but lower should be more efficient.
+    this.queueManager_ = new aqm.CoDelIsh<[Socket, ArrayBuffer, net.Endpoint]>(
+        this.tracedSend_,
+        this.fastSend_,
+        1 / 5,
+        10);
   }
 
   // Set the current transformer parameters.  The default is no transformation.
@@ -441,7 +441,7 @@ class Pipe {
   /**
    * Sends a message to the specified destination.
    */
-  private fastSender_ = (args:[Socket, ArrayBuffer, net.Endpoint]) : void => {
+  private fastSend_ = (args:[Socket, ArrayBuffer, net.Endpoint]) : void => {
     var [socket, buffer, to] = args;
     socket.sendTo.reckless(
         buffer,
@@ -454,7 +454,7 @@ class Pipe {
    * This version also requests an Ack from the core, and returns a Promise
    * that resolves when the core has sent the message.
    */
-  private tracedSender_ = (args:[Socket, ArrayBuffer, net.Endpoint])
+  private tracedSend_ = (args:[Socket, ArrayBuffer, net.Endpoint])
       : Promise<void> => {
     var [socket, buffer, to] = args;
 

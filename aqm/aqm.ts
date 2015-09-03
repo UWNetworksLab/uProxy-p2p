@@ -8,61 +8,43 @@
 // use case: managing an IPC queue whose CPU cost is proportional
 // to the packet rate, not the byte rate.
 export interface AQM<T> {
-  // This function must be set by the user before calling send.
-  // It should add a packet to the send queue, and also return
-  // a Promise that resolves after the packet exits the queue.
-  tracedSender:(args:T) => Promise<void>;
-
-  // This function must be set by the user before calling send.
-  // It should enqueue a packet to be sent.
-  fastSender:(args:T) => void;
-
-  // The fraction of sends that will use tracedSender.
-  // Implementations of AQM should prepopulate this, but it may
-  // be changed by the user of the class.
-  tracingFraction:number;
-
   // Send a packet that is part of a specified flow.  The AQM
   // will determine whether to use |fastSender| or |tracedSender|.
   // The flow identifier allows implementations of fair queueing.
+  // Returns true if the packet was sent, or false if it was dropped.
   send(flow:number, args:T) : boolean;
 }
 
-// A null AQM: just uses the fast sender and lets the queue
-// grow without bound.
+// A null AQM: just uses a fast send and lets the queue grow without
+// bound.
 export class Null<T> implements AQM<T> {
-  public tracedSender:(args:T) => Promise<void>;  // Ignored
-  public fastSender:(args:T) => void;
-  public tracingFraction:number = 0;  // Ignored
+  constructor(private send_:(args:T) => void) {}
 
   public send(flow:number, args:T) : boolean {
-    this.fastSender(args);
+    this.send_(args);
     return true;
   }
 }
 
 // Implements "tail drop", i.e. a hard limit on queue length.
-// Always uses the traced sender.
+// Uses a traced send.
 export class TailDrop<T> implements AQM<T> {
-  public tracedSender:(args:T) => Promise<void>;
-  public fastSender:(args:T) => void;  // Ignored
-  public tracingFraction:number = 1;  // Ignored
-
   private length_ = 0;
 
-  constructor(private maxLength_:number) {}
+  constructor(private send_:(args:T) => Promise<void>,
+              private maxLength_:number) {}
 
   public send(flow:number, args:T) : boolean {
     if (this.length_ >= this.maxLength_) {
       return false;
     }
     ++this.length_;
-    this.tracedSender(args).then(() => {
+    this.send_(args).then(() => {
       --this.length_;
     });
     return true;
   }
-}  // class TailDrop
+}
 
 // When |tracingFraction === 1|, this class implements the classic
 // Random Early Detection AQM algorithm:
@@ -73,10 +55,6 @@ export class TailDrop<T> implements AQM<T> {
 // length, which is noisier than true RED but avoids acking every
 // send call, which would double the IPC cost.
 export class REDSentinel<T> implements AQM<T>{
-  public tracedSender:(args:T) => Promise<void>;
-  public fastSender:(args:T) => void;
-  public tracingFraction:number = 0.2;
-
   // RED uses an exponential moving average.  This weight
   // corresponds to a sliding window of 500 packets, which
   // is the value from the original paper.
@@ -95,7 +73,10 @@ export class REDSentinel<T> implements AQM<T>{
 
   private counter_ = 0|0;  // 32-bit int, asm.js style
 
-  constructor(private dropThreshold_:number) {}
+  constructor(private tracedSend_:(args:T) => Promise<void>,
+              private fastSend_:(args:T) => void,
+              private tracingFraction_:number,
+              private dropThreshold_:number) {}
 
   private updateAvg_() {
     if (this.length_ > 0) {
@@ -103,7 +84,8 @@ export class REDSentinel<T> implements AQM<T>{
           + REDSentinel.WEIGHT_ * this.length_;
     } else {
       var now = new Date();
-      var slots = (now.getTime() - this.emptyDate_.getTime()) * REDSentinel.SENDRATE_;
+      var slots = (now.getTime() - this.emptyDate_.getTime())
+          * REDSentinel.SENDRATE_;
       this.avg_ = this.emptyAvg_ * Math.pow(1 - REDSentinel.WEIGHT_, slots);
     }
   }
@@ -118,11 +100,11 @@ export class REDSentinel<T> implements AQM<T>{
 
     this.counter_ = (this.counter_ + 1)|0;
 
-    if (Math.random() >= this.tracingFraction) {
-      this.fastSender(args);
+    if (Math.random() >= this.tracingFraction_) {
+      this.fastSend_(args);
     } else {
       var counterAtSend = this.counter_;
-      this.tracedSender(args).then(() => {
+      this.tracedSend_(args).then(() => {
         this.length_ = (this.counter_ - counterAtSend)|0;
         if (this.length_ === 0) {
           this.emptyDate_ = new Date();
@@ -133,7 +115,7 @@ export class REDSentinel<T> implements AQM<T>{
 
     return true;
   }
-}  // class REDSentinel
+}
 
 // This class implements something like the new CoDel AQM algorithm:
 //   https://tools.ietf.org/html/draft-ietf-aqm-codel-01
@@ -142,10 +124,6 @@ export class REDSentinel<T> implements AQM<T>{
 //  (2) It uses tail drop (head drop is not possible in this model)
 //  (3) It does not have a byte counter
 export class CoDelIsh<T> implements AQM<T>{
-  public tracedSender:(args:T) => Promise<void>;
-  public fastSender:(args:T) => void;
-  public tracingFraction:number = 0.2;
-
   // CoDel works by checking the minimum delay in each interval.
   // If there is congestion at the end of the interval, the next
   // packet is dropped.
@@ -196,7 +174,10 @@ export class CoDelIsh<T> implements AQM<T>{
   }
 
   // targetDelay_ is the target total queueing delay in milliseconds.
-  constructor(private targetDelay_:number) {}
+  constructor(private tracedSend_:(args:T) => Promise<void>,
+              private fastSend_:(args:T) => void,
+              private tracingFraction_:number,
+              private targetDelay_:number) {}
 
   public send(flow:number, args:T) : boolean {
     ++this.sent_;
@@ -210,7 +191,7 @@ export class CoDelIsh<T> implements AQM<T>{
       this.traceCounter_ -= 1;
 
       var enqueueTime = Date.now();
-      this.tracedSender(args).then(() => {
+      this.tracedSend_(args).then(() => {
         // This runs after a packet is dequeued and acked back from
         // the core.
         var endTime = Date.now();
@@ -222,11 +203,10 @@ export class CoDelIsh<T> implements AQM<T>{
         }
       });
     } else {
-      this.fastSender(args);
+      this.fastSend_(args);
     }
-    this.traceCounter_ += this.tracingFraction;
+    this.traceCounter_ += this.tracingFraction_;
 
     return true;
   }
-
-}  // class CoDelIsh
+}
