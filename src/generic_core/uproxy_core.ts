@@ -298,18 +298,26 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     copyPasteConnection.handleSignal(signal);
   }
 
-  public addUser = (inviteUrl :string) : void => {
-    // TODO: error checking.  How to get errors back to UI?
-    // inviteUrl may be a URL with a token, or just the token.  Remove the
-    // prefixed URL if it is set.
-    var token = inviteUrl.lastIndexOf('/') >= 0 ?
-        inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
-    var tokenObj = JSON.parse(atob(token));
-    var networkName = tokenObj.networkName;
+  public addUser = (inviteUrl :string) : Promise<void> => {
+    try {
+      // inviteUrl may be a URL with a token, or just the token.  Remove the
+      // prefixed URL if it is set.
+      var token = inviteUrl.lastIndexOf('/') >= 0 ?
+          inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+      var networkData = tokenObj.networkData;
+      if (!social_network.networks[networkName]){
+        return Promise.reject('invite URL had invalid social network');
+      }
+    } catch(e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+
     // This code assumes the user is only signed in once to any given network.
     for (var userId in social_network.networks[networkName]) {
-      social_network.networks[networkName][userId].addUserRequest(
-          tokenObj.networkData);
+      return social_network.networks[networkName][userId]
+          .addUserRequest(networkData);
       break;
     }
   }

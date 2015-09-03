@@ -552,32 +552,51 @@ export class UserInterface implements ui_constants.UiApi {
     return {type: type, messages: payload};
   }
 
-  private addUserWithConfirmation_ = (url: string) => {
-    var token = url.substr(url.lastIndexOf('/') + 1);
-    var tokenObj = JSON.parse(atob(token));
-    var userName = tokenObj.userName;
-    this.getConfirmation('', 'Would you like to add ' + userName + '?')
+  private addUserWithConfirmation_ = (url: string) : Promise<void> => {
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var userName = tokenObj.userName;
+    } catch(e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+    return this.getConfirmation('', 'Would you like to add ' + userName + '?')
         .then(() => {
-      this.core.addUser(url);
+      return this.core.addUser(url);
     });
   }
 
   public handleInviteUrlData = (url :string) => {
-    // TODO: add try catch and such in case of bad urls
-    var token = url.substr(url.lastIndexOf('/') + 1);
-    var tokenObj = JSON.parse(atob(token));
-    var networkName = tokenObj.networkName;
+    var showUrlError = () => {
+      this.fireSignal('open-dialog', {
+        heading: '',
+        message: 'There was an error with your invite URL. Please try again.',
+        buttons: [{
+          text: this.i18n_t("OK")
+        }]
+      });
+    };
+
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+    } catch(e) {
+      showUrlError();
+      return;
+    }
+
     if (!this.model.getNetwork(networkName)) {
       this.getConfirmation('Login Required', 'You need to log into ' +
           this.getNetworkApiFromKey_(networkName).name).then(() => {
         this.login(networkName).then(() => {
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          this.addUserWithConfirmation_(url);
+          this.addUserWithConfirmation_(url).catch(showUrlError);
         });
       });
     } else {
-      this.addUserWithConfirmation_(url);
+      this.addUserWithConfirmation_(url).catch(showUrlError);;
     }
   }
 

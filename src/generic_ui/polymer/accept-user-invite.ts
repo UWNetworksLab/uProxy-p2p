@@ -8,15 +8,25 @@ var core = ui_context.core;
 Polymer({
   addUser: function() {
     // TODO: handle errors
-    core.addUser(this.receivedInviteToken);
-    this.fire('open-dialog', {
-      heading: 'Friend Added', // TODO: translate
-      message: '',  // TODO:
-      buttons: [{
-        text: ui.i18n_t("OK")
-      }]
+    core.addUser(this.receivedInviteToken).then(() => {
+      this.fire('open-dialog', {
+        heading: 'Friend Added', // TODO: translate
+        message: '',  // TODO:
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+      this.closeAcceptUserInvitePanel();
+    }).catch(() => {
+      this.fire('open-dialog', {
+        heading: '', // TODO: translate
+        message: 'There was an error adding your friend.',  // TODO:
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+      console.log('There was an error adding your friend.');
     });
-    this.closeAcceptUserInvitePanel();
   },
   openAcceptUserInvitePanel: function() {
     this.$.acceptUserInvitePanel.open();

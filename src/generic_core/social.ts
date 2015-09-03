@@ -263,7 +263,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public addUserRequest = (networkData :string): void => {
+    public addUserRequest = (networkData :string): Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -573,8 +573,8 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public addUserRequest = (networkData :string): void => {
-      this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+    public addUserRequest = (networkData :string): Promise<void> => {
+      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
       });
     }
