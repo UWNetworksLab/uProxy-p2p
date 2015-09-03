@@ -561,9 +561,8 @@ export class UserInterface implements ui_constants.UiApi {
     var tokenObj = JSON.parse(atob(token));
     var networkName = tokenObj.networkName;
     if (!this.model.getNetwork(networkName)) {
-      this.getConfirmation('Login Required',
-          'You need to log into ' + this.getNetworkDisplayName(networkName))
-          .then(() => {
+      this.getConfirmation('Login Required', 'You need to log into ' +
+          this.getNetworkApiFromKey_(networkName).name).then(() => {
         this.login(networkName).then(() => {
           // Fire an update-view event, which root.ts listens for.
           // TODO: can this be done in ui.ts?
@@ -1169,12 +1168,6 @@ export class UserInterface implements ui_constants.UiApi {
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
     this.portControlSupport = support;
   }
-
-   public getNetworkDisplayName = (networkName :string) => {
-     // TODO: unhack this...  use same json..  ugg fuck all this
-     // TODO: stop passing displayName from core to UI
-     return networkName == 'Facebook-Firebase-V2' ? 'Facebook' : networkName;
-   }
 
   // this takes care of updating the view (given the assumuption that we are
   // connected to the core)
