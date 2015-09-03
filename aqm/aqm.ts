@@ -1,5 +1,9 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
+import logging = require('../logging/logging');
+
+var log :logging.Log = new logging.Log('aqm');
+
 // A general interface for Active Queue Manager algorithms.
 // <T> must include everything required to send a packet.
 // The number of bytes per packet is not exposed, so all 
@@ -41,7 +45,7 @@ export class TailDrop<T> implements AQM<T> {
     ++this.length_;
     this.send_(args).then(() => {
       --this.length_;
-    });
+    }, log.error);
     return true;
   }
 }
@@ -110,7 +114,7 @@ export class REDSentinel<T> implements AQM<T>{
           this.emptyDate_ = new Date();
           this.emptyAvg_ = this.avg_;
         }
-      });
+      }, log.error);
     }
 
     return true;
@@ -201,7 +205,7 @@ export class CoDelIsh<T> implements AQM<T>{
         if (enqueueTime > this.deadline_) {
           this.endOfInterval_(endTime);
         }
-      });
+      }, log.error);
     } else {
       this.fastSend_(args);
     }
