@@ -3,6 +3,8 @@
 import argparse
 import select
 import socket
+import sys
+import time
 
 parser = argparse.ArgumentParser(description='Connect two SOCKS adventure instances.')
 parser.add_argument('getter_address', default='localhost',
@@ -22,6 +24,16 @@ getter.setblocking(False)
 giver = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 giver.connect((args.giver_address, args.giver_port))
 giver.setblocking(False)
+
+# Forward stdin to the getter, to allow commands such as
+# port to configure the proxy.
+# TODO: sleep is a horrible hack to prevent our messages
+#       being batched together into one packet which seems
+#       to work better than TCP_NODELAY.
+if not sys.stdin.isatty():
+  for line in sys.stdin:
+    getter.sendall(line + '\n')
+    time.sleep(0.5)
 
 getter.sendall('get\n')
 giver.sendall('give\n')
