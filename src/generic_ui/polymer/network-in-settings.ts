@@ -18,8 +18,7 @@ Polymer({
     if (this.networkApi.version) {
       networkApiStr = [networkApiStr, this.networkApi.version].join('-');
     }
-    ui.login(networkApiStr)
-        .catch((e :Error) => {
+    ui.login(networkApiStr).catch((e :Error) => {
       console.warn('Did not log in', e);
     });
   },
