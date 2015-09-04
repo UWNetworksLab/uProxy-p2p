@@ -205,8 +205,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
-  addUser = (inviteUrl: string): void => {
-    this.sendCommand(uproxy_core_api.Command.ADD_USER, inviteUrl);
+  addUser = (inviteUrl: string): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.ADD_USER, inviteUrl);
   }
 
   // TODO: this should probably take the network path, including userId

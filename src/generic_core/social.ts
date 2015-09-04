@@ -48,7 +48,6 @@ import ui = ui_connector.connector;
       areAllContactsUproxy: true
     },
     'Facebook-Firebase-V2': {
-      displayName: 'Facebook',
       isFirebase: true,
       enableMonitoring: true,
       areAllContactsUproxy: true
@@ -153,17 +152,12 @@ export function notifyUI(networkName :string, userId :string) {
 
   var payload :social.NetworkMessage = {
     name: networkName,
-    displayName: getNetworkDisplayName(networkName),
     online: online,
     userId: userId,
     userName: userName,
     imageData: imageData
   };
   ui.update(uproxy_core_api.Update.NETWORK, payload);
-}
-
-export function getNetworkDisplayName(networkName :string) : string {
-  return NETWORK_OPTIONS[networkName].displayName || networkName;
 }
 
   // Implements those portions of the Network interface for which the logic is
@@ -269,7 +263,7 @@ export function getNetworkDisplayName(networkName :string) : string {
       throw new Error('Operation not implemented');
     }
 
-    public addUserRequest = (networkData :string): void => {
+    public addUserRequest = (networkData :string): Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -278,7 +272,7 @@ export function getNetworkDisplayName(networkName :string) : string {
     }
 
     public sendEmail = (to: string, subject: string, body: string) : void => {
-      throw new Error('Operation not implemented'); 
+      throw new Error('Operation not implemented');
     }
 
     public getNetworkState = () :social.NetworkState => {
@@ -579,15 +573,19 @@ export function getNetworkDisplayName(networkName :string) : string {
       });
     }
 
-    public addUserRequest = (networkData :string): void => {
-      this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+    public addUserRequest = (networkData :string): Promise<void> => {
+      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
       });
     }
 
     public getInviteUrl = () : Promise<string> => {
       return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
-        var tokenObj = { networkName: this.name, networkData: data.networkData };
+        var tokenObj = {
+          networkName: this.name,
+          userName: this.myInstance.userName,
+          networkData: data.networkData
+        };
         return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
       })
     }
@@ -683,7 +681,6 @@ export function getNetworkDisplayName(networkName :string) : string {
 
       return {
         name: this.name,
-        displayName: getNetworkDisplayName(this.name),
         profile: this.myInstance.getUserProfile(),
         roster: rosterState
       };

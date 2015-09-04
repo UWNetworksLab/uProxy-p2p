@@ -36,8 +36,8 @@ describe('UI.UserInterface', () => {
     (<jasmine.Spy>mockCore.connect).and.returnValue(Promise.resolve());
 
     (<jasmine.Spy>mockCore.getFullState).and.returnValue(Promise.resolve({
-      networkNames: [
-        'testNetwork'
+      networkApis: [
+        { name: 'testNetwork', version: '' }
       ],
       globalSettings: {
       }

@@ -212,7 +212,8 @@
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
 
-    <core-signals on-core-signal-open-dialog="{{ openDialog }}"></core-signals> <!-- TODO: why is this needed? -->
+     <!-- Required for cases where an open-dialog signal is sent from the UI via ui.fireSignal -->
+    <core-signals on-core-signal-open-dialog="{{ openDialog }}"></core-signals>
 
     <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
@@ -364,9 +365,10 @@
     <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
       <p>{{ dialog.message }}</p>
       <template repeat='{{ button in dialog.buttons }}'>
-        <paper-button
-          affirmative?='{{ !button.dismissive }}' dismissive?='{{ button.dismissive }}'
-          class='dialogButton' on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}' data-callbackIndex='{{ button.callbackIndex }}'>
+        <paper-button affirmative?='{{ !button.dismissive }}'
+          dismissive?='{{ button.dismissive }}' class='dialogButton'
+          on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'
+          data-callbackIndex='{{ button.callbackIndex }}'>
           {{button.text}}
         </paper-button>
       </template>

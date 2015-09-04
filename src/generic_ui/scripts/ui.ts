@@ -30,7 +30,7 @@ import _ = require('lodash');
 // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
 
 export class Model {
-  public networkNames :string[] = [];
+  public networkApis :NetworkApi[] = [];
 
   public onlineNetworks :Network[] = [];
 
@@ -117,17 +117,21 @@ export interface Contacts {
   shareAccessContacts :ContactCategory;
 }
 
- export interface UserCategories {
-   getTab :string;
-   shareTab :string;
- }
+export interface UserCategories {
+  getTab :string;
+  shareTab :string;
+}
+
+export interface NetworkApi {
+  name :string;
+  version :string;
+}
 
 /**
  * Specific to one particular Social network.
  */
 export interface Network {
   name :string;
-  displayName :string;
   // TODO(salomegeo): Add more information about the user.
   userId :string;
   imageData ?:string;
@@ -431,10 +435,19 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public invokeConfirmationCallback = (index :number) => {
+  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+    if (index > this.confirmationCallbackIndex_) {
+      console.error('Confirmation callback not found: ' + index);
+      return;
+    }
+
     this.confirmationCallbacks_[index]();
-    // TODO: also need to delete corresponding fulfill/reject
     delete this.confirmationCallbacks_[index];
+    if (fulfill) {
+      delete this.confirmationCallbacks_[index + 1];
+    } else {
+      delete this.confirmationCallbacks_[index - 1];
+    }
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -544,33 +557,51 @@ export class UserInterface implements ui_constants.UiApi {
     return {type: type, messages: payload};
   }
 
-  private addUserWithConfirmation_ = (url: string) => {
-    // TODO: display friend name.
-    this.getConfirmation('', 'Would you like to add a friend').then(() => {
-      this.core.addUser(url);
+  private addUserWithConfirmation_ = (url: string) : Promise<void> => {
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var userName = tokenObj.userName;
+    } catch(e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+    return this.getConfirmation('', 'Would you like to add ' + userName + '?')
+        .then(() => {
+      return this.core.addUser(url);
     });
   }
 
   public handleInviteUrlData = (url :string) => {
-    // TODO: add try catch and such in case of bad urls
-    var token = url.substr(url.lastIndexOf('/') + 1);
-    var tokenObj = JSON.parse(atob(token));
-    var networkName = tokenObj.networkName;
+    var showUrlError = () => {
+      this.fireSignal('open-dialog', {
+        heading: '',
+        message: 'There was an error with your invite URL. Please try again.',
+        buttons: [{
+          text: this.i18n_t("OK")
+        }]
+      });
+    };
+
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+    } catch(e) {
+      showUrlError();
+      return;
+    }
+
     if (!this.model.getNetwork(networkName)) {
-      this.getConfirmation('Login Required',
-          'You need to log into ' + this.getNetworkDisplayName(networkName))
-          .then(() => {
+      this.getConfirmation('Login Required', 'You need to log into ' +
+          this.getNetworkApiFromKey_(networkName).name).then(() => {
         this.login(networkName).then(() => {
-          // Fire an update-view event, which root.ts listens for.
-          // TODO: can this be done in ui.ts?
-          // this.fire('update-view', { view: ui_constants.View.ROSTER });
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          this.addUserWithConfirmation_(url);
+          this.addUserWithConfirmation_(url).catch(showUrlError);
         });
       });
     } else {
-      this.addUserWithConfirmation_(url);
+      this.addUserWithConfirmation_(url).catch(showUrlError);;
     }
   }
 
@@ -823,12 +854,12 @@ export class UserInterface implements ui_constants.UiApi {
    */
   private syncNetwork_ = (networkMsg :social.NetworkMessage) => {
     var existingNetwork = this.model.getNetwork(networkMsg.name, networkMsg.userId);
+    var networkApi = this.getNetworkApiFromKey_(networkMsg.name);
 
     if (networkMsg.online) {
       if (!existingNetwork) {
         existingNetwork = {
           name: networkMsg.name,
-          displayName: networkMsg.displayName,
           userId: networkMsg.userId,
           roster: {},
           logoutExpected: false,
@@ -842,8 +873,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
-            // TODO: fix this mess of name vs displayName
-            (networkMsg.name === 'GMail' || networkMsg.displayName === 'Facebook') &&
+            (networkMsg.name === 'GMail' || networkMsg.name === 'Facebook-Firebase-V2') &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
@@ -852,7 +882,7 @@ export class UserInterface implements ui_constants.UiApi {
             this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
           }
           this.showNotification(
-            this.i18n_t("LOGGED_OUT", { network: networkMsg.displayName }));
+            this.i18n_t("LOGGED_OUT", { network: networkApi.name }));
 
           if (!this.model.onlineNetworks.length) {
             this.view = ui_constants.View.SPLASH;
@@ -1069,7 +1099,11 @@ export class UserInterface implements ui_constants.UiApi {
 
   public updateInitialState = (state :uproxy_core_api.InitialState) => {
     console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
-    this.model.networkNames = state.networkNames;
+    this.model.networkApis = [];
+    for (var i = 0; i < state.networkKeys.length; i++) {
+      this.model.networkApis.push(
+          this.getNetworkApiFromKey_(state.networkKeys[i]));
+    }
     this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.i18n_setLng(state.globalSettings.language);
@@ -1109,10 +1143,24 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateIcon_();
   }
 
+  private getNetworkApiFromKey_ = (networkKey :string) : NetworkApi => {
+    var versionIndex = networkKey.indexOf('-');
+    if (versionIndex > -1) {
+      return {
+        name: networkKey.substring(0, versionIndex),
+        version: networkKey.substring(versionIndex + 1)
+      };
+    } else {
+      return {
+        name: networkKey,
+        version: null
+      };
+    }
+  }
+
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
     this.model.onlineNetworks.push({
       name: networkState.name,
-      displayName: networkState.displayName,
       userId: networkState.profile.userId,
       userName: networkState.profile.name,
       imageData: networkState.profile.imageData,
@@ -1148,12 +1196,6 @@ export class UserInterface implements ui_constants.UiApi {
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
     this.portControlSupport = support;
   }
-
-   public getNetworkDisplayName = (networkName :string) => {
-     // TODO: unhack this...  use same json..  ugg fuck all this
-     // TODO: stop passing displayName from core to UI
-     return networkName == 'Facebook-Firebase-V2' ? 'Facebook' : networkName;
-   }
 
   // this takes care of updating the view (given the assumuption that we are
   // connected to the core)

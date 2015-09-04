@@ -40,7 +40,6 @@ export interface LocalInstanceState {
 
 export interface NetworkMessage {
   name        :string;
-  displayName :string;
   online      :boolean;
   userId      :string;
   userName    :string;
@@ -84,7 +83,6 @@ export interface UserData {
 
 export interface NetworkState {
   name         :string;
-  displayName  :string;
   profile      :UserProfileMessage;
   // TODO: bad smell: UI data should not be
   roster       :{[userId :string] :UserData };
@@ -94,7 +92,6 @@ export interface NetworkOptions {
   isFirebase :boolean;
   enableMonitoring :boolean;
   areAllContactsUproxy :boolean;
-  displayName ?:string;
 }
 
 /**
@@ -275,7 +272,7 @@ export interface Network {
   /**
    * Ask the social network to add the user.
    */
-  addUserRequest: (networkData :string) => void;
+  addUserRequest: (networkData :string) => Promise<void>;
 
   /**
    * Generates an invite token

@@ -37,7 +37,7 @@ export interface GlobalSettings {
   force_message_version :number;
 }
 export interface InitialState {
-  networkNames :string[];
+  networkKeys :string[];
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;

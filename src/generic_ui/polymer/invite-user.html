@@ -36,8 +36,8 @@
         <paper-dropdown-menu>
           <paper-dropdown class='dropdown'>
             <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
-              <template repeat="{{ network in model.onlineNetworks }}">
-                <paper-item label='{{ network.name }}'>{{ network.displayName }}</paper-item>
+              <template repeat="{{ networkApi in model.networkApis }}">
+                <paper-item label='{{ networkApi.name }}'>{{ networkApi.name }}</paper-item>
               </template>
             </core-menu>
           </paper-dropdown>

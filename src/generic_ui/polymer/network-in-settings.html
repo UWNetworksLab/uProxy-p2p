@@ -1,6 +1,6 @@
 <link rel='import' href='name-for-network.html'>
 
-<polymer-element name='uproxy-network-in-settings' attributes='name'>
+<polymer-element name='uproxy-network-in-settings' attributes='networkApi'>
   <template>
     <style>
       :host {
@@ -26,7 +26,7 @@
 
     <div>
       <div horizontal layout class='networkLine'>
-        <span class='networkName' flex><bdi>{{displayName}}</bdi></span>
+        <span class='networkName' flex><bdi>{{ networkApi.name }}</bdi></span>
 
         <span class='action'>
           <a hidden?='{{ !signedIn }}' href='#' on-tap='{{ logout }}'>
