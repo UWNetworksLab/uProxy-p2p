@@ -436,6 +436,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+    if (index > this.confirmationCallbackIndex_) {
+      console.error('Confirmation callback not found: ' + index);
+      return;
+    }
+
     this.confirmationCallbacks_[index]();
     delete this.confirmationCallbacks_[index];
     if (fulfill) {
