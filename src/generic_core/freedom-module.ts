@@ -49,16 +49,9 @@ var exported = {
   logging_types: logging_types,
   socks_to_rtc: socks_to_rtc,
   rtc_to_net: rtc_to_net,
+  globals: globals
 };
 export = exported;
-
-ui_connector.onCommand(
-    uproxy_core_api.Command.GET_INITIAL_STATE_DEPRECATED_0_8_10,
-    () => {
-      core.getFullState().then((state :uproxy_core_api.InitialState) => {
-        ui_connector.update(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_10, state);
-      });
-    });
 
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.LOGIN,

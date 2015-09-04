@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Update uProxy version in all relevant places.
 #
 # Run with:

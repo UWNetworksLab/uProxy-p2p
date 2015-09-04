@@ -1,6 +1,5 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
-<link rel='import' href='../../bower/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../../bower/core-label/core-label.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
@@ -64,16 +63,12 @@
       background-color: rgb(240,240,240);
       padding-left: 10px;
       padding-top: 0;
-      padding-bottom: 0;
       margin-bottom: 0.75em;
       margin-top: 0.75em;
     }
-    #advancedSettingsDecorator {
-      height: 340px;
-    }
-    #advancedSettingsPaperTextarea {
-      height: 340px;
-      margin: 0em;
+    textarea[fit] {
+      /* fit does not properly size textareas on Firefox */
+      height: 100%;
     }
     .advancedSettingsText {
       font-size: 12px;
@@ -151,7 +146,7 @@
         <div id='formContainer' flex vertical layout>
           <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
           <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}' flex>
-            <textarea id='advancedSettingsInput' value='{{ settings }}' fit>
+            <textarea value='{{ settings }}' fit>
             </textarea>
           </paper-input-decorator>
           <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>

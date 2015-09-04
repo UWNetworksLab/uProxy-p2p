@@ -39,10 +39,10 @@ freedom('generic_core/freedom-module.json', {
 // Reply to pings from the uproxy website that are checking if the
 // application is installed.
 chrome.runtime.onMessageExternal.addListener(
-    (request:Object, sender:Object,
-     sendResponse:(r:{message:string}) => void) => {
-        if (request) {
-          sendResponse({message: "Application installed."});
+    (request:{checkIfInstalled:boolean}, sender:Object,
+     sendResponse:(r:{appInstalled:boolean}) => void) => {
+        if (request && request.checkIfInstalled) {
+          sendResponse({ appInstalled: true });
         }
         return true;
     });

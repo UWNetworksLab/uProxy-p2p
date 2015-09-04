@@ -10,8 +10,10 @@ var button = buttons.ActionButton({
   id: "uProxy-button",
   label: "uProxy",
   icon: {
-    "18": "./icons/19_offline.gif",
-    "36": "./icons/38_offline.gif"
+    "18": "./icons/18_offline.png",
+    "36": "./icons/36_offline.png",
+    "32": "./icons/32_online.png",
+    "64": "./icons/64_online.png"
   },
   onClick: start,
   badgeColor: "#009968"
@@ -22,7 +24,7 @@ var panel;
 // Load freedom.
 var manifest = self.data.url('generic_core/freedom-module.json');
 var loggingProviderManifest = self.data.url("uproxy-lib/loggingprovider/freedom-module.json");
-freedom(manifest, {
+var init = freedom(manifest, {
   'logger': loggingProviderManifest,
   'debug': 'debug'
 }).then(function(uproxy) {
@@ -44,3 +46,11 @@ function start(state) {
     position: button,
   });
 }
+
+exports.main = function(options, callbacks) {
+  init.then(function() {
+    if (options.loadReason === 'install') {
+      panel.port.emit('newlyInstalled');
+    }
+  }.bind(this));
+}.bind(this);
