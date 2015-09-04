@@ -7,7 +7,6 @@ var core = ui_context.core;
 
 Polymer({
   addUser: function() {
-    // TODO: handle errors
     core.addUser(this.receivedInviteToken).then(() => {
       this.fire('open-dialog', {
         heading: 'Friend Added', // TODO: translate
