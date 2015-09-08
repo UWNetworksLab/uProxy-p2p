@@ -10,8 +10,7 @@
  *  - Instances, which is a list of active uProxy installs.
  */
 
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
