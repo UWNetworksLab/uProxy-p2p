@@ -17,8 +17,9 @@ import PassThrough = require('../simple-transformers/passthrough');
 import CaesarCipher = require('../simple-transformers/caesar');
 
 import logging = require('../logging/logging');
-
 import net = require('../net/net.types');
+import aqm = require('../aqm/aqm');
+
 import ipaddr = require('ipaddr.js');
 
 import Socket = freedom.UdpSocket.Socket;
@@ -138,11 +139,29 @@ class Pipe {
   // report mirror endpoints.
   private lastInterface_ : {v6?:string; v4?:string;} = {};
 
+  // There is an implicit queue between this class, running in a module, and
+  // the actual send call, which runs in the core environment.  Under high
+  // CPU load, that IPC queue can grow very large.  This Active Queue Manager
+  // drops packets when the queue gets too large, so that the browser slows
+  // down its sending, which reduces CPU load.
+  private queueManager_ :aqm.AQM<[Socket, ArrayBuffer, net.Endpoint]>;
+
   // TODO: define a type for event dispatcher in freedom-typescript-api
   constructor(
       private dispatchEvent_:(name:string, args:Object) => void,
       private name_:string = 'unnamed-pipe-' + Pipe.id_) {
     Pipe.id_++;
+
+    // The delay target is 10 milliseconds maximum roundtrip delay to the core.
+    // This is twice 5 milliseconds, which is CoDel's recommended
+    // one-way delay.
+    // TODO: Tune the tracing fraction (1 / 5).  Higher should be more stable,
+    // but lower should be more efficient.
+    this.queueManager_ = new aqm.CoDelIsh<[Socket, ArrayBuffer, net.Endpoint]>(
+        this.tracedSend_,
+        this.fastSend_,
+        1 / 5,
+        10);
   }
 
   // Set the current transformer parameters.  The default is no transformation.
@@ -413,11 +432,39 @@ class Pipe {
       :void => {
     var transformedBuffers = this.transformer_.transform(buffer);
     for(var i = 0; i < transformedBuffers.length; i++) {
-      publicSocket.sendTo.reckless(
-        transformedBuffers[i],
+      // 0 is the identifier for the outbound flow
+      this.queueManager_.send(0, [publicSocket, transformedBuffers[i], to]);
+    }
+  }
+
+  /**
+   * Sends a message to the specified destination.
+   */
+  private fastSend_ = (args:[Socket, ArrayBuffer, net.Endpoint]) : void => {
+    var [socket, buffer, to] = args;
+    socket.sendTo.reckless(
+        buffer,
         to.address,
         to.port);
-    }
+  }
+
+  /**
+   * Sends a message to the specified destination.
+   * This version also requests an Ack from the core, and returns a Promise
+   * that resolves when the core has sent the message.
+   */
+  private tracedSend_ = (args:[Socket, ArrayBuffer, net.Endpoint])
+      : Promise<void> => {
+    var [socket, buffer, to] = args;
+
+    return socket.sendTo(
+        buffer,
+        to.address,
+        to.port).then((bytesWritten:number) => {
+      if (bytesWritten !== buffer.byteLength) {
+        throw new Error('Incomplete UDP send should be impossible');
+      }
+    });
   }
 
   /**
@@ -435,11 +482,13 @@ class Pipe {
     var transformedBuffer = recvFromInfo.data;
     var buffers = this.transformer_.restore(transformedBuffer);
     this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
+      var browserEndpoint:net.Endpoint = {
+        address: iface,
+        port: browserPort
+      };
       for(var i = 0; i < buffers.length; i++) {
-        mirrorSocket.sendTo.reckless(
-            buffers[i],
-            iface,
-            browserPort);
+        // 1 is the identifier for the inbound flow
+        this.queueManager_.send(1, [mirrorSocket, buffers[i], browserEndpoint]);
       }
     });
   }
