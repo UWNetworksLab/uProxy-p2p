@@ -101,8 +101,7 @@ export class ByteSequenceShaper implements Transformer {
   public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
     // Check if the current index into the packet stream is within the range
     // where a packet injection could possibly occur.
-    if (this.outputIndex_ <= this.lastIndex_)
-    {
+    if (this.outputIndex_ <= this.lastIndex_) {
       // Injection has not finished, but may not have started yet.
       if (this.outputIndex_ >= this.firstIndex_) {
         // Injection has started and has not finished, so check to see if it is
