@@ -84,7 +84,7 @@ export class ByteSequenceShaper implements Transformer {
       var config = JSON.parse(json);
 
       // Required parameter 'sequences'
-      if ('sequences' in config) {
+      if ('addSequences' in config && 'removeSequences' in config) {
         // Deserialize the byte sequences from strings
         [this.addSequences_, this.removeSequences_] = this.deserializeConfig_(
           <SequenceConfig>config.sequences);
