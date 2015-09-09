@@ -162,10 +162,11 @@ export class ByteSequenceShaper implements Transformer {
 
   // Decode the byte sequence from a string in the sequence model
   static deserializeModel(model:SerializedSequenceModel) :SequenceModel {
-    return {index:model.index, offset:model.offset,
+    return {
+      index:model.index,
+      offset:model.offset,
       sequence:arraybuffers.hexStringToArrayBuffer(model.sequence),
-      length:model.length
-    }
+      length:model.length};
   }
 
   // Inject packets
