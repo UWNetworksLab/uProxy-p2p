@@ -63,6 +63,9 @@ export class ByteSequenceShaper implements Transformer {
   private lastIndex_ :number;
 
   // Current index into the output stream.
+  // This starts at zero and is incremented every time a packet is output.
+  // The outputIndex_ is compared to the SequenceModel index. When they are
+  // equal, a byte sequence packet is injected into the output.
   private outputIndex_ :number = 0;
 
   // This constructor is necessary for typechecking in churn-pipe.
