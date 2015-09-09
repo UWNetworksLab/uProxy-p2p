@@ -149,11 +149,11 @@ export class ByteSequenceShaper implements Transformer {
     var adds :SequenceModel[] = [];
     var rems :SequenceModel[] = [];
 
-    for(var i = 0; i<config.addSequences.length; i++) {
+    for(var i = 0; i < config.addSequences.length; i++) {
       adds.push(ByteSequenceShaper.deserializeModel(config.addSequences[i]));
     }
 
-    for(var i = 0; i<config.removeSequences.length; i++) {
+    for(var i = 0; i < config.removeSequences.length; i++) {
       rems.push(ByteSequenceShaper.deserializeModel(config.removeSequences[i]));
     }
 
