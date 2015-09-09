@@ -25,6 +25,7 @@ import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
 import random = require('../crypto/random');
+import shaper = require('../fancy-transformers/encryptionShaper');
 import signals = require('../webrtc/signals');
 
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
@@ -302,9 +303,18 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private configurePipe_ = (key:number) : void => {
       this.pipe_ = freedom['churnPipe'](this.peerName);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
+
       this.pipe_.setTransformer('caesar',
           new Uint8Array([key]).buffer,
           '{}');
+
+      // Uncomment this to enable AES-based obfuscation.
+      // this.pipe_.setTransformer('encryptionShaper',
+      //     undefined,
+      //     JSON.stringify({
+      //       'key': '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0'
+      //     }));
+
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
