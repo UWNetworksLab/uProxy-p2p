@@ -7,6 +7,7 @@ import random = require('../crypto/random');
 var log :logging.Log = new logging.Log('fancy-transformers');
 
 // Configuration where the sequences have been encoded as strings.
+// This is the interface that configure() expects as an argument.
 export interface SequenceConfig {
   // Sequences that should be added to the outgoing packet stream.
   addSequences:SerializedSequenceModel[];
@@ -14,6 +15,9 @@ export interface SequenceConfig {
   // Sequences that should be removed from the incoming packet stream.
   removeSequences:SerializedSequenceModel[]
 }
+
+// Sequence models where the sequences have been encoded as strings.
+// This is used by the SequenceConfig argument passed to configure().
 export interface SerializedSequenceModel {
   // Index of the packet into the sequence.
   index:number;
@@ -28,6 +32,8 @@ export interface SerializedSequenceModel {
   length:number
 }
 
+// Sequence models where the sequences have been decoded as ArrayBuffers.
+// This is used internally by the ByteSequenceShaper.
 interface SequenceModel {
   // Index of the packet into the stream.
   index:number;
