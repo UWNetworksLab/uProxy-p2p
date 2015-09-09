@@ -113,18 +113,16 @@ export class ByteSequenceShaper implements Transformer {
         this.inject_(results);
 
         // Inject the real packet
-        results.push(buffer);
-        this.outputIndex_ = this.outputIndex_+1;
+        this.outputAndIncrement_(results, buffer);
 
         //Inject fake packets after the real packet
         this.inject_(results);
-
-        return results;
       } else {
         // Injection has not started yet. Keep track of the index.
-        this.outputIndex_ = this.outputIndex_ + 1;
-        return [buffer];
+        this.outputAndIncrement_(results, buffer);
       }
+
+      return results;
     } else {
       // Injection has finished and will not occur again. Take the fast path and
       // just return the buffer.
@@ -174,10 +172,14 @@ export class ByteSequenceShaper implements Transformer {
   private inject_ = (results:ArrayBuffer[]) : void => {
     var nextPacket = this.findNextPacket_(this.outputIndex_);
     while(nextPacket !== null) {
-      results.push(this.makePacket_(nextPacket));
-      this.outputIndex_ = this.outputIndex_ + 1;
+      this.outputAndIncrement_(results, this.makePacket_(nextPacket));
       nextPacket = this.findNextPacket_(this.outputIndex_);
     }
+  }
+
+  private outputAndIncrement_ = (results:ArrayBuffer[], result:ArrayBuffer) : void => {
+    results.push(result);
+    this.outputIndex_ = this.outputIndex_ + 1;
   }
 
   // For an index into the packet stream, see if there is a sequence to inject.
