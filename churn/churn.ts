@@ -2,19 +2,6 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
-// TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
-// Ideal:
-//  import Transformer = require('uproxy-obfuscators/transformer');
-// Current:
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-
-
-// TODO(ldixon): re-enable FTE and regex2dfa. But this time, start with a pre-
-// computed set of DFAs because the regex2dfa.js library is 4MB in size. Also
-// experiment with uglify and zip to see if that size drops significantly.
-//
-// import regex2dfa = require('regex2dfa');
-
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
@@ -314,17 +301,6 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //     JSON.stringify({
       //       'key': '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0'
       //     }));
-
-      // TODO(ldixon): re-enable FTE support instead of caesar cipher.
-      //     'fte',
-      //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-      //     JSON.stringify({
-      //       'plaintext_dfa': regex2dfa('^.*$'),
-      //       'plaintext_max_len': 1400,
-      //       // This is equivalent to Rabbit cipher.
-      //       'ciphertext_dfa': regex2dfa('^.*$'),
-      //       'ciphertext_max_len': 1450
-      //     }
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {

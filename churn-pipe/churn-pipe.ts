@@ -2,17 +2,6 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
-// TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
-// Ideal:
-//  import Transformer = require('uproxy-obfuscators/transformer');
-//  import Rabbit = require('uproxy-obfuscators/rabbit.transformer');
-//  import Fte = require('uproxy-obfuscators/fte.transformer');
-// Current:
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-
-// import Rabbit = require('utransformers/src/transformers/uTransformers.fte');
-// import Fte = require('utransformers/src/transformers/uTransformers.rabbit');
-
 import PassThrough = require('../simple-transformers/passthrough');
 import CaesarCipher = require('../simple-transformers/caesar');
 import shaper = require('../fancy-transformers/encryptionShaper');
