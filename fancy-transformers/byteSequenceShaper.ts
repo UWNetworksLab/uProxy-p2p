@@ -34,7 +34,7 @@ export interface SerializedSequenceModel {
 
 // Sequence models where the sequences have been decoded as ArrayBuffers.
 // This is used internally by the ByteSequenceShaper.
-interface SequenceModel {
+export interface SequenceModel {
   // Index of the packet into the stream.
   index:number;
 
@@ -85,8 +85,8 @@ export class ByteSequenceShaper implements Transformer {
     // Required parameters 'addSequences' and 'removeSequences'
     if ('addSequences' in config && 'removeSequences' in config) {
       // Deserialize the byte sequences from strings
-      [this.addSequences_, this.removeSequences_] = this.deserializeConfig_(
-        <SequenceConfig>config.sequences);
+      [this.addSequences_, this.removeSequences_] =
+        ByteSequenceShaper.deserializeConfig(<SequenceConfig>config.sequences);
 
       // Make a note of the index of the first packet to inject
       this.firstIndex_ = this.addSequences_[0].index;
@@ -144,24 +144,24 @@ export class ByteSequenceShaper implements Transformer {
   public dispose = () :void => {}
 
   // Decode the byte sequences from strings in the config information
-  private deserializeConfig_ = (config:SequenceConfig)
-  :[SequenceModel[], SequenceModel[]] => {
+  static deserializeConfig(config:SequenceConfig)
+  :[SequenceModel[], SequenceModel[]] {
     var adds :SequenceModel[] = [];
     var rems :SequenceModel[] = [];
 
     for(var i = 0; i<config.addSequences.length; i++) {
-      adds.push(this.deserializeModel_(config.addSequences[i]));
+      adds.push(ByteSequenceShaper.deserializeModel(config.addSequences[i]));
     }
 
     for(var i = 0; i<config.removeSequences.length; i++) {
-      rems.push(this.deserializeModel_(config.removeSequences[i]));
+      rems.push(ByteSequenceShaper.deserializeModel(config.removeSequences[i]));
     }
 
     return [adds, rems];
   }
 
   // Decode the byte sequence from a string in the sequence model
-  private deserializeModel_ = (model:SerializedSequenceModel) :SequenceModel => {
+  static deserializeModel(model:SerializedSequenceModel) :SequenceModel {
     return {index:model.index, offset:model.offset,
       sequence:arraybuffers.hexStringToArrayBuffer(model.sequence),
       length:model.length
