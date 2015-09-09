@@ -173,9 +173,9 @@ export class ByteSequenceShaper implements Transformer {
   // Inject packets
   private inject_ = (results:ArrayBuffer[]) : void => {
     var nextPacket = this.findNextPacket_(this.outputIndex_);
-    while(nextPacket!==null) {
+    while(nextPacket !== null) {
       results.push(this.makePacket_(nextPacket));
-      this.outputIndex_ = this.outputIndex_+1;
+      this.outputIndex_ = this.outputIndex_ + 1;
       nextPacket = this.findNextPacket_(this.outputIndex_);
     }
   }
