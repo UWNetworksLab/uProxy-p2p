@@ -73,7 +73,9 @@ export class ByteSequenceShaper implements Transformer {
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key:ArrayBuffer) :void => {}
+  public setKey = (key:ArrayBuffer) :void => {
+    throw new Error('setKey unimplemented');
+  }
 
   // Configure the transformer with the byte sequences to inject and the byte
   // sequences to remove.
