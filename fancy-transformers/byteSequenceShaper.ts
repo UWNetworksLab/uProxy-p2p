@@ -80,27 +80,21 @@ export class ByteSequenceShaper implements Transformer {
   // Configure the transformer with the byte sequences to inject and the byte
   // sequences to remove.
   public configure = (json:string) :void => {
-    try {
-      var config = JSON.parse(json);
+    var config = JSON.parse(json);
 
-      // Required parameter 'sequences'
-      if ('addSequences' in config && 'removeSequences' in config) {
-        // Deserialize the byte sequences from strings
-        [this.addSequences_, this.removeSequences_] = this.deserializeConfig_(
-          <SequenceConfig>config.sequences);
+    // Required parameters 'addSequences' and 'removeSequences'
+    if ('addSequences' in config && 'removeSequences' in config) {
+      // Deserialize the byte sequences from strings
+      [this.addSequences_, this.removeSequences_] = this.deserializeConfig_(
+        <SequenceConfig>config.sequences);
 
-        // Make a note of the index of the first packet to inject
-        this.firstIndex_ = this.addSequences_[0].index;
+      // Make a note of the index of the first packet to inject
+      this.firstIndex_ = this.addSequences_[0].index;
 
-        // Make a note of the index of the last packet to inject
-        this.lastIndex_ = this.addSequences_[this.addSequences_.length-1].index;
-      } else {
-        log.error('Bad JSON config file');
-        log.error(json);
-        throw new Error("Byte sequence shaper requires sequences parameter");
-      }
-    } catch(err) {
-      log.error("Byte sequence shaper configuration crashed");
+      // Make a note of the index of the last packet to inject
+      this.lastIndex_ = this.addSequences_[this.addSequences_.length-1].index;
+    } else {
+      throw new Error("Byte sequence shaper requires addSequences and removeSequences parameters");
     }
   }
 
