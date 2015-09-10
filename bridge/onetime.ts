@@ -8,151 +8,58 @@ import logging = require('../logging/logging');
 import signals = require('../webrtc/signals');
 import zlib = require('browserify-zlib');
 
-var log :logging.Log = new logging.Log('one-time batcher');
+var log :logging.Log = new logging.Log('signal batcher');
 
-// Uncompresses a signal message, as encoded by the Batcher.
-// Should be called when you receive a SignalBatcher message
-// over the wire and want to forward it to a PeerConnection.
-export var decode = (encoded:string) : bridge.SignallingMessage => {
+// Uncompresses a batch of signalling messages encoded by SignalBatcher.
+export var decode = (encoded:string) : Object[] => {
   var decoded = new Buffer(encoded, 'base64');
   var uncompressedBuffer = zlib.gunzipSync(decoded);
   var json = uncompressedBuffer.toString();
-  return <bridge.SignallingMessage>JSON.parse(json);
+  return JSON.parse(json);
 };
 
-// Batches and compresses signalling messages, for use in copy/paste
-// scenarios, where size and number of messages are crucial.
-// Right now, churn signalling messages are supported and batches are
-// delimited by NO_MORE_CANDIDATES messages.
-export class SignalBatcher {
+// Queues objects, invoking a callback with a compressed, base64-encoded
+// string representing a "batch" of the queued objects. Batches are
+// determined by the client via the isTerminating_ function.
+// Intended for use in copy/paste scenarios where the size and number
+// of messages transmitted are crucial.
+// gzip is used for compression.
+export class SignalBatcher<T> {
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
   // Messages received since creation or last NO_MORE_CANDIDATES message.
-  private batch_ :bridge.SignallingMessage[] = []
-
-  // Returns true iff message is a "terminating"
-  // message, i.e. NO_MORE_CANDIDATES.
-  private static isTerminating_ = (message:bridge.SignallingMessage) : boolean => {
-    if (bridge.ProviderType[bridge.ProviderType.CHURN] in message.signals ||
-        bridge.ProviderType[bridge.ProviderType.HOLO_ICE] in message.signals) {
-      var providerSignals = message.signals[Object.keys(message.signals)[0]];
-      var churnSignal = <churn_types.ChurnSignallingMessage>providerSignals[0];
-      return churnSignal.webrtcMessage &&
-          churnSignal.webrtcMessage.type === signals.Type.NO_MORE_CANDIDATES;
-    }
-    throw new Error('no supported provider type found');
-  }
-
-  // The flattening code here only works with simple messages.
-  private static isSupportedMessage_ = (
-      message:bridge.SignallingMessage) : boolean => {
-    return message.signals !== undefined &&
-        Object.keys(message.signals).length === 1 &&
-        message.signals[Object.keys(message.signals)[0]].length === 1;
-  }
-
-  // "Flattens" the supplied signalling messages into one, batched, message, e.g.:
-  //   {
-  //     signals: {
-  //      'HOLO_ICE': [
-  //        {
-  //          caesar: 94
-  //        }
-  //      ]
-  //     }
-  //   }
-  // and
-  //   {
-  //     signals: {
-  //      'HOLO_ICE': [
-  //        {
-  //          a: 'hello',
-  //          b: 'world'
-  //        }
-  //      ]
-  //     }
-  //   }
-  // flatten to:
-  //   {
-  //     signals: {
-  //      'HOLO_ICE': [
-  //        {
-  //          caesar: 94
-  //        },
-  //        {
-  //          a: 'hello',
-  //          b: 'world'
-  //        }
-  //      ]
-  //     }
-  //   }
-  //
-  // The messages must all have the same provider type.
-  // Public for testing.
-  public static flatten_ = (
-      messages:bridge.SignallingMessage[]) : bridge.SignallingMessage => {
-    var result :bridge.SignallingMessage = {
-      signals: {},
-      first: true
-    };
-    if (messages.length > 0) {
-      var firstProviderName = Object.keys(messages[0].signals)[0];
-      result.signals[firstProviderName] = messages.map(message => {
-        if (!SignalBatcher.isSupportedMessage_(message)) {
-          throw new Error('messages must have one provider, with one message');
-        }
-        var providerName = Object.keys(message.signals)[0];
-        if (providerName !== firstProviderName) {
-          throw new Error('messages must all have same provider');
-        }
-        return message.signals[firstProviderName][0];
-      });
-    }
-    return result;
-  }
+  private batch_ :T[] = []
 
   // emitBatch_ will be invoked when a batch is complete with a string
   // which can be sent over the wire and decoded with decode().
+  // isTerminating_ is invoked for each message and, if it returns true,
+  // causes a new batch to be emitted.
   constructor(
       private emitBatch_ :(message:string) => void,
-      private name_ :string = 'unnamed-onetime-batcher-' + SignalBatcher.id_) {
+      private isTerminating_ :(message:T) => boolean,
+      private name_ :string = 'unnamed-signal-batcher-' + SignalBatcher.id_) {
     SignalBatcher.id_++;
   }
 
   // Adds a message to the current batch. If the message looks like a
   // "terminating" message, i.e. NO_MORE_CANDIDATES, then the emitBatch_
   // function will be invoked.
-  public addToBatch = (message:bridge.SignallingMessage) : void => {
-    if (!SignalBatcher.isSupportedMessage_(message)) {
-      throw new Error('messages must have one provider, with one message');
-    }
-
-    // is this batchable?
-    // no need to include the terminating message itself
-    if (SignalBatcher.isTerminating_(message)) {
-      var rawLength = 0;
-      this.batch_.forEach((message:bridge.SignallingMessage) => {
-        rawLength += JSON.stringify(message).length;
-      });
-
-      var flattened = SignalBatcher.flatten_(this.batch_);
-      log.debug('%1: batch ready: %2', this.name_, flattened);
-
-      var flattenedJSON = JSON.stringify(flattened);
-      var buffer = new Buffer(flattenedJSON);
+  public addToBatch = (message:T) : void => {
+    if (this.isTerminating_(message)) {
+      var batchAsJson = JSON.stringify(this.batch_);
+      var buffer = new Buffer(batchAsJson);
       var compressedBuffer = zlib.gzipSync(buffer);
       var encoded = compressedBuffer.toString('base64');
 
-      log.debug('%1: raw/batched/compressed/base64: %2/%3/%4/%5', this.name_,
-          rawLength, flattenedJSON.length, compressedBuffer.length, encoded.length);
+      log.info('%1: batch ready (raw/compressed/base64: %2/%3/%4)', this.name_,
+          batchAsJson.length, compressedBuffer.length, encoded.length);
 
       this.emitBatch_(encoded);
 
       // Prepare for the next batch if it happens, e.g. due to renegotiation.
       this.batch_ = [];
     } else {
-      log.debug('%1: adding signal to batch: %2', this.name_, message);
       this.batch_.push(message);
     }
   }
