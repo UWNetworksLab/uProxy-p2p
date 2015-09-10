@@ -310,9 +310,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
-      var buffer=arraybuffers.stringToArrayBuffer("OH HELLO");
-      var hex=arraybuffers.arrayBufferToHexString(buffer);
-      var sequence={index: 0, offset: 0,
+      var buffer = arraybuffers.stringToArrayBuffer("OH HELLO");
+      var hex = arraybuffers.arrayBufferToHexString(buffer);
+      var sequence = {index: 0, offset: 0,
         sequence: hex,
         length: 256};
 
