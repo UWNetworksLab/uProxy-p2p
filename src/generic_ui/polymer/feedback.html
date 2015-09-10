@@ -69,9 +69,8 @@
       background-color: #ffffff;
       text-transform: uppercase;
     }
-    core-icon[icon="launch"],
-    core-icon[icon="help"]{
-      height: 15px;
+    core-icon {
+      height: 15px !important;
       color: grey;
       opacity: 0.6;
       margin-bottom: 2px;
@@ -79,8 +78,7 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
-    core-icon[icon="launch"]:hover,
-    core-icon[icon="help"]:hover{
+    core-icon:hover {
       opacity: 1;
     }
     core-tooltip::shadow #tooltip {
