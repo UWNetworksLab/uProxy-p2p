@@ -292,19 +292,21 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
 
       this.pipe_.setTransformer('caesar',
-          new Uint8Array([key]).buffer,
-          '{}');
+        new Uint8Array([key]).buffer,
+        '{}');
 
       // Uncomment this to enable AES-based obfuscation.
       // this.pipe_.setTransformer('encryptionShaper',
-      //     undefined,
-      //     JSON.stringify({
-      //       'key': '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0'
-      //     }));
+      //   undefined,
+      //   JSON.stringify({
+      //     'key': '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0'
+      // }));
 
       // Uncomment this to enable byte sequence injection obfuscation.
-      // this.pipe_.setTransformer('byteSequenceShaper', undefined,
-      //  JSON.stringify(this.makeSampleSequences_()));
+      // this.pipe_.setTransformer('byteSequenceShaper',
+      //   undefined,
+      //   JSON.stringify(this.makeSampleSequences_())
+      // );
     }
 
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
