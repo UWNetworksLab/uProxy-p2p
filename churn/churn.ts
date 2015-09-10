@@ -302,9 +302,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //       'key': '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0'
       //     }));
 
-      /*this.pipe_.setTransformer('byteSequenceShaper',
-    new Uint8Array([key]).buffer,
-    JSON.stringify({'sequences': this.makeSampleSequences_()}));*/
+      /*this.pipe_.setTransformer('byteSequenceShaper', undefined,
+        JSON.stringify(this.makeSampleSequences_()));*/
     }
 
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
