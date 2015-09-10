@@ -312,11 +312,15 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
       var buffer = arraybuffers.stringToArrayBuffer("OH HELLO");
       var hex = arraybuffers.arrayBufferToHexString(buffer);
-      var sequence = {index: 0, offset: 0,
+      var sequence = {
+        index: 0,
+        offset: 0,
         sequence: hex,
         length: 256};
 
-      return {addSequences: [sequence], removeSequences: [sequence]};
+      return {
+        addSequences: [sequence],
+        removeSequences: [sequence]};
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
