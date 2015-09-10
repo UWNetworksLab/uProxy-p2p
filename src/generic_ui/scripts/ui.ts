@@ -180,8 +180,7 @@ export class UserInterface implements ui_constants.UiApi {
    */
   public copyPastePendingEndpoint :net.Endpoint = null;
   public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
-  public copyPasteGettingMessages :social.PeerMessage[] = [];
-  public copyPasteSharingMessages :social.PeerMessage[] = [];
+  public copyPasteMessage :string;
   public copyPasteState :uproxy_core_api.ConnectionState = {
     localGettingFromRemote: social.GettingState.NONE,
     localSharingWithRemote: social.SharingState.NONE,
@@ -257,16 +256,8 @@ export class UserInterface implements ui_constants.UiApi {
       // TODO: Display the message in the 'manual network' UI.
     });
 
-    core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE,
-        (message :uproxy_core_api.CopyPasteMessages) => {
-      switch (message.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          this.copyPasteGettingMessages = message.data;
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          this.copyPasteSharingMessages = message.data;
-          break;
-      }
+    core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE, (message:string) => {
+      this.copyPasteMessage = message;
     });
 
     // indicates the current getting connection has ended
@@ -486,34 +477,21 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public parseUrlData = (url :string) :{ type :social.PeerMessageType; messages :social.PeerMessage[]; } => {
-    var payload :social.PeerMessage[];
-    var type :social.PeerMessageType;
-
+  public parseUrlData = (url:string) : { type:social.PeerMessageType; message:string } => {
     var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
     if (!match) {
-      return null;
+      throw new Error('invalid URL format');
     }
-
-    try {
-      payload = JSON.parse(atob(decodeURIComponent(match[2])));
-    } catch (e) {
-      return null;
-    }
-
-    if (match[1] === 'request') {
-      type = social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER;
-    } else if (match[1] === 'offer') {
-      type = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
-    } else {
-      return null;
-    }
-
-    return {type: type, messages: payload};
+    return {
+      type: match[1] === 'request' ?
+          social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER :
+          social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
+      message: decodeURIComponent(match[2])
+    };
   }
 
   public handleUrlData = (url :string) => {
-    console.log('received url data from browser');
+    console.log('received one-time URL from browser');
 
     if (this.model.onlineNetworks.length > 0) {
       console.log('Ignoring URL since we have an active network');
@@ -532,37 +510,29 @@ export class UserInterface implements ui_constants.UiApi {
     this.view = ui_constants.View.COPYPASTE;
     this.copyPasteError = ui_constants.CopyPasteError.NONE;
 
-    var parsed = this.parseUrlData(url);
-    if (parsed === null) {
-      console.error('Tried to use invalid copy+paste URL');
-      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
-      return;
-    }
+    try {
+      var parsed = this.parseUrlData(url);
 
-    // at this point, we assume everything is good, so let's check state
-    switch (parsed.type) {
-      case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-        this.copyPasteSharingMessages = [];
-        this.core.startCopyPasteShare();
-        break;
-      case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-        if (social.GettingState.TRYING_TO_GET_ACCESS
-            !== this.copyPasteState.localGettingFromRemote) {
-          console.warn('currently not expecting any information, aborting');
-          this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
-          return;
-        }
-        break;
-    }
-
-    console.log('Sending messages from url to app');
-    for (var i in parsed.messages) {
-      if (parsed.messages[i].type !== parsed.type) {
-        this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
-        return;
+      // at this point, we assume everything is good, so let's check state
+      switch (parsed.type) {
+        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
+          this.core.startCopyPasteShare();
+          break;
+        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
+          if (social.GettingState.TRYING_TO_GET_ACCESS
+              !== this.copyPasteState.localGettingFromRemote) {
+            console.warn('currently not expecting any information, aborting');
+            this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
+            return;
+          }
+          break;
       }
 
-      this.core.sendCopyPasteSignal(parsed.messages[i]);
+      console.log('sending one-time string to app');
+      this.core.sendCopyPasteSignal(parsed.message);
+    } catch (e) {
+      console.error('invalid one-time URL: ' + e.message);
+      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
     }
   }
 
@@ -1006,8 +976,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     // Maybe refactor this to be copyPasteState.
     this.copyPasteState = state.copyPasteState.connectionState;
-    this.copyPasteGettingMessages = state.copyPasteState.gettingMessages;
-    this.copyPasteSharingMessages = state.copyPasteState.sharingMessages;
     this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
 
     while (this.model.onlineNetworks.length > 0) {

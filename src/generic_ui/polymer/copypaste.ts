@@ -42,7 +42,7 @@ Polymer({
     }
 
     doneStopping.then(() => {
-      ui.copyPasteGettingMessages = [];
+      ui.copyPasteMessage = '';
       ui.copyPasteError = ui_constants.CopyPasteError.NONE;
       ui.copyPastePendingEndpoint = null;
 
@@ -141,8 +141,8 @@ Polymer({
       ui.view = ui_constants.View.SPLASH;
     })
   },
-  encodeMessage: function(message :social.PeerMessageType) {
-    return encodeURIComponent(btoa(JSON.stringify(message)));
+  encodeMessage: function(message:string) {
+    return encodeURIComponent(message);
   },
   gettingResponse: '',
   gettingLinkError: false,
