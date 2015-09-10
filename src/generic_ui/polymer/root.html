@@ -22,6 +22,7 @@
 <link rel='import' href='browser-elements.html'>
 <link rel='import' href='icons.html'>
 <link rel='import' href='proxy-error.html'>
+<link rel='import' href='button.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}' on-open-dialog='{{ openDialog }}'>
 
@@ -167,7 +168,7 @@
       .core-overlay-backdrop {
         z-index: 1001;
       }
-      uproxy-action-dialog paper-button {
+      uproxy-action-dialog uproxy-button {
         margin-bottom: 3px;
       }
       uproxy-faq-link .linkText {
@@ -187,7 +188,7 @@
       #disconnectDialog #disconnectDialogText {
         text-align: start;
       }
-      #disconnectDialog paper-button {
+      #disconnectDialog uproxy-button {
         font-size: 12px;
       }
       #progressWrapper {
@@ -353,11 +354,11 @@
     <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
       <p>{{ dialog.message }}</p>
       <template repeat='{{ button in dialog.buttons }}'>
-        <paper-button
+        <uproxy-button
           affirmative?='{{ !button.dismissive }}' dismissive?='{{ button.dismissive }}'
           class='dialogButton' on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'>
           {{button.text}}
-        </paper-button>
+        </uproxy-button>
       </template>
     </uproxy-action-dialog>
 
@@ -369,8 +370,8 @@
         </uproxy-faq-link>{{ "CHANGE_STATS_CHOICE" | $$ }}
       </p>
       <p>{{ "ENABLE_METRICS" | $$ }}</p>
-      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</paper-button>
-      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</paper-button>
+      <uproxy-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
+      <uproxy-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
     </uproxy-action-dialog>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
@@ -385,14 +386,14 @@
           </div>
           <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}' >
             <strong>{{ 'RECONNECT_FAILED' | $$ }}</strong>
-            <paper-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</paper-button>
+            <uproxy-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</uproxy-button>
           </div>
         </div>
         <p>
           {{ "DISCONNECTED_MESSAGE" | $$ }}
         </p>
       </div>
-      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$ }}</paper-button>
+      <uproxy-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$ }}</uproxy-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>

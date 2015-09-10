@@ -1,5 +1,5 @@
 <link rel='import' href='../../bower/paper-icon-button/paper-icon-button.html'>
-<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='button.html'>
 
 <!--
 uproxy-bubble will appear immediately below the previous element in the DOM.
@@ -62,7 +62,7 @@ uproxy-bubble::shadow #done {
     #actions {
       text-align: right;
     }
-    paper-button#done {
+    uproxy-button#done {
       background-color: #222;
     }
 
@@ -91,7 +91,7 @@ uproxy-bubble::shadow #done {
           <content></content>
 
           <div id='actions'>
-            <paper-button id='done' on-tap='{{ close }}'>{{ "DONE" | $$ }}</paper-button>
+            <uproxy-button id='done' on-tap='{{ close }}'>{{ "DONE" | $$ }}</uproxy-button>
           </div>
         </div>
       </div>

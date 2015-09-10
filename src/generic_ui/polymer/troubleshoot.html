@@ -1,5 +1,5 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
-<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='button.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
@@ -39,7 +39,7 @@
     core-icon.button {
       cursor: pointer;
     }
-    paper-button {
+    uproxy-button {
       margin: 10px 2px 3px 2px;
       font-size: 12px;
     }
@@ -86,12 +86,12 @@
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link><br>
         </p>
-        <paper-button on-tap='{{ getNatType }}'>
+        <uproxy-button on-tap='{{ getNatType }}'>
           {{ "YES" | $$ }}
-        </paper-button>
-        <paper-button on-tap='{{ close }}'>
+        </uproxy-button>
+        <uproxy-button on-tap='{{ close }}'>
           {{ "NO" | $$ }}
-        </paper-button>
+        </uproxy-button>
       </div>
 
       <!-- Second screen in dialog shows a loading bar as we get NAT type. -->
@@ -112,12 +112,12 @@
         </uproxy-faq-link>
         <br>
         <div id='analyzedNetworkButtons'>
-          <paper-button on-tap='{{ submitFeedback }}'>
+          <uproxy-button on-tap='{{ submitFeedback }}'>
             {{ "YES" | $$ }}
-          </paper-button>
-          <paper-button on-tap='{{ close }}'>
+          </uproxy-button>
+          <uproxy-button on-tap='{{ close }}'>
             {{ "NO" | $$ }}
-          </paper-button>
+          </uproxy-button>
         </div>
       </div>
 

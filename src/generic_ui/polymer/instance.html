@@ -1,6 +1,6 @@
 <link rel="import" href="../../bower/polymer/polymer.html">
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
-<link rel="import" href="../../bower/paper-button/paper-button.html">
+<link rel="import" href="button.html">
 
 <polymer-element name='uproxy-instance' attributes='user, instance, network'>
   <template>
@@ -8,7 +8,7 @@
     #wrapper.offline {
       opacity: 0.5;
     }
-    paper-button {
+    uproxy-button {
       font-size: 1em;
       margin: 14px 5px 5px 2px;
       padding-left: 1em;
@@ -44,23 +44,23 @@
 
       <!-- not getting or trying to get access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
-        <paper-button raised on-tap='{{ start }}' disabled?='{{ !ui.browserApi.canProxy }}'>
+        <uproxy-button raised on-tap='{{ start }}' disabled?='{{ !ui.browserApi.canProxy }}'>
           {{ "START_GETTING" | $$ }}
-        </paper-button>
+        </uproxy-button>
       </div>
 
       <!-- trying to get access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
-        <paper-button class='grey' raised on-tap='{{ stop }}'>
+        <uproxy-button class='grey' raised on-tap='{{ stop }}'>
           {{ "CANCEL" | $$ }}
-        </paper-button>
+        </uproxy-button>
       </div>
 
       <!-- currently getting access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
-        <paper-button class='grey' raised on-tap='{{ stop }}'>
+        <uproxy-button class='grey' raised on-tap='{{ stop }}'>
           {{ "STOP_GETTING" | $$ }}
-        </paper-button>
+        </uproxy-button>
       </div>
 
     </div> <!-- end of wrapper -->

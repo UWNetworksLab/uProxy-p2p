@@ -1,6 +1,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
-<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='button.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 
 <polymer-element name='uproxy-description' attributes=''>
@@ -12,7 +12,7 @@
         margin-bottom: 5px;
         color: rgb(112, 112, 112);
       }
-      paper-button {
+      uproxy-button {
         width: 70px;
         margin-left: 0px;
         margin-right: 5px;
@@ -40,8 +40,8 @@
       <paper-input-decorator label='{{ "DESCRIPTION" | $$ }}'>
         <input is="core-input" value='{{ descriptionInput }}'>
       </paper-input-decorator>
-      <paper-button raised on-tap="{{ saveDescription }}">{{ "SAVE" | $$ }}</paper-button>
-      <paper-button raised on-tap="{{ cancelEditing }}">{{ "CANCEL" | $$ }}</paper-button>
+      <uproxy-button raised on-tap="{{ saveDescription }}">{{ "SAVE" | $$ }}</uproxy-button>
+      <uproxy-button raised on-tap="{{ cancelEditing }}">{{ "CANCEL" | $$ }}</uproxy-button>
     </div>
     <div id='savedDescription' hidden?='{{ editing }}' on-tap='{{ editDescription }}'>
       {{ showDescription(model.globalSettings.description) }}
