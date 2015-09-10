@@ -4,11 +4,11 @@
 
 import aqm = require('../aqm/aqm');
 import CaesarCipher = require('../simple-transformers/caesar');
+import encryption = require('../fancy-transformers/encryptionShaper');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import PassThrough = require('../simple-transformers/passthrough');
-import shaper = require('../fancy-transformers/encryptionShaper');
 
 import Socket = freedom.UdpSocket.Socket;
 
@@ -34,7 +34,7 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
 // Maps transformer names to class constructors.
 var transformers :{[name:string] : new() => Transformer} = {
   'caesar': CaesarCipher,
-  'encryptionShaper': shaper.EncryptionShaper,
+  'encryptionShaper': encryption.EncryptionShaper,
   'none': PassThrough
 };
 
