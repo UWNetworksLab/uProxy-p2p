@@ -12,7 +12,7 @@ import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
 import random = require('../crypto/random');
-import shaper = require('../fancy-transformers/encryptionShaper');
+import sequence = require('../fancy-transformers/byteSequenceShaper');
 import signals = require('../webrtc/signals');
 
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
@@ -228,7 +228,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom.PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed. Mapping object: ", 
+                      log.debug("addMapping() failed. Mapping object: ",
                                 mapping);
                     } else {
                       log.debug("addMapping() success: ", mapping);
@@ -301,6 +301,20 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //     JSON.stringify({
       //       'key': '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0'
       //     }));
+
+      /*this.pipe_.setTransformer('byteSequenceShaper',
+    new Uint8Array([key]).buffer,
+    JSON.stringify({'sequences': this.makeSampleSequences_()}));*/
+    }
+
+    private makeSampleSequences_ = () :sequence.SequenceConfig => {
+      var buffer=arraybuffers.stringToArrayBuffer("OH HELLO");
+      var hex=arraybuffers.arrayBufferToHexString(buffer);
+      var sequence={index: 0, offset: 0,
+        sequence: hex,
+        length: 256};
+
+      return {addSequences: [sequence], removeSequences: [sequence]};
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
