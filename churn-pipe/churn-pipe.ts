@@ -2,15 +2,13 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
-import PassThrough = require('../simple-transformers/passthrough');
+import aqm = require('../aqm/aqm');
 import CaesarCipher = require('../simple-transformers/caesar');
-import shaper = require('../fancy-transformers/encryptionShaper');
-
+import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
-import aqm = require('../aqm/aqm');
-
-import ipaddr = require('ipaddr.js');
+import PassThrough = require('../simple-transformers/passthrough');
+import shaper = require('../fancy-transformers/encryptionShaper');
 
 import Socket = freedom.UdpSocket.Socket;
 
