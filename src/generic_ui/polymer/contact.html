@@ -26,8 +26,6 @@
       transition: all 0.23s !important;
     }
     .nameRow {
-      white-space: nowrap;
-      text-overflow: ellipsis;
       margin: 18px 24px 0px 24px;
       cursor: pointer;
     }
@@ -61,6 +59,8 @@
       box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.12);
     }
     .name {
+      white-space: nowrap;
+      text-overflow: ellipsis;
       font-size: 15px;
       line-height: 22px;
       color: rgba(0,0,0,0.87);
@@ -86,9 +86,8 @@
       height: 20px;
     }
     core-collapse {
-      margin-left: 80px; /* line up with left bound of contact name */
-      margin-right: 80px;
-      margin-top: 0px; /* line details closer to bottom of contact name */
+      margin-left: 16px;
+      margin-top: 5px;
       color: rgba(0,0,0,0.54);
     }
     .offline {
@@ -125,17 +124,109 @@
 
     <div on-tap='{{ toggle }}' tabindex='-1'
         class='nameRow frame {{ isOnline ? "online" : "offline" }}'
-        center horizontal layout>
+        top horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}'></uproxy-avatar>
-      <div>
+      <div flex>
         <div class='name'><bdi>{{ contact.name }}</bdi></div>
         <div class='{{ isOnline ? "onlineStatus" : "offlineStatus" }}'
-          hidden?="{{ (model.globalSettings.mode==ui_constants.Mode.GET && contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && contact.shareExpanded) }}">
+          hidden?="{{ hideOnlineStatus }}">
           {{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}
         </div>
+        <core-collapse id='getControls' class='expandedControls'
+          hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
+          opened='{{ contact.getExpanded }}'>
+
+          <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
+            <div horizontal layout hidden?='{{ hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
+              <core-icon icon='check'></core-icon>
+              <p class='preButtonText' flex>
+               {{ "GRANTED_YOU_ACCESS" | $$({ name: contact.name || contact.userId }) }}
+              </p>
+            </div>
+            <div horizontal layout hidden?='{{ !hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
+              <core-icon icon='query-builder'></core-icon>
+              <p class='preButtonText' flex>
+                {{ "TRYING_TO_CONNECT" | $$({ name: contact.name || contact.userId }) }}
+              </p>
+            </div>
+            <template repeat='{{ instance in contact.offeringInstances }}' vertical layout>
+              <uproxy-instance
+                  user='{{ contact }}'
+                  instance='{{ instance }}'
+                  network='{{contact.network}}'>
+              </uproxy-instance>
+            </template>
+          </div>
+
+          <div hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION }}'>
+            <div horizontal layout>
+              <core-icon icon='query-builder'></core-icon>
+              <p class='preButtonText' flex>
+                {{ "ASKING_FOR_ACCESS" | $$ }}
+              </p>
+            </div>
+            <p class='preButtonDetailedText'>{{ "WAITING_FOR_ACCESS" | $$({ name: contact.name }) }}</p>
+            <uproxy-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$ }}</uproxy-button>
+          </div>
+
+          <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
+            <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
+            <uproxy-button raised on-tap='{{ request }}'>{{ "ACCEPT_OFFER" | $$ }}</uproxy-button>
+            <uproxy-button raised on-tap='{{ ignoreOffer }}'>{{ "IGNORE" | $$ }}</uproxy-button>
+          </div>
+
+          <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED }}'>
+            <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
+            <uproxy-button class='grey' raised on-tap='{{ unignoreOffer }}'>{{ "STOP_IGNORING_OFFERS" | $$ }}</uproxy-button>
+          </div>
+
+          <div hidden?='{{ contact.gettingConsentState != GettingConsentState.NO_OFFER_OR_REQUEST }}'>
+            <uproxy-button raised on-tap='{{ request }}'>
+              {{ "ASK_FOR_ACCESS" | $$ }}
+            </uproxy-button>
+          </div>
+
+        </core-collapse> <!-- end of getControls -->
+
+        <core-collapse id='shareControls' class='expandedControls'
+          hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
+          opened='{{ contact.shareExpanded }}'>
+
+          <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
+            <p class='preButtonText'>{{ "GRANTED_FRIEND_ACCESS" | $$ }}</p>
+            <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</uproxy-button>
+          </div>
+
+          <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION }}'>
+            <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "CANCEL_OFFER" | $$ }}</uproxy-button>
+          </div>
+
+          <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION }}'>
+            <div horizontal layout>
+              <core-icon icon='mail'></core-icon>
+              <p class='preButtonText' flex>
+                {{ "FRIEND_REQUESTS_ACCESS" | $$({ name: contact.name }) }}
+              </p>
+            </div>
+            <uproxy-button raised on-tap='{{ offer }}'>{{ "GRANT" | $$ }}</uproxy-button>
+            <uproxy-button raised on-tap='{{ ignoreRequest }}'>{{ "IGNORE" | $$ }}</uproxy-button>
+          </div>
+
+          <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED }}'>
+            <p class='preButtonText'>{{ "FRIEND_REQUESTED_ACCESS" | $$ }}</p>
+            <uproxy-button class='grey' raised on-tap='{{ unignoreRequest }}'>{{ "STOP_IGNORING_REQUESTS" | $$ }}</uproxy-button>
+          </div>
+
+          <div hidden?='{{ contact.sharingConsentState != SharingConsentState.NO_OFFER_OR_REQUEST }}'>
+            <p class='preButtonText'>{{ "ACCESS_NOT_GRANTED" | $$ }}</p>
+            <uproxy-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</uproxy-button>
+          </div>
+        </core-collapse> <!-- end of shareControls -->
+
+
       </div>
 
-      <div flex class="iconWrapper">
+      <div class="iconWrapper">
         <core-icon icon="open-in-new"
             hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}"
             title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
@@ -156,98 +247,6 @@
         hidden?='{{ !(model.globalSettings.mode==ui_constants.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==ui_constants.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
       </core-icon>
     </div> <!-- end of #nameRow -->
-
-    <core-collapse id='getControls' class='expandedControls'
-      hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
-      opened='{{ contact.getExpanded }}'>
-
-      <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
-        <div horizontal layout hidden?='{{ hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
-          <core-icon icon='check'></core-icon>
-          <p class='preButtonText' flex>
-           {{ "GRANTED_YOU_ACCESS" | $$({ name: contact.name || contact.userId }) }}
-          </p>
-        </div>
-        <div horizontal layout hidden?='{{ !hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
-          <core-icon icon='query-builder'></core-icon>
-          <p class='preButtonText' flex>
-            {{ "TRYING_TO_CONNECT" | $$({ name: contact.name || contact.userId }) }}
-          </p>
-        </div>
-        <template repeat='{{ instance in contact.offeringInstances }}' vertical layout>
-          <uproxy-instance
-              user='{{ contact }}'
-              instance='{{ instance }}'
-              network='{{contact.network}}'>
-          </uproxy-instance>
-        </template>
-      </div>
-
-      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION }}'>
-        <div horizontal layout>
-          <core-icon icon='query-builder'></core-icon>
-          <p class='preButtonText' flex>
-            {{ "ASKING_FOR_ACCESS" | $$ }}
-          </p>
-        </div>
-        <p class='preButtonDetailedText'>{{ "WAITING_FOR_ACCESS" | $$({ name: contact.name }) }}</p>
-        <uproxy-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$ }}</uproxy-button>
-      </div>
-
-      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
-        <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
-        <uproxy-button raised on-tap='{{ request }}'>{{ "ACCEPT_OFFER" | $$ }}</uproxy-button>
-        <uproxy-button raised on-tap='{{ ignoreOffer }}'>{{ "IGNORE" | $$ }}</uproxy-button>
-      </div>
-
-      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED }}'>
-        <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
-        <uproxy-button class='grey' raised on-tap='{{ unignoreOffer }}'>{{ "STOP_IGNORING_OFFERS" | $$ }}</uproxy-button>
-      </div>
-
-      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.NO_OFFER_OR_REQUEST }}'>
-        <uproxy-button raised on-tap='{{ request }}'>
-          {{ "ASK_FOR_ACCESS" | $$ }}
-        </uproxy-button>
-      </div>
-
-    </core-collapse> <!-- end of getControls -->
-
-    <core-collapse id='shareControls' class='expandedControls'
-      hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
-      opened='{{ contact.shareExpanded }}'>
-
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
-        <p class='preButtonText'>{{ "GRANTED_FRIEND_ACCESS" | $$ }}</p>
-        <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</uproxy-button>
-      </div>
-
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION }}'>
-        <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "CANCEL_OFFER" | $$ }}</uproxy-button>
-      </div>
-
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION }}'>
-        <div horizontal layout>
-          <core-icon icon='mail'></core-icon>
-          <p class='preButtonText' flex>
-            {{ "FRIEND_REQUESTS_ACCESS" | $$({ name: contact.name }) }}
-          </p>
-        </div>
-        <uproxy-button raised on-tap='{{ offer }}'>{{ "GRANT" | $$ }}</uproxy-button>
-        <uproxy-button raised on-tap='{{ ignoreRequest }}'>{{ "IGNORE" | $$ }}</uproxy-button>
-      </div>
-
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED }}'>
-        <p class='preButtonText'>{{ "FRIEND_REQUESTED_ACCESS" | $$ }}</p>
-        <uproxy-button class='grey' raised on-tap='{{ unignoreRequest }}'>{{ "STOP_IGNORING_REQUESTS" | $$ }}</uproxy-button>
-      </div>
-
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.NO_OFFER_OR_REQUEST }}'>
-        <p class='preButtonText'>{{ "ACCESS_NOT_GRANTED" | $$ }}</p>
-        <uproxy-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</uproxy-button>
-      </div>
-    </core-collapse> <!-- end of shareControls -->
-
   </template>
 
   <script src='contact.js'></script>
