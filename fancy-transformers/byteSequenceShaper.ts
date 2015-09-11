@@ -86,7 +86,7 @@ export class ByteSequenceShaper implements Transformer {
     if ('addSequences' in config && 'removeSequences' in config) {
       // Deserialize the byte sequences from strings
       [this.addSequences_, this.removeSequences_] =
-        ByteSequenceShaper.deserializeConfig(<SequenceConfig>config.sequences);
+        ByteSequenceShaper.deserializeConfig(<SequenceConfig>config);
 
       // Make a note of the index of the first packet to inject
       this.firstIndex_ = this.addSequences_[0].index;
