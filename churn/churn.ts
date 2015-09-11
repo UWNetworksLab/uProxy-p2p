@@ -318,8 +318,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     private makeSampleEncryptionConfig_ = () :encryption.EncryptionConfig => {
       var key = new ArrayBuffer(16);
-      return {
-        key: arraybuffers.arrayBufferToHexString(key)};
+      return {key: arraybuffers.arrayBufferToHexString(key)};
     }
 
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
