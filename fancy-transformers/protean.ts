@@ -55,9 +55,9 @@ export class Protean implements Transformer {
   // - Encrypt using AES
   // - Inject packets with byte sequences
   public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
-    var source=[buffer];
-    var encrypted=flatMap(source, this.encrypter_.transform);
-    var injected=flatMap(encrypted, this.injecter_.transform);
+    var source = [buffer];
+    var encrypted = flatMap(source, this.encrypter_.transform);
+    var injected = flatMap(encrypted, this.injecter_.transform);
     return injected;
   }
 
@@ -65,9 +65,9 @@ export class Protean implements Transformer {
   // - Discard injected packets
   // - Decrypt with AES
   public restore = (buffer:ArrayBuffer) :ArrayBuffer[] => {
-    var source=[buffer];
-    var extracted=flatMap(source, this.injecter_.restore);
-    var decrypted=flatMap(extracted, this.encrypter_.restore);
+    var source = [buffer];
+    var extracted = flatMap(source, this.injecter_.restore);
+    var decrypted = flatMap(extracted, this.encrypter_.restore);
     return decrypted;
   }
 
