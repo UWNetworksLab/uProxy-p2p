@@ -319,8 +319,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private makeSampleEncryptionKey_ = () :encryption.EncryptionConfig => {
       var key = new ArrayBuffer(16);
       return {
-        key: arraybuffers.arrayBufferToHexString(key)
-      };
+        key: arraybuffers.arrayBufferToHexString(key)};
     }
 
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
@@ -340,8 +339,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private makeSampleProtean_ = () :protean.ProteanConfig => {
       return {
         encryption: this.makeSampleEncryptionKey_(),
-        injection: this.makeSampleSequences_()
-      };
+        injection: this.makeSampleSequences_()};
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
