@@ -2,6 +2,7 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-collapse/core-collapse.html'>
 <link rel='import' href='instance.html'>
+<link rel='import' href='button.html'>
 
 <polymer-element name='uproxy-contact' attributes='contact, isOnline'>
 
@@ -43,14 +44,15 @@
       margin: 0px 8px;
     }
     .nameRow .iconWrapper core-icon[icon=open-in-new] {
-      width: 16px;
-      height: 16px;
+      width: 16px !important;
+      height: 16px !important;
     }
     .nameRow:hover core-icon.expand {
       opacity: 1;
     }
     uproxy-avatar {
-      width: 40px; height: 40px;
+      width: 40px;
+      height: 40px;
       min-width: 40px;
       border: none;
       border-radius: 50%;
@@ -79,7 +81,7 @@
     .offline {
       opacity: 0.5;
     }
-    paper-button {
+    uproxy-button {
       font-size: 1em;
       margin: 14px 5px 5px 2px;
       padding-left: 1em;
@@ -88,8 +90,8 @@
     core-icon[icon=query-builder],
     core-icon[icon=mail],
     core-icon[icon=check] {
-      height: 16px;
-      width: 16px;
+      height: 16px !important;
+      width: 16px !important;
       color: rgba(0,0,0,0.54);
       margin: 0px 4px 0px 0px;
     }
@@ -170,24 +172,24 @@
           </p>
         </div>
         <p class='preButtonDetailedText'>{{ "WAITING_FOR_ACCESS" | $$({ name: contact.name }) }}</p>
-        <paper-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$ }}</paper-button>
+        <uproxy-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$ }}</uproxy-button>
       </div>
 
       <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
         <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
-        <paper-button raised on-tap='{{ request }}'>{{ "ACCEPT_OFFER" | $$ }}</paper-button>
-        <paper-button raised on-tap='{{ ignoreOffer }}'>{{ "IGNORE" | $$ }}</paper-button>
+        <uproxy-button raised on-tap='{{ request }}'>{{ "ACCEPT_OFFER" | $$ }}</uproxy-button>
+        <uproxy-button raised on-tap='{{ ignoreOffer }}'>{{ "IGNORE" | $$ }}</uproxy-button>
       </div>
 
       <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED }}'>
         <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
-        <paper-button class='grey' raised on-tap='{{ unignoreOffer }}'>{{ "STOP_IGNORING_OFFERS" | $$ }}</paper-button>
+        <uproxy-button class='grey' raised on-tap='{{ unignoreOffer }}'>{{ "STOP_IGNORING_OFFERS" | $$ }}</uproxy-button>
       </div>
 
       <div hidden?='{{ contact.gettingConsentState != GettingConsentState.NO_OFFER_OR_REQUEST }}'>
-        <paper-button raised on-tap='{{ request }}'>
+        <uproxy-button raised on-tap='{{ request }}'>
           {{ "ASK_FOR_ACCESS" | $$ }}
-        </paper-button>
+        </uproxy-button>
       </div>
 
     </core-collapse> <!-- end of getControls -->
@@ -198,11 +200,11 @@
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
         <p class='preButtonText'>{{ "GRANTED_FRIEND_ACCESS" | $$ }}</p>
-        <paper-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</paper-button>
+        <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</uproxy-button>
       </div>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION }}'>
-        <paper-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "CANCEL_OFFER" | $$ }}</paper-button>
+        <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "CANCEL_OFFER" | $$ }}</uproxy-button>
       </div>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION }}'>
@@ -212,18 +214,18 @@
             {{ "FRIEND_REQUESTS_ACCESS" | $$({ name: contact.name }) }}
           </p>
         </div>
-        <paper-button raised on-tap='{{ offer }}'>{{ "GRANT" | $$ }}</paper-button>
-        <paper-button raised on-tap='{{ ignoreRequest }}'>{{ "IGNORE" | $$ }}</paper-button>
+        <uproxy-button raised on-tap='{{ offer }}'>{{ "GRANT" | $$ }}</uproxy-button>
+        <uproxy-button raised on-tap='{{ ignoreRequest }}'>{{ "IGNORE" | $$ }}</uproxy-button>
       </div>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED }}'>
         <p class='preButtonText'>{{ "FRIEND_REQUESTED_ACCESS" | $$ }}</p>
-        <paper-button class='grey' raised on-tap='{{ unignoreRequest }}'>{{ "STOP_IGNORING_REQUESTS" | $$ }}</paper-button>
+        <uproxy-button class='grey' raised on-tap='{{ unignoreRequest }}'>{{ "STOP_IGNORING_REQUESTS" | $$ }}</uproxy-button>
       </div>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.NO_OFFER_OR_REQUEST }}'>
         <p class='preButtonText'>{{ "ACCESS_NOT_GRANTED" | $$ }}</p>
-        <paper-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</paper-button>
+        <uproxy-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</uproxy-button>
       </div>
     </core-collapse> <!-- end of shareControls -->
 

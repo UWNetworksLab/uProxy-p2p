@@ -1,5 +1,4 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
-<link rel='import' href='../../bower/paper-button/paper-button.html'>
 <link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
@@ -69,8 +68,8 @@
       background-color: #fff;
     }
     .settingsContent core-icon {
-      height: 20px;
-      width: 20px;
+      height: 20px !important;
+      width: 20px !important;
     }
     .label {
       text-indent: 5px;
@@ -90,12 +89,6 @@
       padding: 0;
       margin-bottom: 5px;
     }
-    paper-button {
-      width: 70px;
-      margin-left: 0px;
-      margin-right: 5px;
-      font-size: 10px;
-    }
     paper-checkbox::shadow #checkboxContainer {
       margin-left: 1px;
       width: 16px;
@@ -113,7 +106,7 @@
       padding: 0px 8px;
     }
     #metricsCheckbox core-icon[icon='help']{
-      height: 15px;
+      height: 15px !important;
       color: grey;
       opacity: 0.6;
       margin-bottom: 2px;
