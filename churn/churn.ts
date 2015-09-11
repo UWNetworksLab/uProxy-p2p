@@ -6,11 +6,13 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
+import encryption = require('../fancy-transformers/encryptionShaper');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
+import protean = require('../fancy-transformers/protean');
 import random = require('../crypto/random');
 import sequence = require('../fancy-transformers/byteSequenceShaper');
 import signals = require('../webrtc/signals');
@@ -307,6 +309,12 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //   undefined,
       //   JSON.stringify(this.makeSampleSequences_())
       // );
+
+      // Uncomment this to enable Protean shapeshifting
+      // this.pipe_.setTransformer('protean',
+      //   undefined,
+      //   JSON.stringify(this.makeSampleProtean_())
+      // );
     }
 
     private makeSampleEncryptionKey_ = () :encryption.EncryptionConfig => {
@@ -328,6 +336,13 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       return {
         addSequences: [sequence],
         removeSequences: [sequence]};
+    }
+
+    private makeSampleProtean_ = () :protean.ProteanConfig => {
+      return {
+        encryption: this.makeSampleEncryptionKey_(),
+        injection: this.makeSampleSequences_()
+      };
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
