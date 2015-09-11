@@ -10,11 +10,12 @@ var log :logging.Log = new logging.Log('protean');
 
 export interface ProteanConfig {
   encryption: encryption.EncryptionConfig;
+
   injection: sequence.SequenceConfig
 }
 
 function flatMap<T,E>(input :Array<T>, func :(t :T) => Array<E>) :Array<E> {
-  return input.reduce((ys: Array<E>, x: T) => {
+  return input.reduce((ys :Array<E>, x :T) :Array<E> => {
     return ys.concat(func(x));
   }, []);
 }
