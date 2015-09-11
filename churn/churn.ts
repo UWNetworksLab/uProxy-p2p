@@ -299,7 +299,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       // this.pipe_.setTransformer('encryptionShaper',
       //   undefined,
       //   JSON.stringify({
-      //     'key': '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0'
+      //     this.makeSampleEncryptionKey_()
       // }));
 
       // Uncomment this to enable byte sequence injection obfuscation.
@@ -307,6 +307,13 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //   undefined,
       //   JSON.stringify(this.makeSampleSequences_())
       // );
+    }
+
+    private makeSampleEncryptionKey_ = () :encryption.EncryptionConfig => {
+      var key = new ArrayBuffer(16);
+      return {
+        key: arraybuffers.arrayBufferToHexString(key)
+      };
     }
 
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
