@@ -14,9 +14,9 @@ export interface ProteanConfig {
   injection :sequence.SequenceConfig
 }
 
-function flatMap<T,E>(input :Array<T>, func :(t :T) => Array<E>) :Array<E> {
-  return input.reduce((ys :Array<E>, x :T) :Array<E> => {
-    return ys.concat(func(x));
+function flatMap<T,E>(input :Array<T>, mappedFunction :(element :T) => Array<E>) :Array<E> {
+  return input.reduce((accumulator :Array<E>, item :T) :Array<E> => {
+    return accumulator.concat(mappedFunction(item));
   }, []);
 }
 
