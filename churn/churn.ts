@@ -300,9 +300,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       // Uncomment this to enable AES-based obfuscation.
       // this.pipe_.setTransformer('encryptionShaper',
       //   undefined,
-      //   JSON.stringify({
-      //     this.makeSampleEncryptionKey_()
-      // }));
+      //   JSON.stringify(this.makeSampleEncryptionKey_())
+      // );
 
       // Uncomment this to enable byte sequence injection obfuscation.
       // this.pipe_.setTransformer('byteSequenceShaper',
