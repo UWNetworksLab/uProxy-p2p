@@ -57,8 +57,9 @@ var rtcNet:rtc_to_net.RtcToNet;
 var portControl = freedom['portControl']();
 
 var batcher = new onetime.SignalBatcher<bridge.SignallingMessage>(
-    parentModule.emit.bind(undefined, 'signalForPeer'),
-    bridge.isTerminatingSignal);
+    (signal:bridge.SignallingMessage) => {
+  parentModule.emit('signalForPeer', signal);
+}, bridge.isTerminatingSignal);
 
 var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
