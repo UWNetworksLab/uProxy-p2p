@@ -61,11 +61,24 @@
       box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.12);
     }
     .name {
-      font-size: 16px;
+      font-size: 15px;
+      line-height: 22px;
       color: rgba(0,0,0,0.87);
       padding: 0px 18px;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .offlineStatus {
+      padding: 0px 18px;
+      font-size: 12px;
+      line-height: 16px;
+    }
+    .onlineStatus {
+      padding: 0px 18px;
+      font-size: 12px;
+      line-height: 16px;
+      /* Color should be consistent with offlineStatus, whose parent has opacity 0.5 */
+      color: rgba(112, 112, 112, 0.5);
     }
     .accessIcon {
       width: 20px;
@@ -114,7 +127,10 @@
         class='nameRow frame {{ isOnline ? "online" : "offline" }}'
         center horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}'></uproxy-avatar>
-      <div class='name'><bdi>{{ contact.name }}</bdi></div>
+      <div>
+        <div class='name'><bdi>{{ contact.name }}</bdi></div>
+        <div class='{{ isOnline ? "onlineStatus" : "offlineStatus" }}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}</div>
+      </div>
 
       <div flex class="iconWrapper">
         <core-icon icon="open-in-new"
