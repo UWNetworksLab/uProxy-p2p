@@ -300,7 +300,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       // Uncomment this to enable AES-based obfuscation.
       // this.pipe_.setTransformer('encryptionShaper',
       //   undefined,
-      //   JSON.stringify(this.makeSampleEncryptionKey_())
+      //   JSON.stringify(this.makeSampleEncryptionConfig_())
       // );
 
       // Uncomment this to enable byte sequence injection obfuscation.
@@ -316,7 +316,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       // );
     }
 
-    private makeSampleEncryptionKey_ = () :encryption.EncryptionConfig => {
+    private makeSampleEncryptionConfig_ = () :encryption.EncryptionConfig => {
       var key = new ArrayBuffer(16);
       return {
         key: arraybuffers.arrayBufferToHexString(key)};
@@ -338,7 +338,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     private makeSampleProtean_ = () :protean.ProteanConfig => {
       return {
-        encryption: this.makeSampleEncryptionKey_(),
+        encryption: this.makeSampleEncryptionConfig_(),
         injection: this.makeSampleSequences_()};
     }
 
