@@ -56,9 +56,10 @@ var rtcNet:rtc_to_net.RtcToNet;
 
 var portControl = freedom['portControl']();
 
-var batcher = new onetime.SignalBatcher((signal:string) => {
+var batcher = new onetime.SignalBatcher<bridge.SignallingMessage>(
+    (signal:bridge.SignallingMessage) => {
   parentModule.emit('signalForPeer', signal);
-});
+}, bridge.isTerminatingSignal);
 
 var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
@@ -114,10 +115,13 @@ parentModule.on('validateSignalMessage', (encodedMessage:string) => {
 // modules depending on whether we're acting as the frontend or backend,
 // respectively.
 parentModule.on('handleSignalMessage', (encodedMessage:string) => {
-  var message = onetime.decode(encodedMessage);
+  // The UI should only call this function once the message has
+  // already been successfully decoded, via validateSignalMessage,
+  // so we don't perform any error checking here.
+  var messages = onetime.decode(encodedMessage);
 
   if (socksRtc !== undefined) {
-    socksRtc.handleSignalFromPeer(message);
+    messages.forEach(socksRtc.handleSignalFromPeer);
   } else {
     if (rtcNet === undefined) {
       rtcNet = new rtc_to_net.RtcToNet();
@@ -148,7 +152,7 @@ parentModule.on('handleSignalMessage', (encodedMessage:string) => {
         parentModule.emit('proxyingStopped');
       });
     }
-    rtcNet.handleSignalFromPeer(message);
+    messages.forEach(rtcNet.handleSignalFromPeer);
   }
 });
 
