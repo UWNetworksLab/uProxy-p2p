@@ -1,5 +1,5 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
-<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='button.html'>
 <link rel='import' href='../../bower/paper-progress/paper-progress.html'>
 <link rel='import' href='dialog.html'>
 
@@ -10,7 +10,7 @@
       text-align: center;
       font-color: #009688;  /* dark green */
     }
-    paper-button {
+    uproxy-button {
       margin: 10px 2px 3px 2px;
       font-size: 12px;
     }
@@ -29,7 +29,7 @@
       <div>
         <p>{{ "ATTEMPTING_RECONNECT" | $$ }}</p>
         <paper-progress indeterminate='true'></paper-progress>
-        <paper-button on-tap='{{ logout }}'>{{ "LOGOUT" | $$ }}</paper-button>
+        <uproxy-button on-tap='{{ logout }}'>{{ "LOGOUT" | $$ }}</uproxy-button>
       </div>
     </uproxy-dialog>
 

@@ -1,9 +1,3 @@
-/* add simple classes to buttons for green and grey */
-body /deep/ paper-button {
-  background: #009688;  /* teal 500 */
-  color: white;
-}
-
 body /deep/ paper-button[disabled] {
   background: #4DB6AC;  /* teal 300 */
   color: white;
