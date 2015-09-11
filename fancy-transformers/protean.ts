@@ -9,9 +9,9 @@ import sequence = require('../fancy-transformers/byteSequenceShaper');
 var log :logging.Log = new logging.Log('protean');
 
 export interface ProteanConfig {
-  encryption: encryption.EncryptionConfig;
+  encryption :encryption.EncryptionConfig;
 
-  injection: sequence.SequenceConfig
+  injection :sequence.SequenceConfig
 }
 
 function flatMap<T,E>(input :Array<T>, func :(t :T) => Array<E>) :Array<E> {
@@ -33,9 +33,9 @@ export class Protean implements Transformer {
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key:ArrayBuffer) :void => {}
+  public setKey = (key :ArrayBuffer) :void => {}
 
-  public configure = (json:string) :void => {
+  public configure = (json :string) :void => {
     var config = JSON.parse(json);
 
     // Required parameters 'encryption' and 'injection'
@@ -54,7 +54,7 @@ export class Protean implements Transformer {
   // Apply the following transformations:
   // - Encrypt using AES
   // - Inject packets with byte sequences
-  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
+  public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     var source = [buffer];
     var encrypted = flatMap(source, this.encrypter_.transform);
     var injected = flatMap(encrypted, this.injecter_.transform);
@@ -64,7 +64,7 @@ export class Protean implements Transformer {
   // Apply the following transformations:
   // - Discard injected packets
   // - Decrypt with AES
-  public restore = (buffer:ArrayBuffer) :ArrayBuffer[] => {
+  public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     var source = [buffer];
     var extracted = flatMap(source, this.injecter_.restore);
     var decrypted = flatMap(extracted, this.encrypter_.restore);
