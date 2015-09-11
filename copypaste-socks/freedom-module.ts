@@ -115,6 +115,9 @@ parentModule.on('validateSignalMessage', (encodedMessage:string) => {
 // modules depending on whether we're acting as the frontend or backend,
 // respectively.
 parentModule.on('handleSignalMessage', (encodedMessage:string) => {
+  // The UI should only call this function once the message has
+  // already been successfully decoded, via validateSignalMessage,
+  // so we don't perform any error checking here.
   var messages = onetime.decode(encodedMessage);
 
   if (socksRtc !== undefined) {
