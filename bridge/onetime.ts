@@ -63,11 +63,11 @@ export class SignalBatcher<T> {
         let compressedBuffer = zlib.gzipSync(buffer);
         encoded = compressedBuffer.toString('base64');
         log.info('%1: batch ready (raw/compressed/base64: %2/%3/%4)', this.name_,
-          batchAsJson.length, compressedBuffer.length, encoded.length);
+            batchAsJson.length, compressedBuffer.length, encoded.length);
       } else {
         encoded = buffer.toString('base64');
         log.info('%1: batch ready (raw/base64: %2/%3)', this.name_,
-          batchAsJson.length, encoded.length);
+            batchAsJson.length, encoded.length);
       }
 
       this.emitBatch_(encoded);

@@ -2,15 +2,14 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
-import PassThrough = require('../simple-transformers/passthrough');
+import aqm = require('../aqm/aqm');
 import CaesarCipher = require('../simple-transformers/caesar');
-import shaper = require('../fancy-transformers/encryptionShaper');
-
+import encryption = require('../fancy-transformers/encryptionShaper');
+import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
-import aqm = require('../aqm/aqm');
-
-import ipaddr = require('ipaddr.js');
+import PassThrough = require('../simple-transformers/passthrough');
+import sequence = require('../fancy-transformers/byteSequenceShaper');
 
 import Socket = freedom.UdpSocket.Socket;
 
@@ -36,8 +35,9 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
 // Maps transformer names to class constructors.
 var transformers :{[name:string] : new() => Transformer} = {
   'caesar': CaesarCipher,
-  'encryptionShaper': shaper.EncryptionShaper,
-  'none': PassThrough
+  'encryptionShaper': encryption.EncryptionShaper,
+  'none': PassThrough,
+  'sequenceShaper': sequence.ByteSequenceShaper
 };
 
 var makeTransformer_ = (
