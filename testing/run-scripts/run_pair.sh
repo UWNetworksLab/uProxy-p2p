@@ -17,9 +17,10 @@ VNC=false
 KEEP=false
 MTU=
 LATENCY=
+PROXY_PORT=9999
 
 function usage () {
-    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] [-m mtu] [-l latency] browserspec browserspec"
+    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] [-m mtu] [-l latency] [-s port] browserspec browserspec"
     echo "  -b BRANCH: have containers check out this BRANCH.  Default is dev."
     echo "  -r REPO: have containers clone this REPO.  "
     echo "           Default is https://github.com/uProxy/uproxy-lib.git."
@@ -28,6 +29,7 @@ function usage () {
     echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
     echo "  -m MTU: set the MTU on the getter's network interface."
     echo "  -l latency: set latency (in ms) on the getter's network interface."
+    echo "  -s port: forwarding port for the proxy on the host.  Default is 9999."
     echo "  -h, -?: this help message."
     echo
     echo "browserspec is a pair of browser-version."
@@ -36,7 +38,7 @@ function usage () {
     exit 1
 }
 
-while getopts kvb:r:p:m:l:h? opt; do
+while getopts kvb:r:p:m:l:s:h? opt; do
     case $opt in
         k) KEEP=true ;;
         v) VNC=true ;;
@@ -45,6 +47,7 @@ while getopts kvb:r:p:m:l:h? opt; do
         p) PREBUILT="$OPTARG" ;;
         m) MTU="$OPTARG" ;;
         l) LATENCY="$OPTARG" ;;
+        s) PROXY_PORT="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -119,7 +122,7 @@ function run_docker () {
     docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-adventure.sh $RUNARGS -w
 }
 
-run_docker uproxy-getter $1 $VNCOPTS1 -p 9000:9000 -p 9999:9999
+run_docker uproxy-getter $1 $VNCOPTS1 -p 9000:9000 -p $PROXY_PORT:9999
 run_docker uproxy-giver $2 $VNCOPTS2 -p 9010:9000
 
 CONTAINER_IP=localhost
@@ -151,4 +154,4 @@ sleep 2 # make sure nc is shutdown
 ./connect-pair.py $CONTAINER_IP 9000 $CONTAINER_IP 9010
 
 echo "SOCKS proxy should be available, sample command:"
-echo "  curl -x socks5h://localhost:9999 www.example.com"
+echo "  curl -x socks5h://localhost:$PROXY_PORT www.example.com"
