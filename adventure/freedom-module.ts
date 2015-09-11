@@ -13,7 +13,7 @@ import tcp = require('../net/tcp');
 var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(
     loggingTypes.Destination.console,
-    loggingTypes.Level.debug);
+    loggingTypes.Level.info);
 
 var log :logging.Log = new logging.Log('adventure');
 
