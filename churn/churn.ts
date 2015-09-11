@@ -312,7 +312,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       // Uncomment this to enable Protean shapeshifting
       // this.pipe_.setTransformer('protean',
       //   undefined,
-      //   JSON.stringify(this.makeSampleProtean_())
+      //   JSON.stringify(this.makeSampleProteanConfig_())
       // );
     }
 
@@ -335,7 +335,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         removeSequences: [sequence]};
     }
 
-    private makeSampleProtean_ = () :protean.ProteanConfig => {
+    private makeSampleProteanConfig_ = () :protean.ProteanConfig => {
       return {
         encryption: this.makeSampleEncryptionConfig_(),
         injection: this.makeSampleSequences_()};
