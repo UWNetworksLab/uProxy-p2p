@@ -20,7 +20,8 @@ export var decode = (encoded:string) : Object[] => {
 
 // Queues objects, invoking a callback with a compressed, base64-encoded
 // string representing a "batch" of the queued objects. Batches are
-// determined by the client via the isTerminating_ function.
+// determined by the client via the isTerminating_ function. Note that
+// the terminating message itself is not included in batches.
 // Intended for use in copy/paste scenarios where the size and number
 // of messages transmitted are crucial.
 // gzip is used for compression.
