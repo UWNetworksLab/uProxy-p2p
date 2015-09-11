@@ -18,9 +18,10 @@ KEEP=false
 MTU=
 LATENCY=
 PROXY_PORT=9999
+CONTAINER_PREFIX="uproxy"
 
 function usage () {
-    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] [-m mtu] [-l latency] [-s port] browserspec browserspec"
+    echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
     echo "  -b BRANCH: have containers check out this BRANCH.  Default is dev."
     echo "  -r REPO: have containers clone this REPO.  "
     echo "           Default is https://github.com/uProxy/uproxy-lib.git."
@@ -30,6 +31,7 @@ function usage () {
     echo "  -m MTU: set the MTU on the getter's network interface."
     echo "  -l latency: set latency (in ms) on the getter's network interface."
     echo "  -s port: forwarding port for the proxy on the host.  Default is 9999."
+    echo "  -u prefix: prefix for getter and giver container names.  Default is uproxy."
     echo "  -h, -?: this help message."
     echo
     echo "browserspec is a pair of browser-version."
@@ -38,7 +40,7 @@ function usage () {
     exit 1
 }
 
-while getopts kvb:r:p:m:l:s:h? opt; do
+while getopts kvb:r:p:m:l:s:u:h? opt; do
     case $opt in
         k) KEEP=true ;;
         v) VNC=true ;;
@@ -48,6 +50,7 @@ while getopts kvb:r:p:m:l:s:h? opt; do
         m) MTU="$OPTARG" ;;
         l) LATENCY="$OPTARG" ;;
         s) PROXY_PORT="$OPTARG" ;;
+        u) CONTAINER_PREFIX="$OPTARG" ;;
         *) usage ;;
     esac
 done
@@ -73,9 +76,9 @@ fi
 
 # Kill any running giver and getter containers.
 for role in getter giver; do
-  if docker ps -a | grep uproxy-$role >/dev/null; then
-    echo "Stopping running uproxy-$role..."
-    docker rm -f uproxy-$role > /dev/null
+  if docker ps -a | grep $CONTAINER_PREFIX-$role >/dev/null; then
+    echo "Stopping running $CONTAINER_PREFIX-$role..."
+    docker rm -f $CONTAINER_PREFIX-$role > /dev/null
   fi
 done
 
@@ -122,8 +125,8 @@ function run_docker () {
     docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-adventure.sh $RUNARGS -w
 }
 
-run_docker uproxy-getter $1 $VNCOPTS1 -p 9000:9000 -p $PROXY_PORT:9999
-run_docker uproxy-giver $2 $VNCOPTS2 -p 9010:9000
+run_docker $CONTAINER_PREFIX-getter $1 $VNCOPTS1 -p 9000:9000 -p $PROXY_PORT:9999
+run_docker $CONTAINER_PREFIX-giver $2 $VNCOPTS2 -p 9010:9000
 
 CONTAINER_IP=localhost
 if uname|grep Darwin > /dev/null
@@ -137,12 +140,12 @@ echo
 
 if [ -n "$MTU" ]
 then
-    ./set-mtu.sh uproxy-getter $MTU
+    ./set-mtu.sh $CONTAINER_PREFIX-getter $MTU
 fi
 
 if [ -n "$LATENCY" ]
 then
-    ./set-latency.sh uproxy-getter qdisc add dev eth0 root netem delay "$LATENCY"ms
+    ./set-latency.sh $CONTAINER_PREFIX-getter qdisc add dev eth0 root netem delay "$LATENCY"ms
 fi
 
 echo -n "Waiting for giver to come up"
