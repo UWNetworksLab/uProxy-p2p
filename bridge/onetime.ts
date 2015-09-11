@@ -10,21 +10,28 @@ import zlib = require('browserify-zlib');
 
 var log :logging.Log = new logging.Log('signal batcher');
 
-// Uncompresses a batch of signalling messages encoded by SignalBatcher.
+// Decodes a batch of signalling messages encoded by SignalBatcher.
+// Handles both compressed and uncompressed messages.
 export var decode = (encoded:string) : Object[] => {
   var decoded = new Buffer(encoded, 'base64');
-  var uncompressedBuffer = zlib.gunzipSync(decoded);
+  var uncompressedBuffer :Buffer;
+  try {
+    uncompressedBuffer = zlib.gunzipSync(decoded);
+  } catch (e) {
+    log.debug('gzip failed, assuming uncompressed messages');
+    uncompressedBuffer = decoded;
+  }
   var json = uncompressedBuffer.toString();
   return JSON.parse(json);
 };
 
-// Queues objects, invoking a callback with a compressed, base64-encoded
-// string representing a "batch" of the queued objects. Batches are
-// determined by the client via the isTerminating_ function. Note that
-// the terminating message itself is not included in batches.
+// Queues objects, invoking a callback with base64-encoded string
+// representing a "batch" of the queued objects, optionally compressed
+// with gzip. Batches are determined by the client via the
+// isTerminating_ function. Note that the terminating message itself
+// is not included in batches.
 // Intended for use in copy/paste scenarios where the size and number
 // of messages transmitted are crucial.
-// gzip is used for compression.
 export class SignalBatcher<T> {
   // Number of instances created, for logging purposes.
   private static id_ = 0;
@@ -39,6 +46,7 @@ export class SignalBatcher<T> {
   constructor(
       private emitBatch_ :(message:string) => void,
       private isTerminating_ :(message:T) => boolean,
+      private compress_:boolean = false,
       private name_ :string = 'unnamed-signal-batcher-' + SignalBatcher.id_) {
     SignalBatcher.id_++;
   }
@@ -48,13 +56,19 @@ export class SignalBatcher<T> {
   // function will be invoked.
   public addToBatch = (message:T) : void => {
     if (this.isTerminating_(message)) {
-      var batchAsJson = JSON.stringify(this.batch_);
-      var buffer = new Buffer(batchAsJson);
-      var compressedBuffer = zlib.gzipSync(buffer);
-      var encoded = compressedBuffer.toString('base64');
-
-      log.info('%1: batch ready (raw/compressed/base64: %2/%3/%4)', this.name_,
+      let batchAsJson = JSON.stringify(this.batch_);
+      let buffer = new Buffer(batchAsJson);
+      let encoded :string;
+      if (this.compress_) {
+        let compressedBuffer = zlib.gzipSync(buffer);
+        encoded = compressedBuffer.toString('base64');
+        log.info('%1: batch ready (raw/compressed/base64: %2/%3/%4)', this.name_,
           batchAsJson.length, compressedBuffer.length, encoded.length);
+      } else {
+        encoded = buffer.toString('base64');
+        log.info('%1: batch ready (raw/base64: %2/%3)', this.name_,
+          batchAsJson.length, encoded.length);
+      }
 
       this.emitBatch_(encoded);
 
