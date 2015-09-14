@@ -43,7 +43,15 @@ describe('core.tcpsocket wrapper', function() {
   // Loads the testing Freedom module, emits a signal and returns
   // a promise which fulfills once the signal is echoed.
   function loadFreedom(signalName:string) : Promise<void> {
-    return freedom('files/freedom-module.json', {
+    var path: string;
+    if (typeof window == 'undefined') {
+      // Firefox addon
+      path = 'grunt-jasmine-firefoxaddon-runner/data/build/dev/uproxy-lib/integration-tests/tcp/';
+    } else {
+      // Chrome app
+      path = 'files/';
+    }
+    return freedom(path + 'freedom-module.json', {
         'debug': 'debug'
       }).then((integrationTestFactory) => {
         return new Promise((F, R) => {
