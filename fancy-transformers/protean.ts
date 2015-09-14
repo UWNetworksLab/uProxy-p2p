@@ -20,7 +20,10 @@ function flatMap<T,E>(input :Array<T>, mappedFunction :(element :T) => Array<E>)
   }, []);
 }
 
-// A packet shaper that encrypts the packets with AES CBC.
+// A packet shaper that composes multiple transformers.
+// The following transformers are composed:
+// - AES encryption
+// - byte sequence injection
 export class Protean implements Transformer {
   // Encryption transformer
   private encrypter_ :encryption.EncryptionShaper;
