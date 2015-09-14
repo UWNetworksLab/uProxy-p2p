@@ -55,7 +55,8 @@ export function decode(buffer:ArrayBuffer) :Fragment {
     index: arraybuffers.decodeByte(fragmentNumber),
     count: arraybuffers.decodeByte(totalNumber),
     payload: payload,
-    padding: padding};
+    padding: padding
+  };
 }
 
 // Serialize a Fragment object so that it can be sent as a packet

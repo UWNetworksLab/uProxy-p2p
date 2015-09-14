@@ -166,7 +166,8 @@ export class ByteSequenceShaper implements Transformer {
       index:model.index,
       offset:model.offset,
       sequence:arraybuffers.hexStringToArrayBuffer(model.sequence),
-      length:model.length};
+      length:model.length
+    };
   }
 
   // Inject packets

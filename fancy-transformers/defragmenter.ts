@@ -111,7 +111,8 @@ export class Defragmenter {
         this.tracker_[hexid] = {
           pieces: fragmentList,
           counter: counter,
-          timer: timer};
+          timer: timer
+        };
       }
     }
   }

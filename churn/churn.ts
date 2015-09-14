@@ -328,17 +328,20 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         index: 0,
         offset: 0,
         sequence: hex,
-        length: 256};
+        length: 256
+      };
 
       return {
         addSequences: [sequence],
-        removeSequences: [sequence]};
+        removeSequences: [sequence]
+      };
     }
 
     private makeSampleProteanConfig_ = () :protean.ProteanConfig => {
       return {
         encryption: this.makeSampleEncryptionConfig_(),
-        injection: this.makeSampleSequences_()};
+        injection: this.makeSampleSequences_()
+      };
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
