@@ -6,16 +6,16 @@
  */
 /// <reference path='../../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
+/// <reference path='../../../../../third_party/typings/freedom/freedom.d.ts' />
 import browser_connector = require('../../../interfaces/browser_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 import user_interface = require('../../../generic_ui/scripts/ui');
 
-import freedom_types = require('freedom.types');
 
 class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
 
-  private appChannel_ :freedom_types.OnAndEmit<any,any>;
+  private appChannel_ :freedom.OnAndEmit<any,any>;
 
   // Status object indicating whether we're connected to the app.
   public status :browser_connector.StatusObject;

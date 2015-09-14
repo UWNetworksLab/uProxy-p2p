@@ -4,15 +4,14 @@
  * Provides a promise-based interface to the storage provider.
  */
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/storage.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 
 var log :logging.Log = new logging.Log('storage');
 
 // Platform-independent storage provider.
-var fStorage :freedom_Storage = freedom['core.storage']();
+var fStorage :freedom.Storage.Storage = freedom['core.storage']();
 
 // Set false elsewhere to disable log messages (ie. from jasmine)
 export var DEBUG_STATESTORAGE = true;

@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
@@ -25,7 +25,7 @@ export enum UserFeedbackType {
 export interface GlobalSettings {
   version          :number;
   description      :string;
-  stunServers      :freedom_RTCPeerConnection.RTCIceServer[];
+  stunServers      :freedom.RTCPeerConnection.RTCIceServer[];
   hasSeenSharingEnabledScreen :boolean;
   hasSeenWelcome   :boolean;
   allowNonUnicast  :boolean;

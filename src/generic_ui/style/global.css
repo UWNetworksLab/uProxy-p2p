@@ -1,9 +1,3 @@
-/* add simple classes to buttons for green and grey */
-body /deep/ paper-button {
-  background: #009688;  /* teal 500 */
-  color: white;
-}
-
 body /deep/ paper-button[disabled] {
   background: #4DB6AC;  /* teal 300 */
   color: white;
@@ -36,4 +30,11 @@ body /deep/ paper-input-decorator /deep/ .underline div {
 body /deep/ core-toolbar {
   background-color: #009688;
   color: white;
+}
+
+/* get around a bug in polymer styling */
+body /deep/ paper-input-decorator input[is="core-input"] {
+  padding: 0;
+  margin: 0.5em 0 0.25em;
+  width: 100%;
 }

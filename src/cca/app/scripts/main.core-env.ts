@@ -5,22 +5,20 @@
  * loaded.
  */
 
-/// <reference path='../../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
-
-import freedom_types = require('freedom.types');
 
 import CordovaBrowserApi = require('./cordova_browser_api');
 
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
-export interface OnEmitModule extends freedom_types.OnAndEmit<any,any> {};
+export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
-  freedom_types.FreedomModuleFactoryManager<OnEmitModule> {};
+  freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
 // Remember which handlers freedom has installed.
 var haveAppChannel :Function;
-export var uProxyAppChannel :Promise<freedom_types.OnAndEmit<any,any>> =
+export var uProxyAppChannel :Promise<freedom.OnAndEmit<any,any>> =
     new Promise((F, R) => {
   haveAppChannel = F;
 });

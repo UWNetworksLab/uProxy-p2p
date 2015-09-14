@@ -144,7 +144,7 @@ describe('remote_instance.RemoteInstance', () => {
     var fakeSocksToRtc = {
       handlers: <{[key :string] :Function}>{},
       'start':
-          (endpoint:net.Endpoint, pcConfig: freedom_RTCPeerConnection.RTCConfiguration) => {
+          (endpoint:net.Endpoint, pcConfig: freedom.RTCPeerConnection.RTCConfiguration) => {
          return Promise.resolve(endpoint);
       },
       'on': (t:string, f:Function) => { fakeSocksToRtc.handlers[t] = f; },
@@ -201,7 +201,7 @@ describe('remote_instance.RemoteInstance', () => {
     //  // Mock socksToRtc to not fulfill start promise
     //  spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue({
     //    'start':
-    //        (endpoint:net.Endpoint, pcConfig:freedom_RTCPeerConnection.RTCConfiguration) => {
+    //        (endpoint:net.Endpoint, pcConfig:freedom.RTCPeerConnection.RTCConfiguration) => {
     //       return new Promise((F, R) => {});
     //    },
     //    'on': (t:string, f:Function) => {},

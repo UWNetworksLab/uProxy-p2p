@@ -19,8 +19,7 @@
  */
 
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import firewall = require('./firewall');
 import local_instance = require('./local-instance');
@@ -281,7 +280,7 @@ export function notifyUI(networkName :string, userId :string) {
   // events are passed on to the relevant user (provided the user exists).
   export class FreedomNetwork extends AbstractNetwork {
 
-    private freedomApi_ :freedom_Social;
+    private freedomApi_ :freedom.Social.Social;
     // TODO: give real typing to provider_. Ask Freedom not to use overloaded
     // types.
     private provider_ :any;  // Special freedom object which is both a function
@@ -346,7 +345,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom_Social.UserProfile) : void => {
+    public handleUserProfile = (profile :freedom.Social.UserProfile) : void => {
       var userId = profile.userId;
       if (!firewall.isValidUserProfile(profile, null)) {
         log.error('Firewall: invalid user profile', profile);
@@ -387,7 +386,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom_Social.ClientState) : void => {
+    public handleClientState = (freedomClient :freedom.Social.ClientState) : void => {
       if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
         return;
@@ -424,7 +423,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
+    public handleMessage = (incoming :freedom.Social.IncomingMessage) : void => {
       if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
@@ -473,7 +472,7 @@ export function notifyUI(networkName :string, userId :string) {
     //===================== Social.Network implementation ====================//
 
     public login = (reconnect :boolean) : Promise<void> => {
-      var request :freedom_Social.LoginRequest = null;
+      var request :freedom.Social.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
         // TODO: ideally we should use the instanceId for the agent string,
@@ -508,7 +507,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       this.onceLoggedIn_ = this.freedomApi_.login(request)
-          .then((freedomClient :freedom_Social.ClientState) => {
+          .then((freedomClient :freedom.Social.ClientState) => {
             var userId = freedomClient.userId;
             if (userId in networks[this.name]) {
               // If user is already logged in with the same (network, userId)
@@ -719,7 +718,7 @@ export function notifyUI(networkName :string, userId :string) {
 
 
 export function freedomClientToUproxyClient(
-  freedomClientState :freedom_Social.ClientState) :social.ClientState {
+  freedomClientState :freedom.Social.ClientState) :social.ClientState {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
   // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',
   // 'OFFLINE': 4001, 4001: 'OFFLINE'} value.

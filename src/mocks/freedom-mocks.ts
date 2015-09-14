@@ -8,12 +8,12 @@
 
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/storage.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import MockEventHandler = require('../../../third_party/uproxy-lib/freedom/mocks/mock-eventhandler');
 import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 
-export class MockFreedomStorage implements freedom_Storage {
+export class MockFreedomStorage implements freedom.Storage.Storage {
 
   private store_ :{[key :string] :Object} = {};
 
@@ -94,7 +94,7 @@ export class PgpProvider {
     return Promise.resolve(data)
   }
 
-  public verifyDecrypt = (data :ArrayBuffer, key :string) :Promise<VerifyDecryptResult> => {
+  public verifyDecrypt = (data :ArrayBuffer, key :string) :Promise<freedom.PgpProvider.VerifyDecryptResult> => {
     return Promise.resolve({
       data: data,
       signedBy: ['']
