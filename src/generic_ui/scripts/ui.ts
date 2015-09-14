@@ -256,7 +256,7 @@ export class UserInterface implements ui_constants.UiApi {
       // TODO: Display the message in the 'manual network' UI.
     });
 
-    core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE, (message:string) => {
+    core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
       this.copyPasteMessage = message;
     });
 

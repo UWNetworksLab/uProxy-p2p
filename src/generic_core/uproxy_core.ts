@@ -265,7 +265,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // TODO: enable compression
   private resetBatcher_ = () : void => {
     this.batcher_ = new onetime.SignalBatcher<social.PeerMessage>((signal:string) => {
-      ui.update(uproxy_core_api.Update.COPYPASTE_MESSAGE, signal);
+      ui.update(uproxy_core_api.Update.ONETIME_MESSAGE, signal);
     }, (signal:social.PeerMessage) => {
       // This is a terminating message iff signal.data is an instance
       // bridge.SignallingMessage (which we can detect by the presence
