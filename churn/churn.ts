@@ -6,11 +6,13 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
+import encryption = require('../fancy-transformers/encryptionShaper');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
+import protean = require('../fancy-transformers/protean');
 import random = require('../crypto/random');
 import sequence = require('../fancy-transformers/byteSequenceShaper');
 import signals = require('../webrtc/signals');
@@ -298,15 +300,25 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       // Uncomment this to enable AES-based obfuscation.
       // this.pipe_.setTransformer('encryptionShaper',
       //   undefined,
-      //   JSON.stringify({
-      //     'key': '0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0'
-      // }));
+      //   JSON.stringify(this.makeSampleEncryptionConfig_())
+      // );
 
       // Uncomment this to enable byte sequence injection obfuscation.
       // this.pipe_.setTransformer('byteSequenceShaper',
       //   undefined,
       //   JSON.stringify(this.makeSampleSequences_())
       // );
+
+      // Uncomment this to enable Protean shapeshifting
+      // this.pipe_.setTransformer('protean',
+      //   undefined,
+      //   JSON.stringify(this.makeSampleProteanConfig_())
+      // );
+    }
+
+    private makeSampleEncryptionConfig_ = () :encryption.EncryptionConfig => {
+      var key = new ArrayBuffer(16);
+      return {key: arraybuffers.arrayBufferToHexString(key)};
     }
 
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
@@ -316,11 +328,20 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         index: 0,
         offset: 0,
         sequence: hex,
-        length: 256};
+        length: 256
+      };
 
       return {
         addSequences: [sequence],
-        removeSequences: [sequence]};
+        removeSequences: [sequence]
+      };
+    }
+
+    private makeSampleProteanConfig_ = () :protean.ProteanConfig => {
+      return {
+        encryption: this.makeSampleEncryptionConfig_(),
+        injection: this.makeSampleSequences_()
+      };
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {

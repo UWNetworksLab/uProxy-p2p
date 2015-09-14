@@ -9,6 +9,7 @@ import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import PassThrough = require('../simple-transformers/passthrough');
+import protean = require('../fancy-transformers/protean');
 import sequence = require('../fancy-transformers/byteSequenceShaper');
 
 import Socket = freedom.UdpSocket.Socket;
@@ -37,6 +38,7 @@ var transformers :{[name:string] : new() => Transformer} = {
   'caesar': CaesarCipher,
   'encryptionShaper': encryption.EncryptionShaper,
   'none': PassThrough,
+  'protean': protean.Protean,
   'sequenceShaper': sequence.ByteSequenceShaper
 };
 
