@@ -47,6 +47,14 @@
     "description": "Log-out of uProxy.",
     "message": "Log-out of uProxy"
   },
+  "ONLINE": {
+    "description": "Shown under your contact's who are online",
+    "message": "Online"
+  },
+  "OFFLINE": {
+    "description": "Shown under your contact's who are offline",
+    "message": "Offline"
+  },
   "GRANTED_YOU_ACCESS": {
     "description": "The user's friend has allowed the user to use the friend's Internet connection.",
     "message": "__name__ has granted you access"
