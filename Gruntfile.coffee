@@ -490,7 +490,6 @@ module.exports = (grunt) ->
               'freedom-social-firebase/firebase-social-provider.js'
               'freedom-social-firebase/facebook-social-provider.js'
               'freedom-social-wechat/social.wechat.json'
-              'freedom-social-wechat/wechat-social-provider.js'
               'freedom-port-control/port-control.js'
               'freedom-port-control/port-control.json'
               'freedom-pgp-e2e/end-to-end.compiled.js'
@@ -538,7 +537,6 @@ module.exports = (grunt) ->
               'data/freedom-social-firebase/firebase-social-provider.js'
               'data/freedom-social-firebase/facebook-social-provider.js'
               'data/freedom-social-wechat/social.wechat.json'
-              'data/freedom-social-wechat/wechat-social-provider.js'
               'data/freedom-port-control/port-control.js'
               'data/freedom-port-control/port-control.json'
               'data/freedom-pgp-e2e/end-to-end.compiled.js'
@@ -619,7 +617,6 @@ module.exports = (grunt) ->
               'freedom-social-firebase/firebase-social-provider.js'
               'freedom-social-firebase/facebook-social-provider.js'
               'freedom-social-wechat/social.wechat.json'
-              'freedom-social-wechat/wechat-social-provider.js'
               'freedom-port-control/port-control.js'
               'freedom-port-control/port-control.json'
 
