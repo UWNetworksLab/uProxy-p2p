@@ -18,6 +18,7 @@
   ],
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
+    "browserify-zlib": "^0.1.4",
     "bower": "^1.4.1",
     "cca": "^0.7.1",
     "circular-json": "^0.1.6",
@@ -52,7 +53,7 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.6.3",
-    "uproxy-lib": "^31.0.0",
+    "uproxy-lib": "^32.0.0",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
   },

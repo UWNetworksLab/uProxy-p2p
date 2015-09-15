@@ -55,13 +55,6 @@ export interface ConnectionState {
 export interface CopyPasteState {
   connectionState :ConnectionState;
   endpoint :net.Endpoint;
-  gettingMessages :social.PeerMessage[];
-  sharingMessages :social.PeerMessage[];
-}
-
-export interface CopyPasteMessages {
-  type :social.PeerMessageType;
-  data :social.PeerMessage[];
 }
 
 // --- Communications ---
@@ -130,10 +123,13 @@ export enum Update {
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
   POST_TO_CLOUDFRONT = 2021,
+  // Legacy one-time connection string. Unused, do not send.
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
+  // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
+  ONETIME_MESSAGE = 2026
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -222,7 +218,9 @@ export interface CoreApi {
    */
   stopCopyPasteShare() :Promise<void>;
 
-  sendCopyPasteSignal(signal :social.PeerMessage) :void;
+  // Decodes an encoded batch of signalling messages and forwards each signal
+  // to the RemoteConnection.
+  sendCopyPasteSignal(signal:string) :void;
 
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
