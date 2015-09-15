@@ -13,6 +13,14 @@ Polymer({
     name: 'unknown'
   },
   toggle: function() {
+    if (!this.isExpanded) {
+      // Hide the status before we start opening the core-collapse.
+      this.hideOnlineStatus = true;
+    } else {
+      // Let core-collapse close before reshowing the online status.
+      setTimeout(() => { this.hideOnlineStatus = false; }, 400);
+    }
+
     if (this.model.globalSettings.mode == ui_constants.Mode.SHARE) {
       this.contact.shareExpanded = !this.contact.shareExpanded;
     } else if (this.model.globalSettings.mode == ui_constants.Mode.GET) {
@@ -25,6 +33,7 @@ Polymer({
     this.model = ui_context.model;
     this.GettingConsentState = user.GettingConsentState;
     this.SharingConsentState = user.SharingConsentState;
+    this.hideOnlineStatus = this.isExpanded;
   },
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
@@ -75,4 +84,7 @@ Polymer({
     'contact.isGettingFromMe': 'fireChanged',
     'contact.isOnline': 'fireChanged',
   },
+  computed: {
+    'isExpanded': '(model.globalSettings.mode === ui_constants.Mode.GET && contact.getExpanded) || (model.globalSettings.mode === ui_constants.Mode.SHARE && contact.shareExpanded)'
+  }
 });

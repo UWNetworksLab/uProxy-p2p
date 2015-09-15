@@ -47,6 +47,14 @@
     "description": "Log-out of uProxy.",
     "message": "Log-out of uProxy"
   },
+  "ONLINE": {
+    "description": "Shown under your contact's who are online",
+    "message": "Online"
+  },
+  "OFFLINE": {
+    "description": "Shown under your contact's who are offline",
+    "message": "Offline"
+  },
   "GRANTED_YOU_ACCESS": {
     "description": "The user's friend has allowed the user to use the friend's Internet connection.",
     "message": "__name__ has granted you access"
@@ -419,9 +427,9 @@
     "description": "None of the user's friends are currently signed in.",
     "message": "None of your friends are signed into uProxy at this time."
   },
-  "TO_INVITE_FRIENDS": {
+  "FRIENDS_APPEAR_WHEN": {
     "description": "Instruction informing the user how to invite their friends to uProxy.",
-    "message": "To invite friends to uProxy, send them a link to https://www.uproxy.org"
+    "message": "Friends appear when they are using uProxy and logged into the same networks you are."
   },
   "OFFERS": {
     "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted.",
@@ -722,5 +730,9 @@
   "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
     "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
     "message": "More info."
+  },
+  "LEARN_MORE": {
+    "description": "Generic label for links to FAQ.",
+    "message": "Learn more"
   }
 }
