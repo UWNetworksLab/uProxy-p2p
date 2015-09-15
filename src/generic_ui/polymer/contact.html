@@ -37,7 +37,6 @@
       min-width: 25px;
     }
     .nameRow .iconWrapper {
-      min-width: 30px;
       text-align: end;
       margin: 0px 8px;
     }
@@ -122,14 +121,14 @@
     }
     </style>
 
-    <div on-tap='{{ toggle }}' tabindex='-1'
+    <div tabindex='-1'
         class='nameRow frame {{ isOnline ? "online" : "offline" }}'
         top horizontal layout>
-      <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}'></uproxy-avatar>
+      <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
       <div flex>
-        <div class='name'><bdi>{{ contact.name }}</bdi></div>
+        <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
         <div class='{{ isOnline ? "onlineStatus" : "offlineStatus" }}'
-          hidden?="{{ hideOnlineStatus }}">
+          hidden?="{{ hideOnlineStatus }}" on-tap='{{ toggle }}'>
           {{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}
         </div>
         <core-collapse id='getControls' class='expandedControls'
@@ -226,25 +225,24 @@
 
       </div>
 
-      <div class="iconWrapper">
+      <div class="iconWrapper" hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">
         <core-icon icon="open-in-new"
-            hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}"
             title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
       </div>
 
       <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->
       <img src='../icons/getting_animated.gif' class='accessIcon'
-          hidden?='{{ model.globalSettings.mode!=ui_constants.Mode.GET || !contact.isSharingWithMe }}'>
+          hidden?='{{ model.globalSettings.mode!=ui_constants.Mode.GET || !contact.isSharingWithMe }}' on-tap='{{ toggle }}'>
       <img src='../icons/sharing_animated.gif' class='accessIcon'
-          hidden?='{{ model.globalSettings.mode!=ui_constants.Mode.SHARE || !contact.isGettingFromMe }}'>
+          hidden?='{{ model.globalSettings.mode!=ui_constants.Mode.SHARE || !contact.isGettingFromMe }}' on-tap='{{ toggle }}'>
       <!-- If you are sharing with or getting from a contact, the glowing sharing/getting icon will replace the expand/collapse chevron. -->
       <!-- Show expand chevron in only two cases: when contact is collapsed in GET mode and you're not getting from them OR when contact is collapsed in SHARE mode and you're not sharing with them. -->
       <core-icon icon="expand-more" class="expand"
-        hidden?='{{ !(model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe) }}'>
+        hidden?='{{ !(model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe) }}' on-tap='{{ toggle }}'>
       </core-icon>
       <!-- Show collapse chevron in only two cases: when contact is expanded in GET mode and you're not getting from them OR when contact is expanded in SHARE mode and you're not sharing with them. -->
       <core-icon icon="expand-less" class="expand"
-        hidden?='{{ !(model.globalSettings.mode==ui_constants.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==ui_constants.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
+        hidden?='{{ !(model.globalSettings.mode==ui_constants.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==ui_constants.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}' on-tap='{{ toggle }}'>
       </core-icon>
     </div> <!-- end of #nameRow -->
   </template>
