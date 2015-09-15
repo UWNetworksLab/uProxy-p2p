@@ -18,11 +18,10 @@
       },
       "setTransformer": {
         "type": "method",
-        "value": [
-          "string",
-          "buffer",
-          "string"
-        ]
+        "value": [{
+          "name": "string",
+          "config": "string"
+        }]
       },
       "bindLocal": {
         "type": "method",

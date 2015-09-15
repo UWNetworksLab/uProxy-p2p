@@ -3,6 +3,7 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import caesar = require('../simple-transformers/caesar');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
@@ -20,6 +21,7 @@ import signals = require('../webrtc/signals');
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
 import MirrorMapping = churn_pipe_types.MirrorMapping;
+import ObfuscatorConfig = churn_types.ObfuscatorConfig;
 
 import Candidate = candidate.Candidate;
 import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
@@ -101,17 +103,6 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     throw new Error('no srflx or host candidate found');
   };
 
-  // Generates a key suitable for use with CaesarCipher, viz. 1-255.
-  var generateCaesarKey_ = (): number => {
-    try {
-      return (random.randomUint32() % 255) + 1;
-    } catch (e) {
-      // https://github.com/uProxy/uproxy/issues/1593
-      log.warn('crypto unavailable, using Math.random');
-      return Math.floor((Math.random() * 255)) + 1;
-    }
-  }
-
   /**
    * A PeerConnection implementation that establishes obfuscated connections.
    *
@@ -161,10 +152,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     } = {};
 
-    // Fulfills once we know the obfuscation key for caesar cipher.
-    private haveCaesarKey_ :(key:number) => void;
-    private onceHaveCaesarKey_ = new Promise((F, R) => {
-      this.haveCaesarKey_ = F;
+    // Fulfills once we know the obfuscator config, which may
+    // happen in response to a signalling channel message.
+    private haveObfuscatorConfig_ :(config:ObfuscatorConfig) => void;
+    private onceHaveObfuscatorConfig_ = new Promise((F, R) => {
+      this.haveObfuscatorConfig_ = F;
     });
 
     private pipe_ :ChurnPipe;
@@ -186,7 +178,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     constructor(probeRtcPc:freedom.RTCPeerConnection.RTCPeerConnection,
                 peerName?:string,
                 private skipPublicEndpoint_?:boolean,
-                private portControl_?:freedom.PortControl.PortControl) {
+                private portControl_?:freedom.PortControl.PortControl,
+                private preferredObfuscatorConfig_?:ObfuscatorConfig) {
       this.peerName = peerName || 'churn-connection-' +
           (++Connection.internalConnectionId_);
 
@@ -202,8 +195,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.onceClosed = this.obfuscatedConnection_.onceClosed;
 
       // Debugging.
-      this.onceHaveCaesarKey_.then((key: number) => {
-        log.info('%1: caesar key is %2', this.peerName, key);
+      this.onceHaveObfuscatorConfig_.then((config:ObfuscatorConfig) => {
+        log.info('%1: obfuscator config: %2', this.peerName, config);
       });
     }
 
@@ -265,7 +258,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
       this.onceProbingComplete_.then(() => {
         this.probeConnection_.close().then(() => {
-          return this.onceHaveCaesarKey_;
+          return this.onceHaveObfuscatorConfig_;
         }).then(this.configurePipe_).then(() => {
           this.processProbeCandidates_(candidates);
           this.havePipe_();
@@ -289,31 +282,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     }
 
-    private configurePipe_ = (key:number) : void => {
+    private configurePipe_ = (obfuscatorConfig:ObfuscatorConfig) : void => {
       this.pipe_ = freedom['churnPipe'](this.peerName);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-
-      this.pipe_.setTransformer('caesar',
-        new Uint8Array([key]).buffer,
-        '{}');
-
-      // Uncomment this to enable AES-based obfuscation.
-      // this.pipe_.setTransformer('encryptionShaper',
-      //   undefined,
-      //   JSON.stringify(this.makeSampleEncryptionConfig_())
-      // );
-
-      // Uncomment this to enable byte sequence injection obfuscation.
-      // this.pipe_.setTransformer('byteSequenceShaper',
-      //   undefined,
-      //   JSON.stringify(this.makeSampleSequences_())
-      // );
-
-      // Uncomment this to enable Protean shapeshifting
-      // this.pipe_.setTransformer('protean',
-      //   undefined,
-      //   JSON.stringify(this.makeSampleProteanConfig_())
-      // );
+      this.pipe_.setTransformer(obfuscatorConfig);
     }
 
     private makeSampleEncryptionConfig_ = () :encryption.EncryptionConfig => {
@@ -447,14 +419,25 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     public negotiateConnection = () : Promise<void> => {
-      // Generate a key and send it to the remote party.
-      // Once they've received it, they'll be able to establish
-      // a matching pipe.
-      var key = generateCaesarKey_();
-      this.haveCaesarKey_(key);
-      this.signalForPeerQueue.handle({
-        caesar: key
-      });
+      // First, signal the obfuscation config. This will allow the
+      // remote peer establish a matching churn pipe. If no config
+      // was specified, use Caesar cipher for backwards compatibility.
+      if (this.preferredObfuscatorConfig_) {
+        this.signalForPeerQueue.handle({
+          obfuscator: this.preferredObfuscatorConfig_
+        });
+        this.haveObfuscatorConfig_(this.preferredObfuscatorConfig_);
+      } else {
+        var caesarConfig = caesar.makeRandomConfig();
+        this.signalForPeerQueue.handle({
+          caesar: caesarConfig.key
+        });
+        this.haveObfuscatorConfig_({
+          name: 'caesar',
+          config: JSON.stringify(caesarConfig)
+        });
+      }
+
       return this.obfuscatedConnection_.negotiateConnection();
     }
 
@@ -480,8 +463,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             churnMessage.publicEndpoint);
         this.addRemoteCandidate_(fakeRTCIceCandidate);
       }
+      if (churnMessage.obfuscator !== undefined) {
+        this.haveObfuscatorConfig_(churnMessage.obfuscator);
+      }
       if (churnMessage.caesar !== undefined) {
-        this.haveCaesarKey_(churnMessage.caesar);
+        log.debug('%1: received legacy caesar cipher config', this.peerName);
+        this.haveObfuscatorConfig_({
+          name: 'caesar',
+          config: JSON.stringify(<caesar.Config>{
+            key: churnMessage.caesar
+          })
+        });
       }
       if (churnMessage.webrtcMessage) {
         var message = churnMessage.webrtcMessage;

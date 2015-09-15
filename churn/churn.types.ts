@@ -8,4 +8,12 @@ export interface ChurnSignallingMessage {
   webrtcMessage ?:signals.Message;
   publicEndpoint ?:net.Endpoint;
   caesar ?:number;
+  obfuscator ?:ObfuscatorConfig;
+}
+
+export interface ObfuscatorConfig {
+  // As defined in churn pipe.
+  name:string;
+  // Passed to the obfuscator's configure().
+  config:string;
 }

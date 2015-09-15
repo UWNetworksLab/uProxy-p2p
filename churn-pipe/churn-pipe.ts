@@ -3,7 +3,8 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 import aqm = require('../aqm/aqm');
-import CaesarCipher = require('../simple-transformers/caesar');
+import caesar = require('../simple-transformers/caesar');
+import churn_types = require('../churn/churn.types');
 import encryption = require('../fancy-transformers/encryptionShaper');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
@@ -35,34 +36,12 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
 
 // Maps transformer names to class constructors.
 var transformers :{[name:string] : new() => Transformer} = {
-  'caesar': CaesarCipher,
+  'caesar': caesar.CaesarCipher,
   'encryptionShaper': encryption.EncryptionShaper,
   'none': PassThrough,
   'protean': protean.Protean,
   'sequenceShaper': sequence.ByteSequenceShaper
 };
-
-var makeTransformer_ = (
-    // Name of transformer to use, e.g. 'rabbit' or 'none'.
-    name :string,
-    // Key for transformer, if any.
-    key ?:ArrayBuffer,
-    // JSON-encoded configuration, if any.
-    config ?:string)
-    : Transformer => {
-  if (!(name in transformers)) {
-    throw new Error('unknown transformer: ' + name);
-  }
-
-  var transformer: Transformer = new transformers[name]();
-  if (key) {
-    transformer.setKey(key);
-  }
-  if (config) {
-    transformer.configure(config);
-  }
-  return transformer;
-}
 
 interface MirrorSet {
   // If true, these mirrors represent a remote endpoint that has been
@@ -117,7 +96,7 @@ class Pipe {
       {};
 
   // Obfuscates and deobfuscates messages.
-  private transformer_ :Transformer = makeTransformer_('none');
+  private transformer_ :Transformer;
 
   // Endpoint to which incoming obfuscated messages are forwarded on each
   // interface.  The key is the interface, and the value is the port.
@@ -154,14 +133,19 @@ class Pipe {
         10);
   }
 
-  // Set the current transformer parameters.  The default is no transformation.
-  public setTransformer = (
-      transformerName :string,
-      key ?:ArrayBuffer,
-      config ?:string) : Promise<void> => {
+  // Set transformer parameters.
+  public setTransformer = (config:churn_types.ObfuscatorConfig) : Promise<void> => {
     try {
-      log.info('%1: using %2 transformer', this.name_, transformerName);
-      this.transformer_ = makeTransformer_(transformerName, key, config);
+      if (!(config.name in transformers)) {
+        throw new Error('unknown transformer: ' + config.name);
+      }
+
+      log.info('%1: using %2 obfuscator', this.name_, config.name);
+      this.transformer_ = new transformers[config.name]();
+      if (config.config) {
+        this.transformer_.configure(config.config);
+      }
+
       return Promise.resolve<void>();
     } catch (e) {
       return Promise.reject(e);
