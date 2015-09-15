@@ -226,15 +226,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             var MAP_LIFETIME = 24 * 60 * 60;  // 24 hours in seconds
             if (c.type === 'srflx') {
               if (this.portControl_ === undefined) {
-                log.debug('Port control not available in churn');
+                log.debug('%1: port control unavailable', this.name_);
               } else {
+                log.info('%1: port control available', this.name_);
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom.PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed. Mapping object: ",
-                                mapping);
+                      log.debug('%1: addMapping() failed: %2',
+                          this.name_, mapping);
                     } else {
-                      log.debug("addMapping() success: ", mapping);
+                      log.info('%1: addMapping() success: ',
+                          this.name_, mapping);
                     }
                 });
               }
@@ -383,7 +385,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           candidate: copy.toRTCIceCandidate()
         });
       } else {
-        log.error('Got a mapping for a nonexistent candidate');
+        log.error('%1: got mapping for non-existent candidate', this.name_);
       }
     }
 
