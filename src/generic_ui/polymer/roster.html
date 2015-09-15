@@ -44,12 +44,12 @@
     #noContactsFound {
       margin-top: 0.75em;
     }
-    #howDoIFindLearnMoreLink {
+    #noContactsFoundLearnMoreLink {
       text-decoration: underline;
       font-size: 14px;
       color: rgb(150,150,150);
     }
-    #inviteFriends {
+    #friendsAppearWhen {
       font-size: 14px;
       padding-top: 10px;
       color: rgb(150,150,150);
@@ -80,10 +80,10 @@
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
         {{ "NO_FRIENDS_ONLINE" | $$ }}
-        <p id='inviteFriends'>{{ "FRIENDS_APPEAR_WHEN" | $$ }}</p>
+        <p id='friendsAppearWhen'>{{ "FRIENDS_APPEAR_WHEN" | $$ }}</p>
         <p>
           <uproxy-faq-link anchor="howDoIFind">
-            <span id='howDoIFindLearnMoreLink'>{{ "LEARN_MORE" | $$ }}</span>
+            <span id='noContactsFoundLearnMoreLink'>{{ "LEARN_MORE" | $$ }}</span>
           </uproxy-faq-link>
         </p>
       </div>
