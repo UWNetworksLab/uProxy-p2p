@@ -102,9 +102,7 @@ Polymer({
   },
   switchToGetting: function() {
     this.stopSharing().then(() => {
-      if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE) {
-        this.startGetting();
-      }
+      this.startGetting();
     });
   },
   stopSharing: function() {
