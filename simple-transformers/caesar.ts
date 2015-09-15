@@ -1,38 +1,49 @@
+import logging = require('../logging/logging');
+import random = require('../crypto/random');
 
-// TODO(ldixon): update to a require-style inclusion.
-// e.g.
-//  import Transformer = require('uproxy-obfuscators/transformer');
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
+var log :logging.Log = new logging.Log('caesar');
 
-/**
- * An obfuscator which employs the Caesar cipher. *This does not provide any
- * real security!* It's intended to help prototype the interface between
- * transport and obfuscation and was chosen because even though it's trivial to
- * implement it still requires some configuration.
- */
-class CaesarCipher implements Transformer {
+// Accepted in serialised form by configure().
+export interface Config {
+  // Value by which to shift each byte (0-255).
+  key:number;
+}
 
+export var makeRandomConfig = () : Config => {
+  try {
+    return {
+      key: (random.randomUint32() % 255) + 1
+    };
+  } catch (e) {
+    // https://github.com/uProxy/uproxy/issues/1593
+    log.warn('crypto unavailable, using Math.random');
+    return {
+      key: Math.floor((Math.random() * 255)) + 1
+    };
+  }
+}
+
+// Caesar cipher.
+export class CaesarCipher implements Transformer {
   /** Value by which bytes' values are shifted. */
   private shift_ :number;
 
   public constructor() {}
 
-  /**
-   * Caesar cipher requires just one parameter: the value by which to shift
-   * each byte. key should be an ArrayBuffer of just one byte, the value of
-   * which will be used for the shift amount (the byte is interpreted as
-   * an unsigned integer, so negative shift is not possible).
-   */
   public setKey = (key:ArrayBuffer) => {
-    if (key.byteLength != 1) {
-      throw new Error('key must be one byte in length');
-    }
-    var bytes = new Uint8Array(key);
-    this.shift_ = bytes[0];
+    throw new Error('setKey unimplemented');
   }
 
-  /** Nothing to configure -- all this transformer needs is a key. */
-  public configure = (json:string) : void => {}
+  public configure = (json:string) : void => {
+    var config = <Config>JSON.parse(json);
+    if (config.key === undefined) {
+      throw new Error('config must have key field');
+    }
+    if (config.key < 0 || config.key > 255) {
+      throw new Error('key must be 0-255');
+    }
+    this.shift_ = config.key;
+  }
 
   public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
     this.map_(buffer, this.transformByte);
@@ -71,5 +82,3 @@ class CaesarCipher implements Transformer {
     return i % 256;
   }
 }
-
-export = CaesarCipher;

@@ -1,17 +1,19 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
-import CaesarCipher = require('./caesar');
+import caesar = require('./caesar');
 
 describe("caesar cipher", function() {
-  var transformer :CaesarCipher;
+  var transformer :caesar.CaesarCipher;
 
   beforeEach(function() {
-    transformer = new CaesarCipher();
+    transformer = new caesar.CaesarCipher();
   });
 
   function setKey(shift:number) : void {
-    transformer.setKey(new Uint8Array([shift]).buffer);
+    transformer.configure(JSON.stringify(<caesar.Config>{
+      key: shift
+    }));
   }
 
   it('transform', function() {
