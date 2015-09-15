@@ -13,7 +13,7 @@ Polymer({
     name: 'unknown'
   },
   toggle: function() {
-    if (!this.isExpanded()) {
+    if (!this.isExpanded) {
       // Hide the status before we start opening the core-collapse.
       this.hideOnlineStatus = true;
     } else {
@@ -23,15 +23,9 @@ Polymer({
 
     if (this.model.globalSettings.mode == ui_constants.Mode.SHARE) {
       this.contact.shareExpanded = !this.contact.shareExpanded;
-
     } else if (this.model.globalSettings.mode == ui_constants.Mode.GET) {
       this.contact.getExpanded = !this.contact.getExpanded;
     }
-  },
-  isExpanded:function() {
-    return (model.globalSettings.mode == ui_constants.Mode.GET
-        && this.contact.getExpanded) || (model.globalSettings.mode ==
-        ui_constants.Mode.SHARE && this.contact.shareExpanded);
   },
   ready: function() {
     this.ui = ui_context.ui;
@@ -39,7 +33,7 @@ Polymer({
     this.model = ui_context.model;
     this.GettingConsentState = user.GettingConsentState;
     this.SharingConsentState = user.SharingConsentState;
-    this.hideOnlineStatus = this.isExpanded();
+    this.hideOnlineStatus = this.isExpanded;
   },
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
@@ -90,4 +84,7 @@ Polymer({
     'contact.isGettingFromMe': 'fireChanged',
     'contact.isOnline': 'fireChanged',
   },
+  computed: {
+    'isExpanded': '(model.globalSettings.mode === ui_constants.Mode.GET && contact.getExpanded) || (model.globalSettings.mode === ui_constants.Mode.SHARE && contact.shareExpanded)'
+  }
 });
