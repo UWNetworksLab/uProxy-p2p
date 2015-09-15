@@ -171,7 +171,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE);
   }
 
-  sendCopyPasteSignal = (signal :social.PeerMessage) => {
+  sendCopyPasteSignal = (signal:string) => {
     this.sendCommand(uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE, signal);
   }
 
