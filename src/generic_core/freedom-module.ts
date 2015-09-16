@@ -100,8 +100,12 @@ ui_connector.onPromiseCommand(
     core.addUser);
 
 ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GENERATE_INVITE_TOKEN,
-    core.generateInviteToken);
+  uproxy_core_api.Command.INVITE_USER,
+  core.inviteUser);
+
+ui_connector.onCommand(
+  uproxy_core_api.Command.ACCEPT_FRIEND_REQUEST,
+  core.acceptFriendRequest);
 
 ui_connector.onCommand(uproxy_core_api.Command.STOP_PROXYING,
     core.stop);

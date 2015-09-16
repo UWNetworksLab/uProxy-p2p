@@ -278,14 +278,23 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.addUserRequest(data.token);
   }
 
-  public generateInviteToken = (data: { networkId: string }) : Promise<string> => {
+  public inviteUser = (data: { networkId: string; userName: string }): Promise<void> => {
     // TODO: clean this up - hack to find the one network
-    var network :social.Network;
+    var network: social.Network;
     for (var userId in social_network.networks[data.networkId]) {
       network = social_network.networks[data.networkId][userId];
       break;
     }
-    return network.generateInviteToken();
+    return network.inviteUser(data.userName);
+  }
+
+  public acceptFriendRequest = (path: social.UserPath) : void => {
+    var network = social_network.getNetwork(path.network.name, path.network.userId);
+    if (!network) {
+      log.error('No network', path.network.name);
+      return;
+    }
+    network.acceptFriendRequest(path.userId);  // TODO: maybe names should be consistent, acceptFriendRequest doesn't match social2
   }
 
   /**

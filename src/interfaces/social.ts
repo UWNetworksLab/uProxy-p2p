@@ -75,6 +75,7 @@ export interface UserData {
   offeringInstances   ?:InstanceData[];
   instancesSharingWithLocal  :string[];
   user                :UserProfileMessage;
+  state               ?:string;
 }
 
 export interface NetworkState {
@@ -273,7 +274,12 @@ export interface Network {
   /**
    * Generates an invite token
    */
-  generateInviteToken: () => Promise<string>;
+  inviteUser: (userName: string) => Promise<void>;
+
+  /**
+   * TODO: comment, rename?
+   */
+  acceptFriendRequest: (userId: string) => void;
 
   /**
     * Resends the instance handeshake to all uProxy instances.

@@ -140,55 +140,69 @@
       hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
       opened='{{ contact.getExpanded }}'>
 
-      <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
-        <div horizontal layout hidden?='{{ hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
-          <core-icon icon='check'></core-icon>
-          <p class='preButtonText' flex>
-           {{ "GRANTED_YOU_ACCESS" | $$({ name: contact.name || contact.userId }) }}
-          </p>
-        </div>
-        <div horizontal layout hidden?='{{ !hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
-          <core-icon icon='query-builder'></core-icon>
-          <p class='preButtonText' flex>
-            {{ "TRYING_TO_CONNECT" | $$({ name: contact.name || contact.userId }) }}
-          </p>
-        </div>
-        <template repeat='{{ instance in contact.offeringInstances }}' vertical layout>
-          <uproxy-instance
-              user='{{ contact }}'
-              instance='{{ instance }}'
-              network='{{contact.network}}'>
-          </uproxy-instance>
-        </template>
-      </div>
-
-      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION }}'>
-        <div horizontal layout>
-          <core-icon icon='query-builder'></core-icon>
-          <p class='preButtonText' flex>
-            {{ "ASKING_FOR_ACCESS" | $$ }}
-          </p>
-        </div>
-        <p class='preButtonDetailedText'>{{ "WAITING_FOR_ACCESS" | $$({ name: contact.name }) }}</p>
-        <paper-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$ }}</paper-button>
-      </div>
-
-      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
-        <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
-        <paper-button raised on-tap='{{ request }}'>{{ "ACCEPT_OFFER" | $$ }}</paper-button>
-        <paper-button raised on-tap='{{ ignoreOffer }}'>{{ "IGNORE" | $$ }}</paper-button>
-      </div>
-
-      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED }}'>
-        <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
-        <paper-button class='grey' raised on-tap='{{ unignoreOffer }}'>{{ "STOP_IGNORING_OFFERS" | $$ }}</paper-button>
-      </div>
-
-      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.NO_OFFER_OR_REQUEST }}'>
-        <paper-button raised on-tap='{{ request }}'>
-          {{ "ASK_FOR_ACCESS" | $$ }}
+      <div hidden?='{{ contact.state != "INVITE_RECEIVED" }}'>
+        <paper-button raised on-tap='{{ acceptFriendRequest }}'>
+          Accept Friend Request <!-- TODO: translate -->
         </paper-button>
       </div>
+
+      <div hidden?='{{ contact.state != "INVITE_SENT" }}'>
+        Waiting for friend to accept request.
+      </div>
+
+      <div hidden?='{{ contact.state != "FRIEND" }}'>
+
+        <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
+          <div horizontal layout hidden?='{{ hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
+            <core-icon icon='check'></core-icon>
+            <p class='preButtonText' flex>
+             {{ "GRANTED_YOU_ACCESS" | $$({ name: contact.name || contact.userId }) }}
+            </p>
+          </div>
+          <div horizontal layout hidden?='{{ !hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
+            <core-icon icon='query-builder'></core-icon>
+            <p class='preButtonText' flex>
+              {{ "TRYING_TO_CONNECT" | $$({ name: contact.name || contact.userId }) }}
+            </p>
+          </div>
+          <template repeat='{{ instance in contact.offeringInstances }}' vertical layout>
+            <uproxy-instance
+                user='{{ contact }}'
+                instance='{{ instance }}'
+                network='{{contact.network}}'>
+            </uproxy-instance>
+          </template>
+        </div>
+
+        <div hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION }}'>
+          <div horizontal layout>
+            <core-icon icon='query-builder'></core-icon>
+            <p class='preButtonText' flex>
+              {{ "ASKING_FOR_ACCESS" | $$ }}
+            </p>
+          </div>
+          <p class='preButtonDetailedText'>{{ "WAITING_FOR_ACCESS" | $$({ name: contact.name }) }}</p>
+          <paper-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$ }}</paper-button>
+        </div>
+
+        <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
+          <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
+          <paper-button raised on-tap='{{ request }}'>{{ "ACCEPT_OFFER" | $$ }}</paper-button>
+          <paper-button raised on-tap='{{ ignoreOffer }}'>{{ "IGNORE" | $$ }}</paper-button>
+        </div>
+
+        <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED }}'>
+          <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
+          <paper-button class='grey' raised on-tap='{{ unignoreOffer }}'>{{ "STOP_IGNORING_OFFERS" | $$ }}</paper-button>
+        </div>
+
+        <div hidden?='{{ contact.gettingConsentState != GettingConsentState.NO_OFFER_OR_REQUEST }}'>
+          <paper-button raised on-tap='{{ request }}'>
+            {{ "ASK_FOR_ACCESS" | $$ }}
+          </paper-button>
+        </div>
+
+      </div> <!-- end of FRIEND controls -->
 
     </core-collapse> <!-- end of getControls -->
 
@@ -196,35 +210,49 @@
       hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
       opened='{{ contact.shareExpanded }}'>
 
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
-        <p class='preButtonText'>{{ "GRANTED_FRIEND_ACCESS" | $$ }}</p>
-        <paper-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</paper-button>
+      <div hidden?='{{ contact.state != "INVITE_RECEIVED" }}'>
+        <paper-button raised on-tap='{{ acceptFriendRequest }}'>
+          Accept Friend Request <!-- TODO: translate -->
+        </paper-button>
       </div>
 
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION }}'>
-        <paper-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "CANCEL_OFFER" | $$ }}</paper-button>
+      <div hidden?='{{ contact.state != "INVITE_SENT" }}'>
+        Waiting for friend to accept request.
       </div>
 
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION }}'>
-        <div horizontal layout>
-          <core-icon icon='mail'></core-icon>
-          <p class='preButtonText' flex>
-            {{ "FRIEND_REQUESTS_ACCESS" | $$({ name: contact.name }) }}
-          </p>
+      <div hidden?='{{ contact.state != "FRIEND" }}'>
+
+        <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
+          <p class='preButtonText'>{{ "GRANTED_FRIEND_ACCESS" | $$ }}</p>
+          <paper-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</paper-button>
         </div>
-        <paper-button raised on-tap='{{ offer }}'>{{ "GRANT" | $$ }}</paper-button>
-        <paper-button raised on-tap='{{ ignoreRequest }}'>{{ "IGNORE" | $$ }}</paper-button>
-      </div>
 
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED }}'>
-        <p class='preButtonText'>{{ "FRIEND_REQUESTED_ACCESS" | $$ }}</p>
-        <paper-button class='grey' raised on-tap='{{ unignoreRequest }}'>{{ "STOP_IGNORING_REQUESTS" | $$ }}</paper-button>
-      </div>
+        <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION }}'>
+          <paper-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "CANCEL_OFFER" | $$ }}</paper-button>
+        </div>
 
-      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.NO_OFFER_OR_REQUEST }}'>
-        <p class='preButtonText'>{{ "ACCESS_NOT_GRANTED" | $$ }}</p>
-        <paper-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</paper-button>
-      </div>
+        <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION }}'>
+          <div horizontal layout>
+            <core-icon icon='mail'></core-icon>
+            <p class='preButtonText' flex>
+              {{ "FRIEND_REQUESTS_ACCESS" | $$({ name: contact.name }) }}
+            </p>
+          </div>
+          <paper-button raised on-tap='{{ offer }}'>{{ "GRANT" | $$ }}</paper-button>
+          <paper-button raised on-tap='{{ ignoreRequest }}'>{{ "IGNORE" | $$ }}</paper-button>
+        </div>
+
+        <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED }}'>
+          <p class='preButtonText'>{{ "FRIEND_REQUESTED_ACCESS" | $$ }}</p>
+          <paper-button class='grey' raised on-tap='{{ unignoreRequest }}'>{{ "STOP_IGNORING_REQUESTS" | $$ }}</paper-button>
+        </div>
+
+        <div hidden?='{{ contact.sharingConsentState != SharingConsentState.NO_OFFER_OR_REQUEST }}'>
+          <p class='preButtonText'>{{ "ACCESS_NOT_GRANTED" | $$ }}</p>
+          <paper-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</paper-button>
+        </div>
+      
+      </div> <!-- end of FRIEND controls -->
     </core-collapse> <!-- end of shareControls -->
 
   </template>

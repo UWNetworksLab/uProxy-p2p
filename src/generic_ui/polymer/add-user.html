@@ -15,22 +15,15 @@
 
     <paper-action-dialog id='addUserDialog' backdrop heading='' layered='true'>
 
-      <p>To invite a friend to use uProxy with you, share this link with them.</p>
-
-      <!-- TODO: hide this until ready? -->
-      <paper-input-decorator label="{{ 'LOADING' | $$ }}" layout vertical>
-        <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
-      </paper-input-decorator>
-
-      <p>If you have a uProxy link from your friend, you can paste it below to add them.</p>
+      <p>Please enter your friend's name</p>
 
       <div id='addFriend'>
-        <paper-input-decorator label="Add friend by URL">
+        <paper-input-decorator label="">
           <input is='core-input' value='{{ userIdInput }}'>
         </paper-input-decorator>
-        <paper-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</paper-button>
       </div>
 
+      <paper-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</paper-button>
       <paper-button affirmative>Close</paper-button>
 
     </paper-action-dialog>

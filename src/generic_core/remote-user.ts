@@ -31,6 +31,7 @@ import globals = require('./globals');
 import ui = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import _ = require('lodash');
+import freedom_Social = require('../interfaces/social2');   // TODO: rename?  move?
 
 import storage = globals.storage;
 
@@ -390,7 +391,8 @@ var log :logging.Log = new logging.Log('remote-user');
         offeringInstances: offeringInstanceStatesForUi,
         instancesSharingWithLocal: instancesSharingWithLocal,
         allInstanceIds: allInstanceIds,
-        isOnline: isOnline
+        isOnline: isOnline,
+        state: this.profile.state  // TODO: this won't be defined everywhere...
       };
     }
     /**

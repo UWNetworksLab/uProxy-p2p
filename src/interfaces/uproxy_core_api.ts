@@ -98,7 +98,8 @@ export enum Command {
   GET_VERSION = 1020,
   HANDLE_CORE_UPDATE = 1021,
   ADD_USER = 1022,
-  GENERATE_INVITE_TOKEN = 1023
+  INVITE_USER = 1023,
+  ACCEPT_FRIEND_REQUEST = 1024
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must

@@ -267,7 +267,11 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public generateInviteToken = () : Promise<string> => {
+    public inviteUser = (userName: string): Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+
+    public acceptFriendRequest = (userId: string): void => {
       throw new Error('Operation not implemented');
     }
 
@@ -572,20 +576,27 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public addUserRequest = (token: string): Promise<void> => {
+    // TODO: rename token to userId for new invite flow...
+    public acceptUserInvitation = (token: string): Promise<void> => {
       if (token.lastIndexOf('/') >= 0) {
         // Remove prefix url.
         token = token.substr(token.lastIndexOf('/') + 1);
       }
-      return this.freedomApi_.addContact(token).catch((e) => {
+      return this.freedomApi_.acceptUserInvitation(token).catch((e) => {
         log.error('Error calling addContact: ' + token, e.message);
       });
     }
 
-    public generateInviteToken = () : Promise<string> => {
-      return this.freedomApi_.getIntroductionToken().then((token) => {
-        return 'https://www.uproxy.org/invite/' + this.name + '/' + token;
-      })
+    public inviteUser = (userName: string): Promise<void> => {
+      return this.freedomApi_.inviteUser(userName).catch((e) => {
+        log.error('Error calling inviteUser: ' + userName, e.message);
+      });
+    }
+
+    public acceptFriendRequest = (userId: string): void => {
+      this.freedomApi_.acceptUserInvitation(userId).catch((e) => {
+        log.error('Error calling acceptUserInvitation: ' + userId, e.message);
+      });
     }
 
 

@@ -40,6 +40,7 @@ export class User implements social.BaseUser {
   public url               :string;
   public isGettingFromMe   :boolean = false;
   public isSharingWithMe   :boolean = false;
+  public state :string = 'FRIEND';  // TODO: make enum
   // 'filter'-related flags which indicate whether the user should be
   // currently visible in the UI.
   public offeringInstances :social.InstanceData[] = [];
@@ -109,6 +110,7 @@ export class User implements social.BaseUser {
     this.name = profile.name;
     this.imageData = profile.imageData || Constants.DEFAULT_USER_IMG;
     this.url = profile.url;
+    this.state = payload.state || 'FRIEND';  // TODO: explain why we default to friend
 
     // iterate backwards to allow removing elements
     var i = this.offeringInstances.length;

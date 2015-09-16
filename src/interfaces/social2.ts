@@ -20,6 +20,7 @@ export interface UserProfile {
   // Image URI (e.g. data:image/png;base64,adkwe329...)
   imageData    ?:string;
   timestamp    ?:number;
+  state        ?:string; 
 }
 
 export interface Users   { [userId:string]   : UserProfile; }
@@ -101,13 +102,10 @@ export interface FreedomSocialProvider {
   // Invite user returns false when invitation was not delivered, typically due
   // to the destination user lacking some initial setup done by installing and
   // connecting their account.
-  inviteUser(userId: string): Promise<boolean>;
-  acceptUserInvitation(userId: string): void;
+  inviteUser(userId: string): Promise<void>;
+  acceptUserInvitation(userId: string): Promise<void>;
   blockUser(userId: string): void;
   removeUser(userId: string): void;
-
-  addContact(token: string): Promise<void>;
-  getIntroductionToken(): Promise<string>;
 
   // Send a message to user on your network
   // If the message is sent to a userId, it is sent to all clients
