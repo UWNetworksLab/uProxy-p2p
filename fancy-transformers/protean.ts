@@ -25,6 +25,7 @@ function flatMap<T,E>(input :Array<T>, mappedFunction :(element :T) => Array<E>)
 
 // A packet shaper that composes multiple transformers.
 // The following transformers are composed:
+// - Fragmentation based on MTU and chunk size
 // - AES encryption
 // - byte sequence injection
 export class Protean implements Transformer {
@@ -49,7 +50,7 @@ export class Protean implements Transformer {
   public configure = (json :string) :void => {
     var config = JSON.parse(json);
 
-    // Required parameters 'encryption' and 'injection'
+    // Required parameters 'fragmentation', 'encryption', and 'injection'
     if ('encryption' in config && 'injection' in config) {
       this.encrypter_ = new encryption.EncryptionShaper();
       this.injecter_ = new sequence.ByteSequenceShaper();
@@ -60,11 +61,14 @@ export class Protean implements Transformer {
       this.injecter_.configure(JSON.stringify(proteanConfig.injection));
       this.fragmenter_.configure(JSON.stringify(proteanConfig.fragmentation));
     } else {
-      throw new Error("Protean requires encryption and injection parameters.");
+      throw new Error(
+        "Protean requires fragmentation, encryption, and injection parameters."
+      );
     }
   }
 
   // Apply the following transformations:
+  // - Fragment based on MTU and chunk size
   // - Encrypt using AES
   // - Inject packets with byte sequences
   public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
@@ -78,6 +82,7 @@ export class Protean implements Transformer {
   // Apply the following transformations:
   // - Discard injected packets
   // - Decrypt with AES
+  // - Attempt defragmentation
   public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     var source = [buffer];
     var extracted = flatMap(source, this.injecter_.restore);
