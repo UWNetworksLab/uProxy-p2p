@@ -7,6 +7,7 @@ import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
 import encryption = require('../fancy-transformers/encryptionShaper');
+import fragmentation = require('../fancy-transformers/fragmentationShaper');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
@@ -311,6 +312,12 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //   JSON.stringify(this.makeSampleSequences_())
       // );
 
+      // Uncomment this to enable fragmentation
+      // this.pipe_.setTransformer('fragmentationShaper',
+      //   undefined,
+      //   JSON.stringify(this.makeSampleFragmentationConfig_())
+      // );
+
       // Uncomment this to enable Protean shapeshifting
       // this.pipe_.setTransformer('protean',
       //   undefined,
@@ -339,9 +346,14 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       };
     }
 
+    private makeSampleFragmentationConfig_ = () :fragmentation.FragmentationConfig => {
+      return {maxLength: 1440};
+    }
+
     private makeSampleProteanConfig_ = () :protean.ProteanConfig => {
       return {
         encryption: this.makeSampleEncryptionConfig_(),
+        fragmentation: this.makeSampleFragmentationConfig_(),
         injection: this.makeSampleSequences_()
       };
     }
