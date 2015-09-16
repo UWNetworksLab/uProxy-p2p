@@ -36,6 +36,8 @@ import freedom_social = require('../interfaces/social2');   // TODO: rename?  mo
 
 import ui = ui_connector.connector;
 
+  // TODO: move this to shared file
+  // https://github.com/uProxy/uproxy/issues/1901
   export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
@@ -162,6 +164,7 @@ export function notifyUI(networkName :string, userId :string) {
   ui.update(uproxy_core_api.Update.NETWORK, payload);
 }
 
+// TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
 export function getNetworkDisplayName(networkName :string) : string {
   return NETWORK_OPTIONS[networkName].displayName || networkName;
 }

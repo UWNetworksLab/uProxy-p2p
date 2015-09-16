@@ -208,6 +208,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public toastMessage :string = null;
 
+  public showInviteControls: boolean = false;
+
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -887,6 +889,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateView_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private syncUserSelf_ = (payload :social.UserData) => {
@@ -1173,11 +1176,28 @@ export class UserInterface implements ui_constants.UiApi {
     this.portControlSupport = support;
   }
 
-   public getNetworkDisplayName = (networkName :string) => {
-     // TODO: unhack this...  use same json..  ugg fuck all this
-     // TODO: stop passing displayName from core to UI
-     return networkName == 'Facebook-Firebase-V2' ? 'Facebook' : networkName;
-   }
+  // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
+  public getNetworkDisplayName = (networkName :string) => {
+    return networkName == 'Facebook-Firebase-V2' ? 'Facebook' : networkName;
+  }
+
+  // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
+  private supportsInvites_ = (networkName :string) => {
+    return networkName === 'Facebook-Firebase-V2' ||
+        networkName === 'GMail' ||
+        networkName === 'GitHub';
+  }
+
+  private updateShowInviteControls_ = () => {
+    var showControls = false;
+    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
+      if (this.supportsInvites_(this.model.onlineNetworks[i].name)) {
+        showControls = true;
+        break;
+      }
+    }
+    this.showInviteControls = showControls;
+  }
 
   // this takes care of updating the view (given the assumuption that we are
   // connected to the core)
