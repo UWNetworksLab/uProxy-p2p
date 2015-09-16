@@ -6,8 +6,7 @@ import random = require('../crypto/random');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// Configuration where the sequences have been encoded as strings.
-// This is the interface that configure() expects as an argument.
+// Accepted in serialised form by configure().
 export interface SequenceConfig {
   // Sequences that should be added to the outgoing packet stream.
   addSequences:SerializedSequenceModel[];
@@ -46,6 +45,22 @@ export interface SequenceModel {
 
   // Target packet length.
   length:number
+}
+
+export var sampleConfig = () : SequenceConfig => {
+  var buffer = arraybuffers.stringToArrayBuffer("OH HELLO");
+  var hex = arraybuffers.arrayBufferToHexString(buffer);
+  var sequence = {
+    index: 0,
+    offset: 0,
+    sequence: hex,
+    length: 256
+  };
+
+  return {
+    addSequences: [sequence],
+    removeSequences: [sequence]
+  };
 }
 
 // An obfuscator that injects byte sequences.

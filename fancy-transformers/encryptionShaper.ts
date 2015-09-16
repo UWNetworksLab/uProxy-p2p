@@ -7,7 +7,16 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('encryption-shaper');
 
-export interface EncryptionConfig {key:string}
+// Accepted in serialised form by configure().
+export interface EncryptionConfig {
+  key:string
+}
+
+export var sampleConfig = () : EncryptionConfig => {
+  return {
+    key: arraybuffers.arrayBufferToHexString(new ArrayBuffer(16))
+  };
+}
 
 // A packet shaper that encrypts the packets with AES CBC.
 export class EncryptionShaper implements Transformer {

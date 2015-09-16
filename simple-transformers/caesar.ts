@@ -9,7 +9,7 @@ export interface Config {
   key:number;
 }
 
-export var makeRandomConfig = () : Config => {
+export var sampleConfig = () : Config => {
   try {
     return {
       key: (random.randomUint32() % 255) + 1

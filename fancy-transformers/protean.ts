@@ -8,10 +8,17 @@ import sequence = require('../fancy-transformers/byteSequenceShaper');
 
 var log :logging.Log = new logging.Log('protean');
 
+// Accepted in serialised form by configure().
 export interface ProteanConfig {
   encryption :encryption.EncryptionConfig;
-
   injection :sequence.SequenceConfig
+}
+
+export var sampleConfig = () : ProteanConfig => {
+  return {
+    encryption: encryption.sampleConfig(),
+    injection: sequence.sampleConfig()
+  };
 }
 
 function flatMap<T,E>(input :Array<T>, mappedFunction :(element :T) => Array<E>) :Array<E> {
