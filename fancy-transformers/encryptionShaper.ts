@@ -7,6 +7,9 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('encryption-shaper');
 
+export const CHUNK_SIZE :number = 16;
+const IV_SIZE :number = 16;
+
 export interface EncryptionConfig {key:string}
 
 // A packet shaper that encrypts the packets with AES CBC.
@@ -35,7 +38,7 @@ export class EncryptionShaper implements Transformer {
 
   public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
     // This transform performs the following steps:
-    // - Generate a new random 16-byte IV for every packet
+    // - Generate a new random CHUNK_SIZE-byte IV for every packet
     // - Encrypt the packet contents with the random IV and symmetric key
     // - Concatenate the IV and encrypted packet contents
     var iv :ArrayBuffer = EncryptionShaper.makeIV();
@@ -46,11 +49,11 @@ export class EncryptionShaper implements Transformer {
 
   public restore = (buffer:ArrayBuffer) :ArrayBuffer[] => {
     // This restore performs the following steps:
-    // - Split the first 16 bytes from the rest of the packet
+    // - Split the first CHUNK_SIZE bytes from the rest of the packet
     //     The two parts are the IV and the encrypted packet contents
     // - Decrypt the encrypted packet contents with the IV and symmetric key
     // - Return the decrypted packet contents
-    var parts = arraybuffers.split(buffer, 16);
+    var parts = arraybuffers.split(buffer, IV_SIZE);
     var iv = parts[0];
     var ciphertext = parts[1];
     return [this.decrypt_(iv, ciphertext)];
@@ -60,25 +63,25 @@ export class EncryptionShaper implements Transformer {
   public dispose = () :void => {}
 
   static makeIV = () :ArrayBuffer => {
-    var randomBytes = new Uint8Array(16);
+    var randomBytes = new Uint8Array(IV_SIZE);
     crypto.getRandomValues(randomBytes);
     return randomBytes.buffer;
   }
 
   private encrypt_ = (iv:ArrayBuffer, buffer:ArrayBuffer) :ArrayBuffer => {
     var len :ArrayBuffer = arraybuffers.encodeShort(buffer.byteLength);
-    var remainder = (len.byteLength + buffer.byteLength) % 16;
+    var remainder = (len.byteLength + buffer.byteLength) % CHUNK_SIZE;
     var plaintext:ArrayBuffer;
     if (remainder === 0) {
       plaintext = arraybuffers.concat([len, buffer]);
     } else {
-      var padding = new Uint8Array(16-remainder);
+      var padding = new Uint8Array(CHUNK_SIZE-remainder);
       crypto.getRandomValues(padding);
       plaintext = arraybuffers.concat([len, buffer, padding.buffer]);
     }
 
     var cbc = new aes.ModeOfOperation.cbc(new Uint8Array(this.key_), new Uint8Array(iv));
-    var chunks = arraybuffers.chunk(plaintext, 16);
+    var chunks = arraybuffers.chunk(plaintext, CHUNK_SIZE);
     for(var x = 0; x < chunks.length; x++) {
       var plainChunk = arraybuffers.arrayBufferToBuffer(chunks[x]);
       var cipherChunk = cbc.encrypt(plainChunk);
@@ -90,7 +93,7 @@ export class EncryptionShaper implements Transformer {
 
   private decrypt_ = (iv:ArrayBuffer, ciphertext:ArrayBuffer) :ArrayBuffer => {
     var cbc = new aes.ModeOfOperation.cbc(new Uint8Array(this.key_), new Uint8Array(iv));
-    var chunks = arraybuffers.chunk(ciphertext, 16);
+    var chunks = arraybuffers.chunk(ciphertext, CHUNK_SIZE);
     for(var x = 0; x < chunks.length; x++) {
       chunks[x] = arraybuffers.bufferToArrayBuffer(cbc.decrypt(arraybuffers.arrayBufferToBuffer(chunks[x])));
     }
