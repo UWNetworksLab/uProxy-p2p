@@ -15,7 +15,9 @@
   },
   "permissions": [
     "storage",
-    "http://*/"
+    "http://*/",
+    "https://*.wechat.com/*",
+    "https://*.qq.com/*"
   ],
   "sockets": {
     "tcp": {

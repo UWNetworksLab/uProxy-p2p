@@ -327,6 +327,7 @@ module.exports = (grunt) ->
       freedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
       freedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
       freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
+      freedomwechat: grunt.file.readJSON('node_modules/freedom-social-wechat/package.json')
 
     clean: ['build/dev', 'build/dist', '.tscache']
 
@@ -488,6 +489,7 @@ module.exports = (grunt) ->
               'freedom-social-firebase/firebase.js'
               'freedom-social-firebase/firebase-social-provider.js'
               'freedom-social-firebase/facebook-social-provider.js'
+              'freedom-social-wechat/social.wechat.json'
               'freedom-port-control/port-control.js'
               'freedom-port-control/port-control.json'
               'freedom-pgp-e2e/end-to-end.compiled.js'
@@ -534,6 +536,7 @@ module.exports = (grunt) ->
               'data/freedom-social-firebase/firebase.js'
               'data/freedom-social-firebase/firebase-social-provider.js'
               'data/freedom-social-firebase/facebook-social-provider.js'
+              'data/freedom-social-wechat/social.wechat.json'
               'data/freedom-port-control/port-control.js'
               'data/freedom-port-control/port-control.json'
               'data/freedom-pgp-e2e/end-to-end.compiled.js'
@@ -613,6 +616,7 @@ module.exports = (grunt) ->
               'freedom-social-firebase/firebase.js'
               'freedom-social-firebase/firebase-social-provider.js'
               'freedom-social-firebase/facebook-social-provider.js'
+              'freedom-social-wechat/social.wechat.json'
               'freedom-port-control/port-control.js'
               'freedom-port-control/port-control.json'
 
@@ -699,6 +703,11 @@ module.exports = (grunt) ->
               dest: chromeAppDevPath + '/freedom-social-firebase'
             },
             {
+              expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
+              src: ['**']
+              dest: chromeAppDevPath + '/freedom-social-wechat'
+            },
+            {
               expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
               src: ['**']
               dest: chromeAppDevPath + '/freedom-pgp-e2e'
@@ -766,6 +775,11 @@ module.exports = (grunt) ->
               dest: firefoxDevPath + '/data/freedom-social-firebase'
             },
             {
+              expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
+              src: ['**']
+              dest: firefoxDevPath + '/data/freedom-social-wechat'
+            },
+            {
               expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
               src: ['**']
               dest: firefoxDevPath + '/data/freedom-pgp-e2e'
@@ -825,6 +839,11 @@ module.exports = (grunt) ->
               dest: ccaDevPath + '/freedom-social-firebase'
             },
             {
+              expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
+              src: ['**']
+              dest: ccaDevPath + '/freedom-social-wechat'
+            },
+            {
               expand: true, cwd: 'node_modules/freedom-port-control/dist/',
               src: ['**']
               dest: ccaDevPath + '/freedom-port-control'
@@ -877,6 +896,7 @@ module.exports = (grunt) ->
               'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
               'freedom-social-xmpp': '<%= pkgs.freedomxmpp.version %>'
               'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
+              'freedom-social-wechat': '<%= pkgs.freedomwechat.version %>'
           }]
       chromeExtVulcanized:
         finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized')

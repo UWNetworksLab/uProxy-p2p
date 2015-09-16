@@ -49,6 +49,11 @@ import ui = ui_connector.connector;
       isFirebase: true,
       enableMonitoring: true,
       areAllContactsUproxy: false
+    },
+    'WeChat': {
+      isFirebase: false,
+      enableMonitoring: false,
+      areAllContactsUproxy: false
     }
   }
 
