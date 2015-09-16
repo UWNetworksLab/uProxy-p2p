@@ -39,13 +39,11 @@ Polymer({
   checkSettings_: function(oldSettings :any, newSettings :any) {
     for (var key in oldSettings){
       if (!(key in newSettings)) {
-        this.status = StatusState.KEY_VALUE_ERROR;
         return false;
       }
     }
     for (var key in newSettings){
       if (!(key in oldSettings)) {
-        this.status = StatusState.KEY_VALUE_ERROR;
         return false;
       }
     }
@@ -54,14 +52,16 @@ Polymer({
   setAdvancedSettings: function() {
     try {
       var newSettings = JSON.parse(this.settings);
-      if (this.checkSettings_(ui_context.model.globalSettings, newSettings)) {
-        ui_context.model.globalSettings = newSettings; 
-        this.status = StatusState.SET;
-        ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
-
-        this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
-        this.$.advancedSettingsPaperTextarea.update();
+      if (!this.checkSettings_(ui_context.model.globalSettings, newSettings)) {
+        this.status = StatusState.KEY_VALUE_ERROR;
+        return;
       }
+
+      ui_context.model.globalSettings = newSettings;
+      this.status = StatusState.SET;
+      ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+
+      this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
     } catch (e) {
       this.status = StatusState.PARSE_ERROR;
     }
@@ -69,7 +69,6 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.uproxy_core_api = uproxy_core_api;
-    this.refreshPortControl();
   },
   refreshPortControl: function() {
     core.refreshPortControlSupport();

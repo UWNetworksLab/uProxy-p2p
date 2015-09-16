@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Remove key from Chrome manifest
 #
 # Run with:

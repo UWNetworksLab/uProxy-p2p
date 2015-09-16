@@ -147,6 +147,10 @@
     "description": "Message shown when a one-time connection ends.",
     "message": "You are no longer getting access. To request a connection, click the button below."
   },
+  "NO_LONGER_SHARING": {
+    "description": "Message shown when a one-time connection ends and the user was sharing.",
+    "message": "You are no longer sharing access.  Click the button below to request a connection or paste a request link from a friend to share access again."
+  },
   "START_NEW_CONNECTION": {
     "description": "Label for button that takes user back to the 'Start a one-time connection' page.",
     "message": "Start getting a new connection"
@@ -392,8 +396,8 @@
     "message": "Oops! You've been disconnected from your friend."
   },
   "DISCONNECTED_MESSAGE": {
-    "description": "Instruction informing the user that to continue browsing the Internet, the user will need to use their local (potentially unsafe and/or censored) connection.",
-    "message": "Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding."
+    "description": "Instruction informing the user that if they want to browse the Internet and stop waiting for reconnection, the user will need to use their local (potentially unsafe and/or censored) connection.",
+    "message": "If you disable the proxy, your web traffic will no longer be routed through your friend. You may want to close any sensitive pages you have open, before proceeding."
   },
   "CONTINUE_BROWSING": {
     "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet).",
@@ -675,9 +679,17 @@
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
     "message": "Download and enable part 2 of uProxy to get started."
   },
+  "RECONNECTING": {
+    "description": "Indicate that uProxy is attempting to reconnect automatically after a failure.  A progress indicator is also visible.",
+    "message": "Reconnecting..."
+  },
+  "RECONNECT_FAILED": {
+    "description": "Indicate that uProxy attempted to reconnect automatically but it failed.",
+    "message": "Reconnect failed"
+  },
   "RESTART_PROXYING": {
-    "description": "If proxy connection gets disconnected restart the connection",
-    "message": "Reconnect"
+    "description": "Displayed on a button next to the RECONNECT_FAILED message",
+    "message": "Try again"
   },
   "UPDATE_AVAILABLE": {
     "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",

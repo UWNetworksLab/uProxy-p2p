@@ -11,6 +11,7 @@
 /// <reference path='../../../third_party/freedom-typings/storage.d.ts' />
 
 import MockEventHandler = require('../../../third_party/uproxy-lib/freedom/mocks/mock-eventhandler');
+import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 
 export class MockFreedomStorage implements freedom_Storage {
 
@@ -74,5 +75,37 @@ export class MockMetrics {
 export class MockTcpSocket extends MockEventHandler {
   constructor() {
     super(['onConnection', 'onDisconnect']);
+  }
+}
+
+export class PgpProvider {
+  public setup = (passphrase :string, userId :string) :Promise<void>=> {
+    return Promise.resolve<void>();
+  }
+
+  public exportKey = () : Promise<Object> => {
+    return Promise.resolve({
+      key: '',
+      fingerprint: ''
+    });
+  }
+
+  public signEncrypt = (data :ArrayBuffer, key :string) :Promise<ArrayBuffer> => {
+    return Promise.resolve(data)
+  }
+
+  public verifyDecrypt = (data :ArrayBuffer, key :string) :Promise<VerifyDecryptResult> => {
+    return Promise.resolve({
+      data: data,
+      signedBy: ['']
+    });
+  }
+
+  public armor = (data :ArrayBuffer) :Promise<string> => {
+    return Promise.resolve(arraybuffers.arrayBufferToString(data));
+  }
+
+  public dearmor = (data :string) :Promise<ArrayBuffer> => {
+    return Promise.resolve(arraybuffers.stringToArrayBuffer(data));
   }
 }

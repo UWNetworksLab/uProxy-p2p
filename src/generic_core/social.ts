@@ -309,10 +309,9 @@ export function getNetworkDisplayName(networkName :string) : string {
 
     // Promise that delays all message handling until fully logged in.
     private onceLoggedIn_   :Promise<void>;
-    private remember :boolean;
 
     // ID returned by setInterval call for monitoring.
-    private monitorIntervalId_ :number = null;
+    private monitorIntervalId_ :NodeJS.Timer = null;
 
     private fulfillLogout_ : () => void;
     private onceLoggedOut_ : Promise<void>;
@@ -325,7 +324,6 @@ export function getNetworkDisplayName(networkName :string) : string {
       super(name);
 
       this.provider_ = freedom[PREFIX + name];
-      this.remember = false;
       this.onceLoggedIn_ = null;
       this.freedomApi_ = this.provider_();
 
