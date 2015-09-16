@@ -123,6 +123,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   //         https://github.com/uProxy/uproxy/issues/585
   export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
+    // Number of instances created, for logging purposes.
+    private static id_ = 0;
+
     // Maximum time to spend gathering ICE candidates.
     // We cap this so that slow STUN servers, in the absence
     // of trickle ICE, don't make the user wait unnecessarily.
@@ -130,7 +133,6 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     public peerOpenedChannelQueue :handler.QueueHandler<peerconnection.DataChannel, void>;
     public signalForPeerQueue :handler.Queue<ChurnSignallingMessage, void>;
-    public peerName :string;
 
     public onceConnected :Promise<void>;
     public onceClosed :Promise<void>;
@@ -176,12 +178,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private static internalConnectionId_ = 0;
 
     constructor(probeRtcPc:freedom.RTCPeerConnection.RTCPeerConnection,
-                peerName?:string,
+                private name_ = 'unnamed-churn-' + Connection.id_,
                 private skipPublicEndpoint_?:boolean,
                 private portControl_?:freedom.PortControl.PortControl,
                 private preferredObfuscatorConfig_?:ObfuscatorConfig) {
-      this.peerName = peerName || 'churn-connection-' +
-          (++Connection.internalConnectionId_);
+      Connection.id_++;
 
       this.signalForPeerQueue = new handler.Queue<ChurnSignallingMessage,void>();
 
@@ -196,13 +197,13 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
       // Debugging.
       this.onceHaveObfuscatorConfig_.then((config:ObfuscatorConfig) => {
-        log.info('%1: obfuscator config: %2', this.peerName, config);
+        log.info('%1: obfuscator config: %2', this.name_, config);
       });
     }
 
     private configureProbeConnection_ = (
         freedomPc:freedom.RTCPeerConnection.RTCPeerConnection) => {
-      var probePeerName = this.peerName + '-probe';
+      var probePeerName = this.name_ + '-probe';
 
       // The list of all candidates returned by the probe connection.
       var candidates :Candidate[] = [];
@@ -218,15 +219,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             var MAP_LIFETIME = 24 * 60 * 60;  // 24 hours in seconds
             if (c.type === 'srflx') {
               if (this.portControl_ === undefined) {
-                log.debug('Port control not available in churn');
+                log.debug('%1: port control unavailable', this.name_);
               } else {
+                log.info('%1: port control available', this.name_);
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom.PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed. Mapping object: ",
-                                mapping);
+                      log.debug('%1: addMapping() failed: %2',
+                          this.name_, mapping);
                     } else {
-                      log.debug("addMapping() success: ", mapping);
+                      log.info('%1: addMapping() success: ',
+                          this.name_, mapping);
                     }
                 });
               }
@@ -251,8 +254,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       });
 
       setTimeout(() => {
-        log.warn('%1: probing timed out, closing probe connection',
-            this.peerName);
+        log.warn('%1: probing timed out, closing probe connection', this.name_);
         this.probingComplete_();
       }, Connection.PROBE_TIMEOUT_MS_);
 
@@ -283,7 +285,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     private configurePipe_ = (obfuscatorConfig:ObfuscatorConfig) : void => {
-      this.pipe_ = freedom['churnPipe'](this.peerName);
+      this.pipe_ = freedom['churnPipe'](this.name_);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
       this.pipe_.setTransformer(obfuscatorConfig);
     }
@@ -355,7 +357,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           candidate: copy.toRTCIceCandidate()
         });
       } else {
-        log.error('Got a mapping for a nonexistent candidate');
+        log.error('%1: got mapping for non-existent candidate', this.name_);
       }
     }
 
@@ -364,7 +366,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       var obfConfig :freedom.RTCPeerConnection.RTCConfiguration = {
         iceServers: []
       };
-      var obfPeerName = this.peerName + '-obfuscated';
+      var obfPeerName = this.name_ + '-obfuscated';
       var freedomPc = freedom['core.rtcpeerconnection'](obfConfig);
       this.obfuscatedConnection_ = new peerconnection.PeerConnectionClass(
           freedomPc, obfPeerName);
@@ -401,7 +403,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             });
           } catch (e) {
             log.debug('%1: ignoring candidate line %2: %3',
-                this.peerName,
+                this.name_,
                 JSON.stringify(message),
                 e.message);
           }
@@ -467,7 +469,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         this.haveObfuscatorConfig_(churnMessage.obfuscator);
       }
       if (churnMessage.caesar !== undefined) {
-        log.debug('%1: received legacy caesar cipher config', this.peerName);
+        log.debug('%1: received legacy caesar cipher config', this.name_);
         this.haveObfuscatorConfig_({
           name: 'caesar',
           config: JSON.stringify(<caesar.Config>{
