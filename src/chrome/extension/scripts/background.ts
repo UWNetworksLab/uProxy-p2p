@@ -135,7 +135,7 @@ chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
       // TODO: add try catch and such in case of bad urls
       var url = details.url;
-      var network = url.match(/invite\/(\w+)/)[1];
+      var network = url.match(/invite\/(\S+)\//)[1];
       core.addUser(network, url);
       // TODO: show something meaningful in the tab
       return {
