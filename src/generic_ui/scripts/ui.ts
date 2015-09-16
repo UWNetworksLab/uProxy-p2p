@@ -431,10 +431,18 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public invokeConfirmationCallback = (index :number) => {
+  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+    if (index > this.confirmationCallbackIndex_) {
+      console.error('Confirmation callback not found: ' + index);
+      return;
+    }
     this.confirmationCallbacks_[index]();
-    // TODO: also need to delete corresponding fulfill/reject
     delete this.confirmationCallbacks_[index];
+    if (fulfill) {
+      delete this.confirmationCallbacks_[index + 1];
+    } else {
+      delete this.confirmationCallbacks_[index - 1];
+    }
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -544,36 +552,52 @@ export class UserInterface implements ui_constants.UiApi {
     return {type: type, messages: payload};
   }
 
-  private addUserWithConfirmation_ = (url: string) => {
-    // TODO: display friend name.
-    this.getConfirmation('', 'Would you like to add a friend').then(() => {
-      this.core.addUser(url);
+  private addUserWithConfirmation_ = (url: string) : Promise<void> => {
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var userName = tokenObj.userName;
+    } catch(e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+    return this.getConfirmation('', 'Would you like to add ' + userName + '?')
+        .then(() => {
+      return this.core.addUser(url);
     });
   }
 
   public handleInviteUrlData = (url :string) => {
-    // TODO: add try catch and such in case of bad urls
-    var token = url.substr(url.lastIndexOf('/') + 1);
-    var tokenObj = JSON.parse(atob(token));
-    var networkName = tokenObj.networkName;
+    var showUrlError = () => {
+      this.fireSignal('open-dialog', {
+        heading: '',
+        message: 'There was an error with your invite URL. Please try again.',
+        buttons: [{
+          text: this.i18n_t("OK")
+        }]
+      });
+    };
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+    } catch(e) {
+      showUrlError();
+      return;
+    }
     if (!this.model.getNetwork(networkName)) {
-      this.getConfirmation('Login Required',
-          'You need to log into ' + this.getNetworkDisplayName(networkName))
-          .then(() => {
+      this.getConfirmation('Login Required', 'You need to log into ' +
+            this.getNetworkDisplayName(networkName)).then(() => {
         this.login(networkName).then(() => {
-          // Fire an update-view event, which root.ts listens for.
-          // TODO: can this be done in ui.ts?
-          // this.fire('update-view', { view: ui_constants.View.ROSTER });
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          this.addUserWithConfirmation_(url);
+          this.addUserWithConfirmation_(url).catch(showUrlError);
         });
       });
     } else {
-      this.addUserWithConfirmation_(url);
+      this.addUserWithConfirmation_(url).catch(showUrlError);;
     }
   }
-
+    
   public handleCopyPasteUrlData = (url :string) => {
     console.log('received url data from browser');
 

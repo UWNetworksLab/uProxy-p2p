@@ -112,7 +112,8 @@ Polymer({
     // TODO: error checking, isNaN etc
     var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
     if (callbackIndex) {
-      ui.invokeConfirmationCallback(callbackIndex);
+      var fulfill = (target.getAttribute('affirmative') != null);
+      ui.invokeConfirmationCallback(callbackIndex, fulfill);
     }
     var signal = target.getAttribute('data-signal');
     if (signal) {

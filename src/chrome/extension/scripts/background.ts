@@ -134,8 +134,8 @@ var lastUrlTime = 0;
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
       browserApi.emit('inviteUrlData', details.url);
-      // TODO: does this need the same timing logic as copy/paste?
-      // TODO: show something meaningful in the tab
+      // TODO: If there are duplicate emits of this, consider the de-dupe logic
+      // used by the listener for copypaste links below.
       return {
           redirectUrl: chrome.extension.getURL('generic_ui/invite-received.html')
       };
@@ -157,7 +157,7 @@ chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
     var url = details.url;
 
-    // Chome seems to sometimes send the same url to us twice, we never
+    // Chrome seems to sometimes send the same url to us twice, we never
     // should be receiving the exact same data twice so de-dupe any url
     // with the last one we received before processing it.  We also want
     // to allow a url to be pasted twice if there has been at least a second

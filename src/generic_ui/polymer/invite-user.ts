@@ -7,7 +7,7 @@ var core = ui_context.core;
 
 Polymer({
   sendToGMailFriend: function() {
-    // TODO: how to get userId of logged in  user?
+    // TODO: how to get userId of logged in user?
     var selectedNetwork =
         model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
     var selectedNetworkInfo = {
@@ -19,7 +19,7 @@ Polymer({
           networkInfo: selectedNetworkInfo,
           to: this.inviteUserEmail,
           subject: 'Join me on uProxy',
-          body: 'Click here to join me on uProxy' + inviteUrl
+          body: 'Click here to join me on uProxy ' + inviteUrl
       });
       this.fire('open-dialog', {
         heading: 'Invitation Email sent', // TODO: translate
