@@ -1,3 +1,4 @@
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
@@ -52,12 +53,14 @@ describe('firewall.SocialUserProfile', () => {
     // Failed for reserved word on a string field
     {
       'userId' : '__proto__',
-      'timestamp' : 7
+      'timestamp' : 7,
+      'name': 'John Doe',
     },
     // Failed numerical value on a number field.
     {
       'userId' : 'alice@gmail.com',
-      'timestamp' : -1
+      'timestamp' : -1,
+      'name': 'John Doe',
     }]
 
   var goodUserProfile = {
@@ -76,13 +79,13 @@ describe('firewall.SocialUserProfile', () => {
 
   it('accepts good profiles', () => {
     expect(firewall.isValidUserProfile(
-        <freedom_Social.UserProfile> goodUserProfile, policy)).toBe(true);
+        <freedom.Social.UserProfile> goodUserProfile, policy)).toBe(true);
   });
 
   it('rejects structurally-different profiles', () => {
     for (var i in schemaFailingUserProfiles) {
       expect(firewall.isValidUserProfile(
-          <freedom_Social.UserProfile> schemaFailingUserProfiles[i],
+          <freedom.Social.UserProfile> schemaFailingUserProfiles[i],
         policy)).toBe(false);
     }
     expect(policy.failures).toBe(schemaFailingUserProfiles.length);
@@ -91,7 +94,7 @@ describe('firewall.SocialUserProfile', () => {
   it('rejects profiles with bad values', () => {
     for (var i in valueFailingUserProfiles) {
       expect(firewall.isValidUserProfile(
-          <freedom_Social.UserProfile> valueFailingUserProfiles[i],
+          <freedom.Social.UserProfile> valueFailingUserProfiles[i],
         policy)).toBe(false);
     }
     expect(policy.failures).toBe(valueFailingUserProfiles.length);
@@ -155,13 +158,13 @@ describe('firewall.SocialClientState', () => {
 
   it('accepts good client states', () => {
     expect(firewall.isValidClientState(
-        <freedom_Social.ClientState> goodClientState, policy)).toBe(true);
+        <freedom.Social.ClientState> goodClientState, policy)).toBe(true);
   });
 
   it('rejects structurally-different client states', () => {
     for (var i in schemaFailingClientStates) {
       expect(firewall.isValidClientState(
-          <freedom_Social.ClientState> schemaFailingClientStates[i],
+          <freedom.Social.ClientState> schemaFailingClientStates[i],
         policy)).toBe(false);
     }
     expect(policy.failures).toBe(schemaFailingClientStates.length);
@@ -170,7 +173,7 @@ describe('firewall.SocialClientState', () => {
   it('rejects client states with bad values', () => {
     for (var i in valueFailingClientStates) {
       expect(firewall.isValidClientState(
-          <freedom_Social.ClientState> valueFailingClientStates[i],
+          <freedom.Social.ClientState> valueFailingClientStates[i],
         policy)).toBe(false);
     }
     expect(policy.failures).toBe(valueFailingClientStates.length);
@@ -249,13 +252,13 @@ describe('firewall.SocialIncomingMessage', () => {
 
   it('accepts good incoming messages', () => {
     expect(firewall.isValidIncomingMessage(
-        <freedom_Social.IncomingMessage> goodIncomingMessage, policy)).toBe(true);
+        <freedom.Social.IncomingMessage> goodIncomingMessage, policy)).toBe(true);
   });
 
   it('rejects structurally-different incoming messages', () => {
     for (var i in schemaFailingIncomingMessages) {
       expect(firewall.isValidIncomingMessage(
-          <freedom_Social.IncomingMessage> schemaFailingIncomingMessages[i],
+          <freedom.Social.IncomingMessage> schemaFailingIncomingMessages[i],
         policy)).toBe(false);
     }
     expect(policy.failures).toBe(schemaFailingIncomingMessages.length);
@@ -264,7 +267,7 @@ describe('firewall.SocialIncomingMessage', () => {
   it('rejects incoming messages with bad values', () => {
     for (var i in valueFailingIncomingMessages) {
       expect(firewall.isValidIncomingMessage(
-          <freedom_Social.IncomingMessage> valueFailingIncomingMessages[i],
+          <freedom.Social.IncomingMessage> valueFailingIncomingMessages[i],
         policy)).toBe(false);
     }
     expect(policy.failures).toBe(valueFailingIncomingMessages.length);

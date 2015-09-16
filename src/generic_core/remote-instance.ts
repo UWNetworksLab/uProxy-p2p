@@ -6,8 +6,8 @@
  * consent, proxying status, and any other signalling information.
  */
 
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
 
 import consent = require('./consent');
 import globals = require('./globals');
@@ -202,7 +202,7 @@ import Persistent = require('../interfaces/persistent');
       } else {
         return pgp.dearmor(<string>msg.data).then((cipherData :ArrayBuffer) => {
           return pgp.verifyDecrypt(cipherData, this.publicKey);
-        }).then((result :VerifyDecryptResult) => {
+        }).then((result :freedom.PgpProvider.VerifyDecryptResult) => {
           var decryptedSignal =
               JSON.parse(arraybuffers.arrayBufferToString(result.data));
           return this.handleDecryptedSignal_(msg.type, msg.version, decryptedSignal);

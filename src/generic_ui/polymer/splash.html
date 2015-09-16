@@ -1,9 +1,9 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
-<link rel='import' href='../../bower/paper-button/paper-button.html'>
 <link rel='import' href='../../bower/paper-item/paper-item.html'>
 <link rel="import" href="../../bower/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../bower/paper-dropdown/paper-dropdown.html">
 <link rel="import" href="../../bower/core-menu/core-menu.html">
+<link rel='import' href='button.html'>
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='network.html'>
 
@@ -59,7 +59,7 @@
       opacity: 0;
       z-index: -1;
     }
-    paper-button {
+    uproxy-button {
       width: 150px;
     }
     uproxy-network {
@@ -86,8 +86,8 @@
     }
     #logo {
       margin-bottom: 1em;
-      width: 114px;
-      height: 114px;
+      width: 114px !important;
+      height: 114px !important;
     }
     .prevArrow {
       position: absolute;
@@ -101,8 +101,8 @@
       height: 100%;
     }
     #languageLink core-icon {
-      height: 20px;
-      width: 20px;
+      height: 20px !important;
+      width: 20px !important;
     }
     #languageLink paper-item {
       font-size: 13px;
@@ -127,7 +127,7 @@
         </p>
 
         <div id='nextWrapper'>
-          <paper-button raised on-tap='{{next}}'>{{ "NEXT" | $$ }}</paper-button>
+          <uproxy-button raised on-tap='{{next}}'>{{ "NEXT" | $$ }}</uproxy-button>
         </div>
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>

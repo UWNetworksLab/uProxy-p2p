@@ -1,5 +1,5 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 
 
 import browser_connector = require('../interfaces/browser_connector');

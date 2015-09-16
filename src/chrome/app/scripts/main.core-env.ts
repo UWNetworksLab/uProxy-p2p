@@ -5,23 +5,22 @@
  * loaded.
  */
 
-/// <reference path='../../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
-import freedom_types = require('freedom.types');
 
 import Chrome_oauth = require('./chrome_oauth');
 import ChromeUIConnector = require('./chrome_ui_connector');
 
-export interface OnEmitModule extends freedom_types.OnAndEmit<any,any> {};
+export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
-  freedom_types.FreedomModuleFactoryManager<OnEmitModule> {};
+  freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
 // Remember which handlers freedom has installed.
 var oauthOptions :{connector:ChromeUIConnector;} = {
   connector: null
 };
-export var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
+export var uProxyAppChannel :freedom.OnAndEmit<any,any>;
 export var moduleName = 'uProxy App Top Level';
 
 freedom('generic_core/freedom-module.json', {

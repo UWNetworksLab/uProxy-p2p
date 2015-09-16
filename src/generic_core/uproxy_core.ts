@@ -1,10 +1,12 @@
-/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import onetime = require('../../../third_party/uproxy-lib/bridge/onetime');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
@@ -44,8 +46,7 @@ var portControl = globals.portControl;
  */
 export class uProxyCore implements uproxy_core_api.CoreApi {
 
-  private copyPasteSharingMessages_ :social.PeerMessage[] = [];
-  private copyPasteGettingMessages_ :social.PeerMessage[] = [];
+  private batcher_ : onetime.SignalBatcher<social.PeerMessage>;
 
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
@@ -54,27 +55,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   constructor() {
     log.debug('Preparing uProxy Core');
-    copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
+    copyPasteConnection = new remote_connection.RemoteConnection(
+        (update:uproxy_core_api.Update, message?:social.PeerMessage) => {
       if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
         ui.update(update, message);
-        return;
+      } else {
+        this.batcher_.addToBatch(message);
       }
-
-      var data :social.PeerMessage[];
-      switch (message.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          data = this.copyPasteGettingMessages_;
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          data = this.copyPasteSharingMessages_;
-          break;
-      }
-      data.push(message);
-
-      ui.update(uproxy_core_api.Update.COPYPASTE_MESSAGE, {
-        type: message.type,
-        data: data
-      });
     }, undefined, portControl);
 
     this.refreshPortControlSupport();
@@ -250,9 +237,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         availableVersion: this.availableVersion_,
         copyPasteState: {
           connectionState: copyPasteConnection.getCurrentState(),
-          endpoint: copyPasteConnection.activeEndpoint,
-          gettingMessages: this.copyPasteGettingMessages_,
-          sharingMessages: this.copyPasteSharingMessages_
+          endpoint: copyPasteConnection.activeEndpoint
         },
         portControlSupport: this.portControlSupport_,
       };
@@ -276,8 +261,23 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     user.modifyConsent(command.action);
   }
 
+  // Resets the copy/paste signal batcher.
+  // TODO: enable compression
+  private resetBatcher_ = () : void => {
+    this.batcher_ = new onetime.SignalBatcher<social.PeerMessage>((signal:string) => {
+      ui.update(uproxy_core_api.Update.ONETIME_MESSAGE, signal);
+    }, (signal:social.PeerMessage) => {
+      // This is a terminating message iff signal.data is an instance
+      // bridge.SignallingMessage (which we can detect by the presence
+      // of a signals field) for which bridge.isTerminatingSignal
+      // returns true.
+      return signal.data && (<any>signal.data).signals &&
+        bridge.isTerminatingSignal(<bridge.SignallingMessage>signal.data);
+    }, false);
+  }
+
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
-    this.copyPasteGettingMessages_ = [];
+    this.resetBatcher_();
     return copyPasteConnection.startGet(globals.effectiveMessageVersion());
   }
 
@@ -286,7 +286,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public startCopyPasteShare = () => {
-    this.copyPasteSharingMessages_ = [];
+    this.resetBatcher_();
     copyPasteConnection.startShare(globals.effectiveMessageVersion());
   }
 
@@ -294,8 +294,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return copyPasteConnection.stopShare();
   }
 
-  public sendCopyPasteSignal = (signal :social.PeerMessage) => {
-    copyPasteConnection.handleSignal(signal);
+  public sendCopyPasteSignal = (signal:string) => {
+    var decodedSignals = <social.PeerMessage[]>onetime.decode(signal);
+    decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
   public addUser = (inviteUrl: string): Promise<void> => {
@@ -447,7 +448,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
               uproxy_core_api.PortControlSupport.PENDING);
 
     return portControl.probeProtocolSupport().then(
-      (probe:freedom_PortControl.ProtocolSupport) => {
+      (probe:freedom.PortControl.ProtocolSupport) => {
         this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
                                    uproxy_core_api.PortControlSupport.TRUE :
                                    uproxy_core_api.PortControlSupport.FALSE;
@@ -469,7 +470,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
       return portControl.probeProtocolSupport().then(
-        (probe:freedom_PortControl.ProtocolSupport) => {
+        (probe:freedom.PortControl.ProtocolSupport) => {
           natInfo.pmpSupport = probe.natPmp;
           natInfo.pcpSupport = probe.pcp;
           natInfo.upnpSupport = probe.upnp;

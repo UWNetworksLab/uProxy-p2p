@@ -37,15 +37,20 @@
       font-size: 17px;
     }
     .no-friends {
-      width: 150px;
-      height: 150px;
+      width: 150px !important;
+      height: 150px !important;
       color: #cbcbcb;
     }
     #noContactsFound {
       margin-top: 0.75em;
     }
-    #inviteFriends {
-      font-size: 13px;
+    #noContactsFoundLearnMoreLink {
+      text-decoration: underline;
+      font-size: 14px;
+      color: rgb(150,150,150);
+    }
+    #friendsAppearWhen {
+      font-size: 14px;
       padding-top: 10px;
       color: rgb(150,150,150);
     }
@@ -75,7 +80,12 @@
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
         {{ "NO_FRIENDS_ONLINE" | $$ }}
-        <p id='inviteFriends'>{{ "TO_INVITE_FRIENDS" | $$ }}</p>
+        <p id='friendsAppearWhen'>{{ "FRIENDS_APPEAR_WHEN" | $$ }}</p>
+        <p>
+          <uproxy-faq-link anchor="howDoIFind">
+            <span id='noContactsFoundLearnMoreLink'>{{ "LEARN_MORE" | $$ }}</span>
+          </uproxy-faq-link>
+        </p>
       </div>
     </div>
 
