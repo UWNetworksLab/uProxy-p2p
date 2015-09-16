@@ -53,7 +53,7 @@ import ui = ui_connector.connector;
     'WeChat': {
       isFirebase: false,
       enableMonitoring: false,
-      areAllContactsUproxy: true
+      areAllContactsUproxy: false
     }
   }
 
