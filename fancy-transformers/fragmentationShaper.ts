@@ -1,8 +1,3 @@
-
-// TODO(bwiley): update uTransformers to be compatible with require
-// TODO(ldixon): update to a require-style inclusion.
-// e.g.
-//  import Transformer = require('uproxy-obfuscators/transformer');
 /// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
@@ -27,7 +22,7 @@ export class FragmentationShaper {
 
   // Constructor function is needed for typechecking in churn-pipe
   public constructor() {
-    this.fragmentBuffer_=new defragmenter.Defragmenter();
+    this.fragmentBuffer_ = new defragmenter.Defragmenter();
   }
 
   // This method is required to implement the Transformer API.
