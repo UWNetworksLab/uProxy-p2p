@@ -411,10 +411,14 @@ class Pipe {
    */
   private sendTo_ = (publicSocket:Socket, buffer:ArrayBuffer, to:net.Endpoint)
       :void => {
-    var transformedBuffers = this.transformer_.transform(buffer);
-    for(var i = 0; i < transformedBuffers.length; i++) {
-      // 0 is the identifier for the outbound flow
-      this.queueManager_.send(0, [publicSocket, transformedBuffers[i], to]);
+    try {
+      let transformedBuffers = this.transformer_.transform(buffer);
+      for (var i = 0; i < transformedBuffers.length; i++) {
+        // 0 is the identifier for the outbound flow
+        this.queueManager_.send(0, [publicSocket, transformedBuffers[i], to]);
+      }
+    } catch (e) {
+      log.warn('%1: transform error: %2', this.name_, e.message);
     }
   }
 
@@ -461,17 +465,21 @@ class Pipe {
       return;
     }
     var transformedBuffer = recvFromInfo.data;
-    var buffers = this.transformer_.restore(transformedBuffer);
-    this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
-      var browserEndpoint:net.Endpoint = {
-        address: iface,
-        port: browserPort
-      };
-      for(var i = 0; i < buffers.length; i++) {
-        // 1 is the identifier for the inbound flow
-        this.queueManager_.send(1, [mirrorSocket, buffers[i], browserEndpoint]);
-      }
-    });
+    try {
+      let buffers = this.transformer_.restore(transformedBuffer);
+      this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
+        var browserEndpoint:net.Endpoint = {
+          address: iface,
+          port: browserPort
+        };
+        for (var i = 0; i < buffers.length; i++) {
+          // 1 is the identifier for the inbound flow
+          this.queueManager_.send(1, [mirrorSocket, buffers[i], browserEndpoint]);
+        }
+      });
+    } catch (e) {
+      log.warn('%1: restore error: %2', this.name_, e.message);
+    }
   }
 
   public on = (name:string, listener:(event:any) => void) :void => {
