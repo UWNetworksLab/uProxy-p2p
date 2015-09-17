@@ -15,5 +15,5 @@ export interface ObfuscatorConfig {
   // As defined in churn pipe.
   name:string;
   // Passed to the obfuscator's configure().
-  config:string;
+  config?:string;
 }
