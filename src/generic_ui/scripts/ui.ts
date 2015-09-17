@@ -532,7 +532,6 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-<<<<<<< HEAD
   private addUserWithConfirmation_ = (url: string) : Promise<void> => {
     try {
       var token = url.substr(url.lastIndexOf('/') + 1);

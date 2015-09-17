@@ -93,10 +93,9 @@ export interface FreedomSocialProvider {
   // event of type |eventType|. Same events as above.
   once(eventType:string, f:Function) : void;
 
-  login(loginRequest:freedom_Social.LoginRequest)
-    : Promise<freedom_Social.ClientState>;
-  getUsers() : Promise<freedom_Social.Users>;
-  getClients() : Promise<freedom_Social.Clients>;
+  login(loginRequest :LoginRequest) : Promise<ClientState>;
+  getUsers() : Promise<Users>;
+  getClients() : Promise<Clients>;
 
   acceptUserInvitation(inviteToken :string): Promise<void>;
   inviteUser(ignoredStringParam :string): Promise<Object>;

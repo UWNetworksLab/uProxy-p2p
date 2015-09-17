@@ -32,7 +32,7 @@ import user = require('./remote-user');
 import globals = require('./globals');
 import storage = globals.storage;
 
-import freedom_social = require('../interfaces/social2');   // TODO: rename?  move?
+import freedom_social2 = require('../interfaces/social2');
 
 import ui = ui_connector.connector;
 
@@ -309,7 +309,7 @@ export function getNetworkDisplayName(networkName :string) : string {
   // events are passed on to the relevant user (provided the user exists).
   export class FreedomNetwork extends AbstractNetwork {
 
-    private freedomApi_ :freedom.Social.FreedomSocialProvider;
+    private freedomApi_ :freedom_social2.FreedomSocialProvider;
     // TODO: give real typing to provider_. Ask Freedom not to use overloaded
     // types.
     private provider_ :any;  // Special freedom object which is both a function
