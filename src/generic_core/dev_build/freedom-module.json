@@ -7,17 +7,13 @@
     ]
   },
   "dependencies": {
-    "SOCIAL-Google": {
-      "url": "../freedom-social-xmpp/social.google.json",
-      "api": "social"
-    },
-    "SOCIAL-Facebook": {
-      "url": "../freedom-social-firebase/social.firebase-facebook.json",
-      "api": "social"
-    },
-    "SOCIAL-Google+": {
+    "SOCIAL-GMail": {
       "url": "../freedom-social-firebase/social.firebase-google.json",
-      "api": "social"
+      "api": "social2"
+    },
+    "SOCIAL-Facebook-Firebase-V2": {
+      "url": "../freedom-social-firebase/social.firebase-facebook.json",
+      "api": "social2"
     },
     "SOCIAL-WeChat": {
       "url": "../freedom-social-wechat/social.wechat.json",

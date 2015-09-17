@@ -126,7 +126,8 @@ export interface Contacts {
  * Specific to one particular Social network.
  */
 export interface Network {
-  name   :string;
+  name :string;
+  displayName :string;
   // TODO(salomegeo): Add more information about the user.
   userId :string;
   imageData ?:string;
@@ -202,9 +203,11 @@ export class UserInterface implements ui_constants.UiApi {
   public availableVersion :string = null;
 
   // Changing this causes root.ts to fire a core-signal with the new value.
-  public signalToFire :string = '';
+  public signalToFire :Object = null;
 
   public toastMessage :string = null;
+
+  public showInviteControls: boolean = false;
 
 
   /**
@@ -380,7 +383,8 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.setPortControlSupport_);
 
-    browserApi.on('urlData', this.handleUrlData);
+    browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
+    browserApi.on('inviteUrlData', this.handleInviteUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
@@ -392,8 +396,46 @@ export class UserInterface implements ui_constants.UiApi {
   // Because of an observer (in root.ts) watching the value of
   // signalToFire, this function simulates firing a core-signal
   // from the background page.
-  public fireSignal = (signal :string) => {
-    this.signalToFire = signal;
+  public fireSignal = (signalName :string, data ?:Object) => {
+    this.signalToFire = {name: signalName, data: data};
+  }
+
+  private confirmationCallbacks_ :{[index :number] :Function} = {};
+  // Don't use index 0 as it may be treated as false in confirmation code.
+  private confirmationCallbackIndex_ = 1;
+  public getConfirmation = (heading :string, text :string) => {
+    return new Promise((F, R) => {
+      var fulfillIndex = ++this.confirmationCallbackIndex_;
+      var rejectIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[fulfillIndex] = F;
+      this.confirmationCallbacks_[rejectIndex] = R;
+      this.fireSignal('open-dialog', {
+        heading: heading,
+        message: text,
+        buttons: [{
+          text: this.i18n_t("YES"),
+          callbackIndex: fulfillIndex
+        }, {
+          text: this.i18n_t("NO"),
+          callbackIndex: rejectIndex,
+          dismissive: true
+        }]
+      });
+    });
+  }
+
+  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+    if (index > this.confirmationCallbackIndex_) {
+      console.error('Confirmation callback not found: ' + index);
+      return;
+    }
+    this.confirmationCallbacks_[index]();
+    delete this.confirmationCallbacks_[index];
+    if (fulfill) {
+      delete this.confirmationCallbacks_[index + 1];
+    } else {
+      delete this.confirmationCallbacks_[index - 1];
+    }
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -490,7 +532,53 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  public handleUrlData = (url :string) => {
+  private addUserWithConfirmation_ = (url: string) : Promise<void> => {
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var userName = tokenObj.userName;
+    } catch(e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+    return this.getConfirmation('', 'Would you like to add ' + userName + '?')
+        .then(() => {
+      return this.core.addUser(url);
+    });
+  }
+
+  public handleInviteUrlData = (url :string) => {
+    var showUrlError = () => {
+      this.fireSignal('open-dialog', {
+        heading: '',
+        message: 'There was an error with your invite URL. Please try again.',
+        buttons: [{
+          text: this.i18n_t("OK")
+        }]
+      });
+    };
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+    } catch(e) {
+      showUrlError();
+      return;
+    }
+    if (!this.model.getNetwork(networkName)) {
+      this.getConfirmation('Login Required', 'You need to log into ' +
+            this.getNetworkDisplayName(networkName)).then(() => {
+        this.login(networkName).then(() => {
+          this.view = ui_constants.View.ROSTER;
+          this.bringUproxyToFront();
+          this.addUserWithConfirmation_(url).catch(showUrlError);
+        });
+      });
+    } else {
+      this.addUserWithConfirmation_(url).catch(showUrlError);;
+    }
+  }
+    
+  public handleCopyPasteUrlData = (url: string) => {
     console.log('received one-time URL from browser');
 
     if (this.model.onlineNetworks.length > 0) {
@@ -736,6 +824,7 @@ export class UserInterface implements ui_constants.UiApi {
       if (!existingNetwork) {
         existingNetwork = {
           name: networkMsg.name,
+          displayName: networkMsg.displayName,
           userId: networkMsg.userId,
           roster: {},
           logoutExpected: false,
@@ -749,7 +838,8 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
-            (networkMsg.name === 'Google' || networkMsg.name === 'Facebook') &&
+            // TODO: fix this mess of name vs displayName
+            (networkMsg.name === 'GMail' || networkMsg.displayName === 'Facebook') &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
@@ -757,13 +847,19 @@ export class UserInterface implements ui_constants.UiApi {
           if (this.instanceGettingAccessFrom_) {
             this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
           }
-          this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
+          this.showNotification(
+            this.i18n_t("LOGGED_OUT", { network: networkMsg.displayName }));
+
+          if (!this.model.onlineNetworks.length) {
+            this.view = ui_constants.View.SPLASH;
+          }
         }
       }
     }
 
     this.updateView_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private syncUserSelf_ = (payload :social.UserData) => {
@@ -884,11 +980,14 @@ export class UserInterface implements ui_constants.UiApi {
       // Ensure that the user is still attempting to reconnect (i.e. they
       // haven't clicked to stop reconnecting while we were waiting for the
       // ping response).
+      // TODO: this doesn't work quite right if the user is signed into multiple social networks
       if (this.model.reconnecting) {
         this.core.login({network: network, reconnect: true}).then(() => {
+          // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
           this.stopReconnect();
         }).catch((e) => {
           // Reconnect failed, give up.
+          // TODO: this may have only failed for 1 of multiple networks
           this.stopReconnect();
           this.showNotification(
               this.i18n_t("LOGGED_OUT", { network: network }));
@@ -1003,11 +1102,13 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateView_();
     this.updateSharingStatusBar_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
     this.model.onlineNetworks.push({
-      name:   networkState.name,
+      name: networkState.name,
+      displayName: networkState.displayName,
       userId: networkState.profile.userId,
       userName: networkState.profile.name,
       imageData: networkState.profile.imageData,
@@ -1042,6 +1143,29 @@ export class UserInterface implements ui_constants.UiApi {
 
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
     this.portControlSupport = support;
+  }
+
+  // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
+  public getNetworkDisplayName = (networkName :string) => {
+    return networkName == 'Facebook-Firebase-V2' ? 'Facebook' : networkName;
+  }
+
+  // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
+  private supportsInvites_ = (networkName :string) => {
+    return networkName === 'Facebook-Firebase-V2' ||
+        networkName === 'GMail' ||
+        networkName === 'GitHub';
+  }
+
+  private updateShowInviteControls_ = () => {
+    var showControls = false;
+    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
+      if (this.supportsInvites_(this.model.onlineNetworks[i].name)) {
+        showControls = true;
+        break;
+      }
+    }
+    this.showInviteControls = showControls;
   }
 
   // this takes care of updating the view (given the assumuption that we are

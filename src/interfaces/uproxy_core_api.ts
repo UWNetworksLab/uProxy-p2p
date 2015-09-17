@@ -92,7 +92,10 @@ export enum Command {
   GET_VERSION = 1020,
   HANDLE_CORE_UPDATE = 1021,
   REFRESH_PORT_CONTROL = 1022,
-  CREDENTIALS_ERROR = 1023
+  CREDENTIALS_ERROR = 1023,
+  ADD_USER = 1024,
+  GET_INVITE_URL = 1025,
+  SEND_EMAIL = 1026
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -175,6 +178,13 @@ export interface NetworkInfo {
   pcpSupport :boolean;
   upnpSupport :boolean;
   errorMsg ?:string;
+};
+
+export interface EmailData {
+  networkInfo: social.SocialNetworkInfo;
+  to :string;
+  subject :string;
+  body :string;
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};

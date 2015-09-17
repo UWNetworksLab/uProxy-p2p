@@ -12,7 +12,7 @@ describe('UI.User', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     ui = jasmine.createSpyObj<user_interface.UserInterface>('UserInterface', ['showNotification']);
-    var testNetwork :user_interface.Network = {name: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
+    var testNetwork :user_interface.Network = {name: 'testNetwork', displayName: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
     ui.model = new user_interface.Model();
     ui.model.onlineNetworks = [testNetwork];
 

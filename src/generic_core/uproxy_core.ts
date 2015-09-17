@@ -299,6 +299,40 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
+  public addUser = (inviteUrl: string): Promise<void> => {
+    try {
+      // inviteUrl may be a URL with a token, or just the token.  Remove the
+      // prefixed URL if it is set.
+      var token = inviteUrl.lastIndexOf('/') >= 0 ?
+          inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+      var networkData = tokenObj.networkData;
+      if (!social_network.networks[networkName]) {
+        return Promise.reject('invite URL had invalid social network');
+      }
+    } catch (e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+
+    // This code assumes the user is only signed in once to any given network.
+    for (var userId in social_network.networks[networkName]) {
+      return social_network.networks[networkName][userId]
+          .addUserRequest(networkData);
+    }
+  }
+
+  public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    return network.getInviteUrl();
+  }
+
+  public sendEmail = (data :uproxy_core_api.EmailData) : void => {
+    var networkInfo = data.networkInfo;
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    network.sendEmail(data.to, data.subject, data.body);
+  }
+
   /**
    * Begin using a peer as a proxy server.
    * Starts SDP negotiations with a remote peer. Assumes |path| to the

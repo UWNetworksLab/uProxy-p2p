@@ -14,6 +14,9 @@
       uproxy-button.Google {
         background: #dd4b39;
       }
+      uproxy-button.GMail {
+        background: #dd4b39;
+      }
       uproxy-button.Facebook {
         background: #3b5998;
       }
@@ -25,9 +28,9 @@
     <div class='network'>
       <span>
         <span>
-          <uproxy-button raised on-tap='{{connect}}' class='{{ networkName }}'>
-            {{ networkName }}
-          </button>
+          <uproxy-button raised on-tap='{{connect}}' class='{{ displayName }}'>
+            {{ displayName }}
+          </uproxy-button>
         </span>
       </span>
     </div>

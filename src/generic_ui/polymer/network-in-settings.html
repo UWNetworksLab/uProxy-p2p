@@ -26,7 +26,7 @@
 
     <div>
       <div horizontal layout class='networkLine'>
-        <span class='networkName' flex><bdi>{{name}}</bdi></span>
+        <span class='networkName' flex><bdi>{{displayName}}</bdi></span>
 
         <span class='action'>
           <a hidden?='{{ !signedIn }}' href='#' on-tap='{{ logout }}'>

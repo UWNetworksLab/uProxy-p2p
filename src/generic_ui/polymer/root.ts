@@ -109,6 +109,12 @@ Polymer({
     this.$.proxyError.open();
   },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
+    // TODO: error checking, isNaN etc
+    var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
+    if (callbackIndex) {
+      var fulfill = (target.getAttribute('affirmative') != null);
+      ui.invokeConfirmationCallback(callbackIndex, fulfill);
+    }
     var signal = target.getAttribute('data-signal');
     if (signal) {
       this.fire('core-signal', { name: signal });
@@ -162,8 +168,7 @@ Polymer({
   },
   signalToFireChanged: function() {
     if (ui.signalToFire) {
-      this.fire('core-signal', {name: ui.signalToFire});
-      ui.signalToFire = '';
+      this.fire('core-signal', { name: ui.signalToFire.name, data: ui.signalToFire.data });
     }
   },
   revertProxySettings: function() {
@@ -237,6 +242,9 @@ Polymer({
   },
   restart: function() {
     core.restart();
+  },
+  fireOpenInviteUserPanel: function() {
+    this.fire('core-signal', { name: 'open-invite-user-dialog' });
   },
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
