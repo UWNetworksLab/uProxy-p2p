@@ -3,6 +3,7 @@
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import bridge = require('../bridge/bridge');
+import churn_types = require('../churn/churn.types');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
@@ -68,19 +69,46 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 // to a SocksTotc or RtcToNet instance (and further input is treated as
 // signalling channel messages).
 function serveConnection(connection: tcp.Connection): void {
+  var obfuscatorName:string;
+  var obfuscatorConfig:string;
+
   var processCommands = (buffer: ArrayBuffer) : void => {
     // ''.split(' ') == ['']
-    var verb = arraybuffers.arrayBufferToString(
-        buffer).split(' ')[0].trim().toLowerCase();
+    var sentence = arraybuffers.arrayBufferToString(buffer);
+    var words = sentence.split(' ');
+    var verb = words[0].trim().toLowerCase();
     switch (verb) {
       case 'get':
-        get(connection);
+        get(connection, (obfuscatorName || obfuscatorConfig) ? {
+          name: obfuscatorName,
+          config: obfuscatorConfig
+        } : undefined);
         break;
       case 'give':
         give(connection);
         break;
       case 'ping':
         sendReply('ping', connection);
+        connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+        break;
+      case 'obfuscate':
+        if (words.length > 2) {
+          var preposition = words[1].trim().toLowerCase();
+          switch (preposition) {
+            case 'with':
+              obfuscatorName = words[2].trim();
+              break;
+            case 'config':
+              // Cheapo approach but it requires no escaping from the user.
+              obfuscatorConfig = sentence.substring(
+                  sentence.toLowerCase().indexOf(' config ') + 8);
+              break;
+            default:
+              sendReply('usage: obfuscate (with name|config json)', connection);
+          }
+        } else {
+          sendReply('usage: obfuscate (with name|config json)', connection);
+        }
         connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
         break;
       case 'xyzzy':
@@ -102,7 +130,10 @@ function serveConnection(connection: tcp.Connection): void {
 
 // Creates a SocksToRtc instance and forwards signals between it and the
 // connection.
-function get(connection:tcp.Connection) : void {
+function get(
+    connection:tcp.Connection,
+    obfuscatorConfig:churn_types.ObfuscatorConfig)
+    :void {
   var socksToRtc = new socks_to_rtc.SocksToRtc();
 
   // Must do this before calling start.
@@ -110,9 +141,8 @@ function get(connection:tcp.Connection) : void {
     sendReply(JSON.stringify(signal), connection);
   });
 
-  socksToRtc.start(new tcp.Server(socksEndpoint),
-      bridge.best('sockstortc', pcConfig)).then(
-      (endpoint:net.Endpoint) => {
+  socksToRtc.start(new tcp.Server(socksEndpoint), bridge.best('sockstortc',
+      pcConfig, undefined, obfuscatorConfig)).then((endpoint:net.Endpoint) => {
     log.info('SocksToRtc listening on %1', endpoint);
     log.info('curl -x socks5h://%1:%2 www.example.com',
         endpoint.address, endpoint.port);
