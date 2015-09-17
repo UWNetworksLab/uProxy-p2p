@@ -81,7 +81,7 @@ export class FragmentationShaper {
   // - Add fragment headers to each fragment
   // - Add fill if necessary to pad each fragment to a multiple of CHUNK_SIZE
   private makeFragments_ = (buffer :ArrayBuffer) :fragments.Fragment[] => {
-    var payloadSize = buffer.byteLength + fragments.HEADER_SIZE;
+    var payloadSize = buffer.byteLength + fragments.HEADER_SIZE + encryption.IV_SIZE;
     var fillSize = encryption.CHUNK_SIZE - (payloadSize % encryption.CHUNK_SIZE);
     var packetSize = payloadSize + fillSize;
 
@@ -104,7 +104,8 @@ export class FragmentationShaper {
       return [fragment];
     } else {
       // Multiple fragments
-      var firstLength = this.maxLength_ - (fragments.HEADER_SIZE + fillSize);
+      var firstLength = this.maxLength_ - (fragments.HEADER_SIZE +
+        encryption.IV_SIZE + fillSize);
       var restLength = buffer.byteLength - firstLength;
       var parts = arraybuffers.split(buffer, firstLength);
       var first = this.makeFragments_(parts[0]);
