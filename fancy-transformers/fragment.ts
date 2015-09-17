@@ -3,6 +3,9 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
+// Header size: length + id + fragment number + total number
+export const HEADER_SIZE :number = 2 + 32 + 1 + 1;
+
 // A Fragment represents a piece of a packet when fragmentation has occurred.
 export interface Fragment {
   length :number;
