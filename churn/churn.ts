@@ -327,7 +327,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     private makeSampleEncryptionConfig_ = () :encryption.EncryptionConfig => {
       var key = new ArrayBuffer(16);
-      return {key: arraybuffers.arrayBufferToHexString(key)};
+      return {
+        key: arraybuffers.arrayBufferToHexString(key)
+      };
     }
 
     private makeSampleSequences_ = () :sequence.SequenceConfig => {
@@ -347,7 +349,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     private makeSampleFragmentationConfig_ = () :fragmentation.FragmentationConfig => {
-      return {maxLength: 1440};
+      return {
+        maxLength: 1440
+      };
     }
 
     private makeSampleProteanConfig_ = () :protean.ProteanConfig => {
