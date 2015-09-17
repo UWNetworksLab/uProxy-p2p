@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
+
 import logging = require('../logging/logging');
 import random = require('../crypto/random');
 
