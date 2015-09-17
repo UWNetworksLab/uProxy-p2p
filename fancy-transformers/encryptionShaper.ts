@@ -8,7 +8,7 @@ import logging = require('../logging/logging');
 var log :logging.Log = new logging.Log('encryption-shaper');
 
 export const CHUNK_SIZE :number = 16;
-const IV_SIZE :number = 16;
+export const IV_SIZE :number = 16;
 
 export interface EncryptionConfig {key:string}
 
