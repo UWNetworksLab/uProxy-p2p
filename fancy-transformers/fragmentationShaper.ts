@@ -16,12 +16,11 @@ export interface FragmentationConfig {
 export class FragmentationShaper {
   private maxLength_ :number;
 
-  private fragmentBuffer_ :defragmenter.Defragmenter = null;
+  private fragmentBuffer_ :defragmenter.Defragmenter =
+    this.fragmentBuffer_ = new defragmenter.Defragmenter();
 
   // Constructor function is needed for typechecking in churn-pipe
-  public constructor() {
-    this.fragmentBuffer_ = new defragmenter.Defragmenter();
-  }
+  public constructor() {}
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
