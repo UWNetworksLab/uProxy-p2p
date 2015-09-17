@@ -296,10 +296,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     }
 
-    private configurePipe_ = (obfuscatorConfig:ObfuscatorConfig) : void => {
+    private configurePipe_ = (obfuscatorConfig:ObfuscatorConfig) : Promise<void> => {
       this.pipe_ = freedom['churnPipe'](this.name_);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-      this.pipe_.setTransformer(obfuscatorConfig);
+      return this.pipe_.setTransformer(obfuscatorConfig);
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
