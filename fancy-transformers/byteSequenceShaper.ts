@@ -47,9 +47,10 @@ export interface SequenceModel {
   length:number
 }
 
+// Creates a sample (non-random) config, suitable for testing.
 export var sampleConfig = () : SequenceConfig => {
-  var buffer = arraybuffers.stringToArrayBuffer("OH HELLO");
-  var hex = arraybuffers.arrayBufferToHexString(buffer);
+  var bytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  var hex = arraybuffers.arrayBufferToHexString(bytes.buffer);
   var sequence = {
     index: 0,
     offset: 0,
@@ -83,8 +84,9 @@ export class ByteSequenceShaper implements Transformer {
   // equal, a byte sequence packet is injected into the output.
   private outputIndex_ :number = 0;
 
-  // This constructor is necessary for typechecking in churn-pipe.
-  public constructor() {}
+  public constructor() {
+    this.configure(JSON.stringify(sampleConfig()));
+  }
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.

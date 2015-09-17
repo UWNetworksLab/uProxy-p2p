@@ -11,18 +11,11 @@ export interface Config {
   key:number;
 }
 
+// Creates a sample config, suitable for testing.
 export var sampleConfig = () : Config => {
-  try {
-    return {
-      key: (random.randomUint32() % 255) + 1
-    };
-  } catch (e) {
-    // https://github.com/uProxy/uproxy/issues/1593
-    log.warn('crypto unavailable, using Math.random');
-    return {
-      key: Math.floor((Math.random() * 255)) + 1
-    };
-  }
+  return {
+    key: 1
+  };
 }
 
 // Caesar cipher.
@@ -30,7 +23,9 @@ export class CaesarCipher implements Transformer {
   /** Value by which bytes' values are shifted. */
   private shift_ :number;
 
-  public constructor() {}
+  public constructor() {
+    this.configure(JSON.stringify(sampleConfig()));
+  }
 
   public setKey = (key:ArrayBuffer) => {
     throw new Error('setKey unimplemented');

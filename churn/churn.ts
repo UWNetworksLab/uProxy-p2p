@@ -100,6 +100,21 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     throw new Error('no srflx or host candidate found');
   };
 
+  // Generates a key suitable for use with CaesarCipher, viz. 1-255.
+  var generateCaesarKey_ = (): caesar.Config => {
+    try {
+      return {
+        key: (random.randomUint32() % 255) + 1
+      };
+    } catch (e) {
+      // https://github.com/uProxy/uproxy/issues/1593
+      log.warn('crypto unavailable, using Math.random');
+      return {
+        key: Math.floor((Math.random() * 255)) + 1
+      };
+    }
+  }
+
   /**
    * A PeerConnection implementation that establishes obfuscated connections.
    *
@@ -399,7 +414,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         });
         this.haveObfuscatorConfig_(this.preferredObfuscatorConfig_);
       } else {
-        var caesarConfig = caesar.sampleConfig();
+        var caesarConfig = generateCaesarKey_();
         this.signalForPeerQueue.handle({
           caesar: caesarConfig.key
         });

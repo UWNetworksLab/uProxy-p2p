@@ -14,6 +14,7 @@ export interface ProteanConfig {
   injection :sequence.SequenceConfig
 }
 
+// Creates a sample (non-random) config, suitable for testing.
 export var sampleConfig = () : ProteanConfig => {
   return {
     encryption: encryption.sampleConfig(),
@@ -38,8 +39,9 @@ export class Protean implements Transformer {
   // Byte sequence injecter transformer
   private injecter_ :sequence.ByteSequenceShaper;
 
-  // Constructor function is needed for typechecking in churn-pipe
-  public constructor() {}
+  public constructor() {
+    this.configure(JSON.stringify(sampleConfig()));
+  }
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
