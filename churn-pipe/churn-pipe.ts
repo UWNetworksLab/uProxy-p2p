@@ -91,8 +91,6 @@ class Pipe {
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
-  private packetCount_ = 0;
-
   // For each physical network interface, this provides a list of the open
   // public sockets on that interface.  Each socket corresponds to a port that
   // is intended to be publicly routable (possibly thanks to NAT), and is
