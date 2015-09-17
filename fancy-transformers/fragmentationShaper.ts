@@ -110,7 +110,7 @@ export class FragmentationShaper {
       var first = this.makeFragments_(parts[0]);
       var rest = this.makeFragments_(parts[1]);
       var fragmentList = first.concat(rest);
-      this.fixFragments_(fragmentList);
+      FragmentationShaper.fixFragments_(fragmentList);
 
       return fragmentList;
     }
@@ -120,7 +120,7 @@ export class FragmentationShaper {
   // - All fragments have the same id
   // - Each fragment has a unique, incremental index
   // - All fragments have the same, correct count
-  private fixFragments_ = (fragmentList :fragments.Fragment[]) :void => {
+  static fixFragments_ = (fragmentList :fragments.Fragment[]) :void => {
     var id = fragmentList[0].id;
     var count = fragmentList.length;
     for(var index = 0; index < count; index++) {
