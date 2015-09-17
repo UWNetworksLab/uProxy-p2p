@@ -7,7 +7,6 @@ var core = ui_context.core;
 
 Polymer({
   sendToGMailFriend: function() {
-    // TODO: how to get userId of logged in user?
     var selectedNetwork =
         model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
     var selectedNetworkInfo = {
@@ -55,8 +54,6 @@ Polymer({
     });
   },
   onNetworkSelect: function(e :any, details :any) {
-    // TODO: does this need to be initialized?
-    console.log('onNetworkSelect: ', details);
     if (details.isSelected) {
       this.selectedNetworkName = details.item.getAttribute('label');
     }
@@ -64,7 +61,6 @@ Polymer({
   openInviteUserPanel: function() {
     // Reset selectedNetworkName in case it had been set and that network
     // is no longer online.
-    // this.selectedNetworkName = model.onlineNetworks[0].name;
     this.$.networkSelectMenu.selectIndex(0);
     this.$.inviteUserPanel.open();
   },

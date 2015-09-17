@@ -98,7 +98,7 @@ export interface FreedomSocialProvider {
   getClients() : Promise<Clients>;
 
   acceptUserInvitation(inviteToken :string): Promise<void>;
-  inviteUser(ignoredStringParam :string): Promise<Object>;
+  inviteUser(optionalUserId :string): Promise<Object>;
   sendEmail(toEmailAddress :string, subject :string, body :string): Promise<void>;
 
   // Send a message to user on your network
