@@ -209,6 +209,15 @@
         text-transform: uppercase;
         color: #47B5AA;
       }
+      #inviteButton {
+        color: white;
+        background-color: #34ceb9;  /* teal */
+        position: absolute;
+        bottom: 1.5em;
+        right: 1.5em;
+        /* Needed to make button clickable on Firefox issue #1905 */
+        z-index: 1;
+      }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
@@ -309,7 +318,7 @@
 
         <div class='content' fit>
 
-          <paper-fab hidden?='{{!ui.showInviteControls}}' mini icon='add' style='color: white; position:absolute; bottom:1.5em; right:1.5em;' on-tap='{{ fireOpenInviteUserPanel }}'></paper-fab>
+          <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}' mini src='../icons/ic_person_add_white_24dp.svg' on-tap='{{ fireOpenInviteUserPanel }}'></paper-fab>
 
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>

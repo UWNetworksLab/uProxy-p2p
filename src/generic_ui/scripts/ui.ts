@@ -1102,6 +1102,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateView_();
     this.updateSharingStatusBar_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
