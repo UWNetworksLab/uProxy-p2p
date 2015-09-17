@@ -1,9 +1,9 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel="import" href="../../bower/core-signals/core-signals.html">
-<link rel='import' href='../../bower/paper-button/paper-button.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='button.html'>
 
 <polymer-element name='uproxy-accept-user-invite'>
   <template>
@@ -37,7 +37,7 @@
           <paper-input-decorator label="Add friend by URL">
             <input is='core-input' value='{{ receivedInviteToken }}'>
           </paper-input-decorator>
-          <paper-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</paper-button>
+          <uproxy-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</uproxy-button>
         </div>
       </div>
 

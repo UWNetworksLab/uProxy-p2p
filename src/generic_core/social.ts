@@ -171,7 +171,11 @@ export function notifyUI(networkName :string, userId :string) {
 
 // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
 export function getNetworkDisplayName(networkName :string) : string {
-  return NETWORK_OPTIONS[networkName].displayName || networkName;
+  var options = NETWORK_OPTIONS[networkName];
+  if (options && options.displayName) {
+    return options.displayName;
+  }
+  return networkName;
 }
 
   // Implements those portions of the Network interface for which the logic is

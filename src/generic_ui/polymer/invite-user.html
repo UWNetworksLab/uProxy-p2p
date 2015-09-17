@@ -1,10 +1,10 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel="import" href="../../bower/core-signals/core-signals.html">
-<link rel='import' href='../../bower/paper-button/paper-button.html'>
 <link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='button.html'>
 
 <polymer-element name='uproxy-invite-user'>
   <template>
@@ -47,9 +47,9 @@
       <div class='section'>
         <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
           <p>Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
-          <paper-button affirmative on-tap='{{ sendToFacebookFriend }}'>
+          <uproxy-button affirmative on-tap='{{ sendToFacebookFriend }}'>
             Send to Facebook Friend
-          </paper-button>
+          </uproxy-button>
         </div>
 
         <div hidden?='{{ selectedNetworkName != "GMail"}}'>
@@ -58,9 +58,9 @@
             <input is='core-input' value='{{ inviteUserEmail }}' />
           </paper-input-decorator>
 
-          <paper-button affirmative on-tap='{{ sendToGMailFriend }}'>
+          <uproxy-button affirmative on-tap='{{ sendToGMailFriend }}'>
             Send to GMail Friend
-          </paper-button>
+          </uproxy-button>
         </div>
       </div>
 
