@@ -101,7 +101,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   };
 
   // Generates a key suitable for use with CaesarCipher, viz. 1-255.
-  var generateCaesarKey_ = (): caesar.Config => {
+  var generateCaesarConfig_ = (): caesar.Config => {
     try {
       return {
         key: (random.randomUint32() % 255) + 1
@@ -414,7 +414,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         });
         this.haveObfuscatorConfig_(this.preferredObfuscatorConfig_);
       } else {
-        var caesarConfig = generateCaesarKey_();
+        var caesarConfig = generateCaesarConfig_();
         this.signalForPeerQueue.handle({
           caesar: caesarConfig.key
         });
