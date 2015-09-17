@@ -144,7 +144,6 @@ chrome.webRequest.onBeforeRequest.addListener(
           redirectUrl: chrome.extension.getURL('generic_ui/invite-received.html')
       };
     },
-    // TODO: need to do this for Firefox too
     { urls: ['https://www.uproxy.org/invite/*'] },
     ['blocking']
     );
