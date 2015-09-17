@@ -372,7 +372,7 @@ class Pipe {
           if (publicSocket) {
             this.sendTo_(publicSocket, recvFromInfo.data, remoteEndpoint);
           } else {
-            log.warn('Dropping packet due to null public socket');
+            log.warn('%1: Dropping packet due to null public socket', this.name_);
           }
         }
       });
