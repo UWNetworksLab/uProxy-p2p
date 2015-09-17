@@ -27,8 +27,9 @@ export class FragmentationShaper {
   private fragmentBuffer_ :defragmenter.Defragmenter =
     this.fragmentBuffer_ = new defragmenter.Defragmenter();
 
-  // Constructor function is needed for typechecking in churn-pipe
-  public constructor() {}
+  public constructor() {
+    this.configure(JSON.stringify(sampleConfig()));
+  }
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
