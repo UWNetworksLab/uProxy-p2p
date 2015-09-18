@@ -202,3 +202,15 @@ export function parse(buffer:ArrayBuffer, lengths:number[]) :ArrayBuffer[] {
 
   return parts;
 }
+
+// Finds the index of a character in an ArrayBuffer
+export function indexOf(ab :ArrayBuffer, char :number) :number {
+    var bytes = new Uint8Array(ab);
+    for(var i = 0; i < bytes.length; ++i) {
+      if (bytes[i]==char) {
+        return i;
+      }
+    }
+
+    return -1;
+}
