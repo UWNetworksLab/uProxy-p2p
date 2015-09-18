@@ -147,7 +147,7 @@ class Pipe {
       if (config.config !== undefined) {
         this.transformer_.configure(config.config);
       } else {
-        log.warn('%1: no config specified for obfuscator, using default', this.name_);
+        log.warn('%1: no transformer config specified', this.name_);
       }
 
       return Promise.resolve<void>();
