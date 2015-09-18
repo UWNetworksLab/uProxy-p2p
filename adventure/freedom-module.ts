@@ -68,33 +68,47 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 // to a SocksTotc or RtcToNet instance (and further input is treated as
 // signalling channel messages).
 function serveConnection(connection: tcp.Connection): void {
+  var recvBuffer :ArrayBuffer = new ArrayBuffer(0);
+
   var processCommands = (buffer: ArrayBuffer) : void => {
-    // ''.split(' ') == ['']
-    var verb = arraybuffers.arrayBufferToString(
-        buffer).split(' ')[0].trim().toLowerCase();
-    switch (verb) {
-      case 'get':
-        get(connection);
-        break;
-      case 'give':
-        give(connection);
-        break;
-      case 'ping':
-        sendReply('ping', connection);
-        connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
-        break;
-      case 'xyzzy':
-        sendReply('Nothing happens.', connection);
-        connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
-        break;
-      case 'quit':
-        connection.close();
-        break;
-      default:
-        if (verb.length > 0) {
-          sendReply('I don\'t understand that command. (' + verb + ')', connection);
-        }
-        connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+    recvBuffer=arraybuffers.concat([recvBuffer, buffer]);
+    var index = arraybuffers.indexOf(recvBuffer, arraybuffers.decodeByte(
+      arraybuffers.stringToArrayBuffer('\n')
+    ));
+    if (index == -1) {
+      connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+    } else {
+      var parts = arraybuffers.split(recvBuffer, index);
+      var line = parts[0];
+      recvBuffer = parts[1];
+
+      // ''.split(' ') == ['']
+      var verb = arraybuffers.arrayBufferToString(
+          line).split(' ')[0].trim().toLowerCase();
+      switch (verb) {
+        case 'get':
+          get(connection);
+          break;
+        case 'give':
+          give(connection);
+          break;
+        case 'ping':
+          sendReply('ping', connection);
+          connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+          break;
+        case 'xyzzy':
+          sendReply('Nothing happens.', connection);
+          connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+          break;
+        case 'quit':
+          connection.close();
+          break;
+        default:
+          if (verb.length > 0) {
+            sendReply('I don\'t understand that command. (' + verb + ')', connection);
+          }
+          connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+      }
     }
   }
   connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
