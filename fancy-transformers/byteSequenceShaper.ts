@@ -197,8 +197,11 @@ export class ByteSequenceShaper implements Transformer {
 
   // For a byte sequence, see if there is a matching sequence to remove.
   private findMatchingPacket_ = (sequence:ArrayBuffer) => {
-    for(var i = 0; i < this.removeSequences_.length; i++) {
-      if (arraybuffers.byteEquality(sequence, this.removeSequences_[i].sequence)) {
+    for(let i = 0; i < this.removeSequences_.length; i++) {
+      let model = this.removeSequences_[i];
+      let target = model.sequence;
+      let source = sequence.slice(model.offset, target.byteLength);
+      if (arraybuffers.byteEquality(source, target)) {
         return this.removeSequences_.splice(i, 1);
       }
     }
