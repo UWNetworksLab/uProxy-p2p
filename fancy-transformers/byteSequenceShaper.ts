@@ -10,42 +10,42 @@ var log :logging.Log = new logging.Log('fancy-transformers');
 // This is the interface that configure() expects as an argument.
 export interface SequenceConfig {
   // Sequences that should be added to the outgoing packet stream.
-  addSequences:SerializedSequenceModel[];
+  addSequences :SerializedSequenceModel[];
 
   // Sequences that should be removed from the incoming packet stream.
-  removeSequences:SerializedSequenceModel[]
+  removeSequences :SerializedSequenceModel[]
 }
 
 // Sequence models where the sequences have been encoded as strings.
 // This is used by the SequenceConfig argument passed to configure().
 export interface SerializedSequenceModel {
   // Index of the packet into the sequence.
-  index:number;
+  index :number;
 
   // Offset of the sequence in the packet.
-  offset:number;
+  offset :number;
 
   // Byte sequence encoded as a string.
-  sequence:string;
+  sequence :string;
 
   // Target packet length.
-  length:number
+  length :number
 }
 
 // Sequence models where the sequences have been decoded as ArrayBuffers.
 // This is used internally by the ByteSequenceShaper.
 export interface SequenceModel {
   // Index of the packet into the stream.
-  index:number;
+  index :number;
 
   // Offset of the sequence in the packet.
-  offset:number;
+  offset :number;
 
   // Byte sequence.
-  sequence:ArrayBuffer;
+  sequence :ArrayBuffer;
 
   // Target packet length.
-  length:number
+  length :number
 }
 
 // An obfuscator that injects byte sequences.
@@ -98,7 +98,7 @@ export class ByteSequenceShaper implements Transformer {
     }
   }
 
-  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
+  public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     // Check if the current index into the packet stream is within the range
     // where a packet injection could possibly occur.
     if (this.outputIndex_ <= this.lastIndex_) {
@@ -131,7 +131,7 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   // Remove injected packets.
-  public restore = (buffer:ArrayBuffer) :ArrayBuffer[] => {
+  public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     var match = this.findMatchingPacket_(buffer);
     if (match !== null) {
       return [];
@@ -144,7 +144,7 @@ export class ByteSequenceShaper implements Transformer {
   public dispose = () :void => {}
 
   // Decode the byte sequences from strings in the config information
-  static deserializeConfig(config:SequenceConfig)
+  static deserializeConfig(config :SequenceConfig)
   :[SequenceModel[], SequenceModel[]] {
     var adds :SequenceModel[] = [];
     var rems :SequenceModel[] = [];
@@ -161,7 +161,7 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   // Decode the byte sequence from a string in the sequence model
-  static deserializeModel(model:SerializedSequenceModel) :SequenceModel {
+  static deserializeModel(model :SerializedSequenceModel) :SequenceModel {
     return {
       index:model.index,
       offset:model.offset,
@@ -171,7 +171,7 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   // Inject packets
-  private inject_ = (results:ArrayBuffer[]) : void => {
+  private inject_ = (results :ArrayBuffer[]) : void => {
     var nextPacket = this.findNextPacket_(this.outputIndex_);
     while(nextPacket !== null) {
       this.outputAndIncrement_(results, this.makePacket_(nextPacket));
@@ -179,13 +179,13 @@ export class ByteSequenceShaper implements Transformer {
     }
   }
 
-  private outputAndIncrement_ = (results:ArrayBuffer[], result:ArrayBuffer) : void => {
+  private outputAndIncrement_ = (results :ArrayBuffer[], result :ArrayBuffer) : void => {
     results.push(result);
     this.outputIndex_ = this.outputIndex_ + 1;
   }
 
   // For an index into the packet stream, see if there is a sequence to inject.
-  private findNextPacket_ = (index:number) => {
+  private findNextPacket_ = (index :number) => {
     for(var i = 0; i < this.addSequences_.length; i++) {
       if (index === this.addSequences_[i].index) {
         return this.addSequences_[i];
@@ -196,7 +196,7 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   // For a byte sequence, see if there is a matching sequence to remove.
-  private findMatchingPacket_ = (sequence:ArrayBuffer) => {
+  private findMatchingPacket_ = (sequence :ArrayBuffer) => {
     for(let i = 0; i < this.removeSequences_.length; i++) {
       let model = this.removeSequences_[i];
       let target = model.sequence;
@@ -210,7 +210,7 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   // With a sequence model, generate a packet to inject into the stream.
-  private makePacket_ = (model:SequenceModel) :ArrayBuffer => {
+  private makePacket_ = (model :SequenceModel) :ArrayBuffer => {
     var parts :ArrayBuffer[] = [];
 
     // Add the bytes before the sequence.
