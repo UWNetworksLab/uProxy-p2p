@@ -4,7 +4,7 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 import random = require('../crypto/random');
 
-var log :logging.Log = new logging.Log('fancy-transformers');
+let log :logging.Log = new logging.Log('fancy-transformers');
 
 // Configuration where the sequences have been encoded as strings.
 // This is the interface that configure() expects as an argument.
@@ -80,7 +80,7 @@ export class ByteSequenceShaper implements Transformer {
   // Configure the transformer with the byte sequences to inject and the byte
   // sequences to remove.
   public configure = (json:string) :void => {
-    var config = JSON.parse(json);
+    let config = JSON.parse(json);
 
     // Required parameters 'addSequences' and 'removeSequences'
     if ('addSequences' in config && 'removeSequences' in config) {
@@ -99,6 +99,8 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
+    let results :ArrayBuffer[] = [];
+
     // Check if the current index into the packet stream is within the range
     // where a packet injection could possibly occur.
     if (this.outputIndex_ <= this.lastIndex_) {
@@ -106,8 +108,6 @@ export class ByteSequenceShaper implements Transformer {
       if (this.outputIndex_ >= this.firstIndex_) {
         // Injection has started and has not finished, so check to see if it is
         // time to inject a packet.
-
-        var results :ArrayBuffer[] = [];
 
         // Inject fake packets before the real packet
         this.inject_(results);
@@ -132,7 +132,7 @@ export class ByteSequenceShaper implements Transformer {
 
   // Remove injected packets.
   public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
-    var match = this.findMatchingPacket_(buffer);
+    let match = this.findMatchingPacket_(buffer);
     if (match !== null) {
       return [];
     } else {
@@ -146,14 +146,14 @@ export class ByteSequenceShaper implements Transformer {
   // Decode the byte sequences from strings in the config information
   static deserializeConfig(config :SequenceConfig)
   :[SequenceModel[], SequenceModel[]] {
-    var adds :SequenceModel[] = [];
-    var rems :SequenceModel[] = [];
+    let adds :SequenceModel[] = [];
+    let rems :SequenceModel[] = [];
 
-    for(var i = 0; i < config.addSequences.length; i++) {
+    for(let i = 0; i < config.addSequences.length; i++) {
       adds.push(ByteSequenceShaper.deserializeModel(config.addSequences[i]));
     }
 
-    for(var i = 0; i < config.removeSequences.length; i++) {
+    for(let i = 0; i < config.removeSequences.length; i++) {
       rems.push(ByteSequenceShaper.deserializeModel(config.removeSequences[i]));
     }
 
@@ -172,7 +172,7 @@ export class ByteSequenceShaper implements Transformer {
 
   // Inject packets
   private inject_ = (results :ArrayBuffer[]) : void => {
-    var nextPacket = this.findNextPacket_(this.outputIndex_);
+    let nextPacket = this.findNextPacket_(this.outputIndex_);
     while(nextPacket !== null) {
       this.outputAndIncrement_(results, this.makePacket_(nextPacket));
       nextPacket = this.findNextPacket_(this.outputIndex_);
@@ -186,7 +186,7 @@ export class ByteSequenceShaper implements Transformer {
 
   // For an index into the packet stream, see if there is a sequence to inject.
   private findNextPacket_ = (index :number) => {
-    for(var i = 0; i < this.addSequences_.length; i++) {
+    for(let i = 0; i < this.addSequences_.length; i++) {
       if (index === this.addSequences_[i].index) {
         return this.addSequences_[i];
       }
@@ -211,12 +211,12 @@ export class ByteSequenceShaper implements Transformer {
 
   // With a sequence model, generate a packet to inject into the stream.
   private makePacket_ = (model :SequenceModel) :ArrayBuffer => {
-    var parts :ArrayBuffer[] = [];
+    let parts :ArrayBuffer[] = [];
 
     // Add the bytes before the sequence.
     if (model.offset > 0) {
-      var length = model.offset;
-      var randomBytes = new Uint8Array(length);
+      let length = model.offset;
+      let randomBytes = new Uint8Array(length);
       crypto.getRandomValues(randomBytes);
       parts.push(randomBytes.buffer);
     }
@@ -227,7 +227,7 @@ export class ByteSequenceShaper implements Transformer {
     // Add the bytes after the sequnece
     if (model.offset < model.length) {
       length = model.length - (model.offset + model.sequence.byteLength);
-      var randomBytes = new Uint8Array(length);
+      let randomBytes = new Uint8Array(length);
       crypto.getRandomValues(randomBytes);
       parts.push(randomBytes.buffer);
     }
