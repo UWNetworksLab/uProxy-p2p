@@ -67,10 +67,10 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 // "get" or "give" is received, at which point the connection is handed off
 // to a SocksTotc or RtcToNet instance (and further input is treated as
 // signalling channel messages).
-function serveConnection(connection: tcp.Connection): void {
+function serveConnection(connection :tcp.Connection) :void {
   let recvBuffer :ArrayBuffer = new ArrayBuffer(0);
 
-  let processCommands = (buffer: ArrayBuffer) : void => {
+  let processCommands = (buffer :ArrayBuffer) :void => {
     recvBuffer=arraybuffers.concat([recvBuffer, buffer]);
     let index = arraybuffers.indexOf(recvBuffer, arraybuffers.decodeByte(
       arraybuffers.stringToArrayBuffer('\n')
