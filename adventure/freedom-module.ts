@@ -99,9 +99,11 @@ function serveConnection(connection: tcp.Connection): void {
               transformerName = words[2].trim();
               break;
             case 'config':
+              // Treat everything to the right of this marker as JSON.
               // Cheapo approach but it requires no escaping from the user.
+              const marker = ' config ';
               transformerConfig = sentence.substring(
-                  sentence.toLowerCase().indexOf(' config ') + 8);
+                  sentence.toLowerCase().indexOf(marker) + marker.length);
               break;
             default:
               sendReply('usage: transform (with name|config json)', connection);
