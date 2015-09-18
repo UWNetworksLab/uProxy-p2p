@@ -136,7 +136,7 @@ class Pipe {
   }
 
   // Set transformer parameters.
-  public setTransformer = (config:churn_types.ObfuscatorConfig) : Promise<void> => {
+  public setTransformer = (config:churn_types.TransformerConfig) : Promise<void> => {
     try {
       if (!(config.name in transformers)) {
         throw new Error('unknown transformer: ' + config.name);

@@ -9,7 +9,7 @@ export interface MirrorMapping {
 }
 
 export interface freedom_ChurnPipe {
-  setTransformer(config:churn_types.ObfuscatorConfig) : Promise<void>;
+  setTransformer(config:churn_types.TransformerConfig) : Promise<void>;
   bindLocal(publicEndpoint:net.Endpoint) : Promise<void>;
   addBrowserEndpoint(browserEndpoint:net.Endpoint) : Promise<void>;
   bindRemote (remoteEndpoint:net.Endpoint) : Promise<void>;

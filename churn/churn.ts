@@ -18,7 +18,7 @@ import signals = require('../webrtc/signals');
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
 import MirrorMapping = churn_pipe_types.MirrorMapping;
-import ObfuscatorConfig = churn_types.ObfuscatorConfig;
+import TransformerConfig = churn_types.TransformerConfig;
 
 import Candidate = candidate.Candidate;
 import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
@@ -168,9 +168,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     // Fulfills once we know the obfuscator config, which may
     // happen in response to a signalling channel message.
-    private haveObfuscatorConfig_ :(config:ObfuscatorConfig) => void;
-    private onceHaveObfuscatorConfig_ = new Promise((F, R) => {
-      this.haveObfuscatorConfig_ = F;
+    private haveTransformerConfig_ :(config:TransformerConfig) => void;
+    private onceHaveTransformerConfig_ = new Promise((F, R) => {
+      this.haveTransformerConfig_ = F;
     });
 
     private pipe_ :ChurnPipe;
@@ -193,7 +193,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                 private name_ = 'unnamed-churn-' + Connection.id_,
                 private skipPublicEndpoint_?:boolean,
                 private portControl_?:freedom.PortControl.PortControl,
-                private preferredObfuscatorConfig_?:ObfuscatorConfig) {
+                private preferredTransformerConfig_?:TransformerConfig) {
       Connection.id_++;
 
       this.signalForPeerQueue = new handler.Queue<ChurnSignallingMessage,void>();
@@ -208,8 +208,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.onceClosed = this.obfuscatedConnection_.onceClosed;
 
       // Debugging.
-      this.onceHaveObfuscatorConfig_.then((config:ObfuscatorConfig) => {
-        log.info('%1: obfuscator config: %2', this.name_, config);
+      this.onceHaveTransformerConfig_.then((config:TransformerConfig) => {
+        log.info('%1: transformer config: %2', this.name_, config);
       });
     }
 
@@ -272,7 +272,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
       this.onceProbingComplete_.then(() => {
         this.probeConnection_.close().then(() => {
-          return this.onceHaveObfuscatorConfig_;
+          return this.onceHaveTransformerConfig_;
         }).then(this.configurePipe_).then(() => {
           this.processProbeCandidates_(candidates);
           this.havePipe_();
@@ -296,10 +296,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     }
 
-    private configurePipe_ = (obfuscatorConfig:ObfuscatorConfig) : Promise<void> => {
+    private configurePipe_ = (transformerConfig:TransformerConfig) : Promise<void> => {
       this.pipe_ = freedom['churnPipe'](this.name_);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-      return this.pipe_.setTransformer(obfuscatorConfig);
+      return this.pipe_.setTransformer(transformerConfig);
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
@@ -408,17 +408,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       // First, signal the obfuscation config. This will allow the
       // remote peer establish a matching churn pipe. If no config
       // was specified, use Caesar cipher for backwards compatibility.
-      if (this.preferredObfuscatorConfig_) {
+      if (this.preferredTransformerConfig_) {
         this.signalForPeerQueue.handle({
-          obfuscator: this.preferredObfuscatorConfig_
+          transformer: this.preferredTransformerConfig_
         });
-        this.haveObfuscatorConfig_(this.preferredObfuscatorConfig_);
+        this.haveTransformerConfig_(this.preferredTransformerConfig_);
       } else {
         var caesarConfig = generateCaesarConfig_();
         this.signalForPeerQueue.handle({
           caesar: caesarConfig.key
         });
-        this.haveObfuscatorConfig_({
+        this.haveTransformerConfig_({
           name: 'caesar',
           config: JSON.stringify(caesarConfig)
         });
@@ -449,12 +449,12 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             churnMessage.publicEndpoint);
         this.addRemoteCandidate_(fakeRTCIceCandidate);
       }
-      if (churnMessage.obfuscator !== undefined) {
-        this.haveObfuscatorConfig_(churnMessage.obfuscator);
+      if (churnMessage.transformer !== undefined) {
+        this.haveTransformerConfig_(churnMessage.transformer);
       }
       if (churnMessage.caesar !== undefined) {
         log.debug('%1: received legacy caesar cipher config', this.name_);
-        this.haveObfuscatorConfig_({
+        this.haveTransformerConfig_({
           name: 'caesar',
           config: JSON.stringify(<caesar.Config>{
             key: churnMessage.caesar
