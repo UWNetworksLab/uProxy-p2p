@@ -92,6 +92,13 @@ function serveConnection(connection: tcp.Connection): void {
         connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
         break;
       case 'transform':
+        // Sample commands:
+        //  * transform with caesar
+        //    Uses Caesar cipher, with default/example settings.
+        //  * transform config {"key": 5}
+        //    Overrides the default transformer config. Everything
+        //    following 'transform config' is treated as JSON and
+        //    forwarded to the obfuscator's configure() method.
         if (words.length > 2) {
           var preposition = words[1].trim().toLowerCase();
           switch (preposition) {
