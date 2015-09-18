@@ -68,22 +68,22 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 // to a SocksTotc or RtcToNet instance (and further input is treated as
 // signalling channel messages).
 function serveConnection(connection: tcp.Connection): void {
-  var recvBuffer :ArrayBuffer = new ArrayBuffer(0);
+  let recvBuffer :ArrayBuffer = new ArrayBuffer(0);
 
-  var processCommands = (buffer: ArrayBuffer) : void => {
+  let processCommands = (buffer: ArrayBuffer) : void => {
     recvBuffer=arraybuffers.concat([recvBuffer, buffer]);
-    var index = arraybuffers.indexOf(recvBuffer, arraybuffers.decodeByte(
+    let index = arraybuffers.indexOf(recvBuffer, arraybuffers.decodeByte(
       arraybuffers.stringToArrayBuffer('\n')
     ));
     if (index == -1) {
       connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
     } else {
-      var parts = arraybuffers.split(recvBuffer, index);
-      var line = parts[0];
+      let parts = arraybuffers.split(recvBuffer, index);
+      let line = parts[0];
       recvBuffer = parts[1];
 
       // ''.split(' ') == ['']
-      var verb = arraybuffers.arrayBufferToString(
+      let verb = arraybuffers.arrayBufferToString(
           line).split(' ')[0].trim().toLowerCase();
       switch (verb) {
         case 'get':

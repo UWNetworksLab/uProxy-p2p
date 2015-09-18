@@ -205,8 +205,8 @@ export function parse(buffer:ArrayBuffer, lengths:number[]) :ArrayBuffer[] {
 
 // Finds the index of a character in an ArrayBuffer
 export function indexOf(ab :ArrayBuffer, char :number) :number {
-    var bytes = new Uint8Array(ab);
-    for(var i = 0; i < bytes.length; ++i) {
+    let bytes = new Uint8Array(ab);
+    for(let i = 0; i < bytes.length; ++i) {
       if (bytes[i]==char) {
         return i;
       }
