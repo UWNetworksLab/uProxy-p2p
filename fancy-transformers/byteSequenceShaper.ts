@@ -49,8 +49,8 @@ export interface SequenceModel {
 
 // Creates a sample (non-random) config, suitable for testing.
 export var sampleConfig = () : SequenceConfig => {
-  var bytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-  var hex = arraybuffers.arrayBufferToHexString(bytes.buffer);
+  var buffer = arraybuffers.stringToArrayBuffer("OH HELLO");
+  var hex = arraybuffers.arrayBufferToHexString(buffer);
   var sequence = {
     index: 0,
     offset: 0,
