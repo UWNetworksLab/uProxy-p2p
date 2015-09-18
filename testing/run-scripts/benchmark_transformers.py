@@ -12,7 +12,7 @@ FLOOD_SIZE_MB = 64
 FLOOD_MAX_SPEED = '5M'
 
 parser = argparse.ArgumentParser(
-    description='Compare obfuscator throughput.')
+    description='Compare transformer throughput.')
 parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
 args = parser.parse_args()
 
@@ -23,7 +23,7 @@ print('** using flood server at ' + str(flood_ip))
 
 browser_spec = 'chrome-stable'
 # See churn pipe source for the full list.
-obfuscators = [
+transformers = [
   'none',
   'caesar',
   'encryptionShaper',
@@ -34,8 +34,8 @@ obfuscators = [
 
 # Run the benchmarks.
 throughput = {}
-for obfuscator in obfuscators:
-  print('** ' + obfuscator)
+for transformer in transformers:
+  print('** ' + transformer)
 
   result = 0
   try:
@@ -47,7 +47,7 @@ for obfuscator in obfuscators:
         universal_newlines=True,
         stdin=subprocess.PIPE)
 
-    run_pair.stdin.write('obfuscate with ' + obfuscator + '\n')
+    run_pair.stdin.write('transform with ' + transformer + '\n')
     run_pair.stdin.close()
     run_pair.wait(30)
 
@@ -63,26 +63,26 @@ for obfuscator in obfuscators:
     elapsed = round(end - start, 2)
     result = int((FLOOD_SIZE_MB / elapsed) * 1000)
 
-    print('** throughput for ' + obfuscator + ': ' + str(result) + 'K/sec')
+    print('** throughput for ' + transformer + ': ' + str(result) + 'K/sec')
   except Exception as e:
-    print('** failed to test ' + obfuscator + ': ' + str(e))
+    print('** failed to test ' + transformer + ': ' + str(e))
 
-  throughput[obfuscator] = result
+  throughput[transformer] = result
 
 # Raw summary.
 print('** raw numbers: ' + str(throughput))
 
 # CSV, e.g.:
-#   obfuscator,none,caesar,protean
+#   transformer,none,caesar,protean
 #   throughput,500,300,100
 stringio = io.StringIO()
 writer = csv.writer(stringio)
-headers = ['obfuscator']
-headers.extend(obfuscators)
+headers = ['transformer']
+headers.extend(transformers)
 writer.writerow(headers)
 figures = ['throughput']
-for obfuscator in obfuscators:
-  figures.append(throughput[obfuscator])
+for transformer in transformers:
+  figures.append(throughput[transformer])
 writer.writerow(figures)
 print('** CSV')
 print(stringio.getvalue())
