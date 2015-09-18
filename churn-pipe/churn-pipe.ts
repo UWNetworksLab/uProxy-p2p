@@ -136,16 +136,17 @@ class Pipe {
   }
 
   // Set transformer parameters.
-  public setTransformer = (config:churn_types.TransformerConfig) : Promise<void> => {
+  public setTransformer = (
+      transformerConfig:churn_types.TransformerConfig) : Promise<void> => {
     try {
-      if (!(config.name in transformers)) {
-        throw new Error('unknown transformer: ' + config.name);
+      if (!(transformerConfig.name in transformers)) {
+        throw new Error('unknown transformer: ' + transformerConfig.name);
       }
 
-      log.info('%1: using %2 obfuscator', this.name_, config.name);
-      this.transformer_ = new transformers[config.name]();
-      if (config.config !== undefined) {
-        this.transformer_.configure(config.config);
+      log.info('%1: using %2 obfuscator', this.name_, transformerConfig.name);
+      this.transformer_ = new transformers[transformerConfig.name]();
+      if (transformerConfig.config !== undefined) {
+        this.transformer_.configure(transformerConfig.config);
       } else {
         log.warn('%1: no transformer config specified', this.name_);
       }
