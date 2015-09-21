@@ -492,7 +492,15 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     public close = () : Promise<void> => {
-      return this.obfuscatedConnection_.close();
+      var promises = [this.obfuscatedConnection_.close()];
+      if (this.pipe_) {
+        promises.push(this.pipe_.shutdown().catch((e) => {
+          log.warn('Error while shutting down pipe: %1', e);
+        }).then(() => {
+          freedom['churnPipe'].close(this.pipe_);
+        }));
+      }
+      return Promise.all(promises).then((voids:void[]) : void => {});
     }
 
     public toString = () : string => {

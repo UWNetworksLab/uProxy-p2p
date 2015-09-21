@@ -15,4 +15,5 @@ export interface ProxyIntegrationTester {
   on(name:'receivedData', listener:(event:ReceivedDataEvent) => void) :void;
   on(name:string, listener:(event:Object) => void) :void;
   closeEchoConnections() : Promise<void>;
+  shutdown() : Promise<void>;
 }
