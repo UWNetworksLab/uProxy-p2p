@@ -48,7 +48,7 @@ for browser in browsers:
       result = int((FLOOD_SIZE_MB / elapsed) * 1000)
 
       print('** throughput for ' + browser + '/' + version + ': ' +
-          str(result) + 'K/sec')
+          str(result) + 'KB/sec')
     except Exception as e:
       print('** failed to test ' + browser + '/' + version + ': ' + str(e))
 

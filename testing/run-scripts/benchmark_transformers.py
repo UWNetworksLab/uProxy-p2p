@@ -63,7 +63,7 @@ for transformer in transformers:
     elapsed = round(end - start, 2)
     result = int((FLOOD_SIZE_MB / elapsed) * 1000)
 
-    print('** throughput for ' + transformer + ': ' + str(result) + 'K/sec')
+    print('** throughput for ' + transformer + ': ' + str(result) + 'KB/sec')
   except Exception as e:
     print('** failed to test ' + transformer + ': ' + str(e))
 
