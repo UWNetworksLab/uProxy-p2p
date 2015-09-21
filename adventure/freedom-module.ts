@@ -76,15 +76,18 @@ function serveConnection(connection :tcp.Connection) :void {
       arraybuffers.stringToArrayBuffer('\n')
     ));
     if (index == -1) {
+      // A whole command has not been received yet. Continue receiving data.
       connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
     } else {
+      // At least one whole command has been received. Attempt to parse it.
       let parts = arraybuffers.split(recvBuffer, index);
       let line = parts[0];
-      recvBuffer = parts[1];
+      recvBuffer = parts[1].slice(1);
 
       // ''.split(' ') == ['']
       let verb = arraybuffers.arrayBufferToString(
           line).split(' ')[0].trim().toLowerCase();
+      let keepParsing=false;
       switch (verb) {
         case 'get':
           get(connection);
@@ -94,11 +97,11 @@ function serveConnection(connection :tcp.Connection) :void {
           break;
         case 'ping':
           sendReply('ping', connection);
-          connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+          keepParsing=true;
           break;
         case 'xyzzy':
           sendReply('Nothing happens.', connection);
-          connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+          keepParsing=true;
           break;
         case 'quit':
           connection.close();
@@ -107,10 +110,23 @@ function serveConnection(connection :tcp.Connection) :void {
           if (verb.length > 0) {
             sendReply('I don\'t understand that command. (' + verb + ')', connection);
           }
+          keepParsing=true;
+      }
+
+      if (keepParsing) {
+        if (recvBuffer.byteLength > 0) {
+          // There might be another command in the buffer.
+          // Retry command parsing to flush the buffer.
+          // The next parsing determines whether to continue parsing or not.
+          processCommands(new ArrayBuffer(0));
+        } else {
+          // Nothing is left in the buffer. Wait for the next command.
           connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+        }
       }
     }
   }
+
   connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
 }
 
