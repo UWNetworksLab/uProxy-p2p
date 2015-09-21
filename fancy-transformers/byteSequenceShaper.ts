@@ -4,7 +4,7 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 import random = require('../crypto/random');
 
-let log :logging.Log = new logging.Log('fancy-transformers');
+const log :logging.Log = new logging.Log('fancy-transformers');
 
 // Configuration where the sequences have been encoded as strings.
 // This is the interface that configure() expects as an argument.
