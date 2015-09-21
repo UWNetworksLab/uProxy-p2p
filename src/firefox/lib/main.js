@@ -36,8 +36,8 @@ var init = freedom(manifest, {
   })
 
   // Set up connection between freedom and content script.
-  require('lib/glue.js').setUpConnection(new uproxy(), panel, button);
-  require('lib/url-handler.js').setup(panel, button);
+  require('glue.js').setUpConnection(new uproxy(), panel, button);
+  require('url-handler.js').setup(panel, button);
 });
 
 
