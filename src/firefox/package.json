@@ -3,6 +3,7 @@
   "title": "uProxy Alpha",
   "description": "This is the alpha version of uProxy.",
   "author": "uProxy Team <info@uproxy.org>",
+  "id": "jid1-uTe1Bgrsb76jSA",
   "license": "Apache 2.0",
   "version": "0.8.23",
   "permissions": {
