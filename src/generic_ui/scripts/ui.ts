@@ -546,7 +546,7 @@ export class UserInterface implements ui_constants.UiApi {
       return this.core.addUser(url);
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
-      return Promise.resolve<void>();
+      return;
     })
   }
 
