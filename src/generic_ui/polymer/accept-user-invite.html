@@ -4,6 +4,7 @@
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
+<link rel="import" href="i18n-filter.html">
 
 <polymer-element name='uproxy-accept-user-invite'>
   <template>
@@ -12,38 +13,41 @@
         height: 100%;
         width: 100%;
         background-color: white;
-        text-align: center;
       }
       .section {
-        padding: 2em;
+        padding-left: 2em;
+        padding-right: 2em;
+        padding-top: 1em;
+        padding-bottom: 1em;
       }
       a {
         cursor: pointer;
+        text-decoration: underline;
       }
     </style>
-    <!-- TODO: localization -->
 
     <core-signals on-core-signal-open-accept-user-invite-dialog='{{ openAcceptUserInvitePanel }}'></core-signals>
 
     <core-overlay id='acceptUserInvitePanel'>
       <uproxy-app-bar on-go-back='{{ closeAcceptUserInvitePanel }}'>
-        Use an invitation
+        {{ "ENTER_INVITE_CODE" | $$ }}
       </uproxy-app-bar>
 
       <div class='section'>
-        <p>If you have a uProxy token or link from your friend, you can paste it below to add them.</p>
+        <p>{{ "ENTER_INVITE_CODE_DESCRIPTION" | $$ }}</p>
 
         <div id='addFriend'>
-          <paper-input-decorator label="Add friend by URL">
+          <paper-input-decorator label="{{ 'ENTER_INVITE_CODE' | $$ }}">
             <input is='core-input' value='{{ receivedInviteToken }}'>
           </paper-input-decorator>
-          <uproxy-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</uproxy-button>
+          <uproxy-button affirmative autofocus on-tap='{{ addUser }}'>
+            {{ 'SUBMIT_BUTTON_TEXT' | $$ }}
+          </uproxy-button>
         </div>
       </div>
 
       <div class='section'>
-        If you would like to send an invitation to a friend, you can do so
-        <a on-tap='{{ showInviteUser }}'>here</a>
+        <a on-tap='{{ showInviteUser }}'>{{ 'INVITE_LINK_FROM_ACCEPT_PAGE' | $$ }}</a>
       </div>
 
     </core-overlay>
