@@ -5,7 +5,7 @@ import arithmetic = require('./arithmetic');
 import arraybuffers = require('../arraybuffers/arraybuffers');
 
 // Make a sample distribution where all probabilities are equal.
-var makeUniformProbabilities = () :number[] => {
+function makeUniformProbabilities() :number[] {
   var probs :number[] = [];
   for(var index = 0; index<256; index++) {
     probs[index] = 1;
