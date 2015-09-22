@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
@@ -25,7 +25,7 @@ export enum UserFeedbackType {
 export interface GlobalSettings {
   version          :number;
   description      :string;
-  stunServers      :freedom_RTCPeerConnection.RTCIceServer[];
+  stunServers      :freedom.RTCPeerConnection.RTCIceServer[];
   hasSeenSharingEnabledScreen :boolean;
   hasSeenWelcome   :boolean;
   allowNonUnicast  :boolean;
@@ -55,13 +55,6 @@ export interface ConnectionState {
 export interface CopyPasteState {
   connectionState :ConnectionState;
   endpoint :net.Endpoint;
-  gettingMessages :social.PeerMessage[];
-  sharingMessages :social.PeerMessage[];
-}
-
-export interface CopyPasteMessages {
-  type :social.PeerMessageType;
-  data :social.PeerMessage[];
 }
 
 // --- Communications ---
@@ -101,7 +94,9 @@ export enum Command {
   REFRESH_PORT_CONTROL = 1022,
   CREDENTIALS_ERROR = 1023,
   ADD_USER = 1024,
-  ACCEPT_INVITATION = 1025
+  GET_INVITE_URL = 1025,
+  SEND_EMAIL = 1026,
+  ACCEPT_INVITATION = 1027
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -132,10 +127,13 @@ export enum Update {
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
   POST_TO_CLOUDFRONT = 2021,
+  // Legacy one-time connection string. Unused, do not send.
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
+  // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
+  ONETIME_MESSAGE = 2026
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -183,6 +181,13 @@ export interface NetworkInfo {
   errorMsg ?:string;
 };
 
+export interface EmailData {
+  networkInfo: social.SocialNetworkInfo;
+  to :string;
+  subject :string;
+  body :string;
+};
+
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
 /**
@@ -224,7 +229,9 @@ export interface CoreApi {
    */
   stopCopyPasteShare() :Promise<void>;
 
-  sendCopyPasteSignal(signal :social.PeerMessage) :void;
+  // Decodes an encoded batch of signalling messages and forwards each signal
+  // to the RemoteConnection.
+  sendCopyPasteSignal(signal:string) :void;
 
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;

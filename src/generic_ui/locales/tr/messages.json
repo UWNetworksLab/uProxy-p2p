@@ -559,7 +559,7 @@
         "message": "__name__senden proxy'e başladı",
         "description": "Notification for when a friend has started accessing the Internet through the user."
     },
-    "TO_INVITE_FRIENDS": {
+    "FRIENDS_APPEAR_WHEN": {
         "message": "Arkadaşlarını uProxy'e davet etmek için, onlara https://www.uproxy.org'dan bir link gönder",
         "description": "Instruction informing the user how to invite their friends to uProxy."
     },

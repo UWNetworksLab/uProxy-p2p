@@ -30,13 +30,17 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
 
-  public disconnectedWhileProxying = false;
+  // If non-null, the ID of the instance from which we are presently
+  // disconnected.
+  public disconnectedWhileProxying :string = null;
 
   constructor(private browserConnector_ :browser_connector.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_FULFILLED,
                                     this.handleRequestFulfilled_);
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_REJECTED,
                                     this.handleRequestRejected_);
+
+    this.connect();
   }
 
   public on = (name :string, callback :Function) => {
@@ -167,7 +171,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE);
   }
 
-  sendCopyPasteSignal = (signal :social.PeerMessage) => {
+  sendCopyPasteSignal = (signal:string) => {
     this.sendCommand(uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE, signal);
   }
 
@@ -201,11 +205,19 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
-  addUser = (networkId: string, userId: string): Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.ADD_USER,
-      { networkId: networkId, userId: userId });
-    console.log('addUser:' +
-      JSON.stringify({ networkId: networkId, userId: userId }));
+  addUser = (inviteUrl: string): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.ADD_USER, inviteUrl);
+  }
+
+  // TODO: this should probably take the network path, including userId
+  getInviteUrl = (networkInfo :social.SocialNetworkInfo): Promise<string> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_INVITE_URL,
+        networkInfo);
+  }
+
+  // TODO: this should probably take the network path, including userId
+  sendEmail = (emailData :uproxy_core_api.EmailData): void => {
+    this.sendCommand(uproxy_core_api.Command.SEND_EMAIL, emailData);
   }
 
   restart = () => {

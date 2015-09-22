@@ -559,7 +559,7 @@
         "message": "__name__ شروع به پروکسی کردن از طریق شما کرد",
         "description": "Notification for when a friend has started accessing the Internet through the user."
     },
-    "TO_INVITE_FRIENDS": {
+    "FRIENDS_APPEAR_WHEN": {
         "message": "برای دعوت دوستانتان به یوپراکسی، لینک https://www.uproxy.org را برای آن ها ارسال کنید.",
         "description": "Instruction informing the user how to invite their friends to uProxy."
     },

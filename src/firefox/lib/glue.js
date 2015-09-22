@@ -5,8 +5,8 @@
  * for proxy setting and setiing a main icon.
  */
 
-var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
-var xhr = require('firefox_xhr.js').xhr;
+var proxyConfig = require('lib/firefox_proxy_config.js').proxyConfig;
+var xhr = require('lib/firefox_xhr.js').xhr;
 
 // TODO: rename uproxy.js/ts to uproxy-enums.js/ts
 var uproxy_core_api = require('./interfaces/uproxy_core_api.js');
@@ -138,9 +138,11 @@ function setUpConnection(freedom, panel, button) {
   // when required by registering messages that initiate async behaviour.
   onPromiseEmit('frontedPost', post);
 
-  /* Allow any pages in the addon to send messages to the UI or the core */
+  /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
   pagemod.PageMod({
-    include: self.data.url('*'),
+    include: [ self.data.url('*'),
+               "https://www.uproxy.org/*",
+               "https://test-dot-uproxysite.appspot.com/*"],
     contentScriptFile: self.data.url('scripts/content-proxy.js'),
     onAttach: function(worker) {
       worker.port.on('update', function(data) {

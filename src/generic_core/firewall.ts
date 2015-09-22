@@ -14,7 +14,7 @@
  *    visual trickery.  See http://www.unicode.org/reports/tr36/#visual_spoofing
  */
 
-/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 
@@ -138,7 +138,7 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
       object_keys_matched == 0;
   }
 
-  export function isValidUserProfile(profile :freedom_Social.UserProfile,
+  export function isValidUserProfile(profile :freedom.Social.UserProfile,
                                      response :ResponsePolicy) : boolean {
     if (response == null) {
       response = DEFAULT_RESPONSE_POLICY;
@@ -180,7 +180,7 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
     'lastSeen' : '?number'
   };
 
-  export function isValidClientState(state :freedom_Social.ClientState,
+  export function isValidClientState(state :freedom.Social.ClientState,
                                      response :ResponsePolicy) : boolean {
     if (response == null) {
       response = DEFAULT_RESPONSE_POLICY;
@@ -224,7 +224,7 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
     'message' : 'string'
   };
 
-  export function isValidIncomingMessage(state :freedom_Social.IncomingMessage,
+  export function isValidIncomingMessage(state :freedom.Social.IncomingMessage,
                                          response :ResponsePolicy) :boolean {
     if (response == null) {
       response = DEFAULT_RESPONSE_POLICY;

@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import local_storage = require('./storage');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
@@ -81,10 +81,10 @@ export var effectiveMessageVersion = () : number => {
 export var metrics = new metrics_module.Metrics(storage);
 
 export var publicKey :string;
-export var pgp :PgpProvider = freedom['pgp']();
+export var pgp :freedom.PgpProvider.PgpProvider = freedom['pgp']();
 
 pgp.setup('', '<uproxy>').then(() => {
-  pgp.exportKey().then((key :PublicKey) => {
+  pgp.exportKey().then((key :freedom.PgpProvider.PublicKey) => {
     publicKey = key.key;
   });
 }).catch((e) => {

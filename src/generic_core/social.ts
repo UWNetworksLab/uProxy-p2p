@@ -19,7 +19,7 @@
  */
 
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import firewall = require('./firewall');
 import local_instance = require('./local-instance');
@@ -31,11 +31,12 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import globals = require('./globals');
 import storage = globals.storage;
-
-import freedom_social = require('../../../third_party/freedom-social-github/social2');
+import freedom_social2 = require('../interfaces/social2');
 
 import ui = ui_connector.connector;
 
+  // TODO: move this to shared file
+  // https://github.com/uProxy/uproxy/issues/1901
   export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
@@ -47,9 +48,20 @@ import ui = ui_connector.connector;
       enableMonitoring: true,
       areAllContactsUproxy: true
     },
-    'Google+': {
+    'Facebook-Firebase-V2': {
+      displayName: 'Facebook',
       isFirebase: true,
       enableMonitoring: true,
+      areAllContactsUproxy: true
+    },
+    'GMail': {
+      isFirebase: true,
+      enableMonitoring: true,
+      areAllContactsUproxy: true
+    },
+    'WeChat': {
+      isFirebase: false,
+      enableMonitoring: false,
       areAllContactsUproxy: false
     },
     'GitHub': {
@@ -152,12 +164,22 @@ export function notifyUI(networkName :string, userId :string) {
 
   var payload :social.NetworkMessage = {
     name: networkName,
+    displayName: getNetworkDisplayName(networkName),
     online: online,
     userId: userId,
     userName: userName,
     imageData: imageData
   };
   ui.update(uproxy_core_api.Update.NETWORK, payload);
+}
+
+// TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
+export function getNetworkDisplayName(networkName :string) : string {
+  var options = NETWORK_OPTIONS[networkName];
+  if (options && options.displayName) {
+    return options.displayName;
+  }
+  return networkName;
 }
 
   // Implements those portions of the Network interface for which the logic is
@@ -263,7 +285,16 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public addUserRequest = (userId: string): void => {
+    // networkData type?
+    public addUserRequest = (networkData :string): Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+
+    public getInviteUrl = () : Promise<string> => {
+      throw new Error('Operation not implemented');
+    }
+
+    public sendEmail = (to: string, subject: string, body: string) : void => {
       throw new Error('Operation not implemented');
     }
 
@@ -290,7 +321,7 @@ export function notifyUI(networkName :string, userId :string) {
   // events are passed on to the relevant user (provided the user exists).
   export class FreedomNetwork extends AbstractNetwork {
 
-    private freedomApi_: freedom_social.FreedomSocialProvider;
+    private freedomApi_ :freedom_social2.FreedomSocialProvider;
     // TODO: give real typing to provider_. Ask Freedom not to use overloaded
     // types.
     private provider_ :any;  // Special freedom object which is both a function
@@ -298,10 +329,9 @@ export function notifyUI(networkName :string, userId :string) {
 
     // Promise that delays all message handling until fully logged in.
     private onceLoggedIn_   :Promise<void>;
-    private remember :boolean;
 
     // ID returned by setInterval call for monitoring.
-    private monitorIntervalId_ :number = null;
+    private monitorIntervalId_ :NodeJS.Timer = null;
 
     private fulfillLogout_ : () => void;
     private onceLoggedOut_ : Promise<void>;
@@ -314,7 +344,6 @@ export function notifyUI(networkName :string, userId :string) {
       super(name);
 
       this.provider_ = freedom[PREFIX + name];
-      this.remember = false;
       this.onceLoggedIn_ = null;
       this.freedomApi_ = this.provider_();
 
@@ -357,7 +386,8 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom_social.UserProfile) : void => {
+
+    public handleUserProfile = (profile :freedom.Social.UserProfile) : void => {
       var userId = profile.userId;
       if (!firewall.isValidUserProfile(profile, null)) {
         log.error('Firewall: invalid user profile', profile);
@@ -398,7 +428,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom_social.ClientState) : void => {
+    public handleClientState = (freedomClient :freedom.Social.ClientState) : void => {
       if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
         return;
@@ -435,7 +465,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom_social.IncomingMessage) : void => {
+    public handleMessage = (incoming :freedom.Social.IncomingMessage) : void => {
       if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
@@ -484,7 +514,7 @@ export function notifyUI(networkName :string, userId :string) {
     //===================== Social.Network implementation ====================//
 
     public login = (reconnect :boolean) : Promise<void> => {
-      var request :freedom_Social.LoginRequest = null;
+      var request :freedom.Social.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
         // TODO: ideally we should use the instanceId for the agent string,
@@ -519,7 +549,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       this.onceLoggedIn_ = this.freedomApi_.login(request)
-          .then((freedomClient :freedom_social.ClientState) => {
+          .then((freedomClient :freedom.Social.ClientState) => {
             var userId = freedomClient.userId;
             if (userId in networks[this.name]) {
               // If user is already logged in with the same (network, userId)
@@ -570,12 +600,47 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public addUserRequest = (userId: string): void => {
-      this.freedomApi_.inviteUser(userId)
-        .catch((e) => {
-          log.error('Error while inviting user: ' + userId, e.message);
-        });
+// <<<<<<< HEAD
+//     public addUserRequest = (userId: string): void => {
+//       this.freedomApi_.inviteUser(userId)
+//         .catch((e) => {
+//           log.error('Error while inviting user: ' + userId, e.message);
+//         });
+//     }
+
+// =======
+    public addUserRequest = (networkData :string): Promise<void> => {
+      console.log('addUserRequest for network: ' + this.name);
+      if (this.name == 'GitHub') {
+        return this.freedomApi_.inviteUser(JSON.parse(networkData)['userId'])
+            .catch((e) => {
+              log.error('Error while inviting user: ' + JSON.parse(networkData)['userId'], e.message);
+            });
+      }
+
+      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
+      });
     }
+
+    public getInviteUrl = () : Promise<string> => {
+      return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
+        var tokenObj = {
+          v: 1,  // version, using short-hand 'v' to keep the URL shorter
+          networkName: this.name,
+          userName: this.myInstance.userName,
+          networkData: data.networkData
+        };
+        return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
+      })
+    }
+
+    public sendEmail = (to: string, subject: string, body: string): void => {
+      this.freedomApi_.sendEmail(to, subject, body).catch((e :Error) => {
+        log.error('Error sending email', e);
+      });
+    }
+
 
     /**
      * Promise the sending of |msg| to a client with id |clientId|.
@@ -661,6 +726,7 @@ export function notifyUI(networkName :string, userId :string) {
 
       return {
         name: this.name,
+        displayName: getNetworkDisplayName(this.name),
         profile: this.myInstance.getUserProfile(),
         roster: rosterState
       };
@@ -741,7 +807,7 @@ export function notifyUI(networkName :string, userId :string) {
 
 
 export function freedomClientToUproxyClient(
-  freedomClientState :freedom_social.ClientState) :social.ClientState {
+  freedomClientState :freedom.Social.ClientState) :social.ClientState {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
   // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',
   // 'OFFLINE': 4001, 4001: 'OFFLINE'} value.

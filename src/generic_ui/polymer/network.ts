@@ -18,5 +18,7 @@ Polymer({
       console.warn('Did not log in ', e);
     });
   },
-  ready: function() {},
+  ready: function() {
+    this.displayName = ui.getNetworkDisplayName(this.networkName);
+  },
 });

@@ -8,28 +8,13 @@
 <polymer-element name='uproxy-adduser'>
   <template>
     <!-- TODO: localization -->
-    <paper-fab mini icon='add' style='color: white; position:absolute; bottom:10px; right:10px;' on-tap='{{ openAddUserDialog }}'></paper-fab>
 
-    <paper-action-dialog id='addUserDialog' backdrop heading='' layered='true'>
-      <p>How would you like uProxy connect to this friend?</p>
-      <paper-dropdown-menu label='Send them messages via...'>
-        <paper-dropdown class='dropdown'>
-          <core-menu class='menu'>
-            <paper-item>GTalk</paper-item>
-            <paper-item>Facebook</paper-item>
-            <paper-item>GitHub</paper-item>
-            <paper-item>I will copy/paste it to them</paper-item>
-          </core-menu>
-        </paper-dropdown>
-      </paper-dropdown-menu>
-
-      <paper-input-decorator label="Friend's dentifier or URL">
+      <paper-input-decorator label="Friend's identifier or URL">
         <input is='core-input' value='{{ userIdInput }}'>
       </paper-input-decorator>
 
       <paper-button affirmative>Cancel</paper-button>
       <paper-button affirmative autofocus on-tap='{{ addUser }}'>Add Friend</paper-button>
-    </paper-action-dialog>
   </template>
   <script src='add-user.js'></script>
 </polymer-element>

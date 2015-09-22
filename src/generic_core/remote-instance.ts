@@ -6,8 +6,8 @@
  * consent, proxying status, and any other signalling information.
  */
 
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
 
 import consent = require('./consent');
 import globals = require('./globals');
@@ -91,8 +91,8 @@ import Persistent = require('../interfaces/persistent');
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
     // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
     // TODO: why are these not in remote-connection?
-    private startSocksToRtcTimeout_ :number = null;
-    private startRtcToNetTimeout_ :number = null;
+    private startSocksToRtcTimeout_ :NodeJS.Timer = null;
+    private startRtcToNetTimeout_ :NodeJS.Timer = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
@@ -202,7 +202,7 @@ import Persistent = require('../interfaces/persistent');
       } else {
         return pgp.dearmor(<string>msg.data).then((cipherData :ArrayBuffer) => {
           return pgp.verifyDecrypt(cipherData, this.publicKey);
-        }).then((result :VerifyDecryptResult) => {
+        }).then((result :freedom.PgpProvider.VerifyDecryptResult) => {
           var decryptedSignal =
               JSON.parse(arraybuffers.arrayBufferToString(result.data));
           return this.handleDecryptedSignal_(msg.type, msg.version, decryptedSignal);
@@ -285,12 +285,6 @@ import Persistent = require('../interfaces/persistent');
         // assumption that our peer failed to start getting access.
         this.startRtcToNetTimeout_ = setTimeout(() => {
           log.warn('Timing out rtcToNet_ connection');
-          // Tell the UI that sharing failed. It will show a toast.
-          // TODO: have RemoteConnection do this
-          ui.update(uproxy_core_api.Update.FAILED_TO_GIVE, {
-            name: this.user.name,
-            proxyingId: this.connection_.getProxyingId()
-          });
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
 
@@ -299,6 +293,13 @@ import Persistent = require('../interfaces/persistent');
         }, () => {
           log.warn('Could not start sharing.');
           clearTimeout(this.startRtcToNetTimeout_);
+          // Tell the UI that sharing failed. It will show a toast.
+          // TODO: Send this update from remote-connection.ts
+          //       https://github.com/uProxy/uproxy/issues/1861
+          ui.update(uproxy_core_api.Update.FAILED_TO_GIVE, {
+            name: this.user.name,
+            proxyingId: this.connection_.getProxyingId()
+          });
         });
       });
     }
@@ -328,19 +329,22 @@ import Persistent = require('../interfaces/persistent');
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
       this.startSocksToRtcTimeout_ = setTimeout(() => {
         log.warn('Timing out socksToRtc_ connection');
+        this.connection_.stopGet();
+      }, this.SOCKS_TO_RTC_TIMEOUT);
+
+      return this.connection_.startGet(this.messageVersion)
+          .then((endpoints :net.Endpoint) => {
+        clearTimeout(this.startSocksToRtcTimeout_);
+        return endpoints;
+      }).catch((e) => {
         // Tell the UI that sharing failed. It will show a toast.
-        // TODO: have RemoteConnection do this
+        // TODO: Send this update from remote-connection.ts
+        //       https://github.com/uProxy/uproxy/issues/1861
         ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()
         });
-        this.connection_.stopGet();
-      }, this.SOCKS_TO_RTC_TIMEOUT);
-
-      return this.connection_.startGet(this.messageVersion).then(
-          (endpoints :net.Endpoint) => {
-        clearTimeout(this.startSocksToRtcTimeout_);
-        return endpoints;
+        return Promise.reject(e);
       });
     }
 

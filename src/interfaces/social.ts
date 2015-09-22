@@ -39,14 +39,16 @@ export interface LocalInstanceState {
 }
 
 export interface NetworkMessage {
-  name       :string;
-  online     :boolean;
-  userId     :string;
-  userName   :string;
-  imageData  :string
+  name        :string;
+  displayName :string;
+  online      :boolean;
+  userId      :string;
+  userName    :string;
+  imageData   :string
 }
 
 export interface UserProfileMessage {
+  status?: UserStatus;
   imageData    ?:string; // Image URI (e.g. data:image/png;base64,adkwe329...)
   name         ?:string;
   url          ?:string;
@@ -82,16 +84,18 @@ export interface UserData {
 }
 
 export interface NetworkState {
-  name     :string;
-  profile  :UserProfileMessage;
+  name         :string;
+  displayName  :string;
+  profile      :UserProfileMessage;
   // TODO: bad smell: UI data should not be
-  roster   :{[userId :string] :UserData };
+  roster       :{[userId :string] :UserData };
 }
 
 export interface NetworkOptions {
   isFirebase :boolean;
   enableMonitoring :boolean;
   areAllContactsUproxy :boolean;
+  displayName ?:string;
 }
 
 /**
@@ -279,9 +283,19 @@ export interface Network {
   /**
    * Ask the social network to add the user.
    */
-  addUserRequest: (userId: string) => void;
-    
   acceptInvitation: (userId: string) => void;
+
+  addUserRequest: (networkData :string) => Promise<void>;
+
+  /**
+   * Generates an invite token
+   */
+  getInviteUrl: () => Promise<string>;
+
+  /**
+   * Generates an invite token
+   */
+  sendEmail: (to :string, subject :string, body :string) => void;
 
   /**
     * Resends the instance handeshake to all uProxy instances.

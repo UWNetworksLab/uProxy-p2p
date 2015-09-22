@@ -3,7 +3,7 @@
   "name": "__MSG_appName__",
   "description": "__MSG_appDescription__",
   "minimum_chrome_version": "41.0.2272.63",
-  "version": "0.8.19",
+  "version": "0.8.23",
   "default_locale": "en",
   "icons": {
     "128": "icons/128_online.png"
@@ -16,7 +16,9 @@
   "permissions": [
     "storage",
     "http://*/",
-    "https://github.com/login/oauth/access_token"
+    "https://github.com/login/oauth/access_token",
+    "https://*.wechat.com/*",
+    "https://*.qq.com/*"
   ],
   "sockets": {
     "tcp": {

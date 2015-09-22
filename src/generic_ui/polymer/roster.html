@@ -40,15 +40,20 @@
       font-size: 17px;
     }
     .no-friends {
-      width: 150px;
-      height: 150px;
+      width: 150px !important;
+      height: 150px !important;
       color: #cbcbcb;
     }
     #noContactsFound {
       margin-top: 0.75em;
     }
-    #inviteFriends {
-      font-size: 13px;
+    #noContactsFoundLearnMoreLink {
+      text-decoration: underline;
+      font-size: 14px;
+      color: rgb(150,150,150);
+    }
+    #friendsAppearWhen {
+      font-size: 14px;
       padding-top: 10px;
       color: rgb(150,150,150);
     }
@@ -69,8 +74,6 @@
     <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
     <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
 
-    <uproxy-adduser></uproxy-adduser>
-
     <!-- Shown if there are no contacts found so far -->
     <div id='loadContacts' hidden?='{{ hasContacts }}'>
       <core-icon icon="social:person" class="no-friends"></core-icon>
@@ -80,7 +83,12 @@
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
         {{ "NO_FRIENDS_ONLINE" | $$ }}
-        <p id='inviteFriends'>{{ "TO_INVITE_FRIENDS" | $$ }}</p>
+        <p id='friendsAppearWhen'>{{ "FRIENDS_APPEAR_WHEN" | $$ }}</p>
+        <p>
+          <uproxy-faq-link anchor="howDoIFind">
+            <span id='noContactsFoundLearnMoreLink'>{{ "LEARN_MORE" | $$ }}</span>
+          </uproxy-faq-link>
+        </p>
       </div>
     </div>
 

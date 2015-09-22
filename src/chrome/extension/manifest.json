@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extName__",
-  "version": "0.8.19",
+  "version": "0.8.23",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
   "minimum_chrome_version": "41.0.2272.63",
@@ -16,12 +16,13 @@
   },
   "browser_action": {
     "default_icon": {
-      "19": "icons/19_offline.gif",
-      "38": "icons/19_offline.gif"
+      "19": "icons/19_offline.png",
+      "38": "icons/38_offline.png"
     },
     "default_title": "__MSG_extTitle__"
   },
   "permissions": [
+    "background",
     "tabs",
     "proxy",
     "notifications",

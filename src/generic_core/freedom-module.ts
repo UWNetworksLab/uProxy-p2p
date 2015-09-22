@@ -10,8 +10,7 @@
  *  - Instances, which is a list of active uProxy installs.
  */
 
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
@@ -54,14 +53,6 @@ var exported = {
 };
 export = exported;
 
-ui_connector.onCommand(
-    uproxy_core_api.Command.GET_INITIAL_STATE_DEPRECATED_0_8_10,
-    () => {
-      core.getFullState().then((state :uproxy_core_api.InitialState) => {
-        ui_connector.update(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_10, state);
-      });
-    });
-
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.LOGIN,
     core.login);
@@ -97,9 +88,16 @@ ui_connector.onPromiseCommand(
     uproxy_core_api.Command.START_PROXYING,
     core.start);
 
-ui_connector.onCommand(
-  uproxy_core_api.Command.ADD_USER,
-  core.addUser);
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.ADD_USER,
+    core.addUser);
+
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.GET_INVITE_URL,
+    core.getInviteUrl);
+
+ui_connector.onCommand(uproxy_core_api.Command.SEND_EMAIL,
+    core.sendEmail);
 
 ui_connector.onCommand(uproxy_core_api.Command.STOP_PROXYING,
     core.stop);

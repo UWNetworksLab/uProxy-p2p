@@ -33,7 +33,7 @@
       "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
     },
     "lodash/lodash.d.ts": {
-      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+      "commit": "e95958ac847d9a343bdc8d7cbc796a5f6da29f71"
     },
     "chrome/chrome.d.ts": {
       "commit": "1957eb54fbb7ef0d0397c2c78a5b5e638e813ec8"
@@ -52,6 +52,15 @@
     },
     "compare-version/compare-version.d.ts": {
       "commit": "be03157bace6e6465e63f13073d7b68e8ea1303c"
+    },
+    "freedom/freedom.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    },
+    "freedom/freedom-module-env.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    },
+    "freedom/freedom-core-env.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
     }
   }
 }

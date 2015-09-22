@@ -1,4 +1,5 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 
 import social = require('../interfaces/social');
@@ -32,7 +33,7 @@ describe('freedomClientToUproxyClient', () => {
     spyOn(console, 'log');
   });
 
-  var freedomClient :freedom_Social.ClientState = {
+  var freedomClient :freedom.Social.ClientState = {
     userId: 'mockmyself',
     clientId: 'fakemyself',
     status: 'ONLINE',
@@ -59,7 +60,7 @@ describe('social_network.FreedomNetwork', () => {
   freedom['SOCIAL-mock'].api = 'social';
 
   var loginPromise :Promise<void>;
-  var fakeFreedomClient :freedom_Social.ClientState = {
+  var fakeFreedomClient :freedom.Social.ClientState = {
     userId: 'mockmyself',
     clientId: 'fakemyself',
     status: 'ONLINE',
@@ -128,7 +129,7 @@ describe('social_network.FreedomNetwork', () => {
             fakeFreedomClient.userId);
         expect(network['myInstance'].instanceId).toEqual(
             'dummy-instance-id');
-        var freedomClientState :freedom_Social.ClientState = {
+        var freedomClientState :freedom.Social.ClientState = {
           userId: 'fakeuser',
           clientId: 'fakeclient',
           status: 'ONLINE',
@@ -256,7 +257,7 @@ describe('social_network.FreedomNetwork', () => {
     it('passes |onClientState| to correct client', (done) => {
       var user = network.getUser('mockuser');
       spyOn(user, 'handleClient');
-      var freedomClientState :freedom_Social.ClientState = {
+      var freedomClientState :freedom.Social.ClientState = {
         userId: 'mockuser',
         clientId: 'fakeclient',
         status: 'ONLINE',
@@ -270,7 +271,7 @@ describe('social_network.FreedomNetwork', () => {
 
     it('adds placeholder when receiving ClientState with userId not in roster',
         (done) => {
-      var freedomClientState :freedom_Social.ClientState = {
+      var freedomClientState :freedom.Social.ClientState = {
         userId: 'im_not_here',
         clientId: 'fakeclient',
         status: 'ONLINE',

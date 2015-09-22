@@ -1,10 +1,12 @@
-/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import onetime = require('../../../third_party/uproxy-lib/bridge/onetime');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
@@ -14,6 +16,7 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import version = require('../version/version');
+import StoredValue = require('./stored_value');
 import _ = require('lodash');
 
 import ui = ui_connector.connector;
@@ -43,40 +46,49 @@ var portControl = globals.portControl;
  */
 export class uProxyCore implements uproxy_core_api.CoreApi {
 
-  private copyPasteSharingMessages_ :social.PeerMessage[] = [];
-  private copyPasteGettingMessages_ :social.PeerMessage[] = [];
+  private batcher_ : onetime.SignalBatcher<social.PeerMessage>;
 
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
 
+  private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
+
   constructor() {
     log.debug('Preparing uProxy Core');
-    copyPasteConnection = new remote_connection.RemoteConnection((update :uproxy_core_api.Update, message?:any) => {
-      // TODO send this update only when
-      // update !== uproxy_core_api.Update.SIGNALLING_MESSAGE
-      // (after v0.8.13)
-      ui.update(update, message);
+    copyPasteConnection = new remote_connection.RemoteConnection(
+        (update:uproxy_core_api.Update, message?:social.PeerMessage) => {
       if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
-        return;
+        ui.update(update, message);
+      } else {
+        this.batcher_.addToBatch(message);
       }
-
-      var data :social.PeerMessage[];
-      switch (message.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          data = this.copyPasteGettingMessages_;
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          data = this.copyPasteSharingMessages_;
-          break;
-      }
-      data.push(message);
-
-      ui.update(uproxy_core_api.Update.COPYPASTE_MESSAGE, {
-        type: message.type,
-        data: data
-      });
     }, undefined, portControl);
+
     this.refreshPortControlSupport();
+
+    this.connectedNetworks_.get().then((networks :string[]) => {
+      var logins :Promise<void>[] = [];
+
+      for (var i in networks) {
+        logins.push(this.login({
+          network: networks[i],
+          reconnect: true,
+        }).catch(() => {
+          // any failure to login should just be ignored - the user will either
+          // be logged in with just some accounts or still on the login screen
+          return;
+        }));
+
+        // at this point, clear all networks; those that successfully get logged
+        // in will be re-added
+        this.connectedNetworks_.set([]);
+      }
+
+      // this return is meaningless, but it may be useful in the future
+      return Promise.all(logins);
+    }).then(() => {
+      log.info('Finished handling reconnections');
+    });
   }
 
   // sendInstanceHandshakeMessage = (clientId :string) => {
@@ -112,15 +124,24 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       this.pendingNetworks_[networkName] = network;
     }
 
-    // TODO: save the auto-login default
-
     return network.login(loginArgs.reconnect).then(() => {
       delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,
         userId: network.myInstance.userId
       });
-    }).catch((e) => {
+
+      return this.connectedNetworks_.get().then((networks :string[]) => {
+        if (_.includes(networks, networkName)) {
+          return;
+        }
+
+        networks.push(networkName);
+        return this.connectedNetworks_.set(networks);
+      }).catch((e) => {
+        console.warn('Could not save connected networks', e);
+      });
+    }, (e) => {
       delete this.pendingNetworks_[networkName];
       throw e;
     });
@@ -138,11 +159,18 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.warn('Could not logout of network', networkName);
       return;
     }
+
     return network.logout().then(() => {
       log.info('Successfully logged out of network', networkName);
+
+      return this.connectedNetworks_.get().then((networks) => {
+        return this.connectedNetworks_.set(_.without(networks, networkName));
+      }).catch((e) => {
+        log.warn('Could not remove network from list of connected networks', e);
+        // we will probably not be able to log back in anyways, ignore this
+        return;
+      });
     });
-    // TODO: disable auto-login
-    // store.saveMeToStorage();
   }
 
   // onUpdate not needed in the real core.
@@ -209,9 +237,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         availableVersion: this.availableVersion_,
         copyPasteState: {
           connectionState: copyPasteConnection.getCurrentState(),
-          endpoint: copyPasteConnection.activeEndpoint,
-          gettingMessages: this.copyPasteGettingMessages_,
-          sharingMessages: this.copyPasteSharingMessages_
+          endpoint: copyPasteConnection.activeEndpoint
         },
         portControlSupport: this.portControlSupport_,
       };
@@ -235,8 +261,23 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     user.modifyConsent(command.action);
   }
 
+  // Resets the copy/paste signal batcher.
+  // TODO: enable compression
+  private resetBatcher_ = () : void => {
+    this.batcher_ = new onetime.SignalBatcher<social.PeerMessage>((signal:string) => {
+      ui.update(uproxy_core_api.Update.ONETIME_MESSAGE, signal);
+    }, (signal:social.PeerMessage) => {
+      // This is a terminating message iff signal.data is an instance
+      // bridge.SignallingMessage (which we can detect by the presence
+      // of a signals field) for which bridge.isTerminatingSignal
+      // returns true.
+      return signal.data && (<any>signal.data).signals &&
+        bridge.isTerminatingSignal(<bridge.SignallingMessage>signal.data);
+    }, false);
+  }
+
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
-    this.copyPasteGettingMessages_ = [];
+    this.resetBatcher_();
     return copyPasteConnection.startGet(globals.effectiveMessageVersion());
   }
 
@@ -244,8 +285,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return copyPasteConnection.stopGet();
   }
 
-  public startCopyPasteShare = () : void => {
-    this.copyPasteSharingMessages_ = [];
+  public startCopyPasteShare = () => {
+    this.resetBatcher_();
     copyPasteConnection.startShare(globals.effectiveMessageVersion());
   }
 
@@ -253,14 +294,61 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return copyPasteConnection.stopShare();
   }
 
-  public sendCopyPasteSignal = (signal :social.PeerMessage) :void => {
-    copyPasteConnection.handleSignal(signal);
+  public sendCopyPasteSignal = (signal:string) => {
+    var decodedSignals = <social.PeerMessage[]>onetime.decode(signal);
+    decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  public addUser = (user: { networkId: string; userId:string })
-    : void => {
-    var networks = social_network.networks['GitHub'];
-    networks[Object.keys(networks)[0]].addUserRequest(user.networkId);
+  public addUser = (inviteUrl: string): Promise<void> => {
+    try {
+      var userData = JSON.parse(inviteUrl);
+      console.log(userData);
+      if (userData.userId) {
+        var networks = social_network.networks['GitHub'];
+        networks[Object.keys(networks)[0]].addUserRequest(
+          JSON.stringify({userId: userData.userId}));
+        return Promise.resolve<void>();
+      }
+
+      // var networks = social_network.networks['GitHub'];
+      // networks[Object.keys(networks)[0]].addUserRequest(
+      //   JSON.stringify({networkName: "GitHub", networkData:userData.userId);
+    } catch (e) {
+      console.log("not GitHub");
+      //return Promise.reject('Error parsing invite URL');
+    }
+
+    try {
+      // inviteUrl may be a URL with a token, or just the token.  Remove the
+      // prefixed URL if it is set.
+      var token = inviteUrl.lastIndexOf('/') >= 0 ?
+          inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+      var networkData = tokenObj.networkData;
+      if (!social_network.networks[networkName]) {
+        return Promise.reject('invite URL had invalid social network');
+      }
+    } catch (e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+
+    // This code assumes the user is only signed in once to any given network.
+    for (var userId in social_network.networks[networkName]) {
+      return social_network.networks[networkName][userId]
+          .addUserRequest(networkData);
+    }
+  }
+
+  public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    return network.getInviteUrl();
+  }
+
+  public sendEmail = (data :uproxy_core_api.EmailData) : void => {
+    var networkInfo = data.networkInfo;
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    network.sendEmail(data.to, data.subject, data.body);
   }
 
   /**
@@ -331,7 +419,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // the then() block of doNatProvoking ends up being called twice.
   // We keep track of the timeout that resets the NAT type to make sure
   // there is at most one timeout at a time.
-  private natResetTimeout_ :number;
+  private natResetTimeout_ :NodeJS.Timer;
 
   public getNatType = () :Promise<string> => {
     if (globals.natType === '') {
@@ -374,15 +462,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // Sets this.portControlSupport_ and sends update message to UI
   public refreshPortControlSupport = () :Promise<void> => {
     this.portControlSupport_ = uproxy_core_api.PortControlSupport.PENDING;
-    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+    ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
               uproxy_core_api.PortControlSupport.PENDING);
 
     return portControl.probeProtocolSupport().then(
-      (probe:freedom_PortControl.ProtocolSupport) => {
+      (probe:freedom.PortControl.ProtocolSupport) => {
         this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
                                    uproxy_core_api.PortControlSupport.TRUE :
                                    uproxy_core_api.PortControlSupport.FALSE;
-        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS, 
+        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.portControlSupport_);
     });
   }
@@ -400,7 +488,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return this.getNatType().then((natType:string) => {
       natInfo.natType = natType;
       return portControl.probeProtocolSupport().then(
-        (probe:freedom_PortControl.ProtocolSupport) => {
+        (probe:freedom.PortControl.ProtocolSupport) => {
           natInfo.pmpSupport = probe.natPmp;
           natInfo.pcpSupport = probe.pcp;
           natInfo.upnpSupport = probe.upnp;
@@ -420,11 +508,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       if (natInfo.errorMsg) {
         natInfoStr += natInfo.errorMsg + '\n';
       } else {
-        natInfoStr += 'NAT-PMP: ' + 
+        natInfoStr += 'NAT-PMP: ' +
                   (natInfo.pmpSupport ? 'Supported' : 'Not supported') + '\n';
-        natInfoStr += 'PCP: ' + 
+        natInfoStr += 'PCP: ' +
                   (natInfo.pcpSupport ? 'Supported' : 'Not supported') + '\n';
-        natInfoStr += 'UPnP IGD: ' + 
+        natInfoStr += 'UPnP IGD: ' +
                   (natInfo.upnpSupport ? 'Supported' : 'Not supported') + '\n';
       }
       return natInfoStr;

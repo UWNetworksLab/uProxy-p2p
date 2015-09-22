@@ -3,7 +3,6 @@
  *
  * This is the UI-specific representation of a User.
  */
-/// <reference path='../../../../third_party/freedom-typings/social.d.ts' />
 /// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
 import social = require('../../interfaces/social');
@@ -38,7 +37,7 @@ export class User implements social.BaseUser {
   public name              :string;
   public imageData         :string;
   public url               :string;
-  public status            :string = "whatever";
+  public status            :social.UserStatus;
   public isGettingFromMe   :boolean = false;
   public isSharingWithMe   :boolean = false;
   // 'filter'-related flags which indicate whether the user should be
@@ -85,10 +84,10 @@ export class User implements social.BaseUser {
         if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {
           if (payload.consent.localRequestsAccessFromRemote) {
             this.ui_.showNotification(i18n_t("GRANTED_ACCESS_NOTIFICATION", {name: profile.name}),
-                         { mode: 'get', network: this.network.name, user: this.userId });
+                         { mode: 'get', network: this.network.displayName, user: this.userId });
           } else {
             this.ui_.showNotification(i18n_t("OFFERED_ACCESS_NOTIFICATION", {name: profile.name}),
-                         { mode: 'get', network: this.network.name, user: this.userId });
+                         { mode: 'get', network: this.network.displayName, user: this.userId });
           }
         }
       }
@@ -98,10 +97,10 @@ export class User implements social.BaseUser {
         if (!this.consent_.remoteRequestsAccessFromLocal && payload.consent.remoteRequestsAccessFromLocal) {
           if (payload.consent.localGrantsAccessToRemote) {
             this.ui_.showNotification(i18n_t("ACCEPTED_OFFER_NOTIFICATION", {name: profile.name}),
-                         { mode: 'share', network: this.network.name, user: this.userId });
+                         { mode: 'share', network: this.network.displayName, user: this.userId });
           } else {
             this.ui_.showNotification(i18n_t("REQUESTING_ACCESS_NOTIFICATION", {name: profile.name}),
-                         { mode: 'share', network: this.network.name, user: this.userId });
+                         { mode: 'share', network: this.network.displayName, user: this.userId });
           }
         }
       }

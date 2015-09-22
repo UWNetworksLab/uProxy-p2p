@@ -1,0 +1,86 @@
+<link rel='import' href='../../bower/core-icons/core-icons.html'>
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel="import" href="../../bower/core-signals/core-signals.html">
+<link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='button.html'>
+<link rel='import' href='add-user.html'>
+
+<polymer-element name='uproxy-invite-user'>
+  <template>
+    <style>
+      #inviteUserPanel {
+        height: 100%;
+        width: 100%;
+        background-color: white;
+        text-align: center;
+      }
+      .section {
+        padding: 2em;
+      }
+      a {
+        cursor: pointer;
+      }
+    </style>
+    <!-- TODO: localization -->
+
+    <core-signals on-core-signal-open-invite-user-dialog='{{ openInviteUserPanel }}'></core-signals>
+
+    <core-overlay id='inviteUserPanel'>
+      <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
+        Invite a friend
+      </uproxy-app-bar>
+
+      <div hidden?='{{ model.onlineNetworks.length <= 1}}'>
+        <p>How would you like to invite to your friends?</p>
+        <paper-dropdown-menu>
+          <paper-dropdown class='dropdown'>
+            <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
+              <template repeat="{{ network in model.onlineNetworks }}">
+                <paper-item label='{{ network.name }}'>{{ network.displayName }}</paper-item>
+              </template>
+            </core-menu>
+          </paper-dropdown>
+        </paper-dropdown-menu>
+      </div>
+
+      <div class='section'>
+        <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
+          <p>Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list.</p>
+          <uproxy-button affirmative on-tap='{{ sendToFacebookFriend }}'>
+            Send to Facebook Friend
+          </uproxy-button>
+        </div>
+
+        <div hidden?='{{ selectedNetworkName != "GMail"}}'>
+          <p>Enter your friend's GMail address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list.</p>
+          <paper-input-decorator label='GMail address' layout vertical>
+            <input is='core-input' value='{{ inviteUserEmail }}' />
+          </paper-input-decorator>
+
+          <uproxy-button affirmative on-tap='{{ sendToGMailFriend }}'>
+            Send to GMail Friend
+          </uproxy-button>
+        </div>
+
+        <div hidden?='{{ selectedNetworkName != "GitHub"}}'>
+          <p>Enter your friend's GitHub username. You will see in your contact list when they accept your request.</p>
+          <paper-input-decorator label="Friend's identifier or URL">
+            <input is='core-input' value='{{ userIdInput }}'>
+          </paper-input-decorator>
+          <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
+            Invite GitHub Friend
+          </uproxy-button>
+        </div>
+      </div>
+
+      <div class='section'>
+        If your friend has sent you an invitation, you can use it
+        <a on-tap='{{ showAcceptUserInvite }}'>here</a>
+      </div>
+
+    </core-overlay>
+  </template>
+  <script src='invite-user.js'></script>
+</polymer-element>

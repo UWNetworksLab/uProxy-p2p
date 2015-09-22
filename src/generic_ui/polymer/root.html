@@ -4,9 +4,12 @@
 <link rel="import" href="../../bower/core-drawer-panel/core-drawer-panel.html">
 <link rel="import" href="../../bower/core-toolbar/core-toolbar.html">
 <link rel="import" href="../../bower/core-icon-button/core-icon-button.html">
+<link rel='import' href='../../bower/paper-fab/paper-fab.html'>
 <link rel="import" href="../../bower/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
+<link rel='import' href='invite-user.html'>
+<link rel='import' href='accept-user-invite.html'>
 <link rel="import" href="i18n-filter.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
@@ -22,6 +25,7 @@
 <link rel='import' href='browser-elements.html'>
 <link rel='import' href='icons.html'>
 <link rel='import' href='proxy-error.html'>
+<link rel='import' href='button.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}' on-open-dialog='{{ openDialog }}'>
 
@@ -109,8 +113,8 @@
       core-toolbar core-icon.status {
         cursor: pointer;
         color: #006A5A;
-        height: 20px;
-        width: 20px;
+        height: 20px !important;
+        width: 20px !important;
       }
       #settings {
         top: 0;
@@ -167,7 +171,7 @@
       .core-overlay-backdrop {
         z-index: 1001;
       }
-      uproxy-action-dialog paper-button {
+      uproxy-action-dialog uproxy-button {
         margin-bottom: 3px;
       }
       uproxy-faq-link .linkText {
@@ -187,8 +191,11 @@
       #disconnectDialog #disconnectDialogText {
         text-align: start;
       }
-      #disconnectDialog paper-button {
+      #disconnectDialog uproxy-button {
         font-size: 12px;
+      }
+      #progressWrapper {
+        text-align: center;
       }
       paper-toast {
         position: fixed;
@@ -202,9 +209,21 @@
         text-transform: uppercase;
         color: #47B5AA;
       }
+      #inviteButton {
+        color: white;
+        background-color: #34ceb9;  /* teal */
+        position: absolute;
+        bottom: 1.5em;
+        right: 1.5em;
+        /* Needed to make button clickable on Firefox issue #1905 */
+        z-index: 1;
+      }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
+
+    <!-- Required for cases where an open-dialog signal is sent from the UI via ui.fireSignal -->
+    <core-signals on-core-signal-open-dialog="{{ openDialog }}"></core-signals>
 
     <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
@@ -214,6 +233,10 @@
     <uproxy-feedback id='feedback'></uproxy-feedback>
 
     <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
+
+    <uproxy-invite-user></uproxy-invite-user>
+
+    <uproxy-accept-user-invite></uproxy-accept-user-invite>
 
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
@@ -295,6 +318,8 @@
 
         <div class='content' fit>
 
+          <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}' mini src='../icons/ic_person_add_white_24dp.svg' on-tap='{{ fireOpenInviteUserPanel }}'></paper-fab>
+
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
               <uproxy-roster id='get-roster'
@@ -350,11 +375,12 @@
     <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
       <p>{{ dialog.message }}</p>
       <template repeat='{{ button in dialog.buttons }}'>
-        <paper-button
-          affirmative?='{{ !button.dismissive }}' dismissive?='{{ button.dismissive }}'
-          class='dialogButton' on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'>
+        <uproxy-button affirmative?='{{ !button.dismissive }}'
+          dismissive?='{{ button.dismissive }}' class='dialogButton'
+          on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'
+          data-callbackIndex='{{ button.callbackIndex }}'>
           {{button.text}}
-        </paper-button>
+        </uproxy-button>
       </template>
     </uproxy-action-dialog>
 
@@ -366,21 +392,30 @@
         </uproxy-faq-link>{{ "CHANGE_STATS_CHOICE" | $$ }}
       </p>
       <p>{{ "ENABLE_METRICS" | $$ }}</p>
-      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</paper-button>
-      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</paper-button>
+      <uproxy-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
+      <uproxy-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
     </uproxy-action-dialog>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
-        opened="{{ core.disconnectedWhileProxying }}" autoCloseDisabled>
+        opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
         <h1>{{ "DISCONNECTED_TITLE" | $$ }}</h1>
+        <div id='progressWrapper'>
+          <div hidden?='{{ !ui.instanceTryingToGetAccessFrom }}'>
+            <strong>{{ 'RECONNECTING' | $$ }}</strong>
+            <paper-progress indeterminate='true'></paper-progress>
+          </div>
+          <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}' >
+            <strong>{{ 'RECONNECT_FAILED' | $$ }}</strong>
+            <uproxy-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</uproxy-button>
+          </div>
+        </div>
         <p>
           {{ "DISCONNECTED_MESSAGE" | $$ }}
         </p>
       </div>
-      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$ }}</paper-button>
-      <paper-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</paper-button>
+      <uproxy-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$ }}</uproxy-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>

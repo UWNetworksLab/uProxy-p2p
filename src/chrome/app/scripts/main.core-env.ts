@@ -5,23 +5,22 @@
  * loaded.
  */
 
-/// <reference path='../../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
-import freedom_types = require('freedom.types');
 
 import Chrome_oauth = require('./chrome_oauth');
 import ChromeUIConnector = require('./chrome_ui_connector');
 
-export interface OnEmitModule extends freedom_types.OnAndEmit<any,any> {};
+export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
-  freedom_types.FreedomModuleFactoryManager<OnEmitModule> {};
+  freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
 // Remember which handlers freedom has installed.
 var oauthOptions :{connector:ChromeUIConnector;} = {
   connector: null
 };
-export var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
+export var uProxyAppChannel :freedom.OnAndEmit<any,any>;
 export var moduleName = 'uProxy App Top Level';
 
 freedom('generic_core/freedom-module.json', {
@@ -39,10 +38,10 @@ freedom('generic_core/freedom-module.json', {
 // Reply to pings from the uproxy website that are checking if the
 // application is installed.
 chrome.runtime.onMessageExternal.addListener(
-    (request:Object, sender:Object,
-     sendResponse:(r:{message:string}) => void) => {
-        if (request) {
-          sendResponse({message: "Application installed."});
+    (request:{checkIfInstalled:boolean}, sender:Object,
+     sendResponse:(r:{appInstalled:boolean}) => void) => {
+        if (request && request.checkIfInstalled) {
+          sendResponse({ appInstalled: true });
         }
         return true;
     });

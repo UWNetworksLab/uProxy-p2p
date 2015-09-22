@@ -5,7 +5,7 @@
  * It handles the signaling channel between two peers, regardless of permission.
  */
 
-/// <reference path='../../../third_party/freedom-typings/port-control.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
@@ -73,7 +73,7 @@ var generateProxyingSessionId_ = (): string => {
     constructor(
       sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void,
       private userId_?:string,
-      private portControl_?:freedom_PortControl.PortControl
+      private portControl_?:freedom.PortControl.PortControl
     ) {
       this.sendUpdate_ = sendUpdate;
       this.resetSharerCreated();
@@ -131,7 +131,7 @@ var generateProxyingSessionId_ = (): string => {
         throw new Error('rtcToNet_ already exists');
       }
 
-      var config :freedom_RTCPeerConnection.RTCConfiguration = {
+      var config :freedom.RTCPeerConnection.RTCConfiguration = {
         iceServers: globals.settings.stunServers
       };
 
@@ -272,7 +272,7 @@ var generateProxyingSessionId_ = (): string => {
         port: 0
       });
 
-      var config :freedom_RTCPeerConnection.RTCConfiguration = {
+      var config :freedom.RTCPeerConnection.RTCConfiguration = {
         iceServers: globals.settings.stunServers
       };
 

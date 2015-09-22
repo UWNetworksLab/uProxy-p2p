@@ -20,7 +20,7 @@
  * The tricky bit is that the Instance is associated not with the 'human' chat
  * client, but with the 'uProxy' non-human client.
  */
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import remote_instance = require('./remote-instance');
@@ -53,7 +53,7 @@ var log :logging.Log = new logging.Log('remote-user');
     // Name of the user as provided by the social network.
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :social.ClientStatus };
-    public profile :freedom_Social.UserProfile;
+    public profile :freedom.Social.UserProfile;
 
     public consent :consent.State;
 
@@ -89,6 +89,7 @@ var log :logging.Log = new logging.Log('remote-user');
       this.name = 'pending';
       this.profile = {
         userId: this.userId,
+        name: '',
         timestamp: Date.now()
       }
       this.clientIdToStatusMap = {};
@@ -112,7 +113,7 @@ var log :logging.Log = new logging.Log('remote-user');
      * Update the information about this user.
      * The userId must match.
      */
-    public update = (profile :freedom_Social.UserProfile) : void => {
+    public update = (profile :freedom.Social.UserProfile) : void => {
       if (profile.userId != this.userId) {
         throw Error('Updating User ' + this.userId +
                     ' with unexpected userID: ' + profile.userId);

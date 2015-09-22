@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.8.19",
+  "version": "0.8.23",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -18,6 +18,7 @@
   ],
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
+    "browserify-zlib": "^0.1.4",
     "bower": "^1.4.1",
     "cca": "^0.7.1",
     "circular-json": "^0.1.6",
@@ -28,9 +29,10 @@
     "freedom-for-firefox": "^0.6.15",
     "freedom-pgp-e2e": "^0.5.0",
     "freedom-port-control": "^0.9.0",
-    "freedom-social-firebase": "^1.0.4",
+    "freedom-social-firebase": "^2.0.0",
     "freedom-social-xmpp": "^0.4.0",
     "freedom-social-github": "git://github.com/freedomjs/freedom-social-github",
+    "freedom-social-wechat": "^0.1.5",
     "freedomjs-anonymized-metrics": "~0.1.0",
     "fs-extra": "^0.12.0",
     "grunt": "^0.4.2",
@@ -54,7 +56,7 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.6.3",
-    "uproxy-lib": "^30.0.0",
+    "uproxy-lib": "^32.0.0",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
   },

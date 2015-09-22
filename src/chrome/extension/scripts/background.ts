@@ -54,8 +54,11 @@ chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.Messa
 chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runtime.MessageSender, sendResponse :Function) => {
   // Reply to pings from the uproxy website that are checking if the
   // extension is installed.
-  if (request) {
-    sendResponse({ message: 'Extension installed.' });
+  if (request && request.checkIfInstalled) {
+    sendResponse({ extensionInstalled: true });
+  } else if (request && request.openWindow) {
+    browserApi.bringUproxyToFront();
+    sendResponse({ launchedUproxy: true });
   }
   return true;
 });
@@ -133,24 +136,37 @@ var lastUrl = '';
 var lastUrlTime = 0;
 
 chrome.webRequest.onBeforeRequest.addListener(
-  function() {
-    return {cancel: true};
-  },
-  {urls: ['https://www.uproxy.org/oauth-redirect-uri*']},
-  ['blocking']
-);
+    function(details) {
+      browserApi.emit('inviteUrlData', details.url);
+      // TODO: If there are duplicate emits of this, consider the de-dupe logic
+      // used by the listener for copypaste links below.
+      return {
+          redirectUrl: chrome.extension.getURL('generic_ui/invite-received.html')
+      };
+    },
+    { urls: ['https://www.uproxy.org/invite/*'] },
+    ['blocking']
+    );
+
+chrome.webRequest.onBeforeRequest.addListener(
+    function() {
+        return { cancel: true };
+    },
+    { urls: ['https://www.uproxy.org/oauth-redirect-uri*'] },
+    ['blocking']
+    );
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
     var url = details.url;
 
-    // Chome seems to sometimes send the same url to us twice, we never
+    // Chrome seems to sometimes send the same url to us twice, we never
     // should be receiving the exact same data twice so de-dupe any url
     // with the last one we received before processing it.  We also want
     // to allow a url to be pasted twice if there has been at least a second
     // delay in order to allow users to try connecting again.
     if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-      browserApi.emit('urlData', url);
+      browserApi.emit('copyPasteUrlData', url);
     } else {
       console.warn('Received duplicate url events', url);
     }

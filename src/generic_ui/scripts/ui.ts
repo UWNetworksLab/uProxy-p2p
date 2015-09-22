@@ -126,7 +126,8 @@ export interface Contacts {
  * Specific to one particular Social network.
  */
 export interface Network {
-  name   :string;
+  name :string;
+  displayName :string;
   // TODO(salomegeo): Add more information about the user.
   userId :string;
   imageData ?:string;
@@ -152,21 +153,35 @@ export interface NotificationData {
  */
 export class UserInterface implements ui_constants.UiApi {
   public view :ui_constants.View;
+  public model = new Model();
 
-  // Instance you are getting access from.
-  // Null if you are not getting access.
+  /* Instance management */
+  // Instance you are getting access from. Null if you are not getting access.
   public instanceTryingToGetAccessFrom :string = null;
   private instanceGettingAccessFrom_ :string = null;
-
   // The instances you are giving access to.
   // Remote instances to add to this set are received in messages from Core.
   public instancesGivingAccessTo :{[instanceId :string] :boolean} = {};
-
   private mapInstanceIdToUser_ :{[instanceId :string] :User} = {};
 
+  /* Getting and sharing */
   public gettingStatus :string = null;
   public sharingStatus :string = null;
+  public unableToGet :boolean = false;
+  public unableToShare :boolean = false;
+  public isSharingDisabled :boolean = false;
+  public proxyingId: string; // ID of the most recent failed proxying attempt.
+  private userCancelledGetAttempt_ :boolean = false;
 
+  /* Copypaste */
+  /*
+   * This is used to store the information for setting up a copy+paste
+   * connection between establishing the connection and the user confirming
+   * the start of proxying
+   */
+  public copyPastePendingEndpoint :net.Endpoint = null;
+  public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
+  public copyPasteMessage :string;
   public copyPasteState :uproxy_core_api.ConnectionState = {
     localGettingFromRemote: social.GettingState.NONE,
     localSharingWithRemote: social.SharingState.NONE,
@@ -174,46 +189,26 @@ export class UserInterface implements ui_constants.UiApi {
     bytesReceived: 0
   };
 
-  public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
-  public copyPasteGettingMessages :social.PeerMessage[] = [];
-  public copyPasteSharingMessages :social.PeerMessage[] = [];
-
-  public browser :string = '';
-
-  // Changing this causes root.ts to fire a core-signal
-  // with the new value.
-  public signalToFire :string = '';
-
-  public toastMessage :string = null;
-  public unableToGet :boolean = false;
-  public unableToShare :boolean = false;
-
-  // ID of the most recent failed proxying attempt.
-  public proxyingId: string;
-
-  // is a proxy currently set
-  private proxySet_ :boolean = false;
-
-  // Must be included in Chrome extension manifest's list of permissions.
-  public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
-
-  /*
-   * This is used to store the information for setting up a copy+paste
-   * connection between establishing the connection and the user confirming
-   * the start of proxying
-   */
-  public copyPastePendingEndpoint :net.Endpoint = null;
-
-  public isSharingDisabled = false;
-
+  /* Translation */
   public i18n_t :Function = translator_module.i18n_t;
   public i18n_setLng :Function = translator_module.i18n_setLng;
 
-  public model = new Model();
+  /* Constants */
+  // Must be included in Chrome extension manifest's list of permissions.
+  public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
 
+  /* About this uProxy installation */
+  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
+  public browser :string = '';
   public availableVersion :string = null;
 
-  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
+  // Changing this causes root.ts to fire a core-signal with the new value.
+  public signalToFire :Object = null;
+
+  public toastMessage :string = null;
+
+  public showInviteControls: boolean = false;
+
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -222,8 +217,7 @@ export class UserInterface implements ui_constants.UiApi {
   constructor(
       public core   :CoreConnector,
       public browserApi :BrowserAPI) {
-    // TODO: Determine the best way to describe view transitions.
-    this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
+    this.updateView_();
     this.i18n_setLng(this.model.globalSettings.language);
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
@@ -234,7 +228,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     core.on('core_connect', () => {
-      this.view = ui_constants.View.SPLASH;
+      this.updateView_();
 
       core.getFullState()
           .then(this.updateInitialState);
@@ -246,13 +240,9 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.BROWSER_ERROR;
 
       if (this.isGettingAccess()) {
-        this.stopGettingInUiAndConfig({instanceId: null, error: true});
+        this.stoppedGetting({instanceId: null, error: true});
       }
     });
-
-    core.connect();
-
-    core.onUpdate(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_10, this.updateInitialState);
 
     // Add or update the online status of a network.
     core.onUpdate(uproxy_core_api.Update.NETWORK, this.syncNetwork_);
@@ -269,21 +259,13 @@ export class UserInterface implements ui_constants.UiApi {
       // TODO: Display the message in the 'manual network' UI.
     });
 
-    core.onUpdate(uproxy_core_api.Update.COPYPASTE_MESSAGE,
-        (message :uproxy_core_api.CopyPasteMessages) => {
-      switch (message.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          this.copyPasteGettingMessages = message.data;
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          this.copyPasteSharingMessages = message.data;
-          break;
-      }
+    core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
+      this.copyPasteMessage = message;
     });
 
     // indicates the current getting connection has ended
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
-      this.stopGettingInUiAndConfig({instanceId: null, error: error});
+      this.stoppedGetting({instanceId: null, error: error});
     });
 
     // indicates we just started offering access through copy+paste
@@ -308,7 +290,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
         (data :social.StopProxyInfo) => { // TODO better type
-        this.stopGettingInUiAndConfig(data);
+        this.stoppedGetting(data);
     });
 
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
@@ -367,13 +349,25 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.FAILED_TO_GET,
         (info:uproxy_core_api.FailedToGetOrGive) => {
-      console.error('proxying attempt ' + info.proxyingId + ' failed (getting)');
+      if (this.userCancelledGetAttempt_) {
+        console.error('proxying attempt ' + info.proxyingId +
+            ' cancelled (getting)');
+        this.userCancelledGetAttempt_ = false; // Reset.
+      } else {
+        console.error('proxying attempt ' + info.proxyingId +
+            ' failed (getting)');
+        if (!this.core.disconnectedWhileProxying) {
+          // This is an immediate failure, i.e. failure of a connection attempt
+          // that never connected.  It is not a retry.
+          // Show the error toast indicating that a get attempt failed.
+          this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
+            name: info.name
+          });
+          this.unableToGet = true;
+        }
+      }
 
-      this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
-        name: info.name
-      });
       this.instanceTryingToGetAccessFrom = null;
-      this.unableToGet = true;
       this.proxyingId = info.proxyingId;
       this.bringUproxyToFront();
     });
@@ -389,7 +383,8 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.setPortControlSupport_);
 
-    browserApi.on('urlData', this.handleUrlData);
+    browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
+    browserApi.on('inviteUrlData', this.handleInviteUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
@@ -401,8 +396,46 @@ export class UserInterface implements ui_constants.UiApi {
   // Because of an observer (in root.ts) watching the value of
   // signalToFire, this function simulates firing a core-signal
   // from the background page.
-  public fireSignal = (signal :string) => {
-    this.signalToFire = signal;
+  public fireSignal = (signalName :string, data ?:Object) => {
+    this.signalToFire = {name: signalName, data: data};
+  }
+
+  private confirmationCallbacks_ :{[index :number] :Function} = {};
+  // Don't use index 0 as it may be treated as false in confirmation code.
+  private confirmationCallbackIndex_ = 1;
+  public getConfirmation = (heading :string, text :string) => {
+    return new Promise((F, R) => {
+      var fulfillIndex = ++this.confirmationCallbackIndex_;
+      var rejectIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[fulfillIndex] = F;
+      this.confirmationCallbacks_[rejectIndex] = R;
+      this.fireSignal('open-dialog', {
+        heading: heading,
+        message: text,
+        buttons: [{
+          text: this.i18n_t("YES"),
+          callbackIndex: fulfillIndex
+        }, {
+          text: this.i18n_t("NO"),
+          callbackIndex: rejectIndex,
+          dismissive: true
+        }]
+      });
+    });
+  }
+
+  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+    if (index > this.confirmationCallbackIndex_) {
+      console.error('Confirmation callback not found: ' + index);
+      return;
+    }
+    this.confirmationCallbacks_[index]();
+    delete this.confirmationCallbacks_[index];
+    if (fulfill) {
+      delete this.confirmationCallbacks_[index + 1];
+    } else {
+      delete this.confirmationCallbacks_[index - 1];
+    }
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -486,34 +519,67 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public parseUrlData = (url :string) :{ type :social.PeerMessageType; messages :social.PeerMessage[]; } => {
-    var payload :social.PeerMessage[];
-    var type :social.PeerMessageType;
-
+  public parseUrlData = (url:string) : { type:social.PeerMessageType; message:string } => {
     var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
     if (!match) {
-      return null;
+      throw new Error('invalid URL format');
     }
-
-    try {
-      payload = JSON.parse(atob(decodeURIComponent(match[2])));
-    } catch (e) {
-      return null;
-    }
-
-    if (match[1] === 'request') {
-      type = social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER;
-    } else if (match[1] === 'offer') {
-      type = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
-    } else {
-      return null;
-    }
-
-    return {type: type, messages: payload};
+    return {
+      type: match[1] === 'request' ?
+          social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER :
+          social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
+      message: decodeURIComponent(match[2])
+    };
   }
 
-  public handleUrlData = (url :string) => {
-    console.log('received url data from browser');
+  private addUserWithConfirmation_ = (url: string) : Promise<void> => {
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var userName = tokenObj.userName;
+    } catch(e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+    return this.getConfirmation('', 'Would you like to add ' + userName + '?')
+        .then(() => {
+      return this.core.addUser(url);
+    });
+  }
+
+  public handleInviteUrlData = (url :string) => {
+    var showUrlError = () => {
+      this.fireSignal('open-dialog', {
+        heading: '',
+        message: 'There was an error with your invite URL. Please try again.',
+        buttons: [{
+          text: this.i18n_t("OK")
+        }]
+      });
+    };
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+    } catch(e) {
+      showUrlError();
+      return;
+    }
+    if (!this.model.getNetwork(networkName)) {
+      this.getConfirmation('Login Required', 'You need to log into ' +
+            this.getNetworkDisplayName(networkName)).then(() => {
+        this.login(networkName).then(() => {
+          this.view = ui_constants.View.ROSTER;
+          this.bringUproxyToFront();
+          this.addUserWithConfirmation_(url).catch(showUrlError);
+        });
+      });
+    } else {
+      this.addUserWithConfirmation_(url).catch(showUrlError);;
+    }
+  }
+    
+  public handleCopyPasteUrlData = (url: string) => {
+    console.log('received one-time URL from browser');
 
     if (this.model.onlineNetworks.length > 0) {
       console.log('Ignoring URL since we have an active network');
@@ -527,40 +593,34 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
 
+    // do not use the updateView function here, actual state may not have been
+    // processed yet
     this.view = ui_constants.View.COPYPASTE;
     this.copyPasteError = ui_constants.CopyPasteError.NONE;
 
-    var parsed = this.parseUrlData(url);
-    if (parsed === null) {
-      console.error('Tried to use invalid copy+paste URL');
-      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
-      return;
-    }
+    try {
+      var parsed = this.parseUrlData(url);
 
-    // at this point, we assume everything is good, so let's check state
-    switch (parsed.type) {
-      case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-        this.copyPasteSharingMessages = [];
-        this.core.startCopyPasteShare();
-        break;
-      case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-        if (social.GettingState.TRYING_TO_GET_ACCESS
-            !== this.copyPasteState.localGettingFromRemote) {
-          console.warn('currently not expecting any information, aborting');
-          this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
-          return;
-        }
-        break;
-    }
-
-    console.log('Sending messages from url to app');
-    for (var i in parsed.messages) {
-      if (parsed.messages[i].type !== parsed.type) {
-        this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
-        return;
+      // at this point, we assume everything is good, so let's check state
+      switch (parsed.type) {
+        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
+          this.core.startCopyPasteShare();
+          break;
+        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
+          if (social.GettingState.TRYING_TO_GET_ACCESS
+              !== this.copyPasteState.localGettingFromRemote) {
+            console.warn('currently not expecting any information, aborting');
+            this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
+            return;
+          }
+          break;
       }
 
-      this.core.sendCopyPasteSignal(parsed.messages[i]);
+      console.log('sending one-time string to app');
+      this.core.sendCopyPasteSignal(parsed.message);
+    } catch (e) {
+      console.error('invalid one-time URL: ' + e.message);
+      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
     }
   }
 
@@ -573,33 +633,59 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   /**
-   * Removes proxy indicators from UI and undoes proxy configuration
-   * (e.g. chrome.proxy settings).
+   * Takes all actions required when getting stops, including removing proxy
+   * indicators from the UI, and retrying the connection if appropriate.
    * If user didn't end proxying, so if proxy session ended because of some
    * unexpected reason, user should be asked before reverting proxy settings.
    * if data.instanceId is null, it means to stop active proxying.
    */
-  public stopGettingInUiAndConfig = (data :social.StopProxyInfo) => {
-    if (data.instanceId) {
-      this.mapInstanceIdToUser_[data.instanceId].isSharingWithMe = false;
-    } else if (this.instanceGettingAccessFrom_) {
-      this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].isSharingWithMe = false;
+  public stoppedGetting = (data :social.StopProxyInfo) => {
+    var instanceId = data.instanceId || this.instanceGettingAccessFrom_;
+
+    if (instanceId === this.instanceGettingAccessFrom_) {
+      this.instanceGettingAccessFrom_ = null;
+    }
+
+    if (instanceId) {
+      this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
     }
 
     if (data.error) {
-      this.bringUproxyToFront();
-      this.core.disconnectedWhileProxying = true;
-    } else {
-      this.core.disconnectedWhileProxying = false;
-      if (data.instanceId === null ||
-          data.instanceId === this.instanceGettingAccessFrom_) {
-        this.instanceGettingAccessFrom_ = null;
-        this.browserApi.stopUsingProxy();
+      if (instanceId) {
+        // Auto-retry.
+        this.core.disconnectedWhileProxying = instanceId;
+        this.restartProxying();
+      } else {
+        // this handles the case where it was a one-time connection
+        this.core.disconnectedWhileProxying = 'unknown';
       }
+
+      // regardless, let the user know
+      this.bringUproxyToFront();
     }
 
     this.updateGettingStatusBar_();
     this.updateIcon_();
+  }
+
+  /**
+   * Undoes proxy configuration (e.g. chrome.proxy settings).
+   */
+  public stopUsingProxy = (userCancelled ?:boolean) => {
+    if (userCancelled) {
+      this.userCancelledGetAttempt_ = true;
+    }
+
+    this.browserApi.stopUsingProxy();
+    this.core.disconnectedWhileProxying = null;
+    this.updateIcon_();
+
+    // revertProxySettings might call stopUsingProxy while a reconnection is
+    // still being attempted.  In that case, we also want to terminate the
+    // in-progress connection.
+    if (this.instanceTryingToGetAccessFrom) {
+      this.stopGettingFromInstance(this.instanceTryingToGetAccessFrom);
+    }
   }
 
   private getInstancePath_ = (instanceId :string) => {
@@ -616,7 +702,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public restartProxying = () => {
-    this.startGettingFromInstance(this.instanceGettingAccessFrom_);
+    this.startGettingFromInstance(this.core.disconnectedWhileProxying);
   }
 
   public startGettingFromInstance = (instanceId :string) :Promise<void> => {
@@ -632,6 +718,9 @@ export class UserInterface implements ui_constants.UiApi {
         this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
       }
       this.startGettingInUiAndConfig(instanceId, endpoint);
+    }, (err:Error) => {
+      this.instanceTryingToGetAccessFrom = null;
+      throw err;
     });
   }
 
@@ -663,7 +752,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
     }
 
-    this.core.disconnectedWhileProxying = false;
+    this.core.disconnectedWhileProxying = null;
 
     this.startGettingInUi();
 
@@ -735,6 +824,7 @@ export class UserInterface implements ui_constants.UiApi {
       if (!existingNetwork) {
         existingNetwork = {
           name: networkMsg.name,
+          displayName: networkMsg.displayName,
           userId: networkMsg.userId,
           roster: {},
           logoutExpected: false,
@@ -748,15 +838,17 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
-            (networkMsg.name === 'Google' || networkMsg.name === 'Facebook') &&
+            // TODO: fix this mess of name vs displayName
+            (networkMsg.name === 'GMail' || networkMsg.displayName === 'Facebook') &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
         } else {
           if (this.instanceGettingAccessFrom_) {
-            this.stopGettingInUiAndConfig({instanceId: null, error: true});
+            this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
           }
-          this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
+          this.showNotification(
+            this.i18n_t("LOGGED_OUT", { network: networkMsg.displayName }));
 
           if (!this.model.onlineNetworks.length) {
             this.view = ui_constants.View.SPLASH;
@@ -765,7 +857,9 @@ export class UserInterface implements ui_constants.UiApi {
       }
     }
 
+    this.updateView_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private syncUserSelf_ = (payload :social.UserData) => {
@@ -817,10 +911,15 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     for (var i = 0; i < payload.offeringInstances.length; i++) {
-      if (payload.offeringInstances[i].localGettingFromRemote ===
-          social.GettingState.GETTING_ACCESS) {
-        this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+      var gettingState = payload.offeringInstances[i].localGettingFromRemote;
+      var instanceId = payload.offeringInstances[i].instanceId;
+      if (gettingState === social.GettingState.GETTING_ACCESS) {
+        this.instanceGettingAccessFrom_ = instanceId;
         user.isSharingWithMe = true;
+        this.updateGettingStatusBar_();
+        break;
+      } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
+        this. instanceTryingToGetAccessFrom = instanceId;
         this.updateGettingStatusBar_();
         break;
       }
@@ -881,18 +980,19 @@ export class UserInterface implements ui_constants.UiApi {
       // Ensure that the user is still attempting to reconnect (i.e. they
       // haven't clicked to stop reconnecting while we were waiting for the
       // ping response).
+      // TODO: this doesn't work quite right if the user is signed into multiple social networks
       if (this.model.reconnecting) {
         this.core.login({network: network, reconnect: true}).then(() => {
+          // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
           this.stopReconnect();
         }).catch((e) => {
           // Reconnect failed, give up.
+          // TODO: this may have only failed for 1 of multiple networks
           this.stopReconnect();
           this.showNotification(
               this.i18n_t("LOGGED_OUT", { network: network }));
 
-          if (!this.model.onlineNetworks.length) {
-            this.view = ui_constants.View.SPLASH;
-          }
+          this.updateView_();
         });
       }
     });
@@ -975,14 +1075,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // Maybe refactor this to be copyPasteState.
     this.copyPasteState = state.copyPasteState.connectionState;
-    this.copyPasteGettingMessages = state.copyPasteState.gettingMessages;
-    this.copyPasteSharingMessages = state.copyPasteState.sharingMessages;
     this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
-    if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
-        this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
-      // This means we had active copy-paste flow.
-      this.view = ui_constants.View.COPYPASTE;
-    }
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];
@@ -996,24 +1089,26 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (state.onlineNetworks.length > 0) {
       // Check that we dont' have copy paste connection
-      if (this.view === ui_constants.View.COPYPASTE) {
+      if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
+          this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
         console.error(
             'User cannot be online while having a copy-paste connection');
       }
-      // Set view to roster, user is online.
-      this.view = ui_constants.View.ROSTER;
-      this.updateSharingStatusBar_();
     }
 
     this.portControlSupport = state.portControlSupport;
 
-    // state of online networks may have changed, update it
+    // plenty of state may have changed, update it
+    this.updateView_();
+    this.updateSharingStatusBar_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
     this.model.onlineNetworks.push({
-      name:   networkState.name,
+      name: networkState.name,
+      displayName: networkState.displayName,
       userId: networkState.profile.userId,
       userName: networkState.profile.name,
       imageData: networkState.profile.imageData,
@@ -1048,6 +1143,42 @@ export class UserInterface implements ui_constants.UiApi {
 
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
     this.portControlSupport = support;
+  }
+
+  // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
+  public getNetworkDisplayName = (networkName :string) => {
+    return networkName == 'Facebook-Firebase-V2' ? 'Facebook' : networkName;
+  }
+
+  // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
+  private supportsInvites_ = (networkName :string) => {
+    return networkName === 'Facebook-Firebase-V2' ||
+        networkName === 'GMail' ||
+        networkName === 'GitHub';
+  }
+
+  private updateShowInviteControls_ = () => {
+    var showControls = false;
+    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
+      if (this.supportsInvites_(this.model.onlineNetworks[i].name)) {
+        showControls = true;
+        break;
+      }
+    }
+    this.showInviteControls = showControls;
+  }
+
+  // this takes care of updating the view (given the assumuption that we are
+  // connected to the core)
+  private updateView_ = () => {
+    if (this.model.onlineNetworks.length > 0) {
+      this.view = ui_constants.View.ROSTER;
+    } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
+               this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
+      this.view = ui_constants.View.COPYPASTE;
+    } else {
+      this.view = ui_constants.View.SPLASH;
+    }
   }
 } // class UserInterface
 
