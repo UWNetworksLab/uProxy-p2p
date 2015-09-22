@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "churn chat",
-  "description": "Single-page obfuscated chat.",
+  "name": "Simple chat",
+  "description": "Single-page chat.",
   "version": "0.1",
   "minimum_chrome_version": "41.0.2267.0",
   "app": {
