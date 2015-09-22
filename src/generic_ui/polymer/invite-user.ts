@@ -17,12 +17,12 @@ Polymer({
       core.sendEmail({
           networkInfo: selectedNetworkInfo,
           to: this.inviteUserEmail,
-          subject: 'Join me on uProxy',
-          body: 'Click here to join me on uProxy ' + inviteUrl
+          subject: ui.i18n_t('INVITE_EMAIL_SUBJECT'),
+          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: inviteUrl })
       });
       this.fire('open-dialog', {
-        heading: 'Invitation Email sent', // TODO: translate
-        message: '',  // TODO:
+        heading: '',
+        message: ui.i18n_t("INVITE_EMAIL_SENT"),
         buttons: [{
           text: ui.i18n_t("OK")
         }]

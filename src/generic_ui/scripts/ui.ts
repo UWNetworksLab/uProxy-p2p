@@ -540,17 +540,21 @@ export class UserInterface implements ui_constants.UiApi {
     } catch(e) {
       return Promise.reject('Error parsing invite URL');
     }
-    return this.getConfirmation('', 'Would you like to add ' + userName + '?')
-        .then(() => {
+    var confirmationMessage =
+        this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
+    return this.getConfirmation('', confirmationMessage).then(() => {
       return this.core.addUser(url);
-    });
+    }).catch((e) => {
+      // The user did not confirm adding their friend, not an error.
+      return;
+    })
   }
 
   public handleInviteUrlData = (url :string) => {
     var showUrlError = () => {
       this.fireSignal('open-dialog', {
         heading: '',
-        message: 'There was an error with your invite URL. Please try again.',
+        message: this.i18n_t("INVITE_URL_ERROR"),
         buttons: [{
           text: this.i18n_t("OK")
         }]
@@ -565,8 +569,11 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
     if (!this.model.getNetwork(networkName)) {
-      this.getConfirmation('Login Required', 'You need to log into ' +
-            this.getNetworkDisplayName(networkName)).then(() => {
+      var confirmationTitle = this.i18n_t('LOGIN_REQUIRED_TITLE');
+      var confirmationMessage =
+          this.i18n_t('LOGIN_REQUIRED_MESSAGE',
+                      { network: this.getNetworkDisplayName(networkName) });
+      this.getConfirmation(confirmationTitle, confirmationMessage).then(() => {
         this.login(networkName).then(() => {
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();

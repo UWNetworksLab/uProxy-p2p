@@ -734,5 +734,81 @@
   "LEARN_MORE": {
     "description": "Generic label for links to FAQ.",
     "message": "Learn more"
+  },
+  "FRIEND_ADDED": {
+    "description": "Confirmation message after adding a friend to the roster.",
+    "message": "Friend added"
+  },
+  "FRIEND_ADD_ERROR": {
+    "description": "Error message when a friend cannot be added to the roster.",
+    "message": "There was an error adding your friend."
+  },
+  "INVITE_EMAIL_SENT": {
+    "description": "Confirmation message after an invite email has been sent",
+    "message": "Invitation email sent."
+  },
+  "ENTER_INVITE_CODE": {
+    "description": "Title for screen where user enters an invite code",
+    "message": "Enter an invite code"
+  },
+  "ENTER_INVITE_CODE_DESCRIPTION": {
+    "description": "Instructions for user to enter an invite code",
+    "message": "If you've received an invitation from a friend you'd like to use uProxy with, paste it here:"
+  },
+  "SUBMIT_BUTTON_TEXT": {
+    "description": "Button that submits some data entered by the user, e.g. entering a friend invite",
+    "message": "Submit"
+  },
+  "INVITE_LINK_FROM_ACCEPT_PAGE": {
+    "description": "Link to send an invite if the user is already on the accept-invite page.",
+    "message": "Click here if you would like to send an invitation to a friend"
+  },
+  "INVITE_A_FRIEND": {
+    "description": "Title for screen where user invites a friend to uProxy",
+    "message": "Invite a friend"
+  },
+  "HOW_TO_INVITE_FRIENDS": {
+    "description": "Question above network select dropdown on invite screen",
+    "message": "How would you like to invite to your friends?"
+  },
+  "FACEBOOK_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for Facebook",
+    "message": "Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list."
+  },
+  "GMAIL_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for GMail",
+    "message": "Enter your friend's email address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list."
+  },
+  "SEND_INVITATION": {
+    "description": "Button text to initiate sending an invitation",
+    "message": "Send invitation"
+  },
+  "ACCEPT_LINK_FROM_INVITE_PAGE": {
+    "description": "Link to accept an invite if the user is already on the send an invite page",
+    "message": "Click here if you have an invitation from a friend that you would like to use."
+  },
+  "ACCEPT_INVITE_CONFIRMATION": {
+    "description": "Confirmation message when accepting an invite.",
+    "message": "Would you like to add __name__?"
+  },
+  "LOGIN_REQUIRED_TITLE": {
+    "description": "Title for confirmation that the user must login to a network to accept an invitation",
+    "message": "Login Required"
+  },
+  "LOGIN_REQUIRED_MESSAGE": {
+    "description": "Message for confirmation that the user must login to a network to accept an invitation",
+    "message": "To accept this invitation, you will need to log into __network__."
+  },
+  "INVITE_URL_ERROR": {
+    "description": "Error message shown for invalid invite URLs",
+    "message": "There was an error with your invite URL."
+  },
+  "INVITE_EMAIL_SUBJECT": {
+    "description": "Default email subject for sending an uProxy invite",
+    "message": "Join me on uProxy"
+  },
+  "INVITE_EMAIL_BODY": {
+    "description": "Default email body for sending an uProxy invite",
+    "message": "Hi, I'd like to invite you to uProxy.  Click here to join me: __url__"
   }
 }
