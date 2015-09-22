@@ -14,6 +14,18 @@ Polymer({
     name: 'unknown'
   },
   toggle: function() {
+    if (this.contact.status == "2") {
+      return;
+    }
+
+    if (!this.isExpanded) {
+      // Hide the status before we start opening the core-collapse.
+      this.hideOnlineStatus = true;
+    } else {
+      // Let core-collapse close before reshowing the online status.
+      setTimeout(() => { this.hideOnlineStatus = false; }, 400);
+    }
+
     if (this.model.globalSettings.mode == ui_constants.Mode.SHARE) {
       this.contact.shareExpanded = !this.contact.shareExpanded;
     } else if (this.model.globalSettings.mode == ui_constants.Mode.GET) {
@@ -26,6 +38,7 @@ Polymer({
     this.model = ui_context.model;
     this.GettingConsentState = user.GettingConsentState;
     this.SharingConsentState = user.SharingConsentState;
+    this.hideOnlineStatus = this.isExpanded;
   },
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
@@ -82,9 +95,24 @@ Polymer({
     // a level up does not pick up on changes in contact properties
     this.fire('contact-changed');
   },
+  getExpandedChanged: function(oldIsExpanded :boolean, newIsExpanded :boolean) {
+    if (newIsExpanded && this.mode == ui_constants.Mode.GET) {
+      this.hideOnlineStatus = true;
+    }
+  },
+  shareExpandedChanged: function(oldIsExpanded :boolean, newIsExpanded :boolean) {
+    if (newIsExpanded && this.mode == ui_constants.Mode.SHARE) {
+      this.hideOnlineStatus = true;
+    }
+  },
   observe: {
     'contact.isSharingWithMe': 'fireChanged',
     'contact.isGettingFromMe': 'fireChanged',
     'contact.isOnline': 'fireChanged',
+    'contact.getExpanded': 'getExpandedChanged', /* handle changes from ui.ts, toggle() handles other cases */
+    'contact.shareExpanded': 'shareExpandedChanged'
   },
+  computed: {
+    'isExpanded': '(mode === ui_constants.Mode.GET && contact.getExpanded) || (mode === ui_constants.Mode.SHARE && contact.shareExpanded)'
+  }
 });

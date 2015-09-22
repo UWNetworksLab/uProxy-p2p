@@ -26,7 +26,8 @@
       <uproxy-contact contact='{{ c }}'
           hidden?='{{ hideForSearch(c.name, searchQuery) }}'
           isOnline='{{ c.isOnline }}'
-          on-contact-changed='{{ contactsChanged }}'>
+          on-contact-changed='{{ contactsChanged }}'
+          mode='{{ mode }}'>
       </uproxy-contact>
     </template>
 
