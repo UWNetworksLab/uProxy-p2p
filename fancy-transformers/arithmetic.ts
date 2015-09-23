@@ -25,18 +25,6 @@ var log :logging.Log = new logging.Log('fancy-transformers');
 //    bytes) that are represented by a counter counting their number.
 // 4. The last part is represented by the low end range variable of the encoder.
 
-// Returns the highest number in a list of numbers
-function max(items :number[]) :number {
-  var highest :number = 0;
-  for(var i = 0; i < items.length; i++) {
-    if (items[i] > highest) {
-      highest = items[i];
-    }
-  }
-
-  return highest;
-}
-
 // Returns the sum of a list of numbers
 function sum(items :number[]) :number {
   var total :number = 0;
@@ -184,7 +172,7 @@ export class Coder {
     const MAX_SUM :number = 16384;
 
     // If any single probability is too high, rescale.
-    var highestProb = max(probs);
+    var highestProb = Math.max(...probs);
     if (highestProb > MAX_PROB) {
       var divisor = highestProb / SCALER;
       probs = scale(probs, divisor);
