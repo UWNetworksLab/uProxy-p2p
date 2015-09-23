@@ -41,7 +41,6 @@ for transformer in transformers:
   try:
     # Start the relevant config.
     run_pair = subprocess.Popen(['./run_pair.sh',
-        '-v',
         '-p', args.clone_path,
         browser_spec, browser_spec],
         universal_newlines=True,
