@@ -262,7 +262,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   // Resets the copy/paste signal batcher.
-  // TODO: enable compression
   private resetBatcher_ = () : void => {
     this.batcher_ = new onetime.SignalBatcher<social.PeerMessage>((signal:string) => {
       ui.update(uproxy_core_api.Update.ONETIME_MESSAGE, signal);
@@ -273,7 +272,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       // returns true.
       return signal.data && (<any>signal.data).signals &&
         bridge.isTerminatingSignal(<bridge.SignallingMessage>signal.data);
-    }, false);
+    }, true);
   }
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
