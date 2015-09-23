@@ -7,7 +7,7 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 // Make a sample distribution where all probabilities are equal.
 function makeUniformProbabilities() :number[] {
   let probs :number[] = [];
-  for(let index = 0; index<256; index++) {
+  for(let index = 0; index < 256; index++) {
     probs[index] = 1;
   }
 
