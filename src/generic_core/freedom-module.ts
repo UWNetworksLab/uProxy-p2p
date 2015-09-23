@@ -88,9 +88,13 @@ ui_connector.onPromiseCommand(
     uproxy_core_api.Command.START_PROXYING,
     core.start);
 
+// ui_connector.onPromiseCommand(
+//     uproxy_core_api.Command.ACCEPT_INVITATION,
+//     core.acceptInvitation);
+
 ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.ADD_USER,
-    core.addUser);
+    uproxy_core_api.Command.SEND_INVITATION,
+    core.inviteUser);
 
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_INVITE_URL,
@@ -146,11 +150,7 @@ ui_connector.onPromiseCommand(
     uproxy_core_api.Command.PING_UNTIL_ONLINE,
     core.pingUntilOnline);
 
-ui_connector.onCommand(
+ui_connector.onPromiseCommand(
     uproxy_core_api.Command.ACCEPT_INVITATION,
-    (userPath :social.UserPath) => {
-      var network = social_network.getNetwork(userPath.network.name,
-                                              userPath.network.userId);
-      network.acceptInvitation(userPath.userId);
-    });
+    core.acceptInvitation);
 

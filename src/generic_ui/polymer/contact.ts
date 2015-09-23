@@ -53,7 +53,7 @@ Polymer({
       },
       userId: this.contact.userId
     };
-    ui_context.core.acceptInvitation(path);
+    ui_context.core.acceptInvitation({userPath: path, data: this.contact.userId});
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
   modifyConsent: function(action :uproxy_core_api.ConsentUserAction) {

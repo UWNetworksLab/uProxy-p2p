@@ -8,12 +8,12 @@ import uproxy_core_api = require('./uproxy_core_api');
 
 export interface UserPath {
   network :SocialNetworkInfo;
-  userId :string;
+  userId :string; // My friend
 }
 
 export interface SocialNetworkInfo {
   name :string;
-  userId :string;
+  userId :string; // Me
 }
 
 export interface InstancePath extends UserPath {
@@ -283,8 +283,8 @@ export interface Network {
   /**
    * Ask the social network to add the user.
    */
-  acceptInvitation: (userId: string) => void;
-
+  acceptInvitation: (data: string) => Promise<void>;
+  inviteUser(optionalUserId :string): Promise<void>;
   addUserRequest: (networkData :string) => Promise<void>;
 
   /**

@@ -299,46 +299,66 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  public addUser = (inviteUrl: string): Promise<void> => {
-    try {
-      var userData = JSON.parse(inviteUrl);
-      console.log(userData);
-      if (userData.userId) {
-        var networks = social_network.networks['GitHub'];
-        networks[Object.keys(networks)[0]].addUserRequest(
-          JSON.stringify({userId: userData.userId}));
-        return Promise.resolve<void>();
-      }
-
-      // var networks = social_network.networks['GitHub'];
-      // networks[Object.keys(networks)[0]].addUserRequest(
-      //   JSON.stringify({networkName: "GitHub", networkData:userData.userId);
-    } catch (e) {
-      console.log("not GitHub");
-      //return Promise.reject('Error parsing invite URL');
+  public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
+    // TODO: clean this up - hack to find the one network
+    var network: social.Network;
+    for (var userId in social_network.networks[data.networkId]) {
+      network = social_network.networks[data.networkId][userId];
+      break;
     }
-
-    try {
-      // inviteUrl may be a URL with a token, or just the token.  Remove the
-      // prefixed URL if it is set.
-      var token = inviteUrl.lastIndexOf('/') >= 0 ?
-          inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
-      var tokenObj = JSON.parse(atob(token));
-      var networkName = tokenObj.networkName;
-      var networkData = tokenObj.networkData;
-      if (!social_network.networks[networkName]) {
-        return Promise.reject('invite URL had invalid social network');
-      }
-    } catch (e) {
-      return Promise.reject('Error parsing invite URL');
-    }
-
-    // This code assumes the user is only signed in once to any given network.
-    for (var userId in social_network.networks[networkName]) {
-      return social_network.networks[networkName][userId]
-          .addUserRequest(networkData);
-    }
+    return network.inviteUser(data.userName);
   }
+
+  public acceptInvitation = (obj: {userPath :social.UserPath; data :string}): Promise<void> => {
+    var userId = obj.userPath.network.userId;
+    if (!userId) {
+      // Take the first key in the userId to social network map as the current user.
+      // Assumes the user is only signed in once to any given network.
+      userId = Object.keys(social_network.networks[obj.userPath.network.name])[0];
+    }
+    var network = social_network.getNetwork(obj.userPath.network.name, userId);
+    return network.acceptInvitation(obj.data);
+  }
+
+    // try {
+    //   var userData = JSON.parse(inviteUrl);
+    //   console.log(userData);
+    //   if (userData.userId) {
+    //     var networks = social_network.networks['GitHub'];
+    //     networks[Object.keys(networks)[0]].addUserRequest(
+    //       JSON.stringify({userId: userData.userId}));
+    //     return Promise.resolve<void>();
+    //   }
+
+    //   // var networks = social_network.networks['GitHub'];
+    //   // networks[Object.keys(networks)[0]].addUserRequest(
+    //   //   JSON.stringify({networkName: "GitHub", networkData:userData.userId);
+    // } catch (e) {
+    //   console.log("not GitHub");
+    //   //return Promise.reject('Error parsing invite URL');
+    // }
+
+    // try {
+    //   // inviteUrl may be a URL with a token, or just the token.  Remove the
+    //   // prefixed URL if it is set.
+    //   var token = inviteUrl.lastIndexOf('/') >= 0 ?
+    //       inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
+    //   var tokenObj = JSON.parse(atob(token));
+    //   var networkName = tokenObj.networkName;
+    //   var networkData = tokenObj.networkData;
+    //   if (!social_network.networks[networkName]) {
+    //     return Promise.reject('invite URL had invalid social network');
+    //   }
+    // } catch (e) {
+    //   return Promise.reject('Error parsing invite URL');
+    // }
+
+    // // This code assumes the user is only signed in once to any given network.
+    // for (var userId in social_network.networks[networkName]) {
+    //   return social_network.networks[networkName][userId]
+    //       .addUserRequest(networkData);
+    // }
+  //}
 
   public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
     var network = social_network.networks[networkInfo.name][networkInfo.userId];

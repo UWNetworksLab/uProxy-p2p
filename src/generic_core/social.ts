@@ -267,6 +267,10 @@ export function getNetworkDisplayName(networkName :string) : string {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
+    public inviteUser = (userName: string): Promise<void> => {
+      throw new Error("Operation not implemented.");
+    }
+
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
@@ -290,6 +294,10 @@ export function getNetworkDisplayName(networkName :string) : string {
       throw new Error('Operation not implemented');
     }
 
+    // public inviteUser = (userName: string): Promise<void> => {
+    //   throw new Error('Operation not implemented');
+    // }
+
     public getInviteUrl = () : Promise<string> => {
       throw new Error('Operation not implemented');
     }
@@ -308,7 +316,8 @@ export function getNetworkDisplayName(networkName :string) : string {
       return options ? options.areAllContactsUproxy === true : false;
     }
 
-    public acceptInvitation = (userId :string) => {
+    public acceptInvitation = (data :string) : Promise<void> => {
+      throw new Error('Operation not implemented');
     }
 
   }  // class AbstractNetwork
@@ -610,16 +619,30 @@ export function getNetworkDisplayName(networkName :string) : string {
 
 // =======
     public addUserRequest = (networkData :string): Promise<void> => {
-      console.log('addUserRequest for network: ' + this.name);
-      if (this.name == 'GitHub') {
-        return this.freedomApi_.inviteUser(JSON.parse(networkData)['userId'])
-            .catch((e) => {
-              log.error('Error while inviting user: ' + JSON.parse(networkData)['userId'], e.message);
-            });
-      }
+      // console.log('addUserRequest for network: ' + this.name);
+      // if (this.name == 'GitHub') {
+      //   return this.freedomApi_.inviteUser(JSON.parse(networkData)['userId'])
+      //       .catch((e) => {
+      //         log.error('Error while inviting user: ' + JSON.parse(networkData)['userId'], e.message);
+      //       });
+      // }
 
       return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
+      });
+    }
+
+    public acceptInvitation = (networkData :string): Promise<void> => {
+      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
+      });
+    }
+
+    public inviteUser = (userName: string): Promise<void> => {
+      return this.freedomApi_.inviteUser(userName).catch((e) => {
+        log.error('Error calling inviteUser: ' + userName, e.message);
+      }).then(() => {
+        return Promise.resolve<void>();
       });
     }
 
@@ -730,10 +753,6 @@ export function getNetworkDisplayName(networkName :string) : string {
         profile: this.myInstance.getUserProfile(),
         roster: rosterState
       };
-    }
-
-    public acceptInvitation = (userId :string) => {
-      this.freedomApi_.acceptUserInvitation(userId);
     }
 
   }  // class Social.FreedomNetwork

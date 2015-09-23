@@ -537,12 +537,25 @@ export class UserInterface implements ui_constants.UiApi {
       var token = url.substr(url.lastIndexOf('/') + 1);
       var tokenObj = JSON.parse(atob(token));
       var userName = tokenObj.userName;
+      var networkName = tokenObj.networkName;
+      var networkData = tokenObj.networkData;
+      var userId = JSON.parse(networkData)['userId'];
     } catch(e) {
       return Promise.reject('Error parsing invite URL');
     }
     return this.getConfirmation('', 'Would you like to add ' + userName + '?')
         .then(() => {
-      return this.core.addUser(url);
+      var path = {
+        network : {
+         name: networkName,
+         userId: ""
+        },
+        userId: userId
+      };
+      return this.core.acceptInvitation({
+        userPath: path,
+        data: networkData
+      });
     });
   }
 
@@ -577,7 +590,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.addUserWithConfirmation_(url).catch(showUrlError);;
     }
   }
-    
+
   public handleCopyPasteUrlData = (url: string) => {
     console.log('received one-time URL from browser');
 

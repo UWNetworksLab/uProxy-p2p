@@ -15,6 +15,10 @@ interface FullfillAndReject {
   reject :Function;
 };
 
+// interface NetworkData {
+
+// }
+
 /**
  * This class hides all cross backend-ui communication wiring so that the
  * uProxy UI may speak through this connector as if talking directly to Core.
@@ -205,9 +209,13 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
-  addUser = (inviteUrl: string): Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.ADD_USER, inviteUrl);
+  inviteUser = (data: { networkId: string; userName: string }): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.SEND_INVITATION, data);
   }
+
+  // acceptInvitation = (data: { networkName: string; networkData: string }): Promise<void> => {
+  //   return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, data);
+  // }
 
   // TODO: this should probably take the network path, including userId
   getInviteUrl = (networkInfo :social.SocialNetworkInfo): Promise<string> => {
@@ -245,8 +253,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
   }
 
-  acceptInvitation = (userPath :social.UserPath) => {
-    this.sendCommand(uproxy_core_api.Command.ACCEPT_INVITATION, userPath);
+  acceptInvitation = (obj: { userPath: social.UserPath; data: string }) : Promise<void>=> {
+    return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, obj);
   }
 }  // class CoreConnector
 

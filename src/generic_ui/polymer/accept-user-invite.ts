@@ -6,8 +6,23 @@ var model = ui_context.model;
 var core = ui_context.core;
 
 Polymer({
-  addUser: function() {
-    core.addUser(this.receivedInviteToken).then(() => {
+  acceptInvitation: function() {
+    var token = this.receivedInviteToken.lastIndexOf('/') >= 0 ?
+    this.receivedInviteToken.substr(this.receivedInviteToken.lastIndexOf('/') + 1) : this.receivedInviteToken;
+    var tokenObj = JSON.parse(atob(token));
+    var networkName = tokenObj.networkName;
+    var networkData = tokenObj.networkData;
+    var userId = JSON.parse(networkData)['userId'];
+
+    var path = {
+      network : {
+       name: networkName,
+       userId: ""
+      },
+      userId: userId
+    };
+
+    core.acceptInvitation({userPath: path, data: networkData}).then(() => {
       this.fire('open-dialog', {
         heading: 'Friend Added', // TODO: translate
         message: '',  // TODO:

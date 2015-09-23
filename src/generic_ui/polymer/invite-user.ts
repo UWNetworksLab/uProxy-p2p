@@ -54,7 +54,12 @@ Polymer({
     });
   },
   inviteGithubFriend: function() {
-    core.addUser(JSON.stringify({ networkId: this.userIdInput, userId: this.userIdInput }));
+    var selectedNetwork =
+      model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
+    core.inviteUser({
+      networkId: selectedNetwork.name,
+      userName: this.userIdInput
+    });
   },
   onNetworkSelect: function(e :any, details :any) {
     if (details.isSelected) {

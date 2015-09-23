@@ -121,6 +121,9 @@ var log :logging.Log = new logging.Log('remote-user');
       this.name = profile.name;
       this.fulfillNameReceived_(this.name);
       this.profile = profile;
+      if (!this.profile.status) {
+        this.profile.status = 0;
+      }
       this.saveToStorage();
       this.notifyUI();
     }
