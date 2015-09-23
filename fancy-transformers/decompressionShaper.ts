@@ -2,6 +2,7 @@
 
 import arithmetic = require('./arithmetic');
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import decompression = require('../fancy-transformers/decompressionShaper');
 import logging = require('../logging/logging');
 
 const log :logging.Log = new logging.Log('compressionShaper');
