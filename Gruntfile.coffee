@@ -208,6 +208,7 @@ firefoxDevPath = path.join(devBuildPath, 'firefox/')
 ccaDevPath = path.join(devBuildPath, 'cca/app/')
 androidDevPath = path.join(devBuildPath, 'android/')
 iosDevPath = path.join(devBuildPath, 'ios/')
+genericPath = path.join(devBuildPath, 'generic/')
 
 #-------------------------------------------------------------------------
 browserifyIntegrationTest = (path) ->
@@ -241,7 +242,8 @@ FILES =
   ]
   # Files which are required at run-time everywhere.
   uproxy_common: [
-    'version/version.js'
+    'generic/network-options.js'
+    'generic/version.js'
   ]
 
   uproxy_lib_common: [
@@ -661,6 +663,11 @@ module.exports = (grunt) ->
               src: FILES.uproxy_common
               dest: chromeExtDevPath + '/scripts'
             }
+            {
+              expand: true, cwd: devBuildPath, flatten: true
+              src: FILES.uproxy_common
+              dest: chromeExtDevPath + '/generic'
+            }
           ]
           localDestPath: 'chrome/extension'
       chrome_extension_additional:
@@ -803,6 +810,11 @@ module.exports = (grunt) ->
             src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*']
             dest: firefoxDevPath + '/data/generic_ui'
           }
+          { # copy generic files used by core and UI
+            expand: true, cwd: genericPath
+            src: ['*.js']
+            dest: firefoxDevPath + '/data/generic'
+          }
         ]
       cca:
         Rule.copyLibs
@@ -862,6 +874,11 @@ module.exports = (grunt) ->
             src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*', '*.html']
             dest: ccaDevPath + '/generic_ui'
           }
+          { # copy generic files used by core and UI
+            expand: true, cwd: genericPath
+            src: ['*.js']
+            dest: ccaDevPath + '/generic'
+          }
         ]
 
 
@@ -880,8 +897,8 @@ module.exports = (grunt) ->
       version:
         files: [
           {
-            src: path.join(devBuildPath, 'version/version.js')
-            dest: path.join(devBuildPath, 'version/version.js')
+            src: path.join(devBuildPath, 'generic/version.js')
+            dest: path.join(devBuildPath, 'generic/version.js')
           }
         ]
         options:

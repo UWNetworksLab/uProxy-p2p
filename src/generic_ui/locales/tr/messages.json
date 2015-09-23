@@ -183,6 +183,10 @@
         "message": "Arkadaşından erişim almaya başlamak için, aşağıdaki butona tıkla.",
         "description": ""
     },
+    "NO_FRIENDS_ONLINE": {
+        "message": "Şu anda hiçbir arkadaşınız uProxy'e giriş yapmış değil.",
+        "description": "None of the user's friends are currently signed in."
+    },
     "CONTINUE_BROWSING": {
         "message": "uProxy Olmadan Göz Atmaya Devam Et",
         "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."

@@ -40,7 +40,6 @@ export interface LocalInstanceState {
 
 export interface NetworkMessage {
   name        :string;
-  displayName :string;
   online      :boolean;
   userId      :string;
   userName    :string;
@@ -84,7 +83,6 @@ export interface UserData {
 
 export interface NetworkState {
   name         :string;
-  displayName  :string;
   profile      :UserProfileMessage;
   // TODO: bad smell: UI data should not be
   roster       :{[userId :string] :UserData };
@@ -93,8 +91,10 @@ export interface NetworkState {
 export interface NetworkOptions {
   isFirebase :boolean;
   enableMonitoring :boolean;
-  areAllContactsUproxy :boolean;
-  displayName ?:string;
+  areAllContactsUproxy: boolean;
+  supportsReconnect: boolean;
+  supportsInvites: boolean;
+  displayName?: string;  // Network name to be displayed in the UI.
 }
 
 /**

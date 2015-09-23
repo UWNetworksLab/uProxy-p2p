@@ -67,6 +67,11 @@
       border-bottom: solid 1px;
       border-color: rgb(238, 238, 238);
     }
+    #friendsAppearWhen {
+      font-size: 14px;
+      padding-top: 10px;
+      color: rgb(150,150,150);
+    }
     </style>
 
     <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
@@ -79,9 +84,18 @@
         {{ "LOADING_FRIENDS" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
+      <div id='noContactsFound' hidden?='{{ ui.showInviteControls || loadingContacts }}'>
+        {{ "NO_FRIENDS_ONLINE" | $$ }}
+        <p id='friendsAppearWhen'>{{ "FRIENDS_APPEAR_WHEN" | $$ }}</p>
+        <p>
+          <uproxy-faq-link anchor="howDoIFind">
+            <span id='noContactsFoundLearnMoreLink'>{{ "LEARN_MORE" | $$ }}</span>
+          </uproxy-faq-link>
+        </p>
+      </div>
     </div>
 
-    <div id="connectWithFriendsInstruction" hidden?="{{ loadingContacts || hasContacts }}">
+    <div id="connectWithFriendsInstruction" hidden?="{{ !ui.showInviteControls || loadingContacts || hasContacts }}">
       <h2>{{ 'CONNECT_TO_FRIEND' | $$ }}</h2>
       {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
     </div>
