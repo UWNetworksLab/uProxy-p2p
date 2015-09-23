@@ -183,10 +183,6 @@
         "message": "Để bắt đầu nhận truy cập từ bạn bè của bạn, hãy nhấn vào nút dưới đây.",
         "description": ""
     },
-    "NO_FRIENDS_ONLINE": {
-        "message": "Không ai trong số bạn bè của bạn đăng nhập vào uProxy ngay lúc này.",
-        "description": "None of the user's friends are currently signed in."
-    },
     "CONTINUE_BROWSING": {
         "message": "Tiếp Tục Duyệt Web Mà Không Dùng uProxy",
         "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."

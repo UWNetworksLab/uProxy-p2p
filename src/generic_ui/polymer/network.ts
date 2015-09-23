@@ -11,8 +11,7 @@ Polymer({
   connect: function() {
     ui.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
-      // Fire an update-view event, which root.ts listens for.
-      this.fire('update-view', { view: ui_constants.View.ROSTER });
+      // syncNetwork will update the view to the ROSTER.
       ui.bringUproxyToFront();
     }).catch((e :Error) => {
       console.warn('Did not log in ', e);
