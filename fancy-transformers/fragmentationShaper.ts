@@ -8,8 +8,16 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
+// Accepted in serialised form by configure().
 export interface FragmentationConfig {
   maxLength :number
+}
+
+// Creates a sample (non-random) config, suitable for testing.
+export var sampleConfig = () : FragmentationConfig => {
+  return {
+    maxLength: 1440
+  };
 }
 
 // A transformer that enforces a maximum packet length.
@@ -19,8 +27,9 @@ export class FragmentationShaper {
   private fragmentBuffer_ :defragmenter.Defragmenter =
     this.fragmentBuffer_ = new defragmenter.Defragmenter();
 
-  // Constructor function is needed for typechecking in churn-pipe
-  public constructor() {}
+  public constructor() {
+    this.configure(JSON.stringify(sampleConfig()));
+  }
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.

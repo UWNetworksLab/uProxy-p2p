@@ -1,5 +1,6 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
+import churn_types = require('../churn/churn.types');
 import net = require('../net/net.types');
 
 export interface MirrorMapping {
@@ -8,12 +9,11 @@ export interface MirrorMapping {
 }
 
 export interface freedom_ChurnPipe {
-  setTransformer(transformerName :string,
-      key ?:ArrayBuffer,
-      config ?:string) : Promise<void>;
+  setTransformer(config:churn_types.TransformerConfig) : Promise<void>;
   bindLocal(publicEndpoint:net.Endpoint) : Promise<void>;
   addBrowserEndpoint(browserEndpoint:net.Endpoint) : Promise<void>;
-  bindRemote (remoteEndpoint:net.Endpoint) : Promise<void>;
+  bindRemote(remoteEndpoint:net.Endpoint) : Promise<void>;
+  shutdown() : Promise<void>;
   on(name:'mappedAddress', listener:(event:MirrorMapping) => void) : void;
   on(name:string, listener:(event:Object) => void) : void;
 }

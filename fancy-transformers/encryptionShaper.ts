@@ -10,13 +10,27 @@ var log :logging.Log = new logging.Log('encryption-shaper');
 export const CHUNK_SIZE :number = 16;
 export const IV_SIZE :number = 16;
 
-export interface EncryptionConfig {key:string}
+// Accepted in serialised form by configure().
+export interface EncryptionConfig {
+  key:string
+}
+
+// Creates a sample (non-random) config, suitable for testing.
+export var sampleConfig = () : EncryptionConfig => {
+  var bytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  var hex = arraybuffers.arrayBufferToHexString(bytes.buffer);
+  return {
+    key: hex
+  };
+}
 
 // A packet shaper that encrypts the packets with AES CBC.
 export class EncryptionShaper implements Transformer {
   private key_ :ArrayBuffer;
 
-  public constructor() {}
+  public constructor() {
+    this.configure(JSON.stringify(sampleConfig()));
+  }
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.

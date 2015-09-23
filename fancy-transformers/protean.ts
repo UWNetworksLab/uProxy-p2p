@@ -9,12 +9,20 @@ import sequence = require('../fancy-transformers/byteSequenceShaper');
 
 var log :logging.Log = new logging.Log('protean');
 
+// Accepted in serialised form by configure().
 export interface ProteanConfig {
   encryption :encryption.EncryptionConfig;
-
   fragmentation :fragmentation.FragmentationConfig;
-
   injection :sequence.SequenceConfig
+}
+
+// Creates a sample (non-random) config, suitable for testing.
+export var sampleConfig = () : ProteanConfig => {
+  return {
+    encryption: encryption.sampleConfig(),
+    fragmentation: fragmentation.sampleConfig(),
+    injection: sequence.sampleConfig()
+  };
 }
 
 function flatMap<T,E>(input :Array<T>, mappedFunction :(element :T) => Array<E>) :Array<E> {
@@ -38,8 +46,9 @@ export class Protean implements Transformer {
   // Byte sequence injecter transformer
   private injecter_ :sequence.ByteSequenceShaper;
 
-  // Constructor function is needed for typechecking in churn-pipe
-  public constructor() {}
+  public constructor() {
+    this.configure(JSON.stringify(sampleConfig()));
+  }
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.

@@ -3,7 +3,8 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 import aqm = require('../aqm/aqm');
-import CaesarCipher = require('../simple-transformers/caesar');
+import caesar = require('../simple-transformers/caesar');
+import churn_types = require('../churn/churn.types');
 import encryption = require('../fancy-transformers/encryptionShaper');
 import fragmentation = require('../fancy-transformers/fragmentationShaper');
 import ipaddr = require('ipaddr.js');
@@ -36,36 +37,13 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
 
 // Maps transformer names to class constructors.
 var transformers :{[name:string] : new() => Transformer} = {
-  'caesar': CaesarCipher,
+  'caesar': caesar.CaesarCipher,
   'encryptionShaper': encryption.EncryptionShaper,
   'fragmentationShaper': fragmentation.FragmentationShaper,
   'none': PassThrough,
   'protean': protean.Protean,
   'sequenceShaper': sequence.ByteSequenceShaper
 };
-
-var makeTransformer_ = (
-    // Name of transformer to use, e.g. 'rabbit' or 'none'.
-    name :string,
-    // Key for transformer, if any.
-    key ?:ArrayBuffer,
-    // JSON-encoded configuration, if any.
-    config ?:string)
-
-    : Transformer => {
-  if (!(name in transformers)) {
-    throw new Error('unknown transformer: ' + name);
-  }
-
-  var transformer: Transformer = new transformers[name]();
-  if (key) {
-    transformer.setKey(key);
-  }
-  if (config) {
-    transformer.configure(config);
-  }
-  return transformer;
-}
 
 interface MirrorSet {
   // If true, these mirrors represent a remote endpoint that has been
@@ -120,7 +98,7 @@ class Pipe {
       {};
 
   // Obfuscates and deobfuscates messages.
-  private transformer_ :Transformer = makeTransformer_('none');
+  private transformer_ :Transformer;
 
   // Endpoint to which incoming obfuscated messages are forwarded on each
   // interface.  The key is the interface, and the value is the port.
@@ -157,14 +135,22 @@ class Pipe {
         10);
   }
 
-  // Set the current transformer parameters.  The default is no transformation.
+  // Set transformer parameters.
   public setTransformer = (
-      transformerName :string,
-      key ?:ArrayBuffer,
-      config ?:string) :Promise<void> => {
+      transformerConfig:churn_types.TransformerConfig) : Promise<void> => {
     try {
-      log.info('%1: using %2 transformer', this.name_, transformerName);
-      this.transformer_ = makeTransformer_(transformerName, key, config);
+      if (!(transformerConfig.name in transformers)) {
+        throw new Error('unknown transformer: ' + transformerConfig.name);
+      }
+
+      log.info('%1: using %2 obfuscator', this.name_, transformerConfig.name);
+      this.transformer_ = new transformers[transformerConfig.name]();
+      if (transformerConfig.config !== undefined) {
+        this.transformer_.configure(transformerConfig.config);
+      } else {
+        log.warn('%1: no transformer config specified', this.name_);
+      }
+
       return Promise.resolve<void>();
     } catch (e) {
       return Promise.reject(e);
@@ -426,10 +412,14 @@ class Pipe {
    */
   private sendTo_ = (publicSocket:Socket, buffer:ArrayBuffer, to:net.Endpoint)
       :void => {
-    var transformedBuffers = this.transformer_.transform(buffer);
-    for(var i = 0; i < transformedBuffers.length; i++) {
-      // 0 is the identifier for the outbound flow
-      this.queueManager_.send(0, [publicSocket, transformedBuffers[i], to]);
+    try {
+      let transformedBuffers = this.transformer_.transform(buffer);
+      for (var i = 0; i < transformedBuffers.length; i++) {
+        // 0 is the identifier for the outbound flow
+        this.queueManager_.send(0, [publicSocket, transformedBuffers[i], to]);
+      }
+    } catch (e) {
+      log.warn('%1: transform error: %2', this.name_, e.message);
     }
   }
 
@@ -476,21 +466,54 @@ class Pipe {
       return;
     }
     var transformedBuffer = recvFromInfo.data;
-    var buffers = this.transformer_.restore(transformedBuffer);
-    this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
-      var browserEndpoint:net.Endpoint = {
-        address: iface,
-        port: browserPort
-      };
-      for(var i = 0; i < buffers.length; i++) {
-        // 1 is the identifier for the inbound flow
-        this.queueManager_.send(1, [mirrorSocket, buffers[i], browserEndpoint]);
-      }
-    });
+    try {
+      let buffers = this.transformer_.restore(transformedBuffer);
+      this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
+        var browserEndpoint:net.Endpoint = {
+          address: iface,
+          port: browserPort
+        };
+        for (var i = 0; i < buffers.length; i++) {
+          // 1 is the identifier for the inbound flow
+          this.queueManager_.send(1, [mirrorSocket, buffers[i], browserEndpoint]);
+        }
+      });
+    } catch (e) {
+      log.warn('%1: restore error: %2', this.name_, e.message);
+    }
   }
 
   public on = (name:string, listener:(event:any) => void) :void => {
     throw new Error('Placeholder function to keep Typescript happy');
+  }
+
+  private static closeSocket_(socket:Socket) : Promise<void> {
+    return socket.destroy().catch((e) => {
+      log.warn('Error while closing socket: %1', e);
+    }).then(() => {
+      freedom['core.udpsocket'].close(socket);
+    });
+  }
+
+  public shutdown = () : Promise<void> => {
+    var shutdownPromises : Promise<void>[] = [];
+    var address:string;
+    var port:any;  // Typescript doesn't allow number in for...in loops.
+    for (address in this.publicSockets_) {
+      this.publicSockets_[address].forEach((publicSocket) => {
+        shutdownPromises.push(Pipe.closeSocket_(publicSocket));
+      });
+    }
+
+    for (address in this.mirrorSockets_) {
+      for (port in this.mirrorSockets_[address]) {
+        var mirrorPromises = this.mirrorSockets_[address][port].sockets;
+        mirrorPromises.forEach((mirrorPromise) => {
+          shutdownPromises.push(mirrorPromise.then(Pipe.closeSocket_));
+        });
+      }
+    }
+    return Promise.all(shutdownPromises).then((voids:void[]) => {});
   }
 }
 

@@ -3,6 +3,7 @@
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import bridge = require('../bridge/bridge');
+import churn_types = require('../churn/churn.types');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
@@ -68,6 +69,8 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 // to a SocksTotc or RtcToNet instance (and further input is treated as
 // signalling channel messages).
 function serveConnection(connection :tcp.Connection) :void {
+  var transformerName:string;
+  var transformerConfig:string;
   let recvBuffer :ArrayBuffer = new ArrayBuffer(0);
 
   let processCommands = (buffer :ArrayBuffer) :void => {
@@ -85,18 +88,52 @@ function serveConnection(connection :tcp.Connection) :void {
       recvBuffer = parts[1].slice(1);
 
       // ''.split(' ') == ['']
-      let verb = arraybuffers.arrayBufferToString(
-          line).split(' ')[0].trim().toLowerCase();
+      var sentence = arraybuffers.arrayBufferToString(line);
+      var words = sentence.split(' ');
+      var verb = words[0].trim().toLowerCase();
+
       let keepParsing=false;
       switch (verb) {
         case 'get':
-          get(connection);
+          get(connection, (transformerName || transformerConfig) ? {
+            name: transformerName,
+            config: transformerConfig
+          } : undefined);
           break;
         case 'give':
           give(connection);
           break;
         case 'ping':
           sendReply('ping', connection);
+          keepParsing=true;
+          break;
+        case 'transform':
+          // Sample commands:
+          //  * transform with caesar
+          //    Uses Caesar cipher, with default/example settings.
+          //  * transform config {"key": 5}
+          //    Overrides the default transformer config. Everything
+          //    following 'transform config' is treated as JSON and
+          //    forwarded to the obfuscator's configure() method.
+          if (words.length > 2) {
+            var preposition = words[1].trim().toLowerCase();
+            switch (preposition) {
+              case 'with':
+                transformerName = words[2].trim();
+                break;
+              case 'config':
+                // Treat everything to the right of this marker as JSON.
+                // Cheapo approach but it requires no escaping from the user.
+                const marker = ' config ';
+                transformerConfig = sentence.substring(
+                    sentence.toLowerCase().indexOf(marker) + marker.length);
+                break;
+              default:
+                sendReply('usage: transform (with name|config json)', connection);
+            }
+          } else {
+            sendReply('usage: transform (with name|config json)', connection);
+          }
           keepParsing=true;
           break;
         case 'xyzzy':
@@ -132,7 +169,10 @@ function serveConnection(connection :tcp.Connection) :void {
 
 // Creates a SocksToRtc instance and forwards signals between it and the
 // connection.
-function get(connection:tcp.Connection) : void {
+function get(
+    connection:tcp.Connection,
+    transformerConfig:churn_types.TransformerConfig)
+    :void {
   var socksToRtc = new socks_to_rtc.SocksToRtc();
 
   // Must do this before calling start.
@@ -140,9 +180,8 @@ function get(connection:tcp.Connection) : void {
     sendReply(JSON.stringify(signal), connection);
   });
 
-  socksToRtc.start(new tcp.Server(socksEndpoint),
-      bridge.best('sockstortc', pcConfig)).then(
-      (endpoint:net.Endpoint) => {
+  socksToRtc.start(new tcp.Server(socksEndpoint), bridge.best('sockstortc',
+      pcConfig, undefined, transformerConfig)).then((endpoint:net.Endpoint) => {
     log.info('SocksToRtc listening on %1', endpoint);
     log.info('curl -x socks5h://%1:%2 www.example.com',
         endpoint.address, endpoint.port);

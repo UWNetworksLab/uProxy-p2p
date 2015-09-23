@@ -29,20 +29,23 @@ export var preObfuscation = (
 export var basicObfuscation = (
     name?:string,
     config?:freedom.RTCPeerConnection.RTCConfiguration,
-    portControl?:freedom.PortControl.PortControl)
+    portControl?:freedom.PortControl.PortControl,
+    transformerConfig?:churn_types.TransformerConfig)
     :BridgingPeerConnection => {
   return new BridgingPeerConnection(ProviderType.CHURN, name, config, 
-                                    portControl);
+                                    portControl, transformerConfig);
 }
 
 // Use this if you think the remote peer supports holographic ICE.
 export var holographicIceOnly = (
     name?:string,
     config?:freedom.RTCPeerConnection.RTCConfiguration,
-    portControl?:freedom.PortControl.PortControl)
+    portControl?:freedom.PortControl.PortControl,
+    transformerConfig?:churn_types.TransformerConfig)
     :BridgingPeerConnection => {
   return new BridgingPeerConnection(ProviderType.HOLO_ICE,
-                                    name, config, portControl);
+                                    name, config, portControl,
+                                    transformerConfig);
 }
 
 // Creates a bridge which initiates with the best provider and can
@@ -205,7 +208,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       private preferredProviderType_ :ProviderType,
       private name_ :string = 'unnamed-bridge-' + BridgingPeerConnection.id_,
       private config_ ?:freedom.RTCPeerConnection.RTCConfiguration,
-      private portControl_ ?:freedom.PortControl.PortControl) {
+      private portControl_ ?:freedom.PortControl.PortControl,
+      private transformerConfig_ ?:churn_types.TransformerConfig) {
     BridgingPeerConnection.id_++;
   }
 
@@ -247,7 +251,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       pc:freedom.RTCPeerConnection.RTCPeerConnection)
       :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
     log.debug('%1: constructing churn peerconnection', this.name_);
-    return new churn.Connection(pc, this.name_, undefined, this.portControl_);
+    return new churn.Connection(pc, this.name_, undefined,
+        this.portControl_, this.transformerConfig_);
   }
 
   // Factored out for mocking purposes.
@@ -255,7 +260,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       pc:freedom.RTCPeerConnection.RTCPeerConnection)
       :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
     log.debug('%1: constructing holographic ICE peerconnection', this.name_);
-    return new churn.Connection(pc, this.name_, true, this.portControl_);
+    return new churn.Connection(pc, this.name_, true,
+        this.portControl_, this.transformerConfig_);
   }
 
   // Configures the bridge with this provider by forwarding the provider's

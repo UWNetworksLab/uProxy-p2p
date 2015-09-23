@@ -3,24 +3,22 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import caesar = require('../simple-transformers/caesar');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
-import encryption = require('../fancy-transformers/encryptionShaper');
-import fragmentation = require('../fancy-transformers/fragmentationShaper');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
-import protean = require('../fancy-transformers/protean');
 import random = require('../crypto/random');
-import sequence = require('../fancy-transformers/byteSequenceShaper');
 import signals = require('../webrtc/signals');
 
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
 import MirrorMapping = churn_pipe_types.MirrorMapping;
+import TransformerConfig = churn_types.TransformerConfig;
 
 import Candidate = candidate.Candidate;
 import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
@@ -103,13 +101,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   };
 
   // Generates a key suitable for use with CaesarCipher, viz. 1-255.
-  var generateCaesarKey_ = (): number => {
+  var generateCaesarConfig_ = (): caesar.Config => {
     try {
-      return (random.randomUint32() % 255) + 1;
+      return {
+        key: (random.randomUint32() % 255) + 1
+      };
     } catch (e) {
       // https://github.com/uProxy/uproxy/issues/1593
       log.warn('crypto unavailable, using Math.random');
-      return Math.floor((Math.random() * 255)) + 1;
+      return {
+        key: Math.floor((Math.random() * 255)) + 1
+      };
     }
   }
 
@@ -164,10 +166,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     } = {};
 
-    // Fulfills once we know the obfuscation key for caesar cipher.
-    private haveCaesarKey_ :(key:number) => void;
-    private onceHaveCaesarKey_ = new Promise((F, R) => {
-      this.haveCaesarKey_ = F;
+    // Fulfills once we know the obfuscator config, which may
+    // happen in response to a signalling channel message.
+    private haveTransformerConfig_ :(config:TransformerConfig) => void;
+    private onceHaveTransformerConfig_ = new Promise((F, R) => {
+      this.haveTransformerConfig_ = F;
     });
 
     private pipe_ :ChurnPipe;
@@ -189,7 +192,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     constructor(probeRtcPc:freedom.RTCPeerConnection.RTCPeerConnection,
                 private name_ = 'unnamed-churn-' + Connection.id_,
                 private skipPublicEndpoint_?:boolean,
-                private portControl_?:freedom.PortControl.PortControl) {
+                private portControl_?:freedom.PortControl.PortControl,
+                private preferredTransformerConfig_?:TransformerConfig) {
       Connection.id_++;
 
       this.signalForPeerQueue = new handler.Queue<ChurnSignallingMessage,void>();
@@ -204,8 +208,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.onceClosed = this.obfuscatedConnection_.onceClosed;
 
       // Debugging.
-      this.onceHaveCaesarKey_.then((key: number) => {
-        log.info('%1: caesar key is %2', this.name_, key);
+      this.onceHaveTransformerConfig_.then((config:TransformerConfig) => {
+        log.info('%1: transformer config: %2', this.name_, config);
       });
     }
 
@@ -268,7 +272,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
       this.onceProbingComplete_.then(() => {
         this.probeConnection_.close().then(() => {
-          return this.onceHaveCaesarKey_;
+          return this.onceHaveTransformerConfig_;
         }).then(this.configurePipe_).then(() => {
           this.processProbeCandidates_(candidates);
           this.havePipe_();
@@ -292,74 +296,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     }
 
-    private configurePipe_ = (key:number) : void => {
+    private configurePipe_ = (transformerConfig:TransformerConfig) : Promise<void> => {
       this.pipe_ = freedom['churnPipe'](this.name_);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-
-      this.pipe_.setTransformer('caesar',
-        new Uint8Array([key]).buffer,
-        '{}');
-
-      // Uncomment this to enable AES-based obfuscation.
-      // this.pipe_.setTransformer('encryptionShaper',
-      //   undefined,
-      //   JSON.stringify(this.makeSampleEncryptionConfig_())
-      // );
-
-      // Uncomment this to enable byte sequence injection obfuscation.
-      // this.pipe_.setTransformer('byteSequenceShaper',
-      //   undefined,
-      //   JSON.stringify(this.makeSampleSequences_())
-      // );
-
-      // Uncomment this to enable fragmentation
-      // this.pipe_.setTransformer('fragmentationShaper',
-      //   undefined,
-      //   JSON.stringify(this.makeSampleFragmentationConfig_())
-      // );
-
-      // Uncomment this to enable Protean shapeshifting
-      // this.pipe_.setTransformer('protean',
-      //   undefined,
-      //   JSON.stringify(this.makeSampleProteanConfig_())
-      // );
-    }
-
-    private makeSampleEncryptionConfig_ = () :encryption.EncryptionConfig => {
-      var key = new ArrayBuffer(16);
-      return {
-        key: arraybuffers.arrayBufferToHexString(key)
-      };
-    }
-
-    private makeSampleSequences_ = () :sequence.SequenceConfig => {
-      var buffer = arraybuffers.stringToArrayBuffer("OH HELLO");
-      var hex = arraybuffers.arrayBufferToHexString(buffer);
-      var sequence = {
-        index: 0,
-        offset: 0,
-        sequence: hex,
-        length: 256
-      };
-
-      return {
-        addSequences: [sequence],
-        removeSequences: [sequence]
-      };
-    }
-
-    private makeSampleFragmentationConfig_ = () :fragmentation.FragmentationConfig => {
-      return {
-        maxLength: 1440
-      };
-    }
-
-    private makeSampleProteanConfig_ = () :protean.ProteanConfig => {
-      return {
-        encryption: this.makeSampleEncryptionConfig_(),
-        fragmentation: this.makeSampleFragmentationConfig_(),
-        injection: this.makeSampleSequences_()
-      };
+      return this.pipe_.setTransformer(transformerConfig);
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
@@ -465,14 +405,25 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     public negotiateConnection = () : Promise<void> => {
-      // Generate a key and send it to the remote party.
-      // Once they've received it, they'll be able to establish
-      // a matching pipe.
-      var key = generateCaesarKey_();
-      this.haveCaesarKey_(key);
-      this.signalForPeerQueue.handle({
-        caesar: key
-      });
+      // First, signal the obfuscation config. This will allow the
+      // remote peer establish a matching churn pipe. If no config
+      // was specified, use Caesar cipher for backwards compatibility.
+      if (this.preferredTransformerConfig_) {
+        this.signalForPeerQueue.handle({
+          transformer: this.preferredTransformerConfig_
+        });
+        this.haveTransformerConfig_(this.preferredTransformerConfig_);
+      } else {
+        var caesarConfig = generateCaesarConfig_();
+        this.signalForPeerQueue.handle({
+          caesar: caesarConfig.key
+        });
+        this.haveTransformerConfig_({
+          name: 'caesar',
+          config: JSON.stringify(caesarConfig)
+        });
+      }
+
       return this.obfuscatedConnection_.negotiateConnection();
     }
 
@@ -498,8 +449,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             churnMessage.publicEndpoint);
         this.addRemoteCandidate_(fakeRTCIceCandidate);
       }
+      if (churnMessage.transformer !== undefined) {
+        this.haveTransformerConfig_(churnMessage.transformer);
+      }
       if (churnMessage.caesar !== undefined) {
-        this.haveCaesarKey_(churnMessage.caesar);
+        log.debug('%1: received legacy caesar cipher config', this.name_);
+        this.haveTransformerConfig_({
+          name: 'caesar',
+          config: JSON.stringify(<caesar.Config>{
+            key: churnMessage.caesar
+          })
+        });
       }
       if (churnMessage.webrtcMessage) {
         var message = churnMessage.webrtcMessage;
@@ -532,7 +492,15 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     public close = () : Promise<void> => {
-      return this.obfuscatedConnection_.close();
+      var promises = [this.obfuscatedConnection_.close()];
+      if (this.pipe_) {
+        promises.push(this.pipe_.shutdown().catch((e) => {
+          log.warn('Error while shutting down pipe: %1', e);
+        }).then(() => {
+          freedom['churnPipe'].close(this.pipe_);
+        }));
+      }
+      return Promise.all(promises).then((voids:void[]) : void => {});
     }
 
     public toString = () : string => {
