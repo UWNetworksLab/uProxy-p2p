@@ -27,13 +27,9 @@ giver.setblocking(False)
 
 # Forward stdin to the getter, to allow commands such as
 # port to configure the proxy.
-# TODO: sleep is a horrible hack to prevent our messages
-#       being batched together into one packet which seems
-#       to work better than TCP_NODELAY.
 if not sys.stdin.isatty():
   for line in sys.stdin:
     getter.sendall(line + '\n')
-    time.sleep(0.5)
 
 getter.sendall('get\n')
 giver.sendall('give\n')
