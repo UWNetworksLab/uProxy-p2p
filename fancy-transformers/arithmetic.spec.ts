@@ -20,6 +20,7 @@ describe('Arithmetic coding and decoding - short inputs', function() {
   it('encoding short input', function() {
     let plain = arraybuffers.hexStringToArrayBuffer("0.1.2.3");
     let target = arraybuffers.hexStringToArrayBuffer("ca.0.1.2.3.0.0.0.8");
+    let encoder = new arithmetic.Encoder(makeUniformProbabilities());
     let result = encoder.encode(plain);
     expect(arraybuffers.byteEquality(result, target)).toBe(true);
   });
