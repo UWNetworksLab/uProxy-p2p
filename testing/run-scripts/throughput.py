@@ -9,7 +9,7 @@ import time
 import urllib.parse
 
 FLOOD_SIZE_MB = 64
-FLOOD_MAX_SPEED = '5M'
+FLOOD_MAX_SPEED_MB = 5
 
 parser = argparse.ArgumentParser(
     description='Measure SOCKS proxy throughput across browser versions.')
@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 # Where is flood server?
 flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M',
-    FLOOD_MAX_SPEED], universal_newlines=True).strip()
+    str(FLOOD_MAX_SPEED_MB) + 'M'], universal_newlines=True).strip()
 print('** using flood server at ' + str(flood_ip))
 
 browsers = ['chrome', 'firefox']
@@ -48,7 +48,7 @@ for browser in browsers:
       result = int((FLOOD_SIZE_MB / elapsed) * 1000)
 
       print('** throughput for ' + browser + '/' + version + ': ' +
-          str(result) + 'K/sec')
+          str(result) + 'KB/sec')
     except Exception as e:
       print('** failed to test ' + browser + '/' + version + ': ' + str(e))
 
