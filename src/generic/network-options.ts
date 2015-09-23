@@ -2,11 +2,13 @@ import social = require('../interfaces/social');
 
 export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
   'Google': {  // Old GTalk XMPP provider, being deprecated.
+    displayName: 'Google Hangouts',
     isFirebase: false,
     enableMonitoring: true,
     areAllContactsUproxy: false,
     supportsReconnect: true,
-    supportsInvites: false
+    supportsInvites: false,
+    isExperimental: true
   },
   'Facebook': {  // Old "v1" Facebook Firebase provider, being deprecated.
     isFirebase: true,
@@ -35,6 +37,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     enableMonitoring: false,
     areAllContactsUproxy: false,
     supportsReconnect: false,
-    supportsInvites: false
+    supportsInvites: false,
+    isExperimental: true
   }
 };

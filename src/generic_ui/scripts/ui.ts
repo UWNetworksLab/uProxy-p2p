@@ -586,7 +586,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.addUserWithConfirmation_(url).catch(showUrlError);;
     }
   }
-    
+
   public handleCopyPasteUrlData = (url: string) => {
     console.log('received one-time URL from browser');
 
@@ -1168,7 +1168,7 @@ export class UserInterface implements ui_constants.UiApi {
     return false;
   }
 
-  private supportsInvites_ = (networkName: string) : boolean => {
+  public supportsInvites = (networkName: string): boolean => {
     var options = NETWORK_OPTIONS[networkName];
     if (options && options.supportsInvites) {
       return options.supportsInvites;
@@ -1176,10 +1176,18 @@ export class UserInterface implements ui_constants.UiApi {
     return false;
   }
 
+  public isExperimentalNetwork = (networkName: string): boolean => {
+    var options = NETWORK_OPTIONS[networkName];
+    if (options && options.isExperimental) {
+      return options.isExperimental;
+    }
+    return false;
+  }
+
   private updateShowInviteControls_ = () => {
     var showControls = false;
     for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
-      if (this.supportsInvites_(this.model.onlineNetworks[i].name)) {
+      if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
         showControls = true;
         break;
       }

@@ -95,6 +95,7 @@ export interface NetworkOptions {
   supportsReconnect: boolean;
   supportsInvites: boolean;
   displayName?: string;  // Network name to be displayed in the UI.
+  isExperimental?: boolean;
 }
 
 /**
