@@ -68,72 +68,102 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 // "get" or "give" is received, at which point the connection is handed off
 // to a SocksTotc or RtcToNet instance (and further input is treated as
 // signalling channel messages).
-function serveConnection(connection: tcp.Connection): void {
+function serveConnection(connection :tcp.Connection) :void {
   var transformerName:string;
   var transformerConfig:string;
+  let recvBuffer :ArrayBuffer = new ArrayBuffer(0);
 
-  var processCommands = (buffer: ArrayBuffer) : void => {
-    // ''.split(' ') == ['']
-    var sentence = arraybuffers.arrayBufferToString(buffer);
-    var words = sentence.split(' ');
-    var verb = words[0].trim().toLowerCase();
-    switch (verb) {
-      case 'get':
-        get(connection, (transformerName || transformerConfig) ? {
-          name: transformerName,
-          config: transformerConfig
-        } : undefined);
-        break;
-      case 'give':
-        give(connection);
-        break;
-      case 'ping':
-        sendReply('ping', connection);
-        connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
-        break;
-      case 'transform':
-        // Sample commands:
-        //  * transform with caesar
-        //    Uses Caesar cipher, with default/example settings.
-        //  * transform config {"key": 5}
-        //    Overrides the default transformer config. Everything
-        //    following 'transform config' is treated as JSON and
-        //    forwarded to the obfuscator's configure() method.
-        if (words.length > 2) {
-          var preposition = words[1].trim().toLowerCase();
-          switch (preposition) {
-            case 'with':
-              transformerName = words[2].trim();
-              break;
-            case 'config':
-              // Treat everything to the right of this marker as JSON.
-              // Cheapo approach but it requires no escaping from the user.
-              const marker = ' config ';
-              transformerConfig = sentence.substring(
-                  sentence.toLowerCase().indexOf(marker) + marker.length);
-              break;
-            default:
-              sendReply('usage: transform (with name|config json)', connection);
+  let processCommands = (buffer :ArrayBuffer) :void => {
+    recvBuffer = arraybuffers.concat([recvBuffer, buffer]);
+    let index = arraybuffers.indexOf(recvBuffer, arraybuffers.decodeByte(
+      arraybuffers.stringToArrayBuffer('\n')
+    ));
+    if (index == -1) {
+      // A whole command has not been received yet. Continue receiving data.
+      connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+    } else {
+      // At least one whole command has been received. Attempt to parse it.
+      let parts = arraybuffers.split(recvBuffer, index);
+      let line = parts[0];
+      recvBuffer = parts[1].slice(1);
+
+      // ''.split(' ') == ['']
+      var sentence = arraybuffers.arrayBufferToString(line);
+      var words = sentence.split(' ');
+      var verb = words[0].trim().toLowerCase();
+
+      let keepParsing = false;
+      switch (verb) {
+        case 'get':
+          get(connection, (transformerName || transformerConfig) ? {
+            name: transformerName,
+            config: transformerConfig
+          } : undefined);
+          break;
+        case 'give':
+          give(connection);
+          break;
+        case 'ping':
+          sendReply('ping', connection);
+          keepParsing = true;
+          break;
+        case 'transform':
+          // Sample commands:
+          //  * transform with caesar
+          //    Uses Caesar cipher, with default/example settings.
+          //  * transform config {"key": 5}
+          //    Overrides the default transformer config. Everything
+          //    following 'transform config' is treated as JSON and
+          //    forwarded to the obfuscator's configure() method.
+          if (words.length > 2) {
+            var preposition = words[1].trim().toLowerCase();
+            switch (preposition) {
+              case 'with':
+                transformerName = words[2].trim();
+                break;
+              case 'config':
+                // Treat everything to the right of this marker as JSON.
+                // Cheapo approach but it requires no escaping from the user.
+                const marker = ' config ';
+                transformerConfig = sentence.substring(
+                    sentence.toLowerCase().indexOf(marker) + marker.length);
+                break;
+              default:
+                sendReply('usage: transform (with name|config json)', connection);
+            }
+          } else {
+            sendReply('usage: transform (with name|config json)', connection);
           }
+          keepParsing = true;
+          break;
+        case 'xyzzy':
+          sendReply('Nothing happens.', connection);
+          keepParsing = true;
+          break;
+        case 'quit':
+          connection.close();
+          break;
+        default:
+          if (verb.length > 0) {
+            sendReply('I don\'t understand that command. (' + verb + ')', connection);
+          }
+          keepParsing = true;
+      }
+
+      if (keepParsing) {
+        if (recvBuffer.byteLength > 0) {
+          // There might be another command in the buffer.
+          // Retry command parsing to flush the buffer.
+          // The next parsing determines whether to continue parsing or not.
+          processCommands(new ArrayBuffer(0));
         } else {
-          sendReply('usage: transform (with name|config json)', connection);
+          // Nothing is left in the buffer. Wait for the next command.
+          connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
         }
-        connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
-        break;
-      case 'xyzzy':
-        sendReply('Nothing happens.', connection);
-        connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
-        break;
-      case 'quit':
-        connection.close();
-        break;
-      default:
-        if (verb.length > 0) {
-          sendReply('I don\'t understand that command. (' + verb + ')', connection);
-        }
-        connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+      }
     }
   }
+
   connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
 }
 
