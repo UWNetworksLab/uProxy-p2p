@@ -14,13 +14,20 @@ function makeUniformProbabilities() :number[] {
   return probs;
 }
 
+let encoder :arithmetic.Encoder;
+let decoder :arithmetic.Decoder;
+
 describe('Arithmetic coding and decoding - short inputs', function() {
+  beforeEach(function() {
+    encoder = new arithmetic.Encoder(makeUniformProbabilities());
+    decoder = new arithmetic.Decoder(makeUniformProbabilities());
+  });
+
   // The encoding input is a simple numerical sequence.
   // The encoding output is taken from a reference implementation.
   it('encoding short input', function() {
     let plain = arraybuffers.hexStringToArrayBuffer("0.1.2.3");
     let target = arraybuffers.hexStringToArrayBuffer("ca.0.1.2.3.0.0.0.8");
-    let encoder = new arithmetic.Encoder(makeUniformProbabilities());
     let result = encoder.encode(plain);
     expect(arraybuffers.byteEquality(result, target)).toBe(true);
   });
@@ -29,13 +36,17 @@ describe('Arithmetic coding and decoding - short inputs', function() {
   it('decoding short input', function() {
     let encoded = arraybuffers.hexStringToArrayBuffer("ca.0.1.2.3.0.0.0.8");
     let target = arraybuffers.hexStringToArrayBuffer("0.1.2.3");
-    let decoder = new arithmetic.Decoder(makeUniformProbabilities());
     let result = decoder.decode(encoded);
     expect(arraybuffers.byteEquality(result, target)).toBe(true);
   });
 });
 
 describe('Arithmetic coding and decoding - long inputs', function() {
+  beforeEach(function() {
+    encoder = new arithmetic.Encoder(makeUniformProbabilities());
+    decoder = new arithmetic.Decoder(makeUniformProbabilities());
+  });
+
   // The encoding input is an example of a real WebRTC packet.
   // The encoding output is taken from a reference implementation.
   it('encoding long input', function() {
