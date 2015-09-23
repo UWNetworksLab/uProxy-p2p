@@ -8,7 +8,7 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 function makeUniformProbabilities() :number[] {
   let probs :number[] = [];
   for(let index = 0; index < 256; index++) {
-    probs[index] = 1;
+    probs.push(1);
   }
 
   return probs;
