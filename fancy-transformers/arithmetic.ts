@@ -50,7 +50,11 @@ function scale(items :number[], divisor :number) :number[] {
 function saveProbs(items :number[]) :ArrayBuffer {
   var bytes = new Uint8Array(items.length);
   for(var index = 0; index < items.length; index++) {
-    bytes[index] = items[index];
+    if (items[index] >= 0 && items[index] <= 255) {
+      bytes[index] = items[index];
+    } else {
+      throw new Error("Probabilities must be between 0 and 255 inclusive.");
+    }
   }
   return bytes.buffer;
 }
