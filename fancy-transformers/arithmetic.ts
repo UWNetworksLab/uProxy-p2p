@@ -27,25 +27,22 @@ var log :logging.Log = new logging.Log('fancy-transformers');
 
 // Returns the sum of a list of numbers
 function sum(items :number[]) :number {
-  var total :number = 0;
-  for(var i = 0; i < items.length; i++) {
-    total = total + items[i];
-  }
-
-  return total;
+  return items.reduce((a :number, b :number ) => {
+    return a + b;
+  }, 0);
 }
 
 // Takes an input list of integer and returns a list of integers where all of
 // the input integer have been divided by a constant.
 function scale(items :number[], divisor :number) :number[] {
-  for(var i = 0; i < items.length; i++) {
-    items[i] = Math.floor(items[i] / divisor);
-    if (items[i] === 0) {
-      items[i] = 1;
+  return items.map((item :number) => {
+    let scaled = Math.floor(item / divisor);
+    if (scaled === 0) {
+       return 1;
+    } else {
+      return scaled;
     }
-  }
-
-  return items;
+  });
 }
 
 // Takes a list of numbers where the inputs should all be integers from 0 to
