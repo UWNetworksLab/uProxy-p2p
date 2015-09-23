@@ -183,10 +183,6 @@
         "message": "برای گرفتن دسترسی از دوست خود، بر روی دکمه زیر کلیک کنید.",
         "description": ""
     },
-    "NO_FRIENDS_ONLINE": {
-        "message": "در حال حاضر هیچ یک از دوستانتان از یوپراکسی استفاده نمی کنند.",
-        "description": "None of the user's friends are currently signed in."
-    },
     "CONTINUE_BROWSING": {
         "message": "به مرور وب بدون یوپراکسی ادامه دهید",
         "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."

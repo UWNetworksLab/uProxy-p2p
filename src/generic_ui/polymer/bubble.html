@@ -21,7 +21,7 @@ uproxy-bubble::shadow #done {
 }
 -->
 
-<polymer-element name='uproxy-bubble' attributes='active' hidden>
+<polymer-element name='uproxy-bubble' attributes='active noclear' hidden>
   <template>
     <style>
     :host {
@@ -86,7 +86,7 @@ uproxy-bubble::shadow #done {
 
       <div id='box'>
         <div id='content'>
-          <paper-icon-button id='close' icon='clear' role='button' on-tap='{{ close }}'></paper-icon-button>
+          <paper-icon-button id='close' icon='clear' role='button' on-tap='{{ close }}' hidden?='{{ noclear }}'></paper-icon-button>
 
           <content></content>
 
