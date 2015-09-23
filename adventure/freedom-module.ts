@@ -74,7 +74,7 @@ function serveConnection(connection :tcp.Connection) :void {
   let recvBuffer :ArrayBuffer = new ArrayBuffer(0);
 
   let processCommands = (buffer :ArrayBuffer) :void => {
-    recvBuffer=arraybuffers.concat([recvBuffer, buffer]);
+    recvBuffer = arraybuffers.concat([recvBuffer, buffer]);
     let index = arraybuffers.indexOf(recvBuffer, arraybuffers.decodeByte(
       arraybuffers.stringToArrayBuffer('\n')
     ));
@@ -92,7 +92,7 @@ function serveConnection(connection :tcp.Connection) :void {
       var words = sentence.split(' ');
       var verb = words[0].trim().toLowerCase();
 
-      let keepParsing=false;
+      let keepParsing = false;
       switch (verb) {
         case 'get':
           get(connection, (transformerName || transformerConfig) ? {
@@ -105,7 +105,7 @@ function serveConnection(connection :tcp.Connection) :void {
           break;
         case 'ping':
           sendReply('ping', connection);
-          keepParsing=true;
+          keepParsing = true;
           break;
         case 'transform':
           // Sample commands:
@@ -134,11 +134,11 @@ function serveConnection(connection :tcp.Connection) :void {
           } else {
             sendReply('usage: transform (with name|config json)', connection);
           }
-          keepParsing=true;
+          keepParsing = true;
           break;
         case 'xyzzy':
           sendReply('Nothing happens.', connection);
-          keepParsing=true;
+          keepParsing = true;
           break;
         case 'quit':
           connection.close();
@@ -147,7 +147,7 @@ function serveConnection(connection :tcp.Connection) :void {
           if (verb.length > 0) {
             sendReply('I don\'t understand that command. (' + verb + ')', connection);
           }
-          keepParsing=true;
+          keepParsing = true;
       }
 
       if (keepParsing) {
