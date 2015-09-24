@@ -85,12 +85,29 @@ export class DecompressionShaper implements Transformer {
   // Decompress the bytestream. The purpose of this transform is to take a high
   // entropy bytestream and produce a lower entropy one.
   public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
+    // The purpose of this section of code is to encode the data in the format
+    // expected by the decoder. This format is inherited from the original
+    // psuedocode implementation in the range encoding paper.
+    // The decoder expects data to be in the following format:
+    // - header - 1 byte
+    // - data - variable
+    // - footer - 2 bytes
+    // - length - 2 bytes
+
+    // Create a header byte. This is an arbitrary value that is required but
+    // ignored by the decoder. A non-zero value is used to simplify debugging.
     let header = arraybuffers.encodeByte(0xCA);
+    // Create some trailing zero bytes. These are consumed by the decoder.
     let footer = new ArrayBuffer(2);
+    // Create an encoded length. This is required but ignored by the decoder.
     let length = arraybuffers.encodeShort(buffer.byteLength);
+    // Construct an encoded buffer if the form expected by the decoder.
     let encoded = arraybuffers.concat([header, buffer, footer, length]);
+
     // Use a decoder to decompress.
     // This is backwards from what you'd normally expect.
+    // The decoded bytes will have two trailing zeros added, so these are
+    // sliced off.
     let decoded = this.decoder_.decode(encoded).slice(0, -2);
     return [decoded];
   }
@@ -99,6 +116,12 @@ export class DecompressionShaper implements Transformer {
     // Use an encoder to compress.
     // This is backwards from what you'd normally expect.
     let encoded = this.encoder_.encode(buffer);
+    // The encoder generates data to be in the following format:
+    // - header - 1 byte
+    // - data - variable
+    // - footer - 2 bytes
+    // - length - 2 bytes
+    // Slice off the extra bytes and only return the data.
     return [encoded.slice(1, -4)];
   }
 
