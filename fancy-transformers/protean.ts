@@ -99,15 +99,10 @@ export class Protean implements Transformer {
   // - Inject packets with byte sequences
   public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     var source = [buffer];
-  //  log.debug("-> %1", arraybuffers.arrayBufferToHexString(source[0]));
     var fragmented = flatMap(source, this.fragmenter_.transform);
-  //  log.debug("-> %1", arraybuffers.arrayBufferToHexString(fragmented[0]));
     var encrypted = flatMap(fragmented, this.encrypter_.transform);
-  //  log.debug("-> %1", arraybuffers.arrayBufferToHexString(encrypted[0]));
     var decompressed = flatMap(encrypted, this.decompresser_.transform);
-  //  log.debug("-> %1", arraybuffers.arrayBufferToHexString(decompressed[0]));
     var injected = flatMap(decompressed, this.injecter_.transform);
-  //  log.debug("-> %1", arraybuffers.arrayBufferToHexString(injected[0]));
     return injected;
   }
 
@@ -118,15 +113,10 @@ export class Protean implements Transformer {
   // - Attempt defragmentation
   public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     var source = [buffer];
-  //  log.debug("<- %1", arraybuffers.arrayBufferToHexString(source[0]));
     var extracted = flatMap(source, this.injecter_.restore);
-  //  log.debug("<- %1", arraybuffers.arrayBufferToHexString(extracted[0]));
     var decompressed = flatMap(extracted, this.decompresser_.restore);
-  //  log.debug("<- %1", arraybuffers.arrayBufferToHexString(decompressed[0]));
     var decrypted = flatMap(decompressed, this.encrypter_.restore);
-  //  log.debug("<- %1", arraybuffers.arrayBufferToHexString(decrypted[0]));
     var defragmented = flatMap(decrypted, this.fragmenter_.restore);
-  //  log.debug("<- %1", arraybuffers.arrayBufferToHexString(defragmented[0]));
     return defragmented;
   }
 
