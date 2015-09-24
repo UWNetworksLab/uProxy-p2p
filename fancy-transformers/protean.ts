@@ -19,7 +19,7 @@ export interface ProteanConfig {
 }
 
 // Creates a sample (non-random) config, suitable for testing.
-export function sampleConfig() :ProteanConfig => {
+export function sampleConfig() :ProteanConfig {
   return {
     decompression: decompression.sampleConfig(),
     encryption: encryption.sampleConfig(),
