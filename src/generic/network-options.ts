@@ -39,5 +39,13 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     supportsReconnect: false,
     supportsInvites: false,
     isExperimental: true
+  },
+  'GitHub': {
+    isFirebase: false,
+    enableMonitoring: false,
+    areAllContactsUproxy: true,
+    supportsReconnect: false,
+    supportsInvites: true,
+    isExperimental: true
   }
 };
