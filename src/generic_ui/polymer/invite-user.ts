@@ -59,6 +59,23 @@ Polymer({
     core.inviteUser({
       networkId: selectedNetwork.name,
       userName: this.userIdInput
+    }).then(() => {
+      this.closeInviteUserPanel();
+      this.fire('open-dialog', {
+        heading: '',
+        message: 'Invite sent to ' + this.userIdInput + '!',
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+    }).catch(() => {
+      this.fire('open-dialog', {
+        heading: '',
+        message: 'Oops, you can only invite friends who have signed in to uProxy with GitHub before.',
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
     });
   },
   onNetworkSelect: function(e :any, details :any) {

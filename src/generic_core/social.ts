@@ -609,6 +609,7 @@ export function getNetworkDisplayName(networkName :string) : string {
     public inviteUser = (userName: string): Promise<void> => {
       return this.freedomApi_.inviteUser(userName).catch((e) => {
         log.error('Error calling inviteUser: ' + userName, e.message);
+        return Promise.reject('Error calling inviteUser: ' + userName + e.message);
       }).then(() => {
         return Promise.resolve<void>();
       });
