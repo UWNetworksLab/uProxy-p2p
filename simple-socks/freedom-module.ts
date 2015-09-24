@@ -12,13 +12,8 @@ import tcp = require('../net/tcp');
 export var moduleName = 'simple-socks';
 export var log :logging.Log = new logging.Log(moduleName);
 
-// Set each module to info, warn, error, or debug depending on which module
-// you're debugging. Since the proxy outputs quite a lot of messages, show only
-// warnings by default from the rest of the system.  Note that the proxy is
-// extremely slow in debug mode.
 export var loggingController = freedom['loggingcontroller']();
 
-// Example to show how to manuall configure console filtering.
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
                                    loggingTypes.Level.debug);
 
