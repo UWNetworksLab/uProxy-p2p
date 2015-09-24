@@ -15,7 +15,7 @@ import storage = globals.storage;
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
-import version = require('../version/version');
+import version = require('../generic/version');
 import StoredValue = require('./stored_value');
 import _ = require('lodash');
 
@@ -262,7 +262,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   // Resets the copy/paste signal batcher.
-  // TODO: enable compression
   private resetBatcher_ = () : void => {
     this.batcher_ = new onetime.SignalBatcher<social.PeerMessage>((signal:string) => {
       ui.update(uproxy_core_api.Update.ONETIME_MESSAGE, signal);
@@ -273,7 +272,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       // returns true.
       return signal.data && (<any>signal.data).signals &&
         bridge.isTerminatingSignal(<bridge.SignallingMessage>signal.data);
-    }, false);
+    }, true);
   }
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {

@@ -51,13 +51,14 @@
       font-size: 14px;
       color: rgb(150,150,150);
     }
-    #friendsAppearWhen {
-      font-size: 14px;
-      padding-top: 10px;
-      color: rgb(150,150,150);
-    }
     #loadingContacts {
       margin-top: 0.5em;
+    }
+    #connectWithFriendsInstruction {
+      margin: 20px 65px 20px 20px;
+      bottom: 0;
+      position: absolute;
+      font-size: 14px;
     }
     paper-progress {
       margin-bottom: 1em;
@@ -67,6 +68,11 @@
       margin-top: 32px;
       border-bottom: solid 1px;
       border-color: rgb(238, 238, 238);
+    }
+    #friendsAppearWhen {
+      font-size: 14px;
+      padding-top: 10px;
+      color: rgb(150,150,150);
     }
     </style>
 
@@ -80,7 +86,7 @@
         {{ "LOADING_FRIENDS" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
-      <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
+      <div id='noContactsFound' hidden?='{{ ui.showInviteControls || loadingContacts }}'>
         {{ "NO_FRIENDS_ONLINE" | $$ }}
         <p id='friendsAppearWhen'>{{ "FRIENDS_APPEAR_WHEN" | $$ }}</p>
         <p>
@@ -89,6 +95,11 @@
           </uproxy-faq-link>
         </p>
       </div>
+    </div>
+
+    <div id="connectWithFriendsInstruction" hidden?="{{ !ui.showInviteControls || loadingContacts || hasContacts }}">
+      <h2>{{ 'CONNECT_TO_FRIEND' | $$ }}</h2>
+      {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
     </div>
 
     <div hidden?='{{ !hasContacts }}'>

@@ -32,44 +32,9 @@ import user = require('./remote-user');
 import globals = require('./globals');
 import storage = globals.storage;
 import freedom_social2 = require('../interfaces/social2');
-
 import ui = ui_connector.connector;
-
-  // TODO: move this to shared file
-  // https://github.com/uProxy/uproxy/issues/1901
-  export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
-    'Google': {
-      isFirebase: false,
-      enableMonitoring: true,
-      areAllContactsUproxy: false
-    },
-    'Facebook': {
-      isFirebase: true,
-      enableMonitoring: true,
-      areAllContactsUproxy: true
-    },
-    'Facebook-Firebase-V2': {
-      displayName: 'Facebook',
-      isFirebase: true,
-      enableMonitoring: true,
-      areAllContactsUproxy: true
-    },
-    'GMail': {
-      isFirebase: true,
-      enableMonitoring: true,
-      areAllContactsUproxy: true
-    },
-    'WeChat': {
-      isFirebase: false,
-      enableMonitoring: false,
-      areAllContactsUproxy: false
-    },
-    'GitHub': {
-      isFirebase: false,
-      enableMonitoring: false,
-      areAllContactsUproxy: true
-    }
-  }
+import network_options = require('../generic/network-options');
+var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
   var log :logging.Log = new logging.Log('social');
 
@@ -164,22 +129,12 @@ export function notifyUI(networkName :string, userId :string) {
 
   var payload :social.NetworkMessage = {
     name: networkName,
-    displayName: getNetworkDisplayName(networkName),
     online: online,
     userId: userId,
     userName: userName,
     imageData: imageData
   };
   ui.update(uproxy_core_api.Update.NETWORK, payload);
-}
-
-// TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
-export function getNetworkDisplayName(networkName :string) : string {
-  var options = NETWORK_OPTIONS[networkName];
-  if (options && options.displayName) {
-    return options.displayName;
-  }
-  return networkName;
 }
 
   // Implements those portions of the Network interface for which the logic is
@@ -718,7 +673,6 @@ export function getNetworkDisplayName(networkName :string) : string {
 
       return {
         name: this.name,
-        displayName: getNetworkDisplayName(this.name),
         profile: this.myInstance.getUserProfile(),
         roster: rosterState
       };

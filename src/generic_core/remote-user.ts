@@ -129,7 +129,6 @@ var log :logging.Log = new logging.Log('remote-user');
     }
 
     /**
-    status: this.profile.status
      * Handle 'onClientState' events from the social provider, which indicate
      * changes in status such as becoming online, offline.
      *  - Only adds uProxy clients to the clients table.

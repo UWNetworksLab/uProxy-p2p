@@ -17,12 +17,12 @@ Polymer({
       core.sendEmail({
           networkInfo: selectedNetworkInfo,
           to: this.inviteUserEmail,
-          subject: 'Join me on uProxy',
-          body: 'Click here to join me on uProxy ' + inviteUrl
+          subject: ui.i18n_t('INVITE_EMAIL_SUBJECT'),
+          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: inviteUrl })
       });
       this.fire('open-dialog', {
-        heading: 'Invitation Email sent', // TODO: translate
-        message: '',  // TODO:
+        heading: '',
+        message: ui.i18n_t("INVITE_EMAIL_SENT"),
         buttons: [{
           text: ui.i18n_t("OK")
         }]
@@ -84,6 +84,7 @@ Polymer({
     }
   },
   openInviteUserPanel: function() {
+    this.setOnlineInviteNetworks();
     // Reset selectedNetworkName in case it had been set and that network
     // is no longer online.
     this.$.networkSelectMenu.selectIndex(0);
@@ -94,6 +95,18 @@ Polymer({
   },
   showAcceptUserInvite: function() {
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
+  },
+  setOnlineInviteNetworks: function() {
+    this.onlineInviteNetworks = [];
+    for (var i = 0; i < model.onlineNetworks.length; ++i) {
+      var name = model.onlineNetworks[i].name;
+      if (ui.supportsInvites(name)) {
+        this.onlineInviteNetworks.push({
+          name: name,
+          displayName: ui.getNetworkDisplayName(name)
+        });
+      }
+    }
   },
   ready: function() {
     this.inviteUserEmail = '';

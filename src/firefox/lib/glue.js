@@ -5,8 +5,8 @@
  * for proxy setting and setiing a main icon.
  */
 
-var proxyConfig = require('lib/firefox_proxy_config.js').proxyConfig;
-var xhr = require('lib/firefox_xhr.js').xhr;
+var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
+var xhr = require('firefox_xhr.js').xhr;
 
 // TODO: rename uproxy.js/ts to uproxy-enums.js/ts
 var uproxy_core_api = require('./interfaces/uproxy_core_api.js');

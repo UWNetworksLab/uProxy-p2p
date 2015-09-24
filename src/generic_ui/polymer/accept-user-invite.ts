@@ -24,8 +24,8 @@ Polymer({
 
     core.acceptInvitation({userPath: path, data: networkData}).then(() => {
       this.fire('open-dialog', {
-        heading: 'Friend Added', // TODO: translate
-        message: '',  // TODO:
+        heading: '',
+        message: ui.i18n_t("FRIEND_ADDED"),
         buttons: [{
           text: ui.i18n_t("OK")
         }]
@@ -33,13 +33,12 @@ Polymer({
       this.closeAcceptUserInvitePanel();
     }).catch(() => {
       this.fire('open-dialog', {
-        heading: '', // TODO: translate
-        message: 'There was an error adding your friend.',  // TODO:
+        heading: '',
+        message: ui.i18n_t("FRIEND_ADD_ERROR"),
         buttons: [{
           text: ui.i18n_t("OK")
         }]
       });
-      console.log('There was an error adding your friend.');
     });
   },
   openAcceptUserInvitePanel: function() {
