@@ -9,37 +9,44 @@ import rtc_to_net = require('../rtc-to-net/rtc-to-net');
 import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
 import tcp = require('../net/tcp');
 
-export var moduleName = 'simple-socks';
-export var log :logging.Log = new logging.Log(moduleName);
-
-export var loggingController = freedom['loggingcontroller']();
-
+const loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
                                    loggingTypes.Level.debug);
 
-//-----------------------------------------------------------------------------
-var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port:9999 };
+const log :logging.Log = new logging.Log('simple-socks');
 
-//-----------------------------------------------------------------------------
+const socksEndpoint:net.Endpoint = {
+  address: '0.0.0.0',
+  port: 9999
+};
+
 // Don't specify STUN servers because they aren't needed and can, in fact,
 // present a problem when Simple SOCKS is running on a system behind a NAT
 // without support for hair-pinning.
-var pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
+const pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
   iceServers: []
 };
 
-export var rtcNet = new rtc_to_net.RtcToNet();
-rtcNet.start({
-  allowNonUnicast: true
-}, bridge.best('rtctonet', pcConfig));
+export const socksToRtc = new socks_to_rtc.SocksToRtc();
+export const rtcToNet = new rtc_to_net.RtcToNet();
 
-//-----------------------------------------------------------------------------
-export var socksRtc = new socks_to_rtc.SocksToRtc();
-socksRtc.on('signalForPeer', rtcNet.handleSignalFromPeer);
-socksRtc.start(new tcp.Server(localhostEndpoint),
+rtcToNet.start({
+  allowNonUnicast: true
+}, bridge.best('rtctonet', pcConfig)).then(() => {
+  log.info('RtcToNet ready');
+}, (e:Error) => {
+  log.error('failed to start RtcToNet: %1', e.message);
+});
+
+// Must do this after calling start.
+rtcToNet.signalsForPeer.setSyncHandler(socksToRtc.handleSignalFromPeer);
+
+// Must do this before calling start.
+socksToRtc.on('signalForPeer', rtcToNet.handleSignalFromPeer);
+
+socksToRtc.start(new tcp.Server(socksEndpoint),
     bridge.best('sockstortc', pcConfig, undefined, {
-      // Change this value to change the transformer used.
-      // See churn pipe source for the list of names.
+      // See churn pipe source for the full list of transformer names.
       name: 'caesar'
     })).then((endpoint:net.Endpoint) => {
   log.info('SocksToRtc listening on %1', endpoint);
@@ -48,10 +55,3 @@ socksRtc.start(new tcp.Server(localhostEndpoint),
 }, (e:Error) => {
   log.error('failed to start SocksToRtc: %1', e.message);
 });
-
-rtcNet.onceReady
-  .then(() => {
-    log.info('RtcToNet ready');
-  }, (e:Error) => {
-    log.error('failed to start RtcToNet: ' + e.message);
-  });
