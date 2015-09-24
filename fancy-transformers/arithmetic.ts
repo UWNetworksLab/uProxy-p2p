@@ -402,10 +402,7 @@ export class Decoder extends Coder {
       output[index] = this.output_[index];
     }
 
-    // Return only the part of the ArrayBuffer corresponding to the target
-    // length. The decoding process may add extra bytes to the end of the
-    // buffer and these need to be trimmed off.
-    return output.buffer.slice(0, size);
+    return output.buffer;
   }
 
   // Initialize state variables for decoding.
