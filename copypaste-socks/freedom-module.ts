@@ -1,13 +1,13 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import bridge = require('../bridge/bridge');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
+import onetime = require('../bridge/onetime');
 import rtc_to_net = require('../rtc-to-net/rtc-to-net');
-import signals = require('../webrtc/signals');
 import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
 import tcp = require('../net/tcp');
 
@@ -56,15 +56,18 @@ var rtcNet:rtc_to_net.RtcToNet;
 
 var portControl = freedom['portControl']();
 
+var batcher = new onetime.SignalBatcher<bridge.SignallingMessage>(
+    (signal:bridge.SignallingMessage) => {
+  parentModule.emit('signalForPeer', signal);
+}, bridge.isTerminatingSignal);
+
 var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
 
   socksRtc = new socks_to_rtc.SocksToRtc();
 
   // Forward signalling channel messages to the UI.
-  socksRtc.on('signalForPeer', (signal:any) => {
-      parentModule.emit('signalForPeer', signal);
-  });
+  socksRtc.on('signalForPeer', batcher.addToBatch);
 
   // SocksToRtc adds the number of bytes it sends/receives to its respective
   // queue as it proxies. When new numbers (of bytes) are added to these queues,
@@ -94,13 +97,31 @@ var doStart = () => {
 
 parentModule.on('start', doStart);
 
+// Receive signalling channel messages from the UI and
+// reply with a signalMessageResult message indicating
+// whether it's well formed.
+parentModule.on('validateSignalMessage', (encodedMessage:string) => {
+  try {
+    onetime.decode(encodedMessage);
+    parentModule.emit('signalMessageResult', true);
+  } catch (e) {
+    log.warn('input is badly formed');
+    parentModule.emit('signalMessageResult', false);
+  }
+});
+
 // Receive signalling channel messages from the UI.
 // Messages are dispatched to either the socks-to-rtc or rtc-to-net
 // modules depending on whether we're acting as the frontend or backend,
 // respectively.
-parentModule.on('handleSignalMessage', (message:signals.Message) => {
+parentModule.on('handleSignalMessage', (encodedMessage:string) => {
+  // The UI should only call this function once the message has
+  // already been successfully decoded, via validateSignalMessage,
+  // so we don't perform any error checking here.
+  var messages = onetime.decode(encodedMessage);
+
   if (socksRtc !== undefined) {
-    socksRtc.handleSignalFromPeer(message);
+    messages.forEach(socksRtc.handleSignalFromPeer);
   } else {
     if (rtcNet === undefined) {
       rtcNet = new rtc_to_net.RtcToNet();
@@ -110,9 +131,7 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
       log.info('created rtc-to-net');
 
       // Forward signalling channel messages to the UI.
-      rtcNet.signalsForPeer.setSyncHandler((message:signals.Message) => {
-          parentModule.emit('signalForPeer', message);
-      });
+      rtcNet.signalsForPeer.setSyncHandler(batcher.addToBatch);
 
       // Similarly to with SocksToRtc, emit the number of bytes sent/received
       // in RtcToNet to the UI.
@@ -133,7 +152,7 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
         parentModule.emit('proxyingStopped');
       });
     }
-    rtcNet.handleSignalFromPeer(message);
+    messages.forEach(rtcNet.handleSignalFromPeer);
   }
 });
 

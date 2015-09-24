@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
@@ -21,6 +21,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   var testerFactoryManager
         :freedom.FreedomModuleFactoryManager<ProxyIntegrationTester>;
+  var testModule :ProxyIntegrationTester;
   var createTestModule = function(denyLocalhost?:boolean,
       sessionLimit?:number, ipv6Only?:boolean) : ProxyIntegrationTester {
         return testerFactoryManager(denyLocalhost, useChurn, sessionLimit, ipv6Only);

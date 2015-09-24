@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path="../../../third_party/freedom-typings/freedom.d.ts" />
+/// <reference path="../../../third_party/typings/freedom/freedom.d.ts" />
 
 import MockFreedomRtcDataChannel =
   require('../freedom/mocks/mock-rtcdatachannel');
@@ -134,5 +134,31 @@ describe('PeerConnection', function() {
       expect(mockRtcPeerConnection.addIceCandidate).toHaveBeenCalled();
       done();
     });
+  });
+});
+
+describe('extractMaxChannelsFromSdp_', function() {
+  it('simple example', () => {
+      expect(peerconnection.PeerConnectionClass.extractMaxChannelsFromSdp_(
+          'a=sctpmap:5000 webrtc-datachannel 256')).toEqual(256);
+  });
+
+  it('multiple lines', () => {
+      expect(peerconnection.PeerConnectionClass.extractMaxChannelsFromSdp_(
+          'v=0\na=sctpmap:5000 webrtc-datachannel 256\nt=0 0')).toEqual(256);
+  });
+
+  it('unknown protocol', () => {
+    expect(() => {
+      peerconnection.PeerConnectionClass.extractMaxChannelsFromSdp_(
+          'a=sctpmap:5000 banjo 256');
+    }).toThrow();
+  });
+
+  it('weird number', () => {
+    expect(() => {
+      peerconnection.PeerConnectionClass.extractMaxChannelsFromSdp_(
+          'a=sctpmap:5000 webrtc-datachannel a1');
+    }).toThrow();
   });
 });

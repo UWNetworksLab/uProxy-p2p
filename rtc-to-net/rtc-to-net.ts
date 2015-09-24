@@ -2,7 +2,7 @@
 // out to the internet and sending back over WebRTC the responses.
 
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');

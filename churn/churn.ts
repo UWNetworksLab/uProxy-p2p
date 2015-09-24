@@ -1,21 +1,9 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
-// TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
-// Ideal:
-//  import Transformer = require('uproxy-obfuscators/transformer');
-// Current:
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-
-
-// TODO(ldixon): re-enable FTE and regex2dfa. But this time, start with a pre-
-// computed set of DFAs because the regex2dfa.js library is 4MB in size. Also
-// experiment with uglify and zip to see if that size drops significantly.
-//
-// import regex2dfa = require('regex2dfa');
-
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import caesar = require('../simple-transformers/caesar');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
@@ -30,6 +18,7 @@ import signals = require('../webrtc/signals');
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
 import MirrorMapping = churn_pipe_types.MirrorMapping;
+import TransformerConfig = churn_types.TransformerConfig;
 
 import Candidate = candidate.Candidate;
 import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
@@ -112,13 +101,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   };
 
   // Generates a key suitable for use with CaesarCipher, viz. 1-255.
-  var generateCaesarKey_ = (): number => {
+  var generateCaesarConfig_ = (): caesar.Config => {
     try {
-      return (random.randomUint32() % 255) + 1;
+      return {
+        key: (random.randomUint32() % 255) + 1
+      };
     } catch (e) {
       // https://github.com/uProxy/uproxy/issues/1593
       log.warn('crypto unavailable, using Math.random');
-      return Math.floor((Math.random() * 255)) + 1;
+      return {
+        key: Math.floor((Math.random() * 255)) + 1
+      };
     }
   }
 
@@ -142,6 +135,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   //         https://github.com/uProxy/uproxy/issues/585
   export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
+    // Number of instances created, for logging purposes.
+    private static id_ = 0;
+
     // Maximum time to spend gathering ICE candidates.
     // We cap this so that slow STUN servers, in the absence
     // of trickle ICE, don't make the user wait unnecessarily.
@@ -149,7 +145,6 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     public peerOpenedChannelQueue :handler.QueueHandler<peerconnection.DataChannel, void>;
     public signalForPeerQueue :handler.Queue<ChurnSignallingMessage, void>;
-    public peerName :string;
 
     public onceConnected :Promise<void>;
     public onceClosed :Promise<void>;
@@ -171,10 +166,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     } = {};
 
-    // Fulfills once we know the obfuscation key for caesar cipher.
-    private haveCaesarKey_ :(key:number) => void;
-    private onceHaveCaesarKey_ = new Promise((F, R) => {
-      this.haveCaesarKey_ = F;
+    // Fulfills once we know the obfuscator config, which may
+    // happen in response to a signalling channel message.
+    private haveTransformerConfig_ :(config:TransformerConfig) => void;
+    private onceHaveTransformerConfig_ = new Promise((F, R) => {
+      this.haveTransformerConfig_ = F;
     });
 
     private pipe_ :ChurnPipe;
@@ -194,11 +190,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private static internalConnectionId_ = 0;
 
     constructor(probeRtcPc:freedom.RTCPeerConnection.RTCPeerConnection,
-                peerName?:string,
+                private name_ = 'unnamed-churn-' + Connection.id_,
                 private skipPublicEndpoint_?:boolean,
-                private portControl_?:freedom.PortControl.PortControl) {
-      this.peerName = peerName || 'churn-connection-' +
-          (++Connection.internalConnectionId_);
+                private portControl_?:freedom.PortControl.PortControl,
+                private preferredTransformerConfig_?:TransformerConfig) {
+      Connection.id_++;
 
       this.signalForPeerQueue = new handler.Queue<ChurnSignallingMessage,void>();
 
@@ -212,14 +208,14 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.onceClosed = this.obfuscatedConnection_.onceClosed;
 
       // Debugging.
-      this.onceHaveCaesarKey_.then((key: number) => {
-        log.info('%1: caesar key is %2', this.peerName, key);
+      this.onceHaveTransformerConfig_.then((config:TransformerConfig) => {
+        log.info('%1: transformer config: %2', this.name_, config);
       });
     }
 
     private configureProbeConnection_ = (
         freedomPc:freedom.RTCPeerConnection.RTCPeerConnection) => {
-      var probePeerName = this.peerName + '-probe';
+      var probePeerName = this.name_ + '-probe';
 
       // The list of all candidates returned by the probe connection.
       var candidates :Candidate[] = [];
@@ -235,15 +231,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             var MAP_LIFETIME = 24 * 60 * 60;  // 24 hours in seconds
             if (c.type === 'srflx') {
               if (this.portControl_ === undefined) {
-                log.debug('Port control not available in churn');
+                log.debug('%1: port control unavailable', this.name_);
               } else {
+                log.info('%1: port control available', this.name_);
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom.PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed. Mapping object: ", 
-                                mapping);
+                      log.debug('%1: addMapping() failed: %2',
+                          this.name_, mapping);
                     } else {
-                      log.debug("addMapping() success: ", mapping);
+                      log.info('%1: addMapping() success: ',
+                          this.name_, mapping);
                     }
                 });
               }
@@ -268,14 +266,13 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       });
 
       setTimeout(() => {
-        log.warn('%1: probing timed out, closing probe connection',
-            this.peerName);
+        log.warn('%1: probing timed out, closing probe connection', this.name_);
         this.probingComplete_();
       }, Connection.PROBE_TIMEOUT_MS_);
 
       this.onceProbingComplete_.then(() => {
         this.probeConnection_.close().then(() => {
-          return this.onceHaveCaesarKey_;
+          return this.onceHaveTransformerConfig_;
         }).then(this.configurePipe_).then(() => {
           this.processProbeCandidates_(candidates);
           this.havePipe_();
@@ -299,22 +296,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     }
 
-    private configurePipe_ = (key:number) : void => {
-      this.pipe_ = freedom['churnPipe'](this.peerName);
+    private configurePipe_ = (transformerConfig:TransformerConfig) : Promise<void> => {
+      this.pipe_ = freedom['churnPipe'](this.name_);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-      this.pipe_.setTransformer('caesar',
-          new Uint8Array([key]).buffer,
-          '{}');
-      // TODO(ldixon): re-enable FTE support instead of caesar cipher.
-      //     'fte',
-      //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-      //     JSON.stringify({
-      //       'plaintext_dfa': regex2dfa('^.*$'),
-      //       'plaintext_max_len': 1400,
-      //       // This is equivalent to Rabbit cipher.
-      //       'ciphertext_dfa': regex2dfa('^.*$'),
-      //       'ciphertext_max_len': 1450
-      //     }
+      return this.pipe_.setTransformer(transformerConfig);
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
@@ -356,7 +341,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           candidate: copy.toRTCIceCandidate()
         });
       } else {
-        log.error('Got a mapping for a nonexistent candidate');
+        log.error('%1: got mapping for non-existent candidate', this.name_);
       }
     }
 
@@ -365,7 +350,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       var obfConfig :freedom.RTCPeerConnection.RTCConfiguration = {
         iceServers: []
       };
-      var obfPeerName = this.peerName + '-obfuscated';
+      var obfPeerName = this.name_ + '-obfuscated';
       var freedomPc = freedom['core.rtcpeerconnection'](obfConfig);
       this.obfuscatedConnection_ = new peerconnection.PeerConnectionClass(
           freedomPc, obfPeerName);
@@ -402,10 +387,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             });
           } catch (e) {
             log.debug('%1: ignoring candidate line %2: %3',
-                this.peerName,
+                this.name_,
                 JSON.stringify(message),
                 e.message);
           }
+        } else if (message.type === signals.Type.NO_MORE_CANDIDATES) {
+          // churn itself doesn't need this but it serves as an
+          // indication to features such as copy/paste that signalling
+          // is finished.
+          this.signalForPeerQueue.handle({
+            webrtcMessage: message
+          });
         }
       });
       this.peerOpenedChannelQueue =
@@ -413,14 +405,25 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     public negotiateConnection = () : Promise<void> => {
-      // Generate a key and send it to the remote party.
-      // Once they've received it, they'll be able to establish
-      // a matching pipe.
-      var key = generateCaesarKey_();
-      this.haveCaesarKey_(key);
-      this.signalForPeerQueue.handle({
-        caesar: key
-      });
+      // First, signal the obfuscation config. This will allow the
+      // remote peer establish a matching churn pipe. If no config
+      // was specified, use Caesar cipher for backwards compatibility.
+      if (this.preferredTransformerConfig_) {
+        this.signalForPeerQueue.handle({
+          transformer: this.preferredTransformerConfig_
+        });
+        this.haveTransformerConfig_(this.preferredTransformerConfig_);
+      } else {
+        var caesarConfig = generateCaesarConfig_();
+        this.signalForPeerQueue.handle({
+          caesar: caesarConfig.key
+        });
+        this.haveTransformerConfig_({
+          name: 'caesar',
+          config: JSON.stringify(caesarConfig)
+        });
+      }
+
       return this.obfuscatedConnection_.negotiateConnection();
     }
 
@@ -446,8 +449,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             churnMessage.publicEndpoint);
         this.addRemoteCandidate_(fakeRTCIceCandidate);
       }
+      if (churnMessage.transformer !== undefined) {
+        this.haveTransformerConfig_(churnMessage.transformer);
+      }
       if (churnMessage.caesar !== undefined) {
-        this.haveCaesarKey_(churnMessage.caesar);
+        log.debug('%1: received legacy caesar cipher config', this.name_);
+        this.haveTransformerConfig_({
+          name: 'caesar',
+          config: JSON.stringify(<caesar.Config>{
+            key: churnMessage.caesar
+          })
+        });
       }
       if (churnMessage.webrtcMessage) {
         var message = churnMessage.webrtcMessage;
@@ -480,7 +492,15 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     public close = () : Promise<void> => {
-      return this.obfuscatedConnection_.close();
+      var promises = [this.obfuscatedConnection_.close()];
+      if (this.pipe_) {
+        promises.push(this.pipe_.shutdown().catch((e) => {
+          log.warn('Error while shutting down pipe: %1', e);
+        }).then(() => {
+          freedom['churnPipe'].close(this.pipe_);
+        }));
+      }
+      return Promise.all(promises).then((voids:void[]) : void => {});
     }
 
     public toString = () : string => {

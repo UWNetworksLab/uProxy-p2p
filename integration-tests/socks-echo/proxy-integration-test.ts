@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom.d.ts' />
+/// <reference path='../../../../third_party/typings/freedom/freedom.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import bridge = require('../../bridge/bridge');
@@ -233,6 +233,24 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     } catch (e) {
       return Promise.reject(e);
     }
+  }
+
+
+  public shutdown = () : Promise<void> => {
+    var closeSocksToRtc = this.socksToRtc_.stop();
+    var closeRtcToNet = this.rtcToNet_.stop();
+    var stopEchoServers = this.echoServers_.map((server) => {
+      return server.shutdown();
+    });
+    var closeConnections :Promise<void>[] = [];
+    for (var index in this.connections_) {
+      closeConnections.push(this.connections_[index].close().then(
+          (kind:tcp.SocketCloseKind) : void => {}));
+    }
+
+    var shutdownPromises = closeConnections.concat(stopEchoServers,
+        [closeRtcToNet, closeSocksToRtc]);
+    return Promise.all(shutdownPromises).then((voids:void[]) => {});
   }
 
   public on = (name:string, listener:(event:any) => void) : void => {

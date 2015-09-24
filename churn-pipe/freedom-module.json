@@ -18,11 +18,10 @@
       },
       "setTransformer": {
         "type": "method",
-        "value": [
-          "string",
-          "buffer",
-          "string"
-        ]
+        "value": [{
+          "name": "string",
+          "config": "string"
+        }]
       },
       "bindLocal": {
         "type": "method",
@@ -44,6 +43,10 @@
           "address": "string",
           "port": "number"
         }]
+      },
+      "shutdown": {
+        "type": "method",
+        "value": []
       },
       "mappingAdded": {
         "type": "event",

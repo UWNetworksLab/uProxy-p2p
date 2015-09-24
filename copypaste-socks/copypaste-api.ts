@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 // 'model' object contains variables about the state of the application.
 // Polymer elements will bind to model so that the elements' style and
@@ -25,7 +25,7 @@ export interface CopypasteApi {
   // This is a promise for the freedom module stub.
   onceReady :Promise<freedom.OnAndEmit<any,any>>;
   model :Model;
-  parseInboundMessages :(inboundMessageFieldValue:string) => void;
+  parseInboundMessages :() => void;
   consumeInboundMessage :() => void;
   verifyDecryptInboundMessage :(ciphertext:string) => void;
 }

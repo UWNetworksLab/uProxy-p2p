@@ -1,5 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import churn = require('../churn/churn');
 import churn_types = require('../churn/churn.types');
@@ -29,20 +29,23 @@ export var preObfuscation = (
 export var basicObfuscation = (
     name?:string,
     config?:freedom.RTCPeerConnection.RTCConfiguration,
-    portControl?:freedom.PortControl.PortControl)
+    portControl?:freedom.PortControl.PortControl,
+    transformerConfig?:churn_types.TransformerConfig)
     :BridgingPeerConnection => {
   return new BridgingPeerConnection(ProviderType.CHURN, name, config, 
-                                    portControl);
+                                    portControl, transformerConfig);
 }
 
 // Use this if you think the remote peer supports holographic ICE.
 export var holographicIceOnly = (
     name?:string,
     config?:freedom.RTCPeerConnection.RTCConfiguration,
-    portControl?:freedom.PortControl.PortControl)
+    portControl?:freedom.PortControl.PortControl,
+    transformerConfig?:churn_types.TransformerConfig)
     :BridgingPeerConnection => {
   return new BridgingPeerConnection(ProviderType.HOLO_ICE,
-                                    name, config, portControl);
+                                    name, config, portControl,
+                                    transformerConfig);
 }
 
 // Creates a bridge which initiates with the best provider and can
@@ -77,6 +80,39 @@ export interface SignallingMessage {
 ////////
 // Static helper functions.
 ////////
+
+// Returns true iff message is a "terminating" message,
+// i.e. NO_MORE_CANDIDATES. This is intended for use in copy/paste
+// scenarios where it's important for the caller to know when
+// signalling is complete. Handles all providers known to the bridge
+// but does *not* handle "flattened" signalling messages, nor
+// messages with multiple providers.
+export var isTerminatingSignal = (message:SignallingMessage) : boolean => {
+  if (message.signals === undefined) {
+    return false;
+  }
+  var keys = Object.keys(message.signals);
+  if (keys.length !== 1) {
+    throw new Error('only one provider supported');
+  }
+  var providerName = keys[0];
+  var signals = message.signals[providerName];
+  if (signals.length !== 1) {
+    throw new Error('only one signal supported');
+  }
+  switch (providerName) {
+    case ProviderType[ProviderType.PLAIN]:
+      var oldSignal = <peerconnection_types.Message>signals[0];
+      return oldSignal.type === peerconnection_types.Type.NO_MORE_CANDIDATES;
+    case ProviderType[ProviderType.CHURN]:
+    case ProviderType[ProviderType.HOLO_ICE]:
+      var churnSignal = <churn_types.ChurnSignallingMessage>signals[0];
+      return churnSignal.webrtcMessage && churnSignal.webrtcMessage.type ===
+          peerconnection_types.Type.NO_MORE_CANDIDATES;
+    default:
+      throw new Error('no supported provider type found');
+  }
+}
 
 // Constructs a signalling message suitable for the initial offer.
 // Public for testing.
@@ -172,7 +208,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       private preferredProviderType_ :ProviderType,
       private name_ :string = 'unnamed-bridge-' + BridgingPeerConnection.id_,
       private config_ ?:freedom.RTCPeerConnection.RTCConfiguration,
-      private portControl_ ?:freedom.PortControl.PortControl) {
+      private portControl_ ?:freedom.PortControl.PortControl,
+      private transformerConfig_ ?:churn_types.TransformerConfig) {
     BridgingPeerConnection.id_++;
   }
 
@@ -214,7 +251,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       pc:freedom.RTCPeerConnection.RTCPeerConnection)
       :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
     log.debug('%1: constructing churn peerconnection', this.name_);
-    return new churn.Connection(pc, this.name_, undefined, this.portControl_);
+    return new churn.Connection(pc, this.name_, undefined,
+        this.portControl_, this.transformerConfig_);
   }
 
   // Factored out for mocking purposes.
@@ -222,7 +260,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       pc:freedom.RTCPeerConnection.RTCPeerConnection)
       :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
     log.debug('%1: constructing holographic ICE peerconnection', this.name_);
-    return new churn.Connection(pc, this.name_, true, this.portControl_);
+    return new churn.Connection(pc, this.name_, true,
+        this.portControl_, this.transformerConfig_);
   }
 
   // Configures the bridge with this provider by forwarding the provider's
