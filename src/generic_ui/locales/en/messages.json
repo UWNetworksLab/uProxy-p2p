@@ -813,10 +813,10 @@
   },
   "INVITE_EMAIL_SUBJECT": {
     "description": "Default email subject for sending an uProxy invite",
-    "message": "Join me on uProxy"
+    "message": "Invitation to connect with __name__ on uProxy"
   },
   "INVITE_EMAIL_BODY": {
     "description": "Default email body for sending an uProxy invite",
-    "message": "Hi, I'd like to invite you to uProxy.  Click here to join me: __url__"
+    "message": "__name__ has invited you to connect with him on uProxy. To do so, click on the invitation link below or paste it into uProxy.<br><br>__url__<br><br>If you don’t have uProxy installed, you can get it from <a href='uproxy.org'>uproxy.org</a> or directly from the Chrome webstore (<a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>part 1</a> and <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>part 2</a>) and Firefox Marketplace (<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'>here</a>)."
   }
 }
