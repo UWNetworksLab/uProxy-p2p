@@ -54,41 +54,6 @@ socksRtc.start(new tcp.Server(localhostEndpoint),
   log.error('failed to start SocksToRtc: %1', e.message);
 });
 
-//-----------------------------------------------------------------------------
-
-var getterBytesReceived :number = 0;
-var getterBytesSent :number = 0;
-var giverBytesReceived :number = 0;
-var giverBytesSent :number = 0;
-
-rtcNet.signalsForPeer.setSyncHandler(socksRtc.handleSignalFromPeer);
-
-// TODO: Re-enable received/sent messages when per-component logging is fixed:
-//         https://github.com/uProxy/uproxy/issues/906
-socksRtc.on('bytesReceivedFromPeer', (numBytes:number) => {
-  getterBytesReceived += numBytes;
-  // log.debug('Getter received ' + numBytes + ' bytes. (Total received: '
-  //   + getterBytesReceived + ' bytes)');
-});
-
-socksRtc.on('bytesSentToPeer', (numBytes:number) => {
-  getterBytesSent += numBytes;
-  // log.debug('Getter sent ' + numBytes + ' bytes. (Total sent: '
-  //   + getterBytesSent + ' bytes)');
-});
-
-rtcNet.bytesReceivedFromPeer.setSyncHandler((numBytes:number) => {
-  giverBytesReceived += numBytes;
-  // log.debug('Giver received ' + numBytes + ' bytes. (Total received: '
-  //   + giverBytesReceived + ' bytes)');
-});
-
-rtcNet.bytesSentToPeer.setSyncHandler((numBytes:number) => {
-  giverBytesSent += numBytes;
-  // log.debug('Giver sent ' + numBytes + ' bytes. (Total sent: '
-  //   + giverBytesSent + ' bytes)');
-});
-
 rtcNet.onceReady
   .then(() => {
     log.info('RtcToNet ready');
