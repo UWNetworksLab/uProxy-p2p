@@ -124,22 +124,22 @@
     </style>
 
     <div tabindex='-1'
-        class='nameRow frame {{ (isOnline || contact.status!="0") ? "online" : "offline" }} {{ contact.status=="2" ? "" : "expandable" }}'
+        class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.USER_INVITED ? "" : "expandable" }}'
         top horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
       <div flex>
         <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
-        <div class='{{ (isOnline || contact.status!="0") ? "onlineStatus" : "offlineStatus" }}'
+        <div class='{{ (isOnline || contact.status!=UserStatus.FRIEND) ? "onlineStatus" : "offlineStatus" }}'
           hidden?="{{ hideOnlineStatus }}" on-tap='{{ toggle }}'>
-          <span hidden?='{{contact.status!="0"}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}</span>
-          <span hidden?='{{contact.status!="1"}}'>Respond to friend request</span>
-          <span hidden?='{{contact.status!="2"}}'>Friend request sent</span>
+          <span hidden?='{{contact.status!=UserStatus.FRIEND}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}</span>
+          <span hidden?='{{contact.status!=UserStatus.INVITED_BY_USER}}'>Respond to friend request</span>
+          <span hidden?='{{contact.status!=UserStatus.USER_INVITED}}'>Friend request sent</span>
         </div>
         <core-collapse id='getControls' class='expandedControls'
           hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
           opened='{{ contact.getExpanded }}'>
 
-          <div class='friendControls' hidden?='{{contact.status!="0"}}'>
+          <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>
             <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
               <div horizontal layout hidden?='{{ hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
                 <core-icon icon='check'></core-icon>
@@ -190,7 +190,7 @@
               </uproxy-button>
             </div>
           </div>
-          <div class='friendControls' hidden?='{{contact.status!="1"}}'>
+          <div class='friendControls' hidden?='{{contact.status!=UserStatus.INVITED_BY_USER}}'>
             <p class='preButtonText'>Your friend {{contact.name}} would like to use uProxy with you!</p>
             <uproxy-button raised on-tap='{{ acceptInvitation }}'>Accept Invite
             </uproxy-button>
@@ -201,7 +201,7 @@
           hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
           opened='{{ contact.shareExpanded }}'>
 
-          <div class='friendControls' hidden?='{{contact.status!="0"}}'>
+          <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>
             <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
               <p class='preButtonText'>{{ "GRANTED_FRIEND_ACCESS" | $$ }}</p>
               <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</uproxy-button>
@@ -232,7 +232,7 @@
               <uproxy-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</uproxy-button>
             </div>
           </div>
-          <div class='friendControls' hidden?='{{contact.status!="1"}}'>
+          <div class='friendControls' hidden?='{{contact.status!=UserStatus.INVITED_BY_USER}}'>
             <p class='preButtonText'>Your friend {{contact.name}} would like to use uProxy with you!</p>
             <uproxy-button raised on-tap='{{ acceptInvitation }}'>Accept Invite
             </uproxy-button>
@@ -255,7 +255,7 @@
       <!-- If you are sharing with or getting from a contact, the glowing sharing/getting icon will replace the expand/collapse chevron. -->
       <!-- Show expand chevron in only two cases: when contact is collapsed in GET mode and you're not getting from them OR when contact is collapsed in SHARE mode and you're not sharing with them. -->
       <core-icon icon="expand-more" class="expand"
-        hidden?='{{ (!(mode==ui_constants.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(mode==ui_constants.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe)) || contact.status == "2" }}' on-tap='{{ toggle }}'>
+        hidden?='{{ (!(mode==ui_constants.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(mode==ui_constants.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe)) || contact.status == UserStatus.USER_INVITED }}' on-tap='{{ toggle }}'>
       </core-icon>
       <!-- Show collapse chevron in only two cases: when contact is expanded in GET mode and you're not getting from them OR when contact is expanded in SHARE mode and you're not sharing with them. -->
       <core-icon icon="expand-less" class="expand"

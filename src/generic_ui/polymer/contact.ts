@@ -14,7 +14,7 @@ Polymer({
     name: 'unknown'
   },
   toggle: function() {
-    if (this.contact.status == "2") {
+    if (this.contact.status == this.UserStatus.USER_INVITED) {
       return;
     }
 
@@ -39,6 +39,7 @@ Polymer({
     this.GettingConsentState = user.GettingConsentState;
     this.SharingConsentState = user.SharingConsentState;
     this.hideOnlineStatus = this.isExpanded;
+    this.UserStatus = social.UserStatus;
   },
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
@@ -109,7 +110,8 @@ Polymer({
     'contact.isSharingWithMe': 'fireChanged',
     'contact.isGettingFromMe': 'fireChanged',
     'contact.isOnline': 'fireChanged',
-    'contact.getExpanded': 'getExpandedChanged', /* handle changes from ui.ts, toggle() handles other cases */
+    /* handle expand/collapse changes from ui.ts, toggle() handles other cases */
+    'contact.getExpanded': 'getExpandedChanged',
     'contact.shareExpanded': 'shareExpandedChanged'
   },
   computed: {

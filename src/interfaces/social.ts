@@ -8,12 +8,12 @@ import uproxy_core_api = require('./uproxy_core_api');
 
 export interface UserPath {
   network :SocialNetworkInfo;
-  userId :string; // My friend
+  userId :string; // ID for a friend
 }
 
 export interface SocialNetworkInfo {
   name :string;
-  userId :string; // Me
+  userId :string; // ID for current user
 }
 
 export interface InstancePath extends UserPath {
@@ -189,9 +189,9 @@ export enum ClientStatus {
 }
 
 export enum UserStatus {
-  FRIEND,
-  INVITED_BY_USER,
-  USER_INVITED
+  FRIEND = 0,
+  INVITED_BY_USER = 1,
+  USER_INVITED = 2
 }
 
 // Status of a client connected to a social network.
