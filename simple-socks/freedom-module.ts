@@ -20,11 +20,9 @@ const socksEndpoint:net.Endpoint = {
   port: 9999
 };
 
-// Don't specify STUN servers because they aren't needed and can, in fact,
-// present a problem when Simple SOCKS is running on a system behind a NAT
-// without support for hair-pinning.
 const pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
-  iceServers: []
+  iceServers: [{urls: ['stun:stun.l.google.com:19302']},
+               {urls: ['stun:stun.services.mozilla.com']}]
 };
 
 export const socksToRtc = new socks_to_rtc.SocksToRtc();
