@@ -8,7 +8,7 @@ import fragmentation = require('../fancy-transformers/fragmentationShaper');
 import logging = require('../logging/logging');
 import sequence = require('../fancy-transformers/byteSequenceShaper');
 
-var log :logging.Log = new logging.Log('protean');
+const log :logging.Log = new logging.Log('protean');
 
 // Accepted in serialised form by configure().
 export interface ProteanConfig {
