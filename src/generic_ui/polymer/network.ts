@@ -19,5 +19,6 @@ Polymer({
   },
   ready: function() {
     this.displayName = ui.getNetworkDisplayName(this.networkName);
+    this.isExperimental = ui.isExperimentalNetwork(this.networkName);
   },
 });

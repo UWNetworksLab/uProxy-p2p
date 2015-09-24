@@ -183,6 +183,10 @@
         "message": "لبدء تحقيق الوصول عبر صديقك، انقر على الزر أدناه.",
         "description": ""
     },
+    "NO_FRIENDS_ONLINE": {
+        "message": "ليس هناك أي من أصدقائك مسجل دخولهم إلى uProxy في هذا الوقت.",
+        "description": "None of the user's friends are currently signed in."
+    },
     "CONTINUE_BROWSING": {
         "message": "متابعة التصفح دون uProxy",
         "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."

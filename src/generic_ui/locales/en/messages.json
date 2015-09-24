@@ -431,6 +431,14 @@
     "description": "User's friends are being loaded from a social network.",
     "message": "Loading uProxy friends"
   },
+  "NO_FRIENDS_ONLINE": {
+    "description": "None of the user's friends are currently signed in.",
+    "message": "None of your friends are signed into uProxy at this time."
+  },
+  "FRIENDS_APPEAR_WHEN": {
+    "description": "Instruction informing the user how to invite their friends to uProxy.",
+    "message": "Friends appear when they are using uProxy and logged into the same networks you are."
+  },
   "OFFERS": {
     "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted.",
     "message": "Offers"

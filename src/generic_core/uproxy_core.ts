@@ -15,7 +15,7 @@ import storage = globals.storage;
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
-import version = require('../version/version');
+import version = require('../generic/version');
 import StoredValue = require('./stored_value');
 import _ = require('lodash');
 

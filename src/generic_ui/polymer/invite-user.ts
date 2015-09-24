@@ -59,6 +59,7 @@ Polymer({
     }
   },
   openInviteUserPanel: function() {
+    this.setOnlineInviteNetworks();
     // Reset selectedNetworkName in case it had been set and that network
     // is no longer online.
     this.$.networkSelectMenu.selectIndex(0);
@@ -70,9 +71,20 @@ Polymer({
   showAcceptUserInvite: function() {
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
   },
+  setOnlineInviteNetworks: function() {
+    this.onlineInviteNetworks = [];
+    for (var i = 0; i < model.onlineNetworks.length; ++i) {
+      var name = model.onlineNetworks[i].name;
+      if (ui.supportsInvites(name)) {
+        this.onlineInviteNetworks.push({
+          name: name,
+          displayName: ui.getNetworkDisplayName(name)
+        });
+      }
+    }
+  },
   ready: function() {
     this.inviteUserEmail = '';
     this.selectedNetworkName = '';
-    this.model = model;
   }
 });

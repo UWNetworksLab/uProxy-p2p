@@ -20,6 +20,9 @@ import social = require('../../interfaces/social');
 import Constants = require('./constants');
 import translator_module = require('./translator');
 import _ = require('lodash');
+import network_options = require('../../generic/network-options');
+
+var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
 // Filenames for icons.
 // Two important things about using these strings:
@@ -127,7 +130,6 @@ export interface Contacts {
  */
 export interface Network {
   name :string;
-  displayName :string;
   // TODO(salomegeo): Add more information about the user.
   userId :string;
   imageData ?:string;
@@ -584,7 +586,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.addUserWithConfirmation_(url).catch(showUrlError);;
     }
   }
-    
+
   public handleCopyPasteUrlData = (url: string) => {
     console.log('received one-time URL from browser');
 
@@ -826,12 +828,12 @@ export class UserInterface implements ui_constants.UiApi {
    */
   private syncNetwork_ = (networkMsg :social.NetworkMessage) => {
     var existingNetwork = this.model.getNetwork(networkMsg.name, networkMsg.userId);
+    var displayName = this.getNetworkDisplayName(networkMsg.name);
 
     if (networkMsg.online) {
       if (!existingNetwork) {
         existingNetwork = {
           name: networkMsg.name,
-          displayName: networkMsg.displayName,
           userId: networkMsg.userId,
           roster: {},
           logoutExpected: false,
@@ -845,8 +847,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
-            // TODO: fix this mess of name vs displayName
-            (networkMsg.name === 'GMail' || networkMsg.displayName === 'Facebook') &&
+            this.supportsReconnect_(networkMsg.name) &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
@@ -855,7 +856,7 @@ export class UserInterface implements ui_constants.UiApi {
             this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
           }
           this.showNotification(
-            this.i18n_t("LOGGED_OUT", { network: networkMsg.displayName }));
+            this.i18n_t("LOGGED_OUT", { network: displayName }));
 
           if (!this.model.onlineNetworks.length) {
             this.view = ui_constants.View.SPLASH;
@@ -1115,7 +1116,6 @@ export class UserInterface implements ui_constants.UiApi {
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
     this.model.onlineNetworks.push({
       name: networkState.name,
-      displayName: networkState.displayName,
       userId: networkState.profile.userId,
       userName: networkState.profile.name,
       imageData: networkState.profile.imageData,
@@ -1152,22 +1152,33 @@ export class UserInterface implements ui_constants.UiApi {
     this.portControlSupport = support;
   }
 
-  // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
-  public getNetworkDisplayName = (networkName :string) => {
-    return networkName == 'Facebook-Firebase-V2' ? 'Facebook' : networkName;
+  public getNetworkDisplayName = (networkName :string) : string => {
+    return this.getProperty_<string>(networkName, 'displayName') || networkName;
   }
 
-  // TODO: remove this after https://github.com/uProxy/uproxy/issues/1901
-  private supportsInvites_ = (networkName :string) => {
-    return networkName === 'Facebook-Firebase-V2' ||
-        networkName === 'GMail' ||
-        networkName === 'GitHub';
+  private supportsReconnect_ = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'supportsReconnect') || false;
+  }
+
+  public supportsInvites = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'supportsInvites') || false;
+  }
+
+  public isExperimentalNetwork = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'isExperimental') || false;
+  }
+
+  private getProperty_ = <T>(networkName :string, propertyName :string) : T => {
+    if (NETWORK_OPTIONS[networkName]) {
+      return (<any>(NETWORK_OPTIONS[networkName]))[propertyName];
+    }
+    return undefined;
   }
 
   private updateShowInviteControls_ = () => {
     var showControls = false;
     for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
-      if (this.supportsInvites_(this.model.onlineNetworks[i].name)) {
+      if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
         showControls = true;
         break;
       }

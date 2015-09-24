@@ -37,13 +37,15 @@
         {{ 'INVITE_A_FRIEND' | $$ }}
       </uproxy-app-bar>
 
-      <div hidden?='{{ model.onlineNetworks.length <= 1}}' class='section'>
+      <div hidden?='{{ onlineInviteNetworks.length <= 1}}' class='section'>
         <p>{{ 'HOW_TO_INVITE_FRIENDS' | $$ }}</p>
         <paper-dropdown-menu>
           <paper-dropdown class='dropdown'>
             <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
-              <template repeat="{{ network in model.onlineNetworks }}">
-                <paper-item label='{{ network.name }}'>{{ network.displayName }}</paper-item>
+              <template repeat="{{ network in onlineInviteNetworks }}">
+                <paper-item label='{{ network.name }}'>
+                  {{ network.displayName }}
+                </paper-item>
               </template>
             </core-menu>
           </paper-dropdown>
