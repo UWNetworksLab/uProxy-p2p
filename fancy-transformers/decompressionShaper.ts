@@ -69,7 +69,7 @@ export class DecompressionShaper implements Transformer {
 
   // Configure using the target byte frequencies.
   public configure = (json :string) :void => {
-    let config=JSON.parse(json);
+    let config = JSON.parse(json);
 
     // Required parameter 'frequencies'
     if ('frequencies' in config) {
