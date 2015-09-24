@@ -289,15 +289,6 @@ export function getNetworkDisplayName(networkName :string) : string {
       throw new Error('Operation not implemented');
     }
 
-    // networkData type?
-    public addUserRequest = (networkData :string): Promise<void> => {
-      throw new Error('Operation not implemented');
-    }
-
-    // public inviteUser = (userName: string): Promise<void> => {
-    //   throw new Error('Operation not implemented');
-    // }
-
     public getInviteUrl = () : Promise<string> => {
       throw new Error('Operation not implemented');
     }
@@ -606,29 +597,6 @@ export function getNetworkDisplayName(networkName :string) : string {
       }).catch((e) => {
         log.error('Error while logging out:', e.message);
         return Promise.reject(e);
-      });
-    }
-
-// <<<<<<< HEAD
-//     public addUserRequest = (userId: string): void => {
-//       this.freedomApi_.inviteUser(userId)
-//         .catch((e) => {
-//           log.error('Error while inviting user: ' + userId, e.message);
-//         });
-//     }
-
-// =======
-    public addUserRequest = (networkData :string): Promise<void> => {
-      // console.log('addUserRequest for network: ' + this.name);
-      // if (this.name == 'GitHub') {
-      //   return this.freedomApi_.inviteUser(JSON.parse(networkData)['userId'])
-      //       .catch((e) => {
-      //         log.error('Error while inviting user: ' + JSON.parse(networkData)['userId'], e.message);
-      //       });
-      // }
-
-      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
-        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
       });
     }
 

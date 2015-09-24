@@ -320,46 +320,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.acceptInvitation(obj.data);
   }
 
-    // try {
-    //   var userData = JSON.parse(inviteUrl);
-    //   console.log(userData);
-    //   if (userData.userId) {
-    //     var networks = social_network.networks['GitHub'];
-    //     networks[Object.keys(networks)[0]].addUserRequest(
-    //       JSON.stringify({userId: userData.userId}));
-    //     return Promise.resolve<void>();
-    //   }
-
-    //   // var networks = social_network.networks['GitHub'];
-    //   // networks[Object.keys(networks)[0]].addUserRequest(
-    //   //   JSON.stringify({networkName: "GitHub", networkData:userData.userId);
-    // } catch (e) {
-    //   console.log("not GitHub");
-    //   //return Promise.reject('Error parsing invite URL');
-    // }
-
-    // try {
-    //   // inviteUrl may be a URL with a token, or just the token.  Remove the
-    //   // prefixed URL if it is set.
-    //   var token = inviteUrl.lastIndexOf('/') >= 0 ?
-    //       inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
-    //   var tokenObj = JSON.parse(atob(token));
-    //   var networkName = tokenObj.networkName;
-    //   var networkData = tokenObj.networkData;
-    //   if (!social_network.networks[networkName]) {
-    //     return Promise.reject('invite URL had invalid social network');
-    //   }
-    // } catch (e) {
-    //   return Promise.reject('Error parsing invite URL');
-    // }
-
-    // // This code assumes the user is only signed in once to any given network.
-    // for (var userId in social_network.networks[networkName]) {
-    //   return social_network.networks[networkName][userId]
-    //       .addUserRequest(networkData);
-    // }
-  //}
-
   public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
     var network = social_network.networks[networkInfo.name][networkInfo.userId];
     return network.getInviteUrl();

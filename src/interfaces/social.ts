@@ -285,7 +285,6 @@ export interface Network {
    */
   acceptInvitation: (data: string) => Promise<void>;
   inviteUser(optionalUserId :string): Promise<void>;
-  addUserRequest: (networkData :string) => Promise<void>;
 
   /**
    * Generates an invite token
