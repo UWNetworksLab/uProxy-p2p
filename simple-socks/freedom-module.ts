@@ -42,8 +42,11 @@ rtcNet.start({
 export var socksRtc = new socks_to_rtc.SocksToRtc();
 socksRtc.on('signalForPeer', rtcNet.handleSignalFromPeer);
 socksRtc.start(new tcp.Server(localhostEndpoint),
-    bridge.best('sockstortc', pcConfig)).then(
-    (endpoint:net.Endpoint) => {
+    bridge.best('sockstortc', pcConfig, undefined, {
+      // Change this value to change the transformer used.
+      // See churn pipe source for the list of names.
+      name: 'caesar'
+    })).then((endpoint:net.Endpoint) => {
   log.info('SocksToRtc listening on %1', endpoint);
   log.info('curl -x socks5h://%1:%2 www.example.com',
       endpoint.address, endpoint.port);
