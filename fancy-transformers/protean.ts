@@ -64,7 +64,7 @@ export class Protean implements Transformer {
   }
 
   public configure = (json :string) :void => {
-    var config = JSON.parse(json);
+    let config = JSON.parse(json);
 
     // Required parameters:
     // - decompression
@@ -80,7 +80,7 @@ export class Protean implements Transformer {
       this.injecter_ = new sequence.ByteSequenceShaper();
       this.fragmenter_ = new fragmentation.FragmentationShaper();
 
-      var proteanConfig = <ProteanConfig>config;
+      let proteanConfig = <ProteanConfig>config;
       this.decompresser_.configure(JSON.stringify(proteanConfig.decompression));
       this.encrypter_.configure(JSON.stringify(proteanConfig.encryption));
       this.injecter_.configure(JSON.stringify(proteanConfig.injection));
@@ -98,11 +98,11 @@ export class Protean implements Transformer {
   // - Decompress using arithmetic coding
   // - Inject packets with byte sequences
   public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
-    var source = [buffer];
-    var fragmented = flatMap(source, this.fragmenter_.transform);
-    var encrypted = flatMap(fragmented, this.encrypter_.transform);
-    var decompressed = flatMap(encrypted, this.decompresser_.transform);
-    var injected = flatMap(decompressed, this.injecter_.transform);
+    let source = [buffer];
+    let fragmented = flatMap(source, this.fragmenter_.transform);
+    let encrypted = flatMap(fragmented, this.encrypter_.transform);
+    let decompressed = flatMap(encrypted, this.decompresser_.transform);
+    let injected = flatMap(decompressed, this.injecter_.transform);
     return injected;
   }
 
@@ -112,11 +112,11 @@ export class Protean implements Transformer {
   // - Compress with arithmetic coding
   // - Attempt defragmentation
   public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
-    var source = [buffer];
-    var extracted = flatMap(source, this.injecter_.restore);
-    var decompressed = flatMap(extracted, this.decompresser_.restore);
-    var decrypted = flatMap(decompressed, this.encrypter_.restore);
-    var defragmented = flatMap(decrypted, this.fragmenter_.restore);
+    let source = [buffer];
+    let extracted = flatMap(source, this.injecter_.restore);
+    let decompressed = flatMap(extracted, this.decompresser_.restore);
+    let decrypted = flatMap(decompressed, this.encrypter_.restore);
+    let defragmented = flatMap(decrypted, this.fragmenter_.restore);
     return defragmented;
   }
 
