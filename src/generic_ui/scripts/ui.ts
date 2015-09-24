@@ -1152,36 +1152,27 @@ export class UserInterface implements ui_constants.UiApi {
     this.portControlSupport = support;
   }
 
-  public getNetworkDisplayName = (networkName: string) : string => {
-    var options = NETWORK_OPTIONS[networkName];
-    if (options && options.displayName) {
-      return options.displayName;
-    }
-    return networkName;
+  public getNetworkDisplayName = (networkName :string) : string => {
+    return this.getProperty_<string>(networkName, 'displayName') || networkName;
   }
 
-  private supportsReconnect_ = (networkName: string) : boolean => {
-    var options = NETWORK_OPTIONS[networkName];
-    if (options && options.supportsReconnect) {
-      return options.supportsReconnect;
-    }
-    return false;
+  private supportsReconnect_ = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'supportsReconnect') || false;
   }
 
-  public supportsInvites = (networkName: string): boolean => {
-    var options = NETWORK_OPTIONS[networkName];
-    if (options && options.supportsInvites) {
-      return options.supportsInvites;
-    }
-    return false;
+  public supportsInvites = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'supportsInvites') || false;
   }
 
-  public isExperimentalNetwork = (networkName: string): boolean => {
-    var options = NETWORK_OPTIONS[networkName];
-    if (options && options.isExperimental) {
-      return options.isExperimental;
+  public isExperimentalNetwork = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'isExperimental') || false;
+  }
+
+  private getProperty_ = <T>(networkName :string, propertyName :string) : T => {
+    if (NETWORK_OPTIONS[networkName]) {
+      return (<any>(NETWORK_OPTIONS[networkName]))[propertyName];
     }
-    return false;
+    return undefined;
   }
 
   private updateShowInviteControls_ = () => {

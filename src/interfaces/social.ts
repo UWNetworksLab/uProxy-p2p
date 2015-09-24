@@ -91,11 +91,11 @@ export interface NetworkState {
 export interface NetworkOptions {
   isFirebase :boolean;
   enableMonitoring :boolean;
-  areAllContactsUproxy: boolean;
-  supportsReconnect: boolean;
-  supportsInvites: boolean;
-  displayName?: string;  // Network name to be displayed in the UI.
-  isExperimental?: boolean;
+  areAllContactsUproxy :boolean;
+  supportsReconnect :boolean;
+  supportsInvites :boolean;
+  displayName ?:string;  // Network name to be displayed in the UI.
+  isExperimental ?:boolean;
 }
 
 /**
