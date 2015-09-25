@@ -441,12 +441,12 @@
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
         <h1>{{ "DISCONNECTED_TITLE" | $$ }}</h1>
-        <div id='progressWrapper'>
+        <div id='progressWrapper' hidden?='{{ !ui.mapInstanceIdToUser_[core.disconnectedWhileProxying] }}'>
           <div hidden?='{{ !ui.instanceTryingToGetAccessFrom }}'>
             <strong>{{ 'RECONNECTING' | $$ }}</strong>
             <paper-progress indeterminate='true'></paper-progress>
           </div>
-          <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}' >
+          <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}'>
             <strong>{{ 'RECONNECT_FAILED' | $$ }}</strong>
             <uproxy-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</uproxy-button>
           </div>

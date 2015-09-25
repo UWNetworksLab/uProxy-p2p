@@ -376,6 +376,13 @@ import Persistent = require('../interfaces/persistent');
     private updateConsentFromWire_ = (bits :social.ConsentWireState) => {
       var userConsent = this.user.consent;
 
+      if (!bits.isOffering &&
+          this.connection_.localGettingFromRemote === social.GettingState.TRYING_TO_GET_ACCESS) {
+        // if we lose the ability to get, cancel any pending gets
+        clearTimeout(this.startSocksToRtcTimeout_);
+        this.connection_.stopGet();
+      }
+
       // Update this remoteInstance.
       this.wireConsentFromRemote = bits;
       this.user.updateRemoteRequestsAccessFromLocal();
