@@ -31,6 +31,11 @@
     }
     #loadContacts {
       text-align: center;
+    }
+    #loadContacts.inviteEnabled {
+      margin: 110px 80px;
+    }
+    #loadContacts.inviteDisabled {
       margin: 75px 80px;
     }
     #loadContacts div {
@@ -40,6 +45,9 @@
       width: 150px !important;
       height: 150px !important;
       color: #cbcbcb;
+    }
+    core-icon.no-friends {
+      color: #e5efee;
     }
     #noContactsFound {
       margin-top: 0.75em;
@@ -53,10 +61,16 @@
       margin-top: 0.5em;
     }
     #connectWithFriendsInstruction {
-      margin: 20px 65px 20px 20px;
+      margin: 2em 100px 2em 2em;
       bottom: 0;
       position: absolute;
       font-size: 14px;
+      line-height: 20px;
+    }
+    #connectWithFriendsInstruction h1 {
+      font-size: 1.4em;
+      color: #009688;
+      font-weight: normal;
     }
     paper-progress {
       margin-bottom: 1em;
@@ -78,7 +92,7 @@
     <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
 
     <!-- Shown if there are no contacts found so far -->
-    <div id='loadContacts' hidden?='{{ hasContacts }}'>
+    <div id='loadContacts' hidden?='{{ hasContacts }}' class='{{ ui.showInviteControls ? "inviteEnabled" : "inviteDisabled"}}'>
       <core-icon icon="social:person" class="no-friends"></core-icon>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
         {{ "LOADING_FRIENDS" | $$ }}<br>
@@ -96,7 +110,7 @@
     </div>
 
     <div id="connectWithFriendsInstruction" hidden?="{{ !ui.showInviteControls || loadingContacts || hasContacts }}">
-      <h2>{{ 'CONNECT_TO_FRIEND' | $$ }}</h2>
+      <h1>{{ 'CONNECT_TO_FRIEND' | $$ }}</h1>
       {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
     </div>
 

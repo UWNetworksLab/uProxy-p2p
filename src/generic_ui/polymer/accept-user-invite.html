@@ -19,9 +19,18 @@
         padding-right: 2em;
         padding-top: 1em;
         padding-bottom: 1em;
+        line-height: 20px;
       }
       a {
         cursor: pointer;
+      }
+      uproxy-button {
+        margin: 0;
+        padding-left: 1em;
+        padding-right: 1em;
+      }
+      paper-input-decorator {
+        font-size: 16px;
       }
     </style>
 
@@ -29,14 +38,14 @@
 
     <core-overlay id='acceptUserInvitePanel'>
       <uproxy-app-bar on-go-back='{{ closeAcceptUserInvitePanel }}'>
-        {{ "ENTER_INVITE_CODE" | $$ }}
+        {{ "ENTER_INVITATION" | $$ }}
       </uproxy-app-bar>
 
       <div class='section'>
-        <p>{{ "ENTER_INVITE_CODE_DESCRIPTION" | $$ }}</p>
+        <p>{{ "ENTER_INVITATION_DESCRIPTION" | $$ }}</p>
 
         <div id='addFriend'>
-          <paper-input-decorator label="{{ 'ENTER_INVITE_CODE' | $$ }}">
+          <paper-input-decorator label="{{ 'ENTER_INVITATION' | $$ }}">
             <input is='core-input' value='{{ receivedInviteToken }}'>
           </paper-input-decorator>
           <uproxy-button affirmative autofocus on-tap='{{ addUser }}'>
