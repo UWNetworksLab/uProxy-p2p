@@ -53,7 +53,7 @@ var log :logging.Log = new logging.Log('remote-user');
     // Name of the user as provided by the social network.
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :social.ClientStatus };
-    public profile :freedom.Social.UserProfile;
+    public profile :social.UserProfile;
 
     public consent :consent.State;
 
@@ -113,7 +113,7 @@ var log :logging.Log = new logging.Log('remote-user');
      * Update the information about this user.
      * The userId must match.
      */
-    public update = (profile :freedom.Social.UserProfile) : void => {
+    public update = (profile :social.UserProfile) : void => {
       if (profile.userId != this.userId) {
         throw Error('Updating User ' + this.userId +
                     ' with unexpected userID: ' + profile.userId);

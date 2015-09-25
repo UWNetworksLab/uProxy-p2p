@@ -54,6 +54,17 @@ export interface UserProfileMessage {
   userId       :string;
 }
 
+// The profile of a user on a social network.
+export interface UserProfile {
+  userId       :string;
+  status       ?:number;
+  name         ?:string;
+  url          ?:string;
+  // Image URI (e.g. data:image/png;base64,adkwe329...)
+  imageData    ?:string;
+  timestamp    ?:number;
+}
+
 export interface ConsentState {
   ignoringRemoteUserOffer :boolean;
   ignoringRemoteUserRequest :boolean;
