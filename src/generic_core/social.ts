@@ -244,6 +244,11 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
+    // Required for versions 0.8.22 and below
+    public addUserRequest = (networkData :string): Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+
     public getInviteUrl = () : Promise<string> => {
       throw new Error('Operation not implemented');
     }
@@ -552,6 +557,13 @@ export function notifyUI(networkName :string, userId :string) {
       }).catch((e) => {
         log.error('Error while logging out:', e.message);
         return Promise.reject(e);
+      });
+    }
+
+    // Required for versions 0.8.22 and below
+    public addUserRequest = (networkData :string): Promise<void> => {
+      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
       });
     }
 
