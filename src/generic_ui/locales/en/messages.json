@@ -55,6 +55,22 @@
     "description": "Shown under your contact's who are offline",
     "message": "Offline"
   },
+  "RESPOND_TO_FRIEND_REQUEST": {
+    "description": "Shown in roster under contacts who have requested to be the user's uProxy friend."
+    "message": "Respond to friend request"
+  },
+  "FRIEND_REQUEST_SENT": {
+    "description": "Shown in roster under contacts who the user has requested to be a uProxy friend."
+    "message": "Friend request sent"
+  },
+  "FRIEND_REQUEST": {
+    "description": "Message above button for user to accept a uProxy friend request"
+    "message": "Your friend __name__ would like to use uProxy with you!"
+  },
+  "ACCEPT_INVITE": {
+    "description": "Text for button for user to accept a uProxy friend request"
+    "message": "Accept Invite"
+  },
   "GRANTED_YOU_ACCESS": {
     "description": "The user's friend has allowed the user to use the friend's Internet connection.",
     "message": "__name__ has granted you access"
@@ -783,13 +799,33 @@
     "description": "Invite instructions for Facebook",
     "message": "Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list."
   },
+  "FACEBOOK_INVITE_IN_BROWSER": {
+    "description": "Dialog message instructing user to complete Facebook invitation in their browser",
+    "message": "Please complete invitation in Facebook"
+  },
   "GMAIL_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for GMail",
     "message": "Enter your friend's email address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list."
   },
+  "GITHUB_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for GitHub",
+    "message": "Enter your friend's GitHub username. You will see in your contact list when they accept your request."
+  },
+  "GITHUB_INVITE_PLACEHOLDER": {
+    "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
+    "message": "Friend's GitHub username"
+  },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
+  },
+  "INVITE_SENT_CONFIRMATION": {
+    "description": "Dialog text to confirm that an invite was sent to the user's friend",
+    "message": "Invite sent to __name__!"
+  },
+  "GITHUB_INVITE_SEND_FAILED": {
+    "description": "Dialog text informing user that a GitHub friend request failed.",
+    "message": "Oops, you can only invite friends who have signed in to uProxy with GitHub before."
   },
   "ACCEPT_LINK_FROM_INVITE_PAGE": {
     "description": "Link to accept an invite if the user is already on the send an invite page",

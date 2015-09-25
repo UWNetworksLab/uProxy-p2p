@@ -45,7 +45,7 @@ Polymer({
       ui.openTab(facebookUrl);
       this.fire('open-dialog', {
         heading: '', // TODO:
-        message: 'Please complete invitation in Facebook',  // TODO:
+        message: ui.i18n_t("FACEBOOK_INVITE_IN_BROWSER"),
         buttons: [{
           text: ui.i18n_t("OK")
         }]
@@ -63,15 +63,17 @@ Polymer({
       this.closeInviteUserPanel();
       this.fire('open-dialog', {
         heading: '',
-        message: 'Invite sent to ' + this.userIdInput + '!',
+        message: ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.userIdInput }),
         buttons: [{
           text: ui.i18n_t("OK")
         }]
       });
     }).catch(() => {
+      // TODO: The message in this dialog should be passed from the social provider.
+      // https://github.com/uProxy/uproxy/issues/1923
       this.fire('open-dialog', {
         heading: '',
-        message: 'Oops, you can only invite friends who have signed in to uProxy with GitHub before.',
+        message: ui.i18n_t("GITHUB_INVITE_SEND_FAILED"),
         buttons: [{
           text: ui.i18n_t("OK")
         }]

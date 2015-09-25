@@ -72,12 +72,12 @@
         </div>
 
         <div hidden?='{{ selectedNetworkName != "GitHub"}}'>
-          <p>Enter your friend's GitHub username. You will see in your contact list when they accept your request.</p>
-          <paper-input-decorator label="Friend's identifier or URL">
+          <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
+          <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
             <input is='core-input' value='{{ userIdInput }}'>
           </paper-input-decorator>
           <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
-            Invite GitHub Friend
+            {{ 'SEND_INVITATION' | $$ }}
           </uproxy-button>
         </div>
       </div>
