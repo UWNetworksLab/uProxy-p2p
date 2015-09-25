@@ -397,7 +397,7 @@
   },
   "CONNECT_TO_FRIEND_MESSAGE": {
     "description": "Instructions that appears beside a big '+' button. Clicking the button opens a panel with options to add a uProxy friend.",
-    "message": "You don't yet have any uProxy friends. Use this button to send an invitation to a friend or paste an invitation you've received."
+    "message": "Use this button to send an invitation to a friend or paste an invitation you've received."
   },
   "ALPHA_MESSAGE": {
     "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development.",
@@ -771,12 +771,12 @@
     "description": "Confirmation message after an invite email has been sent",
     "message": "Invitation email sent."
   },
-  "ENTER_INVITE_CODE": {
-    "description": "Title for screen where user enters an invite code",
-    "message": "Enter an invite code"
+  "ENTER_INVITATION": {
+    "description": "Title for screen where user enters an invitation",
+    "message": "Enter an invitation"
   },
-  "ENTER_INVITE_CODE_DESCRIPTION": {
-    "description": "Instructions for user to enter an invite code",
+  "ENTER_INVITATION_DESCRIPTION": {
+    "description": "Instructions for user to enter an invitation",
     "message": "If you've received an invitation from a friend you'd like to use uProxy with, paste it here:"
   },
   "SUBMIT_BUTTON_TEXT": {
@@ -785,7 +785,7 @@
   },
   "INVITE_LINK_FROM_ACCEPT_PAGE": {
     "description": "Link to send an invite if the user is already on the accept-invite page.",
-    "message": "Click here if you would like to send an invitation to a friend"
+    "message": "I'd like to send an invitation instead."
   },
   "INVITE_A_FRIEND": {
     "description": "Title for screen where user invites a friend to uProxy",
@@ -829,7 +829,7 @@
   },
   "ACCEPT_LINK_FROM_INVITE_PAGE": {
     "description": "Link to accept an invite if the user is already on the send an invite page",
-    "message": "Click here if you have an invitation from a friend that you would like to use."
+    "message": "I'd like to enter an invitation instead."
   },
   "ACCEPT_INVITE_CONFIRMATION": {
     "description": "Confirmation message when accepting an invite.",
@@ -841,7 +841,7 @@
   },
   "LOGIN_REQUIRED_MESSAGE": {
     "description": "Message for confirmation that the user must login to a network to accept an invitation",
-    "message": "To accept this invitation, you will need to log into __network__."
+    "message": "To accept this invitation, you will need to connect to uProxy with __network__.  Click yes to continue."
   },
   "INVITE_URL_ERROR": {
     "description": "Error message shown for invalid invite URLs",
@@ -849,10 +849,10 @@
   },
   "INVITE_EMAIL_SUBJECT": {
     "description": "Default email subject for sending an uProxy invite",
-    "message": "Join me on uProxy"
+    "message": "Invitation to connect with __name__ on uProxy"
   },
   "INVITE_EMAIL_BODY": {
     "description": "Default email body for sending an uProxy invite",
-    "message": "Hi, I'd like to invite you to uProxy.  Click here to join me: __url__"
+    "message": "__name__ has invited you to connect with him on uProxy. To do so, click on the invitation link below or paste it into uProxy.<br><br>__url__<br><br>If you don’t have uProxy installed, you can get it from <a href='uproxy.org'>uproxy.org</a> or directly from the Chrome webstore (<a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>part 1</a> and <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>part 2</a>) and Firefox Marketplace (<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'>here</a>)."
   }
 }
