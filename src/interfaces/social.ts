@@ -191,8 +191,8 @@ export enum ClientStatus {
 
 export enum UserStatus {
   FRIEND = 0,
-  INVITED_BY_USER = 1,
-  USER_INVITED = 2
+  LOCAL_INVITED_BY_REMOTE = 1,
+  REMOTE_INVITED_BY_LOCAL = 2
 }
 
 // Status of a client connected to a social network.
@@ -283,8 +283,18 @@ export interface Network {
 
   /**
    * Ask the social network to add the user.
+   * Required for versions 0.8.22 and below
+   */
+  addUserRequest: (networkData :string) => Promise<void>;
+
+  /**
+   * Accept an invite to use uProxy with a friend
    */
   acceptInvitation: (data: string) => Promise<void>;
+
+  /**
+   * Send an invite to a friend to use uProxy
+   */
   inviteUser(optionalUserId :string): Promise<void>;
 
   /**

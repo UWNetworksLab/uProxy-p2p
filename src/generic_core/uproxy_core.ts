@@ -298,6 +298,30 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
+  // Required for versions 0.8.22 and below 
+  public addUser = (inviteUrl: string): Promise<void> => {
+    try {
+      // inviteUrl may be a URL with a token, or just the token.  Remove the
+      // prefixed URL if it is set.
+      var token = inviteUrl.lastIndexOf('/') >= 0 ?
+          inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+      var networkData = tokenObj.networkData;
+      if (!social_network.networks[networkName]) {
+        return Promise.reject('invite URL had invalid social network');
+      }
+    } catch (e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+ 
+    // This code assumes the user is only signed in once to any given network.
+    for (var userId in social_network.networks[networkName]) {
+      return social_network.networks[networkName][userId]
+          .addUserRequest(networkData);
+    }
+  }
+
   public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
     // TODO: clean this up - hack to find the one network
     var network: social.Network;
