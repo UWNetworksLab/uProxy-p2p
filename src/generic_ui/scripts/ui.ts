@@ -916,12 +916,10 @@ export class UserInterface implements ui_constants.UiApi {
       var gettingState = payload.offeringInstances[i].localGettingFromRemote;
       var instanceId = payload.offeringInstances[i].instanceId;
       if (gettingState === social.GettingState.GETTING_ACCESS) {
-        this.instanceGettingAccessFrom_ = instanceId;
-        user.isSharingWithMe = true;
-        this.updateGettingStatusBar_();
+        this.startGettingInUiAndConfig(instanceId, payload.offeringInstances[i].activeEndpoint);
         break;
       } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
-        this. instanceTryingToGetAccessFrom = instanceId;
+        this.instanceTryingToGetAccessFrom = instanceId;
         this.updateGettingStatusBar_();
         break;
       }

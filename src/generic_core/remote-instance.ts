@@ -435,6 +435,7 @@ import Persistent = require('../interfaces/persistent');
         localSharingWithRemote: connectionState.localSharingWithRemote,
         bytesSent:              connectionState.bytesSent,
         bytesReceived:          connectionState.bytesReceived,
+        activeEndpoint:         connectionState.activeEndpoint,
       };
     }
 
