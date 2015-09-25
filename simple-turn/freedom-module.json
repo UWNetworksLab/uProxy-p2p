@@ -14,14 +14,9 @@
     "logginglistener": {
       "url": "../loggingprovider/freedom-module.json",
       "api": "logginglistener"
-    },
-    "turnFrontend": {
-      "url": "../turn-frontend/freedom-module.json",
-      "api": "turnFrontend"
-    },
-    "turnBackend": {
-      "url": "../turn-backend/freedom-module.json",
-      "api": "turnBackend"
     }
-  }
+  },
+  "permissions": [
+    "core.udpsocket"
+  ]
 }

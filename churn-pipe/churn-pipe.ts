@@ -5,6 +5,7 @@
 import aqm = require('../aqm/aqm');
 import caesar = require('../simple-transformers/caesar');
 import churn_types = require('../churn/churn.types');
+import decompression = require('../fancy-transformers/decompressionShaper');
 import encryption = require('../fancy-transformers/encryptionShaper');
 import fragmentation = require('../fancy-transformers/fragmentationShaper');
 import ipaddr = require('ipaddr.js');
@@ -38,6 +39,7 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
 // Maps transformer names to class constructors.
 var transformers :{[name:string] : new() => Transformer} = {
   'caesar': caesar.CaesarCipher,
+  'decompressionShaper': decompression.DecompressionShaper,
   'encryptionShaper': encryption.EncryptionShaper,
   'fragmentationShaper': fragmentation.FragmentationShaper,
   'none': PassThrough,

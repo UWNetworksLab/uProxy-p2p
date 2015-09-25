@@ -2,16 +2,15 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
-
+import logging = require('../logging/logging');
 import messages = require('./messages');
 import net = require('../net/net.types');
 
-import logging = require('../logging/logging');
 var log :logging.Log = new logging.Log('TURN frontend');
 
 /**
  * A TURN server which delegates the creation and operation of relay sockets
- * to a separate "net" Freedom module. The separation is intended to
+ * to a separate - possibly remote - backend. The separation is intended to
  * facilitate transformation of intra-process traffic, viz. obfuscation. The
  * intended use of this server is as a proxy for WebRTC traffic to provide,
  * when paired with a NAT-punching and obfuscated network transport, for
@@ -35,9 +34,9 @@ var log :logging.Log = new logging.Log('TURN frontend');
  *    attribute, it does not verify the client's signature
  *  - only the long-term credential mechanism is supported
  */
-class Frontend {
+export class Frontend {
   /** Socket on which the server is listening. */
-  private socket_ :freedom.UdpSocket.Socket;
+  private socket_ :freedom.UdpSocket.Socket = freedom['core.udpsocket']();
 
   // TODO: the following two maps are a code smell...needs a re-think
 
@@ -52,10 +51,12 @@ class Frontend {
    */
   private promises_:{[s:string]:Promise<messages.StunMessage>} = {};
 
-  // TODO: define a type for event dispatcher in freedom-typescript-api
-  constructor (private dispatchEvent_ ?:(name:string, args:any) => void) {
-    this.socket_ = freedom['core.udpsocket']();
-  }
+  /** Invoked when a message must be sent to the frontend. */
+  private ipcHandler_ = (
+      stunMessage:messages.StunMessage,
+      clientEndpoint:net.Endpoint) : void => {
+    log.warn('no handler set for outgoing messages!');
+  };
 
   /**
    * Returns a promise to create a socket, bind to the specified address, and
@@ -63,17 +64,16 @@ class Frontend {
    * choose a free port.
    */
   public bind(address:string, port:number) : Promise<net.Endpoint> {
-    return this.socket_.bind(address, port)
-        .then(this.socket_.getInfo)
-        .then((socketInfo:freedom.UdpSocket.SocketInfo) => {
-          log.info('listening on ' + socketInfo.localAddress + ':' +
-              socketInfo.localPort);
-          this.socket_.on('onData', this.onData_);
-          return {
-            address: socketInfo.localAddress,
-            port: socketInfo.localPort
-          };
-        });
+    return this.socket_.bind(address, port).then(this.socket_.getInfo).then(
+        (socketInfo:freedom.UdpSocket.SocketInfo) => {
+      log.info('listening on ' + socketInfo.localAddress + ':' +
+          socketInfo.localPort);
+      this.socket_.on('onData', this.onData_);
+      return {
+        address: socketInfo.localAddress,
+        port: socketInfo.localPort
+      };
+    });
   }
 
   /**
@@ -90,18 +90,18 @@ class Frontend {
         address: recvFromInfo.address,
         port: recvFromInfo.port
       };
-      this.handleStunMessage(stunMessage, clientEndpoint)
-          .then((response ?:messages.StunMessage) => {
-            if (response) {
-              var responseBytes = messages.formatStunMessageWithIntegrity(response);
-              this.socket_.sendTo(
-                  responseBytes.buffer,
-                  recvFromInfo.address,
-                  recvFromInfo.port);
-            }
-          }, (e) => {
-            log.error('error handling STUN message: ' + e.message);
-          });
+      this.handleStunMessage(stunMessage, clientEndpoint).then(
+          (response ?:messages.StunMessage) => {
+        if (response) {
+          var responseBytes = messages.formatStunMessageWithIntegrity(response);
+          this.socket_.sendTo(
+              responseBytes.buffer,
+              recvFromInfo.address,
+              recvFromInfo.port);
+        }
+      }, (e) => {
+        log.error('error handling STUN message: ' + e.message);
+      });
     } catch (e) {
       log.warn('failed to parse STUN message from ' +
           recvFromInfo.address  + ':' + recvFromInfo.port);
@@ -156,9 +156,9 @@ class Frontend {
       clazz: messages.MessageClass.SUCCESS_RESPONSE,
       transactionId: request.transactionId,
       attributes: [{
-          type: messages.MessageAttribute.LIFETIME,
-          value: new Uint8Array([0x00, 0x00, 600 >> 8, 600 & 0xff]) // 600 = ten mins
-        }]
+        type: messages.MessageAttribute.LIFETIME,
+        value: new Uint8Array([0x00, 0x00, 600 >> 8, 600 & 0xff]) // 600 = ten mins
+      }]
     });
   }
 
@@ -236,7 +236,7 @@ class Frontend {
 
     // Request a new relay socket.
     // TODO: minimise the number of attributes sent
-    this.emitIpc_(request, clientEndpoint);
+    this.ipcHandler_(request, clientEndpoint);
 
     // Fulfill, once our relay socket callback has been invoked.
     return promise;
@@ -249,63 +249,21 @@ class Frontend {
   private handleSendIndication_ = (
       request:messages.StunMessage,
       clientEndpoint:net.Endpoint) : Promise<messages.StunMessage> => {
-    this.emitIpc_(request, clientEndpoint);
+    this.ipcHandler_(request, clientEndpoint);
     return Promise.resolve(undefined);
   }
 
   /**
-   * Emits a Freedom message which should be relayed to the remote side.
-   * The message is a STUN message, as received from a TURN client but with
-   * the addition of an IPC_TAG attribute identifying the TURN client.
+   * Handles a message from the backend.
    */
-  private emitIpc_ = (
+  public handleIpc = (
       stunMessage:messages.StunMessage,
-      clientEndpoint:net.Endpoint) : void => {
-    stunMessage.attributes.push({
-      type: messages.MessageAttribute.IPC_TAG,
-      value: messages.formatXorMappedAddressAttribute(
-          clientEndpoint.address, clientEndpoint.port)
-    });
-    this.dispatchEvent_('ipc', {
-      data: messages.formatStunMessage(stunMessage).buffer
-    });
-  }
-
-  /**
-   * Handles a Freedom message from the remote side.
-   */
-  public handleIpc = (data :ArrayBuffer) : Promise<void> => {
-    var stunMessage :messages.StunMessage;
-    try {
-      stunMessage = messages.parseStunMessage(new Uint8Array(data));
-    } catch (e) {
-      return Promise.reject(new Error(
-          'failed to parse STUN message from IPC channel'));
-    }
-
-    // With which client is this message associated?
-    var clientEndpoint :net.Endpoint;
-    try {
-      var ipcAttribute = messages.findFirstAttributeWithType(
-          messages.MessageAttribute.IPC_TAG,
-          stunMessage.attributes);
-      try {
-        clientEndpoint = messages.parseXorMappedAddressAttribute(
-            ipcAttribute.value);
-      } catch (e) {
-        return Promise.reject(new Error(
-            'could not parse address in IPC_TAG attribute: ' + e.message));
-      }
-    } catch (e) {
-      return Promise.reject(new Error(
-          'message received on IPC channel without IPC_TAG attribute'));
-    }
-    var tag = clientEndpoint.address + ':' + clientEndpoint.port;
-
+      clientEndpoint:net.Endpoint) : Promise<void> => {
     if (stunMessage.method == messages.MessageMethod.ALLOCATE) {
       // A response from one of our relay socket creation requests.
       // Invoke the relevant callback.
       // TODO: check callback exists
+      var tag = clientEndpoint.address + ':' + clientEndpoint.port;
       var callback = this.callbacks_[tag];
       callback(stunMessage);
     } else if (stunMessage.method == messages.MessageMethod.DATA) {
@@ -313,15 +271,20 @@ class Frontend {
       // Forward it to the relevant client.
       // TODO: consider removing the IPC_TAG attribute
       this.socket_.sendTo(
-        data,
-        clientEndpoint.address,
-        clientEndpoint.port);
+          messages.formatStunMessage(stunMessage).buffer,
+          clientEndpoint.address,
+          clientEndpoint.port);
     } else {
       return Promise.reject(new Error(
           'unsupported IPC method: ' + stunMessage.method));
     }
     return Promise.resolve<void>();
   }
-}
 
-export = Frontend;
+  /** Sets the function to call to send a message to the frontend. */
+  public setIpcHandler = (ipcHandler:(
+      stunMessage:messages.StunMessage,
+      clientEndpoint:net.Endpoint) => void) : void => {
+    this.ipcHandler_ = ipcHandler;
+  }
+}
