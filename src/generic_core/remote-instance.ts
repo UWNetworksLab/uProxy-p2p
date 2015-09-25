@@ -57,13 +57,8 @@ import Persistent = require('../interfaces/persistent');
     // Client version of the remote peer.
     public messageVersion :number;
 
-    public bytesSent   :number = 0;
-    public bytesReceived    :number = 0;
     // Current proxy access activity of the remote instance with respect to the
     // local instance of uProxy.
-    public localGettingFromRemote = social.GettingState.NONE;
-    public localSharingWithRemote = social.SharingState.NONE;
-
     public wireConsentFromRemote :social.ConsentWireState = {
       isRequesting: false,
       isOffering: false
@@ -162,10 +157,6 @@ import Persistent = require('../interfaces/persistent');
           });
           break;
         case uproxy_core_api.Update.STATE:
-          this.bytesSent = data.bytesSent;
-          this.bytesReceived = data.bytesReceived;
-          this.localGettingFromRemote = data.localGettingFromRemote;
-          this.localSharingWithRemote = data.localSharingWithRemote;
           this.user.notifyUI();
           break;
         default:
@@ -185,7 +176,7 @@ import Persistent = require('../interfaces/persistent');
     }
 
     public isSharing = () => {
-      return this.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
+      return this.connection_.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
     }
 
     /**
@@ -268,7 +259,7 @@ import Persistent = require('../interfaces/persistent');
       */
     private startShare_ = () : void => {
       var sharingStopped :Promise<void>;
-      if (this.localSharingWithRemote === social.SharingState.NONE) {
+      if (this.connection_.localSharingWithRemote === social.SharingState.NONE) {
         // Stop any existing sharing attempts with this instance.
         sharingStopped = Promise.resolve<void>();
       } else {
@@ -305,12 +296,12 @@ import Persistent = require('../interfaces/persistent');
     }
 
     public stopShare = () :Promise<void> => {
-      if (this.localSharingWithRemote === social.SharingState.NONE) {
+      if (this.connection_.localSharingWithRemote === social.SharingState.NONE) {
         log.warn('Cannot stop sharing while currently not sharing.');
         return Promise.resolve<void>();
       }
 
-      if (this.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {
+      if (this.connection_.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {
         clearTimeout(this.startRtcToNetTimeout_);
       }
       return this.connection_.stopShare();
@@ -441,14 +432,17 @@ import Persistent = require('../interfaces/persistent');
     // TODO: bad smell: remote-instance should not need to know the structure of
     // UI message data. Maybe rename to |getInstanceData|?
     public currentStateForUi = () :social.InstanceData => {
+      var connectionState = this.connection_.getCurrentState();
+
       return {
         instanceId:             this.instanceId,
         description:            this.description,
-        localGettingFromRemote: this.localGettingFromRemote,
-        localSharingWithRemote: this.localSharingWithRemote,
         isOnline:               this.user.isInstanceOnline(this.instanceId),
-        bytesSent:              this.bytesSent,
-        bytesReceived:          this.bytesReceived
+        localGettingFromRemote: connectionState.localGettingFromRemote,
+        localSharingWithRemote: connectionState.localSharingWithRemote,
+        bytesSent:              connectionState.bytesSent,
+        bytesReceived:          connectionState.bytesReceived,
+        activeEndpoint:         connectionState.activeEndpoint,
       };
     }
 

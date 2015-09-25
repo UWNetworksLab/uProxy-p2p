@@ -128,6 +128,7 @@ taskManager.add 'test_ui', [
   'base'
   'browserify:genericUiUiSpec'
   'browserify:genericUiUserSpec'
+  'browserify:genericUiCopypasteStateSpec'
   'jasmine:generic_ui'
 ]
 
@@ -1027,6 +1028,7 @@ module.exports = (grunt) ->
 
       genericUiUiSpec: Rule.browserifySpec 'generic_ui/scripts/ui'
       genericUiUserSpec: Rule.browserifySpec 'generic_ui/scripts/user'
+      genericUiCopypasteStateSpec: Rule.browserifySpec 'generic_ui/scripts/copypaste-state'
       integrationSpec: Rule.browserifySpec 'integration/core'
       integrationFreedomModule: Rule.browserify 'integration/test_connection'
 
