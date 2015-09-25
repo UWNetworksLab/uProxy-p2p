@@ -132,22 +132,22 @@
                 <p>{{ 'ONE_TIME_GETTING_SUCCESS' | $$ }}</p>
 
                 <p>
-                  <span hidden?='{{ ui.copyPasteState.pendingEndpoint === null}}'>
+                  <span hidden?='{{ ui.copyPasteState.active === true }}'>
                     {{ 'START_ONE_TIME_INSTRUCTION' | $$ }}
                   </span>
-                  <span hidden?='{{ ui.copyPasteState.pendingEndpoint !== null}}'>
+                  <span hidden?='{{ ui.copyPasteState.active !== true }}'>
                     {{ 'STOP_ONE_TIME_INSTRUCTION' | $$ }}
                   </span>
                 </p>
 
                 <div class='centered'>
                   <uproxy-button raised on-tap='{{ startProxying }}'
-                      hidden?='{{ ui.copyPasteState.pendingEndpoint === null }}'>
+                      hidden?='{{ ui.copyPasteState.active === true }}'>
                     {{ 'START_GETTING' | $$ }}
                   </uproxy-button>
 
                   <uproxy-button raised class='grey' on-tap='{{ stopGetting }}'
-                      hidden?='{{ ui.copyPasteState.pendingEndpoint !== null }}'>
+                      hidden?='{{ ui.copyPasteState.active !== true }}'>
                     {{ 'STOP_GETTING' | $$ }}
                   </uproxy-button>
                 </div>
@@ -209,7 +209,7 @@
           </div> <!-- #wrapper -->
 
           <div id='status'>
-            <div class='statusRow' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.GETTING_ACCESS || ui.copyPasteState.pendingEndpoint !== null }}'>
+            <div class='statusRow' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.GETTING_ACCESS || ui.copyPasteState.active !== true }}'>
               <div class='statusText'>
                 <core-icon icon='uproxy-icons:receive'></core-icon>
                 {{ 'GETTING_ACCESS_FROM_FRIEND' | $$ }}

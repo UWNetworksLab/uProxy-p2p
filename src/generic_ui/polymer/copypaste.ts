@@ -44,11 +44,10 @@ Polymer({
     doneStopping.then(() => {
       ui.copyPasteState.message = '';
       ui.copyPasteState.error = ui_constants.CopyPasteError.NONE;
-      ui.copyPasteState.pendingEndpoint = null;
 
       return core.startCopyPasteGet();
     }).then((endpoint) => {
-      ui.copyPasteState.pendingEndpoint = endpoint;
+      ui.copyPasteState.activeEndpoint = endpoint;
     }).catch((e) => {
       // TODO we will see this any time the connection is aborted by the user or
       // when something actually goes wrong with the connection.  We should
@@ -81,13 +80,10 @@ Polymer({
   },
   stopGetting: function() {
     ui.stopUsingProxy();
-    return core.stopCopyPasteGet().then(() => {
-      // clean up the pending endpoint in case we got here from going back
-      ui.copyPasteState.pendingEndpoint = null;
-    });
+    return core.stopCopyPasteGet();
   },
   startProxying: function() {
-    if (!ui.copyPasteState.pendingEndpoint) {
+    if (!ui.copyPasteState.activeEndpoint) {
       console.error('Attempting to start copy+paste proxying without a pending endpoint');
       return;
     }
@@ -97,8 +93,8 @@ Polymer({
       return;
     }
 
-    ui.startGettingInUiAndConfig(null, ui.copyPasteState.pendingEndpoint);
-    ui.copyPasteState.pendingEndpoint = null;
+    ui.copyPasteState.active = true;
+    ui.startGettingInUiAndConfig(null, ui.copyPasteState.activeEndpoint);
   },
   switchToGetting: function() {
     this.stopSharing().then(() => {

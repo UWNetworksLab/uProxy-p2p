@@ -10,8 +10,9 @@ class CopyPasteState {
   public localGettingFromRemote :social.GettingState = social.GettingState.NONE;
   public localSharingWithRemote :social.SharingState = social.SharingState.NONE;
   public error :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
-  public pendingEndpoint :net.Endpoint = null;
   public message :string = null;
+  public activeEndpoint :net.Endpoint = null;
+  public active :boolean = false;
 
   public updateFromConnectionState = (state :uproxy_core_api.ConnectionState) :void => {
     this.localGettingFromRemote = state.localGettingFromRemote;

@@ -259,6 +259,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     // indicates the current getting connection has ended
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
+      this.copyPasteState.activeEndpoint = null;
+      this.copyPasteState.active = false;
       this.stoppedGetting({instanceId: null, error: error});
     });
 
@@ -1075,7 +1077,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // Maybe refactor this to be copyPasteState.
     this.copyPasteState.updateFromConnectionState(state.copyPasteState.connectionState);
-    this.copyPasteState.pendingEndpoint = state.copyPasteState.endpoint;
+    this.copyPasteState.activeEndpoint = state.copyPasteState.endpoint;
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];
