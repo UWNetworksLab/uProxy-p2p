@@ -220,7 +220,6 @@ browserifyIntegrationTest = (path) ->
 ccaPath = path.dirname(require.resolve('cca/package.json'))
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
-freedomSocialGitHubPath = path.dirname(require.resolve('freedom-social-github/package.json'))
 
 #ipaddrjsPath = path.dirname(require.resolve('ipaddr.js/package.json'))
 # TODO(ldixon): update utransformers package to uproxy-obfuscators
@@ -482,15 +481,14 @@ module.exports = (grunt) ->
               # actual scripts that run things
               'freedomjs-anonymized-metrics/anonmetrics.json'
               'freedomjs-anonymized-metrics/metric.js'
-
               'freedom-for-chrome/freedom-for-chrome.js'
-
               'freedom-social-xmpp/social.google.json'
               'freedom-social-xmpp/socialprovider.js'
               'freedom-social-xmpp/vcardstore.js'
               'freedom-social-xmpp/node-xmpp-browser.js'
               'freedom-social-xmpp/google-auth.js'
-
+              'freedom-social-github/social.github.json'
+              'freedom-social-github/github-social-provider.js'
               'freedom-social-firebase/social.firebase-facebook.json'
               'freedom-social-firebase/firebase-shims.js'
               'freedom-social-firebase/firebase.js'
@@ -503,9 +501,6 @@ module.exports = (grunt) ->
               'freedom-pgp-e2e/googstorage.js'
               'freedom-pgp-e2e/e2e.js'
               'freedom-pgp-e2e/pgpapi.json'
-
-              'freedom-social-github/social.github.json'
-              'freedom-social-github/github-social-provider.js'
 
               '**/freedom-module.json'
               '!generic_core/freedom-module.json'
@@ -536,13 +531,13 @@ module.exports = (grunt) ->
               'data/freedomjs-anonymized-metrics/anonmetrics.json'
               'data/freedomjs-anonymized-metrics/metric.js'
               'data/freedom-for-firefox/freedom-for-firefox.jsm'
-
               'data/freedom-social-xmpp/social.google.json'
               'data/freedom-social-xmpp/socialprovider.js'
               'data/freedom-social-xmpp/vcardstore.js'
               'data/freedom-social-xmpp/node-xmpp-browser.js'
               'data/freedom-social-xmpp/google-auth.js'
-
+              'data/freedom-social-github/social.github.json'
+              'data/freedom-social-github/github-social-provider.js'
               'data/freedom-social-firebase/social.firebase-facebook.json'
               'data/freedom-social-firebase/firebase-shims.js'
               'data/freedom-social-firebase/firebase.js'
@@ -555,9 +550,6 @@ module.exports = (grunt) ->
               'data/freedom-pgp-e2e/googstorage.js'
               'data/freedom-pgp-e2e/e2e.js'
               'data/freedom-pgp-e2e/pgpapi.json'
-
-              'data/freedom-social-github/social.github.json'
-              'data/freedom-social-github/github-social-provider.js'
 
               'data/**/freedom-module.json'
               '!generic_core/freedom-module.json'
