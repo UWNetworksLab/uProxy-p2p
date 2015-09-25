@@ -56,19 +56,19 @@
     "message": "Offline"
   },
   "RESPOND_TO_FRIEND_REQUEST": {
-    "description": "Shown in roster under contacts who have requested to be the user's uProxy friend."
+    "description": "Shown in roster under contacts who have requested to be the user's uProxy friend.",
     "message": "Respond to friend request"
   },
   "FRIEND_REQUEST_SENT": {
-    "description": "Shown in roster under contacts who the user has requested to be a uProxy friend."
+    "description": "Shown in roster under contacts who the user has requested to be a uProxy friend.",
     "message": "Friend request sent"
   },
   "FRIEND_REQUEST": {
-    "description": "Message above button for user to accept a uProxy friend request"
+    "description": "Message above button for user to accept a uProxy friend request",
     "message": "Your friend __name__ would like to use uProxy with you!"
   },
   "ACCEPT_INVITE": {
-    "description": "Text for button for user to accept a uProxy friend request"
+    "description": "Text for button for user to accept a uProxy friend request",
     "message": "Accept Invite"
   },
   "GRANTED_YOU_ACCESS": {
