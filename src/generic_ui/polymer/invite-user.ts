@@ -14,11 +14,13 @@ Polymer({
       userId: selectedNetwork.userId
     };
     core.getInviteUrl(selectedNetworkInfo).then((inviteUrl: string) => {
+      var name = selectedNetwork.userName || selectedNetwork.userId;
+      var emailBody =
       core.sendEmail({
           networkInfo: selectedNetworkInfo,
           to: this.inviteUserEmail,
-          subject: ui.i18n_t('INVITE_EMAIL_SUBJECT'),
-          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: inviteUrl })
+          subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: name }),
+          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: inviteUrl, name: name })
       });
       this.fire('open-dialog', {
         heading: '',
