@@ -394,15 +394,6 @@ module.exports = (grunt) ->
               src: ['**/*'],
               dest: path.join(thirdPartyBuildPath, 'uproxy-lib/'),
           },
-          # Copy the freedom-social-github to third_party as we use typescript
-          # definition from that repo.
-          {
-              nonull: true,
-              expand: true,
-              cwd: path.join(freedomSocialGitHubPath, 'dist'),
-              src: ['**/*'],
-              dest: path.join(thirdPartyBuildPath, 'freedom-social-github/'),
-          },
           # Use the third_party definitions from uproxy-lib. Copied to the same
           # location relative to their compiled location in uproxy-lib so they
           # have the same relative path to the created `.d.ts` files from
@@ -921,16 +912,6 @@ module.exports = (grunt) ->
           dest: devBuildPath + '/integration'
         }]
     }  # copy
-
-    # Only currently used for "./setup.sh third_party" because npm package is
-    # not official yet.
-    subgrunt: {
-      freedomSocialGitHub: {
-        projects: {
-          'node_modules/freedom-social-github': 'default',
-        }
-      }
-    }
 
     #-------------------------------------------------------------------------
     'string-replace':

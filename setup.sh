@@ -41,7 +41,6 @@ function installThirdParty ()
 {
   runAndAssertCmd "$NPM_BIN_DIR/bower install --allow-root"
   runAndAssertCmd "$NPM_BIN_DIR/tsd reinstall --config ./third_party/tsd.json"
-  runAndAssertCmd "$NPM_BIN_DIR/grunt subgrunt:freedomSocialGitHub"
   runAndAssertCmd "$NPM_BIN_DIR/grunt copy:thirdParty"
 }
 
