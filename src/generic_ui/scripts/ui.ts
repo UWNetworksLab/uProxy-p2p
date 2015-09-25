@@ -549,17 +549,11 @@ export class UserInterface implements ui_constants.UiApi {
     var confirmationMessage =
         this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
     return this.getConfirmation('', confirmationMessage).then(() => {
-      var path = {
-        network : {
-         name: networkName,
-         userId: ""
-        },
-        userId: userId
+      var socialNetworkInfo :social.SocialNetworkInfo = {
+        name: networkName,
+        userId: "" /* The current user's ID will be determined by the core. */
       };
-      return this.core.acceptInvitation({
-        userPath: path,
-        data: networkData
-      });
+      return this.core.acceptInvitation({network: socialNetworkInfo, data: userId});
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
       return;

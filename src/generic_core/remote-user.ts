@@ -476,7 +476,7 @@ var log :logging.Log = new logging.Log('remote-user');
         this.profile.url = state.url;
       }
 
-      this.profile.status = state.status;
+      this.profile.status = state.status || social.UserStatus.FRIEND;
 
       // Restore all instances.
       var onceLoadedPromises :Promise<void>[] = [];

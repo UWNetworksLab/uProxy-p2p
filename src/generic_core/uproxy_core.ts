@@ -308,14 +308,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.inviteUser(data.userName);
   }
 
-  public acceptInvitation = (obj: {userPath :social.UserPath; data :string}): Promise<void> => {
-    var userId = obj.userPath.network.userId;
+  public acceptInvitation = (obj: {network :social.SocialNetworkInfo; data :string}): Promise<void> => {
+    var userId = obj.network.userId;
     if (!userId) {
       // Take the first key in the userId to social network map as the current user.
       // Assumes the user is only signed in once to any given network.
-      userId = Object.keys(social_network.networks[obj.userPath.network.name])[0];
+      userId = Object.keys(social_network.networks[obj.network.name])[0];
     }
-    var network = social_network.getNetwork(obj.userPath.network.name, userId);
+    var network = social_network.getNetwork(obj.network.name, userId);
     return network.acceptInvitation(obj.data);
   }
 

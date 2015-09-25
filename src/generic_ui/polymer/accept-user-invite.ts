@@ -12,17 +12,13 @@ Polymer({
     var tokenObj = JSON.parse(atob(token));
     var networkName = tokenObj.networkName;
     var networkData = tokenObj.networkData;
-    var userId = JSON.parse(networkData)['userId'];
-
-    var path = {
-      network : {
-       name: networkName,
-       userId: ""
-      },
-      userId: userId
+    var socialNetworkInfo = {
+      name: networkName,
+      userId: "" /* The current user's ID will be determined by the core. */
     };
 
-    core.acceptInvitation({userPath: path, data: networkData}).then(() => {
+    core.acceptInvitation({network: socialNetworkInfo, data: networkData})
+        .then(() => {
       this.fire('open-dialog', {
         heading: '',
         message: ui.i18n_t("FRIEND_ADDED"),

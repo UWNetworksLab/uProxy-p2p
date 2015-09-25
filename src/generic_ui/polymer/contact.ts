@@ -14,7 +14,7 @@ Polymer({
     name: 'unknown'
   },
   toggle: function() {
-    if (this.contact.status == this.UserStatus.USER_INVITED) {
+    if (this.contact.status == this.UserStatus.REMOTE_INVITED_BY_LOCAL) {
       return;
     }
 
@@ -47,14 +47,13 @@ Polymer({
   },
   acceptInvitation: function() {
     console.log(this.contact);
-    var path :social.UserPath = {
-      network : {
-       name: this.contact.network.name,
-       userId: this.contact.network.userId
-      },
-      userId: this.contact.userId
+    var socialNetworkInfo :social.SocialNetworkInfo = {
+      name: this.contact.network.name,
+      userId: this.contact.network.userId
     };
-    ui_context.core.acceptInvitation({userPath: path, data: this.contact.userId});
+    ui_context.core.acceptInvitation({
+      network: socialNetworkInfo, data: this.contact.userId
+    });
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
   modifyConsent: function(action :uproxy_core_api.ConsentUserAction) {

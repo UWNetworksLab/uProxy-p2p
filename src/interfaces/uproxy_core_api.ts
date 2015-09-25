@@ -94,9 +94,9 @@ export enum Command {
   REFRESH_PORT_CONTROL = 1022,
   CREDENTIALS_ERROR = 1023,
   SEND_INVITATION = 1024,
-  ACCEPT_INVITATION = 1025,
-  GET_INVITE_URL = 1026,
-  SEND_EMAIL = 1027
+  GET_INVITE_URL = 1025,
+  SEND_EMAIL = 1026,
+  ACCEPT_INVITATION = 1027
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
