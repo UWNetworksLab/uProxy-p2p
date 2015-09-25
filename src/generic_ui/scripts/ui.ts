@@ -1076,8 +1076,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.updateGlobalSettings(state.globalSettings);
 
     // Maybe refactor this to be copyPasteState.
-    this.copyPasteState.updateFromConnectionState(state.copyPasteState.connectionState);
-    this.copyPasteState.activeEndpoint = state.copyPasteState.endpoint;
+    this.copyPasteState.updateFromConnectionState(state.copyPasteConnection);
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];

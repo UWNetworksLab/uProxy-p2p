@@ -17,6 +17,7 @@ class CopyPasteState {
   public updateFromConnectionState = (state :uproxy_core_api.ConnectionState) :void => {
     this.localGettingFromRemote = state.localGettingFromRemote;
     this.localSharingWithRemote = state.localSharingWithRemote;
+    this.activeEndpoint = state.activeEndpoint;
   }
 }
 

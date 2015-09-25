@@ -13,6 +13,7 @@ describe('CopyPasteState', () => {
       localSharingWithRemote: social.SharingState.SHARING_ACCESS,
       bytesSent: 1,
       bytesReceived: 2,
+      activeEndpoint: null,
     };
 
     state.updateFromConnectionState(update);

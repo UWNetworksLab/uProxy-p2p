@@ -41,7 +41,8 @@ export interface InitialState {
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
-  copyPasteState :CopyPasteState;
+  copyPasteState :CopyPasteState; //TODO(jpevarnek): remove this property
+  copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
 }
 
@@ -50,8 +51,10 @@ export interface ConnectionState {
   localSharingWithRemote :social.SharingState;
   bytesSent :number;
   bytesReceived :number;
+  activeEndpoint :net.Endpoint;
 }
 
+//TODO(jpevarnek) remove this interface
 export interface CopyPasteState {
   connectionState :ConnectionState;
   endpoint :net.Endpoint;
