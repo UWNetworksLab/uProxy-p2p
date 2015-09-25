@@ -293,12 +293,6 @@ export interface Network {
   getUser :(userId :string) => RemoteUser;
 
   /**
-   * Ask the social network to add the user.
-   * Required for versions 0.8.22 and below
-   */
-  addUserRequest: (networkData :string) => Promise<void>;
-
-  /**
    * Accept an invite to use uProxy with a friend
    */
   acceptInvitation: (data: string) => Promise<void>;
