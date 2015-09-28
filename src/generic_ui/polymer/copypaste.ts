@@ -42,13 +42,12 @@ Polymer({
     }
 
     doneStopping.then(() => {
-      ui.copyPasteMessage = '';
-      ui.copyPasteError = ui_constants.CopyPasteError.NONE;
-      ui.copyPastePendingEndpoint = null;
+      ui.copyPasteState.message = '';
+      ui.copyPasteState.error = ui_constants.CopyPasteError.NONE;
 
       return core.startCopyPasteGet();
     }).then((endpoint) => {
-      ui.copyPastePendingEndpoint = endpoint;
+      ui.copyPasteState.activeEndpoint = endpoint;
     }).catch((e) => {
       // TODO we will see this any time the connection is aborted by the user or
       // when something actually goes wrong with the connection.  We should
@@ -57,7 +56,7 @@ Polymer({
       // an error, so we are just going to warn about it.
 
       console.warn('error when starting copy+paste get', e);
-      ui.copyPasteError = ui_constants.CopyPasteError.FAILED;
+      ui.copyPasteState.error = ui_constants.CopyPasteError.FAILED;
     });
   },
   handleBackClick: function() {
@@ -81,13 +80,10 @@ Polymer({
   },
   stopGetting: function() {
     ui.stopUsingProxy();
-    return core.stopCopyPasteGet().then(() => {
-      // clean up the pending endpoint in case we got here from going back
-      ui.copyPastePendingEndpoint = null;
-    });
+    return core.stopCopyPasteGet();
   },
   startProxying: function() {
-    if (!ui.copyPastePendingEndpoint) {
+    if (!ui.copyPasteState.activeEndpoint) {
       console.error('Attempting to start copy+paste proxying without a pending endpoint');
       return;
     }
@@ -97,8 +93,8 @@ Polymer({
       return;
     }
 
-    ui.startGettingInUiAndConfig(null, ui.copyPastePendingEndpoint);
-    ui.copyPastePendingEndpoint = null;
+    ui.copyPasteState.active = true;
+    ui.startGettingInUiAndConfig(null, ui.copyPasteState.activeEndpoint);
   },
   switchToGetting: function() {
     this.stopSharing().then(() => {
@@ -114,7 +110,7 @@ Polymer({
     sender.select();
   },
   dismissError: function() {
-    ui.copyPasteError = ui_constants.CopyPasteError.NONE;
+    ui.copyPasteState.error = ui_constants.CopyPasteError.NONE;
   },
   exitMode: function() {
     // if we are currently in the middle of setting up a connection, end it

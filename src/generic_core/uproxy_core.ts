@@ -230,14 +230,17 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
     return globals.loadSettings.then(() => {
+      var copyPasteConnectionState = copyPasteConnection.getCurrentState();
+
       return {
         networkNames: Object.keys(social_network.networks),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,
+        copyPasteConnection: copyPasteConnectionState,
         copyPasteState: {
-          connectionState: copyPasteConnection.getCurrentState(),
-          endpoint: copyPasteConnection.activeEndpoint
+          connectionState: copyPasteConnectionState,
+          endpoint: copyPasteConnectionState.activeEndpoint,
         },
         portControlSupport: this.portControlSupport_,
       };

@@ -7,7 +7,7 @@
  */
 
 import ui_constants = require('../../interfaces/ui');
-import Persistent = require('../../interfaces/persistent');
+import CopyPasteState = require('./copypaste-state');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
@@ -181,15 +181,7 @@ export class UserInterface implements ui_constants.UiApi {
    * connection between establishing the connection and the user confirming
    * the start of proxying
    */
-  public copyPastePendingEndpoint :net.Endpoint = null;
-  public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
-  public copyPasteMessage :string;
-  public copyPasteState :uproxy_core_api.ConnectionState = {
-    localGettingFromRemote: social.GettingState.NONE,
-    localSharingWithRemote: social.SharingState.NONE,
-    bytesSent: 0,
-    bytesReceived: 0
-  };
+  public copyPasteState :CopyPasteState = new CopyPasteState();
 
   /* Translation */
   public i18n_t :Function = translator_module.i18n_t;
@@ -262,11 +254,13 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
-      this.copyPasteMessage = message;
+      this.copyPasteState.message = message;
     });
 
     // indicates the current getting connection has ended
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
+      this.copyPasteState.activeEndpoint = null;
+      this.copyPasteState.active = false;
       this.stoppedGetting({instanceId: null, error: error});
     });
 
@@ -287,7 +281,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // status of the current copy+paste connection
     core.onUpdate(uproxy_core_api.Update.STATE, (state :uproxy_core_api.ConnectionState) => {
-      this.copyPasteState = state;
+      this.copyPasteState.updateFromConnectionState(state);
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
@@ -600,20 +594,20 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (this.model.onlineNetworks.length > 0) {
       console.log('Ignoring URL since we have an active network');
-      this.copyPasteError = ui_constants.CopyPasteError.LOGGED_IN;
+      this.copyPasteState.error = ui_constants.CopyPasteError.LOGGED_IN;
       return;
     }
 
     if (social.SharingState.NONE !== this.copyPasteState.localSharingWithRemote) {
       console.info('should not be processing a URL while in the middle of sharing');
-      this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
+      this.copyPasteState.error = ui_constants.CopyPasteError.UNEXPECTED;
       return;
     }
 
     // do not use the updateView function here, actual state may not have been
     // processed yet
     this.view = ui_constants.View.COPYPASTE;
-    this.copyPasteError = ui_constants.CopyPasteError.NONE;
+    this.copyPasteState.error = ui_constants.CopyPasteError.NONE;
 
     try {
       var parsed = this.parseUrlData(url);
@@ -627,7 +621,7 @@ export class UserInterface implements ui_constants.UiApi {
           if (social.GettingState.TRYING_TO_GET_ACCESS
               !== this.copyPasteState.localGettingFromRemote) {
             console.warn('currently not expecting any information, aborting');
-            this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
+            this.copyPasteState.error = ui_constants.CopyPasteError.UNEXPECTED;
             return;
           }
           break;
@@ -637,7 +631,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.core.sendCopyPasteSignal(parsed.message);
     } catch (e) {
       console.error('invalid one-time URL: ' + e.message);
-      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
+      this.copyPasteState.error = ui_constants.CopyPasteError.BAD_URL;
     }
   }
 
@@ -930,12 +924,10 @@ export class UserInterface implements ui_constants.UiApi {
       var gettingState = payload.offeringInstances[i].localGettingFromRemote;
       var instanceId = payload.offeringInstances[i].instanceId;
       if (gettingState === social.GettingState.GETTING_ACCESS) {
-        this.instanceGettingAccessFrom_ = instanceId;
-        user.isSharingWithMe = true;
-        this.updateGettingStatusBar_();
+        this.startGettingInUiAndConfig(instanceId, payload.offeringInstances[i].activeEndpoint);
         break;
       } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
-        this. instanceTryingToGetAccessFrom = instanceId;
+        this.instanceTryingToGetAccessFrom = instanceId;
         this.updateGettingStatusBar_();
         break;
       }
@@ -1090,8 +1082,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.updateGlobalSettings(state.globalSettings);
 
     // Maybe refactor this to be copyPasteState.
-    this.copyPasteState = state.copyPasteState.connectionState;
-    this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
+    this.copyPasteState.updateFromConnectionState(state.copyPasteConnection);
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];

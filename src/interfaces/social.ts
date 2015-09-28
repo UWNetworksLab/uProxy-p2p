@@ -81,6 +81,7 @@ export interface InstanceData {
   isOnline               :boolean;
   localGettingFromRemote :GettingState;
   localSharingWithRemote :SharingState;
+  activeEndpoint         :net.Endpoint;
 }
 
 export interface UserData {

@@ -161,32 +161,36 @@ describe('remote_instance.RemoteInstance', () => {
     };
 
     it('can start proxying', (done) => {
-      expect(alice.localGettingFromRemote).toEqual(social.GettingState.NONE);
+      var aliceState = alice.currentStateForUi();
+      expect(aliceState.localGettingFromRemote).toEqual(social.GettingState.NONE);
       alice.user.consent.localRequestsAccessFromRemote = true;
       alice.wireConsentFromRemote.isOffering = true;
       // The module & constructor of SocksToRtc may change in the near future.
       spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.start().then(() => {
-        expect(alice.localGettingFromRemote)
+        aliceState = alice.currentStateForUi();
+        expect(aliceState.localGettingFromRemote)
             .toEqual(social.GettingState.GETTING_ACCESS);
         done();
       });
+      aliceState = alice.currentStateForUi();
       expect(socks_to_rtc.SocksToRtc).toHaveBeenCalled();
-      expect(alice.localGettingFromRemote)
+      expect(aliceState.localGettingFromRemote)
           .toEqual(social.GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('can stop proxying', () => {
       alice.stop();
-      expect(alice.localGettingFromRemote).toEqual(social.GettingState.NONE);
+      var aliceState = alice.currentStateForUi();
+      expect(aliceState.localGettingFromRemote).toEqual(social.GettingState.NONE);
     });
 
     it('refuses to start proxy without permission', () => {
       spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.wireConsentFromRemote.isOffering = false;
-      alice.localGettingFromRemote = social.GettingState.NONE;
       alice.start();
-      expect(alice.localGettingFromRemote).toEqual(social.GettingState.NONE);
+      var aliceState = alice.currentStateForUi();
+      expect(aliceState.localGettingFromRemote).toEqual(social.GettingState.NONE);
     });
 
     // This test no longer passes with the hack to use

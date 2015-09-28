@@ -580,8 +580,8 @@ var log :logging.Log = new logging.Log('remote-user');
         // stop the proxy session.
         if (uproxy_core_api.ConsentUserAction.CANCEL_OFFER === action) {
           for (var instanceId in this.instances_) {
-            if (this.instances_[instanceId].localSharingWithRemote ==
-                social.SharingState.SHARING_ACCESS) {
+            var instanceData = this.instances_[instanceId].currentStateForUi();
+            if (instanceData.localSharingWithRemote == social.SharingState.SHARING_ACCESS) {
               this.instances_[instanceId].stopShare();
             }
           }
