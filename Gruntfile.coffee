@@ -136,16 +136,18 @@ compileTypescript = (files) ->
     module: 'commonjs'
     fast: 'always'
 
+readJSONFile = (file) -> JSON.parse(fs.readFileSync(file, 'utf8'))
+
 gruntConfig = {
-  pkg: JSON.parse(fs.readFileSync('package.json', 'utf8'))
+  pkg: readJSONFile('package.json')
   pkgs:
-    lib: JSON.parse(fs.readFileSync('node_modules/uproxy-lib/package.json', 'utf8'))
-    freedom: JSON.parse(fs.readFileSync('node_modules/freedom/package.json', 'utf8'))
-    freedomchrome: JSON.parse(fs.readFileSync('node_modules/freedom-for-chrome/package.json', 'utf8'))
-    freedomfirefox: JSON.parse(fs.readFileSync('node_modules/freedom-for-firefox/package.json', 'utf8'))
-    freedomxmpp: JSON.parse(fs.readFileSync('node_modules/freedom-social-xmpp/package.json', 'utf8'))
-    freedomfirebase: JSON.parse(fs.readFileSync('node_modules/freedom-social-firebase/package.json', 'utf8'))
-    freedomwechat: JSON.parse(fs.readFileSync('node_modules/freedom-social-wechat/package.json', 'utf8'))
+    lib: readJSONFile('node_modules/uproxy-lib/package.json')
+    freedom: readJSONFile('node_modules/freedom/package.json')
+    freedomchrome: readJSONFile('node_modules/freedom-for-chrome/package.json')
+    freedomfirefox: readJSONFile('node_modules/freedom-for-firefox/package.json')
+    freedomxmpp: readJSONFile('node_modules/freedom-social-xmpp/package.json')
+    freedomfirebase: readJSONFile('node_modules/freedom-social-firebase/package.json')
+    freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
 
   clean: ['build/dev', 'build/dist', '.tscache']
 
