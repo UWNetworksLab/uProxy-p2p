@@ -68,6 +68,9 @@ Polymer({
     ui.setMode(ui_types.Mode.SHARE);
   },
   closedWelcome: function() {
+    // New users (who have just completed the welcome screen) will not need
+    // to see the Google and Facebook changed notification.
+    model.globalSettings.hasSeenGoogleAndFacebookChangedNotification = true;
     model.globalSettings.hasSeenWelcome = true;
     core.updateGlobalSettings(model.globalSettings);
   },
@@ -77,6 +80,14 @@ Polymer({
   },
   dismissCopyPasteError: function() {
     ui.copyPasteError = ui_types.CopyPasteError.NONE;
+  },
+  googleAndFacebookChangedNotificationOpened: function() {
+    this.$.googleAndFacebookChangedNotificationContent.innerHTML =
+        ui.i18n_t("GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION");
+  },
+  dismissGoogleAndFacebookChangedNotification: function() {
+    model.globalSettings.hasSeenGoogleAndFacebookChangedNotification = true;
+    core.updateGlobalSettings(model.globalSettings);
   },
   openDialog: function(e :Event, detail :dialog_description) {
     /* 'detail' parameter holds the data that was passed when the open-dialog

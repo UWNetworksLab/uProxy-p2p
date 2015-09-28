@@ -255,6 +255,16 @@
         width: 56px;
         padding: 15px;
       }
+      #googleAndFacebookChangedOverlay {
+        background-color: white;
+        height: 100%;
+        width: 100%;
+        padding: 2em;
+        line-height: 20px;
+      }
+      #googleAndFacebookChangedOverlay ul li {
+        margin-top: 1em;
+      }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
@@ -277,6 +287,15 @@
 
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
+
+    <core-overlay id='googleAndFacebookChangedOverlay' opened='{{ model.globalSettings.hasSeenWelcome && !model.globalSettings.hasSeenGoogleAndFacebookChangedNotification }}' on-core-overlay-open='{{ googleAndFacebookChangedNotificationOpened }}'>
+      <div id='googleAndFacebookChangedNotificationContent'>
+        <!-- content is set using .innerHTML so that we can embed HTML in translations -->
+      </div>
+      <div style="text-align:center;">
+        <uproxy-button on-tap='{{ dismissGoogleAndFacebookChangedNotification }}'>OK</uproxy-button>
+      </div>
+    </core-overlay>
 
     <core-drawer-panel id='mainPanel' forceNarrow='true' drawerWidth='300px'
         hidden?='{{ ui.view !== ui_constants.View.ROSTER }}' rightDrawer='{{ dir == "rtl" ? true : false }}'>
