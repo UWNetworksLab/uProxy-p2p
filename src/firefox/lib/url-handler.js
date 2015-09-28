@@ -10,9 +10,9 @@ exports.setup = function(panel, button) {
       subject.QueryInterface(Ci.nsIHttpChannel);
       var url = subject.URI.spec
 
-      if (/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/.test(url)) {
+      if (/^https:\/\/www.uproxy.org\/(request|offer)\/(.*)/.test(url)) {
         panel.port.emit('copyPasteUrlData', url);
-      } else if (/https:\/\/www.uproxy.org\/invite\/(.*)/.test(url)) {
+      } else if (/^https:\/\/www.uproxy.org\/invite\/(.*)/.test(url)) {
         panel.port.emit('inviteUrlData', url);
       } else {
         return;
