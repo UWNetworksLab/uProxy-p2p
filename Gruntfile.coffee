@@ -940,17 +940,23 @@ testDirectory = (dir) ->
   # every test sequence should include building everything
   testNames = ['base']
 
+  # we use the source directory to figure out what files will end up in the
+  # build directory (this is run before any build steps)
   files = fs.readdirSync(path.join('src', dir))
   for file in files
     match = /(.+)\.spec\.ts/.exec(file)
-    if (match)
+    if match
       loc = path.join(dir, match[1])
       testName = loc + 'spec'
 
+      # add the browserify task as something we can run
       gruntConfig['browserify'][testName] = Rule.browserifySpec(loc)
+      # include the browserification in this step
       testNames.push('browserify:' + testName)
 
+  # add the jasmine task so we can run it
   gruntConfig['jasmine'][dir] = Rule.jasmineSpec(dir)
+  # include running the tests in this task
   testNames.push('jasmine:' + dir)
 
   return testNames
