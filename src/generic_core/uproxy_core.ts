@@ -236,7 +236,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         newSettings.hasSeenGoogleAndFacebookChangedNotification;
   }
 
-  public getFullState = ()  :Promise<uproxy_core_api.InitialState> => {
+  public getFullState = () :Promise<uproxy_core_api.InitialState> => {
     return globals.loadSettings.then(() => {
       var copyPasteConnectionState = copyPasteConnection.getCurrentState();
 
