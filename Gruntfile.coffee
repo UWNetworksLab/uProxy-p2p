@@ -147,7 +147,7 @@ gruntConfig = {
     freedomfirefox: readJSONFile('node_modules/freedom-for-firefox/package.json')
     freedomxmpp: readJSONFile('node_modules/freedom-social-xmpp/package.json')
     freedomfirebase: readJSONFile('node_modules/freedom-social-firebase/package.json')
-    freedomGitHub: grunt.file.readJSON('node_modules/freedom-social-github/package.json')
+    freedomGitHub: readJSONFile('node_modules/freedom-social-github/package.json')
     freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
 
   clean: ['build/dev', 'build/dist', '.tscache']
