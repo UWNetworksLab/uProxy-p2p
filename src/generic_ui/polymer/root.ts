@@ -197,7 +197,7 @@ Polymer({
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   topOfStatuses: function(statusHeight: number, visible :boolean) {
-    return 10 + (visible ? statusHeight : 0);
+    return visible ? statusHeight : 0;
   },
   // mainPanel.selected can be either "drawer" or "main"
   // Our "drawer" is the settings panel. When the settings panel is open,

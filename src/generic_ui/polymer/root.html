@@ -247,7 +247,6 @@
         color: white;
         background-color: #34ceb9;  /* teal */
         position: absolute;
-        bottom: 2em;
         right: 2em;
         /* Needed to make button clickable on Firefox issue #1905 */
         z-index: 1;
@@ -354,7 +353,10 @@
 
         <div class='content' fit>
 
-          <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}' mini src='../icons/ic_person_add_white_24dp.svg' on-tap='{{ fireOpenInviteUserPanel }}'></paper-fab>
+          <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}'
+            mini src='../icons/ic_person_add_white_24dp.svg'
+            on-tap='{{ fireOpenInviteUserPanel }}'
+            style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) + 26 }}px;'></paper-fab>
 
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
@@ -464,7 +466,7 @@
 
     <paper-toast id='toast'
         text='{{ toastMessage }}' responsiveWidth='320px'
-+        style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) }}px;'
+        style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) + 10 }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
           hidden?='{{ !unableToShare && !unableToGet }}'>{{ "GET_HELP" | $$ }}
