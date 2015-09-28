@@ -805,7 +805,7 @@
   },
   "LOGIN_REQUIRED_MESSAGE": {
     "description": "Message for confirmation that the user must login to a network to accept an invitation",
-    "message": "To accept this invitation, you will need to connect to uProxy with __network__.  Click yes to continue."
+    "message": "To accept this invitation from __name__, you will need to connect to uProxy with __network__.  Click yes to continue."
   },
   "INVITE_URL_ERROR": {
     "description": "Error message shown for invalid invite URLs",
