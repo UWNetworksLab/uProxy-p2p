@@ -62,7 +62,8 @@ export class Model {
     statsReportingEnabled: false,
     consoleFilter: 2, // loggingTypes.Level.warn
     language: 'en',
-    force_message_version: 0
+    force_message_version: 0,
+    hasSeenGoogleAndFacebookChangedNotification: false
   };
 
   public reconnecting = false;
