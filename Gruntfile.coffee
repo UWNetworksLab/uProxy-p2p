@@ -830,20 +830,7 @@ gruntConfig = {
     chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
     chromeExtensionCoreConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core_connector'
     genericCoreFirewall: Rule.browserify 'generic_core/firewall'
-#    genericCoreFirewallSpec: Rule.browserifySpec 'generic_core/firewall'
     genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
-#    genericCoreUproxyCoreSpec: Rule.browserifySpec 'generic_core/uproxy_core'
-#    genericCoreLocalInstanceSpec: Rule.browserifySpec 'generic_core/local-instance'
-#    genericCoreMetricsSpec: Rule.browserifySpec 'generic_core/metrics'
-#    genericCoreRemoteConnectionSpec: Rule.browserifySpec 'generic_core/remote-connection'
-#    genericCoreRemoteInstanceSpec: Rule.browserifySpec 'generic_core/remote-instance'
-#    genericCoreRemoteUserSpec: Rule.browserifySpec 'generic_core/remote-user'
-#    genericCoreSocialSpec: Rule.browserifySpec 'generic_core/social'
-#    genericCoreStorageSpec: Rule.browserifySpec 'generic_core/storage'
-
-#    genericUiUiSpec: Rule.browserifySpec 'generic_ui/scripts/ui'
-#    genericUiUserSpec: Rule.browserifySpec 'generic_ui/scripts/user'
-    genericUiCopypasteStateSpec: Rule.browserifySpec 'generic_ui/scripts/copypaste-state'
     integrationSpec: Rule.browserifySpec 'integration/core'
     integrationFreedomModule: Rule.browserify 'integration/test_connection'
 
@@ -980,7 +967,6 @@ taskManager.add 'base', [
   'browserify:ccaMain'
 ]
 
-#
 taskManager.add 'version_file', [
   'gitinfo'
   'string-replace:version'
