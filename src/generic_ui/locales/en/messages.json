@@ -841,7 +841,7 @@
   },
   "LOGIN_REQUIRED_MESSAGE": {
     "description": "Message for confirmation that the user must login to a network to accept an invitation",
-    "message": "To accept this invitation, you will need to connect to uProxy with __network__.  Click yes to continue."
+    "message": "To accept this invitation from __name__, you will need to connect to uProxy with __network__.  Click yes to continue."
   },
   "INVITE_URL_ERROR": {
     "description": "Error message shown for invalid invite URLs",
@@ -853,6 +853,10 @@
   },
   "INVITE_EMAIL_BODY": {
     "description": "Default email body for sending an uProxy invite",
-    "message": "__name__ has invited you to connect with him on uProxy. To do so, click on the invitation link below or paste it into uProxy.<br><br>__url__<br><br>If you don’t have uProxy installed, you can get it from <a href='uproxy.org'>uproxy.org</a> or directly from the Chrome webstore (<a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>part 1</a> and <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>part 2</a>) and Firefox Marketplace (<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'>here</a>)."
+    "message": "__name__ has invited you to connect with them on uProxy. To do so, click on the invitation link below or paste it into uProxy.<br><br>__url__<br><br>If you don’t have uProxy installed, you can get it from <a href='uproxy.org'>uproxy.org</a> or directly from the Chrome webstore (<a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>part 1</a> and <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>part 2</a>) and Firefox Marketplace (<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'>here</a>)."
+  },
+  "GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION": {
+    "description": "",
+    "message": "<h2>We've made big changes to how uProxy works with social networks!</h2><ul><li><strong>We've introduced a new Gmail network</strong> that allows you to connect with anyone who has a Gmail account. Use the the button in the lower right of the buddy list to send them an invitation.</li><li><strong>The \"Google\" network is now called Google Hangouts.</strong> Because Google is removing technology we rely on, our support for this network will be removed.</li><li><strong>Facebook contacts are now added by invitation.</strong> You can invite friends using the button at the lower right of the contact list, and only friends you've invited will be able to tell you're using uProxy. To make this change, we've had to reset your friend list, so you'll have to invite friends you want to connect to.</li></ul><p>Please send feedback about these changes using the feedback link in the menu or by emailing info@uProxy.org</p>"
   }
 }

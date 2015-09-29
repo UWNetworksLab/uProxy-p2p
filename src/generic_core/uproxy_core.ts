@@ -70,8 +70,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       var logins :Promise<void>[] = [];
 
       for (var i in networks) {
+        var networkName = networks[i]
+        if (!(networkName in social_network.networks)) {
+          // Network may have been removed, e.g. old "Facebook" network is now
+          // "Facebook-Firebase-V2".
+          continue;
+        }
         logins.push(this.login({
-          network: networks[i],
+          network: networkName,
           reconnect: true,
         }).catch(() => {
           // any failure to login should just be ignored - the user will either
@@ -226,6 +232,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       globals.settings.consoleFilter);
     globals.settings.language = newSettings.language;
     globals.settings.force_message_version = newSettings.force_message_version;
+    globals.settings.hasSeenGoogleAndFacebookChangedNotification =
+        newSettings.hasSeenGoogleAndFacebookChangedNotification;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {

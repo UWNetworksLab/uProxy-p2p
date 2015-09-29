@@ -35,6 +35,7 @@ export interface GlobalSettings {
   consoleFilter    :loggingTypes.Level;
   language         :string;
   force_message_version :number;
+  hasSeenGoogleAndFacebookChangedNotification :boolean;
 }
 export interface InitialState {
   networkNames :string[];

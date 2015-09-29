@@ -62,7 +62,8 @@ export class Model {
     statsReportingEnabled: false,
     consoleFilter: 2, // loggingTypes.Level.warn
     language: 'en',
-    force_message_version: 0
+    force_message_version: 0,
+    hasSeenGoogleAndFacebookChangedNotification: false
   };
 
   public reconnecting = false;
@@ -568,6 +569,7 @@ export class UserInterface implements ui_constants.UiApi {
       var token = url.substr(url.lastIndexOf('/') + 1);
       var tokenObj = JSON.parse(atob(token));
       var networkName = tokenObj.networkName;
+      var userName = tokenObj.userName;
     } catch(e) {
       showUrlError();
       return;
@@ -576,12 +578,12 @@ export class UserInterface implements ui_constants.UiApi {
       var confirmationTitle = this.i18n_t('LOGIN_REQUIRED_TITLE');
       var confirmationMessage =
           this.i18n_t('LOGIN_REQUIRED_MESSAGE',
-                      { network: this.getNetworkDisplayName(networkName) });
+          { network: this.getNetworkDisplayName(networkName), name: userName });
       this.getConfirmation(confirmationTitle, confirmationMessage).then(() => {
         this.login(networkName).then(() => {
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          this.addUserWithConfirmation_(url).catch(showUrlError);
+          this.core.addUser(url).catch(showUrlError);
         });
       });
     } else {
