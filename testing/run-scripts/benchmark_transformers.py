@@ -26,10 +26,11 @@ browser_spec = 'chrome-stable'
 transformers = [
   'none',
   'caesar',
+  'fragmentationShaper',
   'encryptionShaper',
+  'decompressionShaper',
   'sequenceShaper',
-  'protean',
-  'fragmentationShaper'
+  'protean'
 ]
 
 # Run the benchmarks.
