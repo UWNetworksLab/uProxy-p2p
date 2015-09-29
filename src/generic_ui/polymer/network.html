@@ -9,13 +9,24 @@
         box-sizing: border-box;
       }
       uproxy-button {
-        width: 150px;
+        width: 200px !important;
       }
-      uproxy-button.Google {
+      uproxy-button.Google {  /* Google Hangouts */
+        background: #0f9d58;
+      }
+      uproxy-button.GMail {
         background: #dd4b39;
       }
-      uproxy-button.Facebook {
+      uproxy-button.Facebook,
+      uproxy-button.Facebook-Firebase-V2 {
         background: #3b5998;
+      }
+      uproxy-button.WeChat {
+        background: #6ab000;
+      }
+      .experimental {
+        font-style: italic;
+        font-size: 12px;
       }
     </style>
 
@@ -23,8 +34,9 @@
       <span>
         <span>
           <uproxy-button raised on-tap='{{connect}}' class='{{ networkName }}'>
-            {{ networkName }}
-          </button>
+            {{ displayName }}
+          </uproxy-button>
+          <div class='experimental' hidden?='{{ !isExperimental }}'>Experimental</div>
         </span>
       </span>
     </div>

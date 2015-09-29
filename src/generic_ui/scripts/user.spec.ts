@@ -29,7 +29,8 @@ describe('UI.User', () => {
       localGettingFromRemote: social.GettingState.NONE,
       isOnline: true,
       bytesSent: 0,
-      bytesReceived: 0
+      bytesReceived: 0,
+      activeEndpoint: null,
     };
   }
 

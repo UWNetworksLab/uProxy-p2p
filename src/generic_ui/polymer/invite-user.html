@@ -1,0 +1,93 @@
+<link rel='import' href='../../bower/core-icons/core-icons.html'>
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel="import" href="../../bower/core-signals/core-signals.html">
+<link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='button.html'>
+<link rel="import" href="i18n-filter.html">
+
+<polymer-element name='uproxy-invite-user'>
+  <template>
+    <style>
+      #inviteUserPanel {
+        height: 100%;
+        width: 100%;
+        background-color: white;
+      }
+      .section {
+        padding-left: 2em;
+        padding-right: 2em;
+        padding-top: 1em;
+        padding-bottom: 1em;
+        line-height: 20px;
+      }
+      a {
+        cursor: pointer;
+      }
+      paper-dropdown-menu {
+        padding: 0;
+        margin: 0;
+      }
+      uproxy-button {
+        margin: 0;
+        padding-left: 1em;
+        padding-right: 1em;
+      }
+      paper-input-decorator {
+        font-size: 16px;
+      }
+    </style>
+
+    <core-signals on-core-signal-open-invite-user-dialog='{{ openInviteUserPanel }}'></core-signals>
+
+    <core-overlay id='inviteUserPanel'>
+      <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
+        {{ 'INVITE_A_FRIEND' | $$ }}
+      </uproxy-app-bar>
+
+      <div hidden?='{{ onlineInviteNetworks.length <= 1}}' class='section'>
+        <p>{{ 'HOW_TO_INVITE_FRIENDS' | $$ }}</p>
+        <paper-dropdown-menu>
+          <paper-dropdown class='dropdown'>
+            <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
+              <template repeat="{{ network in onlineInviteNetworks }}">
+                <paper-item label='{{ network.name }}'>
+                  {{ network.displayName }}
+                </paper-item>
+              </template>
+            </core-menu>
+          </paper-dropdown>
+        </paper-dropdown-menu>
+      </div>
+
+      <div class='section'>
+        <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
+          <p>{{ 'FACEBOOK_INVITE_INSTRUCTIONS' | $$ }}</p>
+          <uproxy-button affirmative on-tap='{{ sendToFacebookFriend }}'>
+            {{ 'SEND_INVITATION' | $$ }}
+          </uproxy-button>
+        </div>
+
+        <div hidden?='{{ selectedNetworkName != "GMail"}}'>
+          <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$ }}</p>
+          <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
+            <input is='core-input' value='{{ inviteUserEmail }}' />
+          </paper-input-decorator>
+
+          <uproxy-button affirmative on-tap='{{ sendToGMailFriend }}'>
+            {{ 'SEND_INVITATION' | $$ }}
+          </uproxy-button>
+        </div>
+      </div>
+
+      <div class='section'>
+        <a on-tap='{{ showAcceptUserInvite }}'>
+          {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$ }}
+        </a>
+      </div>
+
+    </core-overlay>
+  </template>
+  <script src='invite-user.js'></script>
+</polymer-element>

@@ -41,11 +41,11 @@ Polymer({
   toastMessage: '',
   unableToGet: '',
   unableToShare: '',
-  updateView: function(e :Event, detail :{ view :ui_types.View }) {
+  viewChanged: function(oldView :ui_types.View, newView :ui_types.View) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
-    if (detail.view == ui_types.View.ROSTER && ui.view == ui_types.View.SPLASH) {
+    if (newView == ui_types.View.ROSTER && oldView == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
       if (!model.globalSettings.hasSeenWelcome) {
         this.statsDialogOrBubbleOpen = true;
@@ -54,17 +54,12 @@ Polymer({
       this.closeSettings();
       this.$.modeTabs.updateBar();
     }
-    ui.view = detail.view;
   },
   statsIconClicked: function() {
     this.$.mainPanel.openDrawer();
   },
   closeSettings: function() {
     this.$.mainPanel.closeDrawer();
-  },
-  rosterView: function() {
-    console.log('rosterView called');
-    ui.view = ui_types.View.ROSTER;
   },
   setGetMode: function() {
     ui.setMode(ui_types.Mode.GET);
@@ -73,6 +68,9 @@ Polymer({
     ui.setMode(ui_types.Mode.SHARE);
   },
   closedWelcome: function() {
+    // New users (who have just completed the welcome screen) will not need
+    // to see the Google and Facebook changed notification.
+    model.globalSettings.hasSeenGoogleAndFacebookChangedNotification = true;
     model.globalSettings.hasSeenWelcome = true;
     core.updateGlobalSettings(model.globalSettings);
   },
@@ -82,6 +80,14 @@ Polymer({
   },
   dismissCopyPasteError: function() {
     ui.copyPasteError = ui_types.CopyPasteError.NONE;
+  },
+  googleAndFacebookChangedNotificationOpened: function() {
+    this.$.googleAndFacebookChangedNotificationContent.innerHTML =
+        ui.i18n_t("GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION");
+  },
+  dismissGoogleAndFacebookChangedNotification: function() {
+    model.globalSettings.hasSeenGoogleAndFacebookChangedNotification = true;
+    core.updateGlobalSettings(model.globalSettings);
   },
   openDialog: function(e :Event, detail :dialog_description) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
@@ -109,6 +115,12 @@ Polymer({
     this.$.proxyError.open();
   },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
+    // TODO: error checking, isNaN etc
+    var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
+    if (callbackIndex) {
+      var fulfill = (target.getAttribute('affirmative') != null);
+      ui.invokeConfirmationCallback(callbackIndex, fulfill);
+    }
     var signal = target.getAttribute('data-signal');
     if (signal) {
       this.fire('core-signal', { name: signal });
@@ -139,10 +151,12 @@ Polymer({
     // TODO: clean up the logic which controls which welcome dialog or bubble
     // is shown.
     this.model.globalSettings.statsReportingEnabled = true;
+    this.$.statsDialog.close();
   },
   disableStats: function() {
     this.model.globalSettings.statsReportingEnabled = false;
     this.statsDialogOrBubbleOpen = false;
+    this.$.statsDialog.close();
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&
@@ -162,8 +176,7 @@ Polymer({
   },
   signalToFireChanged: function() {
     if (ui.signalToFire) {
-      this.fire('core-signal', {name: ui.signalToFire});
-      ui.signalToFire = '';
+      this.fire('core-signal', { name: ui.signalToFire.name, data: ui.signalToFire.data });
     }
   },
   revertProxySettings: function() {
@@ -195,7 +208,7 @@ Polymer({
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   topOfStatuses: function(statusHeight: number, visible :boolean) {
-    return 10 + (visible ? statusHeight : 0);
+    return visible ? statusHeight : 0;
   },
   // mainPanel.selected can be either "drawer" or "main"
   // Our "drawer" is the settings panel. When the settings panel is open,
@@ -238,9 +251,13 @@ Polymer({
   restart: function() {
     core.restart();
   },
+  fireOpenInviteUserPanel: function() {
+    this.fire('core-signal', { name: 'open-invite-user-dialog' });
+  },
   observe: {
-    '$.mainPanel.selected' : 'drawerToggled',
+    '$.mainPanel.selected': 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',
+    'ui.view': 'viewChanged',
     // Use an observer on model.contacts.shareAccessContacts.trustedUproxy
     // so that we can detect any time elements are added or removed from this
     // array.  Unfortunately if we try doing
@@ -250,5 +267,8 @@ Polymer({
         'updateIsSharingEnabledWithOthers',
     'ui.signalToFire': 'signalToFireChanged',
     'model.globalSettings.language': 'languageChanged'
-  }
+  },
+  computed: {
+    'hasContacts': '(model.contacts.getAccessContacts.pending.length + model.contacts.getAccessContacts.trustedUproxy.length + model.contacts.getAccessContacts.untrustedUproxy.length + model.contacts.shareAccessContacts.pending.length + model.contacts.shareAccessContacts.trustedUproxy.length + model.contacts.shareAccessContacts.untrustedUproxy.length) > 0',
+   }
 });

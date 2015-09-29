@@ -15,7 +15,7 @@
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import social_network = require('./social');
-import version = require('../version/version');
+import version = require('../generic/version');
 import browser_connector = require('../interfaces/browser_connector');
 import ui = require('./ui_connector');
 import uproxy_core = require('./uproxy_core');
@@ -86,6 +86,17 @@ ui_connector.onCommand(
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.START_PROXYING,
     core.start);
+
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.ADD_USER,
+    core.addUser);
+
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.GET_INVITE_URL,
+    core.getInviteUrl);
+
+ui_connector.onCommand(uproxy_core_api.Command.SEND_EMAIL,
+    core.sendEmail);
 
 ui_connector.onCommand(uproxy_core_api.Command.STOP_PROXYING,
     core.stop);

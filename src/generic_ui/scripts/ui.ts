@@ -7,7 +7,7 @@
  */
 
 import ui_constants = require('../../interfaces/ui');
-import Persistent = require('../../interfaces/persistent');
+import CopyPasteState = require('./copypaste-state');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
@@ -20,6 +20,9 @@ import social = require('../../interfaces/social');
 import Constants = require('./constants');
 import translator_module = require('./translator');
 import _ = require('lodash');
+import network_options = require('../../generic/network-options');
+
+var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
 // Filenames for icons.
 // Two important things about using these strings:
@@ -59,7 +62,8 @@ export class Model {
     statsReportingEnabled: false,
     consoleFilter: 2, // loggingTypes.Level.warn
     language: 'en',
-    force_message_version: 0
+    force_message_version: 0,
+    hasSeenGoogleAndFacebookChangedNotification: false
   };
 
   public reconnecting = false;
@@ -126,7 +130,7 @@ export interface Contacts {
  * Specific to one particular Social network.
  */
 export interface Network {
-  name   :string;
+  name :string;
   // TODO(salomegeo): Add more information about the user.
   userId :string;
   imageData ?:string;
@@ -178,15 +182,7 @@ export class UserInterface implements ui_constants.UiApi {
    * connection between establishing the connection and the user confirming
    * the start of proxying
    */
-  public copyPastePendingEndpoint :net.Endpoint = null;
-  public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
-  public copyPasteMessage :string;
-  public copyPasteState :uproxy_core_api.ConnectionState = {
-    localGettingFromRemote: social.GettingState.NONE,
-    localSharingWithRemote: social.SharingState.NONE,
-    bytesSent: 0,
-    bytesReceived: 0
-  };
+  public copyPasteState :CopyPasteState = new CopyPasteState();
 
   /* Translation */
   public i18n_t :Function = translator_module.i18n_t;
@@ -202,9 +198,11 @@ export class UserInterface implements ui_constants.UiApi {
   public availableVersion :string = null;
 
   // Changing this causes root.ts to fire a core-signal with the new value.
-  public signalToFire :string = '';
+  public signalToFire :Object = null;
 
   public toastMessage :string = null;
+
+  public showInviteControls: boolean = false;
 
 
   /**
@@ -257,11 +255,13 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
-      this.copyPasteMessage = message;
+      this.copyPasteState.message = message;
     });
 
     // indicates the current getting connection has ended
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
+      this.copyPasteState.activeEndpoint = null;
+      this.copyPasteState.active = false;
       this.stoppedGetting({instanceId: null, error: error});
     });
 
@@ -282,7 +282,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     // status of the current copy+paste connection
     core.onUpdate(uproxy_core_api.Update.STATE, (state :uproxy_core_api.ConnectionState) => {
-      this.copyPasteState = state;
+      this.copyPasteState.updateFromConnectionState(state);
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
@@ -380,7 +380,8 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.setPortControlSupport_);
 
-    browserApi.on('urlData', this.handleUrlData);
+    browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
+    browserApi.on('inviteUrlData', this.handleInviteUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
@@ -392,8 +393,46 @@ export class UserInterface implements ui_constants.UiApi {
   // Because of an observer (in root.ts) watching the value of
   // signalToFire, this function simulates firing a core-signal
   // from the background page.
-  public fireSignal = (signal :string) => {
-    this.signalToFire = signal;
+  public fireSignal = (signalName :string, data ?:Object) => {
+    this.signalToFire = {name: signalName, data: data};
+  }
+
+  private confirmationCallbacks_ :{[index :number] :Function} = {};
+  // Don't use index 0 as it may be treated as false in confirmation code.
+  private confirmationCallbackIndex_ = 1;
+  public getConfirmation = (heading :string, text :string) => {
+    return new Promise((F, R) => {
+      var fulfillIndex = ++this.confirmationCallbackIndex_;
+      var rejectIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[fulfillIndex] = F;
+      this.confirmationCallbacks_[rejectIndex] = R;
+      this.fireSignal('open-dialog', {
+        heading: heading,
+        message: text,
+        buttons: [{
+          text: this.i18n_t("YES"),
+          callbackIndex: fulfillIndex
+        }, {
+          text: this.i18n_t("NO"),
+          callbackIndex: rejectIndex,
+          dismissive: true
+        }]
+      });
+    });
+  }
+
+  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+    if (index > this.confirmationCallbackIndex_) {
+      console.error('Confirmation callback not found: ' + index);
+      return;
+    }
+    this.confirmationCallbacks_[index]();
+    delete this.confirmationCallbacks_[index];
+    if (fulfill) {
+      delete this.confirmationCallbacks_[index + 1];
+    } else {
+      delete this.confirmationCallbacks_[index - 1];
+    }
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -490,25 +529,79 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  public handleUrlData = (url :string) => {
+  private addUserWithConfirmation_ = (url: string) : Promise<void> => {
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var userName = tokenObj.userName;
+    } catch(e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+    var confirmationMessage =
+        this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
+    return this.getConfirmation('', confirmationMessage).then(() => {
+      return this.core.addUser(url);
+    }).catch((e) => {
+      // The user did not confirm adding their friend, not an error.
+      return;
+    })
+  }
+
+  public handleInviteUrlData = (url :string) => {
+    var showUrlError = () => {
+      this.fireSignal('open-dialog', {
+        heading: '',
+        message: this.i18n_t("INVITE_URL_ERROR"),
+        buttons: [{
+          text: this.i18n_t("OK")
+        }]
+      });
+    };
+    try {
+      var token = url.substr(url.lastIndexOf('/') + 1);
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+      var userName = tokenObj.userName;
+    } catch(e) {
+      showUrlError();
+      return;
+    }
+    if (!this.model.getNetwork(networkName)) {
+      var confirmationTitle = this.i18n_t('LOGIN_REQUIRED_TITLE');
+      var confirmationMessage =
+          this.i18n_t('LOGIN_REQUIRED_MESSAGE',
+          { network: this.getNetworkDisplayName(networkName), name: userName });
+      this.getConfirmation(confirmationTitle, confirmationMessage).then(() => {
+        this.login(networkName).then(() => {
+          this.view = ui_constants.View.ROSTER;
+          this.bringUproxyToFront();
+          this.core.addUser(url).catch(showUrlError);
+        });
+      });
+    } else {
+      this.addUserWithConfirmation_(url).catch(showUrlError);;
+    }
+  }
+
+  public handleCopyPasteUrlData = (url: string) => {
     console.log('received one-time URL from browser');
 
     if (this.model.onlineNetworks.length > 0) {
       console.log('Ignoring URL since we have an active network');
-      this.copyPasteError = ui_constants.CopyPasteError.LOGGED_IN;
+      this.copyPasteState.error = ui_constants.CopyPasteError.LOGGED_IN;
       return;
     }
 
     if (social.SharingState.NONE !== this.copyPasteState.localSharingWithRemote) {
       console.info('should not be processing a URL while in the middle of sharing');
-      this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
+      this.copyPasteState.error = ui_constants.CopyPasteError.UNEXPECTED;
       return;
     }
 
     // do not use the updateView function here, actual state may not have been
     // processed yet
     this.view = ui_constants.View.COPYPASTE;
-    this.copyPasteError = ui_constants.CopyPasteError.NONE;
+    this.copyPasteState.error = ui_constants.CopyPasteError.NONE;
 
     try {
       var parsed = this.parseUrlData(url);
@@ -522,7 +615,7 @@ export class UserInterface implements ui_constants.UiApi {
           if (social.GettingState.TRYING_TO_GET_ACCESS
               !== this.copyPasteState.localGettingFromRemote) {
             console.warn('currently not expecting any information, aborting');
-            this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
+            this.copyPasteState.error = ui_constants.CopyPasteError.UNEXPECTED;
             return;
           }
           break;
@@ -532,7 +625,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.core.sendCopyPasteSignal(parsed.message);
     } catch (e) {
       console.error('invalid one-time URL: ' + e.message);
-      this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
+      this.copyPasteState.error = ui_constants.CopyPasteError.BAD_URL;
     }
   }
 
@@ -731,6 +824,7 @@ export class UserInterface implements ui_constants.UiApi {
    */
   private syncNetwork_ = (networkMsg :social.NetworkMessage) => {
     var existingNetwork = this.model.getNetwork(networkMsg.name, networkMsg.userId);
+    var displayName = this.getNetworkDisplayName(networkMsg.name);
 
     if (networkMsg.online) {
       if (!existingNetwork) {
@@ -749,7 +843,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
-            (networkMsg.name === 'Google' || networkMsg.name === 'Facebook') &&
+            this.supportsReconnect_(networkMsg.name) &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect(networkMsg.name);
@@ -757,13 +851,19 @@ export class UserInterface implements ui_constants.UiApi {
           if (this.instanceGettingAccessFrom_) {
             this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
           }
-          this.showNotification(this.i18n_t("LOGGED_OUT", {network: networkMsg.name}));
+          this.showNotification(
+            this.i18n_t("LOGGED_OUT", { network: displayName }));
+
+          if (!this.model.onlineNetworks.length) {
+            this.view = ui_constants.View.SPLASH;
+          }
         }
       }
     }
 
     this.updateView_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private syncUserSelf_ = (payload :social.UserData) => {
@@ -818,12 +918,10 @@ export class UserInterface implements ui_constants.UiApi {
       var gettingState = payload.offeringInstances[i].localGettingFromRemote;
       var instanceId = payload.offeringInstances[i].instanceId;
       if (gettingState === social.GettingState.GETTING_ACCESS) {
-        this.instanceGettingAccessFrom_ = instanceId;
-        user.isSharingWithMe = true;
-        this.updateGettingStatusBar_();
+        this.startGettingInUiAndConfig(instanceId, payload.offeringInstances[i].activeEndpoint);
         break;
       } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
-        this. instanceTryingToGetAccessFrom = instanceId;
+        this.instanceTryingToGetAccessFrom = instanceId;
         this.updateGettingStatusBar_();
         break;
       }
@@ -884,11 +982,14 @@ export class UserInterface implements ui_constants.UiApi {
       // Ensure that the user is still attempting to reconnect (i.e. they
       // haven't clicked to stop reconnecting while we were waiting for the
       // ping response).
+      // TODO: this doesn't work quite right if the user is signed into multiple social networks
       if (this.model.reconnecting) {
         this.core.login({network: network, reconnect: true}).then(() => {
+          // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
           this.stopReconnect();
         }).catch((e) => {
           // Reconnect failed, give up.
+          // TODO: this may have only failed for 1 of multiple networks
           this.stopReconnect();
           this.showNotification(
               this.i18n_t("LOGGED_OUT", { network: network }));
@@ -975,8 +1076,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.updateGlobalSettings(state.globalSettings);
 
     // Maybe refactor this to be copyPasteState.
-    this.copyPasteState = state.copyPasteState.connectionState;
-    this.copyPastePendingEndpoint = state.copyPasteState.endpoint;
+    this.copyPasteState.updateFromConnectionState(state.copyPasteConnection);
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];
@@ -1003,11 +1103,12 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateView_();
     this.updateSharingStatusBar_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
     this.model.onlineNetworks.push({
-      name:   networkState.name,
+      name: networkState.name,
       userId: networkState.profile.userId,
       userName: networkState.profile.name,
       imageData: networkState.profile.imageData,
@@ -1042,6 +1143,40 @@ export class UserInterface implements ui_constants.UiApi {
 
   private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
     this.portControlSupport = support;
+  }
+
+  public getNetworkDisplayName = (networkName :string) : string => {
+    return this.getProperty_<string>(networkName, 'displayName') || networkName;
+  }
+
+  private supportsReconnect_ = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'supportsReconnect') || false;
+  }
+
+  public supportsInvites = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'supportsInvites') || false;
+  }
+
+  public isExperimentalNetwork = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'isExperimental') || false;
+  }
+
+  private getProperty_ = <T>(networkName :string, propertyName :string) : T => {
+    if (NETWORK_OPTIONS[networkName]) {
+      return (<any>(NETWORK_OPTIONS[networkName]))[propertyName];
+    }
+    return undefined;
+  }
+
+  private updateShowInviteControls_ = () => {
+    var showControls = false;
+    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
+      if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
+        showControls = true;
+        break;
+      }
+    }
+    this.showInviteControls = showControls;
   }
 
   // this takes care of updating the view (given the assumuption that we are

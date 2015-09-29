@@ -31,26 +31,10 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import globals = require('./globals');
 import storage = globals.storage;
-
+import freedom_social2 = require('../interfaces/social2');
 import ui = ui_connector.connector;
-
-  export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
-    'Google': {
-      isFirebase: false,
-      enableMonitoring: true,
-      areAllContactsUproxy: false
-    },
-    'Facebook': {
-      isFirebase: true,
-      enableMonitoring: true,
-      areAllContactsUproxy: true
-    },
-    'Google+': {
-      isFirebase: true,
-      enableMonitoring: true,
-      areAllContactsUproxy: false
-    }
-  }
+import network_options = require('../generic/network-options');
+var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
   var log :logging.Log = new logging.Log('social');
 
@@ -83,7 +67,8 @@ import ui = ui_connector.connector;
     for (var dependency in freedom) {
       if (freedom.hasOwnProperty(dependency)) {
         if (dependency.indexOf(PREFIX) !== 0 ||
-            'social' !== freedom[dependency].api) {
+            ('social' !== freedom[dependency].api &&
+             'social2' !== freedom[dependency].api)) {
           continue;
         }
 
@@ -255,6 +240,18 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
+    public addUserRequest = (networkData :string): Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+
+    public getInviteUrl = () : Promise<string> => {
+      throw new Error('Operation not implemented');
+    }
+
+    public sendEmail = (to: string, subject: string, body: string) : void => {
+      throw new Error('Operation not implemented'); 
+    }
+
     public getNetworkState = () :social.NetworkState => {
       throw new Error('Operation not implemented');
     }
@@ -275,7 +272,7 @@ export function notifyUI(networkName :string, userId :string) {
   // events are passed on to the relevant user (provided the user exists).
   export class FreedomNetwork extends AbstractNetwork {
 
-    private freedomApi_ :freedom.Social.Social;
+    private freedomApi_ :freedom_social2.FreedomSocialProvider;
     // TODO: give real typing to provider_. Ask Freedom not to use overloaded
     // types.
     private provider_ :any;  // Special freedom object which is both a function
@@ -552,6 +549,31 @@ export function notifyUI(networkName :string, userId :string) {
         return Promise.reject(e);
       });
     }
+
+    public addUserRequest = (networkData :string): Promise<void> => {
+      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
+      });
+    }
+
+    public getInviteUrl = () : Promise<string> => {
+      return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
+        var tokenObj = {
+          v: 1,  // version, using short-hand 'v' to keep the URL shorter
+          networkName: this.name,
+          userName: this.myInstance.userName,
+          networkData: data.networkData
+        };
+        return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
+      })
+    }
+
+    public sendEmail = (to: string, subject: string, body: string): void => {
+      this.freedomApi_.sendEmail(to, subject, body).catch((e :Error) => {
+        log.error('Error sending email', e);
+      });
+    }
+
 
     /**
      * Promise the sending of |msg| to a client with id |clientId|.

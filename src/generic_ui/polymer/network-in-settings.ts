@@ -30,6 +30,7 @@ Polymer({
   },
   ready: function() {
     this.model = model;
+    this.displayName = ui.getNetworkDisplayName(this.name);
   },
   observe: {
     'model.onlineNetworks': 'updateSignedIn'

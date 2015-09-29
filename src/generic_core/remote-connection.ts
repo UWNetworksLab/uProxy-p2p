@@ -359,12 +359,13 @@ var generateProxyingSessionId_ = (): string => {
       this.sendUpdate_(uproxy_core_api.Update.STATE, this.getCurrentState());
     }
 
-    public getCurrentState = () => {
+    public getCurrentState = () :uproxy_core_api.ConnectionState => {
       return {
         bytesSent: this.bytesSent_,
         bytesReceived: this.bytesReceived_,
         localGettingFromRemote: this.localGettingFromRemote,
-        localSharingWithRemote: this.localSharingWithRemote
+        localSharingWithRemote: this.localSharingWithRemote,
+        activeEndpoint: this.activeEndpoint,
       };
     }
 

@@ -373,19 +373,27 @@
   },
   "WELCOME_MESSAGE": {
     "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately.",
-    "message": "To get started, choose \"Get access\" or \"Share access\" and then click on a friend to connect."
+    "message": "uProxy allows you to get access from your friends, share access with them or do both at once! To get started, choose \"Get access\" or \"Share access.\""
+  },
+  "CONNECT_TO_FRIEND": {
+    "description": "Title above instructions that tell the user how to add a uProxy friend.",
+    "message": "Connect to a friend"
+  },
+  "CONNECT_TO_FRIEND_MESSAGE": {
+    "description": "Instructions that appears beside a big '+' button. Clicking the button opens a panel with options to add a uProxy friend.",
+    "message": "Use this button to send an invitation to a friend or paste an invitation you've received."
   },
   "ALPHA_MESSAGE": {
     "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development.",
-    "message": "This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely."
+    "message": "This is an alpha release of uProxy, and it may occasionally be unreliable."
   },
-  "MORE_INFORMATION": {
+  "MORE_ABOUT_METRICS": {
     "description": "",
-    "message": "More information."
+    "message": "Learn more about anonymous metrics"
   },
   "CHANGE_STATS_CHOICE": {
     "description": "Informs the user that they can opt in and out of sending anonymous statistics at any time they choose, from the Settings menu.",
-    "message": "You can change your choice at any time, from the Settings menu."
+    "message": "You can help us make uProxy better by sharing anonymous metrics. All data is anonymized by the client and transmitted securely."
   },
   "ENABLE_METRICS": {
     "description": "Asks the user if they want to send anonymous metrics about their uProxy usage.",
@@ -734,5 +742,85 @@
   "LEARN_MORE": {
     "description": "Generic label for links to FAQ.",
     "message": "Learn more"
+  },
+  "FRIEND_ADDED": {
+    "description": "Confirmation message after adding a friend to the roster.",
+    "message": "Friend added"
+  },
+  "FRIEND_ADD_ERROR": {
+    "description": "Error message when a friend cannot be added to the roster.",
+    "message": "There was an error adding your friend."
+  },
+  "INVITE_EMAIL_SENT": {
+    "description": "Confirmation message after an invite email has been sent",
+    "message": "Invitation email sent."
+  },
+  "ENTER_INVITATION": {
+    "description": "Title for screen where user enters an invitation",
+    "message": "Enter an invitation"
+  },
+  "ENTER_INVITATION_DESCRIPTION": {
+    "description": "Instructions for user to enter an invitation",
+    "message": "If you've received an invitation from a friend you'd like to use uProxy with, paste it here:"
+  },
+  "SUBMIT_BUTTON_TEXT": {
+    "description": "Button that submits some data entered by the user, e.g. entering a friend invite",
+    "message": "Submit"
+  },
+  "INVITE_LINK_FROM_ACCEPT_PAGE": {
+    "description": "Link to send an invite if the user is already on the accept-invite page.",
+    "message": "I'd like to send an invitation instead."
+  },
+  "INVITE_A_FRIEND": {
+    "description": "Title for screen where user invites a friend to uProxy",
+    "message": "Invite a friend"
+  },
+  "HOW_TO_INVITE_FRIENDS": {
+    "description": "Question above network select dropdown on invite screen",
+    "message": "How would you like to invite to your friends?"
+  },
+  "FACEBOOK_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for Facebook",
+    "message": "Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list."
+  },
+  "GMAIL_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for GMail",
+    "message": "Enter your friend's email address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list."
+  },
+  "SEND_INVITATION": {
+    "description": "Button text to initiate sending an invitation",
+    "message": "Send invitation"
+  },
+  "ACCEPT_LINK_FROM_INVITE_PAGE": {
+    "description": "Link to accept an invite if the user is already on the send an invite page",
+    "message": "I'd like to enter an invitation instead."
+  },
+  "ACCEPT_INVITE_CONFIRMATION": {
+    "description": "Confirmation message when accepting an invite.",
+    "message": "Would you like to add __name__?"
+  },
+  "LOGIN_REQUIRED_TITLE": {
+    "description": "Title for confirmation that the user must login to a network to accept an invitation",
+    "message": "Login Required"
+  },
+  "LOGIN_REQUIRED_MESSAGE": {
+    "description": "Message for confirmation that the user must login to a network to accept an invitation",
+    "message": "To accept this invitation from __name__, you will need to connect to uProxy with __network__.  Click yes to continue."
+  },
+  "INVITE_URL_ERROR": {
+    "description": "Error message shown for invalid invite URLs",
+    "message": "There was an error with your invite URL."
+  },
+  "INVITE_EMAIL_SUBJECT": {
+    "description": "Default email subject for sending an uProxy invite",
+    "message": "Invitation to connect with __name__ on uProxy"
+  },
+  "INVITE_EMAIL_BODY": {
+    "description": "Default email body for sending an uProxy invite",
+    "message": "__name__ has invited you to connect with them on uProxy. To do so, click on the invitation link below or paste it into uProxy.<br><br>__url__<br><br>If you don’t have uProxy installed, you can get it from <a href='uproxy.org'>uproxy.org</a> or directly from the Chrome webstore (<a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>part 1</a> and <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>part 2</a>) and Firefox Marketplace (<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'>here</a>)."
+  },
+  "GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION": {
+    "description": "",
+    "message": "<h2>We've made big changes to how uProxy works with social networks!</h2><ul><li><strong>We've introduced a new Gmail network</strong> that allows you to connect with anyone who has a Gmail account. Use the the button in the lower right of the buddy list to send them an invitation.</li><li><strong>The \"Google\" network is now called Google Hangouts.</strong> Because Google is removing technology we rely on, our support for this network will be removed.</li><li><strong>Facebook contacts are now added by invitation.</strong> You can invite friends using the button at the lower right of the contact list, and only friends you've invited will be able to tell you're using uProxy. To make this change, we've had to reset your friend list, so you'll have to invite friends you want to connect to.</li></ul><p>Please send feedback about these changes using the feedback link in the menu or by emailing info@uProxy.org</p>"
   }
 }

@@ -15,7 +15,7 @@ import storage = globals.storage;
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
-import version = require('../version/version');
+import version = require('../generic/version');
 import StoredValue = require('./stored_value');
 import _ = require('lodash');
 
@@ -70,8 +70,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       var logins :Promise<void>[] = [];
 
       for (var i in networks) {
+        var networkName = networks[i]
+        if (!(networkName in social_network.networks)) {
+          // Network may have been removed, e.g. old "Facebook" network is now
+          // "Facebook-Firebase-V2".
+          continue;
+        }
         logins.push(this.login({
-          network: networks[i],
+          network: networkName,
           reconnect: true,
         }).catch(() => {
           // any failure to login should just be ignored - the user will either
@@ -226,18 +232,23 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       globals.settings.consoleFilter);
     globals.settings.language = newSettings.language;
     globals.settings.force_message_version = newSettings.force_message_version;
+    globals.settings.hasSeenGoogleAndFacebookChangedNotification =
+        newSettings.hasSeenGoogleAndFacebookChangedNotification;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
     return globals.loadSettings.then(() => {
+      var copyPasteConnectionState = copyPasteConnection.getCurrentState();
+
       return {
         networkNames: Object.keys(social_network.networks),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,
+        copyPasteConnection: copyPasteConnectionState,
         copyPasteState: {
-          connectionState: copyPasteConnection.getCurrentState(),
-          endpoint: copyPasteConnection.activeEndpoint
+          connectionState: copyPasteConnectionState,
+          endpoint: copyPasteConnectionState.activeEndpoint,
         },
         portControlSupport: this.portControlSupport_,
       };
@@ -262,7 +273,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   // Resets the copy/paste signal batcher.
-  // TODO: enable compression
   private resetBatcher_ = () : void => {
     this.batcher_ = new onetime.SignalBatcher<social.PeerMessage>((signal:string) => {
       ui.update(uproxy_core_api.Update.ONETIME_MESSAGE, signal);
@@ -273,7 +283,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       // returns true.
       return signal.data && (<any>signal.data).signals &&
         bridge.isTerminatingSignal(<bridge.SignallingMessage>signal.data);
-    }, false);
+    }, true);
   }
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
@@ -297,6 +307,40 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public sendCopyPasteSignal = (signal:string) => {
     var decodedSignals = <social.PeerMessage[]>onetime.decode(signal);
     decodedSignals.forEach(copyPasteConnection.handleSignal);
+  }
+
+  public addUser = (inviteUrl: string): Promise<void> => {
+    try {
+      // inviteUrl may be a URL with a token, or just the token.  Remove the
+      // prefixed URL if it is set.
+      var token = inviteUrl.lastIndexOf('/') >= 0 ?
+          inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
+      var tokenObj = JSON.parse(atob(token));
+      var networkName = tokenObj.networkName;
+      var networkData = tokenObj.networkData;
+      if (!social_network.networks[networkName]) {
+        return Promise.reject('invite URL had invalid social network');
+      }
+    } catch (e) {
+      return Promise.reject('Error parsing invite URL');
+    }
+
+    // This code assumes the user is only signed in once to any given network.
+    for (var userId in social_network.networks[networkName]) {
+      return social_network.networks[networkName][userId]
+          .addUserRequest(networkData);
+    }
+  }
+
+  public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    return network.getInviteUrl();
+  }
+
+  public sendEmail = (data :uproxy_core_api.EmailData) : void => {
+    var networkInfo = data.networkInfo;
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    network.sendEmail(data.to, data.subject, data.body);
   }
 
   /**
