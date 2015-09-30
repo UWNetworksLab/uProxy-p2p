@@ -5,5 +5,3 @@ export var SHARING_ICON = 'sharing.png';
 export var GETTING_ICON = 'getting.png';
 export var ERROR_ICON = 'error.png';
 export var GETTING_SHARING_ICON = 'gettingandsharing.png';
-
-export var DEFAULT_USER_IMG = '../icons/contact-default.png';

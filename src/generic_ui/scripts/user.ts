@@ -106,7 +106,7 @@ export class User implements social.BaseUser {
     }
 
     this.name = profile.name;
-    this.imageData = profile.imageData || Constants.DEFAULT_USER_IMG;
+    this.imageData = profile.imageData;
     this.url = profile.url;
 
     // iterate backwards to allow removing elements
