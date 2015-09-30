@@ -1,9 +1,10 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
-import logging = require('../../logging/logging');
-import loggingTypes = require('../../loggingprovider/loggingprovider.types');
-import peerconnection = require('../../webrtc/peerconnection');
-import signals = require('../../webrtc/signals');
+import churn = require('../churn/churn');
+import logging = require('../logging/logging');
+import loggingTypes = require('../loggingprovider/loggingprovider.types');
+import peerconnection = require('../webrtc/peerconnection');
+import signals = require('../webrtc/signals');
 
 export var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(
@@ -44,7 +45,13 @@ function makePeerConnection(name:string)
       urls: ['stun:stun.l.google.com:19302']},
       {urls: ['stun:stun1.l.google.com:19302']}]
   };
+
   var pc = peerconnection.createPeerConnection(config, name);
+
+  // Replace the preceding statement with this in order to use obfuscation.
+  // var pc = new churn.Connection(
+  //     freedom['core.rtcpeerconnection'](config), name);
+
   pc.onceConnected.then(() => {
     log.info('%1: connected', name);
   }, (e:Error) => {
