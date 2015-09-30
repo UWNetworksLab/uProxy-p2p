@@ -295,7 +295,7 @@ export interface Network {
 
   /**
    * Ask the social network to add the user.
-   * Required for versions 0.8.22 and below
+   * Required for version 0.8.23
    */
   addUserRequest: (networkData :string) => Promise<void>;
 

@@ -92,7 +92,7 @@ ui_connector.onPromiseCommand(
     uproxy_core_api.Command.SEND_INVITATION,
     core.inviteUser);
 
-// Required for versions 0.8.22 and below
+// Required for version 0.8.23
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.ADD_USER,
     core.addUser);

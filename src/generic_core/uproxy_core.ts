@@ -309,7 +309,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  // Required for versions 0.8.22 and below 
+  // Required for version 0.8.23
   public addUser = (inviteUrl: string): Promise<void> => {
     try {
       // inviteUrl may be a URL with a token, or just the token.  Remove the

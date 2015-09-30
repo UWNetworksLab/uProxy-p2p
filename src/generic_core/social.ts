@@ -244,7 +244,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    // Required for versions 0.8.22 and below
+    // Required for version 0.8.23
     public addUserRequest = (networkData :string): Promise<void> => {
       throw new Error('Operation not implemented');
     }
@@ -560,7 +560,7 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    // Required for versions 0.8.22 and below
+    // Required for version 0.8.23
     public addUserRequest = (networkData :string): Promise<void> => {
       return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
