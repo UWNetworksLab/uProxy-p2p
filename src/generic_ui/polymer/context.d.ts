@@ -11,13 +11,13 @@ interface UiGlobals {
   //   generic_ui/scripts/core_connector.ts
   core: any;
 
-  //
+  // Corresponds to generic_ui/scripts/ui.ts class: Model
   model :any;
 
-  //
+  // Corresponds to interfaces/browser_api.ts Interface: BrowserAPI
   browserApi :any;
 
-  //
+  // Corresponds to interfaces/browser_connector.ts Interface: CoreBrowserConnector
   browserConnector :any
 }
 
