@@ -205,6 +205,11 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
+  inviteUser = (data: { networkId: string; userName: string }): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.SEND_INVITATION, data);
+  }
+
+  // Required for version 0.8.23
   addUser = (inviteUrl: string): Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.ADD_USER, inviteUrl);
   }
@@ -243,6 +248,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
 
   getVersion = () :Promise<{ version :string }> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
+  }
+
+  acceptInvitation = (obj: { network: social.SocialNetworkInfo; data: string }) : Promise<void>=> {
+    return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, obj);
   }
 }  // class CoreConnector
 

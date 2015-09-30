@@ -534,13 +534,21 @@ export class UserInterface implements ui_constants.UiApi {
       var token = url.substr(url.lastIndexOf('/') + 1);
       var tokenObj = JSON.parse(atob(token));
       var userName = tokenObj.userName;
+      var networkName = tokenObj.networkName;
+      var networkData = tokenObj.networkData;
+      var userId = JSON.parse(networkData)['userId'];
     } catch(e) {
       return Promise.reject('Error parsing invite URL');
     }
+
     var confirmationMessage =
         this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
     return this.getConfirmation('', confirmationMessage).then(() => {
-      return this.core.addUser(url);
+      var socialNetworkInfo :social.SocialNetworkInfo = {
+        name: networkName,
+        userId: "" /* The current user's ID will be determined by the core. */
+      };
+      return this.core.acceptInvitation({network: socialNetworkInfo, data: userId});
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
       return;

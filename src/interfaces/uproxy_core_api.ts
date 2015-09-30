@@ -97,9 +97,11 @@ export enum Command {
   HANDLE_CORE_UPDATE = 1021,
   REFRESH_PORT_CONTROL = 1022,
   CREDENTIALS_ERROR = 1023,
-  ADD_USER = 1024,
+  ADD_USER = 1024, /* Deprecated as of 0.8.23 */
   GET_INVITE_URL = 1025,
-  SEND_EMAIL = 1026
+  SEND_EMAIL = 1026,
+  ACCEPT_INVITATION = 1027,
+  SEND_INVITATION = 1028
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
