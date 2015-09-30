@@ -26,7 +26,7 @@ To manage dependencies we use:
 
 Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit) to learn more about contributing to uProxy.
 
-### Pre-Requirements to build uProxy
+### Prerequisites to build uProxy
 
 Note: you will either need to run these as root, or set the directories they
 modify (`/usr/local`) to being editable by your user (`sudo chown -R $USER /usr/local`)
