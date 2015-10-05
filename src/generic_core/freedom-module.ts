@@ -140,6 +140,7 @@ ui_connector.onPromiseCommand(uproxy_core_api.Command.GET_VERSION,
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
     globals.metrics, globals.storage, core.getNetworkInfoObj,
     (payload :any) => {
+      console.error('got report payload: ' + JSON.stringify(payload));
       if (globals.settings.statsReportingEnabled) {
         ui_connector.update(
             uproxy_core_api.Update.POST_TO_CLOUDFRONT,

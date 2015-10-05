@@ -21,12 +21,12 @@ export class Metrics {
 
   constructor(private storage_ :storage.Storage) {
     var counterMetric = {
-      type: 'logarithmic', base: 2, num_bloombits: 8, num_hashes: 2,
+      type: 'logarithmic', base: 2, num_bloombits: 16, num_hashes: 2,
       num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
     var natMetric = {
-      type: 'string', num_bloombits: 8, num_hashes: 2,
+      type: 'string', num_bloombits: 16, num_hashes: 2,
       num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
@@ -64,13 +64,6 @@ export class Metrics {
   }
 
   public getReport = (natInfo:uproxy_core_api.NetworkInfo) :Promise<Object> => {
-    try {
-      crypto.randomUint32();
-    } catch (e) {
-      return Promise.reject(new Error(
-          'Unable to getReport, crypto.randomUint32 not available'));
-    }
-
     if (natInfo.errorMsg) {
       return Promise.reject(new Error('getNetworkInfo() failed.'));
     }
@@ -93,6 +86,7 @@ export class Metrics {
 
       return Promise.all([successReport, failureReport, natTypeReport,
                           pmpReport, pcpReport, upnpReport]).then(() => {
+          console.error('calling retrieve');
         return this.metricsProvider_.retrieve();
       });
     });
@@ -119,7 +113,8 @@ export interface DailyMetricsReporterData {
 
 export class DailyMetricsReporter {
   // 5 days in milliseconds.
-  public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;
+  // public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;  // TODO: use this
+  public static MAX_TIMEOUT = 5000;
 
   public onceLoaded_ :Promise<void>;  // Only public for tests
 

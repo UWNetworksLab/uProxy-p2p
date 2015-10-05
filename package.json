@@ -33,7 +33,7 @@
     "freedom-social-xmpp": "^0.4.0",
     "freedom-social-github": "^0.1.3",
     "freedom-social-wechat": "^0.1.5",
-    "freedomjs-anonymized-metrics": "~0.1.0",
+    "freedomjs-anonymized-metrics": "~0.3.0",
     "fs-extra": "^0.12.0",
     "grunt": "^0.4.2",
     "grunt-browserify": "^3.3.1",
