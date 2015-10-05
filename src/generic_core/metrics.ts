@@ -21,12 +21,12 @@ export class Metrics {
 
   constructor(private storage_ :storage.Storage) {
     var counterMetric = {
-      type: 'logarithmic', base: 2, num_bloombits: 16, num_hashes: 2,
+      type: 'logarithmic', base: 2, num_bloombits: 8, num_hashes: 2,
       num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
     var natMetric = {
-      type: 'string', num_bloombits: 16, num_hashes: 2,
+      type: 'string', num_bloombits: 8, num_hashes: 2,
       num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };

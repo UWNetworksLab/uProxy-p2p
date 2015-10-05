@@ -141,11 +141,11 @@ var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
     globals.metrics, globals.storage, core.getNetworkInfoObj,
     (payload :any) => {
       console.error('got report payload: ' + JSON.stringify(payload));
-      if (globals.settings.statsReportingEnabled) {
-        ui_connector.update(
-            uproxy_core_api.Update.POST_TO_CLOUDFRONT,
-            {payload: payload, cloudfrontPath: 'submit-rappor-stats'});
-      }
+      // if (globals.settings.statsReportingEnabled) {
+      //   ui_connector.update(
+      //       uproxy_core_api.Update.POST_TO_CLOUDFRONT,
+      //       {payload: payload, cloudfrontPath: 'submit-rappor-stats'});
+      // }
     });
 
 ui_connector.onPromiseCommand(
