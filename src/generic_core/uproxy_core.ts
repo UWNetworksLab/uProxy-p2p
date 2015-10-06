@@ -130,7 +130,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       this.pendingNetworks_[networkName] = network;
     }
 
-    return network.login(loginArgs.reconnect).then(() => {
+    return network.login(loginArgs.reconnect, loginArgs.userId).then(() => {
       delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,

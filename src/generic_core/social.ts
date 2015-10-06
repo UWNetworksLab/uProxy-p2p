@@ -229,7 +229,7 @@ export function notifyUI(networkName :string, userId :string) {
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
-    public login = (reconnect :boolean) :Promise<void> => {
+    public login = (reconnect :boolean, userId?:string) :Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
@@ -473,7 +473,7 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (reconnect :boolean) : Promise<void> => {
+    public login = (reconnect :boolean, userId ?:string) : Promise<void> => {
       var request :freedom.Social.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
@@ -491,9 +491,10 @@ export function notifyUI(networkName :string, userId :string) {
         // Firebase code to change disconnected clients to OFFLINE, rather
         // than removing them.
         var agent = 'uproxy' + Math.random().toString().substr(2,10);
+        // TODO: remove this crazy hack of passing userId in the version
         request = {
           agent: agent,
-          version: '0.1',
+          version: JSON.stringify({userId: userId}),
           url: 'https://popping-heat-4874.firebaseio.com/',
           interactive: !reconnect,
           rememberLogin: !reconnect
@@ -714,7 +715,7 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (reconnect :boolean) : Promise<void> => {
+    public login = (reconnect :boolean, userId ?:string) : Promise<void> => {
       return Promise.resolve<void>();
     }
 

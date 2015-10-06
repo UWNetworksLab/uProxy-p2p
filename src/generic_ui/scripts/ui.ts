@@ -959,8 +959,12 @@ export class UserInterface implements ui_constants.UiApi {
     this.browserApi.bringUproxyToFront();
   }
 
-  public login = (network :string) : Promise<void> => {
-    return this.core.login({ network : network, reconnect: false }).then(() => {
+  public login = (network :string, userId ?:string) : Promise<void> => {
+    return this.core.login({
+        network: network,
+        reconnect: false,
+        userId: userId
+    }).then(() => {
       this.browserApi.hasInstalledThenLoggedIn = true;
     }).catch((e :Error) => {
       this.showNotification(this.i18n_t("ERROR_SIGNING_IN", {network: network}));
@@ -991,6 +995,7 @@ export class UserInterface implements ui_constants.UiApi {
       // haven't clicked to stop reconnecting while we were waiting for the
       // ping response).
       // TODO: this doesn't work quite right if the user is signed into multiple social networks
+      // FIXME: Preserve display name for Quiver
       if (this.model.reconnecting) {
         this.core.login({network: network, reconnect: true}).then(() => {
           // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks

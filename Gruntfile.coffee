@@ -149,6 +149,7 @@ gruntConfig = {
     freedomfirebase: readJSONFile('node_modules/freedom-social-firebase/package.json')
     freedomGitHub: readJSONFile('node_modules/freedom-social-github/package.json')
     freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
+    freedomquiver: readJSONFile('node_modules/freedom-social-quiver/package.json')
 
   clean: ['build/dev', 'build/dist', '.tscache']
 
@@ -314,6 +315,7 @@ gruntConfig = {
             'freedom-social-firebase/firebase-social-provider.js'
             'freedom-social-firebase/facebook-social-provider.js'
             'freedom-social-firebase/google-social-provider.js'
+            'freedom-social-quiver/socketio.quiver.js'
             'freedom-social-firebase/google-auth.js'
             'freedom-port-control/port-control.js'
             'freedom-port-control/port-control.json'
@@ -367,6 +369,7 @@ gruntConfig = {
             'data/freedom-social-firebase/google-social-provider.js'
             'data/freedom-social-firebase/google-auth.js'
             'data/freedom-social-wechat/social.wechat.json'
+            'data/freedom-social-quiver/socketio.quiver.js'
             'data/freedom-port-control/port-control.js'
             'data/freedom-port-control/port-control.json'
             'data/freedom-pgp-e2e/end-to-end.compiled.js'
@@ -447,6 +450,7 @@ gruntConfig = {
             'freedom-social-firebase/firebase-social-provider.js'
             'freedom-social-firebase/facebook-social-provider.js'
             'freedom-social-wechat/social.wechat.json'
+            'freedom-social-quiver/socketio.quiver.js'
             'freedom-port-control/port-control.js'
             'freedom-port-control/port-control.json'
 
@@ -548,6 +552,11 @@ gruntConfig = {
             dest: chromeAppDevPath + '/freedom-social-wechat'
           },
           {
+            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
+            src: ['**']
+            dest: chromeAppDevPath + '/freedom-social-quiver'
+          },
+          {
             expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
             src: ['**']
             dest: chromeAppDevPath + '/freedom-pgp-e2e'
@@ -625,6 +634,11 @@ gruntConfig = {
             dest: firefoxDevPath + '/data/freedom-social-wechat'
           },
           {
+            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
+            src: ['**']
+            dest: firefoxDevPath + '/data/freedom-social-quiver'
+          },
+          {
             expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
             src: ['**']
             dest: firefoxDevPath + '/data/freedom-pgp-e2e'
@@ -694,6 +708,11 @@ gruntConfig = {
             dest: ccaDevPath + '/freedom-social-wechat'
           },
           {
+            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
+            src: ['**']
+            dest: ccaDevPath + '/freedom-social-quiver'
+          },
+          {
             expand: true, cwd: 'node_modules/freedom-port-control/dist/',
             src: ['**']
             dest: ccaDevPath + '/freedom-port-control'
@@ -753,6 +772,7 @@ gruntConfig = {
             'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
             'freedom-social-github': '<%= pkgs.freedomGitHub.version %>'
             'freedom-social-wechat': '<%= pkgs.freedomwechat.version %>'
+            'freedom-social-quiver': '<%= pkgs.freedomquiver.version %>'
         }]
     chromeExtVulcanized:
       finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized')
