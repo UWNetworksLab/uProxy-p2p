@@ -82,7 +82,8 @@ function get_firefox () {
 RUN echo BROWSER=firefox >/etc/test.conf
 RUN npm install jpm -g
 RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 -np -nd -A '$PATTERN' $URL
-RUN cd /usr/share ; tar xf /tmp/ff/*.bz2
+# Sometimes there are >1 versions in the folder, e.g. following a release.
+RUN cd /usr/share ; ls /tmp/ff/*.bz2|sort|tail -1|xargs tar xf
 RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
 EOF
 
