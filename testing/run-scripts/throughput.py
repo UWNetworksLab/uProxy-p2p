@@ -11,6 +11,7 @@ import urllib.parse
 FLOOD_SIZE_MB = 32
 FLOOD_MAX_SPEED_MB = 5
 
+# https://github.com/uProxy/uproxy-docker/pull/26
 LATENCY_MS = 150
 
 parser = argparse.ArgumentParser(
