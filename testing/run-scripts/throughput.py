@@ -8,7 +8,7 @@ import sys
 import time
 import urllib.parse
 
-FLOOD_SIZE_MB = 64
+FLOOD_SIZE_MB = 32
 FLOOD_MAX_SPEED_MB = 5
 
 LATENCY_MS = 150
