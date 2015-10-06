@@ -11,6 +11,8 @@ import urllib.parse
 FLOOD_SIZE_MB = 64
 FLOOD_MAX_SPEED_MB = 5
 
+LATENCY_MS = 150
+
 parser = argparse.ArgumentParser(
     description='Measure SOCKS proxy throughput across browser versions.')
 parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
@@ -34,7 +36,10 @@ for browser in browsers:
     try:
       spec = browser + '-' + version
       # Start the relevant config.
-      subprocess.call(['./run_pair.sh', '-p', args.clone_path, spec, spec],
+      subprocess.call(['./run_pair.sh',
+          '-p', args.clone_path,
+          '-l', str(LATENCY_MS),
+          spec, spec],
           timeout=15)
 
       # time.time is good for Unix-like systems.
