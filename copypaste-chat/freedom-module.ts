@@ -72,10 +72,7 @@ export var connectDataChannel = (channel:peerconnection.DataChannel) => {
 // This runs on the initiating peer's (getter's) side.
 parentFreedomModule.on('start', () => {
   pc.negotiateConnection().then(() => {
-    return pc.openDataChannel('text').then(
-        (channel:peerconnection.DataChannel) => {
-      connectDataChannel(channel);
-    });
+    return pc.openDataChannel('text').then(connectDataChannel);
   }, (e:Error) => {
     log.error('could not establish connection: %1', e.message);
     parentFreedomModule.emit('error', {});
@@ -83,10 +80,7 @@ parentFreedomModule.on('start', () => {
 });
 
 // This fires on the non-initiating peer's (giver's) side.
-pc.peerOpenedChannelQueue.setSyncHandler(
-    (channel:peerconnection.DataChannel) => {
-  connectDataChannel(channel);
-});
+pc.peerOpenedChannelQueue.setSyncHandler(connectDataChannel);
 
 pc.onceConnected.then(() => {
   log.info('peerconnection established!');
