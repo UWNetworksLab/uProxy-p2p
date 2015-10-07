@@ -7,3 +7,4 @@ install:
   - ./setup.sh install
 script:
   - grunt test
+sudo: false
