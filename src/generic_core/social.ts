@@ -491,11 +491,19 @@ export function notifyUI(networkName :string, userId :string) {
         // Firebase code to change disconnected clients to OFFLINE, rather
         // than removing them.
         var agent = 'uproxy' + Math.random().toString().substr(2,10);
-        // TODO: remove this crazy hack of passing userId in the version
         request = {
           agent: agent,
-          version: JSON.stringify({userId: userId}),
+          version: '0.1',
           url: 'https://popping-heat-4874.firebaseio.com/',
+          interactive: !reconnect,
+          rememberLogin: !reconnect
+        };
+      } else if (this.name === 'Quiver') {
+        // TODO: remove this crazy hack of passing userId in the version
+        request = {
+          agent: 'uproxy',
+          version: JSON.stringify({userId: userId}),
+          url: 'https://github.com/uProxy/uProxy',
           interactive: !reconnect,
           rememberLogin: !reconnect
         };
