@@ -18,7 +18,7 @@ freedom(manifest, {
     width: 800,
     height: 400,
     contentURL: self.data.url("main.html")
-  })
+  });
 
   var button = buttons.ActionButton({
     id: "chat-button",
@@ -53,7 +53,7 @@ freedom(manifest, {
   uiSignalNames.forEach(function(signalName) {
     panel.port.on(signalName, function(data) {
       module.emit(signalName, data);
-    })
+    });
   });
 }, function(e) {
   console.error('could not load freedom module: ' + e.message);

@@ -14,11 +14,11 @@ declare var loadModule:() => Promise<freedom.OnAndEmit<any, any>>;
 loadModule().then((chat:freedom.OnAndEmit<any,any>) => {
   startButton.onclick = () => {
     chat.emit('start', {});
-  }
+  };
 
   sendButton.onclick = () => {
     chat.emit('send', sendArea.value);
-  }
+  };
 
   // Dispatches each line from the paste box as a signalling channel message.
   receiveButton.onclick = () => {
@@ -27,7 +27,7 @@ loadModule().then((chat:freedom.OnAndEmit<any,any>) => {
       chat.emit('handleSignalMessage', signal);
     });
     pasteTextarea.disabled = true;
-  }
+  };
 
   chat.on('signalForPeer', (signal:string) => {
     copyTextarea.value = copyTextarea.value.trim() + '\n' + signal;
