@@ -1,9 +1,9 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
+import churn = require('../churn/churn');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import peerconnection = require('../webrtc/peerconnection');
-import signals = require('../webrtc/signals');
 
 var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
@@ -23,10 +23,17 @@ var config :freedom.RTCPeerConnection.RTCConfiguration = {
   ]
 };
 
-var pc = peerconnection.createPeerConnection(config);
+// var pc = peerconnection.createPeerConnection(config);
+
+// Replace the preceding statement with this in order to use obfuscation.
+// Note that ICE candidates will appear immediately on each peer, before
+// either presses Start.
+var pc = new churn.Connection(
+    freedom['core.rtcpeerconnection'](config),
+    'copypaste');
 
 // Forward signalling channel messages to the UI.
-pc.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
+pc.signalForPeerQueue.setSyncHandler((message:Object) => {
   parentFreedomModule.emit('signalForPeer', JSON.stringify(message));
 });
 
