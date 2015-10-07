@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "copypaste churn chat",
-  "description": "Copy paste-based obfuscating peerconnection chat demo.",
+  "name": "copypaste chat",
+  "description": "WebRTC chat with copy/paste-based signalling channel.",
   "version": "0.1",
   "minimum_chrome_version": "41.0.2267.0",
   "app": {

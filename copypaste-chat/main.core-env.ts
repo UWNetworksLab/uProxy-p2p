@@ -1,6 +1,6 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 
-import churn_types = require('../../churn/churn.types');
+import churn_types = require('../churn/churn.types');
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
@@ -15,14 +15,10 @@ var sendButton = document.getElementById("sendButton");
 var sendArea = <HTMLInputElement>document.getElementById("sendArea");
 var receiveArea = <HTMLInputElement>document.getElementById("receiveArea");
 
-export var copypasteChurnChat :OnEmitModule;
+// Platform-specific function to load the freedomjs module (glue.js).
+declare var loadModule: () => Promise<freedom.OnAndEmit<any, any>>;
 
-freedom('freedom-module.json', {
-    'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
-    'debug': 'debug'
-}).then(function(copypasteChurnChatFactory:OnEmitModuleFactory) {
-  copypasteChurnChat = copypasteChurnChatFactory();
-
+loadModule().then((copypasteChurnChat:freedom.OnAndEmit<any,any>) => {
   // Dispatches each line from the paste box as a signalling channel message.
   function handleSignallingMessages() {
     var signals = pasteTextarea.value.split('\n');

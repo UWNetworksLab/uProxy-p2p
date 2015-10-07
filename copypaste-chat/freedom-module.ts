@@ -1,30 +1,25 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
-import peerconnection = require('../../webrtc/peerconnection');
-import signals = require('../../webrtc/signals');
-import churn_types = require('../../churn/churn.types');
-import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
-import churn = require('../../churn/churn');
-
-import loggingTypes = require('../../loggingprovider/loggingprovider.types');
+import churn = require('../churn/churn');
+import logging = require('../logging/logging');
+import loggingTypes = require('../loggingprovider/loggingprovider.types');
+import peerconnection = require('../webrtc/peerconnection');
+import signals = require('../webrtc/signals');
 
 var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
                                    loggingTypes.Level.debug);
 
-import logging = require('../../logging/logging');
-var log :logging.Log = new logging.Log('copypaste churn chat');
+export var log :logging.Log = new logging.Log('copypaste chat');
 
 var config :freedom.RTCPeerConnection.RTCConfiguration = {
   iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                {urls: ['stun:stun1.l.google.com:19302']}]
 };
 
-var portControl = freedom['portControl']();
+var freedomParentModule = freedom();
 
-export var freedomPc = freedom['core.rtcpeerconnection'](config);
-export var pc = new churn.Connection(freedomPc, undefined, undefined, portControl);
-export var freedomParentModule = freedom();
+var pc = peerconnection.createPeerConnection(config);
 
 // Forward signalling channel messages to the UI.
 pc.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
@@ -34,7 +29,7 @@ pc.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
 });
 
 // Receive signalling channel messages from the UI.
-freedomParentModule.on('handleSignalMessage', (message:ChurnSignallingMessage) => {
+freedomParentModule.on('handleSignalMessage', (message:signals.Message) => {
   pc.handleSignalMessage(message);
 });
 
