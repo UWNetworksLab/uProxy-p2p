@@ -213,7 +213,6 @@ export class UserInterface implements ui_constants.UiApi {
       public core   :CoreConnector,
       public browserApi :BrowserAPI) {
     this.updateView_();
-    this.i18n_setLng(this.model.globalSettings.language);
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
     if (firefoxMatches) {
@@ -1079,7 +1078,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.networkNames = state.networkNames;
     this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
-      this.i18n_setLng(state.globalSettings.language);
+      this.updateLanguage(state.globalSettings.language);
     }
     this.model.updateGlobalSettings(state.globalSettings);
 
