@@ -1,6 +1,5 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
-import churn = require('../churn/churn');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import peerconnection = require('../webrtc/peerconnection');
@@ -44,21 +43,21 @@ parentFreedomModule.on('handleSignalMessage', (message:string) => {
 export var connectDataChannel = (channel:peerconnection.DataChannel) => {
   log.info('datachannel open!');
   // Send messages over the datachannel in response to events from the UI.
-	parentFreedomModule.on('send', (message:string) => {
+  parentFreedomModule.on('send', (message:string) => {
     channel.send({
       str: message
     }).catch((e:Error) => {
-			log.error('error sending message: %1', e.message);
-		});
-	});
+      log.error('error sending message: %1', e.message);
+    });
+  });
   // Forward messages received on the datachannel to the UI.
-	channel.dataFromPeerQueue.setSyncHandler((d:peerconnection.Data) => {
-		if (d.str === undefined) {
-			log.error('only text messages are supported');
-			return;
-		}
-		parentFreedomModule.emit('receive', d.str);
-	});
+  channel.dataFromPeerQueue.setSyncHandler((d:peerconnection.Data) => {
+    if (d.str === undefined) {
+      log.error('only text messages are supported');
+      return;
+    }
+    parentFreedomModule.emit('receive', d.str);
+  });
   parentFreedomModule.emit('ready', {});
 };
 
@@ -68,7 +67,7 @@ parentFreedomModule.on('start', () => {
   pc.negotiateConnection().then(() => {
     return pc.openDataChannel('text').then(
         (channel:peerconnection.DataChannel) => {
-  	  connectDataChannel(channel);
+      connectDataChannel(channel);
     });
   }, (e:Error) => {
     log.error('could not establish connection: %1', e.message);
