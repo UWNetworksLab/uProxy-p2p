@@ -23,14 +23,14 @@ var config :freedom.RTCPeerConnection.RTCConfiguration = {
   ]
 };
 
-// var pc = peerconnection.createPeerConnection(config);
+var pc = peerconnection.createPeerConnection(config);
 
 // Replace the preceding statement with this in order to use obfuscation.
 // Note that ICE candidates will appear immediately on each peer, before
 // either presses Start.
-var pc = new churn.Connection(
-    freedom['core.rtcpeerconnection'](config),
-    'copypaste');
+// var pc = new churn.Connection(
+//     freedom['core.rtcpeerconnection'](config),
+//     'copypaste');
 
 // Forward signalling channel messages to the UI.
 pc.signalForPeerQueue.setSyncHandler((message:Object) => {
