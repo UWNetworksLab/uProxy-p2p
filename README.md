@@ -59,7 +59,7 @@ modify (`/usr/local`) to being editable by your user (`sudo chown -R $USER /usr/
             - Open Control Panel > System and Security > System > Advanced System Settings
             - In the Advanced tab, click on "Environment Variables"
             - In System Variables, click on "Path" (or "PATH")
-            - At the end of the "Variable value:" string, append a ";" and the paths to your bin directory, e.g. "C:\Program Files\nodejs\node_modules\npm\lib;C:\Users\<YOUR_PATH>\AppData\Roaming\npm\node_modules\grunt-cli\bin"
+            - At the end of the "Variable value:" string, append a ";" and the path to your bin directory, e.g. "C:\Program Files\nodejs\node_modules\npm\lib;C:\Users\<YOUR_PATH>\AppData\Roaming\npm\node_modules\grunt-cli\bin"
 
 - [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
     - To install globally on Windows, open the command prompt as admin and then run the command
