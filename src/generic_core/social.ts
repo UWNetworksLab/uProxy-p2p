@@ -139,8 +139,8 @@ export function notifyUI(networkName :string, userId :string) {
 
   // Implements those portions of the Network interface for which the logic is
   // common to multiple Network implementations. Essentially an abstract base
-  // class for Network implementations, except that TypeScript does not allow
-  // abstract classes.
+  // class for Network implementations. TODO: with typescript 1.5, there are now
+  // abstract classes, use them?
   export class AbstractNetwork implements social.Network {
 
     public roster     :{[userId:string] :remote_user.User};
@@ -222,6 +222,10 @@ export function notifyUI(networkName :string, userId :string) {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
+    public inviteUser = (userName: string): Promise<void> => {
+      throw new Error("Operation not implemented.");
+    }
+
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
@@ -240,6 +244,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
+    // Required for version 0.8.23
     public addUserRequest = (networkData :string): Promise<void> => {
       throw new Error('Operation not implemented');
     }
@@ -249,7 +254,7 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
     public sendEmail = (to: string, subject: string, body: string) : void => {
-      throw new Error('Operation not implemented'); 
+      throw new Error('Operation not implemented');
     }
 
     public getNetworkState = () :social.NetworkState => {
@@ -260,6 +265,10 @@ export function notifyUI(networkName :string, userId :string) {
       // Default to false.
       var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
       return options ? options.areAllContactsUproxy === true : false;
+    }
+
+    public acceptInvitation = (data :string) : Promise<void> => {
+      throw new Error('Operation not implemented');
     }
 
   }  // class AbstractNetwork
@@ -337,6 +346,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
+
     public handleUserProfile = (profile :freedom.Social.UserProfile) : void => {
       var userId = profile.userId;
       if (!firewall.isValidUserProfile(profile, null)) {
@@ -550,9 +560,25 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
+    // Required for version 0.8.23
     public addUserRequest = (networkData :string): Promise<void> => {
       return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
+      });
+    }
+
+    public acceptInvitation = (networkData :string): Promise<void> => {
+      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
+      });
+    }
+
+    public inviteUser = (userName: string): Promise<void> => {
+      return this.freedomApi_.inviteUser(userName).catch((e) => {
+        log.error('Error calling inviteUser: ' + userName, e.message);
+        return Promise.reject('Error calling inviteUser: ' + userName + e.message);
+      }).then(() => {
+        return Promise.resolve<void>();
       });
     }
 

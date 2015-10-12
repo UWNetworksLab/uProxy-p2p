@@ -8,12 +8,12 @@ import uproxy_core_api = require('./uproxy_core_api');
 
 export interface UserPath {
   network :SocialNetworkInfo;
-  userId :string;
+  userId :string; // ID for a friend
 }
 
 export interface SocialNetworkInfo {
   name :string;
-  userId :string;
+  userId :string; // ID for current user
 }
 
 export interface InstancePath extends UserPath {
@@ -47,10 +47,22 @@ export interface NetworkMessage {
 }
 
 export interface UserProfileMessage {
+  status?: UserStatus;
   imageData    ?:string; // Image URI (e.g. data:image/png;base64,adkwe329...)
   name         ?:string;
   url          ?:string;
   userId       :string;
+}
+
+// The profile of a user on a social network.
+export interface UserProfile {
+  userId       :string;
+  status       ?:number;
+  name         ?:string;
+  url          ?:string;
+  // Image URI (e.g. data:image/png;base64,adkwe329...)
+  imageData    ?:string;
+  timestamp    ?:number;
 }
 
 export interface ConsentState {
@@ -189,6 +201,12 @@ export enum ClientStatus {
   ONLINE_WITH_OTHER_APP,
 }
 
+export enum UserStatus {
+  FRIEND = 0,
+  LOCAL_INVITED_BY_REMOTE = 1,
+  REMOTE_INVITED_BY_LOCAL = 2
+}
+
 // Status of a client connected to a social network.
 export interface ClientState {
   userId    :string;
@@ -206,6 +224,7 @@ export interface UserState {
   // be saved and loaded separately.
   instanceIds :string[];
   consent     :ConsentState;
+  status      :UserStatus
 }
 
 
@@ -276,8 +295,19 @@ export interface Network {
 
   /**
    * Ask the social network to add the user.
+   * Required for version 0.8.23
    */
   addUserRequest: (networkData :string) => Promise<void>;
+
+  /**
+   * Accept an invite to use uProxy with a friend
+   */
+  acceptInvitation: (data: string) => Promise<void>;
+
+  /**
+   * Send an invite to a friend to use uProxy
+   */
+  inviteUser: (optionalUserId :string) => Promise<void>;
 
   /**
    * Generates an invite token

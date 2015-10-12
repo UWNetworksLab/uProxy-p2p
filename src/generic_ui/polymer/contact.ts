@@ -3,6 +3,7 @@
 /// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
 import ui_constants = require('../../interfaces/ui');
+import social = require('../../interfaces/social');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import user = require('../scripts/user');
 import _ = require('lodash');
@@ -13,6 +14,10 @@ Polymer({
     name: 'unknown'
   },
   toggle: function() {
+    if (this.contact.status == this.UserStatus.REMOTE_INVITED_BY_LOCAL) {
+      return;
+    }
+
     if (!this.isExpanded) {
       // Hide the status before we start opening the core-collapse.
       this.hideOnlineStatus = true;
@@ -34,10 +39,21 @@ Polymer({
     this.GettingConsentState = user.GettingConsentState;
     this.SharingConsentState = user.SharingConsentState;
     this.hideOnlineStatus = this.isExpanded;
+    this.UserStatus = social.UserStatus;
   },
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
     event.stopPropagation();  // Don't toggle when link is clicked.
+  },
+  acceptInvitation: function() {
+    console.log(this.contact);
+    var socialNetworkInfo :social.SocialNetworkInfo = {
+      name: this.contact.network.name,
+      userId: this.contact.network.userId
+    };
+    ui_context.core.acceptInvitation({
+      network: socialNetworkInfo, data: this.contact.userId
+    });
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
   modifyConsent: function(action :uproxy_core_api.ConsentUserAction) {
@@ -79,12 +95,25 @@ Polymer({
     // a level up does not pick up on changes in contact properties
     this.fire('contact-changed');
   },
+  getExpandedChanged: function(oldIsExpanded :boolean, newIsExpanded :boolean) {
+    if (newIsExpanded && this.mode == ui_constants.Mode.GET) {
+      this.hideOnlineStatus = true;
+    }
+  },
+  shareExpandedChanged: function(oldIsExpanded :boolean, newIsExpanded :boolean) {
+    if (newIsExpanded && this.mode == ui_constants.Mode.SHARE) {
+      this.hideOnlineStatus = true;
+    }
+  },
   observe: {
     'contact.isSharingWithMe': 'fireChanged',
     'contact.isGettingFromMe': 'fireChanged',
     'contact.isOnline': 'fireChanged',
+    /* handle expand/collapse changes from ui.ts, toggle() handles other cases */
+    'contact.getExpanded': 'getExpandedChanged',
+    'contact.shareExpanded': 'shareExpandedChanged'
   },
   computed: {
-    'isExpanded': '(model.globalSettings.mode === ui_constants.Mode.GET && contact.getExpanded) || (model.globalSettings.mode === ui_constants.Mode.SHARE && contact.shareExpanded)'
+    'isExpanded': '(mode === ui_constants.Mode.GET && contact.getExpanded) || (mode === ui_constants.Mode.SHARE && contact.shareExpanded)'
   }
 });

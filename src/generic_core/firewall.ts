@@ -97,7 +97,8 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
     'url' : '?string',
     'imageData' : '?string',
     'lastUpdated' : '?number',
-    'lastSeen' : '?number'
+    'lastSeen' : '?number',
+    'status' : '?number'
   };
 
   function checkSchema(object:any, schema:Schema) :boolean {

@@ -48,7 +48,7 @@
           <paper-input-decorator label="{{ 'ENTER_INVITATION' | $$ }}">
             <input is='core-input' value='{{ receivedInviteToken }}'>
           </paper-input-decorator>
-          <uproxy-button affirmative autofocus on-tap='{{ addUser }}'>
+          <uproxy-button affirmative autofocus on-tap='{{ acceptInvitation }}'>
             {{ 'SUBMIT_BUTTON_TEXT' | $$ }}
           </uproxy-button>
         </div>

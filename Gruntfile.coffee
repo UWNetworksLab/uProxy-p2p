@@ -147,6 +147,7 @@ gruntConfig = {
     freedomfirefox: readJSONFile('node_modules/freedom-for-firefox/package.json')
     freedomxmpp: readJSONFile('node_modules/freedom-social-xmpp/package.json')
     freedomfirebase: readJSONFile('node_modules/freedom-social-firebase/package.json')
+    freedomGitHub: readJSONFile('node_modules/freedom-social-github/package.json')
     freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
 
   clean: ['build/dev', 'build/dist', '.tscache']
@@ -304,6 +305,8 @@ gruntConfig = {
             'freedom-social-xmpp/vcardstore.js'
             'freedom-social-xmpp/node-xmpp-browser.js'
             'freedom-social-xmpp/google-auth.js'
+            'freedom-social-github/social.github.json'
+            'freedom-social-github/github-social-provider.js'
             'freedom-social-firebase/social.firebase-facebook.json'
             'freedom-social-firebase/social.firebase-google.json'
             'freedom-social-firebase/firebase-shims.js'
@@ -353,6 +356,8 @@ gruntConfig = {
             'data/freedom-social-xmpp/vcardstore.js'
             'data/freedom-social-xmpp/node-xmpp-browser.js'
             'data/freedom-social-xmpp/google-auth.js'
+            'data/freedom-social-github/social.github.json'
+            'data/freedom-social-github/github-social-provider.js'
             'data/freedom-social-firebase/social.firebase-facebook.json'
             'data/freedom-social-firebase/social.firebase-google.json'
             'data/freedom-social-firebase/firebase-shims.js'
@@ -533,6 +538,11 @@ gruntConfig = {
             dest: chromeAppDevPath + '/freedom-social-firebase'
           },
           {
+            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+            src: ['**/*.js', '**/*.json']
+            dest: chromeAppDevPath + '/freedom-social-github'
+          },
+          {
             expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
             src: ['**']
             dest: chromeAppDevPath + '/freedom-social-wechat'
@@ -603,6 +613,11 @@ gruntConfig = {
             expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
             src: ['**']
             dest: firefoxDevPath + '/data/freedom-social-firebase'
+          },
+          {
+            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+            src: ['**/*.js', '**/*.json']
+            dest: firefoxDevPath + '/data/freedom-social-github'
           },
           {
             expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
@@ -736,6 +751,7 @@ gruntConfig = {
             'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
             'freedom-social-xmpp': '<%= pkgs.freedomxmpp.version %>'
             'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
+            'freedom-social-github': '<%= pkgs.freedomGitHub.version %>'
             'freedom-social-wechat': '<%= pkgs.freedomwechat.version %>'
         }]
     chromeExtVulcanized:

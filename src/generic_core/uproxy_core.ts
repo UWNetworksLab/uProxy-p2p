@@ -309,6 +309,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
+  // Required for version 0.8.23
   public addUser = (inviteUrl: string): Promise<void> => {
     try {
       // inviteUrl may be a URL with a token, or just the token.  Remove the
@@ -324,12 +325,33 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     } catch (e) {
       return Promise.reject('Error parsing invite URL');
     }
-
+ 
     // This code assumes the user is only signed in once to any given network.
     for (var userId in social_network.networks[networkName]) {
       return social_network.networks[networkName][userId]
           .addUserRequest(networkData);
     }
+  }
+
+  public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
+    // TODO: clean this up - hack to find the one network
+    var network: social.Network;
+    for (var userId in social_network.networks[data.networkId]) {
+      network = social_network.networks[data.networkId][userId];
+      break;
+    }
+    return network.inviteUser(data.userName);
+  }
+
+  public acceptInvitation = (obj: {network :social.SocialNetworkInfo; data :string}): Promise<void> => {
+    var userId = obj.network.userId;
+    if (!userId) {
+      // Take the first key in the userId to social network map as the current user.
+      // Assumes the user is only signed in once to any given network.
+      userId = Object.keys(social_network.networks[obj.network.name])[0];
+    }
+    var network = social_network.getNetwork(obj.network.name, userId);
+    return network.acceptInvitation(obj.data);
   }
 
   public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {

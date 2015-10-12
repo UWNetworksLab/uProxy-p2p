@@ -47,12 +47,39 @@ Polymer({
       ui.openTab(facebookUrl);
       this.fire('open-dialog', {
         heading: '', // TODO:
-        message: 'Please complete invitation in Facebook',  // TODO:
+        message: ui.i18n_t("FACEBOOK_INVITE_IN_BROWSER"),
         buttons: [{
           text: ui.i18n_t("OK")
         }]
       });
       this.closeInviteUserPanel();
+    });
+  },
+  inviteGithubFriend: function() {
+    var selectedNetwork =
+      model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
+    core.inviteUser({
+      networkId: selectedNetwork.name,
+      userName: this.userIdInput
+    }).then(() => {
+      this.closeInviteUserPanel();
+      this.fire('open-dialog', {
+        heading: '',
+        message: ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.userIdInput }),
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+    }).catch(() => {
+      // TODO: The message in this dialog should be passed from the social provider.
+      // https://github.com/uProxy/uproxy/issues/1923
+      this.fire('open-dialog', {
+        heading: '',
+        message: ui.i18n_t("GITHUB_INVITE_SEND_FAILED"),
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
     });
   },
   onNetworkSelect: function(e :any, details :any) {
@@ -88,5 +115,7 @@ Polymer({
   ready: function() {
     this.inviteUserEmail = '';
     this.selectedNetworkName = '';
+    this.model = model;
+    this.userIdInput = '';
   }
 });

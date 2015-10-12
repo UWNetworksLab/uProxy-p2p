@@ -79,6 +79,16 @@
             {{ 'SEND_INVITATION' | $$ }}
           </uproxy-button>
         </div>
+
+        <div hidden?='{{ selectedNetworkName != "GitHub"}}'>
+          <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
+          <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
+            <input is='core-input' value='{{ userIdInput }}'>
+          </paper-input-decorator>
+          <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
+            {{ 'SEND_INVITATION' | $$ }}
+          </uproxy-button>
+        </div>
       </div>
 
       <div class='section'>

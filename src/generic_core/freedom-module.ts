@@ -14,6 +14,7 @@
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import social = require('../interfaces/social');
 import social_network = require('./social');
 import version = require('../generic/version');
 import browser_connector = require('../interfaces/browser_connector');
@@ -88,6 +89,11 @@ ui_connector.onPromiseCommand(
     core.start);
 
 ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.SEND_INVITATION,
+    core.inviteUser);
+
+// Required for version 0.8.23
+ui_connector.onPromiseCommand(
     uproxy_core_api.Command.ADD_USER,
     core.addUser);
 
@@ -144,3 +150,8 @@ var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.PING_UNTIL_ONLINE,
     core.pingUntilOnline);
+
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.ACCEPT_INVITATION,
+    core.acceptInvitation);
+

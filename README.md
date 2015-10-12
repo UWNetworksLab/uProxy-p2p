@@ -1,6 +1,6 @@
 # uProxy
 
-[uProxy](uproxy.org) is a browser extension that lets users share their internet connection.
+[uProxy](https://www.uproxy.org) is a browser extension that lets users share their internet connection.
 
 ## Build Status
 
@@ -17,52 +17,65 @@ uProxy is built using the following tools:
  - [Polymer](http://www.polymer-project.org/) for UI
 
 To manage dependencies we use:
- - [npm](https://www.npmjs.org/) for installing node modules that we use for our build process.  (Specified in `package.json`)
+ - [npm](https://www.npmjs.org/) to install node modules that we use for our build process.  (Specified in `package.json`)
  - [Bower](http://bower.io) to install libraries that we use in the UI
-   (specified in `bower.json`) including AngularJS.
+   (specified in `bower.json`) including Polymer.
 
 
 ## Development setup
 
-Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit) to learn more about contributing to uProxy. 
+Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit) to learn more about contributing to uProxy. For a high level technical overview of uProxy, see the [uProxy Design Doc](https://docs.google.com/document/d/1t_30vX7RcrEGuWwcg0Jub-HiNI0Ko3kBOyqXgrQN3Kw/edit#).
 
-### Pre-Requirements to build uProxy
+### Prerequisites to build uProxy
 
 Note: you will either need to run these as root, or set the directories they
-modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/local)
+modify (`/usr/local`) to being editable by your user (`sudo chown -R $USER /usr/local`)
+
+- [git](https://git-scm.com/)
+    - Most machines will have git pre-installed. If you need to install git, you can find instructions from the [git website](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+    - For Windows, install the [desktop git app](https://desktop.github.com/), which provides an easy-to-use interface for git.
 
 - [node](http://nodejs.org/) and npm (Node's package manager):
 
-    - On Mac with Brew, you can do: `brew install node` (You may need to update your brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
+    - On **Mac** with Brew, you can do: `brew install node` (You may need to update your brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
+        - If you do not have [Homebrew](http://brew.sh), you can install it by running `ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
 
-    - On Ubuntu, you can do `apt-get install nodejs`.
-    - We also need to create symlink ( if we are not running legacy node) <br>
+    - On **Ubuntu**, you can do `apt-get install nodejs`.
+    - You may need to create a symlink (if we are not running legacy node) <br>
       Use this: <br>
-      ln -s /usr/bin/nodejs /usr/bin/node 
+      ln -s /usr/bin/nodejs /usr/bin/node
 
-    - On Archlinux, you can do 'pacman -S nodejs'.
+    - On **Archlinux**, you can do 'pacman -S nodejs'.
+
+    - On **Windows**, you can download the installer from the [NodeJS Website](http://nodejs.org/).
 
     - You may need to set your `$NODE_PATH` environment variable appropriately
       (e.g. it might be: `/usr/local/share/npm/lib/node_modules`).
 
-    - If you install npm things globally, you'll need to do so as the
-      appropriate super-user.
-
     - To run binaries from globally-installed npm packages without
-      fully-qualifying paths, make sure you have added your npm bin directory to your path (e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`).
-
-    - On Windows, you can download the installer from the [NodeJS Website](http://nodejs.org/).
+      fully-qualifying paths, make sure you have added your npm bin directory to your path
+        - on Mac or Ubuntu, e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`
+        - on Windows,
+            - Open Control Panel > System and Security > System > Advanced System Settings
+            - In the Advanced tab, click on "Environment Variables"
+            - In System Variables, click on "Path" (or "PATH")
+            - At the end of the "Variable value:" string, append a ";" and the path to your bin directory, e.g. "C:\Program Files\nodejs\node_modules\npm\lib;C:\Users\<YOUR_PATH>\AppData\Roaming\npm\node_modules\grunt-cli\bin"
 
 - [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
+    - To install globally on Windows, open the command prompt as admin and then run the command
 
 ### Building uProxy from source
 
- 1. Clone uProxy and its submodules (and its submodules' submodules...): `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
+ 1. In your terminal, navigate to a directory where you would like to download uProxy. E.g., `cd ~/uProxy`
 
- 1. In the root uProxy directory, run:
-   * In OS X or Linux, run `./setup.sh install` - this will set up build tools and third-party dependencies.
+ 1. Clone the uProxy repository: `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to GitHub set up (useful if you use 2-step auth for GitHub, which you should do).
+
+ 1. Navigate into uProxy's root directory with `cd uproxy`
+
+ 1. Setup build tools and third-party dependencies:
+   * In OS X or Linux, run `./setup.sh install`
    * In Windows, run `.\setup.cmd install` instead (in cmd or PowerShell).
-   * Then run `grunt` - this will build everything, including uProxy for Chrome and Firefox.
+ 1. Run `grunt` - this will build everything, including uProxy for Chrome and Firefox.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `./setup.sh install` to update these dependencies, then rerun `grunt`
 

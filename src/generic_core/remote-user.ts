@@ -53,7 +53,7 @@ var log :logging.Log = new logging.Log('remote-user');
     // Name of the user as provided by the social network.
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :social.ClientStatus };
-    public profile :freedom.Social.UserProfile;
+    public profile :social.UserProfile;
 
     public consent :consent.State;
 
@@ -113,7 +113,7 @@ var log :logging.Log = new logging.Log('remote-user');
      * Update the information about this user.
      * The userId must match.
      */
-    public update = (profile :freedom.Social.UserProfile) : void => {
+    public update = (profile :social.UserProfile) : void => {
       if (profile.userId != this.userId) {
         throw Error('Updating User ' + this.userId +
                     ' with unexpected userID: ' + profile.userId);
@@ -121,6 +121,9 @@ var log :logging.Log = new logging.Log('remote-user');
       this.name = profile.name;
       this.fulfillNameReceived_(this.name);
       this.profile = profile;
+      if (!this.profile.status) {
+        this.profile.status = social.UserStatus.FRIEND;
+      }
       this.saveToStorage();
       this.notifyUI();
     }
@@ -385,7 +388,8 @@ var log :logging.Log = new logging.Log('remote-user');
           userId: this.profile.userId,
           name: this.profile.name,
           imageData: this.profile.imageData,
-          url: this.profile.url
+          url: this.profile.url,
+          status: this.profile.status
         },
         consent: this.consent,
         offeringInstances: offeringInstanceStatesForUi,
@@ -472,6 +476,8 @@ var log :logging.Log = new logging.Log('remote-user');
         this.profile.url = state.url;
       }
 
+      this.profile.status = state.status || social.UserStatus.FRIEND;
+
       // Restore all instances.
       var onceLoadedPromises :Promise<void>[] = [];
       for (var i in state.instanceIds) {
@@ -499,7 +505,8 @@ var log :logging.Log = new logging.Log('remote-user');
         imageData: this.profile.imageData,
         url: this.profile.url,
         instanceIds: Object.keys(this.instances_),
-        consent: this.consent
+        consent: this.consent,
+        status: this.profile.status
       });
     }
 
