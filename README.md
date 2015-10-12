@@ -33,6 +33,7 @@ modify (`/usr/local`) to being editable by your user (`sudo chown -R $USER /usr/
 
 - [git](https://git-scm.com/)
     - Most machines will have git pre-installed. If you need to install git, you can find instructions from the [git website](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+    - For Windows, install the [desktop git app](https://desktop.github.com/), which provides an easy-to-use interface for git.
 
 - [node](http://nodejs.org/) and npm (Node's package manager):
 
@@ -52,9 +53,16 @@ modify (`/usr/local`) to being editable by your user (`sudo chown -R $USER /usr/
       (e.g. it might be: `/usr/local/share/npm/lib/node_modules`).
 
     - To run binaries from globally-installed npm packages without
-      fully-qualifying paths, make sure you have added your npm bin directory to your path (e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`).
+      fully-qualifying paths, make sure you have added your npm bin directory to your path
+        - on Mac or Ubuntu, e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`
+        - on Windows,
+            - Open Control Panel > System and Security > System > Advanced System Settings
+            - In the Advanced tab, click on "Environment Variables"
+            - In System Variables, click on "Path" (or "PATH")
+            - At the end of the "Variable value:" string, append a ";" and the path to your bin directory, e.g. "C:\Program Files\nodejs\node_modules\npm\lib;C:\Users\<YOUR_PATH>\AppData\Roaming\npm\node_modules\grunt-cli\bin"
 
 - [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
+    - To install globally on Windows, open the command prompt as admin and then run the command
 
 ### Building uProxy from source
 
