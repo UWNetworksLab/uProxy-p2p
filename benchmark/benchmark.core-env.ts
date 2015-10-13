@@ -294,7 +294,8 @@ export module Benchmark {
                                                          this.request_counter_);
       request({
         url: 'http://localhost:8080/' + size,
-        agent: new shttpagent({
+        agentClass: Agent,
+        agentOptions: new shttpagent({
           socksHost: 'localhost',
           socksPort: 9999
         })

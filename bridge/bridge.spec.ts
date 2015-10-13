@@ -215,7 +215,6 @@ describe('BridgingPeerConnection', function() {
     spyOn(bob, 'makePlain_').and.returnValue(mockProvider);
 
     bob.handleSignalMessage({
-      type: 'OFFER',
       signals: {
         'PLAIN': [
             offerSignal,
@@ -239,7 +238,6 @@ describe('BridgingPeerConnection', function() {
     var bob = bridge.preObfuscation();
     bob.negotiateConnection();
     bob.handleSignalMessage({
-      type: 'ANSWER',
       signals: {
         'CHURN': []
       }
@@ -255,7 +253,6 @@ describe('BridgingPeerConnection', function() {
   it('rejects offer from unknown provider', (done) => {
     var bob = bridge.best();
     bob.handleSignalMessage({
-      type: 'OFFER',
       signals: {
         'MAGIC': []
       }
