@@ -969,78 +969,40 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
 
-
-//
-//  var confirmationMessage = this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
-//  return this.getConfirmation('', confirmationMessage).then(() => {
-//  var socialNetworkInfo :social.SocialNetworkInfo = {
-//  name: networkName,
-//  userId: "" /* The current user's ID will be determined by the core. */
-//};
-//  return this.core.acceptInvitation({network: socialNetworkInfo, data: userId});
-//}).catch((e) => {
-//  // The user did not confirm adding their friend, not an error.
-//  return;
-//})
-//}
-
-  //"PRE_LOG_OUT": {
-  //  "description": "Notification to ask user if they are sure that they want to log out.",
-  //  "message": "Are you sure you want to log out? You are granting access to __name__ and __numOthers__ others"
-  //},
-
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var network = this.model.getNetwork(networkInfo.name);
 
     //If the user is connecteed to a network, do a check to see if the user is sure that they want to log out
     if (network) {
-
-      console.log(network);
       var instanceIds = Object.keys(this.instancesGivingAccessTo);
+      var confirmationMessage: string;
       if (instanceIds.length > 0) {
-        console.log(instanceIds);
 
-        var confirmationMessage = this.i18n_t("PRE_LOG_OUT", {
+        confirmationMessage = this.i18n_t("PRE_LOG_OUT", {
           name: this.mapInstanceIdToUser_[instanceIds[0]].name,
           numOthers: (instanceIds.length - 1)
         });
-
-        return this.getConfirmation('', confirmationMessage).then(() => {
-          // if we know about the network, record that we expect this logout to
-          // happen
-          network.logoutExpected = true;
-
-          //log out
-          return this.core.logout(networkInfo);
-        }).catch((e) => {
-          // The user did not confirm whether they wanted to log out or not
-          return;
-        })
       }
       else {
-        console.log("we're in the else for not having a network")
-        var confirmationMessage = this.i18n_t("PRE_LOG_OUT_SIMPLE");
-
-        return this.getConfirmation('', confirmationMessage).then(() => {
-          // if we know about the network, record that we expect this logout to
-          // happen
-          network.logoutExpected = true;
-
-          //log out
-          return this.core.logout(networkInfo);
-        }).catch((e) => {
-          // The user did not confirm whether they wanted to log out or not
-          return;
-        })
-        return this.core.logout(networkInfo);
+        confirmationMessage = this.i18n_t("PRE_LOG_OUT_SIMPLE");
       }
+
+      return this.getConfirmation('', confirmationMessage).then(() => {
+        // if we know about the network, record that we expect this logout to
+        // happen
+        network.logoutExpected = true;
+
+        //log out
+        return this.core.logout(networkInfo);
+      }).catch((e) => {
+        // The user did not confirm whether they wanted to log out or not
+        return;
+      })
 
     //If the user is not connected to the network, then don't log him out, you probably won't reach this point anyways. EVER. Probably.
     } else {
-      console.log("we're in the warning else");
       console.warn('User is trying to log out of not-logged-in-network ' + networkInfo.name);
     }
-  console.log( "we hit the end");
   };
 
   public reconnect = (network :string) => {
