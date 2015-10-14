@@ -57,9 +57,8 @@ Polymer({
     model.globalSettings.splashState = this.SPLASH_STATES.QUIVER_LOGIN;
   },
   loginToQuiver: function() {
-    console.log('loginToQuiver called, ' + this.userId);
-    // TODO: userId isn't really the right name for this.
-    ui.login('Quiver', this.userId).then(() => {
+    console.log('loginToQuiver called, ' + this.userName);
+    ui.login('Quiver', this.userName).then(() => {
       // Fire an update-view event, which root.ts listens for.
       this.fire('update-view', { view: ui_constants.View.ROSTER });
     }).catch((e :Error) => {
@@ -67,7 +66,7 @@ Polymer({
       console.warn('Did not log in ', e);
     });
   },
-  userId: '',
+  userName: '',
   ready: function() {
     this.model = model;
     this.languages = languages;

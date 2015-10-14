@@ -7,7 +7,6 @@ var core = ui_context.core;
 
 Polymer({
   generateInviteUrl: function() {
-    // TODO: how to get userId of logged in  user?
     var selectedNetwork =
         model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
     var info = {

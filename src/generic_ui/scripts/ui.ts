@@ -959,11 +959,11 @@ export class UserInterface implements ui_constants.UiApi {
     this.browserApi.bringUproxyToFront();
   }
 
-  public login = (network :string, userId ?:string) : Promise<void> => {
+  public login = (network :string, userName ?:string) : Promise<void> => {
     return this.core.login({
         network: network,
         reconnect: false,
-        userId: userId
+        userName: userName
     }).then(() => {
       this.browserApi.hasInstalledThenLoggedIn = true;
     }).catch((e :Error) => {

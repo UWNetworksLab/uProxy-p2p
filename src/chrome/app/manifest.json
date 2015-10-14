@@ -15,8 +15,7 @@
   },
   "permissions": [
     "storage",
-    "<all_urls>",
-    "webview"
+    "<all_urls>"
   ],
   "sockets": {
     "tcp": {
