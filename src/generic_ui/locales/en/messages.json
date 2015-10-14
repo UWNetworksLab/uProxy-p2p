@@ -667,6 +667,14 @@
     "description": "Notification for when the user has been logged out of the social network.",
     "message": "You have been logged out of __network__"
   },
+  "PRE_LOG_OUT": {
+  "description": "Notification to ask user if they are sure that they want to log out.",
+  "message": "Are you sure you want to log out? You are granting access to __name__ and __numOthers__ others"
+  },
+  "PRE_LOG_OUT_SIMPLE": {
+    "description": "Notification to ask user if they are sure that they want to log out.",
+    "message": "Are you sure you want to log out?"
+  },
   "GRANTED_ACCESS_NOTIFICATION": {
     "description": "Notification for when a user's request to access the Internet through a friend has been accepted by that friend.",
     "message": "__name__ granted you access"
