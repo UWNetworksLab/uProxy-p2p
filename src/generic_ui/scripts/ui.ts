@@ -60,7 +60,7 @@ export class Model {
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
     statsReportingEnabled: false,
-    consoleFilter: 2, // loggingTypes.Level.warn
+    consoleFilter: 0,
     language: 'en',
     force_message_version: 0,
     hasSeenGoogleAndFacebookChangedNotification: false

@@ -39,7 +39,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   version: STORAGE_VERSION,
   splashState: 0,
   statsReportingEnabled: false,
-  consoleFilter: loggingTypes.Level.warn,
+  consoleFilter: loggingTypes.Level.debug,
   language: 'en',
   force_message_version: 0, // zero means "don't override"
   // TODO: remove this in November 2015, to allow 1 month for existing users to
