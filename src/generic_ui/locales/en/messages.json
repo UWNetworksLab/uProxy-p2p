@@ -815,6 +815,18 @@
     "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
     "message": "Friend's GitHub username"
   },
+  "CLOUD_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for Cloud",
+    "message": "Enter your server's address. When a connection has been made, it will appear in your contact list."
+  },
+  "CLOUD_INVITE_PLACEHOLDER": {
+    "description": "Placeholder in input box for the username and address of the user's cloud instance",
+    "message": "Cloud instance address"
+  },
+  "CLOUD_INVITE_FAILED": {
+    "description": "Dialog text informing user that a connection could not be made to their cloud instance",
+    "message": "Oops, connection failed. Please check the key and server address."
+  },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
