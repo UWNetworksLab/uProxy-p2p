@@ -15,20 +15,3 @@ Polymer({
     this.model = ui_context.model;
   }
 });
-
-console.log("0");
-
-window.onload = function() {
-  var backToTop = document.getElementsByClassName("top");
-  console.log("1");
-  console.log(backToTop);
-  for (var i = 0, j = backToTop.length; i < j; i++) {
-    console.log("2");
-
-    backToTop[i].addEventListener("click", function() {
-      window.scroll(0, 0);
-    });
-    console.log("3");
-
-  }
-};

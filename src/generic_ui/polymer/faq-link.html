@@ -1,7 +1,5 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
-<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
-<link rel='import' href='../../bower/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../../bower/core-label/core-label.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
@@ -34,116 +32,10 @@
       color: #009688;
       overflow: auto;
     }
-    .inputLabel {
-      margin: 0;
-      font-weight: 600;
-    }
-    #emailInput {
-      margin: 0;
-    }
-    #logCheckboxContainer {
-      margin: 0.5em 0em;
-    }
-    #logCheckboxLabel {
-      cursor: pointer;
-      text-indent: 10px;
-      display: inline-block;
-    }
-    #logCheckbox {
-      vertical-align: middle;
-    }
-    #moreInfo {
-      color: grey;
-      margin-top: 1em;
-      font-size: 12px;
-      line-height: 20px;
-    }
-    #sendFeedback {
-      width: 100%;
-      padding-top: 1.5em;
-      padding-bottom: 1.5em;
-      border-top: 1px solid rgb(221, 221, 221);
-      color: #009688;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-      background-color: #ffffff;
-      text-transform: uppercase;
-    }
-    core-icon {
-      height: 15px !important;
-      color: grey;
-      opacity: 0.6;
-      margin-bottom: 2px;
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
-    }
-    core-icon:hover {
-      opacity: 1;
-    }
-    core-tooltip::shadow #tooltip {
-      /* Without this, the first time you view the
-         tooltip, it appears off center. */
-      left: -64px !important;
-    }
-    paper-input-decorator[id=feedbackDecorator] /deep/ .unfocused-underline,
-    paper-input-decorator[id=feedbackDecorator] /deep/ .focused-underline {
-      /* Remove the underline from the Feedback textbox. */
-      height: 0px;
-    }
-    paper-input-decorator[id=emailDecorator] {
-      padding: 13px 0px 32px 0px;
-    }
-    paper-input-decorator[id=feedbackDecorator] {
-      padding: 13px 0px 24px 0px;
-    }
 
-    paper-input-decorator {
-      font-size: 16px;
-    }
-    paper-input-decorator::shadow .input-body {
-      color: #707070;
-      padding-bottom: 4px;
-    }
-    paper-checkbox::shadow #ink[checked] {
-      color: white;
-    }
-    paper-checkbox::shadow #checkbox.checked {
-      background-color: #009688;
-      border-color: #009688;
-    }
-    paper-checkbox::shadow #checkbox {
-      border-color: grey;
-    }
-    uproxy-action-dialog {
-      top: 30%;
-      z-index: 1002; /* Must be greater than core-overlay-backdrop */
-    }
-    #sendingFeedback {
-      text-align: center;
-      font-size: 16px;
-    }
-    #feedbackDecorator {
-      height: 190px;
-    }
-    #feedbackPaperTextarea {
-      height: 190px;
-      margin: 0em;
-    }
-    paper-autogrow-textarea::shadow .textarea-container {
-      padding: 0.25em;
-      background-color: rgb(240,240,240);
-      border-radius: 2px;
-      color: #707070;
-    }
-    paper-autogrow-textarea::shadow .mirror-text {
-      white-space: pre-wrap; /* css-3 */
-      white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-    }
     </style>
 
-    <!-- Listen for the 'open-feedback' event, which is fired by the settings and splash pages. -->
+    <!-- Listen for the 'open-faq' event, which is fired by the settings and splash pages. -->
     <core-signals on-core-signal-open-faq="{{ open }}"></core-signals>
 
     <core-overlay id='faqPanel'>
