@@ -15,10 +15,7 @@
   },
   "permissions": [
     "storage",
-    "http://*/",
-    "https://github.com/login/oauth/access_token",
-    "https://*.wechat.com/*",
-    "https://*.qq.com/*"
+    "<all_urls>"
   ],
   "sockets": {
     "tcp": {

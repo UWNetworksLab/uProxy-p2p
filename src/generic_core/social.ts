@@ -229,7 +229,7 @@ export function notifyUI(networkName :string, userId :string) {
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
-    public login = (reconnect :boolean) :Promise<void> => {
+    public login = (reconnect :boolean, userName?:string) :Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
@@ -473,7 +473,7 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (reconnect :boolean) : Promise<void> => {
+    public login = (reconnect :boolean, userName ?:string) : Promise<void> => {
       var request :freedom.Social.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
@@ -495,6 +495,15 @@ export function notifyUI(networkName :string, userId :string) {
           agent: agent,
           version: '0.1',
           url: 'https://popping-heat-4874.firebaseio.com/',
+          interactive: !reconnect,
+          rememberLogin: !reconnect
+        };
+      } else if (this.name === 'Quiver') {
+        // TODO: remove this crazy hack of passing userName in the version
+        request = {
+          agent: 'uproxy',
+          version: JSON.stringify({userId: userName}),
+          url: 'https://github.com/uProxy/uProxy',
           interactive: !reconnect,
           rememberLogin: !reconnect
         };
@@ -714,7 +723,7 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (reconnect :boolean) : Promise<void> => {
+    public login = (reconnect :boolean, userName ?:string) : Promise<void> => {
       return Promise.resolve<void>();
     }
 
