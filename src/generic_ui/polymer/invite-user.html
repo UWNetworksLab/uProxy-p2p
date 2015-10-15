@@ -90,6 +90,18 @@
           </uproxy-button>
         </div>
 
+        <div hidden?='{{ selectedNetworkName != "Quiver"}}'>
+          <!-- TODO: localization -->
+          <uproxy-button affirmative on-tap='{{ generateInviteUrl }}'>
+            Generate Quiver Invite Link
+          </uproxy-button>
+
+          <div hidden?='{{ inviteUrl == "" }}'>
+            <p>Send this link to your friend so they can find you on Quiver</p>
+            <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+          </div>
+        </div>
+
         <div hidden?='{{ selectedNetworkName != "Cloud"}}'>
           <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
           <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>
@@ -99,6 +111,7 @@
             {{ 'DONE' | $$ }}
           </uproxy-button>
         </div>
+
       </div>
 
       <div hidden?='{{ selectedNetworkName === "Cloud"}}'>

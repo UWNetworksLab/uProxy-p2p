@@ -48,6 +48,14 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     supportsInvites: true,
     isExperimental: true
   },
+  'Quiver': {
+    isFirebase: false,
+    enableMonitoring: false,
+    areAllContactsUproxy: true,
+    supportsReconnect: false,
+    supportsInvites: true,
+    isExperimental: true
+  },
   'Cloud': {
     isFirebase: false,
     enableMonitoring: false,
