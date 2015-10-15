@@ -179,10 +179,10 @@
           <span class='label'>{{ "SUBMIT_FEEDBACK" | $$ }}</span>
         </uproxy-link>
 
-        <uproxy-faq-link>
+        <uproxy-link on-tap='{{ openFaqForm }}' role='button'>
           <core-icon icon="help"></core-icon>
           <span class='label'>{{ "GET_HELP" | $$ }}</span>
-        </uproxy-faq-link>
+        </uproxy-link>
 
         <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
           <core-icon icon="settings"></core-icon>
