@@ -71,10 +71,6 @@
     "description": "Text for button for user to accept a uProxy friend request",
     "message": "Accept Invite"
   },
-  "GRANTED_YOU_ACCESS": {
-    "description": "The user's friend has allowed the user to use the friend's Internet connection.",
-    "message": "__name__ has granted you access"
-  },
   "TRYING_TO_CONNECT": {
     "description": "The user is trying to connect to the Internet through their friend.",
     "message": "Trying to connect to __name__"
@@ -114,10 +110,6 @@
   "FRIEND_OFFLINE": {
     "description": "Message shown when trying to get access from a friend who is offline.",
     "message": "__name__ is offline"
-  },
-  "GRANTED_FRIEND_ACCESS": {
-    "description": "The user has agreed to let their friend access the Internet through the user.",
-    "message": "You've given them access."
   },
   "REVOKE_ACCESS": {
     "description": "Label for button that takes back an offer to a friend who has already accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user.",
