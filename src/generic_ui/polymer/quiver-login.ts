@@ -15,11 +15,9 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
     ui.login('Quiver', this.userName).then(() => {
       // Fire an update-view event, which root.ts listens for.
-      // TODO: is this a duplicate?
       this.fire('update-view', { view: ui_constants.View.ROSTER });
       this.closeQuiverLoginPanel();
     }).catch((e: Error) => {
-      // TODO: display error on screen?
       console.warn('Did not log in ', e);
     });
   },
