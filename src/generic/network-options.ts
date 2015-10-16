@@ -52,7 +52,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     isFirebase: false,
     enableMonitoring: false,
     areAllContactsUproxy: true,
-    supportsReconnect: false,
+    supportsReconnect: true,
     supportsInvites: true,
     isExperimental: true
   }

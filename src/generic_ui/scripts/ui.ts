@@ -63,7 +63,8 @@ export class Model {
     consoleFilter: 2, // loggingTypes.Level.warn
     language: 'en',
     force_message_version: 0,
-    hasSeenGoogleAndFacebookChangedNotification: false
+    hasSeenGoogleAndFacebookChangedNotification: false,
+    quiverUserName: ''
   };
 
   public reconnecting = false;
@@ -854,7 +855,7 @@ export class UserInterface implements ui_constants.UiApi {
             this.supportsReconnect_(networkMsg.name) &&
             !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
-          this.reconnect(networkMsg.name);
+          this.reconnect_(networkMsg.name);
         } else {
           if (this.instanceGettingAccessFrom_) {
             this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
@@ -986,8 +987,9 @@ export class UserInterface implements ui_constants.UiApi {
     return this.core.logout(networkInfo);
   }
 
-  public reconnect = (network :string) => {
+  private reconnect_ = (network :string) => {
     this.model.reconnecting = true;
+    // TODO: add wechat, quiver, github URLs
     var pingUrl = network == 'Facebook'
         ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
     this.core.pingUntilOnline(pingUrl).then(() => {
@@ -995,7 +997,6 @@ export class UserInterface implements ui_constants.UiApi {
       // haven't clicked to stop reconnecting while we were waiting for the
       // ping response).
       // TODO: this doesn't work quite right if the user is signed into multiple social networks
-      // FIXME: Preserve display name for Quiver
       if (this.model.reconnecting) {
         this.core.login({network: network, reconnect: true}).then(() => {
           // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
