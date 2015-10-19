@@ -28,7 +28,7 @@
       }
     </style>
 
-    <div id='image' style='background-image: url({{ src }});'>
+    <div id='image' style='background-image: url({{ src || "../icons/contact-default.png" }});'>
       <core-icon icon='uproxy-icons:{{ network }}' hidden?='{{ !showIcon }}' class='{{ {full: !src} | tokenList }}' ></core-icon>
     </div>
   </template>

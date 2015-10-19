@@ -66,7 +66,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     this.refreshPortControlSupport();
 
-    this.connectedNetworks_.get().then((networks :string[]) => {
+    globals.loadSettings.then(() => {
+      return this.connectedNetworks_.get();
+    }).then((networks :string[]) => {
       var logins :Promise<void>[] = [];
 
       for (var i in networks) {
@@ -234,6 +236,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     globals.settings.force_message_version = newSettings.force_message_version;
     globals.settings.hasSeenGoogleAndFacebookChangedNotification =
         newSettings.hasSeenGoogleAndFacebookChangedNotification;
+    globals.settings.quiverUserName = newSettings.quiverUserName;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {

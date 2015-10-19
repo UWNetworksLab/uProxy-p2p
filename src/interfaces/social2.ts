@@ -40,18 +40,20 @@ export interface LoginRequest {
   // the same agent field will be listed as having status |ONLINE|, where
   // those with different agents will be listed as
   // |ONLINE_WITH_OTHER_CLIENT|
-  agent          :string;
+  agent :string;
   // Version of application
-  version        :string;
+  version :string;
   // URL of application
-  url            :string;
+  url :string;
   // When |interactive === true| social will always prompt user for login.
   // Promise fails if the user did not login or provided invalid
   // credentials. When |interactive === false|, promise fails unless the
   // social provider has  cached tokens/credentials.
-  interactive    :boolean;
+  interactive :boolean;
   // When true, social provider will remember the token/credentials.
-  rememberLogin  :boolean;
+  rememberLogin :boolean;
+  // UserName for logged in user.
+  userName ?:string;
 }
 
 // Interfaces for Freedom social API
