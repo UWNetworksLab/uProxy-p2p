@@ -141,12 +141,6 @@
 
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>
             <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
-           
-           
- 
- 
- 
-           
               <div horizontal layout hidden?='{{ !hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
                 <core-icon icon='query-builder'></core-icon>
                 <p class='preButtonText' flex>
@@ -206,7 +200,6 @@
 
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>
             <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
-              <p class='preButtonText'>{{ "GRANTED_FRIEND_ACCESS" | $$ }}</p>
               <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</uproxy-button>
             </div>
 
