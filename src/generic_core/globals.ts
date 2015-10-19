@@ -44,8 +44,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   force_message_version: 0, // zero means "don't override"
   // TODO: remove this in November 2015, to allow 1 month for existing users to
   // see the notification that Google+Facebook social providers have changed.
-  hasSeenGoogleAndFacebookChangedNotification: false,
-  quiverUserName: ''
+  hasSeenGoogleAndFacebookChangedNotification: false
 };
 
 export var natType :string = '';

@@ -14,10 +14,6 @@ Polymer({
     this.networkInfo = network ? network : null;
   },
   connect: function() {
-    if (this.name == 'Quiver') {
-      this.fire('core-signal', { name: 'open-quiver-login-dialog' });
-      return;
-    }
     ui.login(this.name).catch((e :Error) => {
       console.warn('Did not log in', e);
     });

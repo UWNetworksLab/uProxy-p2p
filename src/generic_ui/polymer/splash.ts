@@ -23,7 +23,8 @@ var model = ui_context.model;
 Polymer({
   SPLASH_STATES: {
     INTRO: 0,
-    NETWORKS: 1
+    NETWORKS: 1,
+    QUIVER_LOGIN: 2
   },
   setState: function(state :Number) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
@@ -52,6 +53,20 @@ Polymer({
       window.location.reload();
     }
   },
+  showQuiverLogin: function() {
+    model.globalSettings.splashState = this.SPLASH_STATES.QUIVER_LOGIN;
+  },
+  loginToQuiver: function() {
+    console.log('loginToQuiver called, ' + this.userName);
+    ui.login('Quiver', this.userName).then(() => {
+      // Fire an update-view event, which root.ts listens for.
+      this.fire('update-view', { view: ui_constants.View.ROSTER });
+    }).catch((e :Error) => {
+      // TODO: why does this result in an error popup?
+      console.warn('Did not log in ', e);
+    });
+  },
+  userName: '',
   ready: function() {
     this.model = model;
     this.languages = languages;

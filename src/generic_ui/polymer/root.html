@@ -27,7 +27,6 @@
 <link rel='import' href='icons.html'>
 <link rel='import' href='proxy-error.html'>
 <link rel='import' href='button.html'>
-<link rel='import' href='quiver-login.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-open-dialog='{{ openDialog }}'>
 
@@ -281,10 +280,9 @@
 
     <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
 
-    <!-- core-overlays, launched using core-signals -->
     <uproxy-invite-user></uproxy-invite-user>
+
     <uproxy-accept-user-invite></uproxy-accept-user-invite>
-    <uproxy-quiver-login></uproxy-quiver-login>
 
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>

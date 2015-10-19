@@ -9,8 +9,9 @@ var model = ui_context.model;
 
 Polymer({
   connect: function() {
+    // TODO: clean this up, make generic!
     if (this.networkName == 'Quiver') {
-      this.fire('core-signal', {name: 'open-quiver-login-dialog'});
+      this.fire('core-signal', {name: 'show-quiver-login'});
       return;
     }
 

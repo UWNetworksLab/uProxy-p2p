@@ -499,17 +499,13 @@ export function notifyUI(networkName :string, userId :string) {
           rememberLogin: !reconnect
         };
       } else if (this.name === 'Quiver') {
-        if (!userName) {
-          // userName may not be passed in for reconnect.
-          userName = globals.settings.quiverUserName;
-        }
+        // TODO: remove this crazy hack of passing userName in the version
         request = {
           agent: 'uproxy',
-          version: '0.1',
+          version: JSON.stringify({userId: userName}),
           url: 'https://github.com/uProxy/uProxy',
           interactive: !reconnect,
-          rememberLogin: !reconnect,
-          userName: userName
+          rememberLogin: !reconnect
         };
       } else {
         request = {
