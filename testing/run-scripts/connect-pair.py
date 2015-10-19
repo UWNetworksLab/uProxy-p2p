@@ -6,7 +6,7 @@ import socket
 import sys
 import time
 
-parser = argparse.ArgumentParser(description='Connect two SOCKS adventure instances.')
+parser = argparse.ArgumentParser(description='Connect two Zork instances.')
 parser.add_argument('getter_address', default='localhost',
                     help='getter address, e.g. localhost')
 parser.add_argument('getter_port', type=int,

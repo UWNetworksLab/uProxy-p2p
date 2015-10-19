@@ -17,7 +17,7 @@ while getopts n:t:d opt; do
       *)
           echo "$0 [-n NUM] [-t TASK] [-d]"
           echo "  -n: Instance number NUM.  Port numbers are offset by this much."
-          echo "  -t: Task named TASK.  One of: bash, adventure"
+          echo "  -t: Task named TASK.  One of: bash, zork"
           echo "  -d: Run docker image as daemon (pass -d to docker run)"
           exit 1;
           ;;

@@ -107,7 +107,7 @@ fi
 
 # $1 is the name of the resulting container.
 # $2 is the image to run, and the rest are flags.
-# TODO: Take a -b BRANCH arg and pass it to load-adventure.sh
+# TODO: Take a -b BRANCH arg and pass it to load-zork.sh
 function run_docker () {
     local NAME=$1
     local IMAGE=$2
@@ -122,7 +122,7 @@ function run_docker () {
     then
         HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy-lib"
     fi
-    docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-adventure.sh $RUNARGS -w
+    docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-zork.sh $RUNARGS -w
 }
 
 run_docker $CONTAINER_PREFIX-getter $1 $VNCOPTS1 -p :9000 -p $PROXY_PORT:9999
