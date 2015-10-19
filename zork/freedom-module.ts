@@ -16,7 +16,7 @@ loggingController.setDefaultFilter(
     loggingTypes.Destination.console,
     loggingTypes.Level.info);
 
-var log :logging.Log = new logging.Log('adventure');
+var log :logging.Log = new logging.Log('zork');
 
 var pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
   iceServers: [{urls: ['stun:stun.l.google.com:19302']},
@@ -26,7 +26,7 @@ var pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
 
 // The SOCKS server will start on this address.
 // If you specify port zero then a dynamic port will be chosen
-// and a single adventure instance can instantiate multiple
+// and a single zork instance can instantiate multiple
 // SOCKS servers.
 var socksEndpoint :net.Endpoint = {
   address: '0.0.0.0',

@@ -1,5 +1,5 @@
 {
-  "name": "adventure",
+  "name": "zork",
   "description": "SOCKS server with telnet-based signalling channel.",
   "app": {
     "script": [

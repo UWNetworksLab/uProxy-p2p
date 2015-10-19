@@ -1,8 +1,0 @@
-{
-  "name": "adventure",
-  "title": "SOCKS adventure",
-  "description": "WebRTC distributed SOCKS server with telnet-driven signalling channel.",
-  "author": "uProxy",
-  "license": "Apache 2",
-  "version": "0.0.1"
-}

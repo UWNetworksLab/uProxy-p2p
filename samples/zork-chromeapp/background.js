@@ -3,7 +3,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
   // TODO: Use persistent sockets instead:
   //       https://github.com/uProxy/uproxy/issues/1746
   chrome.app.window.create('index.html', {
-  	id: "adventure",
+  	id: "zork",
     outerBounds: {
       width: 200,
       height: 200,
@@ -15,7 +15,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
   document.head.appendChild(script);
   script.onload = function() {
     console.log('loading freedom!');
-    freedom('uproxy-lib/adventure/freedom-module.json', {
+    freedom('uproxy-lib/zork/freedom-module.json', {
       'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
       'debug': 'debug'
     }).then(function(moduleFactory) {
