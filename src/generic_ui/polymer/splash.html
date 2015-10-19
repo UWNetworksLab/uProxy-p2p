@@ -97,7 +97,7 @@
       margin-left: 8px;
       margin-right: 8px;
     }
-    #intro1, #networks, #quiverLogin {
+    #intro1, #networks {
       height: 100%;
     }
     #languageLink paper-dropdown-menu {
@@ -173,26 +173,6 @@
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
         {{ "LEARN_MORE_SOCIAL" | $$ }}
-      </uproxy-faq-link>
-    </div>
-
-    <!-- TODO: should this be in root to work with settings login? -->
-    <core-signals on-core-signal-show-quiver-login="{{ showQuiverLogin }}"></core-signals>
-    <div vertical layout id='quiverLogin' hidden?='{{ SPLASH_STATES.QUIVER_LOGIN !== model.globalSettings.splashState }}'>
-       <!-- TODO: translate all text here -->
-      <div class='view' flex>
-
-        <h1>Set your display name</h1>
-
-        <paper-input-decorator label="name" layout vertical>
-          <input is='core-input' value='{{ userName }}' />
-        </paper-input-decorator>
-
-        <uproxy-button raised on-tap='{{ loginToQuiver }}'>Start</uproxy-button>
-
-      </div>
-      <uproxy-faq-link anchor='quiverLogin'>
-        Learn more
       </uproxy-faq-link>
     </div>
 
