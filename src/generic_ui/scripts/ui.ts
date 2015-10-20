@@ -968,23 +968,20 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var network = this.model.getNetwork(networkInfo.name);
-
     //If the user is connecteed to a network, do a check to see if the user is sure that they want to log out
     if (network) {
       var instanceIds = Object.keys(this.instancesGivingAccessTo);
       var confirmationMessage: string;
       if (instanceIds.length > 0) {
 
-        confirmationMessage = this.i18n_t("PRE_LOG_OUT", {
+        confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE_OR_MANY", {
           name: this.mapInstanceIdToUser_[instanceIds[0]].name,
           numOthers: (instanceIds.length - 1)
         });
-      }
-      else {
-        confirmationMessage = this.i18n_t("PRE_LOG_OUT_SIMPLE");
+      } else {
+        confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_NOT_SHARING_ACCESS");
       }
 
       return this.getConfirmation('', confirmationMessage).then(() => {
@@ -997,7 +994,7 @@ export class UserInterface implements ui_constants.UiApi {
       }).catch((e) => {
         // The user did not confirm whether they wanted to log out or not
         return;
-      })
+      });
 
     //If the user is not connected to the network, then don't log him out, you probably won't reach this point anyways. EVER. Probably.
     } else {
