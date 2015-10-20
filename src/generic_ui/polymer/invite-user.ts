@@ -6,21 +6,31 @@ var model = ui_context.model;
 var core = ui_context.core;
 
 Polymer({
-  sendToGMailFriend: function() {
+  generateInviteUrl: function() {
     var selectedNetwork =
         model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
-    var selectedNetworkInfo = {
+    var info = {
       name: selectedNetwork.name,
       userId: selectedNetwork.userId
     };
-    core.getInviteUrl(selectedNetworkInfo).then((inviteUrl: string) => {
+    return core.getInviteUrl(info).then((inviteUrl:string) => {
+      this.inviteUrl = inviteUrl;
+      return selectedNetwork;
+    });
+  },
+  sendToGMailFriend: function() {
+    this.generateInviteUrl().then((selectedNetwork:any) => {
+      var selectedNetworkInfo = {
+        name: selectedNetwork.name,
+        userId: selectedNetwork.userId
+      };
       var name = selectedNetwork.userName || selectedNetwork.userId;
       var emailBody =
       core.sendEmail({
           networkInfo: selectedNetworkInfo,
           to: this.inviteUserEmail,
           subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: name }),
-          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: inviteUrl, name: name })
+          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
       });
       this.fire('open-dialog', {
         heading: '',
@@ -31,19 +41,12 @@ Polymer({
       });
       this.closeInviteUserPanel();
     });
-
   },
   sendToFacebookFriend: function() {
-    var selectedNetwork =
-      model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
-    var selectedNetworkInfo = {
-      name: selectedNetwork.name,
-      userId: selectedNetwork.userId
-    };
-    core.getInviteUrl(selectedNetworkInfo).then((inviteUrl: string) => {
+    this.generateInviteUrl().then(() => {
       var facebookUrl =
           'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
-          + inviteUrl + '&redirect_uri=https://www.uproxy.org/';
+          + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
       ui.openTab(facebookUrl);
       this.fire('open-dialog', {
         heading: '', // TODO:
@@ -95,6 +98,7 @@ Polymer({
     this.$.inviteUserPanel.open();
   },
   closeInviteUserPanel: function() {
+    this.inviteUrl = '';
     this.$.inviteUserPanel.close();
   },
   showAcceptUserInvite: function() {
@@ -113,6 +117,7 @@ Polymer({
     }
   },
   ready: function() {
+    this.inviteUrl = '';
     this.inviteUserEmail = '';
     this.selectedNetworkName = '';
     this.model = model;

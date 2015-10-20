@@ -1,10 +1,13 @@
 /// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 /**
  * Script for the introductory splash screen.
  */
 
 declare var require :(path :string) => Object;
+
+import ui_constants = require('../../interfaces/ui');
 
 interface Language {
   description :string;
