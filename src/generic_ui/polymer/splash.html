@@ -211,7 +211,7 @@
           <p>Sign in with a social network.</p>
           <template repeat='{{ n in networkButtonNames }}' vertical layout>
             <div on-tap='{{ loginTapped }}' class='networkLoginButton' data-network='{{n}}'>
-              <core-icon icon='{{"uproxy-icons:" + n}}'></core-icon>
+              <core-icon icon='uproxy-icons:{{n}}'></core-icon>
               <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
               <div class='experimental' hidden?='{{!isExperimentalNetwork(n)}}'>
                 Experimental
