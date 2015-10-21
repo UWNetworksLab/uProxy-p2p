@@ -201,7 +201,7 @@
         <div hidden?='{{!supportsQuiver}}'>
           <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
 
-          <paper-input-decorator label="Choose a user name" layout vertical>
+          <paper-input-decorator label='Choose a user name' layout vertical>
             <input is='core-input' value='{{ userName }}' />
           </paper-input-decorator>
           <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
@@ -209,7 +209,7 @@
           <div class='orText'>- - - OR - - -</div>
           <p>Sign in with a social network.</p>
           <template repeat='{{ n in networkButtonNames }}' vertical layout>
-            <div class='networkLoginButton'>
+            <div on-tap='{{ loginTapped }}' class='networkLoginButton' data-network='{{n}}'>
               <core-icon icon='{{"uproxy-icons:" + n}}'></core-icon>
               <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
               <div class='experimental' hidden?='{{!isExperimentalNetwork(n)}}'>

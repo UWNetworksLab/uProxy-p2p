@@ -53,15 +53,18 @@ Polymer({
     }
   },
   loginToQuiver: function() {
-    // TODO: remove duplicate code from quiver-login.ts
-    // TODO: quiver-login.ts should only say uProxy in visible text.
-    console.log('loginToQuiver called, ' + this.userName);  // TODO: remove
     model.globalSettings.quiverUserName = this.userName;
     core.updateGlobalSettings(model.globalSettings);
-    ui.login('Quiver', this.userName).then(() => {
-      // Fire an update-view event, which root.ts listens for.
-      this.fire('update-view', { view: ui_constants.View.ROSTER });
-      this.closeQuiverLoginPanel();
+    this.login('Quiver', this.userName);
+  },
+  loginTapped: function(event: Event, detail: Object, target: HTMLElement) {
+    var networkName = target.getAttribute('data-network');
+    this.login(networkName);
+  },
+  login: function(networkName :string, userName ?:string) {
+    ui.login(networkName, userName).then(() => {
+      // syncNetwork will update the view to the ROSTER.
+      ui.bringUproxyToFront();
     }).catch((e: Error) => {
       console.warn('Did not log in ', e);
     });
