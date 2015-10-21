@@ -52,8 +52,47 @@ Polymer({
       window.location.reload();
     }
   },
+  loginToQuiver: function() {
+    // TODO: remove duplicate code from quiver-login.ts
+    // TODO: quiver-login.ts should only say uProxy in visible text.
+    console.log('loginToQuiver called, ' + this.userName);  // TODO: remove
+    model.globalSettings.quiverUserName = this.userName;
+    core.updateGlobalSettings(model.globalSettings);
+    ui.login('Quiver', this.userName).then(() => {
+      // Fire an update-view event, which root.ts listens for.
+      this.fire('update-view', { view: ui_constants.View.ROSTER });
+      this.closeQuiverLoginPanel();
+    }).catch((e: Error) => {
+      console.warn('Did not log in ', e);
+    });
+  },
+  getNetworkDisplayName: function(name :string) {
+    return ui.getNetworkDisplayName(name);
+  },
+  isExperimentalNetwork: function(name :string) {
+    return ui.isExperimentalNetwork(name);
+  },
+  updateNetworkButtonNames: function() {
+    var supportsQuiver = false;
+    this.networkButtonNames = [];
+    for (var i = 0; i < model.networkNames.length; ++i) {
+      if (model.networkNames[i] === 'Quiver') {
+        supportsQuiver = true;
+      } else {
+        this.networkButtonNames.push(model.networkNames[i]);
+      }
+    }
+    // Only set .supportsQuiver after iterating through all networks, to prevent
+    // any flicker in case we switch from true to false to true again.
+    this.supportsQuiver = supportsQuiver;
+  },
+  observe: {
+    'model.networkNames': 'updateNetworkButtonNames'
+  },
   ready: function() {
     this.model = model;
     this.languages = languages;
+    this.userName = model.globalSettings.quiverUserName;
+    this.updateNetworkButtonNames();
   }
 });
