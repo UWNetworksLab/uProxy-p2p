@@ -149,9 +149,8 @@
               </div>
               <template repeat='{{ instance in contact.offeringInstances }}' vertical layout>
                 <uproxy-instance
-                    user='{{ contact }}'
-                    instance='{{ instance }}'
-                    network='{{contact.network}}'>
+                    userName='{{ contact.name }}'
+                    instance='{{ instance }}'>
                 </uproxy-instance>
               </template>
             </div>
