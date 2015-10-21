@@ -22,84 +22,85 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import firewall = require('./firewall');
+import globals = require('./globals');
 import local_instance = require('./local-instance');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import network_options = require('../generic/network-options');
 import remote_user = require('./remote-user');
 import social = require('../interfaces/social');
+import freedom_social2 = require('../interfaces/social2');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import user = require('./remote-user');
-import globals = require('./globals');
-import storage = globals.storage;
-import freedom_social2 = require('../interfaces/social2');
 import ui = ui_connector.connector;
-import network_options = require('../generic/network-options');
+
+import storage = globals.storage;
+
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
-  var log :logging.Log = new logging.Log('social');
+var log :logging.Log = new logging.Log('social');
 
-  export var LOGIN_TIMEOUT :number = 5000;  // ms
+export var LOGIN_TIMEOUT :number = 5000;  // ms
 
-  export var MANUAL_NETWORK_ID = 'Manual';
+export var MANUAL_NETWORK_ID = 'Manual';
 
-  // PREFIX is the string prefix indicating which social providers in the
-  // freedom manifest we want to treat as social providers for uProxy.
-  var PREFIX :string = 'SOCIAL-';
-  // Global mapping of social network names (without prefix) to actual Network
-  // instances that interact with that social network.
-  //
-  // TODO: rather than make this global, this should be a parameter of the core.
-  // This simplified Social to being a SocialNetwork and removes the need for
-  // this module. `initializeNetworks` becomes part of the core constructor.
-  export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
+// PREFIX is the string prefix indicating which social providers in the
+// freedom manifest we want to treat as social providers for uProxy.
+var PREFIX :string = 'SOCIAL-';
+// Global mapping of social network names (without prefix) to actual Network
+// instances that interact with that social network.
+//
+// TODO: rather than make this global, this should be a parameter of the core.
+// This simplified Social to being a SocialNetwork and removes the need for
+// this module. `initializeNetworks` becomes part of the core constructor.
+export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
 
-  export function removeNetwork(networkName :string, userId :string) :void {
-    if (networkName !== MANUAL_NETWORK_ID) {
-      delete networks[networkName][userId];
-    }
-    notifyUI(networkName, userId);
+export function removeNetwork(networkName :string, userId :string) :void {
+  if (networkName !== MANUAL_NETWORK_ID) {
+    delete networks[networkName][userId];
   }
+  notifyUI(networkName, userId);
+}
 
-  /**
-   * Goes through network names and gets a reference to each social provider.
-   */
-  export function initializeNetworks() :void {
-    for (var dependency in freedom) {
-      if (freedom.hasOwnProperty(dependency)) {
-        if (dependency.indexOf(PREFIX) !== 0 ||
-            ('social' !== freedom[dependency].api &&
-             'social2' !== freedom[dependency].api)) {
-          continue;
-        }
-
-        var name = dependency.substr(PREFIX.length);
-        networks[name] = {};
+/**
+ * Goes through network names and gets a reference to each social provider.
+ */
+export function initializeNetworks() :void {
+  for (var dependency in freedom) {
+    if (freedom.hasOwnProperty(dependency)) {
+      if (dependency.indexOf(PREFIX) !== 0 ||
+          ('social' !== freedom[dependency].api &&
+           'social2' !== freedom[dependency].api)) {
+        continue;
       }
-    }
 
-    // TODO: re-enable manual networks here when all code is ready
-    // Social.networks[MANUAL_NETWORK_ID] = {
-    //     '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
+      var name = dependency.substr(PREFIX.length);
+      networks[name] = {};
+    }
   }
 
-  /**
-   * Retrieves reference to the network |networkName|.
-   */
-  export function getNetwork(networkName :string, userId :string) :social.Network {
-    if (!(networkName in networks)) {
-      log.warn('Network does not exist', networkName);
-      return null;
-    }
+  // TODO: re-enable manual networks here when all code is ready
+  // Social.networks[MANUAL_NETWORK_ID] = {
+  //     '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
+}
 
-    if (!(userId in networks[networkName])) {
-      log.info('Not logged in to network', {
-        userId: userId,
-        network: networkName
-      });
-      return null;
-    }
-    return networks[networkName][userId];
+/**
+ * Retrieves reference to the network |networkName|.
+ */
+export function getNetwork(networkName :string, userId :string) :social.Network {
+  if (!(networkName in networks)) {
+    log.warn('Network does not exist', networkName);
+    return null;
   }
+
+  if (!(userId in networks[networkName])) {
+    log.info('Not logged in to network', {
+      userId: userId,
+      network: networkName
+    });
+    return null;
+  }
+  return networks[networkName][userId];
+}
 
 
 export function getOnlineNetworks() :social.NetworkState[] {
@@ -474,7 +475,7 @@ export function notifyUI(networkName :string, userId :string) {
     //===================== Social.Network implementation ====================//
 
     public login = (reconnect :boolean, userName ?:string) : Promise<void> => {
-      var request :freedom.Social.LoginRequest = null;
+      var request :freedom_social2.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
         // TODO: ideally we should use the instanceId for the agent string,

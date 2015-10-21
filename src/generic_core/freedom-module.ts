@@ -12,22 +12,21 @@
 
 /// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import social = require('../interfaces/social');
-import social_network = require('./social');
-import version = require('../generic/version');
 import browser_connector = require('../interfaces/browser_connector');
+import globals = require('./globals');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import loggingprovider = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import metrics_module = require('./metrics');
+import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
+import social_network = require('./social');
+import social = require('../interfaces/social');
+import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
 import ui = require('./ui_connector');
 import uproxy_core = require('./uproxy_core');
-import logging_types = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
-import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
-import globals = require('./globals');
-import metrics_module = require('./metrics');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import version = require('../generic/version');
 
 import ui_connector = ui.connector;
-
 
 // Prepare all the social providers from the manifest.
 social_network.initializeNetworks();
@@ -46,7 +45,7 @@ var exported = {
   browser_connector: browser_connector,
   ui_connector: ui_connector,
   loggingController: uproxy_core.loggingController,
-  logging_types: logging_types,
+  logging_types: loggingprovider,
   socks_to_rtc: socks_to_rtc,
   rtc_to_net: rtc_to_net,
   globals: globals
