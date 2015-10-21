@@ -23,7 +23,7 @@ This is a repository of stock docker images for our use, and scripts that build/
  * `testing/run-scripts/image_make.sh` - Make a docker image with the specified browser and version.  Example use:
 > image_make.sh chrome-beta
 
- * `testing/run-scripts/connect-pair.py` - Connect two running copies of the uproxy adventure examples together.  They should be listening to their default ports of 9000 and 9010.
+ * `testing/run-scripts/connect-pair.py` - Connect two running copies of Zork (a telnet-based testing app from uproxy-lib designed to work with our Docker configs) together.  They should be listening to their default ports of 9000 and 9010.
 
 # Local Chrome
  A special `localchrome` target will use a locally-built chrome binary.  Set the environment variable `CHROME_BUILD_DIR` to your `src/` directory, and specify `debug` or `release` as versions.  These will correspond to `out/Debug`, and `out/Release`.

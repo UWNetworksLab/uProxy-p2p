@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Loads the adventure example app.
 RUNVNC=false
 FOREVER=false
 LISTEN=false
@@ -58,9 +57,9 @@ if ! $PREBUILT; then
     git clone $CLONEARGS $CLONESRC
     cd uproxy-lib
     ./setup.sh install
-    grunt adventure
+    grunt zork
 fi
-/test/bin/browser.sh /test/src/uproxy-lib/build/dev/uproxy-lib/samples/adventure
+/test/bin/browser.sh /test/src/uproxy-lib/build/dev/uproxy-lib/samples/zork
 
 while $FOREVER; do
     sleep 1
