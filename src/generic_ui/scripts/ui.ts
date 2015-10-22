@@ -974,27 +974,43 @@ export class UserInterface implements ui_constants.UiApi {
     if (network) {
       var instanceIds = Object.keys(this.instancesGivingAccessTo);
       var confirmationMessage: string;
-      if (instanceIds.length > 0) {
 
-        confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE_OR_MANY", {
-          name: this.mapInstanceIdToUser_[instanceIds[0]].name,
-          numOthers: (instanceIds.length - 1)
+      if (instanceIds.length > 0) {
+        if (instanceIds.length == 1) {
+          confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE", {
+            name: this.mapInstanceIdToUser_[instanceIds[0]].name
+          });
+        } else if (instanceIds.length == 2) {
+          confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_TWO", {
+            name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
+            name2: this.mapInstanceIdToUser_[instanceIds[1]].name
+          });
+        } else {
+          confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_MANY", {
+            name: this.mapInstanceIdToUser_[instanceIds[0]].name,
+            numOthers: (instanceIds.length - 1)
+          });
+        }
+
+        return this.getConfirmation('', confirmationMessage).then(() => {
+          // if we know about the network, record that we expect this logout to
+          // happen
+          network.logoutExpected = true;
+
+          //log out
+          return this.core.logout(networkInfo);
+        }).catch((e) => {
+          // The user did not confirm whether they wanted to log out or not
+          return;
         });
       } else {
-        confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_NOT_SHARING_ACCESS");
-      }
-
-      return this.getConfirmation('', confirmationMessage).then(() => {
         // if we know about the network, record that we expect this logout to
         // happen
         network.logoutExpected = true;
 
         //log out
         return this.core.logout(networkInfo);
-      }).catch((e) => {
-        // The user did not confirm whether they wanted to log out or not
-        return;
-      });
+      }
 
     //If the user is not connected to the network, then don't log him out, you probably won't reach this point anyways. EVER. Probably.
     } else {
