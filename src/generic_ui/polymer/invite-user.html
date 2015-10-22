@@ -29,13 +29,65 @@
         padding: 0;
         margin: 0;
       }
-      uproxy-button {
+      #dialogHeading {
+        color: #333;
+        font-size: 20px;
+        font-weight: normal;
+        margin-top: 0;
+      }
+      #dialogText {
+        color: rgb(160, 160, 160);
+        line-height: 18px;
+        font-weight: lighter;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+      #close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: rgb(180,180,180);
+      }
+      paper-input-decorator {
+        font-size: 16px;
+      }
+      #inviteUserPanel uproxy-button {
+        width: 200px !important;
         margin: 0;
         padding-left: 1em;
         padding-right: 1em;
       }
-      paper-input-decorator {
-        font-size: 16px;
+      uproxy-button.login {
+        margin: 15px 0px;
+      }
+      uproxy-button.login /deep/ .button-content {
+        padding: 0px;
+      }
+      uproxy-button #buttonTextContainer {
+        padding: 0.7em 0.9em;
+        border-left: 1px solid rgba(255,255,255,0.3);
+      }
+      uproxy-button #buttonLogoContainer {
+        padding: 0em 0.3em;
+      }
+      uproxy-button.Google {  /* Google Hangouts */
+        background: #0f9d58;
+      }
+      uproxy-button.GMail {
+        background: #dd4b39;
+      }
+      uproxy-button.Facebook,
+      uproxy-button.Facebook-Firebase-V2 {
+        background: #3b5998;
+      }
+      uproxy-button.WeChat {
+        background: #6ab000;
+      }
+      uproxy-button.GitHub {
+        background: #C4C4C4;
+      }
+      uproxy-dialog {
+        padding: 5px;
       }
     </style>
 
@@ -110,6 +162,23 @@
       </div>
 
     </core-overlay>
+
+    <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog'>
+      <template repeat="{{ network in onlineInviteNetworks }}">
+        <div hidden?='{{selectedNetworkName != network.name}}'>
+          <h1 id="dialogHeading">Sign in to {{network.displayName}}</h1>
+          <core-icon id="close" icon="clear" on-tap='{{ close }}'></core-icon>
+          <p id="dialogText">To invite a {{network.displayName}} friend to uProxy, please login to your {{network.displayName}} account.</p>
+          <div style="text-align:center;">
+            <uproxy-button raised on-tap='{{login(network.name)}}' class='login {{network.name}}'>
+              <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:{{ network.name }}'></core-icon></span>
+              <span id="buttonTextContainer">Sign in to {{network.displayName}}</span>
+            </uproxy-button>
+          </div>
+        </div>
+      </template>
+    </uproxy-dialog>
+
   </template>
   <script src='invite-user.js'></script>
 </polymer-element>

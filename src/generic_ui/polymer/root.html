@@ -277,14 +277,13 @@
     <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
-    <uproxy-feedback id='feedback'></uproxy-feedback>
-
-    <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
-
     <!-- core-overlays, launched using core-signals -->
     <uproxy-invite-user></uproxy-invite-user>
+    <uproxy-google-invite></uproxy-google-invite>
     <uproxy-accept-user-invite></uproxy-accept-user-invite>
     <uproxy-quiver-login></uproxy-quiver-login>
+    <uproxy-feedback id='feedback'></uproxy-feedback>
+    <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
 
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>

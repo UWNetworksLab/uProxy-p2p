@@ -88,6 +88,7 @@ Polymer({
   onNetworkSelect: function(e :any, details :any) {
     if (details.isSelected) {
       this.selectedNetworkName = details.item.getAttribute('label');
+      this.$.loginToInviteFriendDialog.open();
     }
   },
   openInviteUserPanel: function() {
@@ -106,8 +107,8 @@ Polymer({
   },
   setOnlineInviteNetworks: function() {
     this.onlineInviteNetworks = [];
-    for (var i = 0; i < model.onlineNetworks.length; ++i) {
-      var name = model.onlineNetworks[i].name;
+    for (var i = 0; i < model.networkNames.length; ++i) {
+      var name = model.networkNames[i];
       if (ui.supportsInvites(name)) {
         this.onlineInviteNetworks.push({
           name: name,

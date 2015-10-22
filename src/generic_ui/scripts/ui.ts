@@ -203,7 +203,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public toastMessage :string = null;
 
-  public showInviteControls: boolean = false;
+  public showInviteControls: boolean = true;
 
 
   /**
@@ -1183,20 +1183,20 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private updateShowInviteControls_ = () => {
-    var showControls = false;
-    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
-      if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
-        showControls = true;
-        break;
-      }
-    }
-    this.showInviteControls = showControls;
+    // var showControls = false;
+    // for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
+    //   if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
+    //     showControls = true;
+    //     break;
+    //   }
+    // }
+    this.showInviteControls = true;
   }
 
   // this takes care of updating the view (given the assumuption that we are
   // connected to the core)
   private updateView_ = () => {
-    if (this.model.onlineNetworks.length > 0) {
+    if (this.model.onlineNetworks.length > 0 || this.model.globalSettings.hasSeenWelcome) {
       this.view = ui_constants.View.ROSTER;
     } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
                this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {

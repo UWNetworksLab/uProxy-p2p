@@ -136,7 +136,7 @@
     }
     </style>
 
-    <div hidden?='{{ !model.onlineNetworks.length }}' vertical layout>
+    <div vertical layout>
       <div class='userInfo'>
         <div id='pictures' horizontal layout hidden?='{{ model.onlineNetworks.length === 1 && !model.onlineNetworks[0].imageData }}'>
           <template repeat='{{network in model.onlineNetworks}}'>

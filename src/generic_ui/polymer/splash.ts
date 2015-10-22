@@ -34,7 +34,8 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
   },
   next: function() {
-    this.setState(model.globalSettings.splashState + 1);
+    ui.view = ui_constants.View.ROSTER;
+    //this.setState(model.globalSettings.splashState + 1);
   },
   prev: function() {
     this.setState(model.globalSettings.splashState - 1);
