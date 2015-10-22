@@ -64,7 +64,7 @@ then
 fi
 
 remove_container cloud
-docker run $HOSTARGS --name $CONTAINER_PREFIX-cloud -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS -w > /dev/null
+docker run --net=host $HOSTARGS --name $CONTAINER_PREFIX-cloud -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS -w > /dev/null
 
 # Start a container for sshd, linked with Zork's.
 if [ "X$(docker images | tail -n +2 | awk '{print $1}' | grep uproxy/sshd )X" == "Xuproxy/sshdX" ]
@@ -74,10 +74,10 @@ else
   docker build -t uproxy/sshd ${BASH_SOURCE%/*}/../../sshd
 fi
 remove_container sshd
-docker run -d -p $SSHD_PORT:22 --name $CONTAINER_PREFIX-sshd --link $CONTAINER_PREFIX-cloud:zork uproxy/sshd > /dev/null
+HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
+docker run -d -p $SSHD_PORT:22 --name $CONTAINER_PREFIX-sshd --add-host zork:$HOST_IP uproxy/sshd > /dev/null
 
 # Happy, reassuring message.
 echo -n "Waiting for Zork to come up"
-ZORK_CONTAINER_IP=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CONTAINER_PREFIX-cloud`
-while ! ((echo ping ; sleep 0.5) | nc -w 1 $ZORK_CONTAINER_IP 9000 | grep ping) > /dev/null; do echo -n .; done
+while ! ((echo ping ; sleep 0.5) | nc -w 1 localhost 9000 | grep ping) > /dev/null; do echo -n .; done
 echo "ready!"
