@@ -49,6 +49,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     isExperimental: true
   },
   'Quiver': {
+    displayName: 'uProxy',
     isFirebase: false,
     enableMonitoring: false,
     areAllContactsUproxy: true,

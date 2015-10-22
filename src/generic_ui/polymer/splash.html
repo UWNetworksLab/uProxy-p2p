@@ -75,7 +75,8 @@
       text-decoration: underline;
       cursor: pointer;
       display: inline-block;
-      margin-top: 30px;
+      margin-top: 1em;
+      margin-bottom: 1em;
     }
     uproxy-faq-link {
       width: 100%;
@@ -115,6 +116,47 @@
     #languageLink paper-item::shadow .button-content {
       padding: 0;
     }
+    paper-input-decorator {
+      font-size: 16px;
+    }
+    #QuiverLoginButton {
+      width: 200px;
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
+    #QuiverTitle {
+      font-weight: normal;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    .networkLoginButton {
+      display: inline-block;
+      width: 120px;
+      margin-top: 0.5em;
+      margin-bottom: 1em;
+      cursor: pointer;
+      vertical-align: top;
+    }
+    .networkLoginButton .networkName {
+      margin-top: 0.5em;
+    }
+    .networkLoginButton core-icon {
+      width: 75px;
+      height: 75px;
+    }
+    .networkLoginButton .experimental {
+      color: red;
+      font-size: 12px;
+    }
+    .orText {
+      font-size: 26px;
+      margin-top: 0.5em;
+      font-style: italic;
+    }
+    .networkLoginButton.copypaste {
+      margin-top: 2em;
+    }
+
     </style>
 
     <div horizontal layout>
@@ -156,20 +198,60 @@
 
     <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==model.globalSettings.splashState}}'>
       <div class='view' flex>
-        <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$ }}</h1>
-        <p>{{ "WHY_SOCIAL_NETWORK" | $$ }}</p>
-        <template repeat='{{ n in model.networkNames }}' vertical layout>
-          <uproxy-network networkName='{{n}}'></uproxy-network>
-        </template>
-        <p id='oneTimeConnection'>
-          <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$ }}</a>
-        </p>
-        <p>
-          {{ "WE_WONT_POST" | $$ }}
-        </p>
-        <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-          {{ "SUBMIT_FEEDBACK" | $$ }}
-        </span>
+        <!-- TODO: translate before launch on webstore -->
+        <div hidden?='{{!supportsQuiver}}'>
+          <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
+
+          <paper-input-decorator label='Choose a user name' layout vertical>
+            <input is='core-input' value='{{ userName }}' />
+          </paper-input-decorator>
+          <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
+
+          <div class='orText'>- - - OR - - -</div>
+          <p>Sign in with a social network.</p>
+          <template repeat='{{ n in networkButtonNames }}' vertical layout>
+            <div on-tap='{{ loginTapped }}' class='networkLoginButton' data-network='{{n}}'>
+              <core-icon icon='uproxy-icons:{{n}}'></core-icon>
+              <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
+              <div class='experimental' hidden?='{{!isExperimentalNetwork(n)}}'>
+                Experimental
+              </div>
+            </div>
+          </template>
+
+          <div class='orText'>- - - OR - - -</div>
+          <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}'>
+            <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
+            <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
+          </div>
+
+          <p>
+            {{ "WE_WONT_POST" | $$ }}
+          </p>
+
+          <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
+            {{ "SUBMIT_FEEDBACK" | $$ }}
+          </span>
+        </div>
+
+        <!-- TODO: remove this and uproxy-network template once Quiver
+        support is on the webstore -->
+        <div hidden?='{{supportsQuiver}}'>
+          <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$ }}</h1>
+          <p>{{ "WHY_SOCIAL_NETWORK" | $$ }}</p>
+          <template repeat='{{ n in networkButtonNames }}' vertical layout>
+            <uproxy-network networkName='{{n}}'></uproxy-network>
+          </template>
+          <p id='oneTimeConnection'>
+            <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$ }}</a>
+          </p>
+          <p>
+            {{ "WE_WONT_POST" | $$ }}
+          </p>
+          <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
+            {{ "SUBMIT_FEEDBACK" | $$ }}
+          </span>
+        </div>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
         {{ "LEARN_MORE_SOCIAL" | $$ }}
