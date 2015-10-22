@@ -970,11 +970,12 @@ export class UserInterface implements ui_constants.UiApi {
 
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var network = this.model.getNetwork(networkInfo.name);
-    //If the user is connecteed to a network, do a check to see if the user is sure that they want to log out
+    //Check if the user is connected to a network
     if (network) {
       var instanceIds = Object.keys(this.instancesGivingAccessTo);
       var confirmationMessage: string;
 
+      // If the user is sharing access with others, ask them if they are sure that they want to log out
       if (instanceIds.length > 0) {
         if (instanceIds.length == 1) {
           confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE", {
