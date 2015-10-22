@@ -15,10 +15,6 @@
         width: 100%;
         background-color: white;
       }
-      h1 {
-        font-size: 1.4em;
-        color: #009688;  /* dark green */
-      }
       #contents {
         margin: 2em;
         line-height: 20px;
@@ -39,15 +35,14 @@
       <!-- TODO: translate everything before launching on webstore -->
 
       <uproxy-app-bar on-go-back='{{ closeQuiverLoginPanel }}'>
-        Login to Quiver
+        Login to uProxy
       </uproxy-app-bar>
 
       <div id='contents'>
-        <h1>Please enter your name</h1>
-        <paper-input-decorator label="name" layout vertical>
+        <paper-input-decorator label="Choose a user name" layout vertical>
           <input is='core-input' value='{{ userName }}' />
         </paper-input-decorator>
-        <uproxy-button raised on-tap='{{ loginToQuiver }}'>Connect</uproxy-button>
+        <uproxy-button raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
       </div>
 
   </template>
