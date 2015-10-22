@@ -131,7 +131,7 @@ class CordovaBrowserApi implements BrowserAPI {
   public showNotification = (text :string, tag :string) => {
     if (typeof Notification === 'undefined') {
       // Notifications are only supported when using Crosswalk
-      console.log('Can\'t show notifications in webview mode');
+      console.log('Notification (not shown): ' + text);
       return;
     }
 
