@@ -165,7 +165,7 @@ gruntConfig = {
     }
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android'
+      command: '<%= ccaJsPath %> build android --webview=system'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
@@ -441,13 +441,22 @@ gruntConfig = {
             'freedom-social-xmpp/vcardstore.js'
             'freedom-social-xmpp/node-xmpp-browser.js'
             'freedom-social-xmpp/google-auth.js'
+            'freedom-social-github/social.github.json'
+            'freedom-social-github/github-social-provider.js'
             'freedom-social-firebase/social.firebase-facebook.json'
+            'freedom-social-firebase/social.firebase-google.json'
             'freedom-social-firebase/firebase-shims.js'
             'freedom-social-firebase/firebase.js'
             'freedom-social-firebase/firebase-social-provider.js'
             'freedom-social-firebase/facebook-social-provider.js'
+            'freedom-social-firebase/google-social-provider.js'
+            'freedom-social-firebase/google-auth.js'
             'freedom-port-control/port-control.js'
             'freedom-port-control/port-control.json'
+            'freedom-pgp-e2e/end-to-end.compiled.js'
+            'freedom-pgp-e2e/googstorage.js'
+            'freedom-pgp-e2e/e2e.js'
+            'freedom-pgp-e2e/pgpapi.json'
 
             '**/freedom-module.json'
             '!generic_core/freedom-module.json'
@@ -698,6 +707,11 @@ gruntConfig = {
             dest: ccaDevPath + '/freedom-social-firebase'
           },
           {
+            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+            src: ['**/*.js', '**/*.json']
+            dest: ccaDevPath + '/freedom-social-github'
+          },
+          {
             expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
             src: ['**']
             dest: ccaDevPath + '/freedom-social-wechat'
@@ -706,6 +720,11 @@ gruntConfig = {
             expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
             src: ['**']
             dest: ccaDevPath + '/freedom-social-quiver'
+          },
+          {
+            expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
+            src: ['**']
+            dest: ccaDevPath + '/freedom-pgp-e2e'
           },
           {
             expand: true, cwd: 'node_modules/freedom-port-control/dist/',
