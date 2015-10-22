@@ -1,3 +1,6 @@
+/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/inappbrowser.d.ts'/>
+
 /**
  * cordova_browser_api.ts
  *
@@ -9,9 +12,6 @@ import browser_api = require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../../third_party/uproxy-lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
-
-/// <reference path='../../../../third_party/typings/chrome/chrome-app.d.ts'/>
-/// <reference path='../../../../networking-typings/communications.d.ts' />
 
 enum PopupState {
     NOT_LAUNCHED,
@@ -50,14 +50,43 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public startUsingProxy = (endpoint:net.Endpoint) => {
-    // TODO: Implement getter support, possibly using "redsocks".
+    if (!chrome.proxy) {
+      console.log('No proxy setting support; ignoring start command');
+      return;
+    }
+
+    chrome.proxy.settings.set({
+      scope: "regular",
+      value: {
+        mode: "fixed_servers",
+        rules: {
+          singleProxy: {
+            scheme: "socks5",
+            host: endpoint.address,
+            port: '' + endpoint.port
+          }
+        }
+      }
+    }, (response:Object) => {
+      console.log('Set proxy response:', response);
+      // Open the in-app browser through the proxy.
+      cordova.InAppBrowser.open('https://www.uproxy.org/', '_blank');
+    });
   };
 
   public stopUsingProxy = () => {
+    if (!chrome.proxy) {
+      console.log('No proxy setting support; ignoring stop command');
+      return;
+    }
+
+    chrome.proxy.settings.clear({scope: "regular"}, () => {
+      console.log('Cleared proxy settings');
+    });
   };
 
   public openTab = (url :string) => {
-    // TODO: Figure out what this means in Cordova.
+    cordova.InAppBrowser.open(url, '_blank');
   }
 
   public launchTabIfNotOpen = (relativeUrl :string) => {
@@ -100,6 +129,12 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public showNotification = (text :string, tag :string) => {
+    if (typeof Notification === 'undefined') {
+      // Notifications are only supported when using Crosswalk
+      console.log('Can\'t show notifications in webview mode');
+      return;
+    }
+
     var notification =
         new Notification('uProxy', {
           body: text,
