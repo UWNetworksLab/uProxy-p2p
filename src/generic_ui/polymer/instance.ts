@@ -36,5 +36,11 @@ Polymer({
       ui.stopUsingProxy();
     }
     ui.stopGettingFromInstance(this.instance.instanceId);
-  }
+  },
+  fireChanged: function() {
+    this.fire('instance-changed');
+  },
+  observe: {
+    'instance.isOnline': 'fireChanged',
+  },
 });
