@@ -575,7 +575,11 @@ export function notifyUI(networkName :string, userId :string) {
         // prefixed URL if it is set.
         token = token.lastIndexOf('/') >= 0 ?
             token.substr(token.lastIndexOf('/') + 1) : token;
-        networkData = JSON.parse(atob(token)).networkData;
+        try {
+          networkData = JSON.parse(atob(token)).networkData;
+        } catch (e) {
+          return Promise.reject('Invalid invite token ' + token);
+        }
       } else if (userId) {
         networkData = userId;
       }
