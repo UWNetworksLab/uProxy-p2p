@@ -55,6 +55,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     areAllContactsUproxy: true,
     supportsReconnect: true,
     supportsInvites: true,
-    isExperimental: true
+    isExperimental: true,
+    encryptWithClientId: true
   }
 };

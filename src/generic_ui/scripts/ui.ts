@@ -530,26 +530,29 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  private addUserWithConfirmation_ = (url: string) : Promise<void> => {
+  private addUser_ = (url: string, showConfirmation :boolean) : Promise<void> => {
     try {
       var token = url.substr(url.lastIndexOf('/') + 1);
       var tokenObj = JSON.parse(atob(token));
       var userName = tokenObj.userName;
       var networkName = tokenObj.networkName;
       var networkData = tokenObj.networkData;
-      var userId = JSON.parse(networkData)['userId'];
     } catch(e) {
       return Promise.reject('Error parsing invite URL');
     }
 
-    var confirmationMessage =
-        this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
-    return this.getConfirmation('', confirmationMessage).then(() => {
+    var getConfirmation = Promise.resolve();
+    if (showConfirmation) {
+      var confirmationMessage =
+          this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
+      getConfirmation = this.getConfirmation('', confirmationMessage);
+    }
+    return getConfirmation.then(() => {
       var socialNetworkInfo :social.SocialNetworkInfo = {
         name: networkName,
         userId: "" /* The current user's ID will be determined by the core. */
       };
-      return this.core.acceptInvitation({network: socialNetworkInfo, data: userId});
+      return this.core.acceptInvitation({network: socialNetworkInfo, data: networkData});
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
       return;
@@ -584,11 +587,12 @@ export class UserInterface implements ui_constants.UiApi {
         this.login(networkName).then(() => {
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          this.core.addUser(url).catch(showUrlError);
+          // Add user without showing a 2nd confirmation.
+          this.addUser_(url, false).catch(showUrlError);
         });
       });
     } else {
-      this.addUserWithConfirmation_(url).catch(showUrlError);;
+      this.addUser_(url, true).catch(showUrlError);;
     }
   }
 

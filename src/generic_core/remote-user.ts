@@ -57,6 +57,8 @@ var log :logging.Log = new logging.Log('remote-user');
 
     public consent :consent.State;
 
+    public knownPublicKeys :string[] = [];
+
     // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :remote_instance.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
@@ -476,6 +478,10 @@ var log :logging.Log = new logging.Log('remote-user');
         this.profile.url = state.url;
       }
 
+      if (typeof state.knownPublicKeys !== 'undefined') {
+        this.knownPublicKeys = state.knownPublicKeys;
+      }
+
       this.profile.status = state.status || social.UserStatus.FRIEND;
 
       // Restore all instances.
@@ -506,7 +512,8 @@ var log :logging.Log = new logging.Log('remote-user');
         url: this.profile.url,
         instanceIds: Object.keys(this.instances_),
         consent: this.consent,
-        status: this.profile.status
+        status: this.profile.status,
+        knownPublicKeys: this.knownPublicKeys
       });
     }
 

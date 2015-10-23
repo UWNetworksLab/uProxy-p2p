@@ -32,6 +32,7 @@ import user = require('./remote-user');
 import globals = require('./globals');
 import storage = globals.storage;
 import freedom_social2 = require('../interfaces/social2');
+import crypto = require('./crypto');
 import ui = ui_connector.connector;
 import network_options = require('../generic/network-options');
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
@@ -244,11 +245,6 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    // Required for version 0.8.23
-    public addUserRequest = (networkData :string): Promise<void> => {
-      throw new Error('Operation not implemented');
-    }
-
     public getInviteUrl = () : Promise<string> => {
       throw new Error('Operation not implemented');
     }
@@ -267,7 +263,7 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.areAllContactsUproxy === true : false;
     }
 
-    public acceptInvitation = (data :string) : Promise<void> => {
+    public acceptInvitation = (networkData :string, userId ?:string, publicKey ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -431,7 +427,6 @@ export function notifyUI(networkName :string, userId :string) {
         return;
       }
       var userId = incoming.from.userId;
-      var msg :social.VersionedPeerMessage = JSON.parse(incoming.message);
 
       var client :social.ClientState =
           freedomClientToUproxyClient(incoming.from);
@@ -446,13 +441,26 @@ export function notifyUI(networkName :string, userId :string) {
         user.handleClient(client);
       }
 
-      log.info('received message', {
-        userFrom: user.userId,
-        clientFrom: client.clientId,
-        instanceFrom: user.clientToInstance(client.clientId),
-        msg: msg
+      // Decrypt message.
+      var decryptMessage = Promise.resolve(incoming.message);
+      if (this.encryptWithClientId_()) {
+        var key = getKeyFromClientId(client.clientId);
+        // TODO: check if key in user.knownPublicKeys
+        console.log('got encrypted message ' + incoming.message);
+        decryptMessage = crypto.verifyDecrypt(incoming.message, key);
+      }
+
+      decryptMessage.then((messageString :string) => {
+        var msg :social.VersionedPeerMessage = JSON.parse(messageString);
+
+        log.info('received message', {
+          userFrom: user.userId,
+          clientFrom: client.clientId,
+          instanceFrom: user.clientToInstance(client.clientId),
+          msg: msg
+        });
+        user.handleMessage(client.clientId, msg);
       });
-      user.handleMessage(client.clientId, msg);
     }
 
     public restoreFromStorage() {
@@ -504,7 +512,7 @@ export function notifyUI(networkName :string, userId :string) {
           userName = globals.settings.quiverUserName;
         }
         request = {
-          agent: 'uproxy',
+          agent: globals.publicKey,
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
           interactive: !reconnect,
@@ -573,14 +581,11 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    // Required for version 0.8.23
-    public addUserRequest = (networkData :string): Promise<void> => {
-      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
-        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
-      });
-    }
-
-    public acceptInvitation = (networkData :string): Promise<void> => {
+    public acceptInvitation = (networkData :string, userId ?:string, publicKey ?:string) : Promise<void> => {
+      if (userId && publicKey) {
+        var user = this.getOrAddUser_(userId);
+        user.knownPublicKeys.push(userId);
+      }
       return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
       });
@@ -598,10 +603,12 @@ export function notifyUI(networkName :string, userId :string) {
     public getInviteUrl = () : Promise<string> => {
       return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
         var tokenObj = {
-          v: 1,  // version, using short-hand 'v' to keep the URL shorter
+          v: 2,  // version, using short-hand 'v' to keep the URL shorter
           networkName: this.name,
           userName: this.myInstance.userName,
-          networkData: data.networkData
+          networkData: data.networkData,
+          userId: this.myInstance.userId,
+          publicKey: globals.publicKey
         };
         return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
       })
@@ -635,7 +642,15 @@ export function notifyUI(networkName :string, userId :string) {
         instanceTo: user.clientToInstance(clientId),
         msg: messageString
       });
-      return this.freedomApi_.sendMessage(clientId, messageString);
+      if (this.encryptWithClientId_()) {
+        var key = getKeyFromClientId(clientId);
+        return crypto.signEncrypt(messageString, key).then((cipherText :string) => {
+          console.log('sending encrypted message: ' + cipherText);
+          return this.freedomApi_.sendMessage(clientId, cipherText);
+        });
+      } else {
+        return this.freedomApi_.sendMessage(clientId, messageString);
+      }
     }
 
     // TODO: We should make a class for monitors or generally to encapsulate
@@ -685,6 +700,12 @@ export function notifyUI(networkName :string, userId :string) {
       // Default to true.
       var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
       return options ? options.enableMonitoring === true : true;
+    }
+
+    private encryptWithClientId_ = (): boolean => {
+      // Default to false.
+      var options: social.NetworkOptions = NETWORK_OPTIONS[this.name];
+      return options ? options.encryptWithClientId === true : true;
     }
 
     public getNetworkState = () :social.NetworkState => {
@@ -785,4 +806,8 @@ export function freedomClientToUproxyClient(
     timestamp: freedomClientState.timestamp
   };
   return state;
+}
+
+function getKeyFromClientId(clientId :string) : string {
+  return clientId.substr(clientId.indexOf('-----BEGIN PGP'));
 }

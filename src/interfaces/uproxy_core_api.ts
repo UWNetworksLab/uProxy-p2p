@@ -98,7 +98,7 @@ export enum Command {
   HANDLE_CORE_UPDATE = 1021,
   REFRESH_PORT_CONTROL = 1022,
   CREDENTIALS_ERROR = 1023,
-  ADD_USER = 1024, /* Deprecated as of 0.8.23 */
+  /* ADD_USER = 1024, */ /* Deprecated as of 0.8.23 */
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,

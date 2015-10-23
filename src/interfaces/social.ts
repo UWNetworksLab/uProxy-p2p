@@ -109,6 +109,7 @@ export interface NetworkOptions {
   supportsInvites :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
   isExperimental ?:boolean;
+  encryptWithClientId ?:boolean;
 }
 
 /**
@@ -224,7 +225,8 @@ export interface UserState {
   // be saved and loaded separately.
   instanceIds :string[];
   consent     :ConsentState;
-  status      :UserStatus
+  status      :UserStatus;
+  knownPublicKeys :string[];
 }
 
 
@@ -292,12 +294,6 @@ export interface Network {
    * Returns the User corresponding to |userId|.
    */
   getUser :(userId :string) => RemoteUser;
-
-  /**
-   * Ask the social network to add the user.
-   * Required for version 0.8.23
-   */
-  addUserRequest: (networkData :string) => Promise<void>;
 
   /**
    * Accept an invite to use uProxy with a friend
