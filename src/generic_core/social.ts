@@ -568,13 +568,13 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public acceptInvitation = (url ?:string, userId ?:string) : Promise<void> => {
+    public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
       var networkData :string = null;
-      if (url) {
-        // url may be a URL with a token, or just the token.  Remove the
+      if (token) {
+        // token may be a URL with a token, or just the token.  Remove the
         // prefixed URL if it is set.
-        var token = url.lastIndexOf('/') >= 0 ?
-            url.substr(url.lastIndexOf('/') + 1) : url;
+        token = token.lastIndexOf('/') >= 0 ?
+            token.substr(token.lastIndexOf('/') + 1) : token;
         networkData = JSON.parse(atob(token)).networkData;
       } else if (userId) {
         networkData = userId;
