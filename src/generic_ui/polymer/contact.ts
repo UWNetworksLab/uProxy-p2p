@@ -52,7 +52,7 @@ Polymer({
       userId: this.contact.network.userId
     };
     ui_context.core.acceptInvitation({
-      network: socialNetworkInfo, data: this.contact.userId
+      network: socialNetworkInfo, userId: this.contact.userId
     });
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction

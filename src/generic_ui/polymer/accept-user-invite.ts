@@ -11,13 +11,12 @@ Polymer({
     this.receivedInviteToken.substr(this.receivedInviteToken.lastIndexOf('/') + 1) : this.receivedInviteToken;
     var tokenObj = JSON.parse(atob(token));
     var networkName = tokenObj.networkName;
-    var networkData = tokenObj.networkData;
     var socialNetworkInfo = {
       name: networkName,
       userId: "" /* The current user's ID will be determined by the core. */
     };
 
-    core.acceptInvitation({network: socialNetworkInfo, data: networkData})
+    core.acceptInvitation({network: socialNetworkInfo, token: this.receivedInviteToken})
         .then(() => {
       this.fire('open-dialog', {
         heading: '',
