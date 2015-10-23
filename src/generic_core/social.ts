@@ -262,7 +262,7 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.areAllContactsUproxy === true : false;
     }
 
-    public acceptInvitation = (url ?:string, userId ?:string) : Promise<void> => {
+    public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 

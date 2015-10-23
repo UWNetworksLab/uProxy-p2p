@@ -296,7 +296,7 @@ export interface Network {
   /**
    * Accept an invite to use uProxy with a friend
    */
-  acceptInvitation: (url ?:string, userId ?:string) => Promise<void>;
+  acceptInvitation: (token ?:string, userId ?:string) => Promise<void>;
 
   /**
    * Send an invite to a friend to use uProxy
