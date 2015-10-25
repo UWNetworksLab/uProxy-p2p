@@ -101,7 +101,7 @@
     #portControlBox .label {
       color: rgb(112, 112, 112);
     }
-    #portControlBox uproxy-faq-link {
+    #portControlBox .faq-icon {
       color: rgb(0, 150, 136);
     }
     #portControlBox .info {
@@ -120,9 +120,9 @@
         <div id='portControlBox'>
           <p class='inputLabel'>
             {{ 'PORT_CONTROL_TITLE' | $$ }}
-            <uproxy-faq-link anchor='whatIsPortControl'>
+            <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='whatIsPortControl'>
               <core-icon icon='help'></core-icon>
-            </uproxy-faq-link>
+            </uproxy-link>
           </p>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.TRUE }}'>
             {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
@@ -138,9 +138,9 @@
           </uproxy-link>
           <p class='label info' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
             {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
-            <uproxy-faq-link anchor='whatIsPortControl'>
+            <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='whatIsPortControl'>
               {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$ }}
-            </uproxy-faq-link>
+            </uproxy-link>
           </p>
         </div>
         <div id='formContainer' flex vertical layout>

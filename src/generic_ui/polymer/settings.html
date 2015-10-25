@@ -3,7 +3,7 @@
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='description.html'>
-<link rel='import' href='faq-link.html'>
+<link rel='import' href='faq.html'>
 <link rel='import' href='link.html'>
 <link rel='import' href='network-in-settings.html'>
 <link rel='import' href='name-for-network.html'>
@@ -75,8 +75,7 @@
       text-indent: 5px;
       display: inline-block;
     }
-    uproxy-link,
-    uproxy-faq-link {
+    uproxy-link {
       display: block;
       padding: 10px 0px;
     }
@@ -118,7 +117,7 @@
     #metricsCheckbox core-icon[icon='help']:hover {
       opacity: 1;
     }
-    #metricsCheckbox paper-checkbox, uproxy-faq-link {
+    #metricsCheckbox paper-checkbox, .faq-icon {
       display: table-cell;
     }
     #settingsLinks .label {
@@ -191,9 +190,9 @@
 
         <div id='metricsCheckbox'>
           <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "STATS_ENABLED_TITLE" | $$ }}'></paper-checkbox>
-          <uproxy-faq-link anchor='doesUproxyLogData'>
+          <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
-          </uproxy-faq-link>
+          </uproxy-link>
         </div>
 
         <hr>

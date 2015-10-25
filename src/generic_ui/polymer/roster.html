@@ -104,9 +104,9 @@
         {{ "NO_FRIENDS_ONLINE" | $$ }}
         <p id='friendsAppearWhen'>{{ "FRIENDS_APPEAR_WHEN" | $$ }}</p>
         <p>
-          <uproxy-faq-link anchor="howDoIFind">
+          <uproxy-link on-tap='{{ openFaqForm }}' anchor="howDoIFind">
             <span id='noContactsFoundLearnMoreLink'>{{ "LEARN_MORE" | $$ }}</span>
-          </uproxy-faq-link>
+          </uproxy-link>
         </p>
       </div>
     </div>

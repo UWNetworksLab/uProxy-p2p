@@ -141,12 +141,6 @@
 
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>
             <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
-              <div horizontal layout hidden?='{{ hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
-                <core-icon icon='check'></core-icon>
-                <p class='preButtonText' flex>
-                 {{ "GRANTED_YOU_ACCESS" | $$({ name: contact.name || contact.userId }) }}
-                </p>
-              </div>
               <div horizontal layout hidden?='{{ !hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
                 <core-icon icon='query-builder'></core-icon>
                 <p class='preButtonText' flex>

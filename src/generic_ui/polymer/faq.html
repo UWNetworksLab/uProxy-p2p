@@ -4,7 +4,6 @@
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
-<link rel='import' href='faq-link.html'>
 <link rel='import' href='dialog.html'>
 
 <polymer-element name='uproxy-faq' attributes=''>
@@ -26,7 +25,7 @@
     #container {
       height: 100%;
     }
-    #formContainer {
+    #contentContainer {
       padding: 30px;
       text-align: start;
       color: #009688;
@@ -43,7 +42,7 @@
         <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "FAQ_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
-        <div id='formContainer' flex>
+        <div id='contentContainer' flex>
           <div class="content">
             <section id="header">
               <img src="../../icons/uproxy_logo.svg" alt="uProxy Logo" height="140" width="140" />
@@ -193,10 +192,10 @@
             </section>
           </div>
         </div> <!-- end of form container -->
-        
+
       </div>
     </core-overlay>
     
   </template>
-  <script src='faq-link.js'></script>
+  <script src='faq.js'></script>
 </polymer-element>

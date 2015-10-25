@@ -52,5 +52,8 @@ Polymer({
   ready: function() {
     this.model = model;
     this.languages = languages;
-  }
+  },
+  openFaqForm: function() {
+    this.fire('core-signal', {name: 'open-faq'});
+  },
 });
