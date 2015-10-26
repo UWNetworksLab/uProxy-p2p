@@ -289,15 +289,6 @@
     </core-overlay>
 
     <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{dialogOpened}}">
-<!--       <div hidden?="selectedNetworkName != Quiver">
-        <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
-
-        <paper-input-decorator label='Choose a user name' layout vertical>
-          <input is='core-input' value='{{ userName }}' />
-        </paper-input-decorator>
-        <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
-      </div>
- -->
       <template repeat="{{ n in networkButtonNames }}">
         <div hidden?='{{selectedNetworkName != n}}'>
           <h1 id="dialogHeading">Sign in to {{getNetworkDisplayName(n)}}</h1>
