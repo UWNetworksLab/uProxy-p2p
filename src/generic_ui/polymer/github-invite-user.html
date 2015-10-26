@@ -7,14 +7,14 @@
 <link rel='import' href='button.html'>
 <link rel="import" href="i18n-filter.html">
 
-<polymer-element name='uproxy-google-invite-user'>
+<polymer-element name='uproxy-github-invite-user'>
   <template>
     <style>
       uproxy-app-bar /deep/ core-toolbar {
-        background-color: #dd4b39;
+        background-color: #666;
       }
       uproxy-button {
-        background: #dd4b39;
+        background: #666;
       }
       #inviteUserPanel {
         height: 100%;
@@ -27,7 +27,7 @@
       }
       a {
         cursor: pointer;
-        color: #dd4b39 !important;
+        color: #666 !important;
       }
       p {
         font-size: 13px;
@@ -70,7 +70,7 @@
       }
     </style>
 
-    <core-signals on-core-signal-open-google-invite-dialog='{{ openInviteUserPanel }}'></core-signals>
+    <core-signals on-core-signal-open-github-invite-dialog='{{ openInviteUserPanel }}'></core-signals>
 
     <core-overlay id='inviteUserPanel'>
       <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
@@ -78,12 +78,11 @@
       </uproxy-app-bar>
 
       <div class='section'>
-        <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$ }}</p>
-        <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
-          <input is='core-input' value='{{ inviteUserEmail }}' />
+        <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
+        <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
+          <input is='core-input' value='{{ userIdInput }}'>
         </paper-input-decorator>
-
-        <uproxy-button raised affirmative on-tap='{{ sendToGMailFriend }}'>
+        <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
           {{ 'SEND_INVITATION' | $$ }}
         </uproxy-button>
       </div>
@@ -97,5 +96,5 @@
     </core-overlay>
 
   </template>
-  <script src='google-invite-user.js'></script>
+  <script src='github-invite-user.js'></script>
 </polymer-element>

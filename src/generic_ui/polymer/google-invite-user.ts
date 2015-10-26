@@ -7,8 +7,7 @@ var core = ui_context.core;
 
 Polymer({
   generateInviteUrl: function() {
-    var selectedNetwork =
-        model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
+    var selectedNetwork = model.getNetwork('GMail');
     var info = {
       name: selectedNetwork.name,
       userId: selectedNetwork.userId
@@ -42,55 +41,6 @@ Polymer({
       this.closeInviteUserPanel();
     });
   },
-  sendToFacebookFriend: function() {
-    this.generateInviteUrl().then(() => {
-      var facebookUrl =
-          'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
-          + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
-      ui.openTab(facebookUrl);
-      this.fire('open-dialog', {
-        heading: '', // TODO:
-        message: ui.i18n_t("FACEBOOK_INVITE_IN_BROWSER"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
-      this.closeInviteUserPanel();
-    });
-  },
-  inviteGithubFriend: function() {
-    var selectedNetwork =
-      model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
-    core.inviteUser({
-      networkId: selectedNetwork.name,
-      userName: this.userIdInput
-    }).then(() => {
-      this.closeInviteUserPanel();
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.userIdInput }),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
-    }).catch(() => {
-      // TODO: The message in this dialog should be passed from the social provider.
-      // https://github.com/uProxy/uproxy/issues/1923
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("GITHUB_INVITE_SEND_FAILED"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
-    });
-  },
-  onNetworkSelect: function(e :any, details :any) {
-    if (details.isSelected) {
-      this.selectedNetworkName = details.item.getAttribute('label');
-      this.$.loginToInviteFriendDialog.open();
-    }
-  },
   openInviteUserPanel: function() {
     this.$.inviteUserPanel.open();
   },
@@ -104,7 +54,6 @@ Polymer({
   ready: function() {
     this.inviteUrl = '';
     this.inviteUserEmail = '';
-    this.selectedNetworkName = 'GMail';
     this.model = model;
     this.userIdInput = '';
   }

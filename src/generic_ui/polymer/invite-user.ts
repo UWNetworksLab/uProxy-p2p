@@ -158,6 +158,8 @@ Polymer({
         this.fire('core-signal', { name: 'open-google-invite-dialog' });
       } else if (networkName == "Facebook-Firebase-V2") {
         this.sendToFacebookFriend();
+      } else if (networkName == "GitHub") {
+        this.fire('core-signal', { name: 'open-github-invite-dialog' });
       }
       this.closeInviteUserPanel();
     }).catch((e: Error) => {
