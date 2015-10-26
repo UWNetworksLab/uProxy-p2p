@@ -6,9 +6,8 @@ var model = ui_context.model;
 var core = ui_context.core;
 
 Polymer({
-  generateInviteUrl: function() {
-    var selectedNetwork =
-        model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
+  generateInviteUrl: function(name :string) {
+    var selectedNetwork = model.getNetwork(name);
     var info = {
       name: selectedNetwork.name,
       userId: selectedNetwork.userId
@@ -19,7 +18,7 @@ Polymer({
     });
   },
   sendToGMailFriend: function() {
-    this.generateInviteUrl().then((selectedNetwork:any) => {
+    this.generateInviteUrl('GMail').then((selectedNetwork:any) => {
       var selectedNetworkInfo = {
         name: selectedNetwork.name,
         userId: selectedNetwork.userId
@@ -42,8 +41,14 @@ Polymer({
       this.closeInviteUserPanel();
     });
   },
+  generateQuiverInviteUrl: function() {
+    return this.generateInviteUrl('Quiver');
+  },
+  dialogOpened: function() {
+    this.$.loginToInviteFriendDialog.resizeHandler();
+  },
   sendToFacebookFriend: function() {
-    this.generateInviteUrl().then(() => {
+    this.generateInviteUrl('Facebook-Firebase-V2').then(() => {
       var facebookUrl =
           'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
           + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
@@ -100,6 +105,7 @@ Polymer({
   },
   closeInviteUserPanel: function() {
     this.inviteUrl = '';
+    this.userName = '';
     this.$.inviteUserPanel.close();
   },
   showAcceptUserInvite: function() {
@@ -114,6 +120,16 @@ Polymer({
           name: name,
           displayName: ui.getNetworkDisplayName(name)
         });
+      }
+    }
+  },
+  updateOnlineNetworks: function() {
+    this.isQuiverLoggedIn = false;
+    for (var i = 0; i < model.onlineNetworks.length; ++i) {
+      var name = model.onlineNetworks[i].name;
+      if (name == "Quiver") {
+        this.isQuiverLoggedIn = true;
+        break;
       }
     }
   },
@@ -140,7 +156,10 @@ Polymer({
       if (networkName == "GMail") {
         console.log("firing signal");
         this.fire('core-signal', { name: 'open-google-invite-dialog' });
+      } else if (networkName == "Facebook-Firebase-V2") {
+        this.sendToFacebookFriend();
       }
+      this.closeInviteUserPanel();
     }).catch((e: Error) => {
       console.warn('Did not log in ', e);
     });
@@ -150,6 +169,9 @@ Polymer({
   },
   isExperimentalNetwork: function(name :string) {
     return ui.isExperimentalNetwork(name);
+  },
+  supportsInvites: function(name :string) {
+    return ui.supportsInvites(name);
   },
   updateNetworkButtonNames: function() {
     var supportsQuiver = false;
@@ -166,7 +188,8 @@ Polymer({
     this.supportsQuiver = supportsQuiver;
   },
   observe: {
-    'model.networkNames': 'updateNetworkButtonNames'
+    'model.networkNames': 'updateNetworkButtonNames',
+    'model.onlineNetworks': 'updateOnlineNetworks'
   },
   ready: function() {
     this.userName = model.globalSettings.quiverUserName;
@@ -176,5 +199,6 @@ Polymer({
     this.selectedNetworkName = '';
     this.model = model;
     this.userIdInput = '';
+    this.isQuiverLoggedIn = false;
   }
 });

@@ -67,7 +67,7 @@
       }
       #dialogHeading {
         color: #333;
-        font-size: 20px;
+        font-size: 18px;
         font-weight: normal;
         margin-top: 0;
       }
@@ -130,6 +130,9 @@
       .networkLoginButton.copypaste {
         margin-top: 2em;
       }
+      #loginToInviteFriendDialog {
+        min-width: 80%;
+      }
       uproxy-button.login {
         margin: 15px 0px;
       }
@@ -147,7 +150,7 @@
         background: #0f9d58;
       }
       uproxy-button.GMail {
-        background: #c4c4c4;
+        background: #dd4b39; /*#c4c4c4;*/
       }
       uproxy-button.Facebook,
       uproxy-button.Facebook-Firebase-V2 {
@@ -157,7 +160,7 @@
         background: #6ab000;
       }
       uproxy-button.GitHub {
-        background: #C4C4C4;
+        background: #666; /*#c4c4c4;*/
       }
       uproxy-dialog {
         padding: 5px;
@@ -175,12 +178,25 @@
       <div class='view' flex>
         <!-- TODO: translate before launch on webstore -->
         <div hidden?='{{!supportsQuiver}}'>
-          <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
+          <div hidden?='{{isQuiverLoggedIn}}'>
+            <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
+            <paper-input-decorator label='Choose a user name' layout vertical>
+              <input is='core-input' value='{{ userName }}' />
+            </paper-input-decorator>
+            <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
+          </div>
+          <div hidden?='{{!isQuiverLoggedIn}}'>
+            <!-- TODO: localization -->
+            <uproxy-button affirmative on-tap='{{ generateQuiverInviteUrl }}'>
+              Generate Quiver Invite Link
+            </uproxy-button>
 
-          <paper-input-decorator label='Choose a user name' layout vertical>
-            <input is='core-input' value='{{ userName }}' />
-          </paper-input-decorator>
-          <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
+            <div hidden?='{{ inviteUrl == "" }}'>
+              <p>Send this link to your friend so they can find you on Quiver</p>
+              <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+            </div>
+          </div>
+
 
           <div class='orText'>- - - OR - - -</div>
           <p>Sign in with a social network.</p>
@@ -230,7 +246,6 @@
               </paper-dropdown>
             </paper-dropdown-menu>
           </div>
-
           <div class='section'>
             <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
               <p>{{ 'FACEBOOK_INVITE_INSTRUCTIONS' | $$ }}</p>
@@ -259,18 +274,6 @@
                 {{ 'SEND_INVITATION' | $$ }}
               </uproxy-button>
             </div>
-
-            <div hidden?='{{ selectedNetworkName != "Quiver"}}'>
-              <!-- TODO: localization -->
-              <uproxy-button affirmative on-tap='{{ generateInviteUrl }}'>
-                Generate Quiver Invite Link
-              </uproxy-button>
-
-              <div hidden?='{{ inviteUrl == "" }}'>
-                <p>Send this link to your friend so they can find you on Quiver</p>
-                <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
-              </div>
-            </div>
           </div>
 
           <div class='section'>
@@ -283,7 +286,7 @@
 
     </core-overlay>
 
-    <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog'>
+    <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{dialogOpened}}">
 <!--       <div hidden?="selectedNetworkName != Quiver">
         <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
 
@@ -293,15 +296,20 @@
         <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
       </div>
  -->
-      <template repeat="{{ network in onlineInviteNetworks }}">
-        <div hidden?='{{selectedNetworkName != network.name}}'>
-          <h1 id="dialogHeading">Sign in to {{network.displayName}}</h1>
+      <template repeat="{{ n in networkButtonNames }}">
+        <div hidden?='{{selectedNetworkName != n}}'>
+          <h1 id="dialogHeading">Sign in to {{getNetworkDisplayName(n)}}</h1>
           <core-icon id="close" icon="clear" on-tap='{{ close }}'></core-icon>
-          <p id="dialogText">To invite a {{network.displayName}} friend to uProxy, please login to your {{network.displayName}} account.</p>
+          <p id="dialogText" hidden?="{{!supportsInvites(n)}}">
+            To invite a {{getNetworkDisplayName(n)}} friend to uProxy, please login to your {{getNetworkDisplayName(n)}} account.
+          </p>
+          <p id="dialogText" hidden?="{{supportsInvites(n)}}">
+            Signing in will allow your {{getNetworkDisplayName(n)}} contacts who use uProxy to see when you are online with uProxy.
+          </p>
           <div style="text-align:center;">
-            <uproxy-button raised on-tap='{{loginTapped}}' class='login {{network.name}}' data-network="{{network.name}}">
-              <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:{{ network.name }}'></core-icon></span>
-              <span id="buttonTextContainer">Sign in to {{network.displayName}}</span>
+            <uproxy-button raised on-tap='{{loginTapped}}' class='login {{n}}' data-network="{{n}}">
+              <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:{{n}}'></core-icon></span>
+              <span id="buttonTextContainer">Sign in to {{getNetworkDisplayName(n)}}</span>
             </uproxy-button>
           </div>
         </div>
