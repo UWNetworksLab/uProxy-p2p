@@ -528,7 +528,7 @@ gruntConfig = {
           'sha1'
           'uproxy-lib/loggingprovider'
           'uproxy-lib/churn-pipe'
-          'uproxy-lib/social-cloud'
+          'uproxy-lib/cloud/social'
         ]
         files: [
           {

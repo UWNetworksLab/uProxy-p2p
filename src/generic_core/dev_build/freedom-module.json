@@ -32,7 +32,7 @@
       "api": "social2"
     },
     "SOCIAL-Cloud": {
-      "url": "../uproxy-lib/social-cloud/freedom-module.json",
+      "url": "../uproxy-lib/cloud/social/freedom-module.json",
       "api": "social2"
     },
     "loggingcontroller": {
