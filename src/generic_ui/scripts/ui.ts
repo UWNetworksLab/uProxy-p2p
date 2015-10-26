@@ -978,7 +978,40 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
+  private confirmForLogout() :Promise<boolean> {
+    var sharingTo = Object.keys(this.instancesGivingAccessTo);
+    var message :string;
+
+    // Do not need to ask user if not actually sharing
+    if (sharingTo.length === 0) {
+      return Promise.resolve(true);
+    }
+
+    if (sharingTo.length === 1) {
+      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE", {
+        name: this.mapInstanceIdToUser_[sharingTo[0]].name,
+      });
+    } else if (sharingTo.length === 2) {
+      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_TWO", {
+        name1: this.mapInstanceIdToUser_[sharingTo[0]].name,
+        name2: this.mapInstanceIdToUser_[sharingTo[1]].name,
+      });
+    } else {
+      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_MANY", {
+        name: this.mapInstanceIdToUser_[sharingTo[0]].name,
+        numOthers: sharingTo.length - 1,
+      });
+    }
+
+    // should not be using exceptions for flow, switch to boolean
+    return this.getConfirmation('', message).then(() => {
+      return true;
+    }).catch(() => {
+      return false;
+    });
+  }
+
+  public logout(networkInfo :social.SocialNetworkInfo) :Promise<void> {
     var network = this.model.getNetwork(networkInfo.name);
     // Check if the user is connected to a network
     if (!network) {
@@ -989,42 +1022,13 @@ export class UserInterface implements ui_constants.UiApi {
       return Promise.resolve<void>();
     }
 
-    var instanceIds = Object.keys(this.instancesGivingAccessTo);
-    var confirmationMessage: string;
-    var userConfirmed :Promise<void> = Promise.resolve<void>();
+    return this.confirmForLogout().then((confirmed :boolean) => {
+      if (!confirmed) {
+        return;
+      }
 
-    // If the user is sharing access with others, ask them if they are sure
-    // that they want to log out
-    if (instanceIds.length === 1) {
-      confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE", {
-        name: this.mapInstanceIdToUser_[instanceIds[0]].name
-      });
-    } else if (instanceIds.length === 2) {
-      confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_TWO", {
-        name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
-        name2: this.mapInstanceIdToUser_[instanceIds[1]].name
-      });
-    } else if (instanceIds.length > 0) {
-      confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_MANY", {
-        name: this.mapInstanceIdToUser_[instanceIds[0]].name,
-        numOthers: instanceIds.length - 1
-      });
-    }
-
-    if (confirmationMessage) {
-      userConfirmed = this.getConfirmation('', confirmationMessage);
-    }
-
-    userConfirmed.then(() => {
-      // if we know about the network, record that we expect this logout to
-      // happen
       network.logoutExpected = true;
-
-      //log out
       return this.core.logout(networkInfo);
-    }).catch((e) => {
-      // The user did not want to log out
-      return;
     });
   }
 
