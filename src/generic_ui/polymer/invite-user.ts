@@ -105,7 +105,6 @@ Polymer({
   },
   closeInviteUserPanel: function() {
     this.inviteUrl = '';
-    this.userName = '';
     this.$.inviteUserPanel.close();
   },
   showAcceptUserInvite: function() {

@@ -1225,14 +1225,19 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private updateShowInviteControls_ = () => {
-    // var showControls = false;
-    // for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
-    //   if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
-    //     showControls = true;
-    //     break;
-    //   }
-    // }
-    this.showInviteControls = true;
+    var showControls = false;
+    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
+      if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
+        showControls = true;
+        break;
+      }
+    }
+    for (var i = 0; i < this.model.networkNames.length; ++i) {
+      if (this.model.networkNames[i] === 'Quiver') {
+        showControls = true;
+        break;
+      }
+    }
   }
 
   // this takes care of updating the view (given the assumuption that we are

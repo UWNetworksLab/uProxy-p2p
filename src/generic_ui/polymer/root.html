@@ -486,9 +486,9 @@
 
     <uproxy-proxy-error id='proxyError'></uproxy-proxy-error>
 
-    <paper-toast id='toast'
+    <paper-toast id='toast' hidden?="{{ui.view != ui_constants.View.ROSTER}}"
         text='{{ toastMessage }}' responsiveWidth='320px'
-        style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) + 10 }}px;'
+        style='bottom: {{ topOfStatuses($.status.offsetHeight, !$.feedback.opened) + 10 }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
           hidden?='{{ !unableToShare && !unableToGet }}'>{{ "GET_HELP" | $$ }}
