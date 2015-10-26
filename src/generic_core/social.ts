@@ -244,11 +244,6 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    // Required for version 0.8.23
-    public addUserRequest = (networkData :string): Promise<void> => {
-      throw new Error('Operation not implemented');
-    }
-
     public getInviteUrl = () : Promise<string> => {
       throw new Error('Operation not implemented');
     }
@@ -267,7 +262,7 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.areAllContactsUproxy === true : false;
     }
 
-    public acceptInvitation = (data :string) : Promise<void> => {
+    public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -573,14 +568,21 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    // Required for version 0.8.23
-    public addUserRequest = (networkData :string): Promise<void> => {
-      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
-        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
-      });
-    }
-
-    public acceptInvitation = (networkData :string): Promise<void> => {
+    public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
+      var networkData :string = null;
+      if (token) {
+        // token may be a URL with a token, or just the token.  Remove the
+        // prefixed URL if it is set.
+        token = token.lastIndexOf('/') >= 0 ?
+            token.substr(token.lastIndexOf('/') + 1) : token;
+        try {
+          networkData = JSON.parse(atob(token)).networkData;
+        } catch (e) {
+          return Promise.reject('Invalid invite token ' + token);
+        }
+      } else if (userId) {
+        networkData = userId;
+      }
       return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
       });
