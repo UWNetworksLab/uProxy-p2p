@@ -203,7 +203,10 @@ export class UserInterface implements ui_constants.UiApi {
 
   public toastMessage :string = null;
 
-  public showInviteControls: boolean = true;
+  public showInviteControls: boolean = false;
+
+  // TODO: Remove this when we switch completely to a roster-before-login flow.
+  public showRosterBeforeLogin:boolean = false;
 
 
   /**
@@ -1153,6 +1156,13 @@ export class UserInterface implements ui_constants.UiApi {
       }
     }
 
+    // TODO: Remove this when we switch completely to a roster-before-login flow.
+    for (var i = 0; i < this.model.networkNames.length; ++i) {
+      if (this.model.networkNames[i] === 'Quiver') {
+        this.showRosterBeforeLogin = true;
+      }
+    }
+
     this.portControlSupport = state.portControlSupport;
 
     // plenty of state may have changed, update it
@@ -1225,25 +1235,21 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private updateShowInviteControls_ = () => {
-    var showControls = false;
+    var showControls = this.showRosterBeforeLogin;
     for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
       if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
         showControls = true;
         break;
       }
     }
-    for (var i = 0; i < this.model.networkNames.length; ++i) {
-      if (this.model.networkNames[i] === 'Quiver') {
-        showControls = true;
-        break;
-      }
-    }
+    this.showInviteControls = showControls;
   }
 
   // this takes care of updating the view (given the assumuption that we are
   // connected to the core)
   private updateView_ = () => {
-    if (this.model.onlineNetworks.length > 0 || this.model.globalSettings.hasSeenWelcome) {
+    if (this.model.onlineNetworks.length > 0 ||
+        (this.model.globalSettings.hasSeenWelcome && this.showRosterBeforeLogin)) {
       this.view = ui_constants.View.ROSTER;
     } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
                this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {

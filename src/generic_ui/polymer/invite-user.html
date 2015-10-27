@@ -177,7 +177,7 @@
 
       <div class='view' flex>
         <!-- TODO: translate before launch on webstore -->
-        <div id="allInviteMethods" hidden?='{{!supportsQuiver}}'>
+        <div id="allInviteMethods" hidden?='{{!ui.showRosterBeforeLogin}}'>
           <div hidden?='{{isQuiverLoggedIn}}' class='section'>
             <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
             <paper-input-decorator label='Choose a user name' layout vertical>
@@ -233,7 +233,7 @@
 
         <!-- TODO: remove this and uproxy-network template once Quiver
         support is on the webstore -->
-        <div hidden?='{{supportsQuiver}}'>
+        <div hidden?='{{ui.showRosterBeforeLogin}}'>
           <div hidden?='{{ onlineInviteNetworks.length <= 1}}' class='section'>
             <p>{{ 'HOW_TO_INVITE_FRIENDS' | $$ }}</p>
             <paper-dropdown-menu>

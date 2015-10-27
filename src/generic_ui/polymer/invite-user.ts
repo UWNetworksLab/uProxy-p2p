@@ -1,5 +1,6 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -112,8 +113,8 @@ Polymer({
   },
   setOnlineInviteNetworks: function() {
     this.onlineInviteNetworks = [];
-    for (var i = 0; i < model.networkNames.length; ++i) {
-      var name = model.networkNames[i];
+    for (var i = 0; i < model.onlineNetworks.length; ++i) {
+      var name = model.onlineNetworks[i].name;
       if (ui.supportsInvites(name)) {
         this.onlineInviteNetworks.push({
           name: name,
@@ -165,6 +166,22 @@ Polymer({
       console.warn('Did not log in ', e);
     });
   },
+  copypaste: function() {
+    var logoutPromises :Promise<void>[] = [];
+    // logout all networks asynchronously
+    for (var i in model.onlineNetworks) {
+      logoutPromises.push(ui.logout({
+        name: model.onlineNetworks[i].name,
+        userId: model.onlineNetworks[i].userId
+      }).catch((e :Error) => {
+        console.error('logout returned error: ', e);
+      }));
+    }
+    Promise.all(logoutPromises).then(() => {
+      this.closeInviteUserPanel();
+      this.fire('core-signal', { name: 'copypaste-init' });
+    });
+  },
   getNetworkDisplayName: function(name :string) {
     return ui.getNetworkDisplayName(name);
   },
@@ -201,5 +218,6 @@ Polymer({
     this.model = model;
     this.userIdInput = '';
     this.isQuiverLoggedIn = false;
+    this.ui = ui;
   }
 });
