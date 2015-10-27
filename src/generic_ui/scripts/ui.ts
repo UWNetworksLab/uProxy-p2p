@@ -541,7 +541,7 @@ export class UserInterface implements ui_constants.UiApi {
       return Promise.reject('Error parsing invite URL');
     }
 
-    var getConfirmation = Promise.resolve();
+    var getConfirmation = Promise.resolve<void>();
     if (showConfirmation) {
       var confirmationMessage =
           this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
