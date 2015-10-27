@@ -152,14 +152,11 @@ Polymer({
       // syncNetwork will update the view to the ROSTER.
       ui.bringUproxyToFront();
       this.$.loginToInviteFriendDialog.close();
-      console.log('networkName');
-      if (networkName == "GMail") {
-        console.log("firing signal");
+      this.selectedNetwork = networkName;
+      if (networkName == "GMail" || networkName == "GitHub") {
         this.fire('core-signal', { name: 'open-google-invite-dialog' });
       } else if (networkName == "Facebook-Firebase-V2") {
         this.sendToFacebookFriend();
-      } else if (networkName == "GitHub") {
-        this.fire('core-signal', { name: 'open-github-invite-dialog' });
       }
       this.closeInviteUserPanel();
     }).catch((e: Error) => {

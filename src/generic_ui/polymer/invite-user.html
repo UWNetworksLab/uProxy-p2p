@@ -5,8 +5,7 @@
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
-<link rel='import' href='google-invite-user.html'>
-<link rel='import' href='github-invite-user.html'>
+<link rel='import' href='network-invite-user.html'>
 <link rel="import" href="i18n-filter.html">
 
 <polymer-element name='uproxy-invite-user'>
@@ -310,8 +309,7 @@
     </uproxy-dialog>
 
 
-    <uproxy-google-invite-user id="googleInviteUserView"></uproxy-google-invite-user>
-    <uproxy-github-invite-user id="githubInviteUserView"></uproxy-github-invite-user>
+    <uproxy-network-invite-user network="{{selectedNetwork}}"></uproxy-network-invite-user>
 
   </template>
   <script src='invite-user.js'></script>
