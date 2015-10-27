@@ -375,11 +375,6 @@
 
         <div class='content' fit>
 
-          <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}'
-            mini src='../icons/ic_person_add_white_24dp.svg'
-            on-tap='{{ fireOpenInviteUserPanel }}'
-            style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) + 26 }}px;'></paper-fab>
-
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
               <uproxy-roster id='get-roster'
@@ -427,6 +422,11 @@
             </div>
           </div>
         </div>
+        <!-- Elements (like the paper fab) that determine position based on proxying/error statuses, must come after the status elements above. Otherwise the positioning will be incorrect. -->
+        <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}'
+          mini src='../icons/ic_person_add_white_24dp.svg'
+          on-tap='{{ fireOpenInviteUserPanel }}'
+          style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.showInviteControls) + 26 }}px;'></paper-fab>
       </core-header-panel>
     </core-drawer-panel>
 
@@ -486,9 +486,9 @@
 
     <uproxy-proxy-error id='proxyError'></uproxy-proxy-error>
 
-    <paper-toast id='toast' hidden?="{{ui.view != ui_constants.View.ROSTER}}"
+    <paper-toast id='toast'
         text='{{ toastMessage }}' responsiveWidth='320px'
-        style='bottom: {{ topOfStatuses($.status.offsetHeight, !$.feedback.opened) + 10 }}px;'
+        style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) + 10 }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
           hidden?='{{ !unableToShare && !unableToGet }}'>{{ "GET_HELP" | $$ }}
