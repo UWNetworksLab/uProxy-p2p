@@ -172,14 +172,14 @@ export class CloudSocialProvider {
   // This makes all of the stored contacts appear online.
   private loadContacts_ = () => {
     log.debug('loadContacts');
-    this.storage_.get(STORAGE_KEY).then((v: string) => {
-      if (!v) {
+    this.storage_.get(STORAGE_KEY).then((storedString: string) => {
+      if (!storedString) {
         log.debug('no saved contacts');
         return;
       }
-      log.debug('loaded contacts: %1', v);
+      log.debug('loaded contacts: %1', storedString);
       try {
-        var savedContacts: SavedContacts = JSON.parse(v);
+        var savedContacts: SavedContacts = JSON.parse(storedString);
         // Dumb attempt to prevent dupes, in lieu of Set.
         for (let address of savedContacts.addresses) {
           if (this.savedAddresses_.indexOf(address) === -1) {
