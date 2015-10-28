@@ -32,6 +32,7 @@ Polymer({
           subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: name }),
           body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
       });
+      this.closeInviteUserPanel();
       this.fire('open-dialog', {
         heading: '',
         message: ui.i18n_t("INVITE_EMAIL_SENT"),
@@ -39,14 +40,10 @@ Polymer({
           text: ui.i18n_t("OK")
         }]
       });
-      this.closeInviteUserPanel();
     });
   },
   generateQuiverInviteUrl: function() {
     return this.generateInviteUrl('Quiver');
-  },
-  dialogOpened: function() {
-    this.$.loginToInviteFriendDialog.resizeHandler();
   },
   sendToFacebookFriend: function() {
     this.generateInviteUrl('Facebook-Firebase-V2').then(() => {
@@ -54,6 +51,7 @@ Polymer({
           'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
           + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
       ui.openTab(facebookUrl);
+      this.closeInviteUserPanel();
       this.fire('open-dialog', {
         heading: '', // TODO:
         message: ui.i18n_t("FACEBOOK_INVITE_IN_BROWSER"),
@@ -61,7 +59,6 @@ Polymer({
           text: ui.i18n_t("OK")
         }]
       });
-      this.closeInviteUserPanel();
     });
   },
   inviteGithubFriend: function() {
@@ -82,6 +79,7 @@ Polymer({
     }).catch(() => {
       // TODO: The message in this dialog should be passed from the social provider.
       // https://github.com/uProxy/uproxy/issues/1923
+      this.closeInviteUserPanel();
       this.fire('open-dialog', {
         heading: '',
         message: ui.i18n_t("GITHUB_INVITE_SEND_FAILED"),
@@ -94,7 +92,6 @@ Polymer({
   onNetworkSelect: function(e :any, details :any) {
     if (details.isSelected) {
       this.selectedNetworkName = details.item.getAttribute('label');
-      //this.$.loginToInviteFriendDialog.open();
     }
   },
   openInviteUserPanel: function() {
@@ -123,7 +120,9 @@ Polymer({
       }
     }
   },
-  updateOnlineNetworks: function() {
+
+  /* Functions required for roster-before-login flow. */
+  updateQuiverStatus: function() {
     this.isQuiverLoggedIn = false;
     for (var i = 0; i < model.onlineNetworks.length; ++i) {
       var name = model.onlineNetworks[i].name;
@@ -138,9 +137,10 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
     this.login('Quiver', this.userName);
   },
-  iconTapped: function(event: Event, detail: Object, target: HTMLElement) {
+  networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
     this.selectedNetworkName = networkName;
+    // Open dialog asking user to login before inviting friends.
     this.$.loginToInviteFriendDialog.open();
   },
   loginTapped: function(event: Event, detail: Object, target: HTMLElement) {
@@ -149,23 +149,26 @@ Polymer({
   },
   login: function(networkName :string, userName ?:string) {
     ui.login(networkName, userName).then(() => {
-      // syncNetwork will update the view to the ROSTER.
-      ui.bringUproxyToFront();
       this.$.loginToInviteFriendDialog.close();
-      this.selectedNetwork = networkName;
+      this.closeInviteUserPanel();
+
+      ui.bringUproxyToFront();
+      this.selectedNetworkName = networkName;
       if (networkName == "GMail" || networkName == "GitHub") {
-        this.fire('core-signal', { name: 'open-google-invite-dialog' });
+        // After login for these networks, open another view which allows users
+        // to invite their friends.
+        this.fire('core-signal', { name: 'open-network-invite-dialog' });
       } else if (networkName == "Facebook-Firebase-V2") {
         this.sendToFacebookFriend();
       }
-      this.closeInviteUserPanel();
     }).catch((e: Error) => {
       console.warn('Did not log in ', e);
     });
   },
   copypaste: function() {
+    // Logout of all other social networks before starting
+    // copypaste connection.
     var logoutPromises :Promise<void>[] = [];
-    // logout all networks asynchronously
     for (var i in model.onlineNetworks) {
       logoutPromises.push(ui.logout({
         name: model.onlineNetworks[i].name,
@@ -179,14 +182,11 @@ Polymer({
       this.fire('core-signal', { name: 'copypaste-init' });
     });
   },
-  getNetworkDisplayName: function(name :string) {
-    return ui.getNetworkDisplayName(name);
-  },
-  isExperimentalNetwork: function(name :string) {
-    return ui.isExperimentalNetwork(name);
-  },
-  supportsInvites: function(name :string) {
-    return ui.supportsInvites(name);
+  loginToInviteFriendDialogOpened: function() {
+    // Without calling the resizeHandler, the dynamic contents
+    // of the dialog confuse Polymer, and the size of the dialog
+    // will be smaller than expected.
+    this.$.loginToInviteFriendDialog.resizeHandler();
   },
   updateNetworkButtonNames: function() {
     var supportsQuiver = false;
@@ -202,19 +202,28 @@ Polymer({
     // any flicker in case we switch from true to false to true again.
     this.supportsQuiver = supportsQuiver;
   },
+  getNetworkDisplayName: function(name :string) {
+    return ui.getNetworkDisplayName(name);
+  },
+  isExperimentalNetwork: function(name :string) {
+    return ui.isExperimentalNetwork(name);
+  },
+  supportsInvites: function(name :string) {
+    return ui.supportsInvites(name);
+  },
   observe: {
     'model.networkNames': 'updateNetworkButtonNames',
-    'model.onlineNetworks': 'updateOnlineNetworks'
+    'model.onlineNetworks': 'updateQuiverStatus'
   },
   ready: function() {
-    this.userName = model.globalSettings.quiverUserName;
     this.updateNetworkButtonNames();
+    this.userName = model.globalSettings.quiverUserName; // for Quiver
+    this.isQuiverLoggedIn = false;
+    this.userIdInput = ''; // for GitHub
+    this.inviteUserEmail = ''; // for GMail
     this.inviteUrl = '';
-    this.inviteUserEmail = '';
     this.selectedNetworkName = '';
     this.model = model;
-    this.userIdInput = '';
-    this.isQuiverLoggedIn = false;
     this.ui = ui;
   }
 });

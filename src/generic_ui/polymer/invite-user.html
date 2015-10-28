@@ -11,41 +11,23 @@
 <polymer-element name='uproxy-invite-user'>
   <template>
     <style>
-      :host {
-        box-sizing: border-box;
-        height: 100%;
-        width: 100%;
-        font-size: 1.1em;
-        right: -100%;
-        right: 0px;
-        line-height: 24px;
-      }
-      h1 {
-        font-size: 1.4em;
-        color: #009688;  /* dark green */
-        margin-bottom: 1.5em;
-      }
-      h1.uproxyTitle {
-        font-family: "Quicksand", sans-serif;
-        font-weight: 700;
-        font-size: 40px;
-        letter-spacing: -1px;
-        margin-bottom: 1em;
-      }
-      h1.uproxyTitle .first-u {
-        color: #10c9b1;
-      }
-      h1.sub {
-        font-weight: normal;
-      }
       #inviteUserPanel {
         height: 100%;
         width: 100%;
         background-color: white;
       }
+      #inviteUserPanel uproxy-button {
+        width: 200px !important;
+        margin: 0;
+        padding-left: 1em;
+        padding-right: 1em;
+      }
+      #inviteUserPanel h1 {
+        font-size: 1.4em;
+        color: #009688;  /* dark green */
+        margin-bottom: 1.5em;
+      }
       .view {
-        opacity: 1;
-        z-index: 10;
         overflow: auto;
       }
       .section {
@@ -55,40 +37,39 @@
         padding-bottom: 1em;
         line-height: 20px;
       }
-      a {
-        cursor: pointer;
-      }
       paper-dropdown-menu {
         padding: 0;
         margin: 0;
       }
-      #dialogHeading {
+      paper-input-decorator {
+        font-size: 16px;
+      }
+
+      /* CSS for roster-before-login flow. */
+      #allInviteMethods {
+        text-align: center;
+      }
+      #loginToInviteFriendDialog {
+        min-width: 80%;
+      }
+      #loginToInviteFriendDialog h1 {
         color: #333;
         font-size: 18px;
         font-weight: normal;
         margin-top: 0;
       }
-      #dialogText {
+      #loginToInviteFriendDialog p {
         color: rgb(160, 160, 160);
         line-height: 18px;
         font-weight: lighter;
         font-size: 12px;
         letter-spacing: 0.5px;
       }
-      #close {
+      core-icon[icon=clear] {
         position: absolute;
         top: 15px;
         right: 15px;
         color: rgb(180,180,180);
-      }
-      paper-input-decorator {
-        font-size: 16px;
-      }
-      #inviteUserPanel uproxy-button {
-        width: 200px !important;
-        margin: 0;
-        padding-left: 1em;
-        padding-right: 1em;
       }
       #QuiverLoginButton {
         width: 200px;
@@ -98,6 +79,11 @@
       #QuiverTitle {
         font-weight: normal;
         margin: 1em 1em 0em 1em;
+      }
+      .orText {
+        font-size: 26px;
+        margin-top: 0.5em;
+        font-style: italic;
       }
       .networkLoginButton {
         display: inline-block;
@@ -118,19 +104,8 @@
         color: red;
         font-size: 12px;
       }
-      .orText {
-        font-size: 26px;
-        margin-top: 0.5em;
-        font-style: italic;
-      }
       .networkLoginButton.copypaste {
         margin-top: 2em;
-      }
-      #loginToInviteFriendDialog {
-        min-width: 80%;
-      }
-      #allInviteMethods {
-        text-align: center;
       }
       uproxy-button.login {
         margin: 15px 0px;
@@ -149,7 +124,7 @@
         background: #0f9d58;
       }
       uproxy-button.GMail {
-        background: #dd4b39; /*#c4c4c4;*/
+        background: #dd4b39;
       }
       uproxy-button.Facebook,
       uproxy-button.Facebook-Firebase-V2 {
@@ -159,7 +134,7 @@
         background: #6ab000;
       }
       uproxy-button.GitHub {
-        background: #666; /*#c4c4c4;*/
+        background: #666;
       }
       uproxy-dialog {
         padding: 5px;
@@ -200,7 +175,7 @@
           <div class='section'>
           <p>Sign in with a social network.</p>
             <template repeat='{{ n in networkButtonNames }}' vertical layout>
-              <div on-tap='{{ iconTapped }}' class='networkLoginButton' data-network='{{n}}'>
+              <div on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
                 <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
                 <div class='experimental' hidden?='{{!isExperimentalNetwork(n)}}'>
@@ -287,15 +262,15 @@
 
     </core-overlay>
 
-    <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{dialogOpened}}">
+    <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{loginToInviteFriendDialogOpened}}">
       <template repeat="{{ n in networkButtonNames }}">
         <div hidden?='{{selectedNetworkName != n}}'>
-          <h1 id="dialogHeading">Sign in to {{getNetworkDisplayName(n)}}</h1>
-          <core-icon id="close" icon="clear" on-tap='{{ close }}'></core-icon>
-          <p id="dialogText" hidden?="{{!supportsInvites(n)}}">
+          <h1>Sign in to {{getNetworkDisplayName(n)}}</h1>
+          <core-icon icon="clear" on-tap='{{ close }}'></core-icon>
+          <p hidden?="{{!supportsInvites(n)}}">
             To invite a {{getNetworkDisplayName(n)}} friend to uProxy, please login to your {{getNetworkDisplayName(n)}} account.
           </p>
-          <p id="dialogText" hidden?="{{supportsInvites(n)}}">
+          <p hidden?="{{supportsInvites(n)}}">
             Signing in will allow your {{getNetworkDisplayName(n)}} contacts who use uProxy to see when you are online with uProxy.
           </p>
           <div style="text-align:center;">
@@ -309,7 +284,7 @@
     </uproxy-dialog>
 
 
-    <uproxy-network-invite-user network="{{selectedNetwork}}"></uproxy-network-invite-user>
+    <uproxy-network-invite-user network="{{selectedNetworkName}}"></uproxy-network-invite-user>
 
   </template>
   <script src='invite-user.js'></script>

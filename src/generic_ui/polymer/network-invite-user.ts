@@ -6,8 +6,8 @@ var model = ui_context.model;
 var core = ui_context.core;
 
 Polymer({
-  generateInviteUrl: function() {
-    var selectedNetwork = model.getNetwork('GMail');
+  generateInviteUrl: function(name: string) {
+    var selectedNetwork = model.getNetwork(name);
     var info = {
       name: selectedNetwork.name,
       userId: selectedNetwork.userId
@@ -18,7 +18,7 @@ Polymer({
     });
   },
   sendToGMailFriend: function() {
-    this.generateInviteUrl().then((selectedNetwork:any) => {
+    this.generateInviteUrl('GMail').then((selectedNetwork:any) => {
       var selectedNetworkInfo = {
         name: selectedNetwork.name,
         userId: selectedNetwork.userId
@@ -31,6 +31,7 @@ Polymer({
           subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: name }),
           body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
       });
+      this.closeInviteUserPanel();
       this.fire('open-dialog', {
         heading: '',
         message: ui.i18n_t("INVITE_EMAIL_SENT"),
@@ -38,7 +39,6 @@ Polymer({
           text: ui.i18n_t("OK")
         }]
       });
-      this.$.googleInvitePanel.close();
     });
   },
   inviteGithubFriend: function() {
@@ -76,7 +76,7 @@ Polymer({
     this.$.panel.close();
   },
   showAcceptUserInvite: function() {
-    this.$.googleInvitePanel.close();
+    this.closeInviteUserPanel();
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
   },
   ready: function() {
