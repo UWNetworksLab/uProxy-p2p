@@ -113,6 +113,41 @@ describe('UI.UserInterface', () => {
                   });
   }
 
+  function addRemotePeer() {
+    updateToHandlerMap[uproxy_core_api.Update.USER_FRIEND]
+        .call(ui, <social.UserData>{
+                    allInstanceIds: ['testInstance'],
+                    consent: {
+                      ignoringRemoteUserOffer: false,
+                      ignoringRemoteUserRequest: false,
+                      localGrantsAccessToRemote: true,
+                      localRequestsAccessFromRemote: true,
+                      remoteRequestsAccessFromLocal: true,
+                    },
+                    isOnline: true,
+                    network: 'testNetwork',
+                    offeringInstances: [],
+                    instancesSharingWithLocal: [],
+                    user: {
+                      userId: 'testUser',
+                    },
+                  });
+  }
+
+  function startProxyingForRemotePeer() {
+    updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
+        .call(ui, 'testInstance');
+  }
+
+  function activateConfirmationButton(shouldConfirm :boolean) {
+    var text = ui.i18n_t(shouldConfirm ? 'YES' : 'NO');
+    var buttons = (<any>ui.signalToFire).data.buttons;
+    var buttonInfo = <any>_.find(buttons, {text: text});
+    var index = buttonInfo.callbackIndex;
+
+    ui.invokeConfirmationCallback(index, shouldConfirm);
+  }
+
   describe('synced users are correctly exposed', () => {
     beforeEach(login);
     afterEach(logout);
@@ -337,29 +372,10 @@ describe('UI.UserInterface', () => {
 
     it('Waits for confirmation while sharing', (done) => {
       login();
-      updateToHandlerMap[uproxy_core_api.Update.USER_FRIEND]
-          .call(ui, <social.UserData>{
-                      allInstanceIds: ['testInstance'],
-                      consent: {
-                        ignoringRemoteUserOffer: false,
-                        ignoringRemoteUserRequest: false,
-                        localGrantsAccessToRemote: true,
-                        localRequestsAccessFromRemote: true,
-                        remoteRequestsAccessFromLocal: true,
-                      },
-                      isOnline: true,
-                      network: 'testNetwork',
-                      offeringInstances: [],
-                      instancesSharingWithLocal: [],
-                      user: {
-                        userId: 'testUser',
-                      },
-                    });
+      addRemotePeer();
+      startProxyingForRemotePeer();
 
-      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
-          .call(ui, 'testInstance');
-
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {;
+      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
         expect(mockCore.logout).toHaveBeenCalled();
         logout();
         done();
@@ -369,10 +385,21 @@ describe('UI.UserInterface', () => {
       expect(mockCore.logout).not.toHaveBeenCalled();
 
       // pretend the confirmaiton button was clicked
-      var buttons = (<any>ui.signalToFire).data.buttons;
-      var buttonInfo = _.find(buttons, {text: ui.i18n_t('YES')});
-      var confirmationIndex = (<any>buttonInfo).callbackIndex;
-      ui.invokeConfirmationCallback(confirmationIndex, true);
+      activateConfirmationButton(true);
+    });
+
+    it('Will not logout if user rejects', (done) => {
+      login();
+      addRemotePeer();
+      startProxyingForRemotePeer();
+
+      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
+        expect(mockCore.logout).not.toHaveBeenCalled();
+        logout();
+        done();
+      });
+
+      activateConfirmationButton(false);
     });
   });
 });  // UI.UserInterface
