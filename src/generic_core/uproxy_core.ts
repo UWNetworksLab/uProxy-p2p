@@ -1,25 +1,25 @@
 /// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import globals = require('./globals');
+import _ = require('lodash');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
-import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import onetime = require('../../../third_party/uproxy-lib/bridge/onetime');
+import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
-import social = require('../interfaces/social');
+import user = require('./remote-user');
 import social_network = require('./social');
-import storage = globals.storage;
+import social = require('../interfaces/social');
+import StoredValue = require('./stored_value');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import user = require('./remote-user');
 import version = require('../generic/version');
-import StoredValue = require('./stored_value');
-import _ = require('lodash');
 
 import ui = ui_connector.connector;
+import storage = globals.storage;
 
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.

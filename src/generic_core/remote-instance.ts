@@ -9,26 +9,25 @@
 /// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
+import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import consent = require('./consent');
 import globals = require('./globals');
+import _ = require('lodash');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
+import Persistent = require('../interfaces/persistent');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
-import _ = require('lodash');
-import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 import storage = globals.storage;
 import ui = ui_connector.connector;
 import pgp = globals.pgp;
-
-import Persistent = require('../interfaces/persistent');
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
