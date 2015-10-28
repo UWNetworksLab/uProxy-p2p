@@ -275,7 +275,12 @@ export class CloudSocialProvider {
   }
 
   public logout = (): Promise<void> => {
-    log.warn('logout');
+    log.debug('logout');
+    for (let address in this.clients_) {
+      this.clients_[address].then((connection: Connection) => {
+        connection.close();
+      });
+    }
     return Promise.resolve<void>();
   }
 
