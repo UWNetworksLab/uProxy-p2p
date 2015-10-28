@@ -287,10 +287,7 @@ export class CloudSocialProvider {
     log.debug('inviteUser %1', address);
     return this.reconnect_(address).then(() => {
       this.notifyOfUser_(address);
-      // TODO: what should i return?
-      return Promise.resolve({
-        networkData: '{}'
-      });
+      return Promise.resolve();
     });
   }
 
