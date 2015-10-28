@@ -18,10 +18,11 @@ const SSH_SERVER_PASSWORD = 'giver';
 const ZORK_HOST = 'zork';
 const ZORK_PORT = 9000;
 
-// TODO: what is the namespace for storage keys?
+// Key under which our contacts are saved in storage.
 const STORAGE_KEY = 'cloud-social-contacts';
 
-// Placed in storage under STORAGE_KEY.
+// Type of the object placed, in serialised form, in storage
+// under STORAGE_KEY.
 interface SavedContacts {
   addresses?: string[];
 }
