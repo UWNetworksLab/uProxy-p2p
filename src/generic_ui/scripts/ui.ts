@@ -978,13 +978,13 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  private confirmForLogout() :Promise<boolean> {
+  private confirmForLogout() :Promise<void> {
     var sharingTo = Object.keys(this.instancesGivingAccessTo);
     var message :string;
 
     // Do not need to ask user if not actually sharing
     if (sharingTo.length === 0) {
-      return Promise.resolve(true);
+      return Promise.resolve<void>();
     }
 
     if (sharingTo.length === 1) {
@@ -1004,11 +1004,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     // should not be using exceptions for flow, switch to boolean
-    return this.getConfirmation('', message).then(() => {
-      return true;
-    }).catch(() => {
-      return false;
-    });
+    return this.getConfirmation('', message);
   }
 
   public logout(networkInfo :social.SocialNetworkInfo) :Promise<void> {
@@ -1022,14 +1018,10 @@ export class UserInterface implements ui_constants.UiApi {
       return Promise.resolve<void>();
     }
 
-    return this.confirmForLogout().then((confirmed :boolean) => {
-      if (!confirmed) {
-        return;
-      }
-
+    return this.confirmForLogout().then(() => {
       network.logoutExpected = true;
       return this.core.logout(networkInfo);
-    });
+    }, () => { /* MT */ });
   }
 
   private reconnect_ = (network :string) => {
