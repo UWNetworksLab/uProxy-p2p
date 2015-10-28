@@ -15,6 +15,11 @@
     "languageCode": "ar"
   },
   {
+    "description": "Russian language.",
+    "language": "Русский",
+    "languageCode": "ru"
+  },  
+  {
     "description": "Turkish language.",
     "language": "Türkçe",
     "languageCode": "tr"

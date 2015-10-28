@@ -1,0 +1,870 @@
+{
+  "FRIEND_OFFLINE": {
+    "message": "__name__ недоступен",
+    "description": "Message shown when trying to get access from a friend who is offline."
+  },
+  "SEND_CONNECTION_LINK": {
+    "message": "Чтобы поделиться вашим соединением, пожалуйста попросите вашего друга переслать вам их ссылку.",
+    "description": "Instructions for the user to share their connection with a one-time link."
+  },
+  "WELCOME": {
+    "message": "Добро пожаловать в uProxy",
+    "description": ""
+  },
+  "ONE_TIME_SHARING": {
+    "message": "Сейчас вы делитесь доступом.",
+    "description": "The user is sharing their Internet access with a friend."
+  },
+  "REQUESTING_ACCESS_NOTIFICATION": {
+    "message": "__name__ просит доступ",
+    "description": "Notification for when a friend sends a request to access the Internet through the user."
+  },
+  "CHANGE_STATS_CHOICE": {
+    "message": "Вы можете помочь улучшить качество uProxy согласием делиться статистикой анонимно. Все данные анонимизируются клиентом и пересылаются в надежности.",
+    "description": "Informs the user that they can opt in and out of sending anonymous statistics at any time they choose, from the Settings menu."
+  },
+  "SHARING_ACCESS_WITH_TWO": {
+    "message": "Делюсь доступом с __name1__ и __name2__",
+    "description": "Message in a status bar that is visible when two friends are getting access through the user."
+  },
+  "EMAIL_INSTEAD_MESSAGE": {
+    "message": "Не удалось послать ваш отзыв на uproxy.org. Пожалуйста скопируйте и вставьте ваш отзыв в письмо на адрес info@uproxy.org.",
+    "description": "Seen if feedback submission through uProxy fails. Message asks users to email their feedback instead."
+  },
+  "WE_WONT_POST": {
+    "message": "Мы не будем делиться вашими данными или публиковать в социальные сети без вашего согласия",
+    "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user."
+  },
+  "IM_IN": {
+    "message": "Согласен (согласна)",
+    "description": "Agree to submitting anonymous metrics to uProxy."
+  },
+  "STOP_ONE_TIME_INSTRUCTION": {
+    "message": "Чтобы остановить получение доступа, нажмите нижеприведённую ссылку",
+    "description": ""
+  },
+  "THANK_YOU": {
+    "message": "Спасибо!",
+    "description": ""
+  },
+  "EMAIL_INSTEAD_TITLE": {
+    "message": "Отослать отзыв по электронной почте взамен?",
+    "description": "Title for error that appears if feedback submission failed."
+  },
+  "SELECT_LANGUAGE": {
+    "message": "Выберите язык",
+    "description": "Instruction to select language used by the application."
+  },
+  "GET_HELP": {
+    "message": "Помощь",
+    "description": "Get help from the frequently asked questions page."
+  },
+  "YES": {
+    "message": "Да",
+    "description": "Button label."
+  },
+  "SUBMIT_FEEDBACK_SENTENCE_CASE": {
+    "message": "Оставить отзыв дла команды uProxy.",
+    "description": "Submit feedback to the uProxy team."
+  },
+  "GET_ONE_TIME_INSTEAD_INSTRUCTION": {
+    "message": "Если вы хотели бы начать с кем-то одноразовое соединение, нажмите кнопку \"Назад \", а затем \"Начать одноразовое подключение\", чтобы начать новый сеанс.",
+    "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection."
+  },
+  "ERROR_PARSING_LINK": {
+    "message": "Произошла ошибка при чтении ссылки соединения uProxy. Попробуйте нажать на ссылку ещё раз или попросите новую ссылку у вашего друга.",
+    "description": "Error shown if a one-time connection link did not work."
+  },
+  "FEEDBACK_TITLE": {
+    "message": "Оставить отзыв и комментарии",
+    "description": "Label for textbox for user's to submit feedback and comments to uProxy."
+  },
+  "HOW_TO_OFFER_ONE_TIME": {
+    "message": "Если вы хотели предоставить им доступ, скопируйте и предоставьте нижеследующую ссылку.",
+    "description": "Instructions for user if they'd like to share their Internet connection with a one-time link."
+  },
+  "LOADING_FRIENDS": {
+    "message": "uProxy друзья загружаются",
+    "description": "User's friends are being loaded from a social network."
+  },
+  "ACCEPT_OFFER": {
+    "message": "Принять",
+    "description": "Accept a friend's offer that would allow the user to access the Internet through their friend."
+  },
+  "SHARING_ACCESS_WITH_ONE": {
+    "message": "__name__ получает доступ",
+    "description": "Message in a status bar that is visible when one friend is getting access through the user."
+  },
+  "STATS_ENABLED_MESSAGE": {
+    "message": "Этот значок означает что вы согласились делиться анонимной статистикой с uProxy. Нажмите сюда чтобы поправить настройки.",
+    "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
+  },
+  "REQUESTS": {
+    "message": "Запросы",
+    "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
+  },
+  "START_GETTING": {
+    "message": "Начать получение доступа",
+    "description": "Start accessing the Internet through a friend's connection."
+  },
+  "STOP_GETTING": {
+    "message": "Остановить получение доступа",
+    "description": "Stop accessing the Internet through a friend's connection."
+  },
+  "ADVANCED_SETTINGS_SENTENCE_CASE": {
+    "message": "Дополнительные настройки",
+    "description": "Title for the advanced settings screen."
+  },
+  "ENABLE_METRICS": {
+    "message": "Разрешить сбор анонимной статистики?",
+    "description": "Asks the user if they want to send anonymous metrics about their uProxy usage."
+  },
+  "TRYING_TO_SHARE_ONE_TIME": {
+    "message": "В настоящий момент вы пытаетесь разделить ваш доступ. Если же вы хотели запросить доступ взамен то нажмите ссылку сверху.",
+    "description": "Instructions for user if they want to get access instead, while attempting to share access."
+  },
+  "LANGUAGE": {
+    "message": "Язык",
+    "description": "Language used by the application."
+  },
+  "UNLIKELY": {
+    "message": "Маловероятно",
+    "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
+  },
+  "ALPHA_MESSAGE": {
+    "message": "Это альфа-релиз uProxy и в настоящее время может время от времени ненадежно работать.",
+    "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
+  },
+  "MORE_INFORMATION": {
+    "message": "Подробнее",
+    "description": ""
+  },
+  "POSSIBLY": {
+    "message": "Возможно",
+    "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
+  },
+  "FRIEND_REQUESTS_ACCESS": {
+    "message": "__name__ просит получить от вас доступ.",
+    "description": "A friend has requested to access the Internet through the user."
+  },
+  "GET_ONE_TIME_INSTEAD": {
+    "message": "Получить единовременный доступ",
+    "description": "Label for a link to the 'Start a one-time connection' page."
+  },
+  "SET_UP_ONE_TIME": {
+    "message": "Настроить соединение на один раз",
+    "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link."
+  },
+  "FRIEND_REQUESTED_ONE_TIME": {
+    "message": "Ваш друг (подруга) запросил(а) получить от вас одноразовое соединение.",
+    "description": "A friend has requested to access the Internet through the user."
+  },
+  "NO": {
+    "message": "Нет",
+    "description": "Button label."
+  },
+  "ARE_YOU_SURE": {
+    "message": "Прекратить активное соединение?",
+    "description": "Question confirming if the user wants to end an active connection to a friend."
+  },
+  "ACCEPTED_OFFER_NOTIFICATION": {
+    "message": "__name__ принял(а) ваше предложение доступа",
+    "description": "Notification for when a friend has accepted the user's offer to share their Internet with that friend."
+  },
+  "SHARING_UNAVAILABLE_TITLE": {
+    "message": "Не удалось поделиться доступом",
+    "description": "Title for error that appears when the user can not share their Internet access with friends."
+  },
+  "LEARN_MORE_UPROXY": {
+    "message": "Узнать побольше о uProxy",
+    "description": "Label for button that brings user to more information about uProxy."
+  },
+  "START_ONE_TIME_INSTRUCTION": {
+    "message": "Чтобы начать получать доступ от вашего друга, нажмите нижеприведённую кнопку.",
+    "description": ""
+  },
+  "NO_FRIENDS_ONLINE": {
+    "message": "Никого из друзей нет в сети.",
+    "description": "None of the user's friends are currently signed in."
+  },
+  "CONTINUE_BROWSING": {
+    "message": "Продолжать пользование интернетом без uProxy",
+    "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."
+  },
+  "GRANTED_ACCESS_NOTIFICATION": {
+    "message": "__name__ предоставил(а) вам доступ",
+    "description": "Notification for when a user's request to access the Internet through a friend has been accepted by that friend."
+  },
+  "EMAIL_TITLE": {
+    "message": "Email (по желанию)",
+    "description": ""
+  },
+  "ASK_TO_ANALYZE": {
+    "message": "Возможно что вид NAT вашей сети несовместим с uProxy. Хотите чтобы uProxy проанализировал вашу сеть?",
+    "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails."
+  },
+  "SHARE_ONE_TIME": {
+    "message": "Поделиться соединением один раз",
+    "description": "Share access to the user's Internet using a link that will only work once."
+  },
+  "ASK_TO_SUBMIT_ANALYSIS": {
+    "message": "Хотите предоставить информацию про свой тип NAT команде uProxy, чтобы помочь нам лучше понять сети на которых находятся наши пользователи?",
+    "description": "Asks the user if they are willing to share their network analysis results with uProxy, to help the development of uProxy."
+  },
+  "GET_ACCESS": {
+    "message": "Получить доступ",
+    "description": "Text for the tab on the toolbar. When the user is on the 'Get Access' tab, they are looking to get access to the Internet through a friend."
+  },
+  "RETRIEVING_LOGS": {
+    "message": "Получение журнала и анализ вашей сети...",
+    "description": "Message shown while uProxy is analyzing the user's network settings."
+  },
+  "LEARN_MORE_SOCIAL": {
+    "message": "Узнать побольше о социальных сетях",
+    "description": "Label for button that brings user to more information about why social networks are used for uProxy."
+  },
+  "WAITING_FOR_ACCESS": {
+    "message": "Вы сможете получить доступ когда __name__ одобрит ваш запрос.",
+    "description": "User will be able to access the Internet through their friend, once that friend gives the user permission."
+  },
+  "CONNECTED_WITH": {
+    "message": "Соединён с __network__",
+    "description": "Text in settings that informs the user which social network they're connected to."
+  },
+  "REQUEST_ONE_TIME": {
+    "message": "Запросить единовременный доступ",
+    "description": "Request access to the user's friend's Internet using a link that will only work once."
+  },
+  "CONNECT": {
+    "message": "Присоединиться",
+    "description": "User clicks this to connect to a network"
+  },
+  "CLOSE": {
+    "message": "Закрыть",
+    "description": "Button label to close a popup."
+  },
+  "DEVICE_DESCRIPTION": {
+    "message": "Название машины (устройства)",
+    "description": "Title for the section in Settings where the user can edit the name of their device."
+  },
+  "LOGOUT": {
+    "message": "Выйти из uProxy",
+    "description": "Log-out of uProxy."
+  },
+  "EDIT_ADVANCED_SETTINGS": {
+    "message": "Редактировать дополнительные настройки ниже",
+    "description": "Instruction for the user to edit their advanced settings (by typing JSON in a textbox)."
+  },
+  "REVOKE_ACCESS": {
+    "message": "Отменить доступ",
+    "description": "Label for button that takes back an offer to a friend who has already accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
+  },
+  "UNABLE_TO_GET_FROM": {
+    "message": "Не удалось получить доступ от __name__",
+    "description": "Error message seen in uProxy when the user failed to get access to the Internet through a friend."
+  },
+  "FRIENDS_WHO_CAN_GET": {
+    "message": "Друзья которым разрешено получать от вас доступ",
+    "description": "Title for the group of friends who can access the Internet through the user."
+  },
+  "SUBMIT_FEEDBACK": {
+    "message": "Оставить отзыв",
+    "description": "Submit feedback to the uProxy team."
+  },
+  "ASKING_FOR_ACCESS": {
+    "message": "Запрос доступа",
+    "description": "The user is asking for permission to access the Internet through their friend; user is waiting for the friend's reply."
+  },
+  "ANALYZING_NETWORK": {
+    "message": "Анализ вашей сети",
+    "description": "Message shown when the user's network is being analyzed."
+  },
+  "STOP_ONE_TIME_GETTING_BEFORE_NEW": {
+    "message": "Если вы хотите открыть новое единовременное соединение, нажмите сначала \"Остановить получение доступа\".",
+    "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
+  },
+  "MORE_INFO": {
+    "message": "Подробнее",
+    "description": "Link to 'Does uProxy log data about me?' question in the FAQ."
+  },
+  "PRIVACY_POLICY": {
+    "message": "Правила конфиденциальности",
+    "description": "Link to uProxy's privacy policy."
+  },
+  "STOP_IGNORING_OFFERS": {
+    "message": "Приостановить отказ от предложений",
+    "description": "Button label for if the user wants to stop ignoring offers."
+  },
+  "ERROR_SIGNING_IN": {
+    "message": "Ошибка входа в __network__. Пожалуйста попробуйте повторно.",
+    "description": "Notification for when the user could not be signed in to a social network."
+  },
+  "UNABLE_TO_GET": {
+    "message": "Не удалось получить доступ",
+    "description": "Title for popup that appears when an attempt to access the Internet through a friend fails."
+  },
+  "SHARING_ENABLED_MESSAGE": {
+    "message": "Этот значок означает, что вы доступны для соединения друзьям которым вы предлагали доступ.",
+    "description": "Text in a popup that explains what the sharing icon (on the toolbar) is."
+  },
+  "STOP_ONE_TIME_SHARING_BEFORE_NEW": {
+    "message": "Если вы хотите открыть новое единовременное соединение, нажмите сначала \"Остановить получение доступа\".",
+    "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
+  },
+  "IGNORE": {
+    "message": "Пропустить",
+    "description": "Button label that ignores an offer or request."
+  },
+  "LOGS_TITLE": {
+    "message": "Анализ сети и журналы",
+    "description": "Title for the page that displays a user's network information and uProxy logs."
+  },
+  "FRIEND_REQUESTED_ACCESS": {
+    "message": "Друг запросил ваш доступ.",
+    "description": "A friend has requested to access the Internet through the user."
+  },
+  "GO_BACK": {
+    "message": "Вернуться назад?",
+    "description": "Go back to the main page from the one-time connection page."
+  },
+  "ACCESS_NOT_GRANTED": {
+    "message": "Доступ не предоставлен.",
+    "description": "The user has not permissioned a friend to access the Internet through the user."
+  },
+  "NETWORK_AND_LOGS": {
+    "message": "Проанализировать сеть и включить передачу журнала",
+    "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team."
+  },
+  "WELCOME_MESSAGE": {
+    "message": "uProxy позволяет получить доступ от ваших друзей, делиться с ними доступом, или оба варианта одновременно! Для начала, выберите \"Получить доступ\" или \"Поделиться доступом.\"",
+    "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately."
+  },
+  "NO_THANKS": {
+    "message": "Нет, благодарю",
+    "description": "Do not agree to submitting anonymous metrics to uProxy."
+  },
+  "FRIENDS_WHO_SHARE": {
+    "message": "Друзья от которых вы можете получить доступ",
+    "description": "Title for the group of friends who the user can get Internet access from."
+  },
+  "UNABLE_TO_SHARE_WITH": {
+    "message": "__name__ не смог(ла) получить от вас доступ",
+    "description": "Error message seen in uProxy when a friend failed to get access to the Internet through the user."
+  },
+  "SETTINGS_JSON_ERROR": {
+    "message": "Ошибка: неправильный JSON формат",
+    "description": "Error shown to the user if their input for advanced settings is incomplete or incompatible with expected settings configurations."
+  },
+  "OFFER_ACCESS": {
+    "message": "Предложить доступ в интернет",
+    "description": "Label for button that will offer a friend access to the Internet through the user, even though the friend has not requested access."
+  },
+  "NEXT": {
+    "message": "Далее",
+    "description": "Label for button that proceeds from the introduction page to the login page."
+  },
+  "SHARING_UNAVAILABLE_MESSAGE": {
+    "message": "Вы используете 37 версию Firefox, которая содержит ошибку препятствующую обмену доступом (см git.io/vf5x1). Эта ошибка исправлена в Firefox 38, так что вы можете включить совместное пользование доступом в интернет после обновления Firefox или после переключения на Chrome.",
+    "description": "Text for error that appears when the user can not share their Internet access with friends."
+  },
+  "ANALYSIS_RESULTS": {
+    "message": "Похоже, что вы находитесь в сети типа __natType__, которая __natImpact__ на возможность подключения к друзьям.",
+    "description": "A summary of the user's network analysis."
+  },
+  "SHARING_ENABLED_TITLE": {
+    "message": "Включено разделение доступа",
+    "description": "Title for popup that points to the sharing icon in uProxy's top toolbar. The popup appears when the user first grants access to one of their friends. The sharing icon is visible as long as there are friends who can get access to the user's Internet."
+  },
+  "START_NEW_CONNECTION": {
+    "message": "Начать новое единовременное соединение",
+    "description": "Label for button that takes user back to the 'Start a one-time connection' page."
+  },
+  "APP_MISSING_TITLE": {
+    "message": "uProxy полностью не установлено!",
+    "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
+  },
+  "CANCEL_REQUEST": {
+    "message": "Отменить запрос",
+    "description": "Label for button which will take back a request to get Internet access through a friend."
+  },
+  "SHARING_ACCESS_WITH_MANY": {
+    "message": "__name__ и ещё __numOthers__ получают интернет доступ через вас",
+    "description": "Message in a status bar that is visible when three or more friends are getting access through the user."
+  },
+  "CANNOT_OPEN_ONE_TIME_TITLE": {
+    "message": "Не удаётся открыть единовременное соединение",
+    "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
+  },
+  "LOGGED_OUT": {
+    "message": "Выход из __network__",
+    "description": "Notification for when the user has been logged out of the social network."
+  },
+  "RESTART": {
+    "message": "Перезагрузить uProxy",
+    "description": "Restart uProxy completely."
+  },
+  "START_ONE_TIME": {
+    "message": "Начать единовременное соединение",
+    "description": "Start an Internet connection using a link that will only work once."
+  },
+  "STOPPED_PROXYING": {
+    "message": "__name__ перестал(а) пользоваться вашим соединением",
+    "description": "Notification for when a friend has stopped accessing the Internet through the user."
+  },
+  "DISCONNECTED_TITLE": {
+    "message": "Соединение потеряно!",
+    "description": "Title for error that appears when the user was getting access to the Internet through their friend, but that connection was terminated."
+  },
+  "CONNECTED_WITH_NUMBER": {
+    "message": "Число подсоединённых сетей: __number__",
+    "description": "Text in settings informing the user of how many networks they're connected to."
+  },
+  "ATTEMPTING_RECONNECT": {
+    "message": "Попытка повторного соединения.",
+    "description": "uProxy was disconnected from the social network and is trying to reconnect."
+  },
+  "WHICH_SOCIAL_NETWORK": {
+    "message": "Где быстрее всего найти ваши контакты?",
+    "description": "Question seen at the top of uProxy's login page. Asks which social network should be used to find the user's friends."
+  },
+  "TRYING_TO_CONNECT": {
+    "message": "Пытаемся соединиться с __name__",
+    "description": "The user is trying to connect to the Internet through their friend."
+  },
+  "EMAIL_PLACEHOLDER": {
+    "message": "Адрес электронной почты",
+    "description": ""
+  },
+  "SAVE": {
+    "message": "Сохранить",
+    "description": "Label for button that saves the user's text input."
+  },
+  "OFFERED_YOU_ACCESS": {
+    "message": "Вам предложили доступ.",
+    "description": "A friend has offered their Internet access to the user."
+  },
+  "SHARING_ENABLED_TOOLTIP": {
+    "message": "Включена функция совместного использования",
+    "description": "Text that appears in a tooltip when the user hovers over the sharing icon."
+  },
+  "SHARE_ACCESS": {
+    "message": "Поделиться доступом",
+    "description": "Text for the tab on the toolbar. When the user is on the 'Share Access' tab, they are looking to share access to their Internet with a friend."
+  },
+  "DISCONNECT": {
+    "message": "Остановить соединение",
+    "description": "User clicks this to disconnect from a network"
+  },
+  "UNABLE_TO_SHARE": {
+    "message": "Не удалось поделиться доступом",
+    "description": "Title for popup that appears when an attempt to share the Internet with a friend fails."
+  },
+  "DISCONNECTED_MESSAGE": {
+    "message": "Если вы отключите прокси-сервер (uProxy), веб-трафик не будет направляться через вашего друга. Прежде чем продолжить, постарайтесь закрыть все чувствительные страницы которые у вас открыты.",
+    "description": "Instruction informing the user that to continue browsing the Internet, the user will need to use their local (potentially unsafe and/or censored) connection."
+  },
+  "WHY_SOCIAL_NETWORK": {
+    "message": "uProxy использует социальные сети чтобы утанавливать соединения через (для) ваших друзей",
+    "description": "Explains why uProxy needs social networks. (Friends need to login with the same social network on uProxy for friends to see each other.)"
+  },
+  "TO_SEND_LOGS": {
+    "message": "Чтобы переслать ваш журнал пользования команде uProxy, откройте uProxy и нажмите 'Оставить Отзыв'",
+    "description": "Instructions guiding the user through how to submit their logs to uProxy."
+  },
+  "CANCEL": {
+    "message": "Отменить",
+    "description": "Button label that rejects a proposed action."
+  },
+  "FEEDBACK_SUBMITTED": {
+    "message": "Ваш отзыв успешно сохранен.",
+    "description": "User feedback was successfully submitted."
+  },
+  "ABOUT_UPROXY": {
+    "message": "uProxy помогает вам делиться вашим доступом в интернет с друзьями или получать доступ от друзей.",
+    "description": "Description on uProxy's introduction screen explaining what uProxy is."
+  },
+  "EDIT_ADVANCED_SETTINGS_PLACEHOLDER": {
+    "message": "Редактировать настройки",
+    "description": "Default text in the advanced settings textbox."
+  },
+  "STATS_ENABLED_TOOLTIP": {
+    "message": "Включён сбор анонимной статистики.",
+    "description": "Text that appears in a tooltip when the user hovers over the 'anonymous stats enabled' icon."
+  },
+  "DESCRIPTION_DEFAULT": {
+    "message": "Устройство __number__",
+    "description": "If a friend has more than one computer, the computers are given this default name (with increasing numbers) to differentiate them."
+  },
+  "FRIEND_NEEDS_TO_CLICK": {
+    "message": "После того как ваш друг открыл ссылку, они отправят ссылку вам в ответ. Нажмите на ссылку или вставьте ее ниже.",
+    "description": "Instructions telling the user that starting a one-time connection is waiting for action from their friend."
+  },
+  "OFFERS": {
+    "message": "Предложения доступа",
+    "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted."
+  },
+  "DONE": {
+    "message": "Сохранить и продолжить",
+    "description": "Button label that suggests acknowledgement and that closes a popup."
+  },
+  "EXT_MISSING_MESSAGE": {
+    "message": "Загрузите и включите uProxy часть 1 чтобы начать пользование программой.",
+    "description": "Shown in Chrome to instruct the user to install part 1 of uProxy."
+  },
+  "CANCEL_OFFER": {
+    "message": "Отказаться от предложения",
+    "description": "Label for button that takes back an offer to a friend who has not yet accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
+  },
+  "COPY_CONNECTION_LINK": {
+    "message": "Чтобы послать запрос вашему другу скопируйте данную ссылку и перешлите её по надежному каналу связи.",
+    "description": "Instructions for the user to request access from a friend with a one-time link."
+  },
+  "LOADING": {
+    "message": "Загрузка...",
+    "description": "Message show when something is taking time to load."
+  },
+  "ASK_FOR_ACCESS": {
+    "message": "Запросить доступ",
+    "description": "Button label that sends a request to the user's friend, asking if the user can access the Internet through them."
+  },
+  "GRANTED_YOU_ACCESS": {
+    "message": "__name__ предоставляет вам свой доступ",
+    "description": "The user's friend has allowed the user to use the friend's Internet connection."
+  },
+  "CANT_OPEN_ONE_TIME_MESSAGE": {
+    "message": "Невозможно открыть соединение вручную одновременно находясь в социальной сети. Для запуска соединения вручную, пожалуйста, авторизуйтесь через меню настроек и повторно вставьте ссылку.",
+    "description": "Text for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
+  },
+  "EXT_MISSING_TITLE": {
+    "message": "Вы почьти готовы использовать uProxy!",
+    "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
+  },
+  "ONE_TIME_SUCCESS": {
+    "message": "Единовременное соединение успешно наладилось.",
+    "description": "Inform the user that a one-time connection was successfully established."
+  },
+  "ONE_TIME_GETTING": {
+    "message": "В настоящий момент вы получаете доступ.",
+    "description": "The user is connected to the Internet through their friend."
+  },
+  "SET": {
+    "message": "Сохранить",
+    "description": "Label for button that saves the user's advanced settings."
+  },
+  "GETTING_ACCESS_FROM": {
+    "message": "__name__ предоставляет вам доступ",
+    "description": "Message in a status bar that is visible when the user is getting access from a friend."
+  },
+  "STARTED_PROXYING": {
+    "message": "__name__ начал получать доступ через вас",
+    "description": "Notification for when a friend has started accessing the Internet through the user."
+  },
+  "FRIENDS_APPEAR_WHEN": {
+    "message": "Друзья появляются, когда они используют uProxy и вошли в те же сети где вы находитесь.",
+    "description": "Instruction informing the user how to invite their friends to uProxy."
+  },
+  "VERY_LIKELY": {
+    "message": "очень вероятно",
+    "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
+  },
+  "STATS_ENABLED_TITLE": {
+    "message": "Включён сбор анонимной статистики пользования",
+    "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team."
+  },
+  "APP_MISSING_MESSAGE": {
+    "message": "Для начала, загрузите и запустите часть 2 от uProxy.",
+    "description": "Shown in Chrome to instruct the user to install part 2 of uProxy."
+  },
+  "UPROXY_FRIENDS": {
+    "message": "uProxy контакты",
+    "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups."
+  },
+  "STOP_IGNORING_REQUESTS": {
+    "message": "Прекратить игнорировать запросы",
+    "description": "Button label for if the user wants to stop ignoring requests."
+  },
+  "STOP_ONE_TIME_SHARING": {
+    "message": "Прекратить делиться доступом",
+    "description": "Label for button to terminate your connection to a friend who is accessing the Internet through you."
+  },
+  "SETTINGS_BAD_FORMAT_ERROR": {
+    "message": "Ошибка: неправильный формат",
+    "description": "Error shown to the user if their input for advanced settings is badly formed JSON."
+  },
+  "P_I_I_MESSAGE": {
+    "message": "Ваши отзывы и адрес электронной почты будут отправлены uProxy.org. Ваш журнал, информация сети и адрес электронной почты может включать в себя персональную информацию.",
+    "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy."
+  },
+  "SETTINGS_SAVED": {
+    "message": "Настройки сохранились",
+    "description": "Message that confirms to the user that their advanced settings were saved."
+  },
+  "OK": {
+    "message": "ОК",
+    "description": "Button label."
+  },
+  "GRANTED_FRIEND_ACCESS": {
+    "message": "Вы одобрили доступ для вашего друга.",
+    "description": "The user has agreed to let their friend access the Internet through the user."
+  },
+  "OFFERED_ACCESS_NOTIFICATION": {
+    "message": "__name__ предложил свой доступ",
+    "description": "Notification for when the user receives an offer from a friend to access the Internet through them."
+  },
+  "GRANT": {
+    "message": "Разрешить",
+    "description": "Label for button that accepts a friend's request to access the Internet through the user."
+  },
+  "NO_LONGER_GETTING": {
+    "message": "Вы больше не получаете доступ. Чтобы запросить новое соединение нажмите нижеприведённую кнопку",
+    "description": "Message shown when a one-time connection ends."
+  },
+  "NAME_THIS_DEVICE": {
+    "message": "Назовите ваше устройство",
+    "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel."
+  },
+  "FEEDBACK_PLACEHOLDER": {
+    "message": "Оставить отзыв",
+    "description": "The default text that appears in the user feedback textbox."
+  },
+  "CONNECTED_ACCOUNTS": {
+    "message": "Присоединённые счета",
+    "description": "In settings, title for the social networks you can connect to."
+  },
+  "DESCRIPTION": {
+    "message": "Описание",
+    "description": "Placeholder for the input field for the name of the user's device."
+  },
+  "ADVANCED_SETTINGS": {
+    "message": "Расширенные настройки",
+    "description": "Clickable text from the Settings menu. Clicking this opens the advanced settings screen."
+  },
+  "ERROR_STARTING_CONNECTION": {
+    "message": "Произошла ошибка при запуске соединения и оно было прекращено. Пожалуйста, попробуйте начать другое соединение.",
+    "description": "Error shown if a one-time connection failed to start."
+  },
+  "HOW_TO_INVITE_FRIENDS": {
+    "description": "Question above network select dropdown on invite screen",
+    "message": "Как бы вы хотели пригласить ваших друзей?"
+  },
+  "INVITE_A_FRIEND": {
+    "description": "Title for screen where user invites a friend to uProxy",
+    "message": "Пригласить друга"
+  },
+  "FACEBOOK_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for Facebook",
+    "message": "Нажмите нижеприведённую кнопку чтобы послать uProxy приглашение вашим друзьям из Facebook.  Как только они откроют ссылку в uProxy, они появятся в uProxy контактах."
+  },
+  "FACEBOOK_INVITE_IN_BROWSER": {
+    "description": "Dialog message instructing user to complete Facebook invitation in their browser",
+    "message": "Пожалуйста заполните приглашение в Facebook"
+  },
+  "GMAIL_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for GMail",
+    "message": "Введите адрес электронной почты вашего друга.  Как только они примут ваше приглашение, они появятся у вас в контактах."
+  },
+  "GITHUB_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for GitHub",
+    "message": "Введите GitHub логин вашего друга. Вы увидите их в своих контактах когда они примут ваш запрос."
+  },
+  "GITHUB_INVITE_PLACEHOLDER": {
+    "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
+    "message": "Логин друга в GitHub"
+  },
+  "SEND_INVITATION": {
+    "description": "Button text to initiate sending an invitation",
+    "message": "Послать приглашение"
+  },
+  "INVITE_SENT_CONFIRMATION": {
+    "description": "Dialog text to confirm that an invite was sent to the user's friend",
+    "message": "__name__ получил(а) приглашение!"
+  },
+  "SENDING_FEEDBACK": {
+    "description": "Message in dialog indicating feedback is being sent to the uProxy team.",
+    "message": "Отсылаем отзыв"
+  },
+  "ONLINE": {
+    "description": "Shown under your contact's who are online",
+    "message": "Онлайн"
+  },
+  "OFFLINE": {
+    "description": "Shown under your contact's who are offline",
+    "message": "Оффлайн"
+  },
+  "RESPOND_TO_FRIEND_REQUEST": {
+    "description": "Shown in roster under contacts who have requested to be the user's uProxy friend.",
+    "message": "Ответить на запрос друга"
+  },
+  "FRIEND_REQUEST_SENT": {
+    "description": "Shown in roster under contacts who the user has requested to be a uProxy friend.",
+    "message": "Запрос добавить в друзья отправлен"
+  },
+  "FRIEND_REQUEST": {
+    "description": "Message above button for user to accept a uProxy friend request",
+    "message": "Ваш друг __name__ хочет пользоваться с вами uProxy!"
+  },
+  "ACCEPT_INVITE": {
+    "description": "Text for button for user to accept a uProxy friend request",
+    "message": "Принять приглашение"
+  },
+  "NO_LONGER_SHARING": {
+    "description": "Message shown when a one-time connection ends and the user was sharing.",
+    "message": "Вы больше не делитесь доступом. Нажмите кнопку приведённую ниже, чтобы запросить соединение или нажмите кнопку чтобы запросить соединение или вставьте ссылку о запросе от друга чтобы поделиться доступом заново."
+  },
+  "ONE_TIME_SHARING_SUCCESS": {
+    "description": "Inform the user that they are now successfully sharing access through a one-time connection",
+    "message": "Сейчас вы делитесь вашим доступом с другом."
+  },
+  "ONE_TIME_SHARING_STOP_DIRECTIONS": {
+    "description": "Directions for how to stop sharing access; should refer to the act of clicking the button below which should also have a fairly obvious label.",
+    "message": "Чтобы приостановить разделение доступа, нажмите кнопку приведённую ниже."
+  },
+  "ONE_TIME_GETTING_SUCCESS": {
+    "description": "Inform the user that they have now successfully set up a connection through which they can get access.  This message should in no way imply that they are actually getting access (there will be another message prompting them to start using the connection).",
+    "message": "Удача! Единовременное соединение удачно установлено."
+  },
+  "ONE_TIME_LINK_INPUT_DESCRIPTION": {
+    "description": "Text (appearing within the input box) informing the user that they can paste the one-time connection link they get back from their friend here.  It should be clear that it is the link from the friend and not the link they just copied above.",
+    "message": "Ссылка от вашего друга"
+  },
+  "ONE_TIME_LINK_INPUT_ERROR": {
+    "description": "Error message to show the user if they paste a poorly-formatted link into a texbox.  Should prompt them to try pasting the link again.",
+    "message": "Не узнаем ссылку. Проверьте на правильность и попробуйте ещё раз"
+  },
+  "SUBMIT_ONE_TIME_LINK": {
+    "description": "Text for a button the user may click after pasting in a (probably valid) one-time connection link into a textbox above the button.",
+    "message": "Отправить"
+  },
+  "CONNECT_TO_FRIEND": {
+    "description": "Title above instructions that tell the user how to add a uProxy friend.",
+    "message": "Соединиться с другом"
+  },
+  "CONNECT_TO_FRIEND_MESSAGE": {
+    "description": "Instructions that appears beside a big '+' button. Clicking the button opens a panel with options to add a uProxy friend.",
+    "message": "Используйте эту кнопку чтобы послать приглашение другу или вставьте взамен ссылку."
+  },
+  "MORE_ABOUT_METRICS": {
+    "description": "",
+    "message": "Узнать побольше об анонимной статистике"
+  },
+  "GETTING_ACCESS_FROM_FRIEND": {
+    "description": "Message in a status bar that is visible when the user is getting access from a nameless friend",
+    "message": "Получаем доступ от друга"
+  },
+  "SHARING_ACCESS_WITH_FRIEND": {
+    "description": "Message in a status bar that is visible when the user is sharing access with a nameless friend",
+    "message": "Делимся доступом с другом"
+  },
+  "RECONNECTING": {
+    "description": "Indicate that uProxy is attempting to reconnect automatically after a failure.  A progress indicator is also visible.",
+    "message": "Повторное соединение..."
+  },
+  "RECONNECT_FAILED": {
+    "description": "Indicate that uProxy attempted to reconnect automatically but it failed.",
+    "message": "Не удалось повторно соединиться"
+  },
+  "RESTART_PROXYING": {
+    "description": "Displayed on a button next to the RECONNECT_FAILED message",
+    "message": "Попробуйте ещё раз"
+  },
+  "UPDATE_AVAILABLE": {
+    "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link.",
+    "message": "Доступно обновление"
+  },
+  "RESTART_UPROXY_UPDATE": {
+    "description": "A link the user can click on to restart uProxy and permorm an update",
+    "message": "Перезагрузить чтобы обновить"
+  },
+  "PORT_CONTROL_TITLE": {
+    "description": "Title for the port control section in advanced settings",
+    "message": "Состояние порт контроля"
+  },
+  "PORT_CONTROL_SUPPORTED": {
+    "description": "NAT-PMP, PCP, or UPnP is supported in the router",
+    "message": "Ваш раутер поддерживает порт контроль."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED": {
+    "description": "NAT-PMP, PCP, and UPnP are not supported in the router",
+    "message": "Ваш раутер не поддерживает порт контроль."
+  },
+  "PORT_CONTROL_PENDING": {
+    "description": "uProxy is currently probing router for port control support",
+    "message": "Определяем поддерживает ли ваш раутер порт контроль..."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO": {
+    "description": "Extra information displayed when port control is not supported",
+    "message": "Вы можете включить контроль портов чтобы сделать uProxy более надежным."
+  },
+  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
+    "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
+    "message": "Больше информации."
+  },
+  "LEARN_MORE": {
+    "description": "Generic label for links to FAQ.",
+    "message": "Узнать побольше"
+  },
+  "FRIEND_ADDED": {
+    "description": "Confirmation message after adding a friend to the roster.",
+    "message": "Друг добавлен"
+  },
+  "FRIEND_ADD_ERROR": {
+    "description": "Error message when a friend cannot be added to the roster.",
+    "message": "Произошла ошибка при добавлении вашего контакта."
+  },
+  "INVITE_EMAIL_SENT": {
+    "description": "Confirmation message after an invite email has been sent",
+    "message": "Письмо с приглашением отправлено."
+  },
+  "ENTER_INVITATION": {
+    "description": "Title for screen where user enters an invitation",
+    "message": "Добавить приглашение"
+  },
+  "ENTER_INVITATION_DESCRIPTION": {
+    "description": "Instructions for user to enter an invitation",
+    "message": "Если вы получили приглашение от контакта с которым вы хотите пользоваться uProxy with, вставьте его здесь:"
+  },
+  "SUBMIT_BUTTON_TEXT": {
+    "description": "Button that submits some data entered by the user, e.g. entering a friend invite",
+    "message": "Отправить"
+  },
+  "INVITE_LINK_FROM_ACCEPT_PAGE": {
+    "description": "Link to send an invite if the user is already on the accept-invite page.",
+    "message": "Я бы хотел(а) послать приглашение взамен."
+  },
+  "GITHUB_INVITE_SEND_FAILED": {
+    "description": "Dialog text informing user that a GitHub friend request failed.",
+    "message": "Вы только можете добавить друзей которые уже авторизовались в uProxy с GitHub аккаунтом."
+  },
+  "ACCEPT_LINK_FROM_INVITE_PAGE": {
+    "description": "Link to accept an invite if the user is already on the send an invite page",
+    "message": "Я бы хотел(а) принять приглашение взамен."
+  },
+  "ACCEPT_INVITE_CONFIRMATION": {
+    "description": "Confirmation message when accepting an invite.",
+    "message": "Добавить друга с именем __name__?"
+  },
+  "LOGIN_REQUIRED_TITLE": {
+    "description": "Title for confirmation that the user must login to a network to accept an invitation",
+    "message": "Необходимо авторизоваться в сети"
+  },
+  "LOGIN_REQUIRED_MESSAGE": {
+    "description": "Message for confirmation that the user must login to a network to accept an invitation",
+    "message": "чтобы принять приглашение которое вам послал(а) __name__, вам нужно соединиться в uProxy по сети __network__.  Нажмите \"Да\" чтобы продолжить."
+  },
+  "INVITE_URL_ERROR": {
+    "description": "Error message shown for invalid invite URLs",
+    "message": "Произошла ошибка в пригласительной ссылке."
+  },
+  "INVITE_EMAIL_SUBJECT": {
+    "description": "Default email subject for sending an uProxy invite",
+    "message": "__name__, вас приглашают на uProxy"
+  },
+  "INVITE_EMAIL_BODY": {
+    "description": "Default email body for sending an uProxy invite",
+    "message": "__name__ приглашает вас в uProxy. Нажмите на нижеприведённую ссылку или вставьте в uProxy.<br><br>__url__<br><br>Если у вас не установлено uProxy, вы можете загрузить на <a href='uproxy.org'>uproxy.org</a> или прямиком из Chrome веб-магазина (<a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>часть 1</a> и <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>часть 2</a>) и торговая площадка Firefox (<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'>Здесь</a>)."
+  },
+  "GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION": {
+    "description": "",
+    "message": "<h2>Мы сделали большие изменения в работе uProxy с социальными сетями!</h2><ul><li><strong>Мы добавили новую сеть Gmail</strong> которая разрешает вам соединиться с любым у кого есть Gmail аккаунт. Используйте кнопку а правом нижнем углу конткактного листа чтобы послать приглашение.</li><li><strong>The \"Google\" network is now called Google Hangouts.</strong> Because Google is removing technology we rely on, our support for this network will be removed.</li><li><strong>Facebook contacts are now added by invitation.</strong> You can invite friends using the button at the lower right of the contact list, and only friends you've invited will be able to tell you're using uProxy. To make this change, we've had to reset your friend list, so you'll have to invite friends you want to connect to.</li></ul><p>Пожалуйста оставляйте отзыв насчёт этих новых изменений используя ссылку в меню или послав письмо по адресу info@uProxy.org</p>"
+  }
+}
