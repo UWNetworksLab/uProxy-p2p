@@ -332,7 +332,7 @@ class Connection {
 
   constructor(
       private address_: string,
-      private send_: (message:Object) => void,
+      private received_: (message:Object) => void,
       private name_: string = 'tunnel' + Connection.id_++) {}
 
   // TODO: timeout
@@ -375,7 +375,7 @@ class Connection {
                   break;
                 case ConnectionState.ESTABLISHED:
                   try {
-                    this.send_(JSON.parse(reply));
+                    this.received_(JSON.parse(reply));
                   } catch (e) {
                     log.warn('%1: could not de-serialise signalling message: %2',
                         this.address_, reply);
