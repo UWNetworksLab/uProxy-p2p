@@ -260,18 +260,18 @@ export class CloudSocialProvider {
   }
 
   public clearCachedCredentials = (): Promise<void> => {
-    log.warn('clearCachedCredentials');
-    return Promise.resolve<void>();
+    return Promise.reject(
+        new Error('clearCachedCredentials unimplemented'));
   }
 
   public getUsers = (): Promise<freedom.Social.Users> => {
-    log.warn('getUsers');
-    return Promise.resolve();
+    return Promise.reject(
+        new Error('getUsers unimplemented'));
   }
 
   public getClients = (): Promise<freedom.Social.Clients> => {
-    log.warn('getClients');
-    return Promise.resolve();
+    return Promise.reject(
+        new Error('getClients unimplemented'));
   }
 
   public logout = (): Promise<void> => {
@@ -295,18 +295,18 @@ export class CloudSocialProvider {
   }
 
   public acceptUserInvitation = (userId: string): Promise<void> => {
-    log.warn('acceptUserInvitation: %1', userId);
-    return Promise.resolve<void>();
+    return Promise.reject(
+        new Error('acceptUserInvitation unimplemented'));
   }
 
   public blockUser = (userId: string): Promise<void> => {
-    log.warn('blockUser %1', userId);
-    return Promise.resolve<void>();
+    return Promise.reject(
+        new Error('blockUser unimplemented'));
   }
 
   public removeUser = (userId: string): Promise<void> => {
-    log.warn('removeUser %1', userId);
-    return Promise.resolve<void>();
+    return Promise.reject(
+        new Error('removeUser unimplemented'));
   }
 }
 
