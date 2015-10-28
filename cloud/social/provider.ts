@@ -231,6 +231,8 @@ export class CloudSocialProvider {
         if (payload.proxyingId) {
           // Reset the SSH connection because Zork only supports one
           // proxyng session per connection.
+          // TODO: Do not reconnect if we have just invited
+          //       the instance (safe because all we've done is run ping).
           log.info('new proxying session %1', payload.proxyingId);
           if (!(destinationClientId in this.clients_)) {
             log.info('no previous connection to client %1', destinationClientId);
