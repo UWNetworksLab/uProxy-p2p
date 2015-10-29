@@ -1,3 +1,4 @@
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='./context.d.ts' />
 
 // This class will set our global settings object as a JSON blob. It will
@@ -75,5 +76,8 @@ Polymer({
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
+  },
+  openFaqForm: function() {
+    this.fire('core-signal', {name: 'open-faq'});
   },
 });
