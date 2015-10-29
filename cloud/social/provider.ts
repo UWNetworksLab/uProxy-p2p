@@ -172,6 +172,7 @@ export class CloudSocialProvider {
   // This makes all of the stored contacts appear online.
   private loadContacts_ = () => {
     log.debug('loadContacts');
+    this.savedAddresses_ = [];
     this.storage_.get(STORAGE_KEY).then((storedString: string) => {
       if (!storedString) {
         log.debug('no saved contacts');
