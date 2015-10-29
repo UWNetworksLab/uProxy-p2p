@@ -1,9 +1,10 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
-<link rel='import' href='button.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='button.html'>
 <link rel='import' href='dialog.html'>
+<link rel='import' href='faq-link.html'>
 
 <polymer-element name='uproxy-troubleshoot' attributes='titleText'>
   <template>
@@ -64,7 +65,7 @@
     #analyzedNetworkButtons {
       text-align: center;
     }
-    .faq-icon .linkText {
+    uproxy-faq-link .linkText {
       text-decoration: underline;
       color: rgba(0,0,0,0.40);
     }
@@ -81,9 +82,9 @@
       <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
           {{ "ASK_TO_ANALYZE" | $$ }}
-          <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
+          <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
-          </uproxy-link><br>
+          </uproxy-faq-link><br>
         </p>
         <uproxy-button on-tap='{{ getNatType }}'>
           {{ "YES" | $$ }}
@@ -102,13 +103,13 @@
       <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
         {{ "ANALYSIS_RESULTS" | $$({ natType: natType, natImpact: natImpact }) }}
-        <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
+        <uproxy-faq-link anchor='doesUproxyLogData'>
           <span class='linkText'>{{ "MORE_INFO" | $$ }}</span>
-        </uproxy-link><br><br>
+        </uproxy-faq-link><br><br>
         {{ "ASK_TO_SUBMIT_ANALYSIS" | $$ }}
-        <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
+        <uproxy-faq-link anchor='doesUproxyLogData'>
           <span class='linkText'>{{ "PRIVACY_POLICY" | $$ }}</span>
-        </uproxy-link>
+        </uproxy-faq-link>
         <br>
         <div id='analyzedNetworkButtons'>
           <uproxy-button on-tap='{{ submitFeedback }}'>

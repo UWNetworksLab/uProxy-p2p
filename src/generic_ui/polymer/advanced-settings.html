@@ -4,6 +4,8 @@
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='faq-link.html'>
+<link rel='import' href='link.html'>
 
 <polymer-element name='uproxy-advanced-settings'>
   <template>
@@ -101,7 +103,7 @@
     #portControlBox .label {
       color: rgb(112, 112, 112);
     }
-    #portControlBox .faq-icon {
+    #portControlBox uproxy-faq-link {
       color: rgb(0, 150, 136);
     }
     #portControlBox .info {
@@ -120,9 +122,9 @@
         <div id='portControlBox'>
           <p class='inputLabel'>
             {{ 'PORT_CONTROL_TITLE' | $$ }}
-            <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='whatIsPortControl'>
+            <uproxy-faq-link anchor='whatIsPortControl'>
               <core-icon icon='help'></core-icon>
-            </uproxy-link>
+            </uproxy-faq-link>
           </p>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.TRUE }}'>
             {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
@@ -138,9 +140,9 @@
           </uproxy-link>
           <p class='label info' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
             {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
-            <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='whatIsPortControl'>
+            <uproxy-faq-link anchor='whatIsPortControl'>
               {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$ }}
-            </uproxy-link>
+            </uproxy-faq-link>
           </p>
         </div>
         <div id='formContainer' flex vertical layout>

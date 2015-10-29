@@ -7,8 +7,9 @@ Polymer({
   close: function() {
     this.$.faqPanel.close();
   },
-  open: function() {
+  open: function(data :{anchor :string}) {
     this.$.faqPanel.open();
+    // TODO scroll to the anchor
   },
   ready: function() {
     this.ui = ui_context.ui;
