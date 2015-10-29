@@ -211,6 +211,7 @@ export class CloudSocialProvider {
       Promise<freedom.Social.ClientState> => {
     log.debug('login: %1', options);
     this.loadContacts_();
+    // TODO: emit an onUserProfile event, which can include an image URL
     // TODO: base this on the user's public key?
     //       (shown in the "connected accounts" page)
     return Promise.resolve(makeClientState('me'));
