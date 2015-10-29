@@ -175,7 +175,7 @@
       uproxy-action-dialog uproxy-button {
         margin-bottom: 3px;
       }
-      uproxy-faq-link .linkText {
+      uproxy-faq .linkText {
         text-decoration: underline;
         color: rgba(0,0,0,0.40);
       }
@@ -207,7 +207,7 @@
       #statsDialog uproxy-button {
         margin: 1.5em 0.75em;
       }
-      #statsDialog uproxy-faq-link {
+      #statsDialog uproxy-faq {
         width: 100%;
         padding-top: 1em;
         padding-bottom: 1em;
@@ -278,6 +278,8 @@
     </uproxy-copypaste>
 
     <uproxy-feedback id='feedback'></uproxy-feedback>
+
+    <uproxy-faq id='faq'></uproxy-faq>
 
     <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
 
@@ -454,9 +456,9 @@
         <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
         <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
       </div>
-      <uproxy-faq-link anchor='doesUproxyLogData'>
+      <uproxy-faq anchor='doesUproxyLogData'>
         {{ "MORE_ABOUT_METRICS" | $$ }}
-      </uproxy-faq-link>
+      </uproxy-faq>
     </core-overlay>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
