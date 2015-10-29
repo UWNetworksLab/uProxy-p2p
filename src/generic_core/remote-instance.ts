@@ -126,7 +126,8 @@ import pgp = globals.pgp;
             log.error('Could not find clientId for instance', this);
             return;
           }
-          if (typeof this.publicKey !== 'undefined') {
+          if (typeof this.publicKey !== 'undefined'
+              && typeof globals.publicKey !== 'undefined') {
             var arrayBufferData =
                 arraybuffers.stringToArrayBuffer(JSON.stringify(data.data));
             pgp.signEncrypt(arrayBufferData, this.publicKey)
@@ -187,9 +188,8 @@ import pgp = globals.pgp;
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
 
-      if (msg.version < 5) {
-        return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
-      } else {
+      if (typeof this.publicKey !== 'undefined'
+          && typeof globals.publicKey !== 'undefined') {
         return pgp.dearmor(<string>msg.data).then((cipherData :ArrayBuffer) => {
           return pgp.verifyDecrypt(cipherData, this.publicKey);
         }).then((result :freedom.PgpProvider.VerifyDecryptResult) => {
@@ -199,6 +199,8 @@ import pgp = globals.pgp;
         }).catch((e) => {
           log.error('Error decrypting message ', e);
         });
+      } else {
+        return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
       }
     }
 
