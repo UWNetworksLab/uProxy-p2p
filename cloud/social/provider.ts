@@ -123,12 +123,17 @@ export class CloudSocialProvider {
 
   constructor(private dispatchEvent_: (name: string, args: Object) => void) {}
 
-  // Emits UserProfile and Instance messages, causing uProxy to make
-  // the friend appear online.
+  // Emits the messages necessary to make the user appear online 
+  // in the contacts list.
   private notifyOfUser_ = (address: string) => {
     this.dispatchEvent_('onUserProfile', makeUserProfile(address));
+
+    var clientState = makeClientState(address);
+    this.dispatchEvent_('onClientState', clientState);
+
+    // Pretend that we received a message from a remote uProxy client.
     this.dispatchEvent_('onMessage', {
-      from: makeClientState(address),
+      from: clientState,
       // INSTANCE
       message: JSON.stringify(makeVersionedPeerMessage(
         3000, makeInstanceMessage(address)))
