@@ -77,7 +77,4 @@ Polymer({
   computed: {
     'opened': '$.feedbackPanel.opened'
   },
-  openFaqForm: function() {
-    this.fire('core-signal', {name: 'open-faq'});
-  },
 });
