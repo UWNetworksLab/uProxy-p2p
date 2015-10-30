@@ -83,7 +83,7 @@ for role in getter giver; do
 done
 
 function make_image () {
-    if [ "X$(docker images | tail -n +2 | awk '{print $1}' | /bin/grep uproxy/$1 )" == "Xuproxy/$1" ]
+    if [ "X$(docker images | tail -n +2 | awk '{print $1}' | grep uproxy/$1 )" == "Xuproxy/$1" ]
     then
         echo "Reusing existing image uproxy/$1"
     else
@@ -131,7 +131,7 @@ run_docker $CONTAINER_PREFIX-giver $2 $VNCOPTS2 -p :9000
 CONTAINER_IP=localhost
 if uname|grep Darwin > /dev/null
 then
-    CONTAINER_IP=`boot2docker ip`
+    CONTAINER_IP=`docker-machine ip default`
 fi
 
 GETTER_COMMAND_PORT=`docker port $CONTAINER_PREFIX-getter 9000|cut -d':' -f2`
@@ -160,4 +160,4 @@ sleep 2 # make sure nc is shutdown
 ./connect-pair.py $CONTAINER_IP $GETTER_COMMAND_PORT $CONTAINER_IP $GIVER_COMMAND_PORT
 
 echo "SOCKS proxy should be available, sample command:"
-echo "  curl -x socks5h://localhost:$PROXY_PORT www.example.com"
+echo "  curl -x socks5h://$CONTAINER_IP:$PROXY_PORT www.example.com"
