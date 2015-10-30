@@ -3,7 +3,6 @@
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
-<link rel='import' href='faq-link.html'>
 <link rel='import' href='dialog.html'>
 
 <polymer-element name='uproxy-troubleshoot' attributes='titleText'>
@@ -65,7 +64,7 @@
     #analyzedNetworkButtons {
       text-align: center;
     }
-    uproxy-faq-link .linkText {
+    .faq-icon .linkText {
       text-decoration: underline;
       color: rgba(0,0,0,0.40);
     }
@@ -82,9 +81,9 @@
       <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
           {{ "ASK_TO_ANALYZE" | $$ }}
-          <uproxy-faq-link anchor='doesUproxyLogData'>
+          <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
-          </uproxy-faq-link><br>
+          </uproxy-link><br>
         </p>
         <uproxy-button on-tap='{{ getNatType }}'>
           {{ "YES" | $$ }}
@@ -103,13 +102,13 @@
       <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
         {{ "ANALYSIS_RESULTS" | $$({ natType: natType, natImpact: natImpact }) }}
-        <uproxy-faq-link anchor='doesUproxyLogData'>
+        <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
           <span class='linkText'>{{ "MORE_INFO" | $$ }}</span>
-        </uproxy-faq-link><br><br>
+        </uproxy-link><br><br>
         {{ "ASK_TO_SUBMIT_ANALYSIS" | $$ }}
-        <uproxy-faq-link anchor='doesUproxyLogData'>
+        <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
           <span class='linkText'>{{ "PRIVACY_POLICY" | $$ }}</span>
-        </uproxy-faq-link>
+        </uproxy-link>
         <br>
         <div id='analyzedNetworkButtons'>
           <uproxy-button on-tap='{{ submitFeedback }}'>

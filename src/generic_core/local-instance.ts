@@ -5,12 +5,11 @@
  * installation.
  */
 
+import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import Persistent = require('../interfaces/persistent');
 import social = require('../interfaces/social');
 
-import Persistent = require('../interfaces/persistent');
-
-import globals = require('./globals');
 import storage = globals.storage;
 
 // module Core {

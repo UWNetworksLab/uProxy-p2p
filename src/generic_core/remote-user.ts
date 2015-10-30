@@ -22,19 +22,19 @@
  */
 /// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import remote_instance = require('./remote-instance');
-import social = require('../interfaces/social');
 import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import consent = require('./consent');
 import globals = require('./globals');
+import _ = require('lodash');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import Persistent = require('../interfaces/persistent');
+import remote_instance = require('./remote-instance');
+import social = require('../interfaces/social');
 import ui = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import _ = require('lodash');
 
 import storage = globals.storage;
 
-import Persistent = require('../interfaces/persistent');
 
 var log :logging.Log = new logging.Log('remote-user');
 

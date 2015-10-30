@@ -11,6 +11,7 @@ import social = require('../../interfaces/social');
 import user = require('./user');
 import User = user.User;
 import Constants = require('./constants');
+import _ = require('lodash');
 
 describe('UI.UserInterface', () => {
   var ui :user_interface.UserInterface;
@@ -29,11 +30,13 @@ describe('UI.UserInterface', () => {
           'on',
           'connect',
           'getFullState',
-          'stop'
+          'stop',
+          'logout'
         ]);
 
     // assume connect always resolves immediately
     (<jasmine.Spy>mockCore.connect).and.returnValue(Promise.resolve());
+    (<jasmine.Spy>mockCore.logout).and.returnValue(Promise.resolve());
 
     (<jasmine.Spy>mockCore.getFullState).and.returnValue(Promise.resolve({
       networkNames: [
@@ -108,6 +111,41 @@ describe('UI.UserInterface', () => {
                    userId: 'fakeUser',
                    online: false,
                   });
+  }
+
+  function addRemotePeer() {
+    updateToHandlerMap[uproxy_core_api.Update.USER_FRIEND]
+        .call(ui, <social.UserData>{
+                    allInstanceIds: ['testInstance'],
+                    consent: {
+                      ignoringRemoteUserOffer: false,
+                      ignoringRemoteUserRequest: false,
+                      localGrantsAccessToRemote: true,
+                      localRequestsAccessFromRemote: true,
+                      remoteRequestsAccessFromLocal: true,
+                    },
+                    isOnline: true,
+                    network: 'testNetwork',
+                    offeringInstances: [],
+                    instancesSharingWithLocal: [],
+                    user: {
+                      userId: 'testUser',
+                    },
+                  });
+  }
+
+  function startProxyingForRemotePeer() {
+    updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
+        .call(ui, 'testInstance');
+  }
+
+  function activateConfirmationButton(shouldConfirm :boolean) {
+    var text = ui.i18n_t(shouldConfirm ? 'YES' : 'NO');
+    var buttons = (<any>ui.signalToFire).data.buttons;
+    var buttonInfo = <any>_.find(buttons, {text: text});
+    var index = buttonInfo.callbackIndex;
+
+    ui.invokeConfirmationCallback(index, shouldConfirm);
   }
 
   describe('synced users are correctly exposed', () => {
@@ -311,6 +349,59 @@ describe('UI.UserInterface', () => {
       expect(ui.gettingStatus).toEqual(null);
     });
   });  // Update giving and/or getting state in UI
+
+  describe('logout', () => {
+    it('No networks', (done) => {
+      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
+        expect(mockCore.logout).not.toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('Single network', (done) => {
+      login();
+      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {;
+        expect(mockCore.logout).toHaveBeenCalled();
+        logout(); //cleanup
+        done();
+      }).catch(() => {
+        logout();
+        expect('Error: rejected promise').toEqual(false);
+      });
+    });
+
+    it('Waits for confirmation while sharing', (done) => {
+      login();
+      addRemotePeer();
+      startProxyingForRemotePeer();
+
+      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
+        expect(mockCore.logout).toHaveBeenCalled();
+        logout();
+        done();
+      });
+
+      expect(ui.signalToFire).toEqual(jasmine.objectContaining({name: 'open-dialog'}));
+      expect(mockCore.logout).not.toHaveBeenCalled();
+
+      // pretend the confirmaiton button was clicked
+      activateConfirmationButton(true);
+    });
+
+    it('Will not logout if user rejects', (done) => {
+      login();
+      addRemotePeer();
+      startProxyingForRemotePeer();
+
+      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
+        expect(mockCore.logout).not.toHaveBeenCalled();
+        logout();
+        done();
+      });
+
+      activateConfirmationButton(false);
+    });
+  });
 });  // UI.UserInterface
 
 describe('user_interface.model', () => {
