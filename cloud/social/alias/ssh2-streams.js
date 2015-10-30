@@ -5,7 +5,7 @@
 // some constants to point to some of SFTPStream's constants.
 module.exports = {
   SFTPStream: {},
-  SSH2Stream: require('ssh2/node_modules/ssh2-streams/lib/ssh'),
-  utils: require('ssh2/node_modules/ssh2-streams/lib/utils'),
-  constants: require('ssh2/node_modules/ssh2-streams/lib/constants')
+  SSH2Stream: require('ssh2-streams/lib/ssh'),
+  utils: require('ssh2-streams/lib/utils'),
+  constants: require('ssh2-streams/lib/constants')
 };
