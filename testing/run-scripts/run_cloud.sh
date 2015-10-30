@@ -82,7 +82,7 @@ then
   echo "$CONTAINER_PREFIX-sshd image already exists, re-using"
 else
   TMP_DIR=/tmp/uproxy-sshd
-  cp -R ${BASH_SOURCE%/*}/../../sshd $TMP_DIR
+  cp -R ${BASH_SOURCE%/*}/../../sshd/ $TMP_DIR
 
   # 21 characters leaves no = at the end, which is generally easier to double click.
   GIVER_PW=`openssl rand -base64 21`
