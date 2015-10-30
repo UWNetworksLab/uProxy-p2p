@@ -6,7 +6,7 @@
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
-<link rel='import' href='faq-link.html'>
+<link rel='import' href='faq.html'>
 <link rel='import' href='dialog.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
@@ -173,9 +173,9 @@
             <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
               {{ "NETWORK_AND_LOGS" | $$ }}
             </span>
-            <uproxy-faq-link anchor='doesUproxyLogData'>
+            <uproxy-link on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
-            </uproxy-faq-link>
+            </uproxy-link>
           </div>
           <p id='moreInfo'>
             {{ "P_I_I_MESSAGE" | $$ }}

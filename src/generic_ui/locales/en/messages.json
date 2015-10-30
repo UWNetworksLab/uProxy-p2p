@@ -874,5 +874,9 @@
   "GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION": {
     "description": "",
     "message": "<h2>We've made big changes to how uProxy works with social networks!</h2><ul><li><strong>We've introduced a new Gmail network</strong> that allows you to connect with anyone who has a Gmail account. Use the the button in the lower right of the buddy list to send them an invitation.</li><li><strong>The \"Google\" network is now called Google Hangouts.</strong> Because Google is removing technology we rely on, our support for this network will be removed.</li><li><strong>Facebook contacts are now added by invitation.</strong> You can invite friends using the button at the lower right of the contact list, and only friends you've invited will be able to tell you're using uProxy. To make this change, we've had to reset your friend list, so you'll have to invite friends you want to connect to.</li></ul><p>Please send feedback about these changes using the feedback link in the menu or by emailing info@uProxy.org</p>"
+  },
+  "FAQ_SENTENCE_CASE": {
+    "description": "Title of the FAQ window",
+    "message": "Get Help"
   }
 }
