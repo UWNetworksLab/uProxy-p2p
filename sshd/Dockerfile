@@ -6,7 +6,8 @@ RUN apt-get install -y openssh-server supervisor
 
 RUN addgroup giver
 RUN adduser --disabled-password --gecos 'uProxy Giver' --ingroup giver giver
-RUN echo 'giver:giver' | chpasswd
+COPY giverpw /
+RUN echo giver:`cat /giverpw` | chpasswd
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
