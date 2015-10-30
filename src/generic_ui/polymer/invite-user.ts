@@ -140,8 +140,13 @@ Polymer({
   networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
     this.selectedNetworkName = networkName;
-    // Open dialog asking user to login before inviting friends.
-    this.$.loginToInviteFriendDialog.open();
+    if (model.getNetwork(networkName)) {
+      this.initInviteForNetwork(networkName);
+    } else {
+      // Open dialog asking user to login before inviting friends.
+      this.$.loginToInviteFriendDialog.open();
+      this.login(networkName);
+    }
   },
   loginTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
@@ -149,21 +154,25 @@ Polymer({
   },
   login: function(networkName :string, userName ?:string) {
     ui.login(networkName, userName).then(() => {
-      this.$.loginToInviteFriendDialog.close();
-      this.closeInviteUserPanel();
-
-      ui.bringUproxyToFront();
-      this.selectedNetworkName = networkName;
-      if (networkName == "GMail" || networkName == "GitHub") {
-        // After login for these networks, open another view which allows users
-        // to invite their friends.
-        this.fire('core-signal', { name: 'open-network-invite-dialog' });
-      } else if (networkName == "Facebook-Firebase-V2") {
-        this.sendToFacebookFriend();
+      if (networkName != 'Quiver') {
+        this.$.loginToInviteFriendDialog.close();
+        this.closeInviteUserPanel();
       }
+      ui.bringUproxyToFront();
+      this.initInviteForNetwork(networkName);
     }).catch((e: Error) => {
       console.warn('Did not log in ', e);
     });
+  },
+  initInviteForNetwork: function(networkName: string) {
+    this.selectedNetworkName = networkName;
+    if (networkName == "GMail" || networkName == "GitHub") {
+      // After login for these networks, open another view which allows users
+      // to invite their friends.
+      this.fire('core-signal', { name: 'open-network-invite-dialog' });
+    } else if (networkName == "Facebook-Firebase-V2") {
+      this.sendToFacebookFriend();
+    }
   },
   copypaste: function() {
     // Logout of all other social networks before starting
@@ -216,8 +225,8 @@ Polymer({
     'model.onlineNetworks': 'updateQuiverStatus'
   },
   ready: function() {
-    this.updateNetworkButtonNames();
     this.userName = model.globalSettings.quiverUserName; // for Quiver
+    this.supportsQuiver = false;
     this.isQuiverLoggedIn = false;
     this.userIdInput = ''; // for GitHub
     this.inviteUserEmail = ''; // for GMail
@@ -225,5 +234,7 @@ Polymer({
     this.selectedNetworkName = '';
     this.model = model;
     this.ui = ui;
+
+    this.updateNetworkButtonNames();
   }
 });

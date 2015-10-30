@@ -75,12 +75,6 @@
             {{ 'SEND_INVITATION' | $$ }}
           </uproxy-button>
         </div>
-
-        <div class='section'>
-          <a class="GitHub" on-tap='{{ showAcceptUserInvite }}'>
-            {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$ }}
-          </a>
-        </div>
       </div>
 
       <div hidden?="{{network!=='GMail'}}">
@@ -97,12 +91,6 @@
           <uproxy-button class="GMail" raised affirmative on-tap='{{ sendToGMailFriend }}'>
             {{ 'SEND_INVITATION' | $$ }}
           </uproxy-button>
-        </div>
-
-        <div class='section'>
-          <a class="GMail" on-tap='{{ showAcceptUserInvite }}'>
-            {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$ }}
-          </a>
         </div>
       </div>
 

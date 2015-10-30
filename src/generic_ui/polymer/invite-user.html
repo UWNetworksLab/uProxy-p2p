@@ -22,11 +22,6 @@
         padding-left: 1em;
         padding-right: 1em;
       }
-      #inviteUserPanel h1 {
-        font-size: 1.4em;
-        color: #009688;  /* dark green */
-        margin-bottom: 1.5em;
-      }
       .view {
         overflow: auto;
       }
@@ -80,6 +75,8 @@
         margin-bottom: 1em;
       }
       #QuiverTitle {
+        font-size: 1.4em;
+        color: #009688;
         font-weight: normal;
         margin: 1em 1em 0em 1em;
       }
@@ -155,26 +152,27 @@
       <div class='view' flex>
         <!-- TODO: translate before launch on webstore -->
         <div id="allInviteMethods" hidden?='{{!ui.showRosterBeforeLogin}}'>
-          <div hidden?='{{isQuiverLoggedIn}}' class='section'>
-            <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
-            <paper-input-decorator label='Choose a user name' layout vertical>
-              <input is='core-input' value='{{ userName }}' />
-            </paper-input-decorator>
-            <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
-          </div>
-          <div hidden?='{{!isQuiverLoggedIn}}' class='section'>
-            <!-- TODO: localization -->
-            <uproxy-button affirmative on-tap='{{ generateQuiverInviteUrl }}'>
-              Generate Quiver Invite Link
-            </uproxy-button>
-
-            <div hidden?='{{ inviteUrl == "" }}'>
-              <p>Send this link to your friend so they can find you on Quiver</p>
-              <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+          <div hidden?="{{!supportsQuiver}}">
+            <div hidden?='{{isQuiverLoggedIn}}' class='section'>
+              <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
+              <paper-input-decorator label='Choose a user name' layout vertical>
+                <input is='core-input' value='{{ userName }}' />
+              </paper-input-decorator>
+              <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
             </div>
-          </div>
+            <div hidden?='{{!isQuiverLoggedIn}}' class='section'>
+              <!-- TODO: localization -->
+              <uproxy-button affirmative on-tap='{{ generateQuiverInviteUrl }}'>
+                Generate Quiver Invite Link
+              </uproxy-button>
 
-          <div class='orText'>- - - OR - - -</div>
+              <div hidden?='{{ inviteUrl == "" }}'>
+                <p>Send this link to your friend so they can find you on Quiver</p>
+                <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+              </div>
+            </div>
+            <div class='orText'>- - - OR - - -</div>
+          </div>
           <div class='section'>
           <p>Sign in with a social network.</p>
             <template repeat='{{ n in networkButtonNames }}' vertical layout>
@@ -186,6 +184,9 @@
                 </div>
               </div>
             </template>
+            <div class="section">
+              {{ "WE_WONT_POST" | $$ }}
+            </div>
           </div>
 
           <!-- "uProxy social network" button
@@ -204,7 +205,8 @@
           </div>
 
           <div class="section">
-            {{ "WE_WONT_POST" | $$ }}
+            {{ "HAVE_AN_INVITE_CODE" | $$ }}<br>
+            <a on-tap="{{showAcceptUserInvite}}">{{ "ENTER_IT_HERE" | $$ }}</a>
           </div>
         </div>
 

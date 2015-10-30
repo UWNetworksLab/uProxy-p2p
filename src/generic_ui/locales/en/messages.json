@@ -567,6 +567,14 @@
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
     "message": "We won't share your data or post publicly without your consent"
   },
+  "HAVE_AN_INVITE_CODE": {
+    "description": "Text above a button that asks the user if they already have a uProxy invite code",
+    "message": "Have an invite code?"
+  },
+  "ENTER_IT_HERE": {
+    "description": "Text for button that opens a view for the user to enter their uProxy invite code",
+    "message": "Enter it here"
+  },
   "LEARN_MORE_SOCIAL": {
     "description": "Label for button that brings user to more information about why social networks are used for uProxy.",
     "message": "Learn more about social networks"
