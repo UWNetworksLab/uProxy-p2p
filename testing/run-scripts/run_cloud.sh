@@ -74,10 +74,17 @@ else
   docker build -t uproxy/sshd ${BASH_SOURCE%/*}/../../sshd
 fi
 remove_container sshd
-HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
+
+HOST_IP=
+if uname|grep Darwin > /dev/null
+then
+  HOST_IP=`docker-machine ip default`
+else
+  HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
+fi
 docker run -d -p $SSHD_PORT:22 --name $CONTAINER_PREFIX-sshd --add-host zork:$HOST_IP uproxy/sshd > /dev/null
 
 # Happy, reassuring message.
 echo -n "Waiting for Zork to come up"
-while ! ((echo ping ; sleep 0.5) | nc -w 1 localhost 9000 | grep ping) > /dev/null; do echo -n .; done
+while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
 echo "ready!"
