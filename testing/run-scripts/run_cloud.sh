@@ -88,3 +88,5 @@ docker run -d -p $SSHD_PORT:22 --name $CONTAINER_PREFIX-sshd --add-host zork:$HO
 echo -n "Waiting for Zork to come up"
 while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
 echo "ready!"
+echo "Connect with:"
+echo "  telnet $HOST_IP 9000"
