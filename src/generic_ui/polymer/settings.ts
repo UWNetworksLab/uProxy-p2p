@@ -35,8 +35,9 @@ Polymer({
     if (!model.onlineNetworks) {
       return;
     }
-
-    if (model.onlineNetworks.length === 1) {
+    if (model.onlineNetworks.length === 0) {
+      this.connectedNetworks = ui.i18n_t("NOT_CONNECTED_LOGIN_TO_START");
+    } else if (model.onlineNetworks.length === 1) {
       var displayName = ui.getNetworkDisplayName(model.onlineNetworks[0].name);
       this.connectedNetworks = ui.i18n_t("CONNECTED_WITH", {network: displayName});
     } else {

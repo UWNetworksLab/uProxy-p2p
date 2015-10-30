@@ -145,7 +145,6 @@ Polymer({
     } else {
       // Open dialog asking user to login before inviting friends.
       this.$.loginToInviteFriendDialog.open();
-      this.login(networkName);
     }
   },
   loginTapped: function(event: Event, detail: Object, target: HTMLElement) {

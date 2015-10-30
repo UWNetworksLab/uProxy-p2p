@@ -203,7 +203,7 @@
           <span class='label'>{{ "RESTART" | $$ }}</span>
         </uproxy-link>
 
-        <uproxy-link on-tap='{{ logOut }}' role='button'>
+        <uproxy-link on-tap='{{ logOut }}' hidden?="{{model.onlineNetworks.length==0}}" role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
           <span class='label'>{{ "LOGOUT" | $$ }}</span>
         </uproxy-link>

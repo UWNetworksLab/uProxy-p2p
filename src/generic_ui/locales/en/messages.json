@@ -467,6 +467,10 @@
     "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups.",
     "message": "Friends who have uProxy"
   },
+  "NOT_CONNECTED_LOGIN_TO_START": {
+    "description": "Text in settings that informs the user they should sign in to a social network to get started.",
+    "message": "Login to get started"
+  },
   "CONNECTED_WITH": {
     "description": "Text in settings that informs the user which social network they're connected to.",
     "message": "Connected with __network__"
