@@ -821,15 +821,15 @@
   },
   "CLOUD_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for Cloud",
-    "message": "Enter your server's address. When a connection has been made, it will appear in your contact list."
+    "message": "Enter your invite code. When a connection has been made, it will appear in your contact list."
   },
   "CLOUD_INVITE_PLACEHOLDER": {
-    "description": "Placeholder in input box for the username and address of the user's cloud instance",
-    "message": "Cloud instance address"
+    "description": "Placeholder in input box for the invite code.",
+    "message": "Invite code"
   },
   "CLOUD_INVITE_FAILED": {
     "description": "Dialog text informing user that a connection could not be made to their cloud instance",
-    "message": "Oops, connection failed. Please check the key and server address."
+    "message": "Oops, connection failed. Please check the invite code."
   },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
