@@ -12,8 +12,8 @@ Polymer({
     this.$.faqPanel.close();
   },
   open: function(e :Event, detail :{anchor :string}) {
-    this.$.faqPanel.open();
     this.anchor = detail.anchor;
+    this.$.faqPanel.open();
   },
   scroll: function(e :Event) {
     var anchor = this.anchor;
