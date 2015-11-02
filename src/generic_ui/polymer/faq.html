@@ -69,7 +69,7 @@
     <!-- Listen for the 'open-faq' event, which is fired by the settings and splash pages. -->
     <core-signals on-core-signal-open-faq="{{ open }}"></core-signals>
 
-    <core-overlay id='faqPanel' on-core-overlay-open-completed="{{scroll}}">
+    <core-overlay id='faqPanel' on-core-overlay-open-completed="{{scrollAfterOpening}}">
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "FAQ_SENTENCE_CASE" | $$ }}

@@ -3,29 +3,29 @@
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
-interface AnchorElement extends Element {
-  scrollIntoView(top? :boolean) :void;
-}
-
 Polymer({
   close: function() {
     this.$.faqPanel.close();
   },
   open: function(e :Event, detail :{anchor :string}) {
-    this.anchor = detail.anchor;
+    // Since opening the FAQ panel is async, set the openingAnchor,
+    // and then scrollAfterOpening will scroll to openingAnchor after
+    // the panel has finished opening.
+    this.openingAnchor = detail.anchor;
     this.$.faqPanel.open();
   },
+  scrollAfterOpening: function() {
+    var anchorElem = this.$[this.openingAnchor];
+    anchorElem.scrollIntoView();
+  },
   scroll: function(e :Event) {
-    var anchor = this.anchor;
-    var elemTapped :HTMLElement = <HTMLElement>e.target;
-    if (elemTapped && elemTapped.getAttribute('data-anchor')) {
-      anchor = elemTapped.getAttribute('data-anchor');
-    }
-    var anchorElem :AnchorElement = <AnchorElement>document.querySelector("html /deep/ #" + anchor);
+    var elemTapped = <HTMLElement>e.target;
+    var anchor = elemTapped.getAttribute('data-anchor');
+    var anchorElem = this.$[anchor];
     anchorElem.scrollIntoView();
   },
   ready: function() {
-    this.anchor = '';
+    this.openingAnchor = '';
     this.ui = ui_context.ui;
     this.model = ui_context.model;
   }
