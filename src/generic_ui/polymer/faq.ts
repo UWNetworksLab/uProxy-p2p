@@ -4,18 +4,18 @@
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 interface AnchorElement extends Element {
-  scrollIntoView(top?: boolean): void;
+  scrollIntoView(top? :boolean) :void;
 }
 
 Polymer({
   close: function() {
     this.$.faqPanel.close();
   },
-  open: function(e: Event, detail: {anchor: string}) {
+  open: function(e :Event, detail :{anchor :string}) {
     this.$.faqPanel.open();
     this.anchor = detail.anchor;
   },
-  scroll: function(e: Event) {
+  scroll: function(e :Event) {
     var anchor = this.anchor;
     var elemTapped :HTMLElement = <HTMLElement>e.target;
     if (elemTapped && elemTapped.getAttribute('data-anchor')) {
