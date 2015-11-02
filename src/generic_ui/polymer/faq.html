@@ -13,6 +13,19 @@
       text-align: center;
       font-color: #009688;  /* dark green */
     }
+    #header {
+      margin: 20px 0px;
+    }
+    .uproxy-title {
+      font-family: "Quicksand", sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -1px;
+      margin-bottom: 1em;
+    }
+    .light {
+      color: #10c9b1;
+    }
     uproxy-app-bar {
       text-align: left;
       font-size: 18px;
@@ -31,13 +44,31 @@
       color: #009688;
       overflow: auto;
     }
-
+    .content {
+      text-align: center;
+    }
+    li {
+      list-style-type: none;
+      padding: 4px 0px;
+    }
+    a {
+      color: #333 !important;
+    }
+    p {
+      color: #909090;
+    }
+    ul {
+      padding: 0;
+    }
+    section {
+      margin: 50px 0px;
+    }
     </style>
 
     <!-- Listen for the 'open-faq' event, which is fired by the settings and splash pages. -->
     <core-signals on-core-signal-open-faq="{{ open }}"></core-signals>
 
-    <core-overlay id='faqPanel'>
+    <core-overlay id='faqPanel' on-core-overlay-open-completed="{{scroll}}">
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "FAQ_SENTENCE_CASE" | $$ }}
@@ -46,7 +77,6 @@
           <div class="content">
             <section id="header">
               <img src="../../icons/uproxy_logo.svg" alt="uProxy Logo" height="140" width="140" />
-
               <h1 class="uproxy-title"><span class="light">u</span>Proxy FAQ</h1>
             </section>
           </div>
@@ -54,25 +84,25 @@
           <div>
             <section class="faq" id="links">
               <ul class="links left">
-                <li><a href="#whatIsUproxy" class="i18n" data-i18n="WHAT_IS_UPROXY">What is uProxy?</a></li>
-                <li><a href="#whatDoGetAccess" class="i18n" data-i18n="WHAT_DO_GET_ACCESS">What do "get access" and "share access" mean?</a></li>
-                <li><a href="#whyDoesUproxyConnect" class="i18n" data-i18n="WHY_DOES_UPROXY_CONNECT">Why does uProxy connect to social networks?</a></li>
-                <li><a href="#howDoIFind" class="i18n" data-i18n="HOW_DO_I_FIND">How do I find my friends on uProxy?</a></li>
-                <li><a href="#whenIAmSharingAccess" class="i18n" data-i18n="WHEN_I_AM_SHARING_ACCESS">When I am sharing access, what does the other party have access to?</a></li>
-                <li><a href="#willUproxyWork" class="i18n" data-i18n="WILL_UPROXY_WORK">Where does uProxy work?</a></li>
-                <li><a href="#howDoesUproxyHelp" class="i18n" data-i18n="HOW_DOES_UPROXY_HELP">How does uProxy help protect my Internet connection?</a></li>
-                <li><a href="#whyIsItImportant" class="i18n" data-i18n="WHY_IS_IT_IMPORTANT">Why is it important that I trust the people I am connecting to?</a></li>
-                <li><a href="#doesUproxyLogData" class="i18n" data-i18n="DOES_UPROXY_LOG_DATA">Does uProxy log data about me, and what is uProxy's privacy policy?</a></li>
-                <li><a href="#doesUproxyGiveMe" class="i18n" data-i18n="DOES_UPROXY_GIVE_ME">Does uProxy give me anonymity online?</a></li>
-                <li><a href="#whatIsntProxied" class="i18n" data-i18n="WHAT_ISNT_PROXIED">What isn't proxied, and can uProxy leak information about the sites I visit?</a></li>
-                <li><a href="#whoKnowsThat" class="i18n" data-i18n="WHO_KNOWS_THAT">Who knows that I'm using uProxy?</a></li>
-                <li><a href="#doesUproxyProtect" class="i18n" data-i18n="DOES_UPROXY_PROTECT">Does uProxy protect me from viruses, phishing, or hacking?</a></li>
-                <li><a href="#whyIsUproxyAsking" class="i18n" data-i18n="WHY_IS_UPROXY_ASKING">Why is uProxy asking for these Chrome permissions?</a></li>
-                <li><a href="#whatIsPortControl" class="i18n" data-i18n="WHAT_IS_PORT_CONTROL">What does "port control" mean?</a></li>
-                <li><a href="#howDoesUproxyCompare" class="i18n" data-i18n="HOW_DOES_UPROXY_COMPARE">How does uProxy compare to VPNs?</a></li>
-                <li><a href="#whoMadeUproxy" class="i18n" data-i18n="WHO_MADE_UPROXY">Who made uProxy?</a></li>
-                <li><a href="#whatIsAlpha" class="i18n" data-i18n="WHAT_IS_ALPHA">What is an alpha release?</a></li>
-                <li><a href="#howDoISubmit" class="i18n" data-i18n="HOW_DO_I_SUBMIT">How do I submit feedback?</a></li>
+                <li><a data-anchor="howDoISubmit" on-tap="{{scroll}}" class="i18n" data-i18n="WHAT_IS_UPROXY">What is uProxy?</a></li>
+                <li><a data-anchor="whatDoGetAccess" on-tap="{{scroll}}" class="i18n" data-i18n="WHAT_DO_GET_ACCESS">What do "get access" and "share access" mean?</a></li>
+                <li><a data-anchor="whyDoesUproxyConnect" on-tap="{{scroll}}" class="i18n" data-i18n="WHY_DOES_UPROXY_CONNECT">Why does uProxy connect to social networks?</a></li>
+                <li><a data-anchor="howDoIFind" on-tap="{{scroll}}" class="i18n" data-i18n="HOW_DO_I_FIND">How do I find my friends on uProxy?</a></li>
+                <li><a data-anchor="howDoISubmit" on-tap="{{scroll}}" class="i18n" data-i18n="WHEN_I_AM_SHARING_ACCESS">When I am sharing access, what does the other party have access to?</a></li>
+                <li><a data-anchor="willUproxyWork" on-tap="{{scroll}}" class="i18n" data-i18n="WILL_UPROXY_WORK">Where does uProxy work?</a></li>
+                <li><a data-anchor="howDoesUproxyHelp" on-tap="{{scroll}}" class="i18n" data-i18n="HOW_DOES_UPROXY_HELP">How does uProxy help protect my Internet connection?</a></li>
+                <li><a data-anchor="whyIsItImportant" on-tap="{{scroll}}" class="i18n" data-i18n="WHY_IS_IT_IMPORTANT">Why is it important that I trust the people I am connecting to?</a></li>
+                <li><a data-anchor="doesUproxyLogData" on-tap="{{scroll}}" class="i18n" data-i18n="DOES_UPROXY_LOG_DATA">Does uProxy log data about me, and what is uProxy's privacy policy?</a></li>
+                <li><a data-anchor="doesUproxyGiveMe" on-tap="{{scroll}}" class="i18n" data-i18n="DOES_UPROXY_GIVE_ME">Does uProxy give me anonymity online?</a></li>
+                <li><a data-anchor="whatIsntProxied" on-tap="{{scroll}}" class="i18n" data-i18n="WHAT_ISNT_PROXIED">What isn't proxied, and can uProxy leak information about the sites I visit?</a></li>
+                <li><a data-anchor="whoKnowsThat" on-tap="{{scroll}}" class="i18n" data-i18n="WHO_KNOWS_THAT">Who knows that I'm using uProxy?</a></li>
+                <li><a data-anchor="doesUproxyProtect" on-tap="{{scroll}}" class="i18n" data-i18n="DOES_UPROXY_PROTECT">Does uProxy protect me from viruses, phishing, or hacking?</a></li>
+                <li><a data-anchor="whyIsUproxyAsking" on-tap="{{scroll}}" class="i18n" data-i18n="WHY_IS_UPROXY_ASKING">Why is uProxy asking for these Chrome permissions?</a></li>
+                <li><a data-anchor="whatIsPortControl" on-tap="{{scroll}}" class="i18n" data-i18n="WHAT_IS_PORT_CONTROL">What does "port control" mean?</a></li>
+                <li><a data-anchor="howDoesUproxyCompare" on-tap="{{scroll}}" class="i18n" data-i18n="HOW_DOES_UPROXY_COMPARE">How does uProxy compare to VPNs?</a></li>
+                <li><a data-anchor="whoMadeUproxy" on-tap="{{scroll}}" class="i18n" data-i18n="WHO_MADE_UPROXY">Who made uProxy?</a></li>
+                <li><a data-anchor="whatIsAlpha" on-tap="{{scroll}}" class="i18n" data-i18n="WHAT_IS_ALPHA">What is an alpha release?</a></li>
+                <li><a data-anchor="howDoISubmit" on-tap="{{scroll}}" class="i18n" data-i18n="HOW_DO_I_SUBMIT">How do I submit feedback?</a></li>
               </ul>
             </section>
 
