@@ -1,5 +1,5 @@
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
-/// <reference path='../../../../../third_party/typings/cordova/inappbrowser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
 
 /**
  * cordova_browser_api.ts
@@ -46,7 +46,12 @@ class CordovaBrowserApi implements BrowserAPI {
   public handlePopupLaunch :() => void;
   private onceLaunched_ :Promise<void>;
 
+  private browser_ :Window = null;
+
   constructor() {
+    chrome.notifications.onClicked.addListener((tag) => {
+      this.emit_('notificationclicked', tag);
+    });
   }
 
   public startUsingProxy = (endpoint:net.Endpoint) => {
@@ -63,14 +68,14 @@ class CordovaBrowserApi implements BrowserAPI {
           singleProxy: {
             scheme: "socks5",
             host: endpoint.address,
-            port: '' + endpoint.port
+            port: endpoint.port
           }
         }
       }
     }, (response:Object) => {
       console.log('Set proxy response:', response);
       // Open the in-app browser through the proxy.
-      cordova.InAppBrowser.open('https://www.uproxy.org/', '_blank');
+      this.openTab('https://news.google.com/');
     });
   };
 
@@ -86,7 +91,51 @@ class CordovaBrowserApi implements BrowserAPI {
   };
 
   public openTab = (url :string) => {
-    cordova.InAppBrowser.open(url, '_blank');
+    if (this.browser_) {
+      return;
+    }
+    this.browser_ = cordova.ThemeableBrowser.open(url, '_blank', {
+      statusbar: {
+        color: '#ffffffff'
+      },
+      toolbar: {
+        height: 44,
+        color: '#f0f0f0ff'
+      },
+      title: {
+        color: '#003264ff',
+        showPageTitle: false
+      },
+      backButton: {
+        image: 'back',
+        imagePressed: 'back_pressed',
+        align: 'left'
+      },
+      forwardButton: {
+        image: 'forward',
+        imagePressed: 'forward_pressed',
+        align: 'left'
+      },
+      closeButton: {
+        image: 'close',
+        imagePressed: 'close_pressed',
+        align: 'right',
+        event: 'closePressed'
+      },
+      backButtonCanClose: false
+    });
+
+    this.browser_.addEventListener(cordova.ThemeableBrowser.EVT_ERR, function(e) {
+      console.error(e);
+    });
+    this.browser_.addEventListener(cordova.ThemeableBrowser.EVT_WRN, function(e) {
+      console.log(e);
+    });
+    this.browser_.addEventListener('closePressed', (e) => {
+      this.browser_ = null;
+      this.stopUsingProxy();
+      this.emit_('proxyDisconnected');
+    });
   }
 
   public launchTabIfNotOpen = (relativeUrl :string) => {
@@ -129,23 +178,18 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public showNotification = (text :string, tag :string) => {
-    if (typeof Notification === 'undefined') {
-      // Notifications are only supported when using Crosswalk
-      console.log('Notification (not shown): ' + text);
-      return;
-    }
+    // We use chrome.notifications because the HTML5 Notification API is not
+    // available (and not polyfilled) in WebViews, so it only works in
+    // Crosswalk.
+    chrome.notifications.create(tag, {
+      type: 'basic',
+      iconUrl: 'icons/38_' + Constants.DEFAULT_ICON,
+      title: 'uProxy',  // Mandatory attribute
+      message: text
+    }, (tag:string) => {});
 
-    var notification =
-        new Notification('uProxy', {
-          body: text,
-          icon: 'icons/38_' + Constants.DEFAULT_ICON,
-          tag: tag
-        });
-    notification.onclick = () => {
-      this.emit_('notificationClicked', tag);
-    };
     setTimeout(function() {
-      notification.close();
+      chrome.notifications.clear(tag, (wasCleared:boolean) => {});
     }, 5000);
   }
 

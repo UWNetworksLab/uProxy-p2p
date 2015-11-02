@@ -18,7 +18,7 @@ export var STORAGE_VERSION = 1;
 // 2: uproxy-lib v27, move to bridge but no obfuscation yet
 // 3: offer basicObfuscation
 // 4: holographic ICE
-export var MESSAGE_VERSION = 5;
+export var MESSAGE_VERSION = 2;
 
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
