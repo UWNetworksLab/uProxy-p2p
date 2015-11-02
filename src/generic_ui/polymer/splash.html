@@ -4,7 +4,7 @@
 <link rel="import" href="../../bower/paper-dropdown/paper-dropdown.html">
 <link rel="import" href="../../bower/core-menu/core-menu.html">
 <link rel='import' href='button.html'>
-<link rel='import' href='faq.html'>
+<link rel='import' href='faq-link.html'>
 <link rel='import' href='network.html'>
 
 <polymer-element name='uproxy-splash' attributes=''>
@@ -78,7 +78,7 @@
       margin-top: 1em;
       margin-bottom: 1em;
     }
-    .faq-icon {
+    uproxy-faq-link {
       width: 100%;
       padding-top: 1em;
       padding-bottom: 1em;
@@ -191,9 +191,9 @@
         </div>
       </div>
 
-      <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='whatIsUproxy'>
+      <uproxy-faq-link anchor='whatIsUproxy'>
         {{ "LEARN_MORE_UPROXY" | $$ }}
-      </uproxy-link>
+      </uproxy-faq-link>
 
     </div>
 
@@ -254,9 +254,9 @@
           </span>
         </div>
       </div>
-      <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='whyDoesUproxyConnect'>
+      <uproxy-faq-link anchor='whyDoesUproxyConnect'>
         {{ "LEARN_MORE_SOCIAL" | $$ }}
-      </uproxy-link>
+      </uproxy-faq-link>
     </div>
 
   </template>

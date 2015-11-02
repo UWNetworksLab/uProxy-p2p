@@ -2,12 +2,12 @@
 <link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
-<link rel='import' href='description.html'>
-<link rel='import' href='faq.html'>
-<link rel='import' href='link.html'>
-<link rel='import' href='network-in-settings.html'>
-<link rel='import' href='name-for-network.html'>
 <link rel='import' href='avatar.html'>
+<link rel='import' href='description.html'>
+<link rel='import' href='faq-link.html'>
+<link rel='import' href='link.html'>
+<link rel='import' href='name-for-network.html'>
+<link rel='import' href='network-in-settings.html'>
 
 <polymer-element name='uproxy-settings'>
 
@@ -178,10 +178,10 @@
           <span class='label'>{{ "SUBMIT_FEEDBACK" | $$ }}</span>
         </uproxy-link>
 
-        <uproxy-link on-tap='{{ openFaqForm }}' role='button'>
+        <uproxy-faq-link role='button'>
           <core-icon icon="help"></core-icon>
           <span class='label'>{{ "GET_HELP" | $$ }}</span>
-        </uproxy-link>
+        </uproxy-faq-link>
 
         <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
           <core-icon icon="settings"></core-icon>
@@ -190,9 +190,9 @@
 
         <div id='metricsCheckbox'>
           <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "STATS_ENABLED_TITLE" | $$ }}'></paper-checkbox>
-          <uproxy-link class='faq-icon' on-tap='{{ openFaqForm }}' anchor='doesUproxyLogData'>
+          <uproxy-faq-link class='faq-icon' anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
-          </uproxy-link>
+          </uproxy-faq-link>
         </div>
 
         <hr>

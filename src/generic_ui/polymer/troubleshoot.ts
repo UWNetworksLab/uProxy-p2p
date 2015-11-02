@@ -37,7 +37,4 @@ Polymer({
       this.analyzedNetwork = true;
     });
   },
-  openFaqForm: function() {
-    this.fire('core-signal', {name: 'open-faq'});
-  },
 });
