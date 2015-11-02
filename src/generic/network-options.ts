@@ -37,7 +37,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     enableMonitoring: false,
     areAllContactsUproxy: false,
     supportsReconnect: false,
-    supportsInvites: false,
+    supportsInvites: true,
     isExperimental: true
   },
   'GitHub': {
