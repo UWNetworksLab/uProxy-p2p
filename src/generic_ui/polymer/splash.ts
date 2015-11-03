@@ -102,7 +102,4 @@ Polymer({
     this.userName = model.globalSettings.quiverUserName;
     this.updateNetworkButtonNames();
   },
-  openFaqForm: function() {
-    this.fire('core-signal', {name: 'open-faq'});
-  },
 });

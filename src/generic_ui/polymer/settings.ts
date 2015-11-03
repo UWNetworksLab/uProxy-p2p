@@ -28,9 +28,6 @@ Polymer({
   openFeedbackForm: function() {
     this.fire('core-signal', {name: 'open-feedback'});
   },
-  openFaqForm: function() {
-    this.fire('core-signal', {name: 'open-faq'});
-  },
   openAdvancedSettingsForm: function() {
     this.fire('core-signal', {name: 'open-advanced-settings'});
   },

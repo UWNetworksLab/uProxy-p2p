@@ -255,6 +255,18 @@
                 {{ 'SEND_INVITATION' | $$ }}
               </uproxy-button>
             </div>
+
+            <div hidden?='{{ selectedNetworkName != "WeChat"}}'>
+              <!-- TODO: localization -->
+              <uproxy-button affirmative on-tap='{{ generateInviteUrl }}'>
+                Generate WeChat Invite Link
+              </uproxy-button>
+
+              <div hidden?='{{ inviteUrl == "" }}'>
+                <p>Send this link to your friend so they can find you on WeChat</p>
+                <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+              </div>
+            </div>
           </div>
 
           <div class='section'>
