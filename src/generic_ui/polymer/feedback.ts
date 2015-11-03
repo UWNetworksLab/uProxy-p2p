@@ -27,6 +27,13 @@ Polymer({
     this.$.feedbackPanel.open();
   },
   sendFeedback: function() {
+    this.feedback = this.feedback.trim();
+    this.$.feedbackDecorator.isInvalid = !this.feedback.length;
+
+    if (this.$.feedbackDecorator.isInvalid) {
+      return;
+    }
+
     this.$.sendingFeedbackDialog.open();
     ui_context.ui.sendFeedback({
       email: this.email,
@@ -43,7 +50,6 @@ Polymer({
       this.email = '';
       this.feedback = '';
       this.$.logCheckbox.checked = false;
-
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
       this.fire('open-dialog', {

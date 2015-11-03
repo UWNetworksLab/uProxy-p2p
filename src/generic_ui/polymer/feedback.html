@@ -161,7 +161,7 @@
           </paper-input-decorator>
           <p class='inputLabel'>{{ "FEEDBACK_TITLE" | $$ }}</p>
           <paper-input-decorator id='feedbackDecorator'
-              label='{{ "FEEDBACK_PLACEHOLDER" | $$ }}'>
+              label='{{ "FEEDBACK_PLACEHOLDER" | $$ }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$ }}'>
             <paper-autogrow-textarea id="feedbackPaperTextarea">
               <textarea id="feedbackInput"
                      value='{{ feedback }}'>
