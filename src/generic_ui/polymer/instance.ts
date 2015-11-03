@@ -20,7 +20,7 @@ Polymer({
   },
   start: function() {
     if (!this.instance.isOnline) {
-      this.ui.toastMessage = ui.i18n_t("FRIEND_OFFLINE", { name: this.user.name });
+      this.ui.toastMessage = ui.i18n_t("FRIEND_OFFLINE", { name: this.userName });
       return;
     }
 
@@ -36,5 +36,11 @@ Polymer({
       ui.stopUsingProxy();
     }
     ui.stopGettingFromInstance(this.instance.instanceId);
-  }
+  },
+  fireChanged: function() {
+    this.fire('instance-changed');
+  },
+  observe: {
+    'instance.isOnline': 'fireChanged',
+  },
 });
