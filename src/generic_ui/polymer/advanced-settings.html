@@ -39,7 +39,7 @@
       color: grey;
       margin-top: 1em;
     }
-    #analyzeNAT{
+    #analyzeNAT {
       width: 100%;
       border-bottom: 1px solid rgb(221, 221, 221);
       padding: 20px 30px;
@@ -141,8 +141,10 @@
           {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
         <div id='analyzeNAT'>
-          <p class='inputLabel'> <uproxy-link on-tap='{{ viewLogs }}'>
-            {{ "ANALYZE_NAT" | $$ }} </uproxy-link>
+          <p class='inputLabel'>
+            <uproxy-link on-tap='{{ viewLogs }}'>
+              {{ "ANALYZE_NAT" | $$ }}
+            </uproxy-link>
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>

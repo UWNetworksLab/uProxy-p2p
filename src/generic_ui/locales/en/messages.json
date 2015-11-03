@@ -296,7 +296,7 @@
     "message": "Analyze network and include logs"
   },
   "ANALYZE_NAT": {
-    "description": "Analyze network settings uProxy logs",
+    "description": "The text for a button in the settings pane the user can click to check their NAT settings and view the latest logs uProxy has collected",
     "message": "Analyze NAT"
   },
   "P_I_I_MESSAGE": {
