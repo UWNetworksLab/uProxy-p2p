@@ -245,8 +245,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
   }
 
-  acceptInvitation = (obj: { network: social.SocialNetworkInfo; data: string }) : Promise<void>=> {
-    return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, obj);
+  acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void>=> {
+    return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, data);
   }
 }  // class CoreConnector
 

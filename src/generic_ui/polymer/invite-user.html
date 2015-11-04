@@ -93,11 +93,11 @@
         <div hidden?='{{ selectedNetworkName != "Quiver"}}'>
           <!-- TODO: localization -->
           <uproxy-button affirmative on-tap='{{ generateInviteUrl }}'>
-            Generate Quiver Invite Link
+            Generate uProxy Invite Link
           </uproxy-button>
 
           <div hidden?='{{ inviteUrl == "" }}'>
-            <p>Send this link to your friend so they can find you on Quiver</p>
+            <p>Send this link to your friend so they can find you on the uProxy network</p>
             <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
           </div>
         </div>

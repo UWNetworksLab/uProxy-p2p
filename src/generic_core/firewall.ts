@@ -124,7 +124,8 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
       if (k in object) {
         remaining_required--;
         object_keys_matched--;
-        if (typeof(object[k]) != type) {
+        // TODO: clean this up..  I'm allowing optional fields to be null
+        if (typeof(object[k]) != type && !(optional && object[k] === null)) {
           return false;
         }
       } else if (optional) {
@@ -177,7 +178,8 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
     'status' : 'string',
     'timestamp' : '?number',
     'lastUpdated' : '?number',
-    'lastSeen' : '?number'
+    'lastSeen' : '?number',
+    'inviteUserData' : '?string'
   };
 
   export function isValidClientState(state :freedom.Social.ClientState,

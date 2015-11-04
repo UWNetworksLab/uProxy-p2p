@@ -32,10 +32,11 @@ export interface StopProxyInfo {
 }
 
 export interface LocalInstanceState {
-  instanceId  :string;
-  userId      :string;
-  userName    :string;
-  imageData   :string;
+  instanceId       :string;
+  userId           :string;
+  userName         :string;
+  imageData        :string;
+  permissionTokens :string[];
 }
 
 export interface NetworkMessage {
@@ -214,6 +215,7 @@ export interface ClientState {
   clientId  :string;
   status    :ClientStatus;
   timestamp :number;
+  inviteUserData ?:string;
 }
 
 
@@ -298,7 +300,7 @@ export interface Network {
   /**
    * Accept an invite to use uProxy with a friend
    */
-  acceptInvitation: (data: string) => Promise<void>;
+  acceptInvitation: (token ?:string, userId ?:string) => Promise<void>;
 
   /**
    * Send an invite to a friend to use uProxy
