@@ -10,6 +10,8 @@ COPY giverpw /
 RUN echo giver:`cat /giverpw` | chpasswd
 
 RUN addgroup getter
+RUN adduser --disabled-password --gecos 'uProxy Getter' --ingroup getter getter
+
 COPY add_getter.sh /add_getter.sh
 RUN chown root:root /add_getter.sh
 RUN chmod 700 /add_getter.sh
