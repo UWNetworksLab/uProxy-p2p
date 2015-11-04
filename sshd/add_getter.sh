@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Adds users to the getter group with a random password, outputting
+# an invite code for each. This is just for prototyping purposes
+# while we iron out issues with key-based authentication in the client.
+
 set -e
 
 # Users testing on a LAN will want to override this with their
