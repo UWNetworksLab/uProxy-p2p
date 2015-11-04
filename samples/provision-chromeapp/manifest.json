@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "name": "provision",
+  "description": "Provision a VM.",
+  "version": "0.1",
+  "minimum_chrome_version": "41.0.2267.0",
+  "app": {
+    "background": {
+      "scripts": [
+        "background.js"
+      ]
+    }
+  },
+  "permissions": [
+    "identity",
+    "<all_urls>"
+  ],
+  "sockets": {
+    "tcp": {
+      "connect" : ""
+    },
+    "tcpServer": {
+      "listen": ""
+    },
+    "udp": {
+      "bind": "*",
+      "send": "*"
+    }
+  }
+}

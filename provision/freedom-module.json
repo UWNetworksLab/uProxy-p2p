@@ -1,0 +1,34 @@
+{
+  "name": "provision",
+  "description": "Provisions VMs on Digital Ocean",
+  "app": {
+    "script": [ "freedom-module.static.js" ]
+  },
+  "provides": [ "provision" ],
+  "default": "provision",
+  "api": {
+    "provision": {
+      "constructor": { "value": [ ] },
+      "start": {
+        "type": "method",
+        "value": [],
+        "ret": {},
+        "err": {
+          "code": "string",
+          "message": "string"
+        } 
+      },
+      "status": {
+        "type": "event",
+        "value": {
+          "code": "string",
+          "message": "string"
+        }
+      }
+    }
+  },
+  "permissions": [
+    "core.xhr",
+    "core.oauth"
+  ]
+}
