@@ -14,9 +14,9 @@ var STATUS_CODES = {
   "CLOUD_FAILED": "Failed to complete cloud operation",
   "CLOUD_INIT_ADDKEY": "Starting to add SSH key to cloud account",
   "CLOUD_DONE_ADDKEY": "Done adding SSH key to cloud account",
-  "CLOUD_INIT_GETVM": "Starting to get all VMs",
-  "CLOUD_DONE_GETVM": "Done getting all VMs",
-
+  "CLOUD_INIT_VM": "Starting to provision VM",
+  "CLOUD_DONE_VM": "Done provisioning VMs",
+  "CLOUD_WAITING_VM": "Waiting on VM",
 };
 
 var REDIRECT_URIS = [
@@ -182,6 +182,7 @@ Provisioner.prototype._waitDigitalOceanActions = function(resolve, reject) {
     for (var i = 0; i < resp.actions.length; i++) {
       if (resp.actions[i].status === "in-progress") {
         setTimeout(this._waitDigitalOceanActions.bind(this, resolve, reject), POLL_TIMEOUT);
+        return;
       }
     }
     resolve(resp);
@@ -204,8 +205,10 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
   return new Promise(function(resolve, reject) {
     this.state.cloud = {};
 
+    this._sendStatus("CLOUD_INIT_ADDKEY");
+    // Get SSH keys in account
     this._doRequest("GET", "account/keys").then(function(resp) {
-      console.log(resp);
+      //console.log(resp);
       for (var i = 0; i < resp.ssh_keys.length; i++) {
         if (resp.ssh_keys[i].public_key === this.state.ssh.public) {
           return Promise.resolve({
@@ -218,10 +221,14 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
         name: name,
         public_key: this.state.ssh.public
       }));
+    // If missing, put SSH key into account
     }.bind(this)).then(function(resp) {
-      console.log(resp);
+      //console.log(resp);
       this.state.cloud.ssh = resp.ssh_key;
+      this._sendStatus("CLOUD_DONE_ADDKEY");
+      this._sendStatus("CLOUD_INIT_VM");
       return this._doRequest("GET", "droplets");
+    // Get list of droplets
     }.bind(this)).then(function(resp) {
       console.log(resp);
       for (var i = 0; i < resp.droplets.length; i++) {
@@ -240,8 +247,9 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
         image: "ubuntu-14-04-x64",
         ssh_keys: [ this.state.cloud.ssh.id ]
       }));
+    // If missing, create the droplet
     }.bind(this)).then(function(resp) {
-      console.log(resp);
+      //console.log(resp);
       this.state.cloud.vm = resp.droplet;
      
       if (resp.droplet.status == "power_off") {
@@ -254,9 +262,12 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
       } else {
         return Promise.resolve();
       }
+    // If the machine exists, but powered off, turn it on
     }.bind(this)).then(function(resp) {
-      console.log(resp);
+      //console.log(resp);
+      this._sendStatus("CLOUD_WAITING_VM");
       this._waitDigitalOceanActions(resolve, reject);
+    // Wait for all in-progress actions to complete
     }.bind(this)).catch(function(err) {
       console.error("Error w/DigitalOcean: " + err);
       this._sendStatus("CLOUD_FAILED");
@@ -286,10 +297,11 @@ Provisioner.prototype.start = function(name) {
     return this._setupDigitalOcean(name);
   // Setup Digital Ocean (SSH key + droplet)
   }.bind(this)).then(function(actions) {
-    console.log(actions);
+    //console.log(actions);
     return this._doRequest("GET", "droplets/"+this.state.cloud.vm.id);
   // Get the droplet's configuration
   }.bind(this)).then(function(resp) {
+    this._sendStatus("CLOUD_DONE_VM");
     this.state.cloud.vm = resp.droplet;
     this.state.network = {
       "ssh_port": 22
