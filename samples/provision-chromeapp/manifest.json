@@ -13,6 +13,7 @@
   },
   "permissions": [
     "identity",
+    "storage",
     "<all_urls>"
   ],
   "sockets": {

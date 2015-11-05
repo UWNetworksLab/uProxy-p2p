@@ -2,7 +2,10 @@
   "name": "provision",
   "description": "Provisions VMs on Digital Ocean",
   "app": {
-    "script": [ "freedom-module.static.js" ]
+    "script": [
+      "/forge-min/forge.min.js",
+      "freedom-module.static.js"
+    ]
   },
   "provides": [ "provision" ],
   "default": "provision",
@@ -11,10 +14,21 @@
       "constructor": { "value": [ ] },
       "start": {
         "type": "method",
-        "value": [],
-        "ret": {},
+        "value": [ "string" ],
+        "ret": {
+          "oauth": {
+            "access_token": "string",
+            "expires_in": "string",
+            "state": "string",
+            "token_type": "string"
+          },
+          "ssh": {
+            "public": "string",
+            "private": "string"
+          }
+        },
         "err": {
-          "code": "string",
+          "errcode": "string",
           "message": "string"
         } 
       },
@@ -29,6 +43,7 @@
   },
   "permissions": [
     "core.xhr",
-    "core.oauth"
+    "core.oauth",
+    "core.storage"
   ]
 }

@@ -1,12 +1,15 @@
-/*globals window, require, forge*/
 var XMLHttpRequest = require('freedom-xhr').corexhr;
 var DigitalOcean = require('do-wrapper');
+// Included directly in freedom module. node-forge not browserify-friendly
+//var forge = require('node-forge')({ disableNativeCode: true });
 
 var STATUS_CODES = {
   "START": "Starting provisioner",
   "OAUTH_INIT": "Initializing oauth flow",
   "OAUTH_ERROR": "Error getting oauth token",
   "OAUTH_COMPLETE": "Got oauth token",
+  "SSHKEY_RETRIEVED": "Retrieved SSH keys from storage",
+  "SSHKEY_GENERATED": "Generated new SSH keys",
 
 };
 
@@ -120,25 +123,9 @@ function addKey(client, keyName, sshKey) {
   return deferred.promise;
 }
 
-/*
- * Gets an SSH public/private key pair from localstorage or generate a new one
- */
-function getKeyPair() {
-  "use strict";
-  var rsa = forge.pki.rsa;
-  var pair = rsa.generateKeyPair({bits: 1024, e: 0x10001});  // TODO: use async
-  var publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, 'info@uproxy.org');
-  var privateKey = forge.ssh.privateKeyToOpenSSH(pair.privateKey, '');
-  return {public: publicKey, private: privateKey};
-}
 
-// TODO: we should change the name of this file from provision to something like
-// digital-ocean-server.js
 var DigitalOceanServer = function() {
   "use strict";
-  this.eventListeners = {
-    'statusUpdate': []
-  };
 };
 
 /**
@@ -217,22 +204,6 @@ DigitalOceanServer.prototype.start = function(accessToken, name) {
   return deferred.promise;
 };
 
-DigitalOceanServer.prototype.on = function(eventName, callback) {
-  "use strict";
-  if (this.eventListeners[eventName] === undefined) {
-    throw Error('unknown event ' + eventName);
-  }
-  this.eventListeners[eventName].push(callback);
-};
-
-DigitalOceanServer.prototype.emit = function(eventName, data) {
-  "use strict";
-  var callbacks = this.eventListeners[eventName];
-  for (var i = 0; i < callbacks.length; ++i) {
-    callbacks[i](data);
-  }
-};
-
 var Provisioner = function(dispatchEvent) {
   this.dispatch = dispatchEvent;
 };
@@ -244,8 +215,18 @@ Provisioner.prototype._sendStatus = function(code) {
   });
 };
 
-Provisioner.prototype.start = function() {
-  this._sendStatus("START");
+/*
+ * Generates an RSA keypair using forge
+ */
+Provisioner.prototype._generateKeyPair = function() {
+  "use strict";
+  var pair = forge.pki.rsa.generateKeyPair({bits: 1024, e: 0x10001});  // TODO: use async
+  var publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, 'info@uproxy.org');
+  var privateKey = forge.ssh.privateKeyToOpenSSH(pair.privateKey, '');
+  return { public: publicKey, private: privateKey };
+}
+
+Provisioner.prototype._doOAuth = function() {
   return new Promise(function(resolve, reject) {
     var oauth = freedom["core.oauth"]();
 
@@ -257,15 +238,65 @@ Provisioner.prototype.start = function() {
                 "redirect_uri=" + encodeURIComponent(obj.redirect) + "&" +
                 "state=" + encodeURIComponent(obj.state) + "&" +
                 "scope=read%20write";
-      console.log(url);
       return oauth.launchAuthFlow(url, obj);
-    }).then(function(redirectUrl) {
-      console.log("Ignoring code: " + redirectUrl);
-      // app.onOAuthToken(redirectUrl);
-    }).catch(function(err) {
-      console.log("launchAuthFlow error: " + err);
+    }).then(function(responseUrl) {
+      var query = responseUrl.substr(responseUrl.indexOf('#') + 1),
+        param,
+        params = {},
+        keys = query.split('&'),
+        i = 0;
+
+      for (i = 0; i < keys.length; i += 1) {
+        param = keys[i].substr(0, keys[i].indexOf('='));
+        params[param] = keys[i].substr(keys[i].indexOf('=') + 1);
+      }
+
+      this._sendStatus("OAUTH_COMPLETE");
+      resolve(params);
+    }.bind(this)).catch(function(err) {
+      console.error("oauth error: " + JSON.stringify(err));
+      reject(err)
+    }.bind(this));
+  }.bind(this));
+};
+
+Provisioner.prototype._getSshKey = function(name) {
+  var storage = freedom["core.storage"]();
+  return new Promise(function(resolve, reject) {
+    var result = {};
+
+    Promise.all([
+      storage.get("DigitalOcean-" + name + "-PublicKey"),
+      storage.get("DigitalOcean-" + name + "-PrivateKey")
+    ]).then(function(val) {
+      if (val[0] === null ||
+         val[1] === null) {
+        result = this._generateKeyPair();
+        storage.set("DigitalOcean-" + name + "-PublicKey", result.public);
+        storage.set("DigitalOcean-" + name + "-PrivateKey", result.private);
+        this._sendStatus("SSHKEY_GENERATED");
+      } else {
+        result.public = val[0];
+        result.private = val[1];
+        this._sendStatus("SSHKEY_RETRIEVED");
+      }
+      resolve(result);
+    }.bind(this)).catch(function(err) {
+      console.error("storage error: " + JSON.stringify(err));
+      reject(err)
     });
-    resolve({});
+  }.bind(this));
+};
+
+Provisioner.prototype.start = function(name) {
+  var result = {};
+  this._sendStatus("START");
+  return this._doOAuth().then(function(oauthObj) {
+    result.oauth = oauthObj;
+    return this._getSshKey(name);
+  }.bind(this)).then(function(keys) {
+    result.ssh = keys;
+    return result;
   }.bind(this));
 }
 

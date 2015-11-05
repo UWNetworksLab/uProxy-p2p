@@ -23,7 +23,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
       module.on("status", function(msg) {
         console.log("status: " + msg.message);
       });
-      module.start().then(function(ret) {
+      module.start("test").then(function(ret) {
         console.log("start returns: ");
         console.log(ret);
       }).catch(function(err) {
