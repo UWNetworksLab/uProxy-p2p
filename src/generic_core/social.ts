@@ -43,64 +43,64 @@ export var LOGIN_TIMEOUT :number = 5000;  // ms
 
 export var MANUAL_NETWORK_ID = 'Manual';
 
-// PREFIX is the string prefix indicating which social providers in the
-// freedom manifest we want to treat as social providers for uProxy.
-var PREFIX :string = 'SOCIAL-';
-// Global mapping of social network names (without prefix) to actual Network
-// instances that interact with that social network.
-//
-// TODO: rather than make this global, this should be a parameter of the core.
-// This simplified Social to being a SocialNetwork and removes the need for
-// this module. `initializeNetworks` becomes part of the core constructor.
-export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
+  // PREFIX is the string prefix indicating which social providers in the
+  // freedom manifest we want to treat as social providers for uProxy.
+  var PREFIX :string = 'SOCIAL-';
+  // Global mapping of social network names (without prefix) to actual Network
+  // instances that interact with that social network.
+  //
+  // TODO: rather than make this global, this should be a parameter of the core.
+  // This simplified Social to being a SocialNetwork and removes the need for
+  // this module. `initializeNetworks` becomes part of the core constructor.
+  export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
 
-export function removeNetwork(networkName :string, userId :string) :void {
-  if (networkName !== MANUAL_NETWORK_ID) {
-    delete networks[networkName][userId];
-  }
-  notifyUI(networkName, userId);
-}
-
-/**
- * Goes through network names and gets a reference to each social provider.
- */
-export function initializeNetworks() :void {
-  for (var dependency in freedom) {
-    if (freedom.hasOwnProperty(dependency)) {
-      if (dependency.indexOf(PREFIX) !== 0 ||
-          ('social' !== freedom[dependency].api &&
-           'social2' !== freedom[dependency].api)) {
-        continue;
-      }
-
-      var name = dependency.substr(PREFIX.length);
-      networks[name] = {};
+  export function removeNetwork(networkName :string, userId :string) :void {
+    if (networkName !== MANUAL_NETWORK_ID) {
+      delete networks[networkName][userId];
     }
+    notifyUI(networkName, userId);
   }
 
-  // TODO: re-enable manual networks here when all code is ready
-  // Social.networks[MANUAL_NETWORK_ID] = {
-  //     '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
-}
+  /**
+   * Goes through network names and gets a reference to each social provider.
+   */
+  export function initializeNetworks() :void {
+    for (var dependency in freedom) {
+      if (freedom.hasOwnProperty(dependency)) {
+        if (dependency.indexOf(PREFIX) !== 0 ||
+            ('social' !== freedom[dependency].api &&
+             'social2' !== freedom[dependency].api)) {
+          continue;
+        }
 
-/**
- * Retrieves reference to the network |networkName|.
- */
-export function getNetwork(networkName :string, userId :string) :social.Network {
-  if (!(networkName in networks)) {
-    log.warn('Network does not exist', networkName);
-    return null;
+        var name = dependency.substr(PREFIX.length);
+        networks[name] = {};
+      }
+    }
+
+    // TODO: re-enable manual networks here when all code is ready
+    // Social.networks[MANUAL_NETWORK_ID] = {
+    //     '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
   }
 
-  if (!(userId in networks[networkName])) {
-    log.info('Not logged in to network', {
-      userId: userId,
-      network: networkName
-    });
-    return null;
+  /**
+   * Retrieves reference to the network |networkName|.
+   */
+  export function getNetwork(networkName :string, userId :string) :social.Network {
+    if (!(networkName in networks)) {
+      log.warn('Network does not exist', networkName);
+      return null;
+    }
+
+    if (!(userId in networks[networkName])) {
+      log.info('Not logged in to network', {
+        userId: userId,
+        network: networkName
+      });
+      return null;
+    }
+    return networks[networkName][userId];
   }
-  return networks[networkName][userId];
-}
 
 
 export function getOnlineNetworks() :social.NetworkState[] {
