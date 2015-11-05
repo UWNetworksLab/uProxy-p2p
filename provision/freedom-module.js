@@ -2,6 +2,8 @@
 // Included directly in freedom module. node-forge not browserify-friendly
 //var forge = require('node-forge')({ disableNativeCode: true });
 
+var POLL_TIMEOUT = 1000; //milliseconds
+
 var STATUS_CODES = {
   "START": "Starting provisioner",
   "OAUTH_INIT": "Initializing oauth flow",
@@ -27,6 +29,10 @@ var Provisioner = function(dispatchEvent) {
   this.state = {};
 };
 
+/**
+ * Dispatches status events
+ * events listed in STATUS_CODES
+ **/
 Provisioner.prototype._sendStatus = function(code) {
   this.dispatch("status", {
     "code": code,
@@ -45,6 +51,9 @@ Provisioner.prototype._generateKeyPair = function() {
   return { public: publicKey, private: privateKey };
 }
 
+/**
+ * Initiates a Digital Ocean oAuth flow
+ **/
 Provisioner.prototype._doOAuth = function() {
   return new Promise(function(resolve, reject) {
     var oauth = freedom["core.oauth"]();
@@ -74,11 +83,16 @@ Provisioner.prototype._doOAuth = function() {
       resolve(params);
     }.bind(this)).catch(function(err) {
       console.error("oauth error: " + JSON.stringify(err));
+      this._sendStatus("OAUTH_ERROR");
       reject(err)
     }.bind(this));
   }.bind(this));
 };
 
+/**
+ * Try to retrieve SSH keys from storage.
+ * If not found, generate new ones and store
+ **/
 Provisioner.prototype._getSshKey = function(name) {
   var storage = freedom["core.storage"]();
   return new Promise(function(resolve, reject) {
@@ -107,6 +121,9 @@ Provisioner.prototype._getSshKey = function(name) {
   }.bind(this));
 };
 
+/**
+ * Make a request to Digital Ocean
+ **/
 Provisioner.prototype._doRequest = function(method, actionPath, body) {
   return new Promise(function(resolve, reject) {
     var url = 'https://api.digitalocean.com/v2/' + actionPath;
@@ -134,8 +151,25 @@ Provisioner.prototype._doRequest = function(method, actionPath, body) {
   }.bind(this));
 };
 
+Provisioner.prototype._waitDigitalOceanActions = function(resolve, reject) {
+  console.log("Polling for Digital Ocean in-progress actions");
+  this._doRequest("GET", "droplets/" + this.state.cloud.vm.id + "/actions").then(function(resp) {
+    for (var i = 0; i < resp.actions.length; i++) {
+      if (resp.actions[i].status === "in-progress") {
+        setTimeout(this._waitDigitalOceanActions.bind(this, resolve, reject), POLL_TIMEOUT);
+      }
+    }
+    resolve(resp);
+  }.bind(this)).catch(function(e) {
+    console.error("Error waiting for digital ocean actions:" + JSON.stringify(e));
+    reject(e)
+  }.bind(this));
+  
+};
+
 Provisioner.prototype._setupDigitalOcean = function(name) {
   return new Promise(function(resolve, reject) {
+    this.state.cloud = {};
 
 
     this._doRequest("GET", "account/keys").then(function(resp) {
@@ -154,6 +188,7 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
       }));
     }.bind(this)).then(function(resp) {
       console.log(resp);
+      this.state.cloud.ssh = resp.ssh_key;
       return this._doRequest("GET", "droplets");
     }.bind(this)).then(function(resp) {
       console.log(resp);
@@ -171,11 +206,25 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
         region: "nyc3",
         size: "512mb",
         image: "ubuntu-14-04-x64",
-        ssh_keys: [ sshKeyId ]
+        ssh_keys: [ this.state.cloud.ssh.id ]
       }));
     }.bind(this)).then(function(resp) {
       console.log(resp);
-      resolve();
+      this.state.cloud.vm = resp.droplet;
+     
+      if (resp.droplet.status == "power_off") {
+        // Need to power on VM
+        return this._doRequest(
+          "POST", 
+          "droplets/" + resp.droplet.id + "/actions",
+          JSON.stringify({ "type": "power_on" })
+        ) 
+      } else {
+        return Promise.resolve();
+      }
+    }.bind(this)).then(function(resp) {
+      console.log(resp);
+      this._waitDigitalOceanActions(resolve, reject);
     }.bind(this)).catch(function(err) {
       console.error("Error w/DigitalOcean: " + err);
       this._sendStatus("CLOUD_FAILED");
@@ -187,15 +236,42 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
   }.bind(this));
 }
 
+/**
+ * One-click setup of a VM
+ * See freedom-module.json for return and error types
+ **/
 Provisioner.prototype.start = function(name) {
   this._sendStatus("START");
+  // Do oAuth
   return this._doOAuth().then(function(oauthObj) {
     this.state.oauth = oauthObj;
     return this._getSshKey(name);
+  // Get SSH keys
   }.bind(this)).then(function(keys) {
     this.state.ssh = keys;
     return this._setupDigitalOcean(name);
-  }.bind(this)).then(function() {
+  // Setup Digital Ocean (SSH key + droplet)
+  }.bind(this)).then(function(actions) {
+    console.log(actions);
+    return this._doRequest("GET", "droplets/"+this.state.cloud.vm.id);
+  // Get the droplet's configuration
+  }.bind(this)).then(function(resp) {
+    this.state.cloud.vm = resp.droplet;
+    this.state.network = {
+      "ssh_port": 22
+    }
+    // Retrieve public IPv4 address
+    for (var i = 0; i < resp.droplet.networks.v4.length; i++) {
+      if (resp.droplet.networks.v4[i].type === "public") {
+        this.state.network.ipv4 = resp.droplet.networks.v4[i].ip_address;
+      }
+    }
+    // Retrieve public IPv6 address
+    for (var i = 0; i < resp.droplet.networks.v6.length; i++) {
+      if (resp.droplet.networks.v6[i].type === "public") {
+        this.state.network.ipv6 = resp.droplet.networks.v6[i].ip_address;
+      }
+    }
     console.log(this.state);
     return this.state;
   }.bind(this));

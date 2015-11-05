@@ -25,6 +25,11 @@
           "ssh": {
             "public": "string",
             "private": "string"
+          },
+          "network": {
+            "ipv4": "string",
+            "ipv6": "string",
+            "ssh_port": "string"
           }
         },
         "err": {
