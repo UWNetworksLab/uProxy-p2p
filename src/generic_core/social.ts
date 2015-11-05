@@ -37,11 +37,11 @@ import ui = ui_connector.connector;
 import network_options = require('../generic/network-options');
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
-var log :logging.Log = new logging.Log('social');
+  var log :logging.Log = new logging.Log('social');
 
-export var LOGIN_TIMEOUT :number = 5000;  // ms
+  export var LOGIN_TIMEOUT :number = 5000;  // ms
 
-export var MANUAL_NETWORK_ID = 'Manual';
+  export var MANUAL_NETWORK_ID = 'Manual';
 
   // PREFIX is the string prefix indicating which social providers in the
   // freedom manifest we want to treat as social providers for uProxy.
