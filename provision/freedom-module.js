@@ -331,7 +331,7 @@ Provisioner.prototype.start = function(name) {
  * @return {Promise.<Object>}
  **/
 Provisioner.prototype.stop = function(name) {
-  return this._doRequest("GET", "droplets").then(function() {
+  return this._doRequest("GET", "droplets").then(function(resp) {
     for (var i = 0; i < resp.droplets.length; i++) {
       if (resp.droplets[i].name === name) {
         return Promise.resolve({
@@ -340,12 +340,12 @@ Provisioner.prototype.stop = function(name) {
       }
     }
     return Promise.reject({
-      "err_code": "",
+      "errcode": "",
       "message": "Droplet with name," + name + ", doesnt exist"
     });
   }.bind(this)).then(function(resp) {
     return this._doRequest("DELETE", "droplets/" + resp.droplet.id);
-  });
+  }.bind(this));
 };
 
 freedom().providePromises(Provisioner);
