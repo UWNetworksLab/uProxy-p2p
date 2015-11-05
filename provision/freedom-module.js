@@ -32,6 +32,7 @@ var Provisioner = function(dispatchEvent) {
 /**
  * Dispatches status events
  * events listed in STATUS_CODES
+ * @param {String} code - one of STATUS_CODES 
  **/
 Provisioner.prototype._sendStatus = function(code) {
   this.dispatch("status", {
@@ -42,6 +43,7 @@ Provisioner.prototype._sendStatus = function(code) {
 
 /*
  * Generates an RSA keypair using forge
+ * @return {Object.<String,String>} public and private SSH keys
  */
 Provisioner.prototype._generateKeyPair = function() {
   "use strict";
@@ -53,6 +55,13 @@ Provisioner.prototype._generateKeyPair = function() {
 
 /**
  * Initiates a Digital Ocean oAuth flow
+ * @return {Promise.<Object>} oAuth response from Digital Ocean
+ *  {
+ *    access_token: "..",
+ *    expires_in: "..",
+ *    state: "..",
+ *    token_type: ".."
+ *  }
  **/
 Provisioner.prototype._doOAuth = function() {
   return new Promise(function(resolve, reject) {
@@ -92,6 +101,12 @@ Provisioner.prototype._doOAuth = function() {
 /**
  * Try to retrieve SSH keys from storage.
  * If not found, generate new ones and store
+ * @param {String} name of the key (usually same as name of VM later)
+ * @return {Object}
+ * {
+ *    public: "...",
+ *    private: "..."
+ * }
  **/
 Provisioner.prototype._getSshKey = function(name) {
   var storage = freedom["core.storage"]();
@@ -123,6 +138,10 @@ Provisioner.prototype._getSshKey = function(name) {
 
 /**
  * Make a request to Digital Ocean
+ * @param {String} method - GET/POST/DELETE etc
+ * @param {String} actionPath - e.g. "droplets/"
+ * @param {String} body - if POST, contents to post
+ * @return {Promise.<Object>} - JSON object of response body
  **/
 Provisioner.prototype._doRequest = function(method, actionPath, body) {
   return new Promise(function(resolve, reject) {
@@ -151,6 +170,12 @@ Provisioner.prototype._doRequest = function(method, actionPath, body) {
   }.bind(this));
 };
 
+/** 
+ * Waits for all in-progress Digital Ocean actions to complete
+ * e.g. after powering on a machine, or creating a VM
+ * @param {Function} resolve - call when done
+ * @param {Function} reject - call on failure
+ **/
 Provisioner.prototype._waitDigitalOceanActions = function(resolve, reject) {
   console.log("Polling for Digital Ocean in-progress actions");
   this._doRequest("GET", "droplets/" + this.state.cloud.vm.id + "/actions").then(function(resp) {
@@ -167,10 +192,17 @@ Provisioner.prototype._waitDigitalOceanActions = function(resolve, reject) {
   
 };
 
+/**
+ * Properly configure Digital Ocean with a single droplet of name:name
+ * Assumes we already have oAuth token and  SSH key in this.state
+ * This method will use this._waitDigitalOceanActions() to wait until all actions complete
+ * before resolving
+ * @param {String} name of droplet
+ * @return {Promise} resolves on success, rejects on failure
+ **/
 Provisioner.prototype._setupDigitalOcean = function(name) {
   return new Promise(function(resolve, reject) {
     this.state.cloud = {};
-
 
     this._doRequest("GET", "account/keys").then(function(resp) {
       console.log(resp);
@@ -239,6 +271,8 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
 /**
  * One-click setup of a VM
  * See freedom-module.json for return and error types
+ * @param {String} name of VM to create
+ * @return {Promise.<Object>}
  **/
 Provisioner.prototype.start = function(name) {
   this._sendStatus("START");
