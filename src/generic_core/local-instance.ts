@@ -26,7 +26,7 @@ import storage = globals.storage;
     public clientId :string;
     public userName :string;
     public imageData :string;
-    public permissionTokens :string[] = [];
+    public invitePermissionTokens :string[] = [];
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -95,7 +95,7 @@ import storage = globals.storage;
         userId: this.userId,
         userName: this.userName,
         imageData: this.imageData,
-        permissionTokens: this.permissionTokens
+        invitePermissionTokens: this.invitePermissionTokens
       };
     }
     public restoreState = (state:social.LocalInstanceState) :void => {
@@ -104,8 +104,8 @@ import storage = globals.storage;
         this.userName = state.userName;
         this.imageData = state.imageData;
       }
-      if (typeof state.permissionTokens !== 'undefined') {
-        this.permissionTokens = state.permissionTokens;
+      if (typeof state.invitePermissionTokens !== 'undefined') {
+        this.invitePermissionTokens = state.invitePermissionTokens;
       }
     }
 
@@ -118,12 +118,12 @@ import storage = globals.storage;
     }
 
     public addInvitePermissionToken = (permissionToken :string) => {
-      this.permissionTokens.push(permissionToken);
+      this.invitePermissionTokens.push(permissionToken);
       this.saveToStorage();
     }
 
     public isValidInvite = (permissionToken :string) : boolean => {
-      return this.permissionTokens.indexOf(permissionToken) >= 0;
+      return this.invitePermissionTokens.indexOf(permissionToken) >= 0;
     }
 
   }  // class local_instance.LocalInstance

@@ -36,7 +36,7 @@ export interface LocalInstanceState {
   userId           :string;
   userName         :string;
   imageData        :string;
-  permissionTokens :string[];
+  invitePermissionTokens :string[];
 }
 
 export interface NetworkMessage {

@@ -124,7 +124,7 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
       if (k in object) {
         remaining_required--;
         object_keys_matched--;
-        // TODO: clean this up..  I'm allowing optional fields to be null
+        // Types must match, unless the field is optional and null.
         if (typeof(object[k]) != type && !(optional && object[k] === null)) {
           return false;
         }

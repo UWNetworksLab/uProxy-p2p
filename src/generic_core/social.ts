@@ -408,12 +408,6 @@ export function notifyUI(networkName :string, userId :string) {
           return;
         }
 
-        // TODO: for quiver, we need to check if it has inviteUserData
-        //   if so need to verify it is a valid invite and add the publicKey
-        // For all Quiver clients (regardless of whether they have invite data)
-        // We need to make sure that the clientId matches one of the knownPublicKeys
-        // Note we will probably create user objects before checking this
-        // ALSO: we need to verify that clients are valid in the onMessage handler
         this.getOrAddUser_(client.userId).handleClient(client);
       });
     }
@@ -452,8 +446,6 @@ export function notifyUI(networkName :string, userId :string) {
         var decryptMessage = Promise.resolve(incoming.message);
         if (this.encryptWithClientId_()) {
           var key = getKeyFromClientId(client.clientId);
-          // TODO: check if key in user.knownPublicKeys
-          // console.log('got encrypted message ' + incoming.message);
           decryptMessage = crypto.verifyDecrypt(incoming.message, key);
         }
 
@@ -518,7 +510,6 @@ export function notifyUI(networkName :string, userId :string) {
 
           return Promise.resolve(true);
         });  // TODO: error checking?
-        // TODO: do I need to include userId in the map?
         this.pendingClients_[client.clientId] = decryptAndValidate;
         return decryptAndValidate;
       }
@@ -712,7 +703,6 @@ export function notifyUI(networkName :string, userId :string) {
       remoteUser.knownPublicKeys.push(remotePublicKey);
       remoteUser.saveToStorage();
 
-
       // Data to pass back to the user who generated the invite token
       // so they can know who we are and verify that the token is valid
       var inviteAcceptanceObj = {
@@ -725,18 +715,11 @@ export function notifyUI(networkName :string, userId :string) {
       // Encrypt inviteAcceptanceData with the remotePublicKey
       return crypto.signEncrypt(inviteAcceptanceString, remotePublicKey)
       .then((cipherText :string) => {
-        // TODO: need to update freedom-social-quiver to pass cipherText
-        // and uProxy on the other side to handle this in handleUserProfile
         return this.freedomApi_.acceptUserInvitation(networkData, cipherText)
         .catch((e :Error) => {
           log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
         });
       });
-
-      // message to freedom-social-quiver should include our userId, our public Key
-      // the received permission token.... all encrypted with the user's public key
-      // (from the invite token)
-
     }
 
     public inviteUser = (userName: string): Promise<void> => {
