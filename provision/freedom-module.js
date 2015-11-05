@@ -1,5 +1,4 @@
-var XMLHttpRequest = require('freedom-xhr').corexhr;
-var DigitalOcean = require('do-wrapper');
+//var XMLHttpRequest = require('freedom-xhr').corexhr;
 // Included directly in freedom module. node-forge not browserify-friendly
 //var forge = require('node-forge')({ disableNativeCode: true });
 
@@ -10,6 +9,11 @@ var STATUS_CODES = {
   "OAUTH_COMPLETE": "Got oauth token",
   "SSHKEY_RETRIEVED": "Retrieved SSH keys from storage",
   "SSHKEY_GENERATED": "Generated new SSH keys",
+  "CLOUD_FAILED": "Failed to complete cloud operation",
+  "CLOUD_INIT_ADDKEY": "Starting to add SSH key to cloud account",
+  "CLOUD_DONE_ADDKEY": "Done adding SSH key to cloud account",
+  "CLOUD_INIT_GETVM": "Starting to get all VMs",
+  "CLOUD_DONE_GETVM": "Done getting all VMs",
 
 };
 
@@ -18,194 +22,9 @@ var REDIRECT_URIS = [
   //  "http://localhost:10101"
 ];
 
-/**
- * from a digital ocean networks descriptor object, return the
- * array of accessible IP addresses.
- */
-var QUERY_IP_TIMER = 1;  // TODO: Set a maximum timeout to reject promise?
-function queryIpAddress(client, dropletId) {
-  'use strict';
-  var deferred = Q.defer();
-
-  function _queryIpAddress() {
-    client.dropletsGetById(dropletId, function (err, res, body) {
-      // Extract IP addresses from the networks property
-      var networks = body.droplet.networks;
-      var addrs = [];
-      Object.keys(networks).forEach(function (type) {
-        networks[type].forEach(function (address) {
-          if (address.type === "public" && address.ip_address) {
-            addrs.push(address.ip_address);
-          }
-        });
-      });
-
-      // Retry after timeout if there are no IPs, otherwise fulfill with IP array
-      if (addrs.length === 0) {
-        setTimeout(_queryIpAddress, QUERY_IP_TIMER * 1000);
-      } else {
-        deferred.resolve(addrs);
-      }
-    });
-  }
-
-  _queryIpAddress();
-  return deferred.promise;
-}
-
-/**
- * Wait for a Digital Ocean action to complete
- */
-var EVENT_POLL_TIMER = 1;
-function waitForAction(client, dropletId, actionId) {
-  'use strict';
-  var deferred = Q.defer();
-  function _getAction() {
-    client.dropletsGetAction(dropletId, actionId, function (err, res, body) {
-      var status = body.action.status;
-      if (status === "completed") {
-        return deferred.resolve();
-      } else if (status === "errored") {
-        return deferred.reject();
-      } else {
-        setTimeout(_getAction, EVENT_POLL_TIMER * 1000);
-      }
-    });
-  }
-  _getAction();
-  return deferred.promise;
-}
-
-/**
- * Turn on a droplet if it is not active.
- */
-function startServer(client, dropletId) {
-  'use strict';
-  var deferred = Q.defer();
-  client.dropletsRequestAction(dropletId, {"type": "power_on"}, function (err, res, body) {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      waitForAction(client, dropletId, body.action.id).then(function() {
-        return deferred.resolve();
-      });
-    }
-  });
-  return deferred.promise;
-}
-
-function addKey(client, keyName, sshKey) {
-  'use strict';
-  var deferred = Q.defer();
-  // Attempt to add a key
-  client.accountAddKey({name: keyName, public_key: sshKey},
-      function (err, res, body) {
-    if (err) {
-      return deferred.reject(err);
-    } else if (body.message === 'SSH Key is already in use on your account') {
-      // Account already has this key added, need to find it's ID.
-      client.accountGetKeys({}, function(err, res, body) {
-        if (err) {
-          return deferred.reject(err);
-        }
-        for (var i = 0; i < body.ssh_keys.length; ++i) {
-          if (body.ssh_keys[i].public_key === sshKey) {
-            return deferred.resolve(body.ssh_keys[i].id);
-          }
-        }
-        return deferred.reject('Error finding key id');
-      });
-    } else {
-      // Successfully added a new key, return it's ID.
-      return deferred.resolve(body.ssh_key.id);
-    }
-  });
-  return deferred.promise;
-}
-
-
-var DigitalOceanServer = function() {
-  "use strict";
-};
-
-/**
- * Given an accessToken and name,
- * make sure there is a droplet with requested name that exists and is powered on.
- * returns the endpoint host & port for connections.
- */
-DigitalOceanServer.prototype.start = function(accessToken, name) {
-  'use strict';
-
-  var client = new DigitalOcean(accessToken, 25),
-    deferred = Q.defer();
-
-  var emit = this.emit.bind(this);
-
-  client.dropletsGetAll({}, function (err, res, body) {
-    emit('statusUpdate', 'Loaded droplets');
-
-    // TODO: What if we don't have the keys here?
-    // Check if there is an existing droplet with name, and start it
-    var droplets = body.droplets;
-    if (err) {
-      return deferred.reject(err);
-    }
-
-    function queryIPAndResolve(dropletId) {
-      queryIpAddress(client, dropletId).then(function (ips) {
-        emit('statusUpdate', 'Got IP address: ' + ips[0]);
-        deferred.resolve(ips);
-      }); 
-    }
-
-    for (var i = 0; i < droplets.length; i += 1) {
-      if (droplets[i].name === name) {
-        if (droplets[i].status === "active" || droplets[i].status === "in-progress") {
-          return deferred.resolve(queryIpAddress(client, droplets[i].id));
-        } else {
-          return startServer(client, droplets[i].id).
-              then(queryIPAndResolve.bind({}, droplets[i].id));
-        }
-      }
-    }
-
-    // Generate an SSH key pair
-    emit('statusUpdate', 'Creating key');
-    var pair = getKeyPair();
-    var sshKey = pair.public;
-    window.localStorage.setItem("DigitalOcean-" + name + "-PublicKey", pair.public);
-    window.localStorage.setItem("DigitalOcean-" + name + "-PrivateKey", pair.private);  // TODO: Is this safe?
-
-    // Create a droplet with this SSH key as an authorized key
-    emit('statusUpdate', 'Adding key');
-    addKey(client, name + ' Key', sshKey).then(function(sshKeyId) {
-      var config = {
-        name: name,
-        region: "nyc3",
-        size: "512mb",
-        image: "ubuntu-14-04-x64",
-        ssh_keys: [sshKeyId]
-      };
-      emit('statusUpdate', 'Creating droplet');
-      client.dropletsCreate(config, function (err, res, body) {
-        var droplet = body.droplet;
-        emit('statusUpdate', 'Waiting for droplet to create');
-        waitForAction(client, droplet.id, body.links.actions[0].id).then(function() {
-          emit('statusUpdate', 'Getting IP address');
-          queryIpAddress(client, droplet.id).then(function (ips) {
-            emit('statusUpdate', 'Got IP address: ' + ips[0]);
-            deferred.resolve(ips);
-          });
-        });
-      });
-    });
-  });
-
-  return deferred.promise;
-};
-
 var Provisioner = function(dispatchEvent) {
   this.dispatch = dispatchEvent;
+  this.state = {};
 };
 
 Provisioner.prototype._sendStatus = function(code) {
@@ -283,21 +102,94 @@ Provisioner.prototype._getSshKey = function(name) {
       resolve(result);
     }.bind(this)).catch(function(err) {
       console.error("storage error: " + JSON.stringify(err));
-      reject(err)
+      reject(err);
     });
   }.bind(this));
 };
 
-Provisioner.prototype.start = function(name) {
-  var result = {};
-  this._sendStatus("START");
-  return this._doOAuth().then(function(oauthObj) {
-    result.oauth = oauthObj;
-    return this._getSshKey(name);
-  }.bind(this)).then(function(keys) {
-    result.ssh = keys;
-    return result;
+Provisioner.prototype._doRequest = function(method, actionPath, body) {
+  return new Promise(function(resolve, reject) {
+    var url = 'https://api.digitalocean.com/v2/' + actionPath;
+    var xhr = freedom["core.xhr"]()
+    xhr.on("onload", function(resolve, reject, xhr, e) {
+      xhr.getResponseText().then(function(resolve, reject, resp){
+        try {
+          var json = JSON.parse(resp);
+          resolve(json);
+        } catch(e) {
+          reject(e);
+        }
+      }.bind(this, resolve, reject));
+    }.bind(this, resolve, reject, xhr));
+    xhr.on("onerror", reject);
+    xhr.on("ontimeout", reject);
+    xhr.open(method, url, true);
+    xhr.setRequestHeader("Authorization", "Bearer " + this.state.oauth.access_token);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    if (body !== null && typeof body !== "undefined") {
+      xhr.send({ string: body })
+    } else {
+      xhr.send(null);
+    }
+  }.bind(this));
+};
+
+Provisioner.prototype._setupDigitalOcean = function(name) {
+  return new Promise(function(resolve, reject) {
+
+    /**
+    this._sendStatus("CLOUD_INIT_GETVM");
+    this._doRequest("GET", "droplets").then(function(response) {
+      this._sendStatus("CLOUD_DONE_GETVM");
+      console.log(response);
+
+      resolve(response);
+    }.bind(this))**/
+   /**
+    .then(function(response) {
+      console.log(response);
+    }.bind(this))
+    **/
+    this._doRequest("GET", "account/keys").then(function(cloudSshKeys) {
+      console.log(cloudSshKeys);
+      for (var i = 0; i < cloudSshKeys.ssh_keys.length; i++) {
+        if (cloudSshKeys.ssh_keys[i].public_key === this.state.ssh.public) {
+          return Promise.resolve({
+            message: "SSH Key is already in use on your account",
+            ssh_key: cloudSshKeys.ssh_keys[i]
+          });
+        } 
+      }
+      return this._doRequest("POST", "account/keys", JSON.stringify({
+        name: name,
+        public_key: this.state.ssh.public
+      }));
+    }.bind(this)).then(function(sshKey) {
+      console.log(sshKey);
+      resolve();
+    }.bind(this)).catch(function(err) {
+      console.error("Error w/DigitalOcean: " + err);
+      this._sendStatus("CLOUD_FAILED");
+      reject({
+        errcode: "",
+        message: JSON.stringify(err)
+      });
+    }.bind(this));
   }.bind(this));
 }
 
-freedom().providePromises(Provisioner)
+Provisioner.prototype.start = function(name) {
+  this._sendStatus("START");
+  return this._doOAuth().then(function(oauthObj) {
+    this.state.oauth = oauthObj;
+    return this._getSshKey(name);
+  }.bind(this)).then(function(keys) {
+    this.state.ssh = keys;
+    return this._setupDigitalOcean(name);
+  }.bind(this)).then(function() {
+    console.log(this.state);
+    return this.state;
+  }.bind(this));
+}
+
+freedom().providePromises(Provisioner);
