@@ -429,9 +429,6 @@ export function notifyUI(networkName :string, userId :string) {
      * Public to permit testing.
      */
     public handleMessage = (incoming :freedom.Social.IncomingMessage) : Promise<void> => {
-      console.log('*************** GOT MESSAGE ***************');
-      console.log(incoming.message);
-      console.log('*************** END OF MESSAGE ***************');
       if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
@@ -440,9 +437,6 @@ export function notifyUI(networkName :string, userId :string) {
 
       var client :social.ClientState =
           freedomClientToUproxyClient(incoming.from);
-      // TODO: there are race conditions here - due to async decrypt.  we might
-      // think that it's an unknown client, but that's just cause decrypt hasn't
-      // finished yet.
       return this.validateClient_(client).then((isValid :boolean) => {
         if (!isValid) {
           return;
@@ -465,11 +459,6 @@ export function notifyUI(networkName :string, userId :string) {
 
         return decryptMessage.then((messageString :string) => {
           var msg :social.VersionedPeerMessage = JSON.parse(messageString);
-
-          console.log('*************** DECRYPTED MESSAGE ***************');
-          console.log(messageString);
-          console.log('*************** END OF DECRYPTED MESSAGE ***************');
-
           log.info('received message', {
             userFrom: user.userId,
             clientFrom: client.clientId,
@@ -481,7 +470,6 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    // TODO: write tests for this whole method
     private pendingClients_ :any = {};  // TODO: type, explain
     private validateClient_ = (client :social.ClientState) : Promise<boolean> => {
       if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
@@ -519,7 +507,6 @@ export function notifyUI(networkName :string, userId :string) {
             return Promise.resolve(false);
           }
 
-          // TODO: test this
           if (!this.myInstance.isValidInvite(inviteData.permissionToken)) {
             console.warn('Invalid permission token');
             return Promise.resolve(false);
@@ -706,10 +693,6 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
     private acceptQuiverInvitation_ = (token :string) : Promise<void> => {
-      // TODO: none of this has been tested
-      // TODO: still need all the changes in handleUserProfile
-      // and possibly in handleClientState and handleMessage
-
       // token may be a URL with a token, or just the token.  Remove the
       // prefixed URL if it is set.
       token = token.lastIndexOf('/') >= 0 ?
@@ -822,7 +805,6 @@ export function notifyUI(networkName :string, userId :string) {
       if (this.encryptWithClientId_()) {
         var key = getKeyFromClientId(clientId);
         return crypto.signEncrypt(messageString, key).then((cipherText :string) => {
-          console.log('sending encrypted message: ' + cipherText);
           return this.freedomApi_.sendMessage(clientId, cipherText);
         });
       } else {
