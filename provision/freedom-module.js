@@ -230,7 +230,7 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
       return this._doRequest("GET", "droplets");
     // Get list of droplets
     }.bind(this)).then(function(resp) {
-      console.log(resp);
+      //console.log(resp);
       for (var i = 0; i < resp.droplets.length; i++) {
         if (resp.droplets[i].name === name) {
           return Promise.resolve({
@@ -252,7 +252,7 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
       //console.log(resp);
       this.state.cloud.vm = resp.droplet;
      
-      if (resp.droplet.status == "power_off") {
+      if (resp.droplet.status == "off") {
         // Need to power on VM
         return this._doRequest(
           "POST", 
