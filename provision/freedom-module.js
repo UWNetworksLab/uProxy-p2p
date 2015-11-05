@@ -2,7 +2,7 @@
 // Included directly in freedom module. node-forge not browserify-friendly
 //var forge = require('node-forge')({ disableNativeCode: true });
 
-var POLL_TIMEOUT = 1000; //milliseconds
+var POLL_TIMEOUT = 5000; //milliseconds
 
 var STATUS_CODES = {
   "START": "Starting provisioner",
