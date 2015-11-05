@@ -20,6 +20,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
       'debug': 'debug'
     }).then(function(moduleFactory) {
       var module = moduleFactory();
+      window.module = module;
       module.on("status", function(msg) {
         console.log("status: " + msg.message);
       });

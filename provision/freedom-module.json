@@ -37,6 +37,15 @@
           "message": "string"
         } 
       },
+      "stop": {
+        "type": "method",
+        "value": [ "string" ],
+        "ret": [],
+        "err": {
+          "errcode": "string",
+          "message": "string"
+        }
+      },
       "status": {
         "type": "event",
         "value": {

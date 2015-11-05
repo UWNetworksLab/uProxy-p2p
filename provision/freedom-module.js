@@ -323,4 +323,29 @@ Provisioner.prototype.start = function(name) {
   }.bind(this));
 }
 
+/**
+ * One-click destruction of a VM
+ * See freedom-module.json for return and error types
+ * @todo currently doesnt wait for destroy to complete before resolving
+ * @param {String} name of VM to create
+ * @return {Promise.<Object>}
+ **/
+Provisioner.prototype.stop = function(name) {
+  return this._doRequest("GET", "droplets").then(function() {
+    for (var i = 0; i < resp.droplets.length; i++) {
+      if (resp.droplets[i].name === name) {
+        return Promise.resolve({
+          droplet: resp.droplets[i]
+        });
+      }
+    }
+    return Promise.reject({
+      "err_code": "",
+      "message": "Droplet with name," + name + ", doesnt exist"
+    });
+  }.bind(this)).then(function(resp) {
+    return this._doRequest("DELETE", "droplets/" + resp.droplet.id);
+  });
+};
+
 freedom().providePromises(Provisioner);
