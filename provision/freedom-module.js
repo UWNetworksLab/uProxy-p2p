@@ -137,26 +137,14 @@ Provisioner.prototype._doRequest = function(method, actionPath, body) {
 Provisioner.prototype._setupDigitalOcean = function(name) {
   return new Promise(function(resolve, reject) {
 
-    /**
-    this._sendStatus("CLOUD_INIT_GETVM");
-    this._doRequest("GET", "droplets").then(function(response) {
-      this._sendStatus("CLOUD_DONE_GETVM");
-      console.log(response);
 
-      resolve(response);
-    }.bind(this))**/
-   /**
-    .then(function(response) {
-      console.log(response);
-    }.bind(this))
-    **/
-    this._doRequest("GET", "account/keys").then(function(cloudSshKeys) {
-      console.log(cloudSshKeys);
-      for (var i = 0; i < cloudSshKeys.ssh_keys.length; i++) {
-        if (cloudSshKeys.ssh_keys[i].public_key === this.state.ssh.public) {
+    this._doRequest("GET", "account/keys").then(function(resp) {
+      console.log(resp);
+      for (var i = 0; i < resp.ssh_keys.length; i++) {
+        if (resp.ssh_keys[i].public_key === this.state.ssh.public) {
           return Promise.resolve({
             message: "SSH Key is already in use on your account",
-            ssh_key: cloudSshKeys.ssh_keys[i]
+            ssh_key: resp.ssh_keys[i]
           });
         } 
       }
@@ -164,8 +152,29 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
         name: name,
         public_key: this.state.ssh.public
       }));
-    }.bind(this)).then(function(sshKey) {
-      console.log(sshKey);
+    }.bind(this)).then(function(resp) {
+      console.log(resp);
+      return this._doRequest("GET", "droplets");
+    }.bind(this)).then(function(resp) {
+      console.log(resp);
+      for (var i = 0; i < resp.droplets.length; i++) {
+        if (resp.droplets[i].name === name) {
+          return Promise.resolve({
+            message: "Droplet already created with name=" + name,
+            droplet: resp.droplets[i]
+          });
+        }
+      }
+
+      return this._doRequest("POST", "droplets", JSON.stringify({
+        name: name,
+        region: "nyc3",
+        size: "512mb",
+        image: "ubuntu-14-04-x64",
+        ssh_keys: [ sshKeyId ]
+      }));
+    }.bind(this)).then(function(resp) {
+      console.log(resp);
       resolve();
     }.bind(this)).catch(function(err) {
       console.error("Error w/DigitalOcean: " + err);
