@@ -10,6 +10,7 @@
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
 import consent = require('./consent');
+import crypto = require('./crypto');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
@@ -22,11 +23,9 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
 import _ = require('lodash');
-import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 
 import storage = globals.storage;
 import ui = ui_connector.connector;
-import pgp = globals.pgp;
 
 import Persistent = require('../interfaces/persistent');
 
@@ -127,18 +126,14 @@ import Persistent = require('../interfaces/persistent');
             log.error('Could not find clientId for instance', this);
             return;
           }
-          if (typeof this.publicKey !== 'undefined') {
-            var arrayBufferData =
-                arraybuffers.stringToArrayBuffer(JSON.stringify(data.data));
-            pgp.signEncrypt(arrayBufferData, this.publicKey)
-                .then((cipherData:ArrayBuffer) => {
-                  return pgp.armor(cipherData);
-                }).then((cipherText :string) => {
-                  data.data = cipherText;
-                  this.user.network.send(this.user, clientId, data);
-                }).catch((e) => {
-                  log.error('Error encrypting message ', e);
-                });
+          if (typeof this.publicKey !== 'undefined' &&
+              // No need to encrypt again for networks like Quiver
+              !this.user.network.encryptWithClientId()) {
+            crypto.signEncrypt(JSON.stringify(data.data), this.publicKey)
+            .then((cipherText :string) => {
+              data.data = cipherText;
+              this.user.network.send(this.user, clientId, data);
+            });
           } else {
             this.user.network.send(this.user, clientId, data);
           }
@@ -188,18 +183,20 @@ import Persistent = require('../interfaces/persistent');
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
 
-      if (msg.version < 5) {
-        return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
-      } else {
-        return pgp.dearmor(<string>msg.data).then((cipherData :ArrayBuffer) => {
-          return pgp.verifyDecrypt(cipherData, this.publicKey);
-        }).then((result :freedom.PgpProvider.VerifyDecryptResult) => {
-          var decryptedSignal =
-              JSON.parse(arraybuffers.arrayBufferToString(result.data));
-          return this.handleDecryptedSignal_(msg.type, msg.version, decryptedSignal);
+      if (typeof this.publicKey !== 'undefined' &&
+          typeof globals.publicKey !== 'undefined' &&
+          // signal data is not encrypted for Quiver, because entire message
+          // is encrypted over the network and already decrypted by this point
+          !this.user.network.encryptWithClientId()) {
+        return crypto.verifyDecrypt(<string>msg.data, this.publicKey)
+        .then((plainText :string) => {
+          return this.handleDecryptedSignal_(
+              msg.type, msg.version, JSON.parse(plainText));
         }).catch((e) => {
           log.error('Error decrypting message ', e);
         });
+      } else {
+        return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
       }
     }
 

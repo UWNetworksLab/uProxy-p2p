@@ -340,5 +340,7 @@ export interface Network {
   getNetworkState : () => NetworkState;
 
   areAllContactsUproxy : () => boolean;
+
+  encryptWithClientId : () => boolean;
 }
 

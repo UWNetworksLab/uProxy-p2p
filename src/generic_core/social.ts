@@ -263,6 +263,12 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.areAllContactsUproxy === true : false;
     }
 
+    public encryptWithClientId = (): boolean => {
+      // Default to false.
+      var options: social.NetworkOptions = NETWORK_OPTIONS[this.name];
+      return options ? options.encryptWithClientId === true : true;
+    }
+
     public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
@@ -444,7 +450,7 @@ export function notifyUI(networkName :string, userId :string) {
 
         // Decrypt message.
         var decryptMessage = Promise.resolve(incoming.message);
-        if (this.encryptWithClientId_()) {
+        if (this.encryptWithClientId()) {
           var key = getKeyFromClientId(client.clientId);
           decryptMessage = crypto.verifyDecrypt(incoming.message, key);
         }
@@ -503,6 +509,9 @@ export function notifyUI(networkName :string, userId :string) {
             console.warn('Invalid permission token');
             return Promise.resolve(false);
           }
+
+          // TODO: when creating a remote instance, we need to set the public
+          // key!!!!
 
           // Add to user's list of known public keys
           var user = this.getOrAddUser_(client.userId);
@@ -785,7 +794,7 @@ export function notifyUI(networkName :string, userId :string) {
         instanceTo: user.clientToInstance(clientId),
         msg: messageString
       });
-      if (this.encryptWithClientId_()) {
+      if (this.encryptWithClientId()) {
         var key = getKeyFromClientId(clientId);
         return crypto.signEncrypt(messageString, key).then((cipherText :string) => {
           return this.freedomApi_.sendMessage(clientId, cipherText);
@@ -842,12 +851,6 @@ export function notifyUI(networkName :string, userId :string) {
       // Default to true.
       var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
       return options ? options.enableMonitoring === true : true;
-    }
-
-    private encryptWithClientId_ = (): boolean => {
-      // Default to false.
-      var options: social.NetworkOptions = NETWORK_OPTIONS[this.name];
-      return options ? options.encryptWithClientId === true : true;
     }
 
     public getNetworkState = () :social.NetworkState => {
