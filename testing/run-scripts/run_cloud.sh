@@ -105,7 +105,7 @@ HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
 docker run -d -p $SSHD_PORT:22 --name $CONTAINER_PREFIX-sshd --add-host zork:$HOST_IP uproxy/sshd > /dev/null
 
 # Happy, reassuring message.
-echo -n "Waiting for Zork to come up"
+echo -n "Waiting for Zork to come up..."
 while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
 echo "ready!"
 echo "Connect with:"
