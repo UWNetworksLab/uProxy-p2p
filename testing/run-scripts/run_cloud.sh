@@ -92,12 +92,7 @@ else
     # 21 characters leaves no = at the end, which is generally easier to double click.
     GIVER_PW=`openssl rand -base64 21`
     INVITE="{\"host\":\"$CLOUD_IP\", \"user\":\"giver\", \"pass\":\"$GIVER_PW\"}"
-    if uname|grep Darwin > /dev/null
-    then
-      INVITE_CODE=`echo -n $INVITE|base64`
-    else
-      INVITE_CODE=`echo -n $INVITE|base64 -w 0`
-    fi
+    INVITE_CODE=`echo -n $INVITE|base64 -w 0`
     echo "generated invite code: $INVITE_CODE"
   fi
 
@@ -106,13 +101,7 @@ else
 fi
 remove_container sshd
 
-HOST_IP=
-if uname|grep Darwin > /dev/null
-then
-  HOST_IP=`docker-machine ip default`
-else
-  HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
-fi
+HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
 docker run -d -p $SSHD_PORT:22 --name $CONTAINER_PREFIX-sshd --add-host zork:$HOST_IP uproxy/sshd > /dev/null
 
 # Happy, reassuring message.
