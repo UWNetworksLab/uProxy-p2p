@@ -114,7 +114,7 @@
           </div>
         </div>
 
-        <div hidden?='{{ selectedNetworkName != "Cloud"}}'>
+        <div>
           <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
           <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>
             <input is='core-input' value='{{ cloudInstanceInput }}'>
@@ -126,12 +126,10 @@
 
       </div>
 
-      <div hidden?='{{ selectedNetworkName === "Cloud"}}'>
-        <div class='section'>
-          <a on-tap='{{ showAcceptUserInvite }}'>
-            {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$ }}
-          </a>
-        </div>
+      <div class='section'>
+        <a on-tap='{{ showAcceptUserInvite }}'>
+          {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$ }}
+        </a>
       </div>
 
     </core-overlay>
