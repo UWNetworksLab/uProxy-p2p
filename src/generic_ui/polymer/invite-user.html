@@ -113,6 +113,17 @@
             <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
           </div>
         </div>
+
+        <div>
+          <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
+          <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>
+            <input is='core-input' value='{{ cloudInstanceInput }}'>
+          </paper-input-decorator>
+          <uproxy-button affirmative on-tap='{{ addCloudInstance }}'>
+            {{ 'DONE' | $$ }}
+          </uproxy-button>
+        </div>
+
       </div>
 
       <div class='section'>
