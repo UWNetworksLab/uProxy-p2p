@@ -95,6 +95,10 @@ ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_INVITE_URL,
     core.getInviteUrl);
 
+ui_connector.onPromiseCommand(
+    uproxy_core_api.Command.GET_ALL_USER_PROFILES,
+    core.getAllUserProfiles);
+
 ui_connector.onCommand(uproxy_core_api.Command.SEND_EMAIL,
     core.sendEmail);
 

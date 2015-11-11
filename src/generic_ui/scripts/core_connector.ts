@@ -216,6 +216,12 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   }
 
   // TODO: this should probably take the network path, including userId
+  getAllUserProfiles = (networkInfo :social.SocialNetworkInfo): Promise<social.UserProfile[]> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_ALL_USER_PROFILES,
+        networkInfo);
+  }
+
+  // TODO: this should probably take the network path, including userId
   sendEmail = (emailData :uproxy_core_api.EmailData): void => {
     this.sendCommand(uproxy_core_api.Command.SEND_EMAIL, emailData);
   }

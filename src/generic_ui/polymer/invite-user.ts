@@ -1,6 +1,7 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
+import social = require('../../interfaces/social');
 var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
@@ -15,6 +16,44 @@ Polymer({
     };
     return core.getInviteUrl(info).then((inviteUrl:string) => {
       this.inviteUrl = inviteUrl;
+      return selectedNetwork;
+    });
+  },
+  sendWechatInvites: function() {
+    var selectedNetwork = model.getNetwork("WeChat");
+    for (var user in this.wechatInvites) {
+      if (this.wechatInvites[user]) {
+        core.inviteUser({
+          networkId: selectedNetwork.name,
+          userName: user
+        }).then(() => {
+          console.log("Invite sent to: " + user);
+        }).catch(() => {
+          console.log("Failed to invite: " + user);
+        });
+      }
+    }
+    this.fire('open-dialog', {
+      heading: 'Invites sent!',
+      message: "Your friends who add you back will appear in your uProxy contacts.",
+      buttons: [{
+        text: ui.i18n_t("OK")
+      }]
+    });
+    this.closeInviteUserPanel();
+  },
+  getWechatFriends: function() {
+    var selectedNetwork = model.getNetwork("WeChat");
+    var info = {
+      name: selectedNetwork.name,
+      userId: selectedNetwork.userId
+    };
+    return core.getAllUserProfiles(info).then((roster: any) => {
+      for(var i = 0; i < roster.length; i++) {
+        var friend = roster[i];
+        this.wechatFriends[i] = friend;
+        this.wechatInvites[friend.userId] = false;
+      }
       return selectedNetwork;
     });
   },
@@ -89,6 +128,9 @@ Polymer({
     if (details.isSelected) {
       this.selectedNetworkName = details.item.getAttribute('label');
     }
+    if (this.selectedNetworkName == "WeChat") {
+      this.getWechatFriends();
+    }
   },
   openInviteUserPanel: function() {
     this.setOnlineInviteNetworks();
@@ -117,6 +159,8 @@ Polymer({
     }
   },
   ready: function() {
+    this.wechatInvites = {};
+    this.wechatFriends = [];
     this.inviteUrl = '';
     this.inviteUserEmail = '';
     this.selectedNetworkName = '';

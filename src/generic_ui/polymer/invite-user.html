@@ -1,10 +1,12 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
 <link rel="import" href="../../bower/core-signals/core-signals.html">
 <link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
+<link rel='import' href='avatar.html'>
 <link rel="import" href="i18n-filter.html">
 
 <polymer-element name='uproxy-invite-user'>
@@ -36,6 +38,23 @@
       }
       paper-input-decorator {
         font-size: 16px;
+      }
+      uproxy-avatar {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border: none;
+        border-radius: 50%;
+        background-color: #eee;
+        vertical-align: middle;
+        box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.12);
+      }
+      .wechatFriend {
+        margin: 20px 0px;
+        font-size: 16px;
+      }
+      .wechatFriend uproxy-avatar {
+        margin-right: 20px;
       }
     </style>
 
@@ -71,8 +90,19 @@
 
         <div hidden?='{{ selectedNetworkName != "WeChat"}}'>
           <!-- TODO: localization -->
-          <uproxy-button affirmative on-tap='{{ generateInviteUrl }}'>
-            Generate WeChat Invite Link
+          <div style="margin-top: 20px;">
+            Which of your WeChat friends would you like to add to uProxy? Your friends who add you back will appear in your uProxy contacts.
+          </div>
+          <template repeat="{{friend in wechatFriends}}">
+            <div center horizontal layout class="wechatFriend">
+              <uproxy-avatar src='{{friend.imageData}}' network='WeChat' showIcon="true"></uproxy-avatar>
+              <div flex>{{friend.name}}</div>
+              <paper-checkbox checked="{{wechatInvites[friend.userId]}}"></paper-checkbox>
+            </div>
+          </template>
+
+          <uproxy-button affirmative on-tap='{{ sendWechatInvites }}'>
+            Send Invites
           </uproxy-button>
 
           <div hidden?='{{ inviteUrl == "" }}'>
