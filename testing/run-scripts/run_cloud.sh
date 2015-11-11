@@ -16,21 +16,24 @@ CONTAINER_PREFIX="uproxy"
 # Cogged from:
 #   http://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-bash
 CLOUD_IP=`dig +short myip.opendns.com @resolver1.opendns.com`
+INVITE_CODE=
 
 function usage () {
   echo "$0 [-p path] [-h hostname] browser-version"
   echo "  -p: path to pre-built uproxy-lib repository"
   echo "  -i: IP or hostname of the cloud instance"
+  echo "  -t: invite code"
   echo "  -h, -?: this help message"
   echo
   echo "Example browser-version: chrome-stable, firefox-canary"
   exit 1
 }
 
-while getopts p:i:h? opt; do
+while getopts p:i:t:h? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
     i) CLOUD_IP="$OPTARG" ;;
+    t) INVITE_CODE="$OPTARG" ;;
     *) usage ;;
   esac
 done
@@ -85,21 +88,21 @@ else
   rm -fR $TMP_DIR
   cp -R ${BASH_SOURCE%/*}/../../sshd/ $TMP_DIR
 
-  # 21 characters leaves no = at the end, which is generally easier to double click.
-  GIVER_PW=`openssl rand -base64 21`
-  echo -n $GIVER_PW > $TMP_DIR/giverpw
-  docker build -t uproxy/sshd $TMP_DIR
-
-  # TODO: invoke a script on the container, duplicating this code is dumb. 
-  UNENCODED_TOKEN="{\"host\":\"$CLOUD_IP\", \"user\":\"giver\", \"pass\":\"$GIVER_PW\"}"
-  if uname|grep Darwin > /dev/null
-  then
-    ENCODED_TOKEN=`echo -n $UNENCODED_TOKEN|base64`
-  else
-    ENCODED_TOKEN=`echo -n $UNENCODED_TOKEN|base64 -w 0`
+  if [ -z "$INVITE_CODE" ]; then
+    # 21 characters leaves no = at the end, which is generally easier to double click.
+    GIVER_PW=`openssl rand -base64 21`
+    INVITE="{\"host\":\"$CLOUD_IP\", \"user\":\"giver\", \"pass\":\"$GIVER_PW\"}"
+    if uname|grep Darwin > /dev/null
+    then
+      INVITE_CODE=`echo -n $INVITE|base64`
+    else
+      INVITE_CODE=`echo -n $INVITE|base64 -w 0`
+    fi
+    echo "generated invite code: $INVITE_CODE"
   fi
-  echo "password, for shell access: $GIVER_PW"
-  echo "invite code, for uProxy: $ENCODED_TOKEN"
+
+  echo -n $INVITE_CODE > $TMP_DIR/giver-invite-code
+  docker build -t uproxy/sshd $TMP_DIR
 fi
 remove_container sshd
 

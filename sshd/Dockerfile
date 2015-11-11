@@ -2,12 +2,16 @@ FROM ubuntu:trusty
 MAINTAINER Trevor Johnston <trevj@google.com>
 
 RUN apt-get update -qq
-RUN apt-get install -y openssh-server supervisor dnsutils
+RUN apt-get install -y openssh-server supervisor dnsutils jq
 
 RUN addgroup giver
 RUN adduser --disabled-password --gecos 'uProxy Giver' --ingroup giver giver
-COPY giverpw /
-RUN echo giver:`cat /giverpw` | chpasswd
+COPY set_giver_access.sh /
+RUN chown root:root /set_giver_access.sh
+RUN chmod 755 /set_giver_access.sh
+COPY giver-invite-code /
+RUN chmod 600 /giver-invite-code
+RUN /set_giver_access.sh /giver-invite-code
 
 RUN addgroup getter
 RUN adduser --disabled-password --gecos 'uProxy Getter' --ingroup getter getter
