@@ -1,7 +1,3 @@
-//var XMLHttpRequest = require('freedom-xhr').corexhr;
-// Included directly in freedom module. node-forge not browserify-friendly
-//var forge = require('node-forge')({ disableNativeCode: true });
-
 var POLL_TIMEOUT = 5000; //milliseconds
 
 var STATUS_CODES = {
@@ -47,8 +43,8 @@ Provisioner.prototype._sendStatus = function(code) {
  */
 Provisioner.prototype._generateKeyPair = function() {
   "use strict";
-  var pair = forge.pki.rsa.generateKeyPair({bits: 1024, e: 0x10001});  // TODO: use async
-  var publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, 'info@uproxy.org');
+  var pair = forge.pki.rsa.generateKeyPair({bits: 2048, e: 0x10001});
+  var publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, '');
   var privateKey = forge.ssh.privateKeyToOpenSSH(pair.privateKey, '');
   return { public: publicKey, private: privateKey };
 }

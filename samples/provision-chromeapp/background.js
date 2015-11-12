@@ -19,12 +19,12 @@ chrome.app.runtime.onLaunched.addListener(function() {
       'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
       'debug': 'debug'
     }).then(function(moduleFactory) {
-      var module = moduleFactory();
-      window.module = module;
-      module.on("status", function(msg) {
+      var freedomModule = moduleFactory();
+      window.freedomModule = freedomModule;
+      freedomModule.on("status", function(msg) {
         console.log("status: " + msg.message);
       });
-      module.start("test").then(function(ret) {
+      freedomModule.start("test").then(function(ret) {
         console.log("start returns: ");
         console.log(ret);
       }).catch(function(err) {
