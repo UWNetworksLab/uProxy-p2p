@@ -33,7 +33,7 @@ Polymer({
       }
     }
     this.fire('open-dialog', {
-      heading: ui.i18n_t("INVITES_SENT"),
+      heading: ui.i18n_t("WECHAT_INVITES_SENT"),
       message: ui.i18n_t("WECHAT_INVITES_ACCEPTED_WHEN"),
       buttons: [{
         text: ui.i18n_t("OK")
