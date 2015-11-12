@@ -1,7 +1,6 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-import social = require('../../interfaces/social');
 var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
