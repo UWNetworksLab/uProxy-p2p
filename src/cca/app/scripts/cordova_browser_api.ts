@@ -1,3 +1,4 @@
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
 
@@ -9,6 +10,7 @@
  */
 
 import browser_api = require('../../../interfaces/browser_api');
+import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../../third_party/uproxy-lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
@@ -134,7 +136,7 @@ class CordovaBrowserApi implements BrowserAPI {
     this.browser_.addEventListener('closePressed', (e) => {
       this.browser_ = null;
       this.stopUsingProxy();
-      this.emit_('proxyDisconnected');
+      this.emit_('proxyDisconnected', {deliberate: true});
     });
   }
 
