@@ -34,8 +34,8 @@ Polymer({
       }
     }
     this.fire('open-dialog', {
-      heading: 'Invites sent!',
-      message: "Your friends who add you back will appear in your uProxy contacts.",
+      heading: ui.i18n_t("INVITES_SENT"),
+      message: ui.i18n_t("WECHAT_INVITES_ACCEPTED_WHEN"),
       buttons: [{
         text: ui.i18n_t("OK")
       }]

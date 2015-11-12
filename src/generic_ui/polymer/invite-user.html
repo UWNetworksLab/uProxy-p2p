@@ -91,7 +91,7 @@
         <div hidden?='{{ selectedNetworkName != "WeChat"}}'>
           <!-- TODO: localization -->
           <div style="margin-top: 20px;">
-            Which of your WeChat friends would you like to add to uProxy? Your friends who add you back will appear in your uProxy contacts.
+            {{ 'WECHAT_WHO_TO_INVITE' | $$ }}
           </div>
           <template repeat="{{friend in wechatFriends}}">
             <div center horizontal layout class="wechatFriend">
@@ -102,13 +102,8 @@
           </template>
 
           <uproxy-button affirmative on-tap='{{ sendWechatInvites }}'>
-            Send Invites
+            {{ 'SEND_INVITATIONS' | $$ }}
           </uproxy-button>
-
-          <div hidden?='{{ inviteUrl == "" }}'>
-            <p>Send this link to your friend so they can find you on WeChat</p>
-            <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
-          </div>
         </div>
 
         <div hidden?='{{ selectedNetworkName != "GMail"}}'>
@@ -144,7 +139,7 @@
           </div>
         </div>
 
-        <div>
+        <div hidden?='{{ selectedNetworkName != "Cloud"}}'>
           <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
           <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>
             <input is='core-input' value='{{ cloudInstanceInput }}'>
