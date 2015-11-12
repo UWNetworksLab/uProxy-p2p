@@ -3,7 +3,7 @@
   "description": "Provisions VMs on Digital Ocean",
   "app": {
     "script": [
-      "/forge-min/forge.min.js",
+      "../../../forge-min/forge.min.js",
       "freedom-module.static.js"
     ]
   },

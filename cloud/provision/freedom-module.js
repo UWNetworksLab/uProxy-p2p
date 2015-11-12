@@ -15,8 +15,13 @@ var STATUS_CODES = {
   "CLOUD_WAITING_VM": "Waiting on VM",
 };
 
+var ERR_CODES = {
+  "VM_DNE": "VM does not exist",
+  "CLOUD_ERR": "Error from cloud provider"
+};
+
 var REDIRECT_URIS = [
-  "https://kmnjcbmibpajfljogomikcdlmhgpnolg.chromiumapp.org"
+  "https://pjpcdnccaekokkkeheolmpkfifcbibnj.chromiumapp.org"
   //  "http://localhost:10101"
 ];
 
@@ -268,7 +273,7 @@ Provisioner.prototype._setupDigitalOcean = function(name) {
       console.error("Error w/DigitalOcean: " + err);
       this._sendStatus("CLOUD_FAILED");
       reject({
-        errcode: "",
+        errcode: "CLOUD_ERR",
         message: JSON.stringify(err)
       });
     }.bind(this));
@@ -336,7 +341,7 @@ Provisioner.prototype.stop = function(name) {
       }
     }
     return Promise.reject({
-      "errcode": "",
+      "errcode": "VM_DNE",
       "message": "Droplet with name," + name + ", doesnt exist"
     });
   }.bind(this)).then(function(resp) {
