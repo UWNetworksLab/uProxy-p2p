@@ -11,7 +11,8 @@ RUN chown root:root /set_giver_access.sh
 RUN chmod 755 /set_giver_access.sh
 COPY giver-invite-code /
 RUN chmod 600 /giver-invite-code
-RUN /set_giver_access.sh /giver-invite-code
+ARG public_ip
+RUN /set_giver_access.sh -d $public_ip /giver-invite-code
 
 RUN addgroup getter
 RUN adduser --disabled-password --gecos 'uProxy Getter' --ingroup getter getter
