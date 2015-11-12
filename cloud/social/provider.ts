@@ -31,6 +31,8 @@ interface Invite {
   user?: string;
   // Password.
   pass?: string;
+  // Private key, base64-encoded.
+  key?: string;
 }
 
 // Type of the object placed, in serialised form, in storage
@@ -365,6 +367,22 @@ class Connection {
     }
     this.state_ = ConnectionState.CONNECTING;
 
+    let connectConfig: ssh2.ConnectConfig = {
+      host: this.invite_.host,
+      port: SSH_SERVER_PORT,
+      username: this.invite_.user,
+      // Remaining fields only for type-correctness.
+      tryKeyboard: false,
+      debug: undefined
+    };
+
+    if (this.invite_.key) {
+      connectConfig['privateKey'] = new Buffer(this.invite_.key, 'base64');
+    } else {
+      log.warn('using password-based auth, support will be removed soon!');
+      connectConfig['password'] = this.invite_.pass;
+    }
+
     return new Promise<void>((F, R) => {
       this.client_.on('ready', () => {
         this.setState_(ConnectionState.ESTABLISHING_TUNNEL);
@@ -446,12 +464,7 @@ class Connection {
         // TODO: when does this occur? don't see it on normal close or failure
         log.debug('%1: connection close: %2', this.name_, hadError);
         this.close();
-      }).connect({
-        host: this.invite_.host,
-        port: SSH_SERVER_PORT,
-        username: this.invite_.user,
-        password: this.invite_.pass
-      });
+      }).connect(connectConfig);
     });
   }
 
