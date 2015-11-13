@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
+import user_interface = require('../scripts/ui');
 var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
@@ -19,14 +20,14 @@ Polymer({
     });
   },
   sendToGMailFriend: function() {
-    this.generateInviteUrl('GMail').then((selectedNetwork:any) => {
+    this.generateInviteUrl('GMail')
+        .then((selectedNetwork :user_interface.Network) => {
       var selectedNetworkInfo = {
         name: selectedNetwork.name,
         userId: selectedNetwork.userId
       };
       var name = selectedNetwork.userName || selectedNetwork.userId;
-      var emailBody =
-      core.sendEmail({
+      var emailBody = core.sendEmail({
           networkInfo: selectedNetworkInfo,
           to: this.inviteUserEmail,
           subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: name }),
@@ -53,7 +54,7 @@ Polymer({
       ui.openTab(facebookUrl);
       this.closeInviteUserPanel();
       this.fire('open-dialog', {
-        heading: '', // TODO:
+        heading: '',
         message: ui.i18n_t("FACEBOOK_INVITE_IN_BROWSER"),
         buttons: [{
           text: ui.i18n_t("OK")
@@ -66,12 +67,12 @@ Polymer({
       model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
     core.inviteUser({
       networkId: selectedNetwork.name,
-      userName: this.userIdInput
+      userName: this.githubUserIdInput
     }).then(() => {
       this.closeInviteUserPanel();
       this.fire('open-dialog', {
         heading: '',
-        message: ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.userIdInput }),
+        message: ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.githubUserIdInput }),
         buttons: [{
           text: ui.i18n_t("OK")
         }]
@@ -139,9 +140,8 @@ Polymer({
       }
     }
   },
-
   /* Functions required for roster-before-login flow. */
-  updateQuiverStatus: function() {
+  onlineNetworksChanged: function() {
     this.isQuiverLoggedIn = false;
     for (var i = 0; i < model.onlineNetworks.length; ++i) {
       var name = model.onlineNetworks[i].name;
@@ -166,9 +166,8 @@ Polymer({
       this.$.loginToInviteFriendDialog.open();
     }
   },
-  loginTapped: function(event: Event, detail: Object, target: HTMLElement) {
-    var networkName = target.getAttribute('data-network');
-    this.login(networkName);
+  loginTapped: function() {
+    this.login(this.selectedNetworkName);
   },
   login: function(networkName :string, userName ?:string) {
     ui.login(networkName, userName).then(() => {
@@ -215,7 +214,7 @@ Polymer({
     // will be smaller than expected.
     this.$.loginToInviteFriendDialog.resizeHandler();
   },
-  updateNetworkButtonNames: function() {
+  networkNamesChanged: function() {
     var supportsQuiver = false;
     this.networkButtonNames = [];
     for (var i = 0; i < model.networkNames.length; ++i) {
@@ -229,31 +228,31 @@ Polymer({
     // any flicker in case we switch from true to false to true again.
     this.supportsQuiver = supportsQuiver;
   },
-  getNetworkDisplayName: function(name :string) {
-    return ui.getNetworkDisplayName(name);
+  getNetworkDisplayName: function(networkName :string) {
+    return ui.getNetworkDisplayName(networkName) || '';
   },
-  isExperimentalNetwork: function(name :string) {
-    return ui.isExperimentalNetwork(name);
+  isExperimentalNetwork: function(networkName :string) {
+    return ui.isExperimentalNetwork(networkName) || true;
   },
-  supportsInvites: function(name :string) {
-    return ui.supportsInvites(name);
+  supportsInvites: function(networkName :string) {
+    return ui.supportsInvites(networkName) || false;
   },
   observe: {
-    'model.networkNames': 'updateNetworkButtonNames',
-    'model.onlineNetworks': 'updateQuiverStatus'
+    'model.networkNames': 'networkNamesChanged',
+    'model.onlineNetworks': 'onlineNetworksChanged'
   },
   ready: function() {
     this.userName = model.globalSettings.quiverUserName; // for Quiver
     this.supportsQuiver = false;
     this.isQuiverLoggedIn = false;
-    this.userIdInput = ''; // for GitHub
+    this.githubUserIdInput = ''; // for GitHub
     this.inviteUserEmail = ''; // for GMail
-    this.inviteUrl = '';
     this.selectedNetworkName = '';
+    this.inviteUrl = '';
     this.model = model;
     this.cloudInstanceInput = '';
     this.ui = ui;
 
-    this.updateNetworkButtonNames();
+    this.networkNamesChanged();
   }
 });

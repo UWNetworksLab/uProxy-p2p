@@ -174,7 +174,7 @@
             <div class='orText'>- - - OR - - -</div>
           </div>
           <div class='section'>
-          <p>Sign in with a social network.</p>
+          <p>{{ "SIGN_IN_WITH_A_NETWORK" | $$ }}</p>
             <template repeat='{{ n in networkButtonNames }}' vertical layout>
               <div on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
@@ -188,16 +188,6 @@
               {{ "WE_WONT_POST" | $$ }}
             </div>
           </div>
-
-          <!-- "uProxy social network" button
-            <div on-tap='{{ loginTapped }}' class='networkLoginButton' data-network='Quiver'>
-            <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
-            <div class='networkName'>uProxy</div>
-            <div class='experimental' hidden?='{{!isExperimentalNetwork(n)}}'>
-              Experimental
-            </div>
-          </div> -->
-
           <div class='orText'>- - - OR - - -</div>
           <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}' class='section'>
             <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
@@ -249,7 +239,7 @@
             <div hidden?='{{ selectedNetworkName != "GitHub"}}'>
               <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
               <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
-                <input is='core-input' value='{{ userIdInput }}'>
+                <input is='core-input' value='{{ githubUserIdInput }}'>
               </paper-input-decorator>
               <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
                 {{ 'SEND_INVITATION' | $$ }}
@@ -290,25 +280,20 @@
     </core-overlay>
 
     <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{loginToInviteFriendDialogOpened}}">
-      <!-- TODO: internationalize this text -->
-      <template repeat="{{ n in networkButtonNames }}">
-        <div hidden?='{{selectedNetworkName != n}}'>
-          <h1>Sign in to {{getNetworkDisplayName(n)}}</h1>
-          <core-icon icon="clear" on-tap='{{ close }}'></core-icon>
-          <p hidden?="{{!supportsInvites(n)}}">
-            To invite a {{getNetworkDisplayName(n)}} friend to uProxy, please login to your {{getNetworkDisplayName(n)}} account.
-          </p>
-          <p hidden?="{{supportsInvites(n)}}">
-            Signing in will allow your {{getNetworkDisplayName(n)}} contacts who use uProxy to see when you are online with uProxy.
-          </p>
-          <div style="text-align:center;">
-            <uproxy-button raised on-tap='{{loginTapped}}' class='login {{n}}' data-network="{{n}}">
-              <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:{{n}}'></core-icon></span>
-              <span id="buttonTextContainer">Sign in to {{getNetworkDisplayName(n)}}</span>
-            </uproxy-button>
-          </div>
-        </div>
-      </template>
+      <h1>{{ "SIGN_IN_TO_NETWORK" | $$({network: getNetworkDisplayName(selectedNetworkName)})}}</h1>
+      <core-icon icon="clear" on-tap='{{ close }}'></core-icon>
+      <p hidden?="{{!supportsInvites(selectedNetworkName)}}">
+        {{ "SIGN_IN_TO_INVITE_FRIENDS" | $$({network: getNetworkDisplayName(selectedNetworkName)})}}
+      </p>
+      <p hidden?="{{supportsInvites(selectedNetworkName)}}">
+        {{ "SIGN_IN_TO_SEE_ALL_UPROXY_FRIENDS" | $$({network: getNetworkDisplayName(selectedNetworkName)})}}
+      </p>
+      <div style="text-align:center;">
+        <uproxy-button raised on-tap='{{loginTapped}}' class='login {{selectedNetworkName}}'>
+          <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:{{selectedNetworkName}}'></core-icon></span>
+          <span id="buttonTextContainer">{{ "SIGN_IN_TO_NETWORK" | $$({network: getNetworkDisplayName(selectedNetworkName)})}}</span>
+        </uproxy-button>
+      </div>
     </uproxy-dialog>
 
 
