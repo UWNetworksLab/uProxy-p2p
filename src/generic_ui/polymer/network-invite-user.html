@@ -38,12 +38,6 @@
       }
 
       /* Social network specific CSS */
-      uproxy-app-bar.GMail /deep/ core-toolbar {
-        background-color: #dd4b39;
-      }
-      uproxy-app-bar.GitHub /deep/ core-toolbar {
-        background-color: #666;
-      }
       a.GMail {
         color: #dd4b39 !important;
       }
@@ -60,9 +54,9 @@
 
     <core-signals on-core-signal-open-network-invite-dialog='{{openInviteUserPanel}}'></core-signals>
 
-    <core-overlay id='panel'>
-      <div hidden?="{{network!=='GitHub'}}">
-        <uproxy-app-bar class="GitHub" on-go-back='{{ closeInviteUserPanel }}'>
+    <core-overlay id='networkInviteUserPanel'>
+      <div hidden?="{{network !== 'GitHub'}}">
+        <uproxy-app-bar class="GitHub" on-go-back='{{ closeInviteUserPanel }}' color="#dd4b39">
           {{ 'INVITE_A_FRIEND' | $$ }}
         </uproxy-app-bar>
 
@@ -77,8 +71,8 @@
         </div>
       </div>
 
-      <div hidden?="{{network!=='GMail'}}">
-        <uproxy-app-bar class="GMail" on-go-back='{{closeInviteUserPanel}}'>
+      <div hidden?="{{network !== 'GMail'}}">
+        <uproxy-app-bar class="GMail" on-go-back='{{closeInviteUserPanel}}' color="#666">
           {{ 'INVITE_A_FRIEND' | $$ }}
         </uproxy-app-bar>
 

@@ -42,8 +42,7 @@ Polymer({
     });
   },
   inviteGithubFriend: function() {
-    var selectedNetwork =
-      model.getNetwork('GitHub');
+    var selectedNetwork = model.getNetwork('GitHub');
     core.inviteUser({
       networkId: selectedNetwork.name,
       userName: this.userIdInput
@@ -70,10 +69,10 @@ Polymer({
   },
   openInviteUserPanel: function() {
     this.inviteUrl = '';
-    this.$.panel.open();
+    this.$.networkInviteUserPanel.open();
   },
   closeInviteUserPanel: function() {
-    this.$.panel.close();
+    this.$.networkInviteUserPanel.close();
   },
   showAcceptUserInvite: function() {
     this.closeInviteUserPanel();

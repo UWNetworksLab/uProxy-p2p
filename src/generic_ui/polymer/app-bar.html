@@ -1,6 +1,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 
-<polymer-element name='uproxy-app-bar' attributes='disableback'>
+<polymer-element name='uproxy-app-bar' attributes='disableback, color'>
   <template>
     <style>
     core-toolbar#app-bar-toolbar {
@@ -29,12 +29,11 @@
       opacity: .4;
     }
     core-toolbar {
-      background-color: #009688;
       color: white;
     }
     </style>
 
-    <core-toolbar id='app-bar-toolbar'>
+    <core-toolbar id='app-bar-toolbar' style="background-color: {{color}};">
       <core-icon class='back {{ { disabled: disableback } | tokenList }}' icon="arrow-back" on-tap='{{ back }}'></core-icon>
       <div id='app-bar-title' flex>
         <content></content>

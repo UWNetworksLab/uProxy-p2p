@@ -208,7 +208,6 @@ export class UserInterface implements ui_constants.UiApi {
   // TODO: Remove this when we switch completely to a roster-before-login flow.
   public showRosterBeforeLogin:boolean = false;
 
-
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -1229,14 +1228,10 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private updateShowInviteControls_ = () => {
-    var showControls = this.showRosterBeforeLogin;
-    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
-      if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
-        showControls = true;
-        break;
-      }
-    }
-    this.showInviteControls = showControls;
+    this.showInviteControls = this.showRosterBeforeLogin ||
+        _.some(this.model.onlineNetworks, (network) => {
+          return this.supportsInvites(network.name);
+        });
   }
 
   // this takes care of updating the view (given the assumuption that we are
