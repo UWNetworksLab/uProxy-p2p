@@ -89,6 +89,25 @@ Polymer({
       });
     });
   },
+  addCloudInstance: function() {
+    var selectedNetwork =
+      model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
+    core.inviteUser({
+      networkId: selectedNetwork.name,
+      userName: this.cloudInstanceInput
+    }).then(() => {
+      console.log('invited!');
+      this.closeInviteUserPanel();
+    }).catch(() => {
+      this.fire('open-dialog', {
+        heading: '',
+        message: ui.i18n_t("CLOUD_INVITE_FAILED"),
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+    });
+  },
   onNetworkSelect: function(e :any, details :any) {
     if (details.isSelected) {
       this.selectedNetworkName = details.item.getAttribute('label');
@@ -232,6 +251,7 @@ Polymer({
     this.inviteUrl = '';
     this.selectedNetworkName = '';
     this.model = model;
+    this.cloudInstanceInput = '';
     this.ui = ui;
 
     this.updateNetworkButtonNames();
