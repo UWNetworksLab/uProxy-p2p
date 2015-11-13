@@ -56,7 +56,7 @@
 
     <core-overlay id='networkInviteUserPanel'>
       <div hidden?="{{network !== 'GitHub'}}">
-        <uproxy-app-bar class="GitHub" on-go-back='{{ closeInviteUserPanel }}' color="#dd4b39">
+        <uproxy-app-bar class="GitHub" on-go-back='{{ closeInviteUserPanel }}' color="#666">
           {{ 'INVITE_A_FRIEND' | $$ }}
         </uproxy-app-bar>
 
@@ -72,7 +72,7 @@
       </div>
 
       <div hidden?="{{network !== 'GMail'}}">
-        <uproxy-app-bar class="GMail" on-go-back='{{closeInviteUserPanel}}' color="#666">
+        <uproxy-app-bar class="GMail" on-go-back='{{closeInviteUserPanel}}' color="#dd4b39">
           {{ 'INVITE_A_FRIEND' | $$ }}
         </uproxy-app-bar>
 

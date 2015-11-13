@@ -217,7 +217,7 @@ Polymer({
   networkNamesChanged: function() {
     var supportsQuiver = false;
     this.networkButtonNames = [];
-    for (var i = 0; i < model.networkNames.length; ++i) {
+    for (var i in model.networkNames) {
       if (model.networkNames[i] === 'Quiver') {
         supportsQuiver = true;
       } else {
@@ -229,13 +229,13 @@ Polymer({
     this.supportsQuiver = supportsQuiver;
   },
   getNetworkDisplayName: function(networkName :string) {
-    return ui.getNetworkDisplayName(networkName) || '';
+    return ui.getNetworkDisplayName(networkName);
   },
   isExperimentalNetwork: function(networkName :string) {
-    return ui.isExperimentalNetwork(networkName) || true;
+    return ui.isExperimentalNetwork(networkName);
   },
   supportsInvites: function(networkName :string) {
-    return ui.supportsInvites(networkName) || false;
+    return ui.supportsInvites(networkName);
   },
   observe: {
     'model.networkNames': 'networkNamesChanged',
