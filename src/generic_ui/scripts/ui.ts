@@ -12,6 +12,7 @@ import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
+import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import net = require('../../../../third_party/uproxy-lib/net/net.types');
 import noreConnector = require('./core_connector');
 import user_module = require('./user');
@@ -643,9 +644,12 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public proxyDisconnected = () => {
+  public proxyDisconnected = (info?:ProxyDisconnectInfo) => {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
+      if (info && info.deliberate) {
+        return;
+      }
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }

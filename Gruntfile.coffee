@@ -163,6 +163,14 @@ gruntConfig = {
     ccaCreate: {
       command: '<%= ccaJsPath %> create <%= androidDevPath %> --link-to=<%= ccaDevPath %>'
     }
+    ccaPlatformAndroid: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaJsPath %> platform add android'
+    }
+    ccaAddPluginsAndroid: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git cordova-plugin-splashscreen'
+    }
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
       command: '<%= ccaJsPath %> build android --webview=system'
@@ -690,6 +698,7 @@ gruntConfig = {
           'sha1'
           'uproxy-lib/loggingprovider'
           'uproxy-lib/churn-pipe'
+          'uproxy-lib/cloud/social'
         ]
         files: [
           {
@@ -1105,6 +1114,8 @@ taskManager.add 'build_android', [
   'exec:rmAndroidBuild'
   'build_cca'
   'exec:ccaCreate'
+  'exec:ccaPlatformAndroid'
+  'exec:ccaAddPluginsAndroid'
   'exec:ccaBuildAndroid'
 ]
 
