@@ -397,7 +397,8 @@ export function notifyUI(networkName :string, userId :string) {
     public handleClientState = (freedomClient :freedom.Social.ClientState) : Promise<void> => {
       if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
-        return;  // TODO: reject
+        return Promise.reject(
+            'Firewall: invalid client state:' + JSON.stringify(freedomClient));
       }
       var client :social.ClientState =
         freedomClientToUproxyClient(freedomClient);
@@ -472,7 +473,9 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    private pendingClients_ :any = {};  // TODO: type, explain
+    // Clients currently pending validation (due to async verifyDecrypt call).
+    private pendingClients_ :{ [clientId :string] :Promise<boolean> } = {};
+
     private validateClient_ = (client :social.ClientState) : Promise<boolean> => {
       if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
         // Ignore clients that aren't using uProxy.
@@ -488,15 +491,16 @@ export function notifyUI(networkName :string, userId :string) {
       var inviteUserData = (<any>client)['inviteUserData'];
       if (inviteUserData) {
         var key = this.getKeyFromClientId(client.clientId);
+
         var decryptAndValidate = crypto.verifyDecrypt(inviteUserData, key)
         .then((plainText :string) => {
-          // TODO: should I remove from this.pendingClients_[client.clientId]?
-          // I think this will work as long as nothing async happens from here on.....
+          // Cleanup pending validation now that no more async calls are needed
+          // to complete validation.
+          delete this.pendingClients_[client.clientId];
 
           // Parse invite data
           try {
-            // TODO: type inviteData
-            var inviteData = JSON.parse(plainText);
+            var inviteData :social.InviteUserData = JSON.parse(plainText);
           } catch (e) {
             log.warn('Invalid invite data: ' + plainText);
             return Promise.resolve(false);
@@ -514,15 +518,17 @@ export function notifyUI(networkName :string, userId :string) {
             return Promise.resolve(false);
           }
 
-          // TODO: when creating a remote instance, we need to set the public
-          // key!!!!
-
           // Add to user's list of known public keys
           var user = this.getOrAddUser_(client.userId);
           user.knownPublicKeys.push(inviteData.publicKey);
 
           return Promise.resolve(true);
-        });  // TODO: error checking?
+        }).catch((e) => {
+          log.error('Error decrypting inviteUserData', e);
+          return Promise.resolve(false);
+        });
+
+        // Save decrypt promise, so we know this client is pending validation.
         this.pendingClients_[client.clientId] = decryptAndValidate;
         return decryptAndValidate;
       }
@@ -747,7 +753,7 @@ export function notifyUI(networkName :string, userId :string) {
     public getInviteUrl = () : Promise<string> => {
       return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
         var tokenObj :Object;
-        if (this.name === 'Quiver') {  // TODO: make a network-option?
+        if (this.name === 'Quiver') {
           var permissionToken = String(Math.random());
           this.myInstance.addInvitePermissionToken(permissionToken);
           tokenObj = {

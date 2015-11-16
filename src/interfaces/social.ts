@@ -233,6 +233,11 @@ export interface UserState {
   knownPublicKeys :string[];
 }
 
+export interface InviteUserData {
+  userId :string;
+  publicKey :string;
+  permissionToken :string;
+}
 
 export interface RemoteUserInstance {
   start() :Promise<net.Endpoint>;
