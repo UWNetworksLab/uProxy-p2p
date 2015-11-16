@@ -273,6 +273,10 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
+    public getKeyFromClientId = (clientId :string) : string => {
+      return clientId.substr(clientId.indexOf('-----BEGIN PGP'));
+    }
+
   }  // class AbstractNetwork
 
 
@@ -451,7 +455,7 @@ export function notifyUI(networkName :string, userId :string) {
         // Decrypt message.
         var decryptMessage = Promise.resolve(incoming.message);
         if (this.encryptWithClientId()) {
-          var key = getKeyFromClientId(client.clientId);
+          var key = this.getKeyFromClientId(client.clientId);
           decryptMessage = crypto.verifyDecrypt(incoming.message, key);
         }
 
@@ -483,7 +487,7 @@ export function notifyUI(networkName :string, userId :string) {
       // for Quiver and not checked into mainline freedom yet.
       var inviteUserData = (<any>client)['inviteUserData'];
       if (inviteUserData) {
-        var key = getKeyFromClientId(client.clientId);
+        var key = this.getKeyFromClientId(client.clientId);
         var decryptAndValidate = crypto.verifyDecrypt(inviteUserData, key)
         .then((plainText :string) => {
           // TODO: should I remove from this.pendingClients_[client.clientId]?
@@ -499,7 +503,7 @@ export function notifyUI(networkName :string, userId :string) {
           }
 
           // Sanity check
-          if (getKeyFromClientId(client.clientId) != inviteData.publicKey) {
+          if (this.getKeyFromClientId(client.clientId) != inviteData.publicKey) {
             log.warn('clientId does not match publicKey ' +
                 client.clientId + ', ' + inviteData.publicKey);
             return Promise.resolve(false);
@@ -542,7 +546,7 @@ export function notifyUI(networkName :string, userId :string) {
       // At this point we have a client without any inviteUserData set for an
       // already existing user, just verify that the clientId appears in the
       // user's list of knownPublicKeys.
-      if (user.knownPublicKeys.indexOf(getKeyFromClientId(client.clientId)) >= 0) {
+      if (user.knownPublicKeys.indexOf(this.getKeyFromClientId(client.clientId)) >= 0) {
         return Promise.resolve(true);
       } else {
         log.warn('Got unknown clientId: ' + client.clientId);
@@ -795,7 +799,7 @@ export function notifyUI(networkName :string, userId :string) {
         msg: messageString
       });
       if (this.encryptWithClientId()) {
-        var key = getKeyFromClientId(clientId);
+        var key = this.getKeyFromClientId(clientId);
         return crypto.signEncrypt(messageString, key).then((cipherText :string) => {
           return this.freedomApi_.sendMessage(clientId, cipherText);
         });
@@ -954,8 +958,4 @@ export function freedomClientToUproxyClient(
     inviteUserData: (<any>freedomClientState)['inviteUserData']
   };
   return state;
-}
-
-function getKeyFromClientId(clientId :string) : string {
-  return clientId.substr(clientId.indexOf('-----BEGIN PGP'));
 }

@@ -168,11 +168,13 @@ export interface ConsentWireState {
  */
 export interface InstanceHandshake {
   instanceId  :string;
-  publicKey   :string;
   consent     :ConsentWireState;
   description ?:string;
   name        :string;
   userId      :string;
+  // publicKey is not set for networks which include the public key in their
+  // clientId (Quiver).
+  publicKey   ?:string;
 }
 
 // Describing whether or not a remote instance is currently accessing or not,
@@ -342,5 +344,7 @@ export interface Network {
   areAllContactsUproxy : () => boolean;
 
   encryptWithClientId : () => boolean;
+
+  getKeyFromClientId : (clientId :string) => string;
 }
 

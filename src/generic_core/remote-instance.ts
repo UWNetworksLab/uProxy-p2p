@@ -351,7 +351,8 @@ import Persistent = require('../interfaces/persistent');
     public update = (data:social.InstanceHandshake,
         messageVersion:number) :Promise<void> => {
       return this.onceLoaded.then(() => {
-        if (typeof this.publicKey === 'undefined' || !this.keyVerified) {
+        if (data.publicKey &&
+            (typeof this.publicKey === 'undefined' || !this.keyVerified)) {
           this.publicKey = data.publicKey;
         }
         this.description = data.description;
