@@ -159,6 +159,10 @@ Polymer({
   networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
     this.selectedNetworkName = networkName;
+    // TODO: Consider moving this 'if logged in' logic inside
+    // initInviteForNetwork. This would require ui.ts login to be fixed first
+    // to remove possible race conditions:
+    // https://github.com/uProxy/uproxy/issues/2064
     if (model.getNetwork(networkName)) {
       this.initInviteForNetwork(networkName);
     } else {
