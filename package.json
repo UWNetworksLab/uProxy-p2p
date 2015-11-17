@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.8.27",
+  "version": "0.8.28",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -20,7 +20,7 @@
     "arraybuffer-slice": "^0.1.2",
     "browserify-zlib": "^0.1.4",
     "bower": "^1.4.1",
-    "cca": "^0.7.1",
+    "cca": "^0.8.0",
     "circular-json": "^0.1.6",
     "compare-version": "^0.1.2",
     "crypto": "^0.0.3",

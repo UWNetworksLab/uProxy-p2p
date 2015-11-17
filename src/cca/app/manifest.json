@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "uProxy for Sharers",
-  "description": "test",
+  "name": "uProxy",
+  "description": "Get and share access to the open internet",
   "minimum_chrome_version": "41.0.2272.63",
   "version": "0.0",
   "icons": {
@@ -20,7 +20,8 @@
     "storage",
     "http://*/",
     "https://*/",
-    "notifications"
+    "notifications",
+    "proxy"
   ],
   "sockets": {
     "tcp": { "connect" : "" },
