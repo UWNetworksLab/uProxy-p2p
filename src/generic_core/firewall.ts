@@ -124,7 +124,8 @@ function checkSchema(object:any, schema:Schema) :boolean {
     if (k in object) {
       remaining_required--;
       object_keys_matched--;
-      if (typeof(object[k]) != type) {
+      // Types must match, unless the field is optional and null.
+      if (typeof(object[k]) != type && !(optional && object[k] === null)) {
         return false;
       }
     } else if (optional) {
@@ -177,7 +178,8 @@ var CLIENT_STATE_SCHEMA :Schema = {
   'status' : 'string',
   'timestamp' : '?number',
   'lastUpdated' : '?number',
-  'lastSeen' : '?number'
+  'lastSeen' : '?number',
+  'inviteUserData' : '?string'
 };
 
 export function isValidClientState(state :freedom.Social.ClientState,

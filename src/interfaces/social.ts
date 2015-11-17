@@ -32,10 +32,11 @@ export interface StopProxyInfo {
 }
 
 export interface LocalInstanceState {
-  instanceId  :string;
-  userId      :string;
-  userName    :string;
-  imageData   :string;
+  instanceId       :string;
+  userId           :string;
+  userName         :string;
+  imageData        :string;
+  invitePermissionTokens :string[];
 }
 
 export interface NetworkMessage {
@@ -109,6 +110,7 @@ export interface NetworkOptions {
   supportsInvites :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
   isExperimental ?:boolean;
+  encryptsWithClientId ?:boolean;
 }
 
 /**
@@ -166,11 +168,13 @@ export interface ConsentWireState {
  */
 export interface InstanceHandshake {
   instanceId  :string;
-  publicKey   :string;
   consent     :ConsentWireState;
   description ?:string;
   name        :string;
   userId      :string;
+  // publicKey is not set for networks which include the public key in their
+  // clientId (Quiver).
+  publicKey   ?:string;
 }
 
 // Describing whether or not a remote instance is currently accessing or not,
@@ -213,6 +217,7 @@ export interface ClientState {
   clientId  :string;
   status    :ClientStatus;
   timestamp :number;
+  inviteUserData ?:string;
 }
 
 
@@ -224,9 +229,15 @@ export interface UserState {
   // be saved and loaded separately.
   instanceIds :string[];
   consent     :ConsentState;
-  status      :UserStatus
+  status      :UserStatus;
+  knownPublicKeys :string[];
 }
 
+export interface InviteUserData {
+  userId :string;
+  publicKey :string;
+  permissionToken :string;
+}
 
 export interface RemoteUserInstance {
   start() :Promise<net.Endpoint>;
@@ -336,5 +347,9 @@ export interface Network {
   getNetworkState : () => NetworkState;
 
   areAllContactsUproxy : () => boolean;
+
+  encryptsWithClientId : () => boolean;
+
+  getKeyFromClientId : (clientId :string) => string;
 }
 
