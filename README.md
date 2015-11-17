@@ -6,7 +6,7 @@
 
 [![Slack Status](https://uproxy-slack.herokuapp.com/badge.svg)](https://uproxy-slack.herokuapp.com/)
 [![Travis Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
-[![Shippable Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbdc/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
+[![Shippable Status](https://img.shields.io/shippable/54c823bf5ab6cc135289fbdc/dev.svg)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
 
 ## Tools
 
