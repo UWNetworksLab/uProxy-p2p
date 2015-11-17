@@ -267,7 +267,7 @@ export function notifyUI(networkName :string, userId :string) {
     public encryptsWithClientId = (): boolean => {
       // Default to false.
       var options: social.NetworkOptions = NETWORK_OPTIONS[this.name];
-      return options ? options.encryptsWithClientId === true : true;
+      return options ? options.encryptsWithClientId === true : false;
     }
 
     public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
@@ -276,7 +276,7 @@ export function notifyUI(networkName :string, userId :string) {
 
     public getKeyFromClientId = (clientId :string) : string => {
       var beginPgpString = '-----BEGIN PGP PUBLIC KEY BLOCK-----';
-      var endPgpString = '-----END PGP PUBLIC KEY BLOCK-----';
+      var endPgpString = '-----END PGP PUBLIC KEY BLOCK-----\r\n';
       return clientId.match(beginPgpString + '(.|[\r\n])*' + endPgpString)[0];
     }
 

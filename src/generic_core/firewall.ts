@@ -178,7 +178,8 @@ var CLIENT_STATE_SCHEMA :Schema = {
   'status' : 'string',
   'timestamp' : '?number',
   'lastUpdated' : '?number',
-  'lastSeen' : '?number'
+  'lastSeen' : '?number',
+  'inviteUserData' : '?string'
 };
 
 export function isValidClientState(state :freedom.Social.ClientState,
