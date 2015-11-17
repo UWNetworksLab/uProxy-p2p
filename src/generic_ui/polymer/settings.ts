@@ -13,14 +13,8 @@ Polymer({
   connectedNetworks: '',
   logOut: function() {
     // logout all networks asynchronously
-    for (var i in model.onlineNetworks) {
-      ui.logout({
-        name: model.onlineNetworks[i].name,
-        userId: model.onlineNetworks[i].userId
-      }).catch((e :Error) => {
-        console.error('logout returned error: ', e);
-      });
-    }
+    ui.logoutAll();
+    this.fire('core-signal', {name: 'close-settings'});
   },
   restart: function() {
     core.restart();

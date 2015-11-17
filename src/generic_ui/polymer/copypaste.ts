@@ -132,7 +132,7 @@ Polymer({
     }).then(() => {
       // go back to the previous view regardless of whether we successfully
       // stopped the connection
-      ui.view = ui_constants.View.SPLASH;
+      ui.view = ui_constants.View.ROSTER;
     })
   },
   encodeMessage: function(message:string) {

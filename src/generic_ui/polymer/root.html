@@ -430,7 +430,7 @@
 
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
-    <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
+    <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}">
       <p>{{ dialog.message }}</p>
       <template repeat='{{ button in dialog.buttons }}'>
         <uproxy-button affirmative?='{{ !button.dismissive }}'

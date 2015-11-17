@@ -1025,6 +1025,17 @@ export class UserInterface implements ui_constants.UiApi {
     }, () => { /* MT */ });
   }
 
+  public logoutAll = () : Promise<void[]> => {
+    var logoutPromises :Promise<void>[] = [];
+    for (var i in this.model.onlineNetworks) {
+      logoutPromises.push(this.logout({
+        name: this.model.onlineNetworks[i].name,
+        userId: this.model.onlineNetworks[i].userId
+      }));
+    }
+    return Promise.all(logoutPromises);
+  }
+
   private reconnect_ = (network :string) => {
     this.model.reconnecting = true;
     // TODO: add wechat, quiver, github URLs

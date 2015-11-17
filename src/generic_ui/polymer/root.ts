@@ -32,6 +32,15 @@ interface dialog_description {
   buttons: button_description[];
 }
 
+// Since we reuse a uproxy-action-dialog, sometimes there is a race condition
+// where the dialog attempts to open before it is properly closed.
+// We use a Promise to track if the dialog is closed.
+// The Promise is fulfilled by default, and also after a
+// "core-overlay-open-completed" event is observed.
+// The Promise is reset each time we open the dialog.
+var reusableDialogClosedPromise = Promise.resolve<void>();
+var fulfillReusableDialogClosed :Function;
+
 Polymer({
   dialog: {
     message: '',
@@ -108,8 +117,17 @@ Polymer({
     // it's opened. Opening the dialog too early causes it to be positioned
     // incorrectly (i.e. off center).
     this.async(() => {
-      this.$.dialog.open();
+      // Do not open the dialog until we are sure it is closed.
+      reusableDialogClosedPromise.then(() => {
+        reusableDialogClosedPromise = new Promise<void>((F, R) => {
+          fulfillReusableDialogClosed = F;
+        });
+        this.$.dialog.open();
+      });
     });
+  },
+  reusableDialogClosed: function() {
+    fulfillReusableDialogClosed();
   },
   openProxyError: function() {
     this.$.proxyError.open();
