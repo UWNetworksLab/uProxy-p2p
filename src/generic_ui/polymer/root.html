@@ -92,6 +92,8 @@
       core-toolbar {
         height: 105px;
         width: 100%;
+        background-color: #009688;
+        color: white;
       }
       core-toolbar::shadow #topBar {
         padding: 0px 16px;
@@ -274,16 +276,14 @@
     <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
-    <uproxy-feedback id='feedback'></uproxy-feedback>
-
-    <uproxy-faq id='faq'></uproxy-faq>
-
-    <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
-
     <!-- core-overlays, launched using core-signals -->
     <uproxy-invite-user></uproxy-invite-user>
+    <uproxy-google-invite></uproxy-google-invite>
     <uproxy-accept-user-invite></uproxy-accept-user-invite>
     <uproxy-quiver-login></uproxy-quiver-login>
+    <uproxy-feedback id='feedback'></uproxy-feedback>
+    <uproxy-faq id='faq'></uproxy-faq>
+    <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
 
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
@@ -373,11 +373,6 @@
 
         <div class='content' fit>
 
-          <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}'
-            mini src='../icons/ic_person_add_white_24dp.svg'
-            on-tap='{{ fireOpenInviteUserPanel }}'
-            style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) + 26 }}px;'></paper-fab>
-
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
               <uproxy-roster id='get-roster'
@@ -425,12 +420,17 @@
             </div>
           </div>
         </div>
+        <!-- Elements (like the paper fab) that determine position based on proxying/error statuses, must come after the status elements above. Otherwise the positioning will be incorrect. -->
+        <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}'
+          mini src='../icons/ic_person_add_white_24dp.svg'
+          on-tap='{{ fireOpenInviteUserPanel }}'
+          style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.showInviteControls) + 26 }}px;'></paper-fab>
       </core-header-panel>
     </core-drawer-panel>
 
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
-    <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
+    <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}">
       <p>{{ dialog.message }}</p>
       <template repeat='{{ button in dialog.buttons }}'>
         <uproxy-button affirmative?='{{ !button.dismissive }}'

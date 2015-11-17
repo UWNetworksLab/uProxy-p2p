@@ -34,7 +34,11 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
   },
   next: function() {
-    this.setState(model.globalSettings.splashState + 1);
+    if (this.supportsQuiver) {
+      ui.view = ui_constants.View.ROSTER;
+    } else {
+      this.setState(model.globalSettings.splashState + 1);
+    }
   },
   prev: function() {
     this.setState(model.globalSettings.splashState - 1);

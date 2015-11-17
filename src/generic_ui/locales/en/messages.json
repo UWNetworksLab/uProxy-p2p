@@ -475,6 +475,10 @@
     "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups.",
     "message": "Friends who have uProxy"
   },
+  "NOT_CONNECTED_LOGIN_TO_START": {
+    "description": "Text in settings that informs the user they should sign in to a social network to get started.",
+    "message": "Login to get started"
+  },
   "CONNECTED_WITH": {
     "description": "Text in settings that informs the user which social network they're connected to.",
     "message": "Connected with __network__"
@@ -574,6 +578,14 @@
   "WE_WONT_POST": {
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
     "message": "We won't share your data or post publicly without your consent"
+  },
+  "HAVE_AN_INVITE_CODE": {
+    "description": "Text above a button that asks the user if they already have a uProxy invite code",
+    "message": "Have an invite code?"
+  },
+  "ENTER_IT_HERE": {
+    "description": "Text for button that opens a view for the user to enter their uProxy invite code",
+    "message": "Enter it here"
   },
   "LEARN_MORE_SOCIAL": {
     "description": "Label for button that brings user to more information about why social networks are used for uProxy.",
@@ -807,6 +819,10 @@
     "description": "Question above network select dropdown on invite screen",
     "message": "How would you like to invite to your friends?"
   },
+  "SIGN_IN_WITH_A_NETWORK": {
+    "description": "Title above social network icons on the page to find and/or invite friends.",
+    "message": "Sign in with a social network."
+  },
   "FACEBOOK_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for Facebook",
     "message": "Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list."
@@ -859,6 +875,18 @@
     "description": "Confirmation message when accepting an invite.",
     "message": "Would you like to add __name__?"
   },
+  "SIGN_IN_TO_NETWORK": {
+    "description": "Title for dialog that appears after users choose a social network for finding friends.",
+    "message": "Sign in to __network__"
+  },
+  "SIGN_IN_TO_INVITE_FRIENDS": {
+    "description": "Text for dialog that appears if users choose an invite-only social network to find uProxy friends. Text explains that users must sign in before inviting friends.",
+    "message": "To invite a __network__ friend to uProxy, please sign in to your __network__ account."
+  },
+  "SIGN_IN_TO_SEE_ALL_UPROXY_FRIENDS": {
+    "description": "Text for dialog that appears if users choose a 'public' social network to find uProxy friends. Text explains that signing in allows any of your social network contacts using uProxy to see that you are online.",
+    "message": "Signing in will allow your __network__ contacts who use uProxy to see when you are online with uProxy."
+  },
   "LOGIN_REQUIRED_TITLE": {
     "description": "Title for confirmation that the user must login to a network to accept an invitation",
     "message": "Login Required"
@@ -886,5 +914,9 @@
   "FAQ_SENTENCE_CASE": {
     "description": "Title of the FAQ window",
     "message": "Get Help"
+  },
+  "CONFIRM_LOGOUT_FOR_COPYPASTE": {
+    "description": "If a user is signed in to social network(s) and attempt to start a one-time connection, this message informs them that they must first log out of all social networks.",
+    "message": "To start a one-time connection, you will be logged out of connected social networks. Would you like to log out now?"
   }
 }
