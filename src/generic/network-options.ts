@@ -37,7 +37,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     enableMonitoring: false,
     areAllContactsUproxy: false,
     supportsReconnect: false,
-    supportsInvites: false,
+    supportsInvites: true,
     isExperimental: true
   },
   'GitHub': {
@@ -56,6 +56,14 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     supportsReconnect: true,
     supportsInvites: true,
     isExperimental: true,
-    encryptWithClientId: true
+    encryptsWithClientId: true
+  },
+  'Cloud': {
+    isFirebase: false,
+    enableMonitoring: false,
+    areAllContactsUproxy: true,
+    supportsReconnect: false,
+    supportsInvites: true,
+    isExperimental: true
   }
 };

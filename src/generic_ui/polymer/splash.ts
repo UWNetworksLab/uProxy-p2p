@@ -97,5 +97,5 @@ Polymer({
     this.languages = languages;
     this.userName = model.globalSettings.quiverUserName;
     this.updateNetworkButtonNames();
-  }
+  },
 });

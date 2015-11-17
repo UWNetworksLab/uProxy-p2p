@@ -1,11 +1,11 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import browser_connector = require('../interfaces/browser_connector');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import globals = require('./globals');
-import social = require('../interfaces/social');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import social_network = require('./social');
+import social = require('../interfaces/social');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 var log :logging.Log = new logging.Log('ui_connector');
 

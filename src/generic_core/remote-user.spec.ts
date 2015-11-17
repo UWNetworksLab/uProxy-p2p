@@ -20,7 +20,7 @@ describe('remote_user.User', () => {
   ]);
   network['getLocalInstanceId'] = function() { return 'dummyInstanceId'; };
   network['send'] = () => { return Promise.resolve(); };
-  network['encryptWithClientId'] = () => { return false; };
+  network['encryptsWithClientId'] = () => { return false; };
   network['myInstance'] =
       new local_instance.LocalInstance(network, 'localUserId');
 

@@ -36,5 +36,5 @@ Polymer({
       this.analyzingNetwork = false;
       this.analyzedNetwork = true;
     });
-  }
+  },
 });

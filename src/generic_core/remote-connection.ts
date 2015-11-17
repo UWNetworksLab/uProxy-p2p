@@ -7,16 +7,16 @@
 
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
+import peerconnection = require('../../../third_party/uproxy-lib/webrtc/peerconnection');
 import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import social = require('../interfaces/social');
 import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import peerconnection = require('../../../third_party/uproxy-lib/webrtc/peerconnection');
 import tcp = require('../../../third_party/uproxy-lib/net/tcp');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 var PROXYING_SESSION_ID_LENGTH = 16;
 

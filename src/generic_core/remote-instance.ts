@@ -9,25 +9,25 @@
 /// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
+import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import consent = require('./consent');
 import crypto = require('./crypto');
 import globals = require('./globals');
+import _ = require('lodash');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
+import Persistent = require('../interfaces/persistent');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
-import _ = require('lodash');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 import storage = globals.storage;
 import ui = ui_connector.connector;
-
-import Persistent = require('../interfaces/persistent');
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
@@ -127,8 +127,9 @@ import Persistent = require('../interfaces/persistent');
             return;
           }
           if (typeof this.publicKey !== 'undefined' &&
+              typeof globals.publicKey !== 'undefined' &&
               // No need to encrypt again for networks like Quiver
-              !this.user.network.encryptWithClientId()) {
+              !this.user.network.encryptsWithClientId()) {
             crypto.signEncrypt(JSON.stringify(data.data), this.publicKey)
             .then((cipherText :string) => {
               data.data = cipherText;
@@ -182,12 +183,11 @@ import Persistent = require('../interfaces/persistent');
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
-
       if (typeof this.publicKey !== 'undefined' &&
           typeof globals.publicKey !== 'undefined' &&
           // signal data is not encrypted for Quiver, because entire message
           // is encrypted over the network and already decrypted by this point
-          !this.user.network.encryptWithClientId()) {
+          !this.user.network.encryptsWithClientId()) {
         return crypto.verifyDecrypt(<string>msg.data, this.publicKey)
         .then((plainText :string) => {
           return this.handleDecryptedSignal_(
@@ -231,15 +231,15 @@ import Persistent = require('../interfaces/persistent');
         });
 
         /*
-        TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
-        trying to connect. Something like:
-        https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
-        Issue: https://github.com/uProxy/uproxy/issues/1256
+          TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
+          trying to connect. Something like:
+          https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
+          Issue: https://github.com/uProxy/uproxy/issues/1256
 
-        } else if (signalFromRemote['type'] == signals.Type.CANCEL_OFFER) {
+         else if (signalFromRemote['type'] == signals.Type.CANCEL_OFFER) {
           this.stopShare();
           return;
-        }
+          }
         */
       }
 

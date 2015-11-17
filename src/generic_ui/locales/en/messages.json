@@ -291,9 +291,17 @@
     "description": "The default text that appears in the user feedback textbox.",
     "message": "Write your feedback"
   },
+  "FEEDBACK_ERROR_PLACEHOLDER": {
+    "description": "Error that apears if you try to submit an empty feedback.",
+    "message": "Please enter some feedback"
+  },
   "NETWORK_AND_LOGS": {
     "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team.",
     "message": "Analyze network and include logs"
+  },
+  "ANALYZE_NAT": {
+    "description": "The text for a button in the settings pane the user can click to check their NAT settings and view the latest logs uProxy has collected",
+    "message": "Analyze NAT"
   },
   "P_I_I_MESSAGE": {
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
@@ -819,6 +827,18 @@
     "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
     "message": "Friend's GitHub username"
   },
+  "CLOUD_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for Cloud",
+    "message": "Enter your invite code. When a connection has been made, it will appear in your contact list."
+  },
+  "CLOUD_INVITE_PLACEHOLDER": {
+    "description": "Placeholder in input box for the invite code.",
+    "message": "Invite code"
+  },
+  "CLOUD_INVITE_FAILED": {
+    "description": "Dialog text informing user that a connection could not be made to their cloud instance",
+    "message": "Oops, connection failed. Please check the invite code."
+  },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
@@ -862,5 +882,9 @@
   "GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION": {
     "description": "",
     "message": "<h2>We've made big changes to how uProxy works with social networks!</h2><ul><li><strong>We've introduced a new Gmail network</strong> that allows you to connect with anyone who has a Gmail account. Use the the button in the lower right of the buddy list to send them an invitation.</li><li><strong>The \"Google\" network is now called Google Hangouts.</strong> Because Google is removing technology we rely on, our support for this network will be removed.</li><li><strong>Facebook contacts are now added by invitation.</strong> You can invite friends using the button at the lower right of the contact list, and only friends you've invited will be able to tell you're using uProxy. To make this change, we've had to reset your friend list, so you'll have to invite friends you want to connect to.</li></ul><p>Please send feedback about these changes using the feedback link in the menu or by emailing info@uProxy.org</p>"
+  },
+  "FAQ_SENTENCE_CASE": {
+    "description": "Title of the FAQ window",
+    "message": "Get Help"
   }
 }

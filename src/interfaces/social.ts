@@ -110,7 +110,7 @@ export interface NetworkOptions {
   supportsInvites :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
   isExperimental ?:boolean;
-  encryptWithClientId ?:boolean;
+  encryptsWithClientId ?:boolean;
 }
 
 /**
@@ -348,7 +348,7 @@ export interface Network {
 
   areAllContactsUproxy : () => boolean;
 
-  encryptWithClientId : () => boolean;
+  encryptsWithClientId : () => boolean;
 
   getKeyFromClientId : (clientId :string) => string;
 }

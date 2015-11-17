@@ -12,6 +12,7 @@ import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
+import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import net = require('../../../../third_party/uproxy-lib/net/net.types');
 import noreConnector = require('./core_connector');
 import user_module = require('./user');
@@ -60,7 +61,7 @@ export class Model {
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
     statsReportingEnabled: false,
-    consoleFilter: 2, // loggingTypes.Level.warn
+    consoleFilter: 0,
     language: 'en',
     force_message_version: 0,
     hasSeenGoogleAndFacebookChangedNotification: false,
@@ -401,8 +402,8 @@ export class UserInterface implements ui_constants.UiApi {
   private confirmationCallbacks_ :{[index :number] :Function} = {};
   // Don't use index 0 as it may be treated as false in confirmation code.
   private confirmationCallbackIndex_ = 1;
-  public getConfirmation = (heading :string, text :string) => {
-    return new Promise((F, R) => {
+  public getConfirmation(heading :string, text :string) :Promise<void> {
+    return new Promise<void>((F, R) => {
       var fulfillIndex = ++this.confirmationCallbackIndex_;
       var rejectIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[fulfillIndex] = F;
@@ -541,7 +542,7 @@ export class UserInterface implements ui_constants.UiApi {
       return Promise.reject('Error parsing invite URL');
     }
 
-    var getConfirmation = Promise.resolve();
+    var getConfirmation = Promise.resolve<void>();
     if (showConfirmation) {
       var confirmationMessage =
           this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
@@ -643,9 +644,12 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public proxyDisconnected = () => {
+  public proxyDisconnected = (info?:ProxyDisconnectInfo) => {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
+      if (info && info.deliberate) {
+        return;
+      }
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
@@ -978,56 +982,50 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
-    var network = this.model.getNetwork(networkInfo.name);
-    //Check if the user is connected to a network
-    if (network) {
-      var instanceIds = Object.keys(this.instancesGivingAccessTo);
-      var confirmationMessage: string;
+  private confirmForLogout() :Promise<void> {
+    var sharingTo = Object.keys(this.instancesGivingAccessTo);
+    var message :string;
 
-      // If the user is sharing access with others, ask them if they are sure that they want to log out
-      if (instanceIds.length > 0) {
-        if (instanceIds.length == 1) {
-          confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE", {
-            name: this.mapInstanceIdToUser_[instanceIds[0]].name
-          });
-        } else if (instanceIds.length == 2) {
-          confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_TWO", {
-            name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
-            name2: this.mapInstanceIdToUser_[instanceIds[1]].name
-          });
-        } else {
-          confirmationMessage = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_MANY", {
-            name: this.mapInstanceIdToUser_[instanceIds[0]].name,
-            numOthers: (instanceIds.length - 1)
-          });
-        }
-
-        return this.getConfirmation('', confirmationMessage).then(() => {
-          // if we know about the network, record that we expect this logout to
-          // happen
-          network.logoutExpected = true;
-
-          //log out
-          return this.core.logout(networkInfo);
-        }).catch((e) => {
-          // The user did not confirm whether they wanted to log out or not
-          return;
-        });
-      } else {
-        // if we know about the network, record that we expect this logout to
-        // happen
-        network.logoutExpected = true;
-
-        //log out
-        return this.core.logout(networkInfo);
-      }
-
-    //If the user is not connected to the network, then don't log him out, you probably won't reach this point anyways. EVER. Probably.
-    } else {
-      console.warn('User is trying to log out of not-logged-in-network ' + networkInfo.name);
+    // Do not need to ask user if not actually sharing
+    if (sharingTo.length === 0) {
+      return Promise.resolve<void>();
     }
-  };
+
+    if (sharingTo.length === 1) {
+      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE", {
+        name: this.mapInstanceIdToUser_[sharingTo[0]].name,
+      });
+    } else if (sharingTo.length === 2) {
+      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_TWO", {
+        name1: this.mapInstanceIdToUser_[sharingTo[0]].name,
+        name2: this.mapInstanceIdToUser_[sharingTo[1]].name,
+      });
+    } else {
+      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_MANY", {
+        name: this.mapInstanceIdToUser_[sharingTo[0]].name,
+        numOthers: sharingTo.length - 1,
+      });
+    }
+
+    return this.getConfirmation('', message);
+  }
+
+  public logout(networkInfo :social.SocialNetworkInfo) :Promise<void> {
+    var network = this.model.getNetwork(networkInfo.name);
+    // Check if the user is connected to a network
+    if (!network) {
+      // If the user is not connected to the network, then don't log him out,
+      // you probably won't reach this point anyways. EVER. Probably.
+      console.warn('User is trying to log out of not-logged-in-network ' +
+                   networkInfo.name);
+      return Promise.resolve<void>();
+    }
+
+    return this.confirmForLogout().then(() => {
+      network.logoutExpected = true;
+      return this.core.logout(networkInfo);
+    }, () => { /* MT */ });
+  }
 
   private reconnect_ = (network :string) => {
     this.model.reconnecting = true;

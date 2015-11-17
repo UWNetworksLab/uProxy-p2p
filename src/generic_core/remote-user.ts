@@ -22,19 +22,19 @@
  */
 /// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import remote_instance = require('./remote-instance');
-import social = require('../interfaces/social');
 import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import consent = require('./consent');
 import globals = require('./globals');
+import _ = require('lodash');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import Persistent = require('../interfaces/persistent');
+import remote_instance = require('./remote-instance');
+import social = require('../interfaces/social');
 import ui = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import _ = require('lodash');
 
 import storage = globals.storage;
 
-import Persistent = require('../interfaces/persistent');
 
 var log :logging.Log = new logging.Log('remote-user');
 
@@ -304,7 +304,7 @@ var log :logging.Log = new logging.Log('remote-user');
       if (!instance) {
         // Create a new instance.
         instance = new remote_instance.RemoteInstance(this, instanceId);
-        if (this.network.encryptWithClientId()) {
+        if (this.network.encryptsWithClientId()) {
           // Set publicKey using clientId.  For networks which include the
           // publicKey with the clientId (like Quiver), publicKey is not part
           // of the instance handshake.
@@ -554,7 +554,7 @@ var log :logging.Log = new logging.Log('remote-user');
             userId: myInstance.userId
           }
         };
-        if (!this.network.encryptWithClientId()) {
+        if (!this.network.encryptsWithClientId()) {
           // Only include publicKey if we are not already including it with
           // the clientId (i.e. don't include publicKey in instance handshake
           // for Quiver)

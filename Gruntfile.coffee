@@ -163,6 +163,14 @@ gruntConfig = {
     ccaCreate: {
       command: '<%= ccaJsPath %> create <%= androidDevPath %> --link-to=<%= ccaDevPath %>'
     }
+    ccaPlatformAndroid: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaJsPath %> platform add android'
+    }
+    ccaAddPluginsAndroid: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git cordova-plugin-splashscreen'
+    }
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
       command: '<%= ccaJsPath %> build android --webview=system'
@@ -301,11 +309,6 @@ gruntConfig = {
             'freedomjs-anonymized-metrics/anonmetrics.json'
             'freedomjs-anonymized-metrics/metric.js'
             'freedom-for-chrome/freedom-for-chrome.js'
-            'freedom-social-xmpp/social.google.json'
-            'freedom-social-xmpp/socialprovider.js'
-            'freedom-social-xmpp/vcardstore.js'
-            'freedom-social-xmpp/node-xmpp-browser.js'
-            'freedom-social-xmpp/google-auth.js'
             'freedom-social-github/social.github.json'
             'freedom-social-github/github-social-provider.js'
             'freedom-social-firebase/social.firebase-facebook.json'
@@ -352,11 +355,6 @@ gruntConfig = {
             'data/freedomjs-anonymized-metrics/anonmetrics.json'
             'data/freedomjs-anonymized-metrics/metric.js'
             'data/freedom-for-firefox/freedom-for-firefox.jsm'
-            'data/freedom-social-xmpp/social.google.json'
-            'data/freedom-social-xmpp/socialprovider.js'
-            'data/freedom-social-xmpp/vcardstore.js'
-            'data/freedom-social-xmpp/node-xmpp-browser.js'
-            'data/freedom-social-xmpp/google-auth.js'
             'data/freedom-social-github/social.github.json'
             'data/freedom-social-github/github-social-provider.js'
             'data/freedom-social-firebase/social.firebase-facebook.json'
@@ -528,6 +526,7 @@ gruntConfig = {
           'sha1'
           'uproxy-lib/loggingprovider'
           'uproxy-lib/churn-pipe'
+          'uproxy-lib/cloud/social'
         ]
         files: [
           {
@@ -689,6 +688,7 @@ gruntConfig = {
           'sha1'
           'uproxy-lib/loggingprovider'
           'uproxy-lib/churn-pipe'
+          'uproxy-lib/cloud/social'
         ]
         files: [
           {
@@ -1104,6 +1104,8 @@ taskManager.add 'build_android', [
   'exec:rmAndroidBuild'
   'build_cca'
   'exec:ccaCreate'
+  'exec:ccaPlatformAndroid'
+  'exec:ccaAddPluginsAndroid'
   'exec:ccaBuildAndroid'
 ]
 

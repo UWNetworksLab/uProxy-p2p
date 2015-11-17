@@ -15,10 +15,6 @@
       "url": "../freedom-social-firebase/social.firebase-facebook.json",
       "api": "social2"
     },
-    "SOCIAL-Google": {
-      "url": "../freedom-social-xmpp/social.google.json",
-      "api": "social"
-    },
     "loggingcontroller": {
       "url": "../uproxy-lib/loggingprovider/freedom-module.json",
       "api": "loggingcontroller"

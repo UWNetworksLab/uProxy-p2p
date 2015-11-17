@@ -1,4 +1,5 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel="import" href="../../bower/paper-button/paper-button.html">
 <link rel='import' href='../../bower/paper-item/paper-item.html'>
 <link rel="import" href="../../bower/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../bower/paper-dropdown/paper-dropdown.html">
@@ -59,7 +60,7 @@
       opacity: 0;
       z-index: -1;
     }
-    uproxy-button {
+    #nextWrapper uproxy-button {
       width: 150px;
     }
     uproxy-network {
@@ -78,12 +79,12 @@
       margin-top: 1em;
       margin-bottom: 1em;
     }
-    uproxy-faq-link {
+    uproxy-faq-link paper-button {
       width: 100%;
-      padding-top: 1em;
-      padding-bottom: 1em;
+      padding-top: .3em;
+      padding-bottom: .3em;
       border-top: 1px solid rgb(221, 221, 221);
-      text-transform: uppercase;
+      margin: 0;
     }
     #logo {
       margin-bottom: 1em;
@@ -192,8 +193,11 @@
       </div>
 
       <uproxy-faq-link anchor='whatIsUproxy'>
-        {{ "LEARN_MORE_UPROXY" | $$ }}
+        <paper-button>
+          {{ "LEARN_MORE_UPROXY" | $$ }}
+        </paper-button>
       </uproxy-faq-link>
+
     </div>
 
     <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==model.globalSettings.splashState}}'>
@@ -254,7 +258,9 @@
         </div>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
-        {{ "LEARN_MORE_SOCIAL" | $$ }}
+        <paper-button>
+          {{ "LEARN_MORE_SOCIAL" | $$ }}
+        </paper-button>
       </uproxy-faq-link>
     </div>
 

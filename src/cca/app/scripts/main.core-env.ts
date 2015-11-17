@@ -7,6 +7,7 @@
 
 /// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/splashscreen.d.ts'/>
 
 import CordovaBrowserApi = require('./cordova_browser_api');
 
@@ -33,6 +34,9 @@ console.log('Instantiating UI');
 // TODO: Add a loading screen, for slow systems.
 browserApi.bringUproxyToFront().then(() => {
   console.log('UI instantiation complete');
+  if (navigator.splashscreen) {
+    navigator.splashscreen.hide();
+  }
 });
 
 console.log('Loading core');
