@@ -3,7 +3,7 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
-import caesar = require('../simple-transformers/caesar');
+import caesar = require('../transformers/caesar');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
