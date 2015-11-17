@@ -131,7 +131,7 @@
         "message": "غالباً لا",
         "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
     },
-    "ALPHA_MESSAGE": {
+    "BETA_MESSAGE": {
         "message": "هذا إصدار المرحلة ألفا لـ uProxy. يمكنك مساعدتنا على تحسين uProxy بمشاركة معايير مجهول مع فريق التطوير. يتم جعل مصدر البيانات التي يتم الإبلاغ عنها مجهولاً ونقلها بطريقة آمنة.",
         "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
     },
