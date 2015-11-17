@@ -148,7 +148,6 @@
         {{ 'INVITE_A_FRIEND' | $$ }}
       </uproxy-app-bar>
 
-
       <div class='view' flex>
         <!-- TODO: translate before launch on webstore -->
         <div id="allInviteMethods" hidden?='{{!ui.showRosterBeforeLogin}}'>
@@ -287,7 +286,6 @@
           </div>
         </div> <!--End of login-before-roster view-->
       </div>
-
     </core-overlay>
 
     <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{loginToInviteFriendDialogOpened}}">
@@ -306,7 +304,6 @@
         </uproxy-button>
       </div>
     </uproxy-dialog>
-
 
     <uproxy-network-invite-user network="{{selectedNetworkName}}"></uproxy-network-invite-user>
 
