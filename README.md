@@ -2,11 +2,11 @@
 
 [uProxy](https://www.uproxy.org) is a browser extension that lets users share their internet connection.
 
-## Build Status
+## Status
 
-Dev: [![Build Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
-[![Build Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbdc/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
-Master: [![Build Status](https://travis-ci.org/uProxy/uproxy.svg?branch=master)](https://travis-ci.org/uProxy/uproxy)
+[![Slack Status](https://uproxy-slack.herokuapp.com/badge.svg)](https://uproxy-slack.herokuapp.com/)
+[![Travis Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
+[![Shippable Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbdc/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
 
 ## Tools
 
