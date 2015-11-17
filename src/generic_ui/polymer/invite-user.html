@@ -198,7 +198,7 @@
             {{ "HAVE_AN_INVITE_CODE" | $$ }}<br>
             <a on-tap="{{showAcceptUserInvite}}">{{ "ENTER_IT_HERE" | $$ }}</a>
           </div>
-        </div>
+        </div> <!--End of roster-before-login view-->
 
         <!-- TODO: remove this and uproxy-network template once Quiver
         support is on the webstore -->
@@ -267,13 +267,25 @@
                 <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
               </div>
             </div>
+
+            <div hidden?='{{ selectedNetworkName != "Quiver"}}'>
+              <!-- TODO: localization -->
+              <uproxy-button affirmative on-tap='{{ generateInviteUrl }}'>
+                Generate uProxy Invite Link
+              </uproxy-button>
+
+              <div hidden?='{{ inviteUrl == "" }}'>
+                <p>Send this link to your friend so they can find you on the uProxy network</p>
+                <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+              </div>
+            </div>
           </div>
           <div class='section'>
             <a on-tap='{{ showAcceptUserInvite }}'>
               {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$ }}
             </a>
           </div>
-        </div>
+        </div> <!--End of login-before-roster view-->
       </div>
 
     </core-overlay>
