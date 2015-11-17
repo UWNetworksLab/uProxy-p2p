@@ -5,7 +5,7 @@ import aes = require('aes-js');
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 
-var log :logging.Log = new logging.Log('encryption-shaper');
+var log :logging.Log = new logging.Log('encryption shaper');
 
 export const CHUNK_SIZE :number = 16;
 export const IV_SIZE :number = 16;

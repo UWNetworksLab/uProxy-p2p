@@ -5,7 +5,7 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 import decompression = require('./decompressionShaper');
 import logging = require('../logging/logging');
 
-const log :logging.Log = new logging.Log('compressionShaper');
+const log :logging.Log = new logging.Log('decompression shaper');
 
 export interface DecompressionConfig {
   frequencies:number[]

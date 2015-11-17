@@ -6,7 +6,7 @@ import encryption = require('./encryptionShaper');
 import fragments = require('./fragment');
 import logging = require('../logging/logging');
 
-var log :logging.Log = new logging.Log('fancy-transformers');
+var log :logging.Log = new logging.Log('fragmentation shaper');
 
 // Accepted in serialised form by configure().
 export interface FragmentationConfig {
