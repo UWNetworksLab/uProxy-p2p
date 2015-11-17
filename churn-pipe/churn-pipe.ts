@@ -5,15 +5,15 @@
 import aqm = require('../aqm/aqm');
 import caesar = require('../transformers/caesar');
 import churn_types = require('../churn/churn.types');
-import decompression = require('../fancy-transformers/decompressionShaper');
-import encryption = require('../fancy-transformers/encryptionShaper');
-import fragmentation = require('../fancy-transformers/fragmentationShaper');
+import decompression = require('../transformers/decompressionShaper');
+import encryption = require('../transformers/encryptionShaper');
+import fragmentation = require('../transformers/fragmentationShaper');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import PassThrough = require('../transformers/passthrough');
-import protean = require('../fancy-transformers/protean');
-import sequence = require('../fancy-transformers/byteSequenceShaper');
+import protean = require('../transformers/protean');
+import sequence = require('../transformers/byteSequenceShaper');
 
 import Socket = freedom.UdpSocket.Socket;
 

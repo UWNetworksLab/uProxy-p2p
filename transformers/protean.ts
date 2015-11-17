@@ -2,11 +2,11 @@
 /// <reference path='../../../third_party/aes-js/aes-js.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
-import decompression = require('../fancy-transformers/decompressionShaper');
-import encryption = require('../fancy-transformers/encryptionShaper');
-import fragmentation = require('../fancy-transformers/fragmentationShaper');
+import decompression = require('./decompressionShaper');
+import encryption = require('./encryptionShaper');
+import fragmentation = require('./fragmentationShaper');
 import logging = require('../logging/logging');
-import sequence = require('../fancy-transformers/byteSequenceShaper');
+import sequence = require('./byteSequenceShaper');
 
 const log :logging.Log = new logging.Log('protean');
 
