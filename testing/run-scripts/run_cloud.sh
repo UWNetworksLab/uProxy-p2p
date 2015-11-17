@@ -13,9 +13,7 @@ set -e
 PREBUILT=
 INVITE_CODE=
 REFRESH=false
-# Beautiful cross-platform one-liner cogged from:
-#   http://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-bash
-PUBLIC_IP=`dig +short myip.opendns.com @resolver1.opendns.com`
+PUBLIC_IP=
 
 SSHD_PORT=5000
 
@@ -84,10 +82,17 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
     rm -fR $TMP_DIR
     cp -R ${BASH_SOURCE%/*}/../../sshd/ $TMP_DIR
 
-    # If unspecified, set_giver_access.sh will generate an invite code.
-    echo -n $INVITE_CODE > $TMP_DIR/giver-invite-code
-
-    docker build --build-arg public_ip=$PUBLIC_IP -t uproxy/sshd $TMP_DIR
+    # Optional build args aren't very flexible...confine the messiness here.
+    ISSUE_INVITE_ARGS=
+    if [ -n "$PUBLIC_IP" ]
+    then
+      ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -d $PUBLIC_IP"
+    fi
+    if [ -n "$INVITE_CODE" ]
+    then
+      ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -i $INVITE_CODE"
+    fi
+    docker build --build-arg issue_invite_args="$ISSUE_INVITE_ARGS" -t uproxy/sshd $TMP_DIR
   fi
 
   # Add an /etc/hosts entry to the Zork container.
@@ -102,7 +107,7 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
 
   if [ -z "$INVITE_CODE" ]
   then
-    INVITE_CODE=`docker cp uproxy-sshd:/giver-invite-code -|tar xO`
+    INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
     echo "invite code: $INVITE_CODE"
   fi
 fi
