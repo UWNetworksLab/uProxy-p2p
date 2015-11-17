@@ -101,7 +101,8 @@ export enum Command {
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
-  SEND_INVITATION = 1028
+  SEND_INVITATION = 1028,
+  GET_ALL_USER_PROFILES = 1029
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must

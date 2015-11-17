@@ -839,6 +839,22 @@
     "description": "Dialog text informing user that a connection could not be made to their cloud instance",
     "message": "Oops, connection failed. Please check the invite code."
   },
+  "WECHAT_WHO_TO_INVITE": {
+    "description": "Text shown on the invite user panel, asking the user which WeChat friends they'd like to invite.",
+    "message": "Which of your WeChat friends would you like to add to uProxy? Your friends who add you back will appear in your uProxy contacts."
+  },
+  "WECHAT_INVITES_SENT": {
+    "description": "Dialog header text shown to confirm that uProxy invites were sent to WeChat contacts.",
+    "message": "Invites Sent!"
+  },
+  "WECHAT_INVITES_ACCEPTED_WHEN": {
+    "description": "Dialog text that explains your WeChat invites are accepted when those you've invited invite you back.",
+    "message": "Your friends who add you back will appear in your uProxy contacts."
+  },
+  "SEND_INVITATIONS": {
+    "description": "Button text to initiate sending 1+ invitations",
+    "message": "Send invitations"
+  },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"

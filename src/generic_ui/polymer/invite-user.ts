@@ -18,6 +18,44 @@ Polymer({
       return selectedNetwork;
     });
   },
+  sendWechatInvites: function() {
+    var selectedNetwork = model.getNetwork("WeChat");
+    for (var user in this.wechatInvites) {
+      if (this.wechatInvites[user]) {
+        core.inviteUser({
+          networkId: selectedNetwork.name,
+          userName: user
+        }).then(() => {
+          console.log("Invite sent to: " + user);
+        }).catch(() => {
+          console.log("Failed to invite: " + user);
+        });
+      }
+    }
+    this.fire('open-dialog', {
+      heading: ui.i18n_t("WECHAT_INVITES_SENT"),
+      message: ui.i18n_t("WECHAT_INVITES_ACCEPTED_WHEN"),
+      buttons: [{
+        text: ui.i18n_t("OK")
+      }]
+    });
+    this.closeInviteUserPanel();
+  },
+  getWechatFriends: function() {
+    var selectedNetwork = model.getNetwork("WeChat");
+    var info = {
+      name: selectedNetwork.name,
+      userId: selectedNetwork.userId
+    };
+    return core.getAllUserProfiles(info).then((roster: any) => {
+      for(var i = 0; i < roster.length; i++) {
+        var friend = roster[i];
+        this.wechatFriends[i] = friend;
+        this.wechatInvites[friend.userId] = false;
+      }
+      return selectedNetwork;
+    });
+  },
   sendToGMailFriend: function() {
     this.generateInviteUrl().then((selectedNetwork:any) => {
       var selectedNetworkInfo = {
@@ -108,6 +146,9 @@ Polymer({
     if (details.isSelected) {
       this.selectedNetworkName = details.item.getAttribute('label');
     }
+    if (this.selectedNetworkName == "WeChat") {
+      this.getWechatFriends();
+    }
   },
   openInviteUserPanel: function() {
     this.setOnlineInviteNetworks();
@@ -136,6 +177,8 @@ Polymer({
     }
   },
   ready: function() {
+    this.wechatInvites = {};
+    this.wechatFriends = [];
     this.inviteUrl = '';
     this.inviteUserEmail = '';
     this.selectedNetworkName = '';
