@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# Issues a new invite code.
+# Manages invite codes.
+# Invoked without arguments, a new invite code is issued.
+# Other options, notably -i, allow invite codes be "imported"
+# reinstallation and upgrades.
 
 set -e
 
@@ -11,7 +14,7 @@ INVITE_CODE=
 USERNAME=getter
 
 function usage () {
-  echo "$0 [-d ip] [-u username] [-i path-to-invite-code]"
+  echo "$0 [-d ip] [-u username] [-i invite code]"
   echo "  -d: override the detected public IP (for development only)"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
