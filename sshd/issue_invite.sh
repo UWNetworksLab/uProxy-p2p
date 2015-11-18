@@ -65,5 +65,18 @@ mkdir -p $HOMEDIR/.ssh
 cat $TMP/id_rsa.pub >> $HOMEDIR/.ssh/authorized_keys
 
 # Output the actual invite code.
-INVITE="{\"host\":\"$PUBLIC_IP\", \"user\":\"$USERNAME\", \"key\":\"$ENCODED_KEY\"}"
-echo -n $INVITE|base64 -w 0
+export CLOUD_INSTANCE_DETAILS=$(cat << EOF
+{
+  "host":"$PUBLIC_IP",
+  "user":"$USERNAME",
+  "key":"$ENCODED_KEY"
+}
+EOF
+)
+
+echo|base64 -w 0 << EOF
+{
+  "networkName":"Cloud",
+  "networkData":"`echo -n $CLOUD_INSTANCE_DETAILS|sed s/'"'/'\\\\"'/g`"
+}
+EOF
