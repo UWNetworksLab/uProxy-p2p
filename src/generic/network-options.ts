@@ -26,6 +26,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     supportsInvites: true
   },
   'GMail': {
+    displayName: 'Gmail',  // fix incorrect capitalization "GMail"
     isFirebase: true,
     enableMonitoring: true,
     areAllContactsUproxy: true,
