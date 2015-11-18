@@ -18,51 +18,60 @@ var bgAppPageChannel = freedom();
 export class UIConnector {
   constructor() {}
 
-  /**
-   * Install a handler for commands received from the UI.
-   */
-  public onCommand = (cmd :uproxy_core_api.Command, handler:any) => {
-    bgAppPageChannel.on('' + cmd,
-      (args :browser_connector.PromiseCommand) => {
-        // Call handler with args.data and ignore other fields in args
-        // like promiseId.
-        handler(args.data);
-      });
+  private _fulfillPromise(promiseId :number,
+                          command :uproxy_core_api.Command,
+                          args?:any) {
+    this.update(uproxy_core_api.Update.COMMAND_FULFILLED, {
+      command: command,
+      promiseId: promiseId,
+      argsForCallback: args,
+    });
   }
 
-  /**
-   * Install a handler for promise commands received from the UI.
-   * Promise commands return an ack or error to the UI.
-   */
-  public onPromiseCommand = (cmd :uproxy_core_api.Command,
-                             handler :(data ?:any) => Promise<any>) => {
-    var promiseCommandHandler = (args :browser_connector.PromiseCommand) => {
-      // Ensure promiseId is set for all requests
+  private _rejectPromise(promiseId :number, reason :Error) {
+    this.update(uproxy_core_api.Update.COMMAND_REJECTED, {
+      promiseId: promiseId,
+      errorForCallback: reason.toString(),
+    });
+  }
+
+  public onCommand(cmd :uproxy_core_api.Command,
+                   handler :(data ?:any) => (Promise<any>|void)) {
+    // this function returns a promise solely for use in tests, it will normally
+    // not affect anything
+    var commandHandler = (args :browser_connector.PromiseCommand) => {
+      var result = handler(args.data);
+
       if (!args.promiseId) {
-        var err = 'onPromiseCommand called for cmd ' + cmd +
-                  'with promiseId undefined';
-        log.error(err);
-        return Promise.reject(new Error(err));
+        if (result) {
+          console.warn('Unexpected return value from command ' + cmd + ' with ' +
+                       'no way to send result');
+        }
+        return Promise.resolve<void>();
       }
 
-      // Call handler function, then return success or failure to UI.
-      handler(args.data).then(
-        (argsForCallback ?:any) => {
-          this.update(uproxy_core_api.Update.COMMAND_FULFILLED,
-              { command: cmd,
-                promiseId: args.promiseId,
-                argsForCallback: argsForCallback });
-        },
-        (errorForCallback :Error) => {
-          var rejectionData = {
-            promiseId: args.promiseId,
-            errorForCallback: errorForCallback.toString()
-          };
-          this.update(uproxy_core_api.Update.COMMAND_REJECTED, rejectionData);
-        }
-      );
-    };
-    bgAppPageChannel.on('' + cmd, promiseCommandHandler);
+      if (!result) {
+        this._fulfillPromise(args.promiseId, cmd, null);
+        log.warn('Handler for command ' + cmd + ' did not return the expected ' +
+                 'value');
+        return Promise.resolve<void>();
+      }
+
+      if (!(<Promise<any>>result).then) {
+        log.warn('Handler for command ' + cmd + ' returned a value instead of ' +
+                 'a promise');
+        this._fulfillPromise(args.promiseId, cmd, result);
+        return Promise.resolve<void>();
+      }
+
+      return (<Promise<any>>result).then((result?:any) => {
+        this._fulfillPromise(args.promiseId, cmd, result);
+      }, (error :Error) => {
+        this._rejectPromise(args.promiseId, error);
+      });
+    }
+
+    bgAppPageChannel.on('' + cmd, commandHandler);
   }
 
   /**
