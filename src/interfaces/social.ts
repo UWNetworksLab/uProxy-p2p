@@ -146,15 +146,6 @@ export interface VersionedPeerMessage extends PeerMessage {
   version: number;
 }
 
-// The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
-// client ID for the sender but no user ID because in the manual network
-// there is no concept of a single user having multiple clients; in the
-// manual network the client ID uniquely identifies the user.
-export interface HandleManualNetworkInboundMessageCommand {
-  message         :VersionedPeerMessage;
-  senderClientId  :string;
-}
-
 // The different states that uProxy consent can be in w.r.t. a peer. These
 // are the values that get sent or received on the wire.
 export interface ConsentWireState {

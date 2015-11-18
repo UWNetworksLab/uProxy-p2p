@@ -63,32 +63,6 @@ describe('Core', () => {
     expect(user.modifyConsent).toHaveBeenCalledWith(uproxy_core_api.ConsentUserAction.REQUEST);
   });
 
-  it('relays incoming manual network messages to the manual network', () => {
-    var manualNetwork :social_network.ManualNetwork =
-        new social_network.ManualNetwork(social_network.MANUAL_NETWORK_ID);
-
-    spyOn(social_network, 'getNetwork').and.returnValue(manualNetwork);
-    spyOn(manualNetwork, 'receive');
-
-    var senderClientId = 'dummy_sender';
-    var message :social.VersionedPeerMessage = {
-      type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
-      data: {
-        elephants: 'have trunks',
-        birds: 'do not'
-      },
-      version: globals.MESSAGE_VERSION
-    };
-    var command :social.HandleManualNetworkInboundMessageCommand = {
-      senderClientId: senderClientId,
-      message: message
-    };
-    core.handleManualNetworkInboundMessage(command);
-
-    expect(social_network.getNetwork).toHaveBeenCalledWith(social_network.MANUAL_NETWORK_ID, '');
-    expect(manualNetwork.receive).toHaveBeenCalledWith(senderClientId, message);
-  });
-
   it('login fails for invalid network', (done) => {
     core.login({network: 'nothing', reconnect: false}).catch(() => {
       done();
