@@ -6,20 +6,17 @@ RUN apt-get install -y openssh-server supervisor dnsutils jq
 
 RUN addgroup giver
 RUN adduser --disabled-password --gecos 'uProxy Giver' --ingroup giver giver
-COPY set_giver_access.sh /
-RUN chown root:root /set_giver_access.sh
-RUN chmod 755 /set_giver_access.sh
-COPY giver-invite-code /
-RUN chmod 600 /giver-invite-code
-RUN /set_giver_access.sh /giver-invite-code
-
 RUN addgroup getter
 RUN adduser --disabled-password --gecos 'uProxy Getter' --ingroup getter getter
 
-COPY add_getter.sh /add_getter.sh
-RUN chown root:root /add_getter.sh
-RUN chmod 700 /add_getter.sh
-RUN echo 'giver ALL=(ALL) NOPASSWD: /add_getter.sh' > /etc/sudoers
+COPY issue_invite.sh /
+RUN chown root:root /issue_invite.sh
+RUN chmod 755 /issue_invite.sh
+# http://ubuntuforums.org/showthread.php?t=1132821
+RUN echo 'giver ALL=(root)NOPASSWD:/issue_invite.sh "",/issue_invite.sh -d *' > /etc/sudoers
+
+ARG issue_invite_args
+RUN /issue_invite.sh -u giver $issue_invite_args > /initial-giver-invite-code
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
