@@ -61,27 +61,31 @@ EOF
 }
 
 function get_firefox () {
+    cat <<EOF
+RUN echo BROWSER=firefox >/etc/test.conf
+RUN npm install jpm -g
+EOF
     case $1 in
         stable)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-x86_64/en-US/
-            PATTERN='*.tar.bz2'
+            cat <<EOF
+RUN cd /tmp ; mkdir ff ; cd ff ; wget -O firefox-stable.tar.bz2 'https://download.mozilla.org/?product=firefox-latest&os=linux64'
+EOF
             ;;
         beta)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest-beta/linux-x86_64/en-US/
-            PATTERN='*.tar.bz2'
+            cat <<EOF
+RUN cd /tmp ; mkdir ff ; cd ff ; wget -O firefox-beta.tar.bz2 'https://download.mozilla.org/?product=firefox-beta-latest&os=linux64'
+EOF
             ;;
         canary)
-            URL=https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-aurora/
-            PATTERN='*linux-x86_64.tar.bz2'
+            cat <<EOF
+RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 -nd -A '*linux-x86_64.tar.bz2' https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-aurora/
+EOF
             ;;
         *)
             log "Unknown firefox version $1. Options are stable, beta, and canary."
             ;;
     esac
     cat <<EOF
-RUN echo BROWSER=firefox >/etc/test.conf
-RUN npm install jpm -g
-RUN cd /tmp ; mkdir ff ; cd ff ; wget -r -l1 -nd -A '$PATTERN' $URL
 # Sometimes there are >1 versions in the folder, e.g. following a release.
 RUN cd /usr/share ; ls /tmp/ff/*.bz2|sort|tail -1|xargs tar xf
 RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
