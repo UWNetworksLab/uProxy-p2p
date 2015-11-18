@@ -304,24 +304,24 @@ export class CloudSocialProvider {
   // social2
   ////
 
-  public inviteUser = (inviteCode: string): Promise<Object> => {
-    log.debug('inviteUser');
+  public inviteUser = (inviteCode: string): Promise<void> => {
+    return Promise.reject(
+      new Error('inviteUser unimplemented'));
+  }
+
+  // Parses an invite code, received from uProxy in JSON format.
+  // This is the networkData field of the invite codes distributed
+  // to uProxy users.
+  public acceptUserInvitation = (inviteJson: string): Promise<void> => {
+    log.debug('acceptUserInvitation');
     try {
-      var inviteAsString = new Buffer(inviteCode, 'base64');
-      var invite = <Invite>JSON.parse(inviteAsString.toString());
-      log.debug('decoded invite code: %1', invite);
+      var invite = <Invite>JSON.parse(inviteJson);
       return this.reconnect_(invite).then(() => {
         this.notifyOfUser_(invite.host);
-        return Promise.resolve();
       });
     } catch (e) {
       return Promise.reject('could not parse invite code: ' + e.message);
     }
-  }
-
-  public acceptUserInvitation = (userId: string): Promise<void> => {
-    return Promise.reject(
-        new Error('acceptUserInvitation unimplemented'));
   }
 
   public blockUser = (userId: string): Promise<void> => {
