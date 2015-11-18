@@ -819,9 +819,9 @@
     "description": "Question above network select dropdown on invite screen",
     "message": "How would you like to invite to your friends?"
   },
-  "SIGN_IN_WITH_A_NETWORK": {
+  "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK": {
     "description": "Title above social network icons on the page to find and/or invite friends.",
-    "message": "Sign in with a social network."
+    "message": "Find your friends on a social network."
   },
   "FACEBOOK_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for Facebook",

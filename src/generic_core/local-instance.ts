@@ -25,7 +25,7 @@ import storage = globals.storage;
     public clientId :string;
     public userName :string;
     public imageData :string;
-    public invitePermissionTokens :string[] = [];
+    public invitePermissionTokens :{ [token :string] :social.PermissionTokenInfo } = {};
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -116,13 +116,18 @@ import storage = globals.storage;
       });
     }
 
-    public addInvitePermissionToken = (permissionToken :string) => {
-      this.invitePermissionTokens.push(permissionToken);
+    public generateInvitePermissionToken = () : string => {
+      var permissionToken = String(Math.random());
+      this.invitePermissionTokens[permissionToken] = {
+        access: social.PermissionTokenAccess.FRIEND_REQUEST,
+        createdAt: Date.now()
+      };
       this.saveToStorage();
+      return permissionToken;
     }
 
     public isValidInvite = (permissionToken :string) : boolean => {
-      return this.invitePermissionTokens.indexOf(permissionToken) >= 0;
+      return permissionToken in this.invitePermissionTokens;
     }
 
   }  // class local_instance.LocalInstance

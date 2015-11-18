@@ -757,8 +757,7 @@ export function notifyUI(networkName :string, userId :string) {
       return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
         var tokenObj :Object;
         if (this.name === 'Quiver') {
-          var permissionToken = String(Math.random());
-          this.myInstance.addInvitePermissionToken(permissionToken);
+          var permissionToken = this.myInstance.generateInvitePermissionToken();
           tokenObj = {
             v: 2,
             networkName: this.name,

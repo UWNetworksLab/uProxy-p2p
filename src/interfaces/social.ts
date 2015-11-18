@@ -31,12 +31,24 @@ export interface StopProxyInfo {
   error      :boolean;
 }
 
+export enum PermissionTokenAccess {
+  FRIEND_REQUEST = 0,   // only requesting that the user is a friend
+  REQUEST_ACCESS,
+  OFFER_ACCESS,
+  REQUEST_AND_OFFER_ACCESS
+}
+
+export interface PermissionTokenInfo {
+  access :PermissionTokenAccess;
+  createdAt :number;
+}
+
 export interface LocalInstanceState {
   instanceId       :string;
   userId           :string;
   userName         :string;
   imageData        :string;
-  invitePermissionTokens :string[];
+  invitePermissionTokens :{ [token :string] :PermissionTokenInfo };
 }
 
 export interface NetworkMessage {

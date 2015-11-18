@@ -445,7 +445,7 @@ describe('Quiver social networks', () => {
     var user = network.addUser(userId);
     spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
 
-    network.myInstance.addInvitePermissionToken('validToken');
+    var permissionToken = network.myInstance.generateInvitePermissionToken();
     var validClientState :freedom.Social.ClientState = {
       userId: userId,
       clientId: clientId,
@@ -455,7 +455,7 @@ describe('Quiver social networks', () => {
       inviteUserData: JSON.stringify({
         publicKey: publicKey,
         userId: userId,
-        permissionToken: 'validToken'
+        permissionToken: permissionToken
       })
     };
     network.handleMessage({from: validClientState, message: message})

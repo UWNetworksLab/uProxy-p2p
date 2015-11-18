@@ -68,13 +68,14 @@
         top: 15px;
         right: 15px;
         color: rgb(180,180,180);
+        cursor: pointer;
       }
       #QuiverLoginButton {
         width: 200px;
         margin-top: 1em;
         margin-bottom: 1em;
       }
-      #QuiverTitle {
+      .QuiverTitle {
         font-size: 1.4em;
         color: #009688;
         font-weight: normal;
@@ -153,7 +154,7 @@
         <div id="allInviteMethods" hidden?='{{!ui.showRosterBeforeLogin}}'>
           <div hidden?="{{!supportsQuiver}}">
             <div hidden?='{{isQuiverLoggedIn}}' class='section'>
-              <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
+              <h1 class='QuiverTitle'>Sign in to the uProxy network</h1>
               <paper-input-decorator label='Choose a user name' layout vertical>
                 <input is='core-input' value='{{ userName }}' />
               </paper-input-decorator>
@@ -161,19 +162,17 @@
             </div>
             <div hidden?='{{!isQuiverLoggedIn}}' class='section'>
               <!-- TODO: localization -->
-              <uproxy-button affirmative on-tap='{{ generateQuiverInviteUrl }}'>
-                Generate Quiver Invite Link
-              </uproxy-button>
-
-              <div hidden?='{{ inviteUrl == "" }}'>
-                <p>Send this link to your friend so they can find you on Quiver</p>
-                <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+              <h1 class='QuiverTitle'>Send this link to your friends so they can find you on uProxy</h1>
+              <div hidden?='{{ quiverInviteUrl == "" }}'>
+                <paper-input-decorator layout vertical>
+                  <input readonly is='core-input' on-tap='{{ select }}' value='{{ quiverInviteUrl }}' />
+                </paper-input-decorator>
               </div>
             </div>
             <div class='orText'>- - - OR - - -</div>
           </div>
           <div class='section'>
-          <p>{{ "SIGN_IN_WITH_A_NETWORK" | $$ }}</p>
+          <p>{{ "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK" | $$ }}</p>
             <template repeat='{{ n in networkButtonNames }}' vertical layout>
               <div on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
@@ -183,14 +182,15 @@
                 </div>
               </div>
             </template>
+
+            <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}' class='section'>
+              <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
+              <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
+            </div>
+
             <div class="section">
               {{ "WE_WONT_POST" | $$ }}
             </div>
-          </div>
-          <div class='orText'>- - - OR - - -</div>
-          <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}' class='section'>
-            <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
-            <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
           </div>
 
           <div class="section">
@@ -254,30 +254,6 @@
                 {{ 'DONE' | $$ }}
               </uproxy-button>
             </div>
-
-            <div hidden?='{{ selectedNetworkName != "WeChat"}}'>
-              <!-- TODO: localization -->
-              <uproxy-button affirmative on-tap='{{ generateInviteUrl }}'>
-                Generate WeChat Invite Link
-              </uproxy-button>
-
-              <div hidden?='{{ inviteUrl == "" }}'>
-                <p>Send this link to your friend so they can find you on WeChat</p>
-                <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
-              </div>
-            </div>
-
-            <div hidden?='{{ selectedNetworkName != "Quiver"}}'>
-              <!-- TODO: localization -->
-              <uproxy-button affirmative on-tap='{{ generateInviteUrl }}'>
-                Generate uProxy Invite Link
-              </uproxy-button>
-
-              <div hidden?='{{ inviteUrl == "" }}'>
-                <p>Send this link to your friend so they can find you on the uProxy network</p>
-                <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
-              </div>
-            </div>
           </div>
           <div class='section'>
             <a on-tap='{{ showAcceptUserInvite }}'>
@@ -290,7 +266,7 @@
 
     <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{loginToInviteFriendDialogOpened}}">
       <h1>{{ "SIGN_IN_TO_NETWORK" | $$({network: getNetworkDisplayName(selectedNetworkName)})}}</h1>
-      <core-icon icon="clear" on-tap='{{ close }}'></core-icon>
+      <core-icon icon="clear" on-tap='{{ closeLoginDialog }}'></core-icon>
       <p hidden?="{{!supportsInvites(selectedNetworkName)}}">
         {{ "SIGN_IN_TO_INVITE_FRIENDS" | $$({network: getNetworkDisplayName(selectedNetworkName)})}}
       </p>
