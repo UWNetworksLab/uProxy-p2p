@@ -1009,10 +1009,17 @@ testDirectory = (dir) ->
       # include the browserification in this step
       testNames.push('browserify:' + testName)
 
-  # add the jasmine task so we can run it
-  gruntConfig['jasmine'][dir] = Rule.jasmineSpec(dir)
-  # include running the tests in this task
-  testNames.push('jasmine:' + dir)
+      gruntConfig['jasmine'][testName] =
+        src: [
+          require.resolve('arraybuffer-slice'),
+          require.resolve('es6-promise')
+          path.join(thirdPartyBuildPath, 'promise-polyfill.js'),
+        ]
+        options:
+          specs: [path.join(devBuildPath, dir, match[1] + '.spec.static.js')]
+          outfile: path.join(devBuildPath, dir, match[1] + 'Runner.html')
+          keepRunner: true
+      testNames.push('jasmine:' + testName)
 
   return testNames
 
