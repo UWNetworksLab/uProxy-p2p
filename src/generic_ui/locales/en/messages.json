@@ -399,9 +399,9 @@
     "description": "Instructions that appears beside a big '+' button. Clicking the button opens a panel with options to add a uProxy friend.",
     "message": "Use this button to send an invitation to a friend or paste an invitation you've received."
   },
-  "ALPHA_MESSAGE": {
+  "BETA_MESSAGE": {
     "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development.",
-    "message": "This is an alpha release of uProxy, and it may occasionally be unreliable."
+    "message": "This is a beta release of uProxy, and it may occasionally be unreliable."
   },
   "MORE_ABOUT_METRICS": {
     "description": "",
