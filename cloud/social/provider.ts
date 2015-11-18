@@ -3,6 +3,7 @@
 /// <reference path='../../../../third_party/typings/node/node.d.ts' />
 /// <reference path='../../../../third_party/typings/ssh2/ssh2.d.ts' />
 
+import arraybuffers = require('../../arraybuffers/arraybuffers');
 import logging = require('../../logging/logging');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
@@ -345,6 +346,9 @@ enum ConnectionState {
 }
 
 class Connection {
+  private static COMMAND_DELIMITER = arraybuffers.decodeByte(
+      arraybuffers.stringToArrayBuffer('\n'));
+
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
@@ -401,31 +405,40 @@ class Connection {
             this.stream_ = stream;
 
             // TODO: add error handler for stream
+            let recvBuffer = new ArrayBuffer(0);
             this.stream_.on('data', (data: Buffer) => {
-              var reply = data.toString().trim();
-              switch (this.state_) {
-                case ConnectionState.WAITING_FOR_PING:
-                  if (reply === 'ping') {
-                    this.setState_(ConnectionState.ESTABLISHED);
-                    F();
-                  } else {
+              recvBuffer = arraybuffers.concat([recvBuffer, arraybuffers.bufferToArrayBuffer(data)]);
+              let index = arraybuffers.indexOf(recvBuffer, Connection.COMMAND_DELIMITER);
+              if (index !== -1) {
+                let parts = arraybuffers.split(recvBuffer, index);
+                let line = parts[0];
+                recvBuffer = parts[1].slice(1);
+
+                let reply = arraybuffers.arrayBufferToString(line).trim();
+                switch (this.state_) {
+                  case ConnectionState.WAITING_FOR_PING:
+                    if (reply === 'ping') {
+                      this.setState_(ConnectionState.ESTABLISHED);
+                      F();
+                    } else {
+                      this.close();
+                      R(new Error('did not receive ping from server on login: ' +
+                          reply));
+                    }
+                    break;
+                  case ConnectionState.ESTABLISHED:
+                    try {
+                      this.received_(JSON.parse(reply));
+                    } catch (e) {
+                      log.warn('%1: could not de-serialise signalling message: %2',
+                          this.invite_, reply);
+                    }
+                    break;
+                  default:
+                    log.warn('%1: did not expect message in state %2: %3',
+                        this.name_, ConnectionState[this.state_], reply);
                     this.close();
-                    R(new Error('did not receive ping from server on login: ' +
-                        reply));
-                  }
-                  break;
-                case ConnectionState.ESTABLISHED:
-                  try {
-                    this.received_(JSON.parse(reply));
-                  } catch (e) {
-                    log.warn('%1: could not de-serialise signalling message: %2',
-                        this.invite_, reply);
-                  }
-                  break;
-                default:
-                  log.warn('%1: did not expect message in state %2: %3',
-                      this.name_, ConnectionState[this.state_], reply);
-                  this.close();
+                }
               }
             }).on('error', (e: Error) => {
               // This occurs when:
