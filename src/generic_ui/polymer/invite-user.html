@@ -250,13 +250,7 @@
             </div>
 
             <div hidden?='{{ selectedNetworkName != "Cloud"}}'>
-              <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
-              <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>
-                <input is='core-input' value='{{ cloudInstanceInput }}'>
-              </paper-input-decorator>
-              <uproxy-button affirmative on-tap='{{ addCloudInstance }}'>
-                {{ 'DONE' | $$ }}
-              </uproxy-button>
+              <p>{{ 'ADD_CLOUD_INSTRUCTIONS' | $$ }}</p>
             </div>
           </div>
           <div class='section'>

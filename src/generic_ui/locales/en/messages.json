@@ -851,6 +851,10 @@
     "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
     "message": "Add a Cloud friend"
   },
+  "ADD_CLOUD_INSTRUCTIONS": {
+    "description": "If the user is trying to add a Cloud friend, instruct them to click on the link to enter an invitation.",
+    "message": "If you have a Cloud invitation code, please click on the link below and enter your invitation on the destination page."
+  },
   "CLOUD_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for Cloud",
     "message": "Enter your invite code. When a connection has been made, it will appear in your contact list."
