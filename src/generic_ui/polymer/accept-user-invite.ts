@@ -19,8 +19,9 @@ Polymer({
       var confirmationMessage = ui.i18n_t("CLOUD_INVITE_CONFIRM");
       confirmLogin = ui.getConfirmation('', confirmationMessage).then(() => {
         model.globalSettings.showCloud = true;
-        model.globalSettings.mode = ui_constants.Mode.GET;
         core.updateGlobalSettings(model.globalSettings);
+        // Set mode to GET, as Cloud friends only appear in the GET tab.
+        ui.setMode(ui_constants.Mode.GET);
       }).then(() => {
         return ui.login("Cloud").catch((e :Error) => {
           console.warn('Error logging into Cloud', e);
