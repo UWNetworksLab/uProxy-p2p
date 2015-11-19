@@ -3,7 +3,7 @@
 
 import arithmetic = require('./arithmetic');
 import arraybuffers = require('../arraybuffers/arraybuffers');
-import decompression = require('../fancy-transformers/decompressionShaper');
+import decompression = require('./decompressionShaper');
 
 const frequencies :number[] = decompression.sampleConfig().frequencies;
 let encoder :arithmetic.Encoder;

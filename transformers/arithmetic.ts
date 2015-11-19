@@ -1,7 +1,7 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 
-var log :logging.Log = new logging.Log('fancy-transformers');
+var log :logging.Log = new logging.Log('arithmetic shaper');
 
 // Here is some background reading on arithmetic coding and range coding.
 // http://www.arturocampos.com/ac_arithmetic.html

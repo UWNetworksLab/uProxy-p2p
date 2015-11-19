@@ -1,7 +1,7 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 
-var log :logging.Log = new logging.Log('fancy-transformers');
+var log :logging.Log = new logging.Log('fragment');
 
 // Header size: length + id + fragment number + total number
 export const HEADER_SIZE :number = 2 + 32 + 1 + 1;
