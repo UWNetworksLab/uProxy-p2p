@@ -102,6 +102,10 @@ var log :logging.Log = new logging.Log('remote-user');
       this.consent =
           new consent.State(userId === this.network.myInstance.userId);
 
+      if (this.network.name === "Cloud") {
+        this.consent.localRequestsAccessFromRemote = true;
+      }
+
       storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
       }).catch((e) => {

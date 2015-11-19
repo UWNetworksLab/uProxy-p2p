@@ -127,6 +127,7 @@ Polymer({
   },
   showAcceptUserInvite: function() {
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
+    this.closeInviteUserPanel();
   },
   setOnlineInviteNetworks: function() {
     this.onlineInviteNetworks = [];
