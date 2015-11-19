@@ -165,8 +165,9 @@ export class CloudSocialProvider {
   }
 
   // Establishes an SSH connection to a server, first shutting down
-  // any that previously exists. Emits an instance message, allowing
-  // fields such as the description be updated on every reconnect.
+  // any that previously exists. Also emits an instance message,
+  // allowing fields such as the description be updated on every
+  // reconnect, and saves the contact to storage.
   private reconnect_ = (invite: Invite): Promise<Connection> => {
     log.debug('reconnecting to %1', invite.host);
     if (invite.host in this.clients_) {
@@ -194,7 +195,7 @@ export class CloudSocialProvider {
         }
         return banner;
       }, (e: Error) => {
-        log.warn('faild to fetch banner: %1', e);
+        log.warn('failed to fetch banner: %1', e);
         return '';
       }).then((banner: string) => {
         this.notifyOfUser_(invite.host, banner);
@@ -536,6 +537,8 @@ class Connection {
         }
         stream.on('data', function(data: Buffer) {
           F(data.toString());
+        }).stderr.on('data', function(data: Buffer) {
+          R(new Error(data.toString()));
         }).on('close', function(code: any, signal: any) {
           log.debug('banner stream closed');
         });
