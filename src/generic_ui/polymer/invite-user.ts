@@ -9,29 +9,19 @@ var core = ui_context.core;
 
 Polymer({
   generateInviteUrl: function(name :string) {
-    var selectedNetwork = model.getNetwork(name);
-    var info = {
-      name: selectedNetwork.name,
-      userId: selectedNetwork.userId
-    };
-    return core.getInviteUrl(info).then((inviteUrl :string) => {
-      this.inviteUrl = inviteUrl;
-      return selectedNetwork;
-    });
+    var network = model.getNetwork(name);
+    var networkInfo = { name: network.name, userId: network.userId };
+    return core.getInviteUrl(networkInfo);
   },
   sendToGMailFriend: function() {
-    this.generateInviteUrl('GMail')
-        .then((selectedNetwork :user_interface.Network) => {
-      var selectedNetworkInfo = {
-        name: selectedNetwork.name,
-        userId: selectedNetwork.userId
-      };
-      var name = selectedNetwork.userName || selectedNetwork.userId;
+    var network = model.getNetwork('GMail');
+    this.generateInviteUrl('GMail').then((inviteUrl :string) => {
+      var userName = network.userName || network.userId;
       var emailBody = core.sendEmail({
-          networkInfo: selectedNetworkInfo,
+          networkInfo: {name: network.name, userId: network.userId},
           to: this.inviteUserEmail,
-          subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: name }),
-          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
+          subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: userName }),
+          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: inviteUrl, name: userName })
       });
       this.closeInviteUserPanel();
       this.fire('open-dialog', {
@@ -43,14 +33,11 @@ Polymer({
       });
     });
   },
-  generateQuiverInviteUrl: function() {
-    return this.generateInviteUrl('Quiver');
-  },
   sendToFacebookFriend: function() {
-    this.generateInviteUrl('Facebook-Firebase-V2').then(() => {
+    this.generateInviteUrl('Facebook-Firebase-V2').then((inviteUrl :string) => {
       var facebookUrl =
           'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
-          + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
+          + inviteUrl + '&redirect_uri=https://www.uproxy.org/';
       ui.openTab(facebookUrl);
       this.closeInviteUserPanel();
       this.fire('open-dialog', {
@@ -63,10 +50,8 @@ Polymer({
     });
   },
   inviteGithubFriend: function() {
-    var selectedNetwork =
-      model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
     core.inviteUser({
-      networkId: selectedNetwork.name,
+      networkId: 'GitHub',
       userName: this.githubUserIdInput
     }).then(() => {
       this.closeInviteUserPanel();
@@ -91,10 +76,11 @@ Polymer({
     });
   },
   addCloudInstance: function() {
-    var selectedNetwork =
-      model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
+    // TODO: this should be using acceptUserInvitation, not inviteUser,
+    // as the user is entering an invite URL they've received and is not
+    // sending any invite to their friends at this point.
     core.inviteUser({
-      networkId: selectedNetwork.name,
+      networkId: 'Cloud',
       userName: this.cloudInstanceInput
     }).then(() => {
       console.log('invited!');
@@ -122,7 +108,6 @@ Polymer({
     this.$.inviteUserPanel.open();
   },
   closeInviteUserPanel: function() {
-    this.inviteUrl = '';
     this.$.inviteUserPanel.close();
   },
   showAcceptUserInvite: function() {
@@ -142,14 +127,23 @@ Polymer({
   },
   /* Functions required for roster-before-login flow. */
   onlineNetworksChanged: function() {
-    this.isQuiverLoggedIn = false;
     for (var i = 0; i < model.onlineNetworks.length; ++i) {
-      var name = model.onlineNetworks[i].name;
-      if (name == "Quiver") {
+      if (model.onlineNetworks[i].name === 'Quiver') {
+        // User is logged into Quiver.
+        if (!this.isQuiverLoggedIn) {
+          // User just logged on, generate an invite URL.
+          this.generateInviteUrl('Quiver').then((inviteUrl :string) => {
+            this.quiverInviteUrl = inviteUrl;
+          });
+        }
         this.isQuiverLoggedIn = true;
-        break;
+        return;
       }
     }
+
+    // User is not logged into Quiver
+    this.quiverInviteUrl = '';
+    this.isQuiverLoggedIn = false;
   },
   loginToQuiver: function() {
     model.globalSettings.quiverUserName = this.userName;
@@ -239,6 +233,13 @@ Polymer({
   supportsInvites: function(networkName :string) {
     return ui.supportsInvites(networkName);
   },
+  closeLoginDialog: function() {
+    this.$.loginToInviteFriendDialog.close();
+  },
+  select: function(e :Event, d :Object, input :HTMLInputElement) {
+    input.focus();
+    input.select();
+  },
   observe: {
     'model.networkNames': 'networkNamesChanged',
     'model.onlineNetworks': 'onlineNetworksChanged'
@@ -250,7 +251,7 @@ Polymer({
     this.githubUserIdInput = ''; // for GitHub
     this.inviteUserEmail = ''; // for GMail
     this.selectedNetworkName = '';
-    this.inviteUrl = '';
+    this.quiverInviteUrl = '';
     this.model = model;
     this.cloudInstanceInput = '';
     this.ui = ui;
