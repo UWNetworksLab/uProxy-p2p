@@ -96,9 +96,10 @@
 
       <div hidden?='{{ network != "Cloud"}}'>
         <uproxy-app-bar class="Cloud" on-go-back='{{closeInviteUserPanel}}' color="#0073e6">
-          {{ 'INVITE_A_FRIEND' | $$ }}
+          {{ 'ADD_A_CLOUD_FRIEND' | $$ }}
         </uproxy-app-bar>
 
+        <!-- TODO: Discuss and decide if this should give users an invite code to share their cloud instance with friends, or if this should be a place for users to paste invite codes (therefore adding cloud instances to their buddy list). Right now, this is the latter. -->
         <div class='section'>
           <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
           <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>

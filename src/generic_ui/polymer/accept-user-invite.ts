@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
+import ui_constants = require('../../interfaces/ui');
 var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
@@ -15,9 +16,10 @@ Polymer({
 
     var confirmLogin = Promise.resolve<void>();
     if (networkName === "Cloud") {
-      var confirmationMessage = "You've entered an experimental Cloud invitation. Accepting this invitation will connect you to a virtual machine. Would you like to accept?";
+      var confirmationMessage = ui.i18n_t("CLOUD_INVITE_CONFIRM");
       confirmLogin = ui.getConfirmation('', confirmationMessage).then(() => {
         model.globalSettings.showCloud = true;
+        model.globalSettings.mode = ui_constants.Mode.GET;
         core.updateGlobalSettings(model.globalSettings);
       }).then(() => {
         return ui.login("Cloud").catch((e :Error) => {

@@ -68,12 +68,21 @@ Polymer({
     });
   },
   addCloudInstance: function() {
-    var selectedNetwork = model.getNetwork('Cloud');
-    core.inviteUser({
-      networkId: selectedNetwork.name,
-      userName: this.cloudInstanceInput
-    }).then(() => {
-      console.log('invited!');
+    var socialNetworkInfo = {
+      name: "Cloud",
+      userId: "" /* The current user's ID will be determined by the core. */
+    };
+    core.acceptInvitation({
+        network: socialNetworkInfo,
+        token: this.cloudInstanceInput
+      }).then(() => {
+      this.fire('open-dialog', {
+        heading: '',
+        message: ui.i18n_t("FRIEND_ADDED"),
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
       this.closeInviteUserPanel();
     }).catch(() => {
       this.fire('open-dialog', {

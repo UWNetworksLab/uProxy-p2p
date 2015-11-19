@@ -783,6 +783,10 @@
     "description": "Generic label for links to FAQ.",
     "message": "Learn more"
   },
+  "CLOUD_INVITE_CONFIRM" : {
+    "description": "Confirmation message asking the user if they would like to add a cloud instance to their buddy list, which will connect them to a virtual machine.",
+    "message": "You've entered an experimental Cloud invitation. Accepting this invitation will connect you to a virtual machine. Would you like to accept?"
+  },
   "FRIEND_ADDED": {
     "description": "Confirmation message after adding a friend to the roster.",
     "message": "Friend added"
@@ -842,6 +846,10 @@
   "GITHUB_INVITE_PLACEHOLDER": {
     "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
     "message": "Friend's GitHub username"
+  },
+  "ADD_A_CLOUD_FRIEND": {
+    "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
+    "message": "Add a Cloud friend"
   },
   "CLOUD_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for Cloud",
