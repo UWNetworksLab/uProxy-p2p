@@ -244,7 +244,7 @@
           <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$ }}</h1>
           <p>{{ "WHY_SOCIAL_NETWORK" | $$ }}</p>
           <template repeat='{{ n in networkButtonNames }}' vertical layout>
-            <uproxy-network networkName='{{n}}' hidden?="{{n=='Cloud' && !model.globalSettings.showCloud}}"></uproxy-network>
+            <uproxy-network networkName='{{n}}' hidden?="{{n=='Cloud' && !model.globalSettings.showCloud && !ui.showRosterBeforeLogin}}"></uproxy-network>
           </template>
           <p id='oneTimeConnection'>
             <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$ }}</a>
