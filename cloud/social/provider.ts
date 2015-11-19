@@ -66,12 +66,11 @@ function makeVersionedPeerMessage(
 // signalling messages (unnecessary because we are forwarding all the
 // messages over an SSH tunnel).
 // TODO: use typings from the uProxy repo
-function makeInstanceMessage(address:string): any {
+function makeInstanceMessage(address:string, description?:string): any {
   return {
     instanceId: address,
     // Shown in the contacts list while the user's list item is expanded
-    // TODO: show machine details, e.g. Linux (via uname)
-    description: address,
+    description: description,
     consent: {
       isRequesting: false,
       isOffering: true
@@ -139,7 +138,7 @@ export class CloudSocialProvider {
 
   // Emits the messages necessary to make the user appear online 
   // in the contacts list.
-  private notifyOfUser_ = (address: string) => {
+  private notifyOfUser_ = (address: string, description?: string) => {
     this.dispatchEvent_('onUserProfile', makeUserProfile(address));
 
     var clientState = makeClientState(address);
@@ -150,12 +149,13 @@ export class CloudSocialProvider {
       from: clientState,
       // INSTANCE
       message: JSON.stringify(makeVersionedPeerMessage(
-        3000, makeInstanceMessage(address)))
+        3000, makeInstanceMessage(address, description)))
     });
   }
 
   // Establishes an SSH connection to a server, first shutting down
-  // any that previously exists.
+  // any that previously exists. Emits an instance message, allowing
+  // fields such as the description be updated on every reconnect.
   private reconnect_ = (invite: Invite): Promise<Connection> => {
     log.debug('reconnecting to %1', invite.host);
     if (invite.host in this.clients_) {
@@ -175,6 +175,19 @@ export class CloudSocialProvider {
 
     this.clients_[invite.host] = connection.connect().then(() => {
       log.info('connected to zork on %1', invite.host);
+
+      // Fetch the banner, if available, then emit an instance message.
+      connection.getBanner().then((banner: string) => {
+        if (banner.length < 1) {
+          log.debug('empty banner, leaving blank');
+        }
+        return banner;
+      }, (e: Error) => {
+        log.warn('faild to fetch banner: %1', e);
+        return '';
+      }).then((banner: string) => {
+        this.notifyOfUser_(invite.host, banner);
+      });
 
       this.savedInvites_[invite.host] = invite;
       this.saveContacts_();
@@ -200,6 +213,7 @@ export class CloudSocialProvider {
         var savedContacts: SavedContacts = JSON.parse(storedString);
         for (let invite of savedContacts.invites) {
           this.savedInvites_[invite.host] = invite;
+          // TODO: add banner
           this.notifyOfUser_(invite.host);
         }
       } catch (e) {
@@ -316,8 +330,8 @@ export class CloudSocialProvider {
     log.debug('acceptUserInvitation');
     try {
       var invite = <Invite>JSON.parse(inviteJson);
-      return this.reconnect_(invite).then(() => {
-        this.notifyOfUser_(invite.host);
+      return this.reconnect_(invite).then((connection: Connection) => {
+        // Return nothing for type checking purposes.
       });
     } catch (e) {
       return Promise.reject('could not parse invite code: ' + e.message);
@@ -482,6 +496,26 @@ class Connection {
       this.client_.end();
       // TODO: what about the stream?
     }
+  }
+
+  // Fetches the server's description, i.e. /banner.
+  public getBanner = (): Promise<string> => {
+    if (this.state_ !== ConnectionState.ESTABLISHED) {
+      return Promise.reject('can only fetch banner in ESTABLISHED state');
+    }
+    return new Promise<string>((F, R) => {
+      this.client_.exec('cat /banner', (e: Error, stream: ssh2.Channel) => {
+        if (e) {
+          R(e);
+          return;
+        }
+        stream.on('data', function(data: Buffer) {
+          F(data.toString());
+        }).on('close', function(code: any, signal: any) {
+          log.debug('banner stream closed');
+        });
+      });
+    });
   }
 
   private setState_ = (newState: ConnectionState) => {
