@@ -15,7 +15,7 @@ Polymer({
 
     var confirmLogin = Promise.resolve<void>();
     if (networkName === "Cloud") {
-      var confirmationMessage = "You've entered an experimental Cloud invitation, which will connect you to a virtual machine. Would you like to continue?";
+      var confirmationMessage = "You've entered an experimental Cloud invitation. Accepting this invitation will connect you to a virtual machine. Would you like to accept?";
       confirmLogin = ui.getConfirmation('', confirmationMessage).then(() => {
         model.globalSettings.showCloud = true;
         core.updateGlobalSettings(model.globalSettings);
