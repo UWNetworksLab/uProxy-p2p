@@ -391,10 +391,8 @@ class Connection {
           '127.0.0.1', 0,
           ZORK_HOST, ZORK_PORT, (e: Error, stream: ssh2.Channel) => {
             if (e) {
-              log.warn('%1: error establishing tunnel: %2',
-                  this.name_, e.toString());
               this.close();
-              throw e;
+              R('error establishing tunnel: ' + e.toString());
             }
             this.setState_(ConnectionState.WAITING_FOR_PING);
 
