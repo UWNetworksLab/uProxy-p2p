@@ -1,5 +1,6 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -11,28 +12,47 @@ Polymer({
     this.receivedInviteToken.substr(this.receivedInviteToken.lastIndexOf('/') + 1) : this.receivedInviteToken;
     var tokenObj = JSON.parse(atob(token));
     var networkName = tokenObj.networkName;
+
+    var confirmLogin = Promise.resolve<void>();
+    if (networkName === "Cloud") {
+      var confirmationMessage = "You've entered an experimental Cloud invitation, which will connect you to a virtual machine. Would you like to continue?";
+      confirmLogin = ui.getConfirmation('', confirmationMessage).then(() => {
+        model.globalSettings.showCloud = true;
+        core.updateGlobalSettings(model.globalSettings);
+      }).then(() => {
+        return ui.login("Cloud").catch((e :Error) => {
+          console.warn('Error logging into Cloud', e);
+        });
+      }).catch(() => {
+        console.log("Did not log in to Cloud");
+        return;
+      });
+    }
+
     var socialNetworkInfo = {
       name: networkName,
       userId: "" /* The current user's ID will be determined by the core. */
     };
 
-    core.acceptInvitation({network: socialNetworkInfo, token: this.receivedInviteToken})
-        .then(() => {
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("FRIEND_ADDED"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
-      this.closeAcceptUserInvitePanel();
-    }).catch(() => {
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("FRIEND_ADD_ERROR"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
+    confirmLogin.then(() => {
+      core.acceptInvitation({network: socialNetworkInfo, token: this.receivedInviteToken})
+          .then(() => {
+        this.fire('open-dialog', {
+          heading: '',
+          message: ui.i18n_t("FRIEND_ADDED"),
+          buttons: [{
+            text: ui.i18n_t("OK")
+          }]
+        });
+        this.closeAcceptUserInvitePanel();
+      }).catch(() => {
+        this.fire('open-dialog', {
+          heading: '',
+          message: ui.i18n_t("FRIEND_ADD_ERROR"),
+          buttons: [{
+            text: ui.i18n_t("OK")
+          }]
+        });
       });
     });
   },

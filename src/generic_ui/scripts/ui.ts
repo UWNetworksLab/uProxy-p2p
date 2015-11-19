@@ -65,7 +65,8 @@ export class Model {
     language: 'en',
     force_message_version: 0,
     hasSeenGoogleAndFacebookChangedNotification: false,
-    quiverUserName: ''
+    quiverUserName: '',
+    showCloud: false
   };
 
   public reconnecting = false;
