@@ -9,6 +9,10 @@ RUN adduser --disabled-password --gecos 'uProxy Giver' --ingroup giver giver
 RUN addgroup getter
 RUN adduser --disabled-password --gecos 'uProxy Getter' --ingroup getter getter
 
+COPY banner /
+RUN chmod 644 /banner
+RUN chown giver: /banner
+
 COPY issue_invite.sh /
 RUN chown root:root /issue_invite.sh
 RUN chmod 755 /issue_invite.sh
