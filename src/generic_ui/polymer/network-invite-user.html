@@ -44,11 +44,17 @@
       a.GitHub {
         color: #666 !important;
       }
+      a.Cloud {
+        color: #0073e6 !important;
+      }
       uproxy-button.GMail {
         background: #dd4b39;
       }
       uproxy-button.GitHub {
         background: #666;
+      }
+      uproxy-button.Cloud {
+        background: #0073e6;
       }
     </style>
 
@@ -84,6 +90,22 @@
 
           <uproxy-button class="GMail" raised affirmative on-tap='{{ sendToGMailFriend }}'>
             {{ 'SEND_INVITATION' | $$ }}
+          </uproxy-button>
+        </div>
+      </div>
+
+      <div hidden?='{{ network != "Cloud"}}'>
+        <uproxy-app-bar class="Cloud" on-go-back='{{closeInviteUserPanel}}' color="#0073e6">
+          {{ 'INVITE_A_FRIEND' | $$ }}
+        </uproxy-app-bar>
+
+        <div class='section'>
+          <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
+          <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>
+            <input is='core-input' value='{{ cloudInstanceInput }}'>
+          </paper-input-decorator>
+          <uproxy-button class="Cloud" affirmative on-tap='{{ addCloudInstance }}'>
+            {{ 'DONE' | $$ }}
           </uproxy-button>
         </div>
       </div>

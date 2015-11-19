@@ -67,6 +67,24 @@ Polymer({
       });
     });
   },
+  addCloudInstance: function() {
+    var selectedNetwork = model.getNetwork('Cloud');
+    core.inviteUser({
+      networkId: selectedNetwork.name,
+      userName: this.cloudInstanceInput
+    }).then(() => {
+      console.log('invited!');
+      this.closeInviteUserPanel();
+    }).catch(() => {
+      this.fire('open-dialog', {
+        heading: '',
+        message: ui.i18n_t("CLOUD_INVITE_FAILED"),
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+    });
+  },
   openInviteUserPanel: function() {
     this.inviteUrl = '';
     this.$.networkInviteUserPanel.open();

@@ -187,7 +187,7 @@ Polymer({
   },
   initInviteForNetwork: function(networkName: string) {
     this.selectedNetworkName = networkName;
-    if (networkName == "GMail" || networkName == "GitHub") {
+    if (networkName == "GMail" || networkName == "GitHub" || networkName == "Cloud") {
       // After login for these networks, open another view which allows users
       // to invite their friends.
       this.fire('core-signal', { name: 'open-network-invite-dialog' });
