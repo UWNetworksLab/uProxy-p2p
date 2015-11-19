@@ -16,6 +16,9 @@ Polymer({
 
     var confirmLogin = Promise.resolve<void>();
     if (networkName === "Cloud") {
+      // Inform the user that their invite code will connect them to our Cloud
+      // social provider.
+      // TODO: Remove this when we fully launch Cloud.
       var confirmationMessage = ui.i18n_t("CLOUD_INVITE_CONFIRM");
       confirmLogin = ui.getConfirmation('', confirmationMessage).then(() => {
         model.globalSettings.showCloud = true;
@@ -27,7 +30,7 @@ Polymer({
           console.warn('Error logging into Cloud', e);
         });
       }).catch(() => {
-        console.log("Cloud log in declined");
+        console.log("Cloud login declined");
         return;
       });
     }
