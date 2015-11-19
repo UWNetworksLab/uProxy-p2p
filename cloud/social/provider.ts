@@ -39,7 +39,17 @@ interface Invite {
 // Type of the object placed, in serialised form, in storage
 // under STORAGE_KEY.
 interface SavedContacts {
+  // TODO: remove this, invites are now embedded in contacts.
   invites?: Invite[];
+  contacts?: SavedContact[];
+}
+
+// A contact as saved to storage, consisting of the invite
+// plus any data fetched from the server on login (effectively,
+// this on-demand data is cached here).
+interface SavedContact {
+  invite?: Invite;
+  description?: string;
 }
 
 // Returns a VersionedPeerMessage, as defined in interfaces/social.ts
@@ -129,8 +139,8 @@ function makeUserProfile(address: string): freedom.Social.UserProfile {
 export class CloudSocialProvider {
   private storage_: freedom.Storage.Storage = freedom['core.storage']();
 
-  // Invites, keyed by host.
-  private savedInvites_: { [host: string]: Invite } = {};
+  // Saved contacts, keyed by host.
+  private savedContacts_: { [host: string]: SavedContact } = {};
 
   // SSH connections, keyed by host.
   private clients_: { [host: string]: Promise<Connection> } = {};
@@ -188,10 +198,12 @@ export class CloudSocialProvider {
         return '';
       }).then((banner: string) => {
         this.notifyOfUser_(invite.host, banner);
+        this.savedContacts_[invite.host] = {
+          invite: invite,
+          description: banner
+        };
+        this.saveContacts_();
       });
-
-      this.savedInvites_[invite.host] = invite;
-      this.saveContacts_();
 
       return connection;
     });
@@ -203,7 +215,7 @@ export class CloudSocialProvider {
   // This makes all of the stored contacts appear online.
   private loadContacts_ = () => {
     log.debug('loadContacts');
-    this.savedInvites_ = {};
+    this.savedContacts_ = {};
     this.storage_.get(STORAGE_KEY).then((storedString: string) => {
       if (!storedString) {
         log.debug('no saved contacts');
@@ -212,10 +224,10 @@ export class CloudSocialProvider {
       log.debug('loaded contacts: %1', storedString);
       try {
         var savedContacts: SavedContacts = JSON.parse(storedString);
-        for (let invite of savedContacts.invites) {
-          this.savedInvites_[invite.host] = invite;
+        for (let contact of savedContacts.contacts) {
+          this.savedContacts_[contact.invite.host] = contact;
           // TODO: add banner
-          this.notifyOfUser_(invite.host);
+          this.notifyOfUser_(contact.invite.host, contact.description);
         }
       } catch (e) {
         log.error('could not parse saved contacts: %1', e.message);
@@ -229,7 +241,7 @@ export class CloudSocialProvider {
   private saveContacts_ = () => {
     log.debug('saveContacts');
     this.storage_.set(STORAGE_KEY, JSON.stringify(<SavedContacts>{
-      invites: Object.keys(this.savedInvites_).map(key => this.savedInvites_[key])
+      contacts: Object.keys(this.savedContacts_).map(key => this.savedContacts_[key])
     })).then((unused: string) => {
       log.debug('saved contacts');
     }, (e: Error) => {
@@ -265,10 +277,10 @@ export class CloudSocialProvider {
           // TODO: Do not reconnect if we have just invited
           //       the instance (safe because all we've done is run ping).
           log.info('new proxying session %1', payload.proxyingId);
-          if (!(destinationClientId in this.savedInvites_)) {
+          if (!(destinationClientId in this.savedContacts_)) {
             return Promise.reject('unknown client ' + destinationClientId);
           }
-          return this.reconnect_(this.savedInvites_[destinationClientId]).then(
+          return this.reconnect_(this.savedContacts_[destinationClientId].invite).then(
               (connection: Connection) => {
             connection.sendMessage('give');
           });
