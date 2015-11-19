@@ -127,25 +127,23 @@ Polymer({
   },
   /* Functions required for roster-before-login flow. */
   onlineNetworksChanged: function() {
-    var oldQuiverValue = this.isQuiverLoggedIn;
-    var newQuiverValue = false;
     for (var i = 0; i < model.onlineNetworks.length; ++i) {
-      var name = model.onlineNetworks[i].name;
-      if (name == "Quiver") {
-        newQuiverValue = true;
-        break;
+      if (model.onlineNetworks[i].name === 'Quiver') {
+        // User is logged into Quiver.
+        if (!this.isQuiverLoggedIn) {
+          // User just logged on, generate an invite URL.
+          this.generateInviteUrl('Quiver').then((inviteUrl :string) => {
+            this.quiverInviteUrl = inviteUrl;
+          });
+        }
+        this.isQuiverLoggedIn = true;
+        return;
       }
     }
-    if (!oldQuiverValue && newQuiverValue) {
-      // User is now logged into Quiver, generate an inviteUrl to display.
-      this.generateInviteUrl('Quiver').then((inviteUrl :string) => {
-        this.quiverInviteUrl = inviteUrl;
-      });
-    } else if (!newQuiverValue) {
-      // User is not signed into Quiver, clear the invite URL.
-      this.quiverInviteUrl = '';
-    }
-    this.isQuiverLoggedIn = newQuiverValue;
+
+    // User is not logged into Quiver
+    this.quiverInviteUrl = '';
+    this.isQuiverLoggedIn = false;
   },
   loginToQuiver: function() {
     model.globalSettings.quiverUserName = this.userName;
