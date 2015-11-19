@@ -26,7 +26,7 @@ Polymer({
           console.warn('Error logging into Cloud', e);
         });
       }).catch(() => {
-        console.log("Did not log in to Cloud");
+        console.log("Cloud log in declined");
         return;
       });
     }
