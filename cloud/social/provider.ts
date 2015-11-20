@@ -407,7 +407,8 @@ class Connection {
             // TODO: add error handler for stream
             let leftover = new ArrayBuffer(0);
             this.stream_.on('data', (data: Buffer) => {
-              leftover = arraybuffers.concat([leftover, arraybuffers.bufferToArrayBuffer(data)]);
+              leftover = arraybuffers.concat([leftover,
+                  arraybuffers.bufferToArrayBuffer(data)]);
               let i = arraybuffers.indexOf(leftover, Connection.COMMAND_DELIMITER);
               while (i !== -1) {
                 let parts = arraybuffers.split(leftover, i);
@@ -415,7 +416,6 @@ class Connection {
                 leftover = parts[1].slice(1);
                 i = arraybuffers.indexOf(leftover, Connection.COMMAND_DELIMITER);
 
-                log.debug('line: %1', reply);
                 switch (this.state_) {
                   case ConnectionState.WAITING_FOR_PING:
                     if (reply === 'ping') {
