@@ -14,27 +14,30 @@ PREBUILT=
 INVITE_CODE=
 REFRESH=false
 PUBLIC_IP=
+BANNER=
 
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-i invite code] [-r] [-d ip] browser-version"
+  echo "$0 [-p path] [-i invite code] [-r] [-d ip] [-b banner] browser-version"
   echo "  -p: path to pre-built uproxy-lib repository"
   echo "  -i: invite code"
   echo "  -r: recreate Docker images (WARNING: will invalidate invite codes)"
   echo "  -d: override the detected public IP (for development only)"
+  echo "  -b: name to use in contacts list"
   echo "  -h, -?: this help message"
   echo
   echo "Example browser-version: chrome-stable, firefox-canary"
   exit 1
 }
 
-while getopts p:i:rd:h? opt; do
+while getopts p:i:rd:b:h? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
     i) INVITE_CODE="$OPTARG" ;;
     r) REFRESH=true ;;
     d) PUBLIC_IP="$OPTARG" ;;
+    b) BANNER="$OPTARG" ;;
     *) usage ;;
   esac
 done
@@ -81,6 +84,8 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
     TMP_DIR=/tmp/uproxy-sshd
     rm -fR $TMP_DIR
     cp -R ${BASH_SOURCE%/*}/../../sshd/ $TMP_DIR
+
+    echo -n "$BANNER" > $TMP_DIR/banner
 
     # Optional build args aren't very flexible...confine the messiness here.
     ISSUE_INVITE_ARGS=
