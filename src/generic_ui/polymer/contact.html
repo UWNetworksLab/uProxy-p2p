@@ -125,6 +125,7 @@
 
     <div tabindex='-1'
         class='nameRow frame {{ isOnline ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
+        hidden?="{{contact.network.name=='Cloud' && mode==ui_constants.Mode.SHARE}}"
         top horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
       <div flex>

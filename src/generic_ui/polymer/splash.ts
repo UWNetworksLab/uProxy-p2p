@@ -97,6 +97,7 @@ Polymer({
     'model.networkNames': 'updateNetworkButtonNames'
   },
   ready: function() {
+    this.ui = ui;
     this.model = model;
     this.languages = languages;
     this.userName = model.globalSettings.quiverUserName;

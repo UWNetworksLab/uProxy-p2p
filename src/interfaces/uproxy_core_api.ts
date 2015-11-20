@@ -37,6 +37,7 @@ export interface GlobalSettings {
   force_message_version :number;
   hasSeenGoogleAndFacebookChangedNotification :boolean;
   quiverUserName :string;
+  showCloud :boolean;
 }
 export interface InitialState {
   networkNames :string[];

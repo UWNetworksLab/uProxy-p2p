@@ -75,26 +75,6 @@ Polymer({
       });
     });
   },
-  addCloudInstance: function() {
-    // TODO: this should be using acceptUserInvitation, not inviteUser,
-    // as the user is entering an invite URL they've received and is not
-    // sending any invite to their friends at this point.
-    core.inviteUser({
-      networkId: 'Cloud',
-      userName: this.cloudInstanceInput
-    }).then(() => {
-      console.log('invited!');
-      this.closeInviteUserPanel();
-    }).catch(() => {
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("CLOUD_INVITE_FAILED"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
-    });
-  },
   onNetworkSelect: function(e :any, details :any) {
     if (details.isSelected) {
       this.selectedNetworkName = details.item.getAttribute('label');
@@ -112,6 +92,7 @@ Polymer({
   },
   showAcceptUserInvite: function() {
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
+    this.closeInviteUserPanel();
   },
   setOnlineInviteNetworks: function() {
     this.onlineInviteNetworks = [];
@@ -181,7 +162,7 @@ Polymer({
   },
   initInviteForNetwork: function(networkName: string) {
     this.selectedNetworkName = networkName;
-    if (networkName == "GMail" || networkName == "GitHub") {
+    if (networkName == "GMail" || networkName == "GitHub" || networkName == "Cloud") {
       // After login for these networks, open another view which allows users
       // to invite their friends.
       this.fire('core-signal', { name: 'open-network-invite-dialog' });

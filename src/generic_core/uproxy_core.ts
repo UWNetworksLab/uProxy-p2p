@@ -237,6 +237,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     globals.settings.hasSeenGoogleAndFacebookChangedNotification =
         newSettings.hasSeenGoogleAndFacebookChangedNotification;
     globals.settings.quiverUserName = newSettings.quiverUserName;
+    globals.settings.showCloud = newSettings.showCloud;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
