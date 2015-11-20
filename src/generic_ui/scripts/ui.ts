@@ -547,6 +547,9 @@ export class UserInterface implements ui_constants.UiApi {
 
     var getConfirmation = Promise.resolve<void>();
     if (showConfirmation) {
+      if (networkName === "Cloud") {
+        userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
+      }
       var confirmationMessage =
           this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
       getConfirmation = this.getConfirmation('', confirmationMessage);
@@ -584,6 +587,9 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
     if (!this.model.getNetwork(networkName)) {
+      if (networkName === "Cloud") {
+        userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
+      }
       var confirmationTitle = this.i18n_t('LOGIN_REQUIRED_TITLE');
       var confirmationMessage =
           this.i18n_t('LOGIN_REQUIRED_MESSAGE',
@@ -973,6 +979,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string, userName ?:string) : Promise<void> => {
+    if (network === "Cloud") {
+      this.model.globalSettings.showCloud = true;
+      this.core.updateGlobalSettings(this.model.globalSettings);
+    }
+
     return this.core.login({
         network: network,
         reconnect: false,

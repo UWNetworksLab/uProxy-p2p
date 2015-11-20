@@ -867,6 +867,10 @@
     "description": "Dialog text informing user that a connection could not be made to their cloud instance",
     "message": "Oops, connection failed. Please check the invite code."
   },
+  "CLOUD_VIRTUAL_MACHINE": {
+    "description": "Refers to a remote server users can proxy from",
+    "message": "a virtual machine"
+  },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
@@ -885,7 +889,7 @@
   },
   "ACCEPT_INVITE_CONFIRMATION": {
     "description": "Confirmation message when accepting an invite.",
-    "message": "Would you like to add __name__?"
+    "message": "Would you like to add __name__ to your uProxy contacts?"
   },
   "SIGN_IN_TO_NETWORK": {
     "description": "Title for dialog that appears after users choose a social network for finding friends.",
@@ -905,7 +909,7 @@
   },
   "LOGIN_REQUIRED_MESSAGE": {
     "description": "Message for confirmation that the user must login to a network to accept an invitation",
-    "message": "To accept this invitation from __name__, you will need to connect to uProxy with __network__.  Click yes to continue."
+    "message": "To accept this invitation to connect with __name__, you will need to login to uProxy with __network__.  Click yes to continue."
   },
   "INVITE_URL_ERROR": {
     "description": "Error message shown for invalid invite URLs",

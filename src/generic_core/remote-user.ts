@@ -102,6 +102,9 @@ var log :logging.Log = new logging.Log('remote-user');
       this.consent =
           new consent.State(userId === this.network.myInstance.userId);
 
+      // Because it requires user action to add a cloud friend, and because
+      // these cloud instances are only sharers, by default all users are
+      // requesting access from cloud instances.
       if (this.network.name === "Cloud") {
         this.consent.localRequestsAccessFromRemote = true;
       }
