@@ -39,7 +39,17 @@ interface Invite {
 // Type of the object placed, in serialised form, in storage
 // under STORAGE_KEY.
 interface SavedContacts {
+  // TODO: remove this, invites are now embedded in contacts.
   invites?: Invite[];
+  contacts?: SavedContact[];
+}
+
+// A contact as saved to storage, consisting of the invite
+// plus any data fetched from the server on login (effectively,
+// this on-demand data is cached here).
+interface SavedContact {
+  invite?: Invite;
+  description?: string;
 }
 
 // Returns a VersionedPeerMessage, as defined in interfaces/social.ts
@@ -67,12 +77,11 @@ function makeVersionedPeerMessage(
 // signalling messages (unnecessary because we are forwarding all the
 // messages over an SSH tunnel).
 // TODO: use typings from the uProxy repo
-function makeInstanceMessage(address:string): any {
+function makeInstanceMessage(address:string, description?:string): any {
   return {
     instanceId: address,
     // Shown in the contacts list while the user's list item is expanded
-    // TODO: show machine details, e.g. Linux (via uname)
-    description: address,
+    description: description,
     consent: {
       isRequesting: false,
       isOffering: true
@@ -130,8 +139,8 @@ function makeUserProfile(address: string): freedom.Social.UserProfile {
 export class CloudSocialProvider {
   private storage_: freedom.Storage.Storage = freedom['core.storage']();
 
-  // Invites, keyed by host.
-  private savedInvites_: { [host: string]: Invite } = {};
+  // Saved contacts, keyed by host.
+  private savedContacts_: { [host: string]: SavedContact } = {};
 
   // SSH connections, keyed by host.
   private clients_: { [host: string]: Promise<Connection> } = {};
@@ -140,7 +149,7 @@ export class CloudSocialProvider {
 
   // Emits the messages necessary to make the user appear online 
   // in the contacts list.
-  private notifyOfUser_ = (address: string) => {
+  private notifyOfUser_ = (address: string, description?: string) => {
     this.dispatchEvent_('onUserProfile', makeUserProfile(address));
 
     var clientState = makeClientState(address);
@@ -151,12 +160,14 @@ export class CloudSocialProvider {
       from: clientState,
       // INSTANCE
       message: JSON.stringify(makeVersionedPeerMessage(
-        3000, makeInstanceMessage(address)))
+        3000, makeInstanceMessage(address, description)))
     });
   }
 
   // Establishes an SSH connection to a server, first shutting down
-  // any that previously exists.
+  // any that previously exists. Also emits an instance message,
+  // allowing fields such as the description be updated on every
+  // reconnect, and saves the contact to storage.
   private reconnect_ = (invite: Invite): Promise<Connection> => {
     log.debug('reconnecting to %1', invite.host);
     if (invite.host in this.clients_) {
@@ -177,8 +188,23 @@ export class CloudSocialProvider {
     this.clients_[invite.host] = connection.connect().then(() => {
       log.info('connected to zork on %1', invite.host);
 
-      this.savedInvites_[invite.host] = invite;
-      this.saveContacts_();
+      // Fetch the banner, if available, then emit an instance message.
+      connection.getBanner().then((banner: string) => {
+        if (banner.length < 1) {
+          log.debug('empty banner, leaving blank');
+        }
+        return banner;
+      }, (e: Error) => {
+        log.warn('failed to fetch banner: %1', e);
+        return '';
+      }).then((banner: string) => {
+        this.notifyOfUser_(invite.host, banner);
+        this.savedContacts_[invite.host] = {
+          invite: invite,
+          description: banner
+        };
+        this.saveContacts_();
+      });
 
       return connection;
     });
@@ -190,7 +216,7 @@ export class CloudSocialProvider {
   // This makes all of the stored contacts appear online.
   private loadContacts_ = () => {
     log.debug('loadContacts');
-    this.savedInvites_ = {};
+    this.savedContacts_ = {};
     this.storage_.get(STORAGE_KEY).then((storedString: string) => {
       if (!storedString) {
         log.debug('no saved contacts');
@@ -199,9 +225,9 @@ export class CloudSocialProvider {
       log.debug('loaded contacts: %1', storedString);
       try {
         var savedContacts: SavedContacts = JSON.parse(storedString);
-        for (let invite of savedContacts.invites) {
-          this.savedInvites_[invite.host] = invite;
-          this.notifyOfUser_(invite.host);
+        for (let contact of savedContacts.contacts) {
+          this.savedContacts_[contact.invite.host] = contact;
+          this.notifyOfUser_(contact.invite.host, contact.description);
         }
       } catch (e) {
         log.error('could not parse saved contacts: %1', e.message);
@@ -215,7 +241,7 @@ export class CloudSocialProvider {
   private saveContacts_ = () => {
     log.debug('saveContacts');
     this.storage_.set(STORAGE_KEY, JSON.stringify(<SavedContacts>{
-      invites: Object.keys(this.savedInvites_).map(key => this.savedInvites_[key])
+      contacts: Object.keys(this.savedContacts_).map(key => this.savedContacts_[key])
     })).then((unused: string) => {
       log.debug('saved contacts');
     }, (e: Error) => {
@@ -251,10 +277,10 @@ export class CloudSocialProvider {
           // TODO: Do not reconnect if we have just invited
           //       the instance (safe because all we've done is run ping).
           log.info('new proxying session %1', payload.proxyingId);
-          if (!(destinationClientId in this.savedInvites_)) {
+          if (!(destinationClientId in this.savedContacts_)) {
             return Promise.reject('unknown client ' + destinationClientId);
           }
-          return this.reconnect_(this.savedInvites_[destinationClientId]).then(
+          return this.reconnect_(this.savedContacts_[destinationClientId].invite).then(
               (connection: Connection) => {
             connection.sendMessage('give');
           });
@@ -317,8 +343,8 @@ export class CloudSocialProvider {
     log.debug('acceptUserInvitation');
     try {
       var invite = <Invite>JSON.parse(inviteJson);
-      return this.reconnect_(invite).then(() => {
-        this.notifyOfUser_(invite.host);
+      return this.reconnect_(invite).then((connection: Connection) => {
+        // Return nothing for type checking purposes.
       });
     } catch (e) {
       return Promise.reject('could not parse invite code: ' + e.message);
@@ -395,10 +421,8 @@ class Connection {
           '127.0.0.1', 0,
           ZORK_HOST, ZORK_PORT, (e: Error, stream: ssh2.Channel) => {
             if (e) {
-              log.warn('%1: error establishing tunnel: %2',
-                  this.name_, e.toString());
               this.close();
-              throw e;
+              R('error establishing tunnel: ' + e.toString());
             }
             this.setState_(ConnectionState.WAITING_FOR_PING);
 
@@ -498,6 +522,28 @@ class Connection {
       this.client_.end();
       // TODO: what about the stream?
     }
+  }
+
+  // Fetches the server's description, i.e. /banner.
+  public getBanner = (): Promise<string> => {
+    if (this.state_ !== ConnectionState.ESTABLISHED) {
+      return Promise.reject('can only fetch banner in ESTABLISHED state');
+    }
+    return new Promise<string>((F, R) => {
+      this.client_.exec('cat /banner', (e: Error, stream: ssh2.Channel) => {
+        if (e) {
+          R(e);
+          return;
+        }
+        stream.on('data', function(data: Buffer) {
+          F(data.toString());
+        }).stderr.on('data', function(data: Buffer) {
+          R(new Error(data.toString()));
+        }).on('close', function(code: any, signal: any) {
+          log.debug('banner stream closed');
+        });
+      });
+    });
   }
 
   private setState_ = (newState: ConnectionState) => {
