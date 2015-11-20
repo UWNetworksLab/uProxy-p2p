@@ -227,7 +227,6 @@ export class CloudSocialProvider {
         var savedContacts: SavedContacts = JSON.parse(storedString);
         for (let contact of savedContacts.contacts) {
           this.savedContacts_[contact.invite.host] = contact;
-          // TODO: add banner
           this.notifyOfUser_(contact.invite.host, contact.description);
         }
       } catch (e) {
