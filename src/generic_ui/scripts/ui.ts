@@ -86,8 +86,10 @@ export class Model {
       var userCategories = user.getCategories();
       categorizeUser(user, this.contacts.getAccessContacts,
                      userCategories.getTab, null);
-      categorizeUser(user, this.contacts.shareAccessContacts,
-                     userCategories.shareTab, null);
+      if (user.network.name !== "Cloud") {
+        categorizeUser(user, this.contacts.shareAccessContacts,
+                       userCategories.shareTab, null);
+      }
     }
 
     _.remove(this.onlineNetworks, { name: networkName });
@@ -963,8 +965,10 @@ export class UserInterface implements ui_constants.UiApi {
     // Update the user's category in both get and share tabs.
     categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-    categorizeUser(user, this.model.contacts.shareAccessContacts,
-        oldUserCategories.shareTab, newUserCategories.shareTab);
+    if (user.network.name !== "Cloud") {
+      categorizeUser(user, this.model.contacts.shareAccessContacts,
+          oldUserCategories.shareTab, newUserCategories.shareTab);
+    }
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
