@@ -26,10 +26,16 @@ interface button_description {
   dismissive :boolean;
 }
 
+interface UserInputData {
+  placeHolderText :string;
+  initInputValue ?:string;
+}
+
 interface dialog_description {
   heading :string;
   message :string;
   buttons: button_description[];
+  userInputData ?:UserInputData;
 }
 
 // Since we reuse a uproxy-action-dialog, sometimes there is a race condition
@@ -112,6 +118,12 @@ Polymer({
      * }
      */
 
+    if (detail.userInputData && detail.userInputData.initInputValue) {
+      this.$.dialogInput.value = detail.userInputData.initInputValue;
+    } else {
+      this.$.dialogInput.value = '';
+    }
+
     this.dialog = detail;
     // Using async() allows the contents of the dialog to update before
     // it's opened. Opening the dialog too early causes it to be positioned
@@ -134,10 +146,14 @@ Polymer({
   },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     // TODO: error checking, isNaN etc
+
+    // Get userInput, or set to undefined if it is '', null, etc
+    var userInput = this.$.dialogInput.value || undefined;
+
     var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
     if (callbackIndex) {
       var fulfill = (target.getAttribute('affirmative') != null);
-      ui.invokeConfirmationCallback(callbackIndex, fulfill);
+      ui.invokeConfirmationCallback(callbackIndex, fulfill, userInput);
     }
     var signal = target.getAttribute('data-signal');
     if (signal) {
