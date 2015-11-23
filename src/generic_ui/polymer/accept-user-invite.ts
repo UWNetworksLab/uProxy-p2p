@@ -23,6 +23,9 @@ Polymer({
       confirmLogin = ui.getConfirmation('', confirmationMessage).then(() => {
         // Set mode to GET, as Cloud friends only appear in the GET tab.
         ui.setMode(ui_constants.Mode.GET);
+        if (model.getNetwork("Cloud")) {
+          return Promise.resolve<void>();
+        }
         return ui.login("Cloud").catch((e :Error) => {
           console.warn('Error logging into Cloud', e);
         });
