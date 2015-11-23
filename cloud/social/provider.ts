@@ -225,9 +225,11 @@ export class CloudSocialProvider {
       log.debug('loaded contacts: %1', storedString);
       try {
         var savedContacts: SavedContacts = JSON.parse(storedString);
-        for (let contact of savedContacts.contacts) {
-          this.savedContacts_[contact.invite.host] = contact;
-          this.notifyOfUser_(contact.invite.host, contact.description);
+        if (savedContacts.contacts) {
+          for (let contact of savedContacts.contacts) {
+            this.savedContacts_[contact.invite.host] = contact;
+            this.notifyOfUser_(contact.invite.host, contact.description);
+          }
         }
       } catch (e) {
         log.error('could not parse saved contacts: %1', e.message);
