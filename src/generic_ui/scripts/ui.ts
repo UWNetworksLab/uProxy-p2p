@@ -434,7 +434,6 @@ export class UserInterface implements ui_constants.UiApi {
     return new Promise<string>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
-      // TODO: need an X to cancel and reject
       this.fireSignal('open-dialog', {
         heading: heading,
         message: message,
@@ -622,9 +621,8 @@ export class UserInterface implements ui_constants.UiApi {
     } else if (!this.model.getNetwork(networkName) && networkName == 'Quiver') {
       // Show user confirmation for Quiver login, where they can enter their
       // Quiver user name.
-      // TODO: translate
       this.loginToQuiver(
-          'To add ' + userName + ' as a friend, please sign into the uProxy network')
+          this.i18n_t('UPROXY_NETWORK_INVITE_LOGIN_MESSAGE', {name: userName }))
       .then(() => {
         this.addUser_(url, false).catch(showUrlError);
       });
@@ -635,12 +633,11 @@ export class UserInterface implements ui_constants.UiApi {
 
   public loginToQuiver = (message ?:string) : Promise<void> => {
     return this.getUserInput(
-      // TODO: translate
-      'Sign in to the uProxy network',
+      this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
       message || '',
-      'Choose a user name',
+      this.i18n_t('UPROXY_NETWORK_CHOOSE_A_USER_NAME'),
       this.model.globalSettings.quiverUserName,
-      'Sign In')
+      this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
     .then((quiverUserName :string) => {
       this.model.globalSettings.quiverUserName = quiverUserName;
       this.core.updateGlobalSettings(this.model.globalSettings);
