@@ -126,10 +126,15 @@ export interface Contacts {
   shareAccessContacts :ContactCategory;
 }
 
- export interface UserCategories {
-   getTab :string;
-   shareTab :string;
- }
+export interface UserCategories {
+  getTab :string;
+  shareTab :string;
+}
+
+interface PromiseCallbacks {
+  fulfill :Function;
+  reject :Function;
+}
 
 /**
  * Specific to one particular Social network.
@@ -404,42 +409,59 @@ export class UserInterface implements ui_constants.UiApi {
     this.signalToFire = {name: signalName, data: data};
   }
 
-  private confirmationCallbacks_ :{[index :number] :Function} = {};
+  private confirmationCallbacks_ :{[index :number] :PromiseCallbacks} = {};
   // Don't use index 0 as it may be treated as false in confirmation code.
   private confirmationCallbackIndex_ = 1;
+
   public getConfirmation(heading :string, text :string) :Promise<void> {
     return new Promise<void>((F, R) => {
-      var fulfillIndex = ++this.confirmationCallbackIndex_;
-      var rejectIndex = ++this.confirmationCallbackIndex_;
-      this.confirmationCallbacks_[fulfillIndex] = F;
-      this.confirmationCallbacks_[rejectIndex] = R;
+      var callbackIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
       this.fireSignal('open-dialog', {
         heading: heading,
         message: text,
         buttons: [{
-          text: this.i18n_t("YES"),
-          callbackIndex: fulfillIndex
-        }, {
           text: this.i18n_t("NO"),
-          callbackIndex: rejectIndex,
+          callbackIndex: callbackIndex,
           dismissive: true
+        }, {
+          text: this.i18n_t("YES"),
+          callbackIndex: callbackIndex
         }]
       });
     });
   }
 
-  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+  public getUserInput(heading :string, message :string, placeholderText :string, defaultValue :string, buttonText :string) : Promise<string> {
+    return new Promise<string>((F, R) => {
+      var callbackIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
+      this.fireSignal('open-dialog', {
+        heading: heading,
+        message: message,
+        buttons: [{
+          text: buttonText,
+          callbackIndex: callbackIndex
+        }],
+        userInputData: {
+          placeholderText: placeholderText,
+          initInputValue: defaultValue
+        }
+      });
+    });
+  }
+
+  public invokeConfirmationCallback = (index :number, fulfill :boolean, data ?:any) => {
     if (index > this.confirmationCallbackIndex_) {
       console.error('Confirmation callback not found: ' + index);
       return;
     }
-    this.confirmationCallbacks_[index]();
-    delete this.confirmationCallbacks_[index];
     if (fulfill) {
-      delete this.confirmationCallbacks_[index + 1];
+      this.confirmationCallbacks_[index].fulfill(data);
     } else {
-      delete this.confirmationCallbacks_[index - 1];
+      this.confirmationCallbacks_[index].reject(data);
     }
+    delete this.confirmationCallbacks_[index];
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -588,7 +610,9 @@ export class UserInterface implements ui_constants.UiApi {
       showUrlError();
       return;
     }
-    if (!this.model.getNetwork(networkName)) {
+
+    if (!this.model.getNetwork(networkName) && networkName != 'Quiver') {
+      // User is not yet logged onto this network.
       if (networkName === "Cloud") {
         userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
       }
@@ -604,9 +628,31 @@ export class UserInterface implements ui_constants.UiApi {
           this.addUser_(url, false).catch(showUrlError);
         });
       });
+    } else if (!this.model.getNetwork(networkName) && networkName == 'Quiver') {
+      // Show user confirmation for Quiver login, where they can enter their
+      // Quiver user name.
+      this.loginToQuiver(
+          this.i18n_t('UPROXY_NETWORK_INVITE_LOGIN_MESSAGE', {name: userName }))
+      .then(() => {
+        this.addUser_(url, false).catch(showUrlError);
+      });
     } else {
-      this.addUser_(url, true).catch(showUrlError);;
+      this.addUser_(url, true).catch(showUrlError);
     }
+  }
+
+  public loginToQuiver = (message ?:string) : Promise<void> => {
+    return this.getUserInput(
+        this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
+        message || '',
+        this.i18n_t('UPROXY_NETWORK_CHOOSE_A_USER_NAME'),
+        this.model.globalSettings.quiverUserName,
+        this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
+    .then((quiverUserName :string) => {
+      this.model.globalSettings.quiverUserName = quiverUserName;
+      this.core.updateGlobalSettings(this.model.globalSettings);
+      return this.login('Quiver', quiverUserName);
+    });
   }
 
   public handleCopyPasteUrlData = (url: string) => {
@@ -995,7 +1041,8 @@ export class UserInterface implements ui_constants.UiApi {
     }).then(() => {
       this.browserApi.hasInstalledThenLoggedIn = true;
     }).catch((e :Error) => {
-      this.showNotification(this.i18n_t("ERROR_SIGNING_IN", {network: network}));
+      this.showNotification(this.i18n_t(
+          "ERROR_SIGNING_IN", {network: this.getNetworkDisplayName(network)}));
       throw e;
     });
   }
