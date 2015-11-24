@@ -102,10 +102,6 @@ ui_connector.onCommand(uproxy_core_api.Command.STOP_PROXYING,
     core.stop);
 
 ui_connector.onCommand(
-    uproxy_core_api.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
-    core.handleManualNetworkInboundMessage);
-
-ui_connector.onCommand(
     uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS,
     core.updateGlobalSettings);
 
