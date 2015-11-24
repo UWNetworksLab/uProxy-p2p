@@ -133,7 +133,6 @@ interface PromiseCallbacks {
   reject :Function;
 }
 
-
 /**
  * Specific to one particular Social network.
  */
@@ -430,7 +429,7 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public getUserInput(heading :string, message :string, placeHolderText :string, defaultValue :string, buttonText :string) : Promise<string> {
+  public getUserInput(heading :string, message :string, placeholderText :string, defaultValue :string, buttonText :string) : Promise<string> {
     return new Promise<string>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
@@ -442,7 +441,7 @@ export class UserInterface implements ui_constants.UiApi {
           callbackIndex: callbackIndex
         }],
         userInputData: {
-          placeHolderText: placeHolderText,
+          placeholderText: placeholderText,
           initInputValue: defaultValue
         }
       });
@@ -633,11 +632,11 @@ export class UserInterface implements ui_constants.UiApi {
 
   public loginToQuiver = (message ?:string) : Promise<void> => {
     return this.getUserInput(
-      this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
-      message || '',
-      this.i18n_t('UPROXY_NETWORK_CHOOSE_A_USER_NAME'),
-      this.model.globalSettings.quiverUserName,
-      this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
+        this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
+        message || '',
+        this.i18n_t('UPROXY_NETWORK_CHOOSE_A_USER_NAME'),
+        this.model.globalSettings.quiverUserName,
+        this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
     .then((quiverUserName :string) => {
       this.model.globalSettings.quiverUserName = quiverUserName;
       this.core.updateGlobalSettings(this.model.globalSettings);

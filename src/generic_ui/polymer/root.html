@@ -436,8 +436,8 @@
     <uproxy-action-dialog backdrop layered="false" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}">
       <h1>{{ dialog.heading }}</h1>
       <p>{{ dialog.message }}</p>
-      <div hidden?='{{ !dialog.userInputData }}'>
-        <paper-input-decorator label='{{ dialog.userInputData.placeHolderText }}' layout vertical>
+      <div hidden?='{{ !dialog. Data }}'>
+        <paper-input-decorator label='{{ dialog.userInputData.placeholderText }}' layout vertical>
           <input id='dialogInput' is='core-input'/>
         </paper-input-decorator>
       </div>

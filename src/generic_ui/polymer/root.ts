@@ -27,7 +27,7 @@ interface button_description {
 }
 
 interface UserInputData {
-  placeHolderText :string;
+  placeholderText :string;
   initInputValue ?:string;
 }
 
