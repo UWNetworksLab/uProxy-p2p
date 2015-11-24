@@ -138,6 +138,14 @@ compileTypescript = (files) ->
 
 readJSONFile = (file) -> JSON.parse(fs.readFileSync(file, 'utf8'))
 
+backendThirdPartyBuildPaths = [
+  'bower'
+  'sha1'
+  'uproxy-lib/loggingprovider'
+  'uproxy-lib/churn-pipe'
+  'uproxy-lib/cloud/social'
+]
+
 gruntConfig = {
   pkg: readJSONFile('package.json')
   pkgs:
@@ -521,13 +529,7 @@ gruntConfig = {
         pathsFromDevBuild: [
           'generic_core'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-          'uproxy-lib/cloud/social'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
@@ -604,12 +606,7 @@ gruntConfig = {
           'icons'
           'fonts'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
@@ -683,13 +680,7 @@ gruntConfig = {
           'icons'
           'fonts'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-          'uproxy-lib/cloud/social'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
