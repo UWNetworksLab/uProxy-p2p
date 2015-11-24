@@ -170,6 +170,10 @@
       }
       uproxy-action-dialog::shadow #scroller {
         overflow: visible;
+        padding: 30px 30px 0px 30px;
+      }
+      uproxy-action-dialog::shadow #actions {
+        padding: 24px;
       }
       .core-overlay-backdrop {
         z-index: 1001;
@@ -181,6 +185,13 @@
         font-size: 1.4em;
         color: #009688;
         font-weight: normal;
+      }
+      #dialog p {
+        line-height: 20px;
+        color: #666;
+        font-weight: 300;
+        letter-spacing: 0.4px;
+        margin: 0;
       }
       #disconnectDialog {
         text-align: center;
@@ -437,7 +448,7 @@
       <h1>{{ dialog.heading }}</h1>
       <p>{{ dialog.message }}</p>
       <div hidden?='{{ !dialog.userInputData }}'>
-        <paper-input-decorator label='{{ dialog.userInputData.placeHolderText }}' layout vertical>
+        <paper-input-decorator label='{{ dialog.userInputData.placeholderText }}' layout vertical>
           <input id='dialogInput' is='core-input'/>
         </paper-input-decorator>
       </div>
@@ -455,7 +466,7 @@
       <div>
         <h1>{{ "WELCOME" | $$ }}</h1>
         <p>
-          {{ "ALPHA_MESSAGE" | $$ }}<br><br>
+          {{ "BETA_MESSAGE" | $$ }}<br><br>
           {{ "CHANGE_STATS_CHOICE" | $$ }}
         </p>
         <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>

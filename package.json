@@ -21,7 +21,7 @@
     "browserify-zlib": "^0.1.4",
     "bower": "^1.4.1",
     "cca": "^0.8.0",
-    "circular-json": "^0.1.6",
+    "circular-json": "^0.3.0",
     "compare-version": "^0.1.2",
     "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
@@ -57,7 +57,7 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.6.3",
-    "uproxy-lib": "^34.1.0",
+    "uproxy-lib": "^35.0.1",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
   },

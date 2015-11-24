@@ -67,6 +67,33 @@ Polymer({
       });
     });
   },
+  addCloudInstance: function() {
+    var socialNetworkInfo = {
+      name: "Cloud",
+      userId: "" /* The current user's ID will be determined by the core. */
+    };
+    core.acceptInvitation({
+        network: socialNetworkInfo,
+        token: this.cloudInstanceInput
+      }).then(() => {
+      this.fire('open-dialog', {
+        heading: '',
+        message: ui.i18n_t("FRIEND_ADDED"),
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+      this.closeInviteUserPanel();
+    }).catch(() => {
+      this.fire('open-dialog', {
+        heading: '',
+        message: ui.i18n_t("CLOUD_INVITE_FAILED"),
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }]
+      });
+    });
+  },
   openInviteUserPanel: function() {
     this.inviteUrl = '';
     this.$.networkInviteUserPanel.open();

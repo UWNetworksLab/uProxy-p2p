@@ -65,7 +65,8 @@ export class Model {
     language: 'en',
     force_message_version: 0,
     hasSeenGoogleAndFacebookChangedNotification: false,
-    quiverUserName: ''
+    quiverUserName: '',
+    showCloud: false
   };
 
   public reconnecting = false;
@@ -85,8 +86,10 @@ export class Model {
       var userCategories = user.getCategories();
       categorizeUser(user, this.contacts.getAccessContacts,
                      userCategories.getTab, null);
-      categorizeUser(user, this.contacts.shareAccessContacts,
-                     userCategories.shareTab, null);
+      if (user.network.name !== "Cloud") {
+        categorizeUser(user, this.contacts.shareAccessContacts,
+                       userCategories.shareTab, null);
+      }
     }
 
     _.remove(this.onlineNetworks, { name: networkName });
@@ -568,6 +571,9 @@ export class UserInterface implements ui_constants.UiApi {
 
     var getConfirmation = Promise.resolve<void>();
     if (showConfirmation) {
+      if (networkName === "Cloud") {
+        userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
+      }
       var confirmationMessage =
           this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
       getConfirmation = this.getConfirmation('', confirmationMessage);
@@ -604,7 +610,12 @@ export class UserInterface implements ui_constants.UiApi {
       showUrlError();
       return;
     }
+
     if (!this.model.getNetwork(networkName) && networkName != 'Quiver') {
+      // User is not yet logged onto this network.
+      if (networkName === "Cloud") {
+        userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
+      }
       var confirmationTitle = this.i18n_t('LOGIN_REQUIRED_TITLE');
       var confirmationMessage =
           this.i18n_t('LOGIN_REQUIRED_MESSAGE',
@@ -1000,8 +1011,10 @@ export class UserInterface implements ui_constants.UiApi {
     // Update the user's category in both get and share tabs.
     categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-    categorizeUser(user, this.model.contacts.shareAccessContacts,
-        oldUserCategories.shareTab, newUserCategories.shareTab);
+    if (user.network.name !== "Cloud") {
+      categorizeUser(user, this.model.contacts.shareAccessContacts,
+          oldUserCategories.shareTab, newUserCategories.shareTab);
+    }
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
@@ -1016,6 +1029,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string, userName ?:string) : Promise<void> => {
+    if (network === "Cloud") {
+      this.model.globalSettings.showCloud = true;
+      this.core.updateGlobalSettings(this.model.globalSettings);
+    }
+
     return this.core.login({
         network: network,
         reconnect: false,
