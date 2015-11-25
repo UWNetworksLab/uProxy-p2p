@@ -52,7 +52,6 @@ Polymer({
       this.$.logCheckbox.checked = false;
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
-      this.$.sendingFeedbackDialog.close();
       ui.showDialog(ui.i18n_t('THANK_YOU'), ui.i18n_t('FEEDBACK_SUBMITTED'),
           ui.i18n_t('DONE'), 'close-settings');
       this.close();
