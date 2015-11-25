@@ -87,8 +87,6 @@ export enum Command {
   STOP_PROXYING_COPYPASTE_SHARE = 1011,
   COPYPASTE_SIGNALLING_MESSAGE = 1012,
 
-  // Payload should be a HandleManualNetworkInboundMessageCommand.
-  HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE = 1013,
   SEND_CREDENTIALS = 1014,
   UPDATE_GLOBAL_SETTINGS = 1015,
   GET_LOGS = 1016,
@@ -118,8 +116,6 @@ export enum Update {
   STOP_GETTING_FROM_FRIEND = 2008,
   START_GIVING_TO_FRIEND = 2009,
   STOP_GIVING_TO_FRIEND = 2010,
-  // Payload should be a Message.
-  MANUAL_NETWORK_OUTBOUND_MESSAGE = 2011,
   // TODO: "Get credentials" is a command, not an "update". Consider
   // renaming the "Update" enum.
   GET_CREDENTIALS = 2012,
