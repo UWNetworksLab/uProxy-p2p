@@ -39,7 +39,13 @@ if [ -n "$INVITE_CODE" ]
 then
   INVITE=`echo -n $INVITE_CODE|base64 -d`
 
-  ENCODED_KEY=`echo $INVITE|jq -r .key`
+  NETWORK_DATA=`echo $INVITE|jq -r .networkData`
+  if [ "$NETWORK_DATA" == "null" ]
+  then
+    echo "invite code does not contain networkData" 2>&1
+    exit 1
+  fi
+  ENCODED_KEY=`echo $NETWORK_DATA|jq -r .key`
   if [ "$ENCODED_KEY" == "null" ]
   then
     echo "invite code does not contain a private key" 2>&1
