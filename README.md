@@ -132,6 +132,25 @@ Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are enough to immediately
 reject submissions. :)
 
+### uProxy for Android
+
+uProxy can now be built as an Android App, using the Cordova Chrome Apps (CCA)
+tool, also known as the [Chrome Apps for Mobile Toolchain](https://github.com/MobileChromeApps/mobile-chrome-apps).
+After following the steps under "Building uProxy from source",
+ 1. Install [Android Studio](https://developer.android.com/sdk/index.html).
+ 1. Confirm that your `cca` package is ready by running `node_modules/.bin/cca checkenv` from the git checkout root directory.
+
+Then you can build the app using `grunt build_android`.  The output, a file ending
+in `.apk`, will appear in `build/dev/uproxy/android/platforms/android/build/outputs/apk/`.
+Depending on the build configuration, the file might be named `android-debug.apk`,
+`android-armv7-debug.apk`, etc..
+
+To install the app, first [Enable USB Debugging](http://developer.android.com/tools/device.html#device-developer-options)
+on your test phone, then connect it to your computer and accept the connection
+on the phone.  Then, on your computer, install the app on the phone using a command like
+`adb install -r build/dev/uproxy/android/platforms/android/build/outputs/apk/android-debug.apk`.
+You may then launch the app from the phone.  Rerunning this command will close the app
+and replace it with a new version, but will not overwrite saved state on the device.
 
 ### Fixing compilation and setup
 
