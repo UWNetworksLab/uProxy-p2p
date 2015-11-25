@@ -444,11 +444,11 @@
 
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
-    <uproxy-action-dialog backdrop layered="false" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}">
+    <uproxy-action-dialog backdrop layered="false" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}" closeSelector=''>
       <h1>{{ dialog.heading }}</h1>
       <p>{{ dialog.message }}</p>
       <div hidden?='{{ !dialog.userInputData }}'>
-        <paper-input-decorator label='{{ dialog.userInputData.placeholderText }}' layout vertical>
+        <paper-input-decorator label='{{ dialog.userInputData.placeholderText }}' layout vertical error="{{ 'REQUIRED_FIELD' | $$ }}" isInvalid='{{ isUserInputInvalid }}'>
           <input id='dialogInput' is='core-input'/>
         </paper-input-decorator>
       </div>

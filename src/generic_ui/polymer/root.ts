@@ -20,24 +20,6 @@ var core = ui_context.core;
 var model = ui_context.model;
 var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 
-interface button_description {
-  text :string;
-  signal :string;
-  dismissive :boolean;
-}
-
-interface UserInputData {
-  placeholderText :string;
-  initInputValue ?:string;
-}
-
-interface dialog_description {
-  heading :string;
-  message :string;
-  buttons: button_description[];
-  userInputData ?:UserInputData;
-}
-
 // Since we reuse a uproxy-action-dialog, sometimes there is a race condition
 // where the dialog attempts to open before it is properly closed.
 // We use a Promise to track if the dialog is closed.
@@ -104,7 +86,7 @@ Polymer({
     model.globalSettings.hasSeenGoogleAndFacebookChangedNotification = true;
     core.updateGlobalSettings(model.globalSettings);
   },
-  openDialog: function(e :Event, detail :dialog_description) {
+  openDialog: function(e :Event, detail :ui_types.DialogDescription) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
      * signal was fired. It should be of the form:
      *
@@ -123,6 +105,7 @@ Polymer({
     } else {
       this.$.dialogInput.value = '';
     }
+    this.isUserInputInvalid = false;
 
     this.dialog = detail;
     // Using async() allows the contents of the dialog to update before
@@ -145,10 +128,15 @@ Polymer({
     this.$.proxyError.open();
   },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
-    // TODO: error checking, isNaN etc
-
     // Get userInput, or set to undefined if it is '', null, etc
     var userInput = this.$.dialogInput.value || undefined;
+    if (this.dialog.userInputData && !userInput) {
+      // User did not enter any input, don't close
+      this.isUserInputInvalid = true;
+      return;
+    }
+
+    this.isUserInputInvalid = false;
 
     var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
     if (callbackIndex) {
@@ -159,6 +147,7 @@ Polymer({
     if (signal) {
       this.fire('core-signal', { name: signal });
     }
+    this.$.dialog.close();
   },
   ready: function() {
     // Expose global ui object and UI module in this context.
@@ -197,11 +186,8 @@ Polymer({
         this.model.globalSettings.mode == ui_types.Mode.SHARE) {
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
-      this.fire('open-dialog', {
-        heading: ui.i18n_t("SHARING_UNAVAILABLE_TITLE"),
-        message: ui.i18n_t("SHARING_UNAVAILABLE_MESSAGE"),
-        buttons: [{text: ui.i18n_t("CLOSE"), dismissive: true}]
-      });
+      ui.showDialog(ui.i18n_t('SHARING_UNAVAILABLE_TITLE'),
+          ui.i18n_t('SHARING_UNAVAILABLE_MESSAGE'));
     } else {
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core
