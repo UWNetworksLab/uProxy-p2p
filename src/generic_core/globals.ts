@@ -1,4 +1,5 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
 import _ = require('lodash');
 import local_storage = require('./storage');

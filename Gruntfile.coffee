@@ -138,6 +138,14 @@ compileTypescript = (files) ->
 
 readJSONFile = (file) -> JSON.parse(fs.readFileSync(file, 'utf8'))
 
+backendThirdPartyBuildPaths = [
+  'bower'
+  'sha1'
+  'uproxy-lib/loggingprovider'
+  'uproxy-lib/churn-pipe'
+  'uproxy-lib/cloud/social'
+]
+
 gruntConfig = {
   pkg: readJSONFile('package.json')
   pkgs:
@@ -521,13 +529,7 @@ gruntConfig = {
         pathsFromDevBuild: [
           'generic_core'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-          'uproxy-lib/cloud/social'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
@@ -604,12 +606,7 @@ gruntConfig = {
           'icons'
           'fonts'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
@@ -683,13 +680,7 @@ gruntConfig = {
           'icons'
           'fonts'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-          'uproxy-lib/cloud/social'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
@@ -1009,10 +1000,17 @@ testDirectory = (dir) ->
       # include the browserification in this step
       testNames.push('browserify:' + testName)
 
-  # add the jasmine task so we can run it
-  gruntConfig['jasmine'][dir] = Rule.jasmineSpec(dir)
-  # include running the tests in this task
-  testNames.push('jasmine:' + dir)
+      gruntConfig['jasmine'][testName] =
+        src: [
+          require.resolve('arraybuffer-slice'),
+          require.resolve('es6-promise')
+          path.join(thirdPartyBuildPath, 'promise-polyfill.js'),
+        ]
+        options:
+          specs: [path.join(devBuildPath, dir, match[1] + '.spec.static.js')]
+          outfile: path.join(devBuildPath, dir, match[1] + 'Runner.html')
+          keepRunner: true
+      testNames.push('jasmine:' + testName)
 
   return testNames
 

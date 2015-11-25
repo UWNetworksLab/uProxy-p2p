@@ -1,6 +1,15 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+
+import freedom_mocks = require('../mocks/freedom-mocks');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
+  'metrics': () => { return new freedom_mocks.MockMetrics(); },
+  'pgp': () => { return new freedom_mocks.PgpProvider() },
+  'portControl': () => { return new Object },
+});
 
 import social = require('../interfaces/social');
 

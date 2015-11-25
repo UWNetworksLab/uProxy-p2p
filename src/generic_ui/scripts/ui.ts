@@ -259,13 +259,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.USER_FRIEND, this.syncUser);
 
-    core.onUpdate(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
-                  (message :social.PeerMessage) => {
-      console.log('Manual network outbound message: ' +
-                  JSON.stringify(message));
-      // TODO: Display the message in the 'manual network' UI.
-    });
-
     core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
       this.copyPasteState.message = message;
     });

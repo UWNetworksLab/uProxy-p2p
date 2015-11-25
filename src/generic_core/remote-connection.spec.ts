@@ -6,6 +6,18 @@
  * after that connection is established
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+
+import freedom_mocks = require('../mocks/freedom-mocks');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
+  'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
+  'metrics': () => { return new freedom_mocks.MockMetrics(); },
+  'pgp': () => { return new freedom_mocks.PgpProvider() },
+  'portControl': () => { return new Object },
+});
+
 import globals = require('./globals');
 import remote_connection = require('./remote-connection');
 import social = require('../interfaces/social');

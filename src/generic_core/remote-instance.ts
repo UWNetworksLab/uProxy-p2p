@@ -78,7 +78,7 @@ import ui = ui_connector.connector;
     private isUIUpdatePending = false;
 
     // Number of milliseconds before timing out socksToRtc_.start
-    public SOCKS_TO_RTC_TIMEOUT :number = 30000;
+    public SOCKS_TO_RTC_TIMEOUT :number = 90000;
     // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
     // trying to connect) by timing out rtcToNet_.start 15 seconds later than
     // socksToRtc_.start

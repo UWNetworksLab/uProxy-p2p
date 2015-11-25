@@ -375,20 +375,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // TODO: Handle revoked permissions notifications.
   }
 
-  public handleManualNetworkInboundMessage =
-      (command :social.HandleManualNetworkInboundMessageCommand) => {
-    var manualNetwork :social_network.ManualNetwork =
-        <social_network.ManualNetwork> social_network.getNetwork(
-            social_network.MANUAL_NETWORK_ID, '');
-    if (!manualNetwork) {
-      log.error('Manual network does not exist, discarding inbound message',
-                command);
-      return;
-    }
-
-    manualNetwork.receive(command.senderClientId, command.message);
-  }
-
   /**
    * Obtain the RemoteInstance corresponding to an instance path.
    */
