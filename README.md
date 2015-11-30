@@ -137,7 +137,11 @@ reject submissions. :)
 uProxy can now be built as an Android App, using the Cordova Chrome Apps (CCA)
 tool, also known as the [Chrome Apps for Mobile Toolchain](https://github.com/MobileChromeApps/mobile-chrome-apps).
 After following the steps under "Building uProxy from source",
- 1. Install [Android Studio](https://developer.android.com/sdk/index.html).
+ 1. Install the Android SDK.  The easiest way to get it is as part of [Android Studio](https://developer.android.com/sdk/index.html).
+   1. *Linux-only* Add the Android tools to your path, e.g. by modifying your `.bashrc` to include `PATH=$PATH:$HOME/android-studio/tools`.
+ 1. Install the `adb` tool.
+   1. MacOS: `adb` is included with Android Studio.
+   1. Linux: `adb` is available through your package manager.  For example, on Ubuntu run `apt-get install android-tools-adb`.
  1. Confirm that your `cca` package is ready by running `node_modules/.bin/cca checkenv` from the git checkout root directory.
 
 Then you can build the app using `grunt build_android`.  The output, a file ending
@@ -149,8 +153,11 @@ To install the app, first [Enable USB Debugging](http://developer.android.com/to
 on your test phone, then connect it to your computer and accept the connection
 on the phone.  Then, on your computer, install the app on the phone using a command like
 `adb install -r build/dev/uproxy/android/platforms/android/build/outputs/apk/android-debug.apk`.
-You may then launch the app from the phone.  Rerunning this command will close the app
+You may then launch the app from the phone.  Rerunning this command should close the app
 and replace it with a new version, but will not overwrite saved state on the device.
+
+If you encounter an error or want to delete uProxy from your phone, you can do so via
+`Settings -> Apps -> uProxy`, or by long-pressing the uProxy icon in the Apps chooser.
 
 ### Fixing compilation and setup
 
