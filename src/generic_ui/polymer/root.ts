@@ -1,20 +1,12 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/xregexp/xregexp.d.ts' />
-/// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
 
 import social = require('../../interfaces/social');
 import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 import user_module = require('../scripts/user');
-import regEx = require('xregexp');
-import XRegExp = regEx.XRegExp;
 
-// Example usage of these tests:
-// isRightToLeft.test('hi') --> false
-// isRightToLeft.test('لك الوص') --> true
-var isRightToLeft = XRegExp('[\\p{Arabic}\\p{Hebrew}]');
-var isCommonUnicode = XRegExp('[\\p{Common}]');
 var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;

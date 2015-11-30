@@ -19,7 +19,7 @@ body /deep/ a {
   color: #009688;
 }
 
-html /deep/ [dir='rtl'] /deep/ [layout][horizontal] /deep/ core-icon[icon='arrow-back'] {
+html /deep/ [dir='rtl'] /deep/ core-icon[icon='arrow-back'] {
   transform: rotate(180deg);
 }
 
