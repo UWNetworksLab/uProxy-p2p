@@ -12,10 +12,11 @@ import regEx = require('xregexp');
 import XRegExp = regEx.XRegExp;
 
 // Example usage of these tests:
-// isRightToLeft.test('hi') --> false
-// isRightToLeft.test('لك الوص') --> true
-var isRightToLeft = XRegExp('[\\p{Arabic}\\p{Hebrew}]');
-var isCommonUnicode = XRegExp('[\\p{Common}]');
+// isRightToLeft('hi') --> false
+// isRightToLeft('لك الوص') --> true
+function isRightToLeft(lang :string) :boolean {
+  return XRegExp('[\\p{Arabic}\\p{Hebrew}]').test(lang);
+}
 
 declare var window: I18nWindow;
 declare var require :(path :string) => MessageResource;
@@ -55,7 +56,7 @@ i18n.addResources('fa', 'translation', createI18nDictionary(farsi_source));
 
 export var i18n_t = (placeholder :string, params?: any) :string => {
   for (var p in params) {
-    if (isRightToLeft.test(params[p])) {
+    if (isRightToLeft(params[p])) {
       params[p] = "\u200F" + params[p] + "\u200F";
     } else {
       params[p] = "\u200E" + params[p] + "\u200E";
