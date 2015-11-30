@@ -187,7 +187,7 @@ Polymer({
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
       ui.showDialog(ui.i18n_t('SHARING_UNAVAILABLE_TITLE'),
-          ui.i18n_t('SHARING_UNAVAILABLE_MESSAGE'));
+          ui.i18n_t('SHARING_UNAVAILABLE_MESSAGE'), ui.i18n_t('CLOSE'));
     } else {
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core

@@ -43,7 +43,7 @@ Polymer({
       userName: this.githubUserIdInput
     }).then(() => {
       this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('INVITE_SENT_CONFIRMATION'));
+      ui.showDialog('', ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.githubUserIdInput }));
     }).catch(() => {
       // TODO: The message in this dialog should be passed from the social provider.
       // https://github.com/uProxy/uproxy/issues/1923
