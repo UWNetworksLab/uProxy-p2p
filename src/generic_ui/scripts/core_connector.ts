@@ -205,22 +205,16 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
+  // TODO: this should take a SocialNetworkInfo instead of networkId
   inviteUser = (data: { networkId: string; userName: string }): Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.SEND_INVITATION, data);
   }
 
-  // Required for version 0.8.23
-  addUser = (inviteUrl: string): Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.ADD_USER, inviteUrl);
-  }
-
-  // TODO: this should probably take the network path, including userId
   getInviteUrl = (networkInfo :social.SocialNetworkInfo): Promise<string> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_INVITE_URL,
         networkInfo);
   }
 
-  // TODO: this should probably take the network path, including userId
   sendEmail = (emailData :uproxy_core_api.EmailData): void => {
     this.sendCommand(uproxy_core_api.Command.SEND_EMAIL, emailData);
   }
@@ -250,8 +244,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
   }
 
-  acceptInvitation = (obj: { network: social.SocialNetworkInfo; data: string }) : Promise<void>=> {
-    return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, obj);
+  acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void>=> {
+    return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, data);
   }
 }  // class CoreConnector
 

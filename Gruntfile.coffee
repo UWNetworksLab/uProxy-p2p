@@ -138,6 +138,14 @@ compileTypescript = (files) ->
 
 readJSONFile = (file) -> JSON.parse(fs.readFileSync(file, 'utf8'))
 
+backendThirdPartyBuildPaths = [
+  'bower'
+  'sha1'
+  'uproxy-lib/loggingprovider'
+  'uproxy-lib/churn-pipe'
+  'uproxy-lib/cloud/social'
+]
+
 gruntConfig = {
   pkg: readJSONFile('package.json')
   pkgs:
@@ -163,9 +171,17 @@ gruntConfig = {
     ccaCreate: {
       command: '<%= ccaJsPath %> create <%= androidDevPath %> --link-to=<%= ccaDevPath %>'
     }
+    ccaPlatformAndroid: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaJsPath %> platform add android'
+    }
+    ccaAddPluginsAndroid: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git cordova-plugin-splashscreen'
+    }
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android'
+      command: '<%= ccaJsPath %> build android --webview=system'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
@@ -301,11 +317,6 @@ gruntConfig = {
             'freedomjs-anonymized-metrics/anonmetrics.json'
             'freedomjs-anonymized-metrics/metric.js'
             'freedom-for-chrome/freedom-for-chrome.js'
-            'freedom-social-xmpp/social.google.json'
-            'freedom-social-xmpp/socialprovider.js'
-            'freedom-social-xmpp/vcardstore.js'
-            'freedom-social-xmpp/node-xmpp-browser.js'
-            'freedom-social-xmpp/google-auth.js'
             'freedom-social-github/social.github.json'
             'freedom-social-github/github-social-provider.js'
             'freedom-social-firebase/social.firebase-facebook.json'
@@ -352,11 +363,6 @@ gruntConfig = {
             'data/freedomjs-anonymized-metrics/anonmetrics.json'
             'data/freedomjs-anonymized-metrics/metric.js'
             'data/freedom-for-firefox/freedom-for-firefox.jsm'
-            'data/freedom-social-xmpp/social.google.json'
-            'data/freedom-social-xmpp/socialprovider.js'
-            'data/freedom-social-xmpp/vcardstore.js'
-            'data/freedom-social-xmpp/node-xmpp-browser.js'
-            'data/freedom-social-xmpp/google-auth.js'
             'data/freedom-social-github/social.github.json'
             'data/freedom-social-github/github-social-provider.js'
             'data/freedom-social-firebase/social.firebase-facebook.json'
@@ -441,13 +447,22 @@ gruntConfig = {
             'freedom-social-xmpp/vcardstore.js'
             'freedom-social-xmpp/node-xmpp-browser.js'
             'freedom-social-xmpp/google-auth.js'
+            'freedom-social-github/social.github.json'
+            'freedom-social-github/github-social-provider.js'
             'freedom-social-firebase/social.firebase-facebook.json'
+            'freedom-social-firebase/social.firebase-google.json'
             'freedom-social-firebase/firebase-shims.js'
             'freedom-social-firebase/firebase.js'
             'freedom-social-firebase/firebase-social-provider.js'
             'freedom-social-firebase/facebook-social-provider.js'
+            'freedom-social-firebase/google-social-provider.js'
+            'freedom-social-firebase/google-auth.js'
             'freedom-port-control/port-control.js'
             'freedom-port-control/port-control.json'
+            'freedom-pgp-e2e/end-to-end.compiled.js'
+            'freedom-pgp-e2e/googstorage.js'
+            'freedom-pgp-e2e/e2e.js'
+            'freedom-pgp-e2e/pgpapi.json'
 
             '**/freedom-module.json'
             '!generic_core/freedom-module.json'
@@ -514,12 +529,7 @@ gruntConfig = {
         pathsFromDevBuild: [
           'generic_core'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
@@ -596,12 +606,7 @@ gruntConfig = {
           'icons'
           'fonts'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
@@ -675,12 +680,7 @@ gruntConfig = {
           'icons'
           'fonts'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
@@ -698,6 +698,11 @@ gruntConfig = {
             dest: ccaDevPath + '/freedom-social-firebase'
           },
           {
+            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+            src: ['**/*.js', '**/*.json']
+            dest: ccaDevPath + '/freedom-social-github'
+          },
+          {
             expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
             src: ['**']
             dest: ccaDevPath + '/freedom-social-wechat'
@@ -706,6 +711,11 @@ gruntConfig = {
             expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
             src: ['**']
             dest: ccaDevPath + '/freedom-social-quiver'
+          },
+          {
+            expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
+            src: ['**']
+            dest: ccaDevPath + '/freedom-pgp-e2e'
           },
           {
             expand: true, cwd: 'node_modules/freedom-port-control/dist/',
@@ -990,10 +1000,17 @@ testDirectory = (dir) ->
       # include the browserification in this step
       testNames.push('browserify:' + testName)
 
-  # add the jasmine task so we can run it
-  gruntConfig['jasmine'][dir] = Rule.jasmineSpec(dir)
-  # include running the tests in this task
-  testNames.push('jasmine:' + dir)
+      gruntConfig['jasmine'][testName] =
+        src: [
+          require.resolve('arraybuffer-slice'),
+          require.resolve('es6-promise')
+          path.join(thirdPartyBuildPath, 'promise-polyfill.js'),
+        ]
+        options:
+          specs: [path.join(devBuildPath, dir, match[1] + '.spec.static.js')]
+          outfile: path.join(devBuildPath, dir, match[1] + 'Runner.html')
+          keepRunner: true
+      testNames.push('jasmine:' + testName)
 
   return testNames
 
@@ -1085,6 +1102,8 @@ taskManager.add 'build_android', [
   'exec:rmAndroidBuild'
   'build_cca'
   'exec:ccaCreate'
+  'exec:ccaPlatformAndroid'
+  'exec:ccaAddPluginsAndroid'
   'exec:ccaBuildAndroid'
 ]
 

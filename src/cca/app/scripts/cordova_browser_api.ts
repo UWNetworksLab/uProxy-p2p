@@ -1,3 +1,7 @@
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
+
 /**
  * cordova_browser_api.ts
  *
@@ -6,12 +10,10 @@
  */
 
 import browser_api = require('../../../interfaces/browser_api');
+import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../../third_party/uproxy-lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
-
-/// <reference path='../../../../third_party/typings/chrome/chrome-app.d.ts'/>
-/// <reference path='../../../../networking-typings/communications.d.ts' />
 
 enum PopupState {
     NOT_LAUNCHED,
@@ -46,18 +48,96 @@ class CordovaBrowserApi implements BrowserAPI {
   public handlePopupLaunch :() => void;
   private onceLaunched_ :Promise<void>;
 
+  private browser_ :Window = null;
+
   constructor() {
+    chrome.notifications.onClicked.addListener((tag) => {
+      this.emit_('notificationclicked', tag);
+    });
   }
 
   public startUsingProxy = (endpoint:net.Endpoint) => {
-    // TODO: Implement getter support, possibly using "redsocks".
+    if (!chrome.proxy) {
+      console.log('No proxy setting support; ignoring start command');
+      return;
+    }
+
+    chrome.proxy.settings.set({
+      scope: "regular",
+      value: {
+        mode: "fixed_servers",
+        rules: {
+          singleProxy: {
+            scheme: "socks5",
+            host: endpoint.address,
+            port: endpoint.port
+          }
+        }
+      }
+    }, (response:Object) => {
+      console.log('Set proxy response:', response);
+      // Open the in-app browser through the proxy.
+      this.openTab('https://news.google.com/');
+    });
   };
 
   public stopUsingProxy = () => {
+    if (!chrome.proxy) {
+      console.log('No proxy setting support; ignoring stop command');
+      return;
+    }
+
+    chrome.proxy.settings.clear({scope: "regular"}, () => {
+      console.log('Cleared proxy settings');
+    });
   };
 
   public openTab = (url :string) => {
-    // TODO: Figure out what this means in Cordova.
+    if (this.browser_) {
+      return;
+    }
+    this.browser_ = cordova.ThemeableBrowser.open(url, '_blank', {
+      statusbar: {
+        color: '#ffffffff'
+      },
+      toolbar: {
+        height: 44,
+        color: '#f0f0f0ff'
+      },
+      title: {
+        color: '#003264ff',
+        showPageTitle: false
+      },
+      backButton: {
+        image: 'back',
+        imagePressed: 'back_pressed',
+        align: 'left'
+      },
+      forwardButton: {
+        image: 'forward',
+        imagePressed: 'forward_pressed',
+        align: 'left'
+      },
+      closeButton: {
+        image: 'close',
+        imagePressed: 'close_pressed',
+        align: 'right',
+        event: 'closePressed'
+      },
+      backButtonCanClose: false
+    });
+
+    this.browser_.addEventListener(cordova.ThemeableBrowser.EVT_ERR, function(e) {
+      console.error(e);
+    });
+    this.browser_.addEventListener(cordova.ThemeableBrowser.EVT_WRN, function(e) {
+      console.log(e);
+    });
+    this.browser_.addEventListener('closePressed', (e) => {
+      this.browser_ = null;
+      this.stopUsingProxy();
+      this.emit_('proxyDisconnected', {deliberate: true});
+    });
   }
 
   public launchTabIfNotOpen = (relativeUrl :string) => {
@@ -100,17 +180,18 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public showNotification = (text :string, tag :string) => {
-    var notification =
-        new Notification('uProxy', {
-          body: text,
-          icon: 'icons/38_' + Constants.DEFAULT_ICON,
-          tag: tag
-        });
-    notification.onclick = () => {
-      this.emit_('notificationClicked', tag);
-    };
+    // We use chrome.notifications because the HTML5 Notification API is not
+    // available (and not polyfilled) in WebViews, so it only works in
+    // Crosswalk.
+    chrome.notifications.create(tag, {
+      type: 'basic',
+      iconUrl: 'icons/38_' + Constants.DEFAULT_ICON,
+      title: 'uProxy',  // Mandatory attribute
+      message: text
+    }, (tag:string) => {});
+
     setTimeout(function() {
-      notification.close();
+      chrome.notifications.clear(tag, (wasCleared:boolean) => {});
     }, 5000);
   }
 

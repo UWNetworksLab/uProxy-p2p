@@ -1,12 +1,13 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
+import _ = require('lodash');
 import local_storage = require('./storage');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import loggingprovider = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import metrics_module = require('./metrics');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
-import _ = require('lodash');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 var log :logging.Log = new logging.Log('globals');
 
@@ -39,13 +40,14 @@ export var settings :uproxy_core_api.GlobalSettings = {
   version: STORAGE_VERSION,
   splashState: 0,
   statsReportingEnabled: false,
-  consoleFilter: loggingTypes.Level.warn,
+  consoleFilter: loggingprovider.Level.warn,
   language: 'en',
   force_message_version: 0, // zero means "don't override"
   // TODO: remove this in November 2015, to allow 1 month for existing users to
   // see the notification that Google+Facebook social providers have changed.
   hasSeenGoogleAndFacebookChangedNotification: false,
-  quiverUserName: ''
+  quiverUserName: '',
+  showCloud: false
 };
 
 export var natType :string = '';

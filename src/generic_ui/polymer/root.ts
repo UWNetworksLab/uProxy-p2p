@@ -18,11 +18,26 @@ interface button_description {
   dismissive :boolean;
 }
 
+interface UserInputData {
+  placeholderText :string;
+  initInputValue ?:string;
+}
+
 interface dialog_description {
   heading :string;
   message :string;
   buttons: button_description[];
+  userInputData ?:UserInputData;
 }
+
+// Since we reuse a uproxy-action-dialog, sometimes there is a race condition
+// where the dialog attempts to open before it is properly closed.
+// We use a Promise to track if the dialog is closed.
+// The Promise is fulfilled by default, and also after a
+// "core-overlay-open-completed" event is observed.
+// The Promise is reset each time we open the dialog.
+var reusableDialogClosedPromise = Promise.resolve<void>();
+var fulfillReusableDialogClosed :Function;
 
 Polymer({
   dialog: {
@@ -95,23 +110,42 @@ Polymer({
      * }
      */
 
+    if (detail.userInputData && detail.userInputData.initInputValue) {
+      this.$.dialogInput.value = detail.userInputData.initInputValue;
+    } else {
+      this.$.dialogInput.value = '';
+    }
+
     this.dialog = detail;
     // Using async() allows the contents of the dialog to update before
     // it's opened. Opening the dialog too early causes it to be positioned
     // incorrectly (i.e. off center).
     this.async(() => {
-      this.$.dialog.open();
+      // Do not open the dialog until we are sure it is closed.
+      reusableDialogClosedPromise.then(() => {
+        reusableDialogClosedPromise = new Promise<void>((F, R) => {
+          fulfillReusableDialogClosed = F;
+        });
+        this.$.dialog.open();
+      });
     });
+  },
+  reusableDialogClosed: function() {
+    fulfillReusableDialogClosed();
   },
   openProxyError: function() {
     this.$.proxyError.open();
   },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     // TODO: error checking, isNaN etc
+
+    // Get userInput, or set to undefined if it is '', null, etc
+    var userInput = this.$.dialogInput.value || undefined;
+
     var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
     if (callbackIndex) {
       var fulfill = (target.getAttribute('affirmative') != null);
-      ui.invokeConfirmationCallback(callbackIndex, fulfill);
+      ui.invokeConfirmationCallback(callbackIndex, fulfill, userInput);
     }
     var signal = target.getAttribute('data-signal');
     if (signal) {

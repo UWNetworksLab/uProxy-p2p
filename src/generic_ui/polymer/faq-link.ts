@@ -4,7 +4,6 @@
 Polymer({
   anchor: '',
   openFaq: function() {
-    ui_context.ui.openTab('generic_ui/faq.html#' + this.anchor);
+    this.fire('core-signal', {name: 'open-faq', data: {anchor: this.anchor}});
   },
-  ready: function() {}
 });

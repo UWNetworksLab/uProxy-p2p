@@ -27,11 +27,6 @@ body /deep/ paper-input-decorator /deep/ .underline div {
   background-color: #009688;
 }
 
-body /deep/ core-toolbar {
-  background-color: #009688;
-  color: white;
-}
-
 /* get around a bug in polymer styling */
 body /deep/ paper-input-decorator input[is="core-input"] {
   padding: 0;

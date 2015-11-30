@@ -13,6 +13,7 @@
 *.vpw*
 *.vtg
 *.xcf
+*.orig
 *~
 .DS_Store
 .grunt

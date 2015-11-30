@@ -4,6 +4,8 @@
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='faq-link.html'>
+<link rel='import' href='link.html'>
 
 <polymer-element name='uproxy-advanced-settings'>
   <template>
@@ -36,6 +38,27 @@
     #moreInfo {
       color: grey;
       margin-top: 1em;
+    }
+    #analyzeNAT {
+      width: 100%;
+      border-bottom: 1px solid rgb(221, 221, 221);
+      padding: 20px 30px;
+      text-align: start;
+      overflow: auto;
+      color: #009688;
+    }
+    #analyzeNAT core-icon {
+      height: 15px !important;
+      color: grey;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      margin-right: 0px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    #analyzeNAT core-icon:hover {
+      opacity: 1;
     }
     #setAdvancedSettings {
       width: 100%;
@@ -117,7 +140,18 @@
         <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
+        <div id='analyzeNAT'>
+          <p class='inputLabel'>
+            <uproxy-link on-tap='{{ viewLogs }}'>
+              {{ "ANALYZE_NAT" | $$ }}
+            </uproxy-link>
+            <uproxy-faq-link anchor='doesUproxyLogData'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+          </p>
+        </div>
         <div id='portControlBox'>
+
           <p class='inputLabel'>
             {{ 'PORT_CONTROL_TITLE' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>

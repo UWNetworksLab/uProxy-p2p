@@ -9,6 +9,9 @@ import user = require('../scripts/user');
 import _ = require('lodash');
 
 Polymer({
+  created: function() {
+    this.offeringInstancesChanged = _.throttle(this.offeringInstancesChanged.bind(this), 100);
+  },
   contact: {
     // Must adhere to the typescript interface UI.User.
     name: 'unknown'
@@ -52,7 +55,7 @@ Polymer({
       userId: this.contact.network.userId
     };
     ui_context.core.acceptInvitation({
-      network: socialNetworkInfo, data: this.contact.userId
+      network: socialNetworkInfo, userId: this.contact.userId
     });
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
@@ -105,13 +108,19 @@ Polymer({
       this.hideOnlineStatus = true;
     }
   },
+  offeringInstancesChanged: function() {
+    // instanceId arbitrarily chosen
+    this.sortedInstances = _.sortByOrder(this.contact.offeringInstances,
+                                         ['isOnline', 'instanceId'], ['desc', 'asc']);
+  },
   observe: {
     'contact.isSharingWithMe': 'fireChanged',
     'contact.isGettingFromMe': 'fireChanged',
     'contact.isOnline': 'fireChanged',
     /* handle expand/collapse changes from ui.ts, toggle() handles other cases */
     'contact.getExpanded': 'getExpandedChanged',
-    'contact.shareExpanded': 'shareExpandedChanged'
+    'contact.shareExpanded': 'shareExpandedChanged',
+    'contact.offeringInstances': 'offeringInstancesChanged',
   },
   computed: {
     'isExpanded': '(mode === ui_constants.Mode.GET && contact.getExpanded) || (mode === ui_constants.Mode.SHARE && contact.shareExpanded)'

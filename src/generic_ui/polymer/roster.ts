@@ -22,6 +22,8 @@ Polymer({
     }
   },
   computed: {
-    'hasContacts': '(model.contacts.getAccessContacts.pending.length + model.contacts.getAccessContacts.trustedUproxy.length + model.contacts.getAccessContacts.untrustedUproxy.length + model.contacts.shareAccessContacts.pending.length + model.contacts.shareAccessContacts.trustedUproxy.length + model.contacts.shareAccessContacts.untrustedUproxy.length) > 0',
-  }
+    'hasGetContacts': '(model.contacts.getAccessContacts.pending.length + model.contacts.getAccessContacts.trustedUproxy.length + model.contacts.getAccessContacts.untrustedUproxy.length) > 0',
+    'hasShareContacts': '(model.contacts.shareAccessContacts.pending.length + model.contacts.shareAccessContacts.trustedUproxy.length + model.contacts.shareAccessContacts.untrustedUproxy.length) > 0',
+    'hasContacts': '(mode==ui_constants.Mode.GET && hasGetContacts) || (mode==ui_constants.Mode.SHARE && hasShareContacts)'
+  },
 });

@@ -37,6 +37,7 @@ export interface GlobalSettings {
   force_message_version :number;
   hasSeenGoogleAndFacebookChangedNotification :boolean;
   quiverUserName :string;
+  showCloud :boolean;
 }
 export interface InitialState {
   networkNames :string[];
@@ -86,8 +87,6 @@ export enum Command {
   STOP_PROXYING_COPYPASTE_SHARE = 1011,
   COPYPASTE_SIGNALLING_MESSAGE = 1012,
 
-  // Payload should be a HandleManualNetworkInboundMessageCommand.
-  HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE = 1013,
   SEND_CREDENTIALS = 1014,
   UPDATE_GLOBAL_SETTINGS = 1015,
   GET_LOGS = 1016,
@@ -98,7 +97,6 @@ export enum Command {
   HANDLE_CORE_UPDATE = 1021,
   REFRESH_PORT_CONTROL = 1022,
   CREDENTIALS_ERROR = 1023,
-  ADD_USER = 1024, /* Deprecated as of 0.8.23 */
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
@@ -118,8 +116,6 @@ export enum Update {
   STOP_GETTING_FROM_FRIEND = 2008,
   START_GIVING_TO_FRIEND = 2009,
   STOP_GIVING_TO_FRIEND = 2010,
-  // Payload should be a Message.
-  MANUAL_NETWORK_OUTBOUND_MESSAGE = 2011,
   // TODO: "Get credentials" is a command, not an "update". Consider
   // renaming the "Update" enum.
   GET_CREDENTIALS = 2012,
@@ -193,6 +189,12 @@ export interface EmailData {
   to :string;
   subject :string;
   body :string;
+};
+
+export interface AcceptInvitationData {
+  network :social.SocialNetworkInfo;
+  token ?:string;
+  userId ?:string;
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};

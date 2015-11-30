@@ -9,26 +9,25 @@
 /// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
+import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import consent = require('./consent');
+import crypto = require('./crypto');
 import globals = require('./globals');
+import _ = require('lodash');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
+import Persistent = require('../interfaces/persistent');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
-import _ = require('lodash');
-import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 import storage = globals.storage;
 import ui = ui_connector.connector;
-import pgp = globals.pgp;
-
-import Persistent = require('../interfaces/persistent');
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
@@ -79,7 +78,7 @@ import Persistent = require('../interfaces/persistent');
     private isUIUpdatePending = false;
 
     // Number of milliseconds before timing out socksToRtc_.start
-    public SOCKS_TO_RTC_TIMEOUT :number = 30000;
+    public SOCKS_TO_RTC_TIMEOUT :number = 90000;
     // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
     // trying to connect) by timing out rtcToNet_.start 15 seconds later than
     // socksToRtc_.start
@@ -127,18 +126,15 @@ import Persistent = require('../interfaces/persistent');
             log.error('Could not find clientId for instance', this);
             return;
           }
-          if (typeof this.publicKey !== 'undefined') {
-            var arrayBufferData =
-                arraybuffers.stringToArrayBuffer(JSON.stringify(data.data));
-            pgp.signEncrypt(arrayBufferData, this.publicKey)
-                .then((cipherData:ArrayBuffer) => {
-                  return pgp.armor(cipherData);
-                }).then((cipherText :string) => {
-                  data.data = cipherText;
-                  this.user.network.send(this.user, clientId, data);
-                }).catch((e) => {
-                  log.error('Error encrypting message ', e);
-                });
+          if (typeof this.publicKey !== 'undefined' &&
+              typeof globals.publicKey !== 'undefined' &&
+              // No need to encrypt again for networks like Quiver
+              !this.user.network.encryptsWithClientId()) {
+            crypto.signEncrypt(JSON.stringify(data.data), this.publicKey)
+            .then((cipherText :string) => {
+              data.data = cipherText;
+              this.user.network.send(this.user, clientId, data);
+            });
           } else {
             this.user.network.send(this.user, clientId, data);
           }
@@ -187,19 +183,20 @@ import Persistent = require('../interfaces/persistent');
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
-
-      if (msg.version < 5) {
-        return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
-      } else {
-        return pgp.dearmor(<string>msg.data).then((cipherData :ArrayBuffer) => {
-          return pgp.verifyDecrypt(cipherData, this.publicKey);
-        }).then((result :freedom.PgpProvider.VerifyDecryptResult) => {
-          var decryptedSignal =
-              JSON.parse(arraybuffers.arrayBufferToString(result.data));
-          return this.handleDecryptedSignal_(msg.type, msg.version, decryptedSignal);
+      if (typeof this.publicKey !== 'undefined' &&
+          typeof globals.publicKey !== 'undefined' &&
+          // signal data is not encrypted for Quiver, because entire message
+          // is encrypted over the network and already decrypted by this point
+          !this.user.network.encryptsWithClientId()) {
+        return crypto.verifyDecrypt(<string>msg.data, this.publicKey)
+        .then((plainText :string) => {
+          return this.handleDecryptedSignal_(
+              msg.type, msg.version, JSON.parse(plainText));
         }).catch((e) => {
           log.error('Error decrypting message ', e);
         });
+      } else {
+        return this.handleDecryptedSignal_(msg.type, msg.version, msg.data);
       }
     }
 
@@ -234,15 +231,15 @@ import Persistent = require('../interfaces/persistent');
         });
 
         /*
-        TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
-        trying to connect. Something like:
-        https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
-        Issue: https://github.com/uProxy/uproxy/issues/1256
+          TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
+          trying to connect. Something like:
+          https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
+          Issue: https://github.com/uProxy/uproxy/issues/1256
 
-        } else if (signalFromRemote['type'] == signals.Type.CANCEL_OFFER) {
+         else if (signalFromRemote['type'] == signals.Type.CANCEL_OFFER) {
           this.stopShare();
           return;
-        }
+          }
         */
       }
 
@@ -354,7 +351,8 @@ import Persistent = require('../interfaces/persistent');
     public update = (data:social.InstanceHandshake,
         messageVersion:number) :Promise<void> => {
       return this.onceLoaded.then(() => {
-        if (typeof this.publicKey === 'undefined' || !this.keyVerified) {
+        if (data.publicKey &&
+            (typeof this.publicKey === 'undefined' || !this.keyVerified)) {
           this.publicKey = data.publicKey;
         }
         this.description = data.description;

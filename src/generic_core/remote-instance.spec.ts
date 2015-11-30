@@ -8,6 +8,17 @@
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+
+import freedom_mocks = require('../mocks/freedom-mocks');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
+  'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
+  'metrics': () => { return new freedom_mocks.MockMetrics(); },
+  'pgp': () => { return new freedom_mocks.PgpProvider() },
+  'portControl': () => { return new Object },
+});
+
 import remote_user = require('./remote-user');
 import consent = require('./consent');
 import remote_instance = require('./remote-instance');
@@ -257,12 +268,13 @@ describe('remote_instance.RemoteInstance', () => {
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');
       spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       spyOn(rtc_to_net, 'RtcToNet').and.returnValue(fakeRtcToNet);
+      alice['connection_'].onceSharerCreated = Promise.resolve<void>();
     });
 
     it('handles OFFER signal from client peer as server', (done) => {
       alice.handleSignal({
           type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
-          data: JSON.stringify(fakeSignallingMessage),
+          data: fakeSignallingMessage,
           version: globals.MESSAGE_VERSION}).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(
@@ -276,7 +288,7 @@ describe('remote_instance.RemoteInstance', () => {
       alice.start().then(() => {
         alice.handleSignal({
             type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
-            data: JSON.stringify(fakeSignallingMessage),
+            data: fakeSignallingMessage,
             version: globals.MESSAGE_VERSION}).then(() => {
           expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(
               fakeSignallingMessage);
@@ -289,7 +301,7 @@ describe('remote_instance.RemoteInstance', () => {
     it('rejects invalid signals', (done) => {
       alice.handleSignal({
           type: social.PeerMessageType.INSTANCE,
-          data: JSON.stringify(fakeSignallingMessage),
+          data: fakeSignallingMessage,
           version: globals.MESSAGE_VERSION}).then(() => {
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
@@ -301,7 +313,7 @@ describe('remote_instance.RemoteInstance', () => {
       alice.user.consent.localGrantsAccessToRemote = false;
       alice.handleSignal({
           type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
-          data: JSON.stringify(fakeSignallingMessage),
+          data: fakeSignallingMessage,
           version: globals.MESSAGE_VERSION}).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();

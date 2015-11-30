@@ -1,3 +1,4 @@
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='./context.d.ts' />
 
 // This class will set our global settings object as a JSON blob. It will
@@ -8,6 +9,7 @@
 
 var ui = ui_context.ui;
 var core = ui_context.core;
+var model = ui_context.model;
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
@@ -66,9 +68,13 @@ Polymer({
       this.status = StatusState.PARSE_ERROR;
     }
   },
+  viewLogs: function() {
+    this.ui.openTab('generic_ui/view-logs.html?lang=' + this.model.globalSettings.language);
+  },
   ready: function() {
     this.ui = ui;
     this.uproxy_core_api = uproxy_core_api;
+    this.model = model;
   },
   refreshPortControl: function() {
     core.refreshPortControlSupport();

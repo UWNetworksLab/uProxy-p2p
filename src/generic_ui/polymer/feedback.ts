@@ -1,6 +1,11 @@
 /// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
 
 Polymer({
   email: '',
@@ -22,6 +27,13 @@ Polymer({
     this.$.feedbackPanel.open();
   },
   sendFeedback: function() {
+    this.feedback = this.feedback.trim();
+    this.$.feedbackDecorator.isInvalid = !this.feedback.length;
+
+    if (this.$.feedbackDecorator.isInvalid) {
+      return;
+    }
+
     this.$.sendingFeedbackDialog.open();
     ui_context.ui.sendFeedback({
       email: this.email,
@@ -38,7 +50,6 @@ Polymer({
       this.email = '';
       this.feedback = '';
       this.$.logCheckbox.checked = false;
-
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
       this.fire('open-dialog', {

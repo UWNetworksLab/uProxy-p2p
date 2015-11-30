@@ -1,25 +1,25 @@
 /// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import globals = require('./globals');
+import _ = require('lodash');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
-import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import onetime = require('../../../third_party/uproxy-lib/bridge/onetime');
+import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
-import social = require('../interfaces/social');
+import user = require('./remote-user');
 import social_network = require('./social');
-import storage = globals.storage;
+import social = require('../interfaces/social');
+import StoredValue = require('./stored_value');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import user = require('./remote-user');
 import version = require('../generic/version');
-import StoredValue = require('./stored_value');
-import _ = require('lodash');
 
 import ui = ui_connector.connector;
+import storage = globals.storage;
 
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.
@@ -237,6 +237,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     globals.settings.hasSeenGoogleAndFacebookChangedNotification =
         newSettings.hasSeenGoogleAndFacebookChangedNotification;
     globals.settings.quiverUserName = newSettings.quiverUserName;
+    globals.settings.showCloud = newSettings.showCloud;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
@@ -312,30 +313,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  // Required for version 0.8.23
-  public addUser = (inviteUrl: string): Promise<void> => {
-    try {
-      // inviteUrl may be a URL with a token, or just the token.  Remove the
-      // prefixed URL if it is set.
-      var token = inviteUrl.lastIndexOf('/') >= 0 ?
-          inviteUrl.substr(inviteUrl.lastIndexOf('/') + 1) : inviteUrl;
-      var tokenObj = JSON.parse(atob(token));
-      var networkName = tokenObj.networkName;
-      var networkData = tokenObj.networkData;
-      if (!social_network.networks[networkName]) {
-        return Promise.reject('invite URL had invalid social network');
-      }
-    } catch (e) {
-      return Promise.reject('Error parsing invite URL');
-    }
- 
-    // This code assumes the user is only signed in once to any given network.
-    for (var userId in social_network.networks[networkName]) {
-      return social_network.networks[networkName][userId]
-          .addUserRequest(networkData);
-    }
-  }
-
   public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
     // TODO: clean this up - hack to find the one network
     var network: social.Network;
@@ -346,15 +323,16 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.inviteUser(data.userName);
   }
 
-  public acceptInvitation = (obj: {network :social.SocialNetworkInfo; data :string}): Promise<void> => {
-    var userId = obj.network.userId;
-    if (!userId) {
+  public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
+    var networkName = data.network.name;
+    var networkUserId = data.network.userId;
+    if (!networkUserId) {
       // Take the first key in the userId to social network map as the current user.
       // Assumes the user is only signed in once to any given network.
-      userId = Object.keys(social_network.networks[obj.network.name])[0];
+      networkUserId = Object.keys(social_network.networks[networkName])[0];
     }
-    var network = social_network.getNetwork(obj.network.name, userId);
-    return network.acceptInvitation(obj.data);
+    var network = social_network.getNetwork(networkName, networkUserId);
+    return network.acceptInvitation(data.token, data.userId);
   }
 
   public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
@@ -395,20 +373,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
     remote.stop();
     // TODO: Handle revoked permissions notifications.
-  }
-
-  public handleManualNetworkInboundMessage =
-      (command :social.HandleManualNetworkInboundMessageCommand) => {
-    var manualNetwork :social_network.ManualNetwork =
-        <social_network.ManualNetwork> social_network.getNetwork(
-            social_network.MANUAL_NETWORK_ID, '');
-    if (!manualNetwork) {
-      log.error('Manual network does not exist, discarding inbound message',
-                command);
-      return;
-    }
-
-    manualNetwork.receive(command.senderClientId, command.message);
   }
 
   /**

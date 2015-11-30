@@ -34,7 +34,11 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
   },
   next: function() {
-    this.setState(model.globalSettings.splashState + 1);
+    if (this.supportsQuiver) {
+      ui.view = ui_constants.View.ROSTER;
+    } else {
+      this.setState(model.globalSettings.splashState + 1);
+    }
   },
   prev: function() {
     this.setState(model.globalSettings.splashState - 1);
@@ -52,8 +56,51 @@ Polymer({
       window.location.reload();
     }
   },
+  loginToQuiver: function() {
+    model.globalSettings.quiverUserName = this.userName;
+    core.updateGlobalSettings(model.globalSettings);
+    this.login('Quiver', this.userName);
+  },
+  loginTapped: function(event: Event, detail: Object, target: HTMLElement) {
+    var networkName = target.getAttribute('data-network');
+    this.login(networkName);
+  },
+  login: function(networkName :string, userName ?:string) {
+    ui.login(networkName, userName).then(() => {
+      // syncNetwork will update the view to the ROSTER.
+      ui.bringUproxyToFront();
+    }).catch((e: Error) => {
+      console.warn('Did not log in ', e);
+    });
+  },
+  getNetworkDisplayName: function(name :string) {
+    return ui.getNetworkDisplayName(name);
+  },
+  isExperimentalNetwork: function(name :string) {
+    return ui.isExperimentalNetwork(name);
+  },
+  updateNetworkButtonNames: function() {
+    var supportsQuiver = false;
+    this.networkButtonNames = [];
+    for (var i = 0; i < model.networkNames.length; ++i) {
+      if (model.networkNames[i] === 'Quiver') {
+        supportsQuiver = true;
+      } else {
+        this.networkButtonNames.push(model.networkNames[i]);
+      }
+    }
+    // Only set .supportsQuiver after iterating through all networks, to prevent
+    // any flicker in case we switch from true to false to true again.
+    this.supportsQuiver = supportsQuiver;
+  },
+  observe: {
+    'model.networkNames': 'updateNetworkButtonNames'
+  },
   ready: function() {
+    this.ui = ui;
     this.model = model;
     this.languages = languages;
-  }
+    this.userName = model.globalSettings.quiverUserName;
+    this.updateNetworkButtonNames();
+  },
 });

@@ -10,6 +10,7 @@ export interface ClientState {
   clientId  :string;
   status: string;  // a string from: FreedomSocialProvider.STATUS
   timestamp :number;
+  inviteUserData ?:string;
 }
 
 // The profile of a user on a social network.
@@ -100,7 +101,7 @@ export interface FreedomSocialProvider {
   getUsers() : Promise<Users>;
   getClients() : Promise<Clients>;
 
-  acceptUserInvitation(inviteToken :string): Promise<void>;
+  acceptUserInvitation(inviteToken :string, inviteUserData ?:string): Promise<void>;
   inviteUser(optionalUserId :string): Promise<Object>;
   sendEmail(toEmailAddress :string, subject :string, body :string): Promise<void>;
 
