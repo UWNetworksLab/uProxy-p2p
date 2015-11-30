@@ -443,6 +443,20 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
+  public showDialog(heading :string, message :string, buttonText ?:string, signal ?:string) {
+    var button :ui_constants.DialogButtonDescription = {
+      text: buttonText || this.i18n_t("OK")
+    };
+    if (signal) {
+      button['signal'] = signal;
+    }
+    this.fireSignal('open-dialog', {
+      heading: heading,
+      message: message,
+      buttons: [button]
+    });
+  }
+
   public invokeConfirmationCallback = (index :number, fulfill :boolean, data ?:any) => {
     if (index > this.confirmationCallbackIndex_) {
       console.error('Confirmation callback not found: ' + index);
@@ -585,13 +599,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public handleInviteUrlData = (url :string) => {
     var showUrlError = () => {
-      this.fireSignal('open-dialog', {
-        heading: '',
-        message: this.i18n_t("INVITE_URL_ERROR"),
-        buttons: [{
-          text: this.i18n_t("OK")
-        }]
-      });
+      this.showDialog('', this.i18n_t('INVITE_URL_ERROR'));
     };
     try {
       var token = url.substr(url.lastIndexOf('/') + 1);

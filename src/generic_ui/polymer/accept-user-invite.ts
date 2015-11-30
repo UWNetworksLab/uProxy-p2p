@@ -43,22 +43,10 @@ Polymer({
     confirmLogin.then(() => {
       core.acceptInvitation({network: socialNetworkInfo, token: this.receivedInviteToken})
           .then(() => {
-        this.fire('open-dialog', {
-          heading: '',
-          message: ui.i18n_t("FRIEND_ADDED"),
-          buttons: [{
-            text: ui.i18n_t("OK")
-          }]
-        });
+        ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
         this.closeAcceptUserInvitePanel();
       }).catch(() => {
-        this.fire('open-dialog', {
-          heading: '',
-          message: ui.i18n_t("FRIEND_ADD_ERROR"),
-          buttons: [{
-            text: ui.i18n_t("OK")
-          }]
-        });
+        ui.showDialog('', ui.i18n_t('FRIEND_ADD_ERROR'));
       });
     });
   },

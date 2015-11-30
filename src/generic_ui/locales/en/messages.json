@@ -955,4 +955,8 @@
     "description": "Placeholder text for user name on uProxy network",
     "message": "Choose a user name"
   },
+  "REQUIRED_FIELD": {
+    "description": "Error message indicating that a field is required (e.g. user name)",
+    "message": "Required field."
+  },
 }
