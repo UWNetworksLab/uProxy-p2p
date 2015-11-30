@@ -176,7 +176,6 @@ class CordovaBrowserApi implements BrowserAPI {
     console.log("Time between browser icon click and popup launch (ms): " +
         (Date.now() - this.popupCreationStartTime_));
     this.popupState_ = PopupState.LAUNCHED;
-    this.handlePopupLaunch();
   }
 
   public showNotification = (text :string, tag :string) => {

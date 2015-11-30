@@ -177,7 +177,7 @@ gruntConfig = {
     }
     ccaAddPluginsAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git cordova-plugin-splashscreen'
+      command: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
     }
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
@@ -415,6 +415,7 @@ gruntConfig = {
           cwd: ccaDevPath
           src: [
             'manifest.json'
+            'config.xml'
             '*.html'
 
             'bower/webcomponentsjs/webcomponents.min.js'
@@ -478,6 +479,16 @@ gruntConfig = {
           cwd: 'src/generic_core/dist_build/'
           src: ['*']
           dest: 'build/dist/cca/app/generic_core'
+        }
+      ]
+
+    cca_splash:
+      files: [
+        {
+          expand: true
+          cwd: ccaDevPath
+          src: [ 'splashscreen.png' ]
+          dest: 'build/dev/uproxy/android/platforms/android/res/drawable-port-xhdpi'
         }
       ]
 
@@ -1104,6 +1115,7 @@ taskManager.add 'build_android', [
   'exec:ccaCreate'
   'exec:ccaPlatformAndroid'
   'exec:ccaAddPluginsAndroid'
+  'copy:cca_splash'
   'exec:ccaBuildAndroid'
 ]
 
