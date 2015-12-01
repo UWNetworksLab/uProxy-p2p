@@ -25,6 +25,7 @@
     "compare-version": "^0.1.2",
     "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
+    "freedom": "~0.6.20",
     "freedom-for-chrome": "^0.4.20",
     "freedom-for-firefox": "^0.6.15",
     "freedom-pgp-e2e": "^0.5.0",
