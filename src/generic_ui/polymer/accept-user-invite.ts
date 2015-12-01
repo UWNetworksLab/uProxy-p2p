@@ -9,45 +9,11 @@ var core = ui_context.core;
 
 Polymer({
   acceptInvitation: function() {
-    var token = this.receivedInviteToken.lastIndexOf('/') >= 0 ?
-    this.receivedInviteToken.substr(this.receivedInviteToken.lastIndexOf('/') + 1) : this.receivedInviteToken;
-    var tokenObj = JSON.parse(atob(token));
-    var networkName = tokenObj.networkName;
-
-    var confirmLogin = Promise.resolve<void>();
-    if (networkName === "Cloud") {
-      // Inform the user that their invite code will connect them to our Cloud
-      // social provider.
-      // TODO: Remove this when we fully launch Cloud.
-      var confirmationMessage = ui.i18n_t("CLOUD_INVITE_CONFIRM");
-      confirmLogin = ui.getConfirmation('', confirmationMessage).then(() => {
-        // Set mode to GET, as Cloud friends only appear in the GET tab.
-        ui.setMode(ui_constants.Mode.GET);
-        if (model.getNetwork("Cloud")) {
-          return Promise.resolve<void>();
-        }
-        return ui.login("Cloud").catch((e :Error) => {
-          console.warn('Error logging into Cloud', e);
-        });
-      }).catch(() => {
-        console.log("Cloud login declined");
-        return;
-      });
-    }
-
-    var socialNetworkInfo = {
-      name: networkName,
-      userId: "" /* The current user's ID will be determined by the core. */
-    };
-
-    confirmLogin.then(() => {
-      core.acceptInvitation({network: socialNetworkInfo, token: this.receivedInviteToken})
-          .then(() => {
-        ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
-        this.closeAcceptUserInvitePanel();
-      }).catch(() => {
-        ui.showDialog('', ui.i18n_t('FRIEND_ADD_ERROR'));
-      });
+    ui.handleInvite(this.receivedInviteToken).then(() => {
+      ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
+      this.closeAcceptUserInvitePanel();
+    }).catch(() => {
+      ui.showDialog('', ui.i18n_t('FRIEND_ADD_ERROR'));
     });
   },
   openAcceptUserInvitePanel: function() {
