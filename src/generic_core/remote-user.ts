@@ -57,6 +57,8 @@ var log :logging.Log = new logging.Log('remote-user');
 
     public consent :consent.State;
 
+    public knownPublicKeys :string[] = [];
+
     // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :remote_instance.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
@@ -99,6 +101,13 @@ var log :logging.Log = new logging.Log('remote-user');
 
       this.consent =
           new consent.State(userId === this.network.myInstance.userId);
+
+      // Because it requires user action to add a cloud friend, and because
+      // these cloud instances are only sharers, by default all users are
+      // requesting access from cloud instances.
+      if (this.network.name === "Cloud") {
+        this.consent.localRequestsAccessFromRemote = true;
+      }
 
       storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
@@ -302,6 +311,12 @@ var log :logging.Log = new logging.Log('remote-user');
       if (!instance) {
         // Create a new instance.
         instance = new remote_instance.RemoteInstance(this, instanceId);
+        if (this.network.encryptsWithClientId()) {
+          // Set publicKey using clientId.  For networks which include the
+          // publicKey with the clientId (like Quiver), publicKey is not part
+          // of the instance handshake.
+          instance.publicKey = this.network.getKeyFromClientId(clientId);
+        }
         this.instances_[instanceId] = instance;
       }
       return instance.update(instanceHandshake,
@@ -476,6 +491,10 @@ var log :logging.Log = new logging.Log('remote-user');
         this.profile.url = state.url;
       }
 
+      if (typeof state.knownPublicKeys !== 'undefined') {
+        this.knownPublicKeys = state.knownPublicKeys;
+      }
+
       this.profile.status = state.status || social.UserStatus.FRIEND;
 
       // Restore all instances.
@@ -506,7 +525,8 @@ var log :logging.Log = new logging.Log('remote-user');
         url: this.profile.url,
         instanceIds: Object.keys(this.instances_),
         consent: this.consent,
-        status: this.profile.status
+        status: this.profile.status,
+        knownPublicKeys: this.knownPublicKeys
       });
     }
 
@@ -538,10 +558,15 @@ var log :logging.Log = new logging.Log('remote-user');
               isOffering: this.consent.localGrantsAccessToRemote
             },
             name: myInstance.userName,
-            userId: myInstance.userId,
-            publicKey: globals.publicKey
+            userId: myInstance.userId
           }
         };
+        if (!this.network.encryptsWithClientId()) {
+          // Only include publicKey if we are not already including it with
+          // the clientId (i.e. don't include publicKey in instance handshake
+          // for Quiver)
+          (<any>instanceMessage)['data']['publicKey'] = globals.publicKey;
+        }
         return this.network.send(this, clientId, instanceMessage);
       });
     }

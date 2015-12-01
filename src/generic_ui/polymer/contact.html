@@ -87,7 +87,8 @@
       height: 20px;
     }
     core-collapse {
-      margin-left: 16px;
+      -webkit-margin-start: 16px;
+      -moz-margin-start: 16px;
       margin-top: 5px;
       color: rgba(0,0,0,0.54);
     }
@@ -129,7 +130,7 @@
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
       <div flex>
         <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
-        <div class='{{ (isOnline || contact.status!=UserStatus.FRIEND) ? "onlineStatus" : "offlineStatus" }}'
+        <div class='{{ isOnline ? "onlineStatus" : "offlineStatus" }}'
           hidden?="{{ hideOnlineStatus }}" on-tap='{{ toggle }}'>
           <span hidden?='{{contact.status!=UserStatus.FRIEND}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}</span>
           <span hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>{{ 'RESPOND_TO_FRIEND_REQUEST' | $$ }}</span>
@@ -147,11 +148,11 @@
                   {{ "TRYING_TO_CONNECT" | $$({ name: contact.name || contact.userId }) }}
                 </p>
               </div>
-              <template repeat='{{ instance in contact.offeringInstances }}' vertical layout>
+              <template repeat='{{ instance in sortedInstances }}' vertical layout>
                 <uproxy-instance
-                    user='{{ contact }}'
+                    userName='{{ contact.name }}'
                     instance='{{ instance }}'
-                    network='{{contact.network}}'>
+                    on-instance-changed='{{ offeringInstancesChanged }}'>
                 </uproxy-instance>
               </template>
             </div>

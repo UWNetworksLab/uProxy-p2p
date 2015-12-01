@@ -34,7 +34,11 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
   },
   next: function() {
-    this.setState(model.globalSettings.splashState + 1);
+    if (this.supportsQuiver) {
+      ui.view = ui_constants.View.ROSTER;
+    } else {
+      this.setState(model.globalSettings.splashState + 1);
+    }
   },
   prev: function() {
     this.setState(model.globalSettings.splashState - 1);
@@ -93,12 +97,10 @@ Polymer({
     'model.networkNames': 'updateNetworkButtonNames'
   },
   ready: function() {
+    this.ui = ui;
     this.model = model;
     this.languages = languages;
     this.userName = model.globalSettings.quiverUserName;
     this.updateNetworkButtonNames();
-  },
-  openFaqForm: function() {
-    this.fire('core-signal', {name: 'open-faq'});
   },
 });

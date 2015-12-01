@@ -31,6 +31,7 @@ import social = require('../interfaces/social');
 import freedom_social2 = require('../interfaces/social2');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import crypto = require('./crypto');
 import ui = ui_connector.connector;
 
 import storage = globals.storage;
@@ -40,8 +41,6 @@ var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 var log :logging.Log = new logging.Log('social');
 
 export var LOGIN_TIMEOUT :number = 5000;  // ms
-
-export var MANUAL_NETWORK_ID = 'Manual';
 
 // PREFIX is the string prefix indicating which social providers in the
 // freedom manifest we want to treat as social providers for uProxy.
@@ -55,9 +54,7 @@ var PREFIX :string = 'SOCIAL-';
 export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
 
 export function removeNetwork(networkName :string, userId :string) :void {
-  if (networkName !== MANUAL_NETWORK_ID) {
-    delete networks[networkName][userId];
-  }
+  delete networks[networkName][userId];
   notifyUI(networkName, userId);
 }
 
@@ -77,10 +74,6 @@ export function initializeNetworks() :void {
       networks[name] = {};
     }
   }
-
-  // TODO: re-enable manual networks here when all code is ready
-  // Social.networks[MANUAL_NETWORK_ID] = {
-  //     '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
 }
 
 /**
@@ -263,8 +256,20 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.areAllContactsUproxy === true : false;
     }
 
+    public encryptsWithClientId = (): boolean => {
+      // Default to false.
+      var options: social.NetworkOptions = NETWORK_OPTIONS[this.name];
+      return options ? options.encryptsWithClientId === true : false;
+    }
+
     public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
+    }
+
+    public getKeyFromClientId = (clientId :string) : string => {
+      var beginPgpString = '-----BEGIN PGP PUBLIC KEY BLOCK-----';
+      var endPgpString = '-----END PGP PUBLIC KEY BLOCK-----\r\n';
+      return clientId.match(beginPgpString + '(.|[\r\n])*' + endPgpString)[0];
     }
 
   }  // class AbstractNetwork
@@ -384,31 +389,33 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom.Social.ClientState) : void => {
+    public handleClientState = (freedomClient :freedom.Social.ClientState) : Promise<void> => {
       if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
-        return;
+        return Promise.reject(
+            'Firewall: invalid client state:' + JSON.stringify(freedomClient));
       }
       var client :social.ClientState =
         freedomClientToUproxyClient(freedomClient);
-      if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
-        // Ignore clients that aren't using uProxy.
-        return;
-      }
-
-      if (client.userId == this.myInstance.userId &&
-          client.clientId === this.myInstance.clientId) {
-        if (client.status === social.ClientStatus.OFFLINE) {
-          // Our client is disconnected, log out of the social network
-          // (the social provider is responsible for clean up so we don't
-          // need to call logout here).
-          this.fulfillLogout_();
+      return this.validateClient_(client).then((isValid :boolean) => {
+        if (!isValid) {
+          return;
         }
-        log.info('received own ClientState', client);
-        return;
-      }
 
-      this.getOrAddUser_(client.userId).handleClient(client);
+        if (client.userId == this.myInstance.userId &&
+            client.clientId === this.myInstance.clientId) {
+          if (client.status === social.ClientStatus.OFFLINE) {
+            // Our client is disconnected, log out of the social network
+            // (the social provider is responsible for clean up so we don't
+            // need to call logout here).
+            this.fulfillLogout_();
+          }
+          log.info('received own ClientState', client);
+          return;
+        }
+
+        this.getOrAddUser_(client.userId).handleClient(client);
+      });
     }
 
     /**
@@ -421,34 +428,131 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom.Social.IncomingMessage) : void => {
+    public handleMessage = (incoming :freedom.Social.IncomingMessage) : Promise<void> => {
       if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
       }
       var userId = incoming.from.userId;
-      var msg :social.VersionedPeerMessage = JSON.parse(incoming.message);
 
       var client :social.ClientState =
           freedomClientToUproxyClient(incoming.from);
+      return this.validateClient_(client).then((isValid :boolean) => {
+        if (!isValid) {
+          return;
+        }
+
+        var user = this.getOrAddUser_(userId);
+        if (!user.clientIdToStatusMap[client.clientId]) {
+          // Add client.
+          user.handleClient(client);
+        }
+
+        // Decrypt message.
+        var decryptMessage = Promise.resolve(incoming.message);
+        if (this.encryptsWithClientId()) {
+          var key = this.getKeyFromClientId(client.clientId);
+          decryptMessage = crypto.verifyDecrypt(incoming.message, key);
+        }
+
+        return decryptMessage.then((messageString :string) => {
+          var msg :social.VersionedPeerMessage = JSON.parse(messageString);
+          log.info('received message', {
+            userFrom: user.userId,
+            clientFrom: client.clientId,
+            instanceFrom: user.clientToInstance(client.clientId),
+            msg: msg
+          });
+          user.handleMessage(client.clientId, msg);
+        });
+      });
+    }
+
+    // Clients currently pending validation (due to async verifyDecrypt call).
+    private pendingClients_ :{ [clientId :string] :Promise<boolean> } = {};
+
+    private validateClient_ = (client :social.ClientState) : Promise<boolean> => {
       if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
         // Ignore clients that aren't using uProxy.
-        return;
+        return Promise.resolve(false);
+      }
+      if (this.name !== 'Quiver') {
+        // No more validation to do for non-Quiver networks
+        return Promise.resolve(true);
       }
 
-      var user = this.getOrAddUser_(userId);
-      if (!user.clientIdToStatusMap[client.clientId]) {
-        // Add client.
-        user.handleClient(client);
+      // Hack around ClientState type, as inviteUserData is only available
+      // for Quiver and not checked into mainline freedom yet.
+      var inviteUserData = (<any>client)['inviteUserData'];
+      if (inviteUserData) {
+        var key = this.getKeyFromClientId(client.clientId);
+
+        var decryptAndValidate = crypto.verifyDecrypt(inviteUserData, key)
+        .then((plainText :string) => {
+          // Cleanup pending validation now that no more async calls are needed
+          // to complete validation.
+          delete this.pendingClients_[client.clientId];
+
+          // Parse invite data
+          try {
+            var inviteData :social.InviteUserData = JSON.parse(plainText);
+          } catch (e) {
+            log.warn('Invalid invite data: ' + plainText);
+            return Promise.resolve(false);
+          }
+
+          // Sanity check
+          if (this.getKeyFromClientId(client.clientId) != inviteData.publicKey) {
+            log.warn('clientId does not match publicKey ' +
+                client.clientId + ', ' + inviteData.publicKey);
+            return Promise.resolve(false);
+          }
+
+          if (!this.myInstance.isValidInvite(inviteData.permissionToken)) {
+            console.warn('Invalid permission token');
+            return Promise.resolve(false);
+          }
+
+          // Add to user's list of known public keys
+          var user = this.getOrAddUser_(client.userId);
+          user.knownPublicKeys.push(inviteData.publicKey);
+
+          return Promise.resolve(true);
+        }).catch((e) => {
+          log.error('Error decrypting inviteUserData', e);
+          return Promise.resolve(false);
+        });
+
+        // Save decrypt promise, so we know this client is pending validation.
+        this.pendingClients_[client.clientId] = decryptAndValidate;
+        return decryptAndValidate;
       }
 
-      log.info('received message', {
-        userFrom: user.userId,
-        clientFrom: client.clientId,
-        instanceFrom: user.clientToInstance(client.clientId),
-        msg: msg
-      });
-      user.handleMessage(client.clientId, msg);
+      if (this.pendingClients_[client.clientId]) {
+        // Client is currently being validated
+        return this.pendingClients_[client.clientId];
+      }
+
+      var user = this.getUser(client.userId);
+      if (!user) {
+        // No user exists yet, and inviteUserData was not set - do not
+        // create a new user yet and just return invalid.
+        // Note: sometimes Quiver emits onClientState events for clients before
+        // it includes the inviteUserData.  uProxy should just ignore these
+        // and not print errors.
+        log.info('No user found: ' + client.userId);
+        return Promise.resolve(false);
+      }
+
+      // At this point we have a client without any inviteUserData set for an
+      // already existing user, just verify that the clientId appears in the
+      // user's list of knownPublicKeys.
+      if (user.knownPublicKeys.indexOf(this.getKeyFromClientId(client.clientId)) >= 0) {
+        return Promise.resolve(true);
+      } else {
+        log.warn('Got unknown clientId: ' + client.clientId);
+        return Promise.resolve(false);
+      }
     }
 
     public restoreFromStorage() {
@@ -500,7 +604,7 @@ export function notifyUI(networkName :string, userId :string) {
           userName = globals.settings.quiverUserName;
         }
         request = {
-          agent: 'uproxy',
+          agent: globals.publicKey,
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
           interactive: !reconnect,
@@ -570,6 +674,10 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
     public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
+      if (this.name === 'Quiver') {
+        return this.acceptQuiverInvitation_(token);
+      }
+
       var networkData :string = null;
       if (token) {
         // token may be a URL with a token, or just the token.  Remove the
@@ -589,6 +697,45 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
+    private acceptQuiverInvitation_ = (token :string) : Promise<void> => {
+      // token may be a URL with a token, or just the token.  Remove the
+      // prefixed URL if it is set.
+      token = token.lastIndexOf('/') >= 0 ?
+          token.substr(token.lastIndexOf('/') + 1) : token;
+      try {
+        var tokenObj = JSON.parse(atob(token));
+        var remoteUserId = tokenObj.userId;
+        var remotePublicKey = tokenObj.publicKey;
+        var remotePermissionToken = tokenObj.permissionToken;
+        var networkData = tokenObj.networkData;
+      } catch (e) {
+        return Promise.reject('Invalid invite token ' + token);
+      }
+
+      // Get/create remoteUser, update their knownPublicKeys.
+      var remoteUser = this.getOrAddUser_(remoteUserId);
+      remoteUser.knownPublicKeys.push(remotePublicKey);
+      remoteUser.saveToStorage();
+
+      // Data to pass back to the user who generated the invite token
+      // so they can know who we are and verify that the token is valid
+      var inviteAcceptanceObj = {
+        userId: this.myInstance.userId,  // local user id
+        publicKey: globals.publicKey, // public key of local instance
+        permissionToken: remotePermissionToken  // received permission token
+      }
+      var inviteAcceptanceString = JSON.stringify(inviteAcceptanceObj);
+
+      // Encrypt inviteAcceptanceData with the remotePublicKey
+      return crypto.signEncrypt(inviteAcceptanceString, remotePublicKey)
+      .then((cipherText :string) => {
+        return this.freedomApi_.acceptUserInvitation(networkData, cipherText)
+        .catch((e :Error) => {
+          log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
+        });
+      });
+    }
+
     public inviteUser = (userName: string): Promise<void> => {
       return this.freedomApi_.inviteUser(userName).catch((e) => {
         log.error('Error calling inviteUser: ' + userName, e.message);
@@ -600,12 +747,26 @@ export function notifyUI(networkName :string, userId :string) {
 
     public getInviteUrl = () : Promise<string> => {
       return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
-        var tokenObj = {
-          v: 1,  // version, using short-hand 'v' to keep the URL shorter
-          networkName: this.name,
-          userName: this.myInstance.userName,
-          networkData: data.networkData
-        };
+        var tokenObj :Object;
+        if (this.name === 'Quiver') {
+          var permissionToken = this.myInstance.generateInvitePermissionToken();
+          tokenObj = {
+            v: 2,
+            networkName: this.name,
+            userName: this.myInstance.userName,
+            networkData: data.networkData,
+            userId: this.myInstance.userId,
+            publicKey: globals.publicKey,
+            permissionToken: permissionToken
+          };
+        } else {
+          tokenObj = {
+            v: 1,
+            networkName: this.name,
+            userName: this.myInstance.userName,
+            networkData: data.networkData
+          };
+        }
         return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
       })
     }
@@ -615,7 +776,6 @@ export function notifyUI(networkName :string, userId :string) {
         log.error('Error sending email', e);
       });
     }
-
 
     /**
      * Promise the sending of |msg| to a client with id |clientId|.
@@ -638,7 +798,14 @@ export function notifyUI(networkName :string, userId :string) {
         instanceTo: user.clientToInstance(clientId),
         msg: messageString
       });
-      return this.freedomApi_.sendMessage(clientId, messageString);
+      if (this.encryptsWithClientId()) {
+        var key = this.getKeyFromClientId(clientId);
+        return crypto.signEncrypt(messageString, key).then((cipherText :string) => {
+          return this.freedomApi_.sendMessage(clientId, cipherText);
+        });
+      } else {
+        return this.freedomApi_.sendMessage(clientId, messageString);
+      }
     }
 
     // TODO: We should make a class for monitors or generally to encapsulate
@@ -708,74 +875,6 @@ export function notifyUI(networkName :string, userId :string) {
 
   }  // class Social.FreedomNetwork
 
-
-  // A Social.Network implementation that "sends" a message by relaying it to
-  // the uProxy UI for display to the user and "receives" a message from the
-  // uProxy UI after the user has manually entered (copy/pasted) it into the
-  // UI.
-  //
-  // This network is unusual in that there is no distinction among user IDs,
-  // client IDs, and instance IDs; they are all the same thing. The reason is
-  // as follows:
-  //   - The manual network has no concept of a single user having multiple
-  //     clients; the client ID uniquely identifies the user in the manual
-  //     network. Thus, a user ID is also a client ID.
-  //   - Similarly, there is no concept of a single user having multiple
-  //     instances. Each instance is independent and not correlated with other
-  //     instances in any way. Thus, an instance ID is also a user ID.
-  export class ManualNetwork extends AbstractNetwork {
-    constructor(public name :string) {
-      super(name);
-    }
-
-    //===================== Social.Network implementation ====================//
-
-    public login = (reconnect :boolean, userName ?:string) : Promise<void> => {
-      return Promise.resolve<void>();
-    }
-
-    public logout = () : Promise<void> => {
-      return Promise.resolve<void>();
-    }
-
-    public send = (user :remote_user.User,
-                   recipientClientId :string,
-                   message :social.PeerMessage) : Promise<void> => {
-      // TODO: Batch messages.
-      // Relay the message to the UI for display to the user.
-      var versionedMessage :social.VersionedPeerMessage = {
-        type: message.type,
-        data: message.data,
-        version: globals.effectiveMessageVersion()
-      };
-      ui.update(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
-          versionedMessage);
-
-      return Promise.resolve<void>();
-    }
-
-    // TODO: Consider adding a mechanism for reporting back to the UI that a
-    // message is malformed or otherwise invalid.
-    public receive = (senderClientId :string,
-                      message :social.VersionedPeerMessage) : void => {
-      log.debug('Received incoming manual message from %1: %2',
-                senderClientId, message);
-
-      // Client ID and user ID are the same thing in the manual network, so the
-      // sender client ID doubles as the sender user ID.
-      var senderUserId = senderClientId;
-
-      var user =this.getOrAddUser_(senderUserId);
-      // Hack so that handleMessage treats this client as online and doesn't
-      // reject.
-      // TODO: refactor manual network to have its own client messages.
-      user.clientIdToStatusMap[senderClientId] = social.ClientStatus.ONLINE;
-      user.handleMessage(senderUserId, message);
-    }
-
-  }  // class ManualNetwork
-
-
 export function freedomClientToUproxyClient(
   freedomClientState :freedom.Social.ClientState) :social.ClientState {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
@@ -785,7 +884,10 @@ export function freedomClientToUproxyClient(
     userId:    freedomClientState.userId,
     clientId:  freedomClientState.clientId,
     status:    (<any>social.ClientStatus)[freedomClientState.status],
-    timestamp: freedomClientState.timestamp
+    timestamp: freedomClientState.timestamp,
+    // Cast to any because inviteUserData is not yet on "mainstream"
+    // freedom definitions and is only available to Quiver
+    inviteUserData: (<any>freedomClientState)['inviteUserData']
   };
   return state;
 }

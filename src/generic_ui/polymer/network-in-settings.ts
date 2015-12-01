@@ -15,12 +15,13 @@ Polymer({
   },
   connect: function() {
     if (this.name == 'Quiver') {
-      this.fire('core-signal', { name: 'open-quiver-login-dialog' });
-      return;
+      ui.loginToQuiver();
+    } else {
+      ui.login(this.name).catch((e :Error) => {
+        console.warn('Did not log in', e);
+      });
     }
-    ui.login(this.name).catch((e :Error) => {
-      console.warn('Did not log in', e);
-    });
+    this.fire('core-signal', {name: 'close-settings'});
   },
   logout: function() {
     if (!this.signedIn) {

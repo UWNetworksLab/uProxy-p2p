@@ -12,6 +12,7 @@ import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
+import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import net = require('../../../../third_party/uproxy-lib/net/net.types');
 import noreConnector = require('./core_connector');
 import user_module = require('./user');
@@ -60,11 +61,12 @@ export class Model {
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
     statsReportingEnabled: false,
-    consoleFilter: 2, // loggingTypes.Level.warn
+    consoleFilter: 0,
     language: 'en',
     force_message_version: 0,
     hasSeenGoogleAndFacebookChangedNotification: false,
-    quiverUserName: ''
+    quiverUserName: '',
+    showCloud: false
   };
 
   public reconnecting = false;
@@ -84,8 +86,10 @@ export class Model {
       var userCategories = user.getCategories();
       categorizeUser(user, this.contacts.getAccessContacts,
                      userCategories.getTab, null);
-      categorizeUser(user, this.contacts.shareAccessContacts,
-                     userCategories.shareTab, null);
+      if (user.network.name !== "Cloud") {
+        categorizeUser(user, this.contacts.shareAccessContacts,
+                       userCategories.shareTab, null);
+      }
     }
 
     _.remove(this.onlineNetworks, { name: networkName });
@@ -122,10 +126,15 @@ export interface Contacts {
   shareAccessContacts :ContactCategory;
 }
 
- export interface UserCategories {
-   getTab :string;
-   shareTab :string;
- }
+export interface UserCategories {
+  getTab :string;
+  shareTab :string;
+}
+
+interface PromiseCallbacks {
+  fulfill :Function;
+  reject :Function;
+}
 
 /**
  * Specific to one particular Social network.
@@ -205,6 +214,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public showInviteControls: boolean = false;
 
+  // TODO: Remove this when we switch completely to a roster-before-login flow.
+  public showRosterBeforeLogin:boolean = false;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -214,7 +225,6 @@ export class UserInterface implements ui_constants.UiApi {
       public core   :CoreConnector,
       public browserApi :BrowserAPI) {
     this.updateView_();
-    this.i18n_setLng(this.model.globalSettings.language);
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
     if (firefoxMatches) {
@@ -247,13 +257,6 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.USER_SELF, this.syncUserSelf_);
 
     core.onUpdate(uproxy_core_api.Update.USER_FRIEND, this.syncUser);
-
-    core.onUpdate(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
-                  (message :social.PeerMessage) => {
-      console.log('Manual network outbound message: ' +
-                  JSON.stringify(message));
-      // TODO: Display the message in the 'manual network' UI.
-    });
 
     core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
       this.copyPasteState.message = message;
@@ -382,7 +385,7 @@ export class UserInterface implements ui_constants.UiApi {
                   this.setPortControlSupport_);
 
     browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
-    browserApi.on('inviteUrlData', this.handleInviteUrlData);
+    browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
@@ -398,42 +401,73 @@ export class UserInterface implements ui_constants.UiApi {
     this.signalToFire = {name: signalName, data: data};
   }
 
-  private confirmationCallbacks_ :{[index :number] :Function} = {};
+  private confirmationCallbacks_ :{[index :number] :PromiseCallbacks} = {};
   // Don't use index 0 as it may be treated as false in confirmation code.
   private confirmationCallbackIndex_ = 1;
+
   public getConfirmation(heading :string, text :string) :Promise<void> {
     return new Promise<void>((F, R) => {
-      var fulfillIndex = ++this.confirmationCallbackIndex_;
-      var rejectIndex = ++this.confirmationCallbackIndex_;
-      this.confirmationCallbacks_[fulfillIndex] = F;
-      this.confirmationCallbacks_[rejectIndex] = R;
+      var callbackIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
       this.fireSignal('open-dialog', {
         heading: heading,
         message: text,
         buttons: [{
-          text: this.i18n_t("YES"),
-          callbackIndex: fulfillIndex
-        }, {
           text: this.i18n_t("NO"),
-          callbackIndex: rejectIndex,
+          callbackIndex: callbackIndex,
           dismissive: true
+        }, {
+          text: this.i18n_t("YES"),
+          callbackIndex: callbackIndex
         }]
       });
     });
   }
 
-  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+  public getUserInput(heading :string, message :string, placeholderText :string, defaultValue :string, buttonText :string) : Promise<string> {
+    return new Promise<string>((F, R) => {
+      var callbackIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
+      this.fireSignal('open-dialog', {
+        heading: heading,
+        message: message,
+        buttons: [{
+          text: buttonText,
+          callbackIndex: callbackIndex
+        }],
+        userInputData: {
+          placeholderText: placeholderText,
+          initInputValue: defaultValue
+        }
+      });
+    });
+  }
+
+  public showDialog(heading :string, message :string, buttonText ?:string, signal ?:string) {
+    var button :ui_constants.DialogButtonDescription = {
+      text: buttonText || this.i18n_t("OK")
+    };
+    if (signal) {
+      button['signal'] = signal;
+    }
+    this.fireSignal('open-dialog', {
+      heading: heading,
+      message: message,
+      buttons: [button]
+    });
+  }
+
+  public invokeConfirmationCallback = (index :number, fulfill :boolean, data ?:any) => {
     if (index > this.confirmationCallbackIndex_) {
       console.error('Confirmation callback not found: ' + index);
       return;
     }
-    this.confirmationCallbacks_[index]();
-    delete this.confirmationCallbacks_[index];
     if (fulfill) {
-      delete this.confirmationCallbacks_[index + 1];
+      this.confirmationCallbacks_[index].fulfill(data);
     } else {
-      delete this.confirmationCallbacks_[index - 1];
+      this.confirmationCallbacks_[index].reject(data);
     }
+    delete this.confirmationCallbacks_[index];
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -530,71 +564,125 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  private addUser_ = (url: string, showConfirmation :boolean) : Promise<void> => {
+  private addUser_ = (token: string, showConfirmation :boolean) : Promise<void> => {
     try {
-      var token = url.substr(url.lastIndexOf('/') + 1);
       var tokenObj = JSON.parse(atob(token));
       var userName = tokenObj.userName;
       var networkName = tokenObj.networkName;
       var networkData = tokenObj.networkData;
     } catch(e) {
-      return Promise.reject('Error parsing invite URL');
+      return Promise.reject('Error parsing invite token');
     }
 
     var getConfirmation = Promise.resolve<void>();
     if (showConfirmation) {
+      if (networkName === "Cloud") {
+        userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
+      }
       var confirmationMessage =
           this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
       getConfirmation = this.getConfirmation('', confirmationMessage);
     }
+
     return getConfirmation.then(() => {
       var socialNetworkInfo :social.SocialNetworkInfo = {
         name: networkName,
         userId: "" /* The current user's ID will be determined by the core. */
       };
       return this.core.acceptInvitation(
-          {network: socialNetworkInfo, token: url});
+          {network: socialNetworkInfo, token: token});
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
       return;
     })
   }
 
-  public handleInviteUrlData = (url :string) => {
-    var showUrlError = () => {
-      this.fireSignal('open-dialog', {
-        heading: '',
-        message: this.i18n_t("INVITE_URL_ERROR"),
-        buttons: [{
-          text: this.i18n_t("OK")
-        }]
-      });
+  // Token is expected to be in base64 encoded JSON.
+  public handleInvite = (invite :string) : Promise<void> => {
+    var showTokenError = () => {
+      this.showDialog('', this.i18n_t('INVITE_ERROR'));
     };
+
     try {
-      var token = url.substr(url.lastIndexOf('/') + 1);
+      // Get the token at the end of the invite (if in URL format).
+      var token = invite.substr(invite.lastIndexOf('/') + 1);
       var tokenObj = JSON.parse(atob(token));
       var networkName = tokenObj.networkName;
       var userName = tokenObj.userName;
     } catch(e) {
-      showUrlError();
+      showTokenError();
       return;
     }
-    if (!this.model.getNetwork(networkName)) {
+
+    if (networkName == 'Cloud') {
+      // Cloud confirmation is the same regardless of whether the user is
+      // logged into cloud yet.
+      return this.getConfirmation('', this.i18n_t('CLOUD_INVITE_CONFIRM'))
+      .then(() => {
+        // Log into cloud if needed.
+        var loginPromise = Promise.resolve<void>();
+        if (!this.model.getNetwork('Cloud')) {
+          loginPromise = this.login('Cloud');
+        }
+        return loginPromise.then(() => {
+          // Cloud contacts only appear on the GET tab.
+          this.setMode(ui_constants.Mode.GET);
+          // Don't show an additional confirmation for Cloud.
+          return this.addUser_(token, false).catch(showTokenError);
+        });
+      });
+    }
+
+    if (this.model.getNetwork(networkName)) {
+      // User is already logged into the right network (other than Cloud).
+      return this.addUser_(token, true).catch(showTokenError);
+    }
+
+    // loginPromise should resolve when the use is logged into networkName.
+    var loginPromise :Promise<void>;
+    if (networkName == 'Quiver') {
+      // Show user confirmation for Quiver login, where they can enter their
+      // Quiver user name.
+      var message = this.i18n_t('UPROXY_NETWORK_INVITE_LOGIN_MESSAGE',
+          {name: userName });
+      loginPromise = this.loginToQuiver(message);
+    } else {
+      // All networks other than Quiver and Cloud.
       var confirmationTitle = this.i18n_t('LOGIN_REQUIRED_TITLE');
       var confirmationMessage =
           this.i18n_t('LOGIN_REQUIRED_MESSAGE',
           { network: this.getNetworkDisplayName(networkName), name: userName });
-      this.getConfirmation(confirmationTitle, confirmationMessage).then(() => {
-        this.login(networkName).then(() => {
+      loginPromise = this.getConfirmation(confirmationTitle, confirmationMessage)
+      .then(() => {
+        return this.login(networkName).then(() => {
+          // For networks other than Quiver and Cloud, login will open an
+          // OAuth tab.  We need to return to the roster and re-open the uProxy
+          // popup.
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          // Add user without showing a 2nd confirmation.
-          this.addUser_(url, false).catch(showUrlError);
         });
       });
-    } else {
-      this.addUser_(url, true).catch(showUrlError);;
     }
+
+    return loginPromise.then(() => {
+      // User already saw a confirmation when they logged into the network,
+      // don't show an additional confirmation.
+      return this.addUser_(token, false).catch(showTokenError);
+    });
+  }
+
+  public loginToQuiver = (message ?:string) : Promise<void> => {
+    return this.getUserInput(
+        this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
+        message || '',
+        this.i18n_t('UPROXY_NETWORK_CHOOSE_A_USER_NAME'),
+        this.model.globalSettings.quiverUserName,
+        this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
+    .then((quiverUserName :string) => {
+      this.model.globalSettings.quiverUserName = quiverUserName;
+      this.core.updateGlobalSettings(this.model.globalSettings);
+      return this.login('Quiver', quiverUserName);
+    });
   }
 
   public handleCopyPasteUrlData = (url: string) => {
@@ -643,9 +731,12 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public proxyDisconnected = () => {
+  public proxyDisconnected = (info?:ProxyDisconnectInfo) => {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
+      if (info && info.deliberate) {
+        return;
+      }
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
@@ -950,8 +1041,10 @@ export class UserInterface implements ui_constants.UiApi {
     // Update the user's category in both get and share tabs.
     categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-    categorizeUser(user, this.model.contacts.shareAccessContacts,
-        oldUserCategories.shareTab, newUserCategories.shareTab);
+    if (user.network.name !== "Cloud") {
+      categorizeUser(user, this.model.contacts.shareAccessContacts,
+          oldUserCategories.shareTab, newUserCategories.shareTab);
+    }
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
@@ -966,6 +1059,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string, userName ?:string) : Promise<void> => {
+    if (network === "Cloud") {
+      this.model.globalSettings.showCloud = true;
+      this.core.updateGlobalSettings(this.model.globalSettings);
+    }
+
     return this.core.login({
         network: network,
         reconnect: false,
@@ -973,7 +1071,8 @@ export class UserInterface implements ui_constants.UiApi {
     }).then(() => {
       this.browserApi.hasInstalledThenLoggedIn = true;
     }).catch((e :Error) => {
-      this.showNotification(this.i18n_t("ERROR_SIGNING_IN", {network: network}));
+      this.showNotification(this.i18n_t(
+          "ERROR_SIGNING_IN", {network: this.getNetworkDisplayName(network)}));
       throw e;
     });
   }
@@ -1021,6 +1120,17 @@ export class UserInterface implements ui_constants.UiApi {
       network.logoutExpected = true;
       return this.core.logout(networkInfo);
     }, () => { /* MT */ });
+  }
+
+  public logoutAll = () : Promise<void[]> => {
+    var logoutPromises :Promise<void>[] = [];
+    for (var i in this.model.onlineNetworks) {
+      logoutPromises.push(this.logout({
+        name: this.model.onlineNetworks[i].name,
+        userId: this.model.onlineNetworks[i].userId
+      }));
+    }
+    return Promise.all(logoutPromises);
   }
 
   private reconnect_ = (network :string) => {
@@ -1121,7 +1231,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.networkNames = state.networkNames;
     this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
-      this.i18n_setLng(state.globalSettings.language);
+      this.updateLanguage(state.globalSettings.language);
     }
     this.model.updateGlobalSettings(state.globalSettings);
 
@@ -1144,6 +1254,13 @@ export class UserInterface implements ui_constants.UiApi {
           this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
         console.error(
             'User cannot be online while having a copy-paste connection');
+      }
+    }
+
+    // TODO: Remove this when we switch completely to a roster-before-login flow.
+    for (var i = 0; i < this.model.networkNames.length; ++i) {
+      if (this.model.networkNames[i] === 'Quiver') {
+        this.showRosterBeforeLogin = true;
       }
     }
 
@@ -1219,20 +1336,17 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private updateShowInviteControls_ = () => {
-    var showControls = false;
-    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
-      if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
-        showControls = true;
-        break;
-      }
-    }
-    this.showInviteControls = showControls;
+    this.showInviteControls = this.showRosterBeforeLogin ||
+        _.some(this.model.onlineNetworks, (network) => {
+          return this.supportsInvites(network.name);
+        });
   }
 
   // this takes care of updating the view (given the assumuption that we are
   // connected to the core)
   private updateView_ = () => {
-    if (this.model.onlineNetworks.length > 0) {
+    if (this.model.onlineNetworks.length > 0 ||
+        (this.model.globalSettings.hasSeenWelcome && this.showRosterBeforeLogin)) {
       this.view = ui_constants.View.ROSTER;
     } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
                this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {

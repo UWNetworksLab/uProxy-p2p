@@ -13,23 +13,14 @@ Polymer({
   connectedNetworks: '',
   logOut: function() {
     // logout all networks asynchronously
-    for (var i in model.onlineNetworks) {
-      ui.logout({
-        name: model.onlineNetworks[i].name,
-        userId: model.onlineNetworks[i].userId
-      }).catch((e :Error) => {
-        console.error('logout returned error: ', e);
-      });
-    }
+    ui.logoutAll();
+    this.fire('core-signal', {name: 'close-settings'});
   },
   restart: function() {
     core.restart();
   },
   openFeedbackForm: function() {
     this.fire('core-signal', {name: 'open-feedback'});
-  },
-  openFaqForm: function() {
-    this.fire('core-signal', {name: 'open-faq'});
   },
   openAdvancedSettingsForm: function() {
     this.fire('core-signal', {name: 'open-advanced-settings'});
@@ -38,8 +29,9 @@ Polymer({
     if (!model.onlineNetworks) {
       return;
     }
-
-    if (model.onlineNetworks.length === 1) {
+    if (model.onlineNetworks.length === 0) {
+      this.connectedNetworks = ui.i18n_t("NOT_CONNECTED_LOGIN_TO_START");
+    } else if (model.onlineNetworks.length === 1) {
       var displayName = ui.getNetworkDisplayName(model.onlineNetworks[0].name);
       this.connectedNetworks = ui.i18n_t("CONNECTED_WITH", {network: displayName});
     } else {

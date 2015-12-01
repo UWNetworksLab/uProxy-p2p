@@ -31,11 +31,24 @@ export interface StopProxyInfo {
   error      :boolean;
 }
 
+export enum PermissionTokenAccess {
+  FRIEND_REQUEST = 0,   // only requesting that the user is a friend
+  REQUEST_ACCESS,
+  OFFER_ACCESS,
+  REQUEST_AND_OFFER_ACCESS
+}
+
+export interface PermissionTokenInfo {
+  access :PermissionTokenAccess;
+  createdAt :number;
+}
+
 export interface LocalInstanceState {
-  instanceId  :string;
-  userId      :string;
-  userName    :string;
-  imageData   :string;
+  instanceId       :string;
+  userId           :string;
+  userName         :string;
+  imageData        :string;
+  invitePermissionTokens :{ [token :string] :PermissionTokenInfo };
 }
 
 export interface NetworkMessage {
@@ -109,6 +122,7 @@ export interface NetworkOptions {
   supportsInvites :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
   isExperimental ?:boolean;
+  encryptsWithClientId ?:boolean;
 }
 
 /**
@@ -144,15 +158,6 @@ export interface VersionedPeerMessage extends PeerMessage {
   version: number;
 }
 
-// The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
-// client ID for the sender but no user ID because in the manual network
-// there is no concept of a single user having multiple clients; in the
-// manual network the client ID uniquely identifies the user.
-export interface HandleManualNetworkInboundMessageCommand {
-  message         :VersionedPeerMessage;
-  senderClientId  :string;
-}
-
 // The different states that uProxy consent can be in w.r.t. a peer. These
 // are the values that get sent or received on the wire.
 export interface ConsentWireState {
@@ -166,11 +171,13 @@ export interface ConsentWireState {
  */
 export interface InstanceHandshake {
   instanceId  :string;
-  publicKey   :string;
   consent     :ConsentWireState;
   description ?:string;
   name        :string;
   userId      :string;
+  // publicKey is not set for networks which include the public key in their
+  // clientId (Quiver).
+  publicKey   ?:string;
 }
 
 // Describing whether or not a remote instance is currently accessing or not,
@@ -213,6 +220,7 @@ export interface ClientState {
   clientId  :string;
   status    :ClientStatus;
   timestamp :number;
+  inviteUserData ?:string;
 }
 
 
@@ -224,9 +232,15 @@ export interface UserState {
   // be saved and loaded separately.
   instanceIds :string[];
   consent     :ConsentState;
-  status      :UserStatus
+  status      :UserStatus;
+  knownPublicKeys :string[];
 }
 
+export interface InviteUserData {
+  userId :string;
+  publicKey :string;
+  permissionToken :string;
+}
 
 export interface RemoteUserInstance {
   start() :Promise<net.Endpoint>;
@@ -336,5 +350,9 @@ export interface Network {
   getNetworkState : () => NetworkState;
 
   areAllContactsUproxy : () => boolean;
+
+  encryptsWithClientId : () => boolean;
+
+  getKeyFromClientId : (clientId :string) => string;
 }
 

@@ -44,7 +44,7 @@ export interface BrowserAPI {
   on(name: 'inviteUrlData', callback: (url: string) => void): void;
   on(name: 'copyPasteUrlData', callback: (url: string) => void): void;
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
-  on(name :'proxyDisconnected', callback :Function) :void;
+  on(name :'proxyDisconnected', callback :(info?:ProxyDisconnectInfo) => void) :void;
 
   // should be called when popup is launched and ready for use
   handlePopupLaunch() :void;
@@ -52,4 +52,10 @@ export interface BrowserAPI {
   // Overlay the given text as a "badge" over the uProxy extension icon.
   // The notification can be up to 4 characters.
   setBadgeNotification(notification :string) :void;
+}
+
+// Info associated with the 'proxyDisconnect' event.
+// This single bit is packaged as an interface for forward-compatibility.
+export interface ProxyDisconnectInfo {
+  deliberate :boolean;
 }

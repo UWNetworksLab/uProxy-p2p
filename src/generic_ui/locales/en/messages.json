@@ -291,9 +291,17 @@
     "description": "The default text that appears in the user feedback textbox.",
     "message": "Write your feedback"
   },
+  "FEEDBACK_ERROR_PLACEHOLDER": {
+    "description": "Error that apears if you try to submit an empty feedback.",
+    "message": "Please enter some feedback"
+  },
   "NETWORK_AND_LOGS": {
     "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team.",
     "message": "Analyze network and include logs"
+  },
+  "ANALYZE_NAT": {
+    "description": "The text for a button in the settings pane the user can click to check their NAT settings and view the latest logs uProxy has collected",
+    "message": "Analyze NAT"
   },
   "P_I_I_MESSAGE": {
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
@@ -391,9 +399,9 @@
     "description": "Instructions that appears beside a big '+' button. Clicking the button opens a panel with options to add a uProxy friend.",
     "message": "Use this button to send an invitation to a friend or paste an invitation you've received."
   },
-  "ALPHA_MESSAGE": {
+  "BETA_MESSAGE": {
     "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development.",
-    "message": "This is an alpha release of uProxy, and it may occasionally be unreliable."
+    "message": "This is a beta release of uProxy, and it may occasionally be unreliable."
   },
   "MORE_ABOUT_METRICS": {
     "description": "",
@@ -466,6 +474,10 @@
   "UPROXY_FRIENDS": {
     "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups.",
     "message": "Friends who have uProxy"
+  },
+  "NOT_CONNECTED_LOGIN_TO_START": {
+    "description": "Text in settings that informs the user they should sign in to a social network to get started.",
+    "message": "Login to get started"
   },
   "CONNECTED_WITH": {
     "description": "Text in settings that informs the user which social network they're connected to.",
@@ -567,9 +579,21 @@
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
     "message": "We won't share your data or post publicly without your consent"
   },
+  "HAVE_AN_INVITE_CODE": {
+    "description": "Text above a button that asks the user if they already have a uProxy invite code",
+    "message": "Have an invite code?"
+  },
+  "ENTER_IT_HERE": {
+    "description": "Text for button that opens a view for the user to enter their uProxy invite code",
+    "message": "Enter it here"
+  },
   "LEARN_MORE_SOCIAL": {
     "description": "Label for button that brings user to more information about why social networks are used for uProxy.",
     "message": "Learn more about social networks"
+  },
+  "EXPERIMENTAL": {
+    "description": "Label below social networks (on the login page) indicating that a social network is experimental.",
+    "message": "Experimental"
   },
   "ASK_TO_ANALYZE": {
     "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails.",
@@ -763,6 +787,10 @@
     "description": "Generic label for links to FAQ.",
     "message": "Learn more"
   },
+  "CLOUD_INVITE_CONFIRM" : {
+    "description": "Confirmation message asking the user if they would like to add a cloud instance to their buddy list, which will connect them to a virtual machine.",
+    "message": "You've entered an experimental Cloud invitation. Accepting this invitation will connect you to a virtual machine. Would you like to accept?"
+  },
   "FRIEND_ADDED": {
     "description": "Confirmation message after adding a friend to the roster.",
     "message": "Friend added"
@@ -799,6 +827,10 @@
     "description": "Question above network select dropdown on invite screen",
     "message": "How would you like to invite to your friends?"
   },
+  "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK": {
+    "description": "Title above social network icons on the page to find and/or invite friends.",
+    "message": "Find your friends on a social network."
+  },
   "FACEBOOK_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for Facebook",
     "message": "Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list."
@@ -819,6 +851,30 @@
     "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
     "message": "Friend's GitHub username"
   },
+  "ADD_A_CLOUD_FRIEND": {
+    "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
+    "message": "Add a Cloud friend"
+  },
+  "ADD_CLOUD_INSTRUCTIONS": {
+    "description": "If the user is trying to add a Cloud friend, instruct them to click on the link to enter an invitation.",
+    "message": "If you have a Cloud invitation code, please click on the link below and enter your invitation on the destination page."
+  },
+  "CLOUD_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for Cloud",
+    "message": "Enter your invite code. When a connection has been made, it will appear in your contact list."
+  },
+  "CLOUD_INVITE_PLACEHOLDER": {
+    "description": "Placeholder in input box for the invite code.",
+    "message": "Invite code"
+  },
+  "CLOUD_INVITE_FAILED": {
+    "description": "Dialog text informing user that a connection could not be made to their cloud instance",
+    "message": "Oops, connection failed. Please check the invite code."
+  },
+  "CLOUD_VIRTUAL_MACHINE": {
+    "description": "Refers to a remote server users can proxy from",
+    "message": "a virtual machine"
+  },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
@@ -837,7 +893,19 @@
   },
   "ACCEPT_INVITE_CONFIRMATION": {
     "description": "Confirmation message when accepting an invite.",
-    "message": "Would you like to add __name__?"
+    "message": "Would you like to add __name__ to your uProxy contacts?"
+  },
+  "SIGN_IN_TO_NETWORK": {
+    "description": "Title for dialog that appears after users choose a social network for finding friends.",
+    "message": "Sign in to __network__"
+  },
+  "SIGN_IN_TO_INVITE_FRIENDS": {
+    "description": "Text for dialog that appears if users choose an invite-only social network to find uProxy friends. Text explains that users must sign in before inviting friends.",
+    "message": "To invite a __network__ friend to uProxy, please sign in to your __network__ account."
+  },
+  "SIGN_IN_TO_SEE_ALL_UPROXY_FRIENDS": {
+    "description": "Text for dialog that appears if users choose a 'public' social network to find uProxy friends. Text explains that signing in allows any of your social network contacts using uProxy to see that you are online.",
+    "message": "Signing in will allow your __network__ contacts who use uProxy to see when you are online with uProxy."
   },
   "LOGIN_REQUIRED_TITLE": {
     "description": "Title for confirmation that the user must login to a network to accept an invitation",
@@ -845,11 +913,11 @@
   },
   "LOGIN_REQUIRED_MESSAGE": {
     "description": "Message for confirmation that the user must login to a network to accept an invitation",
-    "message": "To accept this invitation from __name__, you will need to connect to uProxy with __network__.  Click yes to continue."
+    "message": "To accept this invitation to connect with __name__, you will need to login to uProxy with __network__.  Click yes to continue."
   },
-  "INVITE_URL_ERROR": {
-    "description": "Error message shown for invalid invite URLs",
-    "message": "There was an error with your invite URL."
+  "INVITE_ERROR": {
+    "description": "Error message shown for invalid invite URLs or tokens",
+    "message": "There was an error with your invite."
   },
   "INVITE_EMAIL_SUBJECT": {
     "description": "Default email subject for sending an uProxy invite",
@@ -866,5 +934,29 @@
   "FAQ_SENTENCE_CASE": {
     "description": "Title of the FAQ window",
     "message": "Get Help"
-  }
+  },
+  "CONFIRM_LOGOUT_FOR_COPYPASTE": {
+    "description": "If a user is signed in to social network(s) and attempt to start a one-time connection, this message informs them that they must first log out of all social networks.",
+    "message": "To start a one-time connection, you will be logged out of connected social networks. Would you like to log out now?"
+  },
+  "UPROXY_NETWORK_LOGIN_TITLE": {
+    "description": "Title for when the user is logging into the uProxy network (via settings or a link)",
+    "message": "Sign in to the uProxy network"
+  },
+  "UPROXY_NETWORK_INVITE_LOGIN_MESSAGE": {
+    "description": "Message instructing user to login to the uProxy network to accept an invitation.",
+    "message": "To add __name__ as a friend, please sign into the uProxy network"
+  },
+  "UPROXY_NETWORK_SIGN_IN": {
+    "description": "Sign in button for the uProxy network",
+    "message": "Sign in"
+  },
+  "UPROXY_NETWORK_CHOOSE_A_USER_NAME": {
+    "description": "Placeholder text for user name on uProxy network",
+    "message": "Choose a user name"
+  },
+  "REQUIRED_FIELD": {
+    "description": "Error message indicating that a field is required (e.g. user name)",
+    "message": "Required field."
+  },
 }

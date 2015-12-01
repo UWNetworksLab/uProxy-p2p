@@ -8,6 +8,17 @@
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+
+import freedom_mocks = require('../mocks/freedom-mocks');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
+  'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); },
+  'metrics': () => { return new freedom_mocks.MockMetrics(); },
+  'pgp': () => { return new freedom_mocks.PgpProvider() },
+  'portControl': () => { return new Object },
+});
+
 import globals = require('./globals');
 import social = require('../interfaces/social');
 import social_network = require('./social');
@@ -61,32 +72,6 @@ describe('Core', () => {
     };
     core.modifyConsent(command);
     expect(user.modifyConsent).toHaveBeenCalledWith(uproxy_core_api.ConsentUserAction.REQUEST);
-  });
-
-  it('relays incoming manual network messages to the manual network', () => {
-    var manualNetwork :social_network.ManualNetwork =
-        new social_network.ManualNetwork(social_network.MANUAL_NETWORK_ID);
-
-    spyOn(social_network, 'getNetwork').and.returnValue(manualNetwork);
-    spyOn(manualNetwork, 'receive');
-
-    var senderClientId = 'dummy_sender';
-    var message :social.VersionedPeerMessage = {
-      type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
-      data: {
-        elephants: 'have trunks',
-        birds: 'do not'
-      },
-      version: globals.MESSAGE_VERSION
-    };
-    var command :social.HandleManualNetworkInboundMessageCommand = {
-      senderClientId: senderClientId,
-      message: message
-    };
-    core.handleManualNetworkInboundMessage(command);
-
-    expect(social_network.getNetwork).toHaveBeenCalledWith(social_network.MANUAL_NETWORK_ID, '');
-    expect(manualNetwork.receive).toHaveBeenCalledWith(senderClientId, message);
   });
 
   it('login fails for invalid network', (done) => {

@@ -7,13 +7,10 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
+// TODO: remove network.ts and network.html once showRosterBeforeLogin is on
+// for everyone.
 Polymer({
   connect: function() {
-    if (this.networkName == 'Quiver') {
-      this.fire('core-signal', {name: 'open-quiver-login-dialog'});
-      return;
-    }
-
     ui.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
       // syncNetwork will update the view to the ROSTER.

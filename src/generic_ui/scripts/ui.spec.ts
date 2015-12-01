@@ -314,7 +314,8 @@ describe('UI.UserInterface', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.sharingStatus).toEqual('Sharing access with Alice');
+      expect(ui.sharingStatus).toEqual(ui.i18n_t('SHARING_ACCESS_WITH_ONE',
+          { name: 'Alice' }));
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
       expect(ui.sharingStatus).toEqual(null);
@@ -343,7 +344,8 @@ describe('UI.UserInterface', () => {
       expect(ui.gettingStatus).toEqual(null);
       ui['instanceGettingAccessFrom_'] = 'testInstanceId';
       ui['updateGettingStatusBar_']();
-      expect(ui.gettingStatus).toEqual('Getting access from Alice');
+      expect(ui.gettingStatus).toEqual(ui.i18n_t('GETTING_ACCESS_FROM',
+          { name: 'Alice' }));
       ui['instanceGettingAccessFrom_'] = null;
       ui['updateGettingStatusBar_']();
       expect(ui.gettingStatus).toEqual(null);
