@@ -915,9 +915,9 @@
     "description": "Message for confirmation that the user must login to a network to accept an invitation",
     "message": "To accept this invitation to connect with __name__, you will need to login to uProxy with __network__.  Click yes to continue."
   },
-  "INVITE_URL_ERROR": {
-    "description": "Error message shown for invalid invite URLs",
-    "message": "There was an error with your invite URL."
+  "INVITE_ERROR": {
+    "description": "Error message shown for invalid invite URLs or tokens",
+    "message": "There was an error with your invite."
   },
   "INVITE_EMAIL_SUBJECT": {
     "description": "Default email subject for sending an uProxy invite",

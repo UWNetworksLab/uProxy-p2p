@@ -385,7 +385,7 @@ export class UserInterface implements ui_constants.UiApi {
                   this.setPortControlSupport_);
 
     browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
-    browserApi.on('inviteUrlData', this.handleInviteUrlData);
+    browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
@@ -564,15 +564,14 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  private addUser_ = (url: string, showConfirmation :boolean) : Promise<void> => {
+  private addUser_ = (token: string, showConfirmation :boolean) : Promise<void> => {
     try {
-      var token = url.substr(url.lastIndexOf('/') + 1);
       var tokenObj = JSON.parse(atob(token));
       var userName = tokenObj.userName;
       var networkName = tokenObj.networkName;
       var networkData = tokenObj.networkData;
     } catch(e) {
-      return Promise.reject('Error parsing invite URL');
+      return Promise.reject('Error parsing invite token');
     }
 
     var getConfirmation = Promise.resolve<void>();
@@ -584,61 +583,92 @@ export class UserInterface implements ui_constants.UiApi {
           this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
       getConfirmation = this.getConfirmation('', confirmationMessage);
     }
+
     return getConfirmation.then(() => {
       var socialNetworkInfo :social.SocialNetworkInfo = {
         name: networkName,
         userId: "" /* The current user's ID will be determined by the core. */
       };
       return this.core.acceptInvitation(
-          {network: socialNetworkInfo, token: url});
+          {network: socialNetworkInfo, token: token});
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
       return;
     })
   }
 
-  public handleInviteUrlData = (url :string) => {
-    var showUrlError = () => {
-      this.showDialog('', this.i18n_t('INVITE_URL_ERROR'));
+  // Token is expected to be in base64 encoded JSON.
+  public handleInvite = (invite :string) : Promise<void> => {
+    var showTokenError = () => {
+      this.showDialog('', this.i18n_t('INVITE_ERROR'));
     };
+
     try {
-      var token = url.substr(url.lastIndexOf('/') + 1);
+      // Get the token at the end of the invite (if in URL format).
+      var token = invite.substr(invite.lastIndexOf('/') + 1);
       var tokenObj = JSON.parse(atob(token));
       var networkName = tokenObj.networkName;
       var userName = tokenObj.userName;
     } catch(e) {
-      showUrlError();
+      showTokenError();
       return;
     }
 
-    if (!this.model.getNetwork(networkName) && networkName != 'Quiver') {
-      // User is not yet logged onto this network.
-      if (networkName === "Cloud") {
-        userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
-      }
+    if (networkName == 'Cloud') {
+      // Cloud confirmation is the same regardless of whether the user is
+      // logged into cloud yet.
+      return this.getConfirmation('', this.i18n_t('CLOUD_INVITE_CONFIRM'))
+      .then(() => {
+        // Log into cloud if needed.
+        var loginPromise = Promise.resolve<void>();
+        if (!this.model.getNetwork('Cloud')) {
+          loginPromise = this.login('Cloud');
+        }
+        return loginPromise.then(() => {
+          // Cloud contacts only appear on the GET tab.
+          this.setMode(ui_constants.Mode.GET);
+          // Don't show an additional confirmation for Cloud.
+          return this.addUser_(token, false).catch(showTokenError);
+        });
+      });
+    }
+
+    if (this.model.getNetwork(networkName)) {
+      // User is already logged into the right network (other than Cloud).
+      return this.addUser_(token, true).catch(showTokenError);
+    }
+
+    // loginPromise should resolve when the use is logged into networkName.
+    var loginPromise :Promise<void>;
+    if (networkName == 'Quiver') {
+      // Show user confirmation for Quiver login, where they can enter their
+      // Quiver user name.
+      var message = this.i18n_t('UPROXY_NETWORK_INVITE_LOGIN_MESSAGE',
+          {name: userName });
+      loginPromise = this.loginToQuiver(message);
+    } else {
+      // All networks other than Quiver and Cloud.
       var confirmationTitle = this.i18n_t('LOGIN_REQUIRED_TITLE');
       var confirmationMessage =
           this.i18n_t('LOGIN_REQUIRED_MESSAGE',
           { network: this.getNetworkDisplayName(networkName), name: userName });
-      this.getConfirmation(confirmationTitle, confirmationMessage).then(() => {
-        this.login(networkName).then(() => {
+      loginPromise = this.getConfirmation(confirmationTitle, confirmationMessage)
+      .then(() => {
+        return this.login(networkName).then(() => {
+          // For networks other than Quiver and Cloud, login will open an
+          // OAuth tab.  We need to return to the roster and re-open the uProxy
+          // popup.
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          // Add user without showing a 2nd confirmation.
-          this.addUser_(url, false).catch(showUrlError);
         });
       });
-    } else if (!this.model.getNetwork(networkName) && networkName == 'Quiver') {
-      // Show user confirmation for Quiver login, where they can enter their
-      // Quiver user name.
-      this.loginToQuiver(
-          this.i18n_t('UPROXY_NETWORK_INVITE_LOGIN_MESSAGE', {name: userName }))
-      .then(() => {
-        this.addUser_(url, false).catch(showUrlError);
-      });
-    } else {
-      this.addUser_(url, true).catch(showUrlError);
     }
+
+    return loginPromise.then(() => {
+      // User already saw a confirmation when they logged into the network,
+      // don't show an additional confirmation.
+      return this.addUser_(token, false).catch(showTokenError);
+    });
   }
 
   public loginToQuiver = (message ?:string) : Promise<void> => {
