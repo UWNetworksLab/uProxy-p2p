@@ -51,15 +51,15 @@ class Provisioner {
       this.state.oauth = oauthObj;
       return this._getSshKey(name);
     // Get SSH keys
-    }.bind(this)).then(function(keys) {
+    }).then(function(keys) {
       this.state.ssh = keys;
       return this._setupDigitalOcean(name);
     // Setup Digital Ocean (SSH key + droplet)
-    }.bind(this)).then(function(actions) {
+    }).then(function(actions) {
       //console.log(actions);
       return this._doRequest("GET", "droplets/"+this.state.cloud.vm.id);
     // Get the droplet's configuration
-    }.bind(this)).then(function(resp) {
+    }).then(function(resp) {
       this._sendStatus("CLOUD_DONE_VM");
       this.state.cloud.vm = resp.droplet;
       this.state.network = {
@@ -79,7 +79,7 @@ class Provisioner {
       }
       console.log(this.state);
       return this.state;
-    }.bind(this));
+    });
   }
   
   /**
@@ -102,9 +102,9 @@ class Provisioner {
         "errcode": "VM_DNE",
         "message": "Droplet with name," + name + ", doesnt exist"
       });
-    }.bind(this)).then(function(resp) {
+    }).then(function(resp) {
       return this._doRequest("DELETE", "droplets/" + resp.droplet.id);
-    }.bind(this));
+    });
   }
   
   /**
@@ -112,7 +112,7 @@ class Provisioner {
   * events listed in STATUS_CODES
   * @param {String} code one of STATUS_CODES 
   **/
-  private _sendStatus(code: string) {
+  private _sendStatus = (code: string) => {
     this.dispatch("status", {
       "code": code,
       "message": STATUS_CODES[code]
@@ -124,7 +124,7 @@ class Provisioner {
   * Generates an RSA keypair using forge
   * @return {Object.<String,String>} public and private SSH keys
   */
-  private static _generateKeyPair = () : Object => {
+  private static _generateKeyPair = () => {
     "use strict";
     var pair = forge.pki.rsa.generateKeyPair({bits: 2048, e: 0x10001});
     var publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, '');
@@ -169,12 +169,12 @@ class Provisioner {
   
         this._sendStatus("OAUTH_COMPLETE");
         resolve(params);
-      }.bind(this)).catch(function(err) {
+      }).catch(function(err) {
         console.error("oauth error: " + JSON.stringify(err));
         this._sendStatus("OAUTH_ERROR");
-        reject(err)
-      }.bind(this));
-    }.bind(this));
+        reject(err);
+      });
+    });
   }
   
   /**
@@ -208,11 +208,11 @@ class Provisioner {
           this._sendStatus("SSHKEY_RETRIEVED");
         }
         resolve(result);
-      }.bind(this)).catch(function(err) {
+      }).catch(function(err) {
         console.error("storage error: " + JSON.stringify(err));
         reject(err);
       });
-    }.bind(this));
+    });
   }
   
   /**
@@ -243,11 +243,11 @@ class Provisioner {
       xhr.setRequestHeader("Authorization", "Bearer " + this.state.oauth.access_token);
       xhr.setRequestHeader("Content-Type", "application/json");
       if (body !== null && typeof body !== "undefined") {
-        xhr.send({ string: body })
+        xhr.send({ string: body });
       } else {
         xhr.send(null);
       }
-    }.bind(this));
+    });
   }
   
   /** 
@@ -256,7 +256,7 @@ class Provisioner {
   * @param {Function} resolve - call when done
   * @param {Function} reject - call on failure
   **/
-  private _waitDigitalOceanActions(resolve: Function, reject: Function) {
+  private _waitDigitalOceanActions = (resolve: Function, reject: Function) => {
     console.log("Polling for Digital Ocean in-progress actions");
     this._doRequest("GET", "droplets/" + this.state.cloud.vm.id + "/actions").then(function(resp) {
       for (var i = 0; i < resp.actions.length; i++) {
@@ -266,10 +266,10 @@ class Provisioner {
         }
       }
       resolve(resp);
-    }.bind(this)).catch(function(e) {
+    }).catch(function(e) {
       console.error("Error waiting for digital ocean actions:" + JSON.stringify(e));
-      reject(e)
-    }.bind(this));
+      reject(e);
+    });
   }
   
   /**
@@ -301,14 +301,14 @@ class Provisioner {
           public_key: this.state.ssh.public
         }));
       // If missing, put SSH key into account
-      }.bind(this)).then(function(resp) {
+      }).then(function(resp) {
         //console.log(resp);
         this.state.cloud.ssh = resp.ssh_key;
         this._sendStatus("CLOUD_DONE_ADDKEY");
         this._sendStatus("CLOUD_INIT_VM");
         return this._doRequest("GET", "droplets");
       // Get list of droplets
-      }.bind(this)).then(function(resp) {
+      }).then(function(resp) {
         //console.log(resp);
         for (var i = 0; i < resp.droplets.length; i++) {
           if (resp.droplets[i].name === name) {
@@ -327,7 +327,7 @@ class Provisioner {
           ssh_keys: [ this.state.cloud.ssh.id ]
         }));
       // If missing, create the droplet
-      }.bind(this)).then(function(resp) {
+      }).then(function(resp) {
         //console.log(resp);
         this.state.cloud.vm = resp.droplet;
       
@@ -337,25 +337,25 @@ class Provisioner {
             "POST", 
             "droplets/" + resp.droplet.id + "/actions",
             JSON.stringify({ "type": "power_on" })
-          ) 
+          );
         } else {
           return Promise.resolve();
         }
       // If the machine exists, but powered off, turn it on
-      }.bind(this)).then(function(resp) {
+      }).then(function(resp) {
         //console.log(resp);
         this._sendStatus("CLOUD_WAITING_VM");
         this._waitDigitalOceanActions(resolve, reject);
       // Wait for all in-progress actions to complete
-      }.bind(this)).catch(function(err) {
+      }).catch(function(err) {
         console.error("Error w/DigitalOcean: " + err);
         this._sendStatus("CLOUD_FAILED");
         reject({
           errcode: "CLOUD_ERR",
           message: JSON.stringify(err)
         });
-      }.bind(this));
-    }.bind(this));
+      });
+    });
   }
 }
 
