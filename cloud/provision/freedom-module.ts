@@ -31,11 +31,16 @@ const REDIRECT_URIS: [string] = [
   //  "http://localhost:10101"
 ];
 
+interface KeyPair {
+  private: string;
+  public: string;
+}
+
 class Provisioner {
-  private dispatch: any;
+  private dispatch: Function;
   private state: any;
 
-  constructor(dispatchEvent: Function, state: Object) {
+  constructor(dispatchEvent: Function, state: any) {
     this.dispatch = dispatchEvent;
     this.state = state;
   }
@@ -53,7 +58,7 @@ class Provisioner {
       this.state.oauth = oauthObj;
       return this.getSshKey_(name);
     // Get SSH keys
-    }).then((keys: any) => {
+    }).then((keys: KeyPair) => {
       this.state.ssh = keys;
       return this.setupDigitalOcean_(name);
     // Setup Digital Ocean (SSH key + droplet)
@@ -64,19 +69,17 @@ class Provisioner {
     }).then((resp: any) => {
       this.sendStatus_("CLOUD_DONE_VM");
       this.state.cloud.vm = resp.droplet;
-      this.state.network = {
-        "ssh_port": 22
-      };
+      this.state.network.ssh_port = 22;
       // Retrieve public IPv4 address
       for (var i = 0; i < resp.droplet.networks.v4.length; i++) {
         if (resp.droplet.networks.v4[i].type === "public") {
-          this.state.network.ipv4 = resp.droplet.networks.v4[i].ip_address;
+          this.state.network['ipv4'] = resp.droplet.networks.v4[i].ip_address;
         }
       }
       // Retrieve public IPv6 address
       for (var i = 0; i < resp.droplet.networks.v6.length; i++) {
         if (resp.droplet.networks.v6[i].type === "public") {
-          this.state.network.ipv6 = resp.droplet.networks.v6[i].ip_address;
+          this.state.network['ipv6'] = resp.droplet.networks.v6[i].ip_address;
         }
       }
       console.log(this.state);
@@ -111,9 +114,9 @@ class Provisioner {
 
   /**
    * Generates an RSA keypair using forge
-   * @return {Object.<String,String>} public and private SSH keys
+   * @return {KeyPair} public and private SSH keys
    */
-  private static generateKeyPair_ = () : { public: string, private: string } => {
+  private static generateKeyPair_ = () : KeyPair => {
     "use strict";
     var pair = forge.pki.rsa.generateKeyPair({bits: 2048, e: 0x10001});
     var publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, '');
@@ -144,7 +147,7 @@ class Provisioner {
    *  }
    */
   private doOAuth_ = () : Promise<Object> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve: Function, reject: Function) => {
       var oauth = freedom["core.oauth"]();
       this.sendStatus_("OAUTH_INIT");
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
@@ -179,7 +182,7 @@ class Provisioner {
    * Try to retrieve SSH keys from storage.
    * If not found, generate new ones and store
    * @param {String} name name of the key (usually same as name of VM later)
-   * @return {Object}
+   * @return {Promise.<Object>} the SSH keys retrieved
    * {
    *    public: "...",
    *    private: "..."
@@ -187,12 +190,12 @@ class Provisioner {
    */
   private getSshKey_ = (name: string) : Promise<Object> => {
     var storage = freedom["core.storage"]();
-    return new Promise((resolve: any, reject: any) => {
-      var result : {public: string, private: string} = null;
+    return new Promise((resolve: Function, reject: Function) => {
+      var result : KeyPair;
       Promise.all([
         storage.get("DigitalOcean-" + name + "-PublicKey"),
         storage.get("DigitalOcean-" + name + "-PrivateKey")
-      ]).then((val: any) => {
+      ]).then((val: string[]) => {
         if (val[0] === null ||
           val[1] === null) {
           result = Provisioner.generateKeyPair_();
@@ -221,11 +224,11 @@ class Provisioner {
    */
   private doRequest_ = (method: string, actionPath: string, body?: string) :
       Promise<Object> => {
-    return new Promise((resolve: any, reject: any) => {
+    return new Promise((resolve: Function, reject: Function) => {
       var url = 'https://api.digitalocean.com/v2/' + actionPath;
       var xhr = freedom["core.xhr"]();
-      xhr.on("onload", (resolve: any, reject: any, xhr: any, e: any) => {
-        xhr.getResponseText().then((resolve: any, reject: any, resp: any) => {
+      xhr.on("onload", (resolve: Function, reject: Function, xhr: any, e: Error) => {
+        xhr.getResponseText().then((resolve: Function, reject: Function, resp: string) => {
           try {
             resolve(JSON.parse(resp));
           } catch(e) {
@@ -252,12 +255,12 @@ class Provisioner {
    * @param {Function} resolve - call when done
    * @param {Function} reject - call on failure
    */
-  private waitDigitalOceanActions_ = (resolve: Function, reject: Function) => {
+  private waitDigitalOceanActions_ = (resolve: Function, reject: Function) : void => {
     console.log("Polling for Digital Ocean in-progress actions");
     this.doRequest_("GET", "droplets/" + this.state.cloud.vm.id + "/actions").then((resp: any) => {
       for (var i = 0; i < resp.actions.length; i++) {
         if (resp.actions[i].status === "in-progress") {
-          setTimeout(this.waitDigitalOceanActions_.bind(this, resolve, reject), POLL_TIMEOUT);
+          setTimeout(this.waitDigitalOceanActions_, POLL_TIMEOUT);
           return;
         }
       }
@@ -274,7 +277,7 @@ class Provisioner {
    * This method will use this.waitDigitalOceanActions_() to wait until all actions complete
    * before resolving
    * @param {String} name of droplet
-   * @return {Promise} resolves on success, rejects on failure
+   * @return {Promise.<Object>} resolves on success, rejects on failure
    */
   private setupDigitalOcean_ = (name: string) : Promise<Object> => {
     return new Promise(function(resolve, reject) {
