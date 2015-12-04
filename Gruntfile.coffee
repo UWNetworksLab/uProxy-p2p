@@ -558,7 +558,7 @@ gruntConfig = {
             dest: chromeAppDevPath + '/freedom-social-firebase'
           },
           {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+            expand: true, cwd: 'node_modules/freedom-social-github/src/',
             src: ['**/*.js', '**/*.json']
             dest: chromeAppDevPath + '/freedom-social-github'
           },
@@ -635,7 +635,7 @@ gruntConfig = {
             dest: firefoxDevPath + '/data/freedom-social-firebase'
           },
           {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+            expand: true, cwd: 'node_modules/freedom-social-github/src/',
             src: ['**/*.js', '**/*.json']
             dest: firefoxDevPath + '/data/freedom-social-github'
           },
@@ -709,7 +709,7 @@ gruntConfig = {
             dest: ccaDevPath + '/freedom-social-firebase'
           },
           {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
+            expand: true, cwd: 'node_modules/freedom-social-github/src/',
             src: ['**/*.js', '**/*.json']
             dest: ccaDevPath + '/freedom-social-github'
           },
