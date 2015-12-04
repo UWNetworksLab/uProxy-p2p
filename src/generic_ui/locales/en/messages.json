@@ -125,7 +125,7 @@
   },
   "GRANT": {
     "description": "Label for button that accepts a friend's request to access the Internet through the user.",
-    "message": "Grant Access"
+    "message": "Grant"
   },
   "FRIEND_REQUESTED_ACCESS": {
     "description": "A friend has requested to access the Internet through the user.",
