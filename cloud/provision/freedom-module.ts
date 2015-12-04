@@ -272,10 +272,10 @@ class Provisioner {
    * This method will use this.waitDigitalOceanActions_() to wait until all actions complete
    * before resolving
    * @param {String} name of droplet
-   * @return {Promise.<Object>} resolves on success, rejects on failure
+   * @return {Promise.<void>} resolves on success, rejects on failure
    */
-  private setupDigitalOcean_ = (name: string) : Promise<Object> => {
-    return new Promise((F, R) => {
+  private setupDigitalOcean_ = (name: string) : Promise<void> => {
+    return new Promise<void>((F, R) => {
       this.state_.cloud = {};
       this.sendStatus_("CLOUD_INIT_ADDKEY");
       // Get SSH keys in account
