@@ -37,7 +37,6 @@ Polymer({
     if (newView == ui_types.View.ROSTER && oldView == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
       if (!model.globalSettings.hasSeenWelcome) {
-        this.statsDialogOrBubbleOpen = true;
         this.$.statsDialog.toggle();
       }
       this.closeSettings();
@@ -154,13 +153,9 @@ Polymer({
     }
     if (ui.view == ui_types.View.ROSTER &&
         !model.globalSettings.hasSeenWelcome) {
-      this.statsDialogOrBubbleOpen = true;
       this.$.statsDialog.open();
     }
     this.updateDirectionality();
-  },
-  closeStatsBubble: function() {
-    this.statsDialogOrBubbleOpen = false;
   },
   enableStats: function() {
     // TODO: clean up the logic which controls which welcome dialog or bubble
@@ -170,7 +165,6 @@ Polymer({
   },
   disableStats: function() {
     this.model.globalSettings.statsReportingEnabled = false;
-    this.statsDialogOrBubbleOpen = false;
     this.$.statsDialog.close();
   },
   tabSelected: function(e :Event) {

@@ -338,11 +338,6 @@
               hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
 
-          <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
-            <h3>{{ "STATS_ENABLED_TITLE" | $$ }}</h3>
-            <p>{{ "STATS_ENABLED_MESSAGE" | $$ }}</p>
-          </uproxy-bubble>
-
           <core-tooltip label='{{ "SHARING_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
               hidden?='{{ !isSharingEnabledWithOthers }}'
@@ -379,7 +374,7 @@
           core-header-panel and it is positioned below the toolbar (see
           https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
         -->
-        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}' noclear="true">
+        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}' noclear="true">
           <p>
             {{ "WELCOME_MESSAGE" | $$ }}
           </p>
