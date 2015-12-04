@@ -220,7 +220,7 @@ export interface ClientState {
   clientId  :string;
   status    :ClientStatus;
   timestamp :number;
-  inviteUserData ?:string;
+  inviteResponse ?:string;
 }
 
 
@@ -236,7 +236,7 @@ export interface UserState {
   knownPublicKeys :string[];
 }
 
-export interface InviteUserData {
+export interface inviteResponse {
   userId :string;
   publicKey :string;
   permissionToken :string;
