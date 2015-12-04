@@ -237,6 +237,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     globals.settings.hasSeenGoogleAndFacebookChangedNotification =
         newSettings.hasSeenGoogleAndFacebookChangedNotification;
     globals.settings.quiverUserName = newSettings.quiverUserName;
+    globals.settings.showCloud = newSettings.showCloud;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
@@ -372,20 +373,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
     remote.stop();
     // TODO: Handle revoked permissions notifications.
-  }
-
-  public handleManualNetworkInboundMessage =
-      (command :social.HandleManualNetworkInboundMessageCommand) => {
-    var manualNetwork :social_network.ManualNetwork =
-        <social_network.ManualNetwork> social_network.getNetwork(
-            social_network.MANUAL_NETWORK_ID, '');
-    if (!manualNetwork) {
-      log.error('Manual network does not exist, discarding inbound message',
-                command);
-      return;
-    }
-
-    manualNetwork.receive(command.senderClientId, command.message);
   }
 
   /**

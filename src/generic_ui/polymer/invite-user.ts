@@ -24,13 +24,7 @@ Polymer({
           body: ui.i18n_t('INVITE_EMAIL_BODY', { url: inviteUrl, name: userName })
       });
       this.closeInviteUserPanel();
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("INVITE_EMAIL_SENT"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+      ui.showDialog('', ui.i18n_t('INVITE_EMAIL_SENT'));
     });
   },
   sendToFacebookFriend: function() {
@@ -40,13 +34,7 @@ Polymer({
           + inviteUrl + '&redirect_uri=https://www.uproxy.org/';
       ui.openTab(facebookUrl);
       this.closeInviteUserPanel();
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("FACEBOOK_INVITE_IN_BROWSER"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+      ui.showDialog('', ui.i18n_t('FACEBOOK_INVITE_IN_BROWSER'));
     });
   },
   inviteGithubFriend: function() {
@@ -55,44 +43,12 @@ Polymer({
       userName: this.githubUserIdInput
     }).then(() => {
       this.closeInviteUserPanel();
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.githubUserIdInput }),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+      ui.showDialog('', ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.githubUserIdInput }));
     }).catch(() => {
       // TODO: The message in this dialog should be passed from the social provider.
       // https://github.com/uProxy/uproxy/issues/1923
       this.closeInviteUserPanel();
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("GITHUB_INVITE_SEND_FAILED"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
-    });
-  },
-  addCloudInstance: function() {
-    // TODO: this should be using acceptUserInvitation, not inviteUser,
-    // as the user is entering an invite URL they've received and is not
-    // sending any invite to their friends at this point.
-    core.inviteUser({
-      networkId: 'Cloud',
-      userName: this.cloudInstanceInput
-    }).then(() => {
-      console.log('invited!');
-      this.closeInviteUserPanel();
-    }).catch(() => {
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("CLOUD_INVITE_FAILED"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+      ui.showDialog('', ui.i18n_t('GITHUB_INVITE_SEND_FAILED'));
     });
   },
   onNetworkSelect: function(e :any, details :any) {
@@ -112,6 +68,7 @@ Polymer({
   },
   showAcceptUserInvite: function() {
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
+    this.closeInviteUserPanel();
   },
   setOnlineInviteNetworks: function() {
     this.onlineInviteNetworks = [];
@@ -181,7 +138,7 @@ Polymer({
   },
   initInviteForNetwork: function(networkName: string) {
     this.selectedNetworkName = networkName;
-    if (networkName == "GMail" || networkName == "GitHub") {
+    if (networkName == "GMail" || networkName == "GitHub" || networkName == "Cloud") {
       // After login for these networks, open another view which allows users
       // to invite their friends.
       this.fire('core-signal', { name: 'open-network-invite-dialog' });

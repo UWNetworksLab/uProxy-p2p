@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.8.28",
+  "version": "0.8.29",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -18,22 +18,23 @@
   ],
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
-    "browserify-zlib": "^0.1.4",
     "bower": "^1.4.1",
+    "browserify-zlib": "^0.1.4",
     "cca": "^0.8.0",
-    "circular-json": "^0.1.6",
+    "circular-json": "^0.3.0",
     "compare-version": "^0.1.2",
     "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
+    "freedom": "^0.6.27",
     "freedom-for-chrome": "^0.4.20",
     "freedom-for-firefox": "^0.6.15",
     "freedom-pgp-e2e": "^0.5.0",
     "freedom-port-control": "^0.9.0",
     "freedom-social-firebase": "^2.0.0",
-    "freedom-social-xmpp": "^0.4.0",
     "freedom-social-github": "^0.1.3",
-    "freedom-social-wechat": "^0.1.5",
     "freedom-social-quiver": "^0.0.3",
+    "freedom-social-wechat": "^0.1.5",
+    "freedom-social-xmpp": "^0.4.0",
     "freedomjs-anonymized-metrics": "~0.1.0",
     "fs-extra": "^0.12.0",
     "grunt": "^0.4.2",
@@ -41,7 +42,7 @@
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-jasmine": "^0.8.0",
+    "grunt-contrib-jasmine": "^0.9.0",
     "grunt-exec": "^0.4.6",
     "grunt-gitinfo": "^0.1.7",
     "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",
@@ -57,12 +58,9 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.6.3",
-    "uproxy-lib": "^34.1.0",
+    "uproxy-lib": "^35.0.2",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
-  },
-  "peerDependencies": {
-    "freedom": "^0.6.18"
   },
   "private": true
 }

@@ -42,8 +42,6 @@ var log :logging.Log = new logging.Log('social');
 
 export var LOGIN_TIMEOUT :number = 5000;  // ms
 
-export var MANUAL_NETWORK_ID = 'Manual';
-
 // PREFIX is the string prefix indicating which social providers in the
 // freedom manifest we want to treat as social providers for uProxy.
 var PREFIX :string = 'SOCIAL-';
@@ -56,9 +54,7 @@ var PREFIX :string = 'SOCIAL-';
 export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
 
 export function removeNetwork(networkName :string, userId :string) :void {
-  if (networkName !== MANUAL_NETWORK_ID) {
-    delete networks[networkName][userId];
-  }
+  delete networks[networkName][userId];
   notifyUI(networkName, userId);
 }
 
@@ -78,10 +74,6 @@ export function initializeNetworks() :void {
       networks[name] = {};
     }
   }
-
-  // TODO: re-enable manual networks here when all code is ready
-  // Social.networks[MANUAL_NETWORK_ID] = {
-  //     '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
 }
 
 /**
@@ -882,74 +874,6 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
   }  // class Social.FreedomNetwork
-
-
-  // A Social.Network implementation that "sends" a message by relaying it to
-  // the uProxy UI for display to the user and "receives" a message from the
-  // uProxy UI after the user has manually entered (copy/pasted) it into the
-  // UI.
-  //
-  // This network is unusual in that there is no distinction among user IDs,
-  // client IDs, and instance IDs; they are all the same thing. The reason is
-  // as follows:
-  //   - The manual network has no concept of a single user having multiple
-  //     clients; the client ID uniquely identifies the user in the manual
-  //     network. Thus, a user ID is also a client ID.
-  //   - Similarly, there is no concept of a single user having multiple
-  //     instances. Each instance is independent and not correlated with other
-  //     instances in any way. Thus, an instance ID is also a user ID.
-  export class ManualNetwork extends AbstractNetwork {
-    constructor(public name :string) {
-      super(name);
-    }
-
-    //===================== Social.Network implementation ====================//
-
-    public login = (reconnect :boolean, userName ?:string) : Promise<void> => {
-      return Promise.resolve<void>();
-    }
-
-    public logout = () : Promise<void> => {
-      return Promise.resolve<void>();
-    }
-
-    public send = (user :remote_user.User,
-                   recipientClientId :string,
-                   message :social.PeerMessage) : Promise<void> => {
-      // TODO: Batch messages.
-      // Relay the message to the UI for display to the user.
-      var versionedMessage :social.VersionedPeerMessage = {
-        type: message.type,
-        data: message.data,
-        version: globals.effectiveMessageVersion()
-      };
-      ui.update(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
-          versionedMessage);
-
-      return Promise.resolve<void>();
-    }
-
-    // TODO: Consider adding a mechanism for reporting back to the UI that a
-    // message is malformed or otherwise invalid.
-    public receive = (senderClientId :string,
-                      message :social.VersionedPeerMessage) : void => {
-      log.debug('Received incoming manual message from %1: %2',
-                senderClientId, message);
-
-      // Client ID and user ID are the same thing in the manual network, so the
-      // sender client ID doubles as the sender user ID.
-      var senderUserId = senderClientId;
-
-      var user =this.getOrAddUser_(senderUserId);
-      // Hack so that handleMessage treats this client as online and doesn't
-      // reject.
-      // TODO: refactor manual network to have its own client messages.
-      user.clientIdToStatusMap[senderClientId] = social.ClientStatus.ONLINE;
-      user.handleMessage(senderUserId, message);
-    }
-
-  }  // class ManualNetwork
-
 
 export function freedomClientToUproxyClient(
   freedomClientState :freedom.Social.ClientState) :social.ClientState {

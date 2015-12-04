@@ -1,39 +1,19 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
+import ui_constants = require('../../interfaces/ui');
 var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
 
 Polymer({
   acceptInvitation: function() {
-    var token = this.receivedInviteToken.lastIndexOf('/') >= 0 ?
-    this.receivedInviteToken.substr(this.receivedInviteToken.lastIndexOf('/') + 1) : this.receivedInviteToken;
-    var tokenObj = JSON.parse(atob(token));
-    var networkName = tokenObj.networkName;
-    var socialNetworkInfo = {
-      name: networkName,
-      userId: "" /* The current user's ID will be determined by the core. */
-    };
-
-    core.acceptInvitation({network: socialNetworkInfo, token: this.receivedInviteToken})
-        .then(() => {
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("FRIEND_ADDED"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+    ui.handleInvite(this.receivedInviteToken).then(() => {
+      ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
       this.closeAcceptUserInvitePanel();
     }).catch(() => {
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("FRIEND_ADD_ERROR"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+      ui.showDialog('', ui.i18n_t('FRIEND_ADD_ERROR'));
     });
   },
   openAcceptUserInvitePanel: function() {

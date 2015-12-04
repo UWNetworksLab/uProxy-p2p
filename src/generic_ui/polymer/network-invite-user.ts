@@ -32,13 +32,7 @@ Polymer({
           body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
       });
       this.closeInviteUserPanel();
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("INVITE_EMAIL_SENT"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+      ui.showDialog('', ui.i18n_t('INVITE_EMAIL_SENT'));
     });
   },
   inviteGithubFriend: function() {
@@ -48,23 +42,27 @@ Polymer({
       userName: this.userIdInput
     }).then(() => {
       this.closeInviteUserPanel();
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.userIdInput }),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+      ui.showDialog('',
+          ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.userIdInput }));
     }).catch(() => {
       // TODO: The message in this dialog should be passed from the social provider.
       // https://github.com/uProxy/uproxy/issues/1923
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("GITHUB_INVITE_SEND_FAILED"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
+      ui.showDialog('', ui.i18n_t('GITHUB_INVITE_SEND_FAILED'));
+    });
+  },
+  addCloudInstance: function() {
+    var socialNetworkInfo = {
+      name: "Cloud",
+      userId: "" /* The current user's ID will be determined by the core. */
+    };
+    core.acceptInvitation({
+        network: socialNetworkInfo,
+        token: this.cloudInstanceInput
+      }).then(() => {
+      ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
+      this.closeInviteUserPanel();
+    }).catch(() => {
+      ui.showDialog('', ui.i18n_t('CLOUD_INVITE_FAILED'));
     });
   },
   openInviteUserPanel: function() {
