@@ -32,9 +32,9 @@ Polymer({
     this.ui.openTab(url);
   },
   sanitize: function(i18nMessage :string) {
-    // Remove all HTML that isn't a, strong, span or p.
+    // Remove all HTML that isn't a, strong or p.
     var sanitizedMessage = i18nMessage
-        .replace(/<((?!(\/?(strong|a|p|span)))[^>]+)>/g, '');
+        .replace(/<((?!(\/?(strong|a|p)))[^>]+)>/g, '');
 
     // Replace all links with openTab events
     sanitizedMessage = sanitizedMessage
@@ -47,7 +47,6 @@ Polymer({
       var url = regexToGetUrl.exec(p1)[1];
       return "<a on-tap='{{openTab}}' data-url=" + url + ">" + p2 + "</a>";
     });
-
     return sanitizedMessage;
   },
   ready: function() {
