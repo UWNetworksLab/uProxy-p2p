@@ -26,7 +26,7 @@
     "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
     "freedom": "^0.6.27",
-    "freedom-for-chrome": "^0.4.20",
+    "freedom-for-chrome": "^0.4.22",
     "freedom-for-firefox": "^0.6.15",
     "freedom-pgp-e2e": "^0.5.0",
     "freedom-port-control": "^0.9.0",
