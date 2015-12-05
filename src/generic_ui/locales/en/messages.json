@@ -951,13 +951,9 @@
     "description": "",
     "message": "What do \"get access\" and \"share access\" mean?"
   },
-  "WHAT_DO_GET_ACCESS_ANSWER_PT_1": {
+  "WHAT_DO_GET_ACCESS_ANSWER": {
     "description": "",
-    "message": "When you are getting access from a friend, all the web traffic from your browser first travels encrypted to your friend's computer and from there, to the Internet. This means that, to most websites, the request will appear to be coming from your friend's computer, and someone monitoring your connection will only see that you have a secure connection to your friend."
-  },
-  "WHAT_DO_GET_ACCESS_ANSWER_PT_2": {
-    "description": "",
-    "message": "When you are sharing access, authorized friends will be able to send their web traffic to your computer and from there to the Internet. Your friend can only connect through a computer if you authorize them on that computer, and you can revoke their authorization at any time."
+    "message": "When you are <strong>getting access</strong> from a friend, all the web traffic from your browser first travels encrypted to your friend's computer and from there, to the Internet. This means that, to most websites, the request will appear to be coming from your friend's computer, and someone monitoring your connection will only see that you have a secure connection to your friend.</p><p>When you are <strong>sharing access</strong>, authorized friends will be able to send their web traffic to your computer and from there to the Internet. Your friend can only connect through a computer if you authorize them on that computer, and you can revoke their authorization at any time."
   },
   "WHY_DOES_UPROXY_CONNECT": {
     "description": "",
@@ -965,7 +961,7 @@
   },
   "WHY_DOES_UPROXY_CONNECT_ANSWER": {
     "description": "",
-    "message": "uProxy needs a way to see when your friends are online, and it needs to exchange information (IP address, port, and encryption keys) between peers to set up direct connections. Instead of operating a central service that could be easily blocked, uProxy connects to social networks that you and your friends are already using. They are only used to help establish a direct connection between users; proxied Internet traffic is not sent through the social network. uProxy will never post publicly on your behalf. It only exchanges private messages with friends of yours who are also running uProxy."
+    "message": "uProxy needs a way to see when your friends are online, and it needs to exchange information (IP address, port, and encryption keys) between peers to set up direct connections. Instead of operating a central service that could be easily blocked, uProxy connects to social networks that you and your friends are already using. They are only used to help establish a direct connection between users; proxied Internet traffic is not sent through the social network. <strong>uProxy will never post publicly on your behalf.</strong> It only exchanges private messages with friends of yours who are also running uProxy."
   },
   "DOES_UPROXY_LOG_DATA_SHORT": {
     "description": "",
@@ -975,13 +971,9 @@
     "description": "",
     "message": "Does uProxy log data about me, and what is uProxy's privacy policy?"
   },
-  "DOES_UPROXY_LOG_DATA_ANSWER_PT_1": {
+  "DOES_UPROXY_LOG_DATA_ANSWER": {
     "description": "",
-    "message": "We ask users if they would like to opt-in to report usage metrics. If they do, all metrics are anonymized on the client (before they are submitted) using Rappor (www.github.com/google/rappor). In addition, when users manually use the Submit Feedback tool in the settings menu, they have the option to include logs from their recent uProxy activity. Logs may contain personally identifiable information (PII). PII is never shared outside the uProxy team, and the logs that contain it are retained for at most three months before being deleted. All reports are submitted in a way that makes it hard for an adversary to detect uProxy users."
-  },
-  "DOES_UPROXY_LOG_DATA_ANSWER_PT_2": {
-    "description": "",
-    "message": "There is more information on the team's development site about our data collection policy (www.github.com/uProxy/uproxy/wiki/Data-Collection) and trusting social networks (www.github.com/uProxy/uproxy/wiki/Trust)."
+    "message": "We ask users if they would like to opt-in to report usage metrics. If they do, all metrics are anonymized on the client (before they are submitted) using <a href=\"https://github.com/google/rappor/blob/master/README.md\">Rappor</a>. In addition, when users manually use the Submit Feedback tool in the settings menu, they have the option to include logs from their recent uProxy activity. Logs may contain personally identifiable information (PII). PII is never shared outside the uProxy team, and the logs that contain it are retained for at most three months before being deleted. All reports are submitted in a way that makes it hard for an adversary to detect uProxy users.</p><p>There is more information on the team's development site about <a href=\"https://github.com/uProxy/uproxy/wiki/Data-Collection\">our data collection policy</a> and <a href=\"https://github.com/uProxy/uproxy/wiki/Trust\">trusting social networks</a>."
   },
   "WHEN_I_AM_SHARING_ACCESS": {
     "description": "",
@@ -1003,29 +995,17 @@
     "description": "",
     "message": "How do I find my friends on uProxy?"
   },
-  "HOW_DO_I_FIND_ANSWER_PT_1": {
+  "HOW_DO_I_FIND_ANSWER": {
     "description": "",
-    "message": "In order to see a friend in your contact list, you have to be logged into the same social network they're using with uProxy. You can log into multiple social networks at the same time by going into the menu ( ≡ ) and expanding the header ( ▼ ) to see social network options."
-  },
-  "HOW_DO_I_FIND_ANSWER_PT_2": {
-    "description": "",
-    "message": "If you're logged into Google, friends will appear in your contact list if they're currently logged into uProxy and if they appear in your Google Hangouts (or Google Chat) buddylist. You can add friends by sending them a message using Google Hangouts (hangouts.google.com)."
-  },
-  "HOW_DO_I_FIND_ANSWER_PT_3": {
-    "description": "",
-    "message": "If you're logged into Facebook, people will appear in your contact list if they're your Facebook friends list and if they've logged into uProxy using their Facebook account in the past."
+    "message": "In order to see a friend in your contact list, you have to be logged into the same social network they're using with uProxy. You can log into multiple social networks at the same time by going into the menu ( &equiv; ) and expanding the header ( &#9660; ) to see social network options.</p><p>If you're logged into <strong>Google</strong>, friends will appear in your contact list if they're currently logged into uProxy and if they appear in your Google Hangouts (or Google Chat) buddylist. You can add friends by sending them a message using <a href=\"https://hangouts.google.com/\">Google Hangouts</a>.</p><p>If you're logged into <strong>Facebook</strong>, people will appear in your contact list if they're your Facebook friends list and if they've logged into uProxy using their Facebook account in the past."
   },
   "HOW_DOES_UPROXY_HELP": {
     "description": "",
     "message": "How does uProxy help protect my Internet connection?"
   },
-  "HOW_DOES_UPROXY_HELP_ANSWER_PT_1": {
+  "HOW_DOES_UPROXY_HELP_ANSWER": {
     "description": "",
-    "message": "When you use the Internet normally, your Internet service provider (ISP) is able to see which sites you're visiting, and they may try to interfere with your connection by blocking access to some sites or even altering their contents. In addition, on some networks, like unsecure wifi, other users can also observe your web traffic."
-  },
-  "HOW_DOES_UPROXY_HELP_ANSWER_PT_2": {
-    "description": "",
-    "message": "When you're getting access through uProxy, the connection between you and your friend is encrypted, and your web traffic is sent through that connection, and then out to the internet from your friend's machine. Your ISP should not be able to monitor normal web browsing done over uProxy, and we intentionally make uProxy connections difficult for an ISP to identify and block."
+    "message": "When you use the Internet normally, your Internet service provider (ISP) is able to see which sites you're visiting, and they may try to interfere with your connection by blocking access to some sites or even altering their contents. In addition, on some networks, like unsecure wifi, other users can also observe your web traffic.</p><p>When you're getting access through uProxy, the connection between you and your friend is encrypted, and your web traffic is sent through that connection, and then out to the internet from your friend's machine. Your ISP should not be able to monitor normal web browsing done over uProxy, and we intentionally make uProxy connections difficult for an ISP to identify and block."
   },
   "WHY_IS_IT_IMPORTANT": {
     "description": "",
@@ -1041,7 +1021,7 @@
   },
   "DOES_UPROXY_GIVE_ME_ANSWER": {
     "description": "",
-    "message": "uProxy is not an anonymity service; it is useful for concealing your browsing from your ISP, but not for hiding your identity from the sites you visit. A website visited by someone who is getting access via uProxy will see the IP address of the person who is sharing access, and the website may be able to discover the IP address of the uProxy user who is getting access. If you need to hide your identity from the websites you visit, we recommend using the Tor Browser (www.torproject.org/projects/torbrowser.html)."
+    "message": "uProxy is not an anonymity service; it is useful for concealing your browsing from your ISP, but not for hiding your identity from the sites you visit. A website visited by someone who is getting access via uProxy will see the IP address of the person who is sharing access, and the website may be able to discover the IP address of the uProxy user who is getting access. If you need to hide your identity from the websites you visit, we recommend using the <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor Browser</a>."
   },
   "WHAT_ISNT_PROXIED": {
     "description": "",
@@ -1055,17 +1035,9 @@
     "description": "",
     "message": "Who knows that I'm using uProxy?"
   },
-  "WHO_KNOWS_THAT_ANSWER_PT_1": {
+  "WHO_KNOWS_THAT_ANSWER": {
     "description": "",
-    "message": "Anyone you get or share with knows that you're using uProxy. In addition, if you choose to connect uProxy to Facebook or Google, your friends on that network (Facebook friends or Google Hangouts contacts) who are also using uProxy will be able to see that you've logged on."
-  },
-  "WHO_KNOWS_THAT_ANSWER_PT_2": {
-    "description": "",
-    "message": "If you connect uProxy to a social network, that company is able to tell that you're running uProxy. In addition, using uProxy with Google and Facebook relies partly on Firebase, a service operated by Google, so Google and the uProxy team (which administers the uProxy Firebase account) have access to information about which accounts are using uProxy."
-  },
-  "WHO_KNOWS_THAT_ANSWER_PT_3": {
-    "description": "",
-    "message": "Users who are concerned about using uProxy with their personal accounts may wish to consider creating a dedicated pseudonymous account."
+    "message": "Anyone you get or share with knows that you're using uProxy. In addition, if you choose to connect uProxy to Facebook or Google, your friends on that network (Facebook friends or Google Hangouts contacts) who are also using uProxy will be able to see that you've logged on.</p>If you connect uProxy to a social network, that company is able to tell that you're running uProxy. In addition, using uProxy with Google and Facebook relies partly on Firebase, a service operated by Google, so Google and the uProxy team (which administers the uProxy Firebase account) have access to information about which accounts are using uProxy.</p><p>Users who are concerned about using uProxy with their personal accounts may wish to consider creating a dedicated pseudonymous account."
   },
   "DOES_UPROXY_PROTECT": {
     "description": "",
@@ -1087,13 +1059,9 @@
     "description": "",
     "message": "What does \"port control\" mean?"
   },
-  "WHAT_IS_PORT_CONTROL_ANSWER_PT_1": {
+  "WHAT_IS_PORT_CONTROL_ANSWER": {
     "description": "",
-    "message": "Network Address Translation (NAT) is typically implemented by routers to allow a single IP address to be shared by multiple computers. However, this can make it challenging for users to establish direct connections with each other, and some types of NATs (particularly symmetric NATs) can prevent uProxy from successfully establishing connections."
-  },
-  "WHAT_IS_PORT_CONTROL_ANSWER_PT_2": {
-    "description": "",
-    "message": "If your router has port control enabled (UPnP, NAT-PMP, or PCP), uProxy can instruct your router to specifically allow incoming connections from other uProxy users. If either side of a uProxy connection is able to use port control, connections will almost always be successful, regardless of NAT configuration. To learn how to enable port control on your router, check your router manual or Google \"your router name\" + \"enable UPnP\"."
+    "message": "Network Address Translation (NAT) is typically implemented by routers to allow a single IP address to be shared by multiple computers. However, this can make it challenging for users to establish direct connections with each other, and some types of NATs (particularly symmetric NATs) can prevent uProxy from successfully establishing connections.</p><p>If your router has port control enabled (UPnP, NAT-PMP, or PCP), uProxy can instruct your router to specifically allow incoming connections from other uProxy users. If either side of a uProxy connection is able to use port control, connections will almost always be successful, regardless of NAT configuration. To learn how to enable port control on your router, check your router manual or Google \"your router name\" + \"enable UPnP\"."
   },
   "HOW_DOES_UPROXY_COMPARE": {
     "description": "",
@@ -1111,13 +1079,21 @@
     "description": "",
     "message": "uProxy is being developed by the University of Washington. The project was seeded by Google Ideas and has received contributions from Google, Brave New Software, and the open source community."
   },
+  "WHAT_IS_ALPHA": {
+    "description": "",
+    "message": "What is an alpha release?"
+  },
+  "WHAT_IS_ALPHA_ANSWER": {
+    "description": "",
+    "message": "This alpha version of uProxy is still under development and may be unstable at times; some features are not complete, and there's a <a href=\"https://github.com/uProxy/uproxy/issues\">list of open issues</a> on GitHub. We'd love for you to try it and help us make improvements, by giving us feedback."
+  },
   "WHAT_IS_BETA": {
     "description": "",
     "message": "What is a beta release?"
   },
   "WHAT_IS_BETA_ANSWER": {
     "description": "",
-    "message": "This beta version of uProxy is still under development, but we believe it should work well for users who have access to at least one of the social networks it supports. There's a list of open issues on GitHub (www.github.com/uProxy/uproxy/issues). We'd love for you to try it and help us make improvements, by giving us feedback."
+    "message": "This beta version of uProxy is still under development, but we believe it should work well for users who have access to at least one of the social networks it supports. There's a <a href=\"https://github.com/uProxy/uproxy/issues\">list of open issues</a> on GitHub. We'd love for you to try it and help us make improvements, by giving us feedback."
   },
   "HOW_DO_I_SUBMIT": {
     "description": "",
@@ -1125,7 +1101,7 @@
   },
   "HOW_DO_I_SUBMIT_ANSWER": {
     "description": "",
-    "message": "To submit feedback, click on the menu icon ( ≡ ) and then on \"Submit Feedback,\" or email us at info@uproxy.org."
+    "message": "To submit feedback, click on the menu icon ( &equiv; ) and then on \"Submit Feedback,\" or email us at <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>."
   },
   "BACK_TO_TOP": {
     "description": "",
