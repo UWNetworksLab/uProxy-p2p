@@ -61,6 +61,7 @@ function bind(i:number = 0) : Promise<tcp.Server> {
 
 // Sends a reply to the client, appending a newline.
 var sendReply = (message:string, connection:tcp.Connection) : void => {
+  log.debug('%1: sending reply: %2', connection.connectionId, message);
   connection.send(arraybuffers.stringToArrayBuffer(message + '\n'));
 }
 
@@ -89,6 +90,7 @@ function serveConnection(connection :tcp.Connection) :void {
 
       // ''.split(' ') == ['']
       var sentence = arraybuffers.arrayBufferToString(line);
+      log.debug('%1: received command: %2', connection.connectionId, sentence);
       var words = sentence.split(' ');
       var verb = words[0].trim().toLowerCase();
 
@@ -182,12 +184,12 @@ function get(
 
   socksToRtc.start(new tcp.Server(socksEndpoint), bridge.best('sockstortc',
       pcConfig, undefined, transformerConfig)).then((endpoint:net.Endpoint) => {
-    log.info('SocksToRtc listening on %1', endpoint);
-    log.info('curl -x socks5h://%1:%2 www.example.com',
-        endpoint.address, endpoint.port);
+    log.info('%1: SOCKS server listening on %2 (curl -x socks5h://%1:%2 www.example.com)',
+        connection.connectionId, endpoint,endpoint.address, endpoint.port);
     connection.close();
   }, (e:Error) => {
-    log.error('failed to start SocksToRtc: %1', e.message);
+    log.error('%1: failed to start SOCKS server: %2',
+        connection.connectionId, e.message);
     connection.close();
   });
 
@@ -195,11 +197,13 @@ function get(
     var signals = arraybuffers.arrayBufferToString(buffer).split('\n');
     for (var i = 0; i < signals.length; i++) {
       var signal = signals[i];
+      log.debug('%1: received signalling message: %2',
+          connection.connectionId, signal);
       try {
-        // log.debug('signal for sockstortc: %1', signal);
         socksToRtc.handleSignalFromPeer(JSON.parse(signal));
       } catch (e) {
-        log.warn('could not parse signal: %1', signal);
+        log.warn('%1: could not parse signal (%2): %3',
+            connection.connectionId, signal, e.message);
       }
     }
   });
@@ -216,7 +220,8 @@ function give(connection:tcp.Connection) : void {
     log.info('RtcToNet connected');
     connection.close();
   }, (e: Error) => {
-    log.error('failed to start rtcToNet: %1', e.message);
+    log.error('%1: failed to start rtcToNet: %1',
+        connection.connectionId, e.message);
     connection.close();
   });
 
@@ -229,10 +234,13 @@ function give(connection:tcp.Connection) : void {
     var signals = arraybuffers.arrayBufferToString(buffer).split('\n');
     for (var i = 0; i < signals.length; i++) {
       var signal = signals[i];
+      log.debug('%1: received signalling message: %2',
+          connection.connectionId, signal);
       try {
         rtcToNet.handleSignalFromPeer(JSON.parse(signal));
       } catch (e) {
-        log.warn('could not parse signal: .%1.', signal);
+        log.warn('%1: could not parse signal (%2): %3',
+            connection.connectionId, signal, e.message);
       }
     }
   });
@@ -243,7 +251,8 @@ function give(connection:tcp.Connection) : void {
 bind().then((server:tcp.Server) => {
   server.connectionsQueue.setSyncHandler((connection: tcp.Connection) => {
     connection.onceConnected.then((endpoint: tcp.ConnectionInfo) => {
-      log.info('now serving client at %1', endpoint.remote);
+      log.info('%1: new client from %2',
+          connection.connectionId, endpoint.remote);
       serveConnection(connection);
     });
   });
