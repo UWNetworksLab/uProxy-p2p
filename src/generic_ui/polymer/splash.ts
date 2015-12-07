@@ -108,11 +108,13 @@ Polymer({
     this.supportsQuiver = supportsQuiver;
   },
   enableStats: function() {
-    this.model.globalSettings.statsReportingEnabled = true;
+    model.globalSettings.statsReportingEnabled = true;
+    core.updateGlobalSettings(model.globalSettings);
     this.next();
   },
   disableStats: function() {
-    this.model.globalSettings.statsReportingEnabled = false;
+    model.globalSettings.statsReportingEnabled = false;
+    core.updateGlobalSettings(model.globalSettings);
     this.next();
   },
   observe: {

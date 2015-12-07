@@ -189,7 +189,7 @@
         </uproxy-link>
 
         <div id='metricsCheckbox'>
-          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "STATS_ENABLED_TITLE" | $$ }}'></paper-checkbox>
+          <paper-checkbox label='{{ "STATS_ENABLED_TITLE" | $$ }}' checked='{{ model.globalSettings.statsReportingEnabled }}' on-change='{{updateStatsReportingEnabled}}'></paper-checkbox>
           <uproxy-faq-link class='faq-icon' anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
           </uproxy-faq-link>
