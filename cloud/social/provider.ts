@@ -439,6 +439,7 @@ class Connection {
               while (i !== -1) {
                 let parts = arraybuffers.split(leftover, i);
                 let reply = arraybuffers.arrayBufferToString(parts[0]).trim();
+                log.debug('%1: received message: %2', this.name_, reply);
                 leftover = parts[1].slice(1);
                 i = arraybuffers.indexOf(leftover, Connection.COMMAND_DELIMITER);
 
