@@ -61,6 +61,12 @@ Polymer({
     // Reset selectedNetworkName in case it had been set and that network
     // is no longer online.
     this.$.networkSelectMenu.selectIndex(0);
+
+    // Reset the input, expectation is for it to be empty
+    this.userName = model.globalSettings.quiverUserName;
+    this.inviteUserEmail = '';
+    this.githubUserIdInput = '';
+
     this.$.inviteUserPanel.open();
   },
   closeInviteUserPanel: function() {
