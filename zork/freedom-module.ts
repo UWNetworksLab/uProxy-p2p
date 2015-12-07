@@ -38,6 +38,9 @@ var socksEndpoint :net.Endpoint = {
 // run on the same machine.
 var PORTS = [9000, 9010, 9020];
 
+const COMMAND_DELIMITER = arraybuffers.decodeByte(
+    arraybuffers.stringToArrayBuffer('\n'));
+
 // Starts a TCP server on the first free port listed in PORTS.
 // Rejects if no port is free.
 function bind(i:number = 0) : Promise<tcp.Server> {
@@ -193,12 +196,17 @@ function get(
     connection.close();
   });
 
-  connection.dataFromSocketQueue.setSyncHandler((buffer:ArrayBuffer): void => {
-    var signals = arraybuffers.arrayBufferToString(buffer).split('\n');
-    for (var i = 0; i < signals.length; i++) {
-      var signal = signals[i];
+  let leftover = new ArrayBuffer(0);
+  connection.dataFromSocketQueue.setSyncHandler((buffer: ArrayBuffer): void => {
+    leftover = arraybuffers.concat([leftover, buffer]);
+    let i = arraybuffers.indexOf(leftover, COMMAND_DELIMITER);
+    while (i !== -1) {
+      let parts = arraybuffers.split(leftover, i);
+      let signal = arraybuffers.arrayBufferToString(parts[0]).trim();
       log.debug('%1: received signalling message: %2',
-          connection.connectionId, signal);
+        connection.connectionId, signal);
+      leftover = parts[1].slice(1);
+      i = arraybuffers.indexOf(leftover, COMMAND_DELIMITER);
       try {
         socksToRtc.handleSignalFromPeer(JSON.parse(signal));
       } catch (e) {
@@ -230,12 +238,17 @@ function give(connection:tcp.Connection) : void {
     sendReply(JSON.stringify(signal), connection);
   });
 
-  connection.dataFromSocketQueue.setSyncHandler((buffer:ArrayBuffer): void => {
-    var signals = arraybuffers.arrayBufferToString(buffer).split('\n');
-    for (var i = 0; i < signals.length; i++) {
-      var signal = signals[i];
+  let leftover = new ArrayBuffer(0);
+  connection.dataFromSocketQueue.setSyncHandler((buffer: ArrayBuffer): void => {
+    leftover = arraybuffers.concat([leftover, buffer]);
+    let i = arraybuffers.indexOf(leftover, COMMAND_DELIMITER);
+    while (i !== -1) {
+      let parts = arraybuffers.split(leftover, i);
+      let signal = arraybuffers.arrayBufferToString(parts[0]).trim();
       log.debug('%1: received signalling message: %2',
           connection.connectionId, signal);
+      leftover = parts[1].slice(1);
+      i = arraybuffers.indexOf(leftover, COMMAND_DELIMITER);
       try {
         rtcToNet.handleSignalFromPeer(JSON.parse(signal));
       } catch (e) {
