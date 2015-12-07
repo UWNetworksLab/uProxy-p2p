@@ -280,7 +280,7 @@ export class CloudSocialProvider {
           //       the instance (safe because all we've done is run ping).
           log.info('new proxying session %1', payload.proxyingId);
           if (!(destinationClientId in this.savedContacts_)) {
-            return Promise.reject('unknown client ' + destinationClientId);
+            return Promise.reject(new Error('unknown client ' + destinationClientId));
           }
           return this.reconnect_(this.savedContacts_[destinationClientId].invite).then(
               (connection: Connection) => {
@@ -293,14 +293,14 @@ export class CloudSocialProvider {
               connection.sendMessage(JSON.stringify(payload));
             });
           } else {
-            return Promise.reject('unknown client ' + destinationClientId);
+            return Promise.reject(new Error('unknown client ' + destinationClientId));
           }
         }
       } else {
-        return Promise.reject('message has no or wrong type field');
+        return Promise.reject(new Error('message has no or wrong type field'));
       }
     } catch (e) {
-      return Promise.reject('could not de-serialise message: ' + e.message);
+      return Promise.reject(new Error('could not de-serialise message: ' + e.message));
     }
   }
 
@@ -349,7 +349,7 @@ export class CloudSocialProvider {
         // Return nothing for type checking purposes.
       });
     } catch (e) {
-      return Promise.reject('could not parse invite code: ' + e.message);
+      return Promise.reject(new Error('could not parse invite code: ' + e.message));
     }
   }
 
@@ -395,7 +395,7 @@ class Connection {
   // TODO: timeout
   public connect = (): Promise<void> => {
     if (this.state_ !== ConnectionState.NEW) {
-      return Promise.reject('can only connect in NEW state');
+      return Promise.reject(new Error('can only connect in NEW state'));
     }
     this.state_ = ConnectionState.CONNECTING;
 
@@ -529,7 +529,7 @@ class Connection {
   // Fetches the server's description, i.e. /banner.
   public getBanner = (): Promise<string> => {
     if (this.state_ !== ConnectionState.ESTABLISHED) {
-      return Promise.reject('can only fetch banner in ESTABLISHED state');
+      return Promise.reject(new Error('can only fetch banner in ESTABLISHED state'));
     }
     return new Promise<string>((F, R) => {
       this.client_.exec('cat /banner', (e: Error, stream: ssh2.Channel) => {
