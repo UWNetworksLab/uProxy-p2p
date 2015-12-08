@@ -11,12 +11,20 @@ var model = ui_context.model;
 // for everyone.
 Polymer({
   connect: function() {
-    ui.login(this.networkName).then(() => {
-      console.log('connected to ' + this.networkName);
-      // syncNetwork will update the view to the ROSTER.
-      ui.bringUproxyToFront();
-    }).catch((e :Error) => {
-      console.warn('Did not log in ', e);
+    var getConfirmation = Promise.resolve();
+    if (this.networkName === 'GitHub') {
+      getConfirmation = ui.getConfirmation(
+          '', ui.i18n_t('GITHUB_LOGIN_CONFIRMATION'), true);
+    }
+
+    getConfirmation.then(() => {
+      ui.login(this.networkName).then(() => {
+        console.log('connected to ' + this.networkName);
+        // syncNetwork will update the view to the ROSTER.
+        ui.bringUproxyToFront();
+      }).catch((e :Error) => {
+        console.warn('Did not log in ', e);
+      });
     });
   },
   ready: function() {
