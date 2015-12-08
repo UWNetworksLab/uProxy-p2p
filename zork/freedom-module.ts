@@ -144,6 +144,11 @@ function serveConnection(connection: tcp.Connection): void {
     }
   };
   lineFeeder.setSyncNextHandler(doit);
+
+  connection.onceClosed.then((kind:tcp.SocketCloseKind) => {
+    log.info('%1: closed (%2)',
+      connection.connectionId, tcp.SocketCloseKind[kind]);
+  });
 }
 
 // Creates a SocksToRtc instance and forwards signals between it and the
