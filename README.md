@@ -171,6 +171,14 @@ make sure an emulator is running.
 * Install the app from the command line with `adb install -r build/dev/uproxy/android/platforms/android/build/outputs/apk/android-debug.apk`. You should see `success` if the app is installed.
 * You may then launch the app from the emulator.
 
+#### Creating a Play Store release build
+Android app release builds must be signed.  To create a release build:
+ 1. Get the appropriate `play_store_keys.p12` and `android-release-keys.properties` files, and symlink them into `src/cca/keys`.
+   * The uProxy team's release keys are stored in a secure location, not in the public git repository.  Symlinking ensures that you do not accidentally copy the keys into insecure storage.
+ 1. Run `grunt release_android`
+ 1. From the `build/dev/uproxy/android/platforms/android/build/outputs/apk/` directory, upload `android-release.apk`, `android-x86-release.apk`, and `android-armv7-release.apk` to the Play Store using [the multiple APK upload procedure](http://developer.android.com/google/play/publishing/multiple-apks.html).
+   * This allows us to have a smaller build (~10 MB) for modern Android, and a larger build (~33 MB) for older Android versions that need [Crosswalk](https://crosswalk-project.org/) because the system webview is too old to run uProxy.
+
 ### Fixing compilation and setup
 
 - If something is going wrong during the build process, please try running `grunt

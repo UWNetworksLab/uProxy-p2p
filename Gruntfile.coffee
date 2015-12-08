@@ -169,7 +169,7 @@ gruntConfig = {
   iosDevPath: iosDevPath
   exec: {
     ccaCreate: {
-      command: '<%= ccaJsPath %> create <%= androidDevPath %> --link-to=<%= ccaDevPath %>'
+      command: '<%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
     }
     ccaPlatformAndroid: {
       cwd: '<%= androidDevPath %>'
@@ -181,7 +181,11 @@ gruntConfig = {
     }
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android --webview=system'
+      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk'
+    }
+    ccaReleaseAndroid: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaJsPath %> build android --release --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --release --webview=crosswalk'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
@@ -486,7 +490,7 @@ gruntConfig = {
       files: [
         {
           expand: true
-          cwd: ccaDevPath
+          cwd: 'src/cca'
           src: [ 'splashscreen.png' ]
           dest: 'build/dev/uproxy/android/platforms/android/res/drawable-port-xhdpi'
         }
@@ -764,6 +768,21 @@ gruntConfig = {
         dest: devBuildPath + '/integration'
       }]
   }  # copy
+
+  symlink: {
+    cca_keys:
+      files: [
+        {
+          expand: true
+          cwd: 'src/cca/keys'
+          src: [
+            'android-release-keys.properties'
+            'play_store_keys.p12'
+          ]
+          dest: 'build/dev/uproxy/android'
+        }
+      ]
+  }
 
   #-------------------------------------------------------------------------
   'string-replace':
@@ -1109,14 +1128,24 @@ taskManager.add 'build_cca', [
 ]
 
 # Mobile OS build tasks
-taskManager.add 'build_android', [
+taskManager.add 'prepare_android', [
   'exec:rmAndroidBuild'
   'build_cca'
   'exec:ccaCreate'
   'exec:ccaPlatformAndroid'
   'exec:ccaAddPluginsAndroid'
   'copy:cca_splash'
+]
+
+taskManager.add 'build_android', [
+  'prepare_android'
   'exec:ccaBuildAndroid'
+]
+
+taskManager.add 'release_android', [
+  'prepare_android'
+  'symlink:cca_keys'
+  'exec:ccaReleaseAndroid'
 ]
 
 # Emulate the mobile client
@@ -1191,6 +1220,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
