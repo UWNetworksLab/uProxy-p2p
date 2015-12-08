@@ -1359,6 +1359,11 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.SPLASH;
     }
   }
+
+  public i18nSanitizeHtml = (i18nMessage :string) => {
+    // Remove all HTML other than supported tags like strong, a, p, etc.
+    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br)))[^>]+)>/g, '');
+  }
 } // class UserInterface
 
 // non-exported method to handle categorizing users

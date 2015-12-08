@@ -95,6 +95,13 @@ Polymer({
     }
     this.isUserInputInvalid = false;
 
+    // Set heading and message innerHTML so translations can include
+    // <p>, <a>, <strong>, etc tags.
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(detail.heading), this.$.dialogHeading);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(detail.message), this.$.dialogMessage);
+
     this.dialog = detail;
     // Using async() allows the contents of the dialog to update before
     // it's opened. Opening the dialog too early causes it to be positioned
