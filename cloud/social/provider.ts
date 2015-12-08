@@ -4,7 +4,9 @@
 /// <reference path='../../../../third_party/typings/ssh2/ssh2.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
+import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
+import queue = require('../../handler/queue');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
 import * as ssh2 from 'ssh2';
@@ -430,44 +432,38 @@ class Connection {
 
             this.stream_ = stream;
 
-            // TODO: add error handler for stream
-            let leftover = new ArrayBuffer(0);
-            this.stream_.on('data', (data: Buffer) => {
-              leftover = arraybuffers.concat([leftover,
-                  arraybuffers.bufferToArrayBuffer(data)]);
-              let i = arraybuffers.indexOf(leftover, Connection.COMMAND_DELIMITER);
-              while (i !== -1) {
-                let parts = arraybuffers.split(leftover, i);
-                let reply = arraybuffers.arrayBufferToString(parts[0]).trim();
-                log.debug('%1: received message: %2', this.name_, reply);
-                leftover = parts[1].slice(1);
-                i = arraybuffers.indexOf(leftover, Connection.COMMAND_DELIMITER);
-
-                switch (this.state_) {
-                  case ConnectionState.WAITING_FOR_PING:
-                    if (reply === 'ping') {
-                      this.setState_(ConnectionState.ESTABLISHED);
-                      F();
-                    } else {
-                      this.close();
-                      R(new Error('did not receive ping from server on login: ' +
-                          reply));
-                    }
-                    break;
-                  case ConnectionState.ESTABLISHED:
-                    try {
-                      this.received_(JSON.parse(reply));
-                    } catch (e) {
-                      log.warn('%1: could not de-serialise signalling message: %2',
-                          this.invite_, reply);
-                    }
-                    break;
-                  default:
-                    log.warn('%1: did not expect message in state %2: %3',
-                        this.name_, ConnectionState[this.state_], reply);
+            var bufferQueue = new queue.Queue<ArrayBuffer, void>();
+            new linefeeder.LineFeeder(bufferQueue).setSyncHandler((reply: string) => {
+              log.debug('%1: received message: %2', this.name_, reply);
+              switch (this.state_) {
+                case ConnectionState.WAITING_FOR_PING:
+                  if (reply === 'ping') {
+                    this.setState_(ConnectionState.ESTABLISHED);
+                    F();
+                  } else {
                     this.close();
-                }
+                    R(new Error('did not receive ping from server on login: ' +
+                      reply));
+                  }
+                  break;
+                case ConnectionState.ESTABLISHED:
+                  try {
+                    this.received_(JSON.parse(reply));
+                  } catch (e) {
+                    log.warn('%1: could not de-serialise signalling message: %2',
+                      this.invite_, reply);
+                  }
+                  break;
+                default:
+                  log.warn('%1: did not expect message in state %2: %3',
+                    this.name_, ConnectionState[this.state_], reply);
+                  this.close();
               }
+            });
+
+            // TODO: add error handler for stream
+            stream.on('data', (buffer: Buffer) => {
+              bufferQueue.handle(arraybuffers.bufferToArrayBuffer(buffer));
             }).on('error', (e: Error) => {
               // This occurs when:
               //  - host cannot be reached, e.g. non-existant hostname
