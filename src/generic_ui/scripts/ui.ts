@@ -1378,5 +1378,9 @@ function categorizeUser(user :User, contacts :ContactCategory, oldCategory :stri
   if (newCategory) {
     // add user to new category
     contacts[newCategory].push(user);
+    if (user.status == social.UserStatus.LOCAL_INVITED_BY_REMOTE) {
+      user.getExpanded = true;
+      user.shareExpanded = true;
+    }
   }
 }
