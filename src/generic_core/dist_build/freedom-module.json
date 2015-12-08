@@ -19,10 +19,6 @@
       "url": "../uproxy-lib/cloud/social/freedom-module.json",
       "api": "social2"
     },
-    "SOCIAL-GitHub": {
-      "url": "../freedom-social-github/social.github.json",
-      "api": "social2"
-    },
     "loggingcontroller": {
       "url": "../uproxy-lib/loggingprovider/freedom-module.json",
       "api": "loggingcontroller"
