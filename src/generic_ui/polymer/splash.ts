@@ -23,7 +23,8 @@ var model = ui_context.model;
 Polymer({
   SPLASH_STATES: {
     INTRO: 0,
-    NETWORKS: 1
+    METRICS_OPT_IN: 1,
+    NETWORKS: 2
   },
   setState: function(state :Number) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
@@ -33,15 +34,28 @@ Polymer({
     model.globalSettings.splashState = state;
     core.updateGlobalSettings(model.globalSettings);
   },
+  // TODO: Remove the if and else if blocks for next() and prev() when we
+  // remove the NETWORKS splash state.
   next: function() {
-    if (this.supportsQuiver) {
+    if (this.supportsQuiver && model.globalSettings.splashState
+        == this.SPLASH_STATES.METRICS_OPT_IN) {
       ui.view = ui_constants.View.ROSTER;
+    } else if (model.globalSettings.hasSeenWelcome &&
+        model.globalSettings.splashState == this.SPLASH_STATES.INTRO) {
+        // Skip metrics opt-in if we've seen it before.
+        this.setState(this.SPLASH_STATES.NETWORKS);
     } else {
       this.setState(model.globalSettings.splashState + 1);
     }
   },
   prev: function() {
-    this.setState(model.globalSettings.splashState - 1);
+    if (model.globalSettings.hasSeenWelcome &&
+        model.globalSettings.splashState == this.SPLASH_STATES.NETWORKS) {
+        // Skip metrics opt-in if we've seen it before.
+        this.setState(this.SPLASH_STATES.INTRO);
+    } else {
+      this.setState(model.globalSettings.splashState - 1);
+    }
   },
   copypaste: function() {
     this.fire('core-signal', { name: 'copypaste-init' });
@@ -92,6 +106,16 @@ Polymer({
     // Only set .supportsQuiver after iterating through all networks, to prevent
     // any flicker in case we switch from true to false to true again.
     this.supportsQuiver = supportsQuiver;
+  },
+  enableStats: function() {
+    model.globalSettings.statsReportingEnabled = true;
+    core.updateGlobalSettings(model.globalSettings);
+    this.next();
+  },
+  disableStats: function() {
+    model.globalSettings.statsReportingEnabled = false;
+    core.updateGlobalSettings(model.globalSettings);
+    this.next();
   },
   observe: {
     'model.networkNames': 'updateNetworkButtonNames'

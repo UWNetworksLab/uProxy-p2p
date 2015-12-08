@@ -423,14 +423,14 @@ describe('Quiver social networks', () => {
     });
   });
 
-  it('Ignores messages if inviteUserData contains invalid permission token', (done) => {
+  it('Ignores messages if inviteResponse contains invalid permission token', (done) => {
     var validClientState :freedom.Social.ClientState = {
       userId: 'mockuser',
       clientId: 'mockuser:' + publicKey,
       status: 'ONLINE',
       timestamp: 12345,
-      // Use clear-text inviteUserData, as mock pgp provider doesn't decrypt
-      inviteUserData: JSON.stringify({
+      // Use clear-text inviteResponse, as mock pgp provider doesn't decrypt
+      inviteResponse: JSON.stringify({
         publicKey: publicKey,
         userId: 'mockuser',
         permissionToken: 'invalid'
@@ -446,7 +446,7 @@ describe('Quiver social networks', () => {
     });
   });
 
-  it('Accepts messages if inviteUserData is valid', (done) => {
+  it('Accepts messages if inviteResponse is valid', (done) => {
     var userId = 'mockuser';
     var clientId = userId + ':' + publicKey;
 
@@ -460,8 +460,8 @@ describe('Quiver social networks', () => {
       clientId: clientId,
       status: 'ONLINE',
       timestamp: 12345,
-      // Use clear-text inviteUserData, as mock pgp provider doesn't decrypt
-      inviteUserData: JSON.stringify({
+      // Use clear-text inviteResponse, as mock pgp provider doesn't decrypt
+      inviteResponse: JSON.stringify({
         publicKey: publicKey,
         userId: userId,
         permissionToken: permissionToken

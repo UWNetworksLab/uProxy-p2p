@@ -481,13 +481,13 @@ export function notifyUI(networkName :string, userId :string) {
         return Promise.resolve(true);
       }
 
-      // Hack around ClientState type, as inviteUserData is only available
+      // Hack around ClientState type, as inviteResponse is only available
       // for Quiver and not checked into mainline freedom yet.
-      var inviteUserData = (<any>client)['inviteUserData'];
-      if (inviteUserData) {
+      var inviteResponse = (<any>client)['inviteResponse'];
+      if (inviteResponse) {
         var key = this.getKeyFromClientId(client.clientId);
 
-        var decryptAndValidate = crypto.verifyDecrypt(inviteUserData, key)
+        var decryptAndValidate = crypto.verifyDecrypt(inviteResponse, key)
         .then((plainText :string) => {
           // Cleanup pending validation now that no more async calls are needed
           // to complete validation.
@@ -495,7 +495,7 @@ export function notifyUI(networkName :string, userId :string) {
 
           // Parse invite data
           try {
-            var inviteData :social.InviteUserData = JSON.parse(plainText);
+            var inviteData :social.inviteResponse = JSON.parse(plainText);
           } catch (e) {
             log.warn('Invalid invite data: ' + plainText);
             return Promise.resolve(false);
@@ -519,7 +519,7 @@ export function notifyUI(networkName :string, userId :string) {
 
           return Promise.resolve(true);
         }).catch((e) => {
-          log.error('Error decrypting inviteUserData', e);
+          log.error('Error decrypting inviteResponse', e);
           return Promise.resolve(false);
         });
 
@@ -535,16 +535,16 @@ export function notifyUI(networkName :string, userId :string) {
 
       var user = this.getUser(client.userId);
       if (!user) {
-        // No user exists yet, and inviteUserData was not set - do not
+        // No user exists yet, and inviteResponse was not set - do not
         // create a new user yet and just return invalid.
         // Note: sometimes Quiver emits onClientState events for clients before
-        // it includes the inviteUserData.  uProxy should just ignore these
+        // it includes the inviteResponse.  uProxy should just ignore these
         // and not print errors.
         log.info('No user found: ' + client.userId);
         return Promise.resolve(false);
       }
 
-      // At this point we have a client without any inviteUserData set for an
+      // At this point we have a client without any inviteResponse set for an
       // already existing user, just verify that the clientId appears in the
       // user's list of knownPublicKeys.
       if (user.knownPublicKeys.indexOf(this.getKeyFromClientId(client.clientId)) >= 0) {
@@ -885,9 +885,9 @@ export function freedomClientToUproxyClient(
     clientId:  freedomClientState.clientId,
     status:    (<any>social.ClientStatus)[freedomClientState.status],
     timestamp: freedomClientState.timestamp,
-    // Cast to any because inviteUserData is not yet on "mainstream"
+    // Cast to any because inviteResponse is not yet on "mainstream"
     // freedom definitions and is only available to Quiver
-    inviteUserData: (<any>freedomClientState)['inviteUserData']
+    inviteResponse: (<any>freedomClientState)['inviteResponse']
   };
   return state;
 }

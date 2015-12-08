@@ -36,10 +36,6 @@ Polymer({
     // this event.
     if (newView == ui_types.View.ROSTER && oldView == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
-      if (!model.globalSettings.hasSeenWelcome) {
-        this.statsDialogOrBubbleOpen = true;
-        this.$.statsDialog.toggle();
-      }
       this.closeSettings();
       this.$.modeTabs.updateBar();
     }
@@ -152,26 +148,7 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
-    if (ui.view == ui_types.View.ROSTER &&
-        !model.globalSettings.hasSeenWelcome) {
-      this.statsDialogOrBubbleOpen = true;
-      this.$.statsDialog.open();
-    }
     this.updateDirectionality();
-  },
-  closeStatsBubble: function() {
-    this.statsDialogOrBubbleOpen = false;
-  },
-  enableStats: function() {
-    // TODO: clean up the logic which controls which welcome dialog or bubble
-    // is shown.
-    this.model.globalSettings.statsReportingEnabled = true;
-    this.$.statsDialog.close();
-  },
-  disableStats: function() {
-    this.model.globalSettings.statsReportingEnabled = false;
-    this.statsDialogOrBubbleOpen = false;
-    this.$.statsDialog.close();
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&

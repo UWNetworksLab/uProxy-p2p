@@ -338,11 +338,6 @@
               hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
 
-          <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
-            <h3>{{ "STATS_ENABLED_TITLE" | $$ }}</h3>
-            <p>{{ "STATS_ENABLED_MESSAGE" | $$ }}</p>
-          </uproxy-bubble>
-
           <core-tooltip label='{{ "SHARING_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
               hidden?='{{ !isSharingEnabledWithOthers }}'
@@ -379,7 +374,7 @@
           core-header-panel and it is positioned below the toolbar (see
           https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
         -->
-        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}' noclear="true">
+        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}' noclear="true">
           <p>
             {{ "WELCOME_MESSAGE" | $$ }}
           </p>
@@ -461,22 +456,6 @@
         </uproxy-button>
       </template>
     </uproxy-action-dialog>
-
-    <core-overlay id='statsDialog' backdrop layered="false" heading='{{ "WELCOME" | $$ }}'>
-      <div>
-        <h1>{{ "WELCOME" | $$ }}</h1>
-        <p>
-          {{ "BETA_MESSAGE" | $$ }}<br><br>
-          {{ "CHANGE_STATS_CHOICE" | $$ }}
-        </p>
-        <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>
-        <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
-        <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
-      </div>
-      <uproxy-faq-link anchor='doesUproxyLogData'>
-        {{ "MORE_ABOUT_METRICS" | $$ }}
-      </uproxy-faq-link>
-    </core-overlay>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>

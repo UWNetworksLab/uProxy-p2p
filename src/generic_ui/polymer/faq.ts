@@ -3,6 +3,8 @@
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
+var ui = ui_context.ui;
+
 Polymer({
   close: function() {
     this.$.faqPanel.close();
@@ -24,9 +26,44 @@ Polymer({
     var anchorElem = this.$[anchor];
     anchorElem.scrollIntoView();
   },
+  openTab: function(e :Event) {
+    var elemTapped = <HTMLElement>e.target;
+    var url = elemTapped.getAttribute('data-url');
+    this.ui.openTab(url);
+  },
+  sanitize: function(i18nMessage :string) {
+    // Remove all HTML that isn't a, strong or p.
+    var sanitizedMessage = i18nMessage
+        .replace(/<((?!(\/?(strong|a|p)))[^>]+)>/g, '');
+
+    // Replace all links with openTab events
+    sanitizedMessage = sanitizedMessage
+        .replace(/<a([^>]+)>(.+?)<\/a>/g, function(p0, p1, p2) {
+      // p0 is the full string matched: e.g. <a href="...">Click Me!</a>
+      // p1 is the first matching group: e.g. href="..."
+      // p2 is the second matching group: e.g. Click Me!
+      var regexToGetUrl =
+          /href\s*=\s*(\"([^"]*\")|'[^']*'|([^'">\s]+))/g;
+      var url = regexToGetUrl.exec(p1)[1];
+      return "<a on-tap='{{openTab}}' data-url=" + url + ">" + p2 + "</a>";
+    });
+    return sanitizedMessage;
+  },
   ready: function() {
     this.openingAnchor = '';
     this.ui = ui_context.ui;
     this.model = ui_context.model;
+  },
+  domReady: function() {
+    var textElements = document.querySelectorAll('html /deep/ .i18n');
+    for (var i = 0; i < textElements.length; i++) {
+      var element = <HTMLElement>(textElements[i]);
+      var i18nKey = element.getAttribute('data-i18n');
+      var i18nMessage = ui.i18n_t(i18nKey);
+      if (i18nMessage.indexOf('<') > -1) {
+        i18nMessage = this.sanitize(i18nMessage);
+      }
+      this.injectBoundHTML(i18nMessage, element);
+    }
   }
 });
