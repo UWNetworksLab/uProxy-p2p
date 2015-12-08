@@ -167,7 +167,7 @@ function get(
 
   socksToRtc.start(new tcp.Server(socksEndpoint), bridge.best('sockstortc',
       pcConfig, undefined, transformerConfig)).then((endpoint:net.Endpoint) => {
-    log.info('%1: SOCKS server listening on %2 (curl -x socks5h://%1:%2 www.example.com)',
+    log.info('%1: SOCKS server listening on %2 (curl -x socks5h://%3:%4 www.example.com)',
         connection.connectionId, endpoint,endpoint.address, endpoint.port);
     connection.close();
   }, (e:Error) => {
