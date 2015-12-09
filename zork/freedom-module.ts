@@ -76,7 +76,7 @@ function serveConnection(connection: tcp.Connection): void {
   var transformerConfig: string;
 
   const lineFeeder = new linefeeder.LineFeeder(connection.dataFromSocketQueue);
-  var doit = (command: string) => {
+  var processCommand = (command: string) => {
     log.debug('%1: received command: %2', connection.connectionId, command);
 
     let keepParsing = false;
@@ -140,10 +140,10 @@ function serveConnection(connection: tcp.Connection): void {
     }
 
     if (keepParsing) {
-      lineFeeder.setSyncNextHandler(doit);
+      lineFeeder.setSyncNextHandler(processCommand);
     }
   };
-  lineFeeder.setSyncNextHandler(doit);
+  lineFeeder.setSyncNextHandler(processCommand);
 
   connection.onceClosed.then((kind:tcp.SocketCloseKind) => {
     log.info('%1: closed (%2)',
