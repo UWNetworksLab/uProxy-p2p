@@ -95,10 +95,6 @@
         "message": "به اشتراک گذاری دسترسی با __name__",
         "description": "Message in a status bar that is visible when one friend is getting access through the user."
     },
-    "STATS_ENABLED_MESSAGE": {
-        "message": "این آیکون بدان معناست که شما تصمیم گرفته اید گزارش های آماری خود را به صورت ناشناس برای تیم یوپراکسی ارسال کنید. برای انجام تغییرات کلیک کنید.",
-        "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
-    },
     "REQUESTS": {
         "message": "درخواست ها",
         "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."

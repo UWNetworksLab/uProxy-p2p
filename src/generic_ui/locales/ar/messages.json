@@ -95,10 +95,6 @@
         "message": "مشاركة إمكانية الوصول مع __name__",
         "description": "Message in a status bar that is visible when one friend is getting access through the user."
     },
-    "STATS_ENABLED_MESSAGE": {
-        "message": "تهني هذه الأيقونة أنك اخترت مشاركة إحصائيات مجهولة المصدر مع فريق uProxy. انقر لتعديل الإعدادات.",
-        "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
-    },
     "REQUESTS": {
         "message": "الطلبات",
         "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."

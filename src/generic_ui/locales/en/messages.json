@@ -359,10 +359,6 @@
     "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team.",
     "message": "Anonymous stats enabled"
   },
-  "STATS_ENABLED_MESSAGE": {
-    "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon.",
-    "message": "This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings."
-  },
   "STATS_ENABLED_TOOLTIP": {
     "description": "Text that appears in a tooltip when the user hovers over the 'anonymous stats enabled' icon.",
     "message": "You are sharing anonymous stats."
