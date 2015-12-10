@@ -234,8 +234,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       globals.settings.consoleFilter);
     globals.settings.language = newSettings.language;
     globals.settings.force_message_version = newSettings.force_message_version;
-    globals.settings.hasSeenGoogleAndFacebookChangedNotification =
-        newSettings.hasSeenGoogleAndFacebookChangedNotification;
     globals.settings.quiverUserName = newSettings.quiverUserName;
     globals.settings.showCloud = newSettings.showCloud;
   }

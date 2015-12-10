@@ -58,14 +58,14 @@ describe('uproxy core', function() {
   it('logs in', (done) => {
     var promises :Promise<Object>[] = [];
     alice.emit('' + uproxy_core_api.Command.LOGIN,
-                     <browser_connector.PromiseCommand>{data: 'Google', promiseId: ++promiseId});
+                     <browser_connector.PromiseCommand>{data: 'GMail', promiseId: ++promiseId});
     promises.push(new Promise(function(fulfill, reject) {
       alice.once('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data :any) => {
         fulfill();
       });
     }));
     bob.emit('' + uproxy_core_api.Command.LOGIN,
-                     <browser_connector.PromiseCommand>{data: 'Google', promiseId: ++promiseId});
+                     <browser_connector.PromiseCommand>{data: 'GMail', promiseId: ++promiseId});
     promises.push(new Promise(function(fulfill, reject) {
       bob.once('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data :any) => {
         fulfill();
@@ -112,7 +112,7 @@ describe('uproxy core', function() {
   it('ask and get permission', (done) => {
     alicePath = {
       network: {
-        name: 'Google',
+        name: 'GMail',
         userId: BOB.EMAIL,
       },
       userId: ALICE.ANONYMIZED_ID,
@@ -120,7 +120,7 @@ describe('uproxy core', function() {
     };
     bobPath = {
       network: {
-        name: 'Google',
+        name: 'GMail',
         userId: ALICE.EMAIL,
       },
       userId: BOB.ANONYMIZED_ID,
@@ -213,21 +213,21 @@ describe('uproxy core', function() {
 
   it('log out and modify permissions for offline user', (done) => {
     alice.emit('' + uproxy_core_api.Command.LOGOUT,
-               {data: {name: 'Google', userId: ALICE.EMAIL}, promiseId: ++promiseId});
+               {data: {name: 'GMail', userId: ALICE.EMAIL}, promiseId: ++promiseId});
 
     alice.once('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data :any) => {
       expect(data.promiseId).toEqual(promiseId);
       bob.emit('' + uproxy_core_api.Command.MODIFY_CONSENT,
                        {data: {path: alicePath, action:uproxy_core_api.ConsentUserAction.CANCEL_OFFER}});
       bob.emit('' + uproxy_core_api.Command.LOGOUT,
-                 {data: {name: 'Google', userId: BOB.EMAIL}, promiseId: ++promiseId});
+                 {data: {name: 'GMail', userId: BOB.EMAIL}, promiseId: ++promiseId});
       done();
     });
   });
 
   it('log back in and check permissions', (done) => {
     alice.emit('' + uproxy_core_api.Command.LOGIN,
-               {data: 'Google', promiseId: ++promiseId});
+               {data: 'GMail', promiseId: ++promiseId});
     var aliceLoggedIn = new Promise((F, R) => {
       alice.on('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data :any) => {
         if (data.promiseId === promiseId) {
@@ -248,7 +248,7 @@ describe('uproxy core', function() {
                            {data: {path: bobPath, action:uproxy_core_api.ConsentUserAction.OFFER}});
           alice.off('' + uproxy_core_api.Update.USER_FRIEND, aliceHandleFriend);
           bob.emit('' + uproxy_core_api.Command.LOGIN,
-                   {data: 'Google', promiseId: ++promiseId});
+                   {data: 'GMail', promiseId: ++promiseId});
           // After bob logs in, consent state is restored from storage correctly.
           var aliceReceivedConsent = new Promise(function(fulfill, reject) {
             aliceHandleFriend = function(data :any) {

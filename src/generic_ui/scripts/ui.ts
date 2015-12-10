@@ -64,7 +64,6 @@ export class Model {
     consoleFilter: 0,
     language: 'en',
     force_message_version: 0,
-    hasSeenGoogleAndFacebookChangedNotification: false,
     quiverUserName: '',
     showCloud: false
   };
@@ -211,8 +210,6 @@ export class UserInterface implements ui_constants.UiApi {
   public signalToFire :Object = null;
 
   public toastMessage :string = null;
-
-  public showInviteControls: boolean = false;
 
   // TODO: Remove this when we switch completely to a roster-before-login flow.
   public showRosterBeforeLogin:boolean = false;
@@ -975,7 +972,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateView_();
     this.updateIcon_();
-    this.updateShowInviteControls_();
   }
 
   private syncUserSelf_ = (payload :social.UserData) => {
@@ -1143,7 +1139,7 @@ export class UserInterface implements ui_constants.UiApi {
   private reconnect_ = (network :string) => {
     this.model.reconnecting = true;
     // TODO: add wechat, quiver, github URLs
-    var pingUrl = network == 'Facebook'
+    var pingUrl = network == 'Facebook-Firebase-V2'
         ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
     this.core.pingUntilOnline(pingUrl).then(() => {
       // Ensure that the user is still attempting to reconnect (i.e. they
@@ -1277,7 +1273,6 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateView_();
     this.updateSharingStatusBar_();
     this.updateIcon_();
-    this.updateShowInviteControls_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
@@ -1327,10 +1322,6 @@ export class UserInterface implements ui_constants.UiApi {
     return this.getProperty_<boolean>(networkName, 'supportsReconnect') || false;
   }
 
-  public supportsInvites = (networkName :string) : boolean => {
-    return this.getProperty_<boolean>(networkName, 'supportsInvites') || false;
-  }
-
   public isExperimentalNetwork = (networkName :string) : boolean => {
     return this.getProperty_<boolean>(networkName, 'isExperimental') || false;
   }
@@ -1340,13 +1331,6 @@ export class UserInterface implements ui_constants.UiApi {
       return (<any>(NETWORK_OPTIONS[networkName]))[propertyName];
     }
     return undefined;
-  }
-
-  private updateShowInviteControls_ = () => {
-    this.showInviteControls = this.showRosterBeforeLogin ||
-        _.some(this.model.onlineNetworks, (network) => {
-          return this.supportsInvites(network.name);
-        });
   }
 
   // this takes care of updating the view (given the assumuption that we are

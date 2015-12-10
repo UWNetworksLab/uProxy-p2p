@@ -157,7 +157,6 @@ gruntConfig = {
     freedom: readJSONFile('node_modules/freedom/package.json')
     freedomchrome: readJSONFile('node_modules/freedom-for-chrome/package.json')
     freedomfirefox: readJSONFile('node_modules/freedom-for-firefox/package.json')
-    freedomxmpp: readJSONFile('node_modules/freedom-social-xmpp/package.json')
     freedomfirebase: readJSONFile('node_modules/freedom-social-firebase/package.json')
     freedomGitHub: readJSONFile('node_modules/freedom-social-github/package.json')
     freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
@@ -481,6 +480,9 @@ gruntConfig = {
             'freedomjs-anonymized-metrics/anonmetrics.json'
             'freedomjs-anonymized-metrics/metric.js'
             'freedom-for-chrome/freedom-for-chrome.js'
+            'freedom-social-github/social.github.json'
+            'freedom-social-github/github-social-provider.js'
+            'freedom-social-firebase/social.firebase-facebook.json'
             'freedom-social-firebase/social.firebase-google.json'
             'freedom-social-firebase/firebase-shims.js'
             'freedom-social-firebase/firebase.js'
@@ -589,11 +591,6 @@ gruntConfig = {
             dest: chromeAppDevPath + '/freedomjs-anonymized-metrics'
           },
           {
-            expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-social-xmpp'
-          },
-          {
             expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
             src: ['**']
             dest: chromeAppDevPath + '/freedom-social-firebase'
@@ -666,11 +663,6 @@ gruntConfig = {
             dest: firefoxDevPath + 'data/freedomjs-anonymized-metrics'
           },
           {
-            expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-social-xmpp'
-          },
-          {
             expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
             src: ['**']
             dest: firefoxDevPath + '/data/freedom-social-firebase'
@@ -738,11 +730,6 @@ gruntConfig = {
             expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
             src: ['anonmetrics.json', 'metric.js']
             dest: ccaDevPath + '/freedomjs-anonymized-metrics'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-social-xmpp'
           },
           {
             expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
@@ -840,7 +827,6 @@ gruntConfig = {
             freedom: '<%= pkgs.freedom.version %>'
             'freedom-for-chrome': '<%= pkgs.freedomchrome.version %>'
             'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
-            'freedom-social-xmpp': '<%= pkgs.freedomxmpp.version %>'
             'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
             'freedom-social-github': '<%= pkgs.freedomGitHub.version %>'
             'freedom-social-wechat': '<%= pkgs.freedomwechat.version %>'

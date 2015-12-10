@@ -35,7 +35,6 @@ export interface GlobalSettings {
   consoleFilter    :loggingTypes.Level;
   language         :string;
   force_message_version :number;
-  hasSeenGoogleAndFacebookChangedNotification :boolean;
   quiverUserName :string;
   showCloud :boolean;
 }
