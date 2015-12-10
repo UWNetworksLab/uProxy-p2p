@@ -27,4 +27,4 @@ node_modules
 npm-debug.log
 test_output
 tmp
-src/cca/keys
+keys
