@@ -213,10 +213,6 @@ class CordovaBrowserApi implements BrowserAPI {
       title: 'uProxy',  // Mandatory attribute
       message: text
     }, (tag:string) => {});
-
-    setTimeout(function() {
-      chrome.notifications.clear(tag, (wasCleared:boolean) => {});
-    }, 5000);
   }
 
   public setBadgeNotification = (notification:string) :void => {
