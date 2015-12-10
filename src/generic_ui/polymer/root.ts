@@ -155,22 +155,7 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
-<<<<<<< HEAD
-    if (ui.view == ui_types.View.ROSTER &&
-        !model.globalSettings.hasSeenWelcome) {
-      this.$.statsDialog.open();
-    }
     this.updateDirectionality();
-  },
-  enableStats: function() {
-    // TODO: clean up the logic which controls which welcome dialog or bubble
-    // is shown.
-    this.model.globalSettings.statsReportingEnabled = true;
-    this.$.statsDialog.close();
-  },
-  disableStats: function() {
-    this.model.globalSettings.statsReportingEnabled = false;
-    this.$.statsDialog.close();
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&
