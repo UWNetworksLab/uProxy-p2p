@@ -440,8 +440,8 @@
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
     <uproxy-action-dialog backdrop layered="false" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}" closeSelector=''>
-      <h1>{{ dialog.heading }}</h1>
-      <p>{{ dialog.message }}</p>
+      <h1 id='dialogHeading'></h1>
+      <p id='dialogMessage'></p>
       <div hidden?='{{ !dialog.userInputData }}'>
         <paper-input-decorator label='{{ dialog.userInputData.placeholderText }}' layout vertical error="{{ 'REQUIRED_FIELD' | $$ }}" isInvalid='{{ isUserInputInvalid }}'>
           <input id='dialogInput' is='core-input'/>
@@ -456,22 +456,6 @@
         </uproxy-button>
       </template>
     </uproxy-action-dialog>
-
-    <core-overlay id='statsDialog' backdrop layered="false" heading='{{ "WELCOME" | $$ }}'>
-      <div>
-        <h1>{{ "WELCOME" | $$ }}</h1>
-        <p>
-          {{ "BETA_MESSAGE" | $$ }}<br><br>
-          {{ "CHANGE_STATS_CHOICE" | $$ }}
-        </p>
-        <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>
-        <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
-        <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
-      </div>
-      <uproxy-faq-link anchor='doesUproxyLogData'>
-        {{ "MORE_ABOUT_METRICS" | $$ }}
-      </uproxy-faq-link>
-    </core-overlay>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>

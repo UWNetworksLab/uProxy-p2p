@@ -36,9 +36,6 @@ Polymer({
     // this event.
     if (newView == ui_types.View.ROSTER && oldView == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
-      if (!model.globalSettings.hasSeenWelcome) {
-        this.$.statsDialog.toggle();
-      }
       this.closeSettings();
       this.$.modeTabs.updateBar();
     }
@@ -98,6 +95,13 @@ Polymer({
     }
     this.isUserInputInvalid = false;
 
+    // Set heading and message innerHTML so translations can include
+    // <p>, <a>, <strong>, etc tags.
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(detail.heading), this.$.dialogHeading);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(detail.message), this.$.dialogMessage);
+
     this.dialog = detail;
     // Using async() allows the contents of the dialog to update before
     // it's opened. Opening the dialog too early causes it to be positioned
@@ -151,6 +155,7 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
+<<<<<<< HEAD
     if (ui.view == ui_types.View.ROSTER &&
         !model.globalSettings.hasSeenWelcome) {
       this.$.statsDialog.open();

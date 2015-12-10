@@ -38,6 +38,9 @@ Polymer({
       this.connectedNetworks = ui.i18n_t("CONNECTED_WITH_NUMBER", {number: model.onlineNetworks.length});
     }
   },
+  updateStatsReportingEnabled: function() {
+    core.updateGlobalSettings(model.globalSettings);
+  },
   toggleAccountChooser: function() {
     this.accountChooserOpen = !this.accountChooserOpen;
   },

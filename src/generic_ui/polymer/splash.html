@@ -99,8 +99,18 @@
       margin-left: 8px;
       margin-right: 8px;
     }
-    #intro1, #networks {
+    #intro1, #networks, #metricsOptIn {
       height: 100%;
+    }
+    #metricsOptIn {
+      text-align: start;
+    }
+    #metricsButtons {
+      text-align: center;
+    }
+    #metricsButtons uproxy-button {
+      padding: 0px 10px;
+      margin: 1em;
     }
     #languageLink paper-dropdown-menu {
       border-bottom: 0px;
@@ -198,6 +208,26 @@
         </paper-button>
       </uproxy-faq-link>
 
+    </div>
+
+    <div vertical layout id="metricsOptIn" hidden?='{{SPLASH_STATES.METRICS_OPT_IN!==model.globalSettings.splashState}}'>
+      <div class="view" flex>
+        <h1>{{ "WELCOME" | $$ }}</h1>
+        <p>
+          {{ "BETA_MESSAGE" | $$ }}<br><br>
+          {{ "CHANGE_STATS_CHOICE" | $$ }}
+        </p>
+        <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>
+        <div id="metricsButtons">
+          <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
+          <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
+        </div>
+      </div>
+      <uproxy-faq-link anchor='doesUproxyLogData'>
+        <paper-button>
+          {{ "MORE_ABOUT_METRICS" | $$ }}
+        </paper-button>
+      </uproxy-faq-link>
     </div>
 
     <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==model.globalSettings.splashState}}'>
