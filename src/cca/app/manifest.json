@@ -21,7 +21,9 @@
     "http://*/",
     "https://*/",
     "notifications",
-    "proxy"
+    "proxy",
+    "system.network",
+    "alarms"
   ],
   "sockets": {
     "tcp": { "connect" : "" },

@@ -309,6 +309,7 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = true;
       this.showNotification(this.i18n_t("STARTED_PROXYING",
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
+      this.browserApi.onStartedSharing();
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND,
@@ -336,6 +337,7 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
+      this.browserApi.onStoppedSharing();
     });
 
     core.onUpdate(uproxy_core_api.Update.FAILED_TO_GIVE,
@@ -389,6 +391,7 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('inviteUrlData', this.handleInviteUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
+    browserApi.on('connectedToCellularWhileSharing', this.onConnectedToCellularWhileSharing);
 
     core.getFullState()
         .then(this.updateInitialState)
@@ -703,6 +706,11 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
+  }
+
+  public onConnectedToCellularWhileSharing = () => {
+    this.showNotification("You are now sharing data through your cellular " +
+      "network which may incur charges.");
   }
 
   /**
