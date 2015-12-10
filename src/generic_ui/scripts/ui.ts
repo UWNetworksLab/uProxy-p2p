@@ -405,7 +405,9 @@ export class UserInterface implements ui_constants.UiApi {
   // Don't use index 0 as it may be treated as false in confirmation code.
   private confirmationCallbackIndex_ = 1;
 
-  public getConfirmation(heading :string, text :string) :Promise<void> {
+  public getConfirmation(heading :string,
+                         text :string,
+                         cancelContinueButtons :boolean = false) :Promise<void> {
     return new Promise<void>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
@@ -413,11 +415,13 @@ export class UserInterface implements ui_constants.UiApi {
         heading: heading,
         message: text,
         buttons: [{
-          text: this.i18n_t("NO"),
+          text: cancelContinueButtons ?
+              this.i18n_t('CANCEL') : this.i18n_t('NO'),
           callbackIndex: callbackIndex,
           dismissive: true
         }, {
-          text: this.i18n_t("YES"),
+          text: cancelContinueButtons ?
+              this.i18n_t('CONTINUE') : this.i18n_t('YES'),
           callbackIndex: callbackIndex
         }]
       });
@@ -1354,6 +1358,11 @@ export class UserInterface implements ui_constants.UiApi {
     } else {
       this.view = ui_constants.View.SPLASH;
     }
+  }
+
+  public i18nSanitizeHtml = (i18nMessage :string) => {
+    // Remove all HTML other than supported tags like strong, a, p, etc.
+    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br)))[^>]+)>/g, '');
   }
 } // class UserInterface
 

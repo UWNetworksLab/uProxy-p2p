@@ -19,6 +19,10 @@
     "description": "Button label to close a popup.",
     "message": "Close"
   },
+  "CONTINUE": {
+    "description": "Button label.",
+    "message": "Continue"
+  },
   "CANCEL": {
     "description": "Button label that rejects a proposed action.",
     "message": "Cancel"
@@ -1126,5 +1130,9 @@
   "REQUIRED_FIELD": {
     "description": "Error message indicating that a field is required (e.g. user name)",
     "message": "Required field."
+  },
+  "GITHUB_LOGIN_CONFIRMATION": {
+    "description": "Confirmation message the user sees prior to logging into GitHub",
+    "message": "Github is meant to allow software developers to share code, but uProxy can use Github to exchange the information necessary to setup direct connections with your friends.<br><br>Because uProxy creates Github gists, and it may be possible for others to tell which Github accounts are using uProxy, <strong>we recommend you create a new anonymous Github account</strong>, even if you already use Github."
   }
 }

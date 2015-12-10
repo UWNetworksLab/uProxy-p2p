@@ -168,6 +168,23 @@ Polymer({
     });
   },
   loginToInviteFriendDialogOpened: function() {
+    // Set confirmation message, which may include some HTML (e.g. strong, br).
+    var confirmationMessage :string;
+    if (this.selectedNetworkName === 'GitHub') {
+      confirmationMessage = ui.i18n_t('GITHUB_LOGIN_CONFIRMATION');
+    } else if (this.supportsInvites(this.selectedNetworkName)) {
+      confirmationMessage = ui.i18n_t(
+          'SIGN_IN_TO_INVITE_FRIENDS',
+          {network: this.getNetworkDisplayName(this.selectedNetworkName)});
+    } else {
+      confirmationMessage = ui.i18n_t(
+          'SIGN_IN_TO_SEE_ALL_UPROXY_FRIENDS',
+          {network: this.getNetworkDisplayName(this.selectedNetworkName)});
+    }
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(confirmationMessage),
+        this.$.networkLoginConfirmation);
+
     // Without calling the resizeHandler, the dynamic contents
     // of the dialog confuse Polymer, and the size of the dialog
     // will be smaller than expected.
