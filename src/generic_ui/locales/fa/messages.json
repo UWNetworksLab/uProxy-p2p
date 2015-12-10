@@ -179,10 +179,6 @@
         "message": "برای گرفتن دسترسی از دوست خود، بر روی دکمه زیر کلیک کنید.",
         "description": ""
     },
-    "NO_FRIENDS_ONLINE": {
-        "message": "در حال حاضر هیچ یک از دوستانتان از یوپراکسی استفاده نمی کنند.",
-        "description": "None of the user's friends are currently signed in."
-    },
     "CONTINUE_BROWSING": {
         "message": "به مرور وب بدون یوپراکسی ادامه دهید",
         "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."
@@ -554,10 +550,6 @@
     "STARTED_PROXYING": {
         "message": "__name__ شروع به پروکسی کردن از طریق شما کرد",
         "description": "Notification for when a friend has started accessing the Internet through the user."
-    },
-    "FRIENDS_APPEAR_WHEN": {
-        "message": "برای دعوت دوستانتان به یوپراکسی، لینک https://www.uproxy.org را برای آن ها ارسال کنید.",
-        "description": "Instruction informing the user how to invite their friends to uProxy."
     },
     "VERY_LIKELY": {
         "message": "بسیار زیاد",

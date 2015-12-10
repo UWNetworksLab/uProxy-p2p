@@ -80,12 +80,10 @@ Polymer({
     this.onlineInviteNetworks = [];
     for (var i = 0; i < model.onlineNetworks.length; ++i) {
       var name = model.onlineNetworks[i].name;
-      if (ui.supportsInvites(name)) {
-        this.onlineInviteNetworks.push({
-          name: name,
-          displayName: ui.getNetworkDisplayName(name)
-        });
-      }
+      this.onlineInviteNetworks.push({
+        name: name,
+        displayName: ui.getNetworkDisplayName(name)
+      });
     }
   },
   /* Functions required for roster-before-login flow. */
@@ -172,13 +170,9 @@ Polymer({
     var confirmationMessage :string;
     if (this.selectedNetworkName === 'GitHub') {
       confirmationMessage = ui.i18n_t('GITHUB_LOGIN_CONFIRMATION');
-    } else if (this.supportsInvites(this.selectedNetworkName)) {
-      confirmationMessage = ui.i18n_t(
-          'SIGN_IN_TO_INVITE_FRIENDS',
-          {network: this.getNetworkDisplayName(this.selectedNetworkName)});
     } else {
       confirmationMessage = ui.i18n_t(
-          'SIGN_IN_TO_SEE_ALL_UPROXY_FRIENDS',
+          'SIGN_IN_TO_INVITE_FRIENDS',
           {network: this.getNetworkDisplayName(this.selectedNetworkName)});
     }
     this.injectBoundHTML(
@@ -209,9 +203,6 @@ Polymer({
   },
   isExperimentalNetwork: function(networkName :string) {
     return ui.isExperimentalNetwork(networkName);
-  },
-  supportsInvites: function(networkName :string) {
-    return ui.supportsInvites(networkName);
   },
   closeLoginDialog: function() {
     this.$.loginToInviteFriendDialog.close();
