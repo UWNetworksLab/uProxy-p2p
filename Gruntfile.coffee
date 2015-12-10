@@ -202,6 +202,8 @@ gruntConfig = {
       cwd: '<%= androidDistPath %>'
       command: '<%= ccaAddPluginsCmd %>'
     }
+    # This pair of "cca build" commands is exactly as recommended at
+    # https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Publish.md
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
       command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk'
