@@ -173,7 +173,7 @@ make sure an emulator is running.
 
 #### Creating a Play Store release build
 Android app release builds must be signed.  To create a release build:
- 1. Get the appropriate `play_store_keys.p12` and `android-release-keys.properties` files, and symlink them into `src/cca/keys`.
+ 1. Get the appropriate `play_store_keys.p12` and `android-release-keys.properties` files, and symlink them into a `keys` directory in the git repo root.
    * The uProxy team's release keys are stored in a secure location, not in the public git repository.  Symlinking ensures that you do not accidentally copy the keys into insecure storage.
  1. Run `grunt release_android`
  1. From the `build/dev/uproxy/android/platforms/android/build/outputs/apk/` directory, upload `android-release.apk`, `android-x86-release.apk`, and `android-armv7-release.apk` to the Play Store using [the multiple APK upload procedure](http://developer.android.com/google/play/publishing/multiple-apks.html).
