@@ -15,7 +15,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
   document.head.appendChild(script);
   script.onload = function() {
     console.log('loading freedom!');
-    freedom('uproxy-lib/cloud/provision/freedom-module.json', {
+    freedom('uproxy-lib/cloud/digitalocean/freedom-module.json', {
       'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
       'debug': 'debug'
     }).then(function(moduleFactory) {
