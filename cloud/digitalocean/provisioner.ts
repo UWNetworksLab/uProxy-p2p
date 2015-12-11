@@ -38,7 +38,7 @@ interface KeyPair {
 
 class Provisioner {
 
-  constructor(private dispatch_: Function, private state_: any) {}
+  constructor(private dispatch_: Function, private state_: any = {}) {}
 
   /**
    * One-click setup of a VM
@@ -156,7 +156,7 @@ class Provisioner {
       }).then((responseUrl: string) => {
         var query = responseUrl.substr(responseUrl.indexOf('#') + 1),
             param: string,
-            params: { [k: string]: string },
+            params: { [k: string]: string } = {},
             keys = query.split('&'),
             i = 0;
         for (i = 0; i < keys.length; i++) {
