@@ -2,7 +2,8 @@
 /// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
-const forge = require("forge-min");
+// TODO: https://github.com/uProxy/uproxy/issues/2051
+declare var forge: any;
 
 const POLL_TIMEOUT: number = 5000; //milliseconds
 
