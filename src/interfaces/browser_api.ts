@@ -16,8 +16,6 @@ export interface BrowserAPI {
   // Open a new tab
   openTab(url :string) :void;
   bringUproxyToFront() :void;
-  onStartedSharing(): void;
-  onStoppedSharing(): void;
   // TODO: write comment to explain what browserSpecificElement is.
   browserSpecificElement :string;
 
@@ -47,7 +45,6 @@ export interface BrowserAPI {
   on(name: 'copyPasteUrlData', callback: (url: string) => void): void;
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
   on(name :'proxyDisconnected', callback :(info?:ProxyDisconnectInfo) => void) :void;
-  on(name: 'connectedToCellularWhileSharing', callback: Function): void;
 
   // should be called when popup is launched and ready for use
   handlePopupLaunch() :void;

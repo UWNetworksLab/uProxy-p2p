@@ -212,12 +212,6 @@ class ChromeBrowserApi implements BrowserAPI {
     }, 5000);
   }
 
-  public onStartedSharing = () => {
-  }
-
-  public onStoppedSharing = () => {
-  }
-
   private events_ :{[name :string] :Function} = {};
 
   public on = (name :string, callback :Function) => {
