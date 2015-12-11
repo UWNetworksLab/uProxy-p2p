@@ -187,7 +187,7 @@ class Provisioner {
   private getSshKey_ = (name: string) : Promise<KeyPair> => {
     var storage = freedom["core.storage"]();
     return new Promise((F, R) => {
-      var result : KeyPair;
+      var result: KeyPair = <KeyPair>{};
       Promise.all([
         storage.get("DigitalOcean-" + name + "-PublicKey"),
         storage.get("DigitalOcean-" + name + "-PrivateKey")
