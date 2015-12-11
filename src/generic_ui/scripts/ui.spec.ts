@@ -57,8 +57,6 @@ describe('UI.UserInterface', () => {
         ['setIcon',
          'startUsingProxy',
          'stopUsingProxy',
-         'onStoppedSharing',
-         'onStartedSharing',
          'openTab',
          'showNotification',
          'on',

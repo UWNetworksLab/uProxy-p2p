@@ -72,12 +72,6 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('showNotification', { text: text, tag: tag });
   }
 
-  public onStartedSharing = () => {
-  }
-
-  public onStoppedSharing = () => {
-  }
-
   public on = (name :string, callback :Function) => {
     port.on(name, callback);
   }
