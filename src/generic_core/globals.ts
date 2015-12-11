@@ -21,6 +21,12 @@ export var STORAGE_VERSION = 1;
 // 4: holographic ICE
 export var MESSAGE_VERSION = 5;
 
+if (!freedom['churnPipe']) {
+  // Obfuscation support has been removed from this build.  Set the message
+  // version to one that does not enable obfuscation.
+  MESSAGE_VERSION = 2;
+}
+
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
   {urls: ['stun:stun.services.mozilla.com']},
