@@ -31,10 +31,6 @@
       "url": "../freedomjs-anonymized-metrics/anonmetrics.json",
       "api": "metrics"
     },
-    "churnPipe": {
-      "url": "../uproxy-lib/churn-pipe/freedom-module.json",
-      "api": "churnPipe"
-    },
     "pgp": {
       "url": "../freedom-pgp-e2e/pgpapi.json",
       "api": "crypto"
