@@ -350,8 +350,6 @@ class Provisioner {
   }
 }
 
-if (typeof freedom !== 'undefined') {
-  freedom['provisioner']().providePromises(Provisioner);
-}
+freedom().providePromises(Provisioner);
 
 export = Provisioner;
