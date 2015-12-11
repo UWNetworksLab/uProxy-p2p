@@ -342,7 +342,8 @@ export class CloudSocialProvider {
   // Returns a new invite code for the specified server.
   // Rejects if the user is not logged in as an admin or there
   // is any error executing the command.
-  public inviteUser = (clientId: string): Promise<string> => {
+  // TODO: typings for invite codes
+  public inviteUser = (clientId: string): Promise<Object> => {
     log.debug('inviteUser');
     if (!(clientId in this.clients_)) {
       return Promise.reject(new Error('unknown client ' + clientId));
@@ -352,7 +353,7 @@ export class CloudSocialProvider {
           this.savedContacts_[clientId].invite.user));
     }
     return this.clients_[clientId].then((connection: Connection) => {
-      return connection.getBanner();
+      return connection.issueInvite();
     });
   }
 
@@ -545,9 +546,11 @@ class Connection {
     return this.exec_('cat /banner');
   }
 
-  // Issues a new invite code.
-  public issueInvite = (): Promise<string> => {
-    return this.exec_('sudo /issue_invite.sh');
+  // Returns a base64-decoded, deserialised invite code.
+  public issueInvite = (): Promise<Object> => {
+    return this.exec_('sudo /issue_invite.sh').then((inviteCode: string) => {
+      return JSON.parse(new Buffer(inviteCode, 'base64').toString());
+    });
   }
 
   // Executes a command, fulfilling with the command's stdout
