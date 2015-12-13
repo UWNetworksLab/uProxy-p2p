@@ -30,5 +30,6 @@ Polymer({
   },
   ready: function() {
     this.receivedInviteToken = '';
+    this.model = model;
   }
 });

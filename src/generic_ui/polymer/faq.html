@@ -72,7 +72,7 @@
     <core-overlay id='faqPanel' on-core-overlay-open-completed="{{scrollAfterOpening}}">
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ "FAQ_SENTENCE_CASE" | $$ }}
+          {{ model.globalSettings.language | $$("FAQ_SENTENCE_CASE") }}
         </uproxy-app-bar>
         <div id='contentContainer' flex>
           <div class="content">

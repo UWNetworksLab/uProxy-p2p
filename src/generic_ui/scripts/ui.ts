@@ -1221,9 +1221,9 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public updateLanguage = (newLanguage :string) => {
+    this.i18n_setLng(newLanguage);
     this.model.globalSettings.language = newLanguage;
     this.core.updateGlobalSettings(this.model.globalSettings);
-    this.i18n_setLng(newLanguage);
   }
 
   public updateInitialState = (state :uproxy_core_api.InitialState) => {
@@ -1233,7 +1233,6 @@ export class UserInterface implements ui_constants.UiApi {
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.updateLanguage(state.globalSettings.language);
     }
-    this.model.updateGlobalSettings(state.globalSettings);
 
     // Maybe refactor this to be copyPasteState.
     this.copyPasteState.updateFromConnectionState(state.copyPasteConnection);

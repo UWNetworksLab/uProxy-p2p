@@ -37,14 +37,15 @@
     </style>
 
     <div id='editingDescription' hidden?='{{ !editing }}'>
-      <paper-input-decorator label='{{ "DESCRIPTION" | $$ }}'>
+      <paper-input-decorator label='{{ model.globalSettings.language | $$("DESCRIPTION") }}'>
         <input is="core-input" value='{{ descriptionInput }}'>
       </paper-input-decorator>
-      <uproxy-button raised on-tap="{{ saveDescription }}">{{ "SAVE" | $$ }}</uproxy-button>
-      <uproxy-button raised on-tap="{{ cancelEditing }}">{{ "CANCEL" | $$ }}</uproxy-button>
+      <uproxy-button raised on-tap="{{ saveDescription }}">{{ model.globalSettings.language | $$("SAVE") }}</uproxy-button>
+      <uproxy-button raised on-tap="{{ cancelEditing }}">{{ model.globalSettings.language | $$("CANCEL") }}</uproxy-button>
     </div>
     <div id='savedDescription' hidden?='{{ editing }}' on-tap='{{ editDescription }}'>
-      {{ showDescription(model.globalSettings.description) }}
+      <span hidden?='{{!model.globalSettings.description}}'>{{model.globalSettings.description}}</span>
+      <span hidden?='{{model.globalSettings.description}}'>{{model.globalSettings.language | $$("NAME_THIS_DEVICE")}}</span>
       <core-icon icon='create'></core-icon>
     </div>
   </template>

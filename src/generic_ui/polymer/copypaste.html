@@ -59,18 +59,18 @@
     <core-header-panel fit>
       <uproxy-app-bar class='core-header' on-go-back='{{ handleBackClick }}'>
         <span hidden?='{{ SharingState.NONE === ui.copyPasteState.localSharingWithRemote }}'>
-          {{ 'SHARE_ONE_TIME' | $$ }}
+          {{ model.globalSettings.language | $$('SHARE_ONE_TIME') }}
         </span>
         <span hidden?='{{ SharingState.NONE !== ui.copyPasteState.localSharingWithRemote || GettingState.NONE === ui.copyPasteState.localGettingFromRemote }}'>
-          {{ 'REQUEST_ONE_TIME' | $$ }}
+          {{ model.globalSettings.language | $$('REQUEST_ONE_TIME') }}
         </span>
         <span hidden?='{{ SharingState.NONE !== ui.copyPasteState.localSharingWithRemote || !(SharingState.NONE !== ui.copyPasteState.localSharingWithRemote || GettingState.NONE === ui.copyPasteState.localGettingFromRemote) }}'>
-          {{ 'START_ONE_TIME' | $$ }}
+          {{ model.globalSettings.language | $$('START_ONE_TIME') }}
         </span>
       </uproxy-app-bar>
 
       <uproxy-bubble active='{{ ui.copyPasteState.error === ui_constants.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
-        {{ 'ERROR_PARSING_LINK' | $$ }}
+        {{ model.globalSettings.language | $$('ERROR_PARSING_LINK') }}
       </uproxy-bubble>
 
       <div class='content' fit>
@@ -78,24 +78,24 @@
           <div id='wrapper' flex>
             <div id='nothing' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.NONE || ui.copyPasteState.localSharingWithRemote !== SharingState.NONE }}'>
               <p hidden?='{{ lastState == STATE.SHARING }}'>
-                {{ 'NO_LONGER_GETTING' | $$ }}
+                {{ model.globalSettings.language | $$('NO_LONGER_GETTING') }}
               </p>
 
               <p hidden?='{{ lastState == STATE.GETTING }}'>
-                {{ 'NO_LONGER_SHARING' | $$ }}
+                {{ model.globalSettings.language | $$('NO_LONGER_SHARING') }}
               </p>
 
               <div class='centered'>
                 <uproxy-button on-tap='{{ startGetting }}'>
-                  {{ 'START_NEW_CONNECTION' | $$ }}
+                  {{ model.globalSettings.language | $$('START_NEW_CONNECTION') }}
                 </uproxy-button>
               </div>
 
               <uproxy-bubble active='{{ ui.copyPasteState.error === ui_constants.CopyPasteError.FAILED }}' on-closed='{{ dismissError }}' class='error'>
-                {{ 'ERROR_STARTING_CONNECTION' | $$ }}
+                {{ model.globalSettings.language | $$('ERROR_STARTING_CONNECTION') }}
               </uproxy-bubble>
 
-              <p>{{ 'SEND_CONNECTION_LINK' | $$ }}</p>
+              <p>{{ model.globalSettings.language | $$('SEND_CONNECTION_LINK') }}</p>
             </div>
 
             <div id='getting' hidden?='{{ ui.copyPasteState.localGettingFromRemote === GettingState.NONE || ui.copyPasteState.localSharingWithRemote !== SharingState.NONE }}'>
@@ -103,59 +103,59 @@
 
                 <div class='subsection'>
                   <p>
-                    {{ 'COPY_CONNECTION_LINK' | $$ }}
+                    {{ model.globalSettings.language | $$('COPY_CONNECTION_LINK') }}
                   </p>
 
-                  <paper-input-decorator label="{{ 'LOADING' | $$ }}" layout vertical>
+                  <paper-input-decorator label="{{ model.globalSettings.language | $$('LOADING') }}" layout vertical>
                     <input readonly is='core-input' on-tap='{{ select }}' value='https://www.uproxy.org/request/{{ ui.copyPasteState.message | encodeMessage }}' />
                   </paper-input-decorator>
                 </div>
 
                 <div class='subsection'>
                   <p>
-                    {{ 'FRIEND_NEEDS_TO_CLICK' | $$ }}
+                    {{ model.globalSettings.language | $$('FRIEND_NEEDS_TO_CLICK') }}
                   </p>
 
-                  <paper-input-decorator label="{{ 'ONE_TIME_LINK_INPUT_DESCRIPTION' | $$ }}" layout vertical error="{{ 'ONE_TIME_LINK_INPUT_ERROR' | $$ }}" isInvalid='{{ gettingLinkError }}'>
+                  <paper-input-decorator label="{{ model.globalSettings.language | $$('ONE_TIME_LINK_INPUT_DESCRIPTION') }}" layout vertical error="{{ model.globalSettings.language | $$('ONE_TIME_LINK_INPUT_ERROR') }}" isInvalid='{{ gettingLinkError }}'>
                     <input is='core-input' value='{{ gettingResponse }}' />
                   </paper-input-decorator>
 
                   <uproxy-button raised on-tap='{{ submitGettingLink }}'
                       hidden?='{{ !showGettingSubmit }}'>
-                    {{ 'SUBMIT_ONE_TIME_LINK' | $$ }}
+                    {{ model.globalSettings.language | $$('SUBMIT_ONE_TIME_LINK') }}
                   </uproxy-button>
                 </div>
 
               </div>
 
               <div class='connected' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.GETTING_ACCESS }}'>
-                <p>{{ 'ONE_TIME_GETTING_SUCCESS' | $$ }}</p>
+                <p>{{ model.globalSettings.language | $$('ONE_TIME_GETTING_SUCCESS') }}</p>
 
                 <p>
                   <span hidden?='{{ ui.copyPasteState.active === true }}'>
-                    {{ 'START_ONE_TIME_INSTRUCTION' | $$ }}
+                    {{ model.globalSettings.language | $$('START_ONE_TIME_INSTRUCTION') }}
                   </span>
                   <span hidden?='{{ ui.copyPasteState.active !== true }}'>
-                    {{ 'STOP_ONE_TIME_INSTRUCTION' | $$ }}
+                    {{ model.globalSettings.language | $$('STOP_ONE_TIME_INSTRUCTION') }}
                   </span>
                 </p>
 
                 <div class='centered'>
                   <uproxy-button raised on-tap='{{ startProxying }}'
                       hidden?='{{ ui.copyPasteState.active === true }}'>
-                    {{ 'START_GETTING' | $$ }}
+                    {{ model.globalSettings.language | $$('START_GETTING') }}
                   </uproxy-button>
 
                   <uproxy-button raised class='grey' on-tap='{{ stopGetting }}'
                       hidden?='{{ ui.copyPasteState.active !== true }}'>
-                    {{ 'STOP_GETTING' | $$ }}
+                    {{ model.globalSettings.language | $$('STOP_GETTING') }}
                   </uproxy-button>
                 </div>
 
                 <uproxy-bubble active='{{ ui.copyPasteState.error === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
-                  <p>{{ 'ONE_TIME_GETTING' | $$ }}</p>
+                  <p>{{ model.globalSettings.language | $$('ONE_TIME_GETTING') }}</p>
                   <p>
-                    {{ 'STOP_ONE_TIME_GETTING_BEFORE_NEW' | $$ }}
+                    {{ model.globalSettings.language | $$('STOP_ONE_TIME_GETTING_BEFORE_NEW') }}
                   </p>
                 </uproxy-bubble>
               </div>
@@ -163,27 +163,27 @@
 
             <div id='sharing' hidden?='{{ ui.copyPasteState.localSharingWithRemote === SharingState.NONE }}'>
               <div class='link' hidden?='{{ ui.copyPasteState.localSharingWithRemote !== SharingState.TRYING_TO_SHARE_ACCESS }}'>
-                <p>{{ 'FRIEND_REQUESTED_ONE_TIME' | $$ }}</p>
+                <p>{{ model.globalSettings.language | $$('FRIEND_REQUESTED_ONE_TIME') }}</p>
 
                 <p>
-                  {{ 'HOW_TO_OFFER_ONE_TIME' | $$ }}
+                  {{ model.globalSettings.language | $$('HOW_TO_OFFER_ONE_TIME') }}
                 </p>
 
 
-                <paper-input-decorator label="{{ 'LOADING' | $$ }}" layout vertical>
+                <paper-input-decorator label="{{ model.globalSettings.language | $$('LOADING') }}" layout vertical>
                   <input readonly is='core-input' on-tap='{{ select }}' value='https://www.uproxy.org/offer/{{ ui.copyPasteState.message | encodeMessage }}' />
                 </paper-input-decorator>
 
                 <div>
-                  <a href='#' on-tap='{{ switchToGetting }}'>{{ 'GET_ONE_TIME_INSTEAD' | $$ }}</a>
+                  <a href='#' on-tap='{{ switchToGetting }}'>{{ model.globalSettings.language | $$('GET_ONE_TIME_INSTEAD') }}</a>
 
                   <uproxy-bubble active='{{ ui.copyPasteState.error === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
                     <p>
-                      {{ 'TRYING_TO_SHARE_ONE_TIME' | $$ }}
+                      {{ model.globalSettings.language | $$('TRYING_TO_SHARE_ONE_TIME') }}
                     </p>
 
                     <p>
-                      {{ 'GET_ONE_TIME_INSTEAD_INSTRUCTION' | $$ }}
+                      {{ model.globalSettings.language | $$('GET_ONE_TIME_INSTEAD_INSTRUCTION') }}
                     </p>
                   </uproxy-bubble>
                 </div>
@@ -191,17 +191,17 @@
               </div>
 
               <div class='connected' hidden?='{{ ui.copyPasteState.localSharingWithRemote !== SharingState.SHARING_ACCESS }}'>
-                <p>{{ 'ONE_TIME_SHARING_SUCCESS' | $$ }}</p>
+                <p>{{ model.globalSettings.language | $$('ONE_TIME_SHARING_SUCCESS') }}</p>
 
-                <p>{{ 'ONE_TIME_SHARING_STOP_DIRECTIONS' | $$ }}</p>
+                <p>{{ model.globalSettings.language | $$('ONE_TIME_SHARING_STOP_DIRECTIONS') }}</p>
 
-                <uproxy-button raised class='grey' on-tap='{{ stopSharing }}'>{{ 'STOP_ONE_TIME_SHARING' | $$ }}</uproxy-button>
+                <uproxy-button raised class='grey' on-tap='{{ stopSharing }}'>{{ model.globalSettings.language | $$('STOP_ONE_TIME_SHARING') }}</uproxy-button>
 
                 <uproxy-bubble active='{{ ui.copyPasteState.error === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}' class='error'>
-                  <p>{{ 'ONE_TIME_SHARING' | $$ }}</p>
+                  <p>{{ model.globalSettings.language | $$('ONE_TIME_SHARING') }}</p>
 
                   <p>
-                    {{ 'STOP_ONE_TIME_SHARING_BEFORE_NEW' | $$ }}
+                    {{ model.globalSettings.language | $$('STOP_ONE_TIME_SHARING_BEFORE_NEW') }}
                   </p>
                 </uproxy-bubble>
               </div>
@@ -212,14 +212,14 @@
             <div class='statusRow' hidden?='{{ ui.copyPasteState.localGettingFromRemote !== GettingState.GETTING_ACCESS || ui.copyPasteState.active !== true }}'>
               <div class='statusText'>
                 <core-icon icon='uproxy-icons:receive'></core-icon>
-                {{ 'GETTING_ACCESS_FROM_FRIEND' | $$ }}
+                {{ model.globalSettings.language | $$('GETTING_ACCESS_FROM_FRIEND') }}
               </div>
             </div>
 
             <div class='statusRow' hidden?='{{ ui.copyPasteState.localSharingWithRemote !== SharingState.SHARING_ACCESS }}'>
               <div class='statusText'>
                 <core-icon icon='uproxy-icons:share'></core-icon>
-                {{ 'SHARING_ACCESS_WITH_FRIEND' | $$ }}
+                {{ model.globalSettings.language | $$('SHARING_ACCESS_WITH_FRIEND') }}
               </div>
             </div>
           </div>

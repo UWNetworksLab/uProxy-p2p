@@ -132,9 +132,9 @@
         <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
         <div class='{{ isOnline ? "onlineStatus" : "offlineStatus" }}'
           hidden?="{{ hideOnlineStatus }}" on-tap='{{ toggle }}'>
-          <span hidden?='{{contact.status!=UserStatus.FRIEND}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}</span>
-          <span hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>{{ 'RESPOND_TO_FRIEND_REQUEST' | $$ }}</span>
-          <span hidden?='{{contact.status!=UserStatus.REMOTE_INVITED_BY_LOCAL}}'>{{ 'FRIEND_REQUEST_SENT' | $$ }}</span>
+          <span hidden?='{{contact.status!=UserStatus.FRIEND}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$(model.globalSettings.language) }}</span>
+          <span hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>{{ model.globalSettings.language | $$('RESPOND_TO_FRIEND_REQUEST') }}</span>
+          <span hidden?='{{contact.status!=UserStatus.REMOTE_INVITED_BY_LOCAL}}'>{{ model.globalSettings.language | $$('FRIEND_REQUEST_SENT') }}</span>
         </div>
         <core-collapse id='getControls' class='expandedControls'
           hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
@@ -145,7 +145,7 @@
               <div horizontal layout hidden?='{{ !hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
                 <core-icon icon='query-builder'></core-icon>
                 <p class='preButtonText' flex>
-                  {{ "TRYING_TO_CONNECT" | $$({ name: contact.name || contact.userId }) }}
+                  {{ model.globalSettings.language | $$("TRYING_TO_CONNECT", { name: contact.name || contact.userId }) }}
                 </p>
               </div>
               <template repeat='{{ instance in sortedInstances }}' vertical layout>
@@ -161,36 +161,36 @@
               <div horizontal layout>
                 <core-icon icon='query-builder'></core-icon>
                 <p class='preButtonText' flex>
-                  {{ "ASKING_FOR_ACCESS" | $$ }}
+                  {{ model.globalSettings.language | $$("ASKING_FOR_ACCESS") }}
                 </p>
               </div>
-              <p class='preButtonDetailedText'>{{ "WAITING_FOR_ACCESS" | $$({ name: contact.name }) }}</p>
-              <uproxy-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$ }}</uproxy-button>
+              <p class='preButtonDetailedText'>{{ model.globalSettings.language | $$("WAITING_FOR_ACCESS", { name: contact.name }) }}</p>
+              <uproxy-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ model.globalSettings.language | $$("CANCEL_REQUEST") }}</uproxy-button>
             </div>
 
             <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
-              <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
-              <uproxy-button raised on-tap='{{ request }}'>{{ "ACCEPT_OFFER" | $$ }}</uproxy-button>
-              <uproxy-button raised on-tap='{{ ignoreOffer }}'>{{ "IGNORE" | $$ }}</uproxy-button>
+              <p class='preButtonText'>{{ model.globalSettings.language | $$("OFFERED_YOU_ACCESS") }}</p>
+              <uproxy-button raised on-tap='{{ request }}'>{{ model.globalSettings.language | $$("ACCEPT_OFFER") }}</uproxy-button>
+              <uproxy-button raised on-tap='{{ ignoreOffer }}'>{{ model.globalSettings.language | $$("IGNORE") }}</uproxy-button>
             </div>
 
             <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED }}'>
-              <p class='preButtonText'>{{ "OFFERED_YOU_ACCESS" | $$ }}</p>
-              <uproxy-button class='grey' raised on-tap='{{ unignoreOffer }}'>{{ "STOP_IGNORING_OFFERS" | $$ }}</uproxy-button>
+              <p class='preButtonText'>{{ model.globalSettings.language | $$("OFFERED_YOU_ACCESS") }}</p>
+              <uproxy-button class='grey' raised on-tap='{{ unignoreOffer }}'>{{ model.globalSettings.language | $$("STOP_IGNORING_OFFERS") }}</uproxy-button>
             </div>
 
             <div hidden?='{{ contact.gettingConsentState != GettingConsentState.NO_OFFER_OR_REQUEST }}'>
               <uproxy-button raised on-tap='{{ request }}'>
-                {{ "ASK_FOR_ACCESS" | $$ }}
+                {{ model.globalSettings.language | $$("ASK_FOR_ACCESS") }}
               </uproxy-button>
             </div>
           </div>
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>
             <p class='preButtonText'>
-              {{ "FRIEND_REQUEST" | $$({ name: contact.name }) }}
+              {{ model.globalSettings.language | $$("FRIEND_REQUEST", { name: contact.name }) }}
             </p>
             <uproxy-button raised on-tap='{{ acceptInvitation }}'>
-              {{ "ACCEPT_INVITE" | $$ }}
+              {{ model.globalSettings.language | $$("ACCEPT_INVITE") }}
             </uproxy-button>
           </div>
         </core-collapse> <!-- end of getControls -->
@@ -201,40 +201,40 @@
 
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>
             <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
-              <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</uproxy-button>
+              <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ model.globalSettings.language | $$("REVOKE_ACCESS") }}</uproxy-button>
             </div>
 
             <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION }}'>
-              <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "CANCEL_OFFER" | $$ }}</uproxy-button>
+              <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ model.globalSettings.language | $$("CANCEL_OFFER") }}</uproxy-button>
             </div>
 
             <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION }}'>
               <div horizontal layout>
                 <core-icon icon='mail'></core-icon>
                 <p class='preButtonText' flex>
-                  {{ "FRIEND_REQUESTS_ACCESS" | $$({ name: contact.name }) }}
+                  {{ model.globalSettings.language | $$("FRIEND_REQUESTS_ACCESS", { name: contact.name }) }}
                 </p>
               </div>
-              <uproxy-button raised on-tap='{{ offer }}'>{{ "GRANT" | $$ }}</uproxy-button>
-              <uproxy-button raised on-tap='{{ ignoreRequest }}'>{{ "IGNORE" | $$ }}</uproxy-button>
+              <uproxy-button raised on-tap='{{ offer }}'>{{ model.globalSettings.language | $$("GRANT") }}</uproxy-button>
+              <uproxy-button raised on-tap='{{ ignoreRequest }}'>{{ model.globalSettings.language | $$("IGNORE") }}</uproxy-button>
             </div>
 
             <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED }}'>
-              <p class='preButtonText'>{{ "FRIEND_REQUESTED_ACCESS" | $$ }}</p>
-              <uproxy-button class='grey' raised on-tap='{{ unignoreRequest }}'>{{ "STOP_IGNORING_REQUESTS" | $$ }}</uproxy-button>
+              <p class='preButtonText'>{{ model.globalSettings.language | $$("FRIEND_REQUESTED_ACCESS") }}</p>
+              <uproxy-button class='grey' raised on-tap='{{ unignoreRequest }}'>{{ model.globalSettings.language | $$("STOP_IGNORING_REQUESTS") }}</uproxy-button>
             </div>
 
             <div hidden?='{{ contact.sharingConsentState != SharingConsentState.NO_OFFER_OR_REQUEST }}'>
-              <p class='preButtonText'>{{ "ACCESS_NOT_GRANTED" | $$ }}</p>
-              <uproxy-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</uproxy-button>
+              <p class='preButtonText'>{{ model.globalSettings.language | $$("ACCESS_NOT_GRANTED") }}</p>
+              <uproxy-button raised on-tap='{{ offer }}'>{{ model.globalSettings.language | $$("OFFER_ACCESS") }}</uproxy-button>
             </div>
           </div>
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>
             <p class='preButtonText'>
-              {{ "FRIEND_REQUEST" | $$({ name: contact.name }) }}
+              {{ model.globalSettings.language | $$("FRIEND_REQUEST", { name: contact.name }) }}
             </p>
             <uproxy-button raised on-tap='{{ acceptInvitation }}'>
-              {{ "ACCEPT_INVITE" | $$ }}
+              {{ model.globalSettings.language | $$("ACCEPT_INVITE") }}
             </uproxy-button>
           </div>
         </core-collapse> <!-- end of shareControls -->

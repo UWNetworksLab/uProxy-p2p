@@ -98,23 +98,23 @@
     <div id='loadContacts' hidden?='{{ hasContacts }}' class='{{ ui.showInviteControls ? "inviteEnabled" : "inviteDisabled"}}'>
       <core-icon icon="social:person" class="no-friends"></core-icon>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
-        {{ "LOADING_FRIENDS" | $$ }}<br>
+        {{ model.globalSettings.language | $$("LOADING_FRIENDS") }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
       <div id='noContactsFound' hidden?='{{ ui.showInviteControls || loadingContacts }}'>
-        {{ "NO_FRIENDS_ONLINE" | $$ }}
-        <p id='friendsAppearWhen'>{{ "FRIENDS_APPEAR_WHEN" | $$ }}</p>
+        {{ model.globalSettings.language | $$("NO_FRIENDS_ONLINE") }}
+        <p id='friendsAppearWhen'>{{ model.globalSettings.language | $$("FRIENDS_APPEAR_WHEN") }}</p>
         <p>
           <uproxy-faq-link anchor="howDoIFind">
-            <span id='noContactsFoundLearnMoreLink'>{{ "LEARN_MORE" | $$ }}</span>
+            <span id='noContactsFoundLearnMoreLink'>{{ model.globalSettings.language | $$("LEARN_MORE") }}</span>
           </uproxy-faq-link>
         </p>
       </div>
     </div>
 
     <div id="connectWithFriendsInstruction" hidden?="{{ !ui.showInviteControls || loadingContacts || hasContacts }}">
-      <h1>{{ 'CONNECT_TO_FRIEND' | $$ }}</h1>
-      {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
+      <h1>{{ model.globalSettings.language | $$('CONNECT_TO_FRIEND') }}</h1>
+      {{ model.globalSettings.language | $$('CONNECT_TO_FRIEND_MESSAGE') }}
     </div>
 
     <div hidden?='{{ !hasContacts }}'>
@@ -123,7 +123,7 @@
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$ }}'
+          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$(model.globalSettings.language) }}'
           contacts='{{ contacts.pending }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
@@ -134,7 +134,7 @@
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$ }}'
+          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$(model.globalSettings.language) }}'
           contacts='{{ contacts.trustedUproxy }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
@@ -145,7 +145,7 @@
 
       <!-- untrusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{ "UPROXY_FRIENDS" | $$ }}'
+          groupTitle='{{ model.globalSettings.language | $$("UPROXY_FRIENDS") }}'
           contacts='{{ contacts.untrustedUproxy }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>

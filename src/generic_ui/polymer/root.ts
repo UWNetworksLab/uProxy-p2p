@@ -232,11 +232,6 @@ Polymer({
     }
     this.dir = 'ltr';
   },
-  languageChanged: function(oldLanguage :string, newLanguage :string) {
-    if (typeof oldLanguage != 'undefined') {
-      window.location.reload();
-    }
-  },
   restart: function() {
     core.restart();
   },
@@ -255,7 +250,7 @@ Polymer({
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
     'ui.signalToFire': 'signalToFireChanged',
-    'model.globalSettings.language': 'languageChanged'
+    'model.globalSettings.language': 'updateDirectionality'
   },
   computed: {
     'hasContacts': '(model.contacts.getAccessContacts.pending.length + model.contacts.getAccessContacts.trustedUproxy.length + model.contacts.getAccessContacts.untrustedUproxy.length + model.contacts.shareAccessContacts.pending.length + model.contacts.shareAccessContacts.trustedUproxy.length + model.contacts.shareAccessContacts.untrustedUproxy.length) > 0',

@@ -36,7 +36,7 @@
           <uproxy-button raised on-tap='{{connect}}' class='{{ networkName }}'>
             {{ displayName }}
           </uproxy-button>
-          <div class='experimental' hidden?='{{ !isExperimental }}'>{{ "EXPERIMENTAL" | $$}}</div>
+          <div class='experimental' hidden?='{{ !isExperimental }}'>{{ model.globalSettings.language | $$("EXPERIMENTAL") }}</div>
         </span>
       </span>
     </div>
