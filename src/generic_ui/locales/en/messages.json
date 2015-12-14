@@ -169,7 +169,7 @@
   },
   "NO_LONGER_SHARING": {
     "description": "Message shown when a one-time connection ends and the user was sharing.",
-    "message": "You are no longer sharing access.  Click the button below to request a connection or paste a request link from a friend to share access again."
+    "message": "You are no longer sharing access. Click the button below to request a connection or paste a request link from a friend to share access again."
   },
   "START_NEW_CONNECTION": {
     "description": "Label for button that takes user back to the 'Start a one-time connection' page.",
@@ -229,7 +229,7 @@
   },
   "HOW_TO_OFFER_ONE_TIME": {
     "description": "Instructions for user if they'd like to share their Internet connection with a one-time link.",
-    "message": "If you'd like to give them access, copy and paste this URL back to them."
+    "message": "If you’d like to give them access, copy and paste this URL back to them."
   },
   "GET_ONE_TIME_INSTEAD": {
     "description": "Label for a link to the 'Start a one-time connection' page.",
@@ -237,7 +237,7 @@
   },
   "TRYING_TO_SHARE_ONE_TIME": {
     "description": "Instructions for user if they want to get access instead, while attempting to share access.",
-    "message": "You are currently in the process of trying to share access. If you would like to get access instead, click the link above."
+    "message": "You are currently in the process of trying to give access. If you would like to get access instead, click the link above."
   },
   "GET_ONE_TIME_INSTEAD_INSTRUCTION": {
     "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection.",
@@ -380,16 +380,16 @@
     "message": "Get Access"
   },
   "SHARE_ACCESS": {
-    "description": "Text for the tab on the toolbar. When the user is on the 'Share Access' tab, they are looking to share access to their Internet with a friend.",
-    "message": "Share Access"
+    "description": "Text for the tab on the toolbar. When the user is on the 'Give Access' tab, they are looking to give access to their Internet to a friend.",
+    "message": "Give Access"
   },
   "WELCOME": {
     "description": "",
     "message": "Welcome to uProxy"
   },
   "WELCOME_MESSAGE": {
-    "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately.",
-    "message": "uProxy allows you to get access from your friends, share access with them or do both at once! To get started, choose \"Get access\" or \"Share access.\""
+    "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Give tab appropriately.",
+    "message": "uProxy allows you to get access from your friends, give access to them or do both at once! To get started, choose \"Get access\" or \"Give access.\""
   },
   "CONNECT_TO_FRIEND": {
     "description": "Title above instructions that tell the user how to add a uProxy friend.",
@@ -641,7 +641,7 @@
   },
   "UNABLE_TO_SHARE_WITH": {
     "description": "Error message seen in uProxy when a friend failed to get access to the Internet through the user.",
-    "message": "Unable to share access with __name__"
+    "message": "Unable to give access to __name__"
   },
   "UNABLE_TO_GET_FROM": {
     "description": "Error message seen in uProxy when the user failed to get access to the Internet through a friend.",
@@ -933,7 +933,7 @@
   },
   "WHAT_DO_GET_ACCESS": {
     "description": "",
-    "message": "What do \"get access\" and \"share access\" mean?"
+    "message": "What do “get access” and “give access” mean?"
   },
   "WHAT_DO_GET_ACCESS_ANSWER": {
     "description": "",
