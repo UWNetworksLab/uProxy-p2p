@@ -223,12 +223,12 @@ class Provisioner {
     return new Promise((F, R) => {
       var url = 'https://api.digitalocean.com/v2/' + actionPath;
       var xhr = freedom["core.xhr"]();
-      xhr.on("onload", (resolve: Function, reject: Function, xhr: any, e: Error) => {
-        xhr.getResponseText().then((resolve: Function, reject: Function, resp: string) => {
+      xhr.on("onload", (loadInfo: any) => {
+        xhr.getResponseText().then((response: string) => {
           try {
-            resolve(JSON.parse(resp));
+            F(JSON.parse(response));
           } catch(e) {
-            reject(e);
+            R(e);
           }
         });
       });
