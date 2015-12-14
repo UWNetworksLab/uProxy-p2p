@@ -125,14 +125,14 @@
     </style>
 
     <div tabindex='-1'
-        class='nameRow frame {{ isOnline ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
+        class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
         top horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
       <div flex>
         <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
-        <div class='{{ isOnline ? "onlineStatus" : "offlineStatus" }}'
+        <div class='{{ (isOnline || contact.status!=UserStatus.FRIEND) ? "onlineStatus" : "offlineStatus" }}'
           hidden?="{{ hideOnlineStatus }}" on-tap='{{ toggle }}'>
-          <span hidden?='{{contact.status!=UserStatus.FRIEND}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$(model.globalSettings.language) }}</span>
+          <span hidden?='{{contact.status!=UserStatus.FRIEND}}'>{{ model.globalSettings.language | $$(isOnline ? "ONLINE" : "OFFLINE") }}</span>
           <span hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>{{ model.globalSettings.language | $$('RESPOND_TO_FRIEND_REQUEST') }}</span>
           <span hidden?='{{contact.status!=UserStatus.REMOTE_INVITED_BY_LOCAL}}'>{{ model.globalSettings.language | $$('FRIEND_REQUEST_SENT') }}</span>
         </div>
