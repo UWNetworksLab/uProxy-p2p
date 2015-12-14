@@ -11,6 +11,7 @@ TaskManager = require 'uproxy-lib/build/tools/taskmanager'
 
 # Location of where src is copied into and compiled.
 devBuildPath = 'build/dev/uproxy'
+distBuildPath = 'build/dist'
 # Location of where to copy/build third_party source/libs.
 thirdPartyBuildPath = 'build/third_party'
 # This is used for the copying of uproxy libraries into the target directory.
@@ -37,6 +38,9 @@ androidDevPath = path.join(devBuildPath, 'android/')
 iosDevPath = path.join(devBuildPath, 'ios/')
 genericPath = path.join(devBuildPath, 'generic/')
 
+ccaDistPath = path.join(distBuildPath, 'cca/app/')
+androidDistPath = path.join(distBuildPath, 'android/')
+iosDistPath = path.join(distBuildPath, 'ios/')
 #-------------------------------------------------------------------------
 browserifyIntegrationTest = (path) ->
   Rule.browserifySpec(path, {
@@ -166,38 +170,70 @@ gruntConfig = {
   androidDevPath: androidDevPath
   ccaDevPath: ccaDevPath
   iosDevPath: iosDevPath
+  androidDistPath: androidDistPath
+  ccaDistPath: ccaDistPath
+  iosDistPath: iosDistPath
+
+  # Create commands to run in different directories
+  ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
+  ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
+
   exec: {
-    ccaCreate: {
-      command: '<%= ccaJsPath %> create <%= androidDevPath %> --link-to=<%= ccaDevPath %>'
+    ccaCreateDev: {
+      command: '<%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
     }
-    ccaPlatformAndroid: {
+    ccaCreateDist: {
+      command: '<%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
+    }
+    ccaPlatformAndroidDev: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> platform add android'
+      command: '<%= ccaPlatformAndroidCmd %>'
     }
-    ccaAddPluginsAndroid: {
+    ccaPlatformAndroidDist: {
+      cwd: '<%= androidDistPath %>'
+      command: '<%= ccaPlatformAndroidCmd %>'
+    }
+    ccaAddPluginsAndroidDev: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
+      command: '<%= ccaAddPluginsCmd %>'
     }
+    ccaAddPluginsAndroidDist: {
+      cwd: '<%= androidDistPath %>'
+      command: '<%= ccaAddPluginsCmd %>'
+    }
+    # This pair of "cca build" commands is exactly as recommended at
+    # https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Publish.md
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android --webview=system'
+      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk'
+    }
+    ccaReleaseAndroid: {
+      cwd: '<%= androidDistPath %>'
+      command: '<%= ccaJsPath %> build android --release --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --release --webview=crosswalk'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
       command: '<%= ccaJsPath %> run android --emulator'
     }
     rmAndroidBuild: {
-      command: 'rm -rf <%= androidDevPath %>'
+      command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
     }
-    ccaCreateIos: {
+    ccaCreateIosDev: {
       command: '<%= ccaJsPath %> create <%= iosDevPath %> --link-to=<%= ccaDevPath %>'
     }
-    ccaBuildIos: {
+    ccaCreateIosDist: {
+      command: '<%= ccaJsPath %> create <%= iosDistPath %> --link-to=<%= ccaDistPath %>'
+    }
+    ccaBuildIosDev: {
       cwd: '<%= iosDevPath %>'
-      command: '<%= ccaJsPath %> build --webview=system ios'
+      command: '<%= ccaJsPath %> build ios'
+    }
+    ccaBuildIosDist: {
+      cwd: '<%= iosDistPath %>'
+      command: '<%= ccaJsPath %> build ios'
     }
     rmIosBuild: {
-      command: 'rm -rf <%= iosDevPath %>'
+      command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
   }
 
@@ -439,6 +475,8 @@ gruntConfig = {
             'polymer/vulcanized.{html,js}'
 
             # actual scripts that run things
+            # Only the Gmail and Quiver social providers seem to work on Android, so the
+            # others have been removed from this list.
             'freedomjs-anonymized-metrics/anonmetrics.json'
             'freedomjs-anonymized-metrics/metric.js'
             'freedom-for-chrome/freedom-for-chrome.js'
@@ -449,9 +487,10 @@ gruntConfig = {
             'freedom-social-firebase/firebase-shims.js'
             'freedom-social-firebase/firebase.js'
             'freedom-social-firebase/firebase-social-provider.js'
-            'freedom-social-firebase/facebook-social-provider.js'
             'freedom-social-firebase/google-social-provider.js'
             'freedom-social-firebase/google-auth.js'
+            'freedom-social-quiver/socketio.quiver.json'
+            'freedom-social-quiver/socketio.quiver.js'
             'freedom-port-control/port-control.js'
             'freedom-port-control/port-control.json'
             'freedom-pgp-e2e/end-to-end.compiled.js'
@@ -466,23 +505,33 @@ gruntConfig = {
             'icons/*'
             'fonts/*'
           ]
-          dest: 'build/dist/cca'
+          dest: ccaDistPath
         }
-        { # Chrome app freedom-module
+        { # CCA dist freedom-module.json
           expand: true
-          cwd: 'src/generic_core/dist_build/'
+          cwd: 'src/generic_core/cca_dist_build/'
           src: ['*']
-          dest: 'build/dist/cca/app/generic_core'
+          dest: path.join(ccaDistPath, 'generic_core')
         }
       ]
 
-    cca_splash:
+    cca_splash_dev:
       files: [
         {
           expand: true
-          cwd: ccaDevPath
+          cwd: 'src/cca'
           src: [ 'splashscreen.png' ]
-          dest: 'build/dev/uproxy/android/platforms/android/res/drawable-port-xhdpi'
+          dest: path.join(androidDevPath, 'platforms/android/res/drawable-port-xhdpi')
+        }
+      ]
+
+    cca_splash_dist:
+      files: [
+        {
+          expand: true
+          cwd: 'src/cca'
+          src: [ 'splashscreen.png' ]
+          dest: path.join(androidDistPath, 'platforms/android/res/drawable-port-xhdpi')
         }
       ]
 
@@ -743,6 +792,21 @@ gruntConfig = {
         dest: devBuildPath + '/integration'
       }]
   }  # copy
+
+  symlink: {
+    cca_keys:
+      files: [
+        {
+          expand: true
+          cwd: 'keys'
+          src: [
+            'android-release-keys.properties'
+            'play_store_keys.p12'
+          ]
+          dest: androidDistPath
+        }
+      ]
+  }
 
   #-------------------------------------------------------------------------
   'string-replace':
@@ -1090,11 +1154,22 @@ taskManager.add 'build_cca', [
 taskManager.add 'build_android', [
   'exec:rmAndroidBuild'
   'build_cca'
-  'exec:ccaCreate'
-  'exec:ccaPlatformAndroid'
-  'exec:ccaAddPluginsAndroid'
-  'copy:cca_splash'
+  'exec:ccaCreateDev'
+  'exec:ccaPlatformAndroidDev'
+  'exec:ccaAddPluginsAndroidDev'
+  'copy:cca_splash_dev'
   'exec:ccaBuildAndroid'
+]
+
+taskManager.add 'release_android', [
+  'build_cca'
+  'copy:dist'
+  'exec:ccaCreateDist'
+  'exec:ccaPlatformAndroidDist'
+  'exec:ccaAddPluginsAndroidDist'
+  'copy:cca_splash_dist'
+  'symlink:cca_keys'
+  'exec:ccaReleaseAndroid'
 ]
 
 # Emulate the mobile client
@@ -1169,6 +1244,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
