@@ -6,7 +6,7 @@
  * front-end.
  *
  * In-memory state includes:
- *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
+ *  - Roster, which is a list of contacts, always synced with friend lists.
  *  - Instances, which is a list of active uProxy installs.
  */
 

@@ -556,7 +556,6 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
     public restoreFromStorage() {
-      // xmpp is weird, so we need to do this.
       log.info('Loading users from storage');
       return storage.keys().then((keys :string[]) => {
         var myKey = this.getStorePath();
@@ -821,10 +820,6 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       var monitorCallback = () => {
-        // TODO: if too many instances are missing, we may send more messages
-        // than our XMPP server will allow and be throttled.  We should change
-        // monitoring to limit the number of XMPP messages it sends on each
-        // interval.
         for (var userId in this.roster) {
           this.getUser(userId).monitor();
         }

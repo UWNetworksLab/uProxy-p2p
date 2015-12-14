@@ -179,10 +179,6 @@
         "message": "لبدء تحقيق الوصول عبر صديقك، انقر على الزر أدناه.",
         "description": ""
     },
-    "NO_FRIENDS_ONLINE": {
-        "message": "ليس هناك أي من أصدقائك مسجل دخولهم إلى uProxy في هذا الوقت.",
-        "description": "None of the user's friends are currently signed in."
-    },
     "CONTINUE_BROWSING": {
         "message": "متابعة التصفح دون uProxy",
         "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."
@@ -554,10 +550,6 @@
     "STARTED_PROXYING": {
         "message": "بدأ __name__ الاتصال بالإنترنت بالوكالة من خلالك",
         "description": "Notification for when a friend has started accessing the Internet through the user."
-    },
-    "FRIENDS_APPEAR_WHEN": {
-        "message": "لدعوة الأصدقاء إلى uProxy، أرسل لهم وصلة إلى https://www.uproxy.org",
-        "description": "Instruction informing the user how to invite their friends to uProxy."
     },
     "VERY_LIKELY": {
         "message": "على الأغلب",
