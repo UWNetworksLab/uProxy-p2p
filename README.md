@@ -143,21 +143,41 @@ After following the steps under "Building uProxy from source",
    * MacOS: `adb` is included with Android Studio.
    * Linux: `adb` is available through your package manager.  For example, on Ubuntu run `apt-get install android-tools-adb`.
  1. Confirm that your `cca` package is ready by running `node_modules/.bin/cca checkenv` from the git checkout root directory.
+   * If this fails, set the `ANDROID_HOME` variable to the Android SDK path in your `.bashrc`, e.g. `export ANDROID_HOME=$HOME/Android/Sdk`
 
 Then you can build the app using `grunt build_android`.  The output, a file ending
 in `.apk`, will appear in `build/dev/uproxy/android/platforms/android/build/outputs/apk/`.
 Depending on the build configuration, the file might be named `android-debug.apk`,
 `android-armv7-debug.apk`, etc..
 
-To install the app, first [Enable USB Debugging](http://developer.android.com/tools/device.html#device-developer-options)
+#### Installing on an Android device
+* To install the app, first [Enable USB Debugging](http://developer.android.com/tools/device.html#device-developer-options)
 on your test phone, then connect it to your computer and accept the connection
-on the phone.  Then, on your computer, install the app on the phone using a command like
+on the phone.
+* Then, on your computer, install the app on the phone using a command like
 `adb install -r build/dev/uproxy/android/platforms/android/build/outputs/apk/android-debug.apk`.
-You may then launch the app from the phone.  Rerunning this command should close the app
+* You may then launch the app from the phone. Rerunning this command should close the app
 and replace it with a new version, but will not overwrite saved state on the device.
 
 If you encounter an error or want to complete delete uProxy from your phone, you can do so via
 `Settings -> Apps -> uProxy`, which as a button labeled "Uninstall for all users".
+
+#### Installing on an Android emulator
+* Create a virtual device using the [Android Virtual Device
+Manager](http://developer.android.com/tools/devices/index.html) with an API of 21
+(Lollipop) or higher.
+* Launch the emulator and check `adb devices` at the command line to
+make sure an emulator is running. 
+* Install the app from the command line with `adb install -r build/dev/uproxy/android/platforms/android/build/outputs/apk/android-debug.apk`. You should see `success` if the app is installed.
+* You may then launch the app from the emulator.
+
+#### Creating a Play Store release build
+Android app release builds must be signed.  To create a release build:
+ 1. Get the appropriate `play_store_keys.p12` and `android-release-keys.properties` files, and symlink them into a `keys` directory in the git repo root.
+   * The uProxy team's release keys are stored in a secure location, not in the public git repository.  Symlinking ensures that you do not accidentally copy the keys into insecure storage.
+ 1. Run `grunt release_android`
+ 1. From the `build/dev/uproxy/android/platforms/android/build/outputs/apk/` directory, upload `android-release.apk`, `android-x86-release.apk`, and `android-armv7-release.apk` to the Play Store using [the multiple APK upload procedure](http://developer.android.com/google/play/publishing/multiple-apks.html).
+   * This allows us to have a smaller build (~10 MB) for modern Android, and a larger build (~33 MB) for older Android versions that need [Crosswalk](https://crosswalk-project.org/) because the system webview is too old to run uProxy.
 
 ### Fixing compilation and setup
 

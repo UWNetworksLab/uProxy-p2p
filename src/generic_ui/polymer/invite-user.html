@@ -265,12 +265,7 @@
     <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{loginToInviteFriendDialogOpened}}">
       <h1>{{ model.globalSettings.language | $$("SIGN_IN_TO_NETWORK", {network: getNetworkDisplayName(selectedNetworkName)})}}</h1>
       <core-icon icon="clear" on-tap='{{ closeLoginDialog }}'></core-icon>
-      <p hidden?="{{!supportsInvites(selectedNetworkName)}}">
-        {{ model.globalSettings.language | $$("SIGN_IN_TO_INVITE_FRIENDS", {network: getNetworkDisplayName(selectedNetworkName)})}}
-      </p>
-      <p hidden?="{{supportsInvites(selectedNetworkName)}}">
-        {{ model.globalSettings.language | $$("SIGN_IN_TO_SEE_ALL_UPROXY_FRIENDS", {network: getNetworkDisplayName(selectedNetworkName)})}}
-      </p>
+      <p id="networkLoginConfirmation"></p>
       <div style="text-align:center;">
         <uproxy-button raised on-tap='{{loginTapped}}' class='login {{selectedNetworkName}}'>
           <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:{{selectedNetworkName}}'></core-icon></span>

@@ -95,10 +95,6 @@
         "message": "__name__ ile erişim paylaşılıyor",
         "description": "Message in a status bar that is visible when one friend is getting access through the user."
     },
-    "STATS_ENABLED_MESSAGE": {
-        "message": "Bu simge anonim istatistikleri uProxy takımıyla paylaşmayı tercih ettiğiniz anlamına gelir. Ayarları düzenlemek için tıkla.",
-        "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
-    },
     "REQUESTS": {
         "message": "İstekler",
         "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
