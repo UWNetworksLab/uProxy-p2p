@@ -150,7 +150,7 @@
 
     <core-overlay id='inviteUserPanel'>
       <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-        {{ model.globalSettings.language | $$('INVITE_A_FRIEND') }}
+        {{ 'INVITE_A_FRIEND' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='view' flex>
@@ -176,7 +176,7 @@
             <div class='orText'>- - - OR - - -</div>
           </div>
           <div class='section'>
-          <p>{{ model.globalSettings.language | $$("FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK") }}</p>
+          <p>{{ "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK" | $$(model.globalSettings.language) }}</p>
             <template repeat='{{ n in networkButtonNames }}' vertical layout>
               <div on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
@@ -189,17 +189,17 @@
 
             <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}' class='section'>
               <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
-              <div class='networkName'>{{ model.globalSettings.language | $$("SET_UP_ONE_TIME") }}</div>
+              <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$(model.globalSettings.language) }}</div>
             </div>
 
             <div class="section">
-              {{ model.globalSettings.language | $$("WE_WONT_POST") }}
+              {{ "WE_WONT_POST" | $$(model.globalSettings.language) }}
             </div>
           </div>
 
           <div class="section">
-            {{ model.globalSettings.language | $$("HAVE_AN_INVITE_CODE") }}<br>
-            <a on-tap="{{showAcceptUserInvite}}">{{ model.globalSettings.language | $$("ENTER_IT_HERE") }}</a>
+            {{ "HAVE_AN_INVITE_CODE" | $$(model.globalSettings.language) }}<br>
+            <a on-tap="{{showAcceptUserInvite}}">{{ "ENTER_IT_HERE" | $$(model.globalSettings.language) }}</a>
           </div>
         </div> <!--End of roster-before-login view-->
 
@@ -207,7 +207,7 @@
         support is on the webstore -->
         <div hidden?='{{ui.showRosterBeforeLogin}}'>
           <div hidden?='{{ onlineInviteNetworks.length <= 1}}' class='section'>
-            <p>{{ model.globalSettings.language | $$('HOW_TO_INVITE_FRIENDS') }}</p>
+            <p>{{ 'HOW_TO_INVITE_FRIENDS' | $$(model.globalSettings.language) }}</p>
             <paper-dropdown-menu>
               <paper-dropdown class='dropdown'>
                 <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
@@ -222,40 +222,40 @@
           </div>
           <div class='section'>
             <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
-              <p>{{ model.globalSettings.language | $$('FACEBOOK_INVITE_INSTRUCTIONS') }}</p>
+              <p>{{ 'FACEBOOK_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
               <uproxy-button affirmative on-tap='{{ sendToFacebookFriend }}'>
-                {{ model.globalSettings.language | $$('SEND_INVITATION') }}
+                {{ 'SEND_INVITATION' | $$(model.globalSettings.language) }}
               </uproxy-button>
             </div>
 
             <div hidden?='{{ selectedNetworkName != "GMail"}}'>
-              <p>{{ model.globalSettings.language | $$('GMAIL_INVITE_INSTRUCTIONS') }}</p>
-              <paper-input-decorator label='{{ model.globalSettings.language | $$("EMAIL_PLACEHOLDER") }}' layout vertical>
+              <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
+              <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$(model.globalSettings.language) }}' layout vertical>
                 <input is='core-input' value='{{ inviteUserEmail }}' />
               </paper-input-decorator>
 
               <uproxy-button affirmative on-tap='{{ sendToGMailFriend }}'>
-                {{ model.globalSettings.language | $$('SEND_INVITATION') }}
+                {{ 'SEND_INVITATION' | $$(model.globalSettings.language) }}
               </uproxy-button>
             </div>
 
             <div hidden?='{{ selectedNetworkName != "GitHub"}}'>
-              <p>{{ model.globalSettings.language | $$('GITHUB_INVITE_INSTRUCTIONS') }}</p>
-              <paper-input-decorator label='{{ model.globalSettings.language | $$("GITHUB_INVITE_PLACEHOLDER") }}'>
+              <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
+              <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
                 <input is='core-input' value='{{ githubUserIdInput }}'>
               </paper-input-decorator>
               <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
-                {{ model.globalSettings.language | $$('SEND_INVITATION') }}
+                {{ 'SEND_INVITATION' | $$(model.globalSettings.language) }}
               </uproxy-button>
             </div>
 
             <div hidden?='{{ selectedNetworkName != "Cloud"}}'>
-              <p>{{ model.globalSettings.language | $$('ADD_CLOUD_INSTRUCTIONS') }}</p>
+              <p>{{ 'ADD_CLOUD_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
             </div>
           </div>
           <div class='section'>
             <a on-tap='{{ showAcceptUserInvite }}'>
-              {{ model.globalSettings.language | $$('ACCEPT_LINK_FROM_INVITE_PAGE') }}
+              {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$(model.globalSettings.language) }}
             </a>
           </div>
         </div> <!--End of login-before-roster view-->
@@ -263,13 +263,13 @@
     </core-overlay>
 
     <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{loginToInviteFriendDialogOpened}}">
-      <h1>{{ model.globalSettings.language | $$("SIGN_IN_TO_NETWORK", {network: getNetworkDisplayName(selectedNetworkName)})}}</h1>
+      <h1>{{ "SIGN_IN_TO_NETWORK" | $$(model.globalSettings.language, {network: getNetworkDisplayName(selectedNetworkName)})}}</h1>
       <core-icon icon="clear" on-tap='{{ closeLoginDialog }}'></core-icon>
       <p id="networkLoginConfirmation"></p>
       <div style="text-align:center;">
         <uproxy-button raised on-tap='{{loginTapped}}' class='login {{selectedNetworkName}}'>
           <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:{{selectedNetworkName}}'></core-icon></span>
-          <span id="buttonTextContainer">{{ model.globalSettings.language | $$("SIGN_IN_TO_NETWORK", {network: getNetworkDisplayName(selectedNetworkName)})}}</span>
+          <span id="buttonTextContainer">{{ "SIGN_IN_TO_NETWORK" | $$(model.globalSettings.language, {network: getNetworkDisplayName(selectedNetworkName)})}}</span>
         </uproxy-button>
       </div>
     </uproxy-dialog>

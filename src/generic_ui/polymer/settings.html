@@ -149,11 +149,11 @@
         <div class='clickable currentAccountInfo' on-tap='{{ toggleAccountChooser }}'>
           <div horizontal center layout>
             <span hidden?="{{ model.onlineNetworks.length != 0 }}"
-              class='subdued' flex>{{ model.globalSettings.language | $$("NOT_CONNECTED_LOGIN_TO_START") }}</span>
+              class='subdued' flex>{{ "NOT_CONNECTED_LOGIN_TO_START" | $$(model.globalSettings.language) }}</span>
             <span hidden?="{{ model.onlineNetworks.length != 1 }}"
-              class='subdued' flex>{{ model.globalSettings.language | $$("CONNECTED_WITH", {network: displayName}) }}</span>
+              class='subdued' flex>{{ "CONNECTED_WITH" | $$(model.globalSettings.language, {network: displayName}) }}</span>
             <span hidden?="{{ model.onlineNetworks.length < 2}}"
-              class='subdued' flex>{{ model.globalSettings.language | $$("CONNECTED_WITH_NUMBER", {number: model.onlineNetworks.length}) }}</span>
+              class='subdued' flex>{{ "CONNECTED_WITH_NUMBER" | $$(model.globalSettings.language, {number: model.onlineNetworks.length}) }}</span>
             <span hidden?='{{ model.onlineNetworks.length === 1 }}'>
               <core-icon icon='arrow-drop-down' hidden?='{{ accountChooserOpen }}'></core-icon>
               <core-icon icon='arrow-drop-up' hidden?='{{ !accountChooserOpen }}'></core-icon>
@@ -171,7 +171,7 @@
 
       <div id='mainSettings' class='settingsContent' hidden?='{{ accountChooserOpen }}'>
         <div class='smalltext'>
-          {{ model.globalSettings.language | $$("DEVICE_DESCRIPTION") }}
+          {{ "DEVICE_DESCRIPTION" | $$(model.globalSettings.language) }}
           <uproxy-description></uproxy-description>
         </div>
 
@@ -180,21 +180,21 @@
         <uproxy-link on-tap='{{ openFeedbackForm }}' role='button'>
           <core-icon icon="announcement"></core-icon>
           <!-- try taking out these .label spans and see what happens. -->
-          <span class='label'>{{ model.globalSettings.language | $$("SUBMIT_FEEDBACK") }}</span>
+          <span class='label'>{{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}</span>
         </uproxy-link>
 
         <uproxy-faq-link role='button'>
           <core-icon icon="help"></core-icon>
-          <span class='label'>{{ model.globalSettings.language | $$("GET_HELP") }}</span>
+          <span class='label'>{{ "GET_HELP" | $$(model.globalSettings.language) }}</span>
         </uproxy-faq-link>
 
         <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
           <core-icon icon="settings"></core-icon>
-          <span class='label'>{{ model.globalSettings.language | $$("ADVANCED_SETTINGS") }}</span>
+          <span class='label'>{{ "ADVANCED_SETTINGS" | $$(model.globalSettings.language) }}</span>
         </uproxy-link>
 
         <div id='metricsCheckbox'>
-          <paper-checkbox label='{{ model.globalSettings.language | $$("STATS_ENABLED_TITLE") }}' checked='{{ model.globalSettings.statsReportingEnabled }}' on-change='{{updateStatsReportingEnabled}}'></paper-checkbox>
+          <paper-checkbox label='{{ "STATS_ENABLED_TITLE" | $$(model.globalSettings.language) }}' checked='{{ model.globalSettings.statsReportingEnabled }}' on-change='{{updateStatsReportingEnabled}}'></paper-checkbox>
           <uproxy-faq-link class='faq-icon' anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
           </uproxy-faq-link>
@@ -204,17 +204,17 @@
 
         <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
           <core-icon icon='refresh'></core-icon>
-          <span class='label'>{{ model.globalSettings.language | $$("RESTART") }}</span>
+          <span class='label'>{{ "RESTART" | $$(model.globalSettings.language) }}</span>
         </uproxy-link>
 
         <uproxy-link on-tap='{{ logOut }}' hidden?="{{model.onlineNetworks.length==0}}" role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
-          <span class='label'>{{ model.globalSettings.language | $$("LOGOUT") }}</span>
+          <span class='label'>{{ "LOGOUT" | $$(model.globalSettings.language) }}</span>
         </uproxy-link>
       </div>
 
       <div id='accountChooser' class='settingsContent' hidden?='{{ !accountChooserOpen }}'>
-        <span class='smalltext'>{{ model.globalSettings.language | $$("CONNECTED_ACCOUNTS") }}</span>
+        <span class='smalltext'>{{ "CONNECTED_ACCOUNTS" | $$(model.globalSettings.language) }}</span>
         <template repeat='{{ name in model.networkNames }}'>
           <div hidden?="{{name=='Cloud' && !model.globalSettings.showCloud && !ui.showRosterBeforeLogin}}">
             <uproxy-network-in-settings name='{{ name }}'></uproxy-network-in-settings>

@@ -7,7 +7,7 @@ Polymer({
   logs: '',
   loadingLogs: true,
   language: 'en',
-  $$: function(lang :string, placeholder :string) {
+  $$: function(placeholder :string, lang :string) {
     return translator_module.i18n_t(placeholder);
   },
   openUproxy: function() {

@@ -52,11 +52,11 @@
     </style>
 
     <div id='container'>
-      <h1><bdi>{{ language | $$("LOGS_TITLE") }}</bdi></h1>
-      <p><bdi>{{ language | $$("TO_SEND_LOGS") }}</bdi></p>
+      <h1><bdi>{{ "LOGS_TITLE" | $$(language) }}</bdi></h1>
+      <p><bdi>{{ "TO_SEND_LOGS" | $$(language) }}</bdi></p>
       <div id='logs'>
         <div id="loadingLogs" hidden?="{{ !loadingLogs }}">
-          <p>{{ language | $$("RETRIEVING_LOGS") }}</p>
+          <p>{{ "RETRIEVING_LOGS" | $$(language) }}</p>
           <paper-progress indeterminate='true'></paper-progress>
         </div>
         <pre>{{ logs }}</pre>
