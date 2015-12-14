@@ -212,6 +212,9 @@ class ChromeBrowserApi implements BrowserAPI {
     }, 5000);
   }
 
+  public checkConnectivity = () => {
+  }
+
   private events_ :{[name :string] :Function} = {};
 
   public on = (name :string, callback :Function) => {

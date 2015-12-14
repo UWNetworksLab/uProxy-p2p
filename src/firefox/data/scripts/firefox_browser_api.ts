@@ -72,6 +72,9 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('showNotification', { text: text, tag: tag });
   }
 
+  public checkConnectivity = () => {
+  }
+
   public on = (name :string, callback :Function) => {
     port.on(name, callback);
   }

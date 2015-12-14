@@ -56,6 +56,20 @@ class CordovaBrowserApi implements BrowserAPI {
     });
   }
 
+  public checkConnectivity = () => {
+    console.log('Checking if the user is connected to cellular network.');
+    chrome.system.network.getNetworkInterfaces((networkIfaceArray) => {
+      for (var i = 0; i < networkIfaceArray.length; i++) {
+        var iface = networkIfaceArray[i];
+        if (iface.name.substring(0, 5) === 'rmnet') {
+          console.log('User Connected to cellular network.');
+          this.emit_('connectedToCellularWhileSharing');
+          break;
+        }
+      }
+    });
+  }
+
   public startUsingProxy = (endpoint:net.Endpoint) => {
     if (!chrome.proxy) {
       console.log('No proxy setting support; ignoring start command');

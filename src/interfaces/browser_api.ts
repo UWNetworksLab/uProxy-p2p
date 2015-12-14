@@ -16,6 +16,7 @@ export interface BrowserAPI {
   // Open a new tab
   openTab(url :string) :void;
   bringUproxyToFront() :void;
+  checkConnectivity(): void;
   // TODO: write comment to explain what browserSpecificElement is.
   browserSpecificElement :string;
 
