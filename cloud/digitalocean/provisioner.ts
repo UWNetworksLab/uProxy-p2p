@@ -58,7 +58,7 @@ class Provisioner {
       this.state_.ssh = keys;
       return this.setupDigitalOcean_(name);
     // Setup Digital Ocean (SSH key + droplet)
-    }).then((actions: any) => {
+    }).then(() => {
       //console.log(actions);
       return this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id);
     // Get the droplet's configuration
@@ -251,19 +251,21 @@ class Provisioner {
    * @param {Function} resolve - call when done
    * @param {Function} reject - call on failure
    */
-  private waitDigitalOceanActions_ = (resolve: Function, reject: Function) : void => {
+  private waitDigitalOceanActions_ = () : Promise<void> => {
     console.log("Polling for Digital Ocean in-progress actions");
-    this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id + "/actions").then((resp: any) => {
+    return this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id + "/actions").then((resp: any) => {
       for (var i = 0; i < resp.actions.length; i++) {
         if (resp.actions[i].status === "in-progress") {
-          setTimeout(this.waitDigitalOceanActions_, POLL_TIMEOUT);
-          return;
+          return new Promise<void>((F, R) => {
+            setTimeout(() => {
+              this.waitDigitalOceanActions_().then(F, R);
+            }, POLL_TIMEOUT);
+          });
         }
       }
-      resolve(resp);
     }).catch((e: Error) => {
       console.error("Error waiting for digital ocean actions:" + JSON.stringify(e));
-      reject(e);
+      throw e;
     });
   }
   
@@ -337,7 +339,7 @@ class Provisioner {
       }).then((resp: any) => {
         //console.log(resp);
         this.sendStatus_("CLOUD_WAITING_VM");
-        this.waitDigitalOceanActions_(F, R);
+        this.waitDigitalOceanActions_().then(F, R);
       // Wait for all in-progress actions to complete
       }).catch((err: Error) => {
         console.error("Error w/DigitalOcean: " + err);
