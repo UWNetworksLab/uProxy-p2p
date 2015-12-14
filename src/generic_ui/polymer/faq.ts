@@ -32,13 +32,12 @@ Polymer({
     this.ui.openTab(url);
   },
   sanitize: function(i18nMessage :string) {
-    // Remove all HTML that isn't a, strong or p.
-    var sanitizedMessage = i18nMessage
-        .replace(/<((?!(\/?(strong|a|p)))[^>]+)>/g, '');
+    var sanitizedMessage = ui.i18nSanitizeHtml(i18nMessage);
 
     // Replace all links with openTab events
     sanitizedMessage = sanitizedMessage
-        .replace(/<a([^>]+)>(.+?)<\/a>/g, function(p0, p1, p2) {
+        .replace(/<a([^>]+)>(.+?)<\/a>/g,
+            function(p0 :string, p1 :string, p2 :string) {
       // p0 is the full string matched: e.g. <a href="...">Click Me!</a>
       // p1 is the first matching group: e.g. href="..."
       // p2 is the second matching group: e.g. Click Me!
@@ -49,12 +48,7 @@ Polymer({
     });
     return sanitizedMessage;
   },
-  ready: function() {
-    this.openingAnchor = '';
-    this.ui = ui_context.ui;
-    this.model = ui_context.model;
-  },
-  domReady: function() {
+  translateElements: function() {
     var textElements = document.querySelectorAll('html /deep/ .i18n');
     for (var i = 0; i < textElements.length; i++) {
       var element = <HTMLElement>(textElements[i]);
@@ -65,5 +59,16 @@ Polymer({
       }
       this.injectBoundHTML(i18nMessage, element);
     }
+  },
+  ready: function() {
+    this.openingAnchor = '';
+    this.ui = ui_context.ui;
+    this.model = ui_context.model;
+  },
+  domReady: function() {
+    this.translateElements();
+  },
+  observe: {
+    'model.globalSettings.language': 'translateElements'
   }
 });
