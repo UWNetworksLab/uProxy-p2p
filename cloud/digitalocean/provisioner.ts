@@ -65,7 +65,9 @@ class Provisioner {
     }).then((resp: any) => {
       this.sendStatus_("CLOUD_DONE_VM");
       this.state_.cloud.vm = resp.droplet;
-      this.state_.network.ssh_port = 22;
+      this.state_.network = {
+        "ssh_port": 22
+      };
       // Retrieve public IPv4 address
       for (var i = 0; i < resp.droplet.networks.v4.length; i++) {
         if (resp.droplet.networks.v4[i].type === "public") {
