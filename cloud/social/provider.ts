@@ -22,6 +22,10 @@ const ZORK_PORT = 9000;
 // Key under which our contacts are saved in storage.
 const STORAGE_KEY = 'cloud-social-contacts';
 
+// Admin users can issue invites.
+const ADMIN_USERNAME = 'giver';
+const REGULAR_USERNAME = 'getter';
+
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
 // TODO: add (private) keys, for key-based auth
@@ -335,9 +339,22 @@ export class CloudSocialProvider {
   // social2
   ////
 
-  public inviteUser = (inviteCode: string): Promise<void> => {
-    return Promise.reject(
-      new Error('inviteUser unimplemented'));
+  // Returns a new invite code for the specified server.
+  // Rejects if the user is not logged in as an admin or there
+  // is any error executing the command.
+  // TODO: typings for invite codes
+  public inviteUser = (clientId: string): Promise<Object> => {
+    log.debug('inviteUser');
+    if (!(clientId in this.clients_)) {
+      return Promise.reject(new Error('unknown client ' + clientId));
+    }
+    if (this.savedContacts_[clientId].invite.user !== ADMIN_USERNAME) {
+      return Promise.reject(new Error('user is logged in as non-admin user ' +
+          this.savedContacts_[clientId].invite.user));
+    }
+    return this.clients_[clientId].then((connection: Connection) => {
+      return connection.issueInvite();
+    });
   }
 
   // Parses an invite code, received from uProxy in JSON format.
@@ -526,11 +543,24 @@ class Connection {
 
   // Fetches the server's description, i.e. /banner.
   public getBanner = (): Promise<string> => {
+    return this.exec_('cat /banner');
+  }
+
+  // Returns a base64-decoded, deserialised invite code.
+  public issueInvite = (): Promise<Object> => {
+    return this.exec_('sudo /issue_invite.sh').then((inviteCode: string) => {
+      return JSON.parse(new Buffer(inviteCode, 'base64').toString());
+    });
+  }
+
+  // Executes a command, fulfilling with the command's stdout
+  // or rejecting if output is received on stderr.
+  private exec_ = (command:string): Promise<string> => {
     if (this.state_ !== ConnectionState.ESTABLISHED) {
-      return Promise.reject(new Error('can only fetch banner in ESTABLISHED state'));
+      return Promise.reject(new Error('can only execute commands in ESTABLISHED state'));
     }
     return new Promise<string>((F, R) => {
-      this.client_.exec('cat /banner', (e: Error, stream: ssh2.Channel) => {
+      this.client_.exec(command, (e: Error, stream: ssh2.Channel) => {
         if (e) {
           R(e);
           return;
@@ -540,7 +570,7 @@ class Connection {
         }).stderr.on('data', function(data: Buffer) {
           R(new Error(data.toString()));
         }).on('close', function(code: any, signal: any) {
-          log.debug('banner stream closed');
+          log.debug('exec stream closed');
         });
       });
     });
