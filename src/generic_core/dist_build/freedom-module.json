@@ -15,6 +15,10 @@
       "url": "../freedom-social-firebase/social.firebase-facebook.json",
       "api": "social2"
     },
+    "SOCIAL-GitHub": {
+      "url": "../freedom-social-github/social.github.json",
+      "api": "social2"
+    },
     "SOCIAL-Cloud": {
       "url": "../uproxy-lib/cloud/social/freedom-module.json",
       "api": "social2"
