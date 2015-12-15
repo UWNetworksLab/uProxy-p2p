@@ -183,8 +183,9 @@ export function socksEchoTestDescription(useChurn:boolean) {
         }
         expect(event.connectionId).toEqual(connectionId);
         outputString += arraybuffers.arrayBufferToString(event.response);
-        if (outputString.indexOf('HTTP/1.0 404 Not Found') != -1 &&
-            outputString.indexOf(nonExistentPath) != -1) {
+        if ((outputString.indexOf('HTTP/1.0 404 Not Found') != -1 &&
+            outputString.indexOf(nonExistentPath) != -1) ||
+            outputString.indexOf('HTTP/1.1 403 Forbidden') != -1) {
           isDone = true;
           done();
         }
