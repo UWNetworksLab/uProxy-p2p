@@ -8,31 +8,33 @@ import pgp = globals.pgp;
 // Sign with private key and encrypt with encryptKey
 export function signEncrypt(plainText :string, encryptKey :string) : Promise<string> {
   var ab = arraybuffers.stringToArrayBuffer(plainText);
-  var startTime = new Date();
-  var id = startTime.getTime();
-  console.log(id + " Encryption: starting at " + startTime);
+  var startTime = new Date().getTime();
+  var startString = startTime.toString();
+  var id = startString.substr(startString.length - 4);
+  console.log(id + ' Encryption: starting');
   return pgp.signEncrypt(ab, encryptKey).then((cipherData :ArrayBuffer) => {
     var endTime = new Date();
-    console.log(id + " Encryption: completed at " + endTime);
-    console.log(id + " Encryption: time elapsed " + - (id - endTime.getTime()));
+    console.log(id + ' Encryption: completed');
+    console.log(id + ' Encryption: time elapsed ' + - (startTime - endTime.getTime()));
     return pgp.armor(cipherData);
   }).catch((e :Error) => {
-    console.log(id + "Encryption: failed at " + new Date());
+    console.log(id + ' Encryption: failed');
     return Promise.reject('Error in signEncrypt ' + e);
   });
 }
 
 // Decrypt with private key and verify with verifyKey
 export function verifyDecrypt(cipherText :string, verifyKey :string) : Promise<string> {
-  var startTime = new Date();
-  var id = startTime.getTime();
-  console.log(id + " Decryption: starting at " + startTime);
+  var startTime = new Date().getTime();
+  var startString = startTime.toString();
+  var id = startString.substr(startString.length - 4);
+  console.log(id + ' Decryption: starting');
   return pgp.dearmor(cipherText).then((cipherData :ArrayBuffer) => {
     return pgp.verifyDecrypt(cipherData, verifyKey);
   }).then((result :freedom.PgpProvider.VerifyDecryptResult) => {
     var endTime = new Date();
-    console.log(id + " Decryption: completed at " + endTime);
-    console.log(id + " Decryption: time elapsed " + - (id - endTime.getTime()));
+    console.log(id + ' Decryption: completed');
+    console.log(id + ' Decryption: time elapsed ' + - (startTime - endTime.getTime()));
     return arraybuffers.arrayBufferToString(result.data);
   }).catch((e :Error) => {
     console.log("Decryption: failed at " + new Date());
