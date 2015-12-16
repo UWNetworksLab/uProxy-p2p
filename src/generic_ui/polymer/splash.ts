@@ -94,18 +94,11 @@ Polymer({
     return ui.isExperimentalNetwork(name);
   },
   updateNetworkButtonNames: function() {
-    var supportsQuiver = false;
-    this.networkButtonNames = [];
-    for (var i = 0; i < model.networkNames.length; ++i) {
-      if (model.networkNames[i] === 'Quiver') {
-        supportsQuiver = true;
-      } else {
-        this.networkButtonNames.push(model.networkNames[i]);
-      }
-    }
-    // Only set .supportsQuiver after iterating through all networks, to prevent
-    // any flicker in case we switch from true to false to true again.
-    this.supportsQuiver = supportsQuiver;
+    this.networkButtonNames = _.filter(model.networkNames, (name) => {
+      // we do not want a button for Quiver
+      return name !== 'Quiver';
+    });
+    this.supportsQuiver = model.hasQuiverSupport();
   },
   enableStats: function() {
     model.globalSettings.statsReportingEnabled = true;
