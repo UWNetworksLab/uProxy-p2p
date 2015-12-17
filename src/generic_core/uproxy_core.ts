@@ -248,10 +248,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,
         copyPasteConnection: copyPasteConnectionState,
-        copyPasteState: {
-          connectionState: copyPasteConnectionState,
-          endpoint: copyPasteConnectionState.activeEndpoint,
-        },
         portControlSupport: this.portControlSupport_,
       };
     });

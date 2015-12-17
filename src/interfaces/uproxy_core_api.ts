@@ -43,7 +43,6 @@ export interface InitialState {
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
-  copyPasteState :CopyPasteState; //TODO(jpevarnek): remove this property
   copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
 }
