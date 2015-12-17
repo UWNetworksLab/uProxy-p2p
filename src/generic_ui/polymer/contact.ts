@@ -35,27 +35,30 @@ Polymer({
       this.contact.getExpanded = !this.contact.getExpanded;
     }
   },
-  ready: function() {
-    this.ui = ui_context.ui;
-    this.ui_constants = ui_constants;
-    this.model = ui_context.model;
-    this.GettingConsentState = user.GettingConsentState;
-    this.SharingConsentState = user.SharingConsentState;
-    this.hideOnlineStatus = this.isExpanded;
-    this.UserStatus = social.UserStatus;
-  },
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
     event.stopPropagation();  // Don't toggle when link is clicked.
   },
   acceptInvitation: function() {
-    console.log(this.contact);
     var socialNetworkInfo :social.SocialNetworkInfo = {
       name: this.contact.network.name,
       userId: this.contact.network.userId
     };
     ui_context.core.acceptInvitation({
       network: socialNetworkInfo, userId: this.contact.userId
+    });
+  },
+  generateCloudInviteUrl: function() {
+    ui_context.core.inviteUser({
+      networkId: this.contact.network.name,
+      userName: this.contact.userId
+    }).then((cloudInviteNetworkData: string) => {
+      var inviteObj = {
+        networkName: 'Cloud',
+        networkData: cloudInviteNetworkData
+      };
+      this.cloudInviteUrl = 'https://www.uproxy.org/invite/' +
+          btoa(JSON.stringify(inviteObj));
     });
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
@@ -112,6 +115,23 @@ Polymer({
     // instanceId arbitrarily chosen
     this.sortedInstances = _.sortByOrder(this.contact.offeringInstances,
                                          ['isOnline', 'instanceId'], ['desc', 'asc']);
+  },
+  select: function(e :Event, d :Object, input :HTMLInputElement) {
+    input.focus();
+    input.select();
+  },
+  ready: function() {
+    this.ui = ui_context.ui;
+    this.ui_constants = ui_constants;
+    this.model = ui_context.model;
+    this.GettingConsentState = user.GettingConsentState;
+    this.SharingConsentState = user.SharingConsentState;
+    this.hideOnlineStatus = this.isExpanded;
+    this.UserStatus = social.UserStatus;
+    if (this.contact.network.name == "Cloud" &&
+        this.mode == ui_constants.Mode.SHARE) {
+      this.generateCloudInviteUrl();
+    }
   },
   observe: {
     'contact.isSharingWithMe': 'fireChanged',

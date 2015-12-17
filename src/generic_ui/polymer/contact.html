@@ -136,6 +136,8 @@
           <span hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>{{ 'RESPOND_TO_FRIEND_REQUEST' | $$ }}</span>
           <span hidden?='{{contact.status!=UserStatus.REMOTE_INVITED_BY_LOCAL}}'>{{ 'FRIEND_REQUEST_SENT' | $$ }}</span>
         </div>
+
+        <!-- beginning of getControls -->
         <core-collapse id='getControls' class='expandedControls'
           hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
           opened='{{ contact.getExpanded }}'>
@@ -184,7 +186,8 @@
                 {{ "ASK_FOR_ACCESS" | $$ }}
               </uproxy-button>
             </div>
-          </div>
+          </div> <!-- end of controls for friends -->
+
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>
             <p class='preButtonText'>
               {{ "FRIEND_REQUEST" | $$({ name: contact.name }) }}
@@ -195,11 +198,12 @@
           </div>
         </core-collapse> <!-- end of getControls -->
 
+        <!-- beginning of shareControls -->
         <core-collapse id='shareControls' class='expandedControls'
           hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
           opened='{{ contact.shareExpanded }}'>
 
-          <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>
+          <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND || contact.network.name=="Cloud"}}'>
             <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
               <uproxy-button class='grey' raised on-tap='{{ cancelOffer }}'>{{ "REVOKE_ACCESS" | $$ }}</uproxy-button>
             </div>
@@ -228,7 +232,17 @@
               <p class='preButtonText'>{{ "ACCESS_NOT_GRANTED" | $$ }}</p>
               <uproxy-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</uproxy-button>
             </div>
+          </div> <!-- end of controls for friends -->
+
+          <div hidden?="{{contact.network.name!='Cloud'}}">
+            <p class='preButtonText'>
+              {{ "CLOUD_SHARE_INSTRUCTIONS" | $$ }}
+            </p>
+            <paper-input-decorator layout vertical>
+              <input readonly is='core-input' on-tap='{{ select }}' value='{{ cloudInviteUrl }}' />
+            </paper-input-decorator>
           </div>
+
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>
             <p class='preButtonText'>
               {{ "FRIEND_REQUEST" | $$({ name: contact.name }) }}
@@ -238,8 +252,6 @@
             </uproxy-button>
           </div>
         </core-collapse> <!-- end of shareControls -->
-
-
       </div>
 
       <div class="iconWrapper" hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">
