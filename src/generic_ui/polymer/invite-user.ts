@@ -1,13 +1,15 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import user_interface = require('../scripts/ui');
+import loginCommon = require('./login-common');
+import _ = require('lodash');
 var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
 
-Polymer({
+var inviteUser = {
   generateInviteUrl: function(name :string) {
     var network = model.getNetwork(name);
     var networkInfo = { name: network.name, userId: network.userId };
@@ -126,18 +128,8 @@ Polymer({
     }
   },
   loginTapped: function() {
-    this.login(this.selectedNetworkName);
-  },
-  login: function(networkName :string, userName ?:string) {
-    ui.login(networkName, userName).then(() => {
-      if (networkName != 'Quiver') {
-        this.$.loginToInviteFriendDialog.close();
-        this.closeInviteUserPanel();
-      }
-      ui.bringUproxyToFront();
-      this.initInviteForNetwork(networkName);
-    }).catch((e: Error) => {
-      console.warn('Did not log in ', e);
+    this.login(this.selectedNetworkName).then(() => {
+      this.initInviteForNetwork();
     });
   },
   initInviteForNetwork: function(networkName: string) {
@@ -150,21 +142,6 @@ Polymer({
       this.sendToFacebookFriend();
     }
   },
-  copypaste: function() {
-    // Logout of all other social networks before starting
-    // copypaste connection.
-    var getConfirmation = Promise.resolve<void>();
-    if (model.onlineNetworks.length > 0) {
-      var confirmationMessage =
-          ui.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE');
-      getConfirmation = ui.getConfirmation('', confirmationMessage);
-    }
-
-    getConfirmation.then(ui.logoutAll).then(() => {
-      this.closeInviteUserPanel();
-      this.fire('core-signal', { name: 'copypaste-init' });
-    });
-  },
   loginToInviteFriendDialogOpened: function() {
     // Set confirmation message, which may include some HTML (e.g. strong, br).
     var confirmationMessage :string;
@@ -173,7 +150,7 @@ Polymer({
     } else {
       confirmationMessage = ui.i18n_t(
           'SIGN_IN_TO_INVITE_FRIENDS',
-          {network: this.getNetworkDisplayName(this.selectedNetworkName)});
+          {network: ui.getNetworkDisplayName(this.selectedNetworkName)});
     }
     this.injectBoundHTML(
         ui.i18nSanitizeHtml(confirmationMessage),
@@ -184,20 +161,6 @@ Polymer({
     // will be smaller than expected.
     this.$.loginToInviteFriendDialog.resizeHandler();
   },
-  networkNamesChanged: function() {
-    this.networkButtonNames = _.filter(model.networkNames, (name) => {
-      // we do not want a button for Quiver
-      return name !== 'Quiver';
-    });
-    this.supportsQuiver = model.hasQuiverSupport();
-
-  },
-  getNetworkDisplayName: function(networkName :string) {
-    return ui.getNetworkDisplayName(networkName);
-  },
-  isExperimentalNetwork: function(networkName :string) {
-    return ui.isExperimentalNetwork(networkName);
-  },
   closeLoginDialog: function() {
     this.$.loginToInviteFriendDialog.close();
   },
@@ -206,8 +169,8 @@ Polymer({
     input.select();
   },
   observe: {
-    'model.networkNames': 'networkNamesChanged',
-    'model.onlineNetworks': 'onlineNetworksChanged'
+    'model.networkNames': 'updateNetworkButtonNames',
+    'model.onlineNetworks': 'onlineNetworksChanged',
   },
   ready: function() {
     this.userName = model.globalSettings.quiverUserName; // for Quiver
@@ -217,10 +180,13 @@ Polymer({
     this.inviteUserEmail = ''; // for GMail
     this.selectedNetworkName = '';
     this.quiverInviteUrl = '';
-    this.model = model;
     this.cloudInstanceInput = '';
     this.ui = ui;
+    this.model = model;
 
-    this.networkNamesChanged();
+    this.updateNetworkButtonNames();
   }
-});
+};
+
+(<any>_.mixin)(inviteUser, loginCommon);
+Polymer(inviteUser);

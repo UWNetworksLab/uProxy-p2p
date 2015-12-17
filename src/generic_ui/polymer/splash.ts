@@ -8,6 +8,8 @@
 declare var require :(path :string) => Object;
 
 import ui_constants = require('../../interfaces/ui');
+import loginCommon = require('./login-common');
+import _ = require('lodash');
 
 interface Language {
   description :string;
@@ -20,7 +22,7 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
-Polymer({
+var splash = {
   SPLASH_STATES: {
     INTRO: 0,
     METRICS_OPT_IN: 1,
@@ -57,9 +59,6 @@ Polymer({
       this.setState(model.globalSettings.splashState - 1);
     }
   },
-  copypaste: function() {
-    this.fire('core-signal', { name: 'copypaste-init' });
-  },
   openFeedbackForm: function() {
     this.fire('core-signal', {name: 'open-feedback'});
   },
@@ -79,27 +78,6 @@ Polymer({
     var networkName = target.getAttribute('data-network');
     this.login(networkName);
   },
-  login: function(networkName :string, userName ?:string) {
-    ui.login(networkName, userName).then(() => {
-      // syncNetwork will update the view to the ROSTER.
-      ui.bringUproxyToFront();
-    }).catch((e: Error) => {
-      console.warn('Did not log in ', e);
-    });
-  },
-  getNetworkDisplayName: function(name :string) {
-    return ui.getNetworkDisplayName(name);
-  },
-  isExperimentalNetwork: function(name :string) {
-    return ui.isExperimentalNetwork(name);
-  },
-  updateNetworkButtonNames: function() {
-    this.networkButtonNames = _.filter(model.networkNames, (name) => {
-      // we do not want a button for Quiver
-      return name !== 'Quiver';
-    });
-    this.supportsQuiver = model.hasQuiverSupport();
-  },
   enableStats: function() {
     model.globalSettings.statsReportingEnabled = true;
     core.updateGlobalSettings(model.globalSettings);
@@ -111,7 +89,7 @@ Polymer({
     this.next();
   },
   observe: {
-    'model.networkNames': 'updateNetworkButtonNames'
+    'model.networkNames': 'updateNetworkButtonNames',
   },
   ready: function() {
     this.ui = ui;
@@ -120,4 +98,7 @@ Polymer({
     this.userName = model.globalSettings.quiverUserName;
     this.updateNetworkButtonNames();
   },
-});
+};
+
+(<any>_.mixin)(splash, loginCommon);
+Polymer(splash);
