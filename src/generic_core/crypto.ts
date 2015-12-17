@@ -14,8 +14,7 @@ export function signEncrypt(plainText :string, encryptKey :string) : Promise<str
   console.log(id + ' Encryption: starting');
   return pgp.signEncrypt(ab, encryptKey).then((cipherData :ArrayBuffer) => {
     var endTime = new Date();
-    console.log(id + ' Encryption: completed');
-    console.log(id + ' Encryption: time elapsed ' + - (startTime - endTime.getTime()));
+    console.log(id + ' Encryption: completed, time elapsed - ' + (endTime.getTime() - startTime));
     return pgp.armor(cipherData);
   }).catch((e :Error) => {
     console.log(id + ' Encryption: failed');
@@ -33,8 +32,7 @@ export function verifyDecrypt(cipherText :string, verifyKey :string) : Promise<s
     return pgp.verifyDecrypt(cipherData, verifyKey);
   }).then((result :freedom.PgpProvider.VerifyDecryptResult) => {
     var endTime = new Date();
-    console.log(id + ' Decryption: completed');
-    console.log(id + ' Decryption: time elapsed ' + - (startTime - endTime.getTime()));
+    console.log(id + ' Decryption: completed, time elapsed - ' + (endTime.getTime() - startTime));
     return arraybuffers.arrayBufferToString(result.data);
   }).catch((e :Error) => {
     console.log("Decryption: failed at " + new Date());
