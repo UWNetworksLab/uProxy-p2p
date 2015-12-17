@@ -92,8 +92,8 @@ FILES =
 finishVulcanized = (basePath, baseFilename) ->
   files: [
     {
-      src: path.join(basePath, '/polymer/' + baseFilename + '.html')
-      dest: path.join(basePath, '/polymer/' + baseFilename + '.html')
+      src: path.join(basePath, baseFilename + '.html')
+      dest: path.join(basePath, baseFilename + '.html')
     }
   ]
   options:
@@ -105,21 +105,10 @@ finishVulcanized = (basePath, baseFilename) ->
       replacement: '<script src="../lib/$1"></script>'
     }]
 
-vulcanizeInline = (src, dest) ->
+doVulcanize = (src, dest, inline, csp) ->
   options:
-    inline: true
-    excludes:
-      scripts: [
-        'polymer.js'
-      ]
-  files: [{
-    src: src
-    dest: dest
-  }]
-
-vulcanizeCsp = (src, dest) ->
-  options:
-    csp: true
+    inline: inline
+    csp: csp
     excludes:
       scripts: [
         'polymer.js'
@@ -832,23 +821,6 @@ gruntConfig = {
             'freedom-social-wechat': '<%= pkgs.freedomwechat.version %>'
             'freedom-social-quiver': '<%= pkgs.freedomquiver.version %>'
         }]
-    chromeExtVulcanized:
-      finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized')
-
-    firefoxVulcanized:
-      finishVulcanized(firefoxDevPath + '/data/generic_ui', 'vulcanized')
-
-    chromeExtLogsVulcanized:
-      finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized-view-logs')
-
-    firefoxLogsVulcanized:
-      finishVulcanized(firefoxDevPath + '/data/generic_ui', 'vulcanized-view-logs')
-
-    ccaVulcanized:
-      finishVulcanized(ccaDevPath + '/generic_ui', 'vulcanized')
-
-    ccaLogsVulcanized:
-      finishVulcanized(ccaDevPath + '/generic_ui', 'vulcanized-view-logs')
   #-------------------------------------------------------------------------
   # All typescript compiles to locations in `build/`
   # Typescript compilation rules
@@ -904,8 +876,6 @@ gruntConfig = {
         standalone: 'ui_context'
     )
 
-    chromeVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized', {})# no exports from this
-    chromeLogsVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized-view-logs', {})
     firefoxContext:
       src: [
         firefoxDevPath + '/data/scripts/background.js'
@@ -914,8 +884,6 @@ gruntConfig = {
       options:
         browserifyOptions:
           standalone: 'ui_context'
-    firefoxVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized', {})# no exports from this
-    firefoxLogsVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized-view-logs', {})
 
     ccaMain: Rule.browserify('cca/app/scripts/main.core-env',
       browserifyOptions:
@@ -925,8 +893,6 @@ gruntConfig = {
       browserifyOptions:
         standalone: 'ui_context'
     )
-    ccaVulcanized: Rule.browserify('cca/app/generic_ui/polymer/vulcanized', {})# no exports from this
-    ccaLogsVulcanized: Rule.browserify('cca/app/generic_ui/polymer/vulcanized-view-logs', {})
 
     chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
     chromeExtensionCoreConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core_connector'
@@ -972,59 +938,7 @@ gruntConfig = {
         extension_dir: 'build/dist/firefox'
         dist_dir: 'build/dist'
 
-  vulcanize:
-    chromeExtInline:
-      vulcanizeInline(
-          chromeExtDevPath + '/generic_ui/polymer/root.html',
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html')
-    chromeExtCsp:
-      vulcanizeCsp(
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html',
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized.html')
-    chromeAppInline:
-      vulcanizeInline(
-          chromeAppDevPath + '/polymer/ext-missing.html',
-          chromeAppDevPath + '/polymer/vulcanized-inline.html')
-    chromeAppCsp:
-      vulcanizeCsp(
-          chromeAppDevPath + '/polymer/vulcanized-inline.html',
-          chromeAppDevPath + '/polymer/vulcanized.html')
-    firefoxInline:
-      vulcanizeInline(
-          firefoxDevPath + '/data/generic_ui/polymer/root.html',
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html')
-    firefoxCsp:
-      vulcanizeCsp(
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html',
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html')
-    ccaInline:
-      vulcanizeInline(
-          ccaDevPath + '/generic_ui/polymer/root.html',
-          ccaDevPath + '/generic_ui/polymer/vulcanized-inline.html',
-          ccaDevPath + '/polymer/ext-missing.html',
-          ccaDevPath + '/polymer/vulcanized-inline.html')
-    ccaCsp:
-      vulcanizeCsp(
-          ccaDevPath + '/generic_ui/polymer/vulcanized-inline.html',
-          ccaDevPath + '/generic_ui/polymer/vulcanized.html',
-          ccaDevPath + '/polymer/vulcanized-inline.html',
-          ccaDevPath + '/polymer/vulcanized.html')
-    chromeViewLogsInline:
-      vulcanizeInline(
-          chromeExtDevPath + '/generic_ui/polymer/logs.html',
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs-inline.html')
-    chromeViewLogsCsp:
-      vulcanizeCsp(
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs-inline.html',
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs.html')
-    firefoxViewLogsInline:
-      vulcanizeInline(
-          firefoxDevPath + '/data/generic_ui/polymer/logs.html',
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs-inline.html')
-    firefoxViewLogsCsp:
-      vulcanizeCsp(
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs-inline.html',
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs.html')
+  vulcanize: {}
 }  # grunt.initConfig
 
 #-------------------------------------------------------------------------
@@ -1067,6 +981,27 @@ testDirectory = (dir) ->
 
   return testNames
 
+fullyVulcanize = (basePath, srcFilename, destFilename, browserify = false) ->
+  tasks = []
+  addTask = (component, task, rule) ->
+    gruntConfig[component][task] = rule
+    tasks.push(component + ':' + task)
+
+  realBasePath = path.join(devBuildPath, basePath)
+  srcFile = path.join(realBasePath, srcFilename + '.html')
+  intermediateFile = path.join(realBasePath, destFilename + '-inline.html')
+  destFile = path.join(realBasePath, destFilename + '.html')
+
+  addTask('vulcanize', destFile + 'Inline', doVulcanize(srcFile, intermediateFile, true, false))
+  addTask('vulcanize', destFile + 'Csp', doVulcanize(intermediateFile, destFile, false, true))
+
+  if browserify
+    browserifyPath = path.join(basePath, destFilename)
+    addTask('string-replace', destFile + 'Vulcanized', finishVulcanized(realBasePath, destFilename))
+    addTask('browserify', browserifyPath, Rule.browserify(browserifyPath, {}))
+
+  return tasks
+
 #-------------------------------------------------------------------------
 # Define the tasks
 taskManager = new TaskManager.Manager()
@@ -1090,27 +1025,17 @@ taskManager.add 'build_chrome_app', [
   'base'
   'ts:chrome_app'
   'copy:chrome_app'
-  'vulcanize:chromeAppInline'
-  'vulcanize:chromeAppCsp'
-  'copy:chrome_app'
-]
+].concat fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')
 
 taskManager.add 'build_chrome_ext', [
   'base'
   'ts:chrome_extension'
   'copy:chrome_extension'
   'copy:chrome_extension_additional'
-  'vulcanize:chromeExtInline'
-  'vulcanize:chromeExtCsp'
-  'vulcanize:chromeViewLogsInline'
-  'vulcanize:chromeViewLogsCsp'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
-  'browserify:chromeVulcanized'
-  'browserify:chromeLogsVulcanized'
-  'string-replace:chromeExtVulcanized'
-  'string-replace:chromeExtLogsVulcanized'
-]
+].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)
+.concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true)
 
 taskManager.add 'build_chrome', [
   'build_chrome_app'
@@ -1123,16 +1048,9 @@ taskManager.add 'build_firefox', [
   'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'
-  'vulcanize:firefoxInline'
-  'vulcanize:firefoxCsp'
-  'vulcanize:firefoxViewLogsInline'
-  'vulcanize:firefoxViewLogsCsp'
-  'string-replace:firefoxVulcanized'
-  'string-replace:firefoxLogsVulcanized'
   'browserify:firefoxContext'
-  'browserify:firefoxVulcanized'
-  'browserify:firefoxLogsVulcanized'
-]
+].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)
+.concat fullyVulcanize('firefox/data/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true)
 
 # CCA build tasks.
 taskManager.add 'build_cca', [
@@ -1140,15 +1058,9 @@ taskManager.add 'build_cca', [
   'ts:cca'
   'copy:cca'
   'copy:cca_additional'
-  'vulcanize:ccaInline'
-  'vulcanize:ccaCsp'
   'browserify:ccaMain'
   'browserify:ccaContext'
-  'browserify:ccaVulcanized'
-  'browserify:ccaLogsVulcanized'
-  'string-replace:ccaVulcanized'
-  'string-replace:ccaLogsVulcanized'
-]
+].concat fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)
 
 # Mobile OS build tasks
 taskManager.add 'build_android', [
