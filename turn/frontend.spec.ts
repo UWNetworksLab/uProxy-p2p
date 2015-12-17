@@ -1,6 +1,11 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.udpsocket': (() => { /* MT */ }), // this only needs to be defined for test to work
+});
+
 import turn_frontend = require('./frontend');
 import messages = require('./messages');
 import net = require('../net/net.types');

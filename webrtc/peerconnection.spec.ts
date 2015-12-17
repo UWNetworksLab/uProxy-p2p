@@ -10,6 +10,7 @@ import RTCPeerConnection = freedom.RTCPeerConnection.RTCPeerConnection;
 import RTCDataChannelInit = freedom.RTCPeerConnection.RTCDataChannelInit;
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
 import signals = require('./signals');
 import peerconnection = require('./peerconnection');
@@ -45,7 +46,7 @@ describe('PeerConnection', function() {
 
     // Mock synchronously emit onmessage immediately after ondatachannel.
     mockRtcDataChannel.handleEvent('onmessage', {text: 'foo'});
-    
+
     pc.peerOpenedChannelQueue.setSyncNextHandler((dc:datachannel.DataChannel) => {
       dc.dataFromPeerQueue.setSyncNextHandler((data:datachannel.Data) => {
         expect(data.str).toEqual('foo');
