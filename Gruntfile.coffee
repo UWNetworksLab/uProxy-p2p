@@ -2,6 +2,7 @@
 Gruntfile for uProxy
 ###
 
+_ = require('lodash')
 fs = require('fs')
 rules = require './build/tools/common-grunt-rules'
 path = require 'path'
@@ -948,43 +949,6 @@ gruntConfig = {
 #-------------------------------------------------------------------------
 # Helper functions for different components
 
-# Adds rules to the gruntConfig to build all the tests in a given directory and
-# to run those tests, returns an array of task names to be run for testing that
-# directory
-#
-# All test files should have a name ending with .spec.ts
-testDirectory = (dir) ->
-  # every test sequence should include building everything
-  testNames = ['base']
-
-  # we use the source directory to figure out what files will end up in the
-  # build directory (this is run before any build steps)
-  files = fs.readdirSync(path.join('src', dir))
-  for file in files
-    match = /(.+)\.spec\.ts/.exec(file)
-    if match
-      loc = path.join(dir, match[1])
-      testName = loc + 'spec'
-
-      # add the browserify task as something we can run
-      gruntConfig['browserify'][testName] = Rule.browserifySpec(loc)
-      # include the browserification in this step
-      testNames.push('browserify:' + testName)
-
-      gruntConfig['jasmine'][testName] =
-        src: [
-          require.resolve('arraybuffer-slice'),
-          require.resolve('es6-promise')
-          path.join(thirdPartyBuildPath, 'promise-polyfill.js'),
-        ]
-        options:
-          specs: [path.join(devBuildPath, dir, match[1] + '.spec.static.js')]
-          outfile: path.join(devBuildPath, dir, match[1] + 'Runner.html')
-          keepRunner: true
-      testNames.push('jasmine:' + testName)
-
-  return testNames
-
 fullyVulcanize = (basePath, srcFilename, destFilename, browserify = false) ->
   tasks = []
 
@@ -1116,9 +1080,17 @@ taskManager.add 'emulate_ios', [
 ]
 
 # --- Testing tasks ---
-taskManager.add 'test_core', testDirectory('generic_core')
+taskManager.add 'test_core', [
+  'base'
+].concat _.flatten(
+  Rule.buildAndRunTest(spec, gruntConfig) for spec in Rule.getTests('src', 'generic_core')
+)
 
-taskManager.add 'test_ui', testDirectory('generic_ui/scripts')
+taskManager.add 'test_ui', [
+  'base'
+].concat _.flatten(
+  Rule.buildAndRunTest(spec, gruntConfig) for spec in Rule.getTests('src', 'generic_ui/scripts')
+)
 
 taskManager.add 'test_chrome', [
   'build_chrome'
