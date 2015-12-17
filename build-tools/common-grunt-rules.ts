@@ -2,6 +2,7 @@
 
 /// <reference path='../../../third_party/typings/node/node.d.ts' />
 
+import fs = require('fs');
 import path = require('path');
 
 export interface RuleConfig {
@@ -90,6 +91,21 @@ export class Rule {
       options: {
         specs: [ path.join(this.config.devBuildPath, name, '/**/*.spec.static.js') ],
         outfile: path.join(this.config.devBuildPath, name, '/SpecRunner.html'),
+        keepRunner: true
+      }
+    }
+  }
+
+  public jasmineSingleSpec(file :string) :JasmineRule {
+    return {
+      src: [
+        require.resolve('arraybuffer-slice'),
+        require.resolve('es6-promise'),
+        path.join(this.config.thirdPartyBuildPath, 'promise-polyfill.js'),
+      ],
+      options: {
+        specs: [ path.join(this.config.devBuildPath, file + '.spec.static.js') ],
+        outfile: path.join(this.config.devBuildPath, file, '/SpecRunner.html'),
         keepRunner: true
       }
     }
@@ -213,6 +229,74 @@ export class Rule {
     });
 
     return { files: allFilesForlibPaths.concat(copyInfo.files) };
+  }
+
+  public buildAndRunTest(test :string, gruntConfig :{[c :string] :{[t :string] :Object}},
+                         coverage?:boolean) :string[] {
+    var name = test + 'Spec';
+    var browserifyRule = this.browserifySpec(test);
+    var jasmineRule = this.jasmineSingleSpec(test);
+
+    if (coverage) {
+      name += 'Cov';
+      browserifyRule = this.addCoverageToBrowserify(browserifyRule);
+      jasmineRule = this.addCoverageToSpec(jasmineRule);
+    }
+
+    gruntConfig['browserify'][name] = browserifyRule;
+    gruntConfig['jasmine'][name] = jasmineRule;
+
+    return [
+      'browserify:' + name,
+      'jasmine:' + name,
+    ];
+  }
+
+  /*
+   * Returns a list of tests that exist within the directory structure of a
+   * project.
+   *
+   * rootDir is the directory under which the layout will match what this file
+   * expects for paths being passed in (i.e. under devBuildPath)
+   *
+   * getTests('src');
+   *   Lists all tests under the src/ directory
+   * getTests('src', 'generic_ui/scripts');
+   *   Lists all tests under the generic_ui/scripts directory, all paths
+   *   relative to src/
+   * getTests('src', undefined, ['integration-tests']);
+   *   Lists all the tests under src/ ignoring anything named integration-tests
+   */
+  public getTests(rootDir :string, current?:string, ignore?:string[]) {
+    var tests :string[] = [];
+    if (typeof current === 'undefined') {
+      current = '';
+    }
+
+    if (typeof ignore === 'undefined') {
+      ignore = [];
+    }
+
+    var files = fs.readdirSync(path.join(rootDir, current));
+    for (var f in files) {
+      if (ignore.indexOf(files[f]) !== -1) {
+        continue;
+      }
+
+      var file = path.join(current, files[f]);
+
+      var stats = fs.statSync(path.join(rootDir, file));
+      if (stats.isDirectory()) {
+        tests = tests.concat(this.getTests(rootDir, file, ignore));
+      } else {
+        var match = /(.+)\.spec\.ts/.exec(file);
+        if (match) {
+          tests.push(match[1]);
+        }
+      }
+    }
+
+    return tests;
   }
 
 }  // class Rule
