@@ -210,7 +210,9 @@ export enum ClientStatus {
 export enum UserStatus {
   FRIEND = 0,
   LOCAL_INVITED_BY_REMOTE = 1,
-  REMOTE_INVITED_BY_LOCAL = 2
+  REMOTE_INVITED_BY_LOCAL = 2,
+  CLOUD_INSTANCE_CREATED_BY_LOCAL = 3,
+  CLOUD_INSTANCE_SHARED_WITH_LOCAL = 4
 }
 
 // Status of a client connected to a social network.
