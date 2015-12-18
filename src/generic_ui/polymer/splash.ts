@@ -42,7 +42,7 @@ var splash = {
     if (this.supportsQuiver && model.globalSettings.splashState
         == this.SPLASH_STATES.METRICS_OPT_IN) {
       ui.view = ui_constants.View.ROSTER;
-    } else if (model.globalSettings.hasSeenWelcome &&
+    } else if (model.globalSettings.hasSeenMetrics &&
         model.globalSettings.splashState == this.SPLASH_STATES.INTRO) {
         // Skip metrics opt-in if we've seen it before.
         this.setState(this.SPLASH_STATES.NETWORKS);
@@ -51,7 +51,7 @@ var splash = {
     }
   },
   prev: function() {
-    if (model.globalSettings.hasSeenWelcome &&
+    if (model.globalSettings.hasSeenMetrics &&
         model.globalSettings.splashState == this.SPLASH_STATES.NETWORKS) {
         // Skip metrics opt-in if we've seen it before.
         this.setState(this.SPLASH_STATES.INTRO);
@@ -69,15 +69,17 @@ var splash = {
       window.location.reload();
     }
   },
-  enableStats: function() {
-    model.globalSettings.statsReportingEnabled = true;
+  updateSeenMetrics: function(val :Boolean) {
+    model.globalSettings.hasSeenMetrics = true;
+    model.globalSettings.statsReportingEnabled = val;
     core.updateGlobalSettings(model.globalSettings);
     this.next();
   },
+  enableStats: function() {
+    return this.updateSeenMetrics(true);
+  },
   disableStats: function() {
-    model.globalSettings.statsReportingEnabled = false;
-    core.updateGlobalSettings(model.globalSettings);
-    this.next();
+    return this.updateSeenMetrics(false);
   },
   observe: {
     'model.networkNames': 'updateNetworkButtonNames',
