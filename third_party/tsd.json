@@ -38,6 +38,9 @@
     "chrome/chrome.d.ts": {
       "commit": "1957eb54fbb7ef0d0397c2c78a5b5e638e813ec8"
     },
+    "chrome/chrome-app.d.ts": {
+      "commit": "c5db2d4088aeae2d695d96d416141dd944533459"
+    },
     "circular-json/circular-json.d.ts": {
       "commit": "9c2d795cc1d98cd3e11186de9290776c66578ea0"
     },

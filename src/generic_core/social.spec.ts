@@ -424,7 +424,7 @@ describe('Quiver social networks', () => {
   });
 
   it('Ignores messages if inviteResponse contains invalid permission token', (done) => {
-    var validClientState :freedom.Social.ClientState = {
+    var validClientState = <freedom.Social.ClientState>{
       userId: 'mockuser',
       clientId: 'mockuser:' + publicKey,
       status: 'ONLINE',
@@ -455,7 +455,7 @@ describe('Quiver social networks', () => {
     spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
 
     var permissionToken = network.myInstance.generateInvitePermissionToken();
-    var validClientState :freedom.Social.ClientState = {
+    var validClientState = <freedom.Social.ClientState>{
       userId: userId,
       clientId: clientId,
       status: 'ONLINE',
