@@ -28,6 +28,7 @@ export interface GlobalSettings {
   stunServers      :freedom.RTCPeerConnection.RTCIceServer[];
   hasSeenSharingEnabledScreen :boolean;
   hasSeenWelcome   :boolean;
+  hasSeenMetrics   :boolean;
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
