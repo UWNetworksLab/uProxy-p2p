@@ -35,6 +35,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   stunServers: DEFAULT_STUN_SERVERS.slice(0),
   hasSeenSharingEnabledScreen: false,
   hasSeenWelcome: false,
+  hasSeenMetrics: false,
   allowNonUnicast: false,
   mode: user_interface.Mode.GET,
   version: STORAGE_VERSION,

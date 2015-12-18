@@ -56,6 +56,7 @@ export class Model {
     description: '',
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
+    hasSeenMetrics: false,
     hasSeenWelcome: false,
     splashState : 0,
     mode : ui_constants.Mode.GET,
@@ -111,6 +112,10 @@ export class Model {
 
       return undefined;
     });
+  }
+
+  public hasQuiverSupport() {
+    return _.indexOf(this.networkNames, 'Quiver') != -1;
   }
 }
 
@@ -1277,11 +1282,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     // TODO: Remove this when we switch completely to a roster-before-login flow.
-    for (var i = 0; i < this.model.networkNames.length; ++i) {
-      if (this.model.networkNames[i] === 'Quiver') {
-        this.showRosterBeforeLogin = true;
-      }
-    }
+    this.showRosterBeforeLogin = this.model.hasQuiverSupport();
 
     this.portControlSupport = state.portControlSupport;
 
