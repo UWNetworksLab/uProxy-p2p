@@ -56,6 +56,7 @@ export class Model {
     description: '',
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
+    hasSeenMetrics: false,
     hasSeenWelcome: false,
     splashState : 0,
     mode : ui_constants.Mode.GET,
