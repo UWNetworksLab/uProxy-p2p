@@ -69,15 +69,6 @@ var splash = {
       window.location.reload();
     }
   },
-  loginToQuiver: function() {
-    model.globalSettings.quiverUserName = this.userName;
-    core.updateGlobalSettings(model.globalSettings);
-    this.login('Quiver', this.userName);
-  },
-  loginTapped: function(event: Event, detail: Object, target: HTMLElement) {
-    var networkName = target.getAttribute('data-network');
-    this.login(networkName);
-  },
   enableStats: function() {
     model.globalSettings.statsReportingEnabled = true;
     core.updateGlobalSettings(model.globalSettings);

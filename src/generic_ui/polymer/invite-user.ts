@@ -127,6 +127,19 @@ var inviteUser = {
       this.$.loginToInviteFriendDialog.open();
     }
   },
+  login: function(networkName :string, userName ?:string ) {
+    return ui.login(networkName, userName).then(() => {
+      if (networkName != 'Quiver') {
+        this.$.loginToInviteFriendDialog.close();
+        if (this.closeInviteUserPanel) {
+          this.closeInviteUserPanel();
+        }
+      }
+      ui.bringUproxyToFront();
+    }).catch((e: Error) => {
+      console.warn('Did not log in ', e);
+    });
+  },
   loginTapped: function() {
     this.login(this.selectedNetworkName).then(() => {
       this.initInviteForNetwork();
@@ -160,6 +173,12 @@ var inviteUser = {
     // of the dialog confuse Polymer, and the size of the dialog
     // will be smaller than expected.
     this.$.loginToInviteFriendDialog.resizeHandler();
+  },
+  getNetworkDisplayName: function(networkName :string) {
+    return ui.getNetworkDisplayName(networkName);
+  },
+  isExperimentalNetwork: function(networkName :string) {
+    return ui.isExperimentalNetwork(networkName);
   },
   closeLoginDialog: function() {
     this.$.loginToInviteFriendDialog.close();
