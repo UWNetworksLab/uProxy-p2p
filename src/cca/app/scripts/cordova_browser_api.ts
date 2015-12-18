@@ -57,7 +57,7 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public isConnectedToCellular = () : Promise<boolean> => {
-    return new Promise<boolean>(() => {(): boolean => {
+    return new Promise<boolean>((F, R): boolean => {
         var isConnectedToCellular = false;
         chrome.system.network.getNetworkInterfaces((networkIfaceArray) => {
           for (var i = 0; i < networkIfaceArray.length; i++) {
@@ -68,10 +68,10 @@ class CordovaBrowserApi implements BrowserAPI {
               break;
             }
           }
+          F();
         });
         return isConnectedToCellular;
-      }
-    });
+      });
   }
 
   public startUsingProxy = (endpoint:net.Endpoint) => {
