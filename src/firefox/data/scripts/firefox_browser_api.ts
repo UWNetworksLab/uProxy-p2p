@@ -72,7 +72,8 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('showNotification', { text: text, tag: tag });
   }
 
-  public checkConnectivity = () => {
+  public isConnectedToCellular = (): Promise<boolean> => {
+    return new Promise<boolean>(false);
   }
 
   public on = (name :string, callback :Function) => {

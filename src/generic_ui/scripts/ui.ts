@@ -64,6 +64,7 @@ export class Model {
     consoleFilter: 0,
     language: 'en',
     force_message_version: 0,
+    hasSeenGoogleAndFacebookChangedNotification: false,
     quiverUserName: '',
     showCloud: false
   };
@@ -211,6 +212,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public toastMessage :string = null;
 
+  public showInviteControls: boolean = false;
+
   // TODO: Remove this when we switch completely to a roster-before-login flow.
   public showRosterBeforeLogin:boolean = false;
 
@@ -291,7 +294,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.stoppedGetting(data);
     });
 
-    var checkConnectivityIntervalId : number;
+    var checkConnectivityIntervalId = -1;
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
         (instanceId :string) => {
       // TODO (lucyhe): Update instancesGivingAccessTo before calling
@@ -306,7 +309,9 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = true;
       this.showNotification(this.i18n_t("STARTED_PROXYING",
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
-      checkConnectivityIntervalId = setInterval(this.browserApi.checkConnectivity, 5 * 60 * 1000);
+      checkConnectivityIntervalId = setInterval(
+        this.notifyUserIfConnectedToCellular_,
+        5 * 60 * 1000);
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND,
@@ -334,7 +339,10 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
-      clearInterval(checkConnectivityIntervalId);
+      if (checkConnectivityIntervalId != -1) {
+        clearInterval(checkConnectivityIntervalId);
+        checkConnectivityIntervalId = -1;
+      }
     });
 
     core.onUpdate(uproxy_core_api.Update.FAILED_TO_GIVE,
@@ -392,6 +400,13 @@ export class UserInterface implements ui_constants.UiApi {
     core.getFullState()
         .then(this.updateInitialState)
         .then(this.browserApi.handlePopupLaunch);
+  }
+
+  private notifyUserIfConnectedToCellular_ = () => {
+    if (this.browserApi.isConnectedToCellular) {
+       this.showNotification("Your friend is proxying through your cellular network which could"
+          + " incur charges.");
+      }
   }
 
   // Because of an observer (in root.ts) watching the value of
@@ -972,6 +987,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateView_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private syncUserSelf_ = (payload :social.UserData) => {
@@ -1139,7 +1155,7 @@ export class UserInterface implements ui_constants.UiApi {
   private reconnect_ = (network :string) => {
     this.model.reconnecting = true;
     // TODO: add wechat, quiver, github URLs
-    var pingUrl = network == 'Facebook-Firebase-V2'
+    var pingUrl = network == 'Facebook'
         ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
     this.core.pingUntilOnline(pingUrl).then(() => {
       // Ensure that the user is still attempting to reconnect (i.e. they
@@ -1273,6 +1289,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateView_();
     this.updateSharingStatusBar_();
     this.updateIcon_();
+    this.updateShowInviteControls_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
@@ -1322,6 +1339,10 @@ export class UserInterface implements ui_constants.UiApi {
     return this.getProperty_<boolean>(networkName, 'supportsReconnect') || false;
   }
 
+  public supportsInvites = (networkName :string) : boolean => {
+    return this.getProperty_<boolean>(networkName, 'supportsInvites') || false;
+  }
+
   public isExperimentalNetwork = (networkName :string) : boolean => {
     return this.getProperty_<boolean>(networkName, 'isExperimental') || false;
   }
@@ -1331,6 +1352,13 @@ export class UserInterface implements ui_constants.UiApi {
       return (<any>(NETWORK_OPTIONS[networkName]))[propertyName];
     }
     return undefined;
+  }
+
+  private updateShowInviteControls_ = () => {
+    this.showInviteControls = this.showRosterBeforeLogin ||
+        _.some(this.model.onlineNetworks, (network) => {
+          return this.supportsInvites(network.name);
+        });
   }
 
   // this takes care of updating the view (given the assumuption that we are

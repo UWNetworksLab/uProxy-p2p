@@ -16,7 +16,7 @@ export interface BrowserAPI {
   // Open a new tab
   openTab(url :string) :void;
   bringUproxyToFront() :void;
-  checkConnectivity(): void;
+  isConnectedToCellular(): Promise<boolean>;
   // TODO: write comment to explain what browserSpecificElement is.
   browserSpecificElement :string;
 

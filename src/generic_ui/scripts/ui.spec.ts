@@ -57,15 +57,13 @@ describe('UI.UserInterface', () => {
         ['setIcon',
          'startUsingProxy',
          'stopUsingProxy',
-         'onStoppedSharing',
-         'onStartedSharing',
          'openTab',
          'showNotification',
          'on',
          'handlePopupLaunch',
          'bringUproxyToFront',
          'setBadgeNotification',
-         'checkConnectivity'
+         'isConnectedToCellular'
          ]);
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');

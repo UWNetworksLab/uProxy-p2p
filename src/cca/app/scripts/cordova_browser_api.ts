@@ -56,16 +56,20 @@ class CordovaBrowserApi implements BrowserAPI {
     });
   }
 
-  public checkConnectivity = () => {
-    console.log('Checking if the user is connected to cellular network.');
-    chrome.system.network.getNetworkInterfaces((networkIfaceArray) => {
-      for (var i = 0; i < networkIfaceArray.length; i++) {
-        var iface = networkIfaceArray[i];
-        if (iface.name.substring(0, 5) === 'rmnet') {
-          console.log('User Connected to cellular network.');
-          this.emit_('connectedToCellularWhileSharing');
-          break;
-        }
+  public isConnectedToCellular = () : Promise<boolean> => {
+    return new Promise<boolean>(() => {(): boolean => {
+        var isConnectedToCellular = false;
+        chrome.system.network.getNetworkInterfaces((networkIfaceArray) => {
+          for (var i = 0; i < networkIfaceArray.length; i++) {
+            var iface = networkIfaceArray[i];
+            if (iface.name.substring(0, 5) === 'rmnet') {
+              console.log('User Connected to cellular network.');
+              isConnectedToCellular = true;
+              break;
+            }
+          }
+        });
+        return isConnectedToCellular;
       }
     });
   }
@@ -202,10 +206,6 @@ class CordovaBrowserApi implements BrowserAPI {
       title: 'uProxy',  // Mandatory attribute
       message: text
     }, (tag:string) => {});
-
-    setTimeout(function() {
-      chrome.notifications.clear(tag, (wasCleared:boolean) => {});
-    }, 5000);
   }
 
   public setBadgeNotification = (notification:string) :void => {
