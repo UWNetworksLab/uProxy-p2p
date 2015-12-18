@@ -206,7 +206,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   }
 
   // TODO: this should take a SocialNetworkInfo instead of networkId
-  inviteUser = (data: { networkId: string; userName: string }): Promise<string> => {
+  inviteUser = (data: { networkId: string; userName: string }): Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.SEND_INVITATION, data);
   }
 

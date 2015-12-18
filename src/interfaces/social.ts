@@ -316,7 +316,7 @@ export interface Network {
   /**
    * Send an invite to a friend to use uProxy
    */
-  inviteUser: (optionalUserId :string) => Promise<string>;
+  inviteUser: (optionalUserId :string) => Promise<void>;
 
   /**
    * Generates an invite token

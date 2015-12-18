@@ -216,7 +216,7 @@ export function notifyUI(networkName :string, userId :string) {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
-    public inviteUser = (userName: string): Promise<string> => {
+    public inviteUser = (userName: string): Promise<void> => {
       throw new Error("Operation not implemented.");
     }
 
@@ -735,7 +735,7 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public inviteUser = (userName: string): Promise<string> => {
+    public inviteUser = (userName: string): Promise<void> => {
       return this.freedomApi_.inviteUser(userName).catch((e) => {
         log.error('Error calling inviteUser: ' + userName, e.message);
         return Promise.reject('Error calling inviteUser: ' + userName + e.message);

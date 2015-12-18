@@ -1045,7 +1045,6 @@ export class UserInterface implements ui_constants.UiApi {
       categorizeUser(user, this.model.contacts.shareAccessContacts,
           oldUserCategories.shareTab, newUserCategories.shareTab);
     }
-
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
