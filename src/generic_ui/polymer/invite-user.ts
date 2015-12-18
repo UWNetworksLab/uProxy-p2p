@@ -127,6 +127,19 @@ var inviteUser = {
       this.$.loginToInviteFriendDialog.open();
     }
   },
+  login: function(networkName :string, userName ?:string ) {
+    return ui.login(networkName, userName).then(() => {
+      if (networkName != 'Quiver') {
+        this.$.loginToInviteFriendDialog.close();
+        if (this.closeInviteUserPanel) {
+          this.closeInviteUserPanel();
+        }
+      }
+      ui.bringUproxyToFront();
+    }).catch((e: Error) => {
+      console.warn('Did not log in ', e);
+    });
+  },
   loginTapped: function() {
     this.login(this.selectedNetworkName).then(() => {
       this.initInviteForNetwork();
@@ -167,6 +180,12 @@ var inviteUser = {
   select: function(e :Event, d :Object, input :HTMLInputElement) {
     input.focus();
     input.select();
+  },
+  getNetworkDisplayName: function() {
+    return ui.getNetworkDisplayName.apply(this, arguments);
+  },
+  isExperimentalNetwork: function() {
+    return ui.isExperimentalNetwork.apply(this, arguments);
   },
   observe: {
     'model.networkNames': 'updateNetworkButtonNames',
