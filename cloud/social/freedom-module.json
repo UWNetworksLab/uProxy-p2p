@@ -59,7 +59,7 @@
       "inviteUser": {
         "type": "method",
         "value": ["string"],
-        "ret": "Object"
+        "ret": "object"
       },
 
       "acceptUserInvitation": {
