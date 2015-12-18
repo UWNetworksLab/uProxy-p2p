@@ -63,50 +63,50 @@
     <core-overlay id='networkInviteUserPanel'>
       <div hidden?="{{network !== 'GitHub'}}">
         <uproxy-app-bar class="GitHub" on-go-back='{{ closeInviteUserPanel }}' color="#666">
-          {{ 'INVITE_A_FRIEND' | $$ }}
+          {{ 'INVITE_A_FRIEND' | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
 
         <div class='section'>
-          <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
-          <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
+          <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
+          <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
             <input is='core-input' value='{{ userIdInput }}'>
           </paper-input-decorator>
           <uproxy-button class="GitHub" affirmative on-tap='{{ inviteGithubFriend }}'>
-            {{ 'SEND_INVITATION' | $$ }}
+            {{ 'SEND_INVITATION' | $$(model.globalSettings.language) }}
           </uproxy-button>
         </div>
       </div>
 
       <div hidden?="{{network !== 'GMail'}}">
         <uproxy-app-bar class="GMail" on-go-back='{{closeInviteUserPanel}}' color="#dd4b39">
-          {{ 'INVITE_A_FRIEND' | $$ }}
+          {{ 'INVITE_A_FRIEND' | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
 
         <div class='section'>
-          <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$ }}</p>
-          <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
+          <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
+          <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$(model.globalSettings.language) }}' layout vertical>
             <input is='core-input' value='{{ inviteUserEmail }}' />
           </paper-input-decorator>
 
           <uproxy-button class="GMail" raised affirmative on-tap='{{ sendToGMailFriend }}'>
-            {{ 'SEND_INVITATION' | $$ }}
+            {{ 'SEND_INVITATION' | $$(model.globalSettings.language) }}
           </uproxy-button>
         </div>
       </div>
 
       <div hidden?='{{ network != "Cloud"}}'>
         <uproxy-app-bar class="Cloud" on-go-back='{{closeInviteUserPanel}}' color="#0073e6">
-          {{ 'ADD_A_CLOUD_FRIEND' | $$ }}
+          {{ 'ADD_A_CLOUD_FRIEND' | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
 
         <!-- TODO: Discuss and decide if this should give users an invite code to share their cloud instance with friends, or if this should be a place for users to paste invite codes (therefore adding cloud instances to their buddy list). Right now, this is the latter. -->
         <div class='section'>
-          <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
-          <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>
+          <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
+          <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
             <input is='core-input' value='{{ cloudInstanceInput }}'>
           </paper-input-decorator>
           <uproxy-button class="Cloud" affirmative on-tap='{{ addCloudInstance }}'>
-            {{ 'DONE' | $$ }}
+            {{ 'DONE' | $$(model.globalSettings.language) }}
           </uproxy-button>
         </div>
       </div>

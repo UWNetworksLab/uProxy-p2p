@@ -48,12 +48,7 @@ Polymer({
     });
     return sanitizedMessage;
   },
-  ready: function() {
-    this.openingAnchor = '';
-    this.ui = ui_context.ui;
-    this.model = ui_context.model;
-  },
-  domReady: function() {
+  translateElements: function() {
     var textElements = document.querySelectorAll('html /deep/ .i18n');
     for (var i = 0; i < textElements.length; i++) {
       var element = <HTMLElement>(textElements[i]);
@@ -64,5 +59,16 @@ Polymer({
       }
       this.injectBoundHTML(i18nMessage, element);
     }
+  },
+  ready: function() {
+    this.openingAnchor = '';
+    this.ui = ui_context.ui;
+    this.model = ui_context.model;
+  },
+  domReady: function() {
+    this.translateElements();
+  },
+  observe: {
+    'model.globalSettings.language': 'translateElements'
   }
 });

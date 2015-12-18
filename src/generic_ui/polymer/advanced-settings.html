@@ -138,12 +138,12 @@
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
+          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
         <div id='analyzeNAT'>
           <p class='inputLabel'>
             <uproxy-link on-tap='{{ viewLogs }}'>
-              {{ "ANALYZE_NAT" | $$ }}
+              {{ "ANALYZE_NAT" | $$(model.globalSettings.language) }}
             </uproxy-link>
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
@@ -153,48 +153,48 @@
         <div id='portControlBox'>
 
           <p class='inputLabel'>
-            {{ 'PORT_CONTROL_TITLE' | $$ }}
+            {{ 'PORT_CONTROL_TITLE' | $$(model.globalSettings.language) }}
             <uproxy-faq-link anchor='whatIsPortControl'>
               <core-icon icon='help'></core-icon>
             </uproxy-faq-link>
           </p>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.TRUE }}'>
-            {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
+            {{ 'PORT_CONTROL_SUPPORTED' | $$(model.globalSettings.language) }}
           </span>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
-            {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
+            {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$(model.globalSettings.language) }}
           </span>
           <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.PENDING }}'>
-            {{ 'PORT_CONTROL_PENDING' | $$ }}
+            {{ 'PORT_CONTROL_PENDING' | $$(model.globalSettings.language) }}
           </span>
           <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
             <core-icon icon='refresh'></core-icon>
           </uproxy-link>
           <p class='label info' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
-            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
+            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$(model.globalSettings.language) }}
             <uproxy-faq-link anchor='whatIsPortControl'>
-              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$ }}
+              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$(model.globalSettings.language) }}
             </uproxy-faq-link>
           </p>
         </div>
         <div id='formContainer' flex vertical layout>
-          <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}' flex>
+          <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$(model.globalSettings.language) }}</p>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$(model.globalSettings.language) }}' flex>
             <textarea value='{{ settings }}' fit>
             </textarea>
           </paper-input-decorator>
           <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>
-            {{ "SETTINGS_SAVED" | $$ }}
+            {{ "SETTINGS_SAVED" | $$(model.globalSettings.language) }}
           </p>
           <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>
-            {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
+            {{ "SETTINGS_BAD_FORMAT_ERROR" | $$(model.globalSettings.language) }}
           </p>
           <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>
-            {{ "SETTINGS_JSON_ERROR" | $$ }}
+            {{ "SETTINGS_JSON_ERROR" | $$(model.globalSettings.language) }}
           </p>
         </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
-          {{ "SET" | $$ }}
+          {{ "SET" | $$(model.globalSettings.language) }}
         </div>
       </div>
     </core-overlay>

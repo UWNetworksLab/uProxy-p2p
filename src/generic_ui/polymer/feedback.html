@@ -149,19 +149,19 @@
     <core-overlay id='feedbackPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$ }}
+          {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
         <div id='formContainer' flex>
-          <p class='inputLabel'>{{ "EMAIL_TITLE" | $$ }}</p>
+          <p class='inputLabel'>{{ "EMAIL_TITLE" | $$(model.globalSettings.language) }}</p>
           <paper-input-decorator id='emailDecorator'
-              label='{{ "EMAIL_PLACEHOLDER" | $$ }}'>
+              label='{{ "EMAIL_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
             <input id="emailInput"
                    is="core-input"
                    value='{{ email }}'>
           </paper-input-decorator>
-          <p class='inputLabel'>{{ "FEEDBACK_TITLE" | $$ }}</p>
+          <p class='inputLabel'>{{ "FEEDBACK_TITLE" | $$(model.globalSettings.language) }}</p>
           <paper-input-decorator id='feedbackDecorator'
-              label='{{ "FEEDBACK_PLACEHOLDER" | $$ }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$ }}'>
+              label='{{ "FEEDBACK_PLACEHOLDER" | $$(model.globalSettings.language) }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
             <paper-autogrow-textarea id="feedbackPaperTextarea">
               <textarea id="feedbackInput"
                      value='{{ feedback }}'>
@@ -171,22 +171,22 @@
           <div id='logCheckboxContainer'>
             <paper-checkbox for id='logCheckbox'></paper-checkbox>
             <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
-              {{ "NETWORK_AND_LOGS" | $$ }}
+              {{ "NETWORK_AND_LOGS" | $$(model.globalSettings.language) }}
             </span>
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>
           </div>
           <p id='moreInfo'>
-            {{ "P_I_I_MESSAGE" | $$ }}
+            {{ "P_I_I_MESSAGE" | $$(model.globalSettings.language) }}
           </p>
         </div> <!-- end of form container -->
-        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>{{ "SUBMIT_FEEDBACK" | $$ }}</div>
+        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>{{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}</div>
       </div>
     </core-overlay>
     <uproxy-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
       <div id="SENDING_FEEDBACK">
-        {{ "SENDING_FEEDBACK" | $$ }}<br>
+        {{ "SENDING_FEEDBACK" | $$(model.globalSettings.language) }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
     </uproxy-action-dialog>

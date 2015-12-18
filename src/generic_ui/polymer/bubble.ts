@@ -122,5 +122,8 @@ Polymer({
     } else {
       this.setAttribute('hidden', '');
     }
+  },
+  ready: function() {
+    this.model = ui_context.model;
   }
 });

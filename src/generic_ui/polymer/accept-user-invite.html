@@ -38,24 +38,24 @@
 
     <core-overlay id='acceptUserInvitePanel'>
       <uproxy-app-bar on-go-back='{{ closeAcceptUserInvitePanel }}'>
-        {{ "ENTER_INVITATION" | $$ }}
+        {{ "ENTER_INVITATION" | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='section'>
-        <p>{{ "ENTER_INVITATION_DESCRIPTION" | $$ }}</p>
+        <p>{{ "ENTER_INVITATION_DESCRIPTION" | $$(model.globalSettings.language) }}</p>
 
         <div id='addFriend'>
-          <paper-input-decorator label="{{ 'ENTER_INVITATION' | $$ }}">
+          <paper-input-decorator label="{{ 'ENTER_INVITATION' | $$(model.globalSettings.language) }}">
             <input is='core-input' value='{{ receivedInviteToken }}'>
           </paper-input-decorator>
           <uproxy-button affirmative autofocus on-tap='{{ acceptInvitation }}'>
-            {{ 'SUBMIT_BUTTON_TEXT' | $$ }}
+            {{ 'SUBMIT_BUTTON_TEXT' | $$(model.globalSettings.language) }}
           </uproxy-button>
         </div>
       </div>
 
       <div class='section'>
-        <a on-tap='{{ showInviteUser }}'>{{ 'INVITE_LINK_FROM_ACCEPT_PAGE' | $$ }}</a>
+        <a on-tap='{{ showInviteUser }}'>{{ 'INVITE_LINK_FROM_ACCEPT_PAGE' | $$(model.globalSettings.language) }}</a>
       </div>
 
     </core-overlay>

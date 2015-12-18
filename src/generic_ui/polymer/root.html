@@ -308,39 +308,39 @@
           <div id='title' flex>uProxy</div>
 
           <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
-            <h3>{{ "CANNOT_OPEN_ONE_TIME_TITLE" | $$ }}</h3>
+            <h3>{{ "CANNOT_OPEN_ONE_TIME_TITLE" | $$(model.globalSettings.language) }}</h3>
             <p>
-              {{ "CANT_OPEN_ONE_TIME_MESSAGE" | $$ }}
+              {{ "CANT_OPEN_ONE_TIME_MESSAGE" | $$(model.globalSettings.language) }}
             </p>
           </uproxy-bubble>
 
-          <core-tooltip id='statsTooltip' label='{{ "STATS_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
+          <core-tooltip id='statsTooltip' label='{{ "STATS_ENABLED_TOOLTIP" | $$(model.globalSettings.language) }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
               hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
 
-          <core-tooltip label='{{ "SHARING_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
+          <core-tooltip label='{{ "SHARING_ENABLED_TOOLTIP" | $$(model.globalSettings.language) }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
               hidden?='{{ !isSharingEnabledWithOthers }}'
               on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && isSharingEnabledWithOthers }}'>
-            <h3>{{ "SHARING_ENABLED_TITLE" | $$ }}</h3>
-            <p>{{ "SHARING_ENABLED_MESSAGE" | $$ }}</p>
+            <h3>{{ "SHARING_ENABLED_TITLE" | $$(model.globalSettings.language) }}</h3>
+            <p>{{ "SHARING_ENABLED_MESSAGE" | $$(model.globalSettings.language) }}</p>
           </uproxy-bubble>
 
           <div class='bottom fit' dir="ltr">
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$ }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$(model.globalSettings.language) }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.getAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.getAccessContacts.pending.length }}
                 </span>
-              </paper-tab>
+              </paper-tab>ro
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ "SHARE_ACCESS" | $$ }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ "SHARE_ACCESS" | $$(model.globalSettings.language) }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.shareAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.shareAccessContacts.pending.length }}
@@ -357,7 +357,7 @@
         -->
         <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}' noclear="true">
           <p>
-            {{ "WELCOME_MESSAGE" | $$ }}
+            {{ "WELCOME_MESSAGE" | $$(model.globalSettings.language) }}
           </p>
         </uproxy-bubble>
 
@@ -402,9 +402,9 @@
               <div class='statusRow' hidden?='{{!ui.availableVersion}}'>
                 <div class='statusText' horizontal layout>
                   <span flex>
-                    {{ "UPDATE_AVAILABLE" | $$ }}
+                    {{ "UPDATE_AVAILABLE" | $$(model.globalSettings.language) }}
                   </span>
-                  <a href='#' on-tap='{{ restart }}'>{{ "RESTART_UPROXY_UPDATE" | $$ }}</a>
+                  <a href='#' on-tap='{{ restart }}'>{{ "RESTART_UPROXY_UPDATE" | $$(model.globalSettings.language) }}</a>
                 </div>
               </div>
             </div>
@@ -424,7 +424,7 @@
       <h1 id='dialogHeading'></h1>
       <p id='dialogMessage'></p>
       <div hidden?='{{ !dialog.userInputData }}'>
-        <paper-input-decorator label='{{ dialog.userInputData.placeholderText }}' layout vertical error="{{ 'REQUIRED_FIELD' | $$ }}" isInvalid='{{ isUserInputInvalid }}'>
+        <paper-input-decorator label='{{ dialog.userInputData.placeholderText }}' layout vertical error="{{ 'REQUIRED_FIELD' | $$(model.globalSettings.language) }}" isInvalid='{{ isUserInputInvalid }}'>
           <input id='dialogInput' is='core-input'/>
         </paper-input-decorator>
       </div>
@@ -442,22 +442,22 @@
         opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
-        <h1>{{ "DISCONNECTED_TITLE" | $$ }}</h1>
+        <h1>{{ "DISCONNECTED_TITLE" | $$(model.globalSettings.language) }}</h1>
         <div id='progressWrapper' hidden?='{{ !ui.mapInstanceIdToUser_[core.disconnectedWhileProxying] }}'>
           <div hidden?='{{ !ui.instanceTryingToGetAccessFrom }}'>
-            <strong>{{ 'RECONNECTING' | $$ }}</strong>
+            <strong>{{ 'RECONNECTING' | $$(model.globalSettings.language) }}</strong>
             <paper-progress indeterminate='true'></paper-progress>
           </div>
           <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}'>
-            <strong>{{ 'RECONNECT_FAILED' | $$ }}</strong>
-            <uproxy-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$ }}</uproxy-button>
+            <strong>{{ 'RECONNECT_FAILED' | $$(model.globalSettings.language) }}</strong>
+            <uproxy-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$(model.globalSettings.language) }}</uproxy-button>
           </div>
         </div>
         <p>
-          {{ "DISCONNECTED_MESSAGE" | $$ }}
+          {{ "DISCONNECTED_MESSAGE" | $$(model.globalSettings.language) }}
         </p>
       </div>
-      <uproxy-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$ }}</uproxy-button>
+      <uproxy-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$(model.globalSettings.language) }}</uproxy-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
@@ -469,7 +469,7 @@
         style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) + 10 }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !unableToShare && !unableToGet }}'>{{ "GET_HELP" | $$ }}
+          hidden?='{{ !unableToShare && !unableToGet }}'>{{ "GET_HELP" | $$(model.globalSettings.language) }}
       </div>
     </paper-toast>
 

@@ -20,9 +20,9 @@
       }
     </style>
     <div>
-      <h1>{{ "APP_MISSING_TITLE" | $$ }}</h1>
-      <div>{{ "APP_MISSING_MESSAGE" | $$ }}</div><br>
-      <paper-button class='highlightedButton' raised on-tap='{{ downloadApp }}'>{{ "NEXT" | $$ }}</paper-button>
+      <h1>{{ "APP_MISSING_TITLE" | $$(model.globalSettings.language) }}</h1>
+      <div>{{ "APP_MISSING_MESSAGE" | $$(model.globalSettings.language) }}</div><br>
+      <paper-button class='highlightedButton' raised on-tap='{{ downloadApp }}'>{{ "NEXT" | $$(model.globalSettings.language) }}</paper-button>
     </div>
 
   </template>

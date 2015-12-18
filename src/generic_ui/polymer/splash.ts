@@ -67,7 +67,6 @@ Polymer({
     if (detail.isSelected) {
       var newLanguage = detail.item.getAttribute('languageCode');
       ui.updateLanguage(newLanguage);
-      window.location.reload();
     }
   },
   loginToQuiver: function() {

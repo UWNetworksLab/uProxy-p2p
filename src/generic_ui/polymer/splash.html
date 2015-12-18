@@ -180,15 +180,15 @@
         <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
         <p>
-          {{ "ABOUT_UPROXY" | $$ }}
+          {{ "ABOUT_UPROXY" | $$(model.globalSettings.language) }}
         </p>
 
         <div id='nextWrapper'>
-          <uproxy-button raised on-tap='{{next}}'>{{ "NEXT" | $$ }}</uproxy-button>
+          <uproxy-button raised on-tap='{{next}}'>{{ "NEXT" | $$(model.globalSettings.language) }}</uproxy-button>
         </div>
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>
-          <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
+          <paper-dropdown-menu label='{{ "LANGUAGE" | $$(model.globalSettings.language) }}'>
             <paper-dropdown class="dropdown" valign="bottom">
                 <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
                     <template repeat='{{ l in languages }}'>
@@ -204,7 +204,7 @@
 
       <uproxy-faq-link anchor='whatIsUproxy'>
         <paper-button>
-          {{ "LEARN_MORE_UPROXY" | $$ }}
+          {{ "LEARN_MORE_UPROXY" | $$(model.globalSettings.language) }}
         </paper-button>
       </uproxy-faq-link>
 
@@ -212,20 +212,20 @@
 
     <div vertical layout id="metricsOptIn" hidden?='{{SPLASH_STATES.METRICS_OPT_IN!==model.globalSettings.splashState}}'>
       <div class="view" flex>
-        <h1>{{ "WELCOME" | $$ }}</h1>
+        <h1>{{ "WELCOME" | $$(model.globalSettings.language) }}</h1>
         <p>
-          {{ "BETA_MESSAGE" | $$ }}<br><br>
-          {{ "CHANGE_STATS_CHOICE" | $$ }}
+          {{ "BETA_MESSAGE" | $$(model.globalSettings.language) }}<br><br>
+          {{ "CHANGE_STATS_CHOICE" | $$(model.globalSettings.language) }}
         </p>
-        <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>
+        <p><b>{{ "ENABLE_METRICS" | $$(model.globalSettings.language) }}</b></p>
         <div id="metricsButtons">
-          <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
-          <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
+          <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$(model.globalSettings.language) }}</uproxy-button>
+          <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$(model.globalSettings.language) }}</uproxy-button>
         </div>
       </div>
       <uproxy-faq-link anchor='doesUproxyLogData'>
         <paper-button>
-          {{ "MORE_ABOUT_METRICS" | $$ }}
+          {{ "MORE_ABOUT_METRICS" | $$(model.globalSettings.language) }}
         </paper-button>
       </uproxy-faq-link>
     </div>
@@ -256,40 +256,40 @@
           <div class='orText'>- - - OR - - -</div>
           <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}'>
             <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
-            <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
+            <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$(model.globalSettings.language) }}</div>
           </div>
 
           <p>
-            {{ "WE_WONT_POST" | $$ }}
+            {{ "WE_WONT_POST" | $$(model.globalSettings.language) }}
           </p>
 
           <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-            {{ "SUBMIT_FEEDBACK" | $$ }}
+            {{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}
           </span>
         </div>
 
         <!-- TODO: remove this and uproxy-network template once Quiver
         support is on the webstore -->
         <div hidden?='{{supportsQuiver}}'>
-          <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$ }}</h1>
-          <p>{{ "WHY_SOCIAL_NETWORK" | $$ }}</p>
+          <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$(model.globalSettings.language) }}</h1>
+          <p>{{ "WHY_SOCIAL_NETWORK" | $$(model.globalSettings.language) }}</p>
           <template repeat='{{ n in networkButtonNames }}' vertical layout>
             <uproxy-network networkName='{{n}}' hidden?="{{n=='Cloud' && !model.globalSettings.showCloud && !ui.showRosterBeforeLogin}}"></uproxy-network>
           </template>
           <p id='oneTimeConnection'>
-            <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$ }}</a>
+            <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$(model.globalSettings.language) }}</a>
           </p>
           <p>
-            {{ "WE_WONT_POST" | $$ }}
+            {{ "WE_WONT_POST" | $$(model.globalSettings.language) }}
           </p>
           <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-            {{ "SUBMIT_FEEDBACK" | $$ }}
+            {{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}
           </span>
         </div>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
         <paper-button>
-          {{ "LEARN_MORE_SOCIAL" | $$ }}
+          {{ "LEARN_MORE_SOCIAL" | $$(model.globalSettings.language) }}
         </paper-button>
       </uproxy-faq-link>
     </div>
