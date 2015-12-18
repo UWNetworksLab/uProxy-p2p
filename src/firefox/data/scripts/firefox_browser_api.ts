@@ -73,7 +73,7 @@ class FirefoxBrowserApi implements BrowserAPI {
   }
 
   public isConnectedToCellular = (): Promise<boolean> => {
-    return new Promise<boolean>(false);
+    return new Promise<boolean>(() => { return false;});
   }
 
   public on = (name :string, callback :Function) => {

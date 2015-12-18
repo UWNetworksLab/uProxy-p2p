@@ -213,7 +213,7 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public isConnectedToCellular = (): Promise<boolean> => {
-    return new Promise<boolean>(false);
+    return new Promise<boolean>(() => { return false; });
   }
 
   private events_ :{[name :string] :Function} = {};
