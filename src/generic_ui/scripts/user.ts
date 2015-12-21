@@ -5,6 +5,7 @@
  */
 /// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
+import model = require('./model');
 import social = require('../../interfaces/social');
 import user_interface = require('./ui');
 import translator_module = require('./translator');
@@ -59,7 +60,7 @@ export class User implements social.BaseUser {
   /**
    * Initialize the user to an 'empty' default.
    */
-  constructor(public userId :string, public network :user_interface.Network,
+  constructor(public userId :string, public network :model.Network,
       private ui_ :user_interface.UserInterface) {
     console.log('new user: ' + this.userId);
     this.name = '';

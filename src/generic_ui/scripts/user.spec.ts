@@ -1,5 +1,6 @@
 /// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import model = require('./model');
 import user_interface = require('./ui');
 import translator = require('./translator');
 import user = require('./user');
@@ -13,8 +14,8 @@ describe('UI.User', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     ui = jasmine.createSpyObj<user_interface.UserInterface>('UserInterface', ['showNotification']);
-    var testNetwork :user_interface.Network = {name: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
-    ui.model = new user_interface.Model();
+    var testNetwork :model.Network = {name: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
+    ui.model = new model.Model();
     ui.model.onlineNetworks = [testNetwork];
     ui.i18n_t = translator.i18n_t;
 
