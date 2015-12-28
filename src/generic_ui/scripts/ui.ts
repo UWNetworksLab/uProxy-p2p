@@ -405,10 +405,14 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private notifyUserIfConnectedToCellular_ = () => {
-    if (this.browserApi.isConnectedToCellular) {
-      this.showNotification('Your friend is proxying through your cellular network which could'
-        + ' incur charges.');
+    this.browserApi.isConnectedToCellular().then((isConnectedToCellular) => {
+      if (isConnectedToCellular) {
+        this.showNotification('Your friend is proxying through your cellular network which could'
+          + ' incur charges.');
       }
+    }, function(reason) {
+      console.log('Could not check if connected to cellular or not. reason: ' + reason);
+    });
   }
 
   // Because of an observer (in root.ts) watching the value of
