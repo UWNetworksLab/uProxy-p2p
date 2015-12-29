@@ -219,6 +219,9 @@ export class UserInterface implements ui_constants.UiApi {
   // TODO: Remove this when we switch completely to a roster-before-login flow.
   public showRosterBeforeLogin:boolean = false;
 
+  // Please note that this value is updated periodically so may not reflect current reality.
+  private isConnectedToCellular_: boolean = false;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -406,10 +409,11 @@ export class UserInterface implements ui_constants.UiApi {
 
   private notifyUserIfConnectedToCellular_ = () => {
     this.browserApi.isConnectedToCellular().then((isConnectedToCellular) => {
-      if (isConnectedToCellular) {
+      if (isConnectedToCellular && !this.isConnectedToCellular_) {
         this.showNotification('Your friend is proxying through your cellular network which could'
           + ' incur charges.');
       }
+      this.isConnectedToCellular_ = isConnectedToCellular;
     }, function(reason) {
       console.log('Could not check if connected to cellular or not. reason: ' + reason);
     });
