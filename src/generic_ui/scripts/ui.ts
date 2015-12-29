@@ -220,7 +220,7 @@ export class UserInterface implements ui_constants.UiApi {
   public showRosterBeforeLogin:boolean = false;
 
   // Please note that this value is updated periodically so may not reflect current reality.
-  private isConnectedToCellular_: boolean = false;
+  private isConnectedToCellular_ :boolean = false;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -344,9 +344,10 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
-      if (checkConnectivityIntervalId !== -1) {
+      if (checkConnectivityIntervalId !== -1 && Object.keys(this.instancesGivingAccessTo).length === 0) {
         clearInterval(checkConnectivityIntervalId);
         checkConnectivityIntervalId = -1;
+        this.isConnectedToCellular_ = false;
       }
     });
 
