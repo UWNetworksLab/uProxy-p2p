@@ -269,7 +269,8 @@ export function notifyUI(networkName :string, userId :string) {
     public getKeyFromClientId = (clientId :string) : string => {
       var beginPgpString = '-----BEGIN PGP PUBLIC KEY BLOCK-----';
       var endPgpString = '-----END PGP PUBLIC KEY BLOCK-----\r\n';
-      return clientId.match(beginPgpString + '(.|[\r\n])*' + endPgpString)[0];
+      var start = clientId.lastIndexOf(beginPgpString);
+      return clientId.slice(start).match(beginPgpString + '(.|[\r\n])*' + endPgpString)[0];
     }
 
   }  // class AbstractNetwork

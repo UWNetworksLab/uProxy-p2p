@@ -56,6 +56,23 @@ class CordovaBrowserApi implements BrowserAPI {
     });
   }
 
+  public isConnectedToCellular = () : Promise<boolean> => {
+    return new Promise<boolean>((F, R) => {
+        var isConnectedToCellular = false;
+        chrome.system.network.getNetworkInterfaces((networkIfaceArray) => {
+          for (var i = 0; i < networkIfaceArray.length; i++) {
+            var iface = networkIfaceArray[i];
+            if (iface.name.substring(0, 5) === 'rmnet') {
+              console.log('User Connected to cellular network.');
+              isConnectedToCellular = true;
+              break;
+            }
+          }
+          F(isConnectedToCellular);
+        });
+      });
+  }
+
   public startUsingProxy = (endpoint:net.Endpoint) => {
     if (!chrome.proxy) {
       console.log('No proxy setting support; ignoring start command');
@@ -188,10 +205,6 @@ class CordovaBrowserApi implements BrowserAPI {
       title: 'uProxy',  // Mandatory attribute
       message: text
     }, (tag:string) => {});
-
-    setTimeout(function() {
-      chrome.notifications.clear(tag, (wasCleared:boolean) => {});
-    }, 5000);
   }
 
   public setBadgeNotification = (notification:string) :void => {

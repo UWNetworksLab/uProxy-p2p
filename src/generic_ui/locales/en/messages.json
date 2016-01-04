@@ -1127,7 +1127,7 @@
   },
   "GITHUB_LOGIN_CONFIRMATION": {
     "description": "Confirmation message the user sees prior to logging into GitHub",
-    "message": "uProxy can use Github, a developer tool, to help you connect with your friends.<br><br>Because it may be possible for others to tell which Github accounts are using uProxy, <strong>we recommend you create a new anonymous Github account</strong>, even if you already use Github.  <strong>You will need to verify your email with GitHub before you connect.</strong>"
+    "message": "uProxy can use GitHub, a developer tool, to help you connect with your friends.<br><br>Because it may be possible for others to tell which GitHub accounts are using uProxy, <strong>we recommend you create a new anonymous GitHub account</strong>, even if you already use GitHub.  <strong>You will need to verify your email with GitHub before you connect.</strong>"
   },
    "CLOUD_SHARE_INSTRUCTIONS": {
     "description": "Message shown below each Cloud friend in the Share tab to let users know how they can allow their friends to proxy through their Cloud instance.",

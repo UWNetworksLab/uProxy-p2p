@@ -98,6 +98,7 @@ describe('uproxy core', function() {
         stunServers: <any>[],
         hasSeenSharingEnabledScreen: true,
         hasSeenWelcome: false,
+        hasSeenMetrics: false,
         allowNonUnicast: true,
         statsReportingEnabled: false
       };

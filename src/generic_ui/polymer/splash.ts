@@ -8,6 +8,8 @@
 declare var require :(path :string) => Object;
 
 import ui_constants = require('../../interfaces/ui');
+import loginCommon = require('./login-common');
+import _ = require('lodash');
 
 interface Language {
   description :string;
@@ -20,7 +22,7 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
-Polymer({
+var splash = {
   SPLASH_STATES: {
     INTRO: 0,
     METRICS_OPT_IN: 1,
@@ -40,7 +42,7 @@ Polymer({
     if (this.supportsQuiver && model.globalSettings.splashState
         == this.SPLASH_STATES.METRICS_OPT_IN) {
       ui.view = ui_constants.View.ROSTER;
-    } else if (model.globalSettings.hasSeenWelcome &&
+    } else if (model.globalSettings.hasSeenMetrics &&
         model.globalSettings.splashState == this.SPLASH_STATES.INTRO) {
         // Skip metrics opt-in if we've seen it before.
         this.setState(this.SPLASH_STATES.NETWORKS);
@@ -49,16 +51,13 @@ Polymer({
     }
   },
   prev: function() {
-    if (model.globalSettings.hasSeenWelcome &&
+    if (model.globalSettings.hasSeenMetrics &&
         model.globalSettings.splashState == this.SPLASH_STATES.NETWORKS) {
         // Skip metrics opt-in if we've seen it before.
         this.setState(this.SPLASH_STATES.INTRO);
     } else {
       this.setState(model.globalSettings.splashState - 1);
     }
-  },
-  copypaste: function() {
-    this.fire('core-signal', { name: 'copypaste-init' });
   },
   openFeedbackForm: function() {
     this.fire('core-signal', {name: 'open-feedback'});
@@ -70,55 +69,20 @@ Polymer({
       window.location.reload();
     }
   },
-  loginToQuiver: function() {
-    model.globalSettings.quiverUserName = this.userName;
+  updateSeenMetrics: function(val :Boolean) {
+    model.globalSettings.hasSeenMetrics = true;
+    model.globalSettings.statsReportingEnabled = val;
     core.updateGlobalSettings(model.globalSettings);
-    this.login('Quiver', this.userName);
-  },
-  loginTapped: function(event: Event, detail: Object, target: HTMLElement) {
-    var networkName = target.getAttribute('data-network');
-    this.login(networkName);
-  },
-  login: function(networkName :string, userName ?:string) {
-    ui.login(networkName, userName).then(() => {
-      // syncNetwork will update the view to the ROSTER.
-      ui.bringUproxyToFront();
-    }).catch((e: Error) => {
-      console.warn('Did not log in ', e);
-    });
-  },
-  getNetworkDisplayName: function(name :string) {
-    return ui.getNetworkDisplayName(name);
-  },
-  isExperimentalNetwork: function(name :string) {
-    return ui.isExperimentalNetwork(name);
-  },
-  updateNetworkButtonNames: function() {
-    var supportsQuiver = false;
-    this.networkButtonNames = [];
-    for (var i = 0; i < model.networkNames.length; ++i) {
-      if (model.networkNames[i] === 'Quiver') {
-        supportsQuiver = true;
-      } else {
-        this.networkButtonNames.push(model.networkNames[i]);
-      }
-    }
-    // Only set .supportsQuiver after iterating through all networks, to prevent
-    // any flicker in case we switch from true to false to true again.
-    this.supportsQuiver = supportsQuiver;
+    this.next();
   },
   enableStats: function() {
-    model.globalSettings.statsReportingEnabled = true;
-    core.updateGlobalSettings(model.globalSettings);
-    this.next();
+    return this.updateSeenMetrics(true);
   },
   disableStats: function() {
-    model.globalSettings.statsReportingEnabled = false;
-    core.updateGlobalSettings(model.globalSettings);
-    this.next();
+    return this.updateSeenMetrics(false);
   },
   observe: {
-    'model.networkNames': 'updateNetworkButtonNames'
+    'model.networkNames': 'updateNetworkButtonNames',
   },
   ready: function() {
     this.ui = ui;
@@ -127,4 +91,7 @@ Polymer({
     this.userName = model.globalSettings.quiverUserName;
     this.updateNetworkButtonNames();
   },
-});
+};
+
+(<any>_.mixin)(splash, loginCommon);
+Polymer(splash);
