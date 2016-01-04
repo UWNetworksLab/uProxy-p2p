@@ -48,6 +48,25 @@ then
   usage
 fi
 
+# Set the cloud instance's banner.
+# In descending order of preference:
+#  - command-line option
+#  - pull from existing container
+#  - server's hostname
+if [ -z "$BANNER" ]
+then
+  if docker ps -a | grep uproxy-sshd >/dev/null
+  then
+    if [ `docker inspect --format='{{ .State.Status }}' uproxy-sshd` != "running" ]
+    then
+      docker start uproxy-sshd > /dev/null
+    fi
+    BANNER=`docker exec uproxy-sshd cat /banner`
+  else
+    BANNER=`hostname`
+  fi
+fi
+
 if [ $REFRESH = true ]
 then
   docker rm -f uproxy-sshd || true
