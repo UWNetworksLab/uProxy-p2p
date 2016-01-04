@@ -8,7 +8,7 @@ import logging = require('../logging/logging');
 // We keep this running on Amazon EC2 and the source
 // may be found here:
 //   https://github.com/uProxy/uproxy-probe/blob/master/python-src/probe-server.py
-var TEST_SERVER = '54.68.73.184';
+var TEST_SERVER = '52.34.126.245';
 var TEST_PORT = 6666;
 
 var log :logging.Log = new logging.Log('probe');
