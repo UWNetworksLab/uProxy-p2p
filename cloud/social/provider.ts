@@ -58,12 +58,17 @@ interface SavedContact {
   description?: string;
 }
 
-var UserStatus = {
-  FRIEND: 0,
-  INVITED_BY_USER: 1,
-  USER_INVITED: 2,
-  CLOUD_INSTANCE_CREATED_BY_LOCAL: 3,
-  CLOUD_INSTANCE_SHARED_WITH_LOCAL: 4
+// State of remote user's relationship to local user.
+// Defined in github.com/uProxy/uproxy/blob/dev/src/interfaces/social.ts
+//
+// For cloud instances, only CLOUD_INSTANCE_CREATED_BY_LOCAL or
+// CLOUD_INSTANCE_SHARED_WITH_LOCAL are possible statuses.
+enum UserStatus {
+  FRIEND = 0,
+  LOCAL_INVITED_BY_REMOTE = 1,
+  REMOTE_INVITED_BY_LOCAL = 2,
+  CLOUD_INSTANCE_CREATED_BY_LOCAL = 3,
+  CLOUD_INSTANCE_SHARED_WITH_LOCAL = 4
 }
 
 // Returns a VersionedPeerMessage, as defined in interfaces/social.ts
