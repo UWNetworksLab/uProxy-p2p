@@ -267,15 +267,8 @@ export class Rule {
    * getTests('src', undefined, ['integration-tests']);
    *   Lists all the tests under src/ ignoring anything named integration-tests
    */
-  public getTests(rootDir :string, current?:string, ignore?:string[]) {
+  public getTests(rootDir :string, current :string = '', ignore :string[] = []) {
     var tests :string[] = [];
-    if (typeof current === 'undefined') {
-      current = '';
-    }
-
-    if (typeof ignore === 'undefined') {
-      ignore = [];
-    }
 
     var files = fs.readdirSync(path.join(rootDir, current));
     for (var f in files) {
