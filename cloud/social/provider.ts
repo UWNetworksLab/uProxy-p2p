@@ -345,14 +345,15 @@ export class CloudSocialProvider {
   // TODO: typings for invite codes
   public inviteUser = (clientId: string): Promise<Object> => {
     log.debug('inviteUser');
-    if (!(clientId in this.clients_)) {
-      return Promise.reject(new Error('unknown client ' + clientId));
+    if (!(clientId in this.savedContacts_)) {
+      return Promise.reject(new Error('unknown cloud instance ' + clientId));
     }
     if (this.savedContacts_[clientId].invite.user !== ADMIN_USERNAME) {
       return Promise.reject(new Error('user is logged in as non-admin user ' +
           this.savedContacts_[clientId].invite.user));
     }
-    return this.clients_[clientId].then((connection: Connection) => {
+    return this.reconnect_(this.savedContacts_[clientId].invite).then(
+        (connection: Connection) => {
       return connection.issueInvite();
     });
   }
