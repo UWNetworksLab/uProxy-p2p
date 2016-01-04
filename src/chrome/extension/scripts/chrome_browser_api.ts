@@ -212,6 +212,10 @@ class ChromeBrowserApi implements BrowserAPI {
     }, 5000);
   }
 
+  public isConnectedToCellular = (): Promise<boolean> => {
+    return Promise.resolve(false);
+  }
+
   private events_ :{[name :string] :Function} = {};
 
   public on = (name :string, callback :Function) => {

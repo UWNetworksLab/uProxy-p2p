@@ -219,6 +219,9 @@ export class UserInterface implements ui_constants.UiApi {
   // TODO: Remove this when we switch completely to a roster-before-login flow.
   public showRosterBeforeLogin:boolean = false;
 
+  // Please note that this value is updated periodically so may not reflect current reality.
+  private isConnectedToCellular_ :boolean = false;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -296,6 +299,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.stoppedGetting(data);
     });
 
+    var checkConnectivityIntervalId = -1;
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
         (instanceId :string) => {
       // TODO (lucyhe): Update instancesGivingAccessTo before calling
@@ -310,6 +314,9 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = true;
       this.showNotification(this.i18n_t("STARTED_PROXYING",
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
+      checkConnectivityIntervalId = setInterval(
+          this.notifyUserIfConnectedToCellular_,
+          5 * 60 * 1000);
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND,
@@ -337,6 +344,11 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
+      if (checkConnectivityIntervalId !== -1 && Object.keys(this.instancesGivingAccessTo).length === 0) {
+        clearInterval(checkConnectivityIntervalId);
+        checkConnectivityIntervalId = -1;
+        this.isConnectedToCellular_ = false;
+      }
     });
 
     core.onUpdate(uproxy_core_api.Update.FAILED_TO_GIVE,
@@ -394,6 +406,18 @@ export class UserInterface implements ui_constants.UiApi {
     core.getFullState()
         .then(this.updateInitialState)
         .then(this.browserApi.handlePopupLaunch);
+  }
+
+  private notifyUserIfConnectedToCellular_ = () => {
+    this.browserApi.isConnectedToCellular().then((isConnectedToCellular) => {
+      if (isConnectedToCellular && !this.isConnectedToCellular_) {
+        this.showNotification('Your friend is proxying through your cellular network which could'
+          + ' incur charges.');
+      }
+      this.isConnectedToCellular_ = isConnectedToCellular;
+    }, function(reason) {
+      console.log('Could not check if connected to cellular or not. reason: ' + reason);
+    });
   }
 
   // Because of an observer (in root.ts) watching the value of
