@@ -301,7 +301,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
+  public inviteUser = (data: {networkId: string; userName: string}): Promise<string> => {
     // TODO: clean this up - hack to find the one network
     var network: social.Network;
     for (var userId in social_network.networks[data.networkId]) {
