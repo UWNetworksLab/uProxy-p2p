@@ -124,7 +124,7 @@ function makeUserProfile(
     address: string,
     username :string): freedom.Social.UserProfile {
   var status = UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
-  if (username == ADMIN_USERNAME) {
+  if (username === ADMIN_USERNAME) {
     status = UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL;
   }
   return {
