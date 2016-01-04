@@ -16,7 +16,7 @@
         width: 100%;
         background-color: white;
       }
-      #inviteUserPanel uproxy-button {
+      #oldControls uproxy-button {
         width: 200px;
         margin: 0;
         padding-left: 1em;
@@ -31,6 +31,15 @@
         padding-top: 1em;
         padding-bottom: 1em;
         line-height: 20px;
+      }
+      .acceptInvite {
+        text-align: left;
+        padding: 26px;
+        border-bottom: 1px solid rgb(221, 221, 221);
+      }
+      .acceptInvite paper-input-decorator {
+        padding-top: 0;
+        padding-bottom: 18px;
       }
       a {
         cursor: pointer;
@@ -70,27 +79,14 @@
         color: rgb(180,180,180);
         cursor: pointer;
       }
-      #QuiverLoginButton {
-        width: 200px;
-        margin-top: 1em;
-        margin-bottom: 1em;
-      }
-      .QuiverTitle {
-        font-size: 1.4em;
-        color: #009688;
-        font-weight: normal;
-        margin: 1em 1em 0em 1em;
-      }
-      .orText {
-        font-size: 26px;
-        margin-top: 0.5em;
-        font-style: italic;
+      #acceptInviteButton {
+        padding-left: 1em;
+        padding-right: 1em;
       }
       .networkLoginButton {
         display: inline-block;
-        width: 120px;
-        margin-top: 0.5em;
-        margin-bottom: 1em;
+        width: 102px;
+        margin-bottom: 26px;
         cursor: pointer;
         vertical-align: top;
       }
@@ -102,11 +98,7 @@
         height: 75px;
       }
       .networkLoginButton .experimental {
-        color: red;
         font-size: 12px;
-      }
-      .networkLoginButton.copypaste {
-        margin-top: 2em;
       }
       uproxy-button.login {
         margin: 15px 0px;
@@ -141,68 +133,77 @@
       uproxy-dialog {
         padding: 5px;
       }
+      /* uproxy-faq-link is used in the translation for weWontPostLearnMore */
+      uproxy-faq-link {
+        font-weight: bold;
+      }
+      /* underline is not applied unless we do this hack.  TODO: find out why */
+      uproxy-faq-link::shadow span {
+        text-decoration: underline;
+        color: rgb(112, 112, 112);
+      }
+      .highlightedText {
+        color: #009688;
+      }
+      #chooseASocialNetwork {
+        font-size: 14px;
+        margin: 26px;
+      }
+      #weWontPostLearnMore {
+        font-size: 14px;
+        padding-left: 26px;
+        padding-right: 26px;
+        padding-bottom: 26px;
+        color: #999;
+      }
     </style>
 
     <core-signals on-core-signal-open-invite-user-dialog='{{ openInviteUserPanel }}'></core-signals>
 
     <core-overlay id='inviteUserPanel'>
       <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-        {{ 'INVITE_A_FRIEND' | $$ }}
+        {{ 'CONNECT_WITH_A_FRIEND' | $$ }}
       </uproxy-app-bar>
 
       <div class='view' flex>
         <!-- TODO: translate before launch on webstore -->
         <div id="allInviteMethods" hidden?='{{!ui.showRosterBeforeLogin}}'>
-          <div hidden?="{{!supportsQuiver}}">
-            <div hidden?='{{isQuiverLoggedIn}}' class='section'>
-              <h1 class='QuiverTitle'>Sign in to the uProxy network</h1>
-              <paper-input-decorator label='Choose a user name' layout vertical>
-                <input is='core-input' value='{{ userName }}' />
+          <div hidden?="{{!ui.showRosterBeforeLogin}}">
+            <div class='acceptInvite'>
+              <paper-input-decorator id='inviteCodeDecorator' label='Have an invitation code?  Enter it here' layout vertical>
+                <input is='core-input' value='{{ inviteCode }}' />
               </paper-input-decorator>
-              <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
+              <uproxy-button id='acceptInviteButton' raised on-tap='{{ acceptInvite }}'>Submit</uproxy-button>
             </div>
-            <div hidden?='{{!isQuiverLoggedIn}}' class='section'>
-              <!-- TODO: localization -->
-              <h1 class='QuiverTitle'>Send this link to your friends so they can find you on uProxy</h1>
-              <div hidden?='{{ quiverInviteUrl == "" }}'>
-                <paper-input-decorator layout vertical>
-                  <input readonly is='core-input' on-tap='{{ select }}' value='{{ quiverInviteUrl }}' />
-                </paper-input-decorator>
-              </div>
-            </div>
-            <div class='orText'>- - - OR - - -</div>
           </div>
-          <div class='section'>
-          <p>{{ "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK" | $$ }}</p>
-            <template repeat='{{ n in networkButtonNames }}' vertical layout>
+
+          <p id='chooseASocialNetwork' class='highlightedText'>{{ "CHOOSE_A_SOCIAL_NETWORK_AND_FIND_YOUR_FRIENDS" | $$ }}</p>
+
+          <div>
+            <template repeat='{{ n in model.networkNames }}' vertical layout>
               <div on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
                 <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
-                <div class='experimental' hidden?='{{!isExperimentalNetwork(n)}}'>
+                <div class='experimental highlightedText' hidden?='{{!isExperimentalNetwork(n)}}'>
                   Experimental
                 </div>
               </div>
             </template>
 
-            <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}' class='section'>
+            <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}'>
               <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
               <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
             </div>
-
-            <div class="section">
-              {{ "WE_WONT_POST" | $$ }}
-            </div>
           </div>
 
-          <div class="section">
-            {{ "HAVE_AN_INVITE_CODE" | $$ }}<br>
-            <a on-tap="{{showAcceptUserInvite}}">{{ "ENTER_IT_HERE" | $$ }}</a>
-          </div>
+          <div id="weWontPostLearnMore"></div>
         </div> <!--End of roster-before-login view-->
+
+
 
         <!-- TODO: remove this and uproxy-network template once Quiver
         support is on the webstore -->
-        <div hidden?='{{ui.showRosterBeforeLogin}}'>
+        <div hidden?='{{ui.showRosterBeforeLogin}}' id='oldControls'>
           <div hidden?='{{ onlineInviteNetworks.length <= 1}}' class='section'>
             <p>{{ 'HOW_TO_INVITE_FRIENDS' | $$ }}</p>
             <paper-dropdown-menu>

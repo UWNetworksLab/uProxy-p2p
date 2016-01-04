@@ -1347,7 +1347,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public i18nSanitizeHtml = (i18nMessage :string) => {
     // Remove all HTML other than supported tags like strong, a, p, etc.
-    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br)))[^>]+)>/g, '');
+    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 } // class UserInterface
 

@@ -33,3 +33,7 @@ body /deep/ paper-input-decorator input[is="core-input"] {
   margin: 0.5em 0 0.25em;
   width: 100%;
 }
+
+body /deep/ uproxy-action-dialog::shadow #actions {
+  padding: 24px;
+}

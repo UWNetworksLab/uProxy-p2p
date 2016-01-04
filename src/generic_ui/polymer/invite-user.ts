@@ -65,9 +65,15 @@ var inviteUser = {
     this.$.networkSelectMenu.selectIndex(0);
 
     // Reset the input, expectation is for it to be empty
-    this.userName = model.globalSettings.quiverUserName;
     this.inviteUserEmail = '';
     this.githubUserIdInput = '';
+    this.inviteCode = '';
+    // Forces the placeholder text to be visible again.
+    this.$.inviteCodeDecorator.updateLabelVisibility(this.inviteCode);
+
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('WE_WONT_POST_LEARN_MORE')),
+        this.$.weWontPostLearnMore);
 
     this.$.inviteUserPanel.open();
   },
@@ -88,31 +94,6 @@ var inviteUser = {
       });
     }
   },
-  /* Functions required for roster-before-login flow. */
-  onlineNetworksChanged: function() {
-    for (var i = 0; i < model.onlineNetworks.length; ++i) {
-      if (model.onlineNetworks[i].name === 'Quiver') {
-        // User is logged into Quiver.
-        if (!this.isQuiverLoggedIn) {
-          // User just logged on, generate an invite URL.
-          this.generateInviteUrl('Quiver').then((inviteUrl :string) => {
-            this.quiverInviteUrl = inviteUrl;
-          });
-        }
-        this.isQuiverLoggedIn = true;
-        return;
-      }
-    }
-
-    // User is not logged into Quiver
-    this.quiverInviteUrl = '';
-    this.isQuiverLoggedIn = false;
-  },
-  loginToQuiver: function() {
-    model.globalSettings.quiverUserName = this.userName;
-    core.updateGlobalSettings(model.globalSettings);
-    this.login('Quiver', this.userName);
-  },
   networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
     this.selectedNetworkName = networkName;
@@ -123,17 +104,28 @@ var inviteUser = {
     if (model.getNetwork(networkName)) {
       this.initInviteForNetwork(networkName);
     } else {
-      // Open dialog asking user to login before inviting friends.
-      this.$.loginToInviteFriendDialog.open();
+      if (networkName === 'Quiver') {
+        // TODO: set a message explaining Quiver
+        return ui.loginToQuiver().then(() => {
+          this.initInviteForNetwork();
+        });
+      } else {
+        // Open dialog asking user to login before inviting friends.
+        this.$.loginToInviteFriendDialog.open();
+      }
     }
   },
-  login: function(networkName :string, userName ?:string ) {
-    return ui.login(networkName, userName).then(() => {
-      if (networkName != 'Quiver') {
-        this.$.loginToInviteFriendDialog.close();
-        if (this.closeInviteUserPanel) {
-          this.closeInviteUserPanel();
-        }
+  login: function(networkName :string) {
+    // login should only be called by the loginToInviteFriendDialog, which
+    // is not used for Quiver.
+    if (networkName === 'Quiver') {
+      throw Error('invite-user.ts: login called for Quiver');
+    }
+
+    return ui.login(networkName).then(() => {
+      this.$.loginToInviteFriendDialog.close();
+      if (this.closeInviteUserPanel) {
+        this.closeInviteUserPanel();
       }
       ui.bringUproxyToFront();
     }).catch((e: Error) => {
@@ -141,13 +133,19 @@ var inviteUser = {
     });
   },
   loginTapped: function() {
+    // loginTapped should only be called by the loginToInviteFriendDialog, which
+    // is not used for Quiver.
+    if (this.selectedNetworkName === 'Quiver') {
+      throw Error('invite-user.ts: loginTapped called for Quiver');
+    }
+
     this.login(this.selectedNetworkName).then(() => {
       this.initInviteForNetwork();
     });
   },
   initInviteForNetwork: function(networkName: string) {
     this.selectedNetworkName = networkName;
-    if (networkName == "GMail" || networkName == "GitHub" || networkName == "Cloud") {
+    if (['GMail', 'GitHub', 'Cloud', 'Quiver'].indexOf(networkName) >= 0) {
       // After login for these networks, open another view which allows users
       // to invite their friends.
       this.fire('core-signal', { name: 'open-network-invite-dialog' });
@@ -187,21 +185,25 @@ var inviteUser = {
     input.focus();
     input.select();
   },
+  acceptInvite: function() {
+    ui.handleInvite(this.inviteCode).then(() => {
+      this.closeInviteUserPanel();
+      ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
+    }).catch(() => {
+      ui.showDialog('', ui.i18n_t('FRIEND_ADD_ERROR'));
+    });
+  },
   observe: {
-    'model.networkNames': 'updateNetworkButtonNames',
-    'model.onlineNetworks': 'onlineNetworksChanged',
+    'model.networkNames': 'updateNetworkButtonNames'
   },
   ready: function() {
-    this.userName = model.globalSettings.quiverUserName; // for Quiver
-    this.supportsQuiver = false;
-    this.isQuiverLoggedIn = false;
     this.githubUserIdInput = ''; // for GitHub
     this.inviteUserEmail = ''; // for GMail
     this.selectedNetworkName = '';
-    this.quiverInviteUrl = '';
     this.cloudInstanceInput = '';
     this.ui = ui;
     this.model = model;
+    this.inviteCode = '';
 
     this.updateNetworkButtonNames();
   }
