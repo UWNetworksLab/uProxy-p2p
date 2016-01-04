@@ -249,8 +249,6 @@ class Provisioner {
   /** 
    * Waits for all in-progress Digital Ocean actions to complete
    * e.g. after powering on a machine, or creating a VM
-   * @param {Function} resolve - call when done
-   * @param {Function} reject - call on failure
    */
   private waitDigitalOceanActions_ = () : Promise<void> => {
     console.log("Polling for Digital Ocean in-progress actions");
