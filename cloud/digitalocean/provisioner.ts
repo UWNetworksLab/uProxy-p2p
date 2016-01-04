@@ -59,7 +59,6 @@ class Provisioner {
       return this.setupDigitalOcean_(name);
     // Setup Digital Ocean (SSH key + droplet)
     }).then(() => {
-      //console.log(actions);
       return this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id);
     // Get the droplet's configuration
     }).then((resp: any) => {
@@ -285,7 +284,6 @@ class Provisioner {
       this.sendStatus_("CLOUD_INIT_ADDKEY");
       // Get SSH keys in account
       this.doRequest_("GET", "account/keys").then((resp: any) => {
-        //console.log(resp);
         for (var i = 0; i < resp.ssh_keys.length; i++) {
           if (resp.ssh_keys[i].public_key === this.state_.ssh.public) {
             return Promise.resolve({
@@ -300,14 +298,12 @@ class Provisioner {
         }));
       // If missing, put SSH key into account
       }).then((resp: any) => {
-        //console.log(resp);
         this.state_.cloud.ssh = resp.ssh_key;
         this.sendStatus_("CLOUD_DONE_ADDKEY");
         this.sendStatus_("CLOUD_INIT_VM");
         return this.doRequest_("GET", "droplets");
       // Get list of droplets
       }).then((resp: any) => {
-        //console.log(resp);
         for (var i = 0; i < resp.droplets.length; i++) {
           if (resp.droplets[i].name === name) {
             return Promise.resolve({
@@ -325,7 +321,6 @@ class Provisioner {
         }));
       // If missing, create the droplet
       }).then((resp: any) => {
-        //console.log(resp);
         this.state_.cloud.vm = resp.droplet;
         if (resp.droplet.status == "off") {
           // Need to power on VM
@@ -339,7 +334,6 @@ class Provisioner {
         }
       // If the machine exists, but powered off, turn it on
       }).then((resp: any) => {
-        //console.log(resp);
         this.sendStatus_("CLOUD_WAITING_VM");
         this.waitDigitalOceanActions_().then(F, R);
       // Wait for all in-progress actions to complete
