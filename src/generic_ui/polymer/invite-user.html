@@ -170,10 +170,10 @@
         <div id="allInviteMethods" hidden?='{{!ui.showRosterBeforeLogin}}'>
           <div hidden?="{{!ui.showRosterBeforeLogin}}">
             <div class='acceptInvite'>
-              <paper-input-decorator id='inviteCodeDecorator' label='Have an invitation code?  Enter it here' layout vertical>
+              <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$ }}' layout vertical>
                 <input is='core-input' value='{{ inviteCode }}' />
               </paper-input-decorator>
-              <uproxy-button id='acceptInviteButton' raised on-tap='{{ acceptInvite }}'>Submit</uproxy-button>
+              <uproxy-button id='acceptInviteButton' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
             </div>
           </div>
 
@@ -198,7 +198,6 @@
 
           <div id="weWontPostLearnMore"></div>
         </div> <!--End of roster-before-login view-->
-
 
 
         <!-- TODO: remove this and uproxy-network template once Quiver

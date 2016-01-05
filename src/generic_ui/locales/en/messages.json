@@ -1144,5 +1144,9 @@
   "QUIVER_LINK_INSTRUCTIONS": {
     "description": "Instructions telling user how to use link for the uProxy network (aka Quiver).",
     "message": "Send this link to your friends so they can find you on uProxy"
+  },
+  "INVITATION_PLACEHOLDER_TEXT": {
+    "description": "Invitation placeholder text, instructing users to enter an invite in this field",
+    "message": "Have an invitation code?  Enter it here"
   }
 }
