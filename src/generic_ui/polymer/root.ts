@@ -79,6 +79,8 @@ Polymer({
 
     if (detail.userInputData && detail.userInputData.initInputValue) {
       this.$.dialogInput.value = detail.userInputData.initInputValue;
+    } else if (detail.displayData) {
+      this.$.dialogDisplay.value = detail.displayData;
     } else {
       this.$.dialogInput.value = '';
     }
@@ -104,6 +106,10 @@ Polymer({
         this.$.dialog.open();
       });
     });
+  },
+  selectAll: function(e :Event, d :Object, input :HTMLInputElement) {
+    input.focus();
+    input.select();
   },
   reusableDialogClosed: function() {
     fulfillReusableDialogClosed();

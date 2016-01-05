@@ -48,17 +48,6 @@ Polymer({
       network: socialNetworkInfo, userId: this.contact.userId
     });
   },
-  generateCloudInviteUrl: function() {
-    ui_context.core.getInviteUrl({
-      network: {
-        name: this.contact.network.name,
-        userId: this.contact.network.userId // Local userId
-      },
-      userId: this.contact.userId // Cloud instance userId
-    }).then((cloudInviteUrl: string) => {
-      this.cloudInviteUrl = cloudInviteUrl;
-    });
-  },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
   modifyConsent: function(action :uproxy_core_api.ConsentUserAction) {
     var command = <uproxy_core_api.ConsentCommand>{
@@ -114,9 +103,23 @@ Polymer({
     this.sortedInstances = _.sortByOrder(this.contact.offeringInstances,
                                          ['isOnline', 'instanceId'], ['desc', 'asc']);
   },
-  select: function(e :Event, d :Object, input :HTMLInputElement) {
-    input.focus();
-    input.select();
+  shareCloudFriend: function() {
+    ui_context.core.getInviteUrl({
+      network: {
+        name: this.contact.network.name,
+        userId: this.contact.network.userId // Local userId
+      },
+      userId: this.contact.userId // Cloud instance userId
+    }).then((cloudInviteUrl: string) => {
+      ui.fireSignal('open-dialog', {
+        heading: ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"),
+        message: '',
+        buttons: [{
+          text: ui.i18n_t("OK")
+        }],
+        displayData: cloudInviteUrl
+      });
+    });
   },
   ready: function() {
     this.ui = ui_context.ui;
@@ -126,10 +129,6 @@ Polymer({
     this.SharingConsentState = user.SharingConsentState;
     this.hideOnlineStatus = this.isExpanded;
     this.UserStatus = social.UserStatus;
-    if (this.contact.network.name == "Cloud" &&
-        this.mode == ui_constants.Mode.SHARE) {
-      this.generateCloudInviteUrl();
-    }
   },
   observe: {
     'contact.isSharingWithMe': 'fireChanged',

@@ -235,12 +235,7 @@
           </div> <!-- end of controls for friends -->
 
           <div hidden?="{{contact.network.name!='Cloud'}}">
-            <p class='preButtonText'>
-              {{ "CLOUD_SHARE_INSTRUCTIONS" | $$ }}
-            </p>
-            <paper-input-decorator layout vertical>
-              <input readonly is='core-input' on-tap='{{ select }}' value='{{ cloudInviteUrl }}' />
-            </paper-input-decorator>
+            <uproxy-button raised on-tap='{{ shareCloudFriend }}'>{{ "SHARE_WITH_A_FRIEND" | $$ }}</uproxy-button>
           </div>
 
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>

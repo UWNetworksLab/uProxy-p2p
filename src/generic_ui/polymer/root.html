@@ -428,6 +428,11 @@
           <input id='dialogInput' is='core-input'/>
         </paper-input-decorator>
       </div>
+      <div hidden?='{{ !dialog.displayData }}'>
+        <paper-input-decorator layout vertical>
+          <input id='dialogDisplay' readonly is='core-input' on-tap='{{ selectAll }}' />
+        </paper-input-decorator>
+      </div>
       <template repeat='{{ button in dialog.buttons }}'>
         <uproxy-button affirmative?='{{ !button.dismissive }}'
           dismissive?='{{ button.dismissive }}' class='dialogButton'
