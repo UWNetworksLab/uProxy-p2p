@@ -216,7 +216,7 @@ export function notifyUI(networkName :string, userId :string) {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
-    public inviteUser = (userName: string): Promise<string> => {
+    public inviteUser = (userName: string): Promise<void> => {
       throw new Error("Operation not implemented.");
     }
 
@@ -238,7 +238,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public getInviteUrl = () : Promise<string> => {
+    public getInviteUrl = (userId :string) : Promise<string> => {
       throw new Error('Operation not implemented');
     }
 
@@ -736,20 +736,17 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public inviteUser = (userName: string): Promise<string> => {
+    public inviteUser = (userName: string): Promise<void> => {
       return this.freedomApi_.inviteUser(userName).catch((e) => {
         log.error('Error calling inviteUser: ' + userName, e.message);
         return Promise.reject('Error calling inviteUser: ' + userName + e.message);
-      }).then((data?: { networkName :string; networkData :string }) => {
-        if (data && data.networkData) {
-          return Promise.resolve(data.networkData);
-        }
-        return Promise.resolve('');
+      }).then(() => {
+        return Promise.resolve<void>();
       });
     }
 
-    public getInviteUrl = () : Promise<string> => {
-      return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
+    public getInviteUrl = (userId: string) : Promise<string> => {
+      return this.freedomApi_.inviteUser(userId).then((data: { networkData :string }) => {
         var tokenObj :Object;
         if (this.name === 'Quiver') {
           var permissionToken = this.myInstance.generateInvitePermissionToken();

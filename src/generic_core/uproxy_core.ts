@@ -301,7 +301,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  public inviteUser = (data: {networkId: string; userName: string}): Promise<string> => {
+  public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
     // TODO: clean this up - hack to find the one network
     var network: social.Network;
     for (var userId in social_network.networks[data.networkId]) {
@@ -311,7 +311,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.inviteUser(data.userName);
   }
 
-  public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
+  public acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void> => {
     var networkName = data.network.name;
     var networkUserId = data.network.userId;
     if (!networkUserId) {
@@ -323,9 +323,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.acceptInvitation(data.token, data.userId);
   }
 
-  public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
-    var network = social_network.networks[networkInfo.name][networkInfo.userId];
-    return network.getInviteUrl();
+  public getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {
+    var network = social_network.networks[data.network.name][data.network.userId];
+    return network.getInviteUrl(data.userId || '');
   }
 
   public sendEmail = (data :uproxy_core_api.EmailData) : void => {

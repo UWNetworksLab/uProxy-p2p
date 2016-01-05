@@ -49,16 +49,14 @@ Polymer({
     });
   },
   generateCloudInviteUrl: function() {
-    ui_context.core.inviteUser({
-      networkId: this.contact.network.name,
-      userName: this.contact.userId
-    }).then((cloudInviteNetworkData: string) => {
-      var inviteObj = {
-        networkName: 'Cloud',
-        networkData: cloudInviteNetworkData
-      };
-      this.cloudInviteUrl = 'https://www.uproxy.org/invite/' +
-          btoa(JSON.stringify(inviteObj));
+    ui_context.core.getInviteUrl({
+      network: {
+        name: this.contact.network.name,
+        userId: this.contact.network.userId // Local userId
+      },
+      userId: this.contact.userId // Cloud instance userId
+    }).then((cloudInviteUrl: string) => {
+      this.cloudInviteUrl = cloudInviteUrl;
     });
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
