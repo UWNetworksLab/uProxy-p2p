@@ -571,6 +571,10 @@
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
     "message": "We won't share your data or post publicly without your consent"
   },
+  "WE_WONT_POST_LEARN_MORE": {
+    "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
+    "message": "We won't share your data or post publicly without your consent. <uproxy-faq-link anchor='whyDoesUproxyConnect'>Learn more</uproxy-faq-link>"
+  },
   "HAVE_AN_INVITE_CODE": {
     "description": "Text above a button that asks the user if they already have a uProxy invite code",
     "message": "Have an invite code?"
@@ -1136,5 +1140,21 @@
   "SHARE_WITH_A_FRIEND": {
     "description": "Button text shown below each Cloud friend in the Share tab to open a dialog with a Cloud invite code.",
     "message": "Share with a friend"
+  },
+  "CONNECT_WITH_A_FRIEND": {
+    "description": "Title of screen for user to send invites or enter received invites.",
+    "message": "Connect with a friend"
+  },
+  "CHOOSE_A_SOCIAL_NETWORK_AND_FIND_YOUR_FRIENDS": {
+    "description": "Text prompting user to log into social networks and invite their friends.",
+    "message": "Choose a social network and find your friends"
+  },
+  "QUIVER_LINK_INSTRUCTIONS": {
+    "description": "Instructions telling user how to use link for the uProxy network (aka Quiver).",
+    "message": "Send this link to your friends so they can find you on uProxy"
+  },
+  "INVITATION_PLACEHOLDER_TEXT": {
+    "description": "Invitation placeholder text, instructing users to enter an invite in this field",
+    "message": "Have an invitation code?  Enter it here"
   }
 }
