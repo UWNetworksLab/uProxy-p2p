@@ -58,6 +58,19 @@ interface SavedContact {
   description?: string;
 }
 
+// State of remote user's relationship to local user.
+// Defined in github.com/uProxy/uproxy/blob/dev/src/interfaces/social.ts
+//
+// For cloud instances, only CLOUD_INSTANCE_CREATED_BY_LOCAL or
+// CLOUD_INSTANCE_SHARED_WITH_LOCAL are possible statuses.
+enum UserStatus {
+  FRIEND = 0,
+  LOCAL_INVITED_BY_REMOTE = 1,
+  REMOTE_INVITED_BY_LOCAL = 2,
+  CLOUD_INSTANCE_CREATED_BY_LOCAL = 3,
+  CLOUD_INSTANCE_SHARED_WITH_LOCAL = 4
+}
+
 // Returns a VersionedPeerMessage, as defined in interfaces/social.ts
 // in the uProxy repo.
 //
@@ -112,10 +125,17 @@ function makeClientState(address: string): freedom.Social.ClientState {
 // To see how these fields are handled, see
 // generic_core/social.ts#handleUserProfile in the uProxy repo. We omit
 // the status field since remote-user.ts#update will use FRIEND as a default.
-function makeUserProfile(address: string): freedom.Social.UserProfile {
+function makeUserProfile(
+    address: string,
+    username :string): freedom.Social.UserProfile {
+  var status = UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
+  if (username === ADMIN_USERNAME) {
+    status = UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL;
+  }
   return {
     userId: address,
-    name: address
+    name: address,
+    status: status
   };
 }
 
@@ -153,12 +173,13 @@ export class CloudSocialProvider {
 
   constructor(private dispatchEvent_: (name: string, args: Object) => void) { }
 
-  // Emits the messages necessary to make the user appear online 
+  // Emits the messages necessary to make the user appear online
   // in the contacts list.
-  private notifyOfUser_ = (address: string, description?: string) => {
-    this.dispatchEvent_('onUserProfile', makeUserProfile(address));
+  private notifyOfUser_ = (invite: Invite, description?: string) => {
+    this.dispatchEvent_('onUserProfile',
+        makeUserProfile(invite.host, invite.user));
 
-    var clientState = makeClientState(address);
+    var clientState = makeClientState(invite.host);
     this.dispatchEvent_('onClientState', clientState);
 
     // Pretend that we received a message from a remote uProxy client.
@@ -166,7 +187,7 @@ export class CloudSocialProvider {
       from: clientState,
       // INSTANCE
       message: JSON.stringify(makeVersionedPeerMessage(
-        3000, makeInstanceMessage(address, description)))
+        3000, makeInstanceMessage(invite.host, description)))
     });
   }
 
@@ -204,7 +225,7 @@ export class CloudSocialProvider {
         log.warn('failed to fetch banner: %1', e);
         return '';
       }).then((banner: string) => {
-        this.notifyOfUser_(invite.host, banner);
+        this.notifyOfUser_(invite, banner);
         this.savedContacts_[invite.host] = {
           invite: invite,
           description: banner
@@ -234,7 +255,7 @@ export class CloudSocialProvider {
         if (savedContacts.contacts) {
           for (let contact of savedContacts.contacts) {
             this.savedContacts_[contact.invite.host] = contact;
-            this.notifyOfUser_(contact.invite.host, contact.description);
+            this.notifyOfUser_(contact.invite, contact.description);
           }
         }
       } catch (e) {
