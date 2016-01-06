@@ -1,9 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "provision",
-  "description": "Provision a VM.",
+  "name": "deployer",
+  "description": "Provision a uProxy cloud instance.",
   "version": "0.1",
-  "minimum_chrome_version": "41.0.2267.0",
   "app": {
     "background": {
       "scripts": [

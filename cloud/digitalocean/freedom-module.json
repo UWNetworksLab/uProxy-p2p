@@ -1,5 +1,5 @@
 {
-  "name": "provision",
+  "name": "digitalocean",
   "description": "Provisions VMs on Digital Ocean",
   "app": {
     "script": [
@@ -7,10 +7,10 @@
       "freedom-module.static.js"
     ]
   },
-  "provides": [ "provision" ],
-  "default": "provision",
+  "provides": [ "digitalocean" ],
+  "default": "digitalocean",
   "api": {
-    "provision": {
+    "digitalocean": {
       "constructor": { "value": [ ] },
       "start": {
         "type": "method",
