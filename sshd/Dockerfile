@@ -13,6 +13,10 @@ COPY banner /
 RUN chmod 644 /banner
 RUN chown giver: /banner
 
+COPY hostname /
+RUN chmod 644 /hostname
+RUN chown giver: /hostname
+
 COPY issue_invite.sh /
 RUN chown root:root /issue_invite.sh
 RUN chmod 755 /issue_invite.sh

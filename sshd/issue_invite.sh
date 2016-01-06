@@ -7,24 +7,19 @@
 
 set -e
 
-# Beautiful cross-platform one-liner cogged from:
-#   http://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-bash
-PUBLIC_IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 INVITE_CODE=
 USERNAME=getter
 
 function usage () {
-  echo "$0 [-d ip] [-u username] [-i invite code]"
-  echo "  -d: override the detected public IP (for development only)"
+  echo "$0 [-u username] [-i invite code]"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts d:i:u:h? opt; do
+while getopts i:u:h? opt; do
   case $opt in
-    d) PUBLIC_IP="$OPTARG" ;;
     i) INVITE_CODE="$OPTARG" ;;
     u) USERNAME="$OPTARG" ;;
     *) usage ;;
@@ -71,6 +66,7 @@ mkdir -p $HOMEDIR/.ssh
 cat $TMP/id_rsa.pub >> $HOMEDIR/.ssh/authorized_keys
 
 # Output the actual invite code.
+PUBLIC_IP=`cat /hostname`
 export CLOUD_INSTANCE_DETAILS=$(cat << EOF
 {
   "host":"$PUBLIC_IP",
