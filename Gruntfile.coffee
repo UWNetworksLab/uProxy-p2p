@@ -208,18 +208,22 @@ gruntConfig = {
       command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
     }
     ccaCreateIosDev: {
-      command: '<%= ccaJsPath %> create <%= iosDevPath %> --link-to=<%= ccaDevPath %>'
+      command: '<%= ccaJsPath %> create <%= iosDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
     }
     ccaCreateIosDist: {
-      command: '<%= ccaJsPath %> create <%= iosDistPath %> --link-to=<%= ccaDistPath %>'
+      command: '<%= ccaJsPath %> create <%= iosDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
     }
-    ccaBuildIosDev: {
+    ccaPrepareIosDev: {
       cwd: '<%= iosDevPath %>'
-      command: '<%= ccaJsPath %> build ios'
+      command: '<%= ccaJsPath %> prepare'
     }
-    ccaBuildIosDist: {
+    ccaPrepareIosDist: {
       cwd: '<%= iosDistPath %>'
-      command: '<%= ccaJsPath %> build ios'
+      command: '<%= ccaJsPath %> prepare'
+    }
+    ccaEmulateIos: {
+      cwd: '<%= iosDevPath %>'
+      command: '<%= ccaJsPath %> run ios --emulator'
     }
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
@@ -1092,7 +1096,7 @@ taskManager.add 'release_android', [
   'exec:ccaReleaseAndroid'
 ]
 
-# Emulate the mobile client
+# Emulate the mobile client for android
 taskManager.add 'emulate_android', [
  'build_android'
  'exec:ccaEmulateAndroid'
@@ -1101,8 +1105,14 @@ taskManager.add 'emulate_android', [
 taskManager.add 'build_ios', [
   'exec:rmIosBuild'
   'build_cca'
-  'exec:ccaCreateIos'
-  'exec:ccaBuildIos'
+  'exec:ccaCreateIosDev'
+  'exec:ccaPrepareIosDev'
+]
+
+# Emulate the mobile client for ios
+taskManager.add 'emulate_ios', [
+ 'build_ios'
+ 'exec:ccaEmulateIos'
 ]
 
 # --- Testing tasks ---
