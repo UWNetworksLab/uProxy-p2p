@@ -122,6 +122,12 @@
       font-size: 14px;
       line-height: 20px;
     }
+    p.description {
+      margin: 0;
+      font-size: 13px;
+      line-height: 20px;
+      color: #333;
+    }
     </style>
 
     <div tabindex='-1'
@@ -235,6 +241,8 @@
           </div> <!-- end of controls for friends -->
 
           <div hidden?="{{contact.network.name!='Cloud'}}">
+            <!-- Instances and descriptions are usually hidden from the Share tab because we have user-level sharing permissions. For Cloud, we should show the description as it also describes the user (since there is one instance per user). -->
+            <p class='description'>{{ sortedInstances[0].description }}</p>
             <uproxy-button raised on-tap='{{ shareCloudFriend }}'>{{ "SHARE_WITH_A_FRIEND" | $$ }}</uproxy-button>
           </div>
 
