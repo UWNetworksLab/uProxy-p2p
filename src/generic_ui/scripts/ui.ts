@@ -473,7 +473,8 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public showDialog(heading :string, message :string, buttonText ?:string, signal ?:string) {
+  public showDialog(heading :string, message :string, buttonText ?:string,
+      signal ?:string, displayData ?:string) {
     var button :ui_constants.DialogButtonDescription = {
       text: buttonText || this.i18n_t("OK")
     };
@@ -483,7 +484,8 @@ export class UserInterface implements ui_constants.UiApi {
     this.fireSignal('open-dialog', {
       heading: heading,
       message: message,
-      buttons: [button]
+      buttons: [button],
+      displayData: displayData || null
     });
   }
 

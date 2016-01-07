@@ -111,14 +111,8 @@ Polymer({
       },
       userId: this.contact.userId // Cloud instance userId
     }).then((cloudInviteUrl: string) => {
-      ui.fireSignal('open-dialog', {
-        heading: ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"),
-        message: '',
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }],
-        displayData: cloudInviteUrl
-      });
+      ui.showDialog(ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"), '', ui.i18n_t("OK"),
+        undefined, cloudInviteUrl);
     });
   },
   ready: function() {
