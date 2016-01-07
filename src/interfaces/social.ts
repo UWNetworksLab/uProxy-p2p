@@ -321,7 +321,7 @@ export interface Network {
   /**
    * Generates an invite token
    */
-  getInviteUrl: (userId :string) => Promise<string>;
+  getInviteUrl: (userId ?:string) => Promise<string>;
 
   /**
    * Generates an invite token

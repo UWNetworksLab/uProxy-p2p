@@ -238,7 +238,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public getInviteUrl = (userId :string) : Promise<string> => {
+    public getInviteUrl = (userId ?:string) : Promise<string> => {
       throw new Error('Operation not implemented');
     }
 
