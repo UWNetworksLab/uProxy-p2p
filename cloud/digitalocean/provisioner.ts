@@ -2,7 +2,8 @@
 /// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
-const forge = require("forge-min");
+// TODO: https://github.com/uProxy/uproxy/issues/2051
+declare var forge: any;
 
 const POLL_TIMEOUT: number = 5000; //milliseconds
 
@@ -38,7 +39,7 @@ interface KeyPair {
 
 class Provisioner {
 
-  constructor(private dispatch_: Function, private state_: any) {}
+  constructor(private dispatch_: Function, private state_: any = {}) {}
 
   /**
    * One-click setup of a VM
@@ -57,14 +58,15 @@ class Provisioner {
       this.state_.ssh = keys;
       return this.setupDigitalOcean_(name);
     // Setup Digital Ocean (SSH key + droplet)
-    }).then((actions: any) => {
-      //console.log(actions);
+    }).then(() => {
       return this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id);
     // Get the droplet's configuration
     }).then((resp: any) => {
       this.sendStatus_("CLOUD_DONE_VM");
       this.state_.cloud.vm = resp.droplet;
-      this.state_.network.ssh_port = 22;
+      this.state_.network = {
+        "ssh_port": 22
+      };
       // Retrieve public IPv4 address
       for (var i = 0; i < resp.droplet.networks.v4.length; i++) {
         if (resp.droplet.networks.v4[i].type === "public") {
@@ -156,7 +158,7 @@ class Provisioner {
       }).then((responseUrl: string) => {
         var query = responseUrl.substr(responseUrl.indexOf('#') + 1),
             param: string,
-            params: { [k: string]: string },
+            params: { [k: string]: string } = {},
             keys = query.split('&'),
             i = 0;
         for (i = 0; i < keys.length; i++) {
@@ -186,7 +188,7 @@ class Provisioner {
   private getSshKey_ = (name: string) : Promise<KeyPair> => {
     var storage = freedom["core.storage"]();
     return new Promise((F, R) => {
-      var result : KeyPair;
+      var result: KeyPair = <KeyPair>{};
       Promise.all([
         storage.get("DigitalOcean-" + name + "-PublicKey"),
         storage.get("DigitalOcean-" + name + "-PrivateKey")
@@ -222,12 +224,12 @@ class Provisioner {
     return new Promise((F, R) => {
       var url = 'https://api.digitalocean.com/v2/' + actionPath;
       var xhr = freedom["core.xhr"]();
-      xhr.on("onload", (resolve: Function, reject: Function, xhr: any, e: Error) => {
-        xhr.getResponseText().then((resolve: Function, reject: Function, resp: string) => {
+      xhr.on("onload", (loadInfo: any) => {
+        xhr.getResponseText().then((response: string) => {
           try {
-            resolve(JSON.parse(resp));
+            F(JSON.parse(response));
           } catch(e) {
-            reject(e);
+            R(e);
           }
         });
       });
@@ -247,22 +249,22 @@ class Provisioner {
   /** 
    * Waits for all in-progress Digital Ocean actions to complete
    * e.g. after powering on a machine, or creating a VM
-   * @param {Function} resolve - call when done
-   * @param {Function} reject - call on failure
    */
-  private waitDigitalOceanActions_ = (resolve: Function, reject: Function) : void => {
+  private waitDigitalOceanActions_ = () : Promise<void> => {
     console.log("Polling for Digital Ocean in-progress actions");
-    this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id + "/actions").then((resp: any) => {
+    return this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id + "/actions").then((resp: any) => {
       for (var i = 0; i < resp.actions.length; i++) {
         if (resp.actions[i].status === "in-progress") {
-          setTimeout(this.waitDigitalOceanActions_, POLL_TIMEOUT);
-          return;
+          return new Promise<void>((F, R) => {
+            setTimeout(() => {
+              this.waitDigitalOceanActions_().then(F, R);
+            }, POLL_TIMEOUT);
+          });
         }
       }
-      resolve(resp);
     }).catch((e: Error) => {
       console.error("Error waiting for digital ocean actions:" + JSON.stringify(e));
-      reject(e);
+      throw e;
     });
   }
   
@@ -280,7 +282,6 @@ class Provisioner {
       this.sendStatus_("CLOUD_INIT_ADDKEY");
       // Get SSH keys in account
       this.doRequest_("GET", "account/keys").then((resp: any) => {
-        //console.log(resp);
         for (var i = 0; i < resp.ssh_keys.length; i++) {
           if (resp.ssh_keys[i].public_key === this.state_.ssh.public) {
             return Promise.resolve({
@@ -295,14 +296,12 @@ class Provisioner {
         }));
       // If missing, put SSH key into account
       }).then((resp: any) => {
-        //console.log(resp);
         this.state_.cloud.ssh = resp.ssh_key;
         this.sendStatus_("CLOUD_DONE_ADDKEY");
         this.sendStatus_("CLOUD_INIT_VM");
         return this.doRequest_("GET", "droplets");
       // Get list of droplets
       }).then((resp: any) => {
-        //console.log(resp);
         for (var i = 0; i < resp.droplets.length; i++) {
           if (resp.droplets[i].name === name) {
             return Promise.resolve({
@@ -320,7 +319,6 @@ class Provisioner {
         }));
       // If missing, create the droplet
       }).then((resp: any) => {
-        //console.log(resp);
         this.state_.cloud.vm = resp.droplet;
         if (resp.droplet.status == "off") {
           // Need to power on VM
@@ -334,9 +332,8 @@ class Provisioner {
         }
       // If the machine exists, but powered off, turn it on
       }).then((resp: any) => {
-        //console.log(resp);
         this.sendStatus_("CLOUD_WAITING_VM");
-        this.waitDigitalOceanActions_(F, R);
+        this.waitDigitalOceanActions_().then(F, R);
       // Wait for all in-progress actions to complete
       }).catch((err: Error) => {
         console.error("Error w/DigitalOcean: " + err);
@@ -348,10 +345,6 @@ class Provisioner {
       });
     });
   }
-}
-
-if (typeof freedom !== 'undefined') {
-  freedom['provisioner']().providePromises(Provisioner);
 }
 
 export = Provisioner;
