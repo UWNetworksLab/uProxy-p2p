@@ -86,7 +86,7 @@ export class Model {
       var userCategories = user.getCategories();
       categorizeUser(user, this.contacts.getAccessContacts,
                      userCategories.getTab, null);
-      if (user.network.name !== "Cloud") {
+      if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
         categorizeUser(user, this.contacts.shareAccessContacts,
                        userCategories.shareTab, null);
       }
@@ -473,7 +473,8 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public showDialog(heading :string, message :string, buttonText ?:string, signal ?:string) {
+  public showDialog(heading :string, message :string, buttonText ?:string,
+      signal ?:string, displayData ?:string) {
     var button :ui_constants.DialogButtonDescription = {
       text: buttonText || this.i18n_t("OK")
     };
@@ -483,7 +484,8 @@ export class UserInterface implements ui_constants.UiApi {
     this.fireSignal('open-dialog', {
       heading: heading,
       message: message,
-      buttons: [button]
+      buttons: [button],
+      displayData: displayData || null
     });
   }
 
@@ -1070,7 +1072,7 @@ export class UserInterface implements ui_constants.UiApi {
     // Update the user's category in both get and share tabs.
     categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-    if (user.network.name !== "Cloud") {
+    if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
       categorizeUser(user, this.model.contacts.shareAccessContacts,
           oldUserCategories.shareTab, newUserCategories.shareTab);
     }

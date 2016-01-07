@@ -12,7 +12,7 @@ Polymer({
       name: selectedNetwork.name,
       userId: selectedNetwork.userId
     };
-    return core.getInviteUrl(info).then((inviteUrl:string) => {
+    return core.getInviteUrl({ network: info }).then((inviteUrl:string) => {
       this.inviteUrl = inviteUrl;
       return selectedNetwork;
     });

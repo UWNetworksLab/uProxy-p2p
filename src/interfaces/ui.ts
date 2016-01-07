@@ -56,4 +56,5 @@ export interface DialogDescription {
   message :string;
   buttons: DialogButtonDescription[];
   userInputData ?:DialogUserInputData;
+  displayData ?:string;
 }

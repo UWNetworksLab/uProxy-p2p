@@ -122,6 +122,12 @@
       font-size: 14px;
       line-height: 20px;
     }
+    p.description {
+      margin: 0;
+      font-size: 13px;
+      line-height: 20px;
+      color: #333;
+    }
     </style>
 
     <div tabindex='-1'
@@ -132,15 +138,17 @@
         <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
         <div class='{{ (isOnline || contact.status!=UserStatus.FRIEND) ? "onlineStatus" : "offlineStatus" }}'
           hidden?="{{ hideOnlineStatus }}" on-tap='{{ toggle }}'>
-          <span hidden?='{{contact.status!=UserStatus.FRIEND}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}</span>
+          <span hidden?='{{contact.status==UserStatus.LOCAL_INVITED_BY_REMOTE || contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}</span>
           <span hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>{{ 'RESPOND_TO_FRIEND_REQUEST' | $$ }}</span>
           <span hidden?='{{contact.status!=UserStatus.REMOTE_INVITED_BY_LOCAL}}'>{{ 'FRIEND_REQUEST_SENT' | $$ }}</span>
         </div>
+
+        <!-- beginning of getControls -->
         <core-collapse id='getControls' class='expandedControls'
           hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
           opened='{{ contact.getExpanded }}'>
 
-          <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>
+          <div class='friendControls' hidden?='{{contact.status==UserStatus.LOCAL_INVITED_BY_REMOTE || contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL}}'>
             <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
               <div horizontal layout hidden?='{{ !hasInstance(ui.instanceTryingToGetAccessFrom) }}'>
                 <core-icon icon='query-builder'></core-icon>
@@ -184,7 +192,8 @@
                 {{ "ASK_FOR_ACCESS" | $$ }}
               </uproxy-button>
             </div>
-          </div>
+          </div> <!-- end of controls for friends -->
+
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>
             <p class='preButtonText'>
               {{ "FRIEND_REQUEST" | $$({ name: contact.name }) }}
@@ -195,6 +204,7 @@
           </div>
         </core-collapse> <!-- end of getControls -->
 
+        <!-- beginning of shareControls -->
         <core-collapse id='shareControls' class='expandedControls'
           hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
           opened='{{ contact.shareExpanded }}'>
@@ -228,7 +238,14 @@
               <p class='preButtonText'>{{ "ACCESS_NOT_GRANTED" | $$ }}</p>
               <uproxy-button raised on-tap='{{ offer }}'>{{ "OFFER_ACCESS" | $$ }}</uproxy-button>
             </div>
+          </div> <!-- end of controls for friends -->
+
+          <div hidden?="{{contact.network.name!='Cloud'}}">
+            <!-- Instances and descriptions are usually hidden from the Share tab because we have user-level sharing permissions. For Cloud, we should show the description as it also describes the user (since there is one instance per user). -->
+            <p class='description'>{{ sortedInstances[0].description }}</p>
+            <uproxy-button raised on-tap='{{ shareCloudFriend }}'>{{ "SHARE_WITH_A_FRIEND" | $$ }}</uproxy-button>
           </div>
+
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>
             <p class='preButtonText'>
               {{ "FRIEND_REQUEST" | $$({ name: contact.name }) }}
@@ -238,8 +255,6 @@
             </uproxy-button>
           </div>
         </core-collapse> <!-- end of shareControls -->
-
-
       </div>
 
       <div class="iconWrapper" hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">

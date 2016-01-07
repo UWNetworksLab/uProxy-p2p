@@ -190,7 +190,8 @@ export interface EmailData {
   body :string;
 };
 
-export interface AcceptInvitationData {
+// Data needed to accept user invites or to get an invite URL.
+export interface InvitationData {
   network :social.SocialNetworkInfo;
   token ?:string;
   userId ?:string;

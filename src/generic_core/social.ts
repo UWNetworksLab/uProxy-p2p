@@ -238,7 +238,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public getInviteUrl = () : Promise<string> => {
+    public getInviteUrl = (userId ?:string) : Promise<string> => {
       throw new Error('Operation not implemented');
     }
 
@@ -736,6 +736,7 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
+    // Sends an in-band invite to a friend to be a uProxy contact.
     public inviteUser = (userName: string): Promise<void> => {
       return this.freedomApi_.inviteUser(userName).catch((e) => {
         log.error('Error calling inviteUser: ' + userName, e.message);
@@ -745,8 +746,16 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public getInviteUrl = () : Promise<string> => {
-      return this.freedomApi_.inviteUser('').then((data: { networkData :string }) => {
+    // Returns an invite url for the user to send to friends out-of-band.
+    //
+    // For cloud, the url gives friends access to a cloud server. The userId
+    // identifies a cloud server owned by the user, which is being shared
+    // with someone else.
+    // For other social networks, the url adds the local user as a uproxy
+    // contact for friends who use the url. The userId isn't used.
+    public getInviteUrl = (userId ?:string) : Promise<string> => {
+      return this.freedomApi_.inviteUser(userId || '')
+          .then((data: { networkData :string }) => {
         var tokenObj :Object;
         if (this.name === 'Quiver') {
           var permissionToken = this.myInstance.generateInvitePermissionToken();

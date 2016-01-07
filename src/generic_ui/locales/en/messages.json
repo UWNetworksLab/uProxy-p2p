@@ -1133,6 +1133,14 @@
     "description": "Confirmation message the user sees prior to logging into GitHub",
     "message": "uProxy can use GitHub, a developer tool, to help you connect with your friends.<br><br>Because it may be possible for others to tell which GitHub accounts are using uProxy, <strong>we recommend you create a new anonymous GitHub account</strong>, even if you already use GitHub.  <strong>You will need to verify your email with GitHub before you connect.</strong>"
   },
+  "CLOUD_SHARE_INSTRUCTIONS": {
+    "description": "Message shown in a dialog, with a Cloud invite code, to let users know how they can allow their friends to proxy through their Cloud instance.",
+    "message": "Share access to your cloud instance by sending this link to a friend."
+  },
+  "SHARE_WITH_A_FRIEND": {
+    "description": "Button text shown below each Cloud friend in the Share tab to open a dialog with a Cloud invite code.",
+    "message": "Share with a friend"
+  },
   "CONNECT_WITH_A_FRIEND": {
     "description": "Title of screen for user to send invites or enter received invites.",
     "message": "Connect with a friend"

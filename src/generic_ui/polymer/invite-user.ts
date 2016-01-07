@@ -13,7 +13,7 @@ var inviteUser = {
   generateInviteUrl: function(name :string) {
     var network = model.getNetwork(name);
     var networkInfo = { name: network.name, userId: network.userId };
-    return core.getInviteUrl(networkInfo);
+    return core.getInviteUrl({ network: networkInfo });
   },
   sendToGMailFriend: function() {
     var network = model.getNetwork('GMail');
