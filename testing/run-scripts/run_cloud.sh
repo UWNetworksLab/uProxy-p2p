@@ -67,6 +67,30 @@ then
   fi
 fi
 
+# Set the cloud instance's hostname.
+# In descending order of preference:
+#  - command-line option
+#  - pull from existing container
+#  - pull from DNS
+if [ -z "$PUBLIC_IP" ]
+then
+  if docker ps -a | grep uproxy-sshd >/dev/null
+  then
+    if [ `docker inspect --format='{{ .State.Status }}' uproxy-sshd` != "running" ]
+    then
+      docker start uproxy-sshd > /dev/null
+    fi
+    # Don't fail if the current installation has no /hostname.
+    PUBLIC_IP=`docker exec uproxy-sshd cat /hostname || echo -n ""`
+  fi
+  if [ -z "$PUBLIC_IP" ]
+  then
+    # Beautiful cross-platform one-liner cogged from:
+    #   http://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-bash
+    PUBLIC_IP=`dig +short myip.opendns.com @resolver1.opendns.com`
+  fi
+fi
+
 if [ $REFRESH = true ]
 then
   docker rm -f uproxy-sshd || true
@@ -105,13 +129,10 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
     cp -R ${BASH_SOURCE%/*}/../../sshd/ $TMP_DIR
 
     echo -n "$BANNER" > $TMP_DIR/banner
+    echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
 
     # Optional build args aren't very flexible...confine the messiness here.
     ISSUE_INVITE_ARGS=
-    if [ -n "$PUBLIC_IP" ]
-    then
-      ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -d $PUBLIC_IP"
-    fi
     if [ -n "$INVITE_CODE" ]
     then
       ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -i $INVITE_CODE"
