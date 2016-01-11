@@ -130,7 +130,9 @@ var log :logging.Log = new logging.Log('remote-user');
       this.name = profile.name;
       this.fulfillNameReceived_(this.name);
       this.profile = profile;
-      if (!this.profile.status) {
+      if (!this.profile.status && this.network.name === "Cloud") {
+        this.profile.status = social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
+      } else if (typeof this.profile.status === "undefined") {
         this.profile.status = social.UserStatus.FRIEND;
       }
       this.saveToStorage();
@@ -495,7 +497,14 @@ var log :logging.Log = new logging.Log('remote-user');
         this.knownPublicKeys = state.knownPublicKeys;
       }
 
-      this.profile.status = state.status || social.UserStatus.FRIEND;
+      if (typeof state.status === "undefined" &&
+          this.network.name === "Cloud") {
+        this.profile.status = social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
+      } else if (typeof state.status === "undefined") {
+        this.profile.status = social.UserStatus.FRIEND;
+      } else {
+        this.profile.status = state.status;
+      }
 
       // Restore all instances.
       var onceLoadedPromises :Promise<void>[] = [];

@@ -56,6 +56,7 @@ export class Model {
     description: '',
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
+    hasSeenMetrics: false,
     hasSeenWelcome: false,
     splashState : 0,
     mode : ui_constants.Mode.GET,
@@ -85,7 +86,7 @@ export class Model {
       var userCategories = user.getCategories();
       categorizeUser(user, this.contacts.getAccessContacts,
                      userCategories.getTab, null);
-      if (user.network.name !== "Cloud") {
+      if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
         categorizeUser(user, this.contacts.shareAccessContacts,
                        userCategories.shareTab, null);
       }
@@ -218,6 +219,9 @@ export class UserInterface implements ui_constants.UiApi {
   // TODO: Remove this when we switch completely to a roster-before-login flow.
   public showRosterBeforeLogin:boolean = false;
 
+  // Please note that this value is updated periodically so may not reflect current reality.
+  private isConnectedToCellular_ :boolean = false;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -295,6 +299,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.stoppedGetting(data);
     });
 
+    var checkConnectivityIntervalId = -1;
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
         (instanceId :string) => {
       // TODO (lucyhe): Update instancesGivingAccessTo before calling
@@ -309,6 +314,9 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = true;
       this.showNotification(this.i18n_t("STARTED_PROXYING",
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
+      checkConnectivityIntervalId = setInterval(
+          this.notifyUserIfConnectedToCellular_,
+          5 * 60 * 1000);
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND,
@@ -336,6 +344,11 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
+      if (checkConnectivityIntervalId !== -1 && Object.keys(this.instancesGivingAccessTo).length === 0) {
+        clearInterval(checkConnectivityIntervalId);
+        checkConnectivityIntervalId = -1;
+        this.isConnectedToCellular_ = false;
+      }
     });
 
     core.onUpdate(uproxy_core_api.Update.FAILED_TO_GIVE,
@@ -395,6 +408,18 @@ export class UserInterface implements ui_constants.UiApi {
         .then(this.browserApi.handlePopupLaunch);
   }
 
+  private notifyUserIfConnectedToCellular_ = () => {
+    this.browserApi.isConnectedToCellular().then((isConnectedToCellular) => {
+      if (isConnectedToCellular && !this.isConnectedToCellular_) {
+        this.showNotification('Your friend is proxying through your cellular network which could'
+          + ' incur charges.');
+      }
+      this.isConnectedToCellular_ = isConnectedToCellular;
+    }, function(reason) {
+      console.log('Could not check if connected to cellular or not. reason: ' + reason);
+    });
+  }
+
   // Because of an observer (in root.ts) watching the value of
   // signalToFire, this function simulates firing a core-signal
   // from the background page.
@@ -448,7 +473,8 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public showDialog(heading :string, message :string, buttonText ?:string, signal ?:string) {
+  public showDialog(heading :string, message :string, buttonText ?:string,
+      signal ?:string, displayData ?:string) {
     var button :ui_constants.DialogButtonDescription = {
       text: buttonText || this.i18n_t("OK")
     };
@@ -458,7 +484,8 @@ export class UserInterface implements ui_constants.UiApi {
     this.fireSignal('open-dialog', {
       heading: heading,
       message: message,
-      buttons: [button]
+      buttons: [button],
+      displayData: displayData || null
     });
   }
 
@@ -1045,7 +1072,7 @@ export class UserInterface implements ui_constants.UiApi {
     // Update the user's category in both get and share tabs.
     categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-    if (user.network.name !== "Cloud") {
+    if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
       categorizeUser(user, this.model.contacts.shareAccessContacts,
           oldUserCategories.shareTab, newUserCategories.shareTab);
     }
@@ -1346,7 +1373,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public i18nSanitizeHtml = (i18nMessage :string) => {
     // Remove all HTML other than supported tags like strong, a, p, etc.
-    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br)))[^>]+)>/g, '');
+    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 } // class UserInterface
 

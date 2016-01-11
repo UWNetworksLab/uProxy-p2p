@@ -197,22 +197,28 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     if (newSettings.stunServers.length === 0) {
       newSettings.stunServers = globals.DEFAULT_STUN_SERVERS;
     }
+    var oldDescription = globals.settings.description;
     globals.storage.save('globalSettings', newSettings)
       .catch((e) => {
         log.error('Could not save globalSettings to storage', e.stack);
       });
 
-    // Clear the existing servers and add in each new server.
-    // Trying globalSettings = newSettings does not correctly update
-    // pre-existing references to stunServers (e.g. from RemoteInstances).
-    globals.settings.stunServers
-        .splice(0, globals.settings.stunServers.length);
-    for (var i = 0; i < newSettings.stunServers.length; ++i) {
-      globals.settings.stunServers.push(newSettings.stunServers[i]);
-    }
+    _.merge(globals.settings, newSettings, (a :Object, b :Object) => {
+        // ensure we do not merge the arrays and that the reference remains intact
+        if (_.isArray(a) && _.isArray(b)) {
+          var arrayA = <Object[]>a;
+          arrayA.splice(0, arrayA.length);
+          for (var i in b) {
+            arrayA.push((<Object[]>b)[i]);
+          }
+          return a;
+        }
 
-    if (newSettings.description != globals.settings.description) {
-      globals.settings.description = newSettings.description;
+        // this causes us to fall back to the default merge behaviour
+        return undefined;
+    });
+
+    if (globals.settings.description !== oldDescription) {
       // Resend instance info to update description for logged in networks.
       for (var networkName in social_network.networks) {
         for (var userId in social_network.networks[networkName]) {
@@ -221,21 +227,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       }
     }
 
-    globals.settings.hasSeenSharingEnabledScreen =
-        newSettings.hasSeenSharingEnabledScreen;
-    globals.settings.hasSeenWelcome = newSettings.hasSeenWelcome;
-    globals.settings.allowNonUnicast = newSettings.allowNonUnicast;
-    globals.settings.mode = newSettings.mode;
-    globals.settings.statsReportingEnabled = newSettings.statsReportingEnabled;
-    globals.settings.splashState = newSettings.splashState;
-    globals.settings.consoleFilter = newSettings.consoleFilter;
     loggingController.setDefaultFilter(
       loggingTypes.Destination.console,
       globals.settings.consoleFilter);
-    globals.settings.language = newSettings.language;
-    globals.settings.force_message_version = newSettings.force_message_version;
-    globals.settings.quiverUserName = newSettings.quiverUserName;
-    globals.settings.showCloud = newSettings.showCloud;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
@@ -317,7 +311,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.inviteUser(data.userName);
   }
 
-  public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
+  public acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void> => {
     var networkName = data.network.name;
     var networkUserId = data.network.userId;
     if (!networkUserId) {
@@ -329,9 +323,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.acceptInvitation(data.token, data.userId);
   }
 
-  public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
-    var network = social_network.networks[networkInfo.name][networkInfo.userId];
-    return network.getInviteUrl();
+  public getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {
+    var network = social_network.networks[data.network.name][data.network.userId];
+    return network.getInviteUrl(data.userId || '');
   }
 
   public sendEmail = (data :uproxy_core_api.EmailData) : void => {

@@ -12,7 +12,7 @@ Polymer({
       name: selectedNetwork.name,
       userId: selectedNetwork.userId
     };
-    return core.getInviteUrl(info).then((inviteUrl:string) => {
+    return core.getInviteUrl({ network: info }).then((inviteUrl:string) => {
       this.inviteUrl = inviteUrl;
       return selectedNetwork;
     });
@@ -67,14 +67,25 @@ Polymer({
   },
   openInviteUserPanel: function() {
     this.inviteUrl = '';
-    this.$.networkInviteUserPanel.open();
+    if (this.network === 'Quiver') {
+      this.generateInviteUrl('Quiver').then(() => {
+        this.$.QuiverDialog.open();
+      });
+    } else {
+      this.$.networkInviteUserPanel.open();
+    }
   },
   closeInviteUserPanel: function() {
     this.$.networkInviteUserPanel.close();
+    this.$.QuiverDialog.close();
   },
   showAcceptUserInvite: function() {
     this.closeInviteUserPanel();
     this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
+  },
+  select: function(e :Event, d :Object, input :HTMLInputElement) {
+    input.focus();
+    input.select();
   },
   ready: function() {
     this.inviteUrl = '';

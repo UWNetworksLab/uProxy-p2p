@@ -3,6 +3,7 @@
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
+<link rel='import' href='dialog.html'>
 <link rel="import" href="i18n-filter.html">
 
 <polymer-element name='uproxy-network-invite-user' attributes="network">
@@ -26,10 +27,10 @@
         letter-spacing: .3px;
         margin-top: 0px;
       }
-      paper-input-decorator {
+      core-overlay paper-input-decorator {
         font-size: 16px;
       }
-      paper-input-decorator /deep/ .underline div {
+      core-overlay paper-input-decorator /deep/ .underline div {
         background-color: #dddddd !important;
       }
       .section {
@@ -55,6 +56,11 @@
       }
       uproxy-button.Cloud {
         background: #0073e6;
+      }
+      uproxy-action-dialog h1 {
+        font-size: 1.4em;
+        color: #009688;
+        font-weight: normal;
       }
     </style>
 
@@ -112,6 +118,16 @@
       </div>
 
     </core-overlay>
+
+    <uproxy-action-dialog backdrop layered="false" id="QuiverDialog">
+      <h1>{{ 'QUIVER_LINK_INSTRUCTIONS' | $$ }}</h1>
+      <div hidden?='{{ inviteUrl == "" }}'>
+        <paper-input-decorator layout vertical>
+          <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+        </paper-input-decorator>
+      </div>
+      <uproxy-button affirmative>{{ 'OK' | $$ }}</uproxy-button>
+    </uproxy-action-dialog>
 
   </template>
   <script src='network-invite-user.js'></script>
