@@ -58,7 +58,7 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.6.3",
-    "uproxy-lib": "^35.1.0",
+    "uproxy-lib": "^36.0.0",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
   },
