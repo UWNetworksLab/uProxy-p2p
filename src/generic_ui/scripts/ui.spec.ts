@@ -77,7 +77,6 @@ describe('UI.UserInterface', () => {
         userId: userId,
         name: userName,
         imageData: 'testImageData',
-        isOnline: true
       },
       allInstanceIds: [instanceId],
       offeringInstances: [],
