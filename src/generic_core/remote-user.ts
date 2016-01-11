@@ -379,10 +379,13 @@ var log :logging.Log = new logging.Log('remote-user');
       for (var instanceId in this.instances_) {
         allInstanceIds.push(instanceId);
         var instance = this.instances_[instanceId];
+        var instanceStateForUi = instance.currentStateForUi();
         if (instance.wireConsentFromRemote.isOffering) {
-          offeringInstanceStatesForUi.push(instance.currentStateForUi());
+          offeringInstanceStatesForUi.push(instanceStateForUi);
         }
-        if (!isOnline && this.isInstanceOnline(instanceId)) {
+        console.log("here isSharingDisabled" + instance.wireConsentFromRemote.isSharingDisabled);
+        if (!isOnline && this.isInstanceOnline(instanceId) &&
+            !instance.wireConsentFromRemote.isSharingDisabled) {
           isOnline = true;
         }
         if (instance.isSharing()) {
@@ -564,7 +567,8 @@ var log :logging.Log = new logging.Log('remote-user');
             description: globals.settings.description,
             consent: {
               isRequesting: this.consent.localRequestsAccessFromRemote,
-              isOffering: this.consent.localGrantsAccessToRemote
+              isOffering: this.consent.localGrantsAccessToRemote,
+              isSharingDisabled: true
             },
             name: myInstance.userName,
             userId: myInstance.userId

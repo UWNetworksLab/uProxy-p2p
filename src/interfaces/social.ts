@@ -162,6 +162,7 @@ export interface VersionedPeerMessage extends PeerMessage {
 export interface ConsentWireState {
   isRequesting :boolean;
   isOffering   :boolean;
+  isSharingDisabled: boolean;
 }
 
 /**

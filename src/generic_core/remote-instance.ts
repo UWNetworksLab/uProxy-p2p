@@ -60,7 +60,8 @@ import ui = ui_connector.connector;
     // local instance of uProxy.
     public wireConsentFromRemote :social.ConsentWireState = {
       isRequesting: false,
-      isOffering: false
+      isOffering: false,
+      isSharingDisabled: globals.settings.shareOverWifiOnly
     };
 
     // Used to prevent saving state while we have not yet loaded the state
@@ -314,6 +315,11 @@ import ui = ui_connector.connector;
         return Promise.reject(Error('Lacking permission to proxy'));
       }
 
+      if (this.wireConsentFromRemote.isSharingDisabled) {
+        log.warn('Sharing is disabled');
+        return Promise.reject(Error('Sharing is disabled'));
+      }
+
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
       this.startSocksToRtcTimeout_ = setTimeout(() => {
         log.warn('Timing out socksToRtc_ connection');
@@ -364,8 +370,9 @@ import ui = ui_connector.connector;
 
     private updateConsentFromWire_ = (bits :social.ConsentWireState) => {
       var userConsent = this.user.consent;
+      console.log("here consent" + bits.isSharingDisabled);
 
-      if (!bits.isOffering &&
+      if ((!bits.isOffering || bits.isSharingDisabled) &&
           this.connection_.localGettingFromRemote === social.GettingState.TRYING_TO_GET_ACCESS) {
         // if we lose the ability to get, cancel any pending gets
         clearTimeout(this.startSocksToRtcTimeout_);

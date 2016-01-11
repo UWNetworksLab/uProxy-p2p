@@ -375,6 +375,14 @@
     "description": "Text that appears in a tooltip when the user hovers over the sharing icon.",
     "message": "You are available for sharing."
   },
+  "SHARING_OVER_WIFI_ONLY_TITLE": {
+    "description": "The user has elected to share access over wi-fi only.",
+    "message": "Share over Wi-Fi only."
+  },
+  "SHARING_SETTINGS": {
+    "description": "Sharing settings.",
+    "message": "Sharing settings"
+  },
   "GET_ACCESS": {
     "description": "Text for the tab on the toolbar. When the user is on the 'Get Access' tab, they are looking to get access to the Internet through a friend.",
     "message": "Get Access"

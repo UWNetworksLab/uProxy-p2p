@@ -160,7 +160,7 @@ describe('remote_user.User', () => {
         type: social.PeerMessageType.INSTANCE,
         data: {
           instanceId: 'instanceId', description: '', publicKey: '',
-          consent: {isOffering: false, isRequesting: false}
+          consent: {isOffering: false, isRequesting: false, isSharingDisabled: false}
         },
         version: globals.MESSAGE_VERSION
       });
@@ -185,7 +185,7 @@ describe('remote_user.User', () => {
     instanceId: 'fakeinstance',
     publicKey: <string>null,
     description: 'fake instance',
-    consent: {isRequesting: false, isOffering: false},
+    consent: {isRequesting: false, isOffering: false, isSharingDisabled: false},
     name: 'nameFromInstance',
     userId: 'userIdFromInstance'
   }
@@ -253,7 +253,7 @@ describe('remote_user.User', () => {
       expect(pendingUser.name).toEqual('pending');
       pendingUser.syncInstance_('fakeclient', {
         instanceId: 'fakeinstance', publicKey: <string>null, description: 'x',
-        consent: {isRequesting: false, isOffering: false},
+        consent: { isRequesting: false, isOffering: false, isSharingDisabled: false},
         name: '', userId: 'userIdFromInstance'
       }, globals.MESSAGE_VERSION);
       expect(pendingUser.name).toEqual('userIdFromInstance');
