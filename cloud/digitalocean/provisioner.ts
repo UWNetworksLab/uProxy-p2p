@@ -45,22 +45,26 @@ class Provisioner {
    * One-click setup of a VM
    * See freedom-module.json for return and error types
    * @param {String} name of VM to create
+   * @param {String} region to create VM in
    * @return {Promise.<Object>}
    */
-  public start = (name: string) : Promise<Object> => {
+  public start = (name: string, region?: string) : Promise<Object> => {
     this.sendStatus_("START");
     // Do oAuth
     return this.doOAuth_().then((oauthObj: any) => {
       this.state_.oauth = oauthObj;
       return this.getSshKey_(name);
-    // Get SSH keys
+      // Get SSH keys
     }).then((keys: KeyPair) => {
       this.state_.ssh = keys;
-      return this.setupDigitalOcean_(name);
-    // Setup Digital Ocean (SSH key + droplet)
+      if (typeof region === "undefined") {
+        region = "nyc3";
+      }
+      return this.setupDigitalOcean_(name, region);
+      // Setup Digital Ocean (SSH key + droplet)
     }).then(() => {
       return this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id);
-    // Get the droplet's configuration
+      // Get the droplet's configuration
     }).then((resp: any) => {
       this.sendStatus_("CLOUD_DONE_VM");
       this.state_.cloud.vm = resp.droplet;
@@ -149,18 +153,18 @@ class Provisioner {
       this.sendStatus_("OAUTH_INIT");
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
         var url = "https://cloud.digitalocean.com/v1/oauth/authorize?" +
-                  "client_id=c16837b5448cd6cf2582d2c2f767cfb7d11844ec395a91b43f26ca72513416c8&" +
-                  "response_type=token&" +
-                  "redirect_uri=" + encodeURIComponent(obj.redirect) + "&" +
-                  "state=" + encodeURIComponent(obj.state) + "&" +
-                  "scope=read%20write";
+          "client_id=c16837b5448cd6cf2582d2c2f767cfb7d11844ec395a91b43f26ca72513416c8&" +
+          "response_type=token&" +
+          "redirect_uri=" + encodeURIComponent(obj.redirect) + "&" +
+          "state=" + encodeURIComponent(obj.state) + "&" +
+          "scope=read%20write";
         return oauth.launchAuthFlow(url, obj);
       }).then((responseUrl: string) => {
         var query = responseUrl.substr(responseUrl.indexOf('#') + 1),
-            param: string,
-            params: { [k: string]: string } = {},
-            keys = query.split('&'),
-            i = 0;
+        param: string,
+        params: { [k: string]: string } = {},
+        keys = query.split('&'),
+        i = 0;
         for (i = 0; i < keys.length; i++) {
           param = keys[i].substr(0, keys[i].indexOf('='));
           params[param] = keys[i].substr(keys[i].indexOf('=') + 1);
@@ -194,7 +198,7 @@ class Provisioner {
         storage.get("DigitalOcean-" + name + "-PrivateKey")
       ]).then((val: string[]) => {
         if (val[0] === null ||
-          val[1] === null) {
+            val[1] === null) {
           result = Provisioner.generateKeyPair_();
           storage.set("DigitalOcean-" + name + "-PublicKey", result.public);
           storage.set("DigitalOcean-" + name + "-PrivateKey", result.private);
@@ -220,7 +224,7 @@ class Provisioner {
    * @return {Promise.<Object>} - JSON object of response body
    */
   private doRequest_ = (method: string, actionPath: string, body?: string) :
-      Promise<Object> => {
+  Promise<Object> => {
     return new Promise((F, R) => {
       var url = 'https://api.digitalocean.com/v2/' + actionPath;
       var xhr = freedom["core.xhr"]();
@@ -274,9 +278,11 @@ class Provisioner {
    * This method will use this.waitDigitalOceanActions_() to wait until all actions complete
    * before resolving
    * @param {String} name of droplet
+   * @param {String} region to create VM in
    * @return {Promise.<void>} resolves on success, rejects on failure
    */
-  private setupDigitalOcean_ = (name: string) : Promise<void> => {
+  private setupDigitalOcean_ = (name: string, region: string) :
+  Promise<void> => {
     return new Promise<void>((F, R) => {
       this.state_.cloud = {};
       this.sendStatus_("CLOUD_INIT_ADDKEY");
@@ -294,13 +300,13 @@ class Provisioner {
           name: name,
           public_key: this.state_.ssh.public
         }));
-      // If missing, put SSH key into account
+        // If missing, put SSH key into account
       }).then((resp: any) => {
         this.state_.cloud.ssh = resp.ssh_key;
         this.sendStatus_("CLOUD_DONE_ADDKEY");
         this.sendStatus_("CLOUD_INIT_VM");
         return this.doRequest_("GET", "droplets");
-      // Get list of droplets
+        // Get list of droplets
       }).then((resp: any) => {
         for (var i = 0; i < resp.droplets.length; i++) {
           if (resp.droplets[i].name === name) {
@@ -312,12 +318,12 @@ class Provisioner {
         }
         return this.doRequest_("POST", "droplets", JSON.stringify({
           name: name,
-          region: "nyc3",
+          region: region,
           size: "512mb",
           image: "ubuntu-14-04-x64",
           ssh_keys: [ this.state_.cloud.ssh.id ]
         }));
-      // If missing, create the droplet
+        // If missing, create the droplet
       }).then((resp: any) => {
         this.state_.cloud.vm = resp.droplet;
         if (resp.droplet.status == "off") {
@@ -330,11 +336,11 @@ class Provisioner {
         } else {
           return Promise.resolve();
         }
-      // If the machine exists, but powered off, turn it on
+        // If the machine exists, but powered off, turn it on
       }).then((resp: any) => {
         this.sendStatus_("CLOUD_WAITING_VM");
         this.waitDigitalOceanActions_().then(F, R);
-      // Wait for all in-progress actions to complete
+        // Wait for all in-progress actions to complete
       }).catch((err: Error) => {
         console.error("Error w/DigitalOcean: " + err);
         this.sendStatus_("CLOUD_FAILED");

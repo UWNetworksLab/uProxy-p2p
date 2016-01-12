@@ -14,7 +14,7 @@
       "constructor": { "value": [ ] },
       "start": {
         "type": "method",
-        "value": [ "string" ],
+        "value": [ "string", "string" ],
         "ret": {
           "oauth": {
             "access_token": "string",
