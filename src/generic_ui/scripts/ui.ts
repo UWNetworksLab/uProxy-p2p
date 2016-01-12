@@ -20,8 +20,8 @@ import User = user_module.User;
 import social = require('../../interfaces/social');
 import Constants = require('./constants');
 import translator_module = require('./translator');
-import _ = require('lodash');
 import network_options = require('../../generic/network-options');
+import model = require('./model');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
@@ -33,124 +33,9 @@ var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 // different sizes of icons, the actual filenames have the dimension
 // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
 
-export class Model {
-  public networkNames :string[] = [];
-
-  public onlineNetworks :Network[] = [];
-
-  public contacts :Contacts = {
-    getAccessContacts: {
-      pending: [],
-      trustedUproxy: [],
-      untrustedUproxy: [],
-    },
-    shareAccessContacts: {
-      pending: [],
-      trustedUproxy: [],
-      untrustedUproxy: [],
-    }
-  };
-
-  public globalSettings :uproxy_core_api.GlobalSettings = {
-    version: 0,
-    description: '',
-    stunServers: [],
-    hasSeenSharingEnabledScreen: false,
-    hasSeenMetrics: false,
-    hasSeenWelcome: false,
-    splashState : 0,
-    mode : ui_constants.Mode.GET,
-    allowNonUnicast: false,
-    statsReportingEnabled: false,
-    consoleFilter: 0,
-    language: 'en',
-    force_message_version: 0,
-    quiverUserName: '',
-    showCloud: false
-  };
-
-  public reconnecting = false;
-
-  // userId is included as an optional parameter because we will eventually
-  // want to use it to get an accurate network.  For now, it is ignored and
-  // serves to remind us of where we still need to add the info
-  public getNetwork = (networkName :string, userId?:string) :Network => {
-    return _.find(this.onlineNetworks, { name: networkName });
-  }
-
-  public removeNetwork = (networkName :string, userId :string) => {
-    var network = this.getNetwork(networkName, userId);
-
-    for (var otherUserId in network.roster) {
-      var user = this.getUser(network, otherUserId);
-      var userCategories = user.getCategories();
-      categorizeUser(user, this.contacts.getAccessContacts,
-                     userCategories.getTab, null);
-      if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
-        categorizeUser(user, this.contacts.shareAccessContacts,
-                       userCategories.shareTab, null);
-      }
-    }
-
-    _.remove(this.onlineNetworks, { name: networkName });
-  }
-
-  public getUser = (network :Network, userId :string) :User => {
-    if (network.roster[userId]) {
-      return network.roster[userId];
-    }
-
-    return null;
-  }
-
-  public updateGlobalSettings = (settings :Object) => {
-    _.merge(this.globalSettings, settings, (a :any, b :any) => {
-      if (_.isArray(a) && _.isArray(b)) {
-        return b;
-      }
-
-      return undefined;
-    });
-  }
-
-  public hasQuiverSupport() {
-    return _.indexOf(this.networkNames, 'Quiver') != -1;
-  }
-}
-
-export interface ContactCategory {
-  [type :string] :User[];
-  pending :User[];
-  trustedUproxy :User[];
-  untrustedUproxy :User[];
-}
-
-export interface Contacts {
-  getAccessContacts :ContactCategory;
-  shareAccessContacts :ContactCategory;
-}
-
 export interface UserCategories {
   getTab :string;
   shareTab :string;
-}
-
-interface PromiseCallbacks {
-  fulfill :Function;
-  reject :Function;
-}
-
-/**
- * Specific to one particular Social network.
- */
-export interface Network {
-  name :string;
-  // TODO(salomegeo): Add more information about the user.
-  userId :string;
-  imageData ?:string;
-  userName ?:string;
-  logoutExpected: boolean;
-  roster :{ [userId:string] :User };
 }
 
 export interface NotificationData {
@@ -158,6 +43,11 @@ export interface NotificationData {
   network :string;
   user :string;
   unique ?:string;
+}
+
+interface PromiseCallbacks {
+  fulfill :Function;
+  reject :Function;
 }
 
 /**
@@ -170,7 +60,7 @@ export interface NotificationData {
  */
 export class UserInterface implements ui_constants.UiApi {
   public view :ui_constants.View;
-  public model = new Model();
+  public model = new model.Model();
 
   /* Instance management */
   // Instance you are getting access from. Null if you are not getting access.
@@ -1070,10 +960,11 @@ export class UserInterface implements ui_constants.UiApi {
 
     var newUserCategories = user.getCategories();
     // Update the user's category in both get and share tabs.
-    categorizeUser(user, this.model.contacts.getAccessContacts,
+    model.categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
+
     if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
-      categorizeUser(user, this.model.contacts.shareAccessContacts,
+      model.categorizeUser(user, this.model.contacts.shareAccessContacts,
           oldUserCategories.shareTab, newUserCategories.shareTab);
     }
     this.updateBadgeNotification_();
@@ -1376,31 +1267,3 @@ export class UserInterface implements ui_constants.UiApi {
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 } // class UserInterface
-
-// non-exported method to handle categorizing users
-function categorizeUser(user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) {
-  if (oldCategory === newCategory) {
-    // no need to do any work if nothing changed
-    return;
-  }
-
-  if (oldCategory) {
-    // remove user from old category
-    var oldCategoryArray = contacts[oldCategory];
-    for (var i = 0; i < oldCategoryArray.length; ++i) {
-      if (oldCategoryArray[i] == user) {
-        oldCategoryArray.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  if (newCategory) {
-    // add user to new category
-    contacts[newCategory].push(user);
-    if (user.status == social.UserStatus.LOCAL_INVITED_BY_REMOTE) {
-      user.getExpanded = true;
-      user.shareExpanded = true;
-    }
-  }
-}
