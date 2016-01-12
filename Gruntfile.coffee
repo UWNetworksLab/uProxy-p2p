@@ -140,6 +140,60 @@ backendThirdPartyBuildPaths = [
   'uproxy-lib/cloud/social'
 ]
 
+getWithBasePath = (files, base = '') ->
+  for file in files
+    if file[0] == '!'
+      '!' + path.join(base, file[1..])
+    else
+      path.join(base, file)
+
+uiDistFiles = [
+  'generic_ui/*.html'
+  'generic_ui/style/*.css'
+  'generic_ui/polymer/vulcanized*.{html,js}'
+  'generic_ui/fonts/*'
+  'generic_ui/icons/*'
+]
+
+coreDistFiles = [
+  'fonts/*'
+  '*.html' # technically does not exist in Firefox
+
+  'freedomjs-anonymized-metrics/anonmetrics.json'
+  'freedomjs-anonymized-metrics/metric.js'
+  'freedom-social-github/social.github.json'
+  'freedom-social-github/github-social-provider.js'
+  'freedom-social-firebase/social.firebase-facebook.json'
+  'freedom-social-firebase/social.firebase-google.json'
+  'freedom-social-firebase/firebase-shims.js'
+  'freedom-social-firebase/firebase.js'
+  'freedom-social-firebase/firebase-social-provider.js'
+  'freedom-social-firebase/facebook-social-provider.js'
+  'freedom-social-firebase/google-social-provider.js'
+  'freedom-social-firebase/google-auth.js'
+  'freedom-port-control/port-control.js'
+  'freedom-port-control/port-control.json'
+  'freedom-pgp-e2e/end-to-end.compiled.js'
+  'freedom-pgp-e2e/googstorage.js'
+  'freedom-pgp-e2e/e2e.js'
+  'freedom-pgp-e2e/pgpapi.json'
+
+  '**/freedom-module.json'
+  '**/*.static.js'
+]
+
+# this should always be added to the array last
+universalDistFiles = [
+  'icons/*'
+  'bower/webcomponentsjs/webcomponents.min.js'
+  'bower/polymer/polymer.js'
+
+  '!generic_core/freedom-module.json' # not actually needed for the UI builds
+  '!generic_ui/polymer/vulcanized*inline.html'
+  '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+  '!**/*spec*'
+]
+
 gruntConfig = {
   pkg: readJSONFile('package.json')
   pkgs:
@@ -308,29 +362,14 @@ gruntConfig = {
           cwd: chromeExtDevPath
           src: [
             'manifest.json'
-
-            'bower/webcomponentsjs/webcomponents.min.js'
-            'bower/polymer/polymer.js'
-
-            'generic_ui/*.html'
-            'generic_ui/polymer/vulcanized*.{html,js}'
-            '!generic_ui/polymer/vulcanized*inline.html'
-            '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+            '_locales/**'
 
             'generic_ui/scripts/copypaste.js'
             'generic_ui/scripts/get_logs.js'
             'scripts/context.static.js'
             'scripts/background.static.js'
-            '!**/*spec*'
-
-            'generic_ui/style/*.css'
-
-            # extra components we use
-            'generic_ui/fonts/*'
-            'generic_ui/icons/*'
-            'icons/*'
-            '_locales/**'
-          ]
+          ].concat uiDistFiles
+            .concat universalDistFiles
           dest: 'build/dist/chrome/extension'
         }
         { # Chrome app
@@ -338,45 +377,15 @@ gruntConfig = {
           cwd: chromeAppDevPath
           src: [
             'manifest.json'
-            '*.html'
-
-            'bower/webcomponentsjs/webcomponents.min.js'
-            'bower/polymer/polymer.js'
+            '_locales/**'
 
             # UI for not-connected
             # This is not browserified so we use .js instead of .static.js
             'polymer/vulcanized.{html,js}'
 
-            # actual scripts that run things
-            'freedomjs-anonymized-metrics/anonmetrics.json'
-            'freedomjs-anonymized-metrics/metric.js'
             'freedom-for-chrome/freedom-for-chrome.js'
-            'freedom-social-github/social.github.json'
-            'freedom-social-github/github-social-provider.js'
-            'freedom-social-firebase/social.firebase-facebook.json'
-            'freedom-social-firebase/social.firebase-google.json'
-            'freedom-social-firebase/firebase-shims.js'
-            'freedom-social-firebase/firebase.js'
-            'freedom-social-firebase/firebase-social-provider.js'
-            'freedom-social-firebase/facebook-social-provider.js'
-            'freedom-social-firebase/google-social-provider.js'
-            'freedom-social-firebase/google-auth.js'
-            'freedom-port-control/port-control.js'
-            'freedom-port-control/port-control.json'
-            'freedom-pgp-e2e/end-to-end.compiled.js'
-            'freedom-pgp-e2e/googstorage.js'
-            'freedom-pgp-e2e/e2e.js'
-            'freedom-pgp-e2e/pgpapi.json'
-
-            '**/freedom-module.json'
-            '!generic_core/freedom-module.json'
-            '**/*.static.js'
-            '!**/*spec*'
-
-            'icons/*'
-            'fonts/*'
-            '_locales/**'
-          ]
+          ].concat coreDistFiles
+            .concat universalDistFiles
           dest: 'build/dist/chrome/app'
         }
         { # Chrome app freedom-module
@@ -394,48 +403,13 @@ gruntConfig = {
             # addon sdk scripts
             'lib/**/*.js'
 
-            'data/freedomjs-anonymized-metrics/anonmetrics.json'
-            'data/freedomjs-anonymized-metrics/metric.js'
-            'data/freedom-for-firefox/freedom-for-firefox.jsm'
-            'data/freedom-social-github/social.github.json'
-            'data/freedom-social-github/github-social-provider.js'
-            'data/freedom-social-firebase/social.firebase-facebook.json'
-            'data/freedom-social-firebase/social.firebase-google.json'
-            'data/freedom-social-firebase/firebase-shims.js'
-            'data/freedom-social-firebase/firebase.js'
-            'data/freedom-social-firebase/firebase-social-provider.js'
-            'data/freedom-social-firebase/facebook-social-provider.js'
-            'data/freedom-social-firebase/google-social-provider.js'
-            'data/freedom-social-firebase/google-auth.js'
-            'data/freedom-port-control/port-control.js'
-            'data/freedom-port-control/port-control.json'
-            'data/freedom-pgp-e2e/end-to-end.compiled.js'
-            'data/freedom-pgp-e2e/googstorage.js'
-            'data/freedom-pgp-e2e/e2e.js'
-            'data/freedom-pgp-e2e/pgpapi.json'
-
-            'data/**/freedom-module.json'
-            '!generic_core/freedom-module.json'
-            'data/**/*.static.js'
             'data/generic_ui/scripts/get_logs.js'
             'data/scripts/content-proxy.js'
-            '!**/*spec*'
 
-            'data/bower/webcomponentsjs/webcomponents.min.js'
-            'data/bower/polymer/polymer.js'
-
-            'data/generic_ui/*.html'
-            'data/generic_ui/polymer/vulcanized*.{html,js}'
-            '!data/generic_ui/polymer/vulcanized*inline.html'
-            '!data/generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
-
-            'data/generic_ui/style/*.css'
-
-            'data/fonts/*'
-            'data/icons/*'
-            'data/generic_ui/fonts/*'
-            'data/generic_ui/icons/*'
-          ]
+            'data/freedom-for-firefox/freedom-for-firefox.jsm'
+          ].concat getWithBasePath(uiDistFiles, 'data')
+            .concat getWithBasePath(coreDistFiles, 'data')
+            .concat getWithBasePath(universalDistFiles, 'data')
           dest: 'build/dist/firefox'
         }
         { # Firefox freedom-module
@@ -450,60 +424,21 @@ gruntConfig = {
           src: [
             'manifest.json'
             'config.xml'
-            '*.html'
-
-            'bower/webcomponentsjs/webcomponents.min.js'
-            'bower/polymer/polymer.js'
-
-            'generic_ui/*.html'
-            'generic_ui/polymer/vulcanized*.{html,js}'
-            '!generic_ui/polymer/vulcanized*inline.html'
-            '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
-
-            'generic_ui/scripts/copypaste.js'
-            'generic_ui/scripts/get_logs.js'
-            '!**/*spec*'
-
-            'generic_ui/style/*.css'
-
-            # extra components we use
-            'generic_ui/fonts/*'
-            'generic_ui/icons/*'
 
             # This is not browserified so we use .js instead of .static.js
             'polymer/vulcanized.{html,js}'
 
-            # actual scripts that run things
-            # Only the Gmail and Quiver social providers seem to work on Android, so the
-            # others have been removed from this list.
-            'freedomjs-anonymized-metrics/anonmetrics.json'
-            'freedomjs-anonymized-metrics/metric.js'
-            'freedom-for-chrome/freedom-for-chrome.js'
-            'freedom-social-github/social.github.json'
-            'freedom-social-github/github-social-provider.js'
-            'freedom-social-firebase/social.firebase-facebook.json'
-            'freedom-social-firebase/social.firebase-google.json'
-            'freedom-social-firebase/firebase-shims.js'
-            'freedom-social-firebase/firebase.js'
-            'freedom-social-firebase/firebase-social-provider.js'
-            'freedom-social-firebase/google-social-provider.js'
-            'freedom-social-firebase/google-auth.js'
+            'generic_ui/scripts/copypaste.js'
+            'generic_ui/scripts/get_logs.js'
+
+            # TODO move to universalDistFiles once supported on other platforms
             'freedom-social-quiver/socketio.quiver.json'
             'freedom-social-quiver/socketio.quiver.js'
-            'freedom-port-control/port-control.js'
-            'freedom-port-control/port-control.json'
-            'freedom-pgp-e2e/end-to-end.compiled.js'
-            'freedom-pgp-e2e/googstorage.js'
-            'freedom-pgp-e2e/e2e.js'
-            'freedom-pgp-e2e/pgpapi.json'
 
-            '**/freedom-module.json'
-            '!generic_core/freedom-module.json'
-            '**/*.static.js'
-
-            'icons/*'
-            'fonts/*'
-          ]
+            'freedom-for-chrome/freedom-for-chrome.js'
+          ].concat uiDistFiles
+            .concat coreDistFiles
+            .concat universalDistFiles
           dest: ccaDistPath
         }
         { # CCA dist freedom-module.json
