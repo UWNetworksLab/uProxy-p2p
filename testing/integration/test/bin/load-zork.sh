@@ -1,12 +1,14 @@
 #!/bin/bash
 
+. /etc/test.conf
+
 RUNVNC=false
 FOREVER=false
 LISTEN=false
 CLONEARGS=
 CLONESRC=https://github.com/uProxy/uproxy-lib.git
 PREBUILT=false
-while getopts b:r:lpvwh? opt; do
+while getopts b:r:lpvh? opt; do
     case $opt in
         b)
             CLONEARGS="$CLONEARGS -b $OPTARG"
@@ -20,9 +22,6 @@ while getopts b:r:lpvwh? opt; do
         v)
             RUNVNC=true
             ;;
-        w)
-            FOREVER=true
-            ;;
         l)
             LISTEN=true
             ;;
@@ -32,7 +31,6 @@ while getopts b:r:lpvwh? opt; do
             echo "  -r: REPO is the repository to clone instead of github.com/uProxy/uproxy-lib."
             echo "  -p: use a pre-built uproxy-lib repo (overrides -b and -r)."
             echo "  -v: run a vncserver (port 5900 in the instance)"
-            echo "  -w: after doing everything else, wait forever."
             echo "  -l: wait until the extension is listening."
             exit 1;
             ;;
@@ -59,8 +57,5 @@ if ! $PREBUILT; then
     ./setup.sh install
     grunt zork
 fi
-/test/bin/browser.sh /test/src/uproxy-lib/build/dev/uproxy-lib/samples/zork
 
-while $FOREVER; do
-    sleep 1
-done
+/usr/bin/supervisord -n -c /test/etc/supervisord-$BROWSER.conf
