@@ -62,9 +62,6 @@ class Provisioner {
       // Get SSH keys
     }).then((keys: KeyPair) => {
       this.state_.ssh = keys;
-      if (typeof region === "undefined") {
-        region = "nyc3";
-      }
       return this.setupDigitalOcean_(name, region);
       // Setup Digital Ocean (SSH key + droplet)
     }).then(() => {
