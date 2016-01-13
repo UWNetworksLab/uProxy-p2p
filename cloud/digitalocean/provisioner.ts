@@ -7,6 +7,10 @@ declare var forge: any;
 
 const POLL_TIMEOUT: number = 5000; //milliseconds
 
+// To see available regions:
+// https://developers.digitalocean.com/documentation/v2/#list-all-regions
+const DEFAULT_REGION: string = "nyc3";
+
 const STATUS_CODES: { [k: string]: string; } = {
   "START": "Starting provisioner",
   "OAUTH_INIT": "Initializing oauth flow",
@@ -48,7 +52,8 @@ class Provisioner {
    * @param {String} region to create VM in
    * @return {Promise.<Object>}
    */
-  public start = (name: string, region?: string) : Promise<Object> => {
+  public start = (name: string, region: string = DEFAULT_REGION) :
+      Promise<Object> => {
     this.sendStatus_("START");
     // Do oAuth
     return this.doOAuth_().then((oauthObj: any) => {
@@ -153,18 +158,18 @@ class Provisioner {
       this.sendStatus_("OAUTH_INIT");
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
         var url = "https://cloud.digitalocean.com/v1/oauth/authorize?" +
-          "client_id=c16837b5448cd6cf2582d2c2f767cfb7d11844ec395a91b43f26ca72513416c8&" +
-          "response_type=token&" +
-          "redirect_uri=" + encodeURIComponent(obj.redirect) + "&" +
-          "state=" + encodeURIComponent(obj.state) + "&" +
-          "scope=read%20write";
+            "client_id=c16837b5448cd6cf2582d2c2f767cfb7d11844ec395a91b43f26ca72513416c8&" +
+            "response_type=token&" +
+            "redirect_uri=" + encodeURIComponent(obj.redirect) + "&" +
+            "state=" + encodeURIComponent(obj.state) + "&" +
+            "scope=read%20write";
         return oauth.launchAuthFlow(url, obj);
       }).then((responseUrl: string) => {
         var query = responseUrl.substr(responseUrl.indexOf('#') + 1),
-        param: string,
-        params: { [k: string]: string } = {},
-        keys = query.split('&'),
-        i = 0;
+            param: string,
+            params: { [k: string]: string } = {},
+            keys = query.split('&'),
+            i = 0;
         for (i = 0; i < keys.length; i++) {
           param = keys[i].substr(0, keys[i].indexOf('='));
           params[param] = keys[i].substr(keys[i].indexOf('=') + 1);
@@ -224,7 +229,7 @@ class Provisioner {
    * @return {Promise.<Object>} - JSON object of response body
    */
   private doRequest_ = (method: string, actionPath: string, body?: string) :
-  Promise<Object> => {
+      Promise<Object> => {
     return new Promise((F, R) => {
       var url = 'https://api.digitalocean.com/v2/' + actionPath;
       var xhr = freedom["core.xhr"]();
