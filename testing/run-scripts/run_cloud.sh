@@ -118,7 +118,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   then
       RUNARGS="$RUNARGS -p"
   fi
-  docker run --restart=always --net=host  $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS
+  docker run --restart=always --net=host  $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS -n
 fi
 
 # Start sshd, if necessary.
