@@ -482,6 +482,12 @@ export function notifyUI(networkName :string, userId :string) {
         return Promise.resolve(true);
       }
 
+      if (this.myInstance.userId === client.userId &&
+          this.myInstance.clientId === client.clientId) {
+        // Received client for local instance.
+        return Promise.resolve(true);
+      }
+
       // Hack around ClientState type, as inviteResponse is only available
       // for Quiver and not checked into mainline freedom yet.
       var inviteResponse = (<any>client)['inviteResponse'];
