@@ -482,8 +482,8 @@ export function notifyUI(networkName :string, userId :string) {
         return Promise.resolve(true);
       }
 
-      if (this.myInstance.userId == client.userId &&
-          this.myInstance.clientId == client.clientId) {
+      if (this.myInstance.userId === client.userId &&
+          this.myInstance.clientId === client.clientId) {
         // Received client for local instance.
         return Promise.resolve(true);
       }
