@@ -539,8 +539,12 @@ export class UserInterface implements ui_constants.UiApi {
     if (networkName == 'Cloud') {
       // Cloud confirmation is the same regardless of whether the user is
       // logged into cloud yet.
-      return this.getConfirmation('', this.i18n_t('CLOUD_INVITE_CONFIRM'))
-      .then(() => {
+      this.toastMessage = this.i18n_t('CLOUD_INVITE_CONFIRM');
+      // no need to make the user confirm this, auto-accept the invite instead.
+      // the user pasting the invite link means they know what they're doing
+      // and just want to connect.
+      var getConfirmation = Promise.resolve<void>();
+      getConfirmation.then(() => {
         // Log into cloud if needed.
         var loginPromise = Promise.resolve<void>();
         if (!this.model.getNetwork('Cloud')) {
@@ -553,6 +557,7 @@ export class UserInterface implements ui_constants.UiApi {
           return this.addUser_(token, false).catch(showTokenError);
         });
       });
+      return getConfirmation;
     }
 
     if (this.model.getNetwork(networkName)) {

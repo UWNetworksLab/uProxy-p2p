@@ -785,7 +785,7 @@
   },
   "CLOUD_INVITE_CONFIRM" : {
     "description": "Confirmation message asking the user if they would like to add a cloud instance to their buddy list, which will connect them to a virtual machine.",
-    "message": "You've entered an experimental Cloud invitation. Accepting this invitation will connect you to a virtual machine. Would you like to accept?"
+    "message": "You're now being connected to a uProxy cloud server. Thanks for being one of our first testers of this experimental feature!"
   },
   "FRIEND_ADDED": {
     "description": "Confirmation message after adding a friend to the roster.",
