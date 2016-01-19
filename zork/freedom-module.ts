@@ -202,7 +202,7 @@ function give(
     log.info('%1: RtcToNet connected', connection.connectionId);
     connection.close();
   }, (e: Error) => {
-    log.error('%1: failed to start rtcToNet: %1',
+    log.error('%1: failed to start rtcToNet: %2',
         connection.connectionId, e.message);
     connection.close();
   });
