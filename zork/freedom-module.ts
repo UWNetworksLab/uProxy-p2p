@@ -199,7 +199,7 @@ function give(
   rtcToNet.start({
     allowNonUnicast: true
   }, bridge.best('rtctonet', pcConfig)).then(() => {
-    log.info('RtcToNet connected');
+    log.info('%1: RtcToNet connected', connection.connectionId);
     connection.close();
   }, (e: Error) => {
     log.error('%1: failed to start rtcToNet: %1',
