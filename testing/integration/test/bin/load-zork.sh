@@ -55,7 +55,7 @@ if [[! $PREBUILT ]] || $NPM; then
     mkdir -p /test/src
     cd /test/src
     npm install -g bower grunt-cli
-    if NPM; then
+    if $NPM; then
         npm install uproxy-lib
         cp -r node_modules/uproxy-lib .
         cd uproxy-lib
