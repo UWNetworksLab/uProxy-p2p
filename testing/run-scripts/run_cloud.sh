@@ -149,10 +149,8 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   echo -n "Waiting for Zork to come up..."
   while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
   echo "ready!"
-
-  if [ -z "$INVITE_CODE" ]
-  then
-    INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
-    echo "invite code: $INVITE_CODE"
-  fi
 fi
+
+# Output the invitation URL.
+INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
+echo "invite code: https://www.uproxy.org/invite/$INVITE_CODE"
