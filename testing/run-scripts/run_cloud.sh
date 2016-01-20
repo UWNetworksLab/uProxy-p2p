@@ -11,6 +11,7 @@
 set -e
 
 PREBUILT=
+NPM=false
 INVITE_CODE=
 REFRESH=false
 PUBLIC_IP=
@@ -21,6 +22,7 @@ SSHD_PORT=5000
 function usage () {
   echo "$0 [-p path] [-i invite code] [-r] [-d ip] [-b banner] browser-version"
   echo "  -p: path to pre-built uproxy-lib repository"
+  echo "  -n: install uproxy-lib from npm"
   echo "  -i: invite code"
   echo "  -r: recreate Docker images (WARNING: will invalidate invite codes)"
   echo "  -d: override the detected public IP (for development only)"
@@ -31,9 +33,10 @@ function usage () {
   exit 1
 }
 
-while getopts p:i:rd:b:h? opt; do
+while getopts p:n:i:rd:b:h? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
+    n) NPM=true ;;
     i) INVITE_CODE="$OPTARG" ;;
     r) REFRESH=true ;;
     d) PUBLIC_IP="$OPTARG" ;;
@@ -118,7 +121,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   then
       RUNARGS="$RUNARGS -p"
   fi
-  docker run --restart=always --net=host  $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS -n
+  docker run --restart=always --net=host  $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS
 fi
 
 # Start sshd, if necessary.

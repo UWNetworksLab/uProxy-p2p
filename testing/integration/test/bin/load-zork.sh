@@ -8,7 +8,8 @@ LISTEN=false
 CLONEARGS=
 CLONESRC=https://github.com/uProxy/uproxy-lib.git
 PREBUILT=false
-while getopts b:r:lpvh? opt; do
+NPM=false
+while getopts b:r:n:lpvh? opt; do
     case $opt in
         b)
             CLONEARGS="$CLONEARGS -b $OPTARG"
@@ -51,21 +52,21 @@ if $RUNVNC; then
     x11vnc -display :10 -forever &
 fi
 
-if [[! $PREBUILT ]] || $NPM; then
+if [[! $PREBUILT ]]; then
     mkdir -p /test/src
     cd /test/src
-    npm install -g bower grunt-cli
     if $NPM; then
-        npm install uproxy-lib
-        cp -r node_modules/uproxy-lib .
+        npm install --prefix /test/src uproxy-lib
+        ln -s /test/src/node_modules /test/src/uproxy-lib
         cd uproxy-lib
-    elif ! $PREBUILT; then
+    else
+        npm install -g bower grunt-cli
         echo git clone $CLONEARGS $CLONESRC
         git clone $CLONEARGS $CLONESRC
         cd uproxy-lib
         ./setup.sh install
+        grunt zork
     fi
-    grunt zork
 fi
 
 /usr/bin/supervisord -n -c /test/etc/supervisord-$BROWSER.conf
