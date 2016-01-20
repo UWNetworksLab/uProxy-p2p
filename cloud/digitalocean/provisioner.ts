@@ -256,6 +256,10 @@ class Provisioner {
    * Waits for all in-progress Digital Ocean actions to complete
    * e.g. after powering on a machine, or creating a VM
    */
+  // TODO: It's not until several moments after this resolves
+  //       that you can actually SSH into the server. We need
+  //       to find a way to detect when the machine is *really*
+  //       ready.
   private waitDigitalOceanActions_ = () : Promise<void> => {
     console.log("Polling for Digital Ocean in-progress actions");
     return this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id + "/actions").then((resp: any) => {

@@ -10,16 +10,25 @@ loggingController.setDefaultFilter(loggingTypes.Destination.console,
 
 const log :logging.Log = new logging.Log('deployer');
 
-const digitalOcean = freedom['digitalocean']();
+const provisioner = freedom['digitalocean']();
 
-digitalOcean.on('status', (msg:any) => {
+provisioner.on('status', (msg:any) => {
   log.info('status: %1', msg.message);
 });
 
 log.info('deploying...');
+// TODO: typings for provisioner return type
+provisioner.start('test').then((serverInfo: any) => {
+  log.info('server provisioned: %1', serverInfo);
 
-digitalOcean.start('test').then((ret: any) => {
-  log.info('final result: %1', ret);
+  const installer = freedom['cloudinstall']();
+  log.info('installing...');
+  installer.install(serverInfo.network.ipv4, serverInfo.network.ssh_port,
+  	  'root', serverInfo.ssh.private).then((invitation: string) => {
+    log.info('uproxy installed! invitation: %1', invitation);
+    }, (e: Error) => {
+    log.error('failed to install: %1', e.message);
+  });
 }, (e:Error) => {
-  log.error('failed to deploy: %1', e);
+  log.error('failed to deploy: %1', e.message);
 });
