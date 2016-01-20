@@ -52,7 +52,7 @@ if $RUNVNC; then
     x11vnc -display :10 -forever &
 fi
 
-if [[! $PREBUILT ]]; then
+if ! $PREBUILT; then
     mkdir -p /test/src
     cd /test/src
     if $NPM; then
