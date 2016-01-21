@@ -153,4 +153,4 @@ fi
 
 # Output the invitation URL.
 INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
-echo "invite code: https://www.uproxy.org/invite/$INVITE_CODE"
+echo -e "\nINVITE CODE URL:\nhttps://www.uproxy.org/invite/$INVITE_CODE"
