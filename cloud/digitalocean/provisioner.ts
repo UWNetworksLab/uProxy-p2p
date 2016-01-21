@@ -326,7 +326,12 @@ class Provisioner {
           name: name,
           region: region,
           size: "512mb",
-          image: "ubuntu-14-04-x64",
+          // 'docker' is a slug name, a.k.a. application image, a.k.a. one-click app.
+          // The full list of available slugs is available only through the API, e.g.:
+          //   this.doRequest_("GET", "images?type=application&per_page=50").then((resp: any) => {
+          //     console.log('available application images: ' + JSON.stringify(resp, undefined, 2));
+          // });
+          image: 'docker',
           ssh_keys: [ this.state_.cloud.ssh.id ]
         }));
         // If missing, create the droplet
