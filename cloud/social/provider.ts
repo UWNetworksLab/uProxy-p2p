@@ -465,9 +465,7 @@ class Connection {
           ZORK_HOST, ZORK_PORT, (e: Error, stream: ssh2.Channel) => {
             if (e) {
               this.close();
-              R({
-                message: 'error establishing tunnel: ' + e.message
-              });
+              R(new Error('error establishing tunnel: ' + e.toString()));
               return;
             }
             this.setState_(ConnectionState.WAITING_FOR_PING);
@@ -484,9 +482,8 @@ class Connection {
                     F();
                   } else {
                     this.close();
-                    R({
-                      message: 'expected ping on login, received: ' + reply
-                    });
+                    R(new Error('did not receive ping from server on login: ' +
+                      reply));
                   }
                   break;
                 case ConnectionState.ESTABLISHED:
@@ -513,9 +510,7 @@ class Connection {
               // TODO: does this occur outside of startup, i.e. should it always reject?
               log.warn('%1: tunnel error: %2', this.name_, e);
               this.close();
-              R({
-                message: 'could not establish tunnel: ' + e.message
-              });
+              R(new Error('could not establish tunnel: ' + e.toString()));
             }).on('end', () => {
               // Occurs when the stream is "over" for any reason, including
               // failed connection.
@@ -536,9 +531,7 @@ class Connection {
         // TODO: does this occur outside of startup, i.e. should it always reject?
         log.warn('%1: connection error: %2', this.name_, e);
         this.close();
-        R({
-          message: 'could not login: ' + e.message
-        });
+        R(new Error('could not login: ' + e.toString()));
       }).on('end', () => {
         // Occurs when the connection is "over" for any reason, including
         // failed connection.
