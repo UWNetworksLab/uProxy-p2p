@@ -12,8 +12,7 @@ var Client = require('ssh2').Client;
 var log: logging.Log = new logging.Log('cloud installer');
 
 // Command to install uProxy.
-// TODO: update the URL once the uproxy-docker pull request is submitted
-const INSTALL_COMMAND = 'curl -sSL https://raw.githubusercontent.com/uProxy/uproxy-docker/trevj-curl-installer/install-cloud.sh | sh';
+const INSTALL_COMMAND = 'curl -sSL https://raw.githubusercontent.com/uProxy/uproxy-docker/master/install-cloud.sh | sh';
 
 // Prefix for invitation URLs.
 const INVITATION_URL_PREFIX = 'https://www.uproxy.org/invite/';
