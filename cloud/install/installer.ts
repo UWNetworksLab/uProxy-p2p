@@ -54,8 +54,6 @@ class CloudInstaller {
             return;
           }
           stream.on('end', () => {
-            log.debug('exec stream closed');
-            // TODO: is it correct to reject if we haven't already resolved?
             R({
               message: 'invitation URL not found'
             });
@@ -73,14 +71,13 @@ class CloudInstaller {
         // This occurs when:
         //  - user supplies the wrong username or password
         //  - host cannot be reached, e.g. non-existant hostname
-        log.warn('failed to connect: %1', e);
         R({
           message: 'could not login: ' + e.message
         });
       }).on('end', () => {
         log.debug('end');
       }).on('close', (hadError: boolean) => {
-        log.debug('close');
+        log.debug('close (hadError: %1)', hadError);
       }).connect(connectConfig);
     });
   }
