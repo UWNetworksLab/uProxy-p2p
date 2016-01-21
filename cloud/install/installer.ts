@@ -15,8 +15,8 @@ var log: logging.Log = new logging.Log('cloud installer');
 // TODO: update the URL once the uproxy-docker pull request is submitted
 const INSTALL_COMMAND = 'curl -sSL https://raw.githubusercontent.com/uProxy/uproxy-docker/trevj-curl-installer/install-cloud.sh | sh';
 
-// Prefix for the output line containing the invitation code.
-const INVITATION_LINE_PREFIX = 'invite code: ';
+// Prefix for invitation URLs.
+const INVITATION_URL_PREFIX = 'https://www.uproxy.org/invite/';
 
 // Installs uProxy on a server, via SSH.
 // The process is as close as possible to a manual install
@@ -62,8 +62,8 @@ class CloudInstaller {
           }).on('data', function(data: Buffer) {
             const output = data.toString();
             log.debug('STDOUT: %1', output);
-            if (output.indexOf(INVITATION_LINE_PREFIX) === 0) {
-              F(output.substring(INVITATION_LINE_PREFIX.length));
+            if (output.indexOf(INVITATION_URL_PREFIX) === 0) {
+              F(output.substring(INVITATION_URL_PREFIX.length));
             }
           }).stderr.on('data', function(data: Buffer) {
             log.error(data.toString());
