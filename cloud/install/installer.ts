@@ -41,18 +41,20 @@ class CloudInstaller {
       debug: undefined
     };
 
-    const client = new Client();
+    const connection = new Client();
     return new Promise<string>((F, R) => {
-      client.on('ready', () => {
+      connection.on('ready', () => {
         log.debug('logged into server');
-        client.exec(INSTALL_COMMAND, (e: Error, stream: ssh2.Channel) => {
+        connection.exec(INSTALL_COMMAND, (e: Error, stream: ssh2.Channel) => {
           if (e) {
+            connection.end();
             R({
               message: 'could not execute command: ' + e.message
             });
             return;
           }
           stream.on('end', () => {
+            connection.end();
             R({
               message: 'invitation URL not found'
             });
@@ -74,9 +76,9 @@ class CloudInstaller {
           message: 'could not login: ' + e.message
         });
       }).on('end', () => {
-        log.debug('end');
+        log.debug('connection end');
       }).on('close', (hadError: boolean) => {
-        log.debug('close (hadError: %1)', hadError);
+        log.debug('connection close, with%1 error', (hadError ? '' : 'out'));
       }).connect(connectConfig);
     });
   }
