@@ -203,7 +203,7 @@ export class CloudSocialProvider {
     if (invite.host in this.clients_) {
       log.debug('closing old connection to %1', invite.host);
       this.clients_[invite.host].then((connection: Connection) => {
-        connection.close();
+        connection.end();
       });
     }
 
@@ -353,7 +353,7 @@ export class CloudSocialProvider {
     log.debug('logout');
     for (let address in this.clients_) {
       this.clients_[address].then((connection: Connection) => {
-        connection.close();
+        connection.end();
       });
     }
     return Promise.resolve<void>();
@@ -430,10 +430,10 @@ class Connection {
 
   private state_ = ConnectionState.NEW;
 
-  private client_ = new Client();
+  private connection_ = new Client();
 
   // The tunneled connection, i.e. secure link to Zork.
-  private stream_ :ssh2.Channel;
+  private tunnel_ :ssh2.Channel;
 
   constructor(
       private invite_: Invite,
@@ -467,23 +467,22 @@ class Connection {
     }
 
     return new Promise<void>((F, R) => {
-      this.client_.on('ready', () => {
+      this.connection_.on('ready', () => {
         // TODO: set a timeout here, too
         this.setState_(ConnectionState.ESTABLISHING_TUNNEL);
-        this.client_.forwardOut(
+        this.connection_.forwardOut(
           // TODO: since we communicate using the stream, what does this mean?
           '127.0.0.1', 0,
-          ZORK_HOST, ZORK_PORT, (e: Error, stream: ssh2.Channel) => {
+          ZORK_HOST, ZORK_PORT, (e: Error, tunnel: ssh2.Channel) => {
             if (e) {
-              this.close();
+              this.end();
               R({
                 message: 'error establishing tunnel: ' + e.message
               });
               return;
             }
-            this.setState_(ConnectionState.WAITING_FOR_PING);
 
-            this.stream_ = stream;
+            this.setState_(ConnectionState.WAITING_FOR_PING);
 
             var bufferQueue = new queue.Queue<ArrayBuffer, void>();
             new linefeeder.LineFeeder(bufferQueue).setSyncHandler((reply: string) => {
@@ -494,7 +493,7 @@ class Connection {
                     this.setState_(ConnectionState.ESTABLISHED);
                     F();
                   } else {
-                    this.close();
+                    this.end();
                     R({
                       message: 'did not receive ping from server on login: ' + reply
                     });
@@ -511,54 +510,36 @@ class Connection {
                 default:
                   log.warn('%1: did not expect message in state %2: %3',
                     this.name_, ConnectionState[this.state_], reply);
-                  this.close();
+                  this.end();
               }
             });
 
-            // TODO: add error handler for stream
-            stream.on('data', (buffer: Buffer) => {
+            this.tunnel_ = tunnel;
+            tunnel.on('data', (buffer: Buffer) => {
               bufferQueue.handle(arraybuffers.bufferToArrayBuffer(buffer));
-            }).on('error', (e: Error) => {
-              // This occurs when:
-              //  - host cannot be reached, e.g. non-existant hostname
-              // TODO: does this occur outside of startup, i.e. should it always reject?
-              log.warn('%1: tunnel error: %2', this.name_, e);
-              this.close();
-              R({
-                message: 'could not establish tunnel: ' + e.message
-              });
             }).on('end', () => {
-              // Occurs when the stream is "over" for any reason, including
-              // failed connection.
               log.debug('%1: tunnel end', this.name_);
-              this.close();
             }).on('close', (hadError: boolean) => {
-              // TODO: when does this occur? don't see it on normal close or failure
-              log.debug('%1: tunnel close: %2', this.name_, hadError);
-              this.close();
+              log.debug('%1: tunnel close, with%2 error', this.name_, (hadError ? '' : 'out'));
             });
 
-            stream.write('ping\n');
+            tunnel.write('ping\n');
           });
       }).on('error', (e: Error) => {
         // This occurs when:
         //  - user supplies the wrong username or password
         //  - host cannot be reached, e.g. non-existant hostname
-        // TODO: does this occur outside of startup, i.e. should it always reject?
         log.warn('%1: connection error: %2', this.name_, e);
-        this.close();
+        this.setState_(ConnectionState.TERMINATED);
         R({
           message: 'could not login: ' + e.message
         });
       }).on('end', () => {
-        // Occurs when the connection is "over" for any reason, including
-        // failed connection.
-        log.debug('%1: connection ended', this.name_);
-        this.close();
+        log.debug('%1: connection end', this.name_);
+        this.setState_(ConnectionState.TERMINATED);
       }).on('close', (hadError: boolean) => {
-        // TODO: when does this occur? don't see it on normal close or failure
-        log.debug('%1: connection close: %2', this.name_, hadError);
-        this.close();
+        log.debug('%1: connection close, with%1 error', this.name_, (hadError ? '' : 'out'));
+        this.setState_(ConnectionState.TERMINATED);
       }).connect(connectConfig);
     });
   }
@@ -567,17 +548,14 @@ class Connection {
     if (this.state_ !== ConnectionState.ESTABLISHED) {
       throw new Error('can only connect in ESTABLISHED state');
     }
-    this.stream_.write(s + '\n');
+    this.tunnel_.write(s + '\n');
   }
 
-  public close = (): void => {
+  public end = (): void => {
     log.debug('%1: close', this.name_);
-    if (this.state_ === ConnectionState.TERMINATED) {
-      log.debug('%1: already closed', this.name_);
-    } else {
+    if (this.state_ !== ConnectionState.TERMINATED) {
       this.setState_(ConnectionState.TERMINATED);
-      this.client_.end();
-      // TODO: what about the stream?
+      this.connection_.end();
     }
   }
 
@@ -596,21 +574,29 @@ class Connection {
   // Executes a command, fulfilling with the command's stdout
   // or rejecting if output is received on stderr.
   private exec_ = (command:string): Promise<string> => {
+    log.debug('%1: execute command: %2', this.name_, command);
     if (this.state_ !== ConnectionState.ESTABLISHED) {
       return Promise.reject(new Error('can only execute commands in ESTABLISHED state'));
     }
     return new Promise<string>((F, R) => {
-      this.client_.exec(command, (e: Error, stream: ssh2.Channel) => {
+      this.connection_.exec(command, (e: Error, stream: ssh2.Channel) => {
         if (e) {
-          R(e);
+          R({
+            message: 'failed to execute command: ' + e.message
+          });
           return;
         }
-        stream.on('data', function(data: Buffer) {
+
+        // TODO: There is a close event with a return code which
+        //       is probably a better indication of success.
+        stream.on('data', (data: Buffer) => {
           F(data.toString());
-        }).stderr.on('data', function(data: Buffer) {
-          R(new Error(data.toString()));
-        }).on('close', function(code: any, signal: any) {
-          log.debug('exec stream closed');
+        }).stderr.on('data', (data: Buffer) => {
+          R({
+            message: 'command output to STDERR: ' + data.toString()
+          });
+        }).on('end', (code: any, signal: any) => {
+          log.debug('%1: exec stream end', this.name_);
         });
       });
     });
