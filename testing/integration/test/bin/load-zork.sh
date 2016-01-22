@@ -9,7 +9,7 @@ CLONEARGS=
 CLONESRC=https://github.com/uProxy/uproxy-lib.git
 PREBUILT=false
 NPM=false
-while getopts b:r:n:lpvh? opt; do
+while getopts b:r:nlpvh? opt; do
     case $opt in
         b)
             CLONEARGS="$CLONEARGS -b $OPTARG"
@@ -30,13 +30,14 @@ while getopts b:r:n:lpvh? opt; do
             LISTEN=true
             ;;
         *)
-            echo "$0 [-v] [-w] [-l] [-b branch] [-r repo]"
+            echo "$0 [-b branch] [-r repo] [-n] [-l] [-p] [-v] [-h]"
             echo "  -b: BRANCH is the branch to checkout instead of HEAD's referant."
             echo "  -r: REPO is the repository to clone instead of github.com/uProxy/uproxy-lib."
-            echo "  -p: use a pre-built uproxy-lib repo (overrides -b and -r)."
             echo "  -n: install uproxy-lib from npm (overrides -b, -r, and -p)"
-            echo "  -v: run a vncserver (port 5900 in the instance)"
             echo "  -l: wait until the extension is listening."
+            echo "  -p: use a pre-built uproxy-lib repo (overrides -b and -r)."
+            echo "  -v: run a vncserver (port 5900 in the instance)"
+            echo "  -h, -?: this help message"
             exit 1;
             ;;
     esac
@@ -48,16 +49,16 @@ export DISPLAY=:10
 Xvfb :10 -screen 0 1280x1024x24 &
 fvwm &
 
-if $RUNVNC; then
+if [ $RUNVNC = true ]; then
     x11vnc -display :10 -forever &
 fi
 
-if ! $PREBUILT; then
+if [ $PREBUILT = false ]; then
     mkdir -p /test/src
     cd /test/src
-    if $NPM; then
+    if [ $NPM = true ]; then
         npm install --prefix /test/src uproxy-lib
-        ln -s /test/src/node_modules /test/src/uproxy-lib
+        ln -s /test/src/node_modules/uproxy-lib /test/src/uproxy-lib
         cd uproxy-lib
     else
         npm install -g bower grunt-cli

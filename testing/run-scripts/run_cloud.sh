@@ -20,7 +20,7 @@ BANNER=
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-i invite code] [-r] [-d ip] [-b banner] browser-version"
+  echo "$0 [-p path] [-n] [-i invite code] [-r] [-d ip] [-b banner] browser-version"
   echo "  -p: path to pre-built uproxy-lib repository"
   echo "  -n: install uproxy-lib from npm"
   echo "  -i: invite code"
@@ -33,7 +33,7 @@ function usage () {
   exit 1
 }
 
-while getopts p:n:i:rd:b:h? opt; do
+while getopts p:ni:rd:b:h? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
     n) NPM=true ;;
