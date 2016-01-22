@@ -121,7 +121,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   then
       RUNARGS="$RUNARGS -p"
   fi
-  if [ ! -z "$NPM" ]
+  if [ $NPM = true ]
   then
       RUNARGS="$RUNARGS -n"
   fi
