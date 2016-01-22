@@ -367,11 +367,15 @@ export class CloudSocialProvider {
   public inviteUser = (clientId: string): Promise<Object> => {
     log.debug('inviteUser');
     if (!(clientId in this.savedContacts_)) {
-      return Promise.reject(new Error('unknown cloud instance ' + clientId));
+      return Promise.reject({
+        message: 'unknown cloud instance ' + clientId
+      });
     }
     if (this.savedContacts_[clientId].invite.user !== ADMIN_USERNAME) {
-      return Promise.reject(new Error('user is logged in as non-admin user ' +
-          this.savedContacts_[clientId].invite.user));
+      return Promise.reject({
+        message: 'user is logged in as non-admin user ' +
+            this.savedContacts_[clientId].invite.user
+      });
     }
     return this.reconnect_(this.savedContacts_[clientId].invite).then(
         (connection: Connection) => {
@@ -436,7 +440,9 @@ class Connection {
   // TODO: timeout
   public connect = (): Promise<void> => {
     if (this.state_ !== ConnectionState.NEW) {
-      return Promise.reject(new Error('can only connect in NEW state'));
+      return Promise.reject({
+        message: 'can only connect in NEW state'
+      });
     }
     this.state_ = ConnectionState.CONNECTING;
 
@@ -465,7 +471,9 @@ class Connection {
           ZORK_HOST, ZORK_PORT, (e: Error, stream: ssh2.Channel) => {
             if (e) {
               this.close();
-              R(new Error('error establishing tunnel: ' + e.toString()));
+              R({
+                message: 'error establishing tunnel: ' + e.message
+              });
               return;
             }
             this.setState_(ConnectionState.WAITING_FOR_PING);
@@ -482,8 +490,9 @@ class Connection {
                     F();
                   } else {
                     this.close();
-                    R(new Error('did not receive ping from server on login: ' +
-                      reply));
+                    R({
+                      message: 'did not receive ping from server on login: ' + reply
+                    });
                   }
                   break;
                 case ConnectionState.ESTABLISHED:
@@ -510,7 +519,9 @@ class Connection {
               // TODO: does this occur outside of startup, i.e. should it always reject?
               log.warn('%1: tunnel error: %2', this.name_, e);
               this.close();
-              R(new Error('could not establish tunnel: ' + e.toString()));
+              R({
+                message: 'could not establish tunnel: ' + e.message
+              });
             }).on('end', () => {
               // Occurs when the stream is "over" for any reason, including
               // failed connection.
@@ -531,7 +542,9 @@ class Connection {
         // TODO: does this occur outside of startup, i.e. should it always reject?
         log.warn('%1: connection error: %2', this.name_, e);
         this.close();
-        R(new Error('could not login: ' + e.toString()));
+        R({
+          message: 'could not login: ' + e.message
+        });
       }).on('end', () => {
         // Occurs when the connection is "over" for any reason, including
         // failed connection.
