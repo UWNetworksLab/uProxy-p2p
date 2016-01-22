@@ -595,7 +595,7 @@ class Connection {
           R({
             message: 'command output to STDERR: ' + data.toString()
           });
-        }).on('end', (code: any, signal: any) => {
+        }).on('end', () => {
           log.debug('%1: exec stream end', this.name_);
         });
       });
