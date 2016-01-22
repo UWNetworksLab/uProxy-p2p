@@ -61,6 +61,9 @@ class CloudInstaller {
           }).on('data', function(data: Buffer) {
             const output = data.toString();
             log.debug('STDOUT: %1', output);
+            // Search for the URL anywhere in the line so we will
+            // continue to work in the face of minor changes
+            // to the install script.
             if (output.indexOf(INVITATION_URL_PREFIX) === 0) {
               F(output.substring(INVITATION_URL_PREFIX.length));
             }
