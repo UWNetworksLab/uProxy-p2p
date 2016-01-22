@@ -26,6 +26,9 @@ const STORAGE_KEY = 'cloud-social-contacts';
 const ADMIN_USERNAME = 'giver';
 const REGULAR_USERNAME = 'getter';
 
+// Timeout for establishing an SSH connection.
+const CONNECT_TIMEOUT_MS = 10000;
+
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
 // TODO: add (private) keys, for key-based auth
@@ -450,6 +453,7 @@ class Connection {
       host: this.invite_.host,
       port: SSH_SERVER_PORT,
       username: this.invite_.user,
+      readyTimeout: CONNECT_TIMEOUT_MS,
       // Remaining fields only for type-correctness.
       tryKeyboard: false,
       debug: undefined
@@ -464,6 +468,7 @@ class Connection {
 
     return new Promise<void>((F, R) => {
       this.client_.on('ready', () => {
+        // TODO: set a timeout here, too
         this.setState_(ConnectionState.ESTABLISHING_TUNNEL);
         this.client_.forwardOut(
           // TODO: since we communicate using the stream, what does this mean?
