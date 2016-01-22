@@ -31,7 +31,6 @@ import social = require('../interfaces/social');
 import freedom_social2 = require('../interfaces/social2');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import crypto = require('./crypto');
 import ui = ui_connector.connector;
 
 import storage = globals.storage;
@@ -256,10 +255,10 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.areAllContactsUproxy === true : false;
     }
 
-    public encryptsWithClientId = (): boolean => {
+    public isEncrypted = (): boolean => {
       // Default to false.
       var options: social.NetworkOptions = NETWORK_OPTIONS[this.name];
-      return options ? options.encryptsWithClientId === true : false;
+      return options ? options.isEncrypted === true : false;
     }
 
     public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
@@ -390,33 +389,26 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom.Social.ClientState) : Promise<void> => {
+    public handleClientState = (freedomClient :freedom.Social.ClientState) => {
       if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
-        return Promise.reject(
-            'Firewall: invalid client state:' + JSON.stringify(freedomClient));
+        return;
       }
       var client :social.ClientState =
         freedomClientToUproxyClient(freedomClient);
-      return this.validateClient_(client).then((isValid :boolean) => {
-        if (!isValid) {
-          return;
+      if (client.userId == this.myInstance.userId &&
+          client.clientId === this.myInstance.clientId) {
+        if (client.status === social.ClientStatus.OFFLINE) {
+          // Our client is disconnected, log out of the social network
+          // (the social provider is responsible for clean up so we don't
+          // need to call logout here).
+          this.fulfillLogout_();
         }
+        log.info('received own ClientState', client);
+        return;
+      }
 
-        if (client.userId == this.myInstance.userId &&
-            client.clientId === this.myInstance.clientId) {
-          if (client.status === social.ClientStatus.OFFLINE) {
-            // Our client is disconnected, log out of the social network
-            // (the social provider is responsible for clean up so we don't
-            // need to call logout here).
-            this.fulfillLogout_();
-          }
-          log.info('received own ClientState', client);
-          return;
-        }
-
-        this.getOrAddUser_(client.userId).handleClient(client);
-      });
+      this.getOrAddUser_(client.userId).handleClient(client);
     }
 
     /**
@@ -429,7 +421,7 @@ export function notifyUI(networkName :string, userId :string) {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom.Social.IncomingMessage) : Promise<void> => {
+    public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
       if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
@@ -438,128 +430,20 @@ export function notifyUI(networkName :string, userId :string) {
 
       var client :social.ClientState =
           freedomClientToUproxyClient(incoming.from);
-      return this.validateClient_(client).then((isValid :boolean) => {
-        if (!isValid) {
-          return;
-        }
+      var user = this.getOrAddUser_(userId);
+      if (!user.clientIdToStatusMap[client.clientId]) {
+        // Add client.
+        user.handleClient(client);
+      }
 
-        var user = this.getOrAddUser_(userId);
-        if (!user.clientIdToStatusMap[client.clientId]) {
-          // Add client.
-          user.handleClient(client);
-        }
-
-        // Decrypt message.
-        var decryptMessage = Promise.resolve(incoming.message);
-        if (this.encryptsWithClientId()) {
-          var key = this.getKeyFromClientId(client.clientId);
-          decryptMessage = crypto.verifyDecrypt(incoming.message, key);
-        }
-
-        return decryptMessage.then((messageString :string) => {
-          var msg :social.VersionedPeerMessage = JSON.parse(messageString);
-          log.info('received message', {
-            userFrom: user.userId,
-            clientFrom: client.clientId,
-            instanceFrom: user.clientToInstance(client.clientId),
-            msg: msg
-          });
-          user.handleMessage(client.clientId, msg);
-        });
+      var msg :social.VersionedPeerMessage = JSON.parse(incoming.message);
+      log.info('received message', {
+        userFrom: user.userId,
+        clientFrom: client.clientId,
+        instanceFrom: user.clientToInstance(client.clientId),
+        msg: msg
       });
-    }
-
-    // Clients currently pending validation (due to async verifyDecrypt call).
-    private pendingClients_ :{ [clientId :string] :Promise<boolean> } = {};
-
-    private validateClient_ = (client :social.ClientState) : Promise<boolean> => {
-      if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
-        // Ignore clients that aren't using uProxy.
-        return Promise.resolve(false);
-      }
-      if (this.name !== 'Quiver') {
-        // No more validation to do for non-Quiver networks
-        return Promise.resolve(true);
-      }
-
-      if (this.myInstance.userId === client.userId &&
-          this.myInstance.clientId === client.clientId) {
-        // Received client for local instance.
-        return Promise.resolve(true);
-      }
-
-      // Hack around ClientState type, as inviteResponse is only available
-      // for Quiver and not checked into mainline freedom yet.
-      var inviteResponse = (<any>client)['inviteResponse'];
-      if (inviteResponse) {
-        var key = this.getKeyFromClientId(client.clientId);
-
-        var decryptAndValidate = crypto.verifyDecrypt(inviteResponse, key)
-        .then((plainText :string) => {
-          // Cleanup pending validation now that no more async calls are needed
-          // to complete validation.
-          delete this.pendingClients_[client.clientId];
-
-          // Parse invite data
-          try {
-            var inviteData :social.inviteResponse = JSON.parse(plainText);
-          } catch (e) {
-            log.warn('Invalid invite data: ' + plainText);
-            return Promise.resolve(false);
-          }
-
-          // Sanity check
-          if (this.getKeyFromClientId(client.clientId) != inviteData.publicKey) {
-            log.warn('clientId does not match publicKey ' +
-                client.clientId + ', ' + inviteData.publicKey);
-            return Promise.resolve(false);
-          }
-
-          if (!this.myInstance.isValidInvite(inviteData.permissionToken)) {
-            console.warn('Invalid permission token');
-            return Promise.resolve(false);
-          }
-
-          // Add to user's list of known public keys
-          var user = this.getOrAddUser_(client.userId);
-          user.knownPublicKeys.push(inviteData.publicKey);
-
-          return Promise.resolve(true);
-        }).catch((e) => {
-          log.error('Error decrypting inviteResponse', e);
-          return Promise.resolve(false);
-        });
-
-        // Save decrypt promise, so we know this client is pending validation.
-        this.pendingClients_[client.clientId] = decryptAndValidate;
-        return decryptAndValidate;
-      }
-
-      if (this.pendingClients_[client.clientId]) {
-        // Client is currently being validated
-        return this.pendingClients_[client.clientId];
-      }
-
-      var user = this.getUser(client.userId);
-      if (!user) {
-        // No user exists yet, and inviteResponse was not set - do not
-        // create a new user yet and just return invalid.
-        // Note: sometimes Quiver emits onClientState events for clients before
-        // it includes the inviteResponse.  uProxy should just ignore these
-        // and not print errors.
-        log.info('No user found: ' + client.userId);
-        return Promise.resolve(false);
-      }
-
-      // At this point we have a client without any inviteResponse set for an
-      // already existing user, just verify that the clientId appears in the
-      // user's list of knownPublicKeys.
-      if (user.knownPublicKeys.indexOf(this.getKeyFromClientId(client.clientId)) >= 0) {
-        return Promise.resolve(true);
-      } else {
-        log.warn('Got unknown clientId: ' + client.clientId);
-        return Promise.resolve(false);
-      }
+      user.handleMessage(client.clientId, msg);
     }
 
     public restoreFromStorage() {
@@ -610,7 +494,7 @@ export function notifyUI(networkName :string, userId :string) {
           userName = globals.settings.quiverUserName;
         }
         request = {
-          agent: globals.publicKey,
+          agent: Math.random().toString().substr(2,10),
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
           interactive: !reconnect,
@@ -680,10 +564,6 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
     public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
-      if (this.name === 'Quiver') {
-        return this.acceptQuiverInvitation_(token);
-      }
-
       var networkData :string = null;
       if (token) {
         // token may be a URL with a token, or just the token.  Remove the
@@ -700,45 +580,6 @@ export function notifyUI(networkName :string, userId :string) {
       }
       return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
-      });
-    }
-
-    private acceptQuiverInvitation_ = (token :string) : Promise<void> => {
-      // token may be a URL with a token, or just the token.  Remove the
-      // prefixed URL if it is set.
-      token = token.lastIndexOf('/') >= 0 ?
-          token.substr(token.lastIndexOf('/') + 1) : token;
-      try {
-        var tokenObj = JSON.parse(atob(token));
-        var remoteUserId = tokenObj.userId;
-        var remotePublicKey = tokenObj.publicKey;
-        var remotePermissionToken = tokenObj.permissionToken;
-        var networkData = tokenObj.networkData;
-      } catch (e) {
-        return Promise.reject('Invalid invite token ' + token);
-      }
-
-      // Get/create remoteUser, update their knownPublicKeys.
-      var remoteUser = this.getOrAddUser_(remoteUserId);
-      remoteUser.knownPublicKeys.push(remotePublicKey);
-      remoteUser.saveToStorage();
-
-      // Data to pass back to the user who generated the invite token
-      // so they can know who we are and verify that the token is valid
-      var inviteAcceptanceObj = {
-        userId: this.myInstance.userId,  // local user id
-        publicKey: globals.publicKey, // public key of local instance
-        permissionToken: remotePermissionToken  // received permission token
-      }
-      var inviteAcceptanceString = JSON.stringify(inviteAcceptanceObj);
-
-      // Encrypt inviteAcceptanceData with the remotePublicKey
-      return crypto.signEncrypt(inviteAcceptanceString, remotePublicKey)
-      .then((cipherText :string) => {
-        return this.freedomApi_.acceptUserInvitation(networkData, cipherText)
-        .catch((e :Error) => {
-          log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
-        });
       });
     }
 
@@ -762,26 +603,12 @@ export function notifyUI(networkName :string, userId :string) {
     public getInviteUrl = (userId ?:string) : Promise<string> => {
       return this.freedomApi_.inviteUser(userId || '')
           .then((data: { networkData :string }) => {
-        var tokenObj :Object;
-        if (this.name === 'Quiver') {
-          var permissionToken = this.myInstance.generateInvitePermissionToken();
-          tokenObj = {
-            v: 2,
-            networkName: this.name,
-            userName: this.myInstance.userName,
-            networkData: data.networkData,
-            userId: this.myInstance.userId,
-            publicKey: globals.publicKey,
-            permissionToken: permissionToken
-          };
-        } else {
-          tokenObj = {
-            v: 1,
-            networkName: this.name,
-            userName: this.myInstance.userName,
-            networkData: data.networkData
-          };
-        }
+        var tokenObj = {
+          v: 1,
+          networkName: this.name,
+          userName: this.myInstance.userName,
+          networkData: data.networkData
+        };
         return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
       })
     }
@@ -813,14 +640,7 @@ export function notifyUI(networkName :string, userId :string) {
         instanceTo: user.clientToInstance(clientId),
         msg: messageString
       });
-      if (this.encryptsWithClientId()) {
-        var key = this.getKeyFromClientId(clientId);
-        return crypto.signEncrypt(messageString, key).then((cipherText :string) => {
-          return this.freedomApi_.sendMessage(clientId, cipherText);
-        });
-      } else {
-        return this.freedomApi_.sendMessage(clientId, messageString);
-      }
+      return this.freedomApi_.sendMessage(clientId, messageString);
     }
 
     // TODO: We should make a class for monitors or generally to encapsulate
@@ -895,10 +715,7 @@ export function freedomClientToUproxyClient(
     userId:    freedomClientState.userId,
     clientId:  freedomClientState.clientId,
     status:    (<any>social.ClientStatus)[freedomClientState.status],
-    timestamp: freedomClientState.timestamp,
-    // Cast to any because inviteResponse is not yet on "mainstream"
-    // freedom definitions and is only available to Quiver
-    inviteResponse: (<any>freedomClientState)['inviteResponse']
+    timestamp: freedomClientState.timestamp
   };
   return state;
 }

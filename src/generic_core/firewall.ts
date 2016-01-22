@@ -178,8 +178,7 @@ var CLIENT_STATE_SCHEMA :Schema = {
   'status' : 'string',
   'timestamp' : '?number',
   'lastUpdated' : '?number',
-  'lastSeen' : '?number',
-  'inviteResponse' : '?string'
+  'lastSeen' : '?number'
 };
 
 export function isValidClientState(state :freedom.Social.ClientState,
@@ -214,6 +213,16 @@ export function isValidClientState(state :freedom.Social.ClientState,
   }
 
   if (state.timestamp < 0) {
+    fail();
+    return false;
+  }
+
+  if (state.timestamp < 0) {
+    fail();
+    return false;
+  }
+
+  if (!(state.status === 'ONLINE' || state.status === 'OFFLINE')) {
     fail();
     return false;
   }
