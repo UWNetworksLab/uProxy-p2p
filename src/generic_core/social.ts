@@ -499,7 +499,8 @@ export function notifyUI(networkName :string, userId :string) {
           url: 'https://github.com/uProxy/uProxy',
           interactive: !reconnect,
           rememberLogin: !reconnect,
-          userName: userName
+          userName: userName,
+          pgpKeyName: '<uproxy>'
         };
       } else {
         request = {

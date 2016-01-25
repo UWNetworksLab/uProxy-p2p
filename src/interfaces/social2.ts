@@ -54,6 +54,8 @@ export interface LoginRequest {
   rememberLogin :boolean;
   // UserName for logged in user.
   userName ?:string;
+  // PGP key name to be used for encryption.
+  pgpKeyName ?:string;
 }
 
 // Interfaces for Freedom social API
