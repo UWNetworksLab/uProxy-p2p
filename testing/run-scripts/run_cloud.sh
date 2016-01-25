@@ -11,6 +11,7 @@
 set -e
 
 PREBUILT=
+NPM=true
 INVITE_CODE=
 REFRESH=false
 PUBLIC_IP=
@@ -111,12 +112,17 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   HOSTARGS=
   if [ ! -z "$PREBUILT" ]
   then
+    NPM=false
     HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy-lib"
   fi
   RUNARGS=
   if [ ! -z "$PREBUILT" ]
   then
       RUNARGS="$RUNARGS -p"
+  fi
+  if [ $NPM = true ]
+  then
+      RUNARGS="$RUNARGS -n"
   fi
   docker run --restart=always --net=host  $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS
 fi
