@@ -11,7 +11,7 @@
 set -e
 
 PREBUILT=
-NPM=false
+NPM=true
 INVITE_CODE=
 REFRESH=false
 PUBLIC_IP=
@@ -20,9 +20,8 @@ BANNER=
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-n] [-i invite code] [-r] [-d ip] [-b banner] browser-version"
+  echo "$0 [-p path] [-i invite code] [-r] [-d ip] [-b banner] browser-version"
   echo "  -p: path to pre-built uproxy-lib repository"
-  echo "  -n: install uproxy-lib from npm"
   echo "  -i: invite code"
   echo "  -r: recreate Docker images (WARNING: will invalidate invite codes)"
   echo "  -d: override the detected public IP (for development only)"
@@ -33,10 +32,9 @@ function usage () {
   exit 1
 }
 
-while getopts p:ni:rd:b:h? opt; do
+while getopts p:i:rd:b:h? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
-    n) NPM=true ;;
     i) INVITE_CODE="$OPTARG" ;;
     r) REFRESH=true ;;
     d) PUBLIC_IP="$OPTARG" ;;
@@ -114,6 +112,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   HOSTARGS=
   if [ ! -z "$PREBUILT" ]
   then
+    NPM=false
     HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy-lib"
   fi
   RUNARGS=
