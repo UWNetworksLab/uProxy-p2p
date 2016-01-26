@@ -15,10 +15,11 @@ export var ui :user_interface.UserInterface;
 export var model :ui_model.Model;
 
 chrome.runtime.getBackgroundPage((bgPage) => {
-  // Workaround for iosrtc RTCDataChannel.prototype.send(). Foreground 
-  // and background ArrayBuffer need to be the same.
-  window.ArrayBuffer = bgPage.ArrayBuffer;
-  
+  // Workaround for iosrtc RTCDataChannel.prototype.send(); foreground 
+  // and background ArrayBuffer need to be the same so that we can 
+  // check instanceof ArrayBuffer.
+  (<any>window).ArrayBuffer = (<any>bgPage).ArrayBuffer;
+
   ui_context = (<any>bgPage).ui_context;
   ui = new user_interface.UserInterface(core, ui_context.browserApi);
   model = ui.model;
