@@ -538,7 +538,7 @@ class Connection {
         log.debug('%1: connection end', this.name_);
         this.setState_(ConnectionState.TERMINATED);
       }).on('close', (hadError: boolean) => {
-        log.debug('%1: connection close, with%1 error', this.name_, (hadError ? '' : 'out'));
+        log.debug('%1: connection close, with%2 error', this.name_, (hadError ? '' : 'out'));
         this.setState_(ConnectionState.TERMINATED);
       }).connect(connectConfig);
     });
