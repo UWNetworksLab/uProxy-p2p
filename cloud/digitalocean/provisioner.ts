@@ -256,6 +256,10 @@ class Provisioner {
    * Waits for all in-progress Digital Ocean actions to complete
    * e.g. after powering on a machine, or creating a VM
    */
+  // TODO: It's not until several moments after this resolves
+  //       that you can actually SSH into the server. We need
+  //       to find a way to detect when the machine is *really*
+  //       ready.
   private waitDigitalOceanActions_ = () : Promise<void> => {
     console.log("Polling for Digital Ocean in-progress actions");
     return this.doRequest_("GET", "droplets/" + this.state_.cloud.vm.id + "/actions").then((resp: any) => {
@@ -322,7 +326,12 @@ class Provisioner {
           name: name,
           region: region,
           size: "512mb",
-          image: "ubuntu-14-04-x64",
+          // 'docker' is a slug name, a.k.a. application image, a.k.a. one-click app.
+          // The full list of available slugs is available only through the API, e.g.:
+          //   this.doRequest_("GET", "images?type=application&per_page=50").then((resp: any) => {
+          //     console.log('available application images: ' + JSON.stringify(resp, undefined, 2));
+          // });
+          image: 'docker',
           ssh_keys: [ this.state_.cloud.ssh.id ]
         }));
         // If missing, create the droplet

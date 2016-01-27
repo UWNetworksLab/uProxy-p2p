@@ -18,6 +18,10 @@
     "digitalocean": {
       "url": "../digitalocean/freedom-module.json",
       "api": "digitalocean"
+    },
+    "cloudinstall": {
+      "url": "../install/freedom-module.json",
+      "api": "cloudinstall"
     }
   }
 }
