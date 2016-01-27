@@ -48,8 +48,9 @@ while getopts b:r:nlpvz:h? opt; do
     esac
 done
 
-
 # Overlap X startup with our download and build.
+pkill Xvfb
+rm -f /tmp/.X10-lock
 export DISPLAY=:10
 Xvfb :10 -screen 0 1280x1024x24 &
 fvwm &
