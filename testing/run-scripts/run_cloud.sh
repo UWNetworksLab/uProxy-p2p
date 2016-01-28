@@ -65,8 +65,9 @@ then
     fi
     BANNER=`docker exec uproxy-sshd cat /banner`
   else
-    # DigitalOcean's metadata API can tell us the region in which
-    # the machine is located:
+    # Quickly try (timeout after two seconds) DigitalOcean's
+    # metadata API which can tell us the region in which a
+    # droplet is located:
     #   https://developers.digitalocean.com/documentation/metadata/#metadata-api-endpoints
     BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region`
     if [ -n "$BANNER" ]
