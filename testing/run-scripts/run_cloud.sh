@@ -69,7 +69,7 @@ then
     # the machine is located:
     #   https://developers.digitalocean.com/documentation/metadata/#metadata-api-endpoints
     BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region`
-    if [ ! -z "$BANNER" ]
+    if [ -n "$BANNER" ]
     then
       BANNER=`echo "$BANNER"|sed 's/ams./Netherlands/;s/sgp./Singapore/;s/fra./Germany/;s/tor./Canada/;s/nyc./New York, USA/;s/sfo./San Francisco, USA/;s/lon./UK/'`
       BANNER="$BANNER (DigitalOcean)"
