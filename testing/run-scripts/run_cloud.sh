@@ -71,7 +71,7 @@ then
     BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region`
     if [ -n "$BANNER" ]
     then
-      BANNER=`echo "$BANNER"|sed 's/ams./Netherlands/;s/sgp./Singapore/;s/fra./Germany/;s/tor./Canada/;s/nyc./New York, USA/;s/sfo./San Francisco, USA/;s/lon./UK/'`
+      BANNER=`echo "$BANNER"|sed 's/ams./Amsterdam/;s/sgp./Singapore/;s/fra./Frankfurt/;s/tor./Toronto/;s/nyc./New York/;s/sfo./San Francisco/;s/lon./London/'`
       BANNER="$BANNER (DigitalOcean)"
     else
       BANNER=`hostname`
