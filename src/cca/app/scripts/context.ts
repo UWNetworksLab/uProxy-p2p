@@ -18,7 +18,7 @@ chrome.runtime.getBackgroundPage((bgPage) => {
   // Workaround for iosrtc RTCDataChannel.prototype.send(); foreground 
   // and background ArrayBuffer need to be the same so that we can 
   // check instanceof ArrayBuffer.
-  if (cordova.plugins.iosrtc) {
+  if ((<any>cordova).plugins.iosrtc) {
     (<any>window).ArrayBuffer = (<any>bgPage).ArrayBuffer;
   }
 
