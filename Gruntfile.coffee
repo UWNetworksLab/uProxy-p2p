@@ -941,11 +941,17 @@ gruntConfig = {
       }
     }
   }
-  'jpm':
-    options:
-      src: 'build/dist/firefox/'
-      xpi: 'build/dist/'
-      debug: true
+  'mozilla-addon-sdk':
+    'latest':
+      options:
+        dest_dir: '.mozilla_addon_sdk/'
+
+  'mozilla-cfx-xpi':
+    'dist':
+      options:
+        'mozilla-addon-sdk': 'latest'
+        extension_dir: 'build/dist/firefox'
+        dist_dir: 'build/dist'
 
   vulcanize: {}
 }  # grunt.initConfig
@@ -1139,7 +1145,8 @@ taskManager.add 'build', [
 taskManager.add 'dist', [
   'build'
   'copy:dist'
-  'jpm:xpi'
+  'mozilla-addon-sdk'
+  'mozilla-cfx-xpi:dist'
 ]
 
 taskManager.add 'default', [
@@ -1157,7 +1164,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
-  grunt.loadNpmTasks 'grunt-jpm'
+  grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
   grunt.loadNpmTasks 'grunt-string-replace'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-vulcanize'
