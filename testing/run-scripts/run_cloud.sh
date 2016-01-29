@@ -56,6 +56,7 @@ fi
 # In descending order of preference:
 #  - command-line option
 #  - pull from existing container
+#  - automatic, using provider-specific APIs
 #  - server's hostname
 if [ -z "$BANNER" ]
 then
@@ -66,6 +67,20 @@ then
             docker start uproxy-sshd > /dev/null
         fi
         BANNER=`docker exec uproxy-sshd cat /banner`
+    else
+        BANNER=`hostname`
+    fi
+    BANNER=`docker exec uproxy-sshd cat /banner`
+else
+    # Quickly try (timeout after two seconds) DigitalOcean's
+    # metadata API which can tell us the region in which a
+    # droplet is located:
+    #   https://developers.digitalocean.com/documentation/metadata/#metadata-api-endpoints
+    BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region`
+    if [ -n "$BANNER" ]
+    then
+        BANNER=`echo "$BANNER"|sed 's/ams./Amsterdam/;s/sgp./Singapore/;s/fra./Frankfurt/;s/tor./Toronto/;s/nyc./New York/;s/sfo./San Francisco/;s/lon./London/'`
+        BANNER="$BANNER (DigitalOcean)"
     else
         BANNER=`hostname`
     fi
