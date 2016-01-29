@@ -13,19 +13,19 @@ set -e
 PREBUILT=
 NPM=true
 INVITE_CODE=
-REFRESH=false
 UPDATE=false
+WIPE=false
 PUBLIC_IP=
 BANNER=
 
 SSHD_PORT=5000
 
 function usage () {
-    echo "$0 [-p path] [-i invite code] [-r] [-u] [-d ip] [-b banner] browser-version"
+    echo "$0 [-p path] [-i invite code] [-u] [-w] [-d ip] [-b banner] browser-version"
     echo "  -p: path to pre-built uproxy-lib repository"
     echo "  -i: invite code"
-    echo "  -r: recreate Docker images (WARNING: will invalidate invite codes)"
-    echo "  -u: update uProxy (overrides -r)"
+    echo "  -u: update Docker images (backs up invite code unless -i or -w used)"
+    echo "  -w: wipe existing images (WARNING: will invalidate invite codes)"
     echo "  -d: override the detected public IP (for development only)"
     echo "  -b: name to use in contacts list"
     echo "  -h, -?: this help message"
@@ -34,12 +34,12 @@ function usage () {
     exit 1
 }
 
-while getopts p:i:rud:b:h? opt; do
+while getopts p:i:uwd:b:h? opt; do
     case $opt in
         p) PREBUILT="$OPTARG" ;;
         i) INVITE_CODE="$OPTARG" ;;
-        r) REFRESH=true ;;
         u) UPDATE=true ;;
+        w) WIPE=true ;;
         d) PUBLIC_IP="$OPTARG" ;;
         b) BANNER="$OPTARG" ;;
         *) usage ;;
@@ -95,13 +95,21 @@ then
     fi
 fi
 
-if [ $UPDATE = true ]
+if [ -z "$INVITE_CODE" ]
 then
-    INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
-    REFRESH=true  # want to remove existing containers
+    if docker ps -a | grep uproxy-sshd >/dev/null
+    then
+        if [ `docker inspect --format='{{ .State.Status }}' uproxy-sshd` != "running" ]
+        then
+            docker start uproxy-sshd > /dev/null
+        fi
+    fi
+    if [ $WIPE = false ]
+    then
+        INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
+    fi
 fi
-
-if [ $REFRESH = true ]
+if [ $UPDATE = true || $WIPE = true ]
 then
     docker rm -f uproxy-sshd || true
     docker rm -f uproxy-zork || true
