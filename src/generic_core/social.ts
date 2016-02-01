@@ -609,6 +609,7 @@ export function notifyUI(networkName :string, userId :string) {
           // TODO: once we think all/most users have versions of uProxy
           // that support jsurl style invites, we should update all our
           // social networks to generate those invites.
+          // TODO: encode non networkData parameters as URL query params
           return 'https://www.uproxy.org/invite/' + jsurl.stringify(tokenObj);
         } else {
           return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
