@@ -4,8 +4,8 @@
   before freedom-for-chrome.js loads so we do so in the background here. This script should only be loaded for ios.
 */
 
-if(cordova.plugins.iosrtc){
-	window.RTCPeerConnection = cordova.plugins.iosrtc.RTCPeerConnection;
-	window.RTCSessionDescription = cordova.plugins.iosrtc.RTCSessionDescription;
-	window.RTCIceCandidate = cordova.plugins.iosrtc.RTCIceCandidate;
+if (cordova.plugins.iosrtc) {
+  window.RTCPeerConnection = cordova.plugins.iosrtc.RTCPeerConnection;
+  window.RTCSessionDescription = cordova.plugins.iosrtc.RTCSessionDescription;
+  window.RTCIceCandidate = cordova.plugins.iosrtc.RTCIceCandidate;
 }

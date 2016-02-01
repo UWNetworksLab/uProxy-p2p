@@ -167,7 +167,7 @@ gruntConfig = {
   # Create commands to run in different directories
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
   ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
-  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin add cordova-plugin-iosrtc'
+  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin add https://github.com/gitlaura/cordova-plugin-iosrtc.git'
 
   exec: {
     ccaCreateDev: {
@@ -1076,7 +1076,7 @@ taskManager.add 'build_ios', [
   'exec:ccaCreateIosDev'
   'exec:ccaAddPluginsIosBuild'
   'exec:ccaPrepareIosDev'
-  'exec:updateIosrtcPlugin'
+  #'exec:updateIosrtcPlugin'
 ]
 
 # Emulate the mobile client for ios
