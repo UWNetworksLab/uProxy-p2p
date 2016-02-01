@@ -25,7 +25,7 @@ function usage () {
     echo "  -p: path to pre-built uproxy-lib repository"
     echo "  -i: invite code"
     echo "  -u: update Docker images (backs up invite code unless -i or -w used)"
-    echo "  -w: wipe existing images (WARNING: will invalidate invite codes)"
+    echo "  -w: do not migrate data from existing containers (WARNING: will invalidate invite codes)"
     echo "  -d: override the detected public IP (for development only)"
     echo "  -b: name to use in contacts list"
     echo "  -h, -?: this help message"
@@ -110,7 +110,8 @@ then
     fi
 fi
 
-if [ -z "$INVITE_CODE" ]
+# If no invite code passed in and no -w flag, try to get the existing one
+if [ -z "$INVITE_CODE" && $WIPE = false ]
 then
     if docker ps -a | grep uproxy-sshd >/dev/null
     then
@@ -119,11 +120,9 @@ then
             docker start uproxy-sshd > /dev/null
         fi
     fi
-    if [ $WIPE = false ]
-    then
-        INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
-    fi
+    INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO || echo -n ""`
 fi
+
 if [ $UPDATE = true || $WIPE = true ]
 then
     docker rm -f uproxy-sshd || true
