@@ -605,7 +605,14 @@ export function notifyUI(networkName :string, userId :string) {
           userName: this.myInstance.userName,
           networkData: networkData
         };
-        return 'https://www.uproxy.org/invite/' + jsurl.stringify(tokenObj);
+        if (this.name === 'Quiver') {
+          // TODO: once we think all/most users have versions of uProxy
+          // that support jsurl style invites, we should update all our
+          // social networks to generate those invites.
+          return 'https://www.uproxy.org/invite/' + jsurl.stringify(tokenObj);
+        } else {
+          return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
+        }
       })
     }
 
