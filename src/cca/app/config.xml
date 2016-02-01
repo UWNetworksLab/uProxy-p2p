@@ -3,4 +3,7 @@
     <preference name="SplashScreen" value="splashscreen" />
     <preference name="SplashScreenDelay" value="20000" />
     <preference name="SplashMaintainAspectRatio" value="true" />
+    <platform name="ios">
+        <preference name="deployment-target" value="7.0"/> 
+    </platform>
 </widget>
