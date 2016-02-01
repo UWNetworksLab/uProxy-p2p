@@ -167,6 +167,7 @@ gruntConfig = {
   # Create commands to run in different directories
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
   ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
+  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin add https://github.com/gitlaura/cordova-plugin-iosrtc.git'
 
   exec: {
     ccaCreateDev: {
@@ -213,6 +214,10 @@ gruntConfig = {
     }
     ccaCreateIosDist: {
       command: '<%= ccaJsPath %> create <%= iosDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
+    }
+    ccaAddPluginsIosBuild: {
+      cwd: '<%= iosDevPath %>'
+      command: '<%= ccaAddPluginsIosCmd %>'
     }
     ccaPrepareIosDev: {
       cwd: '<%= iosDevPath %>'
@@ -931,17 +936,11 @@ gruntConfig = {
       }
     }
   }
-  'mozilla-addon-sdk':
-    'latest':
-      options:
-        dest_dir: '.mozilla_addon_sdk/'
-
-  'mozilla-cfx-xpi':
-    'dist':
-      options:
-        'mozilla-addon-sdk': 'latest'
-        extension_dir: 'build/dist/firefox'
-        dist_dir: 'build/dist'
+  'jpm':
+    options:
+      src: 'build/dist/firefox/'
+      xpi: 'build/dist/'
+      debug: true
 
   vulcanize: {}
 }  # grunt.initConfig
@@ -1070,6 +1069,7 @@ taskManager.add 'build_ios', [
   'exec:rmIosBuild'
   'build_cca'
   'exec:ccaCreateIosDev'
+  'exec:ccaAddPluginsIosBuild'
   'exec:ccaPrepareIosDev'
 ]
 
@@ -1123,6 +1123,8 @@ taskManager.add 'test', [
 ]
 
 taskManager.add 'build', [
+  'exec:rmIosBuild'
+  'exec:rmAndroidBuild'
   'build_chrome'
   'build_firefox'
   'build_cca'
@@ -1131,8 +1133,7 @@ taskManager.add 'build', [
 taskManager.add 'dist', [
   'build'
   'copy:dist'
-  'mozilla-addon-sdk'
-  'mozilla-cfx-xpi:dist'
+  'jpm:xpi'
 ]
 
 taskManager.add 'default', [
@@ -1150,7 +1151,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
-  grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
+  grunt.loadNpmTasks 'grunt-jpm'
   grunt.loadNpmTasks 'grunt-string-replace'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-vulcanize'

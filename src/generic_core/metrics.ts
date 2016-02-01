@@ -21,20 +21,20 @@ export class Metrics {
 
   constructor(private storage_ :storage.Storage) {
     var counterMetric = {
-      type: 'logarithmic', base: 2, num_bloombits: 8, num_hashes: 2,
-      num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
+      type: 'logarithmic', base: 2, num_bloombits: 256, num_hashes: 1,
+      num_cohorts: 8, prob_p: 0.25, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
     var natMetric = {
-      type: 'string', num_bloombits: 8, num_hashes: 2,
-      num_cohorts: 64, prob_p: 0.5, prob_q: 0.75, prob_f: 0.5,
+      type: 'string', num_bloombits: 256, num_hashes: 1,
+      num_cohorts: 8, prob_p: 0.25, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
     this.metricsProvider_ = freedom['metrics']({
       name: 'uProxyMetrics',
-      definition: {'success-v1': counterMetric, 'failure-v1': counterMetric,
-                   'nat-type-v2': natMetric, 'pmp-v2': natMetric,
-                   'pcp-v2': natMetric, 'upnp-v2': natMetric}
+      definition: {'success-v2': counterMetric, 'failure-v2': counterMetric,
+                   'nat-type-v3': natMetric, 'pmp-v3': natMetric,
+                   'pcp-v3': natMetric, 'upnp-v3': natMetric}
     });
 
     this.onceLoaded_ = this.storage_.load('metrics').then(
@@ -79,17 +79,17 @@ export class Metrics {
     // by the caller instead.
     return this.onceLoaded_.then(() => {
       var successReport =
-        this.metricsProvider_.report('success-v1', this.data_.success);
+        this.metricsProvider_.report('success-v2', this.data_.success);
       var failureReport =
-        this.metricsProvider_.report('failure-v1', this.data_.failure);
+        this.metricsProvider_.report('failure-v2', this.data_.failure);
       var natTypeReport =
-        this.metricsProvider_.report('nat-type-v2', natInfo.natType);
+        this.metricsProvider_.report('nat-type-v3', natInfo.natType);
       var pmpReport =
-        this.metricsProvider_.report('pmp-v2', natInfo.pmpSupport.toString());
+        this.metricsProvider_.report('pmp-v3', natInfo.pmpSupport.toString());
       var pcpReport =
-        this.metricsProvider_.report('pcp-v2', natInfo.pcpSupport.toString());
+        this.metricsProvider_.report('pcp-v3', natInfo.pcpSupport.toString());
       var upnpReport =
-        this.metricsProvider_.report('upnp-v2', natInfo.upnpSupport.toString());
+        this.metricsProvider_.report('upnp-v3', natInfo.upnpSupport.toString());
 
       return Promise.all([successReport, failureReport, natTypeReport,
                           pmpReport, pcpReport, upnpReport]).then(() => {
