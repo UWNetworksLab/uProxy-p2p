@@ -234,11 +234,6 @@ gruntConfig = {
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
-    # Temporary hack until cordova-plugin-iosrtc's next release (waiting for version 2.2.3)
-    updateIosrtcPlugin: {
-      cwd: '<%= iosDevPath %>'
-      command: 'cp ../../../../src/cca/app/scripts/cordova-plugin-iosrtc-bugfixes.js platforms/ios/www/plugins/cordova-plugin-iosrtc/dist/cordova-plugin-iosrtc.js'
-    }
   }
 
   copy: {
