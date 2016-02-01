@@ -1071,7 +1071,6 @@ taskManager.add 'build_ios', [
   'exec:ccaCreateIosDev'
   'exec:ccaAddPluginsIosBuild'
   'exec:ccaPrepareIosDev'
-  #'exec:updateIosrtcPlugin'
 ]
 
 # Emulate the mobile client for ios
