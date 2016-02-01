@@ -320,7 +320,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       networkUserId = Object.keys(social_network.networks[networkName])[0];
     }
     var network = social_network.getNetwork(networkName, networkUserId);
-    return network.acceptInvitation(data.token, data.userId);
+    return network.acceptInvitation(data.tokenObj, data.userId);
   }
 
   public getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {

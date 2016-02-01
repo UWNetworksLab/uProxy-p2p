@@ -1,4 +1,5 @@
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
 
 /**
  * ui.ts
@@ -22,6 +23,7 @@ import Constants = require('./constants');
 import translator_module = require('./translator');
 import network_options = require('../../generic/network-options');
 import model = require('./model');
+import jsurl = require('jsurl');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
@@ -486,9 +488,8 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  private addUser_ = (token: string, showConfirmation :boolean) : Promise<void> => {
+  private addUser_ = (tokenObj: any, showConfirmation :boolean) : Promise<void> => {
     try {
-      var tokenObj = JSON.parse(atob(token));
       var userName = tokenObj.userName;
       var networkName = tokenObj.networkName;
       var networkData = tokenObj.networkData;
@@ -512,7 +513,7 @@ export class UserInterface implements ui_constants.UiApi {
         userId: "" /* The current user's ID will be determined by the core. */
       };
       return this.core.acceptInvitation(
-          {network: socialNetworkInfo, token: token});
+          {network: socialNetworkInfo, tokenObj: tokenObj});
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
       return;
@@ -528,7 +529,7 @@ export class UserInterface implements ui_constants.UiApi {
     try {
       // Get the token at the end of the invite (if in URL format).
       var token = invite.substr(invite.lastIndexOf('/') + 1);
-      var tokenObj = JSON.parse(atob(token));
+      var tokenObj = jsurl.parse(token);
       var networkName = tokenObj.networkName;
       var userName = tokenObj.userName;
     } catch(e) {
@@ -550,14 +551,14 @@ export class UserInterface implements ui_constants.UiApi {
           // Cloud contacts only appear on the GET tab.
           this.setMode(ui_constants.Mode.GET);
           // Don't show an additional confirmation for Cloud.
-          return this.addUser_(token, false).catch(showTokenError);
+          return this.addUser_(tokenObj, false).catch(showTokenError);
         });
       });
     }
 
     if (this.model.getNetwork(networkName)) {
       // User is already logged into the right network (other than Cloud).
-      return this.addUser_(token, true).catch(showTokenError);
+      return this.addUser_(tokenObj, true).catch(showTokenError);
     }
 
     // loginPromise should resolve when the use is logged into networkName.
@@ -589,7 +590,7 @@ export class UserInterface implements ui_constants.UiApi {
     return loginPromise.then(() => {
       // User already saw a confirmation when they logged into the network,
       // don't show an additional confirmation.
-      return this.addUser_(token, false).catch(showTokenError);
+      return this.addUser_(tokenObj, false).catch(showTokenError);
     });
   }
 

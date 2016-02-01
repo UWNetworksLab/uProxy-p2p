@@ -20,6 +20,7 @@
 
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/generic/jsurl.d.ts' />
 
 import firewall = require('./firewall');
 import globals = require('./globals');
@@ -32,6 +33,7 @@ import freedom_social2 = require('../interfaces/social2');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import ui = ui_connector.connector;
+import jsurl = require('jsurl');
 
 import storage = globals.storage;
 
@@ -261,7 +263,7 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.isEncrypted === true : false;
     }
 
-    public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
+    public acceptInvitation = (tokenObj ?:any, userId ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -564,23 +566,16 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public acceptInvitation = (token ?:string, userId ?:string) : Promise<void> => {
-      var networkData :string = null;
-      if (token) {
-        // token may be a URL with a token, or just the token.  Remove the
-        // prefixed URL if it is set.
-        token = token.lastIndexOf('/') >= 0 ?
-            token.substr(token.lastIndexOf('/') + 1) : token;
-        try {
-          networkData = JSON.parse(atob(token)).networkData;
-        } catch (e) {
-          return Promise.reject('Invalid invite token ' + token);
-        }
+    public acceptInvitation = (tokenObj ?:any, userId ?:string) : Promise<void> => {
+      var networkData :Object = null;
+      if (tokenObj) {
+        networkData = tokenObj.networkData;
       } else if (userId) {
         networkData = userId;
       }
       return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
-        log.error('Error calling acceptUserInvitation: ' + networkData, e.message);
+        log.error('Error calling acceptUserInvitation: ' +
+            JSON.stringify(networkData), e.message);
       });
     }
 
@@ -603,14 +598,14 @@ export function notifyUI(networkName :string, userId :string) {
     // contact for friends who use the url. The userId isn't used.
     public getInviteUrl = (userId ?:string) : Promise<string> => {
       return this.freedomApi_.inviteUser(userId || '')
-          .then((data: { networkData :string }) => {
+          .then((networkData: Object) => {
         var tokenObj = {
           v: 1,
           networkName: this.name,
           userName: this.myInstance.userName,
-          networkData: data.networkData
+          networkData: networkData
         };
-        return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
+        return 'https://www.uproxy.org/invite/' + jsurl.stringify(tokenObj);
       })
     }
 
