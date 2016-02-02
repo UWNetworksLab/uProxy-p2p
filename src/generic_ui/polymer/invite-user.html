@@ -41,6 +41,9 @@
         padding-top: 0;
         padding-bottom: 18px;
       }
+      #inviteCodeDecorator {
+        padding-bottom: 0;
+      }
       a {
         cursor: pointer;
       }
@@ -80,22 +83,28 @@
         cursor: pointer;
       }
       #acceptInviteButton {
-        padding-left: 1em;
-        padding-right: 1em;
+        width: 100%;
+        margin-top: 18px;
+        margin-left: 0;
+        margin-right: 0;
       }
       .networkLoginButton {
+        text-align: center;
         display: inline-block;
-        width: 102px;
+        /* buttons only fit 1 per row with 50%.  TODO: find out why */
+        width: 49%;
         margin-bottom: 26px;
         cursor: pointer;
         vertical-align: top;
       }
       .networkLoginButton .networkName {
-        margin-top: 0.5em;
+        margin-top: 0.7em;
+        font-size: 16px;
+        color: rgba(0, 0, 0, .86);
       }
       .networkLoginButton core-icon {
-        width: 75px;
-        height: 75px;
+        width: 86px;
+        height: 86px;
       }
       .networkLoginButton .experimental {
         font-size: 12px;
@@ -142,8 +151,8 @@
         text-decoration: underline;
         color: rgb(112, 112, 112);
       }
-      .highlightedText {
-        color: #009688;
+      .paleText {
+        color: #9e9e9e;
       }
       #chooseASocialNetwork {
         font-size: 14px;
@@ -151,10 +160,14 @@
       }
       #weWontPostLearnMore {
         font-size: 14px;
+        padding: 26px;
+        color: #999;
+        border-top: 1px solid rgb(221, 221, 221);
+      }
+      #allNetworkButtons {
         padding-left: 26px;
         padding-right: 26px;
-        padding-bottom: 26px;
-        color: #999;
+        text-align: left;
       }
     </style>
 
@@ -173,18 +186,18 @@
               <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$ }}' layout vertical>
                 <input is='core-input' value='{{ inviteCode }}' />
               </paper-input-decorator>
-              <uproxy-button id='acceptInviteButton' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
+              <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
             </div>
           </div>
 
-          <p id='chooseASocialNetwork' class='highlightedText'>{{ "CHOOSE_A_SOCIAL_NETWORK_AND_FIND_YOUR_FRIENDS" | $$ }}</p>
+          <p id='chooseASocialNetwork' class='paleText'>{{ "CHOOSE_A_SOCIAL_NETWORK_AND_FIND_YOUR_FRIENDS" | $$ }}</p>
 
-          <div>
+          <div id='allNetworkButtons'>
             <template repeat='{{ n in model.networkNames }}' vertical layout>
               <div on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
                 <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
-                <div class='experimental highlightedText' hidden?='{{!isExperimentalNetwork(n)}}'>
+                <div class='experimental paleText' hidden?='{{!isExperimentalNetwork(n)}}'>
                   Experimental
                 </div>
               </div>
