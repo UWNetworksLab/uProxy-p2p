@@ -155,7 +155,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
     # NET_ADMIN is required to run iptables inside the container.
     # Full list of capabilities:
     #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
-    docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS -z true
+    docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d uproxy/$1 /sbin/my_init -- /test/bin/load-zork.sh $RUNARGS -z true
 fi
 
 # Start sshd, if necessary.

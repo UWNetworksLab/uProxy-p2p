@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat <<EOF
-FROM library/ubuntu:trusty
+FROM phusion/baseimage:0.9.18
 # From setup_image.sh $@
 MAINTAINER Lally Singh <lally@google.com>
 
