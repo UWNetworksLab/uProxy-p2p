@@ -139,13 +139,13 @@ export class User implements social.BaseUser {
 
     // Update gettingConsentState, used to display correct getting buttons.
     if (this.offeringInstances.length > 0) {
-      // Expand the contact if there previously were no offers and we are not
-      // ignoring offers.
+      // Expand the contact if there previously were no offers, we are not
+      // ignoring offers, and the contact is online.
       if ((this.gettingConsentState ==
           GettingConsentState.NO_OFFER_OR_REQUEST ||
           this.gettingConsentState ==
           GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION) &&
-          !this.consent_.ignoringRemoteUserOffer) {
+          !this.consent_.ignoringRemoteUserOffer && this.isOnline) {
         this.getExpanded = true;
       }
       if (this.consent_.localRequestsAccessFromRemote) {
@@ -169,13 +169,13 @@ export class User implements social.BaseUser {
 
     // Update sharingConsentState, used to display correct sharing buttons.
     if (this.consent_.remoteRequestsAccessFromLocal) {
-      // Expand the contact if there previously were no requests and we are not
-      // ignoring requests.
+      // Expand the contact if there previously were no requests, we are not
+      // ignoring requests, and the contact is online.
       if ((this.sharingConsentState ==
           SharingConsentState.NO_OFFER_OR_REQUEST ||
           this.sharingConsentState ==
           SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION) &&
-          !this.consent_.ignoringRemoteUserRequest) {
+          !this.consent_.ignoringRemoteUserRequest && this.isOnline) {
         this.shareExpanded = true;
       }
       if (this.consent_.localGrantsAccessToRemote) {
