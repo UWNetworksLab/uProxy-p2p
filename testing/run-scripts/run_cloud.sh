@@ -72,7 +72,7 @@ then
         # metadata API which can tell us the region in which a
         # droplet is located:
         #   https://developers.digitalocean.com/documentation/metadata/#metadata-api-endpoints
-        BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region`
+        BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region || echo -n ""`
         if [ -n "$BANNER" ]
         then
             BANNER=`echo "$BANNER"|sed 's/ams./Amsterdam/;s/sgp./Singapore/;s/fra./Frankfurt/;s/tor./Toronto/;s/nyc./New York/;s/sfo./San Francisco/;s/lon./London/'`
