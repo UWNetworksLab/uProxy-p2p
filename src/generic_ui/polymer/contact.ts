@@ -116,11 +116,6 @@ Polymer({
     });
   },
   ready: function() {
-    // Collapse offline contacts by default
-    if (!this.contact.isOnline) {
-      this.contact.shareExpanded = false;
-      this.contact.getExpanded = false;
-    }
     this.ui = ui_context.ui;
     this.ui_constants = ui_constants;
     this.model = ui_context.model;
