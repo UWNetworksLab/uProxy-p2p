@@ -25,7 +25,7 @@ function usage () {
     echo "  -p: path to pre-built uproxy-lib repository"
     echo "  -i: invite code"
     echo "  -u: update Docker images (backs up invite code unless -i or -w used)"
-    echo "  -w: do not migrate data from existing containers (WARNING: will invalidate invite codes)"
+    echo "  -w: do not copy invite code from current installation when updating"
     echo "  -d: override the detected public IP (for development only)"
     echo "  -b: name to use in contacts list"
     echo "  -h, -?: this help message"
@@ -49,6 +49,12 @@ shift $((OPTIND-1))
 
 if [ $# -lt 1 ]
 then
+    usage
+fi
+
+if [ "$WIPE" = true ] && [ "$UPDATE" = false ]
+then
+    echo "-u must be used when -w is used"
     usage
 fi
 
@@ -108,7 +114,7 @@ then
 fi
 
 # If no invite code passed in and no -w flag, try to get the existing one
-if [ -z "$INVITE_CODE" && $WIPE = false ]
+if [ -z "$INVITE_CODE"] && [ "$WIPE" = false ]
 then
     if docker ps -a | grep uproxy-sshd >/dev/null
     then
@@ -120,7 +126,7 @@ then
     INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO || echo -n ""`
 fi
 
-if [ $UPDATE = true || $WIPE = true ]
+if [ "$UPDATE" = true ]
 then
     docker rm -f uproxy-sshd || true
     docker rm -f uproxy-zork || true
@@ -148,7 +154,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
     then
         RUNARGS="$RUNARGS -p"
     fi
-    if [ $NPM = true ]
+    if [ "$NPM" = true ]
     then
         RUNARGS="$RUNARGS -n"
     fi
