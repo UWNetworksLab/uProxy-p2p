@@ -263,7 +263,7 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.isEncrypted === true : false;
     }
 
-    public acceptInvitation = (tokenObj ?:any, userId ?:string) : Promise<void> => {
+    public acceptInvitation = (tokenObj ?:social.InviteTokenData, userId ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -566,7 +566,11 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public acceptInvitation = (tokenObj ?:any, userId ?:string) : Promise<void> => {
+    public acceptInvitation = (tokenObj ?:social.InviteTokenData, userId ?:string) : Promise<void> => {
+      // TODO: networkData will be an Object for Quiver, but a string (userId)
+      // for GitHub, and a string (JSON format) for Firebase networks.  We
+      // should update the Freedom social providers so they all take the same
+      // type.
       var networkData :Object = null;
       if (tokenObj) {
         networkData = tokenObj.networkData;
@@ -599,20 +603,26 @@ export function notifyUI(networkName :string, userId :string) {
     public getInviteUrl = (userId ?:string) : Promise<string> => {
       return this.freedomApi_.inviteUser(userId || '')
           .then((networkData: Object) => {
-        var tokenObj = {
-          v: 1,
-          networkName: this.name,
-          userName: this.myInstance.userName,
-          networkData: networkData
-        };
         if (this.name === 'Quiver') {
           // TODO: once we think all/most users have versions of uProxy
           // that support jsurl style invites, we should update all our
           // social networks to generate those invites.
-          // TODO: encode non networkData parameters as URL query params
-          return 'https://www.uproxy.org/invite/' + jsurl.stringify(tokenObj);
+          var urlParams :string[] = [
+            'v=2',
+            'networkName=Quiver',
+            'userName=' + encodeURIComponent(this.myInstance.userName),
+            'networkData=' + jsurl.stringify(networkData)
+          ];
+          return 'https://www.uproxy.org/invite?' + urlParams.join('&');
         } else {
-          return 'https://www.uproxy.org/invite/' + btoa(JSON.stringify(tokenObj));
+          var tokenObj = {
+            v: 1,
+            networkName: this.name,
+            userName: this.myInstance.userName,
+            networkData: networkData
+          };
+          return 'https://www.uproxy.org/invite/' +
+              btoa(JSON.stringify(tokenObj));
         }
       })
     }

@@ -15,7 +15,6 @@ import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import net = require('../../../../third_party/uproxy-lib/net/net.types');
-import noreConnector = require('./core_connector');
 import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
@@ -488,11 +487,10 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  private addUser_ = (tokenObj: any, showConfirmation :boolean) : Promise<void> => {
+  private addUser_ = (tokenObj :social.InviteTokenData, showConfirmation :boolean) : Promise<void> => {
     try {
       var userName = tokenObj.userName;
       var networkName = tokenObj.networkName;
-      var networkData = tokenObj.networkData;
     } catch(e) {
       return Promise.reject('Error parsing invite token');
     }
@@ -520,22 +518,48 @@ export class UserInterface implements ui_constants.UiApi {
     })
   }
 
-  // Token is expected to be in base64 encoded JSON.
+  private parseInviteUrl_ = (invite :string) : social.InviteTokenData => {
+    // Adapted from http://stackoverflow.com/questions/901115
+    function getParameterByName(url :string, name :string) {
+      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+      var results = regex.exec(url);
+      return results === null ? "" :
+          decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    try {
+      if (getParameterByName(invite, 'v')) {
+        return {
+          v: parseInt(getParameterByName(invite, 'v'), 10),
+          networkData: jsurl.parse(getParameterByName(invite, 'networkData')),
+          networkName: getParameterByName(invite, 'networkName'),
+          userName: getParameterByName(invite, 'userName')
+        }
+      } else {
+        // Old v1 invites are base64 encoded JSON
+        var token = invite.substr(invite.lastIndexOf('/') + 1);
+        // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
+        token = token.match("[A-Za-z0-9+/=_]+")[0];
+        return JSON.parse(atob(token));
+      }
+    } catch(e) {
+      return null;
+    }
+  }
+
   public handleInvite = (invite :string) : Promise<void> => {
     var showTokenError = () => {
       this.showDialog('', this.i18n_t('INVITE_ERROR'));
     };
 
-    try {
-      // Get the token at the end of the invite (if in URL format).
-      var token = invite.substr(invite.lastIndexOf('/') + 1);
-      var tokenObj = jsurl.parse(token);
-      var networkName = tokenObj.networkName;
-      var userName = tokenObj.userName;
-    } catch(e) {
+    var tokenObj = this.parseInviteUrl_(invite);
+    if (!tokenObj) {
       showTokenError();
       return;
     }
+    var userName = tokenObj.userName;
+    var networkName = tokenObj.networkName;
 
     if (networkName == 'Cloud') {
       // Cloud confirmation is the same regardless of whether the user is
