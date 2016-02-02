@@ -12,6 +12,15 @@ export interface IceExtension {
   value: string;
 }
 
+// The unexpected introduction of new fields has impacted churn
+// in the past, e.g. ufrag:
+//   https://github.com/uProxy/uproxy/issues/2167
+// To help prevent similar breakages re-occurring, we generally
+// remove fields that aren't defined in the spec. Exceptions are
+// made for TCP candidates and Chrome's generation field, which
+// has been around forever.
+const EXTENSION_WHITELIST = ['tcptype', 'generation'];
+
 // Represents an RTCIceCandidate object from the WebRTC spec:
 //   http://www.w3.org/TR/webrtc/#rtcicecandidate-type
 // This encapsulates a candidate as described in section 15.1 of the ICE RFC
@@ -136,10 +145,14 @@ export class Candidate {
     }
 
     for (; i < tokens.length; i += 2) {
-      c.extensions.push({
-        key: tokens[i],
-        value: tokens[i + 1]
-      });
+      const key = tokens[i];
+      const value = tokens[i + 1];
+      if (EXTENSION_WHITELIST.indexOf(key) >= 0) {
+        c.extensions.push({
+          key: key,
+          value: value
+        });
+      }
     }
 
     c.sdpMid = rtcIceCandidate.sdpMid;

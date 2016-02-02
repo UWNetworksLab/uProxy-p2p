@@ -101,4 +101,24 @@ describe("extractEndpointFromCandidateLine", function() {
     // Roundtrip
     expect(c.toRTCIceCandidate()).toEqual(rtcIceCandidate);
   });
+
+  // Ensure un-whitelisted extensions are stripped:
+  //   https://github.com/uProxy/uproxy/issues/2167
+  it('un-whitelisted extensions are removed', () => {
+    const rtcIceCandidate = {
+      candidate: 'candidate:1302982778 1 tcp 1518214911 172.29.18.131 0 typ host generation 0 ufrag abc123',
+      sdpMid: '',
+      sdpMLineIndex: 0
+    };
+    const c = Candidate.fromRTCIceCandidate(rtcIceCandidate);
+    expect(c.extensions.length).toEqual(1);
+    expect(c.extensions[0]).toEqual({ key: 'generation', value: '0' });
+
+    // Roundtrip, sanitised.
+    expect(c.toRTCIceCandidate()).toEqual({
+      candidate: 'candidate:1302982778 1 tcp 1518214911 172.29.18.131 0 typ host generation 0',
+      sdpMid: '',
+      sdpMLineIndex: 0
+    });
+  });
 });
