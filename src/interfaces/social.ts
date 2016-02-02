@@ -235,7 +235,7 @@ export interface SignallingMetadata {
   proxyingId ?:string;
 }
 
-export interface InviteData {
+export interface InviteTokenData {
   v :number;  // version
   networkName :string;
   userName :string;
@@ -297,7 +297,7 @@ export interface Network {
   /**
    * Accept an invite to use uProxy with a friend
    */
-  acceptInvitation: (token ?:InviteData, userId ?:string) => Promise<void>;
+  acceptInvitation: (token ?:InviteTokenData, userId ?:string) => Promise<void>;
 
   /**
    * Send an invite to a friend to use uProxy

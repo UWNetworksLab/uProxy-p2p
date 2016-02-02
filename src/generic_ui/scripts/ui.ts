@@ -487,7 +487,7 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  private addUser_ = (tokenObj :social.InviteData, showConfirmation :boolean) : Promise<void> => {
+  private addUser_ = (tokenObj :social.InviteTokenData, showConfirmation :boolean) : Promise<void> => {
     try {
       var userName = tokenObj.userName;
       var networkName = tokenObj.networkName;
@@ -518,7 +518,7 @@ export class UserInterface implements ui_constants.UiApi {
     })
   }
 
-  private parseInviteUrl_ = (invite :string) : social.InviteData => {
+  private parseInviteUrl_ = (invite :string) : social.InviteTokenData => {
     // Adapted from http://stackoverflow.com/questions/901115
     function getParameterByName(url :string, name :string) {
       name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");

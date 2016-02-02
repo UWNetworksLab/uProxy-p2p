@@ -263,7 +263,7 @@ export function notifyUI(networkName :string, userId :string) {
       return options ? options.isEncrypted === true : false;
     }
 
-    public acceptInvitation = (tokenObj ?:social.InviteData, userId ?:string) : Promise<void> => {
+    public acceptInvitation = (tokenObj ?:social.InviteTokenData, userId ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -566,7 +566,7 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
-    public acceptInvitation = (tokenObj ?:social.InviteData, userId ?:string) : Promise<void> => {
+    public acceptInvitation = (tokenObj ?:social.InviteTokenData, userId ?:string) : Promise<void> => {
       // TODO: networkData will be an Object for Quiver, but a string (userId)
       // for GitHub, and a string (JSON format) for Firebase networks.  We
       // should update the Freedom social providers so they all take the same

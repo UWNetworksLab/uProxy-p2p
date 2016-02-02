@@ -29,7 +29,7 @@ class MockSocial {
   public login = () => {}
   public logout = () => {}
   public sendMessage = () => { return Promise.resolve(); }
-  public inviteUser = () => { return Promise.resolve({data: 'inviteData'}); }
+  public inviteUser = () => { return Promise.resolve({data: 'InviteTokenData'}); }
 }
 
 // Valid message that won't have side effects on network/user/instance objects.
