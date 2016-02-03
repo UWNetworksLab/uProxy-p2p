@@ -194,6 +194,23 @@ universalDistFiles = [
   '!**/*spec*'
 ]
 
+extraFilesForCoreBuilds = [
+  'freedomjs-anonymized-metrics',
+  'freedom-social-firebase',
+  'freedom-social-github',
+  'freedom-social-wechat',
+  'freedom-social-quiver',
+  'freedom-pgp-e2e',
+  'freedom-port-control',
+]
+
+getExtraFilesForCoreBuild = (basePath) ->
+  for spec in extraFilesForCoreBuilds
+    expand: true,
+    cwd: path.join('node_modules', spec, 'dist'),
+    src: ['**'],
+    dest: path.join(basePath, spec)
+
 gruntConfig = {
   pkg: readJSONFile('package.json')
   pkgs:
@@ -518,48 +535,11 @@ gruntConfig = {
           'generic_core'
         ]
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
-        files: [
-          {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedomjs-anonymized-metrics'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-social-firebase'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
-            src: ['**/*.js', '**/*.json']
-            dest: chromeAppDevPath + '/freedom-social-github'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-social-wechat'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-social-quiver'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-pgp-e2e'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-port-control/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-port-control'
-          },
-          { # uProxy Icons and fonts
-            expand: true, cwd: 'src/'
-            src: ['icons/128_online.png', 'fonts/*']
-            dest: chromeAppDevPath
-          }
-        ]
+        files: getExtraFilesForCoreBuild(chromeAppDevPath).concat({ # uProxy Icons and fonts
+          expand: true, cwd: 'src/'
+          src: ['icons/128_online.png', 'fonts/*']
+          dest: chromeAppDevPath
+        })
         localDestPath: 'chrome/app/'
 
     # {
@@ -590,48 +570,11 @@ gruntConfig = {
           'fonts'
         ]
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
-        files: [
-          {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/dist/',
-            src: ['**']
-            dest: firefoxDevPath + 'data/freedomjs-anonymized-metrics'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-social-firebase'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
-            src: ['**/*.js', '**/*.json']
-            dest: firefoxDevPath + '/data/freedom-social-github'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-social-wechat'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-social-quiver'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-pgp-e2e'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-port-control/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-port-control'
-          },
-          { # lib
-            expand: true, cwd: devBuildPath
-            src: ['interfaces/*.js']
-            dest: firefoxDevPath + '/lib'
-          }
-        ]
+        files: getExtraFilesForCoreBuild(path.join(firefoxDevPath, 'data')).concat({ #lib
+          expand: true, cwd: devBuildPath
+          src: ['interfaces/*.js']
+          dest: firefoxDevPath + '/lib'
+        })
         localDestPath: 'firefox/data'
     firefox_additional:
       files: [
@@ -659,48 +602,11 @@ gruntConfig = {
           'fonts'
         ]
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
-        files: [
-          {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedomjs-anonymized-metrics'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-social-firebase'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
-            src: ['**/*.js', '**/*.json']
-            dest: ccaDevPath + '/freedom-social-github'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-social-wechat'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-social-quiver'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-pgp-e2e'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-port-control/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-port-control'
-          },
-          { # uProxy Icons and fonts
-            expand: true, cwd: 'src/'
-            src: ['icons/128_online.png', 'fonts/*']
-            dest: ccaDevPath
-          }
-        ]
+        files: getExtraFilesForCoreBuild(ccaDevPath).concat({ # uProxy Icons and fonts
+          expand: true, cwd: 'src/'
+          src: ['icons/128_online.png', 'fonts/*']
+          dest: ccaDevPath
+        })
         localDestPath: 'cca/app/'
     cca_additional:
       files: [
