@@ -530,9 +530,13 @@ export class UserInterface implements ui_constants.UiApi {
 
     try {
       if (getParameterByName(invite, 'v')) {
+        // networkData is in jsurl format, but may have ' replaced with %27 by
+        // Chrome.
+        var networkDataObj = jsurl.parse(
+            getParameterByName(invite, 'networkData').replace('%27', "'"));
         return {
           v: parseInt(getParameterByName(invite, 'v'), 10),
-          networkData: jsurl.parse(getParameterByName(invite, 'networkData')),
+          networkData: networkDataObj,
           networkName: getParameterByName(invite, 'networkName'),
           userName: getParameterByName(invite, 'userName')
         }
