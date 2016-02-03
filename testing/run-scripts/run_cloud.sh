@@ -25,7 +25,7 @@ function usage () {
     echo "  -p: path to pre-built uproxy-lib repository"
     echo "  -i: invite code"
     echo "  -u: update Docker images (backs up invite code unless -i or -w used)"
-    echo "  -w: do not migrate data from existing containers (WARNING: will invalidate invite codes)"
+    echo "  -w: do not copy invite code from current installation when updating"
     echo "  -d: override the detected public IP (for development only)"
     echo "  -b: name to use in contacts list"
     echo "  -h, -?: this help message"
@@ -52,6 +52,12 @@ then
     usage
 fi
 
+if [ "$WIPE" = true ] && [ "$UPDATE" = false ]
+then
+    echo "-u must be used when -w is used"
+    usage
+fi
+
 # Set the cloud instance's banner.
 # In descending order of preference:
 #  - command-line option
@@ -72,7 +78,7 @@ then
         # metadata API which can tell us the region in which a
         # droplet is located:
         #   https://developers.digitalocean.com/documentation/metadata/#metadata-api-endpoints
-        BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region`
+        BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region || echo -n ""`
         if [ -n "$BANNER" ]
         then
             BANNER=`echo "$BANNER"|sed 's/ams./Amsterdam/;s/sgp./Singapore/;s/fra./Frankfurt/;s/tor./Toronto/;s/nyc./New York/;s/sfo./San Francisco/;s/lon./London/'`
@@ -108,7 +114,7 @@ then
 fi
 
 # If no invite code passed in and no -w flag, try to get the existing one
-if [ -z "$INVITE_CODE" && $WIPE = false ]
+if [ -z "$INVITE_CODE"] && [ "$WIPE" = false ]
 then
     if docker ps -a | grep uproxy-sshd >/dev/null
     then
@@ -120,7 +126,7 @@ then
     INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO || echo -n ""`
 fi
 
-if [ $UPDATE = true || $WIPE = true ]
+if [ "$UPDATE" = true ]
 then
     docker rm -f uproxy-sshd || true
     docker rm -f uproxy-zork || true
@@ -148,7 +154,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
     then
         RUNARGS="$RUNARGS -p"
     fi
-    if [ $NPM = true ]
+    if [ "$NPM" = true ]
     then
         RUNARGS="$RUNARGS -n"
     fi
