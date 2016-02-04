@@ -178,7 +178,7 @@ parentModule.on('connectionscount', () => {
 
   server.listen().then((endpoint:net.Endpoint) => {
     var clients :tcp.Connection[] = [];
-    for (var i = 0; i < 1; i++) {
+    for (var i = 0; i < 5; i++) {
       clients.push(new tcp.Connection({endpoint: endpoint}));
     }
 
