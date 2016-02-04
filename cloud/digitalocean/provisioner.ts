@@ -16,8 +16,10 @@ const STATUS_CODES: { [k: string]: string; } = {
   "OAUTH_INIT": "Initializing oauth flow",
   "OAUTH_ERROR": "Error getting oauth token",
   "OAUTH_COMPLETE": "Got oauth token",
-  "SSHKEY_RETRIEVED": "Retrieved SSH keys from storage",
+  "SSHKEY_RETRIEVED": "Loaded SSH keys from storage",
+  "GENERATING_SSHKEY": "Generating new SSH keys",
   "SSHKEY_GENERATED": "Generated new SSH keys",
+  "SSHKEY_SAVED": "Saved SSH keys to storage",
   "CLOUD_FAILED": "Failed to complete cloud operation",
   "CLOUD_INIT_ADDKEY": "Starting to add SSH key to cloud account",
   "CLOUD_DONE_ADDKEY": "Done adding SSH key to cloud account",
@@ -120,11 +122,16 @@ class Provisioner {
    * @return {KeyPair} public and private SSH keys
    */
   private static generateKeyPair_ = () : KeyPair => {
-    "use strict";
-    var pair = forge.pki.rsa.generateKeyPair({bits: 2048, e: 0x10001});
-    var publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, '');
-    var privateKey = forge.ssh.privateKeyToOpenSSH(pair.privateKey, '');
-    return { public: publicKey, private: privateKey };
+    const pair = forge.pki.rsa.generateKeyPair({
+      bits: 2048,
+      e: 0x10001
+    });
+    const publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, '');
+    const privateKey = forge.ssh.privateKeyToOpenSSH(pair.privateKey, '');
+    return {
+      public: publicKey,
+      private: privateKey
+    };
   }
 
   /**
@@ -182,38 +189,52 @@ class Provisioner {
   }
 
   /**
-   * Try to retrieve SSH keys from storage.
-   * If not found, generate new ones and store
-   * @param {String} name name of the key (usually same as name of VM later)
-   * @return {Promise.<KeyPair>} the SSH keys retrieved
-   * {
-   *    public: "...",
-   *    private: "..."
-   * }
+   * Retrieves an SSH keypair from storage, generating and saving
+   * a new keypair if none is found.
+   * @param {String} name name of the key
+   * @return {Promise.<KeyPair>}
+   * @throws if there is any problem loading from or saving to
+   * storage or if a keypair cannot be generated
    */
   private getSshKey_ = (name: string) : Promise<KeyPair> => {
-    var storage = freedom["core.storage"]();
-    return new Promise((F, R) => {
-      var result: KeyPair = <KeyPair>{};
-      Promise.all([
-        storage.get("DigitalOcean-" + name + "-PublicKey"),
-        storage.get("DigitalOcean-" + name + "-PrivateKey")
-      ]).then((val: string[]) => {
-        if (val[0] === null ||
-            val[1] === null) {
-          result = Provisioner.generateKeyPair_();
-          storage.set("DigitalOcean-" + name + "-PublicKey", result.public);
-          storage.set("DigitalOcean-" + name + "-PrivateKey", result.private);
-          this.sendStatus_("SSHKEY_GENERATED");
-        } else {
-          result.public = val[0];
-          result.private = val[1];
-          this.sendStatus_("SSHKEY_RETRIEVED");
-        }
-        F(result);
-      }).catch((err: Error) => {
-        console.error("storage error: " + JSON.stringify(err));
-        R(err);
+    const publicKeyIndex = 'DigitalOcean-' + name + '-PublicKey';
+    const privateKeyIndex = 'DigitalOcean-' + name + '-PrivateKey';
+    const storage = freedom['core.storage']();
+    return Promise.all([
+        storage.get(publicKeyIndex),
+        storage.get(privateKeyIndex)
+    ]).then((results: string[]) => {
+      if (results[0] !== null && results[1] !== null) {
+        this.sendStatus_('SSHKEY_RETRIEVED');
+        return {
+          public: results[0],
+          private: results[1]
+        };
+      }
+
+      this.sendStatus_('GENERATING_SSHKEY');
+      try {
+        const result = Provisioner.generateKeyPair_();
+        this.sendStatus_('SSHKEY_GENERATED');
+        return Promise.all([
+          storage.set(publicKeyIndex, result.public),
+          storage.set(privateKeyIndex, result.private)
+        ]).then((ignored: any) => {
+          this.sendStatus_('SSHKEY_SAVED');
+          return result;
+        }, (e: Error) => {
+          return Promise.reject({
+            message: 'error saving SSH keys to storage: ' + e.message
+          });
+        });
+      } catch (e) {
+        return Promise.reject({
+          message: 'error generating SSH keys: ' + e.message
+        });
+      }
+    }, (e: Error) => {
+      return Promise.reject({
+        message: 'error loading SSH keys from storage: ' + e.message
       });
     });
   }
