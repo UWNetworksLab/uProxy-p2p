@@ -368,6 +368,7 @@ gruntConfig = {
             'freedom-pgp-e2e/end-to-end.compiled.js'
             'freedom-pgp-e2e/googstorage.js'
             'freedom-pgp-e2e/e2e.js'
+            'freedom-pgp-e2e/hex2words.js'
             'freedom-pgp-e2e/pgpapi.json'
 
             '**/freedom-module.json'
@@ -416,6 +417,7 @@ gruntConfig = {
             'data/freedom-pgp-e2e/end-to-end.compiled.js'
             'data/freedom-pgp-e2e/googstorage.js'
             'data/freedom-pgp-e2e/e2e.js'
+            'data/freedom-pgp-e2e/hex2words.js'
             'data/freedom-pgp-e2e/pgpapi.json'
 
             'data/**/freedom-module.json'
