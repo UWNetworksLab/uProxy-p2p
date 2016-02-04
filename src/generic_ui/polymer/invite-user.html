@@ -194,7 +194,7 @@
 
           <div id='allNetworkButtons'>
             <template repeat='{{ n in model.networkNames }}' vertical layout>
-              <div on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
+              <div hidden?='{{ n == "Cloud" }}' on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
                 <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
                 <div class='experimental paleText' hidden?='{{!isExperimentalNetwork(n)}}'>

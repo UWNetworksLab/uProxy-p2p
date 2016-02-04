@@ -10,7 +10,6 @@ export interface ClientState {
   clientId  :string;
   status: string;  // a string from: FreedomSocialProvider.STATUS
   timestamp :number;
-  inviteResponse ?:string;
 }
 
 // The profile of a user on a social network.
@@ -55,6 +54,8 @@ export interface LoginRequest {
   rememberLogin :boolean;
   // UserName for logged in user.
   userName ?:string;
+  // PGP key name to be used for encryption.
+  pgpKeyName ?:string;
 }
 
 // Interfaces for Freedom social API
@@ -101,8 +102,8 @@ export interface FreedomSocialProvider {
   getUsers() : Promise<Users>;
   getClients() : Promise<Clients>;
 
-  acceptUserInvitation(inviteToken :string, inviteResponse ?:string): Promise<void>;
-  inviteUser(optionalUserId :string): Promise<Object>;
+  acceptUserInvitation(networkData :Object): Promise<void>;
+  inviteUser(optionalUserId ?:string): Promise<Object>;
   sendEmail(toEmailAddress :string, subject :string, body :string): Promise<void>;
 
   // Send a message to user on your network

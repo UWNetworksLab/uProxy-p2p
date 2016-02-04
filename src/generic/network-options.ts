@@ -36,7 +36,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     areAllContactsUproxy: true,
     supportsReconnect: true,
     isExperimental: true,
-    encryptsWithClientId: true
+    isEncrypted: true
   },
   'Cloud': {
     isFirebase: false,

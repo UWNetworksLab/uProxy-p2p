@@ -130,7 +130,7 @@ describe('firewall.SocialClientState', () => {
     {
       'userId' : '__proto__',
       'clientId' : 'alice@gmail.com/Android-19078634adfkj',
-      'status' : 'Happy',
+      'status' : 'ONLINE',
       'timestamp' : 30,
       'lastSeen' : 100,
     },
@@ -138,7 +138,7 @@ describe('firewall.SocialClientState', () => {
     {
       'userId' : 'alice@gmail.com',
       'clientId' : 'alice@gmail.com/Android-19078634adfkj',
-      'status' : 'Happy',
+      'status' : 'ONLINE',
       'timestamp' : -1,
       'lastSeen' : 100,
     }]
@@ -146,7 +146,7 @@ describe('firewall.SocialClientState', () => {
   var goodClientState = {
     'userId' : 'alice@gmail.com',
     'clientId' : 'alice@gmail.com/Android-23nadsv32f',
-    'status' : 'Happy',
+    'status' : 'ONLINE',
     'timestamp' : 30
   };
 
@@ -218,7 +218,7 @@ describe('firewall.SocialIncomingMessage', () => {
       'from' : {
         'userId' : '__proto__',
         'clientId' : 'alice@gmail.com/Android-19078634adfkj',
-        'status' : 'Happy',
+        'status' : 'ONLINE',
         'timestamp' : 30,
       },
       'message' : ''
@@ -228,7 +228,7 @@ describe('firewall.SocialIncomingMessage', () => {
       'from' : {
         'userId' : 'alice@gmail.com',
         'clientId' : 'alice@gmail.com/Android-19078634adfkj',
-        'status' : 'Happy',
+        'status' : 'ONLINE',
         'timestamp' : -1,
       },
       'message' : ''
@@ -238,7 +238,7 @@ describe('firewall.SocialIncomingMessage', () => {
     'from' : {
       'userId' : 'alice@gmail.com',
       'clientId' : 'alice@gmail.com/Android-23nadsv32f',
-      'status' : 'Happy',
+      'status' : 'ONLINE',
       'timestamp' : 30,
     },
     'message' : 'hello!'

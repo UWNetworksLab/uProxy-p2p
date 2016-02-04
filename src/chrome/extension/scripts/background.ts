@@ -144,7 +144,7 @@ chrome.webRequest.onBeforeRequest.addListener(
           redirectUrl: chrome.extension.getURL('generic_ui/invite-received.html')
       };
     },
-    { urls: ['https://www.uproxy.org/invite/*'] },
+    { urls: ['https://www.uproxy.org/invite*'] },
     ['blocking']
     );
 

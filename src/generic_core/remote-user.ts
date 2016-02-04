@@ -57,8 +57,6 @@ var log :logging.Log = new logging.Log('remote-user');
 
     public consent :consent.State;
 
-    public knownPublicKeys :string[] = [];
-
     // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :remote_instance.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
@@ -313,12 +311,6 @@ var log :logging.Log = new logging.Log('remote-user');
       if (!instance) {
         // Create a new instance.
         instance = new remote_instance.RemoteInstance(this, instanceId);
-        if (this.network.encryptsWithClientId()) {
-          // Set publicKey using clientId.  For networks which include the
-          // publicKey with the clientId (like Quiver), publicKey is not part
-          // of the instance handshake.
-          instance.publicKey = this.network.getKeyFromClientId(clientId);
-        }
         this.instances_[instanceId] = instance;
       }
       return instance.update(instanceHandshake,
@@ -493,10 +485,6 @@ var log :logging.Log = new logging.Log('remote-user');
         this.profile.url = state.url;
       }
 
-      if (typeof state.knownPublicKeys !== 'undefined') {
-        this.knownPublicKeys = state.knownPublicKeys;
-      }
-
       if (typeof state.status === "undefined" &&
           this.network.name === "Cloud") {
         this.profile.status = social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
@@ -534,8 +522,7 @@ var log :logging.Log = new logging.Log('remote-user');
         url: this.profile.url,
         instanceIds: Object.keys(this.instances_),
         consent: this.consent,
-        status: this.profile.status,
-        knownPublicKeys: this.knownPublicKeys
+        status: this.profile.status
       });
     }
 
@@ -567,15 +554,14 @@ var log :logging.Log = new logging.Log('remote-user');
               isOffering: this.consent.localGrantsAccessToRemote
             },
             name: myInstance.userName,
-            userId: myInstance.userId
+            userId: myInstance.userId,
+            // This is not yet used for encrypted networks like Quiver.
+            // TODO: once we have key verification, remove publicKey
+            // from Quiver instance messages if it's not used, e.g. if we
+            // use Quiver's userId (fingerprint) for verification instead.
+            publicKey: globals.publicKey
           }
         };
-        if (!this.network.encryptsWithClientId()) {
-          // Only include publicKey if we are not already including it with
-          // the clientId (i.e. don't include publicKey in instance handshake
-          // for Quiver)
-          (<any>instanceMessage)['data']['publicKey'] = globals.publicKey;
-        }
         return this.network.send(this, clientId, instanceMessage);
       });
     }
