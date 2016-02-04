@@ -65,7 +65,8 @@ export class Model {
     language: 'en',
     force_message_version: 0,
     quiverUserName: '',
-    showCloud: false
+    showCloud: false,
+    proxyBypass: [],
   };
 
   public reconnecting = false;
