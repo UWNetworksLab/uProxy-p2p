@@ -193,7 +193,7 @@ export interface EmailData {
 // Data needed to accept user invites or to get an invite URL.
 export interface InvitationData {
   network :social.SocialNetworkInfo;
-  token ?:string;
+  tokenObj ?:any;
   userId ?:string;
 };
 

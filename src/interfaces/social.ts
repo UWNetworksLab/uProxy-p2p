@@ -31,24 +31,11 @@ export interface StopProxyInfo {
   error      :boolean;
 }
 
-export enum PermissionTokenAccess {
-  FRIEND_REQUEST = 0,   // only requesting that the user is a friend
-  REQUEST_ACCESS,
-  OFFER_ACCESS,
-  REQUEST_AND_OFFER_ACCESS
-}
-
-export interface PermissionTokenInfo {
-  access :PermissionTokenAccess;
-  createdAt :number;
-}
-
 export interface LocalInstanceState {
   instanceId       :string;
   userId           :string;
   userName         :string;
   imageData        :string;
-  invitePermissionTokens :{ [token :string] :PermissionTokenInfo };
 }
 
 export interface NetworkMessage {
@@ -121,7 +108,7 @@ export interface NetworkOptions {
   supportsReconnect :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
   isExperimental ?:boolean;
-  encryptsWithClientId ?:boolean;
+  isEncrypted ?:boolean;
 }
 
 /**
@@ -221,7 +208,6 @@ export interface ClientState {
   clientId  :string;
   status    :ClientStatus;
   timestamp :number;
-  inviteResponse ?:string;
 }
 
 
@@ -234,13 +220,6 @@ export interface UserState {
   instanceIds :string[];
   consent     :ConsentState;
   status      :UserStatus;
-  knownPublicKeys :string[];
-}
-
-export interface inviteResponse {
-  userId :string;
-  publicKey :string;
-  permissionToken :string;
 }
 
 export interface RemoteUserInstance {
@@ -254,6 +233,13 @@ export interface SignallingMetadata {
   // Random ID associated with this proxying attempt.
   // Used for logging purposes and implicitly delimits proxying attempts.
   proxyingId ?:string;
+}
+
+export interface InviteTokenData {
+  v :number;  // version
+  networkName :string;
+  userName :string;
+  networkData :string|Object;
 }
 
 /**
@@ -311,7 +297,7 @@ export interface Network {
   /**
    * Accept an invite to use uProxy with a friend
    */
-  acceptInvitation: (token ?:string, userId ?:string) => Promise<void>;
+  acceptInvitation: (token ?:InviteTokenData, userId ?:string) => Promise<void>;
 
   /**
    * Send an invite to a friend to use uProxy
@@ -352,7 +338,7 @@ export interface Network {
 
   areAllContactsUproxy : () => boolean;
 
-  encryptsWithClientId : () => boolean;
+  isEncrypted : () => boolean;
 
   getKeyFromClientId : (clientId :string) => string;
 }

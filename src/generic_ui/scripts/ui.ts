@@ -1,4 +1,6 @@
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
 
 /**
  * ui.ts
@@ -14,7 +16,6 @@ import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import net = require('../../../../third_party/uproxy-lib/net/net.types');
-import noreConnector = require('./core_connector');
 import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
@@ -22,6 +23,8 @@ import Constants = require('./constants');
 import translator_module = require('./translator');
 import network_options = require('../../generic/network-options');
 import model = require('./model');
+import jsurl = require('jsurl');
+import uparams = require('uparams');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
@@ -486,12 +489,10 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  private addUser_ = (token: string, showConfirmation :boolean) : Promise<void> => {
+  private addUser_ = (tokenObj :social.InviteTokenData, showConfirmation :boolean) : Promise<void> => {
     try {
-      var tokenObj = JSON.parse(atob(token));
       var userName = tokenObj.userName;
       var networkName = tokenObj.networkName;
-      var networkData = tokenObj.networkData;
     } catch(e) {
       return Promise.reject('Error parsing invite token');
     }
@@ -512,29 +513,47 @@ export class UserInterface implements ui_constants.UiApi {
         userId: "" /* The current user's ID will be determined by the core. */
       };
       return this.core.acceptInvitation(
-          {network: socialNetworkInfo, token: token});
+          {network: socialNetworkInfo, tokenObj: tokenObj});
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
       return;
     })
   }
 
-  // Token is expected to be in base64 encoded JSON.
+  private parseInviteUrl_ = (invite :string) : social.InviteTokenData => {
+    try {
+      var params = uparams(invite);
+      if (Object.keys(params).length > 0) {
+        return {
+          v: parseInt(params['v'], 10),
+          networkData: jsurl.parse(params['networkData']),
+          networkName: params['networkName'],
+          userName: params['userName']
+        }
+      } else {
+        // Old v1 invites are base64 encoded JSON
+        var token = invite.substr(invite.lastIndexOf('/') + 1);
+        // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
+        token = token.match("[A-Za-z0-9+/=_]+")[0];
+        return JSON.parse(atob(token));
+      }
+    } catch(e) {
+      return null;
+    }
+  }
+
   public handleInvite = (invite :string) : Promise<void> => {
     var showTokenError = () => {
       this.showDialog('', this.i18n_t('INVITE_ERROR'));
     };
 
-    try {
-      // Get the token at the end of the invite (if in URL format).
-      var token = invite.substr(invite.lastIndexOf('/') + 1);
-      var tokenObj = JSON.parse(atob(token));
-      var networkName = tokenObj.networkName;
-      var userName = tokenObj.userName;
-    } catch(e) {
+    var tokenObj = this.parseInviteUrl_(invite);
+    if (!tokenObj) {
       showTokenError();
       return;
     }
+    var userName = tokenObj.userName;
+    var networkName = tokenObj.networkName;
 
     if (networkName == 'Cloud') {
       // Cloud confirmation is the same regardless of whether the user is
@@ -550,14 +569,14 @@ export class UserInterface implements ui_constants.UiApi {
           // Cloud contacts only appear on the GET tab.
           this.setMode(ui_constants.Mode.GET);
           // Don't show an additional confirmation for Cloud.
-          return this.addUser_(token, false).catch(showTokenError);
+          return this.addUser_(tokenObj, false).catch(showTokenError);
         });
       });
     }
 
     if (this.model.getNetwork(networkName)) {
       // User is already logged into the right network (other than Cloud).
-      return this.addUser_(token, true).catch(showTokenError);
+      return this.addUser_(tokenObj, true).catch(showTokenError);
     }
 
     // loginPromise should resolve when the use is logged into networkName.
@@ -589,7 +608,7 @@ export class UserInterface implements ui_constants.UiApi {
     return loginPromise.then(() => {
       // User already saw a confirmation when they logged into the network,
       // don't show an additional confirmation.
-      return this.addUser_(token, false).catch(showTokenError);
+      return this.addUser_(tokenObj, false).catch(showTokenError);
     });
   }
 
