@@ -194,5 +194,32 @@ describe('UI.User', () => {
     expect(sampleUser.offeringInstances[0]).toBe(second);
   });
 
+  it('expands contact if online', () => {
+    sampleUser.update(makeUpdateMessage({
+      offeringInstances: [
+        getInstance('instance1', '')
+      ],
+      consent: {
+        remoteRequestsAccessFromLocal: true
+      },
+      isOnline: true,
+    }));
+    expect(sampleUser.getExpanded).toBe(true);
+    expect(sampleUser.shareExpanded).toBe(true);
+  });
+
+  it('collapses contact if offline', () => {
+    sampleUser.update(makeUpdateMessage({
+      offeringInstances: [
+        getInstance('instance1', '')
+      ],
+      consent: {
+        remoteRequestsAccessFromLocal: true
+      },
+      isOnline: false,
+    }));
+    expect(sampleUser.getExpanded).toBe(false);
+    expect(sampleUser.shareExpanded).toBe(false);
+  });
   // TODO: more specs
 });  // UI.User
