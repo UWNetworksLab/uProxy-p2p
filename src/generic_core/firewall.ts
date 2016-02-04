@@ -217,11 +217,6 @@ export function isValidClientState(state :freedom.Social.ClientState,
     return false;
   }
 
-  if (state.timestamp < 0) {
-    fail();
-    return false;
-  }
-
   if (!(state.status === 'ONLINE' || state.status === 'OFFLINE')) {
     fail();
     return false;
