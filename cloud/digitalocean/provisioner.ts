@@ -126,8 +126,10 @@ class Provisioner {
       bits: 2048,
       e: 0x10001
     });
-    const publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, '');
-    const privateKey = forge.ssh.privateKeyToOpenSSH(pair.privateKey, '');
+    // trim() the string because forge adds a trailing space to
+    // public keys which really messes things up later.
+    const publicKey = forge.ssh.publicKeyToOpenSSH(pair.publicKey, '').trim();
+    const privateKey = forge.ssh.privateKeyToOpenSSH(pair.privateKey, '').trim();
     return {
       public: publicKey,
       private: privateKey
