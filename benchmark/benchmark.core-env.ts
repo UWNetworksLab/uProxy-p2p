@@ -63,12 +63,12 @@ export module Benchmark {
       if (n) {
         return n.toFixed(2);
       } else {
-        return "undef!";
+        return 'undef!';
       }
     }
 
     public summary () : string {
-      return util.format("[total: %d, min: %d, med: %d, mean: %d, max: %d]",
+      return util.format('[total: %d, min: %d, med: %d, mean: %d, max: %d]',
                          this.count, this.min, this.fmtNumber(this.median),
                          this.fmtNumber(this.mean), this.max);
     }
@@ -247,8 +247,8 @@ export module Benchmark {
       var request_in_error : boolean = err != null;
       var req = this.running_requests_[requestIndex];
       if (req == null) {
-        console.log("Getting a result back for a request that no longer " +
-                    "exists.  Race between timeouts?");
+        console.log('Getting a result back for a request that no longer ' +
+                    'exists.  Race between timeouts?');
         return;
       }
 
@@ -271,14 +271,14 @@ export module Benchmark {
         if (body) {
           body_length = body.length;
         }
-        console.log("--> finishRequest: got err: " + err + ", body length was "
-                    + body.length + ", wanted size: " + req.requestSize +
-                    ", on url " + req.url);
+        console.log('--> finishRequest: got err: ' + err + ', body length was '
+                    + body.length + ', wanted size: ' + req.requestSize +
+                    ', on url ' + req.url);
       } else {
         this.latencies_[req.requestSizeIndex].addValue(latency_ms,
                                                        Result.RES_SUCCESS);
         if (this.verbosity_ > 0) {
-          process.stdout.write("[" + latency_ms + " ms]\t");
+          process.stdout.write('[' + latency_ms + ' ms]\t');
         }
       }
 
@@ -316,7 +316,7 @@ export module Benchmark {
 
       if (this.finished_concurrent_requests_ == this.concurrency) {
         if (this.verbosity_ > 0) {
-          console.log("\nTest run complete.  Generating results");
+          console.log('\nTest run complete.  Generating results');
         }
         var results = new Array<TestResult>();
         for (var sz = 0; sz < this.sizes_.length; sz++) {
@@ -344,8 +344,8 @@ export module Benchmark {
         if (req != null) {
           if (now - req.requestTime > this.kWatchdogInterval) {
             req.requestTime = -1;  // mark as timed out
-            console.log("*ruff! Timing out request " + req.requestNum
-                        + " on slot " + r);
+            console.log('*ruff! Timing out request ' + req.requestNum
+                        + ' on slot ' + r);
             this.finishRequest(r, null, null, null);
             this.timeout_count_--;
           }

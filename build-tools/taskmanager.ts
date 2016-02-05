@@ -124,7 +124,7 @@ export class Manager {
 
   public getUnflattened(name : string) {
     if(! (name in this.taskIndex_)) {
-      throw(name + " is not in taskIndex.");
+      throw(name + ' is not in taskIndex.');
     }
     return this.taskIndex_[name];
   }

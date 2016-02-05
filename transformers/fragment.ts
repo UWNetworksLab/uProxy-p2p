@@ -49,7 +49,7 @@ export function decode(buffer:ArrayBuffer) :Fragment {
     padding = new ArrayBuffer(0);
   } else {
     // buffer.byteLength < length
-    throw new Error("Fragment could not be decoded, shorter than length");
+    throw new Error('Fragment could not be decoded, shorter than length');
   }
 
   return {

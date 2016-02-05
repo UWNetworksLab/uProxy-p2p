@@ -103,7 +103,7 @@ describe('RtcToNet', function() {
   });
 });
 
-describe("RtcToNet session", function() {
+describe('RtcToNet session', function() {
   var session :rtc_to_net.Session;
 
   var mockTcpConnection :tcp.Connection;

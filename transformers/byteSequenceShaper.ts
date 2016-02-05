@@ -49,7 +49,7 @@ export interface SequenceModel {
 
 // Creates a sample (non-random) config, suitable for testing.
 export var sampleConfig = () : SequenceConfig => {
-  var buffer = arraybuffers.stringToArrayBuffer("OH HELLO");
+  var buffer = arraybuffers.stringToArrayBuffer('OH HELLO');
   var hex = arraybuffers.arrayBufferToHexString(buffer);
   var sequence = {
     index: 0,
@@ -111,7 +111,7 @@ export class ByteSequenceShaper implements Transformer {
       // Make a note of the index of the last packet to inject
       this.lastIndex_ = this.addSequences_[this.addSequences_.length-1].index;
     } else {
-      throw new Error("Byte sequence shaper requires addSequences and removeSequences parameters");
+      throw new Error('Byte sequence shaper requires addSequences and removeSequences parameters');
     }
   }
 

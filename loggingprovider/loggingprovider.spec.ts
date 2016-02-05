@@ -28,7 +28,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 import logging = require('./loggingprovider.types');
 import LoggingProvider = require('./loggingprovider');
 
-describe("Logging Provider", () => {
+describe('Logging Provider', () => {
   var logger :logging.Log;
   var loggingControl :logging.Controller;
 

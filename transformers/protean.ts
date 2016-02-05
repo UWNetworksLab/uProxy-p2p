@@ -87,7 +87,7 @@ export class Protean implements Transformer {
       this.fragmenter_.configure(JSON.stringify(proteanConfig.fragmentation));
     } else {
       throw new Error(
-        "Protean requires fragmentation, encryption, and injection parameters."
+        'Protean requires fragmentation, encryption, and injection parameters.'
       );
     }
   }

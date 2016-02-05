@@ -3,7 +3,7 @@
 import candidate = require('./candidate');
 import Candidate = candidate.Candidate;
 
-describe("extractEndpointFromCandidateLine", function() {
+describe('extractEndpointFromCandidateLine', function() {
   it('garbage test', () => {
     expect(function() {
       Candidate.fromRTCIceCandidate({candidate: 'abc def'});

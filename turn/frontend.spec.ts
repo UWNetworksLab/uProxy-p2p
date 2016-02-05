@@ -10,7 +10,7 @@ import turn_frontend = require('./frontend');
 import messages = require('./messages');
 import net = require('../net/net.types');
 
-describe("turn frontend", function() {
+describe('turn frontend', function() {
 
   // Returns an array of 12 bytes, suuitable for use as a STUN/TURN
   // transaction ID.

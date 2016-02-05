@@ -194,7 +194,7 @@ export function parse(buffer:ArrayBuffer, lengths:number[]) :ArrayBuffer[] {
       [part, remaining] = split(remaining, length);
       parts.push(part);
     } else {
-      throw new Error("Not enough bytes to parse");
+      throw new Error('Not enough bytes to parse');
     }
   });
 

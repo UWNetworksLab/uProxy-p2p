@@ -152,7 +152,7 @@ describe('SOCKS server', function() {
   });
 });
 
-describe("SOCKS session", function() {
+describe('SOCKS session', function() {
   var session :socks_to_rtc.Session;
 
   var mockBytesReceived :handler.Queue<number,void>;

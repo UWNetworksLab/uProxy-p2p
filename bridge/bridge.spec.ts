@@ -141,7 +141,7 @@ describe('isTerminatingSignal', function() {
   });
 });
 
-describe("makeSingleProviderMessage", function() {
+describe('makeSingleProviderMessage', function() {
   it('basic', () => {
     var signals = [
       {

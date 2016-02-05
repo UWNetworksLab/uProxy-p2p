@@ -143,21 +143,21 @@ describe('ArrayBuffers <-> strings', function() {
   });
 });
 
-describe("ArrayBuffers(UTF8) <-> strings", function() {
-  it("Empty Buffer -> Empty String", function() {
+describe('ArrayBuffers(UTF8) <-> strings', function() {
+  it('Empty Buffer -> Empty String', function() {
     expect(arraybuffers.arrayBufferDecodedAsUtf8String(emptyArray)).toEqual(emptyString);
   });
-  it("Empty String -> Empty Buffer", function() {
+  it('Empty String -> Empty Buffer', function() {
     expect(arraybuffers.stringToUtf8EncodedArrayBuffer(emptyString).byteLength).toEqual(0);
   });
 
-  it("Buffer(UTF8) -> String", function() {
+  it('Buffer(UTF8) -> String', function() {
     expect(arraybuffers.arrayBufferDecodedAsUtf8String(emptyArray)).toEqual(emptyString);
     expect(arraybuffers.arrayBufferDecodedAsUtf8String(array1)).toEqual(string1);
     expect(arraybuffers.arrayBufferDecodedAsUtf8String(array3)).toEqual(string3);
   });
 
-  it("String -> Buffer(UTF8)", function() {
+  it('String -> Buffer(UTF8)', function() {
     expect(arraybuffers.byteEquality(
         arraybuffers.stringToUtf8EncodedArrayBuffer(emptyString), emptyArray)).toBe(true);
     expect(arraybuffers.byteEquality(
@@ -166,7 +166,7 @@ describe("ArrayBuffers(UTF8) <-> strings", function() {
         arraybuffers.stringToUtf8EncodedArrayBuffer(string3), array3)).toBe(true);
   });
 
-  it("String -> Buffer(UTF8) -> String = identity", function() {
+  it('String -> Buffer(UTF8) -> String = identity', function() {
     expect(arraybuffers.arrayBufferDecodedAsUtf8String(
         arraybuffers.stringToUtf8EncodedArrayBuffer(emptyString))).toEqual(emptyString);
     expect(arraybuffers.arrayBufferDecodedAsUtf8String(
