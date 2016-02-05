@@ -523,7 +523,8 @@ export class UserInterface implements ui_constants.UiApi {
   private parseInviteUrl_ = (invite :string) : social.InviteTokenData => {
     try {
       var params = uparams(invite);
-      if (Object.keys(params).length > 0) {
+      if (params && params['networkName']) {
+        // New style invite using URL params.
         return {
           v: parseInt(params['v'], 10),
           networkData: jsurl.parse(params['networkData']),
