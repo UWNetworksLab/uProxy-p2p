@@ -815,7 +815,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateGettingStatusBar_();
 
-    this.browserApi.startUsingProxy(endpoint);
+    this.browserApi.startUsingProxy(endpoint,
+        this.model.globalSettings.proxyBypass);
   }
 
   /**
