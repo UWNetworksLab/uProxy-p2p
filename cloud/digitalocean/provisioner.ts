@@ -123,8 +123,7 @@ class Provisioner {
    */
   private static generateKeyPair_ = () : KeyPair => {
     const pair = forge.pki.rsa.generateKeyPair({
-      bits: 2048,
-      e: 0x10001
+      bits: 2048
     });
     // trim() the string because forge adds a trailing space to
     // public keys which really messes things up later.
