@@ -38,6 +38,7 @@ export interface GlobalSettings {
   force_message_version :number;
   quiverUserName :string;
   showCloud :boolean;
+  proxyBypass: string[];
 }
 export interface InitialState {
   networkNames :string[];
