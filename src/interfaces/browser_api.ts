@@ -7,7 +7,7 @@ import net = require('../../../third_party/uproxy-lib/net/net.types');
 
 export interface BrowserAPI {
   // Configuration and control of the browsers proxy settings.
-  startUsingProxy(endpoint:net.Endpoint) :void;
+  startUsingProxy(endpoint:net.Endpoint, bypass :string[]) :void;
   stopUsingProxy() :void;
   // Set the browser icon for the extension/add-on.
   setIcon(iconFile :string) :void;
