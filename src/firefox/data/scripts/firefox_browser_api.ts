@@ -2,7 +2,6 @@
  * firefox_browser_api.ts
  *
  * Firefox-specific implementation of the Browser API.
- * TODO(salomegeo): Figure out if it's possible to set proxy from content script.
  */
 
 /// <reference path='../../../../../third_party/typings/firefox/firefox.d.ts' />
@@ -56,7 +55,8 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('launchTabIfNotOpen', url);
   }
 
-  public startUsingProxy = (endpoint:net.Endpoint) => {
+  public startUsingProxy = (endpoint:net.Endpoint, bypass :string[]) => {
+    //TODO actually use bypass list
     port.emit('startUsingProxy', endpoint);
   }
 

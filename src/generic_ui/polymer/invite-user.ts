@@ -105,7 +105,6 @@ var inviteUser = {
       this.initInviteForNetwork(networkName);
     } else {
       if (networkName === 'Quiver') {
-        // TODO: set a message explaining Quiver
         return ui.loginToQuiver().then(() => {
           this.initInviteForNetwork('Quiver');
         });

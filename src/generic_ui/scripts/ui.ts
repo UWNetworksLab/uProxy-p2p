@@ -1,5 +1,6 @@
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
 
 /**
  * ui.ts
@@ -23,6 +24,7 @@ import translator_module = require('./translator');
 import network_options = require('../../generic/network-options');
 import model = require('./model');
 import jsurl = require('jsurl');
+import uparams = require('uparams');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
@@ -519,26 +521,15 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private parseInviteUrl_ = (invite :string) : social.InviteTokenData => {
-    // Adapted from http://stackoverflow.com/questions/901115
-    function getParameterByName(url :string, name :string) {
-      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-      var results = regex.exec(url);
-      return results === null ? "" :
-          decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
-
     try {
-      if (getParameterByName(invite, 'v')) {
-        // networkData is in jsurl format, but may have ' replaced with %27 by
-        // Chrome.
-        var networkDataObj = jsurl.parse(
-            getParameterByName(invite, 'networkData').replace('%27', "'"));
+      var params = uparams(invite);
+      if (params && params['networkName']) {
+        // New style invite using URL params.
         return {
-          v: parseInt(getParameterByName(invite, 'v'), 10),
-          networkData: networkDataObj,
-          networkName: getParameterByName(invite, 'networkName'),
-          userName: getParameterByName(invite, 'userName')
+          v: parseInt(params['v'], 10),
+          networkData: jsurl.parse(params['networkData']),
+          networkName: params['networkName'],
+          userName: params['userName']
         }
       } else {
         // Old v1 invites are base64 encoded JSON
@@ -623,6 +614,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public loginToQuiver = (message ?:string) : Promise<void> => {
+    if (message) {
+      message += '<p>' + this.i18n_t('QUIVER_LOGIN_TEXT') + '</p>';
+    } else {
+      message = this.i18n_t('QUIVER_LOGIN_TEXT');
+    }
     return this.getUserInput(
         this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
         message || '',
@@ -819,7 +815,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateGettingStatusBar_();
 
-    this.browserApi.startUsingProxy(endpoint);
+    this.browserApi.startUsingProxy(endpoint,
+        this.model.globalSettings.proxyBypass);
   }
 
   /**

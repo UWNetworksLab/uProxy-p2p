@@ -27,9 +27,15 @@ export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.stunprotocol.org']}
 ];
 
-  // Initially, the STUN servers are a copy of the default.
-  // We need to use slice to copy the values, otherwise modifying this
-  // variable can modify DEFAULT_STUN_SERVERS as well.
+const DEFAULT_PROXY_BYPASS = [
+  '10.0.0.0/8',
+  '172.16.0.0/12',
+  '192.168.0.0/16',
+];
+
+// Initially, the STUN servers are a copy of the default.
+// We need to use slice to copy the values, otherwise modifying this
+// variable can modify DEFAULT_STUN_SERVERS as well.
 export var settings :uproxy_core_api.GlobalSettings = {
   description: '',
   stunServers: DEFAULT_STUN_SERVERS.slice(0),
@@ -45,7 +51,8 @@ export var settings :uproxy_core_api.GlobalSettings = {
   language: 'en',
   force_message_version: 0, // zero means "don't override"
   quiverUserName: '',
-  showCloud: false
+  showCloud: false,
+  proxyBypass: DEFAULT_PROXY_BYPASS.slice(0),
 };
 
 export var natType :string = '';

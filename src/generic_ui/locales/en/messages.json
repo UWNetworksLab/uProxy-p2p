@@ -1156,5 +1156,15 @@
   "INVITATION_PLACEHOLDER_TEXT": {
     "description": "Invitation placeholder text, instructing users to enter an invite in this field",
     "message": "Have an invitation code?  Enter it here"
+  },
+  "QUIVER_LOGIN_TEXT": {
+    "description": "Text shown to the user when they are about to login to the uProxy Network (aka Quiver)",
+    "message": "The uProxy network is a simple way to reliably find and connect to your friends. <uproxy-faq-link anchor='whatIsUproxyNetwork'>Learn more.</uproxy-faq-link>"
+  },
+  "WHAT_IS_UPROXY_NETWORK": {
+    "message": "What is the uProxy Network?"
+  },
+  "WHAT_IS_UPROXY_NETWORK_ANSWER": {
+    "message": "<p>The uProxy network is designed to be one of the simplest ways to reliably connect with your friends, while still being hard to block. To use the uProxy network, you only need to enter a name (which does not have to be unique) and then you're logged in and ready to share invitations with friends. Currently, identity is tied to a single machine; if you want to set up uProxy on a new computer, you will need to reinvite your friends, in order to connect with them from that machine.</p><p>The uProxy team operates the uProxy network, though in the future it will be possible for third-parties to augment the network by running additional server. All information that is sent over the uProxy network is encrypted end-to-end, between peers, so no one can interfere with it. However, network operators can still tell which IP addresses are connecting to each other.</p>"
   }
 }
