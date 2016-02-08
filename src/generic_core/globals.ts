@@ -27,7 +27,7 @@ export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.stunprotocol.org']}
 ];
 
-export var DEFAULT_PROXY_BYPASS = [
+const DEFAULT_PROXY_BYPASS = [
   '10.0.0.0/8',
   '172.16.0.0/12',
   '192.168.0.0/16',
