@@ -23,7 +23,7 @@ describe('Client logging shim using Freedom', () => {
     it('Get logger with tag tag1', (done) => {
       var mockLoggerPromise = Promise.resolve(jasmine.createSpyObj(
         'tag1', ['debug', 'log', 'info', 'warn', 'error']));
-      var getLoggerSpy = spyOn(freedom.core(), "getLogger");
+      var getLoggerSpy = spyOn(freedom.core(), 'getLogger');
       getLoggerSpy.and.returnValue(mockLoggerPromise);
 
       var log1 = new Logging.Log('tag1');
@@ -34,7 +34,7 @@ describe('Client logging shim using Freedom', () => {
     it('Get logger with tag tag2', (done) => {
       var mockLoggerPromise = Promise.resolve(jasmine.createSpyObj(
         'tag1', ['debug', 'log', 'info', 'warn', 'error']));
-      var getLoggerSpy = spyOn(freedom.core(), "getLogger");
+      var getLoggerSpy = spyOn(freedom.core(), 'getLogger');
       getLoggerSpy.and.returnValue(mockLoggerPromise);
 
       var log2 = new Logging.Log('tag2');

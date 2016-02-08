@@ -3,7 +3,7 @@
 import Socks = require('./socks-headers');
 
 // TODO: add tests for IPv6 address parsing
-describe("socks", function() {
+describe('socks', function() {
   // A valid SOCKS5/IPV4 request.
   var ipv4RequestArray :Uint8Array;
 

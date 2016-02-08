@@ -1,12 +1,12 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 
-var startButton = document.getElementById("startButton");
-var copyTextarea = <HTMLInputElement>document.getElementById("copy");
-var pasteTextarea = <HTMLInputElement>document.getElementById("paste");
-var receiveButton = document.getElementById("receiveButton");
-var sendButton = document.getElementById("sendButton");
-var sendArea = <HTMLInputElement>document.getElementById("sendArea");
-var receiveArea = <HTMLInputElement>document.getElementById("receiveArea");
+var startButton = document.getElementById('startButton');
+var copyTextarea = <HTMLInputElement>document.getElementById('copy');
+var pasteTextarea = <HTMLInputElement>document.getElementById('paste');
+var receiveButton = document.getElementById('receiveButton');
+var sendButton = document.getElementById('sendButton');
+var sendArea = <HTMLInputElement>document.getElementById('sendArea');
+var receiveArea = <HTMLInputElement>document.getElementById('receiveArea');
 
 // Platform-specific function to load the freedomjs module (glue.js).
 declare var loadModule:() => Promise<freedom.OnAndEmit<any, any>>;

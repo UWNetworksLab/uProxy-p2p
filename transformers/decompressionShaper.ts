@@ -79,7 +79,7 @@ export class DecompressionShaper implements Transformer {
       this.encoder_ = new arithmetic.Encoder(this.frequencies_);
       this.decoder_ = new arithmetic.Decoder(this.frequencies_);
     } else {
-      throw new Error("Compression shaper requires frequencies parameter");
+      throw new Error('Compression shaper requires frequencies parameter');
     }
   }
 

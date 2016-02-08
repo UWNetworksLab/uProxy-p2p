@@ -5,7 +5,7 @@
 import net = require('../net/net.types');
 import messages = require('./messages');
 
-describe("stun messages", function() {
+describe('stun messages', function() {
 
   function getTransactionIdBytes() : Uint8Array {
     return new Uint8Array([

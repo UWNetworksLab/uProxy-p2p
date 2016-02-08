@@ -6,7 +6,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
 import caesar = require('./caesar');
 
-describe("caesar cipher", function() {
+describe('caesar cipher', function() {
   var transformer :caesar.CaesarCipher;
 
   beforeEach(function() {

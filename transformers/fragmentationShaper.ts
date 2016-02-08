@@ -46,7 +46,7 @@ export class FragmentationShaper {
       var fragmentationConfig = <FragmentationConfig>config;
       this.maxLength_ = fragmentationConfig.maxLength;
     } else {
-      throw new Error("Fragmentation shaper requires maxLength parameter");
+      throw new Error('Fragmentation shaper requires maxLength parameter');
     }
   }
 

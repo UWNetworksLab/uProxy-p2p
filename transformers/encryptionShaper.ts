@@ -46,7 +46,7 @@ export class EncryptionShaper implements Transformer {
       var encryptionConfig = <EncryptionConfig>config;
       this.key_ = arraybuffers.hexStringToArrayBuffer(encryptionConfig.key);
     } else {
-      throw new Error("Encryption shaper requires key parameter");
+      throw new Error('Encryption shaper requires key parameter');
     }
   }
 

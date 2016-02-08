@@ -53,7 +53,7 @@ function saveProbs(items :number[]) :ArrayBuffer {
     if (items[index] >= 0 && items[index] <= 255) {
       bytes[index] = items[index];
     } else {
-      throw new Error("Probabilities must be between 0 and 255 inclusive.");
+      throw new Error('Probabilities must be between 0 and 255 inclusive.');
     }
   }
   return bytes.buffer;

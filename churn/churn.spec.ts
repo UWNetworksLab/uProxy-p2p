@@ -10,7 +10,7 @@ import net = require('../net/net.types');
 import candidate = require('./candidate');
 import Candidate = candidate.Candidate;
 
-describe("filterCandidatesFromSdp", function() {
+describe('filterCandidatesFromSdp', function() {
   it('with candidates', () => {
     var sdp = 'o=- 3055156452807570418 3 IN IP4 127.0.0.1\n' +
               'a=group:BUNDLE audio data\n' +
@@ -27,7 +27,7 @@ describe("filterCandidatesFromSdp", function() {
 });
 
 
-describe("selectBestPublicAddress", function() {
+describe('selectBestPublicAddress', function() {
   var srflxEndpoint :net.Endpoint = {
     address: '172.26.108.25',
     port: 40762
