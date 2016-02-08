@@ -614,6 +614,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public loginToQuiver = (message ?:string) : Promise<void> => {
+    if (message) {
+      message += '<p>' + this.i18n_t('QUIVER_LOGIN_TEXT') + '</p>';
+    } else {
+      message = this.i18n_t('QUIVER_LOGIN_TEXT');
+    }
     return this.getUserInput(
         this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
         message || '',
