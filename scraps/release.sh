@@ -10,23 +10,17 @@ function gitPush {
 
 function enterDir {
   cd uproxy-release
-  git checkout release-candidate
 }
 
 function setup {
   # make a repo to stage the release in
   git clone git@github.com:uProxy/uproxy.git uproxy-release
   enterDir
-
-  # get the correct code
-  git merge origin/release
-  git merge origin/dev
-  gitPush origin release-candidate:release-candidate
 }
 
 function openPages {
   # Give us information on what the change is
-  doOpen "https://github.com/uProxy/uproxy/compare/release...release-candidate"
+  doOpen "https://github.com/uProxy/uproxy/compare/v$version...master"
   doOpen "https://drive.google.com/a/google.com/folderview?id=0B6oXFcuW01xTfnpSMjBVMWVKX0drZkVnWF9IeDZDeFlJR0dpaGdZbmZabDZ3bS1ZSFh2bVE&usp=sharing"
 }
 
@@ -50,10 +44,6 @@ function makeBuilds {
 }
 
 function updateWithRelease {
-  git checkout release
-  git merge release-candidate
-  gitPush origin release:release
-
   echo "Adding tag - please remember to update github release"
   git tag "v$version"
   gitPush origin "v$version"
@@ -103,13 +93,12 @@ echo -e "Begin:
     I have done no work, I want to start the release process.  I promise I do
     not have a subdirectory named uproxy-release"
 echo -e "Redo:
-    Oops, we had a bug in the release!  I merged the changes into the
-    release-candidate branch upstream, let's pull that down and redo the build
-    from that."
+    Oops, we had a bug in the release!  I merged the changes into master
+    upstream, let's pull that down and redo the build from that."
 echo -e "Final:
-    I am so awesome!  The version I have checked out in the release-candidate
-    branch in the uproxy-release directory is so awesome, and totally on the
-    webstore, let's celebrate by pushing tags!"
+    I am so awesome!  The version I have checked out in the uproxy-release
+    directory is so awesome, and totally on the webstore, let's celebrate
+    by pushing tags!"
 
 select action in Begin Redo Final Abort; do
   case $action in
