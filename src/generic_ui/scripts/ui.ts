@@ -537,11 +537,15 @@ export class UserInterface implements ui_constants.UiApi {
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match("[A-Za-z0-9+/=_]+")[0];
         var parsedObj = JSON.parse(atob(token));
+        var networkData = parsedObj.networkData;
+        if (typeof networkData === 'object' && networkData.networkData) {
+          // Firebase invites have a nested networkData string within a
+          // networkData object.  TODO: move Firebase to use v2 invites.
+          networkData = networkData.networkData;
+        }
         return {
           v: 1,
-          // For v1 invites networkData contains a single string, also
-          // called networkData.
-          networkData: parsedObj.networkData.networkData,
+          networkData: networkData,
           networkName: parsedObj.networkName,
           userName: parsedObj.userName
         };
