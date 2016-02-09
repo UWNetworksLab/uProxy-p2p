@@ -723,6 +723,11 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateGettingStatusBar_();
     this.updateIcon_();
+
+    // This should only be necessary in the case that the user was logged out
+    // of their social network while getting access.  This function is
+    // safe to call multiple times in a row (idempotent).
+    this.browserApi.stopUsingProxy();
   }
 
   /**
