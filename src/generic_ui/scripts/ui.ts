@@ -536,7 +536,15 @@ export class UserInterface implements ui_constants.UiApi {
         var token = invite.substr(invite.lastIndexOf('/') + 1);
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match("[A-Za-z0-9+/=_]+")[0];
-        return JSON.parse(atob(token));
+        var parsedObj = JSON.parse(atob(token));
+        return {
+          v: 1,
+          // For v1 invites networkData contains a single string, also
+          // called networkData.
+          networkData: parsedObj.networkData.networkData,
+          networkName: parsedObj.networkName,
+          userName: parsedObj.userName
+        };
       }
     } catch(e) {
       return null;
