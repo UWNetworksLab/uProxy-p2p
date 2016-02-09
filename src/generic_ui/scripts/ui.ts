@@ -1,4 +1,5 @@
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
 
@@ -25,6 +26,7 @@ import network_options = require('../../generic/network-options');
 import model = require('./model');
 import jsurl = require('jsurl');
 import uparams = require('uparams');
+import jdenticon = require('jdenticon');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
@@ -51,6 +53,14 @@ export interface NotificationData {
 interface PromiseCallbacks {
   fulfill :Function;
   reject :Function;
+}
+
+export function generateIdenticon(userId:string) : string {
+  // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
+  // as long as jdenticon only uses '"' in the generated code...
+  // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
+  // scales the image to fit the space, so this parameter has no effect.
+  return '\'data:image/svg+xml;utf8,' + jdenticon.toSvg(userId, 100) + '\'';
 }
 
 /**
@@ -881,13 +891,15 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (networkMsg.online) {
       if (!existingNetwork) {
+        let imageData :string = networkMsg.imageData ||
+            generateIdenticon(networkMsg.userId);
         existingNetwork = {
           name: networkMsg.name,
           userId: networkMsg.userId,
           roster: {},
           logoutExpected: false,
           userName: networkMsg.userName,
-          imageData: networkMsg.imageData
+          imageData: imageData
         };
         this.model.onlineNetworks.push(existingNetwork);
       }
@@ -927,8 +939,13 @@ export class UserInterface implements ui_constants.UiApi {
     }
     var profile :social.UserProfileMessage = payload.user;
     network.userId = profile.userId;
-    network.imageData = profile.imageData;
     network.userName = profile.name;
+
+    if (!network.imageData && !profile.imageData) {
+      network.imageData = generateIdenticon(network.userId);
+    } else {
+      network.imageData = profile.imageData;
+    }
   }
 
   /**
@@ -1217,11 +1234,13 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
+    let imageData :string = networkState.profile.imageData ||
+        generateIdenticon(networkState.profile.userId);
     this.model.onlineNetworks.push({
       name: networkState.name,
       userId: networkState.profile.userId,
       userName: networkState.profile.name,
-      imageData: networkState.profile.imageData,
+      imageData: imageData,
       logoutExpected: false,
       roster: {}
     });

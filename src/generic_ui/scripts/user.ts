@@ -4,7 +4,6 @@
  * This is the UI-specific representation of a User.
  */
 /// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
 
 import model = require('./model');
 import social = require('../../interfaces/social');
@@ -12,7 +11,6 @@ import user_interface = require('./ui');
 import translator_module = require('./translator');
 import _ = require('lodash');
 import Constants = require('./constants');
-import jdenticon = require('jdenticon');
 
 var i18n_t = translator_module.i18n_t;
 
@@ -110,14 +108,13 @@ export class User implements social.BaseUser {
     }
 
     this.name = profile.name;
-    this.imageData = profile.imageData;
     this.url = profile.url;
     this.status = profile.status;
 
-    if (!this.imageData) {
-      // Extra single-quotes are needed for CSS/Polymer parsing.
-      this.imageData = '\'' + 'data:image/svg+xml;utf8,' +
-          jdenticon.toSvg(this.userId, 100) + '\'';
+    if (!this.imageData && !profile.imageData) {
+      this.imageData = user_interface.generateIdenticon(this.userId);
+    } else {
+      this.imageData = profile.imageData;
     }
 
     // iterate backwards to allow removing elements
