@@ -523,7 +523,8 @@ export class UserInterface implements ui_constants.UiApi {
   private parseInviteUrl_ = (invite :string) : social.InviteTokenData => {
     try {
       var params = uparams(invite);
-      if (Object.keys(params).length > 0) {
+      if (params && params['networkName']) {
+        // New style invite using URL params.
         return {
           v: parseInt(params['v'], 10),
           networkData: jsurl.parse(params['networkData']),
@@ -535,7 +536,15 @@ export class UserInterface implements ui_constants.UiApi {
         var token = invite.substr(invite.lastIndexOf('/') + 1);
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match("[A-Za-z0-9+/=_]+")[0];
-        return JSON.parse(atob(token));
+        var parsedObj = JSON.parse(atob(token));
+        return {
+          v: 1,
+          // For v1 invites networkData contains a single string, also
+          // called networkData.
+          networkData: parsedObj.networkData.networkData,
+          networkName: parsedObj.networkName,
+          userName: parsedObj.userName
+        };
       }
     } catch(e) {
       return null;
@@ -613,6 +622,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public loginToQuiver = (message ?:string) : Promise<void> => {
+    if (message) {
+      message += '<p>' + this.i18n_t('QUIVER_LOGIN_TEXT') + '</p>';
+    } else {
+      message = this.i18n_t('QUIVER_LOGIN_TEXT');
+    }
     return this.getUserInput(
         this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
         message || '',
@@ -809,7 +823,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateGettingStatusBar_();
 
-    this.browserApi.startUsingProxy(endpoint);
+    this.browserApi.startUsingProxy(endpoint,
+        this.model.globalSettings.proxyBypass);
   }
 
   /**

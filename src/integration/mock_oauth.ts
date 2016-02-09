@@ -1,8 +1,8 @@
 
 var REDIRECT_URL = 'http://localhost';
 var CLIENT_ID =
-    '746567772449-mv4h0e34orsf6t6kkbbht22t9otijip0.apps.googleusercontent.com';
-var CLIENT_SECRET = 'M-EGTuFRaWLS5q_hygpJZMBu';
+    '746567772449-jkm5q5hjqtpq5m9htg9kn0os8qphra4d.apps.googleusercontent.com';
+var CLIENT_SECRET = 'h_hfPI4jvs9fgOgPweSBKnMu';
 
 export class MockOAuth {
   constructor(public refreshToken :string) {
@@ -15,6 +15,7 @@ export class MockOAuth {
 
   public launchAuthFlow = (authUrl :string,
                            stateObj :Object,
+                           interactive :boolean,
                            continuation :Function) => {
     if (!this.refreshToken) {
       continuation(undefined, 'No refreshToken set.');

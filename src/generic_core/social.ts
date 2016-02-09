@@ -466,6 +466,7 @@ export function notifyUI(networkName :string, userId :string) {
     //===================== Social.Network implementation ====================//
 
     public login = (reconnect :boolean, userName ?:string) : Promise<void> => {
+      console.error('in social.ts login! ' + this.name);
       var request :freedom_social2.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
@@ -487,8 +488,8 @@ export function notifyUI(networkName :string, userId :string) {
           agent: agent,
           version: '0.1',
           url: 'https://popping-heat-4874.firebaseio.com/',
-          interactive: !reconnect,
-          rememberLogin: !reconnect
+          interactive: true,    // TODO: This is needed to force old access_code logic..  make this part of the args...
+          rememberLogin: false
         };
       } else if (this.name === 'Quiver') {
         if (!userName) {
@@ -516,6 +517,7 @@ export function notifyUI(networkName :string, userId :string) {
 
       this.onceLoggedIn_ = this.freedomApi_.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
+            console.error('A');
             var userId = freedomClient.userId;
             if (userId in networks[this.name]) {
               // If user is already logged in with the same (network, userId)
@@ -528,6 +530,7 @@ export function notifyUI(networkName :string, userId :string) {
             this.startMonitor_();
             log.info('logged into network', this.name);
             return this.prepareLocalInstance_(userId).then(() => {
+              console.error('B');
               this.myInstance.clientId = freedomClient.clientId;
               // Notify UI that this network is online before we fulfill
               // the onceLoggedIn_ promise.  This ensures that the UI knows
@@ -537,6 +540,7 @@ export function notifyUI(networkName :string, userId :string) {
           });
       return this.onceLoggedIn_
           .then(() => {
+            console.error('C');
             this.onceLoggedOut_ = new Promise((F, R) => {
               this.fulfillLogout_ = F;
             }).then(() => {
