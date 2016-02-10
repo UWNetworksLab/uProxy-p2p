@@ -55,12 +55,21 @@ interface PromiseCallbacks {
   reject :Function;
 }
 
-export function generateIdenticon(userId:string) : string {
-  // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
-  // as long as jdenticon only uses '"' in the generated code...
-  // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
-  // scales the image to fit the space, so this parameter has no effect.
-  return '\'data:image/svg+xml;utf8,' + jdenticon.toSvg(userId, 100) + '\'';
+export function getImageData(userId :string, oldImageData :string,
+                             newImageData :string) : string {
+  if (!oldImageData && !newImageData) {
+    // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
+    // as long as jdenticon only uses '"' in the generated code...
+    // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
+    // scales the image to fit the space, so this parameter has no effect.
+    return '\'data:image/svg+xml;utf8,' + jdenticon.toSvg(userId, 100) + '\'';
+  } else if (!newImageData) {
+    // This case is hit when we've already generated a jdenticon for a user
+    // who doesn't have any image in uProxy core.
+    return oldImageData;
+  } else {
+    return newImageData;
+  }
 }
 
 /**
@@ -891,15 +900,13 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (networkMsg.online) {
       if (!existingNetwork) {
-        let imageData :string = networkMsg.imageData ||
-            generateIdenticon(networkMsg.userId);
         existingNetwork = {
           name: networkMsg.name,
           userId: networkMsg.userId,
           roster: {},
           logoutExpected: false,
           userName: networkMsg.userName,
-          imageData: imageData
+          imageData: getImageData(networkMsg.userId, null, networkMsg.imageData)
         };
         this.model.onlineNetworks.push(existingNetwork);
       }
@@ -940,12 +947,8 @@ export class UserInterface implements ui_constants.UiApi {
     var profile :social.UserProfileMessage = payload.user;
     network.userId = profile.userId;
     network.userName = profile.name;
-
-    if (!network.imageData && !profile.imageData) {
-      network.imageData = generateIdenticon(network.userId);
-    } else {
-      network.imageData = profile.imageData;
-    }
+    network.imageData =
+        getImageData(network.userId, network.imageData, profile.imageData);
   }
 
   /**
@@ -1234,13 +1237,12 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
-    let imageData :string = networkState.profile.imageData ||
-        generateIdenticon(networkState.profile.userId);
+    var profile = networkState.profile;
     this.model.onlineNetworks.push({
       name: networkState.name,
-      userId: networkState.profile.userId,
-      userName: networkState.profile.name,
-      imageData: imageData,
+      userId: profile.userId,
+      userName: profile.name,
+      imageData: getImageData(profile.userId, null, profile.imageData),
       logoutExpected: false,
       roster: {}
     });

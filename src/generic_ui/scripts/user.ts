@@ -111,11 +111,8 @@ export class User implements social.BaseUser {
     this.url = profile.url;
     this.status = profile.status;
 
-    if (!this.imageData && !profile.imageData) {
-      this.imageData = user_interface.generateIdenticon(this.userId);
-    } else {
-      this.imageData = profile.imageData;
-    }
+    this.imageData = user_interface.getImageData(this.userId, this.imageData,
+                                                 profile.imageData);
 
     // iterate backwards to allow removing elements
     var i = this.offeringInstances.length;
