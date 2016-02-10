@@ -36,6 +36,7 @@ describe('uproxy core', function() {
   // TODO: the 'start proxying' test fails with a timeout of less than 10s,
   // and the 'stop proxying' test fails with a timeout of less than 20s.
   // We should speed up these actions!
+  // https://github.com/uProxy/uproxy/issues/2247
   (<any>jasmine).DEFAULT_TIMEOUT_INTERVAL = 20000;
 
   var uProxyFreedom = 'files/generic_core/freedom-module.json';
@@ -93,10 +94,12 @@ describe('uproxy core', function() {
   // is received to set the instanceId and could be 100% sure that the
   // offering/receiving instances matched the instances created by these
   // tests.
+  // https://github.com/uProxy/uproxy/issues/2246
 
   // TODO: emit commands skip proper type checking because they don't use
   // the uProxyCore or CoreConnector classes.  We should switch from emits
   // to using those classes if possible.
+  // https://github.com/uProxy/uproxy/issues/2245
 
   it('logs in', (done) => {
     var promises :Promise<Object>[] = [];
