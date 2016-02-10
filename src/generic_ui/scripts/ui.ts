@@ -537,11 +537,15 @@ export class UserInterface implements ui_constants.UiApi {
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match("[A-Za-z0-9+/=_]+")[0];
         var parsedObj = JSON.parse(atob(token));
+        var networkData = parsedObj.networkData;
+        if (typeof networkData === 'object' && networkData.networkData) {
+          // Firebase invites have a nested networkData string within a
+          // networkData object.  TODO: move Firebase to use v2 invites.
+          networkData = networkData.networkData;
+        }
         return {
           v: 1,
-          // For v1 invites networkData contains a single string, also
-          // called networkData.
-          networkData: parsedObj.networkData.networkData,
+          networkData: networkData,
           networkName: parsedObj.networkName,
           userName: parsedObj.userName
         };
@@ -1022,7 +1026,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     return this.core.login({
         network: network,
-        reconnect: false,
+        loginType: uproxy_core_api.LoginType.INITIAL,
         userName: userName
     }).then(() => {
       this.browserApi.hasInstalledThenLoggedIn = true;
@@ -1100,7 +1104,7 @@ export class UserInterface implements ui_constants.UiApi {
       // ping response).
       // TODO: this doesn't work quite right if the user is signed into multiple social networks
       if (this.model.reconnecting) {
-        this.core.login({network: network, reconnect: true}).then(() => {
+        this.core.login({network: network, loginType: uproxy_core_api.LoginType.RECONNECT}).then(() => {
           // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
           this.stopReconnect();
         }).catch((e) => {

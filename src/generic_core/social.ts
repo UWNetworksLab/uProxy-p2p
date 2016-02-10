@@ -224,7 +224,8 @@ export function notifyUI(networkName :string, userId :string) {
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
-    public login = (reconnect :boolean, userName?:string) :Promise<void> => {
+    public login = (loginType :uproxy_core_api.LoginType,
+                    userName ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
@@ -465,8 +466,22 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (reconnect :boolean, userName ?:string) : Promise<void> => {
-      console.error('in social.ts login! ' + this.name);
+    public login = (loginType :uproxy_core_api.LoginType,
+                    userName ?:string) : Promise<void> => {
+      var interactive :boolean;
+      var rememberLogin :boolean;
+      if (loginType === uproxy_core_api.LoginType.INITIAL) {
+        interactive = true;
+        rememberLogin = true;
+      } else if (loginType === uproxy_core_api.LoginType.RECONNECT) {
+        interactive = false;
+        rememberLogin = false;
+      } else if (loginType === uproxy_core_api.LoginType.TEST) {
+        // interactive is true so that MockOAuth is used, rather than looking
+        // for refresh tokens in storage.
+        interactive = true;
+        rememberLogin = false;
+      }
       var request :freedom_social2.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
@@ -488,8 +503,8 @@ export function notifyUI(networkName :string, userId :string) {
           agent: agent,
           version: '0.1',
           url: 'https://popping-heat-4874.firebaseio.com/',
-          interactive: true,    // TODO: This is needed to force old access_code logic..  make this part of the args...
-          rememberLogin: false
+          interactive: interactive,
+          rememberLogin: rememberLogin
         };
       } else if (this.name === 'Quiver') {
         if (!userName) {
@@ -500,8 +515,8 @@ export function notifyUI(networkName :string, userId :string) {
           agent: Math.random().toString().substr(2,10),
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
-          interactive: !reconnect,
-          rememberLogin: !reconnect,
+          interactive: interactive,
+          rememberLogin: rememberLogin,
           userName: userName,
           pgpKeyName: '<uproxy>'
         };
@@ -510,14 +525,13 @@ export function notifyUI(networkName :string, userId :string) {
           agent: 'uproxy',
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
-          interactive: !reconnect,
-          rememberLogin: !reconnect
+          interactive: interactive,
+          rememberLogin: rememberLogin
         };
       }
 
       this.onceLoggedIn_ = this.freedomApi_.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
-            console.error('A');
             var userId = freedomClient.userId;
             if (userId in networks[this.name]) {
               // If user is already logged in with the same (network, userId)
@@ -529,8 +543,7 @@ export function notifyUI(networkName :string, userId :string) {
             // Upon successful login, save local client information.
             this.startMonitor_();
             log.info('logged into network', this.name);
-            return this.prepareLocalInstance_(userId).then(() => {
-              console.error('B');
+            return this.prepareLocalInstance_(userId).then(() => {('B');
               this.myInstance.clientId = freedomClient.clientId;
               // Notify UI that this network is online before we fulfill
               // the onceLoggedIn_ promise.  This ensures that the UI knows
@@ -540,7 +553,6 @@ export function notifyUI(networkName :string, userId :string) {
           });
       return this.onceLoggedIn_
           .then(() => {
-            console.error('C');
             this.onceLoggedOut_ = new Promise((F, R) => {
               this.fulfillLogout_ = F;
             }).then(() => {

@@ -133,7 +133,7 @@ describe('social_network.FreedomNetwork', () => {
           'dummy-instance-id/roster/somefriend', ''));
 
       Promise.all(savedToStorage).then(() => {
-        var loginPromise = network.login(false);
+        var loginPromise = network.login(uproxy_core_api.LoginType.INITIAL);
         return loginPromise;
       }).then(() => {
         expect(network.myInstance).toBeDefined();
@@ -173,7 +173,7 @@ describe('social_network.FreedomNetwork', () => {
       // Pretend the social API's login failed.
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           Promise.reject(new Error('mock failure')));
-      network.login(false).catch(done);
+      network.login(uproxy_core_api.LoginType.INITIAL).catch(done);
       //jasmine.clock().tick(1);
     });
 
@@ -218,7 +218,7 @@ describe('social_network.FreedomNetwork', () => {
             fakeLoginFulfill = F;
           }));
       expect(network['onceLoggedIn_']).toBeDefined();
-      network.login(false);  // Will complete in the next spec.
+      network.login(uproxy_core_api.LoginType.INITIAL);  // Will complete in the next spec.
       // handlerPromise = delayed('hooray');
       handlerPromise = network['delayForLogin_'](foo.bar)('hooray');
       expect(foo.bar).not.toHaveBeenCalled();

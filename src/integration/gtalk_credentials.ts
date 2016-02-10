@@ -1,17 +1,15 @@
 export var ALICE = {
-  EMAIL: 'aliceintegrationuproxy2@gmail.com',
-  NAME: 'Alice Uproxy',
+  // EMAIL: 'aliceintegrationuproxy2@gmail.com',  // TODO: remove?
   REFRESH_TOKEN:
       '1/ah2-QQWbmE4ch-H8UefbFABVCvTqFWynlSIsEAX9MjpIgOrJDtdun6zK6XiATCKT',  // TODO: need to test these!!!
-  ANONYMIZED_ID: '2tyz0phxktjvy2p1aadswo35gk@public.talk.google.com',  // TODO: remove this field
+  USER_ID: '117139766290212605765',
   INSTANCE_ID: <string>null
 };
 export var BOB = {
-  EMAIL: 'bobintegrationuproxy2@gmail.com',
-  NAME: 'Bob Uproxy',
+  // EMAIL: 'bobintegrationuproxy2@gmail.com',  // TODO: remove?
   REFRESH_TOKEN:
       '1/pfnOMWcdIMGTQWbMvUchExDHKUOoQkMzVriiOxNXjGVIgOrJDtdun6zK6XiATCKT',
-  ANONYMIZED_ID: '2s8akwyxcqxgq0nhwznicouy9s@public.talk.google.com',
+  USER_ID: '116764384918192711247',
   INSTANCE_ID: <string>null
 };
 
