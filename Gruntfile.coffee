@@ -132,6 +132,13 @@ compileTypescript = (files) ->
 
 readJSONFile = (file) -> JSON.parse(fs.readFileSync(file, 'utf8'))
 
+getWithBasePath = (files, base = '') ->
+  for file in files
+    if file[0] == '!'
+      '!' + path.join(base, file[1..])
+    else
+      path.join(base, file)
+
 backendThirdPartyBuildPaths = [
   'bower'
   'sha1'
@@ -139,13 +146,6 @@ backendThirdPartyBuildPaths = [
   'uproxy-lib/churn-pipe'
   'uproxy-lib/cloud/social'
 ]
-
-getWithBasePath = (files, base = '') ->
-  for file in files
-    if file[0] == '!'
-      '!' + path.join(base, file[1..])
-    else
-      path.join(base, file)
 
 uiDistFiles = [
   'generic_ui/*.html'
@@ -182,7 +182,7 @@ coreDistFiles = [
   '**/*.static.js'
 ]
 
-# this should always be added to the array last
+# this should always be added to arrays of files to copy last
 universalDistFiles = [
   'icons/*'
   'bower/webcomponentsjs/webcomponents.min.js'
@@ -385,8 +385,7 @@ gruntConfig = {
             'generic_ui/scripts/get_logs.js'
             'scripts/context.static.js'
             'scripts/background.static.js'
-          ].concat uiDistFiles
-            .concat universalDistFiles
+          ].concat(uiDistFiles, universalDistFiles)
           dest: 'build/dist/chrome/extension'
         }
         { # Chrome app
@@ -401,8 +400,7 @@ gruntConfig = {
             'polymer/vulcanized.{html,js}'
 
             'freedom-for-chrome/freedom-for-chrome.js'
-          ].concat coreDistFiles
-            .concat universalDistFiles
+          ].concat(coreDistFiles, universalDistFiles)
           dest: 'build/dist/chrome/app'
         }
         { # Chrome app freedom-module
@@ -424,9 +422,10 @@ gruntConfig = {
             'data/scripts/content-proxy.js'
 
             'data/freedom-for-firefox/freedom-for-firefox.jsm'
-          ].concat getWithBasePath(uiDistFiles, 'data')
-            .concat getWithBasePath(coreDistFiles, 'data')
-            .concat getWithBasePath(universalDistFiles, 'data')
+          ].concat(
+            getWithBasePath(uiDistFiles, 'data'),
+            getWithBasePath(coreDistFiles, 'data'),
+            getWithBasePath(universalDistFiles, 'data'))
           dest: 'build/dist/firefox'
         }
         { # Firefox freedom-module
@@ -453,9 +452,7 @@ gruntConfig = {
             'freedom-social-quiver/socketio.quiver.js'
 
             'freedom-for-chrome/freedom-for-chrome.js'
-          ].concat uiDistFiles
-            .concat coreDistFiles
-            .concat universalDistFiles
+          ].concat(uiDistFiles, coreDistFiles, universalDistFiles)
           dest: ccaDistPath
         }
         { # CCA dist freedom-module.json
