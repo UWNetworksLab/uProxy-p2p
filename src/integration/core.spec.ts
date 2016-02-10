@@ -1,7 +1,9 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
 
+import _ = require('lodash');
 import browser_connector = require('../interfaces/browser_connector');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
@@ -146,6 +148,7 @@ describe('uproxy core', function() {
 
   it('ask and get permission', (done) => {
     aliceUserPath = {
+      // This is Alice's user relative to Bob's logged in uProxy.
       network: {
         name: 'GMail',
         userId: BOB.USER_ID,
@@ -153,6 +156,7 @@ describe('uproxy core', function() {
       userId: ALICE.USER_ID
     };
     bobUserPath = {
+      // This is Bob's user relative to Alice's logged in uProxy.
       network: {
         name: 'GMail',
         userId: ALICE.USER_ID,
@@ -177,14 +181,8 @@ describe('uproxy core', function() {
       if (data.user.userId === BOB.USER_ID
           && data.offeringInstances.length > 0) {
         bobOfferingInstanceId = data.offeringInstances[0].instanceId;
-        bobInstancePath = {
-          network: {
-            name: 'GMail',
-            userId: ALICE.USER_ID,
-          },
-          userId: BOB.USER_ID,
-          instanceId: bobOfferingInstanceId
-        };
+        bobInstancePath = <social.InstancePath>(_.cloneDeep(bobUserPath));
+        bobInstancePath.instanceId = bobOfferingInstanceId;
         alice.off('' + uproxy_core_api.Update.USER_FRIEND, aliceHandleFriend);
         done();
       }
@@ -298,14 +296,8 @@ describe('uproxy core', function() {
                   && data.consent.remoteRequestsAccessFromLocal
                   && !data.consent.localGrantsAccessToRemote) {
                 aliceOfferingInstanceId = data.offeringInstances[0].instanceId;
-                aliceInstancePath = {
-                  network: {
-                    name: 'GMail',
-                    userId: BOB.USER_ID,
-                  },
-                  userId: ALICE.USER_ID,
-                  instanceId: aliceOfferingInstanceId
-                };
+                aliceInstancePath = <social.InstancePath>(_.cloneDeep(aliceUserPath));
+                aliceInstancePath.instanceId = aliceOfferingInstanceId;
                 bob.off('' + uproxy_core_api.Update.USER_FRIEND, bobHandleFriend);
                 fulfill();
               }
