@@ -1,6 +1,7 @@
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/md5.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
 
 /**
@@ -26,6 +27,7 @@ import network_options = require('../../generic/network-options');
 import model = require('./model');
 import jsurl = require('jsurl');
 import uparams = require('uparams');
+import md5 = require('md5');
 import jdenticon = require('jdenticon');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
@@ -62,7 +64,8 @@ export function getImageData(userId :string, oldImageData :string,
     // as long as jdenticon only uses '"' in the generated code...
     // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
     // scales the image to fit the space, so this parameter has no effect.
-    return '\'data:image/svg+xml;utf8,' + jdenticon.toSvg(userId, 100) + '\'';
+    return '\'data:image/svg+xml;utf8,' +
+        jdenticon.toSvg(md5(userId), 100) + '\'';
   } else if (!newImageData) {
     // This case is hit when we've already generated a jdenticon for a user
     // who doesn't have any image in uProxy core.
