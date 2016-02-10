@@ -543,7 +543,7 @@ export function notifyUI(networkName :string, userId :string) {
             // Upon successful login, save local client information.
             this.startMonitor_();
             log.info('logged into network', this.name);
-            return this.prepareLocalInstance_(userId).then(() => {('B');
+            return this.prepareLocalInstance_(userId).then(() => {
               this.myInstance.clientId = freedomClient.clientId;
               // Notify UI that this network is online before we fulfill
               // the onceLoggedIn_ promise.  This ensures that the UI knows

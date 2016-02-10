@@ -932,7 +932,7 @@ gruntConfig = {
       options: {
         outdir: 'build/dev/uproxy/integration/'
         # Uncomment this for debugging
-        keepRunner: true,
+        # keepRunner: true,
       }
     }
   }

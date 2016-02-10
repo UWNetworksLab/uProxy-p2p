@@ -19,6 +19,10 @@
       "url": "../freedom-social-firebase/social.firebase-facebook.json",
       "api": "social2"
     },
+    "SOCIAL-WeChat": {
+      "url": "../freedom-social-wechat/social.wechat.json",
+      "api": "social2"
+    },
     "SOCIAL-GitHub": {
       "url": "../freedom-social-github/social.github.json",
       "api": "social2"
