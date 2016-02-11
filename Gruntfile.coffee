@@ -585,8 +585,8 @@ gruntConfig = {
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
-            src: ['anonmetrics.json', 'metric.js']
+            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/dist/',
+            src: ['**']
             dest: chromeAppDevPath + '/freedomjs-anonymized-metrics'
           },
           {
@@ -657,8 +657,8 @@ gruntConfig = {
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
-            src: ['anonmetrics.json', 'metric.js']
+            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/dist/',
+            src: ['**']
             dest: firefoxDevPath + 'data/freedomjs-anonymized-metrics'
           },
           {
@@ -726,8 +726,8 @@ gruntConfig = {
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: [
           {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
-            src: ['anonmetrics.json', 'metric.js']
+            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/dist/',
+            src: ['**']
             dest: ccaDevPath + '/freedomjs-anonymized-metrics'
           },
           {

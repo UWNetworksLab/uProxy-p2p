@@ -558,7 +558,19 @@ export class UserInterface implements ui_constants.UiApi {
         var token = invite.substr(invite.lastIndexOf('/') + 1);
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match("[A-Za-z0-9+/=_]+")[0];
-        return JSON.parse(atob(token));
+        var parsedObj = JSON.parse(atob(token));
+        var networkData = parsedObj.networkData;
+        if (typeof networkData === 'object' && networkData.networkData) {
+          // Firebase invites have a nested networkData string within a
+          // networkData object.  TODO: move Firebase to use v2 invites.
+          networkData = networkData.networkData;
+        }
+        return {
+          v: 1,
+          networkData: networkData,
+          networkName: parsedObj.networkName,
+          userName: parsedObj.userName
+        };
       }
     } catch(e) {
       return null;
