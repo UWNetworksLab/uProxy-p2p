@@ -20,7 +20,7 @@ function setup {
 
 function openPages {
   # Give us information on what the change is
-  doOpen "https://github.com/uProxy/uproxy/compare/v$version...master"
+  doOpen "https://github.com/uProxy/uproxy/compare/v$versionPrev...master"
   doOpen "https://drive.google.com/a/google.com/folderview?id=0B6oXFcuW01xTfnpSMjBVMWVKX0drZkVnWF9IeDZDeFlJR0dpaGdZbmZabDZ3bS1ZSFh2bVE&usp=sharing"
 }
 
@@ -70,7 +70,9 @@ function goUp {
 
 function getVersions {
   version=$(jq -r ".version" ./package.json)
-  versionNext="${version%.*}.$((${version##*.}+1))" # http://stackoverflow.com/a/6245903
+  # http://stackoverflow.com/a/6245903
+  versionPrev="${version%.*}.$((${version##*.}-1))"
+  versionNext="${version%.*}.$((${version##*.}+1))"
 }
 
 function doOpen {
