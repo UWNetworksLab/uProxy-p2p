@@ -102,6 +102,8 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
     // we only want to launch the window on the first install
     return;
   }
+  setManagedPolicyValues();
+
   browserConnector.onceConnected.then(() => {
     browserApi.hasInstalledThenLoggedIn = false;
     chrome.browserAction.setIcon({
@@ -181,3 +183,45 @@ chrome.webRequest.onBeforeRequest.addListener(
   ['blocking']
 );
 
+var managedStorageNamespace = 'managed';
+// The set of acceptable policy variables could also be a list so as
+// to remove setting each value to true. The check would then be on
+// containment of a key.
+var acceptablePolicyVariables = {
+  'proxy_server_keys': true,
+  'enforce_proxy_server_validity': true,
+};
+var currentPolicy = {};
+
+chrome.storage.onChanged.addListener((changedPolicies, storageNamespace) => {
+  console.log('Handling managed policy change event from control panel.');
+  if (storageNamespace == managedStorageNamespace) {
+    var changedPolicyKey;
+    for (changedPolicyKey in changedPolicies) {
+      var newPolicyValue = changedPolicies[changedPolicyKey]['newValue'];
+      currentPolicy[changedPolicyKey] = newPolicyValue;
+    }
+  }
+});
+
+var setManagedPolicyValues = function() {
+  try {
+    chrome.storage.managed.get((managedPolicy) => {
+      if (Object.keys(managedPolicy).length == 0) {
+        console.log('No managed policy found. Consumer mode.');
+      } else {
+        console.log('Managed policy found. Enterprise mode.');
+        for (var key in managedPolicy) {
+          var newPolicyValue = managedPolicy[key];
+          if (acceptablePolicyVariables[key]) {
+            currentPolicy[key] = newPolicyValue;
+          } else {
+            console.log('Invalid policy key: ' + key);
+          }
+        }
+      }
+    });
+  } catch (e) {
+    console.log('Error when attempting to set managed policy: ' + e.message);
+  }
+};
