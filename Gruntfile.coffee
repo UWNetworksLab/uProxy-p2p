@@ -171,10 +171,13 @@ coreDistFiles = [
   'freedom-social-firebase/facebook-social-provider.js'
   'freedom-social-firebase/google-social-provider.js'
   'freedom-social-firebase/google-auth.js'
+  'freedom-social-quiver/socketio.quiver.json'
+  'freedom-social-quiver/socketio.quiver.js'
   'freedom-port-control/port-control.js'
   'freedom-port-control/port-control.json'
   'freedom-pgp-e2e/end-to-end.compiled.js'
   'freedom-pgp-e2e/googstorage.js'
+  'freedom-pgp-e2e/hex2words.js'
   'freedom-pgp-e2e/e2e.js'
   'freedom-pgp-e2e/pgpapi.json'
 
