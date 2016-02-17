@@ -10,14 +10,6 @@ open the FAQ within the uProxy window.
 
 -->
 
-<polymer-element name='uproxy-faq-link' attributes='anchor'>
-
-  <template>
-    <uproxy-link role='link' on-tap='{{ openFaq }}'>
-      <content></content>
-    </uproxy-link>
-  </template>
-
+<polymer-element name='uproxy-faq-link' attributes='anchor' extends='uproxy-link' on-tap='{{ openFaq }}'>
   <script src='faq-link.js'></script>
-
 </polymer-element>

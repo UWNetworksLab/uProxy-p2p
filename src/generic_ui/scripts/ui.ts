@@ -1,4 +1,8 @@
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/md5.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
 
 /**
  * ui.ts
@@ -12,15 +16,19 @@ import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
+import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import net = require('../../../../third_party/uproxy-lib/net/net.types');
-import noreConnector = require('./core_connector');
 import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
 import Constants = require('./constants');
 import translator_module = require('./translator');
-import _ = require('lodash');
 import network_options = require('../../generic/network-options');
+import model = require('./model');
+import jsurl = require('jsurl');
+import uparams = require('uparams');
+import md5 = require('md5');
+import jdenticon = require('jdenticon');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
@@ -32,112 +40,9 @@ var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 // different sizes of icons, the actual filenames have the dimension
 // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
 
-export class Model {
-  public networkNames :string[] = [];
-
-  public onlineNetworks :Network[] = [];
-
-  public contacts :Contacts = {
-    getAccessContacts: {
-      pending: [],
-      trustedUproxy: [],
-      untrustedUproxy: [],
-    },
-    shareAccessContacts: {
-      pending: [],
-      trustedUproxy: [],
-      untrustedUproxy: [],
-    }
-  };
-
-  public globalSettings :uproxy_core_api.GlobalSettings = {
-    version: 0,
-    description: '',
-    stunServers: [],
-    hasSeenSharingEnabledScreen: false,
-    hasSeenWelcome: false,
-    splashState : 0,
-    mode : ui_constants.Mode.GET,
-    allowNonUnicast: false,
-    statsReportingEnabled: false,
-    consoleFilter: 0,
-    language: 'en',
-    force_message_version: 0,
-    hasSeenGoogleAndFacebookChangedNotification: false,
-    quiverUserName: ''
-  };
-
-  public reconnecting = false;
-
-  // userId is included as an optional parameter because we will eventually
-  // want to use it to get an accurate network.  For now, it is ignored and
-  // serves to remind us of where we still need to add the info
-  public getNetwork = (networkName :string, userId?:string) :Network => {
-    return _.find(this.onlineNetworks, { name: networkName });
-  }
-
-  public removeNetwork = (networkName :string, userId :string) => {
-    var network = this.getNetwork(networkName, userId);
-
-    for (var otherUserId in network.roster) {
-      var user = this.getUser(network, otherUserId);
-      var userCategories = user.getCategories();
-      categorizeUser(user, this.contacts.getAccessContacts,
-                     userCategories.getTab, null);
-      categorizeUser(user, this.contacts.shareAccessContacts,
-                     userCategories.shareTab, null);
-    }
-
-    _.remove(this.onlineNetworks, { name: networkName });
-  }
-
-  public getUser = (network :Network, userId :string) :User => {
-    if (network.roster[userId]) {
-      return network.roster[userId];
-    }
-
-    return null;
-  }
-
-  public updateGlobalSettings = (settings :Object) => {
-    _.merge(this.globalSettings, settings, (a :any, b :any) => {
-      if (_.isArray(a) && _.isArray(b)) {
-        return b;
-      }
-
-      return undefined;
-    });
-  }
-}
-
-export interface ContactCategory {
-  [type :string] :User[];
-  pending :User[];
-  trustedUproxy :User[];
-  untrustedUproxy :User[];
-}
-
-export interface Contacts {
-  getAccessContacts :ContactCategory;
-  shareAccessContacts :ContactCategory;
-}
-
- export interface UserCategories {
-   getTab :string;
-   shareTab :string;
- }
-
-/**
- * Specific to one particular Social network.
- */
-export interface Network {
-  name :string;
-  // TODO(salomegeo): Add more information about the user.
-  userId :string;
-  imageData ?:string;
-  userName ?:string;
-  logoutExpected: boolean;
-  roster :{ [userId:string] :User };
+export interface UserCategories {
+  getTab :string;
+  shareTab :string;
 }
 
 export interface NotificationData {
@@ -145,6 +50,29 @@ export interface NotificationData {
   network :string;
   user :string;
   unique ?:string;
+}
+
+interface PromiseCallbacks {
+  fulfill :Function;
+  reject :Function;
+}
+
+export function getImageData(userId :string, oldImageData :string,
+                             newImageData :string) : string {
+  if (!oldImageData && !newImageData) {
+    // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
+    // as long as jdenticon only uses '"' in the generated code...
+    // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
+    // scales the image to fit the space, so this parameter has no effect.
+    return '\'data:image/svg+xml;utf8,' +
+        jdenticon.toSvg(md5(userId), 100) + '\'';
+  } else if (!newImageData) {
+    // This case is hit when we've already generated a jdenticon for a user
+    // who doesn't have any image in uProxy core.
+    return oldImageData;
+  } else {
+    return newImageData;
+  }
 }
 
 /**
@@ -157,7 +85,7 @@ export interface NotificationData {
  */
 export class UserInterface implements ui_constants.UiApi {
   public view :ui_constants.View;
-  public model = new Model();
+  public model = new model.Model();
 
   /* Instance management */
   // Instance you are getting access from. Null if you are not getting access.
@@ -203,8 +131,11 @@ export class UserInterface implements ui_constants.UiApi {
 
   public toastMessage :string = null;
 
-  public showInviteControls: boolean = false;
+  // TODO: Remove this when we switch completely to a roster-before-login flow.
+  public showRosterBeforeLogin:boolean = false;
 
+  // Please note that this value is updated periodically so may not reflect current reality.
+  private isConnectedToCellular_ :boolean = false;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -214,7 +145,6 @@ export class UserInterface implements ui_constants.UiApi {
       public core   :CoreConnector,
       public browserApi :BrowserAPI) {
     this.updateView_();
-    this.i18n_setLng(this.model.globalSettings.language);
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
     if (firefoxMatches) {
@@ -247,13 +177,6 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.USER_SELF, this.syncUserSelf_);
 
     core.onUpdate(uproxy_core_api.Update.USER_FRIEND, this.syncUser);
-
-    core.onUpdate(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
-                  (message :social.PeerMessage) => {
-      console.log('Manual network outbound message: ' +
-                  JSON.stringify(message));
-      // TODO: Display the message in the 'manual network' UI.
-    });
 
     core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
       this.copyPasteState.message = message;
@@ -291,6 +214,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.stoppedGetting(data);
     });
 
+    var checkConnectivityIntervalId = -1;
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
         (instanceId :string) => {
       // TODO (lucyhe): Update instancesGivingAccessTo before calling
@@ -305,6 +229,9 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = true;
       this.showNotification(this.i18n_t("STARTED_PROXYING",
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
+      checkConnectivityIntervalId = setInterval(
+          this.notifyUserIfConnectedToCellular_,
+          5 * 60 * 1000);
     });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND,
@@ -332,6 +259,11 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
+      if (checkConnectivityIntervalId !== -1 && Object.keys(this.instancesGivingAccessTo).length === 0) {
+        clearInterval(checkConnectivityIntervalId);
+        checkConnectivityIntervalId = -1;
+        this.isConnectedToCellular_ = false;
+      }
     });
 
     core.onUpdate(uproxy_core_api.Update.FAILED_TO_GIVE,
@@ -382,13 +314,25 @@ export class UserInterface implements ui_constants.UiApi {
                   this.setPortControlSupport_);
 
     browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
-    browserApi.on('inviteUrlData', this.handleInviteUrlData);
+    browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
 
     core.getFullState()
         .then(this.updateInitialState)
         .then(this.browserApi.handlePopupLaunch);
+  }
+
+  private notifyUserIfConnectedToCellular_ = () => {
+    this.browserApi.isConnectedToCellular().then((isConnectedToCellular) => {
+      if (isConnectedToCellular && !this.isConnectedToCellular_) {
+        this.showNotification('Your friend is proxying through your cellular network which could'
+          + ' incur charges.');
+      }
+      this.isConnectedToCellular_ = isConnectedToCellular;
+    }, function(reason) {
+      console.log('Could not check if connected to cellular or not. reason: ' + reason);
+    });
   }
 
   // Because of an observer (in root.ts) watching the value of
@@ -398,42 +342,79 @@ export class UserInterface implements ui_constants.UiApi {
     this.signalToFire = {name: signalName, data: data};
   }
 
-  private confirmationCallbacks_ :{[index :number] :Function} = {};
+  private confirmationCallbacks_ :{[index :number] :PromiseCallbacks} = {};
   // Don't use index 0 as it may be treated as false in confirmation code.
   private confirmationCallbackIndex_ = 1;
-  public getConfirmation(heading :string, text :string) :Promise<void> {
+
+  public getConfirmation(heading :string,
+                         text :string,
+                         cancelContinueButtons :boolean = false) :Promise<void> {
     return new Promise<void>((F, R) => {
-      var fulfillIndex = ++this.confirmationCallbackIndex_;
-      var rejectIndex = ++this.confirmationCallbackIndex_;
-      this.confirmationCallbacks_[fulfillIndex] = F;
-      this.confirmationCallbacks_[rejectIndex] = R;
+      var callbackIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
       this.fireSignal('open-dialog', {
         heading: heading,
         message: text,
         buttons: [{
-          text: this.i18n_t("YES"),
-          callbackIndex: fulfillIndex
-        }, {
-          text: this.i18n_t("NO"),
-          callbackIndex: rejectIndex,
+          text: cancelContinueButtons ?
+              this.i18n_t('CANCEL') : this.i18n_t('NO'),
+          callbackIndex: callbackIndex,
           dismissive: true
+        }, {
+          text: cancelContinueButtons ?
+              this.i18n_t('CONTINUE') : this.i18n_t('YES'),
+          callbackIndex: callbackIndex
         }]
       });
     });
   }
 
-  public invokeConfirmationCallback = (index :number, fulfill :boolean) => {
+  public getUserInput(heading :string, message :string, placeholderText :string, defaultValue :string, buttonText :string) : Promise<string> {
+    return new Promise<string>((F, R) => {
+      var callbackIndex = ++this.confirmationCallbackIndex_;
+      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
+      this.fireSignal('open-dialog', {
+        heading: heading,
+        message: message,
+        buttons: [{
+          text: buttonText,
+          callbackIndex: callbackIndex
+        }],
+        userInputData: {
+          placeholderText: placeholderText,
+          initInputValue: defaultValue
+        }
+      });
+    });
+  }
+
+  public showDialog(heading :string, message :string, buttonText ?:string,
+      signal ?:string, displayData ?:string) {
+    var button :ui_constants.DialogButtonDescription = {
+      text: buttonText || this.i18n_t("OK")
+    };
+    if (signal) {
+      button['signal'] = signal;
+    }
+    this.fireSignal('open-dialog', {
+      heading: heading,
+      message: message,
+      buttons: [button],
+      displayData: displayData || null
+    });
+  }
+
+  public invokeConfirmationCallback = (index :number, fulfill :boolean, data ?:any) => {
     if (index > this.confirmationCallbackIndex_) {
       console.error('Confirmation callback not found: ' + index);
       return;
     }
-    this.confirmationCallbacks_[index]();
-    delete this.confirmationCallbacks_[index];
     if (fulfill) {
-      delete this.confirmationCallbacks_[index + 1];
+      this.confirmationCallbacks_[index].fulfill(data);
     } else {
-      delete this.confirmationCallbacks_[index - 1];
+      this.confirmationCallbacks_[index].reject(data);
     }
+    delete this.confirmationCallbacks_[index];
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -530,71 +511,159 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  private addUser_ = (url: string, showConfirmation :boolean) : Promise<void> => {
+  private addUser_ = (tokenObj :social.InviteTokenData, showConfirmation :boolean) : Promise<void> => {
     try {
-      var token = url.substr(url.lastIndexOf('/') + 1);
-      var tokenObj = JSON.parse(atob(token));
       var userName = tokenObj.userName;
       var networkName = tokenObj.networkName;
-      var networkData = tokenObj.networkData;
     } catch(e) {
-      return Promise.reject('Error parsing invite URL');
+      return Promise.reject('Error parsing invite token');
     }
 
     var getConfirmation = Promise.resolve<void>();
     if (showConfirmation) {
+      if (networkName === "Cloud") {
+        userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
+      }
       var confirmationMessage =
           this.i18n_t('ACCEPT_INVITE_CONFIRMATION', { name: userName });
       getConfirmation = this.getConfirmation('', confirmationMessage);
     }
+
     return getConfirmation.then(() => {
       var socialNetworkInfo :social.SocialNetworkInfo = {
         name: networkName,
         userId: "" /* The current user's ID will be determined by the core. */
       };
       return this.core.acceptInvitation(
-          {network: socialNetworkInfo, token: url});
+          {network: socialNetworkInfo, tokenObj: tokenObj});
     }).catch((e) => {
       // The user did not confirm adding their friend, not an error.
       return;
     })
   }
 
-  public handleInviteUrlData = (url :string) => {
-    var showUrlError = () => {
-      this.fireSignal('open-dialog', {
-        heading: '',
-        message: this.i18n_t("INVITE_URL_ERROR"),
-        buttons: [{
-          text: this.i18n_t("OK")
-        }]
-      });
-    };
+  private parseInviteUrl_ = (invite :string) : social.InviteTokenData => {
     try {
-      var token = url.substr(url.lastIndexOf('/') + 1);
-      var tokenObj = JSON.parse(atob(token));
-      var networkName = tokenObj.networkName;
-      var userName = tokenObj.userName;
+      var params = uparams(invite);
+      if (params && params['networkName']) {
+        // New style invite using URL params.
+        return {
+          v: parseInt(params['v'], 10),
+          networkData: jsurl.parse(params['networkData']),
+          networkName: params['networkName'],
+          userName: params['userName']
+        }
+      } else {
+        // Old v1 invites are base64 encoded JSON
+        var token = invite.substr(invite.lastIndexOf('/') + 1);
+        // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
+        token = token.match("[A-Za-z0-9+/=_]+")[0];
+        var parsedObj = JSON.parse(atob(token));
+        var networkData = parsedObj.networkData;
+        if (typeof networkData === 'object' && networkData.networkData) {
+          // Firebase invites have a nested networkData string within a
+          // networkData object.  TODO: move Firebase to use v2 invites.
+          networkData = networkData.networkData;
+        }
+        return {
+          v: 1,
+          networkData: networkData,
+          networkName: parsedObj.networkName,
+          userName: parsedObj.userName
+        };
+      }
     } catch(e) {
-      showUrlError();
+      return null;
+    }
+  }
+
+  public handleInvite = (invite :string) : Promise<void> => {
+    var showTokenError = () => {
+      this.showDialog('', this.i18n_t('INVITE_ERROR'));
+    };
+
+    var tokenObj = this.parseInviteUrl_(invite);
+    if (!tokenObj) {
+      showTokenError();
       return;
     }
-    if (!this.model.getNetwork(networkName)) {
+    var userName = tokenObj.userName;
+    var networkName = tokenObj.networkName;
+
+    if (networkName == 'Cloud') {
+      // Cloud confirmation is the same regardless of whether the user is
+      // logged into cloud yet.
+      return this.getConfirmation('', this.i18n_t('CLOUD_INVITE_CONFIRM'))
+      .then(() => {
+        // Log into cloud if needed.
+        var loginPromise = Promise.resolve<void>();
+        if (!this.model.getNetwork('Cloud')) {
+          loginPromise = this.login('Cloud');
+        }
+        return loginPromise.then(() => {
+          // Cloud contacts only appear on the GET tab.
+          this.setMode(ui_constants.Mode.GET);
+          // Don't show an additional confirmation for Cloud.
+          return this.addUser_(tokenObj, false).catch(showTokenError);
+        });
+      });
+    }
+
+    if (this.model.getNetwork(networkName)) {
+      // User is already logged into the right network (other than Cloud).
+      return this.addUser_(tokenObj, true).catch(showTokenError);
+    }
+
+    // loginPromise should resolve when the use is logged into networkName.
+    var loginPromise :Promise<void>;
+    if (networkName == 'Quiver') {
+      // Show user confirmation for Quiver login, where they can enter their
+      // Quiver user name.
+      var message = this.i18n_t('UPROXY_NETWORK_INVITE_LOGIN_MESSAGE',
+          {name: userName });
+      loginPromise = this.loginToQuiver(message);
+    } else {
+      // All networks other than Quiver and Cloud.
       var confirmationTitle = this.i18n_t('LOGIN_REQUIRED_TITLE');
       var confirmationMessage =
           this.i18n_t('LOGIN_REQUIRED_MESSAGE',
           { network: this.getNetworkDisplayName(networkName), name: userName });
-      this.getConfirmation(confirmationTitle, confirmationMessage).then(() => {
-        this.login(networkName).then(() => {
+      loginPromise = this.getConfirmation(confirmationTitle, confirmationMessage)
+      .then(() => {
+        return this.login(networkName).then(() => {
+          // For networks other than Quiver and Cloud, login will open an
+          // OAuth tab.  We need to return to the roster and re-open the uProxy
+          // popup.
           this.view = ui_constants.View.ROSTER;
           this.bringUproxyToFront();
-          // Add user without showing a 2nd confirmation.
-          this.addUser_(url, false).catch(showUrlError);
         });
       });
-    } else {
-      this.addUser_(url, true).catch(showUrlError);;
     }
+
+    return loginPromise.then(() => {
+      // User already saw a confirmation when they logged into the network,
+      // don't show an additional confirmation.
+      return this.addUser_(tokenObj, false).catch(showTokenError);
+    });
+  }
+
+  public loginToQuiver = (message ?:string) : Promise<void> => {
+    if (message) {
+      message += '<p>' + this.i18n_t('QUIVER_LOGIN_TEXT') + '</p>';
+    } else {
+      message = this.i18n_t('QUIVER_LOGIN_TEXT');
+    }
+    return this.getUserInput(
+        this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
+        message || '',
+        this.i18n_t('UPROXY_NETWORK_CHOOSE_A_USER_NAME'),
+        this.model.globalSettings.quiverUserName,
+        this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
+    .then((quiverUserName :string) => {
+      this.model.globalSettings.quiverUserName = quiverUserName;
+      this.core.updateGlobalSettings(this.model.globalSettings);
+      return this.login('Quiver', quiverUserName);
+    });
   }
 
   public handleCopyPasteUrlData = (url: string) => {
@@ -643,9 +712,12 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public proxyDisconnected = () => {
+  public proxyDisconnected = (info?:ProxyDisconnectInfo) => {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
+      if (info && info.deliberate) {
+        return;
+      }
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
@@ -777,7 +849,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateGettingStatusBar_();
 
-    this.browserApi.startUsingProxy(endpoint);
+    this.browserApi.startUsingProxy(endpoint,
+        this.model.globalSettings.proxyBypass);
   }
 
   /**
@@ -848,7 +921,7 @@ export class UserInterface implements ui_constants.UiApi {
           roster: {},
           logoutExpected: false,
           userName: networkMsg.userName,
-          imageData: networkMsg.imageData
+          imageData: getImageData(networkMsg.userId, null, networkMsg.imageData)
         };
         this.model.onlineNetworks.push(existingNetwork);
       }
@@ -877,7 +950,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateView_();
     this.updateIcon_();
-    this.updateShowInviteControls_();
   }
 
   private syncUserSelf_ = (payload :social.UserData) => {
@@ -889,8 +961,9 @@ export class UserInterface implements ui_constants.UiApi {
     }
     var profile :social.UserProfileMessage = payload.user;
     network.userId = profile.userId;
-    network.imageData = profile.imageData;
     network.userName = profile.name;
+    network.imageData =
+        getImageData(network.userId, network.imageData, profile.imageData);
   }
 
   /**
@@ -948,10 +1021,13 @@ export class UserInterface implements ui_constants.UiApi {
 
     var newUserCategories = user.getCategories();
     // Update the user's category in both get and share tabs.
-    categorizeUser(user, this.model.contacts.getAccessContacts,
+    model.categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-    categorizeUser(user, this.model.contacts.shareAccessContacts,
-        oldUserCategories.shareTab, newUserCategories.shareTab);
+
+    if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
+      model.categorizeUser(user, this.model.contacts.shareAccessContacts,
+          oldUserCategories.shareTab, newUserCategories.shareTab);
+    }
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
@@ -966,6 +1042,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string, userName ?:string) : Promise<void> => {
+    if (network === "Cloud") {
+      this.model.globalSettings.showCloud = true;
+      this.core.updateGlobalSettings(this.model.globalSettings);
+    }
+
     return this.core.login({
         network: network,
         reconnect: false,
@@ -973,7 +1054,8 @@ export class UserInterface implements ui_constants.UiApi {
     }).then(() => {
       this.browserApi.hasInstalledThenLoggedIn = true;
     }).catch((e :Error) => {
-      this.showNotification(this.i18n_t("ERROR_SIGNING_IN", {network: network}));
+      this.showNotification(this.i18n_t(
+          "ERROR_SIGNING_IN", {network: this.getNetworkDisplayName(network)}));
       throw e;
     });
   }
@@ -1023,10 +1105,21 @@ export class UserInterface implements ui_constants.UiApi {
     }, () => { /* MT */ });
   }
 
+  public logoutAll = () : Promise<void[]> => {
+    var logoutPromises :Promise<void>[] = [];
+    for (var i in this.model.onlineNetworks) {
+      logoutPromises.push(this.logout({
+        name: this.model.onlineNetworks[i].name,
+        userId: this.model.onlineNetworks[i].userId
+      }));
+    }
+    return Promise.all(logoutPromises);
+  }
+
   private reconnect_ = (network :string) => {
     this.model.reconnecting = true;
     // TODO: add wechat, quiver, github URLs
-    var pingUrl = network == 'Facebook'
+    var pingUrl = network == 'Facebook-Firebase-V2'
         ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
     this.core.pingUntilOnline(pingUrl).then(() => {
       // Ensure that the user is still attempting to reconnect (i.e. they
@@ -1121,7 +1214,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.networkNames = state.networkNames;
     this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
-      this.i18n_setLng(state.globalSettings.language);
+      this.updateLanguage(state.globalSettings.language);
     }
     this.model.updateGlobalSettings(state.globalSettings);
 
@@ -1147,21 +1240,24 @@ export class UserInterface implements ui_constants.UiApi {
       }
     }
 
+    // TODO: Remove this when we switch completely to a roster-before-login flow.
+    this.showRosterBeforeLogin = this.model.hasQuiverSupport();
+
     this.portControlSupport = state.portControlSupport;
 
     // plenty of state may have changed, update it
     this.updateView_();
     this.updateSharingStatusBar_();
     this.updateIcon_();
-    this.updateShowInviteControls_();
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
+    var profile = networkState.profile;
     this.model.onlineNetworks.push({
       name: networkState.name,
-      userId: networkState.profile.userId,
-      userName: networkState.profile.name,
-      imageData: networkState.profile.imageData,
+      userId: profile.userId,
+      userName: profile.name,
+      imageData: getImageData(profile.userId, null, profile.imageData),
       logoutExpected: false,
       roster: {}
     });
@@ -1203,10 +1299,6 @@ export class UserInterface implements ui_constants.UiApi {
     return this.getProperty_<boolean>(networkName, 'supportsReconnect') || false;
   }
 
-  public supportsInvites = (networkName :string) : boolean => {
-    return this.getProperty_<boolean>(networkName, 'supportsInvites') || false;
-  }
-
   public isExperimentalNetwork = (networkName :string) : boolean => {
     return this.getProperty_<boolean>(networkName, 'isExperimental') || false;
   }
@@ -1218,21 +1310,11 @@ export class UserInterface implements ui_constants.UiApi {
     return undefined;
   }
 
-  private updateShowInviteControls_ = () => {
-    var showControls = false;
-    for (var i = 0; i < this.model.onlineNetworks.length; ++i) {
-      if (this.supportsInvites(this.model.onlineNetworks[i].name)) {
-        showControls = true;
-        break;
-      }
-    }
-    this.showInviteControls = showControls;
-  }
-
   // this takes care of updating the view (given the assumuption that we are
   // connected to the core)
   private updateView_ = () => {
-    if (this.model.onlineNetworks.length > 0) {
+    if (this.model.onlineNetworks.length > 0 ||
+        (this.model.globalSettings.hasSeenWelcome && this.showRosterBeforeLogin)) {
       this.view = ui_constants.View.ROSTER;
     } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
                this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
@@ -1241,28 +1323,9 @@ export class UserInterface implements ui_constants.UiApi {
       this.view = ui_constants.View.SPLASH;
     }
   }
+
+  public i18nSanitizeHtml = (i18nMessage :string) => {
+    // Remove all HTML other than supported tags like strong, a, p, etc.
+    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
+  }
 } // class UserInterface
-
-// non-exported method to handle categorizing users
-function categorizeUser(user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) {
-  if (oldCategory === newCategory) {
-    // no need to do any work if nothing changed
-    return;
-  }
-
-  if (oldCategory) {
-    // remove user from old category
-    var oldCategoryArray = contacts[oldCategory];
-    for (var i = 0; i < oldCategoryArray.length; ++i) {
-      if (oldCategoryArray[i] == user) {
-        oldCategoryArray.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  if (newCategory) {
-    // add user to new category
-    contacts[newCategory].push(user);
-  }
-}

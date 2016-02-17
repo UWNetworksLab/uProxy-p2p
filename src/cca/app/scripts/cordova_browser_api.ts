@@ -1,5 +1,6 @@
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
-/// <reference path='../../../../../third_party/typings/cordova/inappbrowser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
 
 /**
  * cordova_browser_api.ts
@@ -9,6 +10,7 @@
  */
 
 import browser_api = require('../../../interfaces/browser_api');
+import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../../third_party/uproxy-lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
@@ -46,7 +48,29 @@ class CordovaBrowserApi implements BrowserAPI {
   public handlePopupLaunch :() => void;
   private onceLaunched_ :Promise<void>;
 
+  private browser_ :Window = null;
+
   constructor() {
+    chrome.notifications.onClicked.addListener((tag) => {
+      this.emit_('notificationclicked', tag);
+    });
+  }
+
+  public isConnectedToCellular = () : Promise<boolean> => {
+    return new Promise<boolean>((F, R) => {
+        var isConnectedToCellular = false;
+        chrome.system.network.getNetworkInterfaces((networkIfaceArray) => {
+          for (var i = 0; i < networkIfaceArray.length; i++) {
+            var iface = networkIfaceArray[i];
+            if (iface.name.substring(0, 5) === 'rmnet') {
+              console.log('User Connected to cellular network.');
+              isConnectedToCellular = true;
+              break;
+            }
+          }
+          F(isConnectedToCellular);
+        });
+      });
   }
 
   public startUsingProxy = (endpoint:net.Endpoint) => {
@@ -63,14 +87,14 @@ class CordovaBrowserApi implements BrowserAPI {
           singleProxy: {
             scheme: "socks5",
             host: endpoint.address,
-            port: '' + endpoint.port
+            port: endpoint.port
           }
         }
       }
     }, (response:Object) => {
       console.log('Set proxy response:', response);
       // Open the in-app browser through the proxy.
-      cordova.InAppBrowser.open('https://www.uproxy.org/', '_blank');
+      this.openTab('https://news.google.com/');
     });
   };
 
@@ -86,7 +110,51 @@ class CordovaBrowserApi implements BrowserAPI {
   };
 
   public openTab = (url :string) => {
-    cordova.InAppBrowser.open(url, '_blank');
+    if (this.browser_) {
+      return;
+    }
+    this.browser_ = cordova.ThemeableBrowser.open(url, '_blank', {
+      statusbar: {
+        color: '#ffffffff'
+      },
+      toolbar: {
+        height: 44,
+        color: '#f0f0f0ff'
+      },
+      title: {
+        color: '#003264ff',
+        showPageTitle: false
+      },
+      backButton: {
+        image: 'back',
+        imagePressed: 'back_pressed',
+        align: 'left'
+      },
+      forwardButton: {
+        image: 'forward',
+        imagePressed: 'forward_pressed',
+        align: 'left'
+      },
+      closeButton: {
+        image: 'close',
+        imagePressed: 'close_pressed',
+        align: 'right',
+        event: 'closePressed'
+      },
+      backButtonCanClose: false
+    });
+
+    this.browser_.addEventListener(cordova.ThemeableBrowser.EVT_ERR, function(e) {
+      console.error(e);
+    });
+    this.browser_.addEventListener(cordova.ThemeableBrowser.EVT_WRN, function(e) {
+      console.log(e);
+    });
+    this.browser_.addEventListener('closePressed', (e) => {
+      this.browser_ = null;
+      this.stopUsingProxy();
+      this.emit_('proxyDisconnected', {deliberate: true});
+    });
   }
 
   public launchTabIfNotOpen = (relativeUrl :string) => {
@@ -125,28 +193,18 @@ class CordovaBrowserApi implements BrowserAPI {
     console.log("Time between browser icon click and popup launch (ms): " +
         (Date.now() - this.popupCreationStartTime_));
     this.popupState_ = PopupState.LAUNCHED;
-    this.handlePopupLaunch();
   }
 
   public showNotification = (text :string, tag :string) => {
-    if (typeof Notification === 'undefined') {
-      // Notifications are only supported when using Crosswalk
-      console.log('Notification (not shown): ' + text);
-      return;
-    }
-
-    var notification =
-        new Notification('uProxy', {
-          body: text,
-          icon: 'icons/38_' + Constants.DEFAULT_ICON,
-          tag: tag
-        });
-    notification.onclick = () => {
-      this.emit_('notificationClicked', tag);
-    };
-    setTimeout(function() {
-      notification.close();
-    }, 5000);
+    // We use chrome.notifications because the HTML5 Notification API is not
+    // available (and not polyfilled) in WebViews, so it only works in
+    // Crosswalk.
+    chrome.notifications.create(tag, {
+      type: 'basic',
+      iconUrl: 'icons/38_' + Constants.DEFAULT_ICON,
+      title: 'uProxy',  // Mandatory attribute
+      message: text
+    }, (tag:string) => {});
   }
 
   public setBadgeNotification = (notification:string) :void => {

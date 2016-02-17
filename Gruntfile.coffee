@@ -2,6 +2,7 @@
 Gruntfile for uProxy
 ###
 
+_ = require('lodash')
 fs = require('fs')
 rules = require './build/tools/common-grunt-rules'
 path = require 'path'
@@ -11,6 +12,7 @@ TaskManager = require 'uproxy-lib/build/tools/taskmanager'
 
 # Location of where src is copied into and compiled.
 devBuildPath = 'build/dev/uproxy'
+distBuildPath = 'build/dist'
 # Location of where to copy/build third_party source/libs.
 thirdPartyBuildPath = 'build/third_party'
 # This is used for the copying of uproxy libraries into the target directory.
@@ -37,6 +39,9 @@ androidDevPath = path.join(devBuildPath, 'android/')
 iosDevPath = path.join(devBuildPath, 'ios/')
 genericPath = path.join(devBuildPath, 'generic/')
 
+ccaDistPath = path.join(distBuildPath, 'cca/app/')
+androidDistPath = path.join(distBuildPath, 'android/')
+iosDistPath = path.join(distBuildPath, 'ios/')
 #-------------------------------------------------------------------------
 browserifyIntegrationTest = (path) ->
   Rule.browserifySpec(path, {
@@ -88,8 +93,8 @@ FILES =
 finishVulcanized = (basePath, baseFilename) ->
   files: [
     {
-      src: path.join(basePath, '/polymer/' + baseFilename + '.html')
-      dest: path.join(basePath, '/polymer/' + baseFilename + '.html')
+      src: path.join(basePath, baseFilename + '.html')
+      dest: path.join(basePath, baseFilename + '.html')
     }
   ]
   options:
@@ -101,21 +106,10 @@ finishVulcanized = (basePath, baseFilename) ->
       replacement: '<script src="../lib/$1"></script>'
     }]
 
-vulcanizeInline = (src, dest) ->
+doVulcanize = (src, dest, inline, csp) ->
   options:
-    inline: true
-    excludes:
-      scripts: [
-        'polymer.js'
-      ]
-  files: [{
-    src: src
-    dest: dest
-  }]
-
-vulcanizeCsp = (src, dest) ->
-  options:
-    csp: true
+    inline: inline
+    csp: csp
     excludes:
       scripts: [
         'polymer.js'
@@ -138,6 +132,85 @@ compileTypescript = (files) ->
 
 readJSONFile = (file) -> JSON.parse(fs.readFileSync(file, 'utf8'))
 
+getWithBasePath = (files, base = '') ->
+  for file in files
+    if file[0] == '!'
+      '!' + path.join(base, file[1..])
+    else
+      path.join(base, file)
+
+backendThirdPartyBuildPaths = [
+  'bower'
+  'sha1'
+  'uproxy-lib/loggingprovider'
+  'uproxy-lib/churn-pipe'
+  'uproxy-lib/cloud/social'
+]
+
+uiDistFiles = [
+  'generic_ui/*.html'
+  'generic_ui/style/*.css'
+  'generic_ui/polymer/vulcanized*.{html,js}'
+  'generic_ui/fonts/*'
+  'generic_ui/icons/*'
+]
+
+coreDistFiles = [
+  'fonts/*'
+  '*.html' # technically does not exist in Firefox
+
+  'freedomjs-anonymized-metrics/anonmetrics.json'
+  'freedomjs-anonymized-metrics/metric.js'
+  'freedom-social-github/social.github.json'
+  'freedom-social-github/github-social-provider.js'
+  'freedom-social-firebase/social.firebase-facebook.json'
+  'freedom-social-firebase/social.firebase-google.json'
+  'freedom-social-firebase/firebase-shims.js'
+  'freedom-social-firebase/firebase.js'
+  'freedom-social-firebase/firebase-social-provider.js'
+  'freedom-social-firebase/facebook-social-provider.js'
+  'freedom-social-firebase/google-social-provider.js'
+  'freedom-social-firebase/google-auth.js'
+  'freedom-port-control/port-control.js'
+  'freedom-port-control/port-control.json'
+  'freedom-pgp-e2e/end-to-end.compiled.js'
+  'freedom-pgp-e2e/googstorage.js'
+  'freedom-pgp-e2e/e2e.js'
+  'freedom-pgp-e2e/pgpapi.json'
+
+  '**/freedom-module.json'
+  '**/*.static.js'
+]
+
+# this should always be added to arrays of files to copy last
+universalDistFiles = [
+  'icons/*'
+  'bower/webcomponentsjs/webcomponents.min.js'
+  'bower/polymer/polymer.js'
+
+  '!generic_core/freedom-module.json' # not actually needed for the UI builds
+  '!generic_ui/polymer/vulcanized*inline.html'
+  '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+  '!**/*spec*'
+]
+
+extraFilesForCoreBuilds = [
+  'freedomjs-anonymized-metrics',
+  'freedom-social-firebase',
+  'freedom-social-github',
+  'freedom-social-wechat',
+  'freedom-social-quiver',
+  'freedom-pgp-e2e',
+  'freedom-port-control',
+]
+
+getExtraFilesForCoreBuild = (basePath) ->
+  for spec in extraFilesForCoreBuilds
+    expand: true,
+    cwd: path.join('node_modules', spec, 'dist'),
+    src: ['**'],
+    dest: path.join(basePath, spec)
+
 gruntConfig = {
   pkg: readJSONFile('package.json')
   pkgs:
@@ -145,7 +218,6 @@ gruntConfig = {
     freedom: readJSONFile('node_modules/freedom/package.json')
     freedomchrome: readJSONFile('node_modules/freedom-for-chrome/package.json')
     freedomfirefox: readJSONFile('node_modules/freedom-for-firefox/package.json')
-    freedomxmpp: readJSONFile('node_modules/freedom-social-xmpp/package.json')
     freedomfirebase: readJSONFile('node_modules/freedom-social-firebase/package.json')
     freedomGitHub: readJSONFile('node_modules/freedom-social-github/package.json')
     freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
@@ -159,30 +231,79 @@ gruntConfig = {
   androidDevPath: androidDevPath
   ccaDevPath: ccaDevPath
   iosDevPath: iosDevPath
+  androidDistPath: androidDistPath
+  ccaDistPath: ccaDistPath
+  iosDistPath: iosDistPath
+
+  # Create commands to run in different directories
+  ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
+  ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
+  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin add https://github.com/gitlaura/cordova-plugin-iosrtc.git'
+
   exec: {
-    ccaCreate: {
-      command: '<%= ccaJsPath %> create <%= androidDevPath %> --link-to=<%= ccaDevPath %>'
+    ccaCreateDev: {
+      command: '<%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
     }
+    ccaCreateDist: {
+      command: '<%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
+    }
+    ccaPlatformAndroidDev: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaPlatformAndroidCmd %>'
+    }
+    ccaPlatformAndroidDist: {
+      cwd: '<%= androidDistPath %>'
+      command: '<%= ccaPlatformAndroidCmd %>'
+    }
+    ccaAddPluginsAndroidDev: {
+      cwd: '<%= androidDevPath %>'
+      command: '<%= ccaAddPluginsCmd %>'
+    }
+    ccaAddPluginsAndroidDist: {
+      cwd: '<%= androidDistPath %>'
+      command: '<%= ccaAddPluginsCmd %>'
+    }
+    # This pair of "cca build" commands is exactly as recommended at
+    # https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Publish.md
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android --webview=system'
+      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk'
+    }
+    ccaReleaseAndroid: {
+      cwd: '<%= androidDistPath %>'
+      command: '<%= ccaJsPath %> build android --release --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --release --webview=crosswalk'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
       command: '<%= ccaJsPath %> run android --emulator'
     }
     rmAndroidBuild: {
-      command: 'rm -rf <%= androidDevPath %>'
+      command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
     }
-    ccaCreateIos: {
-      command: '<%= ccaJsPath %> create <%= iosDevPath %> --link-to=<%= ccaDevPath %>'
+    ccaCreateIosDev: {
+      command: '<%= ccaJsPath %> create <%= iosDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
     }
-    ccaBuildIos: {
+    ccaCreateIosDist: {
+      command: '<%= ccaJsPath %> create <%= iosDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
+    }
+    ccaAddPluginsIosBuild: {
       cwd: '<%= iosDevPath %>'
-      command: '<%= ccaJsPath %> build --webview=system ios'
+      command: '<%= ccaAddPluginsIosCmd %>'
+    }
+    ccaPrepareIosDev: {
+      cwd: '<%= iosDevPath %>'
+      command: '<%= ccaJsPath %> prepare'
+    }
+    ccaPrepareIosDist: {
+      cwd: '<%= iosDistPath %>'
+      command: '<%= ccaJsPath %> prepare'
+    }
+    ccaEmulateIos: {
+      cwd: '<%= iosDevPath %>'
+      command: '<%= ccaJsPath %> run ios --emulator'
     }
     rmIosBuild: {
-      command: 'rm -rf <%= iosDevPath %>'
+      command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
   }
 
@@ -258,29 +379,13 @@ gruntConfig = {
           cwd: chromeExtDevPath
           src: [
             'manifest.json'
-
-            'bower/webcomponentsjs/webcomponents.min.js'
-            'bower/polymer/polymer.js'
-
-            'generic_ui/*.html'
-            'generic_ui/polymer/vulcanized*.{html,js}'
-            '!generic_ui/polymer/vulcanized*inline.html'
-            '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+            '_locales/**'
 
             'generic_ui/scripts/copypaste.js'
             'generic_ui/scripts/get_logs.js'
             'scripts/context.static.js'
             'scripts/background.static.js'
-            '!**/*spec*'
-
-            'generic_ui/style/*.css'
-
-            # extra components we use
-            'generic_ui/fonts/*'
-            'generic_ui/icons/*'
-            'icons/*'
-            '_locales/**'
-          ]
+          ].concat(uiDistFiles, universalDistFiles)
           dest: 'build/dist/chrome/extension'
         }
         { # Chrome app
@@ -288,50 +393,14 @@ gruntConfig = {
           cwd: chromeAppDevPath
           src: [
             'manifest.json'
-            '*.html'
-
-            'bower/webcomponentsjs/webcomponents.min.js'
-            'bower/polymer/polymer.js'
+            '_locales/**'
 
             # UI for not-connected
             # This is not browserified so we use .js instead of .static.js
             'polymer/vulcanized.{html,js}'
 
-            # actual scripts that run things
-            'freedomjs-anonymized-metrics/anonmetrics.json'
-            'freedomjs-anonymized-metrics/metric.js'
             'freedom-for-chrome/freedom-for-chrome.js'
-            'freedom-social-xmpp/social.google.json'
-            'freedom-social-xmpp/socialprovider.js'
-            'freedom-social-xmpp/vcardstore.js'
-            'freedom-social-xmpp/node-xmpp-browser.js'
-            'freedom-social-xmpp/google-auth.js'
-            'freedom-social-github/social.github.json'
-            'freedom-social-github/github-social-provider.js'
-            'freedom-social-firebase/social.firebase-facebook.json'
-            'freedom-social-firebase/social.firebase-google.json'
-            'freedom-social-firebase/firebase-shims.js'
-            'freedom-social-firebase/firebase.js'
-            'freedom-social-firebase/firebase-social-provider.js'
-            'freedom-social-firebase/facebook-social-provider.js'
-            'freedom-social-firebase/google-social-provider.js'
-            'freedom-social-firebase/google-auth.js'
-            'freedom-port-control/port-control.js'
-            'freedom-port-control/port-control.json'
-            'freedom-pgp-e2e/end-to-end.compiled.js'
-            'freedom-pgp-e2e/googstorage.js'
-            'freedom-pgp-e2e/e2e.js'
-            'freedom-pgp-e2e/pgpapi.json'
-
-            '**/freedom-module.json'
-            '!generic_core/freedom-module.json'
-            '**/*.static.js'
-            '!**/*spec*'
-
-            'icons/*'
-            'fonts/*'
-            '_locales/**'
-          ]
+          ].concat(coreDistFiles, universalDistFiles)
           dest: 'build/dist/chrome/app'
         }
         { # Chrome app freedom-module
@@ -349,53 +418,14 @@ gruntConfig = {
             # addon sdk scripts
             'lib/**/*.js'
 
-            'data/freedomjs-anonymized-metrics/anonmetrics.json'
-            'data/freedomjs-anonymized-metrics/metric.js'
-            'data/freedom-for-firefox/freedom-for-firefox.jsm'
-            'data/freedom-social-xmpp/social.google.json'
-            'data/freedom-social-xmpp/socialprovider.js'
-            'data/freedom-social-xmpp/vcardstore.js'
-            'data/freedom-social-xmpp/node-xmpp-browser.js'
-            'data/freedom-social-xmpp/google-auth.js'
-            'data/freedom-social-github/social.github.json'
-            'data/freedom-social-github/github-social-provider.js'
-            'data/freedom-social-firebase/social.firebase-facebook.json'
-            'data/freedom-social-firebase/social.firebase-google.json'
-            'data/freedom-social-firebase/firebase-shims.js'
-            'data/freedom-social-firebase/firebase.js'
-            'data/freedom-social-firebase/firebase-social-provider.js'
-            'data/freedom-social-firebase/facebook-social-provider.js'
-            'data/freedom-social-firebase/google-social-provider.js'
-            'data/freedom-social-firebase/google-auth.js'
-            'data/freedom-port-control/port-control.js'
-            'data/freedom-port-control/port-control.json'
-            'data/freedom-pgp-e2e/end-to-end.compiled.js'
-            'data/freedom-pgp-e2e/googstorage.js'
-            'data/freedom-pgp-e2e/e2e.js'
-            'data/freedom-pgp-e2e/pgpapi.json'
-
-            'data/**/freedom-module.json'
-            '!generic_core/freedom-module.json'
-            'data/**/*.static.js'
             'data/generic_ui/scripts/get_logs.js'
             'data/scripts/content-proxy.js'
-            '!**/*spec*'
 
-            'data/bower/webcomponentsjs/webcomponents.min.js'
-            'data/bower/polymer/polymer.js'
-
-            'data/generic_ui/*.html'
-            'data/generic_ui/polymer/vulcanized*.{html,js}'
-            '!data/generic_ui/polymer/vulcanized*inline.html'
-            '!data/generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
-
-            'data/generic_ui/style/*.css'
-
-            'data/fonts/*'
-            'data/icons/*'
-            'data/generic_ui/fonts/*'
-            'data/generic_ui/icons/*'
-          ]
+            'data/freedom-for-firefox/freedom-for-firefox.jsm'
+          ].concat(
+            getWithBasePath(uiDistFiles, 'data'),
+            getWithBasePath(coreDistFiles, 'data'),
+            getWithBasePath(universalDistFiles, 'data'))
           dest: 'build/dist/firefox'
         }
         { # Firefox freedom-module
@@ -409,69 +439,47 @@ gruntConfig = {
           cwd: ccaDevPath
           src: [
             'manifest.json'
-            '*.html'
-
-            'bower/webcomponentsjs/webcomponents.min.js'
-            'bower/polymer/polymer.js'
-
-            'generic_ui/*.html'
-            'generic_ui/polymer/vulcanized*.{html,js}'
-            '!generic_ui/polymer/vulcanized*inline.html'
-            '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
-
-            'generic_ui/scripts/copypaste.js'
-            'generic_ui/scripts/get_logs.js'
-            '!**/*spec*'
-
-            'generic_ui/style/*.css'
-
-            # extra components we use
-            'generic_ui/fonts/*'
-            'generic_ui/icons/*'
+            'config.xml'
 
             # This is not browserified so we use .js instead of .static.js
             'polymer/vulcanized.{html,js}'
 
-            # actual scripts that run things
-            'freedomjs-anonymized-metrics/anonmetrics.json'
-            'freedomjs-anonymized-metrics/metric.js'
+            'generic_ui/scripts/copypaste.js'
+            'generic_ui/scripts/get_logs.js'
+
+            # TODO move to universalDistFiles once supported on other platforms
+            'freedom-social-quiver/socketio.quiver.json'
+            'freedom-social-quiver/socketio.quiver.js'
+
             'freedom-for-chrome/freedom-for-chrome.js'
-            'freedom-social-xmpp/social.google.json'
-            'freedom-social-xmpp/socialprovider.js'
-            'freedom-social-xmpp/vcardstore.js'
-            'freedom-social-xmpp/node-xmpp-browser.js'
-            'freedom-social-xmpp/google-auth.js'
-            'freedom-social-github/social.github.json'
-            'freedom-social-github/github-social-provider.js'
-            'freedom-social-firebase/social.firebase-facebook.json'
-            'freedom-social-firebase/social.firebase-google.json'
-            'freedom-social-firebase/firebase-shims.js'
-            'freedom-social-firebase/firebase.js'
-            'freedom-social-firebase/firebase-social-provider.js'
-            'freedom-social-firebase/facebook-social-provider.js'
-            'freedom-social-firebase/google-social-provider.js'
-            'freedom-social-firebase/google-auth.js'
-            'freedom-port-control/port-control.js'
-            'freedom-port-control/port-control.json'
-            'freedom-pgp-e2e/end-to-end.compiled.js'
-            'freedom-pgp-e2e/googstorage.js'
-            'freedom-pgp-e2e/e2e.js'
-            'freedom-pgp-e2e/pgpapi.json'
-
-            '**/freedom-module.json'
-            '!generic_core/freedom-module.json'
-            '**/*.static.js'
-
-            'icons/*'
-            'fonts/*'
-          ]
-          dest: 'build/dist/cca'
+          ].concat(uiDistFiles, coreDistFiles, universalDistFiles)
+          dest: ccaDistPath
         }
-        { # Chrome app freedom-module
+        { # CCA dist freedom-module.json
           expand: true
-          cwd: 'src/generic_core/dist_build/'
+          cwd: 'src/generic_core/cca_dist_build/'
           src: ['*']
-          dest: 'build/dist/cca/app/generic_core'
+          dest: path.join(ccaDistPath, 'generic_core')
+        }
+      ]
+
+    cca_splash_dev:
+      files: [
+        {
+          expand: true
+          cwd: 'src/cca'
+          src: [ 'splashscreen.png' ]
+          dest: path.join(androidDevPath, 'platforms/android/res/drawable-port-xhdpi')
+        }
+      ]
+
+    cca_splash_dist:
+      files: [
+        {
+          expand: true
+          cwd: 'src/cca'
+          src: [ 'splashscreen.png' ]
+          dest: path.join(androidDistPath, 'platforms/android/res/drawable-port-xhdpi')
         }
       ]
 
@@ -523,60 +531,12 @@ gruntConfig = {
         pathsFromDevBuild: [
           'generic_core'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-          'uproxy-lib/cloud/social'
-        ]
-        files: [
-          {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
-            src: ['anonmetrics.json', 'metric.js']
-            dest: chromeAppDevPath + '/freedomjs-anonymized-metrics'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-social-xmpp'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-social-firebase'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
-            src: ['**/*.js', '**/*.json']
-            dest: chromeAppDevPath + '/freedom-social-github'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-social-wechat'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-social-quiver'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-pgp-e2e'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-port-control/dist/',
-            src: ['**']
-            dest: chromeAppDevPath + '/freedom-port-control'
-          },
-          { # uProxy Icons and fonts
-            expand: true, cwd: 'src/'
-            src: ['icons/128_online.png', 'fonts/*']
-            dest: chromeAppDevPath
-          }
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
+        files: getExtraFilesForCoreBuild(chromeAppDevPath).concat({ # uProxy Icons and fonts
+          expand: true, cwd: 'src/'
+          src: ['icons/128_online.png', 'fonts/*']
+          dest: chromeAppDevPath
+        })
         localDestPath: 'chrome/app/'
 
     # {
@@ -606,59 +566,12 @@ gruntConfig = {
           'icons'
           'fonts'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-        ]
-        files: [
-          {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
-            src: ['anonmetrics.json', 'metric.js']
-            dest: firefoxDevPath + 'data/freedomjs-anonymized-metrics'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-social-xmpp'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-social-firebase'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
-            src: ['**/*.js', '**/*.json']
-            dest: firefoxDevPath + '/data/freedom-social-github'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-social-wechat'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-social-quiver'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-pgp-e2e'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-port-control/dist/',
-            src: ['**']
-            dest: firefoxDevPath + '/data/freedom-port-control'
-          },
-          { # lib
-            expand: true, cwd: devBuildPath
-            src: ['interfaces/*.js']
-            dest: firefoxDevPath + '/lib'
-          }
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
+        files: getExtraFilesForCoreBuild(path.join(firefoxDevPath, 'data')).concat({ #lib
+          expand: true, cwd: devBuildPath
+          src: ['interfaces/*.js']
+          dest: firefoxDevPath + '/lib'
+        })
         localDestPath: 'firefox/data'
     firefox_additional:
       files: [
@@ -685,59 +598,12 @@ gruntConfig = {
           'icons'
           'fonts'
         ]
-        pathsFromThirdPartyBuild: [
-          'bower'
-          'sha1'
-          'uproxy-lib/loggingprovider'
-          'uproxy-lib/churn-pipe'
-        ]
-        files: [
-          {
-            expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
-            src: ['anonmetrics.json', 'metric.js']
-            dest: ccaDevPath + '/freedomjs-anonymized-metrics'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-social-xmpp'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-social-firebase'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-github/dist/',
-            src: ['**/*.js', '**/*.json']
-            dest: ccaDevPath + '/freedom-social-github'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-wechat/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-social-wechat'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-social-quiver/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-social-quiver'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-pgp-e2e/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-pgp-e2e'
-          },
-          {
-            expand: true, cwd: 'node_modules/freedom-port-control/dist/',
-            src: ['**']
-            dest: ccaDevPath + '/freedom-port-control'
-          },
-          { # uProxy Icons and fonts
-            expand: true, cwd: 'src/'
-            src: ['icons/128_online.png', 'fonts/*']
-            dest: ccaDevPath
-          }
-        ]
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
+        files: getExtraFilesForCoreBuild(ccaDevPath).concat({ # uProxy Icons and fonts
+          expand: true, cwd: 'src/'
+          src: ['icons/128_online.png', 'fonts/*']
+          dest: ccaDevPath
+        })
         localDestPath: 'cca/app/'
     cca_additional:
       files: [
@@ -764,6 +630,21 @@ gruntConfig = {
       }]
   }  # copy
 
+  symlink: {
+    cca_keys:
+      files: [
+        {
+          expand: true
+          cwd: 'keys'
+          src: [
+            'android-release-keys.properties'
+            'play_store_keys.p12'
+          ]
+          dest: androidDistPath
+        }
+      ]
+  }
+
   #-------------------------------------------------------------------------
   'string-replace':
     version:
@@ -783,29 +664,11 @@ gruntConfig = {
             freedom: '<%= pkgs.freedom.version %>'
             'freedom-for-chrome': '<%= pkgs.freedomchrome.version %>'
             'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
-            'freedom-social-xmpp': '<%= pkgs.freedomxmpp.version %>'
             'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
             'freedom-social-github': '<%= pkgs.freedomGitHub.version %>'
             'freedom-social-wechat': '<%= pkgs.freedomwechat.version %>'
             'freedom-social-quiver': '<%= pkgs.freedomquiver.version %>'
         }]
-    chromeExtVulcanized:
-      finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized')
-
-    firefoxVulcanized:
-      finishVulcanized(firefoxDevPath + '/data/generic_ui', 'vulcanized')
-
-    chromeExtLogsVulcanized:
-      finishVulcanized(chromeExtDevPath + '/generic_ui', 'vulcanized-view-logs')
-
-    firefoxLogsVulcanized:
-      finishVulcanized(firefoxDevPath + '/data/generic_ui', 'vulcanized-view-logs')
-
-    ccaVulcanized:
-      finishVulcanized(ccaDevPath + '/generic_ui', 'vulcanized')
-
-    ccaLogsVulcanized:
-      finishVulcanized(ccaDevPath + '/generic_ui', 'vulcanized-view-logs')
   #-------------------------------------------------------------------------
   # All typescript compiles to locations in `build/`
   # Typescript compilation rules
@@ -861,8 +724,6 @@ gruntConfig = {
         standalone: 'ui_context'
     )
 
-    chromeVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized', {})# no exports from this
-    chromeLogsVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized-view-logs', {})
     firefoxContext:
       src: [
         firefoxDevPath + '/data/scripts/background.js'
@@ -871,8 +732,6 @@ gruntConfig = {
       options:
         browserifyOptions:
           standalone: 'ui_context'
-    firefoxVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized', {})# no exports from this
-    firefoxLogsVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized-view-logs', {})
 
     ccaMain: Rule.browserify('cca/app/scripts/main.core-env',
       browserifyOptions:
@@ -882,8 +741,6 @@ gruntConfig = {
       browserifyOptions:
         standalone: 'ui_context'
     )
-    ccaVulcanized: Rule.browserify('cca/app/generic_ui/polymer/vulcanized', {})# no exports from this
-    ccaLogsVulcanized: Rule.browserify('cca/app/generic_ui/polymer/vulcanized-view-logs', {})
 
     chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
     chromeExtensionCoreConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core_connector'
@@ -917,105 +774,46 @@ gruntConfig = {
       }
     }
   }
-  'mozilla-addon-sdk':
-    'latest':
-      options:
-        dest_dir: '.mozilla_addon_sdk/'
+  'jpm':
+    options:
+      src: 'build/dist/firefox/'
+      xpi: 'build/dist/'
+      debug: true
 
-  'mozilla-cfx-xpi':
-    'dist':
-      options:
-        'mozilla-addon-sdk': 'latest'
-        extension_dir: 'build/dist/firefox'
-        dist_dir: 'build/dist'
-
-  vulcanize:
-    chromeExtInline:
-      vulcanizeInline(
-          chromeExtDevPath + '/generic_ui/polymer/root.html',
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html')
-    chromeExtCsp:
-      vulcanizeCsp(
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html',
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized.html')
-    chromeAppInline:
-      vulcanizeInline(
-          chromeAppDevPath + '/polymer/ext-missing.html',
-          chromeAppDevPath + '/polymer/vulcanized-inline.html')
-    chromeAppCsp:
-      vulcanizeCsp(
-          chromeAppDevPath + '/polymer/vulcanized-inline.html',
-          chromeAppDevPath + '/polymer/vulcanized.html')
-    firefoxInline:
-      vulcanizeInline(
-          firefoxDevPath + '/data/generic_ui/polymer/root.html',
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html')
-    firefoxCsp:
-      vulcanizeCsp(
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html',
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html')
-    ccaInline:
-      vulcanizeInline(
-          ccaDevPath + '/generic_ui/polymer/root.html',
-          ccaDevPath + '/generic_ui/polymer/vulcanized-inline.html',
-          ccaDevPath + '/polymer/ext-missing.html',
-          ccaDevPath + '/polymer/vulcanized-inline.html')
-    ccaCsp:
-      vulcanizeCsp(
-          ccaDevPath + '/generic_ui/polymer/vulcanized-inline.html',
-          ccaDevPath + '/generic_ui/polymer/vulcanized.html',
-          ccaDevPath + '/polymer/vulcanized-inline.html',
-          ccaDevPath + '/polymer/vulcanized.html')
-    chromeViewLogsInline:
-      vulcanizeInline(
-          chromeExtDevPath + '/generic_ui/polymer/logs.html',
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs-inline.html')
-    chromeViewLogsCsp:
-      vulcanizeCsp(
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs-inline.html',
-          chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs.html')
-    firefoxViewLogsInline:
-      vulcanizeInline(
-          firefoxDevPath + '/data/generic_ui/polymer/logs.html',
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs-inline.html')
-    firefoxViewLogsCsp:
-      vulcanizeCsp(
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs-inline.html',
-          firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs.html')
+  vulcanize: {}
 }  # grunt.initConfig
 
 #-------------------------------------------------------------------------
 # Helper functions for different components
 
-# Adds rules to the gruntConfig to build all the tests in a given directory and
-# to run those tests, returns an array of task names to be run for testing that
-# directory
-#
-# All test files should have a name ending with .spec.ts
-testDirectory = (dir) ->
-  # every test sequence should include building everything
-  testNames = ['base']
+fullyVulcanize = (basePath, srcFilename, destFilename, browserify = false) ->
+  tasks = []
 
-  # we use the source directory to figure out what files will end up in the
-  # build directory (this is run before any build steps)
-  files = fs.readdirSync(path.join('src', dir))
-  for file in files
-    match = /(.+)\.spec\.ts/.exec(file)
-    if match
-      loc = path.join(dir, match[1])
-      testName = loc + 'spec'
+  # this adds the rule to the task to the global gruntConfig object as well as
+  # adding the text needed to run it in a rule to the list of rules that will be
+  # returned
+  addTask = (component, task, rule) ->
+    gruntConfig[component][task] = rule
+    tasks.push(component + ':' + task)
 
-      # add the browserify task as something we can run
-      gruntConfig['browserify'][testName] = Rule.browserifySpec(loc)
-      # include the browserification in this step
-      testNames.push('browserify:' + testName)
+  realBasePath = path.join(devBuildPath, basePath)
+  srcFile = path.join(realBasePath, srcFilename + '.html')
+  intermediateFile = path.join(realBasePath, destFilename + '-inline.html')
+  destFile = path.join(realBasePath, destFilename + '.html')
 
-  # add the jasmine task so we can run it
-  gruntConfig['jasmine'][dir] = Rule.jasmineSpec(dir)
-  # include running the tests in this task
-  testNames.push('jasmine:' + dir)
+  # The basic vulcanize tasks, we do both steps in order to get all the
+  # javascript into a separate file
+  addTask('vulcanize', destFile + 'Inline', doVulcanize(srcFile, intermediateFile, true, false))
+  addTask('vulcanize', destFile + 'Csp', doVulcanize(intermediateFile, destFile, false, true))
 
-  return testNames
+  if browserify
+    # If we need to brewserify the file, there also needs to be a step to replace
+    # some of the strings in the vulcanized html file to refer to the static version
+    browserifyPath = path.join(basePath, destFilename)
+    addTask('string-replace', destFile + 'Vulcanized', finishVulcanized(realBasePath, destFilename))
+    addTask('browserify', browserifyPath, Rule.browserify(browserifyPath, {}))
+
+  return tasks
 
 #-------------------------------------------------------------------------
 # Define the tasks
@@ -1040,27 +838,17 @@ taskManager.add 'build_chrome_app', [
   'base'
   'ts:chrome_app'
   'copy:chrome_app'
-  'vulcanize:chromeAppInline'
-  'vulcanize:chromeAppCsp'
-  'copy:chrome_app'
-]
+].concat fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')
 
 taskManager.add 'build_chrome_ext', [
   'base'
   'ts:chrome_extension'
   'copy:chrome_extension'
   'copy:chrome_extension_additional'
-  'vulcanize:chromeExtInline'
-  'vulcanize:chromeExtCsp'
-  'vulcanize:chromeViewLogsInline'
-  'vulcanize:chromeViewLogsCsp'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
-  'browserify:chromeVulcanized'
-  'browserify:chromeLogsVulcanized'
-  'string-replace:chromeExtVulcanized'
-  'string-replace:chromeExtLogsVulcanized'
-]
+].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)
+.concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true)
 
 taskManager.add 'build_chrome', [
   'build_chrome_app'
@@ -1073,16 +861,9 @@ taskManager.add 'build_firefox', [
   'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'
-  'vulcanize:firefoxInline'
-  'vulcanize:firefoxCsp'
-  'vulcanize:firefoxViewLogsInline'
-  'vulcanize:firefoxViewLogsCsp'
-  'string-replace:firefoxVulcanized'
-  'string-replace:firefoxLogsVulcanized'
   'browserify:firefoxContext'
-  'browserify:firefoxVulcanized'
-  'browserify:firefoxLogsVulcanized'
-]
+].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)
+.concat fullyVulcanize('firefox/data/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true)
 
 # CCA build tasks.
 taskManager.add 'build_cca', [
@@ -1090,25 +871,33 @@ taskManager.add 'build_cca', [
   'ts:cca'
   'copy:cca'
   'copy:cca_additional'
-  'vulcanize:ccaInline'
-  'vulcanize:ccaCsp'
   'browserify:ccaMain'
   'browserify:ccaContext'
-  'browserify:ccaVulcanized'
-  'browserify:ccaLogsVulcanized'
-  'string-replace:ccaVulcanized'
-  'string-replace:ccaLogsVulcanized'
-]
+].concat fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)
 
 # Mobile OS build tasks
 taskManager.add 'build_android', [
   'exec:rmAndroidBuild'
   'build_cca'
-  'exec:ccaCreate'
+  'exec:ccaCreateDev'
+  'exec:ccaPlatformAndroidDev'
+  'exec:ccaAddPluginsAndroidDev'
+  'copy:cca_splash_dev'
   'exec:ccaBuildAndroid'
 ]
 
-# Emulate the mobile client
+taskManager.add 'release_android', [
+  'build_cca'
+  'copy:dist'
+  'exec:ccaCreateDist'
+  'exec:ccaPlatformAndroidDist'
+  'exec:ccaAddPluginsAndroidDist'
+  'copy:cca_splash_dist'
+  'symlink:cca_keys'
+  'exec:ccaReleaseAndroid'
+]
+
+# Emulate the mobile client for android
 taskManager.add 'emulate_android', [
  'build_android'
  'exec:ccaEmulateAndroid'
@@ -1117,14 +906,29 @@ taskManager.add 'emulate_android', [
 taskManager.add 'build_ios', [
   'exec:rmIosBuild'
   'build_cca'
-  'exec:ccaCreateIos'
-  'exec:ccaBuildIos'
+  'exec:ccaCreateIosDev'
+  'exec:ccaAddPluginsIosBuild'
+  'exec:ccaPrepareIosDev'
+]
+
+# Emulate the mobile client for ios
+taskManager.add 'emulate_ios', [
+ 'build_ios'
+ 'exec:ccaEmulateIos'
 ]
 
 # --- Testing tasks ---
-taskManager.add 'test_core', testDirectory('generic_core')
+taskManager.add 'test_core', [
+  'base'
+].concat _.flatten(
+  Rule.buildAndRunTest(spec, gruntConfig) for spec in Rule.getTests('src', 'generic_core')
+)
 
-taskManager.add 'test_ui', testDirectory('generic_ui/scripts')
+taskManager.add 'test_ui', [
+  'base'
+].concat _.flatten(
+  Rule.buildAndRunTest(spec, gruntConfig) for spec in Rule.getTests('src', 'generic_ui/scripts')
+)
 
 taskManager.add 'test_chrome', [
   'build_chrome'
@@ -1157,6 +961,8 @@ taskManager.add 'test', [
 ]
 
 taskManager.add 'build', [
+  'exec:rmIosBuild'
+  'exec:rmAndroidBuild'
   'build_chrome'
   'build_firefox'
   'build_cca'
@@ -1165,8 +971,7 @@ taskManager.add 'build', [
 taskManager.add 'dist', [
   'build'
   'copy:dist'
-  'mozilla-addon-sdk'
-  'mozilla-cfx-xpi:dist'
+  'jpm:xpi'
 ]
 
 taskManager.add 'default', [
@@ -1180,10 +985,11 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
-  grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
+  grunt.loadNpmTasks 'grunt-jpm'
   grunt.loadNpmTasks 'grunt-string-replace'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-vulcanize'

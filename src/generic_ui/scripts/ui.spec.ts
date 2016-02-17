@@ -62,7 +62,8 @@ describe('UI.UserInterface', () => {
          'on',
          'handlePopupLaunch',
          'bringUproxyToFront',
-         'setBadgeNotification'
+         'setBadgeNotification',
+         'isConnectedToCellular'
          ]);
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
@@ -76,7 +77,6 @@ describe('UI.UserInterface', () => {
         userId: userId,
         name: userName,
         imageData: 'testImageData',
-        isOnline: true
       },
       allInstanceIds: [instanceId],
       offeringInstances: [],
@@ -314,7 +314,8 @@ describe('UI.UserInterface', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.sharingStatus).toEqual('Sharing access with Alice');
+      expect(ui.sharingStatus).toEqual(ui.i18n_t('SHARING_ACCESS_WITH_ONE',
+          { name: 'Alice' }));
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
       expect(ui.sharingStatus).toEqual(null);
@@ -343,7 +344,8 @@ describe('UI.UserInterface', () => {
       expect(ui.gettingStatus).toEqual(null);
       ui['instanceGettingAccessFrom_'] = 'testInstanceId';
       ui['updateGettingStatusBar_']();
-      expect(ui.gettingStatus).toEqual('Getting access from Alice');
+      expect(ui.gettingStatus).toEqual(ui.i18n_t('GETTING_ACCESS_FROM',
+          { name: 'Alice' }));
       ui['instanceGettingAccessFrom_'] = null;
       ui['updateGettingStatusBar_']();
       expect(ui.gettingStatus).toEqual(null);
@@ -403,67 +405,3 @@ describe('UI.UserInterface', () => {
     });
   });
 });  // UI.UserInterface
-
-describe('user_interface.model', () => {
-  var model :user_interface.Model;
-
-  beforeEach(() => {
-    model = new user_interface.Model();
-  });
-
-  it('Updating global settings correctly updates description', () => {
-    // description is chosen here as just some arbitrary simple value
-    var newDescription = 'Test description';
-
-    model.updateGlobalSettings({
-      description: newDescription
-    });
-
-    expect(model.globalSettings.description).toEqual(newDescription);
-  });
-
-  it('Updating one field of global settings does not change any other fields', () => {
-    var constantString = 'some arbitrary string';
-
-    model.updateGlobalSettings({
-      description: constantString
-    });
-
-    model.updateGlobalSettings({
-      mode: ui_constants.Mode.SHARE
-    });
-
-    expect(model.globalSettings.description).toEqual(constantString);
-  });
-
-  it('Syncing arrays in global settings works fine', () => {
-    var newStunServers = [
-      {
-        urls: ['something.net:5']
-      },
-      {
-        urls: ['else.net:7']
-      }
-    ];
-
-    model.updateGlobalSettings({
-      stunServers: newStunServers
-    });
-
-    expect(model.globalSettings.stunServers.length).toEqual(newStunServers.length);
-
-    for (var i in newStunServers) {
-      expect(newStunServers[i]).toEqual(model.globalSettings.stunServers[i]);
-    }
-  });
-
-  it('Updating global settings does not reassign', () => {
-    var a = model.globalSettings;
-
-    model.updateGlobalSettings({
-      mode: ui_constants.Mode.SHARE
-    });
-
-    expect(model.globalSettings).toEqual(a);
-  });
-});

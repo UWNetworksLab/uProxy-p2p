@@ -100,6 +100,13 @@ var log :logging.Log = new logging.Log('remote-user');
       this.consent =
           new consent.State(userId === this.network.myInstance.userId);
 
+      // Because it requires user action to add a cloud friend, and because
+      // these cloud instances are only sharers, by default all users are
+      // requesting access from cloud instances.
+      if (this.network.name === "Cloud") {
+        this.consent.localRequestsAccessFromRemote = true;
+      }
+
       storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
       }).catch((e) => {
@@ -121,7 +128,9 @@ var log :logging.Log = new logging.Log('remote-user');
       this.name = profile.name;
       this.fulfillNameReceived_(this.name);
       this.profile = profile;
-      if (!this.profile.status) {
+      if (!this.profile.status && this.network.name === "Cloud") {
+        this.profile.status = social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
+      } else if (typeof this.profile.status === "undefined") {
         this.profile.status = social.UserStatus.FRIEND;
       }
       this.saveToStorage();
@@ -476,7 +485,14 @@ var log :logging.Log = new logging.Log('remote-user');
         this.profile.url = state.url;
       }
 
-      this.profile.status = state.status || social.UserStatus.FRIEND;
+      if (typeof state.status === "undefined" &&
+          this.network.name === "Cloud") {
+        this.profile.status = social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
+      } else if (typeof state.status === "undefined") {
+        this.profile.status = social.UserStatus.FRIEND;
+      } else {
+        this.profile.status = state.status;
+      }
 
       // Restore all instances.
       var onceLoadedPromises :Promise<void>[] = [];
@@ -539,6 +555,10 @@ var log :logging.Log = new logging.Log('remote-user');
             },
             name: myInstance.userName,
             userId: myInstance.userId,
+            // This is not yet used for encrypted networks like Quiver.
+            // TODO: once we have key verification, remove publicKey
+            // from Quiver instance messages if it's not used, e.g. if we
+            // use Quiver's userId (fingerprint) for verification instead.
             publicKey: globals.publicKey
           }
         };

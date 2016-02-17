@@ -35,21 +35,11 @@ Polymer({
       this.contact.getExpanded = !this.contact.getExpanded;
     }
   },
-  ready: function() {
-    this.ui = ui_context.ui;
-    this.ui_constants = ui_constants;
-    this.model = ui_context.model;
-    this.GettingConsentState = user.GettingConsentState;
-    this.SharingConsentState = user.SharingConsentState;
-    this.hideOnlineStatus = this.isExpanded;
-    this.UserStatus = social.UserStatus;
-  },
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
     event.stopPropagation();  // Don't toggle when link is clicked.
   },
   acceptInvitation: function() {
-    console.log(this.contact);
     var socialNetworkInfo :social.SocialNetworkInfo = {
       name: this.contact.network.name,
       userId: this.contact.network.userId
@@ -112,6 +102,27 @@ Polymer({
     // instanceId arbitrarily chosen
     this.sortedInstances = _.sortByOrder(this.contact.offeringInstances,
                                          ['isOnline', 'instanceId'], ['desc', 'asc']);
+  },
+  shareCloudFriend: function() {
+    ui_context.core.getInviteUrl({
+      network: {
+        name: this.contact.network.name,
+        userId: this.contact.network.userId // Local userId
+      },
+      userId: this.contact.userId // Cloud instance userId
+    }).then((cloudInviteUrl: string) => {
+      ui.showDialog(ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"), '', ui.i18n_t("OK"),
+        undefined, cloudInviteUrl);
+    });
+  },
+  ready: function() {
+    this.ui = ui_context.ui;
+    this.ui_constants = ui_constants;
+    this.model = ui_context.model;
+    this.GettingConsentState = user.GettingConsentState;
+    this.SharingConsentState = user.SharingConsentState;
+    this.hideOnlineStatus = this.isExpanded;
+    this.UserStatus = social.UserStatus;
   },
   observe: {
     'contact.isSharingWithMe': 'fireChanged',

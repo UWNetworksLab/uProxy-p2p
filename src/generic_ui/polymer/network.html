@@ -11,9 +11,6 @@
       uproxy-button {
         width: 200px !important;
       }
-      uproxy-button.Google {  /* Google Hangouts */
-        background: #0f9d58;
-      }
       uproxy-button.GMail {
         background: #dd4b39;
       }
@@ -36,7 +33,7 @@
           <uproxy-button raised on-tap='{{connect}}' class='{{ networkName }}'>
             {{ displayName }}
           </uproxy-button>
-          <div class='experimental' hidden?='{{ !isExperimental }}'>Experimental</div>
+          <div class='experimental' hidden?='{{ !isExperimental }}'>{{ "EXPERIMENTAL" | $$}}</div>
         </span>
       </span>
     </div>

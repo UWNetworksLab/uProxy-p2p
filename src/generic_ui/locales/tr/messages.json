@@ -95,10 +95,6 @@
         "message": "__name__ ile erişim paylaşılıyor",
         "description": "Message in a status bar that is visible when one friend is getting access through the user."
     },
-    "STATS_ENABLED_MESSAGE": {
-        "message": "Bu simge anonim istatistikleri uProxy takımıyla paylaşmayı tercih ettiğiniz anlamına gelir. Ayarları düzenlemek için tıkla.",
-        "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
-    },
     "REQUESTS": {
         "message": "İstekler",
         "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
@@ -131,8 +127,8 @@
         "message": "muhtemelen değil",
         "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
     },
-    "ALPHA_MESSAGE": {
-        "message": "Bu, uProxy'nin bir alpha sürümü. Anonim metrikleri geliştirme ekibiyle paylaşarak, uProxy'i geliştirmemize yardım edebilirsin. Raporlanan veri müşteri tarafından anonim hale getirilir ve güvenli bir şekilde iletilir.",
+    "BETA_MESSAGE": {
+        "message": "Bu, uProxy'nin bir beta sürümü. Anonim metrikleri geliştirme ekibiyle paylaşarak, uProxy'i geliştirmemize yardım edebilirsin. Raporlanan veri müşteri tarafından anonim hale getirilir ve güvenli bir şekilde iletilir.",
         "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
     },
     "MORE_INFORMATION": {
@@ -182,10 +178,6 @@
     "START_ONE_TIME_INSTRUCTION": {
         "message": "Arkadaşından erişim almaya başlamak için, aşağıdaki butona tıkla.",
         "description": ""
-    },
-    "NO_FRIENDS_ONLINE": {
-        "message": "Şu anda hiçbir arkadaşınız uProxy'e giriş yapmış değil.",
-        "description": "None of the user's friends are currently signed in."
     },
     "CONTINUE_BROWSING": {
         "message": "uProxy Olmadan Göz Atmaya Devam Et",
@@ -558,10 +550,6 @@
     "STARTED_PROXYING": {
         "message": "__name__senden proxy'e başladı",
         "description": "Notification for when a friend has started accessing the Internet through the user."
-    },
-    "FRIENDS_APPEAR_WHEN": {
-        "message": "Arkadaşlarını uProxy'e davet etmek için, onlara https://www.uproxy.org'dan bir link gönder",
-        "description": "Instruction informing the user how to invite their friends to uProxy."
     },
     "VERY_LIKELY": {
         "message": "en olası",

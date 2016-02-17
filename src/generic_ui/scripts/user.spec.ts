@@ -1,6 +1,8 @@
 /// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import model = require('./model');
 import user_interface = require('./ui');
+import translator = require('./translator');
 import user = require('./user');
 import social = require('../../interfaces/social');
 import _ = require('lodash');
@@ -12,9 +14,10 @@ describe('UI.User', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     ui = jasmine.createSpyObj<user_interface.UserInterface>('UserInterface', ['showNotification']);
-    var testNetwork :user_interface.Network = {name: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
-    ui.model = new user_interface.Model();
+    var testNetwork :model.Network = {name: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
+    ui.model = new model.Model();
     ui.model.onlineNetworks = [testNetwork];
+    ui.i18n_t = translator.i18n_t;
 
     sampleUser = new user.User('fakeuser', testNetwork, ui);
     sampleUser.update(makeUpdateMessage({}));
@@ -95,9 +98,11 @@ describe('UI.User', () => {
         getInstance('instance3', '')
       ]
     }));
-    expect(sampleUser.offeringInstances[0].description).toEqual('Computer 1');
+    expect(sampleUser.offeringInstances[0].description).toEqual(
+        ui.i18n_t('DESCRIPTION_DEFAULT', { number: 1 }));
     expect(sampleUser.offeringInstances[1].description).toEqual('laptop');
-    expect(sampleUser.offeringInstances[2].description).toEqual('Computer 3');
+    expect(sampleUser.offeringInstances[2].description).toEqual(
+        ui.i18n_t('DESCRIPTION_DEFAULT', { number: 3 }));
   });
 
   it('show notification if isOffering changes when not ignoring', () => {
@@ -111,7 +116,8 @@ describe('UI.User', () => {
     }));
 
     expect(ui.showNotification).toHaveBeenCalledWith(
-        sampleUser.name + ' offered you access', { mode: 'get', user: 'fakeuser', network: 'testNetwork' })
+        ui.i18n_t('OFFERED_ACCESS_NOTIFICATION', { name: sampleUser.name }),
+        { mode: 'get', user: 'fakeuser', network: 'testNetwork' })
   });
 
   it('does not show notification if isOffering changes when ignoring', () => {
@@ -144,7 +150,8 @@ describe('UI.User', () => {
       }
     }));
     expect(ui.showNotification).toHaveBeenCalledWith(
-        sampleUser.name + ' is requesting access', { mode: 'share', user: 'fakeuser', network: 'testNetwork' });
+        ui.i18n_t('REQUESTING_ACCESS_NOTIFICATION', { name: sampleUser.name }),
+        { mode: 'share', user: 'fakeuser', network: 'testNetwork' });
   });
 
   it('does not show notificaion if isRequesting changes when ignoring', () => {
@@ -187,5 +194,32 @@ describe('UI.User', () => {
     expect(sampleUser.offeringInstances[0]).toBe(second);
   });
 
+  it('expands contact if online', () => {
+    sampleUser.update(makeUpdateMessage({
+      offeringInstances: [
+        getInstance('instance1', '')
+      ],
+      consent: {
+        remoteRequestsAccessFromLocal: true
+      },
+      isOnline: true,
+    }));
+    expect(sampleUser.getExpanded).toBe(true);
+    expect(sampleUser.shareExpanded).toBe(true);
+  });
+
+  it('collapses contact if offline', () => {
+    sampleUser.update(makeUpdateMessage({
+      offeringInstances: [
+        getInstance('instance1', '')
+      ],
+      consent: {
+        remoteRequestsAccessFromLocal: true
+      },
+      isOnline: false,
+    }));
+    expect(sampleUser.getExpanded).toBe(false);
+    expect(sampleUser.shareExpanded).toBe(false);
+  });
   // TODO: more specs
 });  // UI.User

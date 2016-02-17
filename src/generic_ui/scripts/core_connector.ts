@@ -205,14 +205,13 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
+  // TODO: this should take a SocialNetworkInfo instead of networkId
   inviteUser = (data: { networkId: string; userName: string }): Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.SEND_INVITATION, data);
   }
 
-  // TODO: this should probably take the network path, including userId
-  getInviteUrl = (networkInfo :social.SocialNetworkInfo): Promise<string> => {
-    return this.promiseCommand(uproxy_core_api.Command.GET_INVITE_URL,
-        networkInfo);
+  getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_INVITE_URL, data);
   }
 
   // TODO: this should probably take the network path, including userId
@@ -251,7 +250,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
   }
 
-  acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void>=> {
+  acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void>=> {
     return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, data);
   }
 }  // class CoreConnector

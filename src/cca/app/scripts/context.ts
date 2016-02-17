@@ -1,6 +1,7 @@
 /// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
 /// <reference path='../../../generic_ui/polymer/context.d.ts' />
 
+import ui_model = require('../../../generic_ui/scripts/model');
 import user_interface = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
 import CordovaCoreConnector = require('./cordova_core_connector');
@@ -11,7 +12,7 @@ export var browserConnector = new CordovaCoreConnector({
 });
 export var core = new CoreConnector(browserConnector);
 export var ui :user_interface.UserInterface;
-export var model :user_interface.Model;
+export var model :ui_model.Model;
 
 chrome.runtime.getBackgroundPage((bgPage) => {
   ui_context = (<any>bgPage).ui_context;

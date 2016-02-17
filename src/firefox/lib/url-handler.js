@@ -12,7 +12,7 @@ exports.setup = function(panel, button) {
 
       if (/^https:\/\/www.uproxy.org\/(request|offer)\/(.*)/.test(url)) {
         panel.port.emit('copyPasteUrlData', url);
-      } else if (/^https:\/\/www.uproxy.org\/invite\/(.*)/.test(url)) {
+      } else if (/^https:\/\/www.uproxy.org\/invite(.*)/.test(url)) {
         panel.port.emit('inviteUrlData', url);
       } else {
         return;

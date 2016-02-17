@@ -19,6 +19,10 @@
     "description": "Button label to close a popup.",
     "message": "Close"
   },
+  "CONTINUE": {
+    "description": "Button label.",
+    "message": "Continue"
+  },
   "CANCEL": {
     "description": "Button label that rejects a proposed action.",
     "message": "Cancel"
@@ -355,10 +359,6 @@
     "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team.",
     "message": "Anonymous stats enabled"
   },
-  "STATS_ENABLED_MESSAGE": {
-    "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon.",
-    "message": "This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings."
-  },
   "STATS_ENABLED_TOOLTIP": {
     "description": "Text that appears in a tooltip when the user hovers over the 'anonymous stats enabled' icon.",
     "message": "You are sharing anonymous stats."
@@ -399,9 +399,9 @@
     "description": "Instructions that appears beside a big '+' button. Clicking the button opens a panel with options to add a uProxy friend.",
     "message": "Use this button to send an invitation to a friend or paste an invitation you've received."
   },
-  "ALPHA_MESSAGE": {
+  "BETA_MESSAGE": {
     "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development.",
-    "message": "This is an alpha release of uProxy, and it may occasionally be unreliable."
+    "message": "This is a beta release of uProxy, and it may occasionally be unreliable."
   },
   "MORE_ABOUT_METRICS": {
     "description": "",
@@ -447,14 +447,6 @@
     "description": "User's friends are being loaded from a social network.",
     "message": "Loading uProxy friends"
   },
-  "NO_FRIENDS_ONLINE": {
-    "description": "None of the user's friends are currently signed in.",
-    "message": "None of your friends are signed into uProxy at this time."
-  },
-  "FRIENDS_APPEAR_WHEN": {
-    "description": "Instruction informing the user how to invite their friends to uProxy.",
-    "message": "Friends appear when they are using uProxy and logged into the same networks you are."
-  },
   "OFFERS": {
     "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted.",
     "message": "Offers"
@@ -474,6 +466,10 @@
   "UPROXY_FRIENDS": {
     "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups.",
     "message": "Friends who have uProxy"
+  },
+  "NOT_CONNECTED_LOGIN_TO_START": {
+    "description": "Text in settings that informs the user they should sign in to a social network to get started.",
+    "message": "Login to get started"
   },
   "CONNECTED_WITH": {
     "description": "Text in settings that informs the user which social network they're connected to.",
@@ -575,9 +571,25 @@
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
     "message": "We won't share your data or post publicly without your consent"
   },
+  "WE_WONT_POST_LEARN_MORE": {
+    "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
+    "message": "We won't share your data or post publicly without your consent. <uproxy-faq-link anchor='whyDoesUproxyConnect'>Learn more</uproxy-faq-link>"
+  },
+  "HAVE_AN_INVITE_CODE": {
+    "description": "Text above a button that asks the user if they already have a uProxy invite code",
+    "message": "Have an invite code?"
+  },
+  "ENTER_IT_HERE": {
+    "description": "Text for button that opens a view for the user to enter their uProxy invite code",
+    "message": "Enter it here"
+  },
   "LEARN_MORE_SOCIAL": {
     "description": "Label for button that brings user to more information about why social networks are used for uProxy.",
     "message": "Learn more about social networks"
+  },
+  "EXPERIMENTAL": {
+    "description": "Label below social networks (on the login page) indicating that a social network is experimental.",
+    "message": "Experimental"
   },
   "ASK_TO_ANALYZE": {
     "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails.",
@@ -771,6 +783,10 @@
     "description": "Generic label for links to FAQ.",
     "message": "Learn more"
   },
+  "CLOUD_INVITE_CONFIRM" : {
+    "description": "Confirmation message asking the user if they would like to add a cloud instance to their buddy list, which will connect them to a virtual machine.",
+    "message": "You're about to connect to a uProxy cloud server! Thanks for being one of our first testers of this experimental feature. Would you like to continue?"
+  },
   "FRIEND_ADDED": {
     "description": "Confirmation message after adding a friend to the roster.",
     "message": "Friend added"
@@ -807,6 +823,10 @@
     "description": "Question above network select dropdown on invite screen",
     "message": "How would you like to invite to your friends?"
   },
+  "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK": {
+    "description": "Title above social network icons on the page to find and/or invite friends.",
+    "message": "Find your friends on a social network."
+  },
   "FACEBOOK_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for Facebook",
     "message": "Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list."
@@ -826,6 +846,14 @@
   "GITHUB_INVITE_PLACEHOLDER": {
     "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
     "message": "Friend's GitHub username"
+  },
+  "ADD_A_CLOUD_FRIEND": {
+    "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
+    "message": "Add a Cloud friend"
+  },
+  "ADD_CLOUD_INSTRUCTIONS": {
+    "description": "If the user is trying to add a Cloud friend, instruct them to click on the link to enter an invitation.",
+    "message": "If you have a Cloud invitation code, please click on the link below and enter your invitation on the destination page."
   },
   "CLOUD_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for Cloud",
@@ -855,6 +883,10 @@
     "description": "Button text to initiate sending 1+ invitations",
     "message": "Send invitations"
   },
+  "CLOUD_VIRTUAL_MACHINE": {
+    "description": "Refers to a remote server users can proxy from",
+    "message": "a virtual machine"
+  },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
@@ -873,7 +905,15 @@
   },
   "ACCEPT_INVITE_CONFIRMATION": {
     "description": "Confirmation message when accepting an invite.",
-    "message": "Would you like to add __name__?"
+    "message": "Would you like to add __name__ to your uProxy contacts?"
+  },
+  "SIGN_IN_TO_NETWORK": {
+    "description": "Title for dialog that appears after users choose a social network for finding friends.",
+    "message": "Sign in to __network__"
+  },
+  "SIGN_IN_TO_INVITE_FRIENDS": {
+    "description": "Text for dialog that appears if users choose an invite-only social network to find uProxy friends. Text explains that users must sign in before inviting friends.",
+    "message": "To invite a __network__ friend to uProxy, please sign in to your __network__ account."
   },
   "LOGIN_REQUIRED_TITLE": {
     "description": "Title for confirmation that the user must login to a network to accept an invitation",
@@ -881,11 +921,11 @@
   },
   "LOGIN_REQUIRED_MESSAGE": {
     "description": "Message for confirmation that the user must login to a network to accept an invitation",
-    "message": "To accept this invitation from __name__, you will need to connect to uProxy with __network__.  Click yes to continue."
+    "message": "To accept this invitation to connect with __name__, you will need to login to uProxy with __network__.  Click yes to continue."
   },
-  "INVITE_URL_ERROR": {
-    "description": "Error message shown for invalid invite URLs",
-    "message": "There was an error with your invite URL."
+  "INVITE_ERROR": {
+    "description": "Error message shown for invalid invite URLs or tokens",
+    "message": "There was an error with your invite."
   },
   "INVITE_EMAIL_SUBJECT": {
     "description": "Default email subject for sending an uProxy invite",
@@ -895,12 +935,252 @@
     "description": "Default email body for sending an uProxy invite",
     "message": "__name__ has invited you to connect with them on uProxy. To do so, click on the invitation link below or paste it into uProxy.<br><br>__url__<br><br>If you don’t have uProxy installed, you can get it from <a href='uproxy.org'>uproxy.org</a> or directly from the Chrome webstore (<a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>part 1</a> and <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>part 2</a>) and Firefox Marketplace (<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'>here</a>)."
   },
-  "GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION": {
-    "description": "",
-    "message": "<h2>We've made big changes to how uProxy works with social networks!</h2><ul><li><strong>We've introduced a new Gmail network</strong> that allows you to connect with anyone who has a Gmail account. Use the the button in the lower right of the buddy list to send them an invitation.</li><li><strong>The \"Google\" network is now called Google Hangouts.</strong> Because Google is removing technology we rely on, our support for this network will be removed.</li><li><strong>Facebook contacts are now added by invitation.</strong> You can invite friends using the button at the lower right of the contact list, and only friends you've invited will be able to tell you're using uProxy. To make this change, we've had to reset your friend list, so you'll have to invite friends you want to connect to.</li></ul><p>Please send feedback about these changes using the feedback link in the menu or by emailing info@uProxy.org</p>"
-  },
   "FAQ_SENTENCE_CASE": {
     "description": "Title of the FAQ window",
     "message": "Get Help"
+  },
+  "CONFIRM_LOGOUT_FOR_COPYPASTE": {
+    "description": "If a user is signed in to social network(s) and attempt to start a one-time connection, this message informs them that they must first log out of all social networks.",
+    "message": "To start a one-time connection, you will be logged out of connected social networks. Would you like to log out now?"
+  },
+  "WHAT_IS_UPROXY": {
+    "description": "FAQ",
+    "message": "What is uProxy?"
+  },
+  "WHAT_IS_UPROXY_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy is an open source browser extension for Chrome and Firefox that lets users share their route to the Internet with each other. uProxy can make it much harder for a third party to monitor or interfere with the traffic of the user who is getting access. It’s like a personalized VPN service that you can use to provide secure access to friends and family, and to yourself when you travel.</p>"
+  },
+  "WHERE_TO_GET": {
+    "description": "FAQ",
+    "message": "Where should I get uProxy?"
+  },
+  "WHERE_TO_GET_ANSWER": {
+    "description": "",
+    "message": "<p>The easiest way to get uProxy is by going to the <a href=\"install\">Install</a> page. You can also find uProxy in the <a href=\"https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj\">Chrome Web Store</a> and the <a href=\"https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/\">Firefox Add-Ons site</a>. These are the only places you should go to get uProxy. Never download uProxy from anywhere else, as it could be a phony version that could put you at risk.</p>"
+  },
+  "WHAT_DO_GET_ACCESS": {
+    "description": "",
+    "message": "What do “get access” and “share access” mean?"
+  },
+  "WHAT_DO_GET_ACCESS_ANSWER": {
+    "description": "",
+    "message": "<p>When you are <strong>getting access</strong> from a friend, all the web traffic from your browser first travels encrypted to your friend’s computer and from there, to the Internet. This means that, to most websites, the request will appear to be coming from your friend’s computer, and someone monitoring your connection will only see that you have a secure connection to your friend.</p><p>When you are <strong>sharing access</strong>, authorized friends will be able to send their web traffic to your computer and from there to the Internet. Your friend can only connect through a computer if you authorize them on that computer, and you can revoke their authorization at any time.</p>"
+  },
+  "WHY_DOES_UPROXY_CONNECT": {
+    "description": "",
+    "message": "Why does uProxy connect to social networks?"
+  },
+  "WHY_DOES_UPROXY_CONNECT_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy needs a way to see when your friends are online, and it needs to exchange information (IP address, port, and encryption keys) between peers to set up direct connections. Instead of operating a central service that could be easily blocked, uProxy connects to social networks that you and your friends are already using. They are only used to help establish a direct connection between users; proxied Internet traffic is not sent through the social network. <strong>uProxy will never post publicly on your behalf.</strong> It only exchanges private messages with friends you choose who are also running uProxy. You can read more about trusting social networks <a href=\"https://github.com/uProxy/uproxy/wiki/Trust\">here</a>.</p>"
+  },
+  "DOES_UPROXY_LOG_DATA_SHORT": {
+    "description": "",
+    "message": "Does uProxy collect data about me?"
+  },
+  "DOES_UPROXY_LOG_DATA": {
+    "description": "",
+    "message": "Does uProxy log data about me, and what is uProxy’s privacy policy?"
+  },
+  "DOES_UPROXY_LOG_DATA_ANSWER": {
+    "description": "",
+    "message": "<p>If you do not opt into uProxy’s data reporting, no data is reported about your usage whatsoever. If you do opt in, any usage data is anonymized before it ever leaves your computer, using the same state-of-the-art, privacy-preserving <a href=\"http://googleresearch.blogspot.com/2014/10/learning-statistics-with-privacy-aided.html\">algorithms</a> used in Google Chrome.</p><p>If you manually use the Submit Feedback tool in the settings menu, you have the option to include logs from your recent uProxy usage. Logs may contain personally identifiable information (PII). PII is never shared outside the uProxy team, and any logs that contain PII are retained for at most three months before being expunged.</p><p>All reports are submitted in a way that makes it hard for an observer of the traffic to detect that you’re using uProxy.</p><p>You can read more about uProxy’s data collection <a href=\"https://github.com/uProxy/uproxy/wiki/Data-Collection\">here</a>.<p>"
+  },
+  "WHEN_I_AM_SHARING_ACCESS": {
+    "description": "",
+    "message": "When I’m sharing access with someone, what do they have access to?"
+  },
+  "WHEN_I_AM_SHARING_ACCESS_ANSWER": {
+    "description": "",
+    "message": "<p>Users who are getting access from you are only able to use your Internet connection. They cannot look at files on your computer, see what you’re doing on the Internet, or log into websites using your identity. They also cannot access devices on your local home or work network such as a shared printer or file server.</p>"
+  },
+  "WILL_UPROXY_WORK": {
+    "description": "",
+    "message": "Where does uProxy work?"
+  },
+  "WILL_UPROXY_WORK_ANSWER": {
+    "description": "",
+    "message": "<p>If access is blocked to all of the social networks that uProxy supports, then you will not be able to use a social network to help you set up a connection with your friends. You can still set up a one-time connection manually, by exchanging links generated by uProxy via a secure channel, but you’ll have to repeat this exchange every time you want to connect to your friend. The advantage of using social networks is that connection establishment is automatic, once authorization is granted.</p>"
+  },
+  "HOW_DO_I_FIND": {
+    "description": "",
+    "message": "How do I find my friends on uProxy?"
+  },
+  "HOW_DO_I_FIND_ANSWER": {
+    "description": "",
+    "message": "<p>You can use the “Connect to a friend” button in the lower right of the contact list to invite friends to proxy with you using one of our supported social networks.</p><p>In order to see when a friend is online, you both have to be logged into uProxy with the same social network at the same time. You can log into multiple social networks simultaneously by going into the menu (the ≡ icon in the top-left) and expanding the header (▾).</p>"
+  },
+  "WHAT_IS_GITHUB": {
+    "message": "What is GitHub and how can I use it?"
+  },
+  "WHAT_IS_GITHUB_ANSWER": {
+    "message": "<p>GitHub is a site for helping developers share code, but uProxy can use GitHub to share the information needed to set up direct connections between friends, just like it uses social networks. GitHub is more accessible to some users than many social networks, and is free to <a href=\"https://github.com/join\">sign up</a>.</p><p>Please note that it’s possible to tell if a GitHub account is using uProxy. If you already have a GitHub account that you don’t want associated with uProxy, you can create a pseudonymous GitHub account and use that with uProxy instead.</p>"
+  },
+  "HOW_DOES_UPROXY_HELP": {
+    "description": "",
+    "message": "How does uProxy help protect my Internet connection?"
+  },
+  "HOW_DOES_UPROXY_HELP_ANSWER": {
+    "description": "",
+    "message": "<p>When you use the Internet normally, your Internet service provider (ISP) is able to see which sites you’re visiting, and may try to interfere with your connection by blocking access to some sites, or even tampering with their content. On Wi-Fi networks that don’t require a password, it’s even possible for another user on the network to see which sites you’re visiting, and for sites that are HTTP (and not HTTPS), it’s possible they can see the content of the traffic, too.</p><p>When you’re getting access through uProxy, the connection between you and your friend is encrypted. Your browser’s traffic is sent through that connection, and then out to the Internet from your friend’s computer. While getting access through uProxy, your ISP should not be able to see what sites you’re visiting, and uProxy intentionally makes it difficult for your ISP to identify and block your uProxy traffic.</p>"
+  },
+  "WHY_IS_IT_IMPORTANT": {
+    "description": "",
+    "message": "Why is it important that I trust the people I am connecting to?"
+  },
+  "WHY_IS_IT_IMPORTANT_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy is designed to help friends who trust one another to share an Internet connection. Connecting to people you don’t trust is risky and not recommended.</p><p>If you get access from someone who is malicious, they may be able to spy on your web browsing and even tamper with your traffic. Besides trusting the person you’re getting access from, you should trust that their Internet connection is secure, too. So if they’re connecting from an unknown public Wi-Fi hotspot that may be insecure, it may be better to wait till they’re connected from a secure network back at home.</p><p>If you share access with someone you don’t know and trust, they may be able to use your connection to engage in illegal activity, and depending on local laws, you may be held legally responsible for facilitating that activity.<p>It’s important to trust anyone you share an Internet connection with, whether a guest on your home Wi-Fi network, or a uProxy friend on the other side of the world.</p>"
+  },
+  "DOES_UPROXY_GIVE_ME": {
+    "description": "",
+    "message": "Does uProxy provide anonymous browsing?"
+  },
+  "DOES_UPROXY_GIVE_ME_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy is not an anonymity tool; it is useful for concealing your browsing from your ISP, but not for hiding your identity from the sites you visit. A website visited by someone who is getting access via uProxy will see the IP address of the person who is sharing access, and the website may be able to discover the IP address of the uProxy user who is getting access. If you need to hide your identity from the websites you visit, we recommend using the <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor Browser</a>.</p>"
+  },
+  "WHAT_ISNT_PROXIED": {
+    "description": "",
+    "message": "What traffic isn’t proxied, and can uProxy leak information about the sites I visit?"
+  },
+  "WHAT_ISNT_PROXIED_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy only proxies traffic for the web browser it is running in, not for other applications. There are some uncommon situations where the browser might make unproxied requests, and some web technologies, notably Flash and WebRTC, are capable of making requests that don’t go through the proxy. The same caveats often apply to VPNs. Users with strong privacy needs are encouraged to consider the <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor Browser</a>, which is designed specifically to minimize what an observer of your traffic can learn about your activity.</p>"
+  },
+  "WHO_KNOWS_THAT": {
+    "description": "",
+    "message": "Who knows that I’m using uProxy?"
+  },
+  "WHO_KNOWS_THAT_ANSWER": {
+    "description": "",
+    "message": "<p>Anyone you connect with knows that you’re using uProxy. In addition, if you choose to connect uProxy to a social network such as Facebook, the administrators of the social network can tell that you use uProxy, and your friends on that network who are using uProxy may also be able to tell.</p><p>For users connecting with a Gmail or Facebook account, uProxy uses Firebase, a service operated by Google. The Firebase team, and the uProxy team which administers the uProxy Firebase account, can therefore access information about which accounts are using uProxy.</p><p>If you are concerned about using uProxy with your personal account, create a dedicated pseudonymous account and use that with uProxy instead.</p><p>Note that none of these services ever see what sites or pages you’re visiting while using uProxy. Only a user you’re getting access through would be in a position to monitor your traffic. So again, only get access through friends you trust to share an Internet connection.</p>"
+  },
+  "DOES_UPROXY_PROTECT": {
+    "description": "",
+    "message": "Does uProxy protect me from viruses, phishing, or hacking?"
+  },
+  "DOES_UPROXY_PROTECT_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy can help protect you from an adversary who is trying to redirect you to a malicious site or otherwise tamper with your traffic. However, uProxy’s primary focus is on enabling users to share access to the open Internet.</p>"
+  },
+  "WHY_IS_UPROXY_ASKING": {
+    "description": "",
+    "message": "Why is uProxy asking for these Chrome permissions?"
+  },
+  "WHY_IS_UPROXY_ASKING_ANSWER": {
+    "description": "",
+    "message": "<p>When you install uProxy for Chrome, it asks for permission to (1) read and change all your data on the websites you visit, and (2) communicate with cooperating websites. These permissions are necessary for uProxy to route your traffic through your friend’s connection. No data about the websites you visit is ever sent to the uProxy team or the social networks you connect to.</p>"
+  },
+  "WHAT_IS_PORT_CONTROL": {
+    "description": "",
+    "message": "What is port control?"
+  },
+  "WHAT_IS_PORT_CONTROL_ANSWER": {
+    "description": "",
+    "message": "<p>Network Address Translation (NAT) is typically implemented by routers to allow a single public IP address to be shared by multiple devices on the network. However, this can make it challenging for users to establish direct connections with each other, and some types of NATs (particularly symmetric NATs) can prevent uProxy from successfully establishing connections.</p><p>If your router has port control enabled (UPnP, NAT-PMP, or PCP), uProxy can instruct your router to specifically allow incoming connections from other uProxy users. If either side of a uProxy connection is able to use port control, connections will almost always be successful, regardless of NAT configuration. For information on enabling port control on your router, check your router’s manual or search the web for “(router name) enable UPnP”.</p>"
+  },
+  "HOW_DOES_UPROXY_COMPARE": {
+    "description": "",
+    "message": "How does uProxy compare to VPNs?"
+  },
+  "HOW_DOES_UPROXY_COMPARE_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy is designed to be trustworthy and resistant to blocking.</p><p>VPN users typically connect to easily-identified servers, and VPN traffic can easily be identified and blocked. In contrast, uProxy users connect to each other rather than to common servers, and uProxy makes its traffic hard to identify and therefore hard to block.</p><p>In addition, VPN services can monitor which websites you visit, and many don’t keep this data private. uProxy users place their trust in their connections through friends, rather than in VPN services they may know little about.</p><p>Besides not knowing what VPNs do with their users’ browsing data, it can also be hard to know and trust VPN client and server software, especially when it’s closed source. In contrast, uProxy is open source, and faces ongoing public scrutiny. Whenever possible, uProxy avoids requiring users to put blind faith in software whose trustworthiness cannot be verified.</p>"
+  },
+  "WHO_MADE_UPROXY": {
+    "description": "",
+    "message": "Who is developing uProxy?"
+  },
+  "WHO_MADE_UPROXY_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy is being developed by the University of Washington. The project was seeded by Google Ideas and has received contributions from Google, Brave New Software, and the open source community.</p>"
+  },
+  "WHAT_IS_ALPHA": {
+    "description": "",
+    "message": "What is an alpha release?"
+  },
+  "WHAT_IS_ALPHA_ANSWER": {
+    "description": "",
+    "message": "This alpha version of uProxy is still under development and may be unstable at times; some features are not complete, and there's a <a href=\"https://github.com/uProxy/uproxy/issues\">list of open issues</a> on GitHub. We'd love for you to try it and help us make improvements, by giving us feedback."
+  },
+  "WHAT_IS_BETA": {
+    "description": "",
+    "message": "What is a beta release?"
+  },
+  "WHAT_IS_BETA_ANSWER": {
+    "description": "",
+    "message": "<p>This beta version of uProxy is still under development, but we believe it should work well for users who have access to at least one of the social networks it supports. We’d love for you to try it, and help us make improvements by giving any feedback you’d like to share. You can post to our public discussion list <a href=\"https://groups.google.com/forum/#!forum/uproxy-discuss\">here</a>, or email us privately at <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>. If you’re interested in following progress or contributing to the open source project, please see our <a href=\"https://github.com/uProxy/uproxy/issues\">issue tracker on GitHub</a>.</p>"
+  },
+  "HOW_DO_I_SUBMIT": {
+    "description": "",
+    "message": "How do I submit feedback?"
+  },
+  "HOW_DO_I_SUBMIT_ANSWER": {
+    "description": "",
+    "message": "<p>To submit feedback from within uProxy, go into the menu (≡ icon) and choose “Submit Feedback”. You can also email us at <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>.</p>"
+  },
+  "BACK_TO_TOP": {
+    "description": "",
+    "message": "Back to top"
+  },
+  "UPROXY_NETWORK_LOGIN_TITLE": {
+    "description": "Title for when the user is logging into the uProxy network (via settings or a link)",
+    "message": "Sign in to the uProxy network"
+  },
+  "UPROXY_NETWORK_INVITE_LOGIN_MESSAGE": {
+    "description": "Message instructing user to login to the uProxy network to accept an invitation.",
+    "message": "To add __name__ as a friend, please sign into the uProxy network"
+  },
+  "UPROXY_NETWORK_SIGN_IN": {
+    "description": "Sign in button for the uProxy network",
+    "message": "Sign in"
+  },
+  "UPROXY_NETWORK_CHOOSE_A_USER_NAME": {
+    "description": "Placeholder text for user name on uProxy network",
+    "message": "Choose a user name"
+  },
+  "REQUIRED_FIELD": {
+    "description": "Error message indicating that a field is required (e.g. user name)",
+    "message": "Required field."
+  },
+  "GITHUB_LOGIN_CONFIRMATION": {
+    "description": "Confirmation message the user sees prior to logging into GitHub",
+    "message": "uProxy can use GitHub, a developer tool, to help you connect with your friends.<br><br>Because it may be possible for others to tell which GitHub accounts are using uProxy, <strong>we recommend you create a new anonymous GitHub account</strong>, even if you already use GitHub.  <strong>You will need to verify your email with GitHub before you connect.</strong>"
+  },
+  "CLOUD_SHARE_INSTRUCTIONS": {
+    "description": "Message shown in a dialog, with a Cloud invite code, to let users know how they can allow their friends to proxy through their Cloud instance.",
+    "message": "Share access to your cloud instance by sending this link to a friend."
+  },
+  "SHARE_WITH_A_FRIEND": {
+    "description": "Button text shown below each Cloud friend in the Share tab to open a dialog with a Cloud invite code.",
+    "message": "Share with a friend"
+  },
+  "CONNECT_WITH_A_FRIEND": {
+    "description": "Title of screen for user to send invites or enter received invites.",
+    "message": "Connect with a friend"
+  },
+  "CHOOSE_A_SOCIAL_NETWORK_AND_FIND_YOUR_FRIENDS": {
+    "description": "Text prompting user to log into social networks and invite their friends.",
+    "message": "Choose a social network and find your friends"
+  },
+  "QUIVER_LINK_INSTRUCTIONS": {
+    "description": "Instructions telling user how to use link for the uProxy network (aka Quiver).",
+    "message": "Send this link to your friends so they can find you on uProxy"
+  },
+  "INVITATION_PLACEHOLDER_TEXT": {
+    "description": "Invitation placeholder text, instructing users to enter an invite in this field",
+    "message": "Have an invitation code?  Enter it here"
+  },
+  "QUIVER_LOGIN_TEXT": {
+    "description": "Text shown to the user when they are about to login to the uProxy Network (aka Quiver)",
+    "message": "The uProxy network is a simple way to reliably find and connect to your friends. <uproxy-faq-link anchor='whatIsUproxyNetwork'>Learn more.</uproxy-faq-link>"
+  },
+  "WHAT_IS_UPROXY_NETWORK": {
+    "message": "What is the uProxy Network?"
+  },
+  "WHAT_IS_UPROXY_NETWORK_ANSWER": {
+    "message": "<p>The uProxy network is designed to be one of the simplest ways to reliably connect with your friends, while still being hard to block. To use the uProxy network, you only need to enter a name (which does not have to be unique) and then you're logged in and ready to share invitations with friends. Currently, identity is tied to a single machine; if you want to set up uProxy on a new computer, you will need to reinvite your friends, in order to connect with them from that machine.</p><p>The uProxy team operates the uProxy network, though in the future it will be possible for third-parties to augment the network by running additional server. All information that is sent over the uProxy network is encrypted end-to-end, between peers, so no one can interfere with it. However, network operators can still tell which IP addresses are connecting to each other.</p>"
   }
 }

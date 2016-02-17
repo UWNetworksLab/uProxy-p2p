@@ -7,7 +7,7 @@ import net = require('../../../third_party/uproxy-lib/net/net.types');
 
 export interface BrowserAPI {
   // Configuration and control of the browsers proxy settings.
-  startUsingProxy(endpoint:net.Endpoint) :void;
+  startUsingProxy(endpoint:net.Endpoint, bypass :string[]) :void;
   stopUsingProxy() :void;
   // Set the browser icon for the extension/add-on.
   setIcon(iconFile :string) :void;
@@ -16,6 +16,7 @@ export interface BrowserAPI {
   // Open a new tab
   openTab(url :string) :void;
   bringUproxyToFront() :void;
+  isConnectedToCellular(): Promise<boolean>;
   // TODO: write comment to explain what browserSpecificElement is.
   browserSpecificElement :string;
 
@@ -44,7 +45,7 @@ export interface BrowserAPI {
   on(name: 'inviteUrlData', callback: (url: string) => void): void;
   on(name: 'copyPasteUrlData', callback: (url: string) => void): void;
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
-  on(name :'proxyDisconnected', callback :Function) :void;
+  on(name :'proxyDisconnected', callback :(info?:ProxyDisconnectInfo) => void) :void;
 
   // should be called when popup is launched and ready for use
   handlePopupLaunch() :void;
@@ -52,4 +53,10 @@ export interface BrowserAPI {
   // Overlay the given text as a "badge" over the uProxy extension icon.
   // The notification can be up to 4 characters.
   setBadgeNotification(notification :string) :void;
+}
+
+// Info associated with the 'proxyDisconnect' event.
+// This single bit is packaged as an interface for forward-compatibility.
+export interface ProxyDisconnectInfo {
+  deliberate :boolean;
 }

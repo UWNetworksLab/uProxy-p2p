@@ -1,5 +1,6 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
+/// <reference path='../../../../third_party/typings/xregexp/xregexp.d.ts' />
 
 // IMPORTANT:
 // In order for this to compile, add two definitions to I18nextStatic in i18next.d.ts:
@@ -7,6 +8,15 @@
 // addResourceBundle(language: string, namespace: string, resources :IResourceStoreKey): void;
 
 import i18n = require('i18next-client');
+import regEx = require('xregexp');
+import XRegExp = regEx.XRegExp;
+
+// Example usage of these tests:
+// isRightToLeft('hi') --> false
+// isRightToLeft('لك الوص') --> true
+function isRightToLeft(lang :string) :boolean {
+  return XRegExp('[\\p{Arabic}\\p{Hebrew}]').test(lang);
+}
 
 declare var window: I18nWindow;
 declare var require :(path :string) => MessageResource;
@@ -44,5 +54,14 @@ i18n.addResources('vi', 'translation', createI18nDictionary(vietnamese_source));
 i18n.addResources('ar', 'translation', createI18nDictionary(arabic_source));
 i18n.addResources('fa', 'translation', createI18nDictionary(farsi_source));
 
-export var i18n_t = i18n.t;
+export var i18n_t = (placeholder :string, params?: any) :string => {
+  for (var p in params) {
+    if (isRightToLeft(params[p])) {
+      params[p] = "\u200F" + params[p] + "\u200F";
+    } else {
+      params[p] = "\u200E" + params[p] + "\u200E";
+    }
+  }
+  return i18n.t(placeholder, params);
+};
 export var i18n_setLng = i18n.setLng;

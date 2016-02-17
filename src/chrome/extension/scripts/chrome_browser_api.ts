@@ -1,3 +1,5 @@
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+
 /**
  * chrome_browser_api.ts
  *
@@ -7,11 +9,7 @@
 import browser_api = require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../../third_party/uproxy-lib/net/net.types');
-import UI = require('../../../generic_ui/scripts/ui');
 import Constants = require('../../../generic_ui/scripts/constants');
-
-/// <reference path='../../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../../networking-typings/communications.d.ts' />
 
 enum PopupState {
     NOT_LAUNCHED,
@@ -44,7 +42,6 @@ class ChromeBrowserApi implements BrowserAPI {
   // For proxy configuration.
 
   private preUproxyConfig_ :chrome.proxy.ProxyConfig = null;
-  private uproxyConfig_ :chrome.proxy.ProxyConfig = null;
   private running_ :boolean = false;
 
   // For managing popup.
@@ -63,17 +60,6 @@ class ChromeBrowserApi implements BrowserAPI {
 
   constructor() {
     // use localhost
-    this.uproxyConfig_ = {
-      mode: "fixed_servers",
-      rules: {
-        singleProxy: {
-          scheme: "socks5",
-          host: null,
-          port: null
-        }
-      }
-    };
-
     chrome.proxy.settings.clear({scope: 'regular'});
 
     chrome.proxy.settings.get({}, (details) => {
@@ -110,16 +96,26 @@ class ChromeBrowserApi implements BrowserAPI {
            level === 'controlled_by_this_extension';
   }
 
-  public startUsingProxy = (endpoint:net.Endpoint) => {
-    this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
-    this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
+  public startUsingProxy = (endpoint:net.Endpoint, bypass :string[]) => {
+    var config = {
+      mode: "fixed_servers",
+      rules: {
+        singleProxy: {
+          scheme: "socks5",
+          host: endpoint.address,
+          port: endpoint.port,
+        },
+        bypassList: bypass,
+      }
+    };
+
     console.log('Directing Chrome proxy settings to uProxy');
     this.running_ = true;
     chrome.proxy.settings.get({incognito:false},
       (details) => {
         this.preUproxyConfig_ = details.value;
         chrome.proxy.settings.set({
-            value: this.uproxyConfig_,
+            value: config,
             scope: 'regular'
           }, () => {console.log('Successfully set proxy');});
       });
@@ -210,6 +206,10 @@ class ChromeBrowserApi implements BrowserAPI {
     setTimeout(function() {
       notification.close();
     }, 5000);
+  }
+
+  public isConnectedToCellular = (): Promise<boolean> => {
+    return Promise.resolve(false);
   }
 
   private events_ :{[name :string] :Function} = {};

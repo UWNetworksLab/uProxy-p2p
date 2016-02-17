@@ -32,10 +32,10 @@ export interface StopProxyInfo {
 }
 
 export interface LocalInstanceState {
-  instanceId  :string;
-  userId      :string;
-  userName    :string;
-  imageData   :string;
+  instanceId       :string;
+  userId           :string;
+  userName         :string;
+  imageData        :string;
 }
 
 export interface NetworkMessage {
@@ -106,9 +106,9 @@ export interface NetworkOptions {
   enableMonitoring :boolean;
   areAllContactsUproxy :boolean;
   supportsReconnect :boolean;
-  supportsInvites :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
   isExperimental ?:boolean;
+  isEncrypted ?:boolean;
 }
 
 /**
@@ -144,15 +144,6 @@ export interface VersionedPeerMessage extends PeerMessage {
   version: number;
 }
 
-// The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
-// client ID for the sender but no user ID because in the manual network
-// there is no concept of a single user having multiple clients; in the
-// manual network the client ID uniquely identifies the user.
-export interface HandleManualNetworkInboundMessageCommand {
-  message         :VersionedPeerMessage;
-  senderClientId  :string;
-}
-
 // The different states that uProxy consent can be in w.r.t. a peer. These
 // are the values that get sent or received on the wire.
 export interface ConsentWireState {
@@ -166,11 +157,13 @@ export interface ConsentWireState {
  */
 export interface InstanceHandshake {
   instanceId  :string;
-  publicKey   :string;
   consent     :ConsentWireState;
   description ?:string;
   name        :string;
   userId      :string;
+  // publicKey is not set for networks which include the public key in their
+  // clientId (Quiver).
+  publicKey   ?:string;
 }
 
 // Describing whether or not a remote instance is currently accessing or not,
@@ -204,7 +197,9 @@ export enum ClientStatus {
 export enum UserStatus {
   FRIEND = 0,
   LOCAL_INVITED_BY_REMOTE = 1,
-  REMOTE_INVITED_BY_LOCAL = 2
+  REMOTE_INVITED_BY_LOCAL = 2,
+  CLOUD_INSTANCE_CREATED_BY_LOCAL = 3,
+  CLOUD_INSTANCE_SHARED_WITH_LOCAL = 4
 }
 
 // Status of a client connected to a social network.
@@ -224,9 +219,8 @@ export interface UserState {
   // be saved and loaded separately.
   instanceIds :string[];
   consent     :ConsentState;
-  status      :UserStatus
+  status      :UserStatus;
 }
-
 
 export interface RemoteUserInstance {
   start() :Promise<net.Endpoint>;
@@ -239,6 +233,13 @@ export interface SignallingMetadata {
   // Random ID associated with this proxying attempt.
   // Used for logging purposes and implicitly delimits proxying attempts.
   proxyingId ?:string;
+}
+
+export interface InviteTokenData {
+  v :number;  // version
+  networkName :string;
+  userName :string;
+  networkData :string|Object;
 }
 
 /**
@@ -297,7 +298,7 @@ export interface Network {
   /**
    * Accept an invite to use uProxy with a friend
    */
-  acceptInvitation: (token ?:string, userId ?:string) => Promise<void>;
+  acceptInvitation: (token ?:InviteTokenData, userId ?:string) => Promise<void>;
 
   /**
    * Send an invite to a friend to use uProxy
@@ -307,7 +308,7 @@ export interface Network {
   /**
    * Generates an invite token
    */
-  getInviteUrl: () => Promise<string>;
+  getInviteUrl: (userId ?:string) => Promise<string>;
 
   /**
    * Generates an invite token
@@ -337,5 +338,9 @@ export interface Network {
   getNetworkState : () => NetworkState;
 
   areAllContactsUproxy : () => boolean;
+
+  isEncrypted : () => boolean;
+
+  getKeyFromClientId : (clientId :string) => string;
 }
 

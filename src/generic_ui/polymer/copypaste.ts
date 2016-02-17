@@ -62,7 +62,7 @@ Polymer({
   handleBackClick: function() {
     if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE &&
         ui.copyPasteState.localSharingWithRemote === social.SharingState.NONE) {
-      ui.view = ui_constants.View.SPLASH;
+      ui.view = this.viewForBack;
       return;
     }
 
@@ -132,7 +132,7 @@ Polymer({
     }).then(() => {
       // go back to the previous view regardless of whether we successfully
       // stopped the connection
-      ui.view = ui_constants.View.SPLASH;
+      ui.view = this.viewForBack;
     })
   },
   encodeMessage: function(message:string) {
@@ -166,5 +166,9 @@ Polymer({
     this.model = model;
     this.GettingState = social.GettingState;
     this.SharingState = social.SharingState;
+
+    // temporary fix to make sure we go back to the correct location until the
+    // production build uses the roster as the main screen
+    this.viewForBack = model.hasQuiverSupport() ? ui_constants.View.ROSTER : ui_constants.View.SPLASH;
   }
 });
