@@ -64,8 +64,9 @@ export function getImageData(userId :string, oldImageData :string,
     // as long as jdenticon only uses '"' in the generated code...
     // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
     // scales the image to fit the space, so this parameter has no effect.
+    // We must also replace # with %23 for Firefox support.
     return '\'data:image/svg+xml;utf8,' +
-        jdenticon.toSvg(md5(userId), 100) + '\'';
+        jdenticon.toSvg(md5(userId), 100).replace(/#/g, '%23') + '\'';
   } else if (!newImageData) {
     // This case is hit when we've already generated a jdenticon for a user
     // who doesn't have any image in uProxy core.
