@@ -11,6 +11,14 @@
 
 set -e
 
+if [ -f /etc/centos-release ]
+then 
+  yum update
+  yum install -y git dig bind-utils nmap-ncat
+  curl -fsSL https://get.docker.com/ | sh
+  service docker start
+fi
+
 do_install() {
   TMP_DIR=`mktemp -d`
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
