@@ -14,7 +14,7 @@ set -e
 if [ -f /etc/centos-release ]
 then 
   yum update -y
-  yum install -y git dig bind-utils nmap-ncat
+  yum install -y git bind-utils nmap-ncat
   curl -fsSL https://get.docker.com/ | sh
   service docker start
 fi
