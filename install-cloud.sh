@@ -15,8 +15,11 @@ if [ -f /etc/centos-release ]
 then 
   yum update -y
   yum install -y git bind-utils nmap-ncat
-  curl -fsSL https://get.docker.com/ | sh
-  service docker start
+  if [ ! -f /usr/bin/docker ]
+  then
+    curl -fsSL https://get.docker.com/ | sh
+    service docker start
+  fi
 fi
 
 do_install() {
