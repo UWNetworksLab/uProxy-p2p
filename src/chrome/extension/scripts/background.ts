@@ -115,8 +115,8 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
   chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
       // Do not open the extension when it's installed if the user is
       // going through the inline install flow.
-      if ((tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) &&
-          (tabs[0].url.indexOf("uproxy.org/chrome-install") == -1)) {
+      if ((tabs[0].url.indexOf("uproxysite.appspot.com/install") == -1) &&
+          (tabs[0].url.indexOf("uproxy.org/install") == -1)) {
         browserApi.bringUproxyToFront();
       }
   });
