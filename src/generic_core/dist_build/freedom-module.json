@@ -7,6 +7,10 @@
     ]
   },
   "dependencies": {
+    "SOCIAL-Quiver": {
+      "url": "../freedom-social-quiver/socketio.quiver.json",
+      "api": "social2"
+    },
     "SOCIAL-GMail": {
       "url": "../freedom-social-firebase/social.firebase-google.json",
       "api": "social2"
