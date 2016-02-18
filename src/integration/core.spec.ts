@@ -1,6 +1,7 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
+/// <reference path='../../../third_party/typings/chrome/chrome.d.ts' />
 
 
 import _ = require('lodash');
@@ -53,22 +54,31 @@ describe('uproxy core', function() {
   var bobInstancePath :social.InstancePath;
 
   it('loads uproxy', (done) => {
-    // Ensure that aliceSocialInterface and bobSocialInterface are set.
-    var alicePromise = freedom(uProxyFreedom,
-        <freedom.FreedomInCoreEnvOptions>{
-          oauth: [() => { return new mock_oauth.MockOAuth(ALICE.REFRESH_TOKEN) }],
-          debug: 'log'
-        }).then(function(freedomInterface) {
-      alice = freedomInterface();
+    // Start all tests with empty storage.
+    // TODO: find a browser independent call to clear storage using Freedom's
+    // core.storage, https://github.com/uProxy/uproxy/issues/2265
+    chrome.storage.local.clear(() => {
+      // Ensure that aliceSocialInterface and bobSocialInterface are set.
+      var alicePromise = freedom(uProxyFreedom,
+          <freedom.FreedomInCoreEnvOptions>{
+            oauth: [() => { return new mock_oauth.MockOAuth(ALICE.REFRESH_TOKEN) }],
+            debug: 'log'
+          }).then(function(freedomInterface) {
+        alice = freedomInterface();
+      });
+      var bobPromise = freedom(uProxyFreedom,
+          <freedom.FreedomInCoreEnvOptions>{
+            oauth: [() => { return new mock_oauth.MockOAuth(BOB.REFRESH_TOKEN) }],
+            debug: 'log'
+          }).then(function(freedomInterface) {
+        bob = freedomInterface();
+      });
+      Promise.all([alicePromise, bobPromise]).then(done);
     });
-    var bobPromise = freedom(uProxyFreedom,
-        <freedom.FreedomInCoreEnvOptions>{
-          oauth: [() => { return new mock_oauth.MockOAuth(BOB.REFRESH_TOKEN) }],
-          debug: 'log'
-        }).then(function(freedomInterface) {
-      bob = freedomInterface();
-    });
-    Promise.all([alicePromise, bobPromise]).then(done);
+    // var storage = new local_storage.Storage();
+    // var clearStorage = storage.reset();
+    // var freedomStorage  :freedom.Storage.Storage = freedom['core.storage']();
+    // var clearStorage = freedomStorage.clear();
   });
 
   var login = (uProxyModule :any, networkName :string) : Promise<Object> => {
