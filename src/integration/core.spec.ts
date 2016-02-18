@@ -75,10 +75,6 @@ describe('uproxy core', function() {
       });
       Promise.all([alicePromise, bobPromise]).then(done);
     });
-    // var storage = new local_storage.Storage();
-    // var clearStorage = storage.reset();
-    // var freedomStorage  :freedom.Storage.Storage = freedom['core.storage']();
-    // var clearStorage = freedomStorage.clear();
   });
 
   var login = (uProxyModule :any, networkName :string) : Promise<Object> => {
