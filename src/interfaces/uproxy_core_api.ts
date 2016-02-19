@@ -170,9 +170,15 @@ export interface CloudfrontPostData {
   cloudfrontPath :string;
 }
 
+export enum LoginType {
+  INITIAL = 0,
+  RECONNECT,
+  TEST
+}
+
 export interface LoginArgs {
   network :string;
-  reconnect :boolean;
+  loginType :LoginType;
   userName ?:string;
 }
 

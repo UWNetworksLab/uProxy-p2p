@@ -1,17 +1,16 @@
+// This is for aliceintegrationuproxy2@gmail.com
 export var ALICE = {
-  EMAIL: 'aliceintegrationuproxy@gmail.com',
-  NAME: 'Alice Uproxy',
   REFRESH_TOKEN:
-      '1/vuK4xIChTPxnNMipPA_TumDsw2Pwba3XF9EQmlVQb7oMEudVrK5jSpoR30zcRFq6',
-  ANONYMIZED_ID: '2tyz0phxktjvy2p1aadswo35gk@public.talk.google.com',
+      '1/ah2-QQWbmE4ch-H8UefbFABVCvTqFWynlSIsEAX9MjpIgOrJDtdun6zK6XiATCKT',
+  USER_ID: '117139766290212605765',
   INSTANCE_ID: <string>null
 };
+
+// This is for bobintegrationuproxy2@gmail.com
 export var BOB = {
-  EMAIL: 'bobintegrationuproxy@gmail.com',
-  NAME: 'Bob Uproxy',
   REFRESH_TOKEN:
-      '1/Z4xzQCmnBp5sDlgubZKYF9LL9MEmXvvjsuLhFHhT23YMEudVrK5jSpoR30zcRFq6',
-  ANONYMIZED_ID: '2s8akwyxcqxgq0nhwznicouy9s@public.talk.google.com',
+      '1/pfnOMWcdIMGTQWbMvUchExDHKUOoQkMzVriiOxNXjGVIgOrJDtdun6zK6XiATCKT',
+  USER_ID: '116764384918192711247',
   INSTANCE_ID: <string>null
 };
 

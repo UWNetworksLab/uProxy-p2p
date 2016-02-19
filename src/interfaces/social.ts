@@ -275,7 +275,7 @@ export interface Network {
    * appropriate, and sends an update to the UI upon success. Does nothing if
    * already logged in.
    */
-  login :(reconnect :boolean, userName ?:string) => Promise<void>;
+  login :(loginType :uproxy_core_api.LoginType, userName ?:string) => Promise<void>;
 
   getStorePath :() => string;
 
