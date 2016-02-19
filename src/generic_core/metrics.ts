@@ -64,13 +64,6 @@ export class Metrics {
   }
 
   public getReport = (natInfo:uproxy_core_api.NetworkInfo) :Promise<Object> => {
-    try {
-      crypto.randomUint32();
-    } catch (e) {
-      return Promise.reject(new Error(
-          'Unable to getReport, crypto.randomUint32 not available'));
-    }
-
     if (natInfo.errorMsg) {
       return Promise.reject(new Error('getNetworkInfo() failed.'));
     }
