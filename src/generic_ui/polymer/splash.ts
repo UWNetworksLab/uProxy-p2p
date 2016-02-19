@@ -8,7 +8,6 @@
 declare var require :(path :string) => Object;
 
 import ui_constants = require('../../interfaces/ui');
-import loginCommon = require('./login-common');
 import _ = require('lodash');
 
 interface Language {
@@ -25,8 +24,7 @@ var model = ui_context.model;
 var splash = {
   SPLASH_STATES: {
     INTRO: 0,
-    METRICS_OPT_IN: 1,
-    NETWORKS: 2
+    METRICS_OPT_IN: 1
   },
   setState: function(state :Number) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
@@ -36,31 +34,15 @@ var splash = {
     model.globalSettings.splashState = state;
     core.updateGlobalSettings(model.globalSettings);
   },
-  // TODO: Remove the if and else if blocks for next() and prev() when we
-  // remove the NETWORKS splash state.
   next: function() {
-    if (this.supportsQuiver && model.globalSettings.splashState
-        == this.SPLASH_STATES.METRICS_OPT_IN) {
+    if (model.globalSettings.splashState == this.SPLASH_STATES.METRICS_OPT_IN) {
       ui.view = ui_constants.View.ROSTER;
-    } else if (model.globalSettings.hasSeenMetrics &&
-        model.globalSettings.splashState == this.SPLASH_STATES.INTRO) {
-        // Skip metrics opt-in if we've seen it before.
-        this.setState(this.SPLASH_STATES.NETWORKS);
     } else {
       this.setState(model.globalSettings.splashState + 1);
     }
   },
   prev: function() {
-    if (model.globalSettings.hasSeenMetrics &&
-        model.globalSettings.splashState == this.SPLASH_STATES.NETWORKS) {
-        // Skip metrics opt-in if we've seen it before.
-        this.setState(this.SPLASH_STATES.INTRO);
-    } else {
-      this.setState(model.globalSettings.splashState - 1);
-    }
-  },
-  openFeedbackForm: function() {
-    this.fire('core-signal', {name: 'open-feedback'});
+    this.setState(model.globalSettings.splashState - 1);
   },
   updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
     if (detail.isSelected) {
@@ -81,17 +63,10 @@ var splash = {
   disableStats: function() {
     return this.updateSeenMetrics(false);
   },
-  observe: {
-    'model.networkNames': 'updateNetworkButtonNames',
-  },
   ready: function() {
-    this.ui = ui;
     this.model = model;
     this.languages = languages;
-    this.userName = model.globalSettings.quiverUserName;
-    this.updateNetworkButtonNames();
   },
 };
 
-(<any>_.mixin)(splash, loginCommon);
 Polymer(splash);

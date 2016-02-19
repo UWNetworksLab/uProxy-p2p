@@ -112,10 +112,6 @@ export class Model {
       return undefined;
     });
   }
-
-  public hasQuiverSupport() {
-    return _.indexOf(this.networkNames, 'Quiver') != -1;
-  }
 }
 
 export function categorizeUser(user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) {
