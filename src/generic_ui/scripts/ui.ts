@@ -132,9 +132,6 @@ export class UserInterface implements ui_constants.UiApi {
 
   public toastMessage :string = null;
 
-  // TODO: Remove this when we switch completely to a roster-before-login flow.
-  public showRosterBeforeLogin:boolean = false;
-
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
@@ -1241,9 +1238,6 @@ export class UserInterface implements ui_constants.UiApi {
       }
     }
 
-    // TODO: Remove this when we switch completely to a roster-before-login flow.
-    this.showRosterBeforeLogin = this.model.hasQuiverSupport();
-
     this.portControlSupport = state.portControlSupport;
 
     // plenty of state may have changed, update it
@@ -1315,7 +1309,7 @@ export class UserInterface implements ui_constants.UiApi {
   // connected to the core)
   private updateView_ = () => {
     if (this.model.onlineNetworks.length > 0 ||
-        (this.model.globalSettings.hasSeenWelcome && this.showRosterBeforeLogin)) {
+        this.model.globalSettings.hasSeenWelcome) {
       this.view = ui_constants.View.ROSTER;
     } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
                this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {

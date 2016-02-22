@@ -6,7 +6,6 @@
 <link rel="import" href="../../bower/core-menu/core-menu.html">
 <link rel='import' href='button.html'>
 <link rel='import' href='faq-link.html'>
-<link rel='import' href='network.html'>
 
 <polymer-element name='uproxy-splash' attributes=''>
   <template>
@@ -37,9 +36,6 @@
     h1.uproxyTitle .first-u {
       color: #10c9b1;
     }
-    h1.sub {
-      font-weight: normal;
-    }
     #proxy-pic {
       opacity: 0.3;
     }
@@ -63,21 +59,8 @@
     #nextWrapper uproxy-button {
       width: 150px;
     }
-    uproxy-network {
-      padding: 12px;
-    }
     #nextWrapper {
       margin-top: 50px;
-    }
-    #oneTimeConnection {
-      margin-bottom: 1.5em;
-    }
-    #submitFeedback {
-      text-decoration: underline;
-      cursor: pointer;
-      display: inline-block;
-      margin-top: 1em;
-      margin-bottom: 1em;
     }
     uproxy-faq-link paper-button {
       width: 100%;
@@ -99,7 +82,7 @@
       margin-left: 8px;
       margin-right: 8px;
     }
-    #intro1, #networks, #metricsOptIn {
+    #intro1, #metricsOptIn {
       height: 100%;
     }
     #metricsOptIn {
@@ -126,46 +109,6 @@
     }
     #languageLink paper-item::shadow .button-content {
       padding: 0;
-    }
-    paper-input-decorator {
-      font-size: 16px;
-    }
-    #QuiverLoginButton {
-      width: 200px;
-      margin-top: 1em;
-      margin-bottom: 1em;
-    }
-    #QuiverTitle {
-      font-weight: normal;
-      margin-top: 0;
-      margin-bottom: 0;
-    }
-    .networkLoginButton {
-      display: inline-block;
-      width: 120px;
-      margin-top: 0.5em;
-      margin-bottom: 1em;
-      cursor: pointer;
-      vertical-align: top;
-    }
-    .networkLoginButton .networkName {
-      margin-top: 0.5em;
-    }
-    .networkLoginButton core-icon {
-      width: 75px;
-      height: 75px;
-    }
-    .networkLoginButton .experimental {
-      color: red;
-      font-size: 12px;
-    }
-    .orText {
-      font-size: 26px;
-      margin-top: 0.5em;
-      font-style: italic;
-    }
-    .networkLoginButton.copypaste {
-      margin-top: 2em;
     }
 
     </style>
@@ -226,34 +169,6 @@
       <uproxy-faq-link anchor='doesUproxyLogData'>
         <paper-button>
           {{ "MORE_ABOUT_METRICS" | $$ }}
-        </paper-button>
-      </uproxy-faq-link>
-    </div>
-
-    <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==model.globalSettings.splashState}}'>
-      <div class='view' flex>
-        <!-- TODO: remove this and uproxy-network template once Quiver
-        support is on the webstore -->
-        <div hidden?='{{supportsQuiver}}'>
-          <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$ }}</h1>
-          <p>{{ "WHY_SOCIAL_NETWORK" | $$ }}</p>
-          <template repeat='{{ n in networkButtonNames }}' vertical layout>
-            <uproxy-network networkName='{{n}}' hidden?="{{n=='Cloud' && !model.globalSettings.showCloud && !ui.showRosterBeforeLogin}}"></uproxy-network>
-          </template>
-          <p id='oneTimeConnection'>
-            <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$ }}</a>
-          </p>
-          <p>
-            {{ "WE_WONT_POST" | $$ }}
-          </p>
-          <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-            {{ "SUBMIT_FEEDBACK" | $$ }}
-          </span>
-        </div>
-      </div>
-      <uproxy-faq-link anchor='whyDoesUproxyConnect'>
-        <paper-button>
-          {{ "LEARN_MORE_SOCIAL" | $$ }}
         </paper-button>
       </uproxy-faq-link>
     </div>

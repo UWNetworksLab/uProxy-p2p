@@ -79,10 +79,6 @@ Polymer({
     this.$.networkInviteUserPanel.close();
     this.$.QuiverDialog.close();
   },
-  showAcceptUserInvite: function() {
-    this.closeInviteUserPanel();
-    this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
-  },
   select: function(e :Event, d :Object, input :HTMLInputElement) {
     input.focus();
     input.select();
