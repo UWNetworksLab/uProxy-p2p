@@ -100,6 +100,7 @@ class CordovaBrowserApi implements BrowserAPI {
 
   public stopUsingProxy = () => {
     if (!chrome.proxy) {
+      console.log('No proxy setting support; ignoring stop command');
       return;
     }
 
