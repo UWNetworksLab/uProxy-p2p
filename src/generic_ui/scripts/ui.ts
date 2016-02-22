@@ -1,5 +1,7 @@
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
+/// <reference path='../../../../third_party/typings/generic/md5.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
 
 /**
@@ -25,6 +27,8 @@ import network_options = require('../../generic/network-options');
 import model = require('./model');
 import jsurl = require('jsurl');
 import uparams = require('uparams');
+import md5 = require('md5');
+import jdenticon = require('jdenticon');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
@@ -51,6 +55,25 @@ export interface NotificationData {
 interface PromiseCallbacks {
   fulfill :Function;
   reject :Function;
+}
+
+export function getImageData(userId :string, oldImageData :string,
+                             newImageData :string) : string {
+  if (!oldImageData && !newImageData) {
+    // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
+    // as long as jdenticon only uses '"' in the generated code...
+    // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
+    // scales the image to fit the space, so this parameter has no effect.
+    // We must also replace # with %23 for Firefox support.
+    return '\'data:image/svg+xml;utf8,' +
+        jdenticon.toSvg(md5(userId), 100).replace(/#/g, '%23') + '\'';
+  } else if (!newImageData) {
+    // This case is hit when we've already generated a jdenticon for a user
+    // who doesn't have any image in uProxy core.
+    return oldImageData;
+  } else {
+    return newImageData;
+  }
 }
 
 /**
@@ -108,9 +131,6 @@ export class UserInterface implements ui_constants.UiApi {
   public signalToFire :Object = null;
 
   public toastMessage :string = null;
-
-  // TODO: Remove this when we switch completely to a roster-before-login flow.
-  public showRosterBeforeLogin:boolean = false;
 
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
@@ -536,7 +556,19 @@ export class UserInterface implements ui_constants.UiApi {
         var token = invite.substr(invite.lastIndexOf('/') + 1);
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match("[A-Za-z0-9+/=_]+")[0];
-        return JSON.parse(atob(token));
+        var parsedObj = JSON.parse(atob(token));
+        var networkData = parsedObj.networkData;
+        if (typeof networkData === 'object' && networkData.networkData) {
+          // Firebase invites have a nested networkData string within a
+          // networkData object.  TODO: move Firebase to use v2 invites.
+          networkData = networkData.networkData;
+        }
+        return {
+          v: 1,
+          networkData: networkData,
+          networkName: parsedObj.networkName,
+          userName: parsedObj.userName
+        };
       }
     } catch(e) {
       return null;
@@ -892,7 +924,7 @@ export class UserInterface implements ui_constants.UiApi {
           roster: {},
           logoutExpected: false,
           userName: networkMsg.userName,
-          imageData: networkMsg.imageData
+          imageData: getImageData(networkMsg.userId, null, networkMsg.imageData)
         };
         this.model.onlineNetworks.push(existingNetwork);
       }
@@ -932,8 +964,9 @@ export class UserInterface implements ui_constants.UiApi {
     }
     var profile :social.UserProfileMessage = payload.user;
     network.userId = profile.userId;
-    network.imageData = profile.imageData;
     network.userName = profile.name;
+    network.imageData =
+        getImageData(network.userId, network.imageData, profile.imageData);
   }
 
   /**
@@ -1019,7 +1052,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     return this.core.login({
         network: network,
-        reconnect: false,
+        loginType: uproxy_core_api.LoginType.INITIAL,
         userName: userName
     }).then(() => {
       this.browserApi.hasInstalledThenLoggedIn = true;
@@ -1097,7 +1130,7 @@ export class UserInterface implements ui_constants.UiApi {
       // ping response).
       // TODO: this doesn't work quite right if the user is signed into multiple social networks
       if (this.model.reconnecting) {
-        this.core.login({network: network, reconnect: true}).then(() => {
+        this.core.login({network: network, loginType: uproxy_core_api.LoginType.RECONNECT}).then(() => {
           // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
           this.stopReconnect();
         }).catch((e) => {
@@ -1210,9 +1243,6 @@ export class UserInterface implements ui_constants.UiApi {
       }
     }
 
-    // TODO: Remove this when we switch completely to a roster-before-login flow.
-    this.showRosterBeforeLogin = this.model.hasQuiverSupport();
-
     this.portControlSupport = state.portControlSupport;
 
     // plenty of state may have changed, update it
@@ -1222,11 +1252,12 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private addOnlineNetwork_ = (networkState :social.NetworkState) => {
+    var profile = networkState.profile;
     this.model.onlineNetworks.push({
       name: networkState.name,
-      userId: networkState.profile.userId,
-      userName: networkState.profile.name,
-      imageData: networkState.profile.imageData,
+      userId: profile.userId,
+      userName: profile.name,
+      imageData: getImageData(profile.userId, null, profile.imageData),
       logoutExpected: false,
       roster: {}
     });
@@ -1283,7 +1314,7 @@ export class UserInterface implements ui_constants.UiApi {
   // connected to the core)
   private updateView_ = () => {
     if (this.model.onlineNetworks.length > 0 ||
-        (this.model.globalSettings.hasSeenWelcome && this.showRosterBeforeLogin)) {
+        this.model.globalSettings.hasSeenWelcome) {
       this.view = ui_constants.View.ROSTER;
     } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
                this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {

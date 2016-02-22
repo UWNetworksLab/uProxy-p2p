@@ -1,7 +1,6 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel="import" href="../../bower/core-signals/core-signals.html">
-<link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
@@ -16,21 +15,8 @@
         width: 100%;
         background-color: white;
       }
-      #oldControls uproxy-button {
-        width: 200px;
-        margin: 0;
-        padding-left: 1em;
-        padding-right: 1em;
-      }
       .view {
         overflow: auto;
-      }
-      .section {
-        padding-left: 2em;
-        padding-right: 2em;
-        padding-top: 1em;
-        padding-bottom: 1em;
-        line-height: 20px;
       }
       .acceptInvite {
         text-align: left;
@@ -40,6 +26,7 @@
       .acceptInvite paper-input-decorator {
         padding-top: 0;
         padding-bottom: 18px;
+        font-size: 16px;
       }
       #inviteCodeDecorator {
         padding-bottom: 0;
@@ -47,15 +34,6 @@
       a {
         cursor: pointer;
       }
-      paper-dropdown-menu {
-        padding: 0;
-        margin: 0;
-      }
-      paper-input-decorator {
-        font-size: 16px;
-      }
-
-      /* CSS for roster-before-login flow. */
       #allInviteMethods {
         text-align: center;
       }
@@ -69,7 +47,7 @@
         margin-top: 0;
       }
       #loginToInviteFriendDialog p {
-        color: rgb(160, 160, 160);
+        color: #666;
         line-height: 18px;
         font-weight: lighter;
         font-size: 12px;
@@ -180,14 +158,12 @@
 
       <div class='view' flex>
         <!-- TODO: translate before launch on webstore -->
-        <div id="allInviteMethods" hidden?='{{!ui.showRosterBeforeLogin}}'>
-          <div hidden?="{{!ui.showRosterBeforeLogin}}">
-            <div class='acceptInvite'>
-              <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$ }}' layout vertical>
-                <input is='core-input' value='{{ inviteCode }}' />
-              </paper-input-decorator>
-              <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
-            </div>
+        <div id="allInviteMethods">
+          <div class='acceptInvite'>
+            <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$ }}' layout vertical>
+              <input is='core-input' value='{{ inviteCode }}' />
+            </paper-input-decorator>
+            <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
           </div>
 
           <p id='chooseASocialNetwork' class='paleText'>{{ "CHOOSE_A_SOCIAL_NETWORK_AND_FIND_YOUR_FRIENDS" | $$ }}</p>
@@ -210,64 +186,7 @@
           </div>
 
           <div id="weWontPostLearnMore"></div>
-        </div> <!--End of roster-before-login view-->
-
-        <!-- TODO: remove this and uproxy-network template once Quiver
-        support is on the webstore -->
-        <div hidden?='{{ui.showRosterBeforeLogin}}' id='oldControls'>
-          <div hidden?='{{ onlineInviteNetworks.length <= 1}}' class='section'>
-            <p>{{ 'HOW_TO_INVITE_FRIENDS' | $$ }}</p>
-            <paper-dropdown-menu>
-              <paper-dropdown class='dropdown'>
-                <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
-                  <template repeat="{{ network in onlineInviteNetworks }}">
-                    <paper-item label='{{ network.name }}'>
-                      {{ network.displayName }}
-                    </paper-item>
-                  </template>
-                </core-menu>
-              </paper-dropdown>
-            </paper-dropdown-menu>
-          </div>
-          <div class='section'>
-            <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
-              <p>{{ 'FACEBOOK_INVITE_INSTRUCTIONS' | $$ }}</p>
-              <uproxy-button affirmative on-tap='{{ sendToFacebookFriend }}'>
-                {{ 'SEND_INVITATION' | $$ }}
-              </uproxy-button>
-            </div>
-
-            <div hidden?='{{ selectedNetworkName != "GMail"}}'>
-              <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$ }}</p>
-              <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
-                <input is='core-input' value='{{ inviteUserEmail }}' />
-              </paper-input-decorator>
-
-              <uproxy-button affirmative on-tap='{{ sendToGMailFriend }}'>
-                {{ 'SEND_INVITATION' | $$ }}
-              </uproxy-button>
-            </div>
-
-            <div hidden?='{{ selectedNetworkName != "GitHub"}}'>
-              <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
-              <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
-                <input is='core-input' value='{{ githubUserIdInput }}'>
-              </paper-input-decorator>
-              <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
-                {{ 'SEND_INVITATION' | $$ }}
-              </uproxy-button>
-            </div>
-
-            <div hidden?='{{ selectedNetworkName != "Cloud"}}'>
-              <p>{{ 'ADD_CLOUD_INSTRUCTIONS' | $$ }}</p>
-            </div>
-          </div>
-          <div class='section'>
-            <a on-tap='{{ showAcceptUserInvite }}'>
-              {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$ }}
-            </a>
-          </div>
-        </div> <!--End of login-before-roster view-->
+        </div> <!--End of #allInviteMethods -->
       </div>
     </core-overlay>
 

@@ -3,7 +3,6 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import user_interface = require('../scripts/ui');
-import loginCommon = require('./login-common');
 import _ = require('lodash');
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -15,20 +14,6 @@ var inviteUser = {
     var networkInfo = { name: network.name, userId: network.userId };
     return core.getInviteUrl({ network: networkInfo });
   },
-  sendToGMailFriend: function() {
-    var network = model.getNetwork('GMail');
-    this.generateInviteUrl('GMail').then((inviteUrl :string) => {
-      var userName = network.userName || network.userId;
-      var emailBody = core.sendEmail({
-          networkInfo: {name: network.name, userId: network.userId},
-          to: this.inviteUserEmail,
-          subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: userName }),
-          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: inviteUrl, name: userName })
-      });
-      this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('INVITE_EMAIL_SENT'));
-    });
-  },
   sendToFacebookFriend: function() {
     this.generateInviteUrl('Facebook-Firebase-V2').then((inviteUrl :string) => {
       var facebookUrl =
@@ -39,34 +24,8 @@ var inviteUser = {
       ui.showDialog('', ui.i18n_t('FACEBOOK_INVITE_IN_BROWSER'));
     });
   },
-  inviteGithubFriend: function() {
-    core.inviteUser({
-      networkId: 'GitHub',
-      userName: this.githubUserIdInput
-    }).then(() => {
-      this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.githubUserIdInput }));
-    }).catch(() => {
-      // TODO: The message in this dialog should be passed from the social provider.
-      // https://github.com/uProxy/uproxy/issues/1923
-      this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('GITHUB_INVITE_SEND_FAILED'));
-    });
-  },
-  onNetworkSelect: function(e :any, details :any) {
-    if (details.isSelected) {
-      this.selectedNetworkName = details.item.getAttribute('label');
-    }
-  },
   openInviteUserPanel: function() {
-    this.setOnlineInviteNetworks();
-    // Reset selectedNetworkName in case it had been set and that network
-    // is no longer online.
-    this.$.networkSelectMenu.selectIndex(0);
-
     // Reset the input, expectation is for it to be empty
-    this.inviteUserEmail = '';
-    this.githubUserIdInput = '';
     this.inviteCode = '';
     // Forces the placeholder text to be visible again.
     this.$.inviteCodeDecorator.updateLabelVisibility(this.inviteCode);
@@ -79,20 +38,6 @@ var inviteUser = {
   },
   closeInviteUserPanel: function() {
     this.$.inviteUserPanel.close();
-  },
-  showAcceptUserInvite: function() {
-    this.fire('core-signal', { name: 'open-accept-user-invite-dialog' });
-    this.closeInviteUserPanel();
-  },
-  setOnlineInviteNetworks: function() {
-    this.onlineInviteNetworks = [];
-    for (var i = 0; i < model.onlineNetworks.length; ++i) {
-      var name = model.onlineNetworks[i].name;
-      this.onlineInviteNetworks.push({
-        name: name,
-        displayName: ui.getNetworkDisplayName(name)
-      });
-    }
   },
   networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
@@ -114,23 +59,6 @@ var inviteUser = {
       }
     }
   },
-  login: function(networkName :string) {
-    // login should only be called by the loginToInviteFriendDialog, which
-    // is not used for Quiver.
-    if (networkName === 'Quiver') {
-      throw Error('invite-user.ts: login called for Quiver');
-    }
-
-    return ui.login(networkName).then(() => {
-      this.$.loginToInviteFriendDialog.close();
-      if (this.closeInviteUserPanel) {
-        this.closeInviteUserPanel();
-      }
-      ui.bringUproxyToFront();
-    }).catch((e: Error) => {
-      console.warn('Did not log in ', e);
-    });
-  },
   loginTapped: function() {
     // loginTapped should only be called by the loginToInviteFriendDialog, which
     // is not used for Quiver.
@@ -138,8 +66,11 @@ var inviteUser = {
       throw Error('invite-user.ts: loginTapped called for Quiver');
     }
 
-    this.login(this.selectedNetworkName).then(() => {
-      this.initInviteForNetwork();
+    ui.login(this.selectedNetworkName).then(() => {
+      this.$.loginToInviteFriendDialog.close();
+      this.closeInviteUserPanel();
+      ui.bringUproxyToFront();
+      this.initInviteForNetwork(this.selectedNetworkName);
     });
   },
   initInviteForNetwork: function(networkName: string) {
@@ -180,10 +111,6 @@ var inviteUser = {
   closeLoginDialog: function() {
     this.$.loginToInviteFriendDialog.close();
   },
-  select: function(e :Event, d :Object, input :HTMLInputElement) {
-    input.focus();
-    input.select();
-  },
   acceptInvite: function() {
     ui.handleInvite(this.inviteCode).then(() => {
       this.closeInviteUserPanel();
@@ -192,21 +119,29 @@ var inviteUser = {
       ui.showDialog('', ui.i18n_t('FRIEND_ADD_ERROR'));
     });
   },
-  observe: {
-    'model.networkNames': 'updateNetworkButtonNames'
+  copypaste: function() {
+    // Logout of all other social networks before starting
+    // copypaste connection.
+    var getConfirmation = Promise.resolve<void>();
+    if (model.onlineNetworks.length > 0) {
+      var confirmationMessage =
+          ui.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE');
+      getConfirmation = ui.getConfirmation('', confirmationMessage);
+    }
+
+    getConfirmation.then(ui.logoutAll).then(() => {
+      if (this.closeInviteUserPanel) {
+        this.closeInviteUserPanel();
+      }
+      this.fire('core-signal', { name: 'copypaste-init' });
+    });
   },
   ready: function() {
-    this.githubUserIdInput = ''; // for GitHub
-    this.inviteUserEmail = ''; // for GMail
     this.selectedNetworkName = '';
-    this.cloudInstanceInput = '';
     this.ui = ui;
     this.model = model;
     this.inviteCode = '';
-
-    this.updateNetworkButtonNames();
   }
 };
 
-(<any>_.mixin)(inviteUser, loginCommon);
 Polymer(inviteUser);
