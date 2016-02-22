@@ -224,7 +224,8 @@ export function notifyUI(networkName :string, userId :string) {
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
-    public login = (reconnect :boolean, userName?:string) :Promise<void> => {
+    public login = (loginType :uproxy_core_api.LoginType,
+                    userName ?:string) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
@@ -465,7 +466,22 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (reconnect :boolean, userName ?:string) : Promise<void> => {
+    public login = (loginType :uproxy_core_api.LoginType,
+                    userName ?:string) : Promise<void> => {
+      var interactive :boolean;
+      var rememberLogin :boolean;
+      if (loginType === uproxy_core_api.LoginType.INITIAL) {
+        interactive = true;
+        rememberLogin = true;
+      } else if (loginType === uproxy_core_api.LoginType.RECONNECT) {
+        interactive = false;
+        rememberLogin = false;
+      } else if (loginType === uproxy_core_api.LoginType.TEST) {
+        // interactive is true so that MockOAuth is used, rather than looking
+        // for refresh tokens in storage.
+        interactive = true;
+        rememberLogin = false;
+      }
       var request :freedom_social2.LoginRequest = null;
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
@@ -487,8 +503,8 @@ export function notifyUI(networkName :string, userId :string) {
           agent: agent,
           version: '0.1',
           url: 'https://popping-heat-4874.firebaseio.com/',
-          interactive: !reconnect,
-          rememberLogin: !reconnect
+          interactive: interactive,
+          rememberLogin: rememberLogin
         };
       } else if (this.name === 'Quiver') {
         if (!userName) {
@@ -499,8 +515,8 @@ export function notifyUI(networkName :string, userId :string) {
           agent: Math.random().toString().substr(2,10),
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
-          interactive: !reconnect,
-          rememberLogin: !reconnect,
+          interactive: interactive,
+          rememberLogin: rememberLogin,
           userName: userName,
           pgpKeyName: '<uproxy>'
         };
@@ -509,8 +525,8 @@ export function notifyUI(networkName :string, userId :string) {
           agent: 'uproxy',
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
-          interactive: !reconnect,
-          rememberLogin: !reconnect
+          interactive: interactive,
+          rememberLogin: rememberLogin
         };
       }
 

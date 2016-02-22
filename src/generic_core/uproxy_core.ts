@@ -80,7 +80,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         }
         logins.push(this.login({
           network: networkName,
-          reconnect: true,
+          loginType: uproxy_core_api.LoginType.RECONNECT
         }).catch(() => {
           // any failure to login should just be ignored - the user will either
           // be logged in with just some accounts or still on the login screen
@@ -132,7 +132,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       this.pendingNetworks_[networkName] = network;
     }
 
-    return network.login(loginArgs.reconnect, loginArgs.userName).then(() => {
+    return network.login(loginArgs.loginType, loginArgs.userName).then(() => {
       delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,

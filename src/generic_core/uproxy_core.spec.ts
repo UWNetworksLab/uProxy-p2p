@@ -34,7 +34,9 @@ describe('Core', () => {
   var network = <social.Network><any>jasmine.createSpy('network');
   network.getUser = null;
   network.getStorePath = function() { return 'network-store-path'; };
-  network['login'] = (reconnect :boolean) => { return Promise.resolve<void>() };
+  network['login'] = (loginType :uproxy_core_api.LoginType) => {
+    return Promise.resolve<void>();
+  };
   network['myInstance'] =
             new local_instance.LocalInstance(network, 'localUserId');
   var user = new remote_user.User(network, 'fake-login');
@@ -75,7 +77,8 @@ describe('Core', () => {
   });
 
   it('login fails for invalid network', (done) => {
-    core.login({network: 'nothing', reconnect: false}).catch(() => {
+    core.login({network: 'nothing',
+                loginType: uproxy_core_api.LoginType.INITIAL}).catch(() => {
       done();
     });
   });
@@ -90,14 +93,16 @@ describe('Core', () => {
     // Login promise is not resolved so network object stays in pending logins
     var loginSpy = spyOn(network, 'login');
     loginSpy.and.returnValue(new Promise(() => {}));
-    core.login({network: 'mockNetwork', reconnect: false});
+    core.login({network: 'mockNetwork',
+                loginType: uproxy_core_api.LoginType.INITIAL});
     expect(loginSpy).toHaveBeenCalled();
 
     // Core login will envoke login method on the same network object
     // This time it succeeds, so network object is moved from pending logins
     // to social_network.networks.
     loginSpy.and.returnValue(Promise.resolve());
-    core.login({network: 'mockNetwork', reconnect: false}).then(() => {
+    core.login({network: 'mockNetwork',
+                loginType: uproxy_core_api.LoginType.INITIAL}).then(() => {
       // should have called login on the same spy twice and only constructed
       // one network
       expect(loginSpy.calls.count()).toEqual(2);

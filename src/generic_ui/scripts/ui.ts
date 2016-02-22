@@ -1050,7 +1050,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     return this.core.login({
         network: network,
-        reconnect: false,
+        loginType: uproxy_core_api.LoginType.INITIAL,
         userName: userName
     }).then(() => {
       this.browserApi.hasInstalledThenLoggedIn = true;
@@ -1128,7 +1128,7 @@ export class UserInterface implements ui_constants.UiApi {
       // ping response).
       // TODO: this doesn't work quite right if the user is signed into multiple social networks
       if (this.model.reconnecting) {
-        this.core.login({network: network, reconnect: true}).then(() => {
+        this.core.login({network: network, loginType: uproxy_core_api.LoginType.RECONNECT}).then(() => {
           // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
           this.stopReconnect();
         }).catch((e) => {
