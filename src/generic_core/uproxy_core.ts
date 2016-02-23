@@ -118,7 +118,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   /**
    * Access various social networks using the Social API.
    */
-  public login = (loginArgs :uproxy_core_api.LoginArgs) :Promise<void> => {
+  public login = (loginArgs :uproxy_core_api.LoginArgs) :Promise<uproxy_core_api.LoginResult> => {
     var networkName = loginArgs.network;
 
     if (!(networkName in social_network.networks)) {
@@ -139,16 +139,21 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         userId: network.myInstance.userId
       });
 
-      return this.connectedNetworks_.get().then((networks :string[]) => {
+      // Save network to storage so we can reconnect on restart.
+      this.connectedNetworks_.get().then((networks :string[]) => {
         if (_.includes(networks, networkName)) {
           return;
         }
-
         networks.push(networkName);
-        return this.connectedNetworks_.set(networks);
+        this.connectedNetworks_.set(networks);
       }).catch((e) => {
         console.warn('Could not save connected networks', e);
       });
+
+      return {
+        userId: network.myInstance.userId,
+        instanceId: network.myInstance.instanceId
+      }
     }, (e) => {
       delete this.pendingNetworks_[networkName];
       throw e;

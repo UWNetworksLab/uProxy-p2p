@@ -182,6 +182,11 @@ export interface LoginArgs {
   userName ?:string;
 }
 
+export interface LoginResult {
+  userId     :string;
+  instanceId :string;
+}
+
 export interface NetworkInfo {
   natType ?:string;
   pmpSupport :boolean;
@@ -258,7 +263,7 @@ export interface CoreApi {
   // TODO: Implement this or remove it.
   // changeOption(option :string) : void;
 
-  login(loginArgs :LoginArgs) : Promise<void>;
+  login(loginArgs :LoginArgs) : Promise<LoginResult>;
   logout(networkInfo :social.SocialNetworkInfo) : Promise<void>;
 
   // TODO: use Event instead of attaching manual handler. This allows event

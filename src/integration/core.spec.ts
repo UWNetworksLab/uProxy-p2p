@@ -48,8 +48,8 @@ describe('uproxy core', function() {
   var promiseId = 0;
   var aliceUserPath :social.UserPath;
   var bobUserPath :social.UserPath;
-  var aliceOfferingInstanceId :string;
-  var bobOfferingInstanceId :string;
+  var aliceInstanceId :string;
+  var bobInstanceId :string;
   var aliceInstancePath :social.InstancePath;
   var bobInstancePath :social.InstancePath;
 
@@ -77,12 +77,12 @@ describe('uproxy core', function() {
     });
   });
 
-  var login = (uProxyModule :any, networkName :string) : Promise<Object> => {
+  var login = (uProxyModule :any, networkName :string) : Promise<string> => {
     return new Promise(function(fulfill, reject) {
       var thisPromiseId = ++promiseId;
       uProxyModule.once('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data :any) => {
         if (data.promiseId === thisPromiseId) {
-          fulfill(data);
+          fulfill(data.argsForCallback.instanceId);
         }
       });
       uProxyModule.emit(
@@ -110,13 +110,37 @@ describe('uproxy core', function() {
   // https://github.com/uProxy/uproxy/issues/2245
 
   it('logs in', (done) => {
-    var promises :Promise<Object>[] = [];
+    var promises :Promise<void>[] = [];
 
     // Login to GMail with Alice and Bob
-    promises.push(login(alice, 'GMail'));
-    promises.push(login(bob, 'GMail'));
+    promises.push(login(alice, 'GMail').then((instanceId :string) => {
+      aliceUserPath = {
+        // This is Alice's user relative to Bob's logged in uProxy.
+        network: {
+          name: 'GMail',
+          userId: BOB.USER_ID,
+        },
+        userId: ALICE.USER_ID
+      };
+      aliceInstanceId = instanceId;
+      aliceInstancePath = <social.InstancePath>(_.cloneDeep(aliceUserPath));
+      aliceInstancePath.instanceId = aliceInstanceId;
+    }));
+    promises.push(login(bob, 'GMail').then((instanceId :string) => {
+      bobUserPath = {
+        // This is Bob's user relative to Alice's logged in uProxy.
+        network: {
+          name: 'GMail',
+          userId: ALICE.USER_ID,
+        },
+        userId: BOB.USER_ID
+      };
+      bobInstanceId = instanceId;
+      bobInstancePath = <social.InstancePath>(_.cloneDeep(bobUserPath));
+      bobInstancePath.instanceId = bobInstanceId;
+    }));
 
-    promises.push(new Promise(function(fulfill, reject) {
+    promises.push(new Promise<void>(function(fulfill, reject) {
       alice.on('' + uproxy_core_api.Update.USER_FRIEND, (data :any) => {
         if (data.user.userId === BOB.USER_ID
            && data.allInstanceIds.length > 0) {
@@ -124,7 +148,7 @@ describe('uproxy core', function() {
         }
       })
     }));
-    promises.push(new Promise(function(fulfill, reject) {
+    promises.push(new Promise<void>(function(fulfill, reject) {
       bob.on('' + uproxy_core_api.Update.USER_FRIEND, (data :any) => {
         if (data.user.userId === ALICE.USER_ID
             && data.allInstanceIds.length > 0) {
@@ -152,24 +176,16 @@ describe('uproxy core', function() {
     });
   });  // end of it('logs in', ...
 
-  it('ask and get permission', (done) => {
-    aliceUserPath = {
-      // This is Alice's user relative to Bob's logged in uProxy.
-      network: {
-        name: 'GMail',
-        userId: BOB.USER_ID,
-      },
-      userId: ALICE.USER_ID
-    };
-    bobUserPath = {
-      // This is Bob's user relative to Alice's logged in uProxy.
-      network: {
-        name: 'GMail',
-        userId: ALICE.USER_ID,
-      },
-      userId: BOB.USER_ID
-    };
+  function hasInstance(instanceArray :social.InstanceData[], id :string) : boolean {
+    for (var i = 0; i < instanceArray.length; ++i) {
+      if (instanceArray[i].instanceId === id) {
+        return true;
+      }
+    }
+    return false;
+  }
 
+  it('ask and get permission', (done) => {
     var bobHandleFriend = function(data :any) {
       if (data.user.userId === ALICE.USER_ID
           && data.consent.remoteRequestsAccessFromLocal
@@ -183,10 +199,8 @@ describe('uproxy core', function() {
 
     var aliceHandleFriend = function(data :any) {
       if (data.user.userId === BOB.USER_ID
-          && data.offeringInstances.length > 0) {
-        bobOfferingInstanceId = data.offeringInstances[0].instanceId;
-        bobInstancePath = <social.InstancePath>(_.cloneDeep(bobUserPath));
-        bobInstancePath.instanceId = bobOfferingInstanceId;
+          && hasInstance(data.offeringInstances, bobInstanceId)) {
+        console.log('data.offeringInstances: ', data.offeringInstances);
         alice.off('' + uproxy_core_api.Update.USER_FRIEND, aliceHandleFriend);
         done();
       }
@@ -231,7 +245,7 @@ describe('uproxy core', function() {
 
     var aliceStopped = new Promise(function(fulfill, reject) {
       alice.once('' + uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND, (data :any) => {
-        expect(data).toEqual({instanceId: bobOfferingInstanceId, error: false});
+        expect(data).toEqual({instanceId: bobInstanceId, error: false});
         fulfill();
       });
     });
@@ -279,7 +293,7 @@ describe('uproxy core', function() {
       // the consent state yet.
       aliceLoggedIn.then(() => {
         if (data.user.userId === BOB.USER_ID
-            && data.offeringInstances.length > 0
+            && hasInstance(data.offeringInstances, bobInstanceId)
             && !data.consent.localGrantsAccessToRemote) {
           alice.off('' + uproxy_core_api.Update.USER_FRIEND, aliceHandleFriend);
           login(bob, 'GMail');
@@ -298,12 +312,9 @@ describe('uproxy core', function() {
           var bobReceivedConsent = new Promise(function(fulfill, reject) {
             var bobHandleFriend = function(data :any) {
               if (data.user.userId === ALICE.USER_ID
-                  && data.offeringInstances.length > 0
+                  && hasInstance(data.offeringInstances, aliceInstanceId)
                   && data.consent.remoteRequestsAccessFromLocal
                   && !data.consent.localGrantsAccessToRemote) {
-                aliceOfferingInstanceId = data.offeringInstances[0].instanceId;
-                aliceInstancePath = <social.InstancePath>(_.cloneDeep(aliceUserPath));
-                aliceInstancePath.instanceId = aliceOfferingInstanceId;
                 bob.off('' + uproxy_core_api.Update.USER_FRIEND, bobHandleFriend);
                 fulfill();
               }
@@ -330,7 +341,7 @@ describe('uproxy core', function() {
       }
     });
     alice.on('' + uproxy_core_api.Update.START_GIVING_TO_FRIEND, (data :any) => {
-      expect(data).toEqual(bobOfferingInstanceId);
+      expect(data).toEqual(bobInstanceId);
       done();
     });
     bob.emit('' + uproxy_core_api.Command.MODIFY_CONSENT,
