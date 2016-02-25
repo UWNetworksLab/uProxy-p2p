@@ -43,7 +43,7 @@ describe('uproxy core', function() {
   // and the 'stop proxying' test fails with a timeout of less than 20s.
   // We should speed up these actions!
   // https://github.com/uProxy/uproxy/issues/2247
-  (<any>jasmine).DEFAULT_TIMEOUT_INTERVAL = 20000;
+  (<any>jasmine).DEFAULT_TIMEOUT_INTERVAL = 120000;  // TODO: figure out value for shippable
 
   var alice :CoreConnector;
   var bob :CoreConnector;
