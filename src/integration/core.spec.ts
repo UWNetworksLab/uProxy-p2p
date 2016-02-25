@@ -40,7 +40,7 @@ describe('uproxy core', function() {
   // and the 'stop proxying' test fails with a timeout of less than 20s.
   // We should speed up these actions!
   // https://github.com/uProxy/uproxy/issues/2247
-  (<any>jasmine).DEFAULT_TIMEOUT_INTERVAL = 20000;
+  (<any>jasmine).DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;  // TODO: find the right value for shippable
 
   var uProxyFreedom = 'files/generic_core/freedom-module.json';
   var alice :any;
