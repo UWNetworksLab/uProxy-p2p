@@ -2,7 +2,7 @@ FROM ubuntu:trusty
 MAINTAINER Trevor Johnston <trevj@google.com>
 
 RUN apt-get update -qq
-RUN apt-get install -y openssh-server supervisor dnsutils jq
+RUN apt-get install -y openssh-server supervisor dnsutils jq nodejs npm
 
 RUN addgroup giver
 RUN adduser --disabled-password --gecos 'uProxy Giver' --ingroup giver giver
