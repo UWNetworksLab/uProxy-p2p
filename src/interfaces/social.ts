@@ -30,12 +30,18 @@ export interface StopProxyInfo {
   instanceId :string;
   error      :boolean;
 }
+export interface PermissionTokenInfo {
+  isRequesting :boolean;
+  isOffering :boolean;
+  createdAt :number;
+}
 
 export interface LocalInstanceState {
   instanceId       :string;
   userId           :string;
   userName         :string;
   imageData        :string;
+  invitePermissionTokens :{ [token :string] :PermissionTokenInfo };
 }
 
 export interface NetworkMessage {
@@ -307,7 +313,7 @@ export interface Network {
   /**
    * Generates an invite token
    */
-  getInviteUrl: (userId ?:string) => Promise<string>;
+  getInviteUrl: (isRequesting :boolean, isOffering :boolean, userId ?:string) => Promise<string>;
 
   /**
    * Generates an invite token
@@ -342,4 +348,3 @@ export interface Network {
 
   getKeyFromClientId : (clientId :string) => string;
 }
-

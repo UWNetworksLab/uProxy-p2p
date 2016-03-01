@@ -197,11 +197,19 @@ export interface EmailData {
   body :string;
 };
 
-// Data needed to accept user invites or to get an invite URL.
-export interface InvitationData {
+// Data needed to accept user invites.
+export interface AcceptInvitationData {
   network :social.SocialNetworkInfo;
   tokenObj ?:any;
   userId ?:string;
+};
+
+// Data needed to generate an invite URL.
+export interface GetInviteUrlData {
+  network :social.SocialNetworkInfo;
+  isRequesting :boolean;
+  isOffering :boolean;
+  userId  ?:string;
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
@@ -268,5 +276,5 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
+  getInviteUrl(data :GetInviteUrlData): Promise<string>;
 }
-

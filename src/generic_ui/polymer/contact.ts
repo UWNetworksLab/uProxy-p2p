@@ -109,6 +109,8 @@ Polymer({
         name: this.contact.network.name,
         userId: this.contact.network.userId // Local userId
       },
+      isOffering: false,  // TODO: explain..  No permission needed here at uproxy/uproxy layer..  only on cloud
+      isRequesting: false,
       userId: this.contact.userId // Cloud instance userId
     }).then((cloudInviteUrl: string) => {
       ui.showDialog(ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"), '', ui.i18n_t("OK"),

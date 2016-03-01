@@ -210,7 +210,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.SEND_INVITATION, data);
   }
 
-  getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {
+  getInviteUrl = (data :uproxy_core_api.GetInviteUrlData): Promise<string> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_INVITE_URL, data);
   }
 
@@ -243,7 +243,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_VERSION);
   }
 
-  acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void>=> {
+  acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void>=> {
     return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, data);
   }
 }  // class CoreConnector

@@ -240,7 +240,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public getInviteUrl = (userId ?:string) : Promise<string> => {
+    public getInviteUrl = (isRequesting :boolean, isOffering :boolean, userId ?:string) : Promise<string> => {
       throw new Error('Operation not implemented');
     }
 
@@ -616,9 +616,19 @@ export function notifyUI(networkName :string, userId :string) {
     // with someone else.
     // For other social networks, the url adds the local user as a uproxy
     // contact for friends who use the url. The userId isn't used.
-    public getInviteUrl = (userId ?:string) : Promise<string> => {
+    public getInviteUrl = (isRequesting :boolean, isOffering :boolean, userId ?:string) : Promise<string> => {
       return this.freedomApi_.inviteUser(userId || '')
           .then((networkData: Object) => {
+        // Set permissionData only if the user is requesting / granting access.
+        var permissionData :any;
+        if (access !== social.PermissionTokenAccess.FRIEND_ONLY) {
+          permissionData = {
+            token: this.myInstance.generateInvitePermissionToken(access),
+            userId: this.myInstance.userId,
+            instanceId: this.myInstance.instanceId
+          };
+        }
+
         if (this.name === 'Quiver') {
           // TODO: once we think all/most users have versions of uProxy
           // that support jsurl style invites, we should update all our
@@ -629,14 +639,20 @@ export function notifyUI(networkName :string, userId :string) {
             'userName=' + encodeURIComponent(this.myInstance.userName),
             'networkData=' + jsurl.stringify(networkData)
           ];
+          if (permissionData) {
+            urlParams.push('permission=' + jsurl.stringify(permissionData));
+          }
           return 'https://www.uproxy.org/invite?' + urlParams.join('&');
         } else {
-          var tokenObj = {
+          var tokenObj :any = {
             v: 1,
             networkName: this.name,
             userName: this.myInstance.userName,
             networkData: networkData
           };
+          if (permissionData) {
+            tokenObj['permission'] = permissionData;
+          }
           return 'https://www.uproxy.org/invite/' +
               btoa(JSON.stringify(tokenObj));
         }

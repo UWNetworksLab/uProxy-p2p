@@ -25,6 +25,7 @@ import storage = globals.storage;
     public clientId :string;
     public userName :string;
     public imageData :string;
+    public invitePermissionTokens :{ [token :string] :social.PermissionTokenInfo } = {};
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -92,7 +93,8 @@ import storage = globals.storage;
         instanceId: this.instanceId,
         userId: this.userId,
         userName: this.userName,
-        imageData: this.imageData
+        imageData: this.imageData,
+        invitePermissionTokens: this.invitePermissionTokens
       };
     }
     public restoreState = (state:social.LocalInstanceState) :void => {
@@ -100,6 +102,9 @@ import storage = globals.storage;
       if (typeof this.userName === 'undefined') {
         this.userName = state.userName;
         this.imageData = state.imageData;
+      }
+      if (typeof state.invitePermissionTokens !== 'undefined') {
+        this.invitePermissionTokens = state.invitePermissionTokens;
       }
     }
 
@@ -109,6 +114,24 @@ import storage = globals.storage;
         log.error('Could not save new LocalInstance: ',
             this.instanceId, e.toString());
       });
+    }
+
+    public generateInvitePermissionToken = (access :social.PermissionTokenAccess) : string => {
+      if (access === social.PermissionTokenAccess.FRIEND_ONLY) {
+        // sanity check
+        throw Error('Not generating permission token for FRIEND_ONLY');
+      }
+      var permissionToken = String(Math.random());
+      this.invitePermissionTokens[permissionToken] = {
+        access: access,
+        createdAt: Date.now()
+      };
+      this.saveToStorage();
+      return permissionToken;
+    }
+
+    public isValidInvite = (permissionToken :string) : boolean => {
+      return permissionToken in this.invitePermissionTokens;
     }
 
   }  // class local_instance.LocalInstance

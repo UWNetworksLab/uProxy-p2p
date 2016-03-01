@@ -311,7 +311,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.inviteUser(data.userName);
   }
 
-  public acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void> => {
+  public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
     var networkName = data.network.name;
     var networkUserId = data.network.userId;
     if (!networkUserId) {
@@ -323,9 +323,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.acceptInvitation(data.tokenObj, data.userId);
   }
 
-  public getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {
+  public getInviteUrl = (data :uproxy_core_api.GetInviteUrlData): Promise<string> => {
     var network = social_network.networks[data.network.name][data.network.userId];
-    return network.getInviteUrl(data.userId || '');
+    return network.getInviteUrl(data.access, data.userId || '');
   }
 
   public sendEmail = (data :uproxy_core_api.EmailData) : void => {

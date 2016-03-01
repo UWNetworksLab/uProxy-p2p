@@ -12,7 +12,7 @@ var inviteUser = {
   generateInviteUrl: function(name :string) {
     var network = model.getNetwork(name);
     var networkInfo = { name: network.name, userId: network.userId };
-    return core.getInviteUrl({ network: networkInfo });
+    return core.getInviteUrl({ network: networkInfo, isRequesting: false, isOffering: false});  // TODO: offering/requesting
   },
   sendToFacebookFriend: function() {
     this.generateInviteUrl('Facebook-Firebase-V2').then((inviteUrl :string) => {

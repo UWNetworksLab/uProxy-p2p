@@ -1,18 +1,23 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
+import social = require('../../interfaces/social');
+
 var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
 
 Polymer({
-  generateInviteUrl: function(name: string) {
-    var selectedNetwork = model.getNetwork(name);
-    var info = {
-      name: selectedNetwork.name,
-      userId: selectedNetwork.userId
-    };
-    return core.getInviteUrl({ network: info }).then((inviteUrl:string) => {
+  generateInviteUrl: function(networkName: string) {
+    var selectedNetwork = model.getNetwork(networkName);
+    return core.getInviteUrl({
+      network: {
+        name: selectedNetwork.name,
+        userId: selectedNetwork.userId
+      },
+      isRequesting: this.requestAccess,
+      isOffering: this.offerAccess
+    }).then((inviteUrl:string) => {
       this.inviteUrl = inviteUrl;
       return selectedNetwork;
     });
@@ -50,23 +55,10 @@ Polymer({
       ui.showDialog('', ui.i18n_t('GITHUB_INVITE_SEND_FAILED'));
     });
   },
-  addCloudInstance: function() {
-    var socialNetworkInfo = {
-      name: "Cloud",
-      userId: "" /* The current user's ID will be determined by the core. */
-    };
-    core.acceptInvitation({
-        network: socialNetworkInfo,
-        token: this.cloudInstanceInput
-      }).then(() => {
-      ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
-      this.closeInviteUserPanel();
-    }).catch(() => {
-      ui.showDialog('', ui.i18n_t('CLOUD_INVITE_FAILED'));
-    });
-  },
   openInviteUserPanel: function() {
     this.inviteUrl = '';
+    this.offerAccess = false;
+    this.requestAccess = false;
     if (this.network === 'Quiver') {
       this.generateInviteUrl('Quiver').then(() => {
         this.$.QuiverDialog.open();
@@ -88,5 +80,7 @@ Polymer({
     this.inviteUserEmail = '';
     this.model = model;
     this.userIdInput = '';
+    this.offerAccess = false;
+    this.requestAccess = false;
   }
 });
