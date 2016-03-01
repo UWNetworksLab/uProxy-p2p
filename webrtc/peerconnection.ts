@@ -454,21 +454,17 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       case signals.Type.OFFER:
         return this.handleOfferSignalMessage_(message.description).then(
             this.fulfillHaveRemoteDescription_);
-        break;
       // Answer to an offer we sent
       case signals.Type.ANSWER:
         return this.handleAnswerSignalMessage_(message.description).then(
             this.fulfillHaveRemoteDescription_);
-        break;
       // Add remote ice candidate.
       case signals.Type.CANDIDATE:
         return this.onceHaveRemoteDescription_.then(() => {
           return this.handleCandidateSignalMessage_(message.candidate);
         });
-        break;
       case signals.Type.NO_MORE_CANDIDATES:
         return Promise.resolve<void>();
-        break;
       default:
         return Promise.reject(new Error(
             'unexpected signalling message type ' + message.type));

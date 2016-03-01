@@ -245,7 +245,7 @@ class Pipe {
         if (mirrorSet.signaled) {
           var endpoint :net.Endpoint = {
             address: remoteAddress,
-            port: port
+            port: parseInt(port)
           };
           this.getMirrorSocketAndEmit_(endpoint, this.maxSocketsPerInterface_);
         }
