@@ -1089,23 +1089,24 @@ export class UserInterface implements ui_constants.UiApi {
     var getConfirmation = Promise.resolve<void>();
     if (showConfirmation) {
       // Check if we are getting or sharing on this network.
-      var isGetting = false;
+      var isGettingForThisNetwork = false;
       if (this.instanceGettingAccessFrom_) {
         var user = this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_];
         if (user && user.network.name === networkInfo.name) {
-          isGetting = true;
+          isGettingForThisNetwork = true;
         }
       }
-      var isSharing = false;
+      var isSharingForThisNetwork = false;
       var sharingTo = Object.keys(this.instancesGivingAccessTo);
       for (var i = 0; i < sharingTo.length; ++i) {
         user = this.mapInstanceIdToUser_[sharingTo[i]];
         if (user && user.network.name === networkInfo.name) {
-          isSharing = true;
+          isSharingForThisNetwork = true;
           break;
         }
       }
-      getConfirmation = this.getLogoutConfirmation_(isGetting, isSharing);
+      getConfirmation = this.getLogoutConfirmation_(
+          isGettingForThisNetwork, isSharingForThisNetwork);
     }
 
     return getConfirmation.then(() => {

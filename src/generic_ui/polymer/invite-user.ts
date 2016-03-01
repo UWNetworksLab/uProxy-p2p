@@ -131,7 +131,7 @@ var inviteUser = {
     }
 
     getConfirmation.then(() => {
-      return ui.logoutAll(false)  // Don't show confirmation again.
+      return ui.logoutAll(false);  // Don't show confirmation again.
     }).then(() => {
       if (this.closeInviteUserPanel) {
         this.closeInviteUserPanel();
