@@ -204,7 +204,18 @@ var log :logging.Log = new logging.Log('remote-user');
       switch (msg.type) {
         case social.PeerMessageType.INSTANCE:
           this.syncInstance_(clientId, <social.InstanceHandshake>msg.data,
-              msg.version).catch((e) => {
+              msg.version).then(() => {
+              // TODO: this is totally hacky and weird looking.  maybe syncInstance should just return the
+              // instance?
+              console.log('after sync instance!');
+              var instance = this.getInstance(this.clientToInstance(clientId));
+              if (instance.unusedPermissionToken) {
+                console.log('found unusedPermissionToken!');
+                this.sendPermissionToken(clientId, instance.unusedPermissionToken);
+                instance.unusedPermissionToken = null;
+                // TODO: save user(?), instance, update ui
+              }
+            }).catch((e) => {
             log.error('syncInstance_ failed for ', msg.data);
           });
           return;
@@ -227,6 +238,32 @@ var log :logging.Log = new logging.Log('remote-user');
         case social.PeerMessageType.INSTANCE_REQUEST:
           log.debug('received instance request', clientId);
           this.sendInstanceHandshake(clientId);
+          return;
+
+        case social.PeerMessageType.PERMISSION_TOKEN:
+        // TODO: more error checking...  do I need a try/catch?
+          var token = (<social.PermissionTokenMessage>msg.data).token;
+          var tokenInfo = this.network.myInstance.invitePermissionTokens[token];
+          if (!tokenInfo) {
+            // TODO: warning intead of error
+            console.error('token not found');
+            return;
+          }
+          // TODO: how can I prevent the token from being reused by the same
+          // user multiple times?  i.e. if my token grants them access,
+          // then i later reject them, then they later resend the same token?
+          // can i even distinguish this from multiple use tokens?  they
+          // could always just create a new account....
+          if (tokenInfo.isOffering) {
+            this.consent.localGrantsAccessToRemote = true;
+          }
+          if (tokenInfo.isRequesting) {
+            this.consent.localRequestsAccessFromRemote = true;
+          }
+          // Send them a new instance handshake with updated consent.
+          this.sendInstanceHandshake(clientId);
+          this.saveToStorage();
+          this.notifyUI();  // TODO: what if we don't have the name yet?????
           return;
 
         default:
@@ -532,6 +569,14 @@ var log :logging.Log = new logging.Log('remote-user');
       }
     }
 
+    public sendPermissionToken = (clientId :string, token :string) => {
+      var message = {
+        type: social.PeerMessageType.PERMISSION_TOKEN,
+        data: {token: token}
+      }
+      this.network.send(this, clientId, message);
+    }
+
     public sendInstanceHandshake = (clientId :string) : Promise<void> => {
       var myInstance = this.network.myInstance;
       if (!myInstance) {
@@ -632,6 +677,48 @@ var log :logging.Log = new logging.Log('remote-user');
         }
       }
       this.consent.remoteRequestsAccessFromLocal = false;
+    }
+
+    public handleInvitePermissions = (permission :social.InviteTokenPermissions) => {
+      if (!permission.isRequesting && !permission.isOffering) {
+        return;  // Nothing to do.
+      }
+
+      // Get or create an instance
+      var instanceId = permission.instanceId;
+      var instance = this.getInstance(instanceId);
+      if (!instance) {
+        // Create a simulated instance handshake using permission information
+        var handshake :social.InstanceHandshake = {
+          instanceId: instanceId,
+          consent: {
+            isOffering: permission.isOffering,
+            isRequesting: permission.isRequesting
+          }
+        };
+        // TODO: this is a mess.  can i just call syncInstance even though I don't have a clientId?
+        instance = new remote_instance.RemoteInstance(this, instanceId);
+        this.instances_[instanceId] = instance;
+        instance.update(handshake, 1);  // Assume lowest possible message version.
+      }
+
+      // 2. set a queued permission_token message on the instance
+      // TODO: what if they are already online?
+      if (this.isInstanceOnline(instanceId)) {
+        var clientId = this.instanceToClient(instanceId);
+        // TODO:
+        this.sendPermissionToken(clientId, permission.token);
+      } else {
+        instance.unusedPermissionToken = permission.token;
+      }
+
+      // 3. save user and instance to storage, notify UI
+      this.saveToStorage();
+      instance.saveToStorage();
+      this.notifyUI();  // TODO: what if we don't have the name yet?????
+      // TODO: can we just pass the name into this method?  we have it in the invite data....
+
+      // 4. make sure we properly restore queued permission_token stuff (this is probably in remote-instance)
     }
 
   }  // class User

@@ -325,7 +325,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public getInviteUrl = (data :uproxy_core_api.GetInviteUrlData): Promise<string> => {
     var network = social_network.networks[data.network.name][data.network.userId];
-    return network.getInviteUrl(data.access, data.userId || '');
+    return network.getInviteUrl(data);
   }
 
   public sendEmail = (data :uproxy_core_api.EmailData) : void => {

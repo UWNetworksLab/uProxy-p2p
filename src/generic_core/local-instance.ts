@@ -116,22 +116,20 @@ import storage = globals.storage;
       });
     }
 
-    public generateInvitePermissionToken = (access :social.PermissionTokenAccess) : string => {
-      if (access === social.PermissionTokenAccess.FRIEND_ONLY) {
+    public generateInvitePermissionToken = (isRequesting :boolean, isOffering :boolean) : string => {
+      if (!isRequesting && !isOffering) {
         // sanity check
-        throw Error('Not generating permission token for FRIEND_ONLY');
+        throw Error(
+            'Not generating permission token with !isRequesting && !isOffering');
       }
       var permissionToken = String(Math.random());
       this.invitePermissionTokens[permissionToken] = {
-        access: access,
+        isRequesting: isRequesting,
+        isOffering: isOffering,
         createdAt: Date.now()
       };
       this.saveToStorage();
       return permissionToken;
-    }
-
-    public isValidInvite = (permissionToken :string) : boolean => {
-      return permissionToken in this.invitePermissionTokens;
     }
 
   }  // class local_instance.LocalInstance

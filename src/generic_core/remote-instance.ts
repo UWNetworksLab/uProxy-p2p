@@ -90,6 +90,8 @@ import ui = ui_connector.connector;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
+    public unusedPermissionToken :string;  // TODO: save/load to/from storage.
+
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -377,7 +379,7 @@ import ui = ui_connector.connector;
       this.user.updateRemoteRequestsAccessFromLocal();
     }
 
-    private saveToStorage = () => {
+    public saveToStorage = () => {  // TODO: make private again?
       return this.onceLoaded.then(() => {
         var state = this.currentState();
         return storage.save(this.getStorePath(), state)

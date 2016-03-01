@@ -240,7 +240,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public getInviteUrl = (isRequesting :boolean, isOffering :boolean, userId ?:string) : Promise<string> => {
+    public getInviteUrl = (data :uproxy_core_api.GetInviteUrlData) : Promise<string> => {
       throw new Error('Operation not implemented');
     }
 
@@ -593,7 +593,12 @@ export function notifyUI(networkName :string, userId :string) {
       } else if (userId) {
         networkData = userId;
       }
-      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+      return this.freedomApi_.acceptUserInvitation(networkData).then(() => {
+        if (tokenObj && tokenObj.permission) {
+          var user = this.getOrAddUser_(tokenObj.permission.userId);
+          user.handleInvitePermissions(tokenObj.permission);
+        }
+      }).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' +
             JSON.stringify(networkData), e.message);
       });
@@ -611,21 +616,25 @@ export function notifyUI(networkName :string, userId :string) {
 
     // Returns an invite url for the user to send to friends out-of-band.
     //
-    // For cloud, the url gives friends access to a cloud server. The userId
+    // For cloud, the url gives friends access to a cloud server. The data.userId
     // identifies a cloud server owned by the user, which is being shared
     // with someone else.
     // For other social networks, the url adds the local user as a uproxy
     // contact for friends who use the url. The userId isn't used.
-    public getInviteUrl = (isRequesting :boolean, isOffering :boolean, userId ?:string) : Promise<string> => {
-      return this.freedomApi_.inviteUser(userId || '')
+    public getInviteUrl = (data :uproxy_core_api.GetInviteUrlData) : Promise<string> => {
+      return this.freedomApi_.inviteUser(data.userId || '')
           .then((networkData: Object) => {
         // Set permissionData only if the user is requesting / granting access.
         var permissionData :any;
-        if (access !== social.PermissionTokenAccess.FRIEND_ONLY) {
+        if (data.isRequesting || data.isOffering) {
+          var token = this.myInstance.generateInvitePermissionToken(
+              data.isRequesting, data.isOffering);
           permissionData = {
-            token: this.myInstance.generateInvitePermissionToken(access),
+            token: token,
             userId: this.myInstance.userId,
-            instanceId: this.myInstance.instanceId
+            instanceId: this.myInstance.instanceId,
+            isRequesting: data.isRequesting,
+            isOffering: data.isOffering
           };
         }
 

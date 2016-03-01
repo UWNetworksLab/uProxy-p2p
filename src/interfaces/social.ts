@@ -30,6 +30,7 @@ export interface StopProxyInfo {
   instanceId :string;
   error      :boolean;
 }
+
 export interface PermissionTokenInfo {
   isRequesting :boolean;
   isOffering :boolean;
@@ -133,7 +134,8 @@ export enum PeerMessageType {
   SIGNAL_FROM_CLIENT_PEER,
   SIGNAL_FROM_SERVER_PEER,
   // Request that an instance message be sent back from a peer.
-  INSTANCE_REQUEST
+  INSTANCE_REQUEST,
+  PERMISSION_TOKEN
 }
 
 export interface PeerMessage {
@@ -165,12 +167,18 @@ export interface InstanceHandshake {
   instanceId  :string;
   consent     :ConsentWireState;
   description ?:string;
-  name        :string;
-  userId      :string;
+  name        ?:string;  // TODO: can we remove this now that GTalk is gone?
+  userId      ?:string;  // TODO: can we remove this now that GTalk is gone?
   // publicKey is not set for networks which include the public key in their
   // clientId (Quiver).
   publicKey   ?:string;
 }
+
+// This is only used for sending the received permission token back to the
+// user who generated the token.
+export interface PermissionTokenMessage {
+  token :string;
+};
 
 // Describing whether or not a remote instance is currently accessing or not,
 // assuming consent is GRANTED for that particular pathway.
@@ -241,11 +249,20 @@ export interface SignallingMetadata {
   proxyingId ?:string;
 }
 
+export interface InviteTokenPermissions {
+  token :string;
+  isRequesting :boolean;
+  isOffering :boolean;
+  userId :string;  // TODO: should these be at InviteTokenData level?
+  instanceId :string;
+}
+
 export interface InviteTokenData {
   v :number;  // version
   networkName :string;
   userName :string;
   networkData :string|Object;
+  permission ?:InviteTokenPermissions;
 }
 
 /**
@@ -313,7 +330,7 @@ export interface Network {
   /**
    * Generates an invite token
    */
-  getInviteUrl: (isRequesting :boolean, isOffering :boolean, userId ?:string) => Promise<string>;
+  getInviteUrl: (data :uproxy_core_api.GetInviteUrlData) => Promise<string>;
 
   /**
    * Generates an invite token

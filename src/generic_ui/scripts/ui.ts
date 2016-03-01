@@ -545,11 +545,17 @@ export class UserInterface implements ui_constants.UiApi {
       var params = uparams(invite);
       if (params && params['networkName']) {
         // New style invite using URL params.
+        var permission :any;
+        if (params['permission']) {
+          // TODO: need to test this with v2 invites, haven't tried yet!!!
+          permission = jsurl.parse(params['permission']);
+        }
         return {
           v: parseInt(params['v'], 10),
           networkData: jsurl.parse(params['networkData']),
           networkName: params['networkName'],
-          userName: params['userName']
+          userName: params['userName'],
+          permission: permission
         }
       } else {
         // Old v1 invites are base64 encoded JSON
@@ -567,7 +573,8 @@ export class UserInterface implements ui_constants.UiApi {
           v: 1,
           networkData: networkData,
           networkName: parsedObj.networkName,
-          userName: parsedObj.userName
+          userName: parsedObj.userName,
+          permission: parsedObj.permission
         };
       }
     } catch(e) {

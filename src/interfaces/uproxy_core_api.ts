@@ -209,7 +209,7 @@ export interface GetInviteUrlData {
   network :social.SocialNetworkInfo;
   isRequesting :boolean;
   isOffering :boolean;
-  userId  ?:string;
+  userId ?:string;
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
