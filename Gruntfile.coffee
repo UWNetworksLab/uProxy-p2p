@@ -243,7 +243,12 @@ gruntConfig = {
   # Create commands to run in different directories
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
   ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
-  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin add https://github.com/gitlaura/cordova-plugin-iosrtc.git'
+
+  # Temporarily remove cordova-plugin-chrome-apps-proxy and add gitlaura's forked version
+  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/gitlaura/cordova-plugin-chrome-apps-proxy.git'
+
+  # Hook needed to use 'cca run ios' command. Can only run after cordova-plugin-iosrtc has been added.
+  addIosrtcHookCmd: 'cp plugins/cordova-plugin-iosrtc/extra/hooks/iosrtc-swift-support.js hooks/iosrtc-swift-support.js'
 
   exec: {
     ccaCreateDev: {
@@ -294,6 +299,10 @@ gruntConfig = {
     ccaAddPluginsIosBuild: {
       cwd: '<%= iosDevPath %>'
       command: '<%= ccaAddPluginsIosCmd %>'
+    }
+    addIosrtcHook: {
+      cwd: '<%= iosDevPath %>'
+      command: '<%= addIosrtcHookCmd %>'
     }
     ccaPrepareIosDev: {
       cwd: '<%= iosDevPath %>'
@@ -921,6 +930,7 @@ taskManager.add 'build_ios', [
   'build_cca'
   'exec:ccaCreateIosDev'
   'exec:ccaAddPluginsIosBuild'
+  'exec:addIosrtcHook'
   'exec:ccaPrepareIosDev'
 ]
 
