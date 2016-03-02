@@ -175,7 +175,7 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
         echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
 
         # Optional build args aren't very flexible...confine the messiness here.
-        ISSUE_INVITE_ARGS=
+        ISSUE_INVITE_ARGS="-c"
         if [ -n "$INVITE_CODE" ]
         then
             ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -i $INVITE_CODE"
@@ -196,4 +196,4 @@ fi
 
 # Output the invitation URL.
 INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
-echo -e "\nINVITE CODE URL:\nhttps://www.uproxy.org/invite/$INVITE_CODE"
+echo -e "\nINVITE CODE URL:\n$INVITE_CODE"
