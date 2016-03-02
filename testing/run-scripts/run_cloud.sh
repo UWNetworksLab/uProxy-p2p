@@ -175,7 +175,7 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
         echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
 
         # Optional build args aren't very flexible...confine the messiness here.
-        ISSUE_INVITE_ARGS=
+        ISSUE_INVITE_ARGS="-c"
         if [ -n "$INVITE_CODE" ]
         then
             ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -i $INVITE_CODE"

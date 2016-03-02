@@ -9,26 +9,28 @@ set -e
 
 INVITE_CODE=
 USERNAME=getter
+COMPLETE=false
 
 function usage () {
-  echo "$0 [-u username] [-i invite code]"
+  echo "$0 [-u username] [-i invite code] [-c]"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
+  echo "  -c: output complete invite URL params (for use with cloud)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts i:u:h? opt; do
+while getopts i:u:ch? opt; do
   case $opt in
     i) INVITE_CODE="$OPTARG" ;;
     u) USERNAME="$OPTARG" ;;
+    c) COMPLETE=true ;;
     *) usage ;;
   esac
 done
 shift $((OPTIND-1))
 
 TMP=`mktemp -d`
-npm install jsurl &>/dev/null
 
 # Either read the supplied invite code or generate a new one.
 if [ -n "$INVITE_CODE" ]
@@ -70,6 +72,11 @@ cat $TMP/id_rsa.pub >> $HOMEDIR/.ssh/authorized_keys
 PUBLIC_IP=`cat /hostname`
 export CLOUD_INSTANCE_DETAILS="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
 
-CLOUD_INSTANCE_DETAILS=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS');"`
-
-echo "v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS&userName=$USERNAME"
+if [ "$COMPLETE" = true]
+then
+  npm install jsurl &>/dev/null
+  CLOUD_INSTANCE_DETAILS=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS');"`
+  echo "v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS&userName=$USERNAME"
+else
+  echo $CLOUD_INSTANCE_DETAILS
+fi
