@@ -124,12 +124,15 @@ var inviteUser = {
     // copypaste connection.
     var getConfirmation = Promise.resolve<void>();
     if (model.onlineNetworks.length > 0) {
-      var confirmationMessage =
+      var confirmationMessage = (ui.isGettingAccess() || ui.isGivingAccess()) ?
+          ui.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING') :
           ui.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE');
       getConfirmation = ui.getConfirmation('', confirmationMessage);
     }
 
-    getConfirmation.then(ui.logoutAll).then(() => {
+    getConfirmation.then(() => {
+      return ui.logoutAll(false);  // Don't show confirmation again.
+    }).then(() => {
       if (this.closeInviteUserPanel) {
         this.closeInviteUserPanel();
       }
