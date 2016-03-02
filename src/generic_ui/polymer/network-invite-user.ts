@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import social = require('../../interfaces/social');
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -10,16 +11,28 @@ var core = ui_context.core;
 Polymer({
   generateInviteUrl: function(networkName: string) {
     var selectedNetwork = model.getNetwork(networkName);
-    return core.getInviteUrl({
+    var CreateInviteArgs :uproxy_core_api.CreateInviteArgs = {
       network: {
         name: selectedNetwork.name,
         userId: selectedNetwork.userId
       },
-      isRequesting: this.requestAccess,
-      isOffering: this.offerAccess
-    }).then((inviteUrl:string) => {
+      isLocalRequesting: this.requestAccess,
+      isLocalOffering: this.offerAccess
+    };
+    return core.getInviteUrl(CreateInviteArgs).then((inviteUrl:string) => {
       this.inviteUrl = inviteUrl;
       return selectedNetwork;
+    });
+  },
+  sendToFacebookFriend: function() {
+    this.generateInviteUrl('Facebook-Firebase-V2').then(() => {
+      var facebookUrl =
+          'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
+          + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
+      ui.openTab(facebookUrl);
+      this.closeInviteUserPanel();
+      // TODO: remove this (and translation label)?
+      // ui.showDialog('', ui.i18n_t('FACEBOOK_INVITE_IN_BROWSER'));
     });
   },
   sendToGMailFriend: function() {
@@ -42,9 +55,14 @@ Polymer({
   },
   inviteGithubFriend: function() {
     var selectedNetwork = model.getNetwork('GitHub');
-    core.inviteUser({
-      networkId: selectedNetwork.name,
-      userName: this.userIdInput
+    core.inviteGitHubUser({
+      network: {
+        name: selectedNetwork.name,
+        userId: selectedNetwork.userId
+      },
+      isRequesting: this.requestAccess,
+      isOffering: this.offerAccess,
+      userId: this.userIdInput
     }).then(() => {
       this.closeInviteUserPanel();
       ui.showDialog('',
@@ -59,9 +77,10 @@ Polymer({
     this.inviteUrl = '';
     this.offerAccess = false;
     this.requestAccess = false;
+    this.quiverInviteMessage = '';
     if (this.network === 'Quiver') {
       this.generateInviteUrl('Quiver').then(() => {
-        this.$.QuiverDialog.open();
+        this.$.networkInviteUserPanel.open();
       });
     } else {
       this.$.networkInviteUserPanel.open();
@@ -69,17 +88,22 @@ Polymer({
   },
   closeInviteUserPanel: function() {
     this.$.networkInviteUserPanel.close();
-    this.$.QuiverDialog.close();
   },
-  select: function(e :Event, d :Object, input :HTMLInputElement) {
+  selectQuiverInvite: function(e :Event, d :Object, input :HTMLInputElement) {
     input.focus();
     input.select();
+    this.quiverInviteMessage = '';
+  },
+  updateQuiverInvite: function() {
+    this.generateInviteUrl('Quiver');
+    this.quiverInviteMessage = 'Invite URL has changed, please be sure to copy the last invitation';  // TODO: translate
   },
   ready: function() {
     this.inviteUrl = '';
     this.inviteUserEmail = '';
     this.model = model;
     this.userIdInput = '';
+    this.quiverInviteMessage = '';
     this.offerAccess = false;
     this.requestAccess = false;
   }

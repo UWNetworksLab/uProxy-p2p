@@ -205,12 +205,11 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
-  // TODO: this should take a SocialNetworkInfo instead of networkId
-  inviteUser = (data: { networkId: string; userName: string }): Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.SEND_INVITATION, data);
+  inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.INVITE_GITHUB_USER, data);
   }
 
-  getInviteUrl = (data :uproxy_core_api.GetInviteUrlData): Promise<string> => {
+  getInviteUrl = (data :uproxy_core_api.CreateInviteArgs): Promise<string> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_INVITE_URL, data);
   }
 

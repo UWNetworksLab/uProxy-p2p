@@ -254,10 +254,10 @@ var log :logging.Log = new logging.Log('remote-user');
           // then i later reject them, then they later resend the same token?
           // can i even distinguish this from multiple use tokens?  they
           // could always just create a new account....
-          if (tokenInfo.isOffering) {
+          if (tokenInfo.isLocalOffering) {
             this.consent.localGrantsAccessToRemote = true;
           }
-          if (tokenInfo.isRequesting) {
+          if (tokenInfo.isLocalRequesting) {
             this.consent.localRequestsAccessFromRemote = true;
           }
           // Send them a new instance handshake with updated consent.
@@ -324,24 +324,6 @@ var log :logging.Log = new logging.Log('remote-user');
       }
       this.clientToInstanceMap_[clientId] = instanceId;
       this.instanceToClientMap_[instanceId] = clientId;
-
-      // Set user's name from the instance, only if it is not yet set.
-      // This is a work-around for not getting a UserProfile for some users,
-      // see https://github.com/uProxy/uproxy/issues/1510
-      if (instanceHandshake.name && this.name == 'pending') {
-        log.info('No UserProfile available, setting name from instance');
-        this.name = instanceHandshake.name;
-        this.fulfillNameReceived_(instanceHandshake.name);
-      } else if (instanceHandshake.userId && this.name == 'pending') {
-        // Sometimes users don't get their own UserProfile.  In this case
-        // if we haven't received their UserProfile either, we should set
-        // their name to what they believe their userId is.  For GTalk users,
-        // this should be the non-anomized ID (i.e. not a
-        // @public.talk.google.com ID).
-        log.info('No UserProfile available, setting name from userId');
-        this.name = instanceHandshake.userId;
-        this.fulfillNameReceived_(instanceHandshake.userId);
-      }
 
       // Create or update the Instance object.
       var instance = this.instances_[instanceId];
@@ -444,6 +426,7 @@ var log :logging.Log = new logging.Log('remote-user');
         isOnline: isOnline
       };
     }
+
     /**
      * Send the latest full state about everything in this user to the UI.
      * Only sends to UI if the user is ready to be visible. (has UserProfile)
@@ -451,7 +434,7 @@ var log :logging.Log = new logging.Log('remote-user');
     public notifyUI = () : void => {
       this.onceLoaded.then(() => {
         var state = this.currentStateForUI();
-        if (state) {
+        if (state) {  // state may be null if we don't yet have a user name.
           ui.connector.syncUser(state);
         }
       });
@@ -598,8 +581,6 @@ var log :logging.Log = new logging.Log('remote-user');
               isRequesting: this.consent.localRequestsAccessFromRemote,
               isOffering: this.consent.localGrantsAccessToRemote
             },
-            name: myInstance.userName,
-            userId: myInstance.userId,
             // This is not yet used for encrypted networks like Quiver.
             // TODO: once we have key verification, remove publicKey
             // from Quiver instance messages if it's not used, e.g. if we
@@ -679,13 +660,20 @@ var log :logging.Log = new logging.Log('remote-user');
       this.consent.remoteRequestsAccessFromLocal = false;
     }
 
-    public handleInvitePermissions = (permission :social.InviteTokenPermissions) => {
+    public handleInvitePermissions = (tokenObj ?:social.InviteTokenData) => {
+      var permission = tokenObj.permission;
       if (!permission.isRequesting && !permission.isOffering) {
         return;  // Nothing to do.
       }
 
+      // Ensure that user name is set (in case this is a newly constructed
+      // user object).
+      if (!this.name || this.name === 'pending') {
+        this.name = tokenObj.userName;
+      }
+
       // Get or create an instance
-      var instanceId = permission.instanceId;
+      var instanceId = tokenObj.instanceId;
       var instance = this.getInstance(instanceId);
       if (!instance) {
         // Create a simulated instance handshake using permission information
@@ -699,26 +687,23 @@ var log :logging.Log = new logging.Log('remote-user');
         // TODO: this is a mess.  can i just call syncInstance even though I don't have a clientId?
         instance = new remote_instance.RemoteInstance(this, instanceId);
         this.instances_[instanceId] = instance;
-        instance.update(handshake, 1);  // Assume lowest possible message version.
+        // Assume lowest possible version until we get a real instance message.
+        instance.update(handshake, 1);
       }
 
-      // 2. set a queued permission_token message on the instance
-      // TODO: what if they are already online?
       if (this.isInstanceOnline(instanceId)) {
         var clientId = this.instanceToClient(instanceId);
-        // TODO:
         this.sendPermissionToken(clientId, permission.token);
       } else {
+        // save permission token so that we send it back next time we get
+        // an instance message from them.
         instance.unusedPermissionToken = permission.token;
       }
 
-      // 3. save user and instance to storage, notify UI
+      // Save user and instance to storage, notify UI
       this.saveToStorage();
       instance.saveToStorage();
-      this.notifyUI();  // TODO: what if we don't have the name yet?????
-      // TODO: can we just pass the name into this method?  we have it in the invite data....
-
-      // 4. make sure we properly restore queued permission_token stuff (this is probably in remote-instance)
+      this.notifyUI();
     }
 
   }  // class User

@@ -90,7 +90,10 @@ import ui = ui_connector.connector;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
-    public unusedPermissionToken :string;  // TODO: save/load to/from storage.
+    // Permission token that we have received from this instance, but have not
+    // yet sent back to the remote user (e.g. because they were offline when
+    // we accepted their invite).
+    public unusedPermissionToken :string;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -400,7 +403,8 @@ import ui = ui_connector.connector;
         wireConsentFromRemote: this.wireConsentFromRemote,
         description:           this.description,
         publicKey:             this.publicKey,
-        keyVerified:           this.keyVerified
+        keyVerified:           this.keyVerified,
+        unusedPermissionToken: this.unusedPermissionToken
       });
     }
 
@@ -422,6 +426,9 @@ import ui = ui_connector.connector;
       } else {
         log.error('Failed to load wireConsentFromRemote for instance ' +
             this.instanceId);
+      }
+      if (typeof state.unusedPermissionToken !== 'undefined') {
+        this.unusedPermissionToken = state.unusedPermissionToken;
       }
     }
 
@@ -464,7 +471,8 @@ import ui = ui_connector.connector;
     wireConsentFromRemote :social.ConsentWireState;
     description           :string;
     publicKey             :string;
-    keyVerified           :boolean
+    keyVerified           :boolean;
+    unusedPermissionToken :string;
   }
 
   // TODO: Implement obfuscation.

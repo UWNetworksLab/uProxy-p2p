@@ -847,6 +847,10 @@
     "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
     "message": "Friend's GitHub username"
   },
+  "QUIVER_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for the uProxy Network (aka Quiver)",
+    "message": "Send this link to your friends so they can find you on uProxy.  You can optionally choose to request or offer access to your friends."
+  },
   "ADD_A_CLOUD_FRIEND": {
     "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
     "message": "Add a Cloud friend"
@@ -874,6 +878,10 @@
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
+  },
+  "SEND_INVITATION_FACEBOOK": {
+    "description": "Button text to initiate sending an invitation for Facebook",
+    "message": "Open Facebook and send invite"
   },
   "INVITE_SENT_CONFIRMATION": {
     "description": "Dialog text to confirm that an invite was sent to the user's friend",

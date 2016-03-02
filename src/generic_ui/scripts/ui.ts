@@ -555,7 +555,9 @@ export class UserInterface implements ui_constants.UiApi {
           networkData: jsurl.parse(params['networkData']),
           networkName: params['networkName'],
           userName: params['userName'],
-          permission: permission
+          permission: permission,
+          userId: params['userId'],  // undefined if no permission
+          instanceId: params['instanceId'],  // undefined if no permission
         }
       } else {
         // Old v1 invites are base64 encoded JSON
@@ -574,7 +576,9 @@ export class UserInterface implements ui_constants.UiApi {
           networkData: networkData,
           networkName: parsedObj.networkName,
           userName: parsedObj.userName,
-          permission: parsedObj.permission
+          permission: parsedObj.permission,
+          userId: parsedObj.permission,
+          instanceId: parsedObj.permission,
         };
       }
     } catch(e) {

@@ -301,14 +301,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
-    // TODO: clean this up - hack to find the one network
-    var network: social.Network;
-    for (var userId in social_network.networks[data.networkId]) {
-      network = social_network.networks[data.networkId][userId];
-      break;
-    }
-    return network.inviteUser(data.userName);
+  public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
+    var network = social_network.networks[data.network.name][data.network.userId];
+    return network.inviteGitHubUser(data);
   }
 
   public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
@@ -323,7 +318,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.acceptInvitation(data.tokenObj, data.userId);
   }
 
-  public getInviteUrl = (data :uproxy_core_api.GetInviteUrlData): Promise<string> => {
+  public getInviteUrl = (data :uproxy_core_api.CreateInviteArgs): Promise<string> => {
     var network = social_network.networks[data.network.name][data.network.userId];
     return network.getInviteUrl(data);
   }

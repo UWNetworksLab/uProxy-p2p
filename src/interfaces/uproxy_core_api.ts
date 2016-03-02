@@ -100,7 +100,7 @@ export enum Command {
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
-  SEND_INVITATION = 1028
+  INVITE_GITHUB_USER = 1028
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -205,11 +205,11 @@ export interface AcceptInvitationData {
 };
 
 // Data needed to generate an invite URL.
-export interface GetInviteUrlData {
+export interface CreateInviteArgs {
   network :social.SocialNetworkInfo;
-  isRequesting :boolean;
-  isOffering :boolean;
-  userId ?:string;
+  isLocalRequesting :boolean;
+  isLocalOffering :boolean;
+  userId ?:string;  // for GitHub only
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
@@ -276,5 +276,7 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
-  getInviteUrl(data :GetInviteUrlData): Promise<string>;
+  getInviteUrl(data :CreateInviteArgs): Promise<string>;
+
+  inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }

@@ -32,8 +32,8 @@ export interface StopProxyInfo {
 }
 
 export interface PermissionTokenInfo {
-  isRequesting :boolean;
-  isOffering :boolean;
+  isLocalRequesting :boolean;
+  isLocalOffering :boolean;
   createdAt :number;
 }
 
@@ -104,7 +104,6 @@ export interface UserData {
 export interface NetworkState {
   name         :string;
   profile      :UserProfileMessage;
-  // TODO: bad smell: UI data should not be
   roster       :{[userId :string] :UserData };
 }
 
@@ -167,8 +166,6 @@ export interface InstanceHandshake {
   instanceId  :string;
   consent     :ConsentWireState;
   description ?:string;
-  name        ?:string;  // TODO: can we remove this now that GTalk is gone?
-  userId      ?:string;  // TODO: can we remove this now that GTalk is gone?
   // publicKey is not set for networks which include the public key in their
   // clientId (Quiver).
   publicKey   ?:string;
@@ -253,8 +250,6 @@ export interface InviteTokenPermissions {
   token :string;
   isRequesting :boolean;
   isOffering :boolean;
-  userId :string;  // TODO: should these be at InviteTokenData level?
-  instanceId :string;
 }
 
 export interface InviteTokenData {
@@ -263,6 +258,8 @@ export interface InviteTokenData {
   userName :string;
   networkData :string|Object;
   permission ?:InviteTokenPermissions;
+  userId ?:string;  // Only included if permissions also set
+  instanceId ?:string;  // Only included if permissions also set
 }
 
 /**
@@ -323,14 +320,14 @@ export interface Network {
   acceptInvitation: (token ?:InviteTokenData, userId ?:string) => Promise<void>;
 
   /**
-   * Send an invite to a friend to use uProxy
+   * Send an invite to a GitHub friend to use uProxy
    */
-  inviteUser: (optionalUserId :string) => Promise<void>;
+  inviteGitHubUser: (data :uproxy_core_api.CreateInviteArgs) => Promise<void>;
 
   /**
    * Generates an invite token
    */
-  getInviteUrl: (data :uproxy_core_api.GetInviteUrlData) => Promise<string>;
+  getInviteUrl: (data :uproxy_core_api.CreateInviteArgs) => Promise<string>;
 
   /**
    * Generates an invite token

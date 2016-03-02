@@ -9,21 +9,6 @@ var model = ui_context.model;
 var core = ui_context.core;
 
 var inviteUser = {
-  generateInviteUrl: function(name :string) {
-    var network = model.getNetwork(name);
-    var networkInfo = { name: network.name, userId: network.userId };
-    return core.getInviteUrl({ network: networkInfo, isRequesting: false, isOffering: false});  // TODO: offering/requesting
-  },
-  sendToFacebookFriend: function() {
-    this.generateInviteUrl('Facebook-Firebase-V2').then((inviteUrl :string) => {
-      var facebookUrl =
-          'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
-          + inviteUrl + '&redirect_uri=https://www.uproxy.org/';
-      ui.openTab(facebookUrl);
-      this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('FACEBOOK_INVITE_IN_BROWSER'));
-    });
-  },
   openInviteUserPanel: function() {
     // Reset the input, expectation is for it to be empty
     this.inviteCode = '';
@@ -75,13 +60,9 @@ var inviteUser = {
   },
   initInviteForNetwork: function(networkName: string) {
     this.selectedNetworkName = networkName;
-    if (['GMail', 'GitHub', 'Cloud', 'Quiver'].indexOf(networkName) >= 0) {
-      // After login for these networks, open another view which allows users
-      // to invite their friends.
-      this.fire('core-signal', { name: 'open-network-invite-dialog' });
-    } else if (networkName == "Facebook-Firebase-V2") {
-      this.sendToFacebookFriend();
-    }
+    // After login for these networks, open another view which allows users
+    // to invite their friends.
+    this.fire('core-signal', { name: 'open-network-invite-dialog' });
   },
   loginToInviteFriendDialogOpened: function() {
     // Set confirmation message, which may include some HTML (e.g. strong, br).
