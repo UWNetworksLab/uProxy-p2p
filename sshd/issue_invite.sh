@@ -15,7 +15,7 @@ function usage () {
   echo "$0 [-u username] [-i invite code] [-c]"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
-  echo "  -c: output complete invite URL params (for use with cloud)"
+  echo "  -c: output complete invite URL (for manual installs)"
   echo "  -h, -?: this help message"
   exit 1
 }
@@ -72,11 +72,11 @@ cat $TMP/id_rsa.pub >> $HOMEDIR/.ssh/authorized_keys
 PUBLIC_IP=`cat /hostname`
 export CLOUD_INSTANCE_DETAILS="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
 
-if [ "$COMPLETE" = true]
+if [ "$COMPLETE" = true ]
 then
   npm install jsurl &>/dev/null
   CLOUD_INSTANCE_DETAILS=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS');"`
-  echo "v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS&userName=$USERNAME"
+  echo "https://www.uproxy.org/invite/?v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS"
 else
   echo $CLOUD_INSTANCE_DETAILS
 fi
