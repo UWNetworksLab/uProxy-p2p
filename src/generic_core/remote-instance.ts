@@ -382,7 +382,7 @@ import ui = ui_connector.connector;
       this.user.updateRemoteRequestsAccessFromLocal();
     }
 
-    public saveToStorage = () => {  // TODO: make private again?
+    public saveToStorage = () => {
       return this.onceLoaded.then(() => {
         var state = this.currentState();
         return storage.save(this.getStorePath(), state)

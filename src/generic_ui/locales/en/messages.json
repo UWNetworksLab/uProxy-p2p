@@ -831,10 +831,6 @@
     "description": "Invite instructions for Facebook",
     "message": "Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list."
   },
-  "FACEBOOK_INVITE_IN_BROWSER": {
-    "description": "Dialog message instructing user to complete Facebook invitation in their browser",
-    "message": "Please complete invitation in Facebook"
-  },
   "GMAIL_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for GMail",
     "message": "Enter your friend's email address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list."

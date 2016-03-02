@@ -32,8 +32,8 @@ export interface StopProxyInfo {
 }
 
 export interface PermissionTokenInfo {
-  isLocalRequesting :boolean;
-  isLocalOffering :boolean;
+  isRequesting :boolean;
+  isOffering :boolean;
   createdAt :number;
 }
 

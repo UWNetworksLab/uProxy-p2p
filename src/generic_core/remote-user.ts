@@ -204,16 +204,12 @@ var log :logging.Log = new logging.Log('remote-user');
       switch (msg.type) {
         case social.PeerMessageType.INSTANCE:
           this.syncInstance_(clientId, <social.InstanceHandshake>msg.data,
-              msg.version).then(() => {
-              // TODO: this is totally hacky and weird looking.  maybe syncInstance should just return the
-              // instance?
-              console.log('after sync instance!');
-              var instance = this.getInstance(this.clientToInstance(clientId));
+              msg.version).then((instance: remote_instance.RemoteInstance) => {
+              // Check if we have an unusedPermissionToken for this instance.
               if (instance.unusedPermissionToken) {
-                console.log('found unusedPermissionToken!');
                 this.sendPermissionToken(clientId, instance.unusedPermissionToken);
                 instance.unusedPermissionToken = null;
-                // TODO: save user(?), instance, update ui
+                instance.saveToStorage();
               }
             }).catch((e) => {
             log.error('syncInstance_ failed for ', msg.data);
@@ -241,12 +237,10 @@ var log :logging.Log = new logging.Log('remote-user');
           return;
 
         case social.PeerMessageType.PERMISSION_TOKEN:
-        // TODO: more error checking...  do I need a try/catch?
           var token = (<social.PermissionTokenMessage>msg.data).token;
           var tokenInfo = this.network.myInstance.invitePermissionTokens[token];
           if (!tokenInfo) {
-            // TODO: warning intead of error
-            console.error('token not found');
+            log.warn('token not found');
             return;
           }
           // TODO: how can I prevent the token from being reused by the same
@@ -254,16 +248,16 @@ var log :logging.Log = new logging.Log('remote-user');
           // then i later reject them, then they later resend the same token?
           // can i even distinguish this from multiple use tokens?  they
           // could always just create a new account....
-          if (tokenInfo.isLocalOffering) {
+          if (tokenInfo.isOffering) {
             this.consent.localGrantsAccessToRemote = true;
           }
-          if (tokenInfo.isLocalRequesting) {
+          if (tokenInfo.isRequesting) {
             this.consent.localRequestsAccessFromRemote = true;
           }
           // Send them a new instance handshake with updated consent.
           this.sendInstanceHandshake(clientId);
-          this.saveToStorage();
-          this.notifyUI();  // TODO: what if we don't have the name yet?????
+          this.saveToStorage();  // Save new consent to storage.
+          this.notifyUI();  // Notify UI that consent has changed
           return;
 
         default:
@@ -299,7 +293,7 @@ var log :logging.Log = new logging.Log('remote-user');
     public syncInstance_ = (
         clientId :string,
         instanceHandshake :social.InstanceHandshake,
-        messageVersion :number) : Promise<void> => {
+        messageVersion :number) : Promise<remote_instance.RemoteInstance> => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
@@ -336,6 +330,7 @@ var log :logging.Log = new logging.Log('remote-user');
           messageVersion).then(() => {
         this.saveToStorage();
         this.notifyUI();
+        return instance;
       });
     }
 
@@ -684,7 +679,6 @@ var log :logging.Log = new logging.Log('remote-user');
             isRequesting: permission.isRequesting
           }
         };
-        // TODO: this is a mess.  can i just call syncInstance even though I don't have a clientId?
         instance = new remote_instance.RemoteInstance(this, instanceId);
         this.instances_[instanceId] = instance;
         // Assume lowest possible version until we get a real instance message.

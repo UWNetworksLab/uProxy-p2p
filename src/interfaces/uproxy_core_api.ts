@@ -207,8 +207,8 @@ export interface AcceptInvitationData {
 // Data needed to generate an invite URL.
 export interface CreateInviteArgs {
   network :social.SocialNetworkInfo;
-  isLocalRequesting :boolean;
-  isLocalOffering :boolean;
+  isRequesting :boolean;
+  isOffering :boolean;
   userId ?:string;  // for GitHub only
 };
 

@@ -547,7 +547,6 @@ export class UserInterface implements ui_constants.UiApi {
         // New style invite using URL params.
         var permission :any;
         if (params['permission']) {
-          // TODO: need to test this with v2 invites, haven't tried yet!!!
           permission = jsurl.parse(params['permission']);
         }
         return {

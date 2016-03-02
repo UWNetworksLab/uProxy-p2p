@@ -16,8 +16,8 @@ Polymer({
         name: selectedNetwork.name,
         userId: selectedNetwork.userId
       },
-      isLocalRequesting: this.requestAccess,
-      isLocalOffering: this.offerAccess
+      isRequesting: this.requestAccess,
+      isOffering: this.offerAccess
     };
     return core.getInviteUrl(CreateInviteArgs).then((inviteUrl:string) => {
       this.inviteUrl = inviteUrl;
@@ -31,8 +31,6 @@ Polymer({
           + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/';
       ui.openTab(facebookUrl);
       this.closeInviteUserPanel();
-      // TODO: remove this (and translation label)?
-      // ui.showDialog('', ui.i18n_t('FACEBOOK_INVITE_IN_BROWSER'));
     });
   },
   sendToGMailFriend: function() {

@@ -116,15 +116,15 @@ import storage = globals.storage;
       });
     }
 
-    public generateInvitePermissionToken = (isLocalRequesting :boolean, isLocalOffering :boolean) : string => {
-      if (!isLocalRequesting && !isLocalOffering) {
+    public generateInvitePermissionToken = (isRequesting :boolean, isOffering :boolean) : string => {
+      if (!isRequesting && !isOffering) {
         // sanity check
-        throw Error('Not generating permission token with !isLocalRequesting && !isLocalOffering');
+        throw Error('Not generating permission token with !isRequesting && !isOffering');
       }
       var permissionToken = String(Math.random());
       this.invitePermissionTokens[permissionToken] = {
-        isLocalRequesting: isLocalRequesting,
-        isLocalOffering: isLocalOffering,
+        isRequesting: isRequesting,
+        isOffering: isOffering,
         createdAt: Date.now()
       };
       this.saveToStorage();

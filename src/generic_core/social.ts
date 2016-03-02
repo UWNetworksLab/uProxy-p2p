@@ -615,12 +615,12 @@ export function notifyUI(networkName :string, userId :string) {
         log.error('Error calling inviteUser: ', data, e.message);
         return Promise.reject('Error calling inviteUser: ' + data.userId + e.message);
       }).then(() => {
-        if (data.isLocalOffering || data.isLocalRequesting) {
+        if (data.isOffering || data.isRequesting) {
           var user = this.getOrAddUser_(data.userId);
-          if (data.isLocalOffering) {
+          if (data.isOffering) {
             user.consent.localGrantsAccessToRemote = true;
           }
-          if (data.isLocalRequesting) {
+          if (data.isRequesting) {
             user.consent.localRequestsAccessFromRemote = true;
           }
           user.saveToStorage();
@@ -642,13 +642,13 @@ export function notifyUI(networkName :string, userId :string) {
           .then((networkData: Object) => {
         // Set permissionData only if the user is requesting / granting access.
         var permissionData :social.InviteTokenPermissions;
-        if (data.isLocalRequesting || data.isLocalOffering) {
+        if (data.isRequesting || data.isOffering) {
           var token = this.myInstance.generateInvitePermissionToken(
-              data.isLocalRequesting, data.isLocalOffering);
+              data.isRequesting, data.isOffering);
           permissionData = {
             token: token,
-            isRequesting: data.isLocalRequesting,
-            isOffering: data.isLocalOffering
+            isRequesting: data.isRequesting,
+            isOffering: data.isOffering
           };
         }
 
