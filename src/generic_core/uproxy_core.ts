@@ -588,4 +588,61 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     this.availableVersion_ = details.version;
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
+
+  public deployCloudServer = (args:uproxy_core_api.DeployCloudServerArgs): Promise<uproxy_core_api.CloudInstallArgs> => {
+    log.debug('logging into cloud provider %1', args.providerName);
+    if (args.providerName !== 'digitalocean') {
+      return Promise.reject(new Error('unsupported cloud provider'));
+    }
+
+    const provisioner = freedom['digitalocean']();
+
+    const destroyProvisioner = () => {
+      freedom['digitalocean'].close(provisioner);
+    };
+
+    provisioner.on('status', (update: any) => {
+      ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
+    });
+
+    // This is the server name recommended by the blog post.
+    return provisioner.start('uproxy-cloud-server').then((serverInfo: any) => {
+      log.info('created server on digitalocean: %1', serverInfo);
+
+      destroyProvisioner();
+
+      return {
+        host: serverInfo.network.ipv4,
+        port: serverInfo.network.ssh_port,
+        // TODO: The provisioning module should return this!
+        username: 'root',
+        privateKey: serverInfo.ssh.private
+      };
+    }, (e:Error) => {
+      destroyProvisioner();
+      return Promise.reject(e);
+    });
+  }
+
+  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<string> => {
+    log.debug('installing cloud on %1:%2 as %3', args.host, args.port, args.username);
+
+    const installer = freedom['cloudinstall']();
+
+    const destroyInstaller = () => {
+      freedom['cloudinstall'].close(installer);
+    };
+
+    // TODO: Send real updates. While we could trivially send stdout,
+    //       that's extremely verbose right now.
+    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
+
+    return installer.install(args.host, args.port, args.username, args.privateKey).then((output:string) => {
+      destroyInstaller();
+      return output;
+    }, (e: Error) => {
+      destroyInstaller();
+      return Promise.reject(e);
+    });
+  }
 }  // class uProxyCore

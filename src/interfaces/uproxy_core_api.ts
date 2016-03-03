@@ -100,7 +100,9 @@ export enum Command {
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
-  SEND_INVITATION = 1028
+  SEND_INVITATION = 1028,
+  DEPLOY_CLOUD_SERVER = 1029,
+  CLOUD_INSTALL = 1030
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -135,7 +137,9 @@ export enum Update {
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
-  ONETIME_MESSAGE = 2026
+  ONETIME_MESSAGE = 2026,
+  // Payload is a string.
+  CLOUD_INSTALL_STATUS = 2027
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -206,6 +210,19 @@ export interface InvitationData {
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
+// Argument to #deployCloudServer.
+export interface DeployCloudServerArgs {
+  providerName: string;
+};
+
+// Argument to #cloudInstall.
+export interface CloudInstallArgs {
+  host: string;
+  port: number;
+  username: string;
+  privateKey: string;
+};
+
 /**
  * The primary interface to the uProxy Core.
  *
@@ -268,5 +285,18 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
+  // Obtains the credentials to install uProxy on a server, which are
+  // intended to be passed to #cloudInstall. This function may be
+  // long-running if wants to, e.g. create a server on behalf of the
+  // user (it may also invoke an OAuth flow to do so).
+  deployCloudServer(args:DeployCloudServerArgs): Promise<CloudInstallArgs>;
+
+  // Installs uProxy on a server, resolving with an invite. Intended to
+  // be used primarily with the results from #getCloudInstallArgs but
+  // having separate functions for "create server" and "install on server"
+  // allows us, in future, to install uProxy on any server the user can
+  // point us at. Note that this may be a very long-running function in
+  // the case of servers with low bandwidth.
+  cloudInstall(args:CloudInstallArgs): Promise<string>;
 }
 

@@ -135,6 +135,8 @@ export class UserInterface implements ui_constants.UiApi {
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
+  public cloudInstallStatus :string = '';
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -310,6 +312,10 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.setPortControlSupport_);
+
+    core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
+      this.cloudInstallStatus = status;
+    });
 
     browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
     browserApi.on('inviteUrlData', this.handleInvite);
@@ -1344,5 +1350,13 @@ export class UserInterface implements ui_constants.UiApi {
   public i18nSanitizeHtml = (i18nMessage :string) => {
     // Remove all HTML other than supported tags like strong, a, p, etc.
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
+  }
+
+  public deployCloudServer = (args:uproxy_core_api.DeployCloudServerArgs): Promise<uproxy_core_api.CloudInstallArgs> => {
+    return this.core.deployCloudServer(args);
+  }
+
+  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<string> => {
+    return this.core.cloudInstall(args);
   }
 } // class UserInterface
