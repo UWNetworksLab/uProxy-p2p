@@ -594,7 +594,9 @@ export function notifyUI(networkName :string, userId :string) {
         networkData = userId;
       }
       return this.freedomApi_.acceptUserInvitation(networkData).then(() => {
-        if (tokenObj && tokenObj.permission && tokenObj.userId) {
+        if (tokenObj && tokenObj.permission && tokenObj.userId &&
+            // Cloud doesn't require invite permissions at the uProxy layer.
+            this.name !== 'Cloud') {
           var user = this.getOrAddUser_(tokenObj.userId);
           user.handleInvitePermissions(tokenObj);
         }

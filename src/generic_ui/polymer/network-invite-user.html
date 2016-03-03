@@ -52,134 +52,72 @@
       }
 
       /* Social network specific CSS */
-      .GMail uproxy-button {
-        background: #dd4b39;
-      }
-      .GitHub uproxy-button {
-        background: #666;
-      }
-      .Facebook uproxy-button {
-        background: #3b5998;
-      }
-      .GMail paper-checkbox::shadow #checkbox.checked {
-        background-color: #dd4b39;
-        border-color: #dd4b39;
+      .GitHub uproxy-button,
+      .GitHub uproxy-app-bar::shadow #app-bar-toolbar {
+        background: #666 !important;
       }
       .GitHub paper-checkbox::shadow #checkbox.checked {
         background-color: #666;
         border-color: #666;
       }
-      .Facebook paper-checkbox::shadow #checkbox.checked {
+      .GMail uproxy-button,
+      .GMail uproxy-app-bar::shadow #app-bar-toolbar {
+        background: #dd4b39 !important;
+      }
+      .GMail paper-checkbox::shadow #checkbox.checked {
+        background-color: #dd4b39;
+        border-color: #dd4b39;
+      }
+      .Facebook-Firebase-V2 uproxy-button,
+      .Facebook-Firebase-V2 uproxy-app-bar::shadow #app-bar-toolbar {
+        background: #3b5998 !important;
+      }
+      .Facebook-Firebase-V2 paper-checkbox::shadow #checkbox.checked {
         background-color: #3b5998;
         border-color: #3b5998;
       }
-
-
     </style>
 
     <core-signals on-core-signal-open-network-invite-dialog='{{openInviteUserPanel}}'></core-signals>
 
-    <core-overlay id='networkInviteUserPanel'>
-      <div hidden?="{{network !== 'GitHub'}}" class="GitHub">
-        <uproxy-app-bar class="GitHub" on-go-back='{{ closeInviteUserPanel }}' color="#666">
-          {{ 'INVITE_A_FRIEND' | $$ }}
-        </uproxy-app-bar>
+    <core-overlay id='networkInviteUserPanel' class='{{ network }}'>
+      <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
+        {{ 'INVITE_A_FRIEND' | $$ }}
+      </uproxy-app-bar>
 
-        <div class='section'>
-          <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
-          <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
-            <input is='core-input' value='{{ userIdInput }}'>
+      <div class='section'>
+        <p>{{ instructions }}</p>
+
+        <!-- GitHub specific controls -->
+        <div hidden?="{{network !== 'GitHub'}}">
+          <paper-input-decorator id='GitHubPlaceholder' label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
+            <input is='core-input' value='{{ gitHubUserIdInput }}'>
           </paper-input-decorator>
+        </div> <!-- end of GitHub -->
 
-          <div class='checkboxes'>
-            <p><paper-checkbox label='Request access' checked='{{ requestAccess }}'></paper-checkbox></p>
-            <p><paper-checkbox label='Offer access' checked='{{ offerAccess }}'></paper-checkbox></p>
-          </div>
-
-          <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
-            {{ 'SEND_INVITATION' | $$ }}
-          </uproxy-button>
-        </div>
-      </div> <!-- end of GitHub -->
-
-
-      <div hidden?="{{network !== 'GMail'}}" class="GMail">
-        <uproxy-app-bar on-go-back='{{closeInviteUserPanel}}' color="#dd4b39">
-          {{ 'INVITE_A_FRIEND' | $$ }}
-        </uproxy-app-bar>
-
-        <div class='section'>
-          <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$ }}</p>
-          <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
+        <!-- GMail specific controls -->
+        <div hidden?="{{network !== 'GMail'}}">
+          <paper-input-decorator id='GMailPlaceholder' label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
             <input is='core-input' value='{{ inviteUserEmail }}' />
           </paper-input-decorator>
+        </div> <!-- end of GMail specific controls -->
 
-          <!-- TODO: translate -->
-          <!-- TODO: don't copy this for all networks -->
-          <div class='checkboxes'>
-            <p><paper-checkbox label='Request access' checked='{{ requestAccess }}'></paper-checkbox></p>
-            <p><paper-checkbox label='Offer access' checked='{{ offerAccess }}'></paper-checkbox></p>
-          </div>
-
-          <uproxy-button raised affirmative on-tap='{{ sendToGMailFriend }}'>
-            {{ 'SEND_INVITATION' | $$ }}
-          </uproxy-button>
-        </div>
-      </div> <!-- end of GMail -->
-
-
-      <div hidden?="{{network !== 'Facebook-Firebase-V2'}}" class="Facebook">
-        <uproxy-app-bar on-go-back='{{closeInviteUserPanel}}' color="#3b5998">
-          {{ 'INVITE_A_FRIEND' | $$ }}
-        </uproxy-app-bar>
-
-        <div class='section'>
-          <p>{{ 'FACEBOOK_INVITE_INSTRUCTIONS' | $$ }}</p>
-
-          <!-- TODO: translate -->
-          <!-- TODO: don't copy this for all networks -->
-          <div class='checkboxes'>
-            <p><paper-checkbox label='Request access' checked='{{ requestAccess }}'></paper-checkbox></p>
-            <p><paper-checkbox label='Offer access' checked='{{ offerAccess }}'></paper-checkbox></p>
-          </div>
-
-          <uproxy-button raised affirmative on-tap='{{ sendToFacebookFriend }}'>
-            {{ 'SEND_INVITATION_FACEBOOK' | $$ }}
-          </uproxy-button>
-        </div>
-      </div> <!-- end of Facebook-Firebase-V2 -->
-
-
-      <div hidden?="{{network !== 'Quiver'}}" class="Quiver">
-        <uproxy-app-bar on-go-back='{{closeInviteUserPanel}}'>
-          {{ 'INVITE_A_FRIEND' | $$ }}
-        </uproxy-app-bar>
-
-        <div class='section'>
-          <p>{{ 'QUIVER_INVITE_INSTRUCTIONS' | $$ }}</p>
-
+        <!-- Quiver specific controls -->
+        <div hidden?="{{network !== 'Quiver'}}">
           <paper-input-decorator layout vertical class='{{ quiverInviteMessage.length > 0 ? "modified" : ""}}'>
             <input value='{{ inviteUrl }}' readonly is='core-input' on-tap='{{ selectQuiverInvite }}' />
           </paper-input-decorator>
+        </div> <!-- end of Quiver specific controls -->
 
-          <!-- TODO: translate -->
-          <!-- TODO: don't copy this for all networks -->
-          <div class='checkboxes'>
-            <!-- unlike other social networks, changing the checkboxes on Quiver immediately
-            generates a new invite -->
-            <!-- TODO: should we alert users that they will need to copy again after changing these checkboxes? -->
-            <p><paper-checkbox label='Request access' checked='{{ requestAccess }}' on-change='{{ updateQuiverInvite }}'></paper-checkbox></p>
-            <p><paper-checkbox label='Offer access' checked='{{ offerAccess }}' on-change='{{ updateQuiverInvite }}'></paper-checkbox></p>
-          </div>
-
-          <p id='quiverWarning' hidden?='{{ !quiverInviteMessage }}'>{{ quiverInviteMessage }}</p>
-
-          <uproxy-button raised affirmative on-tap='{{ closeInviteUserPanel }}'>
-            {{ 'CLOSE' | $$ }}
-          </uproxy-button>
+        <div class='checkboxes'>
+          <p><paper-checkbox label='Request access' checked='{{ requestAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
+          <p><paper-checkbox label='Offer access' checked='{{ offerAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
         </div>
-      </div> <!-- end of Quiver -->
 
+        <p id='quiverWarning' hidden?='{{ network !== "Quiver" || !quiverInviteMessage }}'>{{ quiverInviteMessage }}</p>
+
+        <uproxy-button affirmative on-tap='{{ confirmClicked }}'>{{ confirmText }}</uproxy-button>
+      </div>  <!-- end of .section -->
     </core-overlay>
 
   </template>

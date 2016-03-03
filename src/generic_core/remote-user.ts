@@ -238,16 +238,11 @@ var log :logging.Log = new logging.Log('remote-user');
 
         case social.PeerMessageType.PERMISSION_TOKEN:
           var token = (<social.PermissionTokenMessage>msg.data).token;
-          var tokenInfo = this.network.myInstance.invitePermissionTokens[token];
+          var tokenInfo =
+              this.network.myInstance.exchangeInviteToken(token, this.userId);
           if (!tokenInfo) {
-            log.warn('token not found');
             return;
           }
-          // TODO: how can I prevent the token from being reused by the same
-          // user multiple times?  i.e. if my token grants them access,
-          // then i later reject them, then they later resend the same token?
-          // can i even distinguish this from multiple use tokens?  they
-          // could always just create a new account....
           if (tokenInfo.isOffering) {
             this.consent.localGrantsAccessToRemote = true;
           }

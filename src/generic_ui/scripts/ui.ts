@@ -576,8 +576,8 @@ export class UserInterface implements ui_constants.UiApi {
           networkName: parsedObj.networkName,
           userName: parsedObj.userName,
           permission: parsedObj.permission,
-          userId: parsedObj.permission,
-          instanceId: parsedObj.permission,
+          userId: parsedObj.userId,
+          instanceId: parsedObj.instanceId,
         };
       }
     } catch(e) {

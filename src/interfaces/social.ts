@@ -35,6 +35,7 @@ export interface PermissionTokenInfo {
   isRequesting :boolean;
   isOffering :boolean;
   createdAt :number;
+  acceptedByUserIds :string[];
 }
 
 export interface LocalInstanceState {
@@ -43,6 +44,7 @@ export interface LocalInstanceState {
   userName         :string;
   imageData        :string;
   invitePermissionTokens :{ [token :string] :PermissionTokenInfo };
+  exchangeInviteToken : (token :string, userId :string) => PermissionTokenInfo;
 }
 
 export interface NetworkMessage {

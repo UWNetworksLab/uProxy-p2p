@@ -60,11 +60,11 @@ Polymer({
       },
       isRequesting: this.requestAccess,
       isOffering: this.offerAccess,
-      userId: this.userIdInput
+      userId: this.gitHubUserIdInput
     }).then(() => {
       this.closeInviteUserPanel();
       ui.showDialog('',
-          ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.userIdInput }));
+          ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.gitHubUserIdInput }));
     }).catch(() => {
       // TODO: The message in this dialog should be passed from the social provider.
       // https://github.com/uProxy/uproxy/issues/1923
@@ -72,10 +72,7 @@ Polymer({
     });
   },
   openInviteUserPanel: function() {
-    this.inviteUrl = '';
-    this.offerAccess = false;
-    this.requestAccess = false;
-    this.quiverInviteMessage = '';
+    this.initFields();
     if (this.network === 'Quiver') {
       this.generateInviteUrl('Quiver').then(() => {
         this.$.networkInviteUserPanel.open();
@@ -92,17 +89,59 @@ Polymer({
     input.select();
     this.quiverInviteMessage = '';
   },
-  updateQuiverInvite: function() {
-    this.generateInviteUrl('Quiver');
-    this.quiverInviteMessage = 'Invite URL has changed, please be sure to copy the last invitation';  // TODO: translate
+  requestOrOfferChanged: function() {
+    if (this.network === 'Quiver') {
+      this.generateInviteUrl('Quiver');
+      this.quiverInviteMessage = 'Invite URL has changed, please be sure to copy the last invitation';  // TODO: translate
+    }
   },
-  ready: function() {
+  confirmClicked: function() {
+    if (this.network === 'GitHub') {
+      this.inviteGithubFriend();
+    } else if (this.network === 'GMail') {
+      this.sendToGMailFriend();
+    } else if (this.network === 'Facebook-Firebase-V2') {
+      this.sendToFacebookFriend();
+    } else if (this.network === 'Quiver') {
+      this.closeInviteUserPanel();
+    }
+  },
+  initFields: function() {
+    // Fields which should be reset every time this screen opens.
     this.inviteUrl = '';
     this.inviteUserEmail = '';
     this.model = model;
-    this.userIdInput = '';
+    this.gitHubUserIdInput = '';
     this.quiverInviteMessage = '';
     this.offerAccess = false;
     this.requestAccess = false;
+    this.instructions = getInstructions(this.network)
+    this.confirmText = getConfirmText(this.network);
+    // Forces the placeholder text to be visible again.
+    this.$.GitHubPlaceholder.updateLabelVisibility('');
+    this.$.GMailPlaceholder.updateLabelVisibility('');
+  },
+  ready: function() {
+    this.initFields();
   }
 });
+
+function getInstructions(networkName :string) {
+  var label :string = (<any>{
+    'GitHub': 'GITHUB_INVITE_INSTRUCTIONS',
+    'GMail': 'GMAIL_INVITE_INSTRUCTIONS',
+    'Facebook-Firebase-V2': 'FACEBOOK_INVITE_INSTRUCTIONS',
+    'Quiver': 'QUIVER_INVITE_INSTRUCTIONS'
+  })[networkName];
+  return label ? ui.i18n_t(label) : '';
+}
+
+function getConfirmText(networkName :string) {
+  var label :string = (<any>{
+    'GitHub': 'SEND_INVITATION',
+    'GMail': 'SEND_INVITATION',
+    'Facebook-Firebase-V2': 'SEND_INVITATION_FACEBOOK',
+    'Quiver': 'CLOSE'
+  })[networkName];
+  return label ? ui.i18n_t(label) : '';
+}
