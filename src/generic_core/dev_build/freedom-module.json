@@ -55,7 +55,7 @@
       "url": "../freedom-port-control/port-control.json",
       "api": "portControl"
     },
-    "digitalocean": {
+    "CLOUDPROVIDER-digitalocean": {
       "url": "../uproxy-lib/cloud/digitalocean/freedom-module.json",
       "api": "digitalocean"
     },

@@ -34,6 +34,7 @@ export interface Network {
 
 export class Model {
   public networkNames :string[] = [];
+  public cloudProviderNames :string[] = [];
 
   public onlineNetworks :Network[] = [];
 

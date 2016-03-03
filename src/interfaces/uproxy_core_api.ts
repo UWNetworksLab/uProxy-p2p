@@ -42,6 +42,7 @@ export interface GlobalSettings {
 }
 export interface InitialState {
   networkNames :string[];
+  cloudProviderNames :string[];
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;

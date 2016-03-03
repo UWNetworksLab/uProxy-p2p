@@ -40,6 +40,17 @@ loggingController.setDefaultFilter(
 
 var portControl = globals.portControl;
 
+const getCloudProviderNames = (): string[] => {
+  const prefix: string = 'CLOUDPROVIDER-';
+  let results: string[] = [];
+  for (var dependency in freedom) {
+    if (freedom.hasOwnProperty(dependency) && dependency.indexOf(prefix) === 0) {
+      results.push(dependency.substr(prefix.length));
+    }
+  }
+  return results;
+};
+
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updates to the UI, and handles commands from the UI.
@@ -238,6 +249,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
       return {
         networkNames: Object.keys(social_network.networks),
+        cloudProviderNames: getCloudProviderNames(),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,

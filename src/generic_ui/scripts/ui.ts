@@ -1238,6 +1238,7 @@ export class UserInterface implements ui_constants.UiApi {
   public updateInitialState = (state :uproxy_core_api.InitialState) => {
     console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
     this.model.networkNames = state.networkNames;
+    this.model.cloudProviderNames = state.cloudProviderNames;
     this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.updateLanguage(state.globalSettings.language);

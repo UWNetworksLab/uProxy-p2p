@@ -180,7 +180,7 @@
               </div>
             </template>
 
-            <div class='networkLoginButton' on-tap='{{ cloudInstall }}'>
+            <div class='networkLoginButton' on-tap='{{ cloudInstall }}' hidden?='{{ model.cloudProviderNames.length < 1 }}'>
               <core-icon icon='uproxy-icons:Cloud'></core-icon>
               <div class='networkName'>Create a cloud server</div>
               <div class='experimental highlightedText'>Experimental</div>
