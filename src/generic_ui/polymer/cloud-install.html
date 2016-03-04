@@ -52,13 +52,13 @@
     </style>
 
     <!-- TODO: remove this logic from the template -->
-    <core-signals on-core-signal-open-cloud-install-dialog='{{runWizard}}'></core-signals>
+    <core-signals on-core-signal-open-cloud-install-dialog='{{openLoginDialog}}'></core-signals>
 
     <!-- TODO: use core-pages rather than multiple dialogs -->
 
     <uproxy-dialog layered="false" backdrop="true" id='loginDialog'>
       <h1>Create a cloud server</h1>
-      <core-icon icon="clear" on-tap='{{ closeWizard }}'></core-icon>
+      <core-icon icon="clear" on-tap='{{closeDialogs}}'></core-icon>
       <p>We can help you create a uProxy cloud server in a country of your choice. You will be able to get access from this server 24x7 and, optionally, share it with friends and family.</p>
       <p>To get started, please sign in to your DigitalOcean account.</p>
       <div style="text-align:center;">

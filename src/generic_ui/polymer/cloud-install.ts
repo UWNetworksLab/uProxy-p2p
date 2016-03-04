@@ -12,11 +12,11 @@ const INSTALL_ARGS: uproxy_core_api.CloudInstallArgs = {
 };
 
 Polymer({
-  runWizard: function() {
+  openLoginDialog: function() {
     // TODO: Skip this if we're already logged into Digital Ocean.
     this.$.loginDialog.open();
   },
-  closeWizard: function() {
+  closeDialogs: function() {
     this.$.loginDialog.close();
     this.$.installingDialog.close();
   },
@@ -27,11 +27,11 @@ Polymer({
       // TODO: Add the new server to the user's contact list.
       // TODO: Show the invite so the user can copy it so a safe place.
       ui.toastMessage = 'INVITE: ' + result.invite;
-      this.closeWizard();
+      this.closeDialogs();
     }).catch((e: Error) => {
       // TODO: Figure out which fields in e are set, because message isn't.
       ui.toastMessage = 'INSTALL FAILED';
-      this.closeWizard();
+      this.closeDialogs();
     })
   },
   ready: function() {
