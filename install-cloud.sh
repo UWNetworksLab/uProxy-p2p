@@ -19,6 +19,15 @@ then
   then
     curl -fsSL https://get.docker.com/ | sh
     service docker start
+  elif [ -f /usr/bin/docker -a $(( $(docker --version | cut -d . -f 2) < 10 )) ]
+  then
+    echo "Installed version of docker is too old.  Please upgrade it yourself, or remove"
+    echo "it (yum erase docker) and run this script again.  If you don't have other"
+    echo "docker containers/images, removing it is fine, this script can do the rest. If"
+    echo "you do have other docker containers/images, have a look here:"
+    echo " https://github.com/docker/docker/wiki/Engine-v1.10.0-content-addressability-migration"
+    echo "first, and then upgrade docker yourself before running this script again."
+    exit 1
   fi
 fi
 
