@@ -62,7 +62,7 @@ Polymer({
   handleBackClick: function() {
     if (ui.copyPasteState.localGettingFromRemote === social.GettingState.NONE &&
         ui.copyPasteState.localSharingWithRemote === social.SharingState.NONE) {
-      ui.view = ui_constants.View.SPLASH;
+      ui.view = ui_constants.View.ROSTER;
       return;
     }
 
@@ -132,7 +132,7 @@ Polymer({
     }).then(() => {
       // go back to the previous view regardless of whether we successfully
       // stopped the connection
-      ui.view = ui_constants.View.SPLASH;
+      ui.view = ui_constants.View.ROSTER;
     })
   },
   encodeMessage: function(message:string) {

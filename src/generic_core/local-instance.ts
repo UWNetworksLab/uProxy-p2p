@@ -21,9 +21,9 @@ import storage = globals.storage;
   // uproxy-lib, or directly use end-to-end implementation.
   export class LocalInstance implements social.LocalInstanceState, Persistent {
 
-    public instanceId  :string;
-    public clientId    :string;
-    public userName        :string;
+    public instanceId :string;
+    public clientId :string;
+    public userName :string;
     public imageData :string;
 
     /**
@@ -89,10 +89,10 @@ import storage = globals.storage;
      */
     public currentState = () :social.LocalInstanceState => {
       return {
-        instanceId:  this.instanceId,
-        userId:      this.userId,
-        userName:        this.userName,
-        imageData:   this.imageData,
+        instanceId: this.instanceId,
+        userId: this.userId,
+        userName: this.userName,
+        imageData: this.imageData
       };
     }
     public restoreState = (state:social.LocalInstanceState) :void => {

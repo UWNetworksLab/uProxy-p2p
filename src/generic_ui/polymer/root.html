@@ -10,7 +10,6 @@
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
 <link rel="import" href="../../bower/core-overlay/core-overlay.html">
 <link rel='import' href='invite-user.html'>
-<link rel='import' href='accept-user-invite.html'>
 <link rel="import" href="i18n-filter.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='faq.html'>
@@ -28,7 +27,6 @@
 <link rel='import' href='icons.html'>
 <link rel='import' href='proxy-error.html'>
 <link rel='import' href='button.html'>
-<link rel='import' href='quiver-login.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-open-dialog='{{ openDialog }}'>
 
@@ -92,6 +90,8 @@
       core-toolbar {
         height: 105px;
         width: 100%;
+        background-color: #009688;
+        color: white;
       }
       core-toolbar::shadow #topBar {
         padding: 0px 16px;
@@ -169,12 +169,28 @@
       }
       uproxy-action-dialog::shadow #scroller {
         overflow: visible;
+        padding: 30px 30px 0px 30px;
       }
       .core-overlay-backdrop {
         z-index: 1001;
       }
       uproxy-action-dialog uproxy-button {
         margin-bottom: 3px;
+      }
+      uproxy-action-dialog h1 {
+        font-size: 1.4em;
+        color: #009688;
+        font-weight: normal;
+      }
+      #dialogMessage {
+        line-height: 20px;
+        color: #666;
+        font-weight: 300;
+        letter-spacing: 0.4px;
+        margin: 0;
+      }
+      #dialog uproxy-faq-link {
+        font-weight: bold;
       }
       #disconnectDialog {
         text-align: center;
@@ -252,16 +268,6 @@
         width: 56px;
         padding: 15px;
       }
-      #googleAndFacebookChangedOverlay {
-        background-color: white;
-        height: 100%;
-        width: 100%;
-        padding: 2em;
-        line-height: 20px;
-      }
-      #googleAndFacebookChangedOverlay ul li {
-        margin-top: 1em;
-      }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
@@ -274,28 +280,15 @@
     <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
-    <uproxy-feedback id='feedback'></uproxy-feedback>
-
-    <uproxy-faq id='faq'></uproxy-faq>
-
-    <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
-
     <!-- core-overlays, launched using core-signals -->
     <uproxy-invite-user></uproxy-invite-user>
-    <uproxy-accept-user-invite></uproxy-accept-user-invite>
-    <uproxy-quiver-login></uproxy-quiver-login>
+    <uproxy-google-invite></uproxy-google-invite>
+    <uproxy-feedback id='feedback'></uproxy-feedback>
+    <uproxy-faq id='faq'></uproxy-faq>
+    <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
 
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
-
-    <core-overlay id='googleAndFacebookChangedOverlay' opened='{{ model.globalSettings.hasSeenWelcome && !model.globalSettings.hasSeenGoogleAndFacebookChangedNotification }}' on-core-overlay-open='{{ googleAndFacebookChangedNotificationOpened }}'>
-      <div id='googleAndFacebookChangedNotificationContent'>
-        <!-- content is set using .innerHTML so that we can embed HTML in translations -->
-      </div>
-      <div style="text-align:center;">
-        <uproxy-button on-tap='{{ dismissGoogleAndFacebookChangedNotification }}'>{{ "OK" | $$ }}</uproxy-button>
-      </div>
-    </core-overlay>
 
     <core-drawer-panel id='mainPanel' forceNarrow='true' drawerWidth='300px'
         hidden?='{{ ui.view !== ui_constants.View.ROSTER }}' rightDrawer='{{ dir == "rtl" ? true : false }}'>
@@ -323,11 +316,6 @@
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
               hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
-
-          <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
-            <h3>{{ "STATS_ENABLED_TITLE" | $$ }}</h3>
-            <p>{{ "STATS_ENABLED_MESSAGE" | $$ }}</p>
-          </uproxy-bubble>
 
           <core-tooltip label='{{ "SHARING_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
@@ -365,18 +353,13 @@
           core-header-panel and it is positioned below the toolbar (see
           https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
         -->
-        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}' noclear="true">
+        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}' noclear="true">
           <p>
             {{ "WELCOME_MESSAGE" | $$ }}
           </p>
         </uproxy-bubble>
 
         <div class='content' fit>
-
-          <paper-fab id="inviteButton" hidden?='{{!ui.showInviteControls}}'
-            mini src='../icons/ic_person_add_white_24dp.svg'
-            on-tap='{{ fireOpenInviteUserPanel }}'
-            style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) + 26 }}px;'></paper-fab>
 
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
@@ -425,13 +408,29 @@
             </div>
           </div>
         </div>
+        <!-- Elements (like the paper fab) that determine position based on proxying/error statuses, must come after the status elements above. Otherwise the positioning will be incorrect. -->
+        <paper-fab id="inviteButton"
+          mini src='../icons/ic_person_add_white_24dp.svg'
+          on-tap='{{ fireOpenInviteUserPanel }}'
+          style='bottom: {{ $.status.offsetHeight + 26 }}px;'></paper-fab>
       </core-header-panel>
     </core-drawer-panel>
 
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
-    <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
-      <p>{{ dialog.message }}</p>
+    <uproxy-action-dialog backdrop layered="false" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}" closeSelector=''>
+      <h1 id='dialogHeading'></h1>
+      <p id='dialogMessage'></p>
+      <div hidden?='{{ !dialog.userInputData }}'>
+        <paper-input-decorator label='{{ dialog.userInputData.placeholderText }}' layout vertical error="{{ 'REQUIRED_FIELD' | $$ }}" isInvalid='{{ isUserInputInvalid }}'>
+          <input id='dialogInput' is='core-input'/>
+        </paper-input-decorator>
+      </div>
+      <div hidden?='{{ !dialog.displayData }}'>
+        <paper-input-decorator layout vertical>
+          <input id='dialogDisplay' readonly is='core-input' on-tap='{{ selectAll }}' />
+        </paper-input-decorator>
+      </div>
       <template repeat='{{ button in dialog.buttons }}'>
         <uproxy-button affirmative?='{{ !button.dismissive }}'
           dismissive?='{{ button.dismissive }}' class='dialogButton'
@@ -441,22 +440,6 @@
         </uproxy-button>
       </template>
     </uproxy-action-dialog>
-
-    <core-overlay id='statsDialog' backdrop layered="false" heading='{{ "WELCOME" | $$ }}'>
-      <div>
-        <h1>{{ "WELCOME" | $$ }}</h1>
-        <p>
-          {{ "ALPHA_MESSAGE" | $$ }}<br><br>
-          {{ "CHANGE_STATS_CHOICE" | $$ }}
-        </p>
-        <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>
-        <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
-        <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
-      </div>
-      <uproxy-faq-link anchor='doesUproxyLogData'>
-        {{ "MORE_ABOUT_METRICS" | $$ }}
-      </uproxy-faq-link>
-    </core-overlay>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>

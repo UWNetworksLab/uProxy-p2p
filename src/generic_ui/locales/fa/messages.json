@@ -95,10 +95,6 @@
         "message": "به اشتراک گذاری دسترسی با __name__",
         "description": "Message in a status bar that is visible when one friend is getting access through the user."
     },
-    "STATS_ENABLED_MESSAGE": {
-        "message": "این آیکون بدان معناست که شما تصمیم گرفته اید گزارش های آماری خود را به صورت ناشناس برای تیم یوپراکسی ارسال کنید. برای انجام تغییرات کلیک کنید.",
-        "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
-    },
     "REQUESTS": {
         "message": "درخواست ها",
         "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
@@ -131,7 +127,7 @@
         "message": "نه اصلا",
         "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established."
     },
-    "ALPHA_MESSAGE": {
+    "BETA_MESSAGE": {
         "message": "این نسخه آلفا یوپراکسی است. شما با به اشتراک گذاری اطلاعات آماری خود با تیم توسعه دهندگان به صورت ناشناس می توانید به توسعه نرم افزار کمک کنید. داده های گزارش در سیستم کلاینت ناشناس شده و سپس به صورت کاملا امن منتقل می شوند.",
         "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
     },
@@ -182,10 +178,6 @@
     "START_ONE_TIME_INSTRUCTION": {
         "message": "برای گرفتن دسترسی از دوست خود، بر روی دکمه زیر کلیک کنید.",
         "description": ""
-    },
-    "NO_FRIENDS_ONLINE": {
-        "message": "در حال حاضر هیچ یک از دوستانتان از یوپراکسی استفاده نمی کنند.",
-        "description": "None of the user's friends are currently signed in."
     },
     "CONTINUE_BROWSING": {
         "message": "به مرور وب بدون یوپراکسی ادامه دهید",
@@ -558,10 +550,6 @@
     "STARTED_PROXYING": {
         "message": "__name__ شروع به پروکسی کردن از طریق شما کرد",
         "description": "Notification for when a friend has started accessing the Internet through the user."
-    },
-    "FRIENDS_APPEAR_WHEN": {
-        "message": "برای دعوت دوستانتان به یوپراکسی، لینک https://www.uproxy.org را برای آن ها ارسال کنید.",
-        "description": "Instruction informing the user how to invite their friends to uProxy."
     },
     "VERY_LIKELY": {
         "message": "بسیار زیاد",

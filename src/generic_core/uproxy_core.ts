@@ -80,7 +80,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         }
         logins.push(this.login({
           network: networkName,
-          reconnect: true,
+          loginType: uproxy_core_api.LoginType.RECONNECT
         }).catch(() => {
           // any failure to login should just be ignored - the user will either
           // be logged in with just some accounts or still on the login screen
@@ -132,7 +132,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       this.pendingNetworks_[networkName] = network;
     }
 
-    return network.login(loginArgs.reconnect, loginArgs.userName).then(() => {
+    return network.login(loginArgs.loginType, loginArgs.userName).then(() => {
       delete this.pendingNetworks_[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,
@@ -197,22 +197,28 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     if (newSettings.stunServers.length === 0) {
       newSettings.stunServers = globals.DEFAULT_STUN_SERVERS;
     }
+    var oldDescription = globals.settings.description;
     globals.storage.save('globalSettings', newSettings)
       .catch((e) => {
         log.error('Could not save globalSettings to storage', e.stack);
       });
 
-    // Clear the existing servers and add in each new server.
-    // Trying globalSettings = newSettings does not correctly update
-    // pre-existing references to stunServers (e.g. from RemoteInstances).
-    globals.settings.stunServers
-        .splice(0, globals.settings.stunServers.length);
-    for (var i = 0; i < newSettings.stunServers.length; ++i) {
-      globals.settings.stunServers.push(newSettings.stunServers[i]);
-    }
+    _.merge(globals.settings, newSettings, (a :Object, b :Object) => {
+        // ensure we do not merge the arrays and that the reference remains intact
+        if (_.isArray(a) && _.isArray(b)) {
+          var arrayA = <Object[]>a;
+          arrayA.splice(0, arrayA.length);
+          for (var i in b) {
+            arrayA.push((<Object[]>b)[i]);
+          }
+          return a;
+        }
 
-    if (newSettings.description != globals.settings.description) {
-      globals.settings.description = newSettings.description;
+        // this causes us to fall back to the default merge behaviour
+        return undefined;
+    });
+
+    if (globals.settings.description !== oldDescription) {
       // Resend instance info to update description for logged in networks.
       for (var networkName in social_network.networks) {
         for (var userId in social_network.networks[networkName]) {
@@ -221,22 +227,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       }
     }
 
-    globals.settings.hasSeenSharingEnabledScreen =
-        newSettings.hasSeenSharingEnabledScreen;
-    globals.settings.hasSeenWelcome = newSettings.hasSeenWelcome;
-    globals.settings.allowNonUnicast = newSettings.allowNonUnicast;
-    globals.settings.mode = newSettings.mode;
-    globals.settings.statsReportingEnabled = newSettings.statsReportingEnabled;
-    globals.settings.splashState = newSettings.splashState;
-    globals.settings.consoleFilter = newSettings.consoleFilter;
     loggingController.setDefaultFilter(
       loggingTypes.Destination.console,
       globals.settings.consoleFilter);
-    globals.settings.language = newSettings.language;
-    globals.settings.force_message_version = newSettings.force_message_version;
-    globals.settings.hasSeenGoogleAndFacebookChangedNotification =
-        newSettings.hasSeenGoogleAndFacebookChangedNotification;
-    globals.settings.quiverUserName = newSettings.quiverUserName;
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
@@ -249,10 +242,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,
         copyPasteConnection: copyPasteConnectionState,
-        copyPasteState: {
-          connectionState: copyPasteConnectionState,
-          endpoint: copyPasteConnectionState.activeEndpoint,
-        },
         portControlSupport: this.portControlSupport_,
       };
     });
@@ -322,7 +311,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.inviteUser(data.userName);
   }
 
-  public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
+  public acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void> => {
     var networkName = data.network.name;
     var networkUserId = data.network.userId;
     if (!networkUserId) {
@@ -331,12 +320,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       networkUserId = Object.keys(social_network.networks[networkName])[0];
     }
     var network = social_network.getNetwork(networkName, networkUserId);
-    return network.acceptInvitation(data.token, data.userId);
+    return network.acceptInvitation(data.tokenObj, data.userId);
   }
 
-  public getInviteUrl = (networkInfo: social.SocialNetworkInfo): Promise<string> => {
-    var network = social_network.networks[networkInfo.name][networkInfo.userId];
-    return network.getInviteUrl();
+  public getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {
+    var network = social_network.networks[data.network.name][data.network.userId];
+    return network.getInviteUrl(data.userId || '');
   }
 
   public getAllUserProfiles =
@@ -384,20 +373,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
     remote.stop();
     // TODO: Handle revoked permissions notifications.
-  }
-
-  public handleManualNetworkInboundMessage =
-      (command :social.HandleManualNetworkInboundMessageCommand) => {
-    var manualNetwork :social_network.ManualNetwork =
-        <social_network.ManualNetwork> social_network.getNetwork(
-            social_network.MANUAL_NETWORK_ID, '');
-    if (!manualNetwork) {
-      log.error('Manual network does not exist, discarding inbound message',
-                command);
-      return;
-    }
-
-    manualNetwork.receive(command.senderClientId, command.message);
   }
 
   /**

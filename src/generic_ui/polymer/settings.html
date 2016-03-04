@@ -135,7 +135,7 @@
     }
     </style>
 
-    <div hidden?='{{ !model.onlineNetworks.length }}' vertical layout>
+    <div vertical layout>
       <div class='userInfo'>
         <div id='pictures' horizontal layout hidden?='{{ model.onlineNetworks.length === 1 && !model.onlineNetworks[0].imageData }}'>
           <template repeat='{{network in model.onlineNetworks}}'>
@@ -189,7 +189,7 @@
         </uproxy-link>
 
         <div id='metricsCheckbox'>
-          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "STATS_ENABLED_TITLE" | $$ }}'></paper-checkbox>
+          <paper-checkbox label='{{ "STATS_ENABLED_TITLE" | $$ }}' checked='{{ model.globalSettings.statsReportingEnabled }}' on-change='{{updateStatsReportingEnabled}}'></paper-checkbox>
           <uproxy-faq-link class='faq-icon' anchor='doesUproxyLogData'>
             <core-icon icon='help'></core-icon>
           </uproxy-faq-link>
@@ -202,7 +202,7 @@
           <span class='label'>{{ "RESTART" | $$ }}</span>
         </uproxy-link>
 
-        <uproxy-link on-tap='{{ logOut }}' role='button'>
+        <uproxy-link on-tap='{{ logOut }}' hidden?="{{model.onlineNetworks.length==0}}" role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
           <span class='label'>{{ "LOGOUT" | $$ }}</span>
         </uproxy-link>
@@ -211,7 +211,7 @@
       <div id='accountChooser' class='settingsContent' hidden?='{{ !accountChooserOpen }}'>
         <span class='smalltext'>{{ "CONNECTED_ACCOUNTS" | $$ }}</span>
         <template repeat='{{ name in model.networkNames }}'>
-          <div>
+          <div hidden?="{{name=='Cloud' && !model.globalSettings.showCloud}}">
             <uproxy-network-in-settings name='{{ name }}'></uproxy-network-in-settings>
           </div>
         </template>

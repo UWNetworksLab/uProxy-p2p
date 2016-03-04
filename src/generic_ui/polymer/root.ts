@@ -1,36 +1,25 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/xregexp/xregexp.d.ts' />
-/// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
 
 import social = require('../../interfaces/social');
 import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 import user_module = require('../scripts/user');
-import regEx = require('xregexp');
-import XRegExp = regEx.XRegExp;
 
-// Example usage of these tests:
-// isRightToLeft.test('hi') --> false
-// isRightToLeft.test('لك الوص') --> true
-var isRightToLeft = XRegExp('[\\p{Arabic}\\p{Hebrew}]');
-var isCommonUnicode = XRegExp('[\\p{Common}]');
 var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 
-interface button_description {
-  text :string;
-  signal :string;
-  dismissive :boolean;
-}
-
-interface dialog_description {
-  heading :string;
-  message :string;
-  buttons: button_description[];
-}
+// Since we reuse a uproxy-action-dialog, sometimes there is a race condition
+// where the dialog attempts to open before it is properly closed.
+// We use a Promise to track if the dialog is closed.
+// The Promise is fulfilled by default, and also after a
+// "core-overlay-open-completed" event is observed.
+// The Promise is reset each time we open the dialog.
+var reusableDialogClosedPromise = Promise.resolve<void>();
+var fulfillReusableDialogClosed :Function;
 
 Polymer({
   dialog: {
@@ -47,10 +36,6 @@ Polymer({
     // this event.
     if (newView == ui_types.View.ROSTER && oldView == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
-      if (!model.globalSettings.hasSeenWelcome) {
-        this.statsDialogOrBubbleOpen = true;
-        this.$.statsDialog.toggle();
-      }
       this.closeSettings();
       this.$.modeTabs.updateBar();
     }
@@ -68,9 +53,6 @@ Polymer({
     ui.setMode(ui_types.Mode.SHARE);
   },
   closedWelcome: function() {
-    // New users (who have just completed the welcome screen) will not need
-    // to see the Google and Facebook changed notification.
-    model.globalSettings.hasSeenGoogleAndFacebookChangedNotification = true;
     model.globalSettings.hasSeenWelcome = true;
     core.updateGlobalSettings(model.globalSettings);
   },
@@ -81,15 +63,7 @@ Polymer({
   dismissCopyPasteError: function() {
     ui.copyPasteError = ui_types.CopyPasteError.NONE;
   },
-  googleAndFacebookChangedNotificationOpened: function() {
-    this.$.googleAndFacebookChangedNotificationContent.innerHTML =
-        ui.i18n_t("GOOGLE_AND_FACEBOOK_CHANGED_NOTIFICATION");
-  },
-  dismissGoogleAndFacebookChangedNotification: function() {
-    model.globalSettings.hasSeenGoogleAndFacebookChangedNotification = true;
-    core.updateGlobalSettings(model.globalSettings);
-  },
-  openDialog: function(e :Event, detail :dialog_description) {
+  openDialog: function(e :Event, detail :ui_types.DialogDescription) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
      * signal was fired. It should be of the form:
      *
@@ -103,28 +77,67 @@ Polymer({
      * }
      */
 
+    if (detail.userInputData && detail.userInputData.initInputValue) {
+      this.$.dialogInput.value = detail.userInputData.initInputValue;
+    } else if (detail.displayData) {
+      this.$.dialogDisplay.value = detail.displayData;
+    } else {
+      this.$.dialogInput.value = '';
+    }
+    this.isUserInputInvalid = false;
+
+    // Set heading and message innerHTML so translations can include
+    // <p>, <a>, <strong>, etc tags.
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(detail.heading), this.$.dialogHeading);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(detail.message), this.$.dialogMessage);
+
     this.dialog = detail;
     // Using async() allows the contents of the dialog to update before
     // it's opened. Opening the dialog too early causes it to be positioned
     // incorrectly (i.e. off center).
     this.async(() => {
-      this.$.dialog.open();
+      // Do not open the dialog until we are sure it is closed.
+      reusableDialogClosedPromise.then(() => {
+        reusableDialogClosedPromise = new Promise<void>((F, R) => {
+          fulfillReusableDialogClosed = F;
+        });
+        this.$.dialog.open();
+      });
     });
+  },
+  selectAll: function(e :Event, d :Object, input :HTMLInputElement) {
+    input.focus();
+    input.select();
+  },
+  reusableDialogClosed: function() {
+    fulfillReusableDialogClosed();
   },
   openProxyError: function() {
     this.$.proxyError.open();
   },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
-    // TODO: error checking, isNaN etc
+    // Get userInput, or set to undefined if it is '', null, etc
+    var userInput = this.$.dialogInput.value || undefined;
+    if (this.dialog.userInputData && !userInput) {
+      // User did not enter any input, don't close
+      this.isUserInputInvalid = true;
+      return;
+    }
+
+    this.isUserInputInvalid = false;
+
     var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
     if (callbackIndex) {
       var fulfill = (target.getAttribute('affirmative') != null);
-      ui.invokeConfirmationCallback(callbackIndex, fulfill);
+      ui.invokeConfirmationCallback(callbackIndex, fulfill, userInput);
     }
     var signal = target.getAttribute('data-signal');
     if (signal) {
       this.fire('core-signal', { name: signal });
     }
+    this.$.dialog.close();
   },
   ready: function() {
     // Expose global ui object and UI module in this context.
@@ -137,37 +150,15 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
-    if (ui.view == ui_types.View.ROSTER &&
-        !model.globalSettings.hasSeenWelcome) {
-      this.statsDialogOrBubbleOpen = true;
-      this.$.statsDialog.open();
-    }
     this.updateDirectionality();
-  },
-  closeStatsBubble: function() {
-    this.statsDialogOrBubbleOpen = false;
-  },
-  enableStats: function() {
-    // TODO: clean up the logic which controls which welcome dialog or bubble
-    // is shown.
-    this.model.globalSettings.statsReportingEnabled = true;
-    this.$.statsDialog.close();
-  },
-  disableStats: function() {
-    this.model.globalSettings.statsReportingEnabled = false;
-    this.statsDialogOrBubbleOpen = false;
-    this.$.statsDialog.close();
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&
         this.model.globalSettings.mode == ui_types.Mode.SHARE) {
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
-      this.fire('open-dialog', {
-        heading: ui.i18n_t("SHARING_UNAVAILABLE_TITLE"),
-        message: ui.i18n_t("SHARING_UNAVAILABLE_MESSAGE"),
-        buttons: [{text: ui.i18n_t("CLOSE"), dismissive: true}]
-      });
+      ui.showDialog(ui.i18n_t('SHARING_UNAVAILABLE_TITLE'),
+          ui.i18n_t('SHARING_UNAVAILABLE_MESSAGE'), ui.i18n_t('CLOSE'));
     } else {
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core

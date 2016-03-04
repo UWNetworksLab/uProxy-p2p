@@ -2,11 +2,11 @@
 
 [uProxy](https://www.uproxy.org) is a browser extension that lets users share their internet connection.
 
-## Build Status
+## Status
 
-Dev: [![Build Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
-[![Build Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbdc/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
-Master: [![Build Status](https://travis-ci.org/uProxy/uproxy.svg?branch=master)](https://travis-ci.org/uProxy/uproxy)
+[![Slack Status](https://uproxy-slack.herokuapp.com/badge.svg)](https://uproxy-slack.herokuapp.com/)
+[![Travis Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
+[![Shippable Status](https://img.shields.io/shippable/54c823bf5ab6cc135289fbdc/dev.svg)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
 
 ## Tools
 
@@ -15,6 +15,8 @@ uProxy is built using the following tools:
  - [TypeScript](http://www.typescriptlang.org/) as the primary language we code in; this compiles to JavaScript. It gives us type-checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
  - [Jasmine](http://pivotal.github.io/jasmine/) for testing
  - [Polymer](http://www.polymer-project.org/) for UI
+ - [Travis](https://travis-ci.org/) for continuous integration
+ - [Shippable](https://app.shippable.com/) for docker-integrated continuous integration
 
 To manage dependencies we use:
  - [npm](https://www.npmjs.org/) to install node modules that we use for our build process.  (Specified in `package.json`)
@@ -130,6 +132,52 @@ Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are enough to immediately
 reject submissions. :)
 
+### uProxy for Android
+
+uProxy can now be built as an Android App, using the Cordova Chrome Apps (CCA)
+tool, also known as the [Chrome Apps for Mobile Toolchain](https://github.com/MobileChromeApps/mobile-chrome-apps).
+After following the steps under "Building uProxy from source",
+ 1. Install the Android SDK.  The easiest way to get it is as part of [Android Studio](https://developer.android.com/sdk/index.html).
+   * *Linux-only* Add the Android tools to your path, e.g. by modifying your `.bashrc` to include `PATH=$PATH:$HOME/android-studio/tools`.
+ 1. Install the `adb` tool.
+   * MacOS: `adb` is included with Android Studio.
+   * Linux: `adb` is available through your package manager.  For example, on Ubuntu run `apt-get install android-tools-adb`.
+ 1. Confirm that your `cca` package is ready by running `node_modules/.bin/cca checkenv` from the git checkout root directory.
+   * If this fails, set the `ANDROID_HOME` variable to the Android SDK path in your `.bashrc`, e.g. `export ANDROID_HOME=$HOME/Android/Sdk`
+
+Then you can build the app using `grunt build_android`.  The output, a file ending
+in `.apk`, will appear in `build/dev/uproxy/android/platforms/android/build/outputs/apk/`.
+Depending on the build configuration, the file might be named `android-debug.apk`,
+`android-armv7-debug.apk`, etc..
+
+#### Installing on an Android device
+* To install the app, first [Enable USB Debugging](http://developer.android.com/tools/device.html#device-developer-options)
+on your test phone, then connect it to your computer and accept the connection
+on the phone.
+* Then, on your computer, install the app on the phone using a command like
+`adb install -r build/dev/uproxy/android/platforms/android/build/outputs/apk/android-debug.apk`.
+* You may then launch the app from the phone. Rerunning this command should close the app
+and replace it with a new version, but will not overwrite saved state on the device.
+
+If you encounter an error or want to complete delete uProxy from your phone, you can do so via
+`Settings -> Apps -> uProxy`, which as a button labeled "Uninstall for all users".
+
+#### Installing on an Android emulator
+* Create a virtual device using the [Android Virtual Device
+Manager](http://developer.android.com/tools/devices/index.html) with an API of 21
+(Lollipop) or higher.
+* Launch the emulator and check `adb devices` at the command line to
+make sure an emulator is running. 
+* Install the app from the command line with `adb install -r build/dev/uproxy/android/platforms/android/build/outputs/apk/android-debug.apk`. You should see `success` if the app is installed.
+* You may then launch the app from the emulator.
+
+#### Creating a Play Store release build
+Android app release builds must be signed.  To create a release build:
+ 1. Get the appropriate `play_store_keys.p12` and `android-release-keys.properties` files, and symlink them into a `keys` directory in the git repo root.
+   * The uProxy team's release keys are stored in a secure location, not in the public git repository.  Symlinking ensures that you do not accidentally copy the keys into insecure storage.
+ 1. Run `grunt release_android`
+ 1. From the `build/dev/uproxy/android/platforms/android/build/outputs/apk/` directory, upload `android-release.apk`, `android-x86-release.apk`, and `android-armv7-release.apk` to the Play Store using [the multiple APK upload procedure](http://developer.android.com/google/play/publishing/multiple-apks.html).
+   * This allows us to have a smaller build (~10 MB) for modern Android, and a larger build (~33 MB) for older Android versions that need [Crosswalk](https://crosswalk-project.org/) because the system webview is too old to run uProxy.
 
 ### Fixing compilation and setup
 
@@ -167,14 +215,3 @@ Dynamically created directories (`grunt clean` should remove them)
  * `build/dist` created by grunt tasks; holds final distribution versions
  * `.grunt` holds grunt cache stuff
  * `.tscache` holds typescript cache stuff
-
-## Glossary of frameworks you need to know about
-
- * [Bower](http://bower.io) (and the `bower.json` file) - a package manager for the web. Used for javascript and web-libraries that the extension uses (e.g. angular). Note: this uses the file .bowerrc to specify where bower components get installed (in third_party/bower_components)
- * [Coveralls](https://coveralls.io/): a continuous coverage checking system
- * [Grunt](http://gruntjs.com/) (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building
- * [Jasmine](http://pivotal.github.io/jasmine/) - a testing framework for JavaScript.
- * [Karma](http://karma-runner.github.io/) - a test runner
- * [NPM](https://www.npmjs.org/) (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory
- * [Travis](https://travis-ci.org/): a continuous build system
- * [TypeScript](http://www.typescriptlang.org/) as the primary language, which compiles to JavaScript. This does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks

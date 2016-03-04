@@ -39,3 +39,22 @@ export enum CopyPasteError {
   UNEXPECTED, // received a url at an invalid time
   FAILED // something about the connection failed
 }
+
+export interface DialogButtonDescription {
+  text :string;
+  dismissive ?:boolean;
+  signal ?:string;
+}
+
+export interface DialogUserInputData {
+  placeholderText :string;
+  initInputValue ?:string;
+}
+
+export interface DialogDescription {
+  heading :string;
+  message :string;
+  buttons: DialogButtonDescription[];
+  userInputData ?:DialogUserInputData;
+  displayData ?:string;
+}

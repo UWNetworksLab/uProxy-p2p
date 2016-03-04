@@ -19,7 +19,7 @@ body /deep/ a {
   color: #009688;
 }
 
-html /deep/ [dir='rtl'] /deep/ [layout][horizontal] /deep/ core-icon[icon='arrow-back'] {
+html /deep/ [dir='rtl'] /deep/ core-icon[icon='arrow-back'] {
   transform: rotate(180deg);
 }
 
@@ -27,14 +27,13 @@ body /deep/ paper-input-decorator /deep/ .underline div {
   background-color: #009688;
 }
 
-body /deep/ core-toolbar {
-  background-color: #009688;
-  color: white;
-}
-
 /* get around a bug in polymer styling */
 body /deep/ paper-input-decorator input[is="core-input"] {
   padding: 0;
   margin: 0.5em 0 0.25em;
   width: 100%;
+}
+
+body /deep/ uproxy-action-dialog::shadow #actions {
+  padding: 24px;
 }

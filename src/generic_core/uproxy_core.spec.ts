@@ -8,6 +8,17 @@
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+
+import freedom_mocks = require('../mocks/freedom-mocks');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
+  'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); },
+  'metrics': () => { return new freedom_mocks.MockMetrics(); },
+  'pgp': () => { return new freedom_mocks.PgpProvider() },
+  'portControl': () => { return new Object },
+});
+
 import globals = require('./globals');
 import social = require('../interfaces/social');
 import social_network = require('./social');
@@ -23,7 +34,9 @@ describe('Core', () => {
   var network = <social.Network><any>jasmine.createSpy('network');
   network.getUser = null;
   network.getStorePath = function() { return 'network-store-path'; };
-  network['login'] = (reconnect :boolean) => { return Promise.resolve<void>() };
+  network['login'] = (loginType :uproxy_core_api.LoginType) => {
+    return Promise.resolve<void>();
+  };
   network['myInstance'] =
             new local_instance.LocalInstance(network, 'localUserId');
   var user = new remote_user.User(network, 'fake-login');
@@ -63,34 +76,9 @@ describe('Core', () => {
     expect(user.modifyConsent).toHaveBeenCalledWith(uproxy_core_api.ConsentUserAction.REQUEST);
   });
 
-  it('relays incoming manual network messages to the manual network', () => {
-    var manualNetwork :social_network.ManualNetwork =
-        new social_network.ManualNetwork(social_network.MANUAL_NETWORK_ID);
-
-    spyOn(social_network, 'getNetwork').and.returnValue(manualNetwork);
-    spyOn(manualNetwork, 'receive');
-
-    var senderClientId = 'dummy_sender';
-    var message :social.VersionedPeerMessage = {
-      type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
-      data: {
-        elephants: 'have trunks',
-        birds: 'do not'
-      },
-      version: globals.MESSAGE_VERSION
-    };
-    var command :social.HandleManualNetworkInboundMessageCommand = {
-      senderClientId: senderClientId,
-      message: message
-    };
-    core.handleManualNetworkInboundMessage(command);
-
-    expect(social_network.getNetwork).toHaveBeenCalledWith(social_network.MANUAL_NETWORK_ID, '');
-    expect(manualNetwork.receive).toHaveBeenCalledWith(senderClientId, message);
-  });
-
   it('login fails for invalid network', (done) => {
-    core.login({network: 'nothing', reconnect: false}).catch(() => {
+    core.login({network: 'nothing',
+                loginType: uproxy_core_api.LoginType.INITIAL}).catch(() => {
       done();
     });
   });
@@ -105,14 +93,16 @@ describe('Core', () => {
     // Login promise is not resolved so network object stays in pending logins
     var loginSpy = spyOn(network, 'login');
     loginSpy.and.returnValue(new Promise(() => {}));
-    core.login({network: 'mockNetwork', reconnect: false});
+    core.login({network: 'mockNetwork',
+                loginType: uproxy_core_api.LoginType.INITIAL});
     expect(loginSpy).toHaveBeenCalled();
 
     // Core login will envoke login method on the same network object
     // This time it succeeds, so network object is moved from pending logins
     // to social_network.networks.
     loginSpy.and.returnValue(Promise.resolve());
-    core.login({network: 'mockNetwork', reconnect: false}).then(() => {
+    core.login({network: 'mockNetwork',
+                loginType: uproxy_core_api.LoginType.INITIAL}).then(() => {
       // should have called login on the same spy twice and only constructed
       // one network
       expect(loginSpy.calls.count()).toEqual(2);

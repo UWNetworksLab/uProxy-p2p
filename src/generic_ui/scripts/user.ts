@@ -5,6 +5,7 @@
  */
 /// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
+import model = require('./model');
 import social = require('../../interfaces/social');
 import user_interface = require('./ui');
 import translator_module = require('./translator');
@@ -59,7 +60,7 @@ export class User implements social.BaseUser {
   /**
    * Initialize the user to an 'empty' default.
    */
-  constructor(public userId :string, public network :user_interface.Network,
+  constructor(public userId :string, public network :model.Network,
       private ui_ :user_interface.UserInterface) {
     console.log('new user: ' + this.userId);
     this.name = '';
@@ -107,9 +108,11 @@ export class User implements social.BaseUser {
     }
 
     this.name = profile.name;
-    this.imageData = profile.imageData;
     this.url = profile.url;
     this.status = profile.status;
+
+    this.imageData = user_interface.getImageData(this.userId, this.imageData,
+                                                 profile.imageData);
 
     // iterate backwards to allow removing elements
     var i = this.offeringInstances.length;
@@ -138,13 +141,13 @@ export class User implements social.BaseUser {
 
     // Update gettingConsentState, used to display correct getting buttons.
     if (this.offeringInstances.length > 0) {
-      // Expand the contact if there previously were no offers and we are not
-      // ignoring offers.
+      // Expand the contact if there previously were no offers, we are not
+      // ignoring offers, and the contact is online.
       if ((this.gettingConsentState ==
           GettingConsentState.NO_OFFER_OR_REQUEST ||
           this.gettingConsentState ==
           GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION) &&
-          !this.consent_.ignoringRemoteUserOffer) {
+          !this.consent_.ignoringRemoteUserOffer && this.isOnline) {
         this.getExpanded = true;
       }
       if (this.consent_.localRequestsAccessFromRemote) {
@@ -168,13 +171,13 @@ export class User implements social.BaseUser {
 
     // Update sharingConsentState, used to display correct sharing buttons.
     if (this.consent_.remoteRequestsAccessFromLocal) {
-      // Expand the contact if there previously were no requests and we are not
-      // ignoring requests.
+      // Expand the contact if there previously were no requests, we are not
+      // ignoring requests, and the contact is online.
       if ((this.sharingConsentState ==
           SharingConsentState.NO_OFFER_OR_REQUEST ||
           this.sharingConsentState ==
           SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION) &&
-          !this.consent_.ignoringRemoteUserRequest) {
+          !this.consent_.ignoringRemoteUserRequest && this.isOnline) {
         this.shareExpanded = true;
       }
       if (this.consent_.localGrantsAccessToRemote) {

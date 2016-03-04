@@ -8,6 +8,7 @@
 declare var require :(path :string) => Object;
 
 import ui_constants = require('../../interfaces/ui');
+import _ = require('lodash');
 
 interface Language {
   description :string;
@@ -20,10 +21,10 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
-Polymer({
+var splash = {
   SPLASH_STATES: {
     INTRO: 0,
-    NETWORKS: 1
+    METRICS_OPT_IN: 1
   },
   setState: function(state :Number) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
@@ -34,16 +35,14 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
   },
   next: function() {
-    this.setState(model.globalSettings.splashState + 1);
+    if (model.globalSettings.splashState == this.SPLASH_STATES.METRICS_OPT_IN) {
+      ui.view = ui_constants.View.ROSTER;
+    } else {
+      this.setState(model.globalSettings.splashState + 1);
+    }
   },
   prev: function() {
     this.setState(model.globalSettings.splashState - 1);
-  },
-  copypaste: function() {
-    this.fire('core-signal', { name: 'copypaste-init' });
-  },
-  openFeedbackForm: function() {
-    this.fire('core-signal', {name: 'open-feedback'});
   },
   updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
     if (detail.isSelected) {
@@ -52,50 +51,22 @@ Polymer({
       window.location.reload();
     }
   },
-  loginToQuiver: function() {
-    model.globalSettings.quiverUserName = this.userName;
+  updateSeenMetrics: function(val :Boolean) {
+    model.globalSettings.hasSeenMetrics = true;
+    model.globalSettings.statsReportingEnabled = val;
     core.updateGlobalSettings(model.globalSettings);
-    this.login('Quiver', this.userName);
+    this.next();
   },
-  loginTapped: function(event: Event, detail: Object, target: HTMLElement) {
-    var networkName = target.getAttribute('data-network');
-    this.login(networkName);
+  enableStats: function() {
+    return this.updateSeenMetrics(true);
   },
-  login: function(networkName :string, userName ?:string) {
-    ui.login(networkName, userName).then(() => {
-      // syncNetwork will update the view to the ROSTER.
-      ui.bringUproxyToFront();
-    }).catch((e: Error) => {
-      console.warn('Did not log in ', e);
-    });
-  },
-  getNetworkDisplayName: function(name :string) {
-    return ui.getNetworkDisplayName(name);
-  },
-  isExperimentalNetwork: function(name :string) {
-    return ui.isExperimentalNetwork(name);
-  },
-  updateNetworkButtonNames: function() {
-    var supportsQuiver = false;
-    this.networkButtonNames = [];
-    for (var i = 0; i < model.networkNames.length; ++i) {
-      if (model.networkNames[i] === 'Quiver') {
-        supportsQuiver = true;
-      } else {
-        this.networkButtonNames.push(model.networkNames[i]);
-      }
-    }
-    // Only set .supportsQuiver after iterating through all networks, to prevent
-    // any flicker in case we switch from true to false to true again.
-    this.supportsQuiver = supportsQuiver;
-  },
-  observe: {
-    'model.networkNames': 'updateNetworkButtonNames'
+  disableStats: function() {
+    return this.updateSeenMetrics(false);
   },
   ready: function() {
     this.model = model;
     this.languages = languages;
-    this.userName = model.globalSettings.quiverUserName;
-    this.updateNetworkButtonNames();
   },
-});
+};
+
+Polymer(splash);

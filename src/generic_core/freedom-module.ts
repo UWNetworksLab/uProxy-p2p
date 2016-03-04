@@ -6,7 +6,7 @@
  * front-end.
  *
  * In-memory state includes:
- *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
+ *  - Roster, which is a list of contacts, always synced with friend lists.
  *  - Instances, which is a list of active uProxy installs.
  */
 
@@ -52,88 +52,34 @@ var exported = {
 };
 export = exported;
 
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.LOGIN,
-    core.login);
+var commands :{[command :number] :((data?:any) => (Promise<any>|void))} = {};
+commands[uproxy_core_api.Command.LOGIN] = core.login;
+commands[uproxy_core_api.Command.LOGOUT] = core.logout;
+commands[uproxy_core_api.Command.MODIFY_CONSENT] = core.modifyConsent;
+commands[uproxy_core_api.Command.START_PROXYING_COPYPASTE_GET] = core.startCopyPasteGet;
+commands[uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_GET] = core.stopCopyPasteGet;
+commands[uproxy_core_api.Command.START_PROXYING_COPYPASTE_SHARE] = core.startCopyPasteShare;
+commands[uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE] = core.stopCopyPasteShare;
+commands[uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE] = core.sendCopyPasteSignal;
+commands[uproxy_core_api.Command.START_PROXYING] = core.start;
+commands[uproxy_core_api.Command.SEND_INVITATION] = core.inviteUser;
+commands[uproxy_core_api.Command.GET_INVITE_URL] = core.getInviteUrl;
+commands[uproxy_core_api.Command.GET_ALL_USER_PROFILES] = core.getAllUserProfiles;
+commands[uproxy_core_api.Command.SEND_EMAIL] = core.sendEmail;
+commands[uproxy_core_api.Command.STOP_PROXYING] = core.stop;
+commands[uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS] = core.updateGlobalSettings;
+commands[uproxy_core_api.Command.GET_LOGS] = core.getLogsAndNetworkInfo;
+commands[uproxy_core_api.Command.GET_NAT_TYPE] = core.getNatType;
+commands[uproxy_core_api.Command.REFRESH_PORT_CONTROL] = core.refreshPortControlSupport;
+commands[uproxy_core_api.Command.GET_FULL_STATE] = core.getFullState;
+commands[uproxy_core_api.Command.HANDLE_CORE_UPDATE] = core.handleUpdate;
+commands[uproxy_core_api.Command.GET_VERSION] = core.getVersion;
+commands[uproxy_core_api.Command.PING_UNTIL_ONLINE] = core.pingUntilOnline;
+commands[uproxy_core_api.Command.ACCEPT_INVITATION] = core.acceptInvitation;
 
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.LOGOUT,
-    core.logout);
-
-ui_connector.onCommand(uproxy_core_api.Command.MODIFY_CONSENT,
-    core.modifyConsent);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.START_PROXYING_COPYPASTE_GET,
-    core.startCopyPasteGet);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_GET,
-    core.stopCopyPasteGet);
-
-ui_connector.onCommand(
-    uproxy_core_api.Command.START_PROXYING_COPYPASTE_SHARE,
-    core.startCopyPasteShare);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE,
-    core.stopCopyPasteShare);
-
-ui_connector.onCommand(
-    uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE,
-    core.sendCopyPasteSignal);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.START_PROXYING,
-    core.start);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.SEND_INVITATION,
-    core.inviteUser);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GET_INVITE_URL,
-    core.getInviteUrl);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GET_ALL_USER_PROFILES,
-    core.getAllUserProfiles);
-
-ui_connector.onCommand(uproxy_core_api.Command.SEND_EMAIL,
-    core.sendEmail);
-
-ui_connector.onCommand(uproxy_core_api.Command.STOP_PROXYING,
-    core.stop);
-
-ui_connector.onCommand(
-    uproxy_core_api.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
-    core.handleManualNetworkInboundMessage);
-
-ui_connector.onCommand(
-    uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS,
-    core.updateGlobalSettings);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GET_LOGS,
-    core.getLogsAndNetworkInfo);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GET_NAT_TYPE,
-    core.getNatType);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.REFRESH_PORT_CONTROL,
-    core.refreshPortControlSupport);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.GET_FULL_STATE,
-    core.getFullState);
-
-ui_connector.onCommand(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
-    core.handleUpdate);
-
-ui_connector.onPromiseCommand(uproxy_core_api.Command.GET_VERSION,
-    core.getVersion);
+for (var command in commands) {
+  ui_connector.onCommand(command, commands[command]);
+}
 
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
     globals.metrics, globals.storage, core.getNetworkInfoObj,
@@ -144,12 +90,3 @@ var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
             {payload: payload, cloudfrontPath: 'submit-rappor-stats'});
       }
     });
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.PING_UNTIL_ONLINE,
-    core.pingUntilOnline);
-
-ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.ACCEPT_INVITATION,
-    core.acceptInvitation);
-

@@ -1,0 +1,105 @@
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel="import" href="../../bower/core-signals/core-signals.html">
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='button.html'>
+<link rel='import' href='dialog.html'>
+<link rel="import" href="i18n-filter.html">
+
+<polymer-element name='uproxy-network-invite-user' attributes="network">
+  <template>
+    <style>
+      core-overlay {
+        height: 100%;
+        width: 100%;
+        background-color: white;
+      }
+      uproxy-button {
+        margin: 0;
+        padding-left: 1em;
+        padding-right: 1em;
+      }
+      a {
+        cursor: pointer;
+      }
+      p {
+        font-size: 13px;
+        letter-spacing: .3px;
+        margin-top: 0px;
+      }
+      core-overlay paper-input-decorator {
+        font-size: 16px;
+      }
+      core-overlay paper-input-decorator /deep/ .underline div {
+        background-color: #dddddd !important;
+      }
+      .section {
+        padding: 2.3em 2.3em 0em 2.3em;
+        line-height: 20px;
+      }
+
+      /* Social network specific CSS */
+      uproxy-button.GMail {
+        background: #dd4b39;
+      }
+      uproxy-button.GitHub {
+        background: #666;
+      }
+      uproxy-action-dialog h1 {
+        font-size: 1.4em;
+        color: #009688;
+        font-weight: normal;
+      }
+    </style>
+
+    <core-signals on-core-signal-open-network-invite-dialog='{{openInviteUserPanel}}'></core-signals>
+
+    <core-overlay id='networkInviteUserPanel'>
+      <div hidden?="{{network !== 'GitHub'}}">
+        <uproxy-app-bar class="GitHub" on-go-back='{{ closeInviteUserPanel }}' color="#666">
+          {{ 'INVITE_A_FRIEND' | $$ }}
+        </uproxy-app-bar>
+
+        <div class='section'>
+          <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
+          <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
+            <input is='core-input' value='{{ userIdInput }}'>
+          </paper-input-decorator>
+          <uproxy-button class="GitHub" affirmative on-tap='{{ inviteGithubFriend }}'>
+            {{ 'SEND_INVITATION' | $$ }}
+          </uproxy-button>
+        </div>
+      </div>
+
+      <div hidden?="{{network !== 'GMail'}}">
+        <uproxy-app-bar class="GMail" on-go-back='{{closeInviteUserPanel}}' color="#dd4b39">
+          {{ 'INVITE_A_FRIEND' | $$ }}
+        </uproxy-app-bar>
+
+        <div class='section'>
+          <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$ }}</p>
+          <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
+            <input is='core-input' value='{{ inviteUserEmail }}' />
+          </paper-input-decorator>
+
+          <uproxy-button class="GMail" raised affirmative on-tap='{{ sendToGMailFriend }}'>
+            {{ 'SEND_INVITATION' | $$ }}
+          </uproxy-button>
+        </div>
+      </div>
+
+    </core-overlay>
+
+    <uproxy-action-dialog backdrop layered="false" id="QuiverDialog">
+      <h1>{{ 'QUIVER_LINK_INSTRUCTIONS' | $$ }}</h1>
+      <div hidden?='{{ inviteUrl == "" }}'>
+        <paper-input-decorator layout vertical>
+          <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+        </paper-input-decorator>
+      </div>
+      <uproxy-button affirmative>{{ 'OK' | $$ }}</uproxy-button>
+    </uproxy-action-dialog>
+
+  </template>
+  <script src='network-invite-user.js'></script>
+</polymer-element>

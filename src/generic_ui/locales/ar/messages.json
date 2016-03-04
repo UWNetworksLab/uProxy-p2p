@@ -95,10 +95,6 @@
         "message": "مشاركة إمكانية الوصول مع __name__",
         "description": "Message in a status bar that is visible when one friend is getting access through the user."
     },
-    "STATS_ENABLED_MESSAGE": {
-        "message": "تهني هذه الأيقونة أنك اخترت مشاركة إحصائيات مجهولة المصدر مع فريق uProxy. انقر لتعديل الإعدادات.",
-        "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
-    },
     "REQUESTS": {
         "message": "الطلبات",
         "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
@@ -131,7 +127,7 @@
         "message": "غالباً لا",
         "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
     },
-    "ALPHA_MESSAGE": {
+    "BETA_MESSAGE": {
         "message": "هذا إصدار المرحلة ألفا لـ uProxy. يمكنك مساعدتنا على تحسين uProxy بمشاركة معايير مجهول مع فريق التطوير. يتم جعل مصدر البيانات التي يتم الإبلاغ عنها مجهولاً ونقلها بطريقة آمنة.",
         "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
     },
@@ -182,10 +178,6 @@
     "START_ONE_TIME_INSTRUCTION": {
         "message": "لبدء تحقيق الوصول عبر صديقك، انقر على الزر أدناه.",
         "description": ""
-    },
-    "NO_FRIENDS_ONLINE": {
-        "message": "ليس هناك أي من أصدقائك مسجل دخولهم إلى uProxy في هذا الوقت.",
-        "description": "None of the user's friends are currently signed in."
     },
     "CONTINUE_BROWSING": {
         "message": "متابعة التصفح دون uProxy",
@@ -558,10 +550,6 @@
     "STARTED_PROXYING": {
         "message": "بدأ __name__ الاتصال بالإنترنت بالوكالة من خلالك",
         "description": "Notification for when a friend has started accessing the Internet through the user."
-    },
-    "FRIENDS_APPEAR_WHEN": {
-        "message": "لدعوة الأصدقاء إلى uProxy، أرسل لهم وصلة إلى https://www.uproxy.org",
-        "description": "Instruction informing the user how to invite their friends to uProxy."
     },
     "VERY_LIKELY": {
         "message": "على الأغلب",

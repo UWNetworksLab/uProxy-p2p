@@ -95,10 +95,6 @@
         "message": "Đang chia sẻ truy cập với __name__",
         "description": "Message in a status bar that is visible when one friend is getting access through the user."
     },
-    "STATS_ENABLED_MESSAGE": {
-        "message": "Biểu tượng này có nghĩa là bạn đã chọn tham gia chia sẻ thống kê ẩn danh với đội ngũ uProxy. Hãy nhấn vào đây để điều chỉnh cài đặt.",
-        "description": "Text that appears in a popup explaining the 'anonymous stats enabled' icon."
-    },
     "REQUESTS": {
         "message": "Yêu cầu",
         "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
@@ -131,8 +127,8 @@
         "message": "có lẽ là không",
         "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
     },
-    "ALPHA_MESSAGE": {
-        "message": "Đây là phiên bản alpha của uProxy. Bạn có thể giúp chúng tôi cải thiện uProxy bằng cách chia sẻ các số liệu ẩn danh với nhóm phát triển. Dữ liệu báo cáo sẽ được máy khách ẩn danh và được truyền đi một cách bảo mật.",
+    "BETA_MESSAGE": {
+        "message": "Đây là phiên bản beta của uProxy. Bạn có thể giúp chúng tôi cải thiện uProxy bằng cách chia sẻ các số liệu ẩn danh với nhóm phát triển. Dữ liệu báo cáo sẽ được máy khách ẩn danh và được truyền đi một cách bảo mật.",
         "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
     },
     "MORE_INFORMATION": {
@@ -182,10 +178,6 @@
     "START_ONE_TIME_INSTRUCTION": {
         "message": "Để bắt đầu nhận truy cập từ bạn bè của bạn, hãy nhấn vào nút dưới đây.",
         "description": ""
-    },
-    "NO_FRIENDS_ONLINE": {
-        "message": "Không ai trong số bạn bè của bạn đăng nhập vào uProxy ngay lúc này.",
-        "description": "None of the user's friends are currently signed in."
     },
     "CONTINUE_BROWSING": {
         "message": "Tiếp Tục Duyệt Web Mà Không Dùng uProxy",
@@ -558,10 +550,6 @@
     "STARTED_PROXYING": {
         "message": "__name__ bắt đầu proxy thông qua bạn",
         "description": "Notification for when a friend has started accessing the Internet through the user."
-    },
-    "FRIENDS_APPEAR_WHEN": {
-        "message": "Để mời bạn bè đến với uProxy, hãy gửi cho họ một liên kết đến https://www.uproxy.org",
-        "description": "Instruction informing the user how to invite their friends to uProxy."
     },
     "VERY_LIKELY": {
         "message": "nhiều khả năng",

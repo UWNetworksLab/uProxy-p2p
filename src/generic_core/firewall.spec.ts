@@ -6,13 +6,13 @@ import mockFreedomRtcPeerConnection = require('../../../third_party/uproxy-lib/f
 
 import freedom_mocks = require('../mocks/freedom-mocks');
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
-    'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
-    'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); },
-    'metrics': () => { return new freedom_mocks.MockMetrics(); },
-    'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
-    'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); },
-    'pgp': () => { return new freedom_mocks.PgpProvider() },
-    'portControl': () => { return new Object }
+  'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
+  'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); },
+  'metrics': () => { return new freedom_mocks.MockMetrics(); },
+  'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
+  'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); },
+  'pgp': () => { return new freedom_mocks.PgpProvider() },
+  'portControl': () => { return new Object },
 });
 
 
@@ -130,7 +130,7 @@ describe('firewall.SocialClientState', () => {
     {
       'userId' : '__proto__',
       'clientId' : 'alice@gmail.com/Android-19078634adfkj',
-      'status' : 'Happy',
+      'status' : 'ONLINE',
       'timestamp' : 30,
       'lastSeen' : 100,
     },
@@ -138,7 +138,7 @@ describe('firewall.SocialClientState', () => {
     {
       'userId' : 'alice@gmail.com',
       'clientId' : 'alice@gmail.com/Android-19078634adfkj',
-      'status' : 'Happy',
+      'status' : 'ONLINE',
       'timestamp' : -1,
       'lastSeen' : 100,
     }]
@@ -146,7 +146,7 @@ describe('firewall.SocialClientState', () => {
   var goodClientState = {
     'userId' : 'alice@gmail.com',
     'clientId' : 'alice@gmail.com/Android-23nadsv32f',
-    'status' : 'Happy',
+    'status' : 'ONLINE',
     'timestamp' : 30
   };
 
@@ -218,7 +218,7 @@ describe('firewall.SocialIncomingMessage', () => {
       'from' : {
         'userId' : '__proto__',
         'clientId' : 'alice@gmail.com/Android-19078634adfkj',
-        'status' : 'Happy',
+        'status' : 'ONLINE',
         'timestamp' : 30,
       },
       'message' : ''
@@ -228,7 +228,7 @@ describe('firewall.SocialIncomingMessage', () => {
       'from' : {
         'userId' : 'alice@gmail.com',
         'clientId' : 'alice@gmail.com/Android-19078634adfkj',
-        'status' : 'Happy',
+        'status' : 'ONLINE',
         'timestamp' : -1,
       },
       'message' : ''
@@ -238,7 +238,7 @@ describe('firewall.SocialIncomingMessage', () => {
     'from' : {
       'userId' : 'alice@gmail.com',
       'clientId' : 'alice@gmail.com/Android-23nadsv32f',
-      'status' : 'Happy',
+      'status' : 'ONLINE',
       'timestamp' : 30,
     },
     'message' : 'hello!'

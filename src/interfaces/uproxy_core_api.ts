@@ -28,6 +28,7 @@ export interface GlobalSettings {
   stunServers      :freedom.RTCPeerConnection.RTCIceServer[];
   hasSeenSharingEnabledScreen :boolean;
   hasSeenWelcome   :boolean;
+  hasSeenMetrics   :boolean;
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
@@ -35,15 +36,15 @@ export interface GlobalSettings {
   consoleFilter    :loggingTypes.Level;
   language         :string;
   force_message_version :number;
-  hasSeenGoogleAndFacebookChangedNotification :boolean;
   quiverUserName :string;
+  showCloud :boolean;
+  proxyBypass: string[];
 }
 export interface InitialState {
   networkNames :string[];
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
-  copyPasteState :CopyPasteState; //TODO(jpevarnek): remove this property
   copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
 }
@@ -86,8 +87,6 @@ export enum Command {
   STOP_PROXYING_COPYPASTE_SHARE = 1011,
   COPYPASTE_SIGNALLING_MESSAGE = 1012,
 
-  // Payload should be a HandleManualNetworkInboundMessageCommand.
-  HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE = 1013,
   SEND_CREDENTIALS = 1014,
   UPDATE_GLOBAL_SETTINGS = 1015,
   GET_LOGS = 1016,
@@ -118,8 +117,6 @@ export enum Update {
   STOP_GETTING_FROM_FRIEND = 2008,
   START_GIVING_TO_FRIEND = 2009,
   STOP_GIVING_TO_FRIEND = 2010,
-  // Payload should be a Message.
-  MANUAL_NETWORK_OUTBOUND_MESSAGE = 2011,
   // TODO: "Get credentials" is a command, not an "update". Consider
   // renaming the "Update" enum.
   GET_CREDENTIALS = 2012,
@@ -174,9 +171,15 @@ export interface CloudfrontPostData {
   cloudfrontPath :string;
 }
 
+export enum LoginType {
+  INITIAL = 0,
+  RECONNECT,
+  TEST
+}
+
 export interface LoginArgs {
   network :string;
-  reconnect :boolean;
+  loginType :LoginType;
   userName ?:string;
 }
 
@@ -195,9 +198,10 @@ export interface EmailData {
   body :string;
 };
 
-export interface AcceptInvitationData {
+// Data needed to accept user invites or to get an invite URL.
+export interface InvitationData {
   network :social.SocialNetworkInfo;
-  token ?:string;
+  tokenObj ?:any;
   userId ?:string;
 };
 

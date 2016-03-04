@@ -1,6 +1,4 @@
-interface Window {
-    cordova: typeof cordova;
-}
+/// <reference path="cordova.d.ts" />
 
 // See https://github.com/apache/cordova-plugin-inappbrowser
 declare module cordova.InAppBrowser {
