@@ -19,6 +19,10 @@ then
   then
     curl -fsSL https://get.docker.com/ | sh
     service docker start
+  elif [ -f /usr/bin/docker -a $(( $(docker --version | cut -d . -f 2) < 10 )) ]
+  then
+    echo "Installed version of docker is too old.  Please upgrade it yourself, or remove it (yum erase docker) and run this script again."
+    exit 1
   fi
 fi
 
