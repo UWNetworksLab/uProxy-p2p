@@ -75,7 +75,6 @@ commands[uproxy_core_api.Command.HANDLE_CORE_UPDATE] = core.handleUpdate;
 commands[uproxy_core_api.Command.GET_VERSION] = core.getVersion;
 commands[uproxy_core_api.Command.PING_UNTIL_ONLINE] = core.pingUntilOnline;
 commands[uproxy_core_api.Command.ACCEPT_INVITATION] = core.acceptInvitation;
-commands[uproxy_core_api.Command.DEPLOY_CLOUD_SERVER] = core.deployCloudServer;
 commands[uproxy_core_api.Command.CLOUD_INSTALL] = core.cloudInstall;
 
 for (var command in commands) {

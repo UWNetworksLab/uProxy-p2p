@@ -40,12 +40,15 @@ loggingController.setDefaultFilter(
 
 var portControl = globals.portControl;
 
+// Prefix for freedomjs modules which interface with cloud computing providers.
+const CLOUD_PROVIDER_MODULE_PREFIX: string = 'CLOUDPROVIDER-';
+
 const getCloudProviderNames = (): string[] => {
-  const prefix: string = 'CLOUDPROVIDER-';
   let results: string[] = [];
   for (var dependency in freedom) {
-    if (freedom.hasOwnProperty(dependency) && dependency.indexOf(prefix) === 0) {
-      results.push(dependency.substr(prefix.length));
+    if (freedom.hasOwnProperty(dependency) &&
+        dependency.indexOf(CLOUD_PROVIDER_MODULE_PREFIX) === 0) {
+      results.push(dependency.substr(CLOUD_PROVIDER_MODULE_PREFIX.length));
     }
   }
   return results;
@@ -601,16 +604,19 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public deployCloudServer = (args:uproxy_core_api.DeployCloudServerArgs): Promise<uproxy_core_api.CloudInstallArgs> => {
-    log.debug('logging into cloud provider %1', args.providerName);
+  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
 
-    const provisioner = freedom['digitalocean']();
+    log.debug('logging into cloud provider %1', args.providerName);
 
-    const destroyProvisioner = () => {
-      freedom['digitalocean'].close(provisioner);
+    const provisioner = freedom[CLOUD_PROVIDER_MODULE_PREFIX + args.providerName]();
+    const installer = freedom['cloudinstall']();
+
+    const destroyModules = () => {
+      freedom[CLOUD_PROVIDER_MODULE_PREFIX + args.providerName].close(provisioner);
+      freedom['cloudinstall'].close(installer);
     };
 
     provisioner.on('status', (update: any) => {
@@ -621,39 +627,24 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return provisioner.start('uproxy-cloud-server').then((serverInfo: any) => {
       log.info('created server on digitalocean: %1', serverInfo);
 
-      destroyProvisioner();
+      const host = serverInfo.network.ipv4;
+      const port = serverInfo.network.ssh_port;
 
-      return {
-        host: serverInfo.network.ipv4,
-        port: serverInfo.network.ssh_port,
-        // TODO: The provisioning module should return this!
-        username: 'root',
-        privateKey: serverInfo.ssh.private
+      log.debug('installing cloud on %1:%2', host, port);
+
+      // TODO: Send real updates. While we could trivially send stdout,
+      //       that's extremely verbose right now.
+      ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
+
+      // TODO: The provisioning module should return the username!
+      return installer.install(host, port, 'root', serverInfo.ssh.private);
+    }).then((output: string) => {
+      destroyModules();
+      return <uproxy_core_api.CloudInstallResult>{
+        invite: output
       };
-    }, (e:Error) => {
-      destroyProvisioner();
-      return Promise.reject(e);
-    });
-  }
-
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<string> => {
-    log.debug('installing cloud on %1:%2 as %3', args.host, args.port, args.username);
-
-    const installer = freedom['cloudinstall']();
-
-    const destroyInstaller = () => {
-      freedom['cloudinstall'].close(installer);
-    };
-
-    // TODO: Send real updates. While we could trivially send stdout,
-    //       that's extremely verbose right now.
-    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
-
-    return installer.install(args.host, args.port, args.username, args.privateKey).then((output:string) => {
-      destroyInstaller();
-      return output;
     }, (e: Error) => {
-      destroyInstaller();
+      destroyModules();
       return Promise.reject(e);
     });
   }

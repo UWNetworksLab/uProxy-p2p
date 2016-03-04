@@ -7,7 +7,7 @@ import ui_constants = require('../../interfaces/ui');
 
 var ui = ui_context.ui;
 
-const DEPLOY_ARGS: uproxy_core_api.DeployCloudServerArgs = {
+const INSTALL_ARGS: uproxy_core_api.CloudInstallArgs = {
   providerName: 'digitalocean'
 };
 
@@ -23,12 +23,10 @@ Polymer({
   loginTapped: function() {
     this.$.loginDialog.close();
     this.$.installingDialog.open();
-    ui.deployCloudServer(DEPLOY_ARGS).then((serverInfo: uproxy_core_api.CloudInstallArgs) => {
-      return ui.cloudInstall(serverInfo);
-    }).then((invite: string) => {
+    ui.cloudInstall(INSTALL_ARGS).then((result: uproxy_core_api.CloudInstallResult) => {
       // TODO: Add the new server to the user's contact list.
       // TODO: Show the invite so the user can copy it so a safe place.
-      ui.toastMessage = 'INVITE: ' + invite;
+      ui.toastMessage = 'INVITE: ' + result.invite;
       this.closeWizard();
     }).catch((e: Error) => {
       // TODO: Figure out which fields in e are set, because message isn't.

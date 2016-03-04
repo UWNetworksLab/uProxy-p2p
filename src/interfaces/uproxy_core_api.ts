@@ -102,8 +102,7 @@ export enum Command {
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
   SEND_INVITATION = 1028,
-  DEPLOY_CLOUD_SERVER = 1029,
-  CLOUD_INSTALL = 1030
+  CLOUD_INSTALL = 1029
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -139,7 +138,7 @@ export enum Update {
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
   ONETIME_MESSAGE = 2026,
-  // Payload is a string.
+  // Payload is a CloudInstallResult.
   CLOUD_INSTALL_STATUS = 2027
 }
 
@@ -211,17 +210,17 @@ export interface InvitationData {
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
-// Argument to #deployCloudServer.
-export interface DeployCloudServerArgs {
+// Argument to #cloudInstall.
+export interface CloudInstallArgs {
+  // Use this cloud computing provider to create a server.
   providerName: string;
 };
 
-// Argument to #cloudInstall.
-export interface CloudInstallArgs {
-  host: string;
-  port: number;
-  username: string;
-  privateKey: string;
+// Output of #cloudInstall.
+export interface CloudInstallResult {
+  // Invitation URL, iff the the server was successfully created
+  // and provisioned.
+  invite: string;
 };
 
 /**
@@ -286,18 +285,10 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
-  // Obtains the credentials to install uProxy on a server, which are
-  // intended to be passed to #cloudInstall. This function may be
-  // long-running if wants to, e.g. create a server on behalf of the
-  // user (it may also invoke an OAuth flow to do so).
-  deployCloudServer(args:DeployCloudServerArgs): Promise<CloudInstallArgs>;
-
-  // Installs uProxy on a server, resolving with an invite. Intended to
-  // be used primarily with the results from #getCloudInstallArgs but
-  // having separate functions for "create server" and "install on server"
-  // allows us, in future, to install uProxy on any server the user can
-  // point us at. Note that this may be a very long-running function in
-  // the case of servers with low bandwidth.
-  cloudInstall(args:CloudInstallArgs): Promise<string>;
+  // Installs uProxy on a server. Generally a long-running operation, so
+  // callers should expose CLOUD_INSTALL_STATUS updates to the user.
+  // This may also invoke an OAuth flow, in order to perform operations
+  // with the cloud computing provider on the user's behalf.
+  cloudInstall(args:CloudInstallArgs): Promise<CloudInstallResult>;
 }
 
