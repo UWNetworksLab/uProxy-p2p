@@ -328,6 +328,18 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.getInviteUrl(data.userId || '');
   }
 
+  public getAllUserProfiles =
+      (networkInfo: social.SocialNetworkInfo): Promise<social.UserProfile[]> => {
+    var network = social_network.networks[networkInfo.name][networkInfo.userId];
+    var roster :social.UserProfile[] = [];
+    for(var userId in network.roster){
+      if (userId !== networkInfo.userId) {
+        roster.push(network.roster[userId].profile);
+      }
+    };
+    return Promise.resolve(roster);
+  }
+
   public sendEmail = (data :uproxy_core_api.EmailData) : void => {
     var networkInfo = data.networkInfo;
     var network = social_network.networks[networkInfo.name][networkInfo.userId];

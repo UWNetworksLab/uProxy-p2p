@@ -140,6 +140,8 @@ var inviteUser = {
     });
   },
   ready: function() {
+    this.inviteUrl = '';
+    this.inviteUserEmail = ''; // for GMail
     this.selectedNetworkName = '';
     this.ui = ui;
     this.model = model;

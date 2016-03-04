@@ -64,6 +64,7 @@ commands[uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE] = core.sendCopyPa
 commands[uproxy_core_api.Command.START_PROXYING] = core.start;
 commands[uproxy_core_api.Command.SEND_INVITATION] = core.inviteUser;
 commands[uproxy_core_api.Command.GET_INVITE_URL] = core.getInviteUrl;
+commands[uproxy_core_api.Command.GET_ALL_USER_PROFILES] = core.getAllUserProfiles;
 commands[uproxy_core_api.Command.SEND_EMAIL] = core.sendEmail;
 commands[uproxy_core_api.Command.STOP_PROXYING] = core.stop;
 commands[uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS] = core.updateGlobalSettings;

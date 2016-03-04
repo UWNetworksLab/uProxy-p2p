@@ -248,6 +248,7 @@ export interface InviteTokenData {
 export interface RemoteUser {
   modifyConsent(action:uproxy_core_api.ConsentUserAction) : Promise<void>;
   getInstance(instanceId:string) :RemoteUserInstance;
+  profile :UserProfile;
 }
 
 /**
