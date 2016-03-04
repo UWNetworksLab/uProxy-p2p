@@ -6,20 +6,147 @@ import storage = require('../interfaces/storage');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 var log :logging.Log = new logging.Log('metrics');
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+export interface Updater<T> {
+  (orig :T, increment :T):T;
+};
+
+export class WeekBuffer<T> {
+  // timestamps_[k] and values_[k] represent the same bucket (called k).
+  timestamps_: number[];
+  values_: T[];
+
+  constructor() {
+    this.reset();
+  }
+
+  public reset() {
+    this.timestamps_ = [];
+    this.values_ = [];
+  }
+
+  // Put 'value' in for today's bucket.  If there's an existing one,
+  // call 'updater(old, value)' and save its result in the bucket.
+  public update(value:T, updater:Updater<T>): void {
+    this.trim();
+    var now = Date.now();
+    if (this.timestamps_.length == 0) {
+      this.timestamps_.push(now);
+      this.values_.push(value);
+      return;
+    }
+    if (now - this.timestamps_[this.timestamps_.length-1] > ONE_DAY_MS) {
+      if (this.timestamps_.length >= 7) {
+        // this can't happen.
+        log.error('WeekBuffer buckets corrupt!');
+      }
+      this.timestamps_.push(now);
+      this.values_.push(value);
+    } else {
+      // we're within the last bucket.
+      var idx = this.timestamps_.length-1;
+      this.values_[idx] = updater(this.values_[idx], value);
+    }
+  }
+
+  public merge(other:WeekBuffer<T>, updater:Updater<T>) {
+    other.trim();
+    this.trim();
+    if (other.timestamps_.length == 0) {
+      return;
+    } else if (this.timestamps_.length == 0) {
+      this.timestamps_ = other.timestamps_;
+      this.values_ = other.values_;
+      return;
+    } else {
+      log.error('WeekBuffer<T>.merge: actual merging unimplemented.');
+    }
+  }
+
+  private trim() {
+    var threshold = Date.now() - (7 * ONE_DAY_MS);
+    while (this.timestamps_.length > 0 && this.timestamps_[0] < threshold) {
+      this.timestamps_.shift();
+      this.values_.shift();
+    }
+  }
+
+  public reduce(value:T, updater:Updater<T>): T {
+    var cur = value;
+    for (var i = 0; i < this.timestamps_.length; i++) {
+      cur = updater(cur, this.values_[i]);
+    }
+    return cur;
+  }
+};
+
+export interface NetMetrics {
+  [userid :string] :number;
+};
+
 
 export interface MetricsData {
   version :number;
-  success :number;  // Number of successes for getting access only.
-  failure :number;  // Number of failures for getting access only.
+  successes :WeekBuffer<number>;  // Number of getter-side successful proxy
+                                  // sessions started.
+  attempts :WeekBuffer<number>;  // Total number of attempts for getting access.
+  shutdowns :WeekBuffer<number>;  // Number of times a proxy session lived long
+  // enough that a getter hit the 'stop
+  // proxying' button.
+  // Social network stats:
+  //   Negative (-1) for not logged in
+  //   When logged in, the number of friends
+  //   We report the max value seen for this session.
+  on_gmail :NetMetrics;
+  on_facebook :NetMetrics;
+  on_github :NetMetrics;
+  on_quiver :NetMetrics;
 };
+
+function max(a :number, b :number) :number {
+  if (a === undefined) {
+    return b;
+  } else if (b === undefined) {
+    return a;
+  } else {
+    return a > b? a : b;
+  }
+};
+
+function mergeNet(first:NetMetrics, second :NetMetrics) :NetMetrics {
+  var result = first;
+  for (var k in second) {
+    result[k] = max(result[k], second[k]);
+  }
+  return result;
+};
+
+function calcPercentage(numerator :number, denominator :number) {
+  return Math.floor(20 * Math.floor((5.0*numerator) / denominator));
+}
+
+function sumMetrics(mets :NetMetrics) :number{
+  var total = 0;
+  for (var k in mets) {
+    total += mets[k];
+  }
+  return total;
+}
 
 export class Metrics {
   public onceLoaded_ :Promise<void>;  // Only public for tests
+  private add_ :Updater<number>;
+  private max_ :Updater<number>;
   private metricsProvider_ :freedom_AnonymizedMetrics;
   // data_ should be private except for tests.
-  public data_ :MetricsData = {version: 1, success: 0, failure: 0};
+  public data_ :MetricsData;
 
   constructor(private storage_ :storage.Storage) {
+    this.add_ = (a,b) => { return a+b; };
+    this.max_ = (a,b) => { return a > b? a:b; }
+    this.data_.version = 2;
+
     var counterMetric = {
       type: 'logarithmic', base: 2, num_bloombits: 256, num_hashes: 1,
       num_cohorts: 8, prob_p: 0.25, prob_q: 0.75, prob_f: 0.5,
@@ -30,36 +157,80 @@ export class Metrics {
       num_cohorts: 8, prob_p: 0.25, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
+    // This will be an integer as string, values: 0, 20, 40, 60, 80, 100.
+    var percentageMetric = natMetric;
+    // A positive integer.
+    var versionMetric = natMetric;
+    // 'windows', 'mac', 'linux', 'ios'
+    var platformMetric = natMetric;
+    // An integer, possibly -1.
+    var networkMetric = natMetric;
     this.metricsProvider_ = freedom['metrics']({
       name: 'uProxyMetrics',
-      definition: {'success-v2': counterMetric, 'failure-v2': counterMetric,
-                   'nat-type-v3': natMetric, 'pmp-v3': natMetric,
-                   'pcp-v3': natMetric, 'upnp-v3': natMetric}
+      definition: {'success-v3': counterMetric,
+                   'fail-rate-v1': percentageMetric,
+                   'chrome-version-v1' :versionMetric,
+                   'ff-version-v1' :versionMetric,
+                   'platform-v1' :platformMetric,
+                   'shutdown-v1' :percentageMetric,
+                   'gmail-v1' :networkMetric,
+                   'facebook-v1' :networkMetric,
+                   'github-v1' :networkMetric,
+                   'quiver-v1' :networkMetric,
+                   'nat-type-v3': natMetric,
+                   'pmp-v3': natMetric,
+                   'pcp-v3': natMetric,
+                   'upnp-v3': natMetric}
     });
 
-    this.onceLoaded_ = this.storage_.load('metrics').then(
+    if (storage_ !== null) {
+      this.onceLoaded_ = this.storage_.load('metrics').then(
         (storedData :MetricsData) => {
-      log.info('Loaded metrics from storage', storedData);
-      // Add stored metrics to current data_, in case increment has been
-      // called before storage loading is complete.
-      this.data_.success += storedData.success;
-      this.data_.failure += storedData.failure;
-    }).catch((e :Error) => {
-      // Not an error if no metrics are found storage, just use the default
-      // values for success, failure, etc.
-      log.info('No metrics found in storage');
-    });
+          log.info('Loaded metrics from storage', storedData);
+          // Add stored metrics to current data_, in case increment has been
+          // called before storage loading is complete.
+          this.data_.successes.merge(storedData.successes, this.add_);
+          this.data_.attempts.merge(storedData.attempts, this.add_);
+          this.data_.shutdowns.merge(storedData.shutdowns, this.add_);
+          this.data_.on_gmail = mergeNet(this.data_.on_gmail, storedData.on_gmail);
+          this.data_.on_facebook = mergeNet(this.data_.on_facebook,
+                                            storedData.on_facebook);
+          this.data_.on_github = mergeNet(this.data_.on_github, storedData.on_github);
+          this.data_.on_quiver = mergeNet(this.data_.on_quiver, storedData.on_quiver);
+        }).catch((e :Error) => {
+          // Not an error if no metrics are found storage, just use the default
+          // values for success, failure, etc.
+          log.info('No metrics found in storage');
+        });
+    }
   }
 
   public increment = (name :string) => {
     if (name == 'success') {
-      this.data_.success++;
+      this.data_.successes.update(1, this.add_);
       this.save_();
-    } else if (name == 'failure') {
-      this.data_.failure++;
+    } else if (name == 'attempt') {
+      this.data_.attempts.update(1, this.add_);;
       this.save_();
+    } else if (name == 'shutdown') {
+      this.data_.shutdowns.update(1, this.add_);
     } else {
       log.error('Unknown metric ' + name);
+    }
+  }
+
+  // Update how many friends are logged in on this network.
+  public userCount = (network: string, userName :string, friendCount:number) => {
+    if (network == 'gmail') {
+      this.data_.on_gmail[userName] = max(this.data_.on_gmail[userName], friendCount);
+    } else if (network == 'facebook') {
+      this.data_.on_facebook[userName] = max(this.data_.on_facebook[userName], friendCount);
+    } else if (network == 'github') {
+      this.data_.on_github[userName] = max(this.data_.on_github[userName], friendCount);
+    } else if (network == 'quiver') {
+      this.data_.on_quiver[userName] = max(this.data_.on_quiver[userName], friendCount);
+    } else {
+      log.error('Unknown social network: ' + name + ' for user ' + userName);
     }
   }
 
@@ -68,13 +239,69 @@ export class Metrics {
       return Promise.reject(new Error('getNetworkInfo() failed.'));
     }
 
+    var platform = 'unknown';
+    var chromeVersion = 'none';
+    var firefoxVersion = 'none';
+    var agent = navigator.userAgent;
+    var idx :number;
+
+    if ((idx = agent.indexOf('Firefox')) >= 0) {
+      firefoxVersion = '' + parseInt(agent.slice(idx+8));
+    } else if ((idx = agent.indexOf('Chrome')) >= 0) {
+      chromeVersion = '' + parseInt(agent.slice(idx+7));
+    }
+
+    if (agent.indexOf('Linux') >= 0) {
+      platform = 'linux';
+    } else if (agent.indexOf('Android') >= 0) {
+      platform = 'android';
+    } else if (agent.indexOf('Macintosh') >= 0) {
+      platform = 'mac';
+    } else if (agent.indexOf('iOS') >= 0) {
+      platform = 'ios';
+    } else if (agent.indexOf('Windows') >= 0) {
+      platform = 'windows';
+    }
+
+    log.info("getReport: chromeVersion: " + chromeVersion + ", firefoxVersion: "
+             + firefoxVersion + ", platform: " + platform + " from user agent '"
+             + navigator.userAgent + "'.");
     // Don't catch any Promise rejections here so that they can be handled
     // by the caller instead.
     return this.onceLoaded_.then(() => {
+      var attempts = this.data_.attempts.reduce(0, this.add_);
+      var successes = this.data_.successes.reduce(0, this.add_);
+      var shutdowns = this.data_.shutdowns.reduce(0, this.add_);
+
       var successReport =
-        this.metricsProvider_.report('success-v2', this.data_.success);
-      var failureReport =
-        this.metricsProvider_.report('failure-v2', this.data_.failure);
+        this.metricsProvider_.report('success-v3', successes);
+      var failRateReport =
+        this.metricsProvider_.report(
+          'fail-rate-v1', calcPercentage(attempts - successes, attempts));
+      var shutdownReport =
+        this.metricsProvider_.report('shutdown-v1', calcPercentage(
+          shutdowns, successes));
+
+      var chromeVersionReport =
+        this.metricsProvider_.report('chrome-version-v1', chromeVersion);
+      var firefoxVersionReport =
+        this.metricsProvider_.report('ff-version-v1', firefoxVersion);
+      var platformReport =
+        this.metricsProvider_.report('platform-v1', platform);
+
+      var gmailReport =
+        this.metricsProvider_.report('gmail-v1',
+                                     sumMetrics(this.data_.on_gmail));
+      var facebookReport =
+        this.metricsProvider_.report('facebook-v1',
+                                     sumMetrics(this.data_.on_facebook));
+      var githubReport =
+        this.metricsProvider_.report('github-v1',
+                                     sumMetrics(this.data_.on_github));
+      var quiverReport =
+        this.metricsProvider_.report('quiver-v1',
+                                     sumMetrics(this.data_.on_quiver));
+
       var natTypeReport =
         this.metricsProvider_.report('nat-type-v3', natInfo.natType);
       var pmpReport =
@@ -84,16 +311,24 @@ export class Metrics {
       var upnpReport =
         this.metricsProvider_.report('upnp-v3', natInfo.upnpSupport.toString());
 
-      return Promise.all([successReport, failureReport, natTypeReport,
-                          pmpReport, pcpReport, upnpReport]).then(() => {
+      return Promise.all([
+        successReport, failRateReport, shutdownReport, chromeVersionReport,
+        firefoxVersionReport, platformReport, gmailReport, facebookReport,
+        githubReport, quiverReport, natTypeReport, pmpReport, pcpReport,
+        upnpReport]).then(() => {
         return this.metricsProvider_.retrieve();
       });
     });
   }
 
   public reset = () => {
-    this.data_.success = 0;
-    this.data_.failure = 0;
+    this.data_.successes.reset();
+    this.data_.attempts.reset();
+    this.data_.shutdowns.reset();
+    this.data_.on_gmail = {};
+    this.data_.on_facebook = {};
+    this.data_.on_github = {};
+    this.data_.on_quiver = {};
     this.save_();
   }
 
@@ -112,7 +347,7 @@ export interface DailyMetricsReporterData {
 
 export class DailyMetricsReporter {
   // 5 days in milliseconds.
-  public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;
+  public static MAX_TIMEOUT = 5 * ONE_DAY_MS;
 
   public onceLoaded_ :Promise<void>;  // Only public for tests
 
@@ -179,8 +414,9 @@ export class DailyMetricsReporter {
     // TODO: use crypto.randomUint32 once it's available everywhere
     // var randomFloat = crypto.randomUint32() / Math.pow(2, 32);
     var randomFloat = Math.random();
-    var MS_PER_DAY = 24 * 60 * 60 * 1000;
-    var offset_ms = -Math.floor(Math.log(randomFloat) / (1 / MS_PER_DAY));
+    // 1 day, rough send interval.
+    var MEAN_SEND_INTERVAL_MS = ONE_DAY_MS;
+    var offset_ms = -Math.floor(Math.log(randomFloat) / (1 / MEAN_SEND_INTERVAL_MS));
     offset_ms = Math.min(offset_ms, DailyMetricsReporter.MAX_TIMEOUT);
     return Date.now() + offset_ms;
   }
