@@ -221,12 +221,20 @@ var inviteUser = {
   },
   ready: function() {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
     this.wechatInvites = {};
     this.wechatFriends = [];
     this.inviteUrl = '';
     this.inviteUserEmail = '';
+<<<<<<< HEAD
 =======
 >>>>>>> origin/master
+=======
+    this.githubUserIdInput = ''; // for GitHub
+    this.inviteUserEmail = ''; // for GMail
+>>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
     this.selectedNetworkName = '';
     this.ui = ui;
     this.model = model;

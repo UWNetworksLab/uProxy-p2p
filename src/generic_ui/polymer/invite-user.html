@@ -6,10 +6,15 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
 <<<<<<< HEAD
-<link rel='import' href='avatar.html'>
+<<<<<<< HEAD
 =======
+>>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
+<link rel='import' href='avatar.html'>
 <link rel='import' href='network-invite-user.html'>
+<<<<<<< HEAD
 >>>>>>> origin/master
+=======
+>>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
 <link rel="import" href="i18n-filter.html">
 
 <polymer-element name='uproxy-invite-user'>
@@ -39,6 +44,35 @@
       a {
         cursor: pointer;
       }
+<<<<<<< HEAD
+=======
+      paper-dropdown-menu {
+        padding: 0;
+        margin: 0;
+      }
+      paper-input-decorator {
+        font-size: 16px;
+      }
+      uproxy-avatar {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border: none;
+        border-radius: 50%;
+        background-color: #eee;
+        vertical-align: middle;
+        box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.12);
+      }
+      .wechatFriend {
+        margin: 20px 0px;
+        font-size: 16px;
+      }
+      .wechatFriend uproxy-avatar {
+        margin-right: 20px;
+      }
+
+      /* CSS for roster-before-login flow. */
+>>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
       #allInviteMethods {
         text-align: center;
       }
@@ -151,6 +185,7 @@
         padding-left: 26px;
         padding-right: 26px;
         text-align: left;
+<<<<<<< HEAD
       }
       uproxy-avatar {
         width: 40px;
@@ -168,6 +203,8 @@
       }
       .wechatFriend uproxy-avatar {
         margin-right: 20px;
+=======
+>>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
       }
     </style>
 
@@ -282,11 +319,78 @@
             {{ 'DONE' | $$ }}
           </uproxy-button>
         </div>
+<<<<<<< HEAD
 =======
 >>>>>>> origin/master
 
           <div id="weWontPostLearnMore"></div>
         </div> <!--End of #allInviteMethods -->
+=======
+            <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}'>
+              <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
+              <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
+            </div>
+          </div>
+
+          <div id="weWontPostLearnMore"></div>
+        </div> <!--End of roster-before-login view-->
+
+        <!-- TODO: remove this and uproxy-network template once Quiver
+        support is on the webstore -->
+        <div hidden?='{{ui.showRosterBeforeLogin}}' id='oldControls'>
+          <div hidden?='{{ onlineInviteNetworks.length <= 1}}' class='section'>
+            <p>{{ 'HOW_TO_INVITE_FRIENDS' | $$ }}</p>
+            <paper-dropdown-menu>
+              <paper-dropdown class='dropdown'>
+                <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
+                  <template repeat="{{ network in onlineInviteNetworks }}">
+                    <paper-item label='{{ network.name }}'>
+                      {{ network.displayName }}
+                    </paper-item>
+                  </template>
+                </core-menu>
+              </paper-dropdown>
+            </paper-dropdown-menu>
+          </div>
+          <div class='section'>
+            <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
+              <p>{{ 'FACEBOOK_INVITE_INSTRUCTIONS' | $$ }}</p>
+              <uproxy-button affirmative on-tap='{{ sendToFacebookFriend }}'>
+                {{ 'SEND_INVITATION' | $$ }}
+              </uproxy-button>
+            </div>
+
+            <div hidden?='{{ selectedNetworkName != "GMail"}}'>
+              <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$ }}</p>
+              <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
+                <input is='core-input' value='{{ inviteUserEmail }}' />
+              </paper-input-decorator>
+              <uproxy-button affirmative on-tap='{{ sendToGMailFriend }}'>
+                {{ 'SEND_INVITATION' | $$ }}
+              </uproxy-button>
+            </div>
+
+            <div hidden?='{{ selectedNetworkName != "GitHub"}}'>
+              <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$ }}</p>
+              <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
+                <input is='core-input' value='{{ githubUserIdInput }}'>
+              </paper-input-decorator>
+              <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
+                {{ 'SEND_INVITATION' | $$ }}
+              </uproxy-button>
+            </div>
+
+            <div hidden?='{{ selectedNetworkName != "Cloud"}}'>
+              <p>{{ 'ADD_CLOUD_INSTRUCTIONS' | $$ }}</p>
+            </div>
+          </div>
+          <div class='section'>
+            <a on-tap='{{ showAcceptUserInvite }}'>
+              {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$ }}
+            </a>
+          </div>
+        </div> <!--End of login-before-roster view-->
+>>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
       </div>
     </core-overlay>
 
