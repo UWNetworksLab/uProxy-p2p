@@ -1,5 +1,5 @@
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
-<link rel="import" href="../../bower/core-signals/core-signals.html">
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/paper-progress/paper-progress.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
@@ -55,24 +55,24 @@
     </style>
 
     <!-- TODO: remove this logic from the template -->
-    <core-signals on-core-signal-open-cloud-install-dialog='{{openLoginDialog}}'></core-signals>
+    <core-signals on-core-signal-open-cloud-install-dialog='{{ openLoginDialog }}'></core-signals>
 
     <!-- TODO: use core-pages rather than multiple dialogs -->
 
-    <uproxy-dialog layered="false" backdrop="true" id='loginDialog'>
+    <uproxy-dialog layered='false' backdrop='true' id='loginDialog'>
       <h1>Create a cloud server</h1>
-      <core-icon icon="clear" on-tap='{{closeDialogs}}'></core-icon>
+      <core-icon icon='clear' on-tap='{{ closeDialogs }}'></core-icon>
       <p>We can help you create a uProxy cloud server in a country of your choice. You will be able to get access from this server 24x7 and, optionally, share it with friends and family.</p>
       <p>To get started, please sign in to your DigitalOcean account.</p>
-      <div style="text-align:center;">
-        <uproxy-button raised on-tap='{{loginTapped}}'>
-          <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:Cloud'></core-icon></span>
-          <span id="buttonTextContainer">Sign in to Digital Ocean</span>
+      <div style='text-align:center;''>
+        <uproxy-button raised on-tap='{{ loginTapped }}'>
+          <span id='buttonLogoContainer'><core-icon icon='uproxy-icons:Cloud'></core-icon></span>
+          <span id='buttonTextContainer'>Sign in to Digital Ocean</span>
         </uproxy-button>
       </div>
     </uproxy-dialog>
 
-    <uproxy-dialog layered="false" backdrop="true" id='installingDialog'>
+    <uproxy-dialog layered='false' backdrop='true' id='installingDialog'>
       <h1>Create a cloud server</h1>
       <p>Your cloud server is being created. This will take several minutes, please bear with us.</p>
       <div>
@@ -86,7 +86,7 @@
          in the template in which Polymer opens multiple core-overlays,
          messing up the whole UI when the uproxy-action-dialog closes. -->
 
-    <uproxy-dialog layered="false" backdrop="true" id="successDialog">
+    <uproxy-dialog layered='false' backdrop='true' id='successDialog'>
       <h1>Create a cloud server</h1>
       <p>Your cloud server is ready!</p>
       <p>Below is the URL to administer your new server. Copy and paste it into a file and save it somewhere you'll be able to get to it in the future. Think of it as a password: keep it safe and don't share it with anyone you don't trust.</p>
@@ -99,7 +99,7 @@
       <uproxy-button on-tap='{{ closeDialogs }}'>{{ 'OK' | $$ }}</uproxy-button>
     </uproxy-dialog>
 
-    <uproxy-dialog layered="false" backdrop="true" id="failureDialog">
+    <uproxy-dialog layered='false' backdrop='true' id='failureDialog'>
       <h1>Create a cloud server</h1>
       <p>We're sorry. We couldn't create a cloud server for you at this time.</p>
       <p>It may be a temporary problem. Please try again later.</p>
