@@ -19,22 +19,32 @@ Polymer({
   closeDialogs: function() {
     this.$.loginDialog.close();
     this.$.installingDialog.close();
+    this.$.successDialog.close();
+    this.$.failureDialog.close();
   },
   loginTapped: function() {
-    this.$.loginDialog.close();
+    this.closeDialogs();
     this.$.installingDialog.open();
+
     ui.cloudInstall(INSTALL_ARGS).then((result: uproxy_core_api.CloudInstallResult) => {
-      // TODO: Add the new server to the user's contact list.
-      // TODO: Show the invite so the user can copy it so a safe place.
-      ui.toastMessage = 'INVITE: ' + result.invite;
+      this.inviteUrl = result.invite;
       this.closeDialogs();
+      this.$.successDialog.open();
+
+      // TODO: In addition to displaying the URL so the user can store it somewhere
+      //       we should add the new server to the user's contact list.
     }).catch((e: Error) => {
       // TODO: Figure out which fields in e are set, because message isn't.
-      ui.toastMessage = 'INSTALL FAILED';
       this.closeDialogs();
+      this.$.failureDialog.open();
     })
+  },
+  select: function(e: Event, d: Object, input: HTMLInputElement) {
+    input.focus();
+    input.select();
   },
   ready: function() {
     this.ui = ui;
+    this.inviteUrl = '';
   }
 });
