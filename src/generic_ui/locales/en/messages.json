@@ -855,10 +855,6 @@
     "description": "Dialog text informing user that a connection could not be made to their cloud instance",
     "message": "Oops, connection failed. Please check the invite code."
   },
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
   "WECHAT_WHO_TO_INVITE": {
     "description": "Text shown on the invite user panel, asking the user which WeChat friends they'd like to invite.",
     "message": "Which of your WeChat friends would you like to add to uProxy? Your friends who add you back will appear in your uProxy contacts."
@@ -878,10 +874,6 @@
   "CLOUD_VIRTUAL_MACHINE": {
     "description": "Refers to a remote server users can proxy from",
     "message": "a virtual machine"
-<<<<<<< HEAD
->>>>>>> origin/master
-=======
->>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
   },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",

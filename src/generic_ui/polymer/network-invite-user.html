@@ -50,6 +50,24 @@
         color: #009688;
         font-weight: normal;
       }
+
+      uproxy-avatar {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border: none;
+        border-radius: 50%;
+        background-color: #eee;
+        vertical-align: middle;
+        box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.12);
+      }
+      .wechatFriend {
+        margin: 20px 0px;
+        font-size: 16px;
+      }
+      .wechatFriend uproxy-avatar {
+        margin-right: 20px;
+      }
     </style>
 
     <core-signals on-core-signal-open-network-invite-dialog='{{openInviteUserPanel}}'></core-signals>
@@ -86,6 +104,24 @@
             {{ 'SEND_INVITATION' | $$ }}
           </uproxy-button>
         </div>
+      </div>
+
+      <div hidden?='{{network != "WeChat"}}'>
+        <!-- TODO: localization -->
+        <div style="margin-top: 20px;">
+          {{ 'WECHAT_WHO_TO_INVITE' | $$ }}
+        </div>
+        <template repeat="{{friend in wechatFriends}}">
+          <div center horizontal layout class="wechatFriend">
+            <uproxy-avatar src='{{friend.imageData}}' network='WeChat' showIcon="true"></uproxy-avatar>
+            <div flex>{{friend.name}}</div>
+            <paper-checkbox checked="{{wechatInvites[friend.userId]}}"></paper-checkbox>
+          </div>
+        </template>
+
+        <uproxy-button affirmative on-tap='{{ sendWechatInvites }}'>
+          {{ 'SEND_INVITATIONS' | $$ }}
+        </uproxy-button>
       </div>
 
     </core-overlay>

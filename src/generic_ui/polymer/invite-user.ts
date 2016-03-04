@@ -8,88 +8,11 @@ var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
 
-<<<<<<< HEAD
-Polymer({
-  generateInviteUrl: function() {
-    var selectedNetwork =
-        model.onlineNetworks[this.$.networkSelectMenu.selectedIndex];
-    var info = {
-      name: selectedNetwork.name,
-      userId: selectedNetwork.userId
-    };
-    return core.getInviteUrl(info).then((inviteUrl:string) => {
-      this.inviteUrl = inviteUrl;
-      return selectedNetwork;
-    });
-  },
-  sendWechatInvites: function() {
-    var selectedNetwork = model.getNetwork("WeChat");
-    for (var user in this.wechatInvites) {
-      if (this.wechatInvites[user]) {
-        core.inviteUser({
-          networkId: selectedNetwork.name,
-          userName: user
-        }).then(() => {
-          console.log("Invite sent to: " + user);
-        }).catch(() => {
-          console.log("Failed to invite: " + user);
-        });
-      }
-    }
-    this.fire('open-dialog', {
-      heading: ui.i18n_t("WECHAT_INVITES_SENT"),
-      message: ui.i18n_t("WECHAT_INVITES_ACCEPTED_WHEN"),
-      buttons: [{
-        text: ui.i18n_t("OK")
-      }]
-    });
-    this.closeInviteUserPanel();
-  },
-  getWechatFriends: function() {
-    var selectedNetwork = model.getNetwork("WeChat");
-    var info = {
-      name: selectedNetwork.name,
-      userId: selectedNetwork.userId
-    };
-    return core.getAllUserProfiles(info).then((roster: any) => {
-      for(var i = 0; i < roster.length; i++) {
-        var friend = roster[i];
-        this.wechatFriends[i] = friend;
-        this.wechatInvites[friend.userId] = false;
-      }
-      return selectedNetwork;
-    });
-  },
-  sendToGMailFriend: function() {
-    this.generateInviteUrl().then((selectedNetwork:any) => {
-      var selectedNetworkInfo = {
-        name: selectedNetwork.name,
-        userId: selectedNetwork.userId
-      };
-      var name = selectedNetwork.userName || selectedNetwork.userId;
-      var emailBody =
-      core.sendEmail({
-          networkInfo: selectedNetworkInfo,
-          to: this.inviteUserEmail,
-          subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: name }),
-          body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
-      });
-      this.fire('open-dialog', {
-        heading: '',
-        message: ui.i18n_t("INVITE_EMAIL_SENT"),
-        buttons: [{
-          text: ui.i18n_t("OK")
-        }]
-      });
-      this.closeInviteUserPanel();
-    });
-=======
 var inviteUser = {
   generateInviteUrl: function(name :string) {
     var network = model.getNetwork(name);
     var networkInfo = { name: network.name, userId: network.userId };
     return core.getInviteUrl({ network: networkInfo });
->>>>>>> origin/master
   },
   sendToFacebookFriend: function() {
     this.generateInviteUrl('Facebook-Firebase-V2').then((inviteUrl :string) => {
@@ -159,9 +82,6 @@ var inviteUser = {
     } else if (networkName == "Facebook-Firebase-V2") {
       this.sendToFacebookFriend();
     }
-    if (this.selectedNetworkName == "WeChat") {
-      this.getWechatFriends();
-    }
   },
   loginToInviteFriendDialogOpened: function() {
     // Set confirmation message, which may include some HTML (e.g. strong, br).
@@ -220,21 +140,8 @@ var inviteUser = {
     });
   },
   ready: function() {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
-    this.wechatInvites = {};
-    this.wechatFriends = [];
     this.inviteUrl = '';
-    this.inviteUserEmail = '';
-<<<<<<< HEAD
-=======
->>>>>>> origin/master
-=======
-    this.githubUserIdInput = ''; // for GitHub
     this.inviteUserEmail = ''; // for GMail
->>>>>>> 2e79066406c46b49ec4f5a181603d600fb88a04e
     this.selectedNetworkName = '';
     this.ui = ui;
     this.model = model;
