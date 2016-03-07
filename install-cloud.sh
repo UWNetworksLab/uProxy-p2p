@@ -16,10 +16,22 @@ command_exists() {
 }
 
 do_install() {
+  # uProxy requires Docker. If it's not installed and we think the
+  # installer is likely to succeed, run the Docker installer first.
+  # Note: Because this installer is run via curl | sh, it's not
+  #       possible to ask the user for confirmation.
   if ! command_exists docker
   then
+    if [ "$USER" != "root" ]
+    then
+      echo "uProxy requires Docker. Before running this script, please "
+      echo "follow the installation instructions for your system:"
+      echo "  https://docs.docker.com/mac/started/"
+      exit 1
+    fi
+    echo "Docker not found, running Docker installer."
     curl -fsSL https://get.docker.com/ | sh
-fi
+  fi
 
   TMP_DIR=`mktemp -d`
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
