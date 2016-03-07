@@ -187,6 +187,8 @@ uProxy can be built on iOS by using CCA, similarly to uProxy on Android. You can
 * `npm install -g ios-sim`
 * `npm install -g ios-deploy`
 
+Note: In order for uProxy to work on a device right now, crypto must be disabled for both the getter and the sharer. You need to use this version of uProxy for both the iOS instance and the other instance you're connecting to.
+
 #### Running on an iOS emulator
 * `grunt emulate_ios`
   * uProxy should run in an emulator even if you see a grunt warning that exec:ccaEmulateIos failed.
@@ -202,7 +204,7 @@ uProxy can be built on iOS by using CCA, similarly to uProxy on Android. You can
 * `open build/dev/uproxy/ios/platforms/ios/uProxy.xcodeproj/`
 * When prompted with the question "Convert to Latest Swift Syntax?" choose "Cancel"
 
-Because we use cordova-plugin-iosrtc to implement the WebRTC protocol, there are a few Build Settings you need to update when you run uProxy from Xcode:
+  Because we use cordova-plugin-iosrtc to implement the WebRTC protocol, there are a few Build Settings you need to update when running uProxy from Xcode:
 * Within the project Build Settings set "Enable Bitcode" to "No"
 * Within the project Build Settings set "Objective-C Bridging Header" to "uProxy/Plugins/cordova-plugin-iosrtc/cordova-plugin-iosrtc-Bridging-Header.h"
 * Within the project Build Settings add an entry to the "Runpath Search Paths" setting with value "@executable_path/Frameworks"
