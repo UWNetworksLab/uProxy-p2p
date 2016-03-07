@@ -24,6 +24,8 @@ Polymer({
   },
   loginTapped: function() {
     this.closeDialogs();
+    // TODO: show the dialog when this value changes, not this nasty hack
+    ui.cloudInstallStatus = '';
     this.$.installingDialog.open();
 
     ui.cloudInstall(INSTALL_ARGS).then((result: uproxy_core_api.CloudInstallResult) => {
