@@ -122,8 +122,8 @@ then
         then
             docker start uproxy-sshd > /dev/null
         fi
+        INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO || echo -n ""`
     fi
-    INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO || echo -n ""`
 fi
 
 if [ "$UPDATE" = true ]
