@@ -40,6 +40,20 @@ loggingController.setDefaultFilter(
 
 var portControl = globals.portControl;
 
+// Prefix for freedomjs modules which interface with cloud computing providers.
+const CLOUD_PROVIDER_MODULE_PREFIX: string = 'CLOUDPROVIDER-';
+
+const getCloudProviderNames = (): string[] => {
+  let results: string[] = [];
+  for (var dependency in freedom) {
+    if (freedom.hasOwnProperty(dependency) &&
+        dependency.indexOf(CLOUD_PROVIDER_MODULE_PREFIX) === 0) {
+      results.push(dependency.substr(CLOUD_PROVIDER_MODULE_PREFIX.length));
+    }
+  }
+  return results;
+};
+
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updates to the UI, and handles commands from the UI.
@@ -238,6 +252,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
       return {
         networkNames: Object.keys(social_network.networks),
+        cloudProviderNames: getCloudProviderNames(),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,
@@ -587,5 +602,50 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public handleUpdate = (details :{version :string}) => {
     this.availableVersion_ = details.version;
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
+  }
+
+  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
+    if (args.providerName !== 'digitalocean') {
+      return Promise.reject(new Error('unsupported cloud provider'));
+    }
+
+    log.debug('logging into cloud provider %1', args.providerName);
+
+    const provisioner = freedom[CLOUD_PROVIDER_MODULE_PREFIX + args.providerName]();
+    const installer = freedom['cloudinstall']();
+
+    const destroyModules = () => {
+      freedom[CLOUD_PROVIDER_MODULE_PREFIX + args.providerName].close(provisioner);
+      freedom['cloudinstall'].close(installer);
+    };
+
+    provisioner.on('status', (update: any) => {
+      ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
+    });
+
+    // This is the server name recommended by the blog post.
+    return provisioner.start('uproxy-cloud-server').then((serverInfo: any) => {
+      log.info('created server on digitalocean: %1', serverInfo);
+
+      const host = serverInfo.network.ipv4;
+      const port = serverInfo.network.ssh_port;
+
+      log.debug('installing cloud on %1:%2', host, port);
+
+      // TODO: Send real updates. While we could trivially send stdout,
+      //       that's extremely verbose right now.
+      ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
+
+      // TODO: The provisioning module should return the username!
+      return installer.install(host, port, 'root', serverInfo.ssh.private);
+    }).then((output: string) => {
+      destroyModules();
+      return <uproxy_core_api.CloudInstallResult>{
+        invite: output
+      };
+    }, (e: Error) => {
+      destroyModules();
+      return Promise.reject(e);
+    });
   }
 }  // class uProxyCore

@@ -42,6 +42,7 @@ export interface GlobalSettings {
 }
 export interface InitialState {
   networkNames :string[];
+  cloudProviderNames :string[];
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
@@ -100,7 +101,8 @@ export enum Command {
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
-  SEND_INVITATION = 1028
+  SEND_INVITATION = 1028,
+  CLOUD_INSTALL = 1029
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -135,7 +137,9 @@ export enum Update {
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
-  ONETIME_MESSAGE = 2026
+  ONETIME_MESSAGE = 2026,
+  // Payload is a CloudInstallResult.
+  CLOUD_INSTALL_STATUS = 2027
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -206,6 +210,19 @@ export interface InvitationData {
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
+// Argument to #cloudInstall.
+export interface CloudInstallArgs {
+  // Use this cloud computing provider to create a server.
+  providerName: string;
+};
+
+// Output of #cloudInstall.
+export interface CloudInstallResult {
+  // Invitation URL, iff the the server was successfully created
+  // and provisioned.
+  invite: string;
+};
+
 /**
  * The primary interface to the uProxy Core.
  *
@@ -268,5 +285,10 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
+  // Installs uProxy on a server. Generally a long-running operation, so
+  // callers should expose CLOUD_INSTALL_STATUS updates to the user.
+  // This may also invoke an OAuth flow, in order to perform operations
+  // with the cloud computing provider on the user's behalf.
+  cloudInstall(args:CloudInstallArgs): Promise<CloudInstallResult>;
 }
 
