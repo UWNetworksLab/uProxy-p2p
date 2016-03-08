@@ -38,6 +38,17 @@ do_install() {
     echo "Docker not found, running Docker installer."
     curl -fsSL https://get.docker.com/ | sh
   fi
+  # We depend on --build-arg, introduced in Docker 1.9.
+  # Some distros are really slow to update.
+  if [ `docker version --format '{{.Server.Version}}' | cut -d . -f 2` -lt 9 ]
+  then
+    echo "Before running this script, please upgrade Docker to version 1.9 or"
+    echo "greater. If you have containers or images you wish to use afterwards,"
+    echo "read this page first:"
+    echo "  https://github.com/docker/docker/wiki/Engine-v1.10.0-content-addressability-migration"
+    exit 1
+  fi
+
   for dep in git nc
   do
     if ! command_exists $dep
