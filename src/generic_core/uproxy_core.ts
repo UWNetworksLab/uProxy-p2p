@@ -640,10 +640,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       // up to MAX_INSTALLS times.  Failure may occur because we have just
       // created the server and it is not yet ready for SSH.
       // TODO: The provisioning module should return the username!
-      var installFunc = installer.install.bind(
-          installer, host, port, 'root', serverInfo.ssh.private);
-      var MAX_INSTALLS = 5;
-      return retry(installFunc, MAX_INSTALLS);
+      const install = () => {
+        return installer.install(host, port, 'root', serverInfo.ssh.private);
+      };
+      const MAX_INSTALLS = 5;
+      return retry(install, MAX_INSTALLS);
     }).then((output: string) => {
       destroyModules();
       return <uproxy_core_api.CloudInstallResult>{
@@ -658,8 +659,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
 // Invoke an async function, and retry on error, calling func up to
 // maxAttempts number of times.
-export var retry = <T>(func :() => Promise<T>, maxAttempts :number)
-    : Promise<T> => {
+export var retry = <T>(func :() => Promise<T>, maxAttempts :number) : Promise<T> => {
   return func().catch((err) => {
     --maxAttempts;
     if (maxAttempts > 0) {
