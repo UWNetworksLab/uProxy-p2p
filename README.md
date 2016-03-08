@@ -194,14 +194,14 @@ Note: In order for uProxy to work on a device right now, crypto must be disabled
 * `sudo npm install -g ios-sim`
 * `grunt build_ios`
 * `cd build/dev/uproxy/ios`
-* `cca run ios --device`
+* `cca run ios --emulator`
 
 #### Running on an iOS device
 * Attach a device to your Mac through a USB 
 * `sudo npm install -g --unsafe-perm ios-deploy`
 * `grunt build_ios`
 * `cd build/dev/uproxy/ios/`
-* `cca run ios --emulator`
+* `cca run ios --device`
 
 #### Open uProxy in Xcode
 * `grunt build_ios`
