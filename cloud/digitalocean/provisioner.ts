@@ -7,9 +7,15 @@ declare var forge: any;
 
 const POLL_TIMEOUT: number = 5000; //milliseconds
 
-// To see available regions:
-// https://developers.digitalocean.com/documentation/v2/#list-all-regions
-const DEFAULT_REGION: string = 'nyc3';
+// This is the image and size recommended by the blog post.
+// The only way to see the complete current list of options for each
+// is by querying the API, e.g.:
+//   this.doRequest_('GET', 'images?per_page=100').then((resp: any) => {
+//     console.log('available images: ' + JSON.stringify(resp, undefined, 2));
+//   });
+const DEFAULT_REGION: string = 'nyc1';
+const DEFAULT_IMAGE: string = 'ubuntu-14-04-x64';
+const DEFAULT_SIZE: string = '1gb';
 
 const STATUS_CODES: { [k: string]: string; } = {
   'START': 'Starting provisioner',
@@ -54,8 +60,7 @@ class Provisioner {
    * @param {String} region to create VM in
    * @return {Promise.<Object>}
    */
-  public start = (name: string, region: string = DEFAULT_REGION) :
-      Promise<Object> => {
+  public start = (name: string, region = DEFAULT_REGION, image = DEFAULT_IMAGE, size = DEFAULT_SIZE): Promise<Object> => {
     this.sendStatus_('START');
     // Do oAuth
     return this.doOAuth_().then((oauthObj: any) => {
@@ -64,7 +69,7 @@ class Provisioner {
       // Get SSH keys
     }).then((keys: KeyPair) => {
       this.state_.ssh = keys;
-      return this.setupDigitalOcean_(name, region);
+      return this.setupDigitalOcean_(name, region, image, size);
       // Setup Digital Ocean (SSH key + droplet)
     }).then(() => {
       return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id);
@@ -309,8 +314,7 @@ class Provisioner {
    * @param {String} region to create VM in
    * @return {Promise.<void>} resolves on success, rejects on failure
    */
-  private setupDigitalOcean_ = (name: string, region: string) :
-  Promise<void> => {
+  private setupDigitalOcean_ = (name: string, region: string, image: string, size: string):  Promise<void> => {
     return new Promise<void>((F, R) => {
       this.state_.cloud = {};
       this.sendStatus_('CLOUD_INIT_ADDKEY');
@@ -347,13 +351,8 @@ class Provisioner {
         return this.doRequest_('POST', 'droplets', JSON.stringify({
           name: name,
           region: region,
-          size: '512mb',
-          // 'docker' is a slug name, a.k.a. application image, a.k.a. one-click app.
-          // The full list of available slugs is available only through the API, e.g.:
-          //   this.doRequest_('GET', 'images?type=application&per_page=50').then((resp: any) => {
-          //     console.log('available application images: ' + JSON.stringify(resp, undefined, 2));
-          // });
-          image: 'docker',
+          size: size,
+          image: image,
           ssh_keys: [ this.state_.cloud.ssh.id ]
         }));
         // If missing, create the droplet
