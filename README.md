@@ -182,16 +182,17 @@ Android app release builds must be signed.  To create a release build:
 ### uProxy for iOS
 uProxy can be built on iOS by using CCA, similarly to uProxy on Android. You can only run uProxy for iOS on an OS X operating system with Xcode and the iOS SDK installed. 
 
-* Install Xcode (6.0 or higher) if it's not already installed (https://developer.apple.com/xcode/download/)
-* Once Xcode is installed, several command-line tools need to be enabled for CCA to run. From the Xcode menu, select Preferences, then the Downloads tab. From the Components panel, press the Install button next to the Command Line Tools listing.
-* `npm install -g ios-sim`
-* `npm install -g ios-deploy`
+* Install [Xcode](https://developer.apple.com/xcode/download/) 6.0 or higher
+* Once Xcode is installed, several command-line tools need to be enabled for CCA to run. From the Xcode menu, select Preferences, then the Downloads tab. From the Components panel, press the Install button next to the Command Line Tools listing if it's there. Next select the Locations tab and select a version of xcode from the Command Line Tools select box.
+* Install the Android SDK.  The easiest way to get it is as part of [Android Studio](https://developer.android.com/sdk/index.html). 
+* `sudo npm install -g ios-sim`
+* `sudo npm install -g cca`
+* `npm install xcode` (must npm install locally)
 
 Note: In order for uProxy to work on a device right now, crypto must be disabled for both the getter and the sharer. You need to use this version of uProxy for both the iOS instance and the other instance you're connecting to.
 
 #### Running on an iOS emulator
 * `grunt emulate_ios`
-  * uProxy should run in an emulator even if you see a grunt warning that exec:ccaEmulateIos failed.
 
 #### Running on an iOS device
 * Attach a device to your Mac 

@@ -50,6 +50,7 @@ browserifyIntegrationTest = (path) ->
 
 #-------------------------------------------------------------------------
 ccaPath = path.dirname(require.resolve('cca/package.json'))
+#ccaPath = '~/gitlaura-build-ios/uproxy/node_modules/cca/'
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
 
