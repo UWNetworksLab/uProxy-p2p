@@ -185,31 +185,34 @@ uProxy can be built on iOS by using CCA, similarly to uProxy on Android. You can
 * Install [Xcode](https://developer.apple.com/xcode/download/) 6.0 or higher
 * Once Xcode is installed, several command-line tools need to be enabled for CCA to run. From the Xcode menu, select Preferences, then the Downloads tab. From the Components panel, press the Install button next to the Command Line Tools listing if it's there. Next select the Locations tab and select a version of xcode from the Command Line Tools select box.
 * Install the Android SDK.  The easiest way to get it is as part of [Android Studio](https://developer.android.com/sdk/index.html). 
-* `sudo npm install -g ios-sim`
 * `sudo npm install -g cca`
-* `npm install xcode` (must npm install locally)
+* `npm install xcode` (npm install locally)
 
 Note: In order for uProxy to work on a device right now, crypto must be disabled for both the getter and the sharer. You need to use this version of uProxy for both the iOS instance and the other instance you're connecting to.
 
 #### Running on an iOS emulator
-* `grunt emulate_ios`
+* `sudo npm install -g ios-sim`
+* `grunt build_ios`
+* `cd build/dev/uproxy/ios`
+* `cca run ios --device`
 
 #### Running on an iOS device
-* Attach a device to your Mac 
+* Attach a device to your Mac through a USB 
+* `sudo npm install -g --unsafe-perm ios-deploy`
 * `grunt build_ios`
 * `cd build/dev/uproxy/ios/`
-* `cca run ios --device`
+* `cca run ios --emulator`
 
 #### Open uProxy in Xcode
 * `grunt build_ios`
 * `open build/dev/uproxy/ios/platforms/ios/uProxy.xcodeproj/`
 * When prompted with the question "Convert to Latest Swift Syntax?" choose "Cancel"
 
-  Because we use cordova-plugin-iosrtc to implement the WebRTC protocol, there are a few Build Settings you need to update when running uProxy from Xcode:
+Because we use cordova-plugin-iosrtc to implement the WebRTC protocol, there are a few Build Settings you may need to update when running uProxy from Xcode:
 * Within the project Build Settings set "Enable Bitcode" to "No"
 * Within the project Build Settings set "Objective-C Bridging Header" to "uProxy/Plugins/cordova-plugin-iosrtc/cordova-plugin-iosrtc-Bridging-Header.h"
 * Within the project Build Settings add an entry to the "Runpath Search Paths" setting with value "@executable_path/Frameworks"
-* Now you can edit uProxy code and run it from either an emulator or device
+* Now you can update uProxy and run it through xcode from either an emulator or device
 
 ### Fixing compilation and setup
 

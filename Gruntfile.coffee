@@ -42,6 +42,8 @@ genericPath = path.join(devBuildPath, 'generic/')
 ccaDistPath = path.join(distBuildPath, 'cca/app/')
 androidDistPath = path.join(distBuildPath, 'android/')
 iosDistPath = path.join(distBuildPath, 'ios/')
+
+
 #-------------------------------------------------------------------------
 browserifyIntegrationTest = (path) ->
   Rule.browserifySpec(path, {
@@ -49,8 +51,8 @@ browserifyIntegrationTest = (path) ->
   })
 
 #-------------------------------------------------------------------------
-#ccaPath = path.dirname(require.resolve('cca/package.json'))
-ccaPath = path.join('node_modules/', 'cca/')
+basePath = process.cwd()
+ccaPath = path.join(basePath, 'node_modules/cca/')
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
 
@@ -312,10 +314,6 @@ gruntConfig = {
     ccaPrepareIosDist: {
       cwd: '<%= iosDistPath %>'
       command: '<%= ccaJsPath %> prepare'
-    }
-    ccaEmulateIos: {
-      cwd: '<%= iosDevPath %>'
-      command: '<%= ccaJsPath %> run ios --emulator'
     }
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
@@ -933,12 +931,6 @@ taskManager.add 'build_ios', [
   'exec:ccaAddPluginsIosBuild'
   'exec:addIosrtcHook'
   'exec:ccaPrepareIosDev'
-]
-
-# Emulate the mobile client for ios
-taskManager.add 'emulate_ios', [
- 'build_ios'
- 'exec:ccaEmulateIos'
 ]
 
 # --- Testing tasks ---
