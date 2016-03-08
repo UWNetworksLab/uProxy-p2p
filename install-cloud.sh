@@ -11,13 +11,16 @@
 
 set -e
 
+REQUIRED_COMMANDS="docker git nc"
+
 command_exists() {
   command -v "$@" > /dev/null 2>&1
 }
 
 show_deps() {
-  echo "Before running this script, please install git, nc, and Docker."
-  echo "Installation instructions for Docker can be found here:"
+  echo "This script depends on the following commands: $REQUIRED_COMMANDS"
+  echo "Please install them before running this script. Instructions"
+  echo "for installing Docker can be found here:"
   echo "  https://docs.docker.com/mac/started/"
   exit 1
 }
@@ -49,13 +52,14 @@ do_install() {
     exit 1
   fi
 
-  for dep in git nc
+  for dep in $REQUIRED_COMMANDS
   do
     if ! command_exists $dep
     then
       show_deps
     fi
   done
+  exit 1
 
   TMP_DIR=`mktemp -d`
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
