@@ -23,9 +23,9 @@ SSHD_PORT=5000
 function usage () {
     echo "$0 [-p path] [-i invite code] [-u] [-w] [-d ip] [-b banner] browser-version"
     echo "  -p: path to pre-built uproxy-lib repository"
-    echo "  -i: invite code"
-    echo "  -u: update Docker images (backs up invite code unless -i or -w used)"
-    echo "  -w: do not copy invite code from current installation when updating"
+    echo "  -i: bootstrap invite (only for new installs, or with -w)"
+    echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
+    echo "  -w: when -u used, do not copy invites or metadata from current installation"
     echo "  -d: override the detected public IP (for development only)"
     echo "  -b: name to use in contacts list"
     echo "  -h, -?: this help message"
@@ -113,8 +113,8 @@ then
     fi
 fi
 
-# If no invite code passed in and no -w flag, try to get the existing one
-if [ -z "$INVITE_CODE"] && [ "$WIPE" = false ]
+# Migrate the giver and getter accounts' authorized_keys.
+if [ "$WIPE" = false ]
 then
     if docker ps -a | grep uproxy-sshd >/dev/null
     then
@@ -122,7 +122,16 @@ then
         then
             docker start uproxy-sshd > /dev/null
         fi
-        INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO || echo -n ""`
+        GIVER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/giver/.ssh/authorized_keys || echo -n ""`
+        GETTER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys || echo -n ""`
+
+        # Because it's unclear what it would mean to migrate authorized_keys files
+        # when -i is supplied, restrict use of -i to new or wiping (-w) installs.
+        if [ -n "$INVITE_CODE" ]
+        then
+            echo "-i can only be used for new installs or with -w"
+            usage
+        fi
     fi
 fi
 
@@ -135,6 +144,10 @@ then
     #       image, e.g. run_pair.sh. Regular cloud users won't be.
     docker rmi uproxy/$1 || true
 fi
+
+# IP of the host machine.
+# Useful because zork runs with --net=host.
+HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
 
 # Start Zork, if necessary.
 if ! docker ps -a | grep uproxy-zork >/dev/null; then
@@ -162,6 +175,10 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
     # Full list of capabilities:
     #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
     docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS -z true
+
+    echo -n "Waiting for Zork to come up..."
+    while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
+    echo "ready!"
 fi
 
 # Start sshd, if necessary.
@@ -174,26 +191,29 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
         echo -n "$BANNER" > $TMP_DIR/banner
         echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
 
-        # Optional build args aren't very flexible...confine the messiness here.
-        ISSUE_INVITE_ARGS="-c"
-        if [ -n "$INVITE_CODE" ]
-        then
-            ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -i $INVITE_CODE"
-        fi
-        docker build --build-arg issue_invite_args="$ISSUE_INVITE_ARGS" -t uproxy/sshd $TMP_DIR
+        docker build -t uproxy/sshd $TMP_DIR
     fi
 
     # Add an /etc/hosts entry to the Zork container.
     # Because the Zork container runs with --net=host, we can't use the
     # regular, ever-so-slightly-more-elegant Docker notation.
-    HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
     docker run --restart=always -d -p $SSHD_PORT:22 --name uproxy-sshd --add-host zork:$HOST_IP uproxy/sshd > /dev/null
 
-    echo -n "Waiting for Zork to come up..."
-    while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
-    echo "ready!"
+    # Configure access.
+    # In descending order of preference:
+    #  - migrate authorized_keys or apply -i
+    #  - issue a new invite
+    if [ -n "$GIVER_AUTH_KEYS" ] || [ -n "$GETTER_AUTH_KEYS" ]
+    then
+        docker exec uproxy-sshd sh -c "echo $GIVER_AUTH_KEYS > /home/giver/.ssh/authorized_keys"
+        docker exec uproxy-sshd sh -c "echo $GETTER_AUTH_KEYS > /home/getter/.ssh/authorized_keys"
+    else
+        if [ -n "$INVITE_CODE" ]
+        then
+            INVITE_CODE=`docker exec uproxy-sshd /issue_invite.sh -i "$INVITE_CODE"`
+        else
+            INVITE_CODE=`docker exec uproxy-sshd /issue_invite.sh -c -u giver`
+            echo -e "\nINVITE CODE URL:\n$INVITE_CODE"
+        fi
+    fi
 fi
-
-# Output the invitation URL.
-INVITE_CODE=`docker cp uproxy-sshd:/initial-giver-invite-code -|tar xO`
-echo -e "\nINVITE CODE URL:\n$INVITE_CODE"
