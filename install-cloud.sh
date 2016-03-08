@@ -59,7 +59,6 @@ do_install() {
       show_deps
     fi
   done
-  exit 1
 
   TMP_DIR=`mktemp -d`
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
