@@ -32,7 +32,7 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
   'Quiver': {
     displayName: 'uProxy',
     isFirebase: false,
-    enableMonitoring: false,
+    enableMonitoring: true,
     areAllContactsUproxy: true,
     supportsReconnect: true,
     isExperimental: true,
