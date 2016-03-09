@@ -3,7 +3,10 @@
 /// <reference path='../../../../third_party/typings/node/node.d.ts' />
 /// <reference path='../../../../third_party/typings/ssh2/ssh2.d.ts' />
 
+import arraybuffers = require('../../arraybuffers/arraybuffers');
+import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
+import queue = require('../../handler/queue');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
 import * as ssh2 from 'ssh2';
@@ -45,6 +48,23 @@ class CloudInstaller {
     return new Promise<string>((F, R) => {
       connection.on('ready', () => {
         log.debug('logged into server');
+
+        var stdout = new queue.Queue<ArrayBuffer, void>();
+        new linefeeder.LineFeeder(stdout).setSyncHandler((line: string) => {
+          log.debug('STDOUT: %1', line);
+          // Search for the URL anywhere in the line so we will
+          // continue to work in the face of minor changes
+          // to the install script.
+          if (line.indexOf(INVITATION_URL_PREFIX) === 0) {
+            F(line.substring(INVITATION_URL_PREFIX.length));
+          }
+        });
+
+        var stderr = new queue.Queue<ArrayBuffer, void>();
+        new linefeeder.LineFeeder(stderr).setSyncHandler((line: string) => {
+          log.error('STDERR: %1', line);
+        });
+
         connection.exec(INSTALL_COMMAND, (e: Error, stream: ssh2.Channel) => {
           if (e) {
             connection.end();
@@ -58,17 +78,10 @@ class CloudInstaller {
             R({
               message: 'invitation URL not found'
             });
-          }).on('data', function(data: Buffer) {
-            const output = data.toString();
-            log.debug('STDOUT: %1', output);
-            // Search for the URL anywhere in the line so we will
-            // continue to work in the face of minor changes
-            // to the install script.
-            if (output.indexOf(INVITATION_URL_PREFIX) === 0) {
-              F(output.substring(INVITATION_URL_PREFIX.length));
-            }
-          }).stderr.on('data', function(data: Buffer) {
-            log.error(data.toString());
+          }).on('data', (data:Buffer) => {
+            stdout.handle(arraybuffers.bufferToArrayBuffer(data));
+          }).stderr.on('data', (data: Buffer) => {
+            stderr.handle(arraybuffers.bufferToArrayBuffer(data));
           });
         });
       }).on('error', (e: Error) => {
