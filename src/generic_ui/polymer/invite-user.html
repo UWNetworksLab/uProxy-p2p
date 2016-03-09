@@ -6,6 +6,7 @@
 <link rel='import' href='button.html'>
 <link rel='import' href='network-invite-user.html'>
 <link rel="import" href="i18n-filter.html">
+<link rel='import' href='cloud-install.html'>
 
 <polymer-element name='uproxy-invite-user'>
   <template>
@@ -179,6 +180,12 @@
               </div>
             </template>
 
+            <div class='networkLoginButton' on-tap='{{ cloudInstall }}' hidden?='{{ model.cloudProviderNames.length < 1 }}'>
+              <core-icon icon='uproxy-icons:Cloud'></core-icon>
+              <div class='networkName'>Create a cloud server</div>
+              <div class='experimental highlightedText'>Experimental</div>
+            </div>
+
             <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}'>
               <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
               <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
@@ -203,6 +210,7 @@
     </uproxy-dialog>
 
     <uproxy-network-invite-user network="{{selectedNetworkName}}"></uproxy-network-invite-user>
+    <uproxy-cloud-install></uproxy-cloud-install>
 
   </template>
   <script src='invite-user.js'></script>

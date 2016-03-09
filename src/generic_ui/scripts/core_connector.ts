@@ -246,6 +246,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void>=> {
     return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, data);
   }
+
+  cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
+    return this.promiseCommand(uproxy_core_api.Command.CLOUD_INSTALL, args); 
+  }
 }  // class CoreConnector
 
 export = CoreConnector;

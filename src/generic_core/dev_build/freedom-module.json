@@ -54,6 +54,14 @@
     "portControl": {
       "url": "../freedom-port-control/port-control.json",
       "api": "portControl"
+    },
+    "CLOUDPROVIDER-digitalocean": {
+      "url": "../uproxy-lib/cloud/digitalocean/freedom-module.json",
+      "api": "digitalocean"
+    },
+    "cloudinstall": {
+      "url": "../uproxy-lib/cloud/install/freedom-module.json",
+      "api": "cloudinstall"
     }
   },
   "permissions": [
