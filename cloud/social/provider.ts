@@ -22,10 +22,6 @@ const ZORK_PORT = 9000;
 // Key under which our contacts are saved in storage.
 const STORAGE_KEY = 'cloud-social-contacts';
 
-// Admin users can issue invites.
-const ADMIN_USERNAME = 'giver';
-const REGULAR_USERNAME = 'getter';
-
 // Timeout for establishing an SSH connection.
 const CONNECT_TIMEOUT_MS = 10000;
 
@@ -36,13 +32,11 @@ interface Invite {
   // Hostname or IP of the cloud instance.
   // This is the host on which sshd is running, so it should
   // be directly accessible from the client.
-  host?: string;
+  host: string;
   // Username.
-  user?: string;
-  // Password.
-  pass?: string;
+  user: string;
   // Private key, base64-encoded.
-  key?: string;
+  key: string;
   // Is Admin.
   isAdmin?: boolean;
 }
@@ -132,7 +126,7 @@ function makeClientState(address: string): freedom.Social.ClientState {
 // the status field since remote-user.ts#update will use FRIEND as a default.
 function makeUserProfile(
     address: string,
-    isAdmin :boolean): freedom.Social.UserProfile {
+    isAdmin ?:boolean): freedom.Social.UserProfile {
   var status = isAdmin ? UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL :
       UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
   return {
@@ -146,8 +140,7 @@ function makeUserProfile(
 //
 // Intended for use with the run_cloud.sh script in the uproxy-docker
 // repo, which will spin up the expected configuration:
-//  - an SSH server running on port 5000, with an account named
-//    "giver" having the password "giver"
+//  - an SSH server running on port 5000, with an account named "giver"
 //  - a Zork instance, accessible from the SSH server at the
 //    hostname "zork"
 //
@@ -373,8 +366,7 @@ export class CloudSocialProvider {
     return Promise.resolve({
       host: invite.host,
       user: invite.user,
-      key: invite.key,
-      isAdmin: false
+      key: invite.key
     });
   }
 
@@ -453,9 +445,6 @@ class Connection {
 
     if (this.invite_.key) {
       connectConfig['privateKey'] = new Buffer(this.invite_.key, 'base64');
-    } else {
-      log.warn('using password-based auth, support will be removed soon!');
-      connectConfig['password'] = this.invite_.pass;
     }
 
     return new Promise<void>((F, R) => {
@@ -519,7 +508,7 @@ class Connection {
           });
       }).on('error', (e: Error) => {
         // This occurs when:
-        //  - user supplies the wrong username or password
+        //  - user supplies the wrong credentials
         //  - host cannot be reached, e.g. non-existant hostname
         log.warn('%1: connection error: %2', this.name_, e);
         this.setState_(ConnectionState.TERMINATED);
