@@ -571,9 +571,11 @@ class Connection {
     });
   }
 
-  // Executes a command, fulfilling with the command's stdout
-  // or rejecting if output is received on stderr.
-  private exec_ = (command:string): Promise<string> => {
+  // Executes a command, fulfilling with the first line of the command's
+  // output on stdout or rejecting if any output is received on stderr.
+  // TODO: There is a close event with a return code which
+  //       is probably a better indication of success.
+  private exec_ = (command: string): Promise<string> => {
     log.debug('%1: execute command: %2', this.name_, command);
     if (this.state_ !== ConnectionState.ESTABLISHED) {
       return Promise.reject(new Error('can only execute commands in ESTABLISHED state'));
@@ -587,13 +589,16 @@ class Connection {
           return;
         }
 
-        // TODO: There is a close event with a return code which
-        //       is probably a better indication of success.
+        var stdout = new queue.Queue<ArrayBuffer, void>();
+        new linefeeder.LineFeeder(stdout).setSyncHandler((line: string) => {
+          F(line);
+        });
+
         stream.on('data', (data: Buffer) => {
-          F(data.toString());
+          stdout.handle(arraybuffers.bufferToArrayBuffer(data));
         }).stderr.on('data', (data: Buffer) => {
           R({
-            message: 'command output to STDERR: ' + data.toString()
+            message: 'output received on STDERR: ' + data.toString()
           });
         }).on('end', () => {
           log.debug('%1: exec stream end', this.name_);
