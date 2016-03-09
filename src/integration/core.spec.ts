@@ -55,22 +55,26 @@ describe('uproxy core', function() {
   var aliceInstancePath :social.InstancePath;
   var bobInstancePath :social.InstancePath;
 
+  // TODO: all integration tests cases currently depend on the prior tests,
+  // we should modify these to not depend on ordering:
+  // https://github.com/uProxy/uproxy/issues/2250
+
   it('loads uproxy', (done) => {
     // Start all tests with empty storage.
     // TODO: find a browser independent call to clear storage using Freedom's
     // core.storage, https://github.com/uProxy/uproxy/issues/2265
     chrome.storage.local.clear(() => {
-      var alicePromise = createFreedomModule(ALICE.REFRESH_TOKEN)
+      var initializeAlice = createFreedomModule(ALICE.REFRESH_TOKEN)
       .then((freedomModule :any) => {
         alice = new CoreConnector(
           new IntegrationTestConnector(freedomModule));
       });
-      var bobPromise = createFreedomModule(BOB.REFRESH_TOKEN)
+      var initializeBob = createFreedomModule(BOB.REFRESH_TOKEN)
       .then((freedomModule :any) => {
         bob = new CoreConnector(
           new IntegrationTestConnector(freedomModule));
       });
-      Promise.all([alicePromise, bobPromise]).then(done);
+      Promise.all([initializeAlice, initializeBob]).then(done);
     });
   });
 
@@ -163,7 +167,7 @@ describe('uproxy core', function() {
     // CONSIDER: this could be cleaned up if CoreConnector had a once or off
     // method to only listen to 1 onUpdate.
     var fulfillBobGotRequest :Function;
-    var bobGotRequest = new Promise<void>((F, R) => {
+    new Promise<void>((F, R) => {
       fulfillBobGotRequest = F;
     }).then(() => {
       bob.modifyConsent({path: aliceUserPath, action:uproxy_core_api.ConsentUserAction.OFFER});
