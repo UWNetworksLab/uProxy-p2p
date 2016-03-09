@@ -2,6 +2,8 @@
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/paper-progress/paper-progress.html'>
+<link rel='import' href='../../bower/paper-radio-button/paper-radio-button.html'>
+<link rel='import' href='../../bower/paper-radio-group/paper-radio-group.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
 <link rel='import' href='dialog.html'>
@@ -12,7 +14,6 @@
     :host {
       text-align: start;
     }
-
     /* cogged from invite-user.html, to match social network invite dialogs */
     /* TODO: seems like a lot of duplication */
     uproxy-dialog {
@@ -48,9 +49,12 @@
       padding: 0.7em 0.9em;
       border-left: 1px solid rgba(255,255,255,0.3);
     }
-
     paper-progress {
       width: 100%;
+    }
+    paper-radio-button {
+      width: 100%;
+      padding: 6px 12px !important;
     }
     </style>
 
@@ -58,13 +62,21 @@
     <core-signals on-core-signal-open-cloud-install-dialog='{{ openLoginDialog }}'></core-signals>
 
     <!-- TODO: use core-pages rather than multiple dialogs -->
-
     <uproxy-dialog layered='false' backdrop='true' id='loginDialog'>
       <h1>Create a cloud server</h1>
       <core-icon icon='clear' on-tap='{{ closeDialogs }}'></core-icon>
-      <p>We can help you create a uProxy cloud server in a country of your choice. You will be able to get access from this server 24x7 and, optionally, share it with friends and family.</p>
-      <p>To get started, please sign in to your DigitalOcean account.</p>
-      <div style='text-align:center;''>
+      <p>We can help you create a uProxy cloud server. You will be able to get access from this server 24x7 and, optionally, share it with friends and family.</p>
+      <p>Please choose the city in which to locate your new server. For best performance, this should be as close as possible to where you will use uProxy.</p>
+      <div>
+        <paper-radio-group id='regionMenu' selected='sgp1'>
+          <!-- TODO: get available regions from digital ocean -->
+          <paper-radio-button name='sgp1' label='Asia (Singapore)'></paper-radio-button>
+          <paper-radio-button name='ams2' label='Europe (Amsterdam)'></paper-radio-button>
+          <paper-radio-button name='nyc2' label='North America (New York)'></paper-radio-button>
+        </paper-radio-group>
+      </div>
+      <p>To get started, please sign in to your Digital Ocean account.</p>
+      <div style='text-align:center;'>
         <uproxy-button raised on-tap='{{ loginTapped }}'>
           <span id='buttonLogoContainer'><core-icon icon='uproxy-icons:Cloud'></core-icon></span>
           <span id='buttonTextContainer'>Sign in to Digital Ocean</span>

@@ -615,6 +615,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
 
+    if (!args.region) {
+      return Promise.reject(new Error('no region specified for cloud provider'));
+    }
+
     log.debug('logging into cloud provider %1', args.providerName);
 
     const provisioner = freedom[CLOUD_PROVIDER_MODULE_PREFIX + args.providerName]();
@@ -630,7 +634,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     });
 
     // This is the server name recommended by the blog post.
-    return provisioner.start('uproxy-cloud-server').then((serverInfo: any) => {
+    return provisioner.start('uproxy-cloud-server', args.region).then((serverInfo: any) => {
       log.info('created server on digitalocean: %1', serverInfo);
 
       const host = serverInfo.network.ipv4;
