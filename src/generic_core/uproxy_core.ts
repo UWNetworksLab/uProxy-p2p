@@ -140,20 +140,21 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       });
 
       // Save network to storage so we can reconnect on restart.
-      this.connectedNetworks_.get().then((networks :string[]) => {
+      return this.connectedNetworks_.get().then((networks :string[]) => {
         if (_.includes(networks, networkName)) {
           return;
         }
         networks.push(networkName);
-        this.connectedNetworks_.set(networks);
+        return this.connectedNetworks_.set(networks);
       }).catch((e) => {
         console.warn('Could not save connected networks', e);
+      }).then(() => {
+        // Fulfill login's returned promise with uproxy_core_api.LoginResult.
+        return {
+          userId: network.myInstance.userId,
+          instanceId: network.myInstance.instanceId
+        }
       });
-
-      return {
-        userId: network.myInstance.userId,
-        instanceId: network.myInstance.instanceId
-      }
     }, (e) => {
       delete this.pendingNetworks_[networkName];
       throw e;

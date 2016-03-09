@@ -162,14 +162,9 @@ describe('uproxy core', function() {
   }
 
   it('ask and get permission', (done) => {
-    // Use a Promise so that bob only calls modifyConsent once (not every time
-    // he gets an update for Alice).
-    // CONSIDER: this could be cleaned up if CoreConnector had a once or off
-    // method to only listen to 1 onUpdate.
-    var fulfillBobGotRequest :Function;
-    new Promise<void>((F, R) => {
-      fulfillBobGotRequest = F;
-    }).then(() => {
+    // CONSIDER: we could remove the use of _.once if CoreConnector had an
+    // .off(..) method to stop listening to updates.
+    var bobModifyConsent = _.once(() => {
       bob.modifyConsent({path: aliceUserPath, action:uproxy_core_api.ConsentUserAction.OFFER});
     });
     bob.onUpdate(uproxy_core_api.Update.USER_FRIEND, (data :social.UserData) => {
@@ -177,7 +172,7 @@ describe('uproxy core', function() {
           && data.consent.remoteRequestsAccessFromLocal
           && !data.consent.localGrantsAccessToRemote) {
         // Bob now has a REQUEST from Alice, Bob will now reply with OFFER.
-        fulfillBobGotRequest();
+        bobModifyConsent();
       }
     });
 
@@ -274,25 +269,22 @@ describe('uproxy core', function() {
     // Alice and Bob are logged in at this point.  Alice no longer has
     // access to proxy through Bob.  Alice now grants Bob access to proxy
     // though her.
-    // CONSIDER: if we had a once or off method here we wouldn't need an
-    // extra Promise (this promise is used so that we don't repeatedly
-    // invoke bob.modifyConsent after duplicate USER_FRIEND updates).
-    var bobReceivedOffer = new Promise<void>((F, R) => {
-      bob.onUpdate(uproxy_core_api.Update.USER_FRIEND, (friend :social.UserData) => {
-        if (friend.user.userId === ALICE.USER_ID
-            && hasInstance(friend.offeringInstances, aliceInstanceId)
-            && friend.consent.remoteRequestsAccessFromLocal
-            && !friend.consent.localGrantsAccessToRemote) {
-          F();
-        }
-      });
-    });
-    bobReceivedOffer.then(() => {
-      // Bob is now granted access to proxy through Alice,
-      // he needs to accept (REQUEST) this in order to continue.
+    // CONSIDER: we could remove the use of _.once if CoreConnector had an
+    // .off(..) method to stop listening to updates.
+    var bobModifyConsent = _.once(() => {
       bob.modifyConsent({path: aliceUserPath, action:uproxy_core_api.ConsentUserAction.REQUEST});
       done();
-    })
+    });
+    bob.onUpdate(uproxy_core_api.Update.USER_FRIEND, (friend :social.UserData) => {
+      if (friend.user.userId === ALICE.USER_ID
+          && hasInstance(friend.offeringInstances, aliceInstanceId)
+          && friend.consent.remoteRequestsAccessFromLocal
+          && !friend.consent.localGrantsAccessToRemote) {
+        // Bob is now granted access to proxy through Alice,
+        // he needs to accept (REQUEST) this in order to continue.
+        bobModifyConsent();
+      }
+    });
     alice.modifyConsent({path: bobUserPath, action:uproxy_core_api.ConsentUserAction.OFFER});
   });
 
