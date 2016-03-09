@@ -189,11 +189,13 @@ export function notifyUI(networkName :string, userId :string) {
       for (var k in this.roster) {
         numUsers++;
       }
-      this.metrics_.userCount(
-        // Map 'Facebook-Firebase-V2' to 'facebook', 'GMail' to 'gmail', etc.
-        this.name.split('-')[0].toLowerCase(),
-        userId,
-        numUsers);
+      if (this.metrics_) {
+        this.metrics_.userCount(
+          // Map 'Facebook-Firebase-V2' to 'facebook', 'GMail' to 'gmail', etc.
+          this.name.split('-')[0].toLowerCase(),
+          userId,
+          numUsers);
+      }
       return newUser;
     }
 
