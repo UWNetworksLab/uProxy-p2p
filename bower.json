@@ -17,10 +17,13 @@
     "core-overlay": "https://github.com/lucyhe/core-overlay.git#0.1.1",
     "paper-toast": "Polymer/paper-toast#^0.5.6",
     "paper-dropdown": "Polymer/paper-dropdown#~0.5.6",
-    "paper-fab": "Polymer/paper-fab#~0.5.6"
+    "paper-fab": "Polymer/paper-fab#~0.5.6",
+    "paper-listbox": "polymerelements/paper-listbox#~1.1.2"
   },
   "resolutions": {
     "webcomponentsjs": "^0.6.0",
-    "core-overlay": "0.1.1"
+    "core-overlay": "0.1.1",
+    "polymer": "^1.1.0",
+    "font-roboto": "^0.5"
   }
 }
