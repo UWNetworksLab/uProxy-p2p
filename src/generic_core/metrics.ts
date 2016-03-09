@@ -86,22 +86,32 @@ export interface NetMetrics {
 };
 
 
-export interface MetricsData {
-  version :number;
-  successes :WeekBuffer<number>;  // Number of getter-side successful proxy
-                                  // sessions started.
-  attempts :WeekBuffer<number>;  // Total number of attempts for getting access.
-  shutdowns :WeekBuffer<number>;  // Number of times a proxy session lived long
-  // enough that a getter hit the 'stop
-  // proxying' button.
+export class MetricsData {
+  public version :number;
+  public successes :WeekBuffer<number>;  // Number of getter-side successful proxy
+                                         // sessions started.
+  public attempts :WeekBuffer<number>;  // Total number of attempts for getting access.
+  public shutdowns :WeekBuffer<number>;  // Number of times a proxy session lived long
+                                         // enough that a getter hit the 'stop
+                                         // proxying' button.
   // Social network stats:
   //   Negative (-1) for not logged in
   //   When logged in, the number of friends
   //   We report the max value seen for this session.
-  on_gmail :NetMetrics;
-  on_facebook :NetMetrics;
-  on_github :NetMetrics;
-  on_quiver :NetMetrics;
+  public on_gmail :NetMetrics;
+  public on_facebook :NetMetrics;
+  public on_github :NetMetrics;
+  public on_quiver :NetMetrics;
+  constructor() {
+    this.version = 2;
+    this.successes = new WeekBuffer<number>();
+    this.attempts = new WeekBuffer<number>();
+    this.shutdowns = new WeekBuffer<number>();
+    this.on_gmail = {};
+    this.on_facebook = {};
+    this.on_github = {};
+    this.on_quiver = {};
+  }
 };
 
 function max(a :number, b :number) :number {
@@ -145,8 +155,7 @@ export class Metrics {
   constructor(private storage_ :storage.Storage) {
     this.add_ = (a,b) => { return a+b; };
     this.max_ = (a,b) => { return a > b? a:b; }
-    this.data_.version = 2;
-
+    
     var counterMetric = {
       type: 'logarithmic', base: 2, num_bloombits: 256, num_hashes: 1,
       num_cohorts: 8, prob_p: 0.25, prob_q: 0.75, prob_f: 0.5,
@@ -183,10 +192,12 @@ export class Metrics {
                    'upnp-v3': natMetric}
     });
 
+    this.data_ = new MetricsData;
     if (storage_ !== null) {
       this.onceLoaded_ = this.storage_.load('metrics').then(
         (storedData :MetricsData) => {
           log.info('Loaded metrics from storage', storedData);
+
           // Add stored metrics to current data_, in case increment has been
           // called before storage loading is complete.
           this.data_.successes.merge(storedData.successes, this.add_);
