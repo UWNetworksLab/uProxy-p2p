@@ -43,6 +43,8 @@ interface Invite {
   pass?: string;
   // Private key, base64-encoded.
   key?: string;
+  // Is Admin.
+  isAdmin?: boolean;
 }
 
 // Type of the object placed, in serialised form, in storage
@@ -130,11 +132,9 @@ function makeClientState(address: string): freedom.Social.ClientState {
 // the status field since remote-user.ts#update will use FRIEND as a default.
 function makeUserProfile(
     address: string,
-    username :string): freedom.Social.UserProfile {
-  var status = UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
-  if (username === ADMIN_USERNAME) {
-    status = UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL;
-  }
+    isAdmin :boolean): freedom.Social.UserProfile {
+  var status = isAdmin ? UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL :
+      UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
   return {
     userId: address,
     name: address,
@@ -180,7 +180,7 @@ export class CloudSocialProvider {
   // in the contacts list.
   private notifyOfUser_ = (invite: Invite, description?: string) => {
     this.dispatchEvent_('onUserProfile',
-        makeUserProfile(invite.host, invite.user));
+        makeUserProfile(invite.host, invite.isAdmin));
 
     var clientState = makeClientState(invite.host);
     this.dispatchEvent_('onClientState', clientState);
@@ -363,26 +363,18 @@ export class CloudSocialProvider {
   // social2
   ////
 
-  // Returns a new invite code for the specified server.
-  // Rejects if the user is not logged in as an admin or there
-  // is any error executing the command.
-  // TODO: typings for invite codes
-  public inviteUser = (clientId: string): Promise<Object> => {
+  // Returns the invite code for the specified server.
+  public inviteUser = (host: string): Promise<Object> => {
     log.debug('inviteUser');
-    if (!(clientId in this.savedContacts_)) {
-      return Promise.reject({
-        message: 'unknown cloud instance ' + clientId
-      });
+    if (!(host in this.savedContacts_)) {
+      return Promise.reject({message: 'unknown cloud instance ' + host});
     }
-    if (this.savedContacts_[clientId].invite.user !== ADMIN_USERNAME) {
-      return Promise.reject({
-        message: 'user is logged in as non-admin user ' +
-            this.savedContacts_[clientId].invite.user
-      });
-    }
-    return this.reconnect_(this.savedContacts_[clientId].invite).then(
-        (connection: Connection) => {
-      return connection.issueInvite();
+    const invite = this.savedContacts_[host].invite;
+    return Promise.resolve({
+      host: invite.host,
+      user: invite.user,
+      key: invite.key,
+      isAdmin: false
     });
   }
 
@@ -562,13 +554,6 @@ class Connection {
   // Fetches the server's description, i.e. /banner.
   public getBanner = (): Promise<string> => {
     return this.exec_('cat /banner');
-  }
-
-  // Returns a base64-decoded, deserialised invite code.
-  public issueInvite = (): Promise<Object> => {
-    return this.exec_('sudo /issue_invite.sh').then((inviteCode: string) => {
-      return JSON.parse(new Buffer(inviteCode, 'base64').toString());
-    });
   }
 
   // Executes a command, fulfilling with the command's stdout
