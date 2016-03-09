@@ -604,9 +604,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
-    if (args.providerName !== 'digitalocean') {
-      return Promise.reject(new Error('unsupported cloud provider'));
+  public cloudInstall = (args :{providerName :string; region :string}) :Promise<uproxy_core_api.CloudInstallResult> => {
+    if (args.providerName !== 'digitalocean' ) {
+       return Promise.reject(new Error('unsupported cloud provider'));
     }
 
     if (!args.region) {
