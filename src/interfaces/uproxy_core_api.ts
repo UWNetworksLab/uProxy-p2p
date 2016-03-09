@@ -210,6 +210,14 @@ export interface InvitationData {
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
+// Argument to #cloudInstall.
+export interface CloudInstallArgs {
+  // Use this cloud computing provider to create a server.
+  providerName: string;
+  // Provider-specific region in which to locate the new server.
+  region: string;
+};
+
 // Output of #cloudInstall.
 export interface CloudInstallResult {
   // Invitation URL, iff the the server was successfully created
@@ -283,6 +291,6 @@ export interface CoreApi {
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudInstall(args :{providerName :string; region :string}) :Promise<CloudInstallResult>;
+  cloudInstall(args:CloudInstallArgs): Promise<CloudInstallResult>;
 }
 

@@ -7,7 +7,10 @@ import ui_constants = require('../../interfaces/ui');
 
 var ui = ui_context.ui;
 
-const DEFAULT_PROVIDER = 'digitalocean';
+var install_args: uproxy_core_api.CloudInstallArgs = {
+  providerName: 'digitalocean',
+  region: ''
+};
 
 Polymer({
   openLoginDialog: function() {
@@ -20,10 +23,7 @@ Polymer({
     this.$.failureDialog.close();
   },
   loginTapped: function() {
-    var install_args = {
-        providerName: DEFAULT_PROVIDER,
-        region: this.$.regionMenu.selected
-    };
+    install_args.region = this.$.regionMenu.selected;
     this.closeDialogs();
     // TODO: show the dialog when this value changes, not this nasty hack
     ui.cloudInstallStatus = '';
