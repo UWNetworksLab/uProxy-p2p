@@ -147,15 +147,13 @@ function sumMetrics(mets :NetMetrics) :number{
 export class Metrics {
   public onceLoaded_ :Promise<void>;  // Only public for tests
   private add_ :Updater<number>;
-  private max_ :Updater<number>;
   private metricsProvider_ :freedom_AnonymizedMetrics;
   // data_ should be private except for tests.
   public data_ :MetricsData;
 
   constructor(private storage_ :storage.Storage) {
     this.add_ = (a,b) => { return a+b; };
-    this.max_ = (a,b) => { return a > b? a:b; }
-    
+
     var counterMetric = {
       type: 'logarithmic', base: 2, num_bloombits: 256, num_hashes: 1,
       num_cohorts: 8, prob_p: 0.25, prob_q: 0.75, prob_f: 0.5,

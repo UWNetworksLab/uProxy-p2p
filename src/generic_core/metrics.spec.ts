@@ -76,7 +76,9 @@ describe('metrics_module.Metrics', () => {
       done();
     });
     metrics.increment('success');
-    metrics.increment('failure');
+    // Two attempts: one sucessful, one failure.
+    metrics.increment('attempt');
+    metrics.increment('attempt');
   });
 
   it('getReport reports obfuscated metric values', (done) => {
