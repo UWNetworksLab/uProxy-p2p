@@ -7,30 +7,23 @@ import ui_constants = require('../../interfaces/ui');
 
 var ui = ui_context.ui;
 
-const DEFAULT_REGION = 'nyc3'
-
 var install_args: uproxy_core_api.CloudInstallArgs = {
   providerName: 'digitalocean',
-  region: DEFAULT_REGION
+  region: ''
 };
 
 Polymer({
   openLoginDialog: function() {
-    this.$.regionDialog.open();
+    this.$.loginDialog.open();
   },
   closeDialogs: function() {
-    this.$.regionDialog.close();
     this.$.loginDialog.close();
     this.$.installingDialog.close();
     this.$.successDialog.close();
     this.$.failureDialog.close();
   },
-  regionTapped: function() {
-    install_args.region = this.$.regionMenu.selected;
-    this.closeDialogs();
-    this.$.loginDialog.open();
-  },
   loginTapped: function() {
+    install_args.region = this.$.regionMenu.selected;
     this.closeDialogs();
     // TODO: show the dialog when this value changes, not this nasty hack
     ui.cloudInstallStatus = '';
