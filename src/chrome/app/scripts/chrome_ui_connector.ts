@@ -25,8 +25,8 @@ class ChromeUIConnector {
     chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
 
     chrome.runtime.onUpdateAvailable.addListener((details) => {
-      this.sendToCore_(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
-                       {version: details.version});
+      this.sendToCore(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
+                      {version: details.version});
     });
   }
 
@@ -99,7 +99,7 @@ class ChromeUIConnector {
       } else if (msg.type == uproxy_core_api.Command.RESTART) {
         chrome.runtime.reload();
       }
-      this.sendToCore_(msg.type, msg.data, msg.promiseId);
+      this.sendToCore(msg.type, msg.data, msg.promiseId);
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {
@@ -116,13 +116,8 @@ class ChromeUIConnector {
     }
   }
 
-  private sendToCore_ = (msgType :uproxy_core_api.Command, data :Object,
-                         promiseId?:Number) => {
-    if (typeof promiseId === 'undefined') {
-      // promiseId of 0 is used for commands with no associated promise
-      promiseId = 0;
-    }
-
+  public sendToCore = (msgType :uproxy_core_api.Command, data :Object,
+                       promiseId :Number = 0) => {
     this.uProxyAppChannel_.emit(msgType.toString(),
                                 {data: data, promiseId: promiseId});
   }
