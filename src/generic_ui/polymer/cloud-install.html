@@ -1,6 +1,10 @@
+<link rel='import' href='../../bower/core-menu/core-menu.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='../../bower/paper-dropdown/paper-dropdown.html'>
+<link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-item/paper-item.html'>
 <link rel='import' href='../../bower/paper-progress/paper-progress.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
@@ -12,7 +16,6 @@
     :host {
       text-align: start;
     }
-
     /* cogged from invite-user.html, to match social network invite dialogs */
     /* TODO: seems like a lot of duplication */
     uproxy-dialog {
@@ -48,7 +51,9 @@
       padding: 0.7em 0.9em;
       border-left: 1px solid rgba(255,255,255,0.3);
     }
-
+    paper-item {
+      font-size: 12px;
+    }
     paper-progress {
       width: 100%;
     }
@@ -58,13 +63,39 @@
     <core-signals on-core-signal-open-cloud-install-dialog='{{ openLoginDialog }}'></core-signals>
 
     <!-- TODO: use core-pages rather than multiple dialogs -->
+    <uproxy-dialog layered='false' backdrop='true' id='regionDialog'>
+      <h1>Create a cloud server</h1>
+      <core-icon icon='clear' on-tap='{{ closeDialogs }}'></core-icon>
+      <p>We can help you create a uProxy cloud server in a country of your choice.</p>
+      <p>To get started, please select the region for your server. You should choose the region closest to you to minimize latency.</p>
+      <div style='text-align:center;'>
+        <paper-dropdown-menu label='Select Region'>
+          <paper-dropdown class='dropdown'>
+            <!-- TODO: get available regions from digital ocean -->
+            <core-menu class='menu' id='regionMenu' valueattr='value' selected='nyc2'>
+              <paper-item value='nyc2'>New York</paper-item>
+              <paper-item value='sfo1'>San Francisco</paper-item>
+              <paper-item value='lon1'>London</paper-item>
+              <paper-item value='ams2'>Amsterdam</paper-item>
+              <paper-item value='sgp1'>Singapore</paper-item>
+              </core-menu>
+          </paper-dropdown>
+        </paper-dropdown-menu>
+      </div>
+      <div style='text-align:center;'>
+        <uproxy-button raised on-tap='{{ regionTapped }}'>
+          <span id='buttonLogoContainer'><core-icon icon='uproxy-icons:Cloud'></core-icon></span>
+          <span id='buttonTextContainer'>Choose a region</span>
+        </uproxy-button>
+      </div>
+    </uproxy-dialog>
 
     <uproxy-dialog layered='false' backdrop='true' id='loginDialog'>
       <h1>Create a cloud server</h1>
       <core-icon icon='clear' on-tap='{{ closeDialogs }}'></core-icon>
-      <p>We can help you create a uProxy cloud server in a country of your choice. You will be able to get access from this server 24x7 and, optionally, share it with friends and family.</p>
-      <p>To get started, please sign in to your DigitalOcean account.</p>
-      <div style='text-align:center;''>
+      <p>We use Digital Ocean to create your cloud server. When you sign into your account, we will create a new uProxy server that you will have access to 24x7 and, optionally, will be able to share with friends and family.</p>
+      <p>Please sign in to your account to create a cloud server.</p>
+      <div style='text-align:center;'>
         <uproxy-button raised on-tap='{{ loginTapped }}'>
           <span id='buttonLogoContainer'><core-icon icon='uproxy-icons:Cloud'></core-icon></span>
           <span id='buttonTextContainer'>Sign in to Digital Ocean</span>
