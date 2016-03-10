@@ -138,10 +138,16 @@ function calcPercentage(numerator :number, denominator :number) {
 
 function sumMetrics(mets :NetMetrics) :number{
   var total = 0;
+  var num = 0;
   for (var k in mets) {
     total += mets[k];
+    num++;
   }
-  return total;
+  if (num == 0) {
+    return -1;
+  } else {
+    return total;
+  }
 }
 
 export class Metrics {
@@ -244,10 +250,6 @@ export class Metrics {
   }
 
   public getReport = (natInfo:uproxy_core_api.NetworkInfo) :Promise<Object> => {
-    if (natInfo.errorMsg) {
-      return Promise.reject(new Error('getNetworkInfo() failed.'));
-    }
-
     var platform = 'unknown';
     var chromeVersion = 'none';
     var firefoxVersion = 'none';
@@ -311,20 +313,23 @@ export class Metrics {
         this.metricsProvider_.report('quiver-v1',
                                      sumMetrics(this.data_.on_quiver));
 
-      var natTypeReport =
-        this.metricsProvider_.report('nat-type-v3', natInfo.natType);
-      var pmpReport =
-        this.metricsProvider_.report('pmp-v3', natInfo.pmpSupport.toString());
-      var pcpReport =
-        this.metricsProvider_.report('pcp-v3', natInfo.pcpSupport.toString());
-      var upnpReport =
-        this.metricsProvider_.report('upnp-v3', natInfo.upnpSupport.toString());
+      var natPromises:Promise<void>[] = [];
+      if (natInfo && !natInfo.errorMsg) {
+        var natTypeReport =
+          this.metricsProvider_.report('nat-type-v3', natInfo.natType);
+        var pmpReport =
+          this.metricsProvider_.report('pmp-v3', natInfo.pmpSupport.toString());
+        var pcpReport =
+          this.metricsProvider_.report('pcp-v3', natInfo.pcpSupport.toString());
+        var upnpReport =
+          this.metricsProvider_.report('upnp-v3', natInfo.upnpSupport.toString());
+        natPromises = [natTypeReport, pmpReport, pcpReport, upnpReport];
+      }
 
       return Promise.all([
         successReport, failRateReport, shutdownReport, chromeVersionReport,
         firefoxVersionReport, platformReport, gmailReport, facebookReport,
-        githubReport, quiverReport, natTypeReport, pmpReport, pcpReport,
-        upnpReport]).then(() => {
+        githubReport, quiverReport].concat(natPromises)).then(() => {
         return this.metricsProvider_.retrieve();
       });
     });
@@ -356,7 +361,7 @@ export interface DailyMetricsReporterData {
 
 export class DailyMetricsReporter {
   // 5 days in milliseconds.
-  public static MAX_TIMEOUT = 5 * ONE_DAY_MS;
+  public static MAX_TIMEOUT = 5* ONE_DAY_MS;
 
   public onceLoaded_ :Promise<void>;  // Only public for tests
 
@@ -383,27 +388,35 @@ export class DailyMetricsReporter {
     });
   }
 
-  private report_ = () => {
-    // TODO(kennysong): Ideally we want to call getNetworkInfoObj_() as a static
-    // method of uproxy_core.uProxyCore, instead of passing the function in
-    // as a parameter. This can be done after the circular dependency is fixed.
-    // See: https://github.com/uProxy/uproxy/issues/1660
-    this.getNetworkInfoObj_().then((natInfo:uproxy_core_api.NetworkInfo) => {
-      return this.metrics_.getReport(natInfo);
-    }).then((payload:Object) => {
+  private sendReport_ = (natInfo:uproxy_core_api.NetworkInfo) => {
+    this.metrics_.getReport(natInfo).then((payload:Object) => {
       this.onReportCallback_(payload);
     }).catch((e :Error) => {
       log.error('Error getting report', e);
     }).then(() => {
-      // Reset metrics, and set nextSendTimestamp regardless of whether
-      // metrics.getReport succeeded or failed.
-      this.metrics_.reset();
+      // Set nextSendTimestamp regardless of whether metrics.getReport
+      // succeeded or failed.
       this.data_.nextSendTimestamp =
           DailyMetricsReporter.getNextSendTimestamp_();
       DailyMetricsReporter.runNowOrLater_(
           this.report_.bind(this), this.data_.nextSendTimestamp);
       this.save_();
     });
+  }
+
+  private report_ = () => {
+    // TODO(kennysong): Ideally we want to call getNetworkInfoObj_() as a static
+    // method of uproxy_core.uProxyCore, instead of passing the function in
+    // as a parameter. This can be done after the circular dependency is fixed.
+    // See: https://github.com/uProxy/uproxy/issues/1660
+    this.getNetworkInfoObj_().then(
+      (natInfo:uproxy_core_api.NetworkInfo) => {
+        this.sendReport_(natInfo);
+      },
+      (err:any) => {
+        this.sendReport_(null);
+        log.error("Daily metrics send: failed NetworkInfo: ", err);
+      });
   }
 
   // Invokes callback at the given time (specified in milliseconds).  If the
