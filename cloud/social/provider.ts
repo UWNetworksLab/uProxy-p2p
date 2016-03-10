@@ -27,7 +27,6 @@ const CONNECT_TIMEOUT_MS = 10000;
 
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
-// TODO: add (private) keys, for key-based auth
 interface Invite {
   // Hostname or IP of the cloud instance.
   // This is the host on which sshd is running, so it should
@@ -37,7 +36,7 @@ interface Invite {
   user: string;
   // Private key, base64-encoded.
   key: string;
-  // Is Admin.
+  // True iff uProxy has root access on the server, i.e. uProxy deployed it.
   isAdmin?: boolean;
 }
 
@@ -360,10 +359,12 @@ export class CloudSocialProvider {
   public inviteUser = (host: string): Promise<Object> => {
     log.debug('inviteUser');
     if (!(host in this.savedContacts_)) {
-      return Promise.reject({message: 'unknown cloud instance ' + host});
+      return Promise.reject({
+        message: 'unknown cloud instance ' + host
+      });
     }
     const invite = this.savedContacts_[host].invite;
-    return Promise.resolve({
+    return Promise.resolve(<Invite>{
       host: invite.host,
       user: invite.user,
       key: invite.key
