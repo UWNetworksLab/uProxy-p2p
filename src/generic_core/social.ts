@@ -172,6 +172,25 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
+    /**
+     * Updates metrics on login state/user count
+     */
+    protected updateMetrics() {
+      if (this.metrics_) {
+        // There has to be a better way...
+        var numUsers = 0;
+        for (var k in this.roster) {
+          numUsers++;
+        }
+        // One of the users will be us.  Take that one out
+        this.metrics_.userCount(
+          // Map 'Facebook-Firebase-V2' to 'facebook', 'GMail' to 'gmail', etc.
+          this.name.split('-')[0].toLowerCase(),
+          this.myInstance.getUserProfile().userId,
+          numUsers - 1);
+      }
+    }
+
     //===================== Social.Network implementation ====================//
 
     /**
@@ -184,18 +203,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
       var newUser = new remote_user.User(this, userId);
       this.roster[userId] = newUser;
-      // There has to be a better way...
-      var numUsers = 0;
-      for (var k in this.roster) {
-        numUsers++;
-      }
-      if (this.metrics_) {
-        this.metrics_.userCount(
-          // Map 'Facebook-Firebase-V2' to 'facebook', 'GMail' to 'gmail', etc.
-          this.name.split('-')[0].toLowerCase(),
-          userId,
-          numUsers);
-      }
+      this.updateMetrics();
       return newUser;
     }
 
@@ -699,6 +707,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       var monitorCallback = () => {
+        this.updateMetrics();
         for (var userId in this.roster) {
           this.getUser(userId).monitor();
         }
