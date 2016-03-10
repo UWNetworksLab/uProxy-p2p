@@ -57,7 +57,13 @@ class CloudInstaller {
           // to the install script.
           if (line.indexOf(INVITATION_PREFIX) === 0) {
             const inviteJson = line.substring(INVITATION_PREFIX.length);
-            F(JSON.parse(inviteJson));
+            try {
+              F(JSON.parse(inviteJson));
+            } catch (e) {
+              R({
+                message: 'could not parse invite: ' + inviteJson
+              });
+            }
           }
         });
 
