@@ -212,7 +212,7 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
         then
             INVITE_CODE=`docker exec uproxy-sshd /issue_invite.sh -i "$INVITE_CODE"`
         else
-            INVITE_CODE=`docker exec uproxy-sshd /issue_invite.sh -c -u giver`
+            INVITE_CODE=`docker exec uproxy-sshd /issue_invite.sh -c`
             echo -e "\nINVITE CODE URL:\n$INVITE_CODE"
         fi
     fi
