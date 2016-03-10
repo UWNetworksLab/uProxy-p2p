@@ -73,7 +73,7 @@ PUBLIC_IP=`cat /hostname`
 export CLOUD_INSTANCE_DETAILS="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
 
 # Output invite in JSON format, for the frontend installer.
-echo "CLOUD_INSTANCE_DETAILS_JSON:$CLOUD_INSTANCE_DETAILS"
+echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS"
 
 if [ "$COMPLETE" = true ]
 then
