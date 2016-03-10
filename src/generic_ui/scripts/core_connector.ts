@@ -197,7 +197,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   //   this.sendCommand(uproxy_core_api.Command.CHANGE_OPTION, option);
   // }
 
-  login = (loginArgs :uproxy_core_api.LoginArgs) : Promise<void> => {
+  login = (loginArgs :uproxy_core_api.LoginArgs) : Promise<uproxy_core_api.LoginResult> => {
     return this.promiseCommand(uproxy_core_api.Command.LOGIN, loginArgs);
   }
 
@@ -245,6 +245,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
 
   acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void>=> {
     return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, data);
+  }
+
+  cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
+    return this.promiseCommand(uproxy_core_api.Command.CLOUD_INSTALL, args); 
   }
 }  // class CoreConnector
 

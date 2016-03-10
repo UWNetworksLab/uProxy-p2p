@@ -712,7 +712,7 @@ export function notifyUI(networkName :string, userId :string) {
           this.getUser(userId).monitor();
         }
       };
-      this.monitorIntervalId_ = setInterval(monitorCallback, 60000);
+      this.monitorIntervalId_ = setInterval(monitorCallback, 15000);
     }
 
     private stopMonitor_ = () : void => {

@@ -135,6 +135,8 @@ export class UserInterface implements ui_constants.UiApi {
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
+  public cloudInstallStatus :string = '';
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -310,6 +312,10 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.setPortControlSupport_);
+
+    core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
+      this.cloudInstallStatus = status;
+    });
 
     browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
     browserApi.on('inviteUrlData', this.handleInvite);
@@ -751,6 +757,12 @@ export class UserInterface implements ui_constants.UiApi {
 
       // regardless, let the user know
       this.bringUproxyToFront();
+    } else {
+      // Clear the browser proxy settings.  This is necessary in case the
+      // proxy was stopped when the user was signed out of the social network.
+      // In the case where the user clicked stop, this will have no effect
+      // (this function is idempotent).
+      this.browserApi.stopUsingProxy();
     }
 
     this.updateGettingStatusBar_();
@@ -933,9 +945,6 @@ export class UserInterface implements ui_constants.UiApi {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect_(networkMsg.name);
         } else {
-          if (this.instanceGettingAccessFrom_) {
-            this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
-          }
           this.showNotification(
             this.i18n_t("LOGGED_OUT", { network: displayName }));
 
@@ -1058,35 +1067,21 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  private confirmForLogout() :Promise<void> {
-    var sharingTo = Object.keys(this.instancesGivingAccessTo);
-    var message :string;
-
-    // Do not need to ask user if not actually sharing
-    if (sharingTo.length === 0) {
+  private getLogoutConfirmation_ = (isGetting :boolean, isSharing :boolean) : Promise<void> => {
+    if (isGetting && isSharing) {
+      return this.getConfirmation(
+          '', this.i18n_t('CONFIRM_LOGOUT_GETTING_AND_SHARING'));
+    } else if (isGetting) {
+      return this.getConfirmation('', this.i18n_t('CONFIRM_LOGOUT_GETTING'));
+    } else if (isSharing) {
+      return this.getConfirmation('', this.i18n_t('CONFIRM_LOGOUT_SHARING'));
+    } else {
       return Promise.resolve<void>();
     }
-
-    if (sharingTo.length === 1) {
-      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_ONE", {
-        name: this.mapInstanceIdToUser_[sharingTo[0]].name,
-      });
-    } else if (sharingTo.length === 2) {
-      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_TWO", {
-        name1: this.mapInstanceIdToUser_[sharingTo[0]].name,
-        name2: this.mapInstanceIdToUser_[sharingTo[1]].name,
-      });
-    } else {
-      message = this.i18n_t("PRE_LOG_OUT_WHEN_SHARING_WITH_MANY", {
-        name: this.mapInstanceIdToUser_[sharingTo[0]].name,
-        numOthers: sharingTo.length - 1,
-      });
-    }
-
-    return this.getConfirmation('', message);
   }
 
-  public logout(networkInfo :social.SocialNetworkInfo) :Promise<void> {
+  public logout = (networkInfo :social.SocialNetworkInfo,
+                   showConfirmation :boolean = true) : Promise<void> => {
     var network = this.model.getNetwork(networkInfo.name);
     // Check if the user is connected to a network
     if (!network) {
@@ -1097,21 +1092,54 @@ export class UserInterface implements ui_constants.UiApi {
       return Promise.resolve<void>();
     }
 
-    return this.confirmForLogout().then(() => {
+    var getConfirmation = Promise.resolve<void>();
+    if (showConfirmation) {
+      // Check if we are getting or sharing on this network.
+      var isGettingForThisNetwork = false;
+      if (this.instanceGettingAccessFrom_) {
+        var user = this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_];
+        if (user && user.network.name === networkInfo.name) {
+          isGettingForThisNetwork = true;
+        }
+      }
+      var isSharingForThisNetwork = false;
+      var sharingTo = Object.keys(this.instancesGivingAccessTo);
+      for (var i = 0; i < sharingTo.length; ++i) {
+        user = this.mapInstanceIdToUser_[sharingTo[i]];
+        if (user && user.network.name === networkInfo.name) {
+          isSharingForThisNetwork = true;
+          break;
+        }
+      }
+      getConfirmation = this.getLogoutConfirmation_(
+          isGettingForThisNetwork, isSharingForThisNetwork);
+    }
+
+    return getConfirmation.then(() => {
       network.logoutExpected = true;
       return this.core.logout(networkInfo);
     }, () => { /* MT */ });
   }
 
-  public logoutAll = () : Promise<void[]> => {
-    var logoutPromises :Promise<void>[] = [];
-    for (var i in this.model.onlineNetworks) {
-      logoutPromises.push(this.logout({
-        name: this.model.onlineNetworks[i].name,
-        userId: this.model.onlineNetworks[i].userId
-      }));
+  public logoutAll = (showConfirmation :boolean) : Promise<void[]> => {
+    var getConfirmation = Promise.resolve<void>();
+    if (showConfirmation) {
+      getConfirmation = this.getLogoutConfirmation_(
+          this.isGettingAccess(), this.isGivingAccess());
     }
-    return Promise.all(logoutPromises);
+
+    return getConfirmation.then(() => {
+      var logoutPromises :Promise<void>[] = [];
+      for (var i in this.model.onlineNetworks) {
+        logoutPromises.push(
+            this.logout({
+              name: this.model.onlineNetworks[i].name,
+              userId: this.model.onlineNetworks[i].userId
+            }, false)  // Don't show duplicate confirmation messages.
+        );
+      }
+      return Promise.all(logoutPromises);
+    }, () => { /* MT */ });
   }
 
   private reconnect_ = (network :string) => {
@@ -1210,6 +1238,7 @@ export class UserInterface implements ui_constants.UiApi {
   public updateInitialState = (state :uproxy_core_api.InitialState) => {
     console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
     this.model.networkNames = state.networkNames;
+    this.model.cloudProviderNames = state.cloudProviderNames;
     this.availableVersion = state.availableVersion;
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.updateLanguage(state.globalSettings.language);
@@ -1322,5 +1351,9 @@ export class UserInterface implements ui_constants.UiApi {
   public i18nSanitizeHtml = (i18nMessage :string) => {
     // Remove all HTML other than supported tags like strong, a, p, etc.
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
+  }
+
+  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
+    return this.core.cloudInstall(args);
   }
 } // class UserInterface

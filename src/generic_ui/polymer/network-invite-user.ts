@@ -50,21 +50,6 @@ Polymer({
       ui.showDialog('', ui.i18n_t('GITHUB_INVITE_SEND_FAILED'));
     });
   },
-  addCloudInstance: function() {
-    var socialNetworkInfo = {
-      name: "Cloud",
-      userId: "" /* The current user's ID will be determined by the core. */
-    };
-    core.acceptInvitation({
-        network: socialNetworkInfo,
-        token: this.cloudInstanceInput
-      }).then(() => {
-      ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
-      this.closeInviteUserPanel();
-    }).catch(() => {
-      ui.showDialog('', ui.i18n_t('CLOUD_INVITE_FAILED'));
-    });
-  },
   openInviteUserPanel: function() {
     this.inviteUrl = '';
     if (this.network === 'Quiver') {

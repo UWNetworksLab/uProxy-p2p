@@ -144,6 +144,8 @@ backendThirdPartyBuildPaths = [
   'sha1'
   'uproxy-lib/loggingprovider'
   'uproxy-lib/churn-pipe'
+  'uproxy-lib/cloud/digitalocean'
+  'uproxy-lib/cloud/install'
   'uproxy-lib/cloud/social'
 ]
 
@@ -530,6 +532,7 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: [
           'freedom-for-chrome'
+          'forge-min'
         ]
         pathsFromDevBuild: [
           'generic_core'
@@ -561,6 +564,7 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: [
           'freedom-for-firefox'
+          'forge-min'
         ]
         pathsFromDevBuild: [
           'generic_core'

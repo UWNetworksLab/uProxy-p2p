@@ -1,0 +1,123 @@
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-progress/paper-progress.html'>
+<link rel='import' href='../../bower/paper-radio-button/paper-radio-button.html'>
+<link rel='import' href='../../bower/paper-radio-group/paper-radio-group.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='button.html'>
+<link rel='import' href='dialog.html'>
+
+<polymer-element name='uproxy-cloud-install'>
+  <template>
+    <style>
+    :host {
+      text-align: start;
+    }
+    /* cogged from invite-user.html, to match social network invite dialogs */
+    /* TODO: seems like a lot of duplication */
+    uproxy-dialog {
+      min-width: 80%;
+    }
+    uproxy-dialog h1 {
+      color: #333;
+      font-size: 18px;
+      font-weight: normal;
+      margin-top: 0;
+    }
+    uproxy-dialog p {
+      color: rgb(160, 160, 160);
+      line-height: 18px;
+      font-weight: lighter;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    core-icon[icon=clear] {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: rgb(180,180,180);
+      cursor: pointer;
+    }
+    uproxy-button {
+      margin: 15px 0px;
+    }
+    uproxy-button #buttonLogoContainer {
+      padding: 0em 0.3em;
+    }
+    uproxy-button #buttonTextContainer {
+      padding: 0.7em 0.9em;
+      border-left: 1px solid rgba(255,255,255,0.3);
+    }
+    paper-progress {
+      width: 100%;
+    }
+    paper-radio-button {
+      width: 100%;
+      padding: 6px 12px !important;
+    }
+    </style>
+
+    <!-- TODO: remove this logic from the template -->
+    <core-signals on-core-signal-open-cloud-install-dialog='{{ openLoginDialog }}'></core-signals>
+
+    <!-- TODO: use core-pages rather than multiple dialogs -->
+    <uproxy-dialog layered='false' backdrop='true' id='loginDialog'>
+      <h1>Create a cloud server</h1>
+      <core-icon icon='clear' on-tap='{{ closeDialogs }}'></core-icon>
+      <p>We can help you create a uProxy cloud server. You will be able to get access from this server 24x7 and, optionally, share it with friends and family.</p>
+      <p>Please choose the city in which to locate your new server. For best performance, this should be as close as possible to where you will use uProxy.</p>
+      <div>
+        <paper-radio-group id='regionMenu' selected='sgp1'>
+          <!-- TODO: get available regions from digital ocean -->
+          <paper-radio-button name='sgp1' label='Asia (Singapore)'></paper-radio-button>
+          <paper-radio-button name='ams2' label='Europe (Amsterdam)'></paper-radio-button>
+          <paper-radio-button name='nyc2' label='North America (New York)'></paper-radio-button>
+        </paper-radio-group>
+      </div>
+      <p>To get started, please sign in to your Digital Ocean account.</p>
+      <div style='text-align:center;'>
+        <uproxy-button raised on-tap='{{ loginTapped }}'>
+          <span id='buttonLogoContainer'><core-icon icon='uproxy-icons:Cloud'></core-icon></span>
+          <span id='buttonTextContainer'>Sign in to Digital Ocean</span>
+        </uproxy-button>
+      </div>
+    </uproxy-dialog>
+
+    <uproxy-dialog layered='false' backdrop='true' id='installingDialog'>
+      <h1>Create a cloud server</h1>
+      <p>Your cloud server is being created. This will take several minutes, please bear with us.</p>
+      <div>
+        <paper-progress indeterminate='true'></paper-progress>
+      </div>
+      <p>{{ ui.cloudInstallStatus }}</p>
+    </uproxy-dialog>
+
+    <!-- Although we should use a uproxy-action-dialog for these two dialogs,
+         there is some weirdness mixing uproxy-dialog and uproxy-action-dialog
+         in the template in which Polymer opens multiple core-overlays,
+         messing up the whole UI when the uproxy-action-dialog closes. -->
+
+    <uproxy-dialog layered='false' backdrop='true' id='successDialog'>
+      <h1>Create a cloud server</h1>
+      <p>Your cloud server is ready!</p>
+      <p>Below is the URL to administer your new server. Copy and paste it into a file and save it somewhere you'll be able to get to it in the future. Think of it as a password: keep it safe and don't share it with anyone you don't trust.</p>
+      <p>Once you've saved the URL, open it in your browser to add your new server to your contacts list.</p>
+      <div>
+        <paper-input-decorator layout vertical>
+          <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
+        </paper-input-decorator>
+      </div>
+      <uproxy-button on-tap='{{ closeDialogs }}'>{{ 'OK' | $$ }}</uproxy-button>
+    </uproxy-dialog>
+
+    <uproxy-dialog layered='false' backdrop='true' id='failureDialog'>
+      <h1>Create a cloud server</h1>
+      <p>We're sorry. We couldn't create a cloud server for you at this time.</p>
+      <p>It may be a temporary problem. Please try again later.</p>
+      <uproxy-button on-tap='{{ closeDialogs }}'>{{ 'OK' | $$ }}</uproxy-button>
+    </uproxy-dialog>
+
+  </template>
+  <script src='cloud-install.js'></script>
+</polymer-element>
