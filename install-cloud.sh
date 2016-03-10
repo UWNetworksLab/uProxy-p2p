@@ -64,7 +64,7 @@ do_install() {
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
   cd $TMP_DIR/testing/run-scripts
 
-   # TODO: pass arguments, e.g. banner
+  # TODO: pass arguments, e.g. banner
   ./run_cloud.sh firefox-stable
 }
 

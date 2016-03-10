@@ -20,9 +20,9 @@ function reset_test () {
 }
 
 function setup_environment() {
-   export DISPLAY=:10
-   Xvfb :10 -screen 0 1280x1024x24 &
-   sleep 3  # let Xvfb start up
+  export DISPLAY=:10
+  Xvfb :10 -screen 0 1280x1024x24 &
+  sleep 3  # let Xvfb start up
 }
 
 setup_environment
@@ -35,17 +35,17 @@ do
   TRIES=1
   SUCCEEDED=0
   while ((TRIES < 3 && SUCCEEDED == 0)); do
-      if build_and_test $i
-	    then
-	        SUCCEEDED=1
-	    else
-	        TRIES=$((TRIES + 1))
-	        reset_test $i
-	    fi
+    if build_and_test $i
+    then
+      SUCCEEDED=1
+    else
+      TRIES=$((TRIES + 1))
+      reset_test $i
+    fi
   done
   if ((SUCCEEDED == 0)); then
-	   echo "FAILED ON $REPO AFTER 3 TRIES"
-	   exit 1
+    echo "FAILED ON $REPO AFTER 3 TRIES"
+    exit 1
   fi
 done
 
