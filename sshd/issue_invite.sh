@@ -63,10 +63,12 @@ else
   ENCODED_KEY=`base64 -w 0 $TMP/id_rsa`
 fi
 
-# Apply the credentials to the account.
+# Apply the credentials to the account, with access restrictions.
+# man sshd for the complete list of authorized_keys options.
+KEY_OPTS='permitopen="zork:9000"'
 HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
 mkdir -p $HOMEDIR/.ssh
-cat $TMP/id_rsa.pub >> $HOMEDIR/.ssh/authorized_keys
+echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys
 
 # Output the actual invite code.
 PUBLIC_IP=`cat /hostname`
