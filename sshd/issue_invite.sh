@@ -72,6 +72,9 @@ cat $TMP/id_rsa.pub >> $HOMEDIR/.ssh/authorized_keys
 PUBLIC_IP=`cat /hostname`
 export CLOUD_INSTANCE_DETAILS="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
 
+# Output invite in JSON format for the
+echo "ISSUE_INVITE_RESULT:{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
+
 if [ "$COMPLETE" = true ]
 then
   npm install jsurl &>/dev/null
