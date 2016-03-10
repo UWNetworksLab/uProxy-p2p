@@ -18,7 +18,7 @@ var log: logging.Log = new logging.Log('cloud installer');
 const INSTALL_COMMAND = 'curl -sSL https://raw.githubusercontent.com/uProxy/uproxy-docker/master/install-cloud.sh | sh';
 
 // Prefix for invitation URLs.
-const INVITATION_URL_PREFIX = 'https://www.uproxy.org/invite/';
+const INVITATION_PREFIX = 'CLOUD_INSTANCE_DETAILS_JSON:';
 
 // Installs uProxy on a server, via SSH.
 // The process is as close as possible to a manual install
@@ -31,7 +31,7 @@ class CloudInstaller {
       host:string,
       port:number,
       username:string,
-      key:string) : Promise<string> => {
+      key:string) : Promise<Object> => {
     log.debug('installing uproxy on %1:%2 as %3', host, port, username);
 
     const connectConfig: ssh2.ConnectConfig = {
@@ -55,8 +55,9 @@ class CloudInstaller {
           // Search for the URL anywhere in the line so we will
           // continue to work in the face of minor changes
           // to the install script.
-          if (line.indexOf(INVITATION_URL_PREFIX) === 0) {
-            F(line.substring(INVITATION_URL_PREFIX.length));
+          if (line.indexOf(INVITATION_PREFIX) === 0) {
+            const inviteJson = line.substring(INVITATION_PREFIX.length);
+            F(JSON.parse(inviteJson));
           }
         });
 

@@ -13,7 +13,7 @@
       "install": {
         "type": "method",
         "value": ["string", "number", "string", "string"],
-        "ret": "string"
+        "ret": "object"
       },
       "err": {
         "message": "string"
