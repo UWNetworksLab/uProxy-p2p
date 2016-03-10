@@ -7,13 +7,10 @@ import ui_constants = require('../../interfaces/ui');
 
 var ui = ui_context.ui;
 
-const INSTALL_ARGS: uproxy_core_api.CloudInstallArgs = {
-  providerName: 'digitalocean'
-};
+const DEFAULT_PROVIDER = 'digitalocean';
 
 Polymer({
   openLoginDialog: function() {
-    // TODO: Skip this if we're already logged into Digital Ocean.
     this.$.loginDialog.open();
   },
   closeDialogs: function() {
@@ -28,7 +25,10 @@ Polymer({
     ui.cloudInstallStatus = '';
     this.$.installingDialog.open();
 
-    ui.cloudInstall(INSTALL_ARGS).then((result: uproxy_core_api.CloudInstallResult) => {
+    ui.cloudInstall({
+      providerName: DEFAULT_PROVIDER,
+      region: this.$.regionMenu.selected
+    }).then((result: uproxy_core_api.CloudInstallResult) => {
       this.inviteUrl = result.invite;
       this.closeDialogs();
       this.$.successDialog.open();
