@@ -65,7 +65,7 @@ fi
 
 # Apply the credentials to the account, with access restrictions.
 # man sshd for the complete list of authorized_keys options.
-KEY_OPTS='permitopen="zork:9000",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding'
+KEY_OPTS='command="/login.sh",permitopen="zork:9000",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding'
 HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
 mkdir -p $HOMEDIR/.ssh
 echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys

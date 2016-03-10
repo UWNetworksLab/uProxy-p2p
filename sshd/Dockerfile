@@ -28,6 +28,9 @@ RUN chmod 755 /issue_invite.sh
 # http://ubuntuforums.org/showthread.php?t=1132821
 RUN echo 'giver ALL=(root)NOPASSWD:/issue_invite.sh "",/issue_invite.sh -d *' > /etc/sudoers
 
+COPY login.sh /
+RUN chown root:root /login.sh && chmod 755 /login.sh
+
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN mkdir -p /var/run/sshd
