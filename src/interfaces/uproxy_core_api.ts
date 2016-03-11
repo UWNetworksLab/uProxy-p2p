@@ -220,6 +220,8 @@ export enum PortControlSupport {PENDING, TRUE, FALSE};
 export interface CloudInstallArgs {
   // Use this cloud computing provider to create a server.
   providerName: string;
+  // Provider-specific region in which to locate the new server.
+  region: string;
 };
 
 // Output of #cloudInstall.
