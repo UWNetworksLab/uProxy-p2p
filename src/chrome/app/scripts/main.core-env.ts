@@ -20,6 +20,24 @@ export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
+function getPolicyFromManagedStorage() :Promise<Object> {
+  return new Promise((fulfill, reject) => {
+    chrome.storage.managed.get(null, (contents) => {
+      if (contents) {
+        fulfill(contents);
+      } else { /* TODO figure out if this is the correct rejection criteria */
+        reject(chrome.runtime.lastError);
+      }
+    });
+  });
+}
+
+function sendPolicyToCore(contents :Object) :void {
+  chromeUIConnector.sendToCore(
+      uproxy_core_api.Command.UPDATE_ORG_POLICY,
+      contents);
+}
+
 // Remember which handlers freedom has installed.
 var oauthOptions :{connector:ChromeUIConnector;} = {
   connector: null
@@ -40,11 +58,9 @@ freedom('generic_core/freedom-module.json', <freedom.FreedomInCoreEnvOptions>{
 
   oauthOptions.connector = chromeUIConnector;
 
-  chrome.storage.managed.get(null, (contents) => {
+  getPolicyFromManagedStorage().then((contents) => {
     if (!_.isEmpty(contents)) {
-      chromeUIConnector.sendToCore(
-          uproxy_core_api.Command.UPDATE_ORG_POLICY,
-          contents);
+      sendPolicyToCore(contents);
     }
   });
 });
@@ -66,9 +82,7 @@ chrome.storage.onChanged.addListener((properties :Object, namespace :string) => 
     return;
   }
 
-  chrome.storage.managed.get(null, (contents) => {
-    chromeUIConnector.sendToCore(
-        uproxy_core_api.Command.UPDATE_ORG_POLICY,
-        contents);
+  getPolicyFromManagedStorage().then((contents) => {
+    sendPolicyToCore(contents);
   });
 });
