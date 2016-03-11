@@ -5,8 +5,8 @@
 
 if [ $# -lt 2 ]
 then
-    echo "Two arguments needed: browser and version."
-    exit 1
+  echo "Two arguments needed: browser and version."
+  exit 1
 fi
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
