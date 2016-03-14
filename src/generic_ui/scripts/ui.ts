@@ -1350,7 +1350,7 @@ export class UserInterface implements ui_constants.UiApi {
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
+  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
     return this.core.cloudInstall(args);
   }
 } // class UserInterface

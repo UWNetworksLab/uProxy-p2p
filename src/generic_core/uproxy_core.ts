@@ -610,7 +610,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
+  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
@@ -655,15 +655,64 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       };
       const MAX_INSTALLS = 5;
       return retry(install, MAX_INSTALLS);
-    }).then((output: string) => {
+    }).then((cloudNetworkData :any) => {
       destroyModules();
-      return <uproxy_core_api.CloudInstallResult>{
-        invite: output
-      };
+
+      // Login to the Cloud network if the user isn't already so that
+      // we can add the new cloud server to the roster.
+      return this.loginIfNeeded_('Cloud').then((cloudNetwork) => {
+        // Set flag so Cloud social provider knows this invite is for the admin
+        // user, who just created the server.
+        cloudNetworkData['isAdmin'] = true;
+
+        // Synthesize an invite token based on cloudNetworkData.
+        // CONSIDER: if we had a social.acceptInvitation that only took
+        // networkData we wouldn't need to fake the other fields.
+        const inviteTokenData :social.InviteTokenData = {
+          v: 2,
+          networkName: 'Cloud',
+          userName: cloudNetworkData['host'],
+          networkData: JSON.stringify(cloudNetworkData)
+        }
+        return cloudNetwork.acceptInvitation(inviteTokenData);
+      });
     }, (e: Error) => {
       destroyModules();
       return Promise.reject(e);
     });
+  }  // end of cloudInstall
+
+  // Gets a social.Network, and logs the user in if they aren't yet logged in.
+  private loginIfNeeded_ = (networkName :string) : Promise<social.Network> => {
+    var network = this.getNetworkByName_(networkName);
+    if (network) {
+      return Promise.resolve(network);
+    }
+
+    // User is not yet logged in.
+    return this.login({
+      network: networkName,
+      loginType: uproxy_core_api.LoginType.INITIAL
+    }).then(() => {
+      network = this.getNetworkByName_(networkName);
+      if (!network) {
+        // Sanity check - this should never happen.
+        return Promise.reject('Unable to find ' + networkName + ' network');
+      }
+      return Promise.resolve(network);
+    });
+  }
+
+  // The social_network module in theory should support multiple userIds
+  // being logged into the same network.  However that has never been tested
+  // and is not used by the rest of uProxy code.  This method just returns
+  // the first (and currently only) network for the given networkName, or null
+  // if the network is not logged in.
+  private getNetworkByName_ = (networkName :string) : social.Network => {
+    for (var userId in social_network.networks[networkName]) {
+      return social_network.networks[networkName][userId];
+    }
+    return null;
   }
 }  // class uProxyCore
 

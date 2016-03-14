@@ -21,20 +21,15 @@ Polymer({
   },
   loginTapped: function() {
     this.closeDialogs();
-    // TODO: show the dialog when this value changes, not this nasty hack
     ui.cloudInstallStatus = '';
     this.$.installingDialog.open();
 
     ui.cloudInstall({
       providerName: DEFAULT_PROVIDER,
       region: this.$.regionMenu.selected
-    }).then((result: uproxy_core_api.CloudInstallResult) => {
-      this.inviteUrl = result.invite;
+    }).then(() => {
       this.closeDialogs();
       this.$.successDialog.open();
-
-      // TODO: In addition to displaying the URL so the user can store it somewhere
-      //       we should add the new server to the user's contact list.
     }).catch((e: Error) => {
       // TODO: Figure out which fields in e are set, because message isn't.
       this.closeDialogs();
@@ -47,6 +42,5 @@ Polymer({
   },
   ready: function() {
     this.ui = ui;
-    this.inviteUrl = '';
   }
 });

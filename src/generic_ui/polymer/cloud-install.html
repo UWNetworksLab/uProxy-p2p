@@ -1,6 +1,5 @@
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
-<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/paper-progress/paper-progress.html'>
 <link rel='import' href='../../bower/paper-radio-button/paper-radio-button.html'>
 <link rel='import' href='../../bower/paper-radio-group/paper-radio-group.html'>
@@ -100,14 +99,7 @@
 
     <uproxy-dialog layered='false' backdrop='true' id='successDialog'>
       <h1>Create a cloud server</h1>
-      <p>Your cloud server is ready!</p>
-      <p>Below is the URL to administer your new server. Copy and paste it into a file and save it somewhere you'll be able to get to it in the future. Think of it as a password: keep it safe and don't share it with anyone you don't trust.</p>
-      <p>Once you've saved the URL, open it in your browser to add your new server to your contacts list.</p>
-      <div>
-        <paper-input-decorator layout vertical>
-          <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
-        </paper-input-decorator>
-      </div>
+      <p>Your cloud server is ready, and will now appear in your uProxy friends list.</p>
       <uproxy-button on-tap='{{ closeDialogs }}'>{{ 'OK' | $$ }}</uproxy-button>
     </uproxy-dialog>
 
