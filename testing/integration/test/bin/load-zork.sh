@@ -33,7 +33,7 @@ Xvfb :10 -screen 0 1280x1024x24 &
 fvwm &
 
 if [ "$RUNVNC" = true ]; then
-    x11vnc -display :10 -forever &
+  x11vnc -display :10 -forever &
 fi
 
 if [ "$IPTABLES" = true ]
