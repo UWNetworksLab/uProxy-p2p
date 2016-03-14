@@ -62,6 +62,12 @@ then
   usage
 fi
 
+if [ -n "$BRANCH" ] && [ "$GIT" = false ]
+then
+  echo "-g must be used when -b is used"
+  usage
+fi
+
 if [ $# -lt 2 ]
 then
   usage
