@@ -63,7 +63,12 @@ EOF
 function get_firefox () {
   cat <<EOF
 RUN echo BROWSER=firefox >/etc/test.conf
+# jpm's installer requires node.
+RUN apt-get -qq install npm nodejs
+RUN ln -s /usr/bin/nodejs /usr/bin/node
 RUN npm install jpm -g
+# Firefox dependencies (apt-get install -f handles this for Chrome).
+RUN apt-get -qq install libasound2 libdbus-glib-1-2 libgtk2.0.0
 EOF
   case $1 in
     stable)
@@ -87,9 +92,9 @@ EOF
   esac
   cat <<EOF
   # Sometimes there are >1 versions in the folder, e.g. following a release.
-  RUN cd /usr/share ; ls /tmp/ff/*.bz2|sort|tail -1|xargs tar xf
-  RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
-  EOF
+RUN cd /usr/share ; ls /tmp/ff/*.bz2|sort|tail -1|xargs tar xf
+RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
+EOF
 
 }
 case $1 in
