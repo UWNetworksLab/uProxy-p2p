@@ -87,8 +87,10 @@ export class Model {
       var userCategories = user.getCategories();
       categorizeUser(user, this.contacts.getAccessContacts,
                      userCategories.getTab, null);
-      categorizeUser(user, this.contacts.shareAccessContacts,
-                     userCategories.shareTab, null);
+      if (user.network.name !== "Cloud") {
+        categorizeUser(user, this.contacts.shareAccessContacts,
+                       userCategories.shareTab, null);
+      }
     }
 
     _.remove(this.onlineNetworks, { name: networkName });

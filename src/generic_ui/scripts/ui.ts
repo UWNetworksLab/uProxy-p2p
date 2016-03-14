@@ -1030,8 +1030,10 @@ export class UserInterface implements ui_constants.UiApi {
     // Update the user's category in both get and share tabs.
     model.categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-    model.categorizeUser(user, this.model.contacts.shareAccessContacts,
-        oldUserCategories.shareTab, newUserCategories.shareTab);
+    if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
+      model.categorizeUser(user, this.model.contacts.shareAccessContacts,
+          oldUserCategories.shareTab, newUserCategories.shareTab);
+    }
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
