@@ -51,22 +51,24 @@ then
   fi
   echo -n $ENCODED_KEY|base64 -d > $TMP/id_rsa
   chmod 600 $TMP/id_rsa
-  ssh-keygen -y -f $TMP/id_rsa > $TMP/id_rsa.pub
+  ssh-keygen -C "$USERNAME" -y -f $TMP/id_rsa > $TMP/id_rsa.pub
 else
   # TODO: 2048 bits makes for really long keys so we should use
   #       ecdsa when ssh2-streams supports it:
   #         https://github.com/mscdex/ssh2-streams/issues/3
-  ssh-keygen -q -t rsa -b 2048 -N '' -f $TMP/id_rsa
+  ssh-keygen -C "$USERNAME" -q -t rsa -b 2048 -N '' -f $TMP/id_rsa
 
   # TODO: Because SSH keys are already base64-encoded, re-encoding them
   #       like this is very inefficient.
   ENCODED_KEY=`base64 -w 0 $TMP/id_rsa`
 fi
 
-# Apply the credentials to the account.
+# Apply the credentials to the account, with access restrictions.
+# man sshd for the complete list of authorized_keys options.
+KEY_OPTS='command="/login.sh",permitopen="zork:9000",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding'
 HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
 mkdir -p $HOMEDIR/.ssh
-cat $TMP/id_rsa.pub >> $HOMEDIR/.ssh/authorized_keys
+echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys
 
 # Output the actual invite code.
 PUBLIC_IP=`cat /hostname`
