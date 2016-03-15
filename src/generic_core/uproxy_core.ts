@@ -668,13 +668,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         // Synthesize an invite token based on cloudNetworkData.
         // CONSIDER: if we had a social.acceptInvitation that only took
         // networkData we wouldn't need to fake the other fields.
-        const inviteTokenData :social.InviteTokenData = {
+        return cloudNetwork.acceptInvitation({
           v: 2,
           networkName: 'Cloud',
           userName: cloudNetworkData['host'],
           networkData: JSON.stringify(cloudNetworkData)
-        }
-        return cloudNetwork.acceptInvitation(inviteTokenData);
+        });
       });
     }, (e: Error) => {
       destroyModules();
@@ -684,7 +683,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // Gets a social.Network, and logs the user in if they aren't yet logged in.
   private loginIfNeeded_ = (networkName :string) : Promise<social.Network> => {
-    var network = this.getNetworkByName_(networkName);
+    let network = this.getNetworkByName_(networkName);
     if (network) {
       return Promise.resolve(network);
     }
@@ -694,12 +693,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       network: networkName,
       loginType: uproxy_core_api.LoginType.INITIAL
     }).then(() => {
-      network = this.getNetworkByName_(networkName);
-      if (!network) {
-        // Sanity check - this should never happen.
-        return Promise.reject('Unable to find ' + networkName + ' network');
-      }
-      return Promise.resolve(network);
+      return this.getNetworkByName_(networkName);
     });
   }
 
