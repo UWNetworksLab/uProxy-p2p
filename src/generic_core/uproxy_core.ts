@@ -712,6 +712,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
     return null;
   }
+
+  public updateOrgPolicy(policy :Object) :void {
+    /* TODO(xwsxethan) handle updating org policy */
+  }
 }  // class uProxyCore
 
 // Invoke an async function, and retry on error, calling func up to
