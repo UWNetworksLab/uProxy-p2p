@@ -5,8 +5,8 @@ import linefeeder = require('./linefeeder');
 import queue = require('../handler/queue');
 
 describe('LineFeeder', function() {
-  var bufferQueue: queue.Queue<ArrayBuffer, void>;
-  var lines: linefeeder.LineFeeder;
+  let bufferQueue: queue.Queue<ArrayBuffer, void>;
+  let lines: linefeeder.LineFeeder;
 
   beforeEach(() => {
     bufferQueue = new queue.Queue<ArrayBuffer, void>();
@@ -14,8 +14,9 @@ describe('LineFeeder', function() {
   });
 
   it('one and done', (done) => {
-    var s = 'hello world';
-    bufferQueue.handle(arraybuffers.stringToArrayBuffer(s + '\n'));
+    const s = 'hello world';
+    bufferQueue.handle(arraybuffers.stringToArrayBuffer(s));
+    lines.flush();
 
     lines.setSyncNextHandler((result: string) => {
       expect(result).toEqual(s);
@@ -23,10 +24,11 @@ describe('LineFeeder', function() {
     });
   });
 
-  it('dangling lines', (done) => {
-    var s = 'hello world';
+  it('lines of multiple buffers', (done) => {
+    const s = 'hello world';
     bufferQueue.handle(arraybuffers.stringToArrayBuffer('hello '));
     bufferQueue.handle(arraybuffers.stringToArrayBuffer('world\n'));
+    lines.flush();
 
     lines.setSyncNextHandler((result: string) => {
       expect(result).toEqual(s);
@@ -34,8 +36,9 @@ describe('LineFeeder', function() {
     });
   });
 
-  it('multiple lines in one buffer', (done) => {
+  it('buffers of multiple lines', (done) => {
     bufferQueue.handle(arraybuffers.stringToArrayBuffer('a\nb\n'));
+    lines.flush();
 
     lines.setSyncNextHandler((result: string) => {
       expect(result).toEqual('a');
