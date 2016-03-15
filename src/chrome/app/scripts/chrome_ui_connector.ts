@@ -19,14 +19,14 @@ class ChromeUIConnector {
 
   constructor(private uProxyAppChannel_ :freedom.OnAndEmit<any,any>) {
     this.extPort_ = null;
-    chrome.runtime.onConnectExternal.addListener(this.onConnect_);
+    (<chrome.runtime.ExtensionConnectEvent>chrome.runtime.onConnectExternal).addListener(this.onConnect_);
     // Until the extension is connected, we assume uProxy installation is
     // incomplete.
     chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
 
     chrome.runtime.onUpdateAvailable.addListener((details) => {
-      this.sendToCore_(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
-                       {version: details.version});
+      this.sendToCore(uproxy_core_api.Command.HANDLE_CORE_UPDATE,
+                      {version: details.version});
     });
   }
 
@@ -76,12 +76,12 @@ class ChromeUIConnector {
 
     // Once the extension is connected, we know that installation of uProxy
     // is complete.
-    (<chrome.events.Event>chrome.app.runtime.onLaunched).removeListener(this.launchInstallIncompletePage_);
+    chrome.app.runtime.onLaunched.removeListener(this.launchInstallIncompletePage_);
     chrome.app.runtime.onLaunched.addListener(this.launchUproxy_);
     this.extPort_.onDisconnect.addListener(function(){
       // If the extension disconnects, we should show an error
       // page.
-      (<chrome.events.Event>chrome.app.runtime.onLaunched).removeListener(this.launchUproxy_);
+      chrome.app.runtime.onLaunched.removeListener(this.launchUproxy_);
       chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
     }.bind(this));
   }
@@ -99,7 +99,7 @@ class ChromeUIConnector {
       } else if (msg.type == uproxy_core_api.Command.RESTART) {
         chrome.runtime.reload();
       }
-      this.sendToCore_(msg.type, msg.data, msg.promiseId);
+      this.sendToCore(msg.type, msg.data, msg.promiseId);
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {
@@ -116,13 +116,8 @@ class ChromeUIConnector {
     }
   }
 
-  private sendToCore_ = (msgType :uproxy_core_api.Command, data :Object,
-                         promiseId?:Number) => {
-    if (typeof promiseId === 'undefined') {
-      // promiseId of 0 is used for commands with no associated promise
-      promiseId = 0;
-    }
-
+  public sendToCore = (msgType :uproxy_core_api.Command, data :Object,
+                       promiseId :Number = 0) => {
     this.uProxyAppChannel_.emit(msgType.toString(),
                                 {data: data, promiseId: promiseId});
   }
