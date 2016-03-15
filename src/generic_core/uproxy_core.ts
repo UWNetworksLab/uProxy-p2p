@@ -656,6 +656,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       const MAX_INSTALLS = 5;
       return retry(install, MAX_INSTALLS);
     }).then((cloudNetworkData :any) => {
+      // TODO: make cloudNetworkData an Invite type.  This requires the cloud
+      // social provider to export the Invite interface, and also to cleanup
+      // reference paths so that uProxy doesn't need to include modules like
+      // ssh2.
       destroyModules();
 
       // Login to the Cloud network if the user isn't already so that
