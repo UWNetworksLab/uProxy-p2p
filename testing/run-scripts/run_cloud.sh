@@ -11,7 +11,6 @@
 set -e
 
 PREBUILT=
-NPM=true
 INVITE_CODE=
 UPDATE=false
 WIPE=false
@@ -22,7 +21,7 @@ SSHD_PORT=5000
 
 function usage () {
   echo "$0 [-p path] [-i invite code] [-u] [-w] [-d ip] [-b banner] browser-version"
-  echo "  -p: path to pre-built uproxy-lib repository"
+  echo "  -p: use a pre-built uproxy-lib"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
@@ -154,27 +153,22 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   if ! docker images | grep uproxy/$1 >/dev/null; then
     BROWSER=$(echo $1 | cut -d - -f 1)
     VERSION=$(echo $1 | cut -d - -f 2)
-    ${BASH_SOURCE%/*}/image_make.sh $BROWSER $VERSION
+    IMAGEARGS=
+    if [ -n "$PREBUILT" ]
+    then
+      IMAGEARGS="-p"
+    fi
+    ${BASH_SOURCE%/*}/image_make.sh $IMAGEARGS $BROWSER $VERSION
   fi
   HOSTARGS=
-  if [ ! -z "$PREBUILT" ]
+  if [ -n "$PREBUILT" ]
   then
-    NPM=false
     HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy-lib"
-  fi
-  RUNARGS=
-  if [ ! -z "$PREBUILT" ]
-  then
-    RUNARGS="$RUNARGS -p"
-  fi
-  if [ "$NPM" = true ]
-  then
-    RUNARGS="$RUNARGS -n"
   fi
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
   #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
-  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh $RUNARGS -z true
+  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
   while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done

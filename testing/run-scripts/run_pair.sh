@@ -11,8 +11,9 @@ set -e
 
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
-BRANCH="-b dev"
-REPO=
+GIT=false
+BRANCH=
+PREBUILT=
 VNC=false
 KEEP=false
 MTU=
@@ -21,11 +22,10 @@ PROXY_PORT=9999
 CONTAINER_PREFIX="uproxy"
 
 function usage () {
-  echo "$0 [-v] [-k] [-b branch] [-r repo] [-p path] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
-  echo "  -b BRANCH: have containers check out this BRANCH.  Default is dev."
-  echo "  -r REPO: have containers clone this REPO.  "
-  echo "           Default is https://github.com/uProxy/uproxy-lib.git."
-  echo "  -p: path to pre-built uproxy-lib repository (overrides -b and -r)."
+  echo "$0 [-g] [-b branch] [-p path] [-v] [-k] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
+  echo "  -g: pull code from git (conflicts with -p)"
+  echo "  -b: git branch to pull (default: HEAD's referant)"
+  echo "  -p: use a pre-built uproxy-lib (conflicts with -g)"
   echo "  -v: enable VNC on containers.  They will be ports 5900 and 5901."
   echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
   echo "  -m MTU: set the MTU on the getter's network interface."
@@ -40,13 +40,13 @@ function usage () {
   exit 1
 }
 
-while getopts kvb:r:p:m:l:s:u:h? opt; do
+while getopts gb:p:kvr:m:l:s:u:h? opt; do
   case $opt in
+    g) GIT=true ;;
+    b) BRANCH="$OPTARG" ;;
+    p) PREBUILT="$OPTARG" ;;
     k) KEEP=true ;;
     v) VNC=true ;;
-    b) BRANCH="-b $OPTARG" ;;
-    r) REPO="-r $OPTARG" ;;
-    p) PREBUILT="$OPTARG" ;;
     m) MTU="$OPTARG" ;;
     l) LATENCY="$OPTARG" ;;
     s) PROXY_PORT="$OPTARG" ;;
@@ -55,6 +55,18 @@ while getopts kvb:r:p:m:l:s:u:h? opt; do
   esac
 done
 shift $((OPTIND-1))
+
+if [ "$GIT" = true ] && [ "$PREBUILT" = true ]
+then
+  echo "cannot use both -g and -p"
+  usage
+fi
+
+if [ -n "$BRANCH" ] && [ "$GIT" = false ]
+then
+  echo "-g must be used when -b is used"
+  usage
+fi
 
 if [ $# -lt 2 ]
 then
@@ -65,13 +77,6 @@ if $VNC; then
   VNCOPTS1="-p 5900:5900"
   VNCOPTS2="-p 5901:5900"
   RUNARGS="$RUNARGS -v"
-fi
-
-if [ "$PREBUILT" ]
-then
-  RUNARGS="$RUNARGS -p"
-else
-  RUNARGS="$RUNARGS $REPO $BRANCH"
 fi
 
 # Kill any running giver and getter containers.
@@ -89,7 +94,15 @@ function make_image () {
   else
     BROWSER=$(echo $1 | cut -d - -f 1)
     VERSION=$(echo $1 | cut -d - -f 2)
-    ./image_make.sh $BROWSER $VERSION
+    IMAGEARGS=
+    if [ -n "$PREBUILT" ]
+    then
+      IMAGEARGS="-p"
+    elif [ "$GIT" = true ]
+    then
+      IMAGEARGS="-g -b $BRANCH"
+    fi
+    ./image_make.sh $IMAGEARGS $BROWSER $VERSION
   fi
 }
 
