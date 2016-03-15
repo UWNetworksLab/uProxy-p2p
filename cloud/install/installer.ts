@@ -49,8 +49,9 @@ class CloudInstaller {
       connection.on('ready', () => {
         log.debug('logged into server');
 
-        var stdout = new queue.Queue<ArrayBuffer, void>();
-        new linefeeder.LineFeeder(stdout).setSyncHandler((line: string) => {
+        const stdoutRaw = new queue.Queue<ArrayBuffer, void>();
+        const stdout = new linefeeder.LineFeeder(stdoutRaw);
+        stdout.setSyncHandler((line: string) => {
           log.debug('STDOUT: %1', line);
           // Search for the URL anywhere in the line so we will
           // continue to work in the face of minor changes
@@ -67,8 +68,9 @@ class CloudInstaller {
           }
         });
 
-        var stderr = new queue.Queue<ArrayBuffer, void>();
-        new linefeeder.LineFeeder(stderr).setSyncHandler((line: string) => {
+        const stderrRaw = new queue.Queue<ArrayBuffer, void>();
+        const stderr = new linefeeder.LineFeeder(stderrRaw);
+        stderr.setSyncHandler((line: string) => {
           log.error('STDERR: %1', line);
         });
 
@@ -81,14 +83,16 @@ class CloudInstaller {
             return;
           }
           stream.on('end', () => {
+            stdout.flush();
+            stderr.flush();
             connection.end();
             R({
               message: 'invitation URL not found'
             });
           }).on('data', (data:Buffer) => {
-            stdout.handle(arraybuffers.bufferToArrayBuffer(data));
+            stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(data));
           }).stderr.on('data', (data: Buffer) => {
-            stderr.handle(arraybuffers.bufferToArrayBuffer(data));
+            stderrRaw.handle(arraybuffers.bufferToArrayBuffer(data));
           });
         });
       }).on('error', (e: Error) => {

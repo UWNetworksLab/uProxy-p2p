@@ -148,6 +148,7 @@ function serveConnection(connection: tcp.Connection): void {
   connection.onceClosed.then((kind:tcp.SocketCloseKind) => {
     log.info('%1: closed (%2)',
       connection.connectionId, tcp.SocketCloseKind[kind]);
+    lineFeeder.flush();
   });
 }
 

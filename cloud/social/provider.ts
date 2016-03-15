@@ -564,19 +564,21 @@ class Connection {
           return;
         }
 
-        var stdout = new queue.Queue<ArrayBuffer, void>();
-        new linefeeder.LineFeeder(stdout).setSyncHandler((line: string) => {
+        const stdoutRaw = new queue.Queue<ArrayBuffer, void>();
+        const stdout = new linefeeder.LineFeeder(stdoutRaw);
+        stdout.setSyncHandler((line: string) => {
           F(line);
         });
 
         stream.on('data', (data: Buffer) => {
-          stdout.handle(arraybuffers.bufferToArrayBuffer(data));
+          stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(data));
         }).stderr.on('data', (data: Buffer) => {
           R({
             message: 'output received on STDERR: ' + data.toString()
           });
         }).on('end', () => {
           log.debug('%1: exec stream end', this.name_);
+          stdout.flush();
         });
       });
     });
