@@ -9,22 +9,23 @@ set -e
 
 INVITE_CODE=
 USERNAME=getter
-COMPLETE=false
+AUTOMATED=false
 
 function usage () {
-  echo "$0 [-u username] [-i invite code] [-c]"
+  echo "$0 [-u username] [-i invite code] [-c] [-a]"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
   echo "  -c: output complete invite URL (for manual installs)"
+  echo "  -a: do not output complete invite URL"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts i:u:ch? opt; do
+while getopts i:u:cah? opt; do
   case $opt in
     i) INVITE_CODE="$OPTARG" ;;
     u) USERNAME="$OPTARG" ;;
-    c) COMPLETE=true ;;
+    a) AUTOMATED=true ;;
     *) usage ;;
   esac
 done
@@ -75,13 +76,17 @@ PUBLIC_IP=`cat /hostname`
 export CLOUD_INSTANCE_DETAILS="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
 
 # Output invite in JSON format, for the frontend installer.
+# TODO: have uproxy pass -a and hide this when passed
 echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS"
 
-if [ "$COMPLETE" = true ]
+if [ "$AUTOMATED" = false ]
 then
+  # While any apt-get install command would ordinarily be run at
+  # image creation time, we do this here because npm is huge (>150MB)
+  # and only manual users need a copy/paste-able URL.
+  apt-get install -qq nodejs npm
   npm install jsurl &>/dev/null
   CLOUD_INSTANCE_DETAILS=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS');"`
-  echo "https://www.uproxy.org/invite/?v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS"
-else
-  echo $CLOUD_INSTANCE_DETAILS
+  echo
+  echo "INVITE_CODE_URL: https://www.uproxy.org/invite/?v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS"
 fi
