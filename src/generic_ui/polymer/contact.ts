@@ -8,6 +8,10 @@ import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import user = require('../scripts/user');
 import _ = require('lodash');
 
+const DEFAULT_PROVIDER = 'digitalocean';
+
+var coreSignalFired = false;
+
 Polymer({
   created: function() {
     this.offeringInstancesChanged = _.throttle(this.offeringInstancesChanged.bind(this), 100);
@@ -111,9 +115,31 @@ Polymer({
       },
       userId: this.contact.userId // Cloud instance userId
     }).then((cloudInviteUrl: string) => {
-      ui.showDialog(ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"), '', ui.i18n_t("OK"),
+      this.ui.showDialog(this.ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"), '', this.ui.i18n_t("OK"),
         undefined, cloudInviteUrl);
     });
+  },
+  openDestroyCloudDialog: function() {
+    this.ui.showDialog(this.ui.i18n_t("DESTROY_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_CONFIRMATION"),
+      this.ui.i18n_t("NEXT"), 'destroy-cloud-friend', undefined);
+  },
+  destroyCloudFriend: function() {
+    // core-signal-destory-cloud-friend is always fired 4 times, but
+    // we only want to try to destory the cloud server the first time.
+    if (!coreSignalFired) {
+      coreSignalFired = true;
+      ui_context.core.cloudDestroy(DEFAULT_PROVIDER).then(() => {
+        console.log("Destroy cloud friend returned");
+        this.ui.showDialog(this.ui.i18n_t("DESTROY_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_SUCCESS"),
+      this.ui.i18n_t("OK"), undefined, undefined);
+        coreSignalFired = false;
+      }).catch((e: Error) => {
+      console.log('Error: Destroy cloud friend failed');
+      this.ui.showDialog(this.ui.i18n_t("DESTROY_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_FAILURE"),
+          this.ui.i18n_t("OK"), undefined, undefined);
+        coreSignalFired = false;
+      });
+    }
   },
   ready: function() {
     this.ui = ui_context.ui;

@@ -103,7 +103,11 @@ export enum Command {
   ACCEPT_INVITATION = 1027,
   SEND_INVITATION = 1028,
   CLOUD_INSTALL = 1029,
+<<<<<<< HEAD
   UPDATE_ORG_POLICY = 1030,
+=======
+  CLOUD_DESTROY = 1030
+>>>>>>> Added ability to destroy cloud server
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -290,5 +294,9 @@ export interface CoreApi {
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
   cloudInstall(args:CloudInstallArgs): Promise<void>;
+
+  // Invokes OAuth flow and destroys uProxy cloud server on specified
+  // provider.
+  cloudDestroy(providerName :string) :Promise<void>;
 }
 

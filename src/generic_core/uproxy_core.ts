@@ -716,6 +716,32 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public updateOrgPolicy(policy :Object) :void {
     /* TODO(xwsxethan) handle updating org policy */
   }
+
+  public cloudDestroy = (providerName :string) :Promise<void> =>  {
+    log.info('logging into %1 to delete uproxy-cloud-server', providerName);
+
+    const provisioner = freedom[CLOUD_PROVIDER_MODULE_PREFIX + providerName]();
+    const installer = freedom['cloudinstall']();
+
+    const destroyModules = () => {
+      freedom[CLOUD_PROVIDER_MODULE_PREFIX + providerName].close(provisioner);
+      freedom['cloudinstall'].close(installer);
+    };
+
+    provisioner.on('status', (update: any) => {
+      ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
+    });
+
+    return provisioner.stop('uproxy-cloud-server').then(() => {
+      log.info('stopped server on %1', providerName);
+    }).then(() => {
+      destroyModules();
+    }, (e: Error) => {
+      destroyModules();
+      log.debug('Error destroying cloud server:' + JSON.stringify(e));
+      return Promise.reject(e);
+    });
+  }
 }  // class uProxyCore
 
 // Invoke an async function, and retry on error, calling func up to

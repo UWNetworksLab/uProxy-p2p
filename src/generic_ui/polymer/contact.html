@@ -1,6 +1,7 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-collapse/core-collapse.html'>
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='instance.html'>
 <link rel='import' href='button.html'>
 
@@ -130,6 +131,8 @@
     }
     </style>
 
+    <core-signals on-core-signal-destroy-cloud-friend="{{ destroyCloudFriend }}"></core-signals>
+
     <div tabindex='-1'
         class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
         top horizontal layout>
@@ -257,7 +260,13 @@
         </core-collapse> <!-- end of shareControls -->
       </div>
 
-      <div class="iconWrapper" hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">
+      <!-- TODO LR: Make sure the user is an admin of the cloud friend -->
+      <div class="iconWrapper" hidden?="{{ contact.network.name=='Cloud' }}">
+        <core-icon icon="delete"
+            title="{{ contact.url }}" on-tap="{{ openDestroyCloudDialog }}"></core-icon>
+      </div>
+
+      <div class="iconWrapper" hidden?="{{ contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">
         <core-icon icon="open-in-new"
             title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
       </div>

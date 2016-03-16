@@ -1355,4 +1355,8 @@ export class UserInterface implements ui_constants.UiApi {
   public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
     return this.core.cloudInstall(args);
   }
+
+  public cloudDestroy = (providerName: string): Promise<void> => {
+    return this.core.cloudDestroy(providerName);
+  }
 } // class UserInterface
