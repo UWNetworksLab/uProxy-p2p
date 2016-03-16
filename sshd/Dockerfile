@@ -1,8 +1,7 @@
-FROM ubuntu:trusty
-MAINTAINER Trevor Johnston <trevj@google.com>
+FROM library/ubuntu:trusty
 
 RUN apt-get update -qq
-RUN apt-get install -y openssh-server supervisor dnsutils jq nodejs npm
+RUN apt-get install -y openssh-server supervisor dnsutils jq
 
 RUN addgroup giver
 RUN adduser --disabled-password --gecos 'uProxy Giver' --ingroup giver giver
