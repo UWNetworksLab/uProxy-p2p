@@ -139,7 +139,6 @@ export enum Update {
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
   ONETIME_MESSAGE = 2026,
-  // Payload is a CloudInstallResult.
   CLOUD_INSTALL_STATUS = 2027
 }
 
@@ -224,13 +223,6 @@ export interface CloudInstallArgs {
   region: string;
 };
 
-// Output of #cloudInstall.
-export interface CloudInstallResult {
-  // Invitation URL, iff the the server was successfully created
-  // and provisioned.
-  invite: string;
-};
-
 /**
  * The primary interface to the uProxy Core.
  *
@@ -297,6 +289,6 @@ export interface CoreApi {
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudInstall(args:CloudInstallArgs): Promise<CloudInstallResult>;
+  cloudInstall(args:CloudInstallArgs): Promise<void>;
 }
 

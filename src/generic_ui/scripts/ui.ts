@@ -1030,7 +1030,6 @@ export class UserInterface implements ui_constants.UiApi {
     // Update the user's category in both get and share tabs.
     model.categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-
     if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
       model.categorizeUser(user, this.model.contacts.shareAccessContacts,
           oldUserCategories.shareTab, newUserCategories.shareTab);
@@ -1353,7 +1352,7 @@ export class UserInterface implements ui_constants.UiApi {
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
+  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
     return this.core.cloudInstall(args);
   }
 } // class UserInterface
