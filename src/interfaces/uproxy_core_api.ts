@@ -104,7 +104,7 @@ export enum Command {
   SEND_INVITATION = 1028,
   CLOUD_INSTALL = 1029,
   UPDATE_ORG_POLICY = 1030,
-  CLOUD_DESTROY = 1030
+  CLOUD_DESTROY = 1031
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
