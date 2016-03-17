@@ -73,7 +73,7 @@ echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys
 
 # Output the actual invite code.
 PUBLIC_IP=`cat /hostname`
-export CLOUD_INSTANCE_DETAILS="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
+CLOUD_INSTANCE_DETAILS_JSON="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
 
 if [ "$AUTOMATED" = false ]
 then
@@ -82,9 +82,10 @@ then
   # and only manual users need a copy/paste-able URL.
   apt-get install -qq nodejs npm
   npm install jsurl &>/dev/null
-  CLOUD_INSTANCE_DETAILS=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS');"`
+  CLOUD_INSTANCE_DETAILS_JSURL=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS_JSON');"`
   echo
-  echo "INVITE_CODE_URL: https://www.uproxy.org/invite/?v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS"
+  echo "INVITE_CODE_URL: https://www.uproxy.org/invite/?v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS_JSURL"
+  echo
 fi
 
 # Output invite in JSON format, for the frontend installer.
@@ -92,4 +93,4 @@ fi
 # as it sees this line and any further steps may mean the Docker
 # container will not actually be started by the time it does so.
 # TODO: have uproxy pass -a and hide this when passed
-echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS"
+echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS_JSON"
