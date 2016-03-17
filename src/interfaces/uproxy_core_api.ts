@@ -104,6 +104,7 @@ export enum Command {
   SEND_INVITATION = 1028,
   CLOUD_INSTALL = 1029,
   UPDATE_ORG_POLICY = 1030,
+  POST_REPORT = 1031
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -131,7 +132,7 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
-  POST_TO_CLOUDFRONT = 2021,
+  // 2021 was POST_TO_CLOUDFRONT.  Replaced by Command.POST_REPORT.
   // Legacy one-time connection string. Unused, do not send.
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
@@ -223,6 +224,11 @@ export interface CloudInstallArgs {
   region: string;
 };
 
+export interface PostReportArgs {
+  payload: Object;
+  path: string;
+};
+
 /**
  * The primary interface to the uProxy Core.
  *
@@ -290,5 +296,8 @@ export interface CoreApi {
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
   cloudInstall(args:CloudInstallArgs): Promise<void>;
+
+  // Make a domain-fronted POST request to the uProxy logs/stats server.
+  postReport(args:PostReportArgs) : Promise<void>;
 }
 
