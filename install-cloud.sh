@@ -15,7 +15,7 @@ REQUIRED_COMMANDS="docker git nc"
 
 AUTOMATED=false
 
-function usage () {
+usage() {
   echo "$0 [-a] [-h]"
   echo "  -a: do not output complete invite URL"
   echo "  -h, -?: this help message"
