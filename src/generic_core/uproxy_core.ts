@@ -714,7 +714,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public updateOrgPolicy(policy :Object) :void {
-    /* TODO(xwsxethan) handle updating org policy */
+    var keys = Object.keys(policy);
+    for (var i in keys) {
+      if (globals.settings.hasOwnProperty(keys[i])) {
+        globals.settings[keys[i]] = policy[keys[i]];
+      }
+    }
   }
 }  // class uProxyCore
 

@@ -39,6 +39,8 @@ export interface GlobalSettings {
   quiverUserName :string;
   showCloud :boolean;
   proxyBypass: string[];
+  enforceProxyServerValidity :boolean;
+  validProxyServers :Object[];
 }
 export interface InitialState {
   networkNames :string[];
