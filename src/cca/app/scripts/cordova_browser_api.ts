@@ -224,13 +224,6 @@ class CordovaBrowserApi implements BrowserAPI {
       console.error('Attempted to trigger an unknown event', name);
     }
   }
-
-  public frontedPost = (data :any,
-                        externalDomain :string,
-                        cloudfrontDomain :string,
-                        cloudfrontPath = "") : Promise<void> => {
-    return Promise.reject(new Error('TODO: Fronted post in Cordova'));
-  }
 }
 
 export = CordovaBrowserApi;

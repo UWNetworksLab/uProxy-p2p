@@ -17,6 +17,7 @@ import StoredValue = require('./stored_value');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import version = require('../generic/version');
+import freedomXhr = require('freedom-xhr');
 
 import ui = ui_connector.connector;
 import storage = globals.storage;
@@ -358,6 +359,23 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     var networkInfo = data.networkInfo;
     var network = social_network.networks[networkInfo.name][networkInfo.userId];
     network.sendEmail(data.to, data.subject, data.body);
+  }
+
+  public postReport = (args :uproxy_core_api.PostReportArgs) : Promise<void> => {
+    let host = 'd1wtwocg4wx1ih.cloudfront.net';
+    let front = 'https://a0.awsstatic.com/';
+    let request:XMLHttpRequest = new freedomXhr.auto();
+    return new Promise<any>((F, R) => {
+      request.onload = F;
+      request.onerror = R;
+      // Only the front domain is exposed on the wire. The host and path
+      // should be encrypted. The path needs to be here and not
+      // in the Host header, which can only take a host name.
+      request.open('POST', front + args.path, true);
+      // The true destination address is set as the Host in the header.
+      request.setRequestHeader('Host', host);
+      request.send(JSON.stringify(args.payload));
+    });
   }
 
   /**
