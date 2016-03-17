@@ -75,10 +75,6 @@ echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys
 PUBLIC_IP=`cat /hostname`
 export CLOUD_INSTANCE_DETAILS="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
 
-# Output invite in JSON format, for the frontend installer.
-# TODO: have uproxy pass -a and hide this when passed
-echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS"
-
 if [ "$AUTOMATED" = false ]
 then
   # While any apt-get install command would ordinarily be run at
@@ -90,3 +86,10 @@ then
   echo
   echo "INVITE_CODE_URL: https://www.uproxy.org/invite/?v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS"
 fi
+
+# Output invite in JSON format, for the frontend installer.
+# Do this last because the frontend will try to connect as soon
+# as it sees this line and any further steps may mean the Docker
+# container will not actually be started by the time it does so.
+# TODO: have uproxy pass -a and hide this when passed
+echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS"
