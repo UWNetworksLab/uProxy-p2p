@@ -333,6 +333,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void> => {
+    // TODO(xwsxethan): Validate cloud invitations match expected format and
+    // enforce proxy server check if enabled.
     var networkName = data.network.name;
     var networkUserId = data.network.userId;
     if (!networkUserId) {
