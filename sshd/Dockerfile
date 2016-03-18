@@ -1,7 +1,7 @@
 FROM library/ubuntu:trusty
 
 RUN apt-get update -qq
-RUN apt-get install -y openssh-server supervisor dnsutils jq
+RUN apt-get install -y openssh-server supervisor dnsutils jq unattended-upgrades
 
 RUN addgroup giver
 RUN adduser --disabled-password --gecos 'uProxy Giver' --ingroup giver giver
