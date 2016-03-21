@@ -19,7 +19,6 @@ const DEFAULT_SIZE: string = '1gb';
 
 const STATUS_CODES: { [k: string]: string; } = {
   'START': 'Starting provisioner',
-  'STOP': 'Stopping cloud server',
   'OAUTH_INIT': 'Initializing oauth flow',
   'OAUTH_ERROR': 'Error getting oauth token',
   'OAUTH_COMPLETE': 'Got oauth token',
@@ -105,13 +104,8 @@ class Provisioner {
    * @param {String} name of VM to create
    * @return {Promise.<Object>}
    */
-  public stop = (name: string): Promise<Object> => {
-    this.sendStatus_('STOP');
-    return this.doOAuth_().then((oauthObj: any) => {
-      this.state_.oauth = oauthObj;
-    }).then(() => {
-      return this.doRequest_('GET', 'droplets');
-    }).then((resp: any) => {
+  public stop = (name: string) : Promise<Object> => {
+    return this.doRequest_('GET', 'droplets').then((resp: any) => {
       for (var i = 0; i < resp.droplets.length; i++) {
         if (resp.droplets[i].name === name) {
           return Promise.resolve({
@@ -124,12 +118,7 @@ class Provisioner {
         'message': 'Droplet with name,' + name + ', doesnt exist'
       });
     }).then((resp: any) => {
-      // DELETE request does not return a response body. 
-      // TODO: Check that response header indicates success in doRequest
-      this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
-      return Promise.resolve({
-        droplet: resp.droplet
-      });
+      return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
     });
   }
 
