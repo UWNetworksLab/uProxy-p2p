@@ -21,8 +21,8 @@
       }
       .acceptInvite {
         text-align: left;
-        padding: 26px;
-        border-bottom: 1px solid rgb(221, 221, 221);
+        margin: 1em;
+        padding-bottom: 1em;
       }
       .acceptInvite paper-input-decorator {
         padding-top: 0;
@@ -68,22 +68,30 @@
         margin-right: 0;
       }
       .networkLoginButton {
-        text-align: center;
-        display: inline-block;
-        /* buttons only fit 1 per row with 50%.  TODO: find out why */
-        width: 49%;
-        margin-bottom: 26px;
         cursor: pointer;
         vertical-align: top;
+        padding: 1em 2em 1em 2em;
+      }
+      .networkLoginButton {
+        cursor: pointer;
+        vertical-align: top;
+        padding: 1em 2em 1em 2em;
+        border-bottom: 1px solid rgb(221,221,221);
+      }
+      .networkLoginButton:last-child {
+        border-bottom: none;
       }
       .networkLoginButton .networkName {
         margin-top: 0.7em;
+        margin-left: 1em;
         font-size: 16px;
         color: rgba(0, 0, 0, .86);
+        display: inline-block;
+        font-weight: 700;
       }
       .networkLoginButton core-icon {
-        width: 86px;
-        height: 86px;
+        width: 50px;
+        height: 50px;
       }
       .networkLoginButton .experimental {
         font-size: 12px;
@@ -133,10 +141,6 @@
       .paleText {
         color: #9e9e9e;
       }
-      #chooseASocialNetwork {
-        font-size: 14px;
-        margin: 26px;
-      }
       #weWontPostLearnMore {
         font-size: 14px;
         padding: 26px;
@@ -144,9 +148,54 @@
         border-top: 1px solid rgb(221, 221, 221);
       }
       #allNetworkButtons {
-        padding-left: 26px;
-        padding-right: 26px;
         text-align: left;
+      }
+      .categoryHeader {
+        text-align: left;
+        padding: 1em 2em 1em 2em;
+        background-color: rgb(225,246,244);  /* light aqua green */
+        color: #12A391;  /* dark green */
+      }
+      #cloudInstall {
+        color: white;
+        background-color: #34AFCE;  /* blue */;
+        margin: 1em;
+        padding: 2em 1em 2em 2em;
+        cursor: pointer;
+        line-height
+      }
+      #cloudInstall .content {
+        width: 85%;
+        vertical-align: middle;
+        display: inline-block;
+      }
+      #cloudInstall p {
+        line-height: 1.75em;
+      }
+      #cloudInstall h1 {
+        font-weight: 300;
+        margin-top: 0;
+      }
+      #cloudInstall img {
+        height: 50px;
+        margin-bottom: 1em;
+      }
+      .chevronWrapper {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: right;
+      }
+      #cloudInstall .chevronWrapper {
+        width: 13%;  /* TODO: why doesn't 15% work? */
+      }
+      core-icon[icon=chevron-right] {
+        width: 25px;
+        height: 25px;
+      }
+      .networkLoginButton .chevronWrapper {
+        position: absolute;
+        right: 2em;
+        margin-top: 12.5px; /* (network icon height - chevron height) / 2 */
       }
     </style>
 
@@ -158,7 +207,6 @@
       </uproxy-app-bar>
 
       <div class='view' flex>
-        <!-- TODO: translate before launch on webstore -->
         <div id="allInviteMethods">
           <div class='acceptInvite'>
             <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$ }}' layout vertical>
@@ -167,30 +215,43 @@
             <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
           </div>
 
-          <p id='chooseASocialNetwork' class='paleText'>{{ "CHOOSE_A_SOCIAL_NETWORK_AND_FIND_YOUR_FRIENDS" | $$ }}</p>
-
           <div id='allNetworkButtons'>
+
+            <div id='cloudInstall' hidden?='{{ model.cloudProviderNames.length < 1 }}' on-tap='{{ cloudInstall }}'>
+              <div class='content'>
+                <img src='../../icons/cloud/connect-cloud.png'>
+                <h1>{{ 'DIGITAL_OCEAN_INVITE_SCREEN_TITLE' | $$ }}</h1>
+                <p>{{ 'DIGITAL_OCEAN_INVITE_SCREEN_MESSAGE' | $$ }}</p>
+              </div>
+              <div class='chevronWrapper'>
+                <core-icon icon="chevron-right"></core-icon>
+              </div>
+            </div> <!-- end of cloud -->
+
+            <div class='categoryHeader'>{{ "CHOOSE_A_SOCIAL_NETWORK" | $$ }}</div>
+
             <template repeat='{{ n in model.networkNames }}' vertical layout>
               <div hidden?='{{ n == "Cloud" }}' on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
                 <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
-                <div class='experimental paleText' hidden?='{{!isExperimentalNetwork(n)}}'>
-                  Experimental
+                <span class='experimental paleText' hidden?='{{!isExperimentalNetwork(n)}}'>
+                  (Experimental)
+                </span>
+                <div class='chevronWrapper'>
+                  <core-icon icon="chevron-right"></core-icon>
                 </div>
               </div>
             </template>
 
-            <div class='networkLoginButton' on-tap='{{ cloudInstall }}' hidden?='{{ model.cloudProviderNames.length < 1 }}'>
-              <core-icon icon='uproxy-icons:Cloud'></core-icon>
-              <div class='networkName'>Create a cloud server</div>
-              <div class='experimental highlightedText'>Experimental</div>
-            </div>
-
             <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}'>
               <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
               <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
+              <div class='chevronWrapper'>
+                <core-icon icon="chevron-right"></core-icon>
+              </div>
             </div>
-          </div>
+
+          </div> <!-- end of #allNetworkButtons -->
 
           <div id="weWontPostLearnMore"></div>
         </div> <!--End of #allInviteMethods -->

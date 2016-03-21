@@ -1,7 +1,6 @@
 <link rel="import" href="../../bower/core-icons/core-icons.html">
 <link rel="import" href="../../bower/core-icons/social-icons.html">
 <link rel="import" href="../../bower/core-signals/core-signals.html">
-<link rel="import" href="../../bower/paper-fab/paper-fab.html">
 <link rel="import" href="../../bower/polymer/polymer.html">
 <link rel='import' href='../../bower/paper-progress/paper-progress.html'>
 <link rel='import' href='roster-group.html'>
@@ -50,17 +49,51 @@
     #loadingContacts {
       margin-top: 0.5em;
     }
+    /* TODO: this doesn't stretch quite right on large uProxy windows */
     #connectWithFriendsInstruction {
-      margin: 2em 100px 2em 2em;
-      bottom: 0;
+      top: 0;
       position: absolute;
-      font-size: 14px;
-      line-height: 20px;
+      font-size: 16px;
+      line-height: 22px;
+      margin: 2em;
     }
-    #connectWithFriendsInstruction h1 {
-      font-size: 1.4em;
-      color: #009688;
-      font-weight: normal;
+    .instructions {
+      padding-right: 1em;  /* no left padding so img is properly centered */
+      height: 166px;
+    }
+    .instructions.cloud {
+      background-color: rgba(51,187,206,0.15);
+      color: #34AFCE;
+    }
+    .instructions.peerToPeer {
+      background-color: rgba(51,206,185,0.15);
+      color: #12A391;
+    }
+    .instructions .helpText {
+      display: inline-block;
+      width: 60%;
+      vertical-align: middle;
+    }
+    .instructions .imageWrapper {
+      display: inline-block;
+      width: 38%;  /* TODO: why do 39 and 40 wrap? */
+      text-align: center;
+      vertical-align: middle;
+      height: 100%;
+    }
+    .instructions img {
+      height: 50px;
+      position: relative;
+      top: 58px;  /* instructions height - (.5 * img height) */
+    }
+    .downArrow {
+      position: absolute;
+      right: 15px;
+      width: 0px;
+      height: 0px;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 20px solid rgb(225,246,244);  /* light aqua green */
     }
     paper-progress {
       margin-bottom: 1em;
@@ -71,6 +104,24 @@
       border-bottom: solid 1px;
       border-color: rgb(238, 238, 238);
     }
+    #orWrapper {
+      position: absolute;
+      top: 146px;  /* instructions height - (.5 * orCircle height) */
+      width: 100%;
+      text-align: center;
+    }
+    #orCircle {
+      display: inline-block;
+      height: 40px;
+      border-radius: 50%;
+      background-color: white;
+      width: 40px;
+    }
+    #orText {
+      font-size: 14px;
+      padding-top: 10px;
+      color: #12A391;
+    }
     </style>
 
     <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
@@ -78,7 +129,6 @@
 
     <!-- Shown if there are no contacts found so far -->
     <div id='loadContacts' hidden?='{{ hasContacts }}'>
-      <core-icon icon="social:person" class="no-friends"></core-icon>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
         {{ "LOADING_FRIENDS" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
@@ -86,8 +136,24 @@
     </div>
 
     <div id="connectWithFriendsInstruction" hidden?="{{ loadingContacts || hasContacts }}">
-      <h1>{{ 'CONNECT_TO_FRIEND' | $$ }}</h1>
-      {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
+      <div class='instructions cloud'>
+        <div class='imageWrapper'>
+          <img src='../../icons/emptybuddylist-cloud.svg'>
+        </div>
+        <div class='helpText'>
+          {{ "EMPTY_ROSTER_CLOUD_INSTRUCTIONS" | $$ }}
+        </div>
+      </div>
+      <div id='orWrapper'><div id='orCircle'><div id='orText'>or</div></div></div>
+      <div class='instructions peerToPeer' style='margin-top:3px;'>
+        <div class='imageWrapper'>
+          <img src='../../icons/emptybuddylist-friend.svg'>
+        </div>
+        <div class='helpText'>
+          {{ "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS" | $$ }}
+        </div>
+      </div>
+      <div class='downArrow'></div>
     </div>
 
     <div hidden?='{{ !hasContacts }}'>
