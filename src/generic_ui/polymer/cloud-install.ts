@@ -61,7 +61,6 @@ Polymer({
       this.closeOverlays();
       this.$.failureOverlay.open();
     });
-    }
   },
   getLocationLabel: function(locationName :string) {
     return (<any>{
