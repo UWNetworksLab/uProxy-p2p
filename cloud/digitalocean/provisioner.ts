@@ -103,7 +103,7 @@ class Provisioner {
    * See freedom-module.json for return and error types
    * @todo currently doesnt wait for destroy to complete before resolving
    * @param {String} name of VM to create
-   * @return {Promise.<Object>}
+   * @return {Promise.<Object>} { droplet: <droplet id, as a string> }
    */
   public stop = (name: string): Promise<Object> => {
     this.sendStatus_('STOP');
@@ -121,14 +121,14 @@ class Provisioner {
       }
       return Promise.reject({
         'errcode': 'VM_DNE',
-        'message': 'Droplet with name,' + name + ', doesnt exist'
+        'message': 'Droplet ' + name + ' doesnt exist'
       });
     }).then((resp: any) => {
       // DELETE request does not return a response body. 
       // TODO: Check that response header indicates success in doRequest
       this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
       return Promise.resolve({
-        droplet: resp.droplet
+        droplet: resp.droplet.id
       });
     });
   }
