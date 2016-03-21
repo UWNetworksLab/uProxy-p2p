@@ -54,10 +54,9 @@ then
   chmod 600 $TMP/id_rsa
   ssh-keygen -C "$USERNAME" -y -f $TMP/id_rsa > $TMP/id_rsa.pub
 else
-  # TODO: 2048 bits makes for really long keys so we should use
-  #       ecdsa when ssh2-streams supports it:
-  #         https://github.com/mscdex/ssh2-streams/issues/3
-  ssh-keygen -C "$USERNAME" -q -t rsa -b 2048 -N '' -f $TMP/id_rsa
+  # 1536 bits results in an encoded URL of ~1800 characters which is
+  # readily shareable by instant messaging.
+  ssh-keygen -C "$USERNAME" -q -t rsa -b 1536 -N '' -f $TMP/id_rsa
 
   # TODO: Because SSH keys are already base64-encoded, re-encoding them
   #       like this is very inefficient.
