@@ -55,7 +55,7 @@ cat <<EOF > $TMP_DIR/Dockerfile
 FROM library/ubuntu:trusty
 
 RUN apt-get -qq update
-RUN apt-get -qq install wget unzip xvfb fvwm supervisor iptables x11vnc
+RUN apt-get -qq install wget unzip xvfb fvwm supervisor iptables x11vnc unattended-upgrades
 
 RUN mkdir /test
 COPY test /test
