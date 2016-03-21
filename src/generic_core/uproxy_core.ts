@@ -611,6 +611,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
+    // This is the server name recommended by the blog post.
+    const DROPLET_NAME = 'uproxy-cloud-server';
+
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
@@ -634,7 +637,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     });
 
     // This is the server name recommended by the blog post.
-    return provisioner.start('uproxy-cloud-server', args.region).then((serverInfo: any) => {
+    return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
       log.info('created server on digitalocean: %1', serverInfo);
 
       const host = serverInfo.network.ipv4;
@@ -679,9 +682,22 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           networkData: JSON.stringify(cloudNetworkData)
         });
       });
-    }, (e: Error) => {
-      destroyModules();
-      return Promise.reject(e);
+    }, (installError: Error) => {
+      log.error('install failed, cleaning up');
+
+      // Destroy the server we just created so that the user isn't billed.
+      provisioner.stop(DROPLET_NAME).then((unused:Object) => {
+        log.info('destroyed server on digitalocean');
+        destroyModules();
+        return Promise.reject(installError);
+      }, (destroyError:Error) => {
+        // This is bad: the user will be billed for a broken server.
+        // TODO: direct the user at the digitalocean console
+        log.error('failed to destroy new server after install failure: %1',
+            destroyError.message);
+        destroyModules();
+        return Promise.reject(installError);
+      });
     });
   }  // end of cloudInstall
 
