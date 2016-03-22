@@ -37,7 +37,8 @@ const STATUS_CODES: { [k: string]: string; } = {
 
 const ERR_CODES: { [k: string]: string; } = {
   'VM_DNE': 'VM does not exist',
-  'CLOUD_ERR': 'Error from cloud provider'
+  'CLOUD_ERR': 'Error from cloud provider',
+  'OAUTH_ERR': 'Error connecting to cloud provider'
 };
 
 const REDIRECT_URIS: [string] = [
@@ -100,36 +101,48 @@ class Provisioner {
 
   /**
    * One-click destruction of a VM
-   * See freedom-module.json for return and error types
-   * @todo currently doesnt wait for destroy to complete before resolving
    * @param {String} name of VM to create
-   * @return {Promise.<Object>} { droplet: <droplet id, as a string> }
+   * @return {Promise.<void>}
    */
-  public stop = (name: string): Promise<Object> => {
+  public stop = (name: string): Promise<void> => {
     this.sendStatus_('STOP');
     return this.doOAuth_().then((oauthObj: any) => {
       this.state_.oauth = oauthObj;
     }).then(() => {
-      return this.doRequest_('GET', 'droplets');
-    }).then((resp: any) => {
-      for (var i = 0; i < resp.droplets.length; i++) {
-        if (resp.droplets[i].name === name) {
-          return Promise.resolve({
-            droplet: resp.droplets[i]
-          });
+      return this.destroyServer_(name);
+    });
+  }
+
+  /**
+   * Destroys cloud server; assumes OAuth has already been completed
+   * @todo DELETE request does not return a response body so we
+   * need to check that the response header indicates success (204)
+   * @param {String} droplet name, as a string
+   * @return {Promise.<void>}
+   */
+  private destroyServer_ = (name: string): Promise<void> => {
+    if (this.state_.oauth) {
+      return this.doRequest_('GET', 'droplets').then((resp: any) => {
+        // Find and delete the server with the same name
+        for (var i = 0; i < resp.droplets.length; i++) {
+          if (resp.droplets[i].name === name) {
+            return Promise.resolve({
+              droplet: resp.droplets[i]
+            });
+          }
         }
-      }
-      return Promise.reject({
-        'errcode': 'VM_DNE',
-        'message': 'Droplet ' + name + ' doesnt exist'
+        return Promise.reject({
+          'errcode': 'VM_DNE',
+          'message': 'Droplet ' + name + ' doesnt exist'
+        });
+      }).then((resp: any) => {
+        this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
+        return Promise.resolve<void>();
       });
-    }).then((resp: any) => {
-      // DELETE request does not return a response body. 
-      // TODO: Check that response header indicates success in doRequest
-      this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
-      return Promise.resolve({
-        droplet: resp.droplet.id
-      });
+    }
+    return Promise.reject({
+        'errcode': 'OAUTH_ERR',
+        'message': 'Cannot destroy server - not logged into digital ocean'
     });
   }
 
