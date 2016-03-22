@@ -254,6 +254,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   cloudDestroy = (providerName :string): Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.CLOUD_DESTROY, providerName); 
   }
+
+  removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.REMOVE_CONTACT, args);
+  }
 }  // class CoreConnector
 
 export = CoreConnector;

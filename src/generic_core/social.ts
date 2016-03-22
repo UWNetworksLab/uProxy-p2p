@@ -187,6 +187,18 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
     /**
+     * Removes a user from the roster. Does not throw an error because this is
+     * as expected.
+     */
+    public removeUser = (userId :string) => {
+      if (userId in this.roster) {
+        delete this.roster[userId];
+      } else {
+        log.error('Cannot remove user that does not exist in roster', userId);
+      }
+    }
+
+    /**
      * Returns a User object for userId.  If the userId is not found in the
      * roster, a new User object will be created - in that case the User may
      * be missing fields like .name if it is not found in storage.
@@ -273,6 +285,10 @@ export function notifyUI(networkName :string, userId :string) {
       var endPgpString = '-----END PGP PUBLIC KEY BLOCK-----\r\n';
       var start = clientId.lastIndexOf(beginPgpString);
       return clientId.slice(start).match(beginPgpString + '(.|[\r\n])*' + endPgpString)[0];
+    }
+
+    public removeUserFromStorage = (userId :string): Promise<void> => {
+      throw new Error('Operation not implemented');
     }
 
   }  // class AbstractNetwork
@@ -734,6 +750,23 @@ export function notifyUI(networkName :string, userId :string) {
       };
     }
 
+    public removeUserFromStorage = (userId :string) : Promise<void> => {    
+      // Remove user from roster.
+      this.removeUser(userId);
+      // Remove user from storage.
+      var rosterKey = this.getStorePath() + userId;
+      return storage.destroy(rosterKey).then(() => {
+        if (this.name === 'Cloud') {
+          // In addition to the roster key, cloud contacts have another key
+          // of the form 'instance_id/user_id' we need to remove from storage
+          var cloudKey = this.getStorePath().replace('roster/', userId);
+          return storage.destroy(cloudKey).then(() => {
+            // Remove user from cloud social provider
+            return this.freedomApi_.removeUser(userId);
+          });
+        }
+      });
+    }
   }  // class Social.FreedomNetwork
 
 export function freedomClientToUproxyClient(

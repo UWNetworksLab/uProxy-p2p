@@ -71,6 +71,19 @@ export class Storage {
     });
   }
 
+  /**
+   * Promise removing a key from storage
+   */
+  public destroy(key :string) :Promise<void> {
+    log.debug('Removing key %1 from storage ', key);
+    return fStorage.remove(key).then((result :string) => {
+      log.debug('Successfully removed key %1 from storage', key);
+    }).catch((e) => {
+      log.error('Remove operation failed', e.message);
+      return Promise.reject(e);
+    });
+  }
+
   public keys = () : Promise<string[]> => {
     return fStorage.keys();
   }

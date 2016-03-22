@@ -104,12 +104,31 @@ export class Model {
     return null;
   }
 
-  public updateGlobalSettings = (settings :Object) => {
+  public removeContact = (user :User) : void => {
+    // Loop through each category: getAccessContacts and shareAccessContacts
+    for (var category in this.contacts) {
+    var contactsCategory = (<any>this.contacts)[category];
+      // Loop through type of contacts in each category:
+      // pending, trustedUproxy, untrustedUproxy
+      for (var type in contactsCategory) {
+        var typeCategory = contactsCategory[type];
+        // Loop through each user in typeCategory
+        for (var i = 0; i < typeCategory.length; ++i) {
+          // Remove user if found
+          if (typeCategory[i] === user) {
+            console.log('removing user from %1 %2', category, type, user);
+            typeCategory.splice(i, 1);
+          }
+        }
+      }
+    }
+  }
+
+  public updateGlobalSettings = (settings: Object) => {
     _.merge(this.globalSettings, settings, (a :any, b :any) => {
       if (_.isArray(a) && _.isArray(b)) {
         return b;
       }
-
       return undefined;
     });
   }

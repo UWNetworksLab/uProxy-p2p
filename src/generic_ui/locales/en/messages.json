@@ -1171,17 +1171,25 @@
   "WHAT_IS_UPROXY_NETWORK_ANSWER": {
     "message": "<p>The uProxy network is designed to be one of the simplest ways to reliably connect with your friends, while still being hard to block. To use the uProxy network, you only need to enter a name (which does not have to be unique) and then you're logged in and ready to share invitations with friends. Currently, identity is tied to a single machine; if you want to set up uProxy on a new computer, you will need to reinvite your friends, in order to connect with them from that machine.</p><p>The uProxy team operates the uProxy network, though in the future it will be possible for third-parties to augment the network by running additional server. All information that is sent over the uProxy network is encrypted end-to-end, between peers, so no one can interfere with it. However, network operators can still tell which IP addresses are connecting to each other.</p>"
   },
-  "DESTROY_CLOUD_SERVER": {
-    "description": "Title for the dialogs that instruct users on destroying a cloud server",
-    "message": "Destroy cloud server"
+  "REMOVE_CLOUD_SERVER": {
+    "description": "Title for the dialogs that instruct users on deleting a cloud server",
+    "message": "Remove cloud server"
   },
   "DESTROY_CLOUD_SERVER_CONFIRMATION": {
     "description": "Message that warns users their cloud server will be destroyed",
     "message": "This will destroy your uProxy cloud server on Digital Ocean. Please keep in mind that friends and family will no longer be able to use this cloud server once it's destroyed."
   },
-  "DESTROY_CLOUD_SERVER_SUCCESS": {
-    "description": "Message that tells users a cloud server was sucessfully created",
-    "message": "Success! Your cloud server was destroyed."
+  "REMOVE_CLOUD_SERVER_CONFIRMATION": {
+    "description": "Message that warns users their cloud server will be destroyed",
+    "message": "Are you sure you want to delete this cloud server from your list of friends?"
+  },
+  "REMOVE_CLOUD_SERVER_SUCCESS": {
+    "description": "Message that tells users a cloud server was sucessfully deleted from their friend list",
+    "message": "Success! Your cloud server was removed."
+  },
+  "REMOVE_CLOUD_SERVER_FAILURE": {
+    "description": "Message that tells users we failed to destroy their cloud server",
+    "message": "We're sorry. We couldn't remove your cloud server for you at this time."
   },
   "DESTROY_CLOUD_SERVER_FAILURE": {
     "description": "Message that tells users we failed to destroy their cloud server",

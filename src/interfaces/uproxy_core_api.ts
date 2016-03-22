@@ -104,7 +104,8 @@ export enum Command {
   SEND_INVITATION = 1028,
   CLOUD_INSTALL = 1029,
   UPDATE_ORG_POLICY = 1030,
-  CLOUD_DESTROY = 1031
+  CLOUD_DESTROY = 1031,
+  REMOVE_CONTACT = 1032
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -140,7 +141,8 @@ export enum Update {
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
   ONETIME_MESSAGE = 2026,
-  CLOUD_INSTALL_STATUS = 2027
+  CLOUD_INSTALL_STATUS = 2027,
+  REMOVE_FRIEND = 2028 // Removed friend from roster.
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -224,6 +226,15 @@ export interface CloudInstallArgs {
   region: string;
 };
 
+// Argument to removeContact
+export interface RemoveContactArgs {
+  // Name of the network the contact is a part of
+  networkName: string,
+  // userId of the contact you want to remove
+  userId: string
+};
+
+
 /**
  * The primary interface to the uProxy Core.
  *
@@ -292,8 +303,11 @@ export interface CoreApi {
   // with the cloud computing provider on the user's behalf.
   cloudInstall(args:CloudInstallArgs): Promise<void>;
 
-  // Invokes OAuth flow and destroys uProxy cloud server on specified
-  // provider.
-  cloudDestroy(providerName :string) :Promise<void>;
+  // Invokes OAuth flow and destroys uProxy cloud server on the 
+  // provider specified.
+  cloudDestroy(providerName :string) : Promise<void>;
+
+  // Removes contact from roster, storage, and friend list
+  removeContact(args :RemoveContactArgs) : Promise<void>;
 }
 

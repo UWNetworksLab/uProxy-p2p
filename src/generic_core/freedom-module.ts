@@ -78,6 +78,7 @@ commands[uproxy_core_api.Command.ACCEPT_INVITATION] = core.acceptInvitation;
 commands[uproxy_core_api.Command.CLOUD_INSTALL] = core.cloudInstall;
 commands[uproxy_core_api.Command.UPDATE_ORG_POLICY] = core.updateOrgPolicy;
 commands[uproxy_core_api.Command.CLOUD_DESTROY] = core.cloudDestroy;
+commands[uproxy_core_api.Command.REMOVE_CONTACT] = core.removeContact;
 
 for (var command in commands) {
   ui_connector.onCommand(command, commands[command]);

@@ -43,6 +43,8 @@ var portControl = globals.portControl;
 // Prefix for freedomjs modules which interface with cloud computing providers.
 const CLOUD_PROVIDER_MODULE_PREFIX: string = 'CLOUDPROVIDER-';
 
+const DEFAULT_SERVER_NAME = 'uproxy-cloud-server';
+
 const getCloudProviderNames = (): string[] => {
   let results: string[] = [];
   for (var dependency in freedom) {
@@ -181,8 +183,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    */
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
-    var userId = networkInfo.userId;
-    var network = social_network.getNetwork(networkName, userId);
+    if (networkInfo.userId) {
+      var userId = networkInfo.userId;
+      var network = social_network.getNetwork(networkName, userId);
+    } else {
+      var network = this.getNetworkByName_(networkName);
+    }
+
     if (null === network) {
       log.warn('Could not logout of network', networkName);
       return;
@@ -634,7 +641,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     });
 
     // This is the server name recommended by the blog post.
-    return provisioner.start('uproxy-cloud-server', args.region).then((serverInfo: any) => {
+    return provisioner.start(DEFAULT_SERVER_NAME, args.region).then((serverInfo: any) => {
       log.info('created server on digitalocean: %1', serverInfo);
 
       const host = serverInfo.network.ipv4;
@@ -718,29 +725,53 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public cloudDestroy = (providerName :string) :Promise<void> =>  {
-    log.info('logging into %1 to delete uproxy-cloud-server', providerName);
+    log.info('cloudDestroy', providerName, DEFAULT_SERVER_NAME);
 
     const provisioner = freedom[CLOUD_PROVIDER_MODULE_PREFIX + providerName]();
     const installer = freedom['cloudinstall']();
-
     const destroyModules = () => {
       freedom[CLOUD_PROVIDER_MODULE_PREFIX + providerName].close(provisioner);
       freedom['cloudinstall'].close(installer);
     };
-
     provisioner.on('status', (update: any) => {
       ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
     });
-
-    return provisioner.stop('uproxy-cloud-server').then(() => {
-      log.info('stopped server on %1', providerName);
-    }).then(() => {
+    return provisioner.stop(DEFAULT_SERVER_NAME).then(() => {
+      log.info('stopped cloud server on %1', providerName);
       destroyModules();
     }, (e: Error) => {
       destroyModules();
       log.debug('Error destroying cloud server:' + JSON.stringify(e));
       return Promise.reject(e);
     });
+  }
+
+  // Remove contact from friend list and storage
+  public removeContact = (args :uproxy_core_api.RemoveContactArgs) : Promise<void> => {
+    log.info('removeContact', args);
+    var network = this.getNetworkByName_(args.networkName);
+    return network.removeUserFromStorage(args.userId).then(() => {
+      return ui.removeUser({
+        networkName: args.networkName,
+        userId: args.userId 
+      });
+    }).then(() => {
+      // If we removed the only cloud friend, logout of the cloud network
+      if (args.networkName === 'Cloud') {
+        return this.logoutIfRosterEmpty_(network);
+      }
+    });
+  }
+
+  private logoutIfRosterEmpty_ = (network :social.Network) : Promise<void> => {
+    if (Object.keys(network.roster).length === 0) {
+      return this.logout({ name: network.name }).then(() => {
+        log.info('Successfully logged out of %1 network because roster is empty', network.name);
+      });
+    } else {
+      log.info('Did not log out of %1 network because roster is not empty.', network.name);
+      return Promise.resolve<void>();
+    }
   }
 }  // class uProxyCore
 

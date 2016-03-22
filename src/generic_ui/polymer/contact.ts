@@ -10,7 +10,7 @@ import _ = require('lodash');
 
 const DEFAULT_PROVIDER = 'digitalocean';
 
-var coreSignalFired = false;
+var toBeDeleted = false;
 
 Polymer({
   created: function() {
@@ -119,27 +119,50 @@ Polymer({
         undefined, cloudInviteUrl);
     });
   },
-  openDestroyCloudDialog: function() {
-    this.ui.showDialog(this.ui.i18n_t("DESTROY_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_CONFIRMATION"),
-      this.ui.i18n_t("NEXT"), 'destroy-cloud-friend', undefined);
+  displayCloudRemovalConfirmation: function() {
+    this.toBeDeleted = true;
+    var message :string = undefined;
+    if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+      message = "DESTROY_CLOUD_SERVER_CONFIRMATION";
+    } else {
+      message = "REMOVE_CLOUD_SERVER_CONFIRMATION";
+    }
+    this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t(message),
+      true, 'remove-cloud-server');
   },
-  destroyCloudFriend: function() {
-    // core-signal-destory-cloud-friend is always fired 4 times, but
-    // we only want to try to destory the cloud server the first time.
-    if (!coreSignalFired) {
-      coreSignalFired = true;
-      ui_context.core.cloudDestroy(DEFAULT_PROVIDER).then(() => {
-        console.log("Destroy cloud friend returned");
-        this.ui.showDialog(this.ui.i18n_t("DESTROY_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_SUCCESS"),
-      this.ui.i18n_t("OK"), undefined, undefined);
-        coreSignalFired = false;
+  removeCloudFriend: function() {
+    if (!this.toBeDeleted) {
+      return;
+    }
+    // Destroy cloud server if created by user
+    this.destroyCloudServerIfNeeded().then(() => {
+      // Remove cloud contact from friend list and logout if needed
+      ui_context.core.removeContact({
+        networkName: this.contact.network.name,
+        userId: this.contact.userId
+      });
+    }).then(() => {
+      console.log("Successfully removed cloud friend.")
+      this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("REMOVE_CLOUD_SERVER_SUCCESS"),
+        this.ui.i18n_t("OK"), undefined, undefined);
+    }).catch((e: Error) => {
+      console.log('Error: Remove cloud friend failed.');
+      this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("REMOVE_CLOUD_SERVER_FAILURE"),
+        this.ui.i18n_t("OK"), undefined, undefined);
+      this.toBeDeleted = false;
+    });
+  },
+  destroyCloudServerIfNeeded: function() {
+    if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+      return ui_context.core.cloudDestroy(DEFAULT_PROVIDER).then(() => {
+        console.log("Sucessfully destroy cloud server.");
       }).catch((e: Error) => {
-      console.log('Error: Destroy cloud friend failed');
-      this.ui.showDialog(this.ui.i18n_t("DESTROY_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_FAILURE"),
+        console.log('Error: Destroy cloud server failed.');
+        this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_FAILURE"),
           this.ui.i18n_t("OK"), undefined, undefined);
-        coreSignalFired = false;
       });
     }
+    return Promise.resolve<void>();
   },
   ready: function() {
     this.ui = ui_context.ui;

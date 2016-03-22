@@ -119,4 +119,7 @@ export interface FreedomSocialProvider {
   // Forget any tokens/credentials used for logging in with the last used
   // userId.
   clearCachedCredentials() : Promise<void>;
+
+  // Removes user with userId and returns userId
+  removeUser(userId :string) : Promise<void>
 }  // interface FreedomSocialProvider

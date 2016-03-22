@@ -178,6 +178,8 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.USER_FRIEND, this.syncUser);
 
+    core.onUpdate(uproxy_core_api.Update.REMOVE_FRIEND, this.removeFriend);
+
     core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
       this.copyPasteState.message = message;
     });
@@ -352,7 +354,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public getConfirmation(heading :string,
                          text :string,
-                         cancelContinueButtons :boolean = false) :Promise<void> {
+                         cancelContinueButtons :boolean = false,
+                         dataSignal? :string) :Promise<void> {
     return new Promise<void>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
@@ -367,7 +370,9 @@ export class UserInterface implements ui_constants.UiApi {
         }, {
           text: cancelContinueButtons ?
               this.i18n_t('CONTINUE') : this.i18n_t('YES'),
-          callbackIndex: callbackIndex
+          callbackIndex: callbackIndex,
+          signal: dataSignal ?
+              dataSignal : ''
         }]
       });
     });
@@ -1034,12 +1039,24 @@ export class UserInterface implements ui_constants.UiApi {
       model.categorizeUser(user, this.model.contacts.shareAccessContacts,
           oldUserCategories.shareTab, newUserCategories.shareTab);
     }
+
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
   };
 
-  public openTab = (url :string) => {
+  /**
+   * Remove a friend from the friend list by removing it from 
+   * model.contacts
+   */
+  public removeFriend = (args:{ networkName: string, userId: string }) => {
+    var network = this.model.getNetwork(args.networkName);
+    var user = this.model.getUser(network, args.userId);
+    this.model.removeContact(user);
+    console.log('Removed user from model.contacts', user);
+  }
+
+  public openTab = (url: string) => {
     this.browserApi.openTab(url);
   }
 
@@ -1358,5 +1375,9 @@ export class UserInterface implements ui_constants.UiApi {
 
   public cloudDestroy = (providerName: string): Promise<void> => {
     return this.core.cloudDestroy(providerName);
+  }
+
+  public removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
+    return this.core.removeContact(args);
   }
 } // class UserInterface
