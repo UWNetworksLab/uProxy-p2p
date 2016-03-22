@@ -37,8 +37,7 @@ const STATUS_CODES: { [k: string]: string; } = {
 
 const ERR_CODES: { [k: string]: string; } = {
   'VM_DNE': 'VM does not exist',
-  'CLOUD_ERR': 'Error from cloud provider',
-  'OAUTH_ERR': 'Error connecting to cloud provider'
+  'CLOUD_ERR': 'Error from cloud provider'
 };
 
 const REDIRECT_URIS: [string] = [
@@ -121,28 +120,22 @@ class Provisioner {
    * @return {Promise.<void>}
    */
   private destroyServer_ = (name: string): Promise<void> => {
-    if (this.state_.oauth) {
-      return this.doRequest_('GET', 'droplets').then((resp: any) => {
-        // Find and delete the server with the same name
-        for (var i = 0; i < resp.droplets.length; i++) {
-          if (resp.droplets[i].name === name) {
-            return Promise.resolve({
-              droplet: resp.droplets[i]
-            });
-          }
+    return this.doRequest_('GET', 'droplets').then((resp: any) => {
+      // Find and delete the server with the same name
+      for (var i = 0; i < resp.droplets.length; i++) {
+        if (resp.droplets[i].name === name) {
+          return Promise.resolve({
+            droplet: resp.droplets[i]
+          });
         }
-        return Promise.reject({
-          'errcode': 'VM_DNE',
-          'message': 'Droplet ' + name + ' doesnt exist'
-        });
-      }).then((resp: any) => {
-        this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
-        return Promise.resolve<void>();
+      }
+      return Promise.reject({
+        'errcode': 'VM_DNE',
+        'message': 'Droplet ' + name + ' doesnt exist'
       });
-    }
-    return Promise.reject({
-        'errcode': 'OAUTH_ERR',
-        'message': 'Cannot destroy server - not logged into digital ocean'
+    }).then((resp: any) => {
+      this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
+      return Promise.resolve<void>();
     });
   }
 
