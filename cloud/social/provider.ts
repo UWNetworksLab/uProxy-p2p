@@ -388,12 +388,12 @@ export class CloudSocialProvider {
   }
 
   // Removes a cloud contact from storage
-  public removeUser = (host: string): Promise<void> => {
+  public removeUser = (host: string): Promise<string> => {
     log.debug('removeUser %1', host);
     if (!(host in this.savedContacts_)) {
       // Do not return an error because result is as expected.
       log.warn('cloud contact %1 is not in %2 - cannot remove from storage', host, STORAGE_KEY);
-      return Promise.resolve<void>();
+      return Promise.resolve<string>(host);
     }
     // Remove host from savedContacts and clients
     delete this.savedContacts_[host];
