@@ -391,12 +391,12 @@ export class CloudSocialProvider {
         new Error('blockUser unimplemented'));
   }
 
-  // Removes a cloud friend from storage
+  // Removes a cloud contact from storage
   public removeUser = (host: string): Promise<void> => {
     log.debug('removing cloud contact %1 from storage %2', host, STORAGE_KEY);
     if (!this.savedContacts_[host]) {
       // Do not return an error because result is as expected.
-      log.error('cloud contact %1 is not in %2 - cannot remove from storage.', host, STORAGE_KEY);
+      log.error('cloud contact %1 is not in %2 - cannot remove from storage', host, STORAGE_KEY);
     } else {
       // Remove host from this.savedContacts_
       delete this.savedContacts_[host];
