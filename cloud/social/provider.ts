@@ -264,13 +264,9 @@ export class CloudSocialProvider {
   // Saves contacts to storage.
   private saveContacts_ = () => {
     log.debug('saveContacts');
-    this.storage_.set(STORAGE_KEY, JSON.stringify(<SavedContacts>{
+    return this.storage_.set(STORAGE_KEY, JSON.stringify(<SavedContacts>{
       contacts: Object.keys(this.savedContacts_).map(key => this.savedContacts_[key])
-    })).then((unused: string) => {
-      log.debug('saved contacts');
-    }, (e: Error) => {
-      log.error('could not save contacts: %1', e);
-    });
+    }));
   }
 
   public login = (options: freedom.Social.LoginRequest):
@@ -393,17 +389,17 @@ export class CloudSocialProvider {
 
   // Removes a cloud contact from storage
   public removeUser = (host: string): Promise<void> => {
-    log.debug('removing cloud contact %1 from storage %2', host, STORAGE_KEY);
-    if (!this.savedContacts_[host]) {
+    log.debug('removeUser %1', host);
+    if (!(host in this.savedContacts_)) {
       // Do not return an error because result is as expected.
-      log.error('cloud contact %1 is not in %2 - cannot remove from storage', host, STORAGE_KEY);
-    } else {
-      // Remove host from this.savedContacts_
-      delete this.savedContacts_[host];
-      // Update storage with this.savedContacts_
-      this.saveContacts_();
+      log.warn('cloud contact %1 is not in %2 - cannot remove from storage', host, STORAGE_KEY);
+      return Promise.resolve<void>();
     }
-    return Promise.resolve<void>();
+    // Remove host from savedContacts and clients
+    delete this.savedContacts_[host];
+    delete this.clients_[host];
+    // Update storage with this.savedContacts_
+    return this.saveContacts_();
   }
 }
 
