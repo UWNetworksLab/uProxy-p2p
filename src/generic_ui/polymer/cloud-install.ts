@@ -10,7 +10,7 @@ var ui = ui_context.ui;
 const DEFAULT_PROVIDER = 'digitalocean';
 
 Polymer({
-  openCloudInstall: function() {
+  open: function() {
     this.$.getStartedOverlay.open();
   },
   showDigitalOceanAccountHelpOverlay: function() {
@@ -25,16 +25,10 @@ Polymer({
     ui.openTab('https://cloud.digitalocean.com/registrations/new');
   },
   back: function() {
-    if (this.$.getStartedOverlay.opened || this.$.successOverlay.opened) {
-      // Just close overlays to go back to invite-user screen.
-      this.closeOverlays();
-    } else if (this.$.digitalOceanAccountHelpOverlay.opened ||
+    this.closeOverlays();
+    if (this.$.digitalOceanAccountHelpOverlay.opened ||
         this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
-      // Return to start screen.
-      this.closeOverlays();
       this.$.getStartedOverlay.open();
-    } else if (this.$.installingOverlay.opened) {
-      // Do nothing - back button should be disabled when installing.
     }
   },
   closeOverlays: function() {
@@ -61,13 +55,6 @@ Polymer({
       this.closeOverlays();
       this.$.failureOverlay.open();
     });
-  },
-  getLocationLabel: function(locationName :string) {
-    return (<any>{
-      'sgp1': 'Singapore',
-      'ams2': 'Amsterdam',
-      'nyc2': 'New York'
-    })[locationName];
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {
     input.focus();

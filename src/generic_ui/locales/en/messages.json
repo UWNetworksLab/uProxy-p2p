@@ -1164,83 +1164,83 @@
     "message": "<p>The uProxy network is designed to be one of the simplest ways to reliably connect with your friends, while still being hard to block. To use the uProxy network, you only need to enter a name (which does not have to be unique) and then you're logged in and ready to share invitations with friends. Currently, identity is tied to a single machine; if you want to set up uProxy on a new computer, you will need to reinvite your friends, in order to connect with them from that machine.</p><p>The uProxy team operates the uProxy network, though in the future it will be possible for third-parties to augment the network by running additional server. All information that is sent over the uProxy network is encrypted end-to-end, between peers, so no one can interfere with it. However, network operators can still tell which IP addresses are connecting to each other.</p>"
   },
   "CREATE_A_CLOUD_SERVER": {
-    "description": "Title on cloud deployment screens",
+    "description": "Title on cloud deployment screens, where the user can set up a new server that allows them proxy access.",
     "message": "Create a cloud server"
   },
   "CREATE_A_NEW_ACCOUNT": {
-    "description": "Button text for creating a new account (e.g. for Digital Ocean)",
+    "description": "Button text for creating a new account (e.g. for DigitalOcean)",
     "message": "Create a new account"
   },
   "SIGN_IN_AND_CONNECT": {
-    "description": "Button text signing into Digital Ocean",
+    "description": "Button text for signing into DigitalOcean",
     "message": "Sign in and connect"
   },
   "TRY_AGAIN": {
-    "description": "Button text for trying again (e.g. connecting to Digital Ocean)",
+    "description": "Button text for trying again (e.g. connecting to DigitalOcean)",
     "message": "Try again"
   },
-  "DIGITAL_OCEAN_SUCCESS_TITLE": {
-    "description": "Message shown during Digital Ocean server deployment",
-    "message": "Success! You're connected"
+  "CLOUD_INSTALL_SUCCESS_TITLE": {
+    "description": "Message shown after successful DigitalOcean server deployment",
+    "message": "Success! Your new cloud server is ready."
   },
-  "DIGITAL_OCEAN_SUCCESS_MESSAGE": {
-    "description": "Message shown during Digital Ocean server deployment",
-    "message": "Your new cloud connection is ready.  You can now share access with friends and family on your private server."
+  "CLOUD_INSTALL_SUCCESS_MESSAGE": {
+    "description": "Message shown after successful DigitalOcean server deployment",
+    "message": "You can now share access with friends and family from your private server."
   },
-  "DIGITAL_OCEAN_ERROR_TITLE": {
-    "description": "Message shown during Digital Ocean server deployment",
-    "message": "Oops! we had trouble creating a server."
+  "CLOUD_INSTALL_ERROR_TITLE": {
+    "description": "Message shown after failed DigitalOcean server deployment",
+    "message": "Oops! We had trouble creating a cloud server."
   },
-  "DIGITAL_OCEAN_ERROR_MESSAGE": {
-    "description": "Message shown during Digital Ocean server deployment",
-    "message": "Check the settings of your Digital Ocean account to make sure your information is correct."
+  "CLOUD_INSTALL_ERROR_MESSAGE": {
+    "description": "Message shown after failed DigitalOcean server deployment",
+    "message": "Check the settings of your DigitalOcean account to make sure your information is correct."
   },
-  "DIGITAL_OCEAN_INSTALLING_TITLE": {
-    "description": "Message shown during Digital Ocean server deployment",
+  "CLOUD_INSTALL_INSTALLING_TITLE": {
+    "description": "Message shown during DigitalOcean server deployment",
     "message": "Hold tight, we're creating a new cloud server."
   },
-  "DIGITAL_OCEAN_INSTALLING_MESSAGE": {
-    "description": "Message shown during Digital Ocean server deployment",
-    "message": "Your new cloud connection is minutes away.  Please stand by and keep uProxy open."
+  "CLOUD_INSTALL_INSTALLING_MESSAGE": {
+    "description": "Message shown during DigitalOcean server deployment",
+    "message": "This process can take up to 15 minutes.  Please leave the browser open during setup.  Once you're connected, you can share access with friends and family from your private server."
   },
-  "DIGITAL_OCEAN_LOGIN_TITLE": {
-    "description": "Message shown during Digital Ocean server deployment",
+  "CLOUD_INSTALL_LOGIN_TITLE": {
+    "description": "Message shown during DigitalOcean server deployment",
     "message": "Choose a location near you to create a cloud server."
   },
-  "DIGITAL_OCEAN_LOGIN_MESSAGE": {
-    "description": "Message shown during Digital Ocean server deployment",
-    "message": "Once you click connect, you will be charged $10 a month by Digital Ocean."
+  "CLOUD_INSTALL_LOGIN_MESSAGE": {
+    "description": "Message shown during DigitalOcean server deployment, references text for SIGN_IN_AND_CONNECT button",
+    "message": "Once you click \"sign in and connect\", you will be charged $10 a month by DigitalOcean.  You can terminate your server at any time."
   },
-  "DIGITAL_OCEAN_CREATE_ACCOUNT_TITLE": {
-    "description": "Message shown during Digital Ocean server deployment",
+  "CLOUD_INSTALL_CREATE_ACCOUNT_TITLE": {
+    "description": "Message shown during DigitalOcean server deployment",
     "message": "All you need to get started is your email address and a credit card or paypal account."
   },
-  "DIGITAL_OCEAN_CREATE_ACCOUNT_MESSAGE": {
-    "description": "Message shown during Digital Ocean server deployment",
-    "message": "Don't worry about making a new droplet on Digital Ocean, we do that for you.  When you're done creating an account and have updated billing, click \"sign me in.\""
+  "CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE": {
+    "description": "Message shown during DigitalOcean server deployment, references text for SIGN_ME_IN button",
+    "message": "Don't worry about making a new droplet on DigitalOcean, we do that for you.  When you're done creating an account and have updated billing, click \"sign me in.\""
   },
-  "DIGITAL_OCEAN_GET_STARTED_TITLE": {
-    "description": "Message shown during Digital Ocean server deployment",
-    "message": "uProxy now allows you to create a private cloud server through Digital Ocean"
+  "CLOUD_INSTALL_GET_STARTED_TITLE": {
+    "description": "Message shown during DigitalOcean server deployment",
+    "message": "uProxy now allows you to create a private cloud server through DigitalOcean."
   },
-  "DIGITAL_OCEAN_GET_STARTED_MESSAGE": {
-    "description": "Message shown during Digital Ocean server deployment",
+  "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
+    "description": "Message shown during DigitalOcean server deployment",
     "message": "Create a new account or sign in to connect and share access."
   },
-  "DIGITAL_OCEAN_INVITE_SCREEN_TITLE": {
-    "description": "Message shown on invite screen for Digital Ocean server deployment",
-    "message": "Create a cloud server with Digital Ocean"
+  "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
+    "description": "Message shown on invite screen for DigitalOcean server deployment",
+    "message": "Create a cloud server with DigitalOcean"
   },
-  "DIGITAL_OCEAN_INVITE_SCREEN_MESSAGE": {
-    "description": "Message shown on invite screen for Digital Ocean server deployment",
+  "CLOUD_INSTALL_INVITE_SCREEN_MESSAGE": {
+    "description": "Message shown on invite screen for DigitalOcean server deployment",
     "message": "For $10 a month you can get and share access with friends and family from your own private server."
   },
   "I_HAVE_AN_ACCOUNT": {
-    "description": "Button text shown during Digital Ocean server deployment",
+    "description": "Button text shown during DigitalOcean server deployment",
     "message": "I have an account"
   },
   "SIGN_ME_IN": {
-    "description": "Button text shown during Digital Ocean server deployment",
+    "description": "Button text shown during DigitalOcean server deployment",
     "message": "Sign me in!"
   },
   "EMPTY_ROSTER_CLOUD_INSTRUCTIONS": {
@@ -1250,5 +1250,17 @@
   "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS": {
     "description": "Instructions shown for peer-to-peer when the user has an empty roster",
     "message": "Get or share access with family & friends."
+  },
+  "ASIA_SINGAPORE": {
+    "description": "Region option for deploying a DigitalOcean server",
+    "message": "Asia (Singapore)"
+  },
+  "EUROPE_AMSTERDAM": {
+    "description": "Region option for deploying a DigitalOcean server",
+    "message": "Europe (Amsterdam)"
+  },
+  "NORTH_AMERICA_NEW_YORK": {
+    "description": "Region option for deploying a DigitalOcean server",
+    "message": "North America (New York)"
   }
 }
