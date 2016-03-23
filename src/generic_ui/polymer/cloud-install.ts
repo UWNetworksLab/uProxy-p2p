@@ -10,31 +10,53 @@ var ui = ui_context.ui;
 const DEFAULT_PROVIDER = 'digitalocean';
 
 Polymer({
-  openLoginDialog: function() {
-    this.$.loginDialog.open();
+  open: function() {
+    this.$.getStartedOverlay.open();
   },
-  closeDialogs: function() {
-    this.$.loginDialog.close();
-    this.$.installingDialog.close();
-    this.$.successDialog.close();
-    this.$.failureDialog.close();
+  showDigitalOceanAccountHelpOverlay: function() {
+    this.closeOverlays();
+    this.$.digitalOceanAccountHelpOverlay.open();
+  },
+  showLoginOverlay: function() {
+    this.closeOverlays();
+    this.$.loginOverlay.open();
+  },
+  launchDigitalOceanSignup: function() {
+    ui.openTab('https://cloud.digitalocean.com/registrations/new');
+  },
+  back: function() {
+    if (this.$.digitalOceanAccountHelpOverlay.opened ||
+        this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
+      this.closeOverlays();
+      this.$.getStartedOverlay.open();
+    } else {
+      this.closeOverlays();
+    }
+  },
+  closeOverlays: function() {
+    this.$.getStartedOverlay.close();
+    this.$.digitalOceanAccountHelpOverlay.close();
+    this.$.loginOverlay.close();
+    this.$.installingOverlay.close();
+    this.$.successOverlay.close();
+    this.$.failureOverlay.close();
   },
   loginTapped: function() {
-    this.closeDialogs();
+    this.closeOverlays();
     ui.cloudInstallStatus = '';
-    this.$.installingDialog.open();
+    this.$.installingOverlay.open();
 
     ui.cloudInstall({
       providerName: DEFAULT_PROVIDER,
       region: this.$.regionMenu.selected
     }).then(() => {
-      this.closeDialogs();
-      this.$.successDialog.open();
+      this.closeOverlays();
+      this.$.successOverlay.open();
     }).catch((e: Error) => {
       // TODO: Figure out which fields in e are set, because message isn't.
-      this.closeDialogs();
-      this.$.failureDialog.open();
-    })
+      this.closeOverlays();
+      this.$.failureOverlay.open();
+    });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {
     input.focus();

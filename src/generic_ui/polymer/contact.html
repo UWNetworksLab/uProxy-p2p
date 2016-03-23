@@ -111,7 +111,7 @@
       margin: 0px 4px 0px 0px;
     }
     core-icon[icon=check] {
-      color: #009688;
+      color: #12A391;
     }
     p.preButtonDetailedText {
       margin: 18px 0px 0px 0px;
@@ -267,8 +267,7 @@
       </div>
 
       <div class="iconWrapper" hidden?="{{contact.network.name!='Cloud'}}">
-        <core-icon icon="delete"
-            title="{{ contact.url }}" on-tap="{{ displayCloudRemovalConfirmation }}"></core-icon>
+        <core-icon icon="delete" title="{{ contact.url }}" on-tap="{{ displayCloudRemovalConfirmation }}"></core-icon>
       </div>
 
       <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->

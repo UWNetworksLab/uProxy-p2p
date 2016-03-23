@@ -23,7 +23,7 @@
     }
     h1 {
       font-size: 1.4em;
-      color: #009688;  /* dark green */
+      color: #12A391;  /* dark green */
       margin-bottom: 1.5em;
     }
     h1.uproxyTitle {
@@ -60,7 +60,7 @@
       width: 150px;
     }
     #nextWrapper {
-      margin-top: 50px;
+      margin-top: 1em;
     }
     uproxy-faq-link paper-button {
       width: 100%;
@@ -126,9 +126,6 @@
           {{ "ABOUT_UPROXY" | $$ }}
         </p>
 
-        <div id='nextWrapper'>
-          <uproxy-button raised on-tap='{{next}}'>{{ "NEXT" | $$ }}</uproxy-button>
-        </div>
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>
           <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
@@ -142,8 +139,13 @@
                 </core-menu>
             </paper-dropdown>
           </paper-dropdown-menu>
+        </div> <!-- end of #languageLink -->
+
+        <div id='nextWrapper'>
+          <uproxy-button raised on-tap='{{next}}'>{{ "NEXT" | $$ }}</uproxy-button>
         </div>
-      </div>
+
+      </div> <!-- end of .view -->
 
       <uproxy-faq-link anchor='whatIsUproxy'>
         <paper-button>
@@ -151,7 +153,7 @@
         </paper-button>
       </uproxy-faq-link>
 
-    </div>
+    </div> <!-- end of #intro1 -->
 
     <div vertical layout id="metricsOptIn" hidden?='{{SPLASH_STATES.METRICS_OPT_IN!==model.globalSettings.splashState}}'>
       <div class="view" flex>
