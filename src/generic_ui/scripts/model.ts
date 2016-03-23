@@ -116,7 +116,6 @@ export class Model {
         for (var i = 0; i < typeCategory.length; ++i) {
           // Remove user if found
           if (typeCategory[i] === user) {
-            console.log('removing user from %1 %2', category, type, user);
             typeCategory.splice(i, 1);
           }
         }

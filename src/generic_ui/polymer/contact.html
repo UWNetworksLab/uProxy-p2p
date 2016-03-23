@@ -132,6 +132,7 @@
     </style>
 
     <core-signals on-core-signal-remove-cloud-server="{{ removeCloudFriend }}"></core-signals>
+    <core-signals on-core-signal-cancel-cloud-removal="{{ cancelCloudRemoval }}"></core-signals>
 
     <div tabindex='-1'
         class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'

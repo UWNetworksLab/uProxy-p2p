@@ -120,36 +120,51 @@ Polymer({
     });
   },
   displayCloudRemovalConfirmation: function() {
+    // We keep track of which contact should be deleted with toBeDeleted
+    // TODO: Instead of using toBeDeleted, send the contact's ID as data
+    // with a core-signal
     this.toBeDeleted = true;
-    var message :string = undefined;
+    // Core signals for the confirmation dialog cancel and continue buttons
+    var coreSignals = {
+      'cancel': 'cancel-cloud-removal',
+      'continue': 'remove-cloud-server'
+    };
     if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-      message = "DESTROY_CLOUD_SERVER_CONFIRMATION";
+      this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t('DESTROY_CLOUD_SERVER_CONFIRMATION'),
+        true, coreSignals);
     } else {
-      message = "REMOVE_CLOUD_SERVER_CONFIRMATION";
+      this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t('REMOVE_CLOUD_SERVER_CONFIRMATION'),
+        true, coreSignals);
     }
-    this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t(message),
-      true, 'remove-cloud-server');
+  },
+  cancelCloudRemoval: function() {
+    // toBeDeleted should be false if the user cancels cloud removal
+    this.toBeDeleted = false;
   },
   removeCloudFriend: function() {
+    // Don't do anything if this contact is not the one to be deleted
     if (!this.toBeDeleted) {
       return;
     }
+    this.toBeDeleted = false;
     // Destroy cloud server if created by user
     this.destroyCloudServerIfNeeded().then(() => {
-      // Remove cloud contact from friend list and logout if needed
+      // Remove contact from friend list
       ui_context.core.removeContact({
         networkName: this.contact.network.name,
         userId: this.contact.userId
       });
     }).then(() => {
-      console.log("Successfully removed cloud friend.")
       this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("REMOVE_CLOUD_SERVER_SUCCESS"),
         this.ui.i18n_t("OK"), undefined, undefined);
     }).catch((e: Error) => {
-      console.log('Error: Remove cloud friend failed.');
-      this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("REMOVE_CLOUD_SERVER_FAILURE"),
-        this.ui.i18n_t("OK"), undefined, undefined);
-      this.toBeDeleted = false;
+      if (e.name === 'CLOUD_ERR') {
+         this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_FAILURE"),
+          this.ui.i18n_t("OK"), undefined, undefined);
+      } else {
+        this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("REMOVE_CLOUD_SERVER_FAILURE"),
+          this.ui.i18n_t("OK"), undefined, undefined);
+      }
     });
   },
   destroyCloudServerIfNeeded: function() {
@@ -157,9 +172,10 @@ Polymer({
       return ui_context.core.cloudDestroy(DEFAULT_PROVIDER).then(() => {
         console.log("Sucessfully destroy cloud server.");
       }).catch((e: Error) => {
-        console.log('Error: Destroy cloud server failed.');
-        this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_FAILURE"),
-          this.ui.i18n_t("OK"), undefined, undefined);
+        return Promise.reject({
+          "name":"CLOUD_ERR",
+          "message":"Could not destroy cloud server."
+        });
       });
     }
     return Promise.resolve<void>();

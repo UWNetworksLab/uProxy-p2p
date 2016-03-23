@@ -355,10 +355,13 @@ export class UserInterface implements ui_constants.UiApi {
   public getConfirmation(heading :string,
                          text :string,
                          cancelContinueButtons :boolean = false,
-                         dataSignal? :string) :Promise<void> {
+                         dataSignal? :any) :Promise<void> {
     return new Promise<void>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
+      if (!dataSignal) {
+        dataSignal = {'cancel': '', 'continue': ''};
+      }
       this.fireSignal('open-dialog', {
         heading: heading,
         message: text,
@@ -366,13 +369,13 @@ export class UserInterface implements ui_constants.UiApi {
           text: cancelContinueButtons ?
               this.i18n_t('CANCEL') : this.i18n_t('NO'),
           callbackIndex: callbackIndex,
-          dismissive: true
+          dismissive: true,
+          signal: dataSignal.cancel
         }, {
           text: cancelContinueButtons ?
               this.i18n_t('CONTINUE') : this.i18n_t('YES'),
           callbackIndex: callbackIndex,
-          signal: dataSignal ?
-              dataSignal : ''
+          signal: dataSignal.continue
         }]
       });
     });
@@ -1053,7 +1056,7 @@ export class UserInterface implements ui_constants.UiApi {
     var network = this.model.getNetwork(args.networkName);
     var user = this.model.getUser(network, args.userId);
     this.model.removeContact(user);
-    console.log('Removed user from model.contacts', user);
+    console.log('Removed user from contacts', user);
   }
 
   public openTab = (url: string) => {

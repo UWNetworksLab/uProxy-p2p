@@ -1181,7 +1181,7 @@
   },
   "REMOVE_CLOUD_SERVER_CONFIRMATION": {
     "description": "Message that warns users their cloud server will be destroyed",
-    "message": "Are you sure you want to delete this cloud server from your list of friends?"
+    "message": "Are you sure you want to delete this cloud server?"
   },
   "REMOVE_CLOUD_SERVER_SUCCESS": {
     "description": "Message that tells users a cloud server was sucessfully deleted from their friend list",
