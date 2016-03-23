@@ -22,7 +22,7 @@ SSHD_PORT=5000
 
 function usage () {
   echo "$0 [-p path] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] browser-version"
-  echo "  -p: use a pre-built uproxy-lib"
+  echo "  -p: use a pre-built uproxy-zork docker image"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
@@ -159,7 +159,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
     IMAGEARGS=
     if [ -n "$PREBUILT" ]
     then
-      IMAGEARGS="-p"
+      IMAGEARGS="-d"
     fi
     ${BASH_SOURCE%/*}/image_make.sh $IMAGEARGS $BROWSER $VERSION
   fi
