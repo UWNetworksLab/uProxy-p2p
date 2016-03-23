@@ -26,8 +26,8 @@ Polymer({
           userName: user
         }).then(() => {
           console.log("Invite sent to: " + user);
-        }).catch(() => {
-          console.log("Failed to invite: " + user);
+        }, () => {
+          console.warn("Failed to invite: " + user);
         });
       }
     }
@@ -94,9 +94,10 @@ Polymer({
       this.generateInviteUrl('Quiver').then(() => {
         this.$.QuiverDialog.open();
       });
-    } else if (this.network == "WeChat") {
-      this.getWechatFriends();
     } else {
+      if (this.network == "WeChat") {
+        this.getWechatFriends();
+      } 
       this.$.networkInviteUserPanel.open();
     }
   },
