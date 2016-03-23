@@ -75,7 +75,7 @@ var inviteUser = {
   },
   initInviteForNetwork: function(networkName: string) {
     this.selectedNetworkName = networkName;
-    if (['GMail', 'GitHub', 'Cloud', 'Quiver'].indexOf(networkName) >= 0) {
+    if (['GMail', 'GitHub', 'Cloud', 'Quiver', 'WeChat'].indexOf(networkName) >= 0) {
       // After login for these networks, open another view which allows users
       // to invite their friends.
       this.fire('core-signal', { name: 'open-network-invite-dialog' });
