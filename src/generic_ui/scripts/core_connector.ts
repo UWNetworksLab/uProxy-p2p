@@ -214,7 +214,6 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_INVITE_URL, data);
   }
 
-  // TODO: this should probably take the network path, including userId
   getAllUserProfiles = (networkInfo :social.SocialNetworkInfo): Promise<social.UserProfile[]> => {
     return this.promiseCommand(uproxy_core_api.Command.GET_ALL_USER_PROFILES,
         networkInfo);

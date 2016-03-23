@@ -52,7 +52,6 @@ Polymer({
         this.wechatFriends[i] = friend;
         this.wechatInvites[friend.userId] = false;
       }
-      return selectedNetwork;
     });
   },
   sendToGMailFriend: function() {
