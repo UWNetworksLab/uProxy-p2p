@@ -103,7 +103,7 @@ export class UIConnector {
     this.update(uproxy_core_api.Update.USER_FRIEND, payload);
   }
 
-  public removeUser = (args:{ networkName: string, userId :string }) => {
+  public removeFriend = (args:{ networkName: string, userId :string }) => {
     this.update(uproxy_core_api.Update.REMOVE_FRIEND, args);
   }
 }

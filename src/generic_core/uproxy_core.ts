@@ -751,7 +751,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     log.info('removeContact', args);
     var network = this.getNetworkByName_(args.networkName);
     return network.removeUserFromStorage(args.userId).then(() => {
-      return ui.removeUser({
+      return ui.removeFriend({
         networkName: args.networkName,
         userId: args.userId 
       });
