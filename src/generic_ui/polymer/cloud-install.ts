@@ -25,10 +25,12 @@ Polymer({
     ui.openTab('https://cloud.digitalocean.com/registrations/new');
   },
   back: function() {
-    this.closeOverlays();
     if (this.$.digitalOceanAccountHelpOverlay.opened ||
         this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
+      this.closeOverlays();
       this.$.getStartedOverlay.open();
+    } else {
+      this.closeOverlays();
     }
   },
   closeOverlays: function() {
