@@ -719,10 +719,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // TODO(eholder): Might need to map policy as :{[value :string] :Object}
     // for iteration to work correctly, though that should be implied.
     for (var key in policy) {
-      if (globals.settings.hasOwnProperty(key)) {
-        globals.settings[key] = policy[key];
+      var key_string: string = key;
+      if (globals.settings.hasOwnProperty(key_string)) {
+        globals.settings[key_string] = policy[key];
       }
     }
+    updateGlobalSettings(globals.settings);
   }
 }  // class uProxyCore
 

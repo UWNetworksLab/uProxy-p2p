@@ -40,7 +40,7 @@ export interface GlobalSettings {
   showCloud :boolean;
   proxyBypass: string[];
   enforceProxyServerValidity :boolean;
-  validProxyServers :Object[];
+  validProxyServers :ValidProxyServerIdentity[];
 }
 export interface InitialState {
   networkNames :string[];
@@ -50,6 +50,11 @@ export interface InitialState {
   availableVersion :string;
   copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
+}
+
+export interface ValidProxyServerIdentity {
+  ip :string;
+  public_key :string;
 }
 
 export interface ConnectionState {
