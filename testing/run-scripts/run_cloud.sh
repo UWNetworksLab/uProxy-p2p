@@ -11,6 +11,7 @@
 set -e
 
 PREBUILT=
+IMAGE=
 INVITE_CODE=
 UPDATE=false
 WIPE=false
@@ -21,8 +22,9 @@ AUTOMATED=false
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] browser-version"
-  echo "  -p: use a pre-built uproxy-zork docker image"
+  echo "$0 [-p path] [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] browser-version"
+  echo "  -p: use a pre-built uproxy-lib (conflicts with -m)"
+  echo "  -m: use a specified Docker Hub image (conflicts with -p)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
@@ -35,9 +37,10 @@ function usage () {
   exit 1
 }
 
-while getopts p:i:uwd:b:ah? opt; do
+while getopts p:m:i:uwd:b:ah? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
+    m) IMAGE="$OPTARG" ;;
     i) INVITE_CODE="$OPTARG" ;;
     u) UPDATE=true ;;
     w) WIPE=true ;;
@@ -51,6 +54,12 @@ shift $((OPTIND-1))
 
 if [ $# -lt 1 ]
 then
+  usage
+fi
+
+if [ -n "$PREBUILT" ] && [ -n "$IMAGE" ]
+then
+  echo "-p and -m cannot be used together"
   usage
 fi
 
@@ -159,7 +168,10 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
     IMAGEARGS=
     if [ -n "$PREBUILT" ]
     then
-      IMAGEARGS="-d"
+      IMAGEARGS="-p"
+    elif [ -n "$IMAGE" ]
+    then
+      IMAGEARGS="-m $IMAGE"
     fi
     ${BASH_SOURCE%/*}/image_make.sh $IMAGEARGS $BROWSER $VERSION
   fi

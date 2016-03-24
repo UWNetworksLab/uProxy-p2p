@@ -4,25 +4,26 @@ set -e
 
 GIT=false
 BRANCH=
+IMAGE=
 PREBUILT=false
-DOCKER=false
 
 function usage () {
-  echo "$0 [-g] [-b branch] [-p] [-d] [-h] browser version"
-  echo "  -g: pull code from git (conflicts with -p)"
-  echo "  -b: git branch to pull (default: HEAD's referant)"
-  echo "  -p: use a pre-built uproxy-lib (conflicts with -g, -d)"
-  echo "  -d: use a pre-built image from Docker Hub (conflicts with -b, -p)"
+  echo "$0 [-g] [-b branch] [-m image] [-p] [-h] browser version"
+  echo "  -g: pull code from git (conflicts with -m, -p)"
+  echo "  -b: git branch to pull (expects -g, default: HEAD's referant)"
+  echo "  -m: use a specified Docker Hub image (conflicts with -g, -p)"
+  echo "  -p: use a pre-built uproxy-lib (conflicts with -g, -m)"
   echo "  -h, -?: this help message"
   echo
   echo "Without -g or -p the latest uproxy-lib NPM will be run."
   exit 1;
 }
 
-while getopts gb:pdh? opt; do
+while getopts gb:m:ph? opt; do
   case $opt in
     g) GIT=true ;;
     b) BRANCH="-b $OPTARG" ;;
+    m) IMAGE="$OPTARG" ;;
     p) PREBUILT=true ;;
     d) DOCKER=true ;;
     *) usage ;;
@@ -30,10 +31,10 @@ while getopts gb:pdh? opt; do
 done
 shift $((OPTIND-1))
 
-if [ [ "$GIT" = true ] && [ [ "$PREBUILT" = true ] || [ "$DOCKER"" = true ] ] ||
-     [ [ "$PREBUILT" = true ] && [ "$DOCKER" = true ] ] ]
+if [ [ "$GIT" = true ] && [ [ "$PREBUILT" = true ] || [ -n "$IMAGE"  ] ] ||
+       [ [ "$PREBUILT" = true ] && [ -n "IMAGE" ] ] ]
 then
-  echo "cannot use -g, -p, or -d with each other"
+  echo "cannot use -g, -p, or -m with each other"
   usage
 fi
 
@@ -55,10 +56,10 @@ TMP_DIR=`mktemp -d`
 
 cp -R ${BASH_SOURCE%/*}/../integration/test $TMP_DIR/test
 
-if [ "$DOCKER" = true ]
+if [ -n "$IMAGE" ]
 then
   cat <<EOF > $TMP_DIR/Dockerfile
-FROM soycode/uproxy-zork
+FROM $IMAGE
 EOF
 
 else
