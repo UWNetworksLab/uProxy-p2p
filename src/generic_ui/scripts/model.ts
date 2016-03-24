@@ -105,20 +105,19 @@ export class Model {
   }
 
   public removeContact = (user :User) : void => {
-    // Loop through each category: getAccessContacts and shareAccessContacts
-    for (var category in this.contacts) {
-    var contactsCategory = (<any>this.contacts)[category];
-      // Loop through type of contacts in each category:
-      // pending, trustedUproxy, untrustedUproxy
-      for (var type in contactsCategory) {
-        var typeCategory = contactsCategory[type];
-        // Loop through each user in typeCategory
-        for (var i = 0; i < typeCategory.length; ++i) {
-          // Remove user if found
-          if (typeCategory[i] === user) {
-            typeCategory.splice(i, 1);
-          }
-        }
+    var categories = user.getCategories();
+    // Remove user from its getTab category
+    var getCategory = this.contacts.getAccessContacts[categories.getTab];
+    for (var i = 0; i < getCategory.length; ++i) {
+      if (getCategory[i] === user) {
+        getCategory.splice(i, 1);
+      }
+    }
+    // Remove user from its shareTab category
+    var shareCategory = this.contacts.shareAccessContacts[categories.shareTab];
+    for (var i = 0; i < shareCategory.length; ++i) { 
+      if (shareCategory[i] === user) {
+        shareCategory.splice(i, 1);
       }
     }
   }
