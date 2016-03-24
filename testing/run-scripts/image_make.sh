@@ -59,9 +59,6 @@ if [ "$DOCKER" = true ]
 then
   cat <<EOF > $TMP_DIR/Dockerfile
 FROM soycode/uproxy-zork
-
-RUN apt-get -qq update
-RUN apt-get -qq upgrade
 EOF
 
 else
