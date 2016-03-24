@@ -716,10 +716,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public updateOrgPolicy(policy :Object) :void {
-    var keys = Object.keys(policy);
-    for (var i in keys) {
-      if (globals.settings.hasOwnProperty(keys[i])) {
-        globals.settings[keys[i]] = policy[keys[i]];
+    // TODO(eholder): Might need to map policy as :{[value :string] :Object}
+    // for iteration to work correctly, though that should be implied.
+    for (var key in policy) {
+      if (globals.settings.hasOwnProperty(key)) {
+        globals.settings[key] = policy[key];
       }
     }
   }
