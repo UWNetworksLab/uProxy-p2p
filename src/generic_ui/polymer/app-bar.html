@@ -25,17 +25,13 @@
     core-icon.back:hover {
       opacity: 1;
     }
-    core-icon.back.disabled {
-      cursor: not-allowed;
-      opacity: .4;
-    }
     core-toolbar {
       color: white;
     }
     </style>
 
     <core-toolbar id='app-bar-toolbar' style="background-color: {{color}};">
-      <core-icon class='back {{ { disabled: disableback } | tokenList }}' icon="arrow-back" on-tap='{{ back }}'></core-icon>
+      <core-icon hidden?='{{ disableback }}' class='back' icon="arrow-back" on-tap='{{ back }}'></core-icon>
       <div id='app-bar-title' flex>
         <content></content>
       </div>

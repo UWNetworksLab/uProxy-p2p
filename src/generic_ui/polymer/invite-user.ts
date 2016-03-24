@@ -60,7 +60,7 @@ var inviteUser = {
     }
   },
   cloudInstall: function() {
-    this.fire('core-signal', { name: 'open-cloud-install-dialog' });
+    this.fire('core-signal', { name: 'open-cloud-install' });
   },
   loginTapped: function() {
     // loginTapped should only be called by the loginToInviteFriendDialog, which
