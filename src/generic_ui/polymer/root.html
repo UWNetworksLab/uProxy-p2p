@@ -90,7 +90,7 @@
       core-toolbar {
         height: 105px;
         width: 100%;
-        background-color: #009688;
+        background-color: #12A391;
         color: white;
       }
       core-toolbar::shadow #topBar {
@@ -179,7 +179,7 @@
       }
       uproxy-action-dialog h1 {
         font-size: 1.4em;
-        color: #009688;
+        color: #12A391;
         font-weight: normal;
       }
       #dialogMessage {
@@ -261,7 +261,7 @@
         color: white;
         background-color: #34ceb9;  /* teal */
         position: absolute;
-        right: 2em;
+        right: 35px;
         /* Needed to make button clickable on Firefox issue #1905 */
         z-index: 1;
         height: 56px;
@@ -410,9 +410,9 @@
         </div>
         <!-- Elements (like the paper fab) that determine position based on proxying/error statuses, must come after the status elements above. Otherwise the positioning will be incorrect. -->
         <paper-fab id="inviteButton"
-          mini src='../icons/ic_person_add_white_24dp.svg'
+          mini icon='icons:add'
           on-tap='{{ fireOpenInviteUserPanel }}'
-          style='bottom: {{ $.status.offsetHeight + 26 }}px;'></paper-fab>
+          style='bottom: {{ $.status.offsetHeight + 35 }}px;'></paper-fab>
       </core-header-panel>
     </core-drawer-panel>
 
