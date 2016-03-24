@@ -169,7 +169,9 @@ Polymer({
   },
   destroyCloudServerIfNeeded: function() {
     if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-      return ui_context.core.cloudDestroy(DEFAULT_PROVIDER).then(() => {
+      return ui_context.core.cloudDestroy({
+        providerName: DEFAULT_PROVIDER
+      }).then(() => {
         console.log("Sucessfully destroy cloud server.");
       }).catch((e: Error) => {
         return Promise.reject({

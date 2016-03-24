@@ -184,7 +184,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
     if (networkInfo.userId) {
-      var userId = networkInfo.userId;
+      const userId = networkInfo.userId;
       var network = social_network.getNetwork(networkName, userId);
     } else {
       var network = this.getNetworkByName_(networkName);
@@ -617,7 +617,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
+  public cloudInstall = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
@@ -724,24 +724,25 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     /* TODO(xwsxethan) handle updating org policy */
   }
 
-  public cloudDestroy = (providerName :string) :Promise<void> =>  {
-    log.info('cloudDestroy', providerName, DEFAULT_SERVER_NAME);
-
-    const provisioner = freedom[CLOUD_PROVIDER_MODULE_PREFIX + providerName]();
-    const installer = freedom['cloudinstall']();
-    const destroyModules = () => {
-      freedom[CLOUD_PROVIDER_MODULE_PREFIX + providerName].close(provisioner);
-      freedom['cloudinstall'].close(installer);
+  public cloudDestroy = (args :uproxy_core_api.CloudOperationArgs) :Promise<void> =>  {
+    log.info('cloudDestroy', args, DEFAULT_SERVER_NAME);
+    const provisionerName = CLOUD_PROVIDER_MODULE_PREFIX + args.providerName;
+    const provisioner = freedom[provisionerName]();
+    const destroyModule = () => {
+      freedom[provisionerName].close(provisioner);
     };
+
     provisioner.on('status', (update: any) => {
       ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
     });
+
+    // OAuth into provider and destroy cloud server
     return provisioner.stop(DEFAULT_SERVER_NAME).then(() => {
-      log.info('stopped cloud server on %1', providerName);
-      destroyModules();
+      destroyModule();
+      log.info('stopped cloud server on %1', args.providerName);
     }, (e: Error) => {
-      destroyModules();
-      log.debug('Error destroying cloud server:' + JSON.stringify(e));
+      destroyModule();
+      log.error('error destroying cloud server: %1', e.message);
       return Promise.reject(e);
     });
   }
@@ -749,7 +750,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // Remove contact from friend list and storage
   public removeContact = (args :uproxy_core_api.RemoveContactArgs) : Promise<void> => {
     log.info('removeContact', args);
-    var network = this.getNetworkByName_(args.networkName);
+    const network = this.getNetworkByName_(args.networkName);
     return network.removeUserFromStorage(args.userId).then(() => {
       return ui.removeFriend({
         networkName: args.networkName,
@@ -765,13 +766,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private logoutIfRosterEmpty_ = (network :social.Network) : Promise<void> => {
     if (Object.keys(network.roster).length === 0) {
-      return this.logout({ name: network.name }).then(() => {
+      return this.logout({
+       name: network.name
+      }).then(() => {
         log.info('Successfully logged out of %1 network because roster is empty', network.name);
       });
-    } else {
-      log.info('Did not log out of %1 network because roster is not empty.', network.name);
-      return Promise.resolve<void>();
     }
+    return Promise.resolve<void>();
   }
 }  // class uProxyCore
 

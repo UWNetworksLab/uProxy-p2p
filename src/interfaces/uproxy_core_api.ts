@@ -219,19 +219,19 @@ export interface InvitationData {
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
 // Argument to #cloudInstall.
-export interface CloudInstallArgs {
-  // Use this cloud computing provider to create a server.
-  providerName: string;
-  // Provider-specific region in which to locate the new server.
-  region: string;
+export interface CloudOperationArgs {
+  // Use this cloud computing provider to access a server.
+  providerName :string;
+  // Provider-specific region in which to locate a new server.
+  region ?:string;
 };
 
 // Argument to removeContact
 export interface RemoveContactArgs {
   // Name of the network the contact is a part of
-  networkName: string,
+  networkName :string,
   // userId of the contact you want to remove
-  userId: string
+  userId :string
 };
 
 
@@ -301,11 +301,11 @@ export interface CoreApi {
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudInstall(args:CloudInstallArgs): Promise<void>;
+  cloudInstall(args :CloudOperationArgs): Promise<void>;
 
   // Invokes OAuth flow and destroys uProxy cloud server on the 
   // provider specified.
-  cloudDestroy(providerName :string) : Promise<void>;
+  cloudDestroy(args :CloudOperationArgs) : Promise<void>;
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;

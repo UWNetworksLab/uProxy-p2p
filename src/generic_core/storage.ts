@@ -78,9 +78,10 @@ export class Storage {
     log.debug('Removing key %1 from storage ', key);
     return fStorage.remove(key).then((result :string) => {
       log.debug('Successfully removed key %1 from storage', key);
+      return Promise.resolve<void>();
     }).catch((e) => {
-      log.error('Remove operation failed', e.message);
-      return Promise.reject(e);
+      log.warn('Destroy operation failed', e.message);
+      return Promise.resolve<void>();
     });
   }
 

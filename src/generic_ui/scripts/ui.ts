@@ -360,7 +360,10 @@ export class UserInterface implements ui_constants.UiApi {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
       if (!dataSignal) {
-        dataSignal = {'cancel': '', 'continue': ''};
+        dataSignal = {
+          'cancel': '',
+          'continue': ''
+        };
       }
       this.fireSignal('open-dialog', {
         heading: heading,
@@ -1372,12 +1375,12 @@ export class UserInterface implements ui_constants.UiApi {
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
+  public cloudInstall = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
     return this.core.cloudInstall(args);
   }
 
-  public cloudDestroy = (providerName: string): Promise<void> => {
-    return this.core.cloudDestroy(providerName);
+  public cloudDestroy = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
+    return this.core.cloudDestroy(args);
   }
 
   public removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {

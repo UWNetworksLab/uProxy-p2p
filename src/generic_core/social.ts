@@ -179,7 +179,7 @@ export function notifyUI(networkName :string, userId :string) {
      */
     public addUser = (userId :string) :remote_user.User => {
       if (!this.isNewFriend_(userId)) {
-        log.error('Cannot add already existing user', userId);
+        log.warn('Cannot add already existing user', userId);
       }
       var newUser = new remote_user.User(this, userId);
       this.roster[userId] = newUser;
@@ -754,12 +754,12 @@ export function notifyUI(networkName :string, userId :string) {
       // Remove user from roster.
       this.removeUser(userId);
       // Remove user from storage.
-      var rosterKey = this.getStorePath() + userId;
+      const rosterKey = this.getStorePath() + userId;
       return storage.destroy(rosterKey).then(() => {
         if (this.name === 'Cloud') {
           // In addition to the roster key, cloud contacts have another key
           // of the form 'instance_id/user_id' we need to remove from storage
-          var cloudKey = this.getStorePath().replace('roster/', userId);
+          const cloudKey = this.getStorePath().replace('roster/', userId);
           return storage.destroy(cloudKey).then(() => {
             // Remove user from cloud social provider
             return this.freedomApi_.removeUser(userId);

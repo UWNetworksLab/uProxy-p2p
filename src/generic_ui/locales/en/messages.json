@@ -1169,7 +1169,7 @@
   },
   "DESTROY_CLOUD_SERVER_CONFIRMATION": {
     "description": "Message that warns users their cloud server will be destroyed",
-    "message": "This will destroy your uProxy cloud server on Digital Ocean. Please keep in mind that friends and family will no longer be able to use this cloud server once it's destroyed."
+    "message": "This will destroy your uProxy cloud server. Please keep in mind that friends and family will no longer be able to use this cloud server once it's destroyed."
   },
   "REMOVE_CLOUD_SERVER_CONFIRMATION": {
     "description": "Message that warns users their cloud server will be destroyed",
@@ -1185,7 +1185,7 @@
   },
   "DESTROY_CLOUD_SERVER_FAILURE": {
     "description": "Message that tells users we failed to destroy their cloud server",
-    "message": "We're sorry. We couldn't destroy your cloud server for you at this time. You may want to log in to Digital Ocean to destroy it yourself."
+    "message": "We're sorry. We couldn't destroy your cloud server for you at this time. You may want to log in to the cloud provider to destroy it yourself."
   },
   "CREATE_A_CLOUD_SERVER": {
     "description": "Title on cloud deployment screens, where the user can set up a new server that allows them proxy access.",
