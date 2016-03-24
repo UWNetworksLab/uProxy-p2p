@@ -183,7 +183,7 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   if ! docker images | grep uproxy/sshd >/dev/null; then
     TMP_DIR=/tmp/uproxy-sshd
     rm -fR $TMP_DIR
-    cp -R ${BASH_SOURCE%/*}/../../sshd/ $TMP_DIR
+    cp -R ${BASH_SOURCE%/*}/../../sshd/usehub/ $TMP_DIR
 
     echo -n "$BANNER" > $TMP_DIR/banner
     echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
