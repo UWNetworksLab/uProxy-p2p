@@ -247,12 +247,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.ACCEPT_INVITATION, data);
   }
 
-  cloudInstall = (args:uproxy_core_api.CloudOperationArgs): Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.CLOUD_INSTALL, args);
-  }
-
-  cloudDestroy = (args:uproxy_core_api.CloudOperationArgs): Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.CLOUD_DESTROY, args);
+  cloudUpdate = (args:uproxy_core_api.CloudOperationArgs): Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.CLOUD_UPDATE, args);
   }
 
   removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {

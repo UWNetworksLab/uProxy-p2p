@@ -102,10 +102,9 @@ export enum Command {
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
   SEND_INVITATION = 1028,
-  CLOUD_INSTALL = 1029,
+  CLOUD_UPDATE = 1029,
   UPDATE_ORG_POLICY = 1030,
-  CLOUD_DESTROY = 1031,
-  REMOVE_CONTACT = 1032
+  REMOVE_CONTACT = 1031
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -218,8 +217,16 @@ export interface InvitationData {
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
-// Argument to #cloudInstall.
+// Type of cloud operations
+export enum CloudOperation {
+  CLOUD_INSTALL = 0,
+  CLOUD_DESTROY = 1
+}
+
+// Arguments to cloudUpdate
 export interface CloudOperationArgs {
+  // Type of CloudOperation
+  operation: CloudOperation;
   // Use this cloud computing provider to access a server.
   providerName :string;
   // Provider-specific region in which to locate a new server.
@@ -297,15 +304,11 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
-  // Installs uProxy on a server. Generally a long-running operation, so
+  // Installs or destroys uProxy on a server. Generally a long-running operation, so
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudInstall(args :CloudOperationArgs): Promise<void>;
-
-  // Invokes OAuth flow and destroys uProxy cloud server on the 
-  // provider specified.
-  cloudDestroy(args :CloudOperationArgs) : Promise<void>;
+  cloudUpdate(args :CloudOperationArgs): Promise<void>;
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;
