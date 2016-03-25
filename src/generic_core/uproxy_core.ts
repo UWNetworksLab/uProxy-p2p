@@ -637,71 +637,72 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
     });
 
-    if (args.operation === uproxy_core_api.CloudOperation.CLOUD_INSTALL) {
-      if (!args.region) {
-        return Promise.reject(new Error('no region specified for cloud provider'));
-      }
-      return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
-        log.info('created server on digitalocean: %1', serverInfo);
+    switch (args.operation) {
+      case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
+        if (!args.region) {
+          return Promise.reject(new Error('no region specified for cloud provider'));
+        }
+        return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
+          log.info('created server on digitalocean: %1', serverInfo);
 
-        const host = serverInfo.network.ipv4;
-        const port = serverInfo.network.ssh_port;
+          const host = serverInfo.network.ipv4;
+          const port = serverInfo.network.ssh_port;
 
-        log.debug('installing cloud on %1:%2', host, port);
+          log.debug('installing cloud on %1:%2', host, port);
 
-        // TODO: Send real updates. While we could trivially send stdout,
-        //       that's extremely verbose right now.
-        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
+          // TODO: Send real updates. While we could trivially send stdout,
+          //       that's extremely verbose right now.
+          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
 
-        // Attempt to install.  If install fails, retry will attempt again
-        // up to MAX_INSTALLS times.  Failure may occur because we have just
-        // created the server and it is not yet ready for SSH.
-        // TODO: The provisioning module should return the username!
-        const install = () => {
-          return installer.install(host, port, 'root', serverInfo.ssh.private);
-        };
-        const MAX_INSTALLS = 5;
-        return retry(install, MAX_INSTALLS);
-      }).then((cloudNetworkData: any) => {
-        // TODO: make cloudNetworkData an Invite type.  This requires the cloud
-        // social provider to export the Invite interface, and also to cleanup
-        // reference paths so that uProxy doesn't need to include modules like
-        // ssh2.
-        destroyModules();
+          // Attempt to install.  If install fails, retry will attempt again
+          // up to MAX_INSTALLS times.  Failure may occur because we have just
+          // created the server and it is not yet ready for SSH.
+          // TODO: The provisioning module should return the username!
+          const install = () => {
+            return installer.install(host, port, 'root', serverInfo.ssh.private);
+          };
+          const MAX_INSTALLS = 5;
+          return retry(install, MAX_INSTALLS);
+        }).then((cloudNetworkData: any) => {
+          // TODO: make cloudNetworkData an Invite type.  This requires the cloud
+          // social provider to export the Invite interface, and also to cleanup
+          // reference paths so that uProxy doesn't need to include modules like
+          // ssh2.
+          destroyModules();
 
-        // Login to the Cloud network if the user isn't already so that
-        // we can add the new cloud server to the roster.
-        return this.loginIfNeeded_('Cloud').then((cloudNetwork) => {
-          // Set flag so Cloud social provider knows this invite is for the admin
-          // user, who just created the server.
-          cloudNetworkData['isAdmin'] = true;
+          // Login to the Cloud network if the user isn't already so that
+          // we can add the new cloud server to the roster.
+          return this.loginIfNeeded_('Cloud').then((cloudNetwork) => {
+            // Set flag so Cloud social provider knows this invite is for the admin
+            // user, who just created the server.
+            cloudNetworkData['isAdmin'] = true;
 
-          // Synthesize an invite token based on cloudNetworkData.
-          // CONSIDER: if we had a social.acceptInvitation that only took
-          // networkData we wouldn't need to fake the other fields.
-          return cloudNetwork.acceptInvitation({
-            v: 2,
-            networkName: 'Cloud',
-            userName: cloudNetworkData['host'],
-            networkData: JSON.stringify(cloudNetworkData)
+            // Synthesize an invite token based on cloudNetworkData.
+            // CONSIDER: if we had a social.acceptInvitation that only took
+            // networkData we wouldn't need to fake the other fields.
+            return cloudNetwork.acceptInvitation({
+              v: 2,
+              networkName: 'Cloud',
+              userName: cloudNetworkData['host'],
+              networkData: JSON.stringify(cloudNetworkData)
+            });
           });
+        }, (e: Error) => {
+          destroyModules();
+          return Promise.reject(e);
         });
-      }, (e: Error) => {
-        destroyModules();
-        return Promise.reject(e);
-      });
-    } else if (args.operation === uproxy_core_api.CloudOperation.CLOUD_DESTROY) {
-      // OAuth into provider and destroy cloud server
-      return provisioner.stop(DROPLET_NAME).then(() => {
-        destroyModules();
-        log.debug('stopped cloud server on', args.providerName);
-      }, (e: Error) => {
-        destroyModules();
-        log.error('error destroying cloud server:', e.message);
-        return Promise.reject(e);
-      });
-    } else {
-      return Promise.reject(new Error('cloud operation not supported'));
+      case uproxy_core_api.CloudOperationType.CLOUD_DESTROY:
+        // OAuth into provider and destroy cloud server
+        return provisioner.stop(DROPLET_NAME).then(() => {
+          destroyModules();
+          log.debug('stopped cloud server on', args.providerName);
+        }, (e: Error) => {
+          destroyModules();
+          log.error('error destroying cloud server:', e.message);
+          return Promise.reject(e);
+        });
+      default:
+        return Promise.reject(new Error('cloud operation not supported'));
     }
   }  // end of cloudUpdate
 

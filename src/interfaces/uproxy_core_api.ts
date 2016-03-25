@@ -217,16 +217,14 @@ export interface InvitationData {
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
-// Type of cloud operations
-export enum CloudOperation {
+export enum CloudOperationType {
   CLOUD_INSTALL = 0,
   CLOUD_DESTROY = 1
 }
 
 // Arguments to cloudUpdate
 export interface CloudOperationArgs {
-  // Type of CloudOperation
-  operation: CloudOperation;
+  operation: CloudOperationType;
   // Use this cloud computing provider to access a server.
   providerName :string;
   // Provider-specific region in which to locate a new server.
