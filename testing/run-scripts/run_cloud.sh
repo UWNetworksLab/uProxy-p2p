@@ -10,7 +10,6 @@
 
 set -e
 
-PREBUILT=
 IMAGE=
 INVITE_CODE=
 UPDATE=false
@@ -22,9 +21,8 @@ AUTOMATED=false
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] browser-version"
-  echo "  -p: use a pre-built uproxy-lib (conflicts with -m)"
-  echo "  -m: use a specified Docker Hub image (conflicts with -p)"
+  echo "$0 [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
+  echo "  -m: use a specified Docker Hub image (defaults to soycode/uproxy-zork)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
@@ -37,9 +35,8 @@ function usage () {
   exit 1
 }
 
-while getopts p:m:i:uwd:b:ah? opt; do
+while getopts m:i:uwd:b:ah? opt; do
   case $opt in
-    p) PREBUILT="$OPTARG" ;;
     m) IMAGE="$OPTARG" ;;
     i) INVITE_CODE="$OPTARG" ;;
     u) UPDATE=true ;;
@@ -54,12 +51,6 @@ shift $((OPTIND-1))
 
 if [ $# -lt 1 ]
 then
-  usage
-fi
-
-if [ -n "$PREBUILT" ] && [ -n "$IMAGE" ]
-then
-  echo "-p and -m cannot be used together"
   usage
 fi
 
@@ -163,27 +154,19 @@ HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
 # Start Zork, if necessary.
 if ! docker ps -a | grep uproxy-zork >/dev/null; then
   if ! docker images | grep uproxy/$1 >/dev/null; then
-    BROWSER=$(echo $1 | cut -d - -f 1)
-    VERSION=$(echo $1 | cut -d - -f 2)
-    IMAGEARGS=
-    if [ -n "$PREBUILT" ]
+    if [ -n "$IMAGE" ]
     then
-      IMAGEARGS="-p"
-    elif [ -n "$IMAGE" ]
-    then
-      IMAGEARGS="-m $IMAGE"
+      IMAGE="soycode/uproxy-zork"
     fi
-    ${BASH_SOURCE%/*}/image_make.sh $IMAGEARGS $BROWSER $VERSION
-  fi
-  HOSTARGS=
-  if [ -n "$PREBUILT" ]
-  then
-    HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy-lib"
+    ZORK_DIR=`mktemp -d`
+    cp -R ${BASH_SOURCE%/*}/../integration/test $ZORK_DIR/test
+    echo "FROM $IMAGE" > $ZORK_DIR/Dockerfile
+    docker build -t $IMAGE $TMP_DIR
   fi
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
   #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
-  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh -z
+  docker run --restart=always --net=host --cap-add NET_ADMIN --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
   while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
