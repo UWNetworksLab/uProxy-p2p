@@ -597,21 +597,16 @@ export class UserInterface implements ui_constants.UiApi {
     var networkName = tokenObj.networkName;
 
     if (networkName == 'Cloud') {
-      // Cloud confirmation is the same regardless of whether the user is
-      // logged into cloud yet.
-      return this.getConfirmation('', this.i18n_t('CLOUD_INVITE_CONFIRM'))
-      .then(() => {
-        // Log into cloud if needed.
-        var loginPromise = Promise.resolve<void>();
-        if (!this.model.getNetwork('Cloud')) {
-          loginPromise = this.login('Cloud');
-        }
-        return loginPromise.then(() => {
-          // Cloud contacts only appear on the GET tab.
-          this.setMode(ui_constants.Mode.GET);
-          // Don't show an additional confirmation for Cloud.
-          return this.addUser_(tokenObj, false).catch(showTokenError);
-        });
+      // Log into cloud if needed.
+      var loginPromise = Promise.resolve<void>();
+      if (!this.model.getNetwork('Cloud')) {
+        loginPromise = this.login('Cloud');
+      }
+      return loginPromise.then(() => {
+        // Cloud contacts only appear on the GET tab.
+        this.setMode(ui_constants.Mode.GET);
+        // Don't show an additional confirmation for Cloud.
+        return this.addUser_(tokenObj, false).catch(showTokenError);
       });
     }
 
