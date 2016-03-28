@@ -13,7 +13,7 @@ export interface UserPath {
 
 export interface SocialNetworkInfo {
   name :string;
-  userId :string; // ID for current user
+  userId ?:string; // ID for current user
 }
 
 export interface InstancePath extends UserPath {
@@ -341,5 +341,10 @@ export interface Network {
   isEncrypted : () => boolean;
 
   getKeyFromClientId : (clientId :string) => string;
+  
+  /**
+   * Removes user from the network's roster and storage
+   */
+  removeUserFromStorage : (userId :string) => Promise<void>;
 }
 

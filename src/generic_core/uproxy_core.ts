@@ -181,8 +181,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    */
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
-    var userId = networkInfo.userId;
-    var network = social_network.getNetwork(networkName, userId);
+    if (networkInfo.userId) {
+      const userId = networkInfo.userId;
+      var network = social_network.getNetwork(networkName, userId);
+    } else {
+      var network = this.getNetworkByName_(networkName);
+    }
+
     if (null === network) {
       log.warn('Could not logout of network', networkName);
       return;
@@ -610,96 +615,109 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
+  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
     // This is the server name recommended by the blog post.
     const DROPLET_NAME = 'uproxy-cloud-server';
-
+    
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
 
-    if (!args.region) {
-      return Promise.reject(new Error('no region specified for cloud provider'));
-    }
-
-    log.debug('logging into cloud provider %1', args.providerName);
-
-    const provisioner = freedom[CLOUD_PROVIDER_MODULE_PREFIX + args.providerName]();
+    const provisionerName = CLOUD_PROVIDER_MODULE_PREFIX + args.providerName;
+    const provisioner = freedom[provisionerName]();
     const installer = freedom['cloudinstall']();
 
     const destroyModules = () => {
-      freedom[CLOUD_PROVIDER_MODULE_PREFIX + args.providerName].close(provisioner);
+      freedom[provisionerName].close(provisioner);
       freedom['cloudinstall'].close(installer);
     };
 
+    log.debug('logging into cloud provider %1', args.providerName);
     provisioner.on('status', (update: any) => {
       ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
     });
 
-    // This is the server name recommended by the blog post.
-    return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
-      log.info('created server on digitalocean: %1', serverInfo);
+    switch (args.operation) {
+      case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
+        if (!args.region) {
+          return Promise.reject(new Error('no region specified for cloud provider'));
+        }
+        return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
+          log.info('created server on digitalocean: %1', serverInfo);
 
-      const host = serverInfo.network.ipv4;
-      const port = serverInfo.network.ssh_port;
+          const host = serverInfo.network.ipv4;
+          const port = serverInfo.network.ssh_port;
 
-      log.debug('installing cloud on %1:%2', host, port);
+          log.debug('installing cloud on %1:%2', host, port);
 
-      // TODO: Send real updates. While we could trivially send stdout,
-      //       that's extremely verbose right now.
-      ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
+          // TODO: Send real updates. While we could trivially send stdout,
+          //       that's extremely verbose right now.
+          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
 
-      // Attempt to install.  If install fails, retry will attempt again
-      // up to MAX_INSTALLS times.  Failure may occur because we have just
-      // created the server and it is not yet ready for SSH.
-      // TODO: The provisioning module should return the username!
-      const install = () => {
-        return installer.install(host, port, 'root', serverInfo.ssh.private);
-      };
-      const MAX_INSTALLS = 5;
-      return retry(install, MAX_INSTALLS);
-    }).then((cloudNetworkData :any) => {
-      // TODO: make cloudNetworkData an Invite type.  This requires the cloud
-      // social provider to export the Invite interface, and also to cleanup
-      // reference paths so that uProxy doesn't need to include modules like
-      // ssh2.
-      destroyModules();
+          // Attempt to install.  If install fails, retry will attempt again
+          // up to MAX_INSTALLS times.  Failure may occur because we have just
+          // created the server and it is not yet ready for SSH.
+          // TODO: The provisioning module should return the username!
+          const install = () => {
+            return installer.install(host, port, 'root', serverInfo.ssh.private);
+          };
+          const MAX_INSTALLS = 5;
+          return retry(install, MAX_INSTALLS);
+        }).then((cloudNetworkData: any) => {
+          // TODO: make cloudNetworkData an Invite type.  This requires the cloud
+          // social provider to export the Invite interface, and also to cleanup
+          // reference paths so that uProxy doesn't need to include modules like
+          // ssh2.
+          destroyModules();
 
-      // Login to the Cloud network if the user isn't already so that
-      // we can add the new cloud server to the roster.
-      return this.loginIfNeeded_('Cloud').then((cloudNetwork) => {
-        // Set flag so Cloud social provider knows this invite is for the admin
-        // user, who just created the server.
-        cloudNetworkData['isAdmin'] = true;
+          // Login to the Cloud network if the user isn't already so that
+          // we can add the new cloud server to the roster.
+          return this.loginIfNeeded_('Cloud').then((cloudNetwork) => {
+            // Set flag so Cloud social provider knows this invite is for the admin
+            // user, who just created the server.
+            cloudNetworkData['isAdmin'] = true;
 
-        // Synthesize an invite token based on cloudNetworkData.
-        // CONSIDER: if we had a social.acceptInvitation that only took
-        // networkData we wouldn't need to fake the other fields.
-        return cloudNetwork.acceptInvitation({
-          v: 2,
-          networkName: 'Cloud',
-          userName: cloudNetworkData['host'],
-          networkData: JSON.stringify(cloudNetworkData)
+            // Synthesize an invite token based on cloudNetworkData.
+            // CONSIDER: if we had a social.acceptInvitation that only took
+            // networkData we wouldn't need to fake the other fields.
+            return cloudNetwork.acceptInvitation({
+              v: 2,
+              networkName: 'Cloud',
+              userName: cloudNetworkData['host'],
+              networkData: JSON.stringify(cloudNetworkData)
+            });
+          });
+        }, (installError: Error) => {
+          log.error('install failed, cleaning up');
+
+          // Destroy the server we just created so that the user isn't billed.
+          provisioner.stop(DROPLET_NAME).then((unused: Object) => {
+            log.info('destroyed server on digitalocean');
+            destroyModules();
+            return Promise.reject(installError);
+          }, (destroyError: Error) => {
+            // This is bad: the user will be billed for a broken server.
+            // TODO: direct the user at the digitalocean console
+            log.error('failed to destroy new server after install failure: %1',
+              destroyError.message);
+            destroyModules();
+            return Promise.reject(installError);
+          });
         });
-      });
-    }, (installError: Error) => {
-      log.error('install failed, cleaning up');
-
-      // Destroy the server we just created so that the user isn't billed.
-      provisioner.stop(DROPLET_NAME).then((unused:Object) => {
-        log.info('destroyed server on digitalocean');
-        destroyModules();
-        return Promise.reject(installError);
-      }, (destroyError:Error) => {
-        // This is bad: the user will be billed for a broken server.
-        // TODO: direct the user at the digitalocean console
-        log.error('failed to destroy new server after install failure: %1',
-            destroyError.message);
-        destroyModules();
-        return Promise.reject(installError);
-      });
-    });
-  }  // end of cloudInstall
+      case uproxy_core_api.CloudOperationType.CLOUD_DESTROY:
+        // OAuth into provider and destroy cloud server
+        return provisioner.stop(DROPLET_NAME).then(() => {
+          destroyModules();
+          log.debug('stopped cloud server on', args.providerName);
+        }, (e: Error) => {
+          destroyModules();
+          log.error('error destroying cloud server:', e.message);
+          return Promise.reject(e);
+        });
+      default:
+        return Promise.reject(new Error('cloud operation not supported'));
+    }
+  }  // end of cloudUpdate
 
   // Gets a social.Network, and logs the user in if they aren't yet logged in.
   private loginIfNeeded_ = (networkName :string) : Promise<social.Network> => {
@@ -731,6 +749,34 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public updateOrgPolicy(policy :Object) :void {
     /* TODO(xwsxethan) handle updating org policy */
+  }
+
+  // Remove contact from friend list and storage
+  public removeContact = (args :uproxy_core_api.RemoveContactArgs) : Promise<void> => {
+    log.info('removeContact', args);
+    const network = this.getNetworkByName_(args.networkName);
+    return network.removeUserFromStorage(args.userId).then(() => {
+      return ui.removeFriend({
+        networkName: args.networkName,
+        userId: args.userId 
+      });
+    }).then(() => {
+      // If we removed the only cloud friend, logout of the cloud network
+      if (args.networkName === 'Cloud') {
+        return this.logoutIfRosterEmpty_(network);
+      }
+    });
+  }
+
+  private logoutIfRosterEmpty_ = (network :social.Network) : Promise<void> => {
+    if (Object.keys(network.roster).length === 0) {
+      return this.logout({
+       name: network.name
+      }).then(() => {
+        log.info('Successfully logged out of %1 network because roster is empty', network.name);
+      });
+    }
+    return Promise.resolve<void>();
   }
 }  // class uProxyCore
 

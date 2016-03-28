@@ -27,6 +27,7 @@ export enum Mode {
 export interface UiApi {
 
   syncUser(UserMessage:social.UserData) : void;
+  removeFriend(args:{ networkName :string, userId :string }) : void;
   // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
   // the below)...
   // updateAll(data:Object) : void;
