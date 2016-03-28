@@ -19,7 +19,7 @@ class ChromeUIConnector {
 
   constructor(private uProxyAppChannel_ :freedom.OnAndEmit<any,any>) {
     this.extPort_ = null;
-    chrome.runtime.onConnectExternal.addListener(this.onConnect_);
+    (<chrome.runtime.ExtensionConnectEvent>chrome.runtime.onConnectExternal).addListener(this.onConnect_);
     // Until the extension is connected, we assume uProxy installation is
     // incomplete.
     chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
@@ -76,12 +76,12 @@ class ChromeUIConnector {
 
     // Once the extension is connected, we know that installation of uProxy
     // is complete.
-    (<chrome.events.Event>chrome.app.runtime.onLaunched).removeListener(this.launchInstallIncompletePage_);
+    chrome.app.runtime.onLaunched.removeListener(this.launchInstallIncompletePage_);
     chrome.app.runtime.onLaunched.addListener(this.launchUproxy_);
     this.extPort_.onDisconnect.addListener(function(){
       // If the extension disconnects, we should show an error
       // page.
-      (<chrome.events.Event>chrome.app.runtime.onLaunched).removeListener(this.launchUproxy_);
+      chrome.app.runtime.onLaunched.removeListener(this.launchUproxy_);
       chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
     }.bind(this));
   }
