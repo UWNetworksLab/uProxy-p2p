@@ -12,29 +12,13 @@ import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import PassThrough = require('../transformers/passthrough');
+import promises = require('../promises/promises');
 import protean = require('../transformers/protean');
 import sequence = require('../transformers/byteSequenceShaper');
 
 import Socket = freedom.UdpSocket.Socket;
 
 var log :logging.Log = new logging.Log('churn-pipe');
-
-// Retry an async function with exponential backoff for up to 2 seconds
-// before failing.
-var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
-  delayMs = delayMs || 10;
-  return func().catch((err) => {
-    delayMs *= 2;
-    if (delayMs > 2000) {
-      return Promise.reject(err);
-    }
-    return new Promise<T>((F, R) => {
-      setTimeout(() => {
-        retry_(func, delayMs).then(F, R);
-      }, delayMs);
-    });
-  });
-}
 
 // Maps transformer names to class constructors.
 var transformers :{[name:string] : new() => Transformer} = {
@@ -46,6 +30,10 @@ var transformers :{[name:string] : new() => Transformer} = {
   'protean': protean.Protean,
   'sequenceShaper': sequence.ByteSequenceShaper
 };
+
+// Local socket rebinding retry timing (see bindLocal)
+const INITIAL_REBIND_INTERVAL_MS = 10;
+const MAX_REBIND_INTERVAL_MS = 2000;
 
 interface MirrorSet {
   // If true, these mirrors represent a remote endpoint that has been
@@ -198,13 +186,13 @@ class Pipe {
     // This retry is needed because the browser releases the UDP port
     // asynchronously after we call close() on the RTCPeerConnection, so
     // this call to bind() may initially fail, until the port is released.
-    portPromise = retry_(() => {
+    portPromise = promises.retryWithExponentialBackoff(() => {
       log.debug('%1: trying to bind public endpoint: %2',
           this.name_, publicEndpoint);
       // TODO: Once https://github.com/freedomjs/freedom/issues/283 is
       // fixed, catch here, and only retry on an ALREADY_BOUND error.
       return socket.bind(anyInterface, publicEndpoint.port);
-    }).then(() => {
+    }, MAX_REBIND_INTERVAL_MS, INITIAL_REBIND_INTERVAL_MS).then(() => {
       log.debug('%1: successfully bound public endpoint: %2',
           this.name_, publicEndpoint);
       socket.on('onData', (recvFromInfo:freedom.UdpSocket.RecvFromInfo) => {
