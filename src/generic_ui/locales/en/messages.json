@@ -759,10 +759,6 @@
     "description": "Generic label for links to FAQ.",
     "message": "Learn more"
   },
-  "CLOUD_INVITE_CONFIRM" : {
-    "description": "Confirmation message asking the user if they would like to add a cloud instance to their buddy list, which will connect them to a virtual machine.",
-    "message": "You're about to connect to a uProxy cloud server! Thanks for being one of our first testers of this experimental feature. Would you like to continue?"
-  },
   "FRIEND_ADDED": {
     "description": "Confirmation message after adding a friend to the roster.",
     "message": "Friend added"
