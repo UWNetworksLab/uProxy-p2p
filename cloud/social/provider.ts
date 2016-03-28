@@ -6,6 +6,7 @@
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
+import promises = require('../../promises/promises');
 import queue = require('../../handler/queue');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
@@ -24,6 +25,9 @@ const STORAGE_KEY = 'cloud-social-contacts';
 
 // Timeout for establishing an SSH connection.
 const CONNECT_TIMEOUT_MS = 10000;
+
+// Maximum number of times to try establishing an SSH connection.
+const MAX_CONNECT_ATTEMPTS = 3;
 
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
@@ -199,15 +203,23 @@ export class CloudSocialProvider {
       });
     }
 
-    var connection = new Connection(invite, (message: Object) => {
-      this.dispatchEvent_('onMessage', {
-        from: makeClientState(invite.host),
-        // SIGNAL_FROM_SERVER_PEER,
-        message: JSON.stringify(makeVersionedPeerMessage(3002, message))
+    let numAttempts = 0;
+    const connect = () => {
+      log.debug('connection attempt %1...', (++numAttempts));
+      const connection = new Connection(invite, (message: Object) => {
+        this.dispatchEvent_('onMessage', {
+          from: makeClientState(invite.host),
+          // SIGNAL_FROM_SERVER_PEER,
+          message: JSON.stringify(makeVersionedPeerMessage(3002, message))
+        });
       });
-    });
-
-    this.clients_[invite.host] = connection.connect().then(() => {
+      return connection.connect().then(() => {
+        return connection;
+      });
+    };
+        
+    this.clients_[invite.host] = promises.retry(connect,
+        MAX_CONNECT_ATTEMPTS).then((connection:Connection) => {
       log.info('connected to zork on %1', invite.host);
 
       // Fetch the banner, if available, then emit an instance message.
