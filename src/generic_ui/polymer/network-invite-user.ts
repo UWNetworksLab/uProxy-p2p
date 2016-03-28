@@ -46,12 +46,17 @@ Polymer({
       name: selectedNetwork.name,
       userId: selectedNetwork.userId
     };
-    return core.getAllUserProfiles(info).then((roster: any) => {
+    core.getAllUserProfiles(info).then((roster: any) => {
+      var potentialInvites: any = {};
       for(var i = 0; i < roster.length; i++) {
         var friend = roster[i];
-        this.wechatFriends[i] = friend;
-        this.wechatInvites[friend.userId] = false;
+        if (friend.userId.startsWith("wxid_")) {
+          this.wechatFriends[i] = friend;
+          this.wechatInvites[friend.userId] = false;
+          potentialInvites[friend.userId] = friend;
+        }
       }
+      return potentialInvites;
     });
   },
   sendToGMailFriend: function() {

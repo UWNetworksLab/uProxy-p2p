@@ -70,6 +70,10 @@
       .wechatFriend uproxy-avatar {
         margin-right: 20px;
       }
+      .margin12 {
+        margin: 12px;
+      }
+
     </style>
 
     <core-signals on-core-signal-open-network-invite-dialog='{{openInviteUserPanel}}'></core-signals>
@@ -109,18 +113,21 @@
       </div>
 
       <div hidden?='{{network != "WeChat"}}'>
-        <div style="margin-top: 20px;">
+        <uproxy-app-bar class="WeChat" on-go-back='{{closeInviteUserPanel}}' color="#6ab000">
+          {{ 'INVITE_A_FRIEND' | $$ }}
+        </uproxy-app-bar>
+        <div style="margin-top: 20px;" class="margin12">
           {{ 'WECHAT_WHO_TO_INVITE' | $$ }}
         </div>
         <template repeat="{{friend in wechatFriends}}">
-          <div center horizontal layout class="wechatFriend">
+          <div center horizontal layout class="wechatFriend margin12">
             <uproxy-avatar src='{{friend.imageData}}' network='WeChat' showIcon="true"></uproxy-avatar>
             <div flex>{{friend.name}}</div>
             <paper-checkbox checked="{{wechatInvites[friend.userId]}}"></paper-checkbox>
           </div>
         </template>
 
-        <uproxy-button affirmative on-tap='{{ sendWechatInvites }}'>
+        <uproxy-button affirmative on-tap='{{ sendWechatInvites }}' class="margin12">
           {{ 'SEND_INVITATIONS' | $$ }}
         </uproxy-button>
       </div>
