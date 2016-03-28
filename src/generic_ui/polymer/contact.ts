@@ -10,8 +10,6 @@ import _ = require('lodash');
 
 const DEFAULT_PROVIDER = 'digitalocean';
 
-var toBeDeleted = false;
-
 Polymer({
   created: function() {
     this.offeringInstancesChanged = _.throttle(this.offeringInstancesChanged.bind(this), 100);
@@ -119,53 +117,37 @@ Polymer({
         undefined, cloudInviteUrl);
     });
   },
-  displayCloudRemovalConfirmation: function() {
-    // We keep track of which contact should be deleted with toBeDeleted
-    // TODO: Instead of using toBeDeleted, send the contact's ID as data
-    // with a core-signal
-    this.toBeDeleted = true;
-    // Core signals for the confirmation dialog cancel and continue buttons
-    var coreSignals = {
-      'cancel': 'cancel-cloud-removal',
-      'continue': 'remove-cloud-server'
-    };
-    if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-      this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t('DESTROY_CLOUD_SERVER_CONFIRMATION'),
-        true, coreSignals);
-    } else {
-      this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t('REMOVE_CLOUD_SERVER_CONFIRMATION'),
-        true, coreSignals);
-    }
-  },
-  cancelCloudRemoval: function() {
-    // toBeDeleted should be false if the user cancels cloud removal
-    this.toBeDeleted = false;
-  },
   removeCloudFriend: function() {
-    // Don't do anything if this contact is not the one to be deleted
-    if (!this.toBeDeleted) {
-      return;
-    }
-    this.toBeDeleted = false;
-    // Destroy cloud server if created by user
-    this.destroyCloudServerIfNeeded().then(() => {
+    this.displayCloudRemovalConfirmation().then(() => {
+      // Destroy cloud server if created by user
+      this.destroyCloudServerIfNeeded();
+    }).then(() => {
       // Remove contact from friend list
       ui_context.core.removeContact({
         networkName: this.contact.network.name,
         userId: this.contact.userId
       });
     }).then(() => {
-      this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("REMOVE_CLOUD_SERVER_SUCCESS"),
-        this.ui.i18n_t("OK"), undefined, undefined);
+      this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
+        this.ui.i18n_t("REMOVE_CLOUD_SERVER_SUCCESS"));
     }).catch((e: Error) => {
       if (e.name === 'CLOUD_ERR') {
-         this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("DESTROY_CLOUD_SERVER_FAILURE"),
-          this.ui.i18n_t("OK"), undefined, undefined);
+         this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
+           this.ui.i18n_t("DESTROY_CLOUD_SERVER_FAILURE"));
       } else {
-        this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"), this.ui.i18n_t("REMOVE_CLOUD_SERVER_FAILURE"),
-          this.ui.i18n_t("OK"), undefined, undefined);
+        this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
+          this.ui.i18n_t("REMOVE_CLOUD_SERVER_FAILURE"));
       }
     });
+  },
+  displayCloudRemovalConfirmation: function() {
+    if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+      return this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
+        this.ui.i18n_t('DESTROY_CLOUD_SERVER_CONFIRMATION'), true);
+    } else {
+      return this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
+        this.ui.i18n_t('REMOVE_CLOUD_SERVER_CONFIRMATION'), true);
+    }
   },
   destroyCloudServerIfNeeded: function() {
     if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
@@ -173,7 +155,7 @@ Polymer({
         operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
         providerName: DEFAULT_PROVIDER
       }).then(() => {
-        console.log("Sucessfully destroy cloud server.");
+        console.log("Sucessfully destroyed cloud server.");
       }).catch((e: Error) => {
         return Promise.reject({
           "name":"CLOUD_ERR",

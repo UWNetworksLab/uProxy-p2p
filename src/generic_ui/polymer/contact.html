@@ -1,7 +1,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-collapse/core-collapse.html'>
-<link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='instance.html'>
 <link rel='import' href='button.html'>
 
@@ -143,9 +142,6 @@
     }
     </style>
 
-    <core-signals on-core-signal-remove-cloud-server="{{ removeCloudFriend }}"></core-signals>
-    <core-signals on-core-signal-cancel-cloud-removal="{{ cancelCloudRemoval }}"></core-signals>
-
     <div tabindex='-1'
         class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
         top horizontal layout>
@@ -163,7 +159,7 @@
           </td>
           <td class="iconCell">
             <div class="iconWrapper" hidden?="{{contact.network.name!='Cloud'}}">
-              <core-icon icon="delete" title="{{ contact.url }}" on-tap="{{ displayCloudRemovalConfirmation }}"></core-icon>
+              <core-icon icon="delete" title="{{ contact.url }}" on-tap="{{ removeCloudFriend }}"></core-icon>
             </div>
           </td>
         </table>

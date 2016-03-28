@@ -354,17 +354,10 @@ export class UserInterface implements ui_constants.UiApi {
 
   public getConfirmation(heading :string,
                          text :string,
-                         cancelContinueButtons :boolean = false,
-                         dataSignal? :any) :Promise<void> {
+                         cancelContinueButtons :boolean = false) :Promise<void> {
     return new Promise<void>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
-      if (!dataSignal) {
-        dataSignal = {
-          'cancel': '',
-          'continue': ''
-        };
-      }
       this.fireSignal('open-dialog', {
         heading: heading,
         message: text,
@@ -372,13 +365,11 @@ export class UserInterface implements ui_constants.UiApi {
           text: cancelContinueButtons ?
               this.i18n_t('CANCEL') : this.i18n_t('NO'),
           callbackIndex: callbackIndex,
-          dismissive: true,
-          signal: dataSignal.cancel
+          dismissive: true
         }, {
           text: cancelContinueButtons ?
               this.i18n_t('CONTINUE') : this.i18n_t('YES'),
-          callbackIndex: callbackIndex,
-          signal: dataSignal.continue
+          callbackIndex: callbackIndex
         }]
       });
     });

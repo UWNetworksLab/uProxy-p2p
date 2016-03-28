@@ -738,29 +738,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     /* TODO(xwsxethan) handle updating org policy */
   }
 
-  // public cloudDestroy = (args :uproxy_core_api.CloudOperationArgs) :Promise<void> =>  {
-  //   log.info('cloudDestroy', args, DEFAULT_SERVER_NAME);
-  //   const provisionerName = CLOUD_PROVIDER_MODULE_PREFIX + args.providerName;
-  //   const provisioner = freedom[provisionerName]();
-  //   const destroyModule = () => {
-  //     freedom[provisionerName].close(provisioner);
-  //   };
-
-  //   provisioner.on('status', (update: any) => {
-  //     ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
-  //   });
-
-  //   // OAuth into provider and destroy cloud server
-  //   return provisioner.stop(DEFAULT_SERVER_NAME).then(() => {
-  //     destroyModule();
-  //     log.info('stopped cloud server on %1', args.providerName);
-  //   }, (e: Error) => {
-  //     destroyModule();
-  //     log.error('error destroying cloud server: %1', e.message);
-  //     return Promise.reject(e);
-  //   });
-  // }
-
   // Remove contact from friend list and storage
   public removeContact = (args :uproxy_core_api.RemoveContactArgs) : Promise<void> => {
     log.info('removeContact', args);

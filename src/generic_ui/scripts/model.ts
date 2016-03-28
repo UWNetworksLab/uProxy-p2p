@@ -105,21 +105,13 @@ export class Model {
   }
 
   public removeContact = (user :User) : void => {
-    var categories = user.getCategories();
+    var userCategories = user.getCategories();
     // Remove user from its getTab category
-    var getCategory = this.contacts.getAccessContacts[categories.getTab];
-    for (var i = 0; i < getCategory.length; ++i) {
-      if (getCategory[i] === user) {
-        getCategory.splice(i, 1);
-      }
-    }
+    categorizeUser(user, this.contacts.getAccessContacts,
+      userCategories.getTab, null);
     // Remove user from its shareTab category
-    var shareCategory = this.contacts.shareAccessContacts[categories.shareTab];
-    for (var i = 0; i < shareCategory.length; ++i) { 
-      if (shareCategory[i] === user) {
-        shareCategory.splice(i, 1);
-      }
-    }
+    categorizeUser(user, this.contacts.shareAccessContacts,
+      userCategories.shareTab, null);
   }
 
   public updateGlobalSettings = (settings: Object) => {
