@@ -10,7 +10,7 @@
 
 set -e
 
-IMAGE=
+IMAGE="soycode/uproxy-zork"
 INVITE_CODE=
 UPDATE=false
 WIPE=false
@@ -21,7 +21,7 @@ AUTOMATED=false
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
+  echo "$0 [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] browser-version"
   echo "  -m: use a specified Docker Hub image (defaults to soycode/uproxy-zork)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
@@ -153,11 +153,7 @@ HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
 
 # Start Zork, if necessary.
 if ! docker ps -a | grep uproxy-zork >/dev/null; then
-  if ! docker images | grep uproxy/$1 >/dev/null; then
-    if [ -n "$IMAGE" ]
-    then
-      IMAGE="soycode/uproxy-zork"
-    fi
+  if ! docker images | grep $IMAGE >/dev/null; then
     ZORK_DIR=`mktemp -d`
     cp -R ${BASH_SOURCE%/*}/../integration/test $ZORK_DIR/test
     echo "FROM $IMAGE" > $ZORK_DIR/Dockerfile
