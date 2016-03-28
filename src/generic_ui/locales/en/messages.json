@@ -921,7 +921,7 @@
   },
   "WHAT_IS_UPROXY_ANSWER": {
     "description": "",
-    "message": "<p>uProxy is an open source browser extension for Chrome and Firefox that lets users share their route to the Internet with each other. uProxy can make it much harder for a third party to monitor or interfere with the traffic of the user who is getting access. It’s like a personalized VPN service that you can use to provide secure access to friends and family, and to yourself when you travel.</p>"
+    "message": "<p>uProxy is an open source browser extension for Chrome and Firefox that lets users share their route to the Internet with each other or deploy and connect to private cloud servers. uProxy can make it much harder for a third party to monitor or interfere with the traffic of the user who is getting access. It’s like a personalized VPN service that you can use to provide secure access to friends and family, and to yourself when you travel.</p>"
   },
   "WHERE_TO_GET": {
     "description": "FAQ",
@@ -1092,6 +1092,30 @@
   "HOW_DO_I_SUBMIT_ANSWER": {
     "description": "",
     "message": "<p>To submit feedback from within uProxy, go into the menu (≡ icon) and choose “Submit Feedback”. You can also email us at <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>.</p>"
+  },
+  "WHAT_ARE_CLOUD_SERVERS": {
+    "description": "",
+    "message": "What are uProxy cloud servers?"
+  },
+  "WHAT_ARE_CLOUD_SERVERS_ANSWER": {
+    "description": "",
+    "message": "<p>uProxy users can get access in two ways: by proxying their traffic through a friend and by connecting to a server that is running uProxy. uProxy can automate the process of creating a private server on a commercial hosting platform (currently we support DigitalOcean). Once created, we make it easy to share access from your server to your friends and family---just go to the \"share\" tab.</p>"
+  },
+  "WHAT_IS_DIGITAL_OCEAN": {
+    "description": "",
+    "message": "What is DigitalOcean?"
+  },
+  "WHAT_IS_DIGITAL_OCEAN_ANSWER": {
+    "description": "",
+    "message": "<p>DigitalOcean is a cloud hosting provider. Once you create an account and set up a payment method, uProxy will be able to create a server under your account. By default, uProxy will set up a server that costs $10 per month. DigitalOcean offers $5 / month machines, and we plan to support these in the future, but right now we recommend against using them, for performance reasons. In addition to credit cards, DigitalOcean accepts PayPal, which integrates with a number of payment processors, including UnionPay. You can pause your server or terminate your DigitalOcean account at any time.</p>"
+  },
+  "HOW_DO_I_INSTALL_UPROXY_ON_SERVER": {
+    "description": "",
+    "message": "How can I install uProxy on my existing server?"
+  },
+  "HOW_DO_I_INSTALL_UPROXY_ON_SERVER_ANSWER": {
+    "description": "",
+    "message": "<p>The uProxy server runs in a Docker container. Details on how to manually set up a server are given on the <a href=\"https://blog.uproxy.org/2016/02/get-access-24x7-through-your-own-uproxy.html\">uProxy blog</a>, and advanced users should be able to figure out how to do this on their own systems.</p>"
   },
   "BACK_TO_TOP": {
     "description": "",
