@@ -4,37 +4,32 @@ set -e
 
 GIT=false
 BRANCH=
-IMAGE=
 PREBUILT=false
 
 function usage () {
-  echo "$0 [-g] [-b branch] [-m image] [-p] [-h] browser version"
-  echo "  -g: pull code from git (conflicts with -m, -p)"
-  echo "  -b: git branch to pull (expects -g, default: HEAD's referant)"
-  echo "  -m: use a specified Docker Hub image (conflicts with -g, -p)"
-  echo "  -p: use a pre-built uproxy-lib (conflicts with -g, -m)"
+  echo "$0 [-g] [-b branch] [-p] [-h] browser version"
+  echo "  -g: pull code from git (conflicts with -p)"
+  echo "  -b: git branch to pull (default: HEAD's referant)"
+  echo "  -p: use a pre-built uproxy-lib (conflicts with -g)"
   echo "  -h, -?: this help message"
   echo
   echo "Without -g or -p the latest uproxy-lib NPM will be run."
   exit 1;
 }
 
-while getopts gb:m:ph? opt; do
+while getopts gb:ph? opt; do
   case $opt in
     g) GIT=true ;;
     b) BRANCH="-b $OPTARG" ;;
-    m) IMAGE="$OPTARG" ;;
     p) PREBUILT=true ;;
-    d) DOCKER=true ;;
     *) usage ;;
   esac
 done
 shift $((OPTIND-1))
 
-if [ [ "$GIT" = true ] && [ [ "$PREBUILT" = true ] || [ -n "$IMAGE"  ] ] ||
-       [ [ "$PREBUILT" = true ] && [ -n "IMAGE" ] ] ]
+if [ "$GIT" = true ] && [ "$PREBUILT" = true ]
 then
-  echo "cannot use -g, -p, or -m with each other"
+  echo "cannot use both -g and -p"
   usage
 fi
 
@@ -56,14 +51,7 @@ TMP_DIR=`mktemp -d`
 
 cp -R ${BASH_SOURCE%/*}/../integration/test $TMP_DIR/test
 
-if [ -n "$IMAGE" ]
-then
-  cat <<EOF > $TMP_DIR/Dockerfile
-FROM $IMAGE
-EOF
-
-else
-  cat <<EOF > $TMP_DIR/Dockerfile
+cat <<EOF > $TMP_DIR/Dockerfile
 FROM library/ubuntu:trusty
 
 RUN apt-get -qq update
@@ -77,26 +65,25 @@ EXPOSE 9999
 EXPOSE 5900
 EOF
 
-  # load-zork.sh needs a copy of Zork in:
-  #   /test/src/uproxy-lib/build/dist/samples/zork-{chrome|firefox}app.
-  # Unless -p was specified, we need to pull it down.
-  if [ "$GIT" = true ]
-  then
-    cat <<EOF >> $TMP_DIR/Dockerfile
+# load-zork.sh needs a copy of Zork in:
+#   /test/src/uproxy-lib/build/dist/samples/zork-{chrome|firefox}app.
+# Unless -p was specified, we need to pull it down.
+if [ "$GIT" = true ]
+then
+  cat <<EOF >> $TMP_DIR/Dockerfile
 RUN apt-get -qq install git nodejs npm
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 RUN npm install -g grunt-cli
 RUN mkdir -p /test/src && cd /test/src && git clone https://github.com/uProxy/uproxy-lib.git $BRANCH
 RUN cd /test/src/uproxy-lib && ./setup.sh install && grunt zork
 EOF
-  elif [ "$PREBUILT" = false ]
-  then
-    cat <<EOF >> $TMP_DIR/Dockerfile
+elif [ "$PREBUILT" = false ]
+then
+  cat <<EOF >> $TMP_DIR/Dockerfile
 RUN apt-get -qq install npm
 RUN npm install --prefix /test/src uproxy-lib
 RUN ln -s /test/src/node_modules/uproxy-lib /test/src/uproxy-lib
 EOF
-  fi
 fi
 
 ./gen_browser.sh "$@" >> $TMP_DIR/Dockerfile
