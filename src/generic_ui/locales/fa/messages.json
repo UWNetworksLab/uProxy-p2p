@@ -331,10 +331,6 @@
         "message": " تحلیل شبکه و لاگ ها ",
         "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team."
     },
-    "WELCOME_MESSAGE": {
-        "message": "برای شروع کار، \"دریافت دسترسی\" یا \"به اشتراک گذاری دسترسی\" را فعال کرده و سپس بر روی دوستی که تمایل دارید به او متصل شوید کلیک کنید. ",
-        "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately."
-    },
     "NO_THANKS": {
         "message": "نه ممنونم",
         "description": "Do not agree to submitting anonymous metrics to uProxy."

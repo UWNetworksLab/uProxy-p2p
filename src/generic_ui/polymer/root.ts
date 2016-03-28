@@ -35,9 +35,16 @@ Polymer({
     // event indicating the user has logged in. roster.ts listens for
     // this event.
     if (newView == ui_types.View.ROSTER && oldView == ui_types.View.SPLASH) {
+      // TODO: can this be removed now that roster-before-login has launched?
       this.fire('core-signal', {name: "login-success"});
       this.closeSettings();
       this.$.modeTabs.updateBar();
+
+      // User has now seen the welcome messages - this used to be a
+      // uproxy-bubble, now the only welcome content is on the splash screen
+      // and the empty roster text.
+      model.globalSettings.hasSeenWelcome = true;
+      core.updateGlobalSettings(model.globalSettings);
     }
   },
   statsIconClicked: function() {
@@ -53,8 +60,6 @@ Polymer({
     ui.setMode(ui_types.Mode.SHARE);
   },
   closedWelcome: function() {
-    model.globalSettings.hasSeenWelcome = true;
-    core.updateGlobalSettings(model.globalSettings);
   },
   closedSharing: function() {
     model.globalSettings.hasSeenSharingEnabledScreen = true;
