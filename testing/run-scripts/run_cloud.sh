@@ -21,7 +21,7 @@ AUTOMATED=false
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] browser-version"
+  echo "$0 [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
   echo "  -m: use a specified Docker Hub image (defaults to soycode/uproxy-zork)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
@@ -144,7 +144,7 @@ then
   docker rmi uproxy/sshd || true
   # TODO: This will fail if there are any containers using the
   #       image, e.g. run_pair.sh. Regular cloud users won't be.
-  docker rmi uproxy/$1 || true
+  docker rmi $IMAGE || true
 fi
 
 # IP of the host machine.
@@ -162,7 +162,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
   #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
-  docker run --restart=always --net=host --cap-add NET_ADMIN --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh -z
+  docker run --restart=always --net=host --cap-add NET_ADMIN --name uproxy-zork -d $IMAGE /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
   while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
