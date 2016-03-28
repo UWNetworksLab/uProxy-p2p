@@ -387,10 +387,6 @@
     "description": "",
     "message": "Welcome to uProxy"
   },
-  "WELCOME_MESSAGE": {
-    "description": "Text in a popup that appears when the user first uses uProxy. Explains that the user needs to choose either the Get or Share tab appropriately.",
-    "message": "uProxy allows you to get access from your friends, share access with them or do both at once! To get started, choose \"Get access\" or \"Share access.\""
-  },
   "BETA_MESSAGE": {
     "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development.",
     "message": "This is a beta release of uProxy, and it may occasionally be unreliable."
@@ -557,7 +553,7 @@
   },
   "SET_UP_ONE_TIME": {
     "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link.",
-    "message": "Set up a one-time connection"
+    "message": "Set up a 1-time connection"
   },
   "WE_WONT_POST": {
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
