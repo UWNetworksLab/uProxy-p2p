@@ -46,7 +46,8 @@ Polymer({
     ui.cloudInstallStatus = '';
     this.$.installingOverlay.open();
 
-    ui.cloudInstall({
+    ui.cloudUpdate({
+      operation: uproxy_core_api.CloudOperationType.CLOUD_INSTALL,
       providerName: DEFAULT_PROVIDER,
       region: this.$.regionMenu.selected
     }).then(() => {

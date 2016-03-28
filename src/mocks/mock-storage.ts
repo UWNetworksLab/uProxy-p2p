@@ -17,6 +17,13 @@ export class MockStorage implements storage_interface.Storage {
     this.data_[key] = val;
     return Promise.resolve();
   }
+  public destroy(key :string) : Promise<void> {
+    if (this.data_[key]) {
+      return Promise.resolve(this.data_[key]);
+    } else {
+      return Promise.reject('non-existing key');
+    }
+  }
   public keys = () : Promise<string[]> => {
     return Promise.resolve(Object.keys(this.data_));
   }
