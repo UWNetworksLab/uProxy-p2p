@@ -10,6 +10,7 @@
 
 set -e
 
+PREBUILT=
 IMAGE="soycode/uproxy-zork"
 INVITE_CODE=
 UPDATE=false
@@ -21,7 +22,8 @@ AUTOMATED=false
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
+  echo "$0 [-p path] [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
+  echo "  -p: use a pre-built uproxy-lib"
   echo "  -m: use a specified Docker Hub image (defaults to soycode/uproxy-zork)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
@@ -35,8 +37,9 @@ function usage () {
   exit 1
 }
 
-while getopts m:i:uwd:b:ah? opt; do
+while getopts p:m:i:uwd:b:ah? opt; do
   case $opt in
+    p) PREBUILT="$OPTARG" ;;
     m) IMAGE="$OPTARG" ;;
     i) INVITE_CODE="$OPTARG" ;;
     u) UPDATE=true ;;
@@ -48,11 +51,6 @@ while getopts m:i:uwd:b:ah? opt; do
   esac
 done
 shift $((OPTIND-1))
-
-if [ $# -lt 1 ]
-then
-  usage
-fi
 
 if [ "$WIPE" = true ] && [ "$UPDATE" = false ]
 then
@@ -157,12 +155,17 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
     ZORK_DIR=`mktemp -d`
     cp -R ${BASH_SOURCE%/*}/../integration/test $ZORK_DIR/test
     echo "FROM $IMAGE" > $ZORK_DIR/Dockerfile
-    docker build -t $IMAGE $TMP_DIR
+    docker build -t $IMAGE $ZORK_DIR
+  fi
+  HOSTARGS=
+  if [ -n "$PREBUILT" ]
+  then
+    HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy-lib"
   fi
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
   #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
-  docker run --restart=always --net=host --cap-add NET_ADMIN --name uproxy-zork -d $IMAGE /test/bin/load-zork.sh -z
+  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d $IMAGE /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
   while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
