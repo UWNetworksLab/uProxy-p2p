@@ -15,7 +15,7 @@ var Client = require('ssh2').Client;
 var log: logging.Log = new logging.Log('cloud installer');
 
 // Command to install uProxy.
-const INSTALL_COMMAND = 'curl -sSL https://raw.githubusercontent.com/uProxy/uproxy-docker/master/install-cloud.sh | sh';
+const INSTALL_COMMAND = 'curl -sSL https://raw.githubusercontent.com/uProxy/uproxy-docker/master/install-cloud.sh | sh -s -- -a';
 
 // Prefix for invitation URLs.
 const INVITATION_PREFIX = 'CLOUD_INSTANCE_DETAILS_JSON:';
