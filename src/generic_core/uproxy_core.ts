@@ -636,10 +636,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       freedom['cloudinstall'].close(installer);
     };
 
-    log.debug('logging into cloud provider %1', args.providerName);
-    provisioner.on('status', (update: any) => {
-      ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
-    });
+    log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
+    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
 
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
@@ -647,20 +645,22 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
 
-        log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
         ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
+
         return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
           log.info('created server on digitalocean: %1', serverInfo);
+
           ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, DEPLOY_PROGRESS);
+          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_LOGGING_IN');
 
           const host = serverInfo.network.ipv4;
           const port = serverInfo.network.ssh_port;
 
           log.debug('installing cloud on %1:%2', host, port);
 
-          // TODO: Send real updates. While we could trivially send stdout,
-          //       that's extremely verbose right now.
-          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
+          installer.on('status', (status: number) => {
+            ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, status);
+          });
 
           installer.on('progress', (progress:number) => {
             ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS,

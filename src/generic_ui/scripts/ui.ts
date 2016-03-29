@@ -317,7 +317,7 @@ export class UserInterface implements ui_constants.UiApi {
                   this.setPortControlSupport_);
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.cloudInstallStatus = status;
+      this.cloudInstallStatus = this.i18n_t(status);
     });
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
