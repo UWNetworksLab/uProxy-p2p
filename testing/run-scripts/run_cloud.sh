@@ -14,6 +14,7 @@ PREBUILT=
 INVITE_CODE=
 UPDATE=false
 WIPE=false
+BUILD_SSHD=false
 PUBLIC_IP=
 BANNER=
 AUTOMATED=false
@@ -21,11 +22,12 @@ AUTOMATED=false
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] browser-version"
+  echo "$0 [-p path] [-i invite code] [-u] [-w] [-l] [-d ip] [-b banner] [-a] browser-version"
   echo "  -p: use a pre-built uproxy-lib"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
+  echo "  -l: build docker sshd image from scratch (default pull prebuilt)"
   echo "  -d: override the detected public IP (for development only)"
   echo "  -b: name to use in contacts list"
   echo "  -a: do not output complete invite URL"
@@ -35,12 +37,13 @@ function usage () {
   exit 1
 }
 
-while getopts p:i:uwd:b:ah? opt; do
+while getopts p:i:uwld:b:ah? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
     i) INVITE_CODE="$OPTARG" ;;
     u) UPDATE=true ;;
     w) WIPE=true ;;
+    l) BUILD_SSHD=true ;;
     d) PUBLIC_IP="$OPTARG" ;;
     b) BANNER="$OPTARG" ;;
     a) AUTOMATED=true ;;
@@ -183,7 +186,12 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   if ! docker images | grep uproxy/sshd >/dev/null; then
     TMP_DIR=/tmp/uproxy-sshd
     rm -fR $TMP_DIR
-    cp -R ${BASH_SOURCE%/*}/../../sshd/usehub/ $TMP_DIR
+    SRC_DIR=${BASH_SOURCE%/*}/../../sshd/
+    if [ "$BUILD_SSHD" = false ]
+    then
+      SRC_DIR="$SRC_DIRusehub/"
+    fi
+    cp -R $SRC_DIR $TMP_DIR
 
     echo -n "$BANNER" > $TMP_DIR/banner
     echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
