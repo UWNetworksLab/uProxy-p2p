@@ -662,6 +662,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           //       that's extremely verbose right now.
           ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
 
+          installer.on('progress', (progress:number) => {
+            ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS,
+                DEPLOY_PROGRESS + (progress * ((100 - DEPLOY_PROGRESS) / 100)));
+          });
+
           // Attempt to install.  If install fails, retry will attempt again
           // up to MAX_INSTALLS times.  Failure may occur because we have just
           // created the server and it is not yet ready for SSH.
