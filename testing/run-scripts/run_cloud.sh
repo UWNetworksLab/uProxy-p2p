@@ -60,6 +60,9 @@ then
   usage
 fi
 
+# Just having Docker installed is worth a lot.
+echo "CLOUD_INSTALL_PROGRESS 15"
+
 # Set the cloud instance's banner.
 # In descending order of preference:
 #  - command-line option
@@ -152,6 +155,8 @@ fi
 HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
 
 # Start Zork, if necessary.
+echo "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY"
+echo "CLOUD_INSTALL_PROGRESS 20"
 if ! docker ps -a | grep uproxy-zork >/dev/null; then
   if ! docker images | grep uproxy/$1 >/dev/null; then
     BROWSER=$(echo $1 | cut -d - -f 1)
@@ -174,11 +179,15 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d uproxy/$1 /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
+  echo "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY"
+  echo "CLOUD_INSTALL_PROGRESS 50"
   while ! ((echo ping ; sleep 0.5) | nc -w 1 $HOST_IP 9000 | grep ping) > /dev/null; do echo -n .; done
   echo "ready!"
 fi
 
 # Start sshd, if necessary.
+echo "CLOUD_INSTALL_STATUS_INSTALLING_SSH"
+echo "CLOUD_INSTALL_PROGRESS 60"
 if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   if ! docker images | grep uproxy/sshd >/dev/null; then
     TMP_DIR=/tmp/uproxy-sshd
@@ -200,6 +209,8 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   # In descending order of preference:
   #  - migrate authorized_keys or apply -i
   #  - issue a new invite
+  echo "CLOUD_INSTALL_STATUS_CONFIGURING_SSH"
+  echo "CLOUD_INSTALL_PROGRESS 90"
   if [ -n "$GIVER_AUTH_KEYS" ] || [ -n "$GETTER_AUTH_KEYS" ]
   then
     docker exec uproxy-sshd sh -c "echo $GIVER_AUTH_KEYS > /home/giver/.ssh/authorized_keys"
@@ -218,3 +229,5 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
     fi
   fi
 fi
+
+echo "CLOUD_INSTALL_PROGRESS 100"

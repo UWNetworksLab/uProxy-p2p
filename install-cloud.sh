@@ -56,6 +56,7 @@ do_install() {
       show_deps
     fi
     echo "Docker not found, running Docker installer."
+    echo "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER"
     curl -fsSL https://get.docker.com/ | sh
   fi
   # We depend on --build-arg, introduced in Docker 1.9.
@@ -77,6 +78,7 @@ do_install() {
     fi
   done
 
+  echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
   cd $TMP_DIR/testing/run-scripts
