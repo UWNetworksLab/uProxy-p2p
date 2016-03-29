@@ -704,7 +704,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           log.error('install failed, cleaning up');
 
           // Destroy the server we just created so that the user isn't billed.
-          provisioner.stop(DROPLET_NAME).then((unused: Object) => {
+          return provisioner.stop(DROPLET_NAME).then((unused: Object) => {
             log.info('destroyed server on digitalocean');
             destroyModules();
             return Promise.reject(installError);
