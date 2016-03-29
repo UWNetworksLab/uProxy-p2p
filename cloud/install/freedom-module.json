@@ -17,6 +17,14 @@
       },
       "err": {
         "message": "string"
+      },
+      "progress": {
+        "type": "event",
+        "value": "number"
+      },
+      "status": {
+        "type": "event",
+        "value": "string"
       }
     }
   },

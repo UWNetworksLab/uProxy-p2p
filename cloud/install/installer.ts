@@ -20,6 +20,12 @@ const INSTALL_COMMAND = 'curl -sSL https://raw.githubusercontent.com/uProxy/upro
 // Prefix for invitation URLs.
 const INVITATION_PREFIX = 'CLOUD_INSTANCE_DETAILS_JSON:';
 
+// Prefix for progress updates.
+const PROGRESS_PREFIX = 'CLOUD_INSTALL_PROGRESS';
+
+// Prefix for status updates.
+const STATUS_PREFIX = 'CLOUD_INSTALL_STATUS';
+
 // Installs uProxy on a server, via SSH.
 // The process is as close as possible to a manual install
 // so that we have fewer paths to test.
@@ -65,6 +71,16 @@ class CloudInstaller {
                 message: 'could not parse invite: ' + inviteJson
               });
             }
+          } else if (line.indexOf(PROGRESS_PREFIX) === 0) {
+            const tokens = line.split(' ');
+            if (tokens.length < 2) {
+              log.warn('could not parse progress update');
+            } else {
+              const progress = parseInt(tokens[1], 10);
+              this.dispatchEvent_('progress', progress);
+            }
+          } else if (line.indexOf(STATUS_PREFIX) === 0) {
+            this.dispatchEvent_('status', line);
           }
         });
 

@@ -22,6 +22,11 @@ provisioner.start('test').then((serverInfo: any) => {
   log.info('server provisioned: %1', serverInfo);
 
   const installer = freedom['cloudinstall']();
+
+  installer.on('progress', (progress: number) => {
+    log.info('install progress: %1', progress);
+  });
+
   log.info('installing...');
   installer.install(serverInfo.network.ipv4, serverInfo.network.ssh_port,
   	  'root', serverInfo.ssh.private).then((invitation: string) => {
