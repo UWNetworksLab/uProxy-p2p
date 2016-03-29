@@ -1207,9 +1207,13 @@
     "description": "Message shown after failed DigitalOcean server deployment",
     "message": "Oops! We had trouble creating a cloud server."
   },
+  "LAUNCH_DIGITAL_OCEAN_SETTINGS": {
+    "description": "Button text for launching user's DigitalOcean settings page.",
+    "message": "Open DigitalOcean settings"
+  },
   "DIGITAL_OCEAN_ERROR_MESSAGE": {
-    "description": "Following a failed deployment on DigitalOcean, direct the user to DigitalOcean's website where they can check their settings.",
-    "message": "Open <a href=\"https://cloud.digitalocean.com/\">your DigitalOcean control panel</a> to check your settings before trying again. If you do not wish to try again then, in order to avoid any monthly charges, please remove from <a href=\"https://cloud.digitalocean.com/droplets\">your droplet list</a> any item named \"uproxy-cloud-server\"."
+    "description": "Following a failed DigitalOcean install, instruct the user to consult DigitalOcean's website where they can check their settings or remove a half-installed server.",
+    "message": "Please check your DigitalOcean settings before trying again. If you don't wish to try again, verify you have no droplets named \"uproxy-cloud-server\". This will ensure you avoid any monthly charges."
   },
   "CLOUD_INSTALL_INSTALLING_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
