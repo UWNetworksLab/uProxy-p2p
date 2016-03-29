@@ -120,10 +120,10 @@ Polymer({
   removeCloudFriend: function() {
     this.displayCloudRemovalConfirmation().then(() => {
       // Destroy cloud server if created by user
-      this.destroyCloudServerIfNeeded();
+      return this.destroyCloudServerIfNeeded();
     }).then(() => {
       // Remove contact from friend list
-      ui_context.core.removeContact({
+      return ui_context.core.removeContact({
         networkName: this.contact.network.name,
         userId: this.contact.userId
       });
@@ -154,8 +154,6 @@ Polymer({
       return ui_context.core.cloudUpdate({
         operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
         providerName: DEFAULT_PROVIDER
-      }).then(() => {
-        console.log("Sucessfully destroyed cloud server.");
       }).catch((e: Error) => {
         return Promise.reject({
           "name":"CLOUD_ERR",
