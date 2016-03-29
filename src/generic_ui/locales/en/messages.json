@@ -863,6 +863,10 @@
     "description": "Progress bar label shown during cloud install indicating that we are downloading a Docker image for uProxy.",
     "message": "Downloading and installing uProxy image..."
   },
+  "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY": {
+    "description": "Progress bar label shown during cloud install indicating that we are waiting for uProxy to start.",
+    "message": "Waiting for uProxy to start..."
+  },
   "CLOUD_INSTALL_STATUS_INSTALLING_SSH": {
     "description": "Progress bar label shown during cloud install indicating that we are downloading a Docker image for an SSH server.",
     "message": "Downloading and installing SSH server image..."
