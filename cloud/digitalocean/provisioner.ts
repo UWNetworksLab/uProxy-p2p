@@ -114,8 +114,6 @@ class Provisioner {
 
   /**
    * Destroys cloud server; assumes OAuth has already been completed
-   * @todo DELETE request does not return a response body so we
-   * need to check that the response header indicates success (204)
    * @param {String} droplet name, as a string
    * @return {Promise.<void>}
    */
@@ -134,8 +132,12 @@ class Provisioner {
         'message': 'Droplet ' + name + ' doesnt exist'
       });
     }).then((resp: any) => {
-      this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
-      return Promise.resolve<void>();
+      return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
+    }).then((resp: any) => {
+      if (resp.status.startsWith('204')) {
+        return Promise.resolve<void>();
+      }
+      return Promise.reject(new Error('error deleting droplet'));
     });
   }
 
@@ -275,13 +277,21 @@ class Provisioner {
       var url = 'https://api.digitalocean.com/v2/' + actionPath;
       var xhr = freedom['core.xhr']();
       xhr.on('onload', (loadInfo: any) => {
-        xhr.getResponseText().then((response: string) => {
-          try {
-            F(JSON.parse(response));
-          } catch(e) {
-            R(e);
-          }
-        });
+        // DELETE method doesn't return a reponse body. Success
+        // is indicated by 204 response code in header.
+        if (method === 'DELETE') {
+          xhr.getResponseHeader('status').then((response: string) => {
+            F({'status': response});
+          });
+        } else {
+          xhr.getResponseText().then((response: string) => {
+            try {
+              F(JSON.parse(response));
+            } catch (e) {
+              R(e);
+            }
+          });
+        }
       });
       xhr.on('onerror', R);
       xhr.on('ontimeout', R);
