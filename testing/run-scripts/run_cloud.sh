@@ -151,12 +151,6 @@ HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
 
 # Start Zork, if necessary.
 if ! docker ps -a | grep uproxy-zork >/dev/null; then
-  if ! docker images | grep $IMAGE >/dev/null; then
-    ZORK_DIR=`mktemp -d`
-    cp -R ${BASH_SOURCE%/*}/../integration/test $ZORK_DIR/test
-    echo "FROM $IMAGE" > $ZORK_DIR/Dockerfile
-    docker build -t $IMAGE $ZORK_DIR
-  fi
   HOSTARGS=
   if [ -n "$PREBUILT" ]
   then
