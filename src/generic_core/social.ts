@@ -177,17 +177,19 @@ export function notifyUI(networkName :string, userId :string) {
      */
     protected updateMetrics() {
       if (this.metrics_) {
-        // There has to be a better way...
-        var numUsers = 0;
-        for (var k in this.roster) {
-          numUsers++;
-        }
         // One of the users will be us.  Take that one out
+        var numUsers:number;
+        if (NETWORK_OPTIONS[this.name].rosterFunction) {
+          numUsers = NETWORK_OPTIONS[this.name].rosterFunction(
+            Object.keys(this.roster));
+        } else {
+          numUsers = Object.keys(this.roster).length - 1;
+        }
+
         this.metrics_.userCount(
-          // Map 'Facebook-Firebase-V2' to 'facebook', 'GMail' to 'gmail', etc.
-          this.name.split('-')[0].toLowerCase(),
+          NETWORK_OPTIONS[this.name].metricName,
           this.myInstance.getUserProfile().userId,
-          numUsers - 1);
+          numUsers);
       }
     }
 

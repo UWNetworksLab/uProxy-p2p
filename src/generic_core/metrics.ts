@@ -1,5 +1,6 @@
 /// <reference path='../../../third_party/freedomjs-anonymized-metrics/freedomjs-anonymized-metrics.d.ts' />
 
+import _ = require('lodash');
 import crypto = require('../../../third_party/uproxy-lib/crypto/random');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import storage = require('../interfaces/storage');
@@ -73,11 +74,7 @@ export class WeekBuffer<T> {
   }
 
   public reduce(value:T, updater:Updater<T>): T {
-    var cur = value;
-    for (var i = 0; i < this.timestamps_.length; i++) {
-      cur = updater(cur, this.values_[i]);
-    }
-    return cur;
+    return _.reduce(this.values_, updater, value);
   }
 };
 
@@ -102,6 +99,8 @@ export class MetricsData {
   public on_facebook :NetMetrics;
   public on_github :NetMetrics;
   public on_quiver :NetMetrics;
+  public on_wechat :NetMetrics;
+  public on_cloud :NetMetrics;
   constructor() {
     this.version = 2;
     this.successes = new WeekBuffer<number>();
@@ -111,6 +110,8 @@ export class MetricsData {
     this.on_facebook = {};
     this.on_github = {};
     this.on_quiver = {};
+    this.on_wechat = {};
+    this.on_cloud = {};
   }
 };
 
@@ -132,7 +133,7 @@ function mergeNet(first:NetMetrics, second :NetMetrics) :NetMetrics {
   return result;
 };
 
-function calcPercentage(numerator :number, denominator :number) {
+function calcQuantile(numerator :number, denominator :number) {
   return Math.floor(20 * Math.floor((5.0*numerator) / denominator));
 }
 
@@ -165,19 +166,20 @@ export class Metrics {
       num_cohorts: 8, prob_p: 0.25, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
-    var natMetric = {
+    var stringMetric = {
       type: 'string', num_bloombits: 256, num_hashes: 1,
       num_cohorts: 8, prob_p: 0.25, prob_q: 0.75, prob_f: 0.5,
       flag_oneprr: true
     };
+    var natMetric = stringMetric;
     // This will be an integer as string, values: 0, 20, 40, 60, 80, 100.
-    var percentageMetric = natMetric;
+    var percentageMetric = stringMetric;
     // A positive integer.
-    var versionMetric = natMetric;
+    var versionMetric = stringMetric;
     // 'windows', 'mac', 'linux', 'ios'
-    var platformMetric = natMetric;
+    var platformMetric = stringMetric;
     // An integer, possibly -1.
-    var networkMetric = natMetric;
+    var networkMetric = stringMetric;
     this.metricsProvider_ = freedom['metrics']({
       name: 'uProxyMetrics',
       definition: {'success-v3': counterMetric,
@@ -190,10 +192,12 @@ export class Metrics {
                    'facebook-v1' :networkMetric,
                    'github-v1' :networkMetric,
                    'quiver-v1' :networkMetric,
-                   'nat-type-v3': natMetric,
-                   'pmp-v3': natMetric,
-                   'pcp-v3': natMetric,
-                   'upnp-v3': natMetric}
+                   'wechat-v1' :networkMetric,
+                   'cloud-v1' :networkMetric,
+                   'nat-type-v3': stringMetric,
+                   'pmp-v3': stringMetric,
+                   'pcp-v3': stringMetric,
+                   'upnp-v3': stringMetric}
     });
 
     this.data_ = new MetricsData;
@@ -202,16 +206,18 @@ export class Metrics {
         (storedData :MetricsData) => {
           log.info('Loaded metrics from storage', storedData);
 
-          // Add stored metrics to current data_, in case increment has been
-          // called before storage loading is complete.
-          this.data_.successes.merge(storedData.successes, this.add_);
-          this.data_.attempts.merge(storedData.attempts, this.add_);
-          this.data_.shutdowns.merge(storedData.shutdowns, this.add_);
-          this.data_.on_gmail = mergeNet(this.data_.on_gmail, storedData.on_gmail);
-          this.data_.on_facebook = mergeNet(this.data_.on_facebook,
-                                            storedData.on_facebook);
-          this.data_.on_github = mergeNet(this.data_.on_github, storedData.on_github);
-          this.data_.on_quiver = mergeNet(this.data_.on_quiver, storedData.on_quiver);
+          if (storedData.version === this.data_.version) {
+            // Add stored metrics to current data_, in case increment has been
+            // called before storage loading is complete.
+            this.data_.successes.merge(storedData.successes, this.add_);
+            this.data_.attempts.merge(storedData.attempts, this.add_);
+            this.data_.shutdowns.merge(storedData.shutdowns, this.add_);
+            this.data_.on_gmail = mergeNet(this.data_.on_gmail, storedData.on_gmail);
+            this.data_.on_facebook = mergeNet(this.data_.on_facebook,
+                                              storedData.on_facebook);
+            this.data_.on_github = mergeNet(this.data_.on_github, storedData.on_github);
+            this.data_.on_quiver = mergeNet(this.data_.on_quiver, storedData.on_quiver);
+          }
         }).catch((e :Error) => {
           // Not an error if no metrics are found storage, just use the default
           // values for success, failure, etc.
@@ -236,6 +242,8 @@ export class Metrics {
 
   // Update how many friends are logged in on this network.
   public userCount = (network: string, userName :string, friendCount:number) => {
+    // For some networks, we may only see other logged-in users.
+    // Store the max user count we've seen in the last 7 days.
     if (network == 'gmail') {
       this.data_.on_gmail[userName] = max(this.data_.on_gmail[userName], friendCount);
     } else if (network == 'facebook') {
@@ -244,6 +252,10 @@ export class Metrics {
       this.data_.on_github[userName] = max(this.data_.on_github[userName], friendCount);
     } else if (network == 'quiver') {
       this.data_.on_quiver[userName] = max(this.data_.on_quiver[userName], friendCount);
+    } else if (network == 'wechat') {
+      this.data_.on_wechat[userName] = max(this.data_.on_wechat[userName], friendCount);
+    } else if (network == 'cloud') {
+      this.data_.on_cloud[userName] = max(this.data_.on_cloud[userName], friendCount);
     } else {
       log.error('Unknown social network: ' + name + ' for user ' + userName);
     }
@@ -288,9 +300,9 @@ export class Metrics {
         this.metricsProvider_.report('success-v3', successes);
       var failRateReport =
         this.metricsProvider_.report(
-          'fail-rate-v1', calcPercentage(attempts - successes, attempts));
+          'fail-rate-v1', calcQuantile(attempts - successes, attempts));
       var shutdownReport =
-        this.metricsProvider_.report('shutdown-v1', calcPercentage(
+        this.metricsProvider_.report('shutdown-v1', calcQuantile(
           shutdowns, successes));
 
       var chromeVersionReport =
@@ -309,6 +321,12 @@ export class Metrics {
       var githubReport =
         this.metricsProvider_.report('github-v1',
                                      sumMetrics(this.data_.on_github));
+      var quiverReport =
+        this.metricsProvider_.report('quiver-v1',
+                                     sumMetrics(this.data_.on_quiver));
+      var quiverReport =
+        this.metricsProvider_.report('quiver-v1',
+                                     sumMetrics(this.data_.on_quiver));
       var quiverReport =
         this.metricsProvider_.report('quiver-v1',
                                      sumMetrics(this.data_.on_quiver));

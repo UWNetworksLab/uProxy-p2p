@@ -84,7 +84,7 @@ describe('social_network.FreedomNetwork', () => {
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
     spyOn(console, 'log');
-    this.metrics = new rappor_metrics.Metrics(null);
+    metrics = new rappor_metrics.Metrics(null);
   });
 
   it('initialize networks', () => {
