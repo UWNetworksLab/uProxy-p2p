@@ -618,6 +618,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
     // This is the server name recommended by the blog post.
     const DROPLET_NAME = 'uproxy-cloud-server';
+
+    // Percentage of cloud install progress devoted to deploying.
+    // The remainder is devoted to the install script.
+    const DEPLOY_PROGRESS = 20;
     
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
@@ -632,27 +636,36 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       freedom['cloudinstall'].close(installer);
     };
 
-    log.debug('logging into cloud provider %1', args.providerName);
-    provisioner.on('status', (update: any) => {
-      ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, update.message);
-    });
+    log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
+    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
 
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
+
+        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
+
         return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
           log.info('created server on digitalocean: %1', serverInfo);
+
+          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, DEPLOY_PROGRESS);
+          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_LOGGING_IN');
 
           const host = serverInfo.network.ipv4;
           const port = serverInfo.network.ssh_port;
 
           log.debug('installing cloud on %1:%2', host, port);
 
-          // TODO: Send real updates. While we could trivially send stdout,
-          //       that's extremely verbose right now.
-          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'Installing...');
+          installer.on('status', (status: number) => {
+            ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, status);
+          });
+
+          installer.on('progress', (progress:number) => {
+            ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS,
+                DEPLOY_PROGRESS + (progress * ((100 - DEPLOY_PROGRESS) / 100)));
+          });
 
           // Attempt to install.  If install fails, retry will attempt again
           // up to MAX_INSTALLS times.  Failure may occur because we have just
@@ -687,9 +700,22 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
               networkData: JSON.stringify(cloudNetworkData)
             });
           });
-        }, (e: Error) => {
-          destroyModules();
-          return Promise.reject(e);
+        }, (installError: Error) => {
+          log.error('install failed, cleaning up');
+
+          // Destroy the server we just created so that the user isn't billed.
+          return provisioner.stop(DROPLET_NAME).then((unused: Object) => {
+            log.info('destroyed server on digitalocean');
+            destroyModules();
+            return Promise.reject(installError);
+          }, (destroyError: Error) => {
+            // This is bad: the user will be billed for a broken server.
+            // TODO: direct the user at the digitalocean console
+            log.error('failed to destroy new server after install failure: %1',
+              destroyError.message);
+            destroyModules();
+            return Promise.reject(installError);
+          });
         });
       case uproxy_core_api.CloudOperationType.CLOUD_DESTROY:
         // OAuth into provider and destroy cloud server
