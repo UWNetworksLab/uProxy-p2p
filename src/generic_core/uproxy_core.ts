@@ -687,9 +687,22 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
               networkData: JSON.stringify(cloudNetworkData)
             });
           });
-        }, (e: Error) => {
-          destroyModules();
-          return Promise.reject(e);
+        }, (installError: Error) => {
+          log.error('install failed, cleaning up');
+
+          // Destroy the server we just created so that the user isn't billed.
+          provisioner.stop(DROPLET_NAME).then((unused: Object) => {
+            log.info('destroyed server on digitalocean');
+            destroyModules();
+            return Promise.reject(installError);
+          }, (destroyError: Error) => {
+            // This is bad: the user will be billed for a broken server.
+            // TODO: direct the user at the digitalocean console
+            log.error('failed to destroy new server after install failure: %1',
+              destroyError.message);
+            destroyModules();
+            return Promise.reject(installError);
+          });
         });
       case uproxy_core_api.CloudOperationType.CLOUD_DESTROY:
         // OAuth into provider and destroy cloud server
