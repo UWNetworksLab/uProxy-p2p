@@ -155,7 +155,7 @@
         <h1>{{ 'CLOUD_INSTALL_INSTALLING_TITLE' | $$ }}</h1>
         <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$ }}</p>
         <div>
-          <paper-progress indeterminate='true'></paper-progress>
+          <paper-progress id='installProgress' value='{{ ui.cloudInstallProgress }}'></paper-progress>
         </div>
         <p>{{ ui.cloudInstallStatus }}</p>
       </div>

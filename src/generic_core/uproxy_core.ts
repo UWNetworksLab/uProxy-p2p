@@ -618,6 +618,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
     // This is the server name recommended by the blog post.
     const DROPLET_NAME = 'uproxy-cloud-server';
+
+    // Percentage of cloud install progress devoted to deploying.
+    // The remainder is devoted to the install script.
+    const DEPLOY_PROGRESS = 20;
     
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
@@ -642,8 +646,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
+
+        log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
+        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
         return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
           log.info('created server on digitalocean: %1', serverInfo);
+          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, DEPLOY_PROGRESS);
 
           const host = serverInfo.network.ipv4;
           const port = serverInfo.network.ssh_port;
