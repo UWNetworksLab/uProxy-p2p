@@ -14,7 +14,7 @@ const POLL_TIMEOUT: number = 5000; //milliseconds
 //     console.log('available images: ' + JSON.stringify(resp, undefined, 2));
 //   });
 const DEFAULT_REGION: string = 'nyc1';
-const DEFAULT_IMAGE: string = 'ubuntu-14-04-x64';
+const DEFAULT_IMAGE: string = 'docker';
 const DEFAULT_SIZE: string = '1gb';
 
 const STATUS_CODES: { [k: string]: string; } = {
