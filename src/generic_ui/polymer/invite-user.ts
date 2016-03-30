@@ -60,6 +60,7 @@ var inviteUser = {
     }
   },
   cloudInstall: function() {
+    this.closeInviteUserPanel();
     this.fire('core-signal', { name: 'open-cloud-install' });
   },
   loginTapped: function() {
