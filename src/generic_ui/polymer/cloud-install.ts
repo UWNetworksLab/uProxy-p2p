@@ -10,36 +10,72 @@ var ui = ui_context.ui;
 const DEFAULT_PROVIDER = 'digitalocean';
 
 Polymer({
-  openLoginDialog: function() {
-    this.$.loginDialog.open();
+  open: function() {
+    // Set translated HTML content - need to use injectBoundHTML
+    // in order to enable <uproxy-faq-link>, etc tags in the text.
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_GET_STARTED_MESSAGE')),
+        this.$.getStartedMessage);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_EXISTING_SERVER_MESSAGE')),
+        this.$.existingServerMessage);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE')),
+        this.$.createAccountMessage);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
+        this.$.loginMessage);
+
+    this.$.getStartedOverlay.open();
   },
-  closeDialogs: function() {
-    this.$.loginDialog.close();
-    this.$.installingDialog.close();
-    this.$.successDialog.close();
-    this.$.failureDialog.close();
+  showDigitalOceanAccountHelpOverlay: function() {
+    this.closeOverlays();
+    this.$.digitalOceanAccountHelpOverlay.open();
+  },
+  showLoginOverlay: function() {
+    this.closeOverlays();
+    this.$.loginOverlay.open();
+  },
+  launchDigitalOceanSignup: function() {
+    ui.openTab('https://cloud.digitalocean.com/registrations/new');
+  },
+  launchDigitalOceanSettings: function() {
+    ui.openTab('https://cloud.digitalocean.com/droplets');
+  },
+  back: function() {
+    if (this.$.digitalOceanAccountHelpOverlay.opened ||
+        this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
+      this.closeOverlays();
+      this.$.getStartedOverlay.open();
+    } else {
+      this.closeOverlays();
+    }
+  },
+  closeOverlays: function() {
+    this.$.getStartedOverlay.close();
+    this.$.digitalOceanAccountHelpOverlay.close();
+    this.$.loginOverlay.close();
+    this.$.installingOverlay.close();
+    this.$.successOverlay.close();
+    this.$.failureOverlay.close();
   },
   loginTapped: function() {
-    this.closeDialogs();
-    // TODO: show the dialog when this value changes, not this nasty hack
+    this.closeOverlays();
     ui.cloudInstallStatus = '';
-    this.$.installingDialog.open();
+    this.$.installingOverlay.open();
 
-    ui.cloudInstall({
+    ui.cloudUpdate({
+      operation: uproxy_core_api.CloudOperationType.CLOUD_INSTALL,
       providerName: DEFAULT_PROVIDER,
       region: this.$.regionMenu.selected
-    }).then((result: uproxy_core_api.CloudInstallResult) => {
-      this.inviteUrl = result.invite;
-      this.closeDialogs();
-      this.$.successDialog.open();
-
-      // TODO: In addition to displaying the URL so the user can store it somewhere
-      //       we should add the new server to the user's contact list.
+    }).then(() => {
+      this.closeOverlays();
+      this.$.successOverlay.open();
     }).catch((e: Error) => {
       // TODO: Figure out which fields in e are set, because message isn't.
-      this.closeDialogs();
-      this.$.failureDialog.open();
-    })
+      this.closeOverlays();
+      this.$.failureOverlay.open();
+    });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {
     input.focus();
@@ -47,6 +83,5 @@ Polymer({
   },
   ready: function() {
     this.ui = ui;
-    this.inviteUrl = '';
   }
 });
