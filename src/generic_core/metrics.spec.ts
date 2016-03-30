@@ -35,13 +35,16 @@ var newBuffer = function(a:number) :metrics_module.WeekBuffer<number> {
 }
 
 var storageValues = {metrics: {
+  version: 2,
   successes: newBuffer(1),
   attempts: newBuffer(2),
-  shutdowns: newBuffer(3),
+  stops: newBuffer(3),
   on_gmail: {},
   on_facebook: {},
   on_github: {},
-  on_quiver: {}
+  on_quiver: {},
+  on_wechat: {},
+  on_cloud: {}
 }};
 
 describe('metrics_module.Metrics', () => {
@@ -89,8 +92,8 @@ describe('metrics_module.Metrics', () => {
       expect(payload['success-v3']).not.toEqual(1);
       expect(payload['fail-rate-v1']).toBeDefined();
       expect(payload['fail-rate-v1']).not.toEqual(2);
-      expect(payload['shutdown-v1']).toBeDefined();
-      expect(payload['shutdown-v1']).not.toEqual(3);
+      expect(payload['stop-v1']).toBeDefined();
+      expect(payload['stop-v1']).not.toEqual(3);
       expect(payload['nat-type-v3']).toBeDefined();
       expect(payload['nat-type-v3']).not.toEqual('SymmetricNAT');
       expect(payload['pmp-v3']).toBeDefined();

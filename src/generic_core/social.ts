@@ -178,16 +178,21 @@ export function notifyUI(networkName :string, userId :string) {
     protected updateMetrics() {
       if (this.metrics_) {
         // One of the users will be us.  Take that one out
+        var networkName = this.name;
         var numUsers:number;
-        if (NETWORK_OPTIONS[this.name].rosterFunction) {
-          numUsers = NETWORK_OPTIONS[this.name].rosterFunction(
-            Object.keys(this.roster));
-        } else {
-          numUsers = Object.keys(this.roster).length - 1;
+        numUsers = Object.keys(this.roster).length - 1;
+        if (NETWORK_OPTIONS[this.name]) {
+          if (NETWORK_OPTIONS[this.name].metricsName) {
+            networkName = NETWORK_OPTIONS[this.name].metricsName;
+          }
+          if (NETWORK_OPTIONS[this.name].rosterFunction) {
+            numUsers = NETWORK_OPTIONS[this.name].rosterFunction(
+              Object.keys(this.roster));
+          }
         }
 
         this.metrics_.userCount(
-          NETWORK_OPTIONS[this.name].metricName,
+          networkName,
           this.myInstance.getUserProfile().userId,
           numUsers);
       }

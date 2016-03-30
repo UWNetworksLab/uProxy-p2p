@@ -88,7 +88,7 @@ export class MetricsData {
   public successes :WeekBuffer<number>;  // Number of getter-side successful proxy
                                          // sessions started.
   public attempts :WeekBuffer<number>;  // Total number of attempts for getting access.
-  public shutdowns :WeekBuffer<number>;  // Number of times a proxy session lived long
+  public stops :WeekBuffer<number>;  // Number of times a proxy session lived long
                                          // enough that a getter hit the 'stop
                                          // proxying' button.
   // Social network stats:
@@ -105,7 +105,7 @@ export class MetricsData {
     this.version = 2;
     this.successes = new WeekBuffer<number>();
     this.attempts = new WeekBuffer<number>();
-    this.shutdowns = new WeekBuffer<number>();
+    this.stops = new WeekBuffer<number>();
     this.on_gmail = {};
     this.on_facebook = {};
     this.on_github = {};
@@ -187,7 +187,7 @@ export class Metrics {
                    'chrome-version-v1' :versionMetric,
                    'ff-version-v1' :versionMetric,
                    'platform-v1' :platformMetric,
-                   'shutdown-v1' :percentageMetric,
+                   'stop-v1' :percentageMetric,
                    'gmail-v1' :networkMetric,
                    'facebook-v1' :networkMetric,
                    'github-v1' :networkMetric,
@@ -211,13 +211,13 @@ export class Metrics {
             // called before storage loading is complete.
             this.data_.successes.merge(storedData.successes, this.add_);
             this.data_.attempts.merge(storedData.attempts, this.add_);
-            this.data_.shutdowns.merge(storedData.shutdowns, this.add_);
+            this.data_.stops.merge(storedData.stops, this.add_);
             this.data_.on_gmail = mergeNet(this.data_.on_gmail, storedData.on_gmail);
             this.data_.on_facebook = mergeNet(this.data_.on_facebook,
                                               storedData.on_facebook);
             this.data_.on_github = mergeNet(this.data_.on_github, storedData.on_github);
             this.data_.on_quiver = mergeNet(this.data_.on_quiver, storedData.on_quiver);
-            this.data_.on_wechat = mergeNet(this.data_.on_wchat, storedData.on_wechat);
+            this.data_.on_wechat = mergeNet(this.data_.on_wechat, storedData.on_wechat);
             this.data_.on_cloud = mergeNet(this.data_.on_cloud, storedData.on_cloud);
           }
         }).catch((e :Error) => {
@@ -235,8 +235,8 @@ export class Metrics {
     } else if (name == 'attempt') {
       this.data_.attempts.update(1, this.add_);;
       this.save_();
-    } else if (name == 'shutdown') {
-      this.data_.shutdowns.update(1, this.add_);
+    } else if (name == 'stop') {
+      this.data_.stops.update(1, this.add_);
     } else {
       log.error('Unknown metric ' + name);
     }
@@ -296,16 +296,16 @@ export class Metrics {
     return this.onceLoaded_.then(() => {
       var attempts = this.data_.attempts.reduce(0, this.add_);
       var successes = this.data_.successes.reduce(0, this.add_);
-      var shutdowns = this.data_.shutdowns.reduce(0, this.add_);
+      var stops = this.data_.stops.reduce(0, this.add_);
 
       var successReport =
         this.metricsProvider_.report('success-v3', successes);
       var failRateReport =
         this.metricsProvider_.report(
           'fail-rate-v1', calcQuantile(attempts - successes, attempts));
-      var shutdownReport =
-        this.metricsProvider_.report('shutdown-v1', calcQuantile(
-          shutdowns, successes));
+      var stopReport =
+        this.metricsProvider_.report('stop-v1', calcQuantile(
+          stops, successes));
 
       var chromeVersionReport =
         this.metricsProvider_.report('chrome-version-v1', chromeVersion);
@@ -347,7 +347,7 @@ export class Metrics {
       }
 
       return Promise.all([
-        successReport, failRateReport, shutdownReport, chromeVersionReport,
+        successReport, failRateReport, stopReport, chromeVersionReport,
         firefoxVersionReport, platformReport, gmailReport, facebookReport,
         githubReport, quiverReport, wechatReport, cloudReport
       ].concat(natPromises)).then(() => {
@@ -359,7 +359,7 @@ export class Metrics {
   public reset = () => {
     this.data_.successes.reset();
     this.data_.attempts.reset();
-    this.data_.shutdowns.reset();
+    this.data_.stops.reset();
     this.data_.on_gmail = {};
     this.data_.on_facebook = {};
     this.data_.on_github = {};
