@@ -843,6 +843,38 @@
     "description": "Refers to a remote server users can proxy from",
     "message": "a virtual machine"
   },
+  "CLOUD_INSTALL_STATUS_CREATING_SERVER": {
+    "description": "Progress bar label shown during cloud install indicating that a new server is being provisioned.",
+    "message": "Creating server..."
+  },
+  "CLOUD_INSTALL_STATUS_LOGGING_IN": {
+    "description": "Progress bar label shown during cloud install indicating that we are logging into the newly created server.",
+    "message": "Logging into new server..."
+  },
+  "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER": {
+    "description": "Progress bar label shown during cloud install indicating that we are installing Docker, a pre-requisite.",
+    "message": "Installing Docker..."
+  },
+  "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS": {
+    "description": "Progress bar label shown during cloud install indicating that we are downloading scripts which will install uProxy.",
+    "message": "Downloading install scripts..."
+  },
+  "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY": {
+    "description": "Progress bar label shown during cloud install indicating that we are downloading a Docker image for uProxy.",
+    "message": "Downloading and installing uProxy image..."
+  },
+  "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY": {
+    "description": "Progress bar label shown during cloud install indicating that we are waiting for uProxy to start.",
+    "message": "Waiting for uProxy to start..."
+  },
+  "CLOUD_INSTALL_STATUS_INSTALLING_SSH": {
+    "description": "Progress bar label shown during cloud install indicating that we are downloading a Docker image for an SSH server.",
+    "message": "Downloading and installing SSH server image..."
+  },
+  "CLOUD_INSTALL_STATUS_CONFIGURING_SSH": {
+    "description": "Progress bar label shown during cloud install indicating that we are configuring SSH.",
+    "message": "Configuring SSH..."
+  },
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
@@ -1231,9 +1263,13 @@
     "description": "Message shown after failed DigitalOcean server deployment",
     "message": "Oops! We had trouble creating a cloud server."
   },
-  "CLOUD_INSTALL_ERROR_MESSAGE": {
-    "description": "Message shown after failed DigitalOcean server deployment",
-    "message": "Check the settings of your DigitalOcean account to make sure your information is correct."
+  "LAUNCH_DIGITAL_OCEAN_SETTINGS": {
+    "description": "Button text for launching user's DigitalOcean settings page.",
+    "message": "Open DigitalOcean settings"
+  },
+  "DIGITAL_OCEAN_ERROR_MESSAGE": {
+    "description": "Following a failed DigitalOcean install, instruct the user to consult DigitalOcean's website where they can check their settings or remove a half-installed server.",
+    "message": "Please check your DigitalOcean settings before trying again. If you don't wish to try again, verify you have no droplets named \"uproxy-cloud-server\". This will ensure you avoid any monthly charges."
   },
   "CLOUD_INSTALL_INSTALLING_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",

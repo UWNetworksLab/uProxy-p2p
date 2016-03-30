@@ -112,7 +112,7 @@
           {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
         </uproxy-button>
         <uproxy-button raised on-tap='{{ showLoginOverlay }}'>
-          {{ 'SIGN_ME_IN' | $$}
+          {{ 'SIGN_ME_IN' | $$}}
         </uproxy-button>
       </div>
     </core-overlay>
@@ -155,7 +155,7 @@
         <h1>{{ 'CLOUD_INSTALL_INSTALLING_TITLE' | $$ }}</h1>
         <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$ }}</p>
         <div>
-          <paper-progress indeterminate='true'></paper-progress>
+          <paper-progress id='installProgress' value='{{ ui.cloudInstallProgress }}'></paper-progress>
         </div>
         <p>{{ ui.cloudInstallStatus }}</p>
       </div>
@@ -188,10 +188,12 @@
           <img src='../../icons/cloud/error-circle-ic.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_ERROR_TITLE' | $$ }}</h1>
-        <!-- TODO: link "Check the settings" -->
-        <p>{{ 'CLOUD_INSTALL_ERROR_MESSAGE' | $$ }}</p>
+        <p>{{ 'DIGITAL_OCEAN_ERROR_MESSAGE' | $$ }}</p>
         <uproxy-button raised on-tap='{{ loginTapped }}'>
           {{ 'TRY_AGAIN' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ launchDigitalOceanSettings }}'>
+          {{ 'LAUNCH_DIGITAL_OCEAN_SETTINGS' | $$ }}
         </uproxy-button>
       </div>
     </core-overlay>

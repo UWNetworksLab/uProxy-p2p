@@ -24,6 +24,9 @@ Polymer({
   launchDigitalOceanSignup: function() {
     ui.openTab('https://cloud.digitalocean.com/registrations/new');
   },
+  launchDigitalOceanSettings: function() {
+    ui.openTab('https://cloud.digitalocean.com/droplets');
+  },
   back: function() {
     if (this.$.digitalOceanAccountHelpOverlay.opened ||
         this.$.loginOverlay.opened || this.$.failureOverlay.opened) {

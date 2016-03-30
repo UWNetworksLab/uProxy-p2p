@@ -141,7 +141,9 @@ export enum Update {
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
   ONETIME_MESSAGE = 2026,
   CLOUD_INSTALL_STATUS = 2027,
-  REMOVE_FRIEND = 2028 // Removed friend from roster.
+  REMOVE_FRIEND = 2028, // Removed friend from roster.
+  // Payload is an integer between 0 and 100.
+  CLOUD_INSTALL_PROGRESS = 2029
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
