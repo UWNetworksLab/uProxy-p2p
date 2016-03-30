@@ -323,7 +323,7 @@ var generateProxyingSessionId_ = (): string => {
         log.warn('Cannot stop proxying when neither proxying nor trying to proxy.');
         return;
       }
-      globals.metrics.increment('shutdown');
+      globals.metrics.increment('stop');
       this.localGettingFromRemote = social.GettingState.NONE;
       this.stateRefresh_();
       return this.socksToRtc_.stop();

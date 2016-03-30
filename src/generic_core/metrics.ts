@@ -89,8 +89,8 @@ export class MetricsData {
                                          // sessions started.
   public attempts :WeekBuffer<number>;  // Total number of attempts for getting access.
   public stops :WeekBuffer<number>;  // Number of times a proxy session lived long
-                                         // enough that a getter hit the 'stop
-                                         // proxying' button.
+                                     // enough that a getter hit the 'stop
+                                     // proxying' button.
   // Social network stats:
   //   Negative (-1) for not logged in
   //   When logged in, the number of friends
