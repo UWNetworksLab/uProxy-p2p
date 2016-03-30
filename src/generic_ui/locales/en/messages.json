@@ -1285,7 +1285,7 @@
   },
   "CLOUD_INSTALL_LOGIN_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment, references text for SIGN_IN_AND_CONNECT button",
-    "message": "Once you click \"sign in and connect\", you will be charged $10 a month by DigitalOcean.  You can terminate your server at any time."
+    "message": "Once you click \"sign in and connect\", you will be charged $10 a month by DigitalOcean.  You can terminate your server at any time.  <uproxy-faq-link anchor='whatIsDigitalOcean'>Learn more.</uproxy-faq-link>"
   },
   "CLOUD_INSTALL_CREATE_ACCOUNT_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
@@ -1293,7 +1293,7 @@
   },
   "CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment, references text for SIGN_ME_IN button",
-    "message": "Don't worry about making a new droplet on DigitalOcean, we do that for you.  When you're done creating an account and have updated billing, click \"sign me in.\""
+    "message": "Don't worry about making a new droplet on DigitalOcean, we do that for you.  <uproxy-faq-link anchor='whatIsDigitalOcean'>Learn more.</uproxy-faq-link><br>When you're done creating an account and have updated billing, click \"sign me in.\""
   },
   "CLOUD_INSTALL_GET_STARTED_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
@@ -1301,7 +1301,11 @@
   },
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "Create a new account or sign in to connect and share access."
+    "message": "Create a new account or sign in to connect and share access. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+  },
+  "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
+    "description": "Instructions link for users who already have an existing cloud server.",
+    "message": "Already have a cloud server? <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link> to use it with uProxy."
   },
   "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
     "description": "Message shown on invite screen for DigitalOcean server deployment",

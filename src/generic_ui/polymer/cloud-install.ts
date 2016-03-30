@@ -11,6 +11,21 @@ const DEFAULT_PROVIDER = 'digitalocean';
 
 Polymer({
   open: function() {
+    // Set translated HTML content - need to use injectBoundHTML
+    // in order to enable <uproxy-faq-link>, etc tags in the text.
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_GET_STARTED_MESSAGE')),
+        this.$.getStartedMessage);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_EXISTING_SERVER_MESSAGE')),
+        this.$.existingServerMessage);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE')),
+        this.$.createAccountMessage);
+    this.injectBoundHTML(
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
+        this.$.loginMessage);
+
     this.$.getStartedOverlay.open();
   },
   showDigitalOceanAccountHelpOverlay: function() {
