@@ -217,6 +217,8 @@ export class Metrics {
                                               storedData.on_facebook);
             this.data_.on_github = mergeNet(this.data_.on_github, storedData.on_github);
             this.data_.on_quiver = mergeNet(this.data_.on_quiver, storedData.on_quiver);
+            this.data_.on_wechat = mergeNet(this.data_.on_wchat, storedData.on_wechat);
+            this.data_.on_cloud = mergeNet(this.data_.on_cloud, storedData.on_cloud);
           }
         }).catch((e :Error) => {
           // Not an error if no metrics are found storage, just use the default
@@ -324,12 +326,12 @@ export class Metrics {
       var quiverReport =
         this.metricsProvider_.report('quiver-v1',
                                      sumMetrics(this.data_.on_quiver));
-      var quiverReport =
-        this.metricsProvider_.report('quiver-v1',
-                                     sumMetrics(this.data_.on_quiver));
-      var quiverReport =
-        this.metricsProvider_.report('quiver-v1',
-                                     sumMetrics(this.data_.on_quiver));
+      var wechatReport =
+        this.metricsProvider_.report('wechat-v1',
+                                     sumMetrics(this.data_.on_wechat));
+      var cloudReport =
+        this.metricsProvider_.report('cloud-v1',
+                                     sumMetrics(this.data_.on_cloud));
 
       var natPromises:Promise<void>[] = [];
       if (natInfo && !natInfo.errorMsg) {
@@ -347,7 +349,8 @@ export class Metrics {
       return Promise.all([
         successReport, failRateReport, shutdownReport, chromeVersionReport,
         firefoxVersionReport, platformReport, gmailReport, facebookReport,
-        githubReport, quiverReport].concat(natPromises)).then(() => {
+        githubReport, quiverReport, wechatReport, cloudReport
+      ].concat(natPromises)).then(() => {
         return this.metricsProvider_.retrieve();
       });
     });
