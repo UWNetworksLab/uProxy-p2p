@@ -13,6 +13,23 @@ set -e
 
 REQUIRED_COMMANDS="docker git nc"
 
+AUTOMATED=false
+
+usage() {
+  echo "$0 [-a] [-h]"
+  echo "  -a: do not output complete invite URL"
+  echo "  -h, -?: this help message"
+  exit 1
+}
+
+while getopts ah? opt; do
+  case $opt in
+    a) AUTOMATED=true ;;
+    *) usage ;;
+  esac
+done
+shift $((OPTIND-1))
+
 command_exists() {
   command -v "$@" > /dev/null 2>&1
 }
@@ -39,6 +56,7 @@ do_install() {
       show_deps
     fi
     echo "Docker not found, running Docker installer."
+    echo "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER"
     curl -fsSL https://get.docker.com/ | sh
   fi
   # We depend on --build-arg, introduced in Docker 1.9.
@@ -60,12 +78,18 @@ do_install() {
     fi
   done
 
+  echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
   cd $TMP_DIR/testing/run-scripts
 
-  # TODO: pass arguments, e.g. banner
-  ./run_cloud.sh firefox-stable
+  # TODO: pass other run_cloud.sh arguments, e.g. -u
+  RUN_CLOUD_ARGS=
+  if [ "$AUTOMATED" = true ]
+  then
+    RUN_CLOUD_ARGS="$RUNARGS -a"
+  fi
+  ./run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
 
 # Wrapped in a function for some protection against half-downloads.

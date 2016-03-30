@@ -68,7 +68,7 @@ RUN apt-get -qq install npm nodejs
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 RUN npm install jpm -g
 # Firefox dependencies (apt-get install -f handles this for Chrome).
-RUN apt-get -qq install libasound2 libdbus-glib-1-2 libgtk2.0.0
+RUN apt-get -qq install libasound2 libdbus-glib-1-2 libgtk2.0.0 libgtk-3-0
 EOF
   case $1 in
     stable)

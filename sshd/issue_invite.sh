@@ -9,22 +9,23 @@ set -e
 
 INVITE_CODE=
 USERNAME=getter
-COMPLETE=false
+AUTOMATED=false
 
 function usage () {
-  echo "$0 [-u username] [-i invite code] [-c]"
+  echo "$0 [-u username] [-i invite code] [-c] [-a]"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
   echo "  -c: output complete invite URL (for manual installs)"
+  echo "  -a: do not output complete invite URL"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts i:u:ch? opt; do
+while getopts i:u:cah? opt; do
   case $opt in
     i) INVITE_CODE="$OPTARG" ;;
     u) USERNAME="$OPTARG" ;;
-    c) COMPLETE=true ;;
+    a) AUTOMATED=true ;;
     *) usage ;;
   esac
 done
@@ -53,10 +54,9 @@ then
   chmod 600 $TMP/id_rsa
   ssh-keygen -C "$USERNAME" -y -f $TMP/id_rsa > $TMP/id_rsa.pub
 else
-  # TODO: 2048 bits makes for really long keys so we should use
-  #       ecdsa when ssh2-streams supports it:
-  #         https://github.com/mscdex/ssh2-streams/issues/3
-  ssh-keygen -C "$USERNAME" -q -t rsa -b 2048 -N '' -f $TMP/id_rsa
+  # 1536 bits results in an encoded URL of ~1800 characters which is
+  # readily shareable by instant messaging.
+  ssh-keygen -C "$USERNAME" -q -t rsa -b 1536 -N '' -f $TMP/id_rsa
 
   # TODO: Because SSH keys are already base64-encoded, re-encoding them
   #       like this is very inefficient.
@@ -72,16 +72,24 @@ echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys
 
 # Output the actual invite code.
 PUBLIC_IP=`cat /hostname`
-export CLOUD_INSTANCE_DETAILS="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
+CLOUD_INSTANCE_DETAILS_JSON="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
+
+if [ "$AUTOMATED" = false ]
+then
+  # While any apt-get install command would ordinarily be run at
+  # image creation time, we do this here because npm is huge (>150MB)
+  # and only manual users need a copy/paste-able URL.
+  apt-get install -qq nodejs npm
+  npm install jsurl &>/dev/null
+  CLOUD_INSTANCE_DETAILS_JSURL=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS_JSON');"`
+  echo
+  echo "INVITE_CODE_URL: https://www.uproxy.org/invite/?v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS_JSURL"
+  echo
+fi
 
 # Output invite in JSON format, for the frontend installer.
-echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS"
-
-if [ "$COMPLETE" = true ]
-then
-  npm install jsurl &>/dev/null
-  CLOUD_INSTANCE_DETAILS=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS');"`
-  echo "https://www.uproxy.org/invite/?v=2&networkName=Cloud&networkData=$CLOUD_INSTANCE_DETAILS"
-else
-  echo $CLOUD_INSTANCE_DETAILS
-fi
+# Do this last because the frontend will try to connect as soon
+# as it sees this line and any further steps may mean the Docker
+# container will not actually be started by the time it does so.
+# TODO: have uproxy pass -a and hide this when passed
+echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS_JSON"
