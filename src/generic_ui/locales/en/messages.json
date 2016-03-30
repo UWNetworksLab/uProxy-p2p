@@ -1277,7 +1277,7 @@
   },
   "CLOUD_INSTALL_INSTALLING_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "<strong>This process can take up to 15 minutes.</strong>  Please leave the browser open during setup.  Once you're connected, you can share access with friends and family from your private server."
+    "message": "<strong>This process can take up to ten minutes.</strong>  Please leave the browser open during setup.  Once you're connected, you can share access with friends and family from your private server."
   },
   "CLOUD_INSTALL_LOGIN_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
