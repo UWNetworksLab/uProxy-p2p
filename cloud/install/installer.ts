@@ -120,8 +120,14 @@ class CloudInstaller {
         });
       }).on('end', () => {
         log.debug('connection end');
+        R({
+          message: 'connection end without invitation URL'
+        });
       }).on('close', (hadError: boolean) => {
         log.debug('connection close, with%1 error', (hadError ? '' : 'out'));
+        R({
+          message: 'connection close without invitation URL'
+        });
       }).connect(connectConfig);
     });
   }

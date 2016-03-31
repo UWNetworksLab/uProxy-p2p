@@ -542,9 +542,15 @@ class Connection {
       }).on('end', () => {
         log.debug('%1: connection end', this.name_);
         this.setState_(ConnectionState.TERMINATED);
+        R({
+          message: 'connection end without ping'
+        });
       }).on('close', (hadError: boolean) => {
         log.debug('%1: connection close, with%2 error', this.name_, (hadError ? '' : 'out'));
         this.setState_(ConnectionState.TERMINATED);
+        R({
+          message: 'connection close without ping'
+        });
       }).connect(connectConfig);
     });
   }
