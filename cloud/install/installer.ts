@@ -6,6 +6,7 @@
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
+import promises = require('../../promises/promises');
 import queue = require('../../handler/queue');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
@@ -25,6 +26,10 @@ const PROGRESS_PREFIX = 'CLOUD_INSTALL_PROGRESS';
 
 // Prefix for status updates.
 const STATUS_PREFIX = 'CLOUD_INSTALL_STATUS';
+
+// Retry timing for SSH connection establishment.
+const INITIAL_CONNECTION_INTERVAL_MS = 500;
+const MAX_CONNECTION_INTERVAL_MS = 10000;
 
 // Installs uProxy on a server, via SSH.
 // The process is as close as possible to a manual install
@@ -50,86 +55,90 @@ class CloudInstaller {
       debug: undefined
     };
 
-    const connection = new Client();
-    return new Promise<string>((F, R) => {
-      connection.on('ready', () => {
-        log.debug('logged into server');
+    let numAttempts = 0;
+    return promises.retryWithExponentialBackoff(() => {
+      log.debug('connection attempt %1...', (++numAttempts));
+      return new Promise<string>((F, R) => {
+        const connection = new Client();
+        connection.on('ready', () => {
+          log.debug('logged into server');
 
-        const stdoutRaw = new queue.Queue<ArrayBuffer, void>();
-        const stdout = new linefeeder.LineFeeder(stdoutRaw);
-        stdout.setSyncHandler((line: string) => {
-          log.debug('STDOUT: %1', line);
-          // Search for the URL anywhere in the line so we will
-          // continue to work in the face of minor changes
-          // to the install script.
-          if (line.indexOf(INVITATION_PREFIX) === 0) {
-            const inviteJson = line.substring(INVITATION_PREFIX.length);
-            try {
-              F(JSON.parse(inviteJson));
-            } catch (e) {
-              R({
-                message: 'could not parse invite: ' + inviteJson
-              });
+          const stdoutRaw = new queue.Queue<ArrayBuffer, void>();
+          const stdout = new linefeeder.LineFeeder(stdoutRaw);
+          stdout.setSyncHandler((line: string) => {
+            log.debug('STDOUT: %1', line);
+            // Search for the URL anywhere in the line so we will
+            // continue to work in the face of minor changes
+            // to the install script.
+            if (line.indexOf(INVITATION_PREFIX) === 0) {
+              const inviteJson = line.substring(INVITATION_PREFIX.length);
+              try {
+                F(JSON.parse(inviteJson));
+              } catch (e) {
+                R({
+                  message: 'could not parse invite: ' + inviteJson
+                });
+              }
+            } else if (line.indexOf(PROGRESS_PREFIX) === 0) {
+              const tokens = line.split(' ');
+              if (tokens.length < 2) {
+                log.warn('could not parse progress update');
+              } else {
+                const progress = parseInt(tokens[1], 10);
+                this.dispatchEvent_('progress', progress);
+              }
+            } else if (line.indexOf(STATUS_PREFIX) === 0) {
+              this.dispatchEvent_('status', line);
             }
-          } else if (line.indexOf(PROGRESS_PREFIX) === 0) {
-            const tokens = line.split(' ');
-            if (tokens.length < 2) {
-              log.warn('could not parse progress update');
-            } else {
-              const progress = parseInt(tokens[1], 10);
-              this.dispatchEvent_('progress', progress);
-            }
-          } else if (line.indexOf(STATUS_PREFIX) === 0) {
-            this.dispatchEvent_('status', line);
-          }
-        });
-
-        const stderrRaw = new queue.Queue<ArrayBuffer, void>();
-        const stderr = new linefeeder.LineFeeder(stderrRaw);
-        stderr.setSyncHandler((line: string) => {
-          log.error('STDERR: %1', line);
-        });
-
-        connection.exec(INSTALL_COMMAND, (e: Error, stream: ssh2.Channel) => {
-          if (e) {
-            connection.end();
-            R({
-              message: 'could not execute command: ' + e.message
-            });
-            return;
-          }
-          stream.on('end', () => {
-            stdout.flush();
-            stderr.flush();
-            connection.end();
-            R({
-              message: 'invitation URL not found'
-            });
-          }).on('data', (data:Buffer) => {
-            stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(data));
-          }).stderr.on('data', (data: Buffer) => {
-            stderrRaw.handle(arraybuffers.bufferToArrayBuffer(data));
           });
-        });
-      }).on('error', (e: Error) => {
-        // This occurs when:
-        //  - user supplies the wrong username or password
-        //  - host cannot be reached, e.g. non-existant hostname
-        R({
-          message: 'could not login: ' + e.message
-        });
-      }).on('end', () => {
-        log.debug('connection end');
-        R({
-          message: 'connection end without invitation URL'
-        });
-      }).on('close', (hadError: boolean) => {
-        log.debug('connection close, with%1 error', (hadError ? '' : 'out'));
-        R({
-          message: 'connection close without invitation URL'
-        });
-      }).connect(connectConfig);
-    });
+
+          const stderrRaw = new queue.Queue<ArrayBuffer, void>();
+          const stderr = new linefeeder.LineFeeder(stderrRaw);
+          stderr.setSyncHandler((line: string) => {
+            log.error('STDERR: %1', line);
+          });
+
+          connection.exec(INSTALL_COMMAND, (e: Error, stream: ssh2.Channel) => {
+            if (e) {
+              connection.end();
+              R({
+                message: 'could not execute command: ' + e.message
+              });
+              return;
+            }
+            stream.on('end', () => {
+              stdout.flush();
+              stderr.flush();
+              connection.end();
+              R({
+                message: 'invitation URL not found'
+              });
+            }).on('data', (data: Buffer) => {
+              stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(data));
+            }).stderr.on('data', (data: Buffer) => {
+              stderrRaw.handle(arraybuffers.bufferToArrayBuffer(data));
+            });
+          });
+        }).on('error', (e: Error) => {
+          // This occurs when:
+          //  - user supplies the wrong username or password
+          //  - host cannot be reached, e.g. non-existant hostname
+          R({
+            message: 'could not login: ' + e.message
+          });
+        }).on('end', () => {
+          log.debug('connection end');
+          R({
+            message: 'connection end without invitation URL'
+          });
+        }).on('close', (hadError: boolean) => {
+          log.debug('connection close, with%1 error', (hadError ? '' : 'out'));
+          R({
+            message: 'connection close without invitation URL'
+          });
+        }).connect(connectConfig);
+      });
+    }, MAX_CONNECTION_INTERVAL_MS, INITIAL_CONNECTION_INTERVAL_MS);
   }
 }
 
