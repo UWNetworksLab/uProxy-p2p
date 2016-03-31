@@ -60,9 +60,6 @@ then
   usage
 fi
 
-# Just having Docker installed is worth a lot.
-echo "CLOUD_INSTALL_PROGRESS 15"
-
 # Set the cloud instance's banner.
 # In descending order of preference:
 #  - command-line option
@@ -156,7 +153,7 @@ HOST_IP=`ip -o -4 addr list docker0 | awk '{print $4}' | cut -d/ -f1`
 
 # Start Zork, if necessary.
 echo "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY"
-echo "CLOUD_INSTALL_PROGRESS 20"
+echo "CLOUD_INSTALL_PROGRESS 10"
 if ! docker ps -a | grep uproxy-zork >/dev/null; then
   if ! docker images | grep uproxy/$1 >/dev/null; then
     BROWSER=$(echo $1 | cut -d - -f 1)
