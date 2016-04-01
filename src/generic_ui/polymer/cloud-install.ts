@@ -4,6 +4,7 @@
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import ui_constants = require('../../interfaces/ui');
+import user = require('../scripts/user');
 
 var ui = ui_context.ui;
 
@@ -71,10 +72,38 @@ Polymer({
     }).then(() => {
       this.closeOverlays();
       this.$.successOverlay.open();
-    }).catch((e: Error) => {
-      // TODO: Figure out which fields in e are set, because message isn't.
+    }).catch((e :any) => {
       this.closeOverlays();
-      this.$.failureOverlay.open();
+      if (e === 'Error: server already exists') {
+        this.$.serverExistsOverlay.open();
+      } else {
+        this.$.failureOverlay.open();
+      }
+    });
+  },
+  removeServerTapped: function() {
+    this.closeOverlays();
+    ui.cloudInstallStatus = '';
+    this.$.installingOverlay.open();
+    // Destroy server
+    return ui.cloudUpdate({
+      operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
+      providerName: DEFAULT_PROVIDER
+    }).then(() => {
+      // Check if there is a locally created cloud contact
+      return ui.getCloudUser();
+    }).then((user: user.User) => {
+      console.log('got user');
+      console.log(user);
+      if (user) {
+        // Remove cloud contact from friend list
+        return ui_context.core.removeContact({
+          networkName: user.network.name,
+          userId: user.userId
+        });
+      }
+    }).then(() => {
+      return this.loginTapped();
     });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {

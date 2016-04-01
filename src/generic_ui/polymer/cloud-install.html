@@ -203,6 +203,23 @@
       </div>
     </core-overlay>
 
+    <core-overlay id='serverExistsOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/error-circle-ic.svg'>
+        </div>
+        <h1>You already have a uProxy cloud server</h1>
+        <p>It appears you already have a cloud server named 'uproxy-cloud-server'. We can remove it and create a new one for you or you can go back to your list of friends.</p>
+        <uproxy-button raised on-tap='{{ removeServerTapped }}'>
+          REMOVE SERVER AND TRY AGAIN
+        </uproxy-button>
+      </div>
+    </core-overlay>
+
   </template>
   <script src='cloud-install.js'></script>
 </polymer-element>

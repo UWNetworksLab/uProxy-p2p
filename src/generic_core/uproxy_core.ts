@@ -693,10 +693,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
               networkData: JSON.stringify(cloudNetworkData)
             });
           });
-        }, (installError: Error) => {
-          log.error('install failed, cleaning up');
+        }, (installError: any) => {
+          // Tell user if the server already exists
+          if (installError.errcode === "VM_AE") {
+            return Promise.reject(new Error('server already exists'));
+          }
 
           // Destroy the server we just created so that the user isn't billed.
+          log.error('install failed, cleaning up');
           return provisioner.stop(DROPLET_NAME).then((unused: Object) => {
             log.info('destroyed server on digitalocean');
             destroyModules();
