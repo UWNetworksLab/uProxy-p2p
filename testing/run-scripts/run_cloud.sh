@@ -11,7 +11,7 @@
 set -e
 
 PREBUILT=
-IMAGE="soycode/uproxy-zork"
+IMAGE="uproxy/zork"
 INVITE_CODE=
 UPDATE=false
 WIPE=false
@@ -24,7 +24,7 @@ SSHD_PORT=5000
 function usage () {
   echo "$0 [-p path] [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
   echo "  -p: use a pre-built uproxy-lib"
-  echo "  -m: use a specified Docker Hub image (defaults to soycode/uproxy-zork)"
+  echo "  -m: use a specified Docker Hub image (defaults to uproxy/zork)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
