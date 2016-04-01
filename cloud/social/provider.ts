@@ -26,8 +26,9 @@ const STORAGE_KEY = 'cloud-social-contacts';
 // Timeout for establishing an SSH connection.
 const CONNECT_TIMEOUT_MS = 10000;
 
-// Maximum number of times to try establishing an SSH connection.
-const MAX_CONNECT_ATTEMPTS = 3;
+// Retry timing for SSH connection establishment.
+const INITIAL_CONNECTION_INTERVAL_MS = 500;
+const MAX_CONNECTION_INTERVAL_MS = 10000;
 
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
@@ -218,8 +219,9 @@ export class CloudSocialProvider {
       });
     };
         
-    this.clients_[invite.host] = promises.retry(connect,
-        MAX_CONNECT_ATTEMPTS).then((connection:Connection) => {
+    this.clients_[invite.host] = promises.retryWithExponentialBackoff(connect,
+        MAX_CONNECTION_INTERVAL_MS, INITIAL_CONNECTION_INTERVAL_MS).then(
+        (connection:Connection) => {
       log.info('connected to zork on %1', invite.host);
 
       // Fetch the banner, if available, then emit an instance message.
@@ -542,9 +544,15 @@ class Connection {
       }).on('end', () => {
         log.debug('%1: connection end', this.name_);
         this.setState_(ConnectionState.TERMINATED);
+        R({
+          message: 'connection end without ping'
+        });
       }).on('close', (hadError: boolean) => {
         log.debug('%1: connection close, with%2 error', this.name_, (hadError ? '' : 'out'));
         this.setState_(ConnectionState.TERMINATED);
+        R({
+          message: 'connection close without ping'
+        });
       }).connect(connectConfig);
     });
   }
