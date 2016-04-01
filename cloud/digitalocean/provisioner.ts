@@ -36,6 +36,7 @@ const STATUS_CODES: { [k: string]: string; } = {
 };
 
 const ERR_CODES: { [k: string]: string; } = {
+  'VM_AE': 'VM already exists.',
   'VM_DNE': 'VM does not exist',
   'CLOUD_ERR': 'Error from cloud provider'
 };
@@ -67,9 +68,17 @@ class Provisioner {
     return this.doOAuth_().then((oauthObj: any) => {
       this.state_.oauth = oauthObj;
       return this.getSshKey_(name);
-      // Get SSH keys
     }).then((keys: KeyPair) => {
+       // Get SSH keys
       this.state_.ssh = keys;
+      return this.getDroplet_(name);
+    }).then((resp: any) => {
+      if (resp.droplet) {
+        return Promise.reject({
+          'errcode': 'VM_AE',
+          'message': 'Droplet ' + name + ' already exists'
+        });
+      }
       return this.setupDigitalOcean_(name, region, image, size);
       // Setup Digital Ocean (SSH key + droplet)
     }).then(() => {
@@ -120,6 +129,32 @@ class Provisioner {
   private destroyServer_ = (name: string): Promise<void> => {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
       // Find and delete the server with the same name
+      return this.getDroplet_(name);
+    }).then((resp :any) => {
+      if (!resp.droplet) {
+        return Promise.reject({
+          'errcode': 'VM_DNE',
+          'message': 'Droplet ' + name + ' doesnt exist'
+        });
+      }
+      return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
+    }).then((resp: any) => {
+      if (resp.status.startsWith('204')) {
+        return Promise.resolve<void>();
+      }
+      return Promise.reject(new Error('error deleting droplet'));
+    });
+  }
+
+  /**
+   * Finds a droplet with this name
+   * @param {String} droplet name, as a string
+   * @return {Promise.<Object>}, returns droplet if exists
+   * or undefined if it does not exist
+   */
+  private getDroplet_ = (name: string) : Promise<Object> => {
+    return this.doRequest_('GET', 'droplets').then((resp: any) => {
+      // Find and delete the server with the same name
       for (var i = 0; i < resp.droplets.length; i++) {
         if (resp.droplets[i].name === name) {
           return Promise.resolve({
@@ -127,17 +162,9 @@ class Provisioner {
           });
         }
       }
-      return Promise.reject({
-        'errcode': 'VM_DNE',
-        'message': 'Droplet ' + name + ' doesnt exist'
+      return Promise.resolve({
+        droplet: undefined
       });
-    }).then((resp: any) => {
-      return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
-    }).then((resp: any) => {
-      if (resp.status.startsWith('204')) {
-        return Promise.resolve<void>();
-      }
-      return Promise.reject(new Error('error deleting droplet'));
     });
   }
 
