@@ -606,6 +606,9 @@ export function notifyUI(networkName :string, userId :string) {
       var networkData :Object = null;
       if (tokenObj) {
         networkData = tokenObj.networkData;
+        if (this.name === 'Cloud' && (typeof networkData) !== 'string') {
+          networkData = JSON.stringify(networkData);
+        }
       } else if (userId) {
         networkData = userId;
       }
