@@ -12,16 +12,15 @@ USERNAME=getter
 AUTOMATED=false
 
 function usage () {
-  echo "$0 [-u username] [-i invite code] [-c] [-a]"
+  echo "$0 [-u username] [-i invite code] [-a]"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
-  echo "  -c: output complete invite URL (for manual installs)"
   echo "  -a: do not output complete invite URL"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts i:u:cah? opt; do
+while getopts i:u:ah? opt; do
   case $opt in
     i) INVITE_CODE="$OPTARG" ;;
     u) USERNAME="$OPTARG" ;;

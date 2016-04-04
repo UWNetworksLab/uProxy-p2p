@@ -77,6 +77,7 @@ do_install() {
     fi
   done
 
+  echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
   cd $TMP_DIR/testing/run-scripts
