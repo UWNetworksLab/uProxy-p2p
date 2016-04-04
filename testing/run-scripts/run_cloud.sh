@@ -177,22 +177,14 @@ fi
 echo "CLOUD_INSTALL_STATUS_INSTALLING_SSH"
 echo "CLOUD_INSTALL_PROGRESS 60"
 if ! docker ps -a | grep uproxy-sshd >/dev/null; then
-  if ! docker images | grep uproxy/sshd >/dev/null; then
-    TMP_DIR=`mktemp -d`
-    echo -n "$BANNER" > $TMP_DIR/banner
-    echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
-
-    docker run --restart=always --name uproxy-sshd $SSHD_IMAGE
-    docker cp $TMP_DIR/banner uproxy-sshd:/banner
-    docker exec uproxy-sshd sh -c "chmod 644 /banner; chown giver: /banner"
-    docker cp $TMP_DIR/hostname uproxy-sshd:/hostname
-    docker exec uproxy-sshd sh -c "chmod 644 /hostname; chown giver: /hostname"
-  fi
-
   # Add an /etc/hosts entry to the Zork container.
   # Because the Zork container runs with --net=host, we can't use the
   # regular, ever-so-slightly-more-elegant Docker notation.
-  docker run --restart=always -d -p $SSHD_PORT:22 --name uproxy-sshd --add-host zork:$HOST_IP uproxy/sshd > /dev/null
+  docker run --restart=always -d -p $SSHD_PORT:22 --name uproxy-sshd --add-host zork:$HOST_IP $SSHD_IMAGE > /dev/null
+  docker exec uproxy-sshd sh -c "echo $BANNER > /banner"
+  docker exec uproxy-sshd sh -c "chmod 644 /banner; chown giver: /banner"
+  docker exec uproxy-sshd sh -c "echo $HOSTNAME > /hostname"
+  docker exec uproxy-sshd sh -c "chmod 644 /hostname; chown giver: /hostname"
 
   # Configure access.
   # In descending order of preference:
