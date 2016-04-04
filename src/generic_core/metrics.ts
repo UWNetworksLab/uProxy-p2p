@@ -51,6 +51,8 @@ export class WeekBuffer<T> {
     }
   }
 
+  // 'updater' isn't currently used, but will be when merge() is updated
+  // to actually merge overlapping WeekBuffers.
   public merge(other:WeekBuffer<T>, updater:Updater<T>) {
     other.trim();
     this.trim();
