@@ -122,8 +122,8 @@ then
     then
       docker start uproxy-sshd > /dev/null
     fi
-    GIVER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/giver/.ssh/authorized_keys || echo -n ""`
-    GETTER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys || echo -n ""`
+    GIVER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/giver/.ssh/authorized_keys | base64 -w 0 || echo -n ""`
+    GETTER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys | base64 -w 0|| echo -n ""`
 
     # Because it's unclear what it would mean to migrate authorized_keys files
     # when -i is supplied, restrict use of -i to new or wiping (-w) installs.
@@ -198,8 +198,8 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   echo "CLOUD_INSTALL_PROGRESS 90"
   if [ -n "$GIVER_AUTH_KEYS" ] || [ -n "$GETTER_AUTH_KEYS" ]
   then
-    docker exec uproxy-sshd sh -c "echo $GIVER_AUTH_KEYS > /home/giver/.ssh/authorized_keys"
-    docker exec uproxy-sshd sh -c "echo $GETTER_AUTH_KEYS > /home/getter/.ssh/authorized_keys"
+    docker exec uproxy-sshd sh -c "echo $GIVER_AUTH_KEYS | base64 -d > /home/giver/.ssh/authorized_keys"
+    docker exec uproxy-sshd sh -c "echo $GETTER_AUTH_KEYS | base64 -d  > /home/getter/.ssh/authorized_keys"
   else
     ISSUE_INVITE_ARGS=
     if [ "$AUTOMATED" = true ]
