@@ -178,24 +178,15 @@ echo "CLOUD_INSTALL_STATUS_INSTALLING_SSH"
 echo "CLOUD_INSTALL_PROGRESS 60"
 if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   if ! docker images | grep uproxy/sshd >/dev/null; then
-    TMP_DIR=/tmp/uproxy-sshd
-    rm -fR $TMP_DIR
-    SRC_DIR=${BASH_SOURCE%/*}/../../sshd/
-    cp -R $SRC_DIR $TMP_DIR
-    cat <<EOF > $TMP_DIR/Dockerfile
-FROM $SSHD_IMAGE
-COPY banner /
-RUN chmod 644 /banner
-RUN chown giver: /banner
-
-COPY hostname /
-RUN chmod 644 /hostname
-RUN chown giver: /hostname
-EOF
-
+    TMP_DIR=`mktemp -d`
     echo -n "$BANNER" > $TMP_DIR/banner
     echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
-    docker build -t uproxy/sshd $TMP_DIR
+
+    docker run --restart=always --name uproxy-sshd $SSHD_IMAGE
+    docker cp $TMP_DIR/banner uproxy-sshd:/banner
+    docker exec uproxy-sshd sh -c "chmod 644 /banner; chown giver: /banner"
+    docker cp $TMP_DIR/hostname uproxy-sshd:/hostname
+    docker exec uproxy-sshd sh -c "chmod 644 /hostname; chown giver: /hostname"
   fi
 
   # Add an /etc/hosts entry to the Zork container.
