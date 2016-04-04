@@ -1,12 +1,10 @@
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
-<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/paper-progress/paper-progress.html'>
 <link rel='import' href='../../bower/paper-radio-button/paper-radio-button.html'>
 <link rel='import' href='../../bower/paper-radio-group/paper-radio-group.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
-<link rel='import' href='dialog.html'>
 
 <polymer-element name='uproxy-cloud-install'>
   <template>
@@ -14,40 +12,13 @@
     :host {
       text-align: start;
     }
-    /* cogged from invite-user.html, to match social network invite dialogs */
-    /* TODO: seems like a lot of duplication */
-    uproxy-dialog {
-      min-width: 80%;
-    }
-    uproxy-dialog h1 {
-      color: #333;
-      font-size: 18px;
-      font-weight: normal;
-      margin-top: 0;
-    }
-    uproxy-dialog p {
-      color: rgb(160, 160, 160);
-      line-height: 18px;
-      font-weight: lighter;
-      font-size: 12px;
-      letter-spacing: 0.5px;
-    }
-    core-icon[icon=clear] {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      color: rgb(180,180,180);
-      cursor: pointer;
+    core-overlay {
+      height: 100%;
+      width: 100%;
+      background-color: white;
     }
     uproxy-button {
       margin: 15px 0px;
-    }
-    uproxy-button #buttonLogoContainer {
-      padding: 0em 0.3em;
-    }
-    uproxy-button #buttonTextContainer {
-      padding: 0.7em 0.9em;
-      border-left: 1px solid rgba(255,255,255,0.3);
     }
     paper-progress {
       width: 100%;
@@ -56,67 +27,177 @@
       width: 100%;
       padding: 6px 12px !important;
     }
+    .content {
+      margin: 2em;
+    }
+    uproxy-button {
+      background-color: #34AFCE;  /* blue */
+      padding: 0.5em;
+      width: 100%;
+      font-size: 14px;
+    }
+    h1 {
+      color: #34AFCE;  /* blue */
+      font-weight: 400;
+      font-size: 20px;
+      line-height: 30px;
+    }
+    h2 {
+      font-weight: 400;
+      font-size: 23px;
+    }
+    p {
+      line-height: 1.75em;
+    }
+    #regionMenu {
+      font-size: 16px;
+    }
+    .imgWrapper {
+      text-align: center;
+    }
+    .imgWrapper img {
+      margin: 1em 0.5em 1em 0.5em;
+    }
+    paper-progress::shadow #activeProgress {
+      background-color: #34AFCE !important;  /* blue */
+    }
+    paper-radio-button[checked]::shadow #onRadio {
+      background-color: #34AFCE;  /* blue */
+    }
+    paper-radio-button[checked]::shadow #offRadio {
+      border-color: #34AFCE;  /* blue */
+    }
+    uproxy-faq-link {
+      color: #12A391;
+    }
     </style>
 
-    <!-- TODO: remove this logic from the template -->
-    <core-signals on-core-signal-open-cloud-install-dialog='{{ openLoginDialog }}'></core-signals>
+    <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
 
-    <!-- TODO: use core-pages rather than multiple dialogs -->
-    <uproxy-dialog layered='false' backdrop='true' id='loginDialog'>
-      <h1>Create a cloud server</h1>
-      <core-icon icon='clear' on-tap='{{ closeDialogs }}'></core-icon>
-      <p>We can help you create a uProxy cloud server. You will be able to get access from this server 24x7 and, optionally, share it with friends and family.</p>
-      <p>Please choose the city in which to locate your new server. For best performance, this should be as close as possible to where you will use uProxy.</p>
-      <div>
-        <paper-radio-group id='regionMenu' selected='sgp1'>
-          <!-- TODO: get available regions from digital ocean -->
-          <paper-radio-button name='sgp1' label='Asia (Singapore)'></paper-radio-button>
-          <paper-radio-button name='ams2' label='Europe (Amsterdam)'></paper-radio-button>
-          <paper-radio-button name='nyc2' label='North America (New York)'></paper-radio-button>
-        </paper-radio-group>
+    <core-overlay id='getStartedOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/create-circle-ic.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_GET_STARTED_TITLE' | $$ }}</h1>
+        <p id='getStartedMessage'></p>
+        <uproxy-button raised on-tap='{{ showDigitalOceanAccountHelpOverlay }}'>
+          {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ showLoginOverlay }}'>
+          {{ 'I_HAVE_AN_ACCOUNT' | $$ }}
+        </uproxy-button>
+        <p id='existingServerMessage'></p>
       </div>
-      <p>To get started, please sign in to your Digital Ocean account.</p>
-      <div style='text-align:center;'>
-        <uproxy-button raised on-tap='{{ loginTapped }}'>
-          <span id='buttonLogoContainer'><core-icon icon='uproxy-icons:Cloud'></core-icon></span>
-          <span id='buttonTextContainer'>Sign in to Digital Ocean</span>
+    </core-overlay>
+
+    <core-overlay id='digitalOceanAccountHelpOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/getstarted-step1.svg'>
+          <img src='../../icons/cloud/getstarted-step2.svg'>
+          <img src='../../icons/cloud/getstarted-step3.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_CREATE_ACCOUNT_TITLE' | $$ }}</h1>
+        <!-- TODO: some of this text needs to be bold - need to set the HTML element rather than use $$ to translate -->
+        <p id='createAccountMessage'></p>
+        <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
+          {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ showLoginOverlay }}'>
+          {{ 'SIGN_ME_IN' | $$}}
         </uproxy-button>
       </div>
-    </uproxy-dialog>
+    </core-overlay>
 
-    <uproxy-dialog layered='false' backdrop='true' id='installingDialog'>
-      <h1>Create a cloud server</h1>
-      <p>Your cloud server is being created. This will take several minutes, please bear with us.</p>
-      <div>
-        <paper-progress indeterminate='true'></paper-progress>
+    <core-overlay id='loginOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/location-circle.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_LOGIN_TITLE' | $$ }}</h1>
+        <div>
+          <paper-radio-group id='regionMenu' selected='sgp1'>
+            <!-- TODO: get available regions from DigitalOcean -->
+            <paper-radio-button name='sgp1' label='{{ "ASIA_SINGAPORE" | $$ }}'></paper-radio-button>
+            <paper-radio-button name='ams2' label='{{ "EUROPE_AMSTERDAM" | $$ }}'></paper-radio-button>
+            <paper-radio-button name='nyc2' label='{{ "NORTH_AMERICA_NEW_YORK" | $$ }}'></paper-radio-button>
+          </paper-radio-group>
+        </div>
+        <p id='loginMessage'></p>
+        <!-- TODO: add learn more links -->
+        <uproxy-button raised on-tap='{{ loginTapped }}'>
+          {{ 'SIGN_IN_AND_CONNECT' | $$ }}
+        </uproxy-button>
       </div>
-      <p>{{ ui.cloudInstallStatus }}</p>
-    </uproxy-dialog>
+    </core-overlay>
 
-    <!-- Although we should use a uproxy-action-dialog for these two dialogs,
-         there is some weirdness mixing uproxy-dialog and uproxy-action-dialog
-         in the template in which Polymer opens multiple core-overlays,
-         messing up the whole UI when the uproxy-action-dialog closes. -->
+    <core-overlay id='installingOverlay'>
+      <uproxy-app-bar color='#34AFCE' disableback="true">
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
 
-    <uproxy-dialog layered='false' backdrop='true' id='successDialog'>
-      <h1>Create a cloud server</h1>
-      <p>Your cloud server is ready!</p>
-      <p>Below is the URL to administer your new server. Copy and paste it into a file and save it somewhere you'll be able to get to it in the future. Think of it as a password: keep it safe and don't share it with anyone you don't trust.</p>
-      <p>Once you've saved the URL, open it in your browser to add your new server to your contacts list.</p>
-      <div>
-        <paper-input-decorator layout vertical>
-          <input readonly is='core-input' on-tap='{{ select }}' value='{{ inviteUrl }}' />
-        </paper-input-decorator>
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/loading-circle.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_INSTALLING_TITLE' | $$ }}</h1>
+        <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$ }}</p>
+        <div>
+          <paper-progress id='installProgress' value='{{ ui.cloudInstallProgress }}'></paper-progress>
+        </div>
+        <p>{{ ui.cloudInstallStatus }}</p>
       </div>
-      <uproxy-button on-tap='{{ closeDialogs }}'>{{ 'OK' | $$ }}</uproxy-button>
-    </uproxy-dialog>
+    </core-overlay>
 
-    <uproxy-dialog layered='false' backdrop='true' id='failureDialog'>
-      <h1>Create a cloud server</h1>
-      <p>We're sorry. We couldn't create a cloud server for you at this time.</p>
-      <p>It may be a temporary problem. Please try again later.</p>
-      <uproxy-button on-tap='{{ closeDialogs }}'>{{ 'OK' | $$ }}</uproxy-button>
-    </uproxy-dialog>
+    <core-overlay id='successOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/ready-circle.svg'>
+        </div>
+          <h1>{{ 'CLOUD_INSTALL_SUCCESS_TITLE' | $$ }}</h1>
+        <!-- TODO: show IP address -->
+        <p>{{ 'CLOUD_INSTALL_SUCCESS_MESSAGE' | $$ }}</p>
+        <!-- TODO: add start getting access button -->
+        <uproxy-button on-tap='{{ closeOverlays }}'>{{ 'CONTINUE' | $$ }}</uproxy-button>
+      </div>
+    </core-overlay>
+
+    <core-overlay id='failureOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/error-circle-ic.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_ERROR_TITLE' | $$ }}</h1>
+        <p>{{ 'DIGITAL_OCEAN_ERROR_MESSAGE' | $$ }}</p>
+        <uproxy-button raised on-tap='{{ loginTapped }}'>
+          {{ 'TRY_AGAIN' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ launchDigitalOceanSettings }}'>
+          {{ 'LAUNCH_DIGITAL_OCEAN_SETTINGS' | $$ }}
+        </uproxy-button>
+      </div>
+    </core-overlay>
 
   </template>
   <script src='cloud-install.js'></script>

@@ -102,7 +102,9 @@ export enum Command {
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
   SEND_INVITATION = 1028,
-  CLOUD_INSTALL = 1029
+  CLOUD_UPDATE = 1029,
+  UPDATE_ORG_POLICY = 1030,
+  REMOVE_CONTACT = 1031
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -138,8 +140,10 @@ export enum Update {
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
   ONETIME_MESSAGE = 2026,
-  // Payload is a CloudInstallResult.
-  CLOUD_INSTALL_STATUS = 2027
+  CLOUD_INSTALL_STATUS = 2027,
+  REMOVE_FRIEND = 2028, // Removed friend from roster.
+  // Payload is an integer between 0 and 100.
+  CLOUD_INSTALL_PROGRESS = 2029
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -215,20 +219,28 @@ export interface InvitationData {
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
-// Argument to #cloudInstall.
-export interface CloudInstallArgs {
-  // Use this cloud computing provider to create a server.
-  providerName: string;
-  // Provider-specific region in which to locate the new server.
-  region: string;
+export enum CloudOperationType {
+  CLOUD_INSTALL = 0,
+  CLOUD_DESTROY = 1
+}
+
+// Arguments to cloudUpdate
+export interface CloudOperationArgs {
+  operation: CloudOperationType;
+  // Use this cloud computing provider to access a server.
+  providerName :string;
+  // Provider-specific region in which to locate a new server.
+  region ?:string;
 };
 
-// Output of #cloudInstall.
-export interface CloudInstallResult {
-  // Invitation URL, iff the the server was successfully created
-  // and provisioned.
-  invite: string;
+// Argument to removeContact
+export interface RemoveContactArgs {
+  // Name of the network the contact is a part of
+  networkName :string,
+  // userId of the contact you want to remove
+  userId :string
 };
+
 
 /**
  * The primary interface to the uProxy Core.
@@ -292,10 +304,13 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
-  // Installs uProxy on a server. Generally a long-running operation, so
+  // Installs or destroys uProxy on a server. Generally a long-running operation, so
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudInstall(args:CloudInstallArgs): Promise<CloudInstallResult>;
+  cloudUpdate(args :CloudOperationArgs): Promise<void>;
+
+  // Removes contact from roster, storage, and friend list
+  removeContact(args :RemoveContactArgs) : Promise<void>;
 }
 

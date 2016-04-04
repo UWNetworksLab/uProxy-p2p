@@ -136,6 +136,7 @@ export class UserInterface implements ui_constants.UiApi {
   private isConnectedToCellular_ :boolean = false;
 
   public cloudInstallStatus :string = '';
+  public cloudInstallProgress = 0;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -177,6 +178,8 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.USER_SELF, this.syncUserSelf_);
 
     core.onUpdate(uproxy_core_api.Update.USER_FRIEND, this.syncUser);
+
+    core.onUpdate(uproxy_core_api.Update.REMOVE_FRIEND, this.removeFriend);
 
     core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
       this.copyPasteState.message = message;
@@ -314,7 +317,11 @@ export class UserInterface implements ui_constants.UiApi {
                   this.setPortControlSupport_);
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.cloudInstallStatus = status;
+      this.cloudInstallStatus = this.i18n_t(status);
+    });
+
+    core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
+      this.cloudInstallProgress = progress;
     });
 
     browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
@@ -595,21 +602,16 @@ export class UserInterface implements ui_constants.UiApi {
     var networkName = tokenObj.networkName;
 
     if (networkName == 'Cloud') {
-      // Cloud confirmation is the same regardless of whether the user is
-      // logged into cloud yet.
-      return this.getConfirmation('', this.i18n_t('CLOUD_INVITE_CONFIRM'))
-      .then(() => {
-        // Log into cloud if needed.
-        var loginPromise = Promise.resolve<void>();
-        if (!this.model.getNetwork('Cloud')) {
-          loginPromise = this.login('Cloud');
-        }
-        return loginPromise.then(() => {
-          // Cloud contacts only appear on the GET tab.
-          this.setMode(ui_constants.Mode.GET);
-          // Don't show an additional confirmation for Cloud.
-          return this.addUser_(tokenObj, false).catch(showTokenError);
-        });
+      // Log into cloud if needed.
+      var loginPromise = Promise.resolve<void>();
+      if (!this.model.getNetwork('Cloud')) {
+        loginPromise = this.login('Cloud');
+      }
+      return loginPromise.then(() => {
+        // Cloud contacts only appear on the GET tab.
+        this.setMode(ui_constants.Mode.GET);
+        // Don't show an additional confirmation for Cloud.
+        return this.addUser_(tokenObj, false).catch(showTokenError);
       });
     }
 
@@ -1030,17 +1032,28 @@ export class UserInterface implements ui_constants.UiApi {
     // Update the user's category in both get and share tabs.
     model.categorizeUser(user, this.model.contacts.getAccessContacts,
         oldUserCategories.getTab, newUserCategories.getTab);
-
     if (user.status != social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
       model.categorizeUser(user, this.model.contacts.shareAccessContacts,
           oldUserCategories.shareTab, newUserCategories.shareTab);
     }
+
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
   };
 
-  public openTab = (url :string) => {
+  /**
+   * Remove a friend from the friend list by removing it from 
+   * model.contacts
+   */
+  public removeFriend = (args:{ networkName: string, userId: string }) => {
+    var network = this.model.getNetwork(args.networkName);
+    var user = this.model.getUser(network, args.userId);
+    this.model.removeContact(user);
+    console.log('Removed user from contacts', user);
+  }
+
+  public openTab = (url: string) => {
     this.browserApi.openTab(url);
   }
 
@@ -1353,7 +1366,11 @@ export class UserInterface implements ui_constants.UiApi {
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<uproxy_core_api.CloudInstallResult> => {
-    return this.core.cloudInstall(args);
+  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
+    return this.core.cloudUpdate(args);
+  }
+
+  public removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
+    return this.core.removeContact(args);
   }
 } // class UserInterface
