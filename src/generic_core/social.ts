@@ -26,6 +26,7 @@ import firewall = require('./firewall');
 import globals = require('./globals');
 import local_instance = require('./local-instance');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import metrics = require('./metrics');
 import network_options = require('../generic/network-options');
 import remote_user = require('./remote-user');
 import social = require('../interfaces/social');
@@ -145,7 +146,7 @@ export function notifyUI(networkName :string, userId :string) {
       ME: 'me'
     }
 
-    constructor(public name :string) {
+    constructor(public name :string, private metrics_ :metrics.Metrics) {
       this.roster = {};
     }
 
@@ -171,6 +172,32 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
+    /**
+     * Updates metrics on login state/user count
+     */
+    protected updateMetrics() {
+      if (this.metrics_) {
+        // One of the users will be us.  Take that one out
+        var networkName = this.name;
+        var numUsers:number;
+        numUsers = Object.keys(this.roster).length - 1;
+        if (NETWORK_OPTIONS[this.name]) {
+          if (NETWORK_OPTIONS[this.name].metricsName) {
+            networkName = NETWORK_OPTIONS[this.name].metricsName;
+          }
+          if (NETWORK_OPTIONS[this.name].rosterFunction) {
+            numUsers = NETWORK_OPTIONS[this.name].rosterFunction(
+              Object.keys(this.roster));
+          }
+        }
+
+        this.metrics_.userCount(
+          networkName,
+          this.myInstance.getUserProfile().userId,
+          numUsers);
+      }
+    }
+
     //===================== Social.Network implementation ====================//
 
     /**
@@ -183,6 +210,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
       var newUser = new remote_user.User(this, userId);
       this.roster[userId] = newUser;
+      this.updateMetrics();
       return newUser;
     }
 
@@ -320,8 +348,8 @@ export function notifyUI(networkName :string, userId :string) {
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
      */
-    constructor(public name :string) {
-      super(name);
+    constructor(public name :string, metrics :metrics.Metrics) {
+      super(name, metrics);
 
       this.provider_ = freedom[PREFIX + name];
       this.onceLoggedIn_ = null;
@@ -705,6 +733,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       var monitorCallback = () => {
+        this.updateMetrics();
         for (var userId in this.roster) {
           this.getUser(userId).monitor();
         }
