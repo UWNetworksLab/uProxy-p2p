@@ -24,13 +24,36 @@ var getNetworkInfoObj = () => {
   })
 };
 
+var add = function(a:number,b:number) :number {
+  return a+b;
+}
+
+var newBuffer = function(a:number) :metrics_module.WeekBuffer<number> {
+  var buf = new metrics_module.WeekBuffer<number>();
+  buf.update(a, add);
+  return buf;
+}
+
+var storageValues = {metrics: {
+  version: 2,
+  successes: newBuffer(1),
+  attempts: newBuffer(2),
+  stops: newBuffer(3),
+  on_gmail: {},
+  on_facebook: {},
+  on_github: {},
+  on_quiver: {},
+  on_wechat: {},
+  on_cloud: {}
+}};
+
 describe('metrics_module.Metrics', () => {
   it('Loads data from storage', (done) => {
-    var storage = new MockStorage({metrics: {success: 1, failure: 2}});
+    var storage = new MockStorage(storageValues);
     var metrics = new metrics_module.Metrics(storage);
     metrics.onceLoaded_.then(() => {
-      expect(metrics.data_.success).toEqual(1);
-      expect(metrics.data_.failure).toEqual(2);
+      expect(metrics.data_.successes.reduce(0,add)).toEqual(1);
+      expect(metrics.data_.attempts.reduce(0,add)).toEqual(2);
       done();
     });
   });
@@ -39,34 +62,38 @@ describe('metrics_module.Metrics', () => {
     var storage = new MockStorage({});
     var metrics = new metrics_module.Metrics(storage);
     metrics.onceLoaded_.then(() => {
-      expect(metrics.data_.success).toEqual(0);
-      expect(metrics.data_.failure).toEqual(0);
+      expect(metrics.data_.successes.reduce(0,add)).toEqual(0);
+      expect(metrics.data_.attempts.reduce(0,add)).toEqual(0);
       done();
     });
   });
 
   it('Increment adds to the values in storage and saves', (done) => {
-    var storage = new MockStorage({metrics: {success: 1, failure: 2}});
+    var storage = new MockStorage(storageValues);
     spyOn(storage, 'save').and.callThrough();
     var metrics = new metrics_module.Metrics(storage);
     metrics.onceLoaded_.then(() => {
-      expect(metrics.data_.success).toEqual(2);
-      expect(metrics.data_.failure).toEqual(3);
+      expect(metrics.data_.successes.reduce(0,add)).toEqual(1);
+      expect(metrics.data_.attempts.reduce(0,add)).toEqual(2);
       expect(storage.save).toHaveBeenCalled();
       done();
     });
     metrics.increment('success');
-    metrics.increment('failure');
+    // Two attempts: one sucessful, one failure.
+    metrics.increment('attempt');
+    metrics.increment('attempt');
   });
 
   it('getReport reports obfuscated metric values', (done) => {
-    var storage = new MockStorage({metrics: {success: 1, failure: 2}});
+    var storage = new MockStorage(storageValues);
     var metrics = new metrics_module.Metrics(storage);
     metrics.getReport(networkInfo).then((payload :any) => {
-      expect(payload['success-v2']).toBeDefined();
-      expect(payload['success-v2']).not.toEqual(1);
-      expect(payload['failure-v2']).toBeDefined();
-      expect(payload['failure-v2']).not.toEqual(2);
+      expect(payload['success-v3']).toBeDefined();
+      expect(payload['success-v3']).not.toEqual(1);
+      expect(payload['fail-rate-v1']).toBeDefined();
+      expect(payload['fail-rate-v1']).not.toEqual(2);
+      expect(payload['stop-v1']).toBeDefined();
+      expect(payload['stop-v1']).not.toEqual(3);
       expect(payload['nat-type-v3']).toBeDefined();
       expect(payload['nat-type-v3']).not.toEqual('SymmetricNAT');
       expect(payload['pmp-v3']).toBeDefined();
