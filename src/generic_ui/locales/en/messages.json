@@ -1346,5 +1346,17 @@
   "NORTH_AMERICA_NEW_YORK": {
     "description": "Region option for deploying a DigitalOcean server",
     "message": "North America (New York)"
+  },
+  "CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE": {
+    "description": "Message shown after failed server deployment because uproxy-cloud-server already exists",
+    "message": "Oops! You already have a uProxy cloud server."
+  },
+  "CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE": {
+    "description": "Message shown after failed server deployment because uproxy-cloud-server already exists",
+    "message": "You already have a cloud server named 'uproxy-cloud-server'. We can remove it and create a new one for you."
+  },
+  "REMOVE_SERVER_AND_TRY_AGAIN": {
+    "description": "Button text for removing cloud server and trying again (e.g. connecting to DigitalOcean)",
+    "message": "Remove server and try again"
   }
 }

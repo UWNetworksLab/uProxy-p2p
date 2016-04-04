@@ -59,6 +59,7 @@ Polymer({
     this.$.installingOverlay.close();
     this.$.successOverlay.close();
     this.$.failureOverlay.close();
+    this.$.serverExistsOverlay.close();
   },
   loginTapped: function() {
     this.closeOverlays();
