@@ -13,14 +13,6 @@ RUN adduser --disabled-password --gecos 'uProxy Getter' --ingroup getter getter
 RUN mkdir -p /home/getter/.ssh && chown -R getter: /home/getter/.ssh
 RUN touch /home/getter/.ssh/authorized_keys && chown getter: /home/getter/.ssh/authorized_keys
 
-COPY banner /
-RUN chmod 644 /banner
-RUN chown giver: /banner
-
-COPY hostname /
-RUN chmod 644 /hostname
-RUN chown giver: /hostname
-
 COPY issue_invite.sh /
 RUN chown root:root /issue_invite.sh
 RUN chmod 755 /issue_invite.sh
