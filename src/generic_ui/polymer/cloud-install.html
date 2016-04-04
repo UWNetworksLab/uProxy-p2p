@@ -70,6 +70,9 @@
     uproxy-faq-link {
       color: #12A391;
     }
+    .warning {
+      font-weight: bold;
+    }
     </style>
 
     <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
@@ -154,6 +157,7 @@
           <img src='../../icons/cloud/loading-circle.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_INSTALLING_TITLE' | $$ }}</h1>
+        <p class="warning">{{ 'CLOUD_INSTALL_INSTALLING_WARNING' | $$ }}</p>
         <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$ }}</p>
         <div>
           <paper-progress id='installProgress' value='{{ ui.cloudInstallProgress }}'></paper-progress>

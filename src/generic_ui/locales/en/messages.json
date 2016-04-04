@@ -1275,9 +1275,13 @@
     "description": "Message shown during DigitalOcean server deployment",
     "message": "Hold tight, we're creating a new cloud server."
   },
+  "CLOUD_INSTALL_INSTALLING_WARNING": {
+    "description": "Message shown during DigitalOcean server deployment.",
+    "message": "This process can take up to ten minutes. Please keep the browser open and stay online."
+  },
   "CLOUD_INSTALL_INSTALLING_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "This process can take up to 15 minutes.  Please leave the browser open during setup.  Once you're connected, you can share access with friends and family from your private server."
+    "message": "Once you're connected, you can share access with friends and family from your private server."
   },
   "CLOUD_INSTALL_LOGIN_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
@@ -1301,7 +1305,7 @@
   },
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "Create a new account or sign in to connect and share access. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+    "message": "For $10 per month you can get and share access with your friends and family. If you sign up with uProxy, your first month is free! Create a new account or sign in to connect and share access. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
   },
   "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
     "description": "Instructions link for users who already have an existing cloud server.",
@@ -1313,7 +1317,7 @@
   },
   "CLOUD_INSTALL_INVITE_SCREEN_MESSAGE": {
     "description": "Message shown on invite screen for DigitalOcean server deployment",
-    "message": "For $10 a month you can get and share access with friends and family from your own private server."
+    "message": "Get and share access with friends and family from your own private server."
   },
   "I_HAVE_AN_ACCOUNT": {
     "description": "Button text shown during DigitalOcean server deployment",
