@@ -123,6 +123,7 @@ class Provisioner {
 
   /**
    * Destroys cloud server; assumes OAuth has already been completed
+   * This method will use this.waitDigitalOceanActions_() to wait until the server is deleted
    * @param {String} droplet name, as a string
    * @return {Promise.<void>}
    */
@@ -137,12 +138,19 @@ class Provisioner {
           'message': 'Droplet ' + name + ' doesnt exist'
         });
       }
+      this.state_.cloud = {};
+      this.state_.cloud.vm = resp.droplet;
       return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
     }).then((resp: any) => {
       if (resp.status.startsWith('204')) {
-        return Promise.resolve<void>();
+        // Wait until server is deleted
+        this.sendStatus_('CLOUD_WAITING_VM');
+        return this.waitDigitalOceanActions_();
+      } else {
+        return Promise.reject(new Error('error deleting droplet'));
       }
-      return Promise.reject(new Error('error deleting droplet'));
+    }).then(() => {
+      return Promise.resolve<void>();
     });
   }
 
