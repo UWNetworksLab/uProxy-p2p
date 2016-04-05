@@ -26,6 +26,7 @@ import firewall = require('./firewall');
 import globals = require('./globals');
 import local_instance = require('./local-instance');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import metrics = require('./metrics');
 import network_options = require('../generic/network-options');
 import remote_user = require('./remote-user');
 import social = require('../interfaces/social');
@@ -145,7 +146,7 @@ export function notifyUI(networkName :string, userId :string) {
       ME: 'me'
     }
 
-    constructor(public name :string) {
+    constructor(public name :string, private metrics_ :metrics.Metrics) {
       this.roster = {};
     }
 
@@ -171,6 +172,32 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
+    /**
+     * Updates metrics on login state/user count
+     */
+    protected updateMetrics() {
+      if (this.metrics_) {
+        // One of the users will be us.  Take that one out
+        var networkName = this.name;
+        var numUsers:number;
+        numUsers = Object.keys(this.roster).length - 1;
+        if (NETWORK_OPTIONS[this.name]) {
+          if (NETWORK_OPTIONS[this.name].metricsName) {
+            networkName = NETWORK_OPTIONS[this.name].metricsName;
+          }
+          if (NETWORK_OPTIONS[this.name].rosterFunction) {
+            numUsers = NETWORK_OPTIONS[this.name].rosterFunction(
+              Object.keys(this.roster));
+          }
+        }
+
+        this.metrics_.userCount(
+          networkName,
+          this.myInstance.getUserProfile().userId,
+          numUsers);
+      }
+    }
+
     //===================== Social.Network implementation ====================//
 
     /**
@@ -179,11 +206,24 @@ export function notifyUI(networkName :string, userId :string) {
      */
     public addUser = (userId :string) :remote_user.User => {
       if (!this.isNewFriend_(userId)) {
-        log.error('Cannot add already existing user', userId);
+        log.warn('Cannot add already existing user', userId);
       }
       var newUser = new remote_user.User(this, userId);
       this.roster[userId] = newUser;
+      this.updateMetrics();
       return newUser;
+    }
+
+    /**
+     * Removes a user from the roster. Does not throw an error because this is
+     * as expected.
+     */
+    public removeUser = (userId :string) => {
+      if (userId in this.roster) {
+        delete this.roster[userId];
+      } else {
+        log.error('Cannot remove user that does not exist in roster', userId);
+      }
     }
 
     /**
@@ -275,6 +315,10 @@ export function notifyUI(networkName :string, userId :string) {
       return clientId.slice(start).match(beginPgpString + '(.|[\r\n])*' + endPgpString)[0];
     }
 
+    public removeUserFromStorage = (userId :string): Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+
   }  // class AbstractNetwork
 
 
@@ -304,8 +348,8 @@ export function notifyUI(networkName :string, userId :string) {
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
      */
-    constructor(public name :string) {
-      super(name);
+    constructor(public name :string, metrics :metrics.Metrics) {
+      super(name, metrics);
 
       this.provider_ = freedom[PREFIX + name];
       this.onceLoggedIn_ = null;
@@ -590,6 +634,9 @@ export function notifyUI(networkName :string, userId :string) {
       var networkData :Object = null;
       if (tokenObj) {
         networkData = tokenObj.networkData;
+        if (this.name === 'Cloud' && (typeof networkData) !== 'string') {
+          networkData = JSON.stringify(networkData);
+        }
       } else if (userId) {
         networkData = userId;
       }
@@ -686,11 +733,12 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       var monitorCallback = () => {
+        this.updateMetrics();
         for (var userId in this.roster) {
           this.getUser(userId).monitor();
         }
       };
-      this.monitorIntervalId_ = setInterval(monitorCallback, 60000);
+      this.monitorIntervalId_ = setInterval(monitorCallback, 15000);
     }
 
     private stopMonitor_ = () : void => {
@@ -734,6 +782,23 @@ export function notifyUI(networkName :string, userId :string) {
       };
     }
 
+    public removeUserFromStorage = (userId :string) : Promise<void> => {    
+      // Remove user from roster.
+      this.removeUser(userId);
+      // Remove user from storage.
+      const rosterKey = this.getStorePath() + userId;
+      return storage.destroy(rosterKey).then(() => {
+        if (this.name === 'Cloud') {
+          // In addition to the roster key, cloud contacts have another key
+          // of the form 'instance_id/user_id' we need to remove from storage
+          const cloudKey = this.getStorePath().replace('roster/', userId);
+          return storage.destroy(cloudKey).then(() => {
+            // Remove user from cloud social provider
+            return this.freedomApi_.removeUser(userId);
+          });
+        }
+      });
+    }
   }  // class Social.FreedomNetwork
 
 export function freedomClientToUproxyClient(

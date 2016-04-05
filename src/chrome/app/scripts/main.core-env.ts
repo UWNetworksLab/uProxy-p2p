@@ -5,16 +5,38 @@
  * loaded.
  */
 
-/// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../../../third_party/typings/lodash/lodash.d.ts' />
+
 
 
 import Chrome_oauth = require('./chrome_oauth');
 import ChromeUIConnector = require('./chrome_ui_connector');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import _ = require('lodash');
 
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
+
+function getPolicyFromManagedStorage() :Promise<Object> {
+  return new Promise((fulfill, reject) => {
+    chrome.storage.managed.get(null, (contents) => {
+      if (contents) {
+        fulfill(contents);
+      } else { /* TODO figure out if this is the correct rejection criteria */
+        reject(chrome.runtime.lastError);
+      }
+    });
+  });
+}
+
+function sendPolicyToCore(contents :Object) :void {
+  chromeUIConnector.sendToCore(
+      uproxy_core_api.Command.UPDATE_ORG_POLICY,
+      contents);
+}
 
 // Remember which handlers freedom has installed.
 var oauthOptions :{connector:ChromeUIConnector;} = {
@@ -23,6 +45,8 @@ var oauthOptions :{connector:ChromeUIConnector;} = {
 export var uProxyAppChannel :freedom.OnAndEmit<any,any>;
 export var moduleName = 'uProxy App Top Level';
 
+var chromeUIConnector :ChromeUIConnector;
+
 freedom('generic_core/freedom-module.json', <freedom.FreedomInCoreEnvOptions>{
   'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
@@ -30,9 +54,15 @@ freedom('generic_core/freedom-module.json', <freedom.FreedomInCoreEnvOptions>{
   'oauth': [() => { return new Chrome_oauth(oauthOptions); }]
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   uProxyAppChannel = uProxyModuleFactory();
-  var chromeUIConnector = new ChromeUIConnector(uProxyAppChannel);
+  chromeUIConnector = new ChromeUIConnector(uProxyAppChannel);
 
   oauthOptions.connector = chromeUIConnector;
+
+  getPolicyFromManagedStorage().then((contents) => {
+    if (!_.isEmpty(contents)) {
+      sendPolicyToCore(contents);
+    }
+  });
 });
 
 // Reply to pings from the uproxy website that are checking if the
@@ -45,3 +75,14 @@ chrome.runtime.onMessageExternal.addListener(
         }
         return true;
     });
+
+chrome.storage.onChanged.addListener((properties :Object, namespace :string) => {
+  if (namespace != 'managed') {
+    // we only care about the managed storage
+    return;
+  }
+
+  getPolicyFromManagedStorage().then((contents) => {
+    sendPolicyToCore(contents);
+  });
+});

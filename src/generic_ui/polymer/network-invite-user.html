@@ -39,27 +39,15 @@
       }
 
       /* Social network specific CSS */
-      a.GMail {
-        color: #dd4b39 !important;
-      }
-      a.GitHub {
-        color: #666 !important;
-      }
-      a.Cloud {
-        color: #0073e6 !important;
-      }
       uproxy-button.GMail {
         background: #dd4b39;
       }
       uproxy-button.GitHub {
         background: #666;
       }
-      uproxy-button.Cloud {
-        background: #0073e6;
-      }
       uproxy-action-dialog h1 {
         font-size: 1.4em;
-        color: #009688;
+        color: #12A391;
         font-weight: normal;
       }
     </style>
@@ -96,23 +84,6 @@
 
           <uproxy-button class="GMail" raised affirmative on-tap='{{ sendToGMailFriend }}'>
             {{ 'SEND_INVITATION' | $$ }}
-          </uproxy-button>
-        </div>
-      </div>
-
-      <div hidden?='{{ network != "Cloud"}}'>
-        <uproxy-app-bar class="Cloud" on-go-back='{{closeInviteUserPanel}}' color="#0073e6">
-          {{ 'ADD_A_CLOUD_FRIEND' | $$ }}
-        </uproxy-app-bar>
-
-        <!-- TODO: Discuss and decide if this should give users an invite code to share their cloud instance with friends, or if this should be a place for users to paste invite codes (therefore adding cloud instances to their buddy list). Right now, this is the latter. -->
-        <div class='section'>
-          <p>{{ 'CLOUD_INVITE_INSTRUCTIONS' | $$ }}</p>
-          <paper-input-decorator label='{{ "CLOUD_INVITE_PLACEHOLDER" | $$ }}'>
-            <input is='core-input' value='{{ cloudInstanceInput }}'>
-          </paper-input-decorator>
-          <uproxy-button class="Cloud" affirmative on-tap='{{ addCloudInstance }}'>
-            {{ 'DONE' | $$ }}
           </uproxy-button>
         </div>
       </div>

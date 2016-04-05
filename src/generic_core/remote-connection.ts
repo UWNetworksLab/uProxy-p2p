@@ -302,6 +302,7 @@ var generateProxyingSessionId_ = (): string => {
           pc = bridge.best('sockstortc', config, this.portControl_);
         }
 
+        globals.metrics.increment('attempt');
       return this.socksToRtc_.start(tcpServer, pc).then(
           (endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
@@ -312,7 +313,6 @@ var generateProxyingSessionId_ = (): string => {
         return endpoint;
       }).catch((e :Error) => {
         this.localGettingFromRemote = social.GettingState.NONE;
-        globals.metrics.increment('failure');
         this.stateRefresh_();
         return Promise.reject(Error('Could not start proxy'));
       });
@@ -323,7 +323,7 @@ var generateProxyingSessionId_ = (): string => {
         log.warn('Cannot stop proxying when neither proxying nor trying to proxy.');
         return;
       }
-
+      globals.metrics.increment('stop');
       this.localGettingFromRemote = social.GettingState.NONE;
       this.stateRefresh_();
       return this.socksToRtc_.stop();

@@ -12,7 +12,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 });
 
 import social = require('../interfaces/social');
-
+import rappor_metrics = require('./metrics');
 import social_network = require('./social');
 import local_storage = require('./storage');
 import local_instance = require('./local-instance');
@@ -21,6 +21,7 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 import ui_connector = require('./ui_connector');
 import ui = ui_connector.connector;
+
 
 class MockSocial {
   public on = () => {}
@@ -79,9 +80,11 @@ describe('social_network.FreedomNetwork', () => {
   freedom['SOCIAL-Quiver'].api = 'social2';
 
   var loginPromise :Promise<void>;
+  var metrics :rappor_metrics.Metrics;
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
     spyOn(console, 'log');
+    metrics = new rappor_metrics.Metrics(null);
   });
 
   it('initialize networks', () => {
@@ -93,14 +96,14 @@ describe('social_network.FreedomNetwork', () => {
 
 
   it('begins with empty roster', () => {
-    var network = new social_network.FreedomNetwork('mock');
+    var network = new social_network.FreedomNetwork('mock', metrics);
     expect(network.roster).toEqual({});
   });
 
 
   describe('login & logout', () => {
 
-    var network = new social_network.FreedomNetwork('mock');
+    var network = new social_network.FreedomNetwork('mock', metrics);
     it('can log in', (done) => {
       // TODO: figure out how jasmine clock works and add it back
       // jasmine.clock().install();
@@ -212,7 +215,7 @@ describe('social_network.FreedomNetwork', () => {
     // var delayed :Function;
 
     it('delays handler until login', () => {
-      var network = new social_network.FreedomNetwork('mock');
+      var network = new social_network.FreedomNetwork('mock', metrics);
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           new Promise((F, R) => {
             fakeLoginFulfill = F;
@@ -234,7 +237,7 @@ describe('social_network.FreedomNetwork', () => {
   });  // describe handler promise delays
 
   describe('incoming events', () => {
-    var network = new social_network.FreedomNetwork('mock');
+    var network = new social_network.FreedomNetwork('mock', metrics);
 
     it('adds a new user for |onUserProfile|', (done) => {
       network.myInstance = new local_instance.LocalInstance(network, 'fakeId');
@@ -331,7 +334,7 @@ describe('social_network.FreedomNetwork', () => {
   });  // describe events & communication
 
   it('JSON.parse and stringify messages at the right layer', () => {
-    var network = new social_network.FreedomNetwork('mock');
+    var network = new social_network.FreedomNetwork('mock', metrics);
     spyOn(network, 'getStorePath').and.returnValue('');
     network['myInstance'] =
             new local_instance.LocalInstance(network, 'localUserId');
