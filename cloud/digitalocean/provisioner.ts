@@ -71,9 +71,13 @@ class Provisioner {
     }).then((keys: KeyPair) => {
        // Get SSH keys
       this.state_.ssh = keys;
-      return this.getDroplet_(name);
+      return this.getDroplet_(name).catch((e: Error) => {
+        // Droplet does not exist so continue creating new server
+        return Promise.resolve<void>();
+      });
     }).then((resp: any) => {
-      if (resp.droplet) {
+      if (resp) {
+        // Droplet exists so return error
         return Promise.reject({
           'errcode': 'VM_AE',
           'message': 'Droplet ' + name + ' already exists'
@@ -132,12 +136,6 @@ class Provisioner {
       // Find and delete the server with the same name
       return this.getDroplet_(name);
     }).then((resp :any) => {
-      if (!resp.droplet) {
-        return Promise.reject({
-          'errcode': 'VM_DNE',
-          'message': 'Droplet ' + name + ' doesnt exist'
-        });
-      }
       this.state_.cloud = {};
       this.state_.cloud.vm = resp.droplet;
       return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
@@ -170,8 +168,9 @@ class Provisioner {
           });
         }
       }
-      return Promise.resolve({
-        droplet: undefined
+      return Promise.reject({
+        'errcode': 'VM_DNE',
+        'message': 'Droplet ' + name + ' doesnt exist'
       });
     });
   }
