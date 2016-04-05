@@ -23,14 +23,13 @@ AUTOMATED=false
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-z image] [-s image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
+  echo "$0 [-p path] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
   echo "  -p: use a pre-built uproxy-lib"
   echo "  -z: use a specified Zork image (defaults to uproxy/zork)"
   echo "  -s: use a specified sshd image (defaults to uproxy/sshd)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
-  echo "  -l: build docker sshd image from scratch (default pull prebuilt)"
   echo "  -d: override the detected public IP (for development only)"
   echo "  -b: name to use in contacts list"
   echo "  -a: do not output complete invite URL"
@@ -46,7 +45,6 @@ while getopts p:z:s:i:uwd:b:ah? opt; do
     i) INVITE_CODE="$OPTARG" ;;
     u) UPDATE=true ;;
     w) WIPE=true ;;
-    l) BUILD_SSHD=true ;;
     d) PUBLIC_IP="$OPTARG" ;;
     b) BANNER="$OPTARG" ;;
     a) AUTOMATED=true ;;
@@ -182,9 +180,11 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   # regular, ever-so-slightly-more-elegant Docker notation.
   docker run --restart=always -d -p $SSHD_PORT:22 --name uproxy-sshd --add-host zork:$HOST_IP $SSHD_IMAGE > /dev/null
   docker exec uproxy-sshd sh -c "echo $BANNER > /banner"
-  docker exec uproxy-sshd sh -c "chmod 644 /banner; chown giver: /banner"
+  docker exec uproxy-sshd chmod 644 /banner
+  docker exec uproxy-sshd chown giver: /banner
   docker exec uproxy-sshd sh -c "echo $HOSTNAME > /hostname"
-  docker exec uproxy-sshd sh -c "chmod 644 /hostname; chown giver: /hostname"
+  docker exec uproxy-sshd chmod 644 /hostname
+  docker exec uproxy-sshd chown giver: /hostname
 
   # Configure access.
   # In descending order of preference:
