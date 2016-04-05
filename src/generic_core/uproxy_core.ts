@@ -142,7 +142,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     var network = this.pendingNetworks_[networkName];
     if (typeof network === 'undefined') {
-      network = new social_network.FreedomNetwork(networkName);
+      network = new social_network.FreedomNetwork(networkName, globals.metrics);
       this.pendingNetworks_[networkName] = network;
     }
 
