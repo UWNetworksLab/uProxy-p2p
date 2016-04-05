@@ -179,10 +179,10 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   # Because the Zork container runs with --net=host, we can't use the
   # regular, ever-so-slightly-more-elegant Docker notation.
   docker run --restart=always -d -p $SSHD_PORT:22 --name uproxy-sshd --add-host zork:$HOST_IP $SSHD_IMAGE > /dev/null
-  docker exec uproxy-sshd sh -c "echo $BANNER > /banner"
+  docker exec uproxy-sshd sh -c "echo \"$BANNER\" > /banner"
   docker exec uproxy-sshd chmod 644 /banner
   docker exec uproxy-sshd chown giver: /banner
-  docker exec uproxy-sshd sh -c "echo $HOSTNAME > /hostname"
+  docker exec uproxy-sshd sh -c "echo \"$PUBLIC_IP\" > /hostname"
   docker exec uproxy-sshd chmod 644 /hostname
   docker exec uproxy-sshd chown giver: /hostname
 
