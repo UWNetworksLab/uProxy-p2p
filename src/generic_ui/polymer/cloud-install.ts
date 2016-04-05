@@ -62,10 +62,11 @@ Polymer({
     this.$.serverExistsOverlay.close();
   },
   loginTapped: function() {
-    this.closeOverlays();
-    ui.cloudInstallStatus = '';
-    this.$.installingOverlay.open();
-
+    if (!this.$.installingOverlay.opened) {
+      this.closeOverlays();
+      ui.cloudInstallStatus = '';
+      this.$.installingOverlay.open();
+    }
     ui.cloudUpdate({
       operation: uproxy_core_api.CloudOperationType.CLOUD_INSTALL,
       providerName: DEFAULT_PROVIDER,
@@ -75,6 +76,7 @@ Polymer({
       this.$.successOverlay.open();
     }).catch((e :any) => {
       this.closeOverlays();
+      // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
         this.$.serverExistsOverlay.open();
       } else {
@@ -84,25 +86,24 @@ Polymer({
   },
   removeServerTapped: function() {
     this.closeOverlays();
-    ui.cloudInstallStatus = '';
+    ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
     this.$.installingOverlay.open();
-    // Destroy server
+    // Destroy uProxy cloud server
     return ui.cloudUpdate({
       operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
       providerName: DEFAULT_PROVIDER
     }).then(() => {
-      // Check if there is a locally created cloud contact
-      return ui.getCloudUser();
-    }).then((user: user.User) => {
-      console.log('got user');
-      console.log(user);
-      if (user) {
-        // Remove cloud contact from friend list
+      // Get locally created cloud contact if there is one
+      return ui.getCloudUser().then((user: user.User) => {
         return ui_context.core.removeContact({
           networkName: user.network.name,
           userId: user.userId
         });
-      }
+      }).catch((e: Error) => {
+        // Locally created cloud server does not exist
+        // so no need to remove contact
+        return Promise.resolve<void>();
+      });
     }).then(() => {
       return this.loginTapped();
     });

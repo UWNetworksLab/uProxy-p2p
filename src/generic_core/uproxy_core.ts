@@ -636,15 +636,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       freedom['cloudinstall'].close(installer);
     };
 
-    log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
-    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
-
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
 
+        log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
+        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
         ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
 
         return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
@@ -719,6 +718,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         return provisioner.stop(DROPLET_NAME).then(() => {
           destroyModules();
           log.debug('stopped cloud server on', args.providerName);
+          return Promise.resolve<void>();
         }, (e: Error) => {
           destroyModules();
           log.error('error destroying cloud server:', e.message);

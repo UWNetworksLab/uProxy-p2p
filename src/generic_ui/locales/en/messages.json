@@ -1353,10 +1353,14 @@
   },
   "CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE": {
     "description": "Message shown after failed server deployment because uproxy-cloud-server already exists",
-    "message": "You already have a cloud server named 'uproxy-cloud-server'. We can remove it and create a new one for you."
+    "message": "We discovered that you already have a server named 'uproxy-cloud-server'. We can remove it and create a new one for you, or you can go back to your friend list."
   },
   "REMOVE_SERVER_AND_TRY_AGAIN": {
     "description": "Button text for removing cloud server and trying again (e.g. connecting to DigitalOcean)",
     "message": "Remove server and try again"
+  },
+  "REMOVING_UPROXY_CLOUD_STATUS": {
+    "description": "Label to indicate that we are removing a uproxy cloud server.",
+    "message": "Removing uProxy cloud server..."
   }
 }

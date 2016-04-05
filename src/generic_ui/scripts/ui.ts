@@ -1054,16 +1054,17 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public getCloudUser = () : Promise<Object> => {
-    let network = this.model.getNetwork('Cloud');
+    const network = this.model.getNetwork('Cloud');
+    if (!network) {
+      return Promise.reject('not logged into cloud network');
+    }
     for (let userId in network.roster) {
-      var user = this.model.getUser(network, userId);
-      console.log(user);
-      console.log(social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL);
-      if (user.status === social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL) {
+      let user = this.model.getUser(network, userId);
+      if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
         return Promise.resolve(user);
       }
     }
-    return Promise.reject('cloud not find locally created cloud server');
+    return Promise.reject('locally created cloud contact does not exist');
   }
 
   public openTab = (url: string) => {
