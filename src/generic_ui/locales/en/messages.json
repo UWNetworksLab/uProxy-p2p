@@ -1350,5 +1350,17 @@
   "NORTH_AMERICA_NEW_YORK": {
     "description": "Region option for deploying a DigitalOcean server",
     "message": "North America (New York)"
+  },
+  "REQUEST_ACCESS": {
+    "description": "Checkbox text for requesting access as part of invite",
+    "message": "Request access"
+  },
+  "OFFER_ACCESS": {
+    "description": "Checkbox text for offering access as part of invite",
+    "message": "Offer access"
+  },
+  "INVITE_URL_CHANGED": {
+    "description": "Text alerting the user that the invite URL has been changed and needs to be copied again",
+    "message": "Invite URL has changed, please be sure to copy the last invitation"
   }
 }

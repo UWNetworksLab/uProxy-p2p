@@ -93,26 +93,25 @@
           <paper-input-decorator id='GitHubPlaceholder' label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
             <input is='core-input' value='{{ gitHubUserIdInput }}'>
           </paper-input-decorator>
-        </div> <!-- end of GitHub -->
+        </div>
 
         <!-- GMail specific controls -->
         <div hidden?="{{network !== 'GMail'}}">
           <paper-input-decorator id='GMailPlaceholder' label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
             <input is='core-input' value='{{ inviteUserEmail }}' />
           </paper-input-decorator>
-        </div> <!-- end of GMail specific controls -->
+        </div>
 
         <!-- Quiver specific controls -->
         <div hidden?="{{network !== 'Quiver'}}">
           <paper-input-decorator layout vertical class='{{ quiverInviteMessage.length > 0 ? "modified" : ""}}'>
             <input value='{{ inviteUrl }}' readonly is='core-input' on-tap='{{ selectQuiverInvite }}' />
           </paper-input-decorator>
-        </div> <!-- end of Quiver specific controls -->
+        </div>
 
-        <!-- TODO: translate! -->
         <div class='checkboxes'>
-          <p><paper-checkbox label='Request access' checked='{{ requestAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
-          <p><paper-checkbox label='Offer access' checked='{{ offerAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
+          <p><paper-checkbox label='{{ "REQUEST_ACCESS" | $$ }}' checked='{{ requestAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
+          <p><paper-checkbox label='{{ "OFFER_ACCESS" | $$ }}' checked='{{ offerAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
         </div>
 
         <p id='quiverWarning' hidden?='{{ network !== "Quiver" || !quiverInviteMessage }}'>{{ quiverInviteMessage }}</p>

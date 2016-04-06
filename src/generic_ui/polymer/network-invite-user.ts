@@ -92,7 +92,7 @@ Polymer({
   requestOrOfferChanged: function() {
     if (this.network === 'Quiver') {
       this.generateInviteUrl('Quiver');
-      this.quiverInviteMessage = 'Invite URL has changed, please be sure to copy the last invitation';  // TODO: translate
+      this.quiverInviteMessage = ui.i18n_t('INVITE_URL_CHANGED');
     }
   },
   confirmClicked: function() {
