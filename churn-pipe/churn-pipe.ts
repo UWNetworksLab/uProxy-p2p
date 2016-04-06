@@ -96,6 +96,14 @@ class Pipe {
   // most one port on each interface.
   private browserEndpoints_ :{ [address:string]:number } = {};
 
+  // The set of ports used by the browser. All values are true.
+  // This is only needed because Pipe's mirror sockets are bound to the ANY
+  // interface (0.0.0.0).  If the browser also binds to ANY, packets between
+  // these interfaces may appear to originate from any local interface, so we
+  // can't require that source addresses and ports match.
+  // This object allows O(1) lookup of whether ports are available.
+  private browserPorts_: {[port:number]:boolean } = {};
+
   // The most recently set public interface for IPv6 and IPv4.  Used to
   // report mirror endpoints.
   private lastInterface_ : {v6?:string; v4?:string;} = {};
@@ -262,6 +270,7 @@ class Pipe {
           this.name_, this.browserEndpoints_[browserEndpoint.address])
     }
     this.browserEndpoints_[browserEndpoint.address] = browserEndpoint.port;
+    this.browserPorts_[browserEndpoint.port] = true;
     return Promise.resolve<void>();
   }
 
@@ -330,16 +339,22 @@ class Pipe {
       mirrorSocket.on('onData', (recvFromInfo:freedom.UdpSocket.RecvFromInfo) => {
         // Ignore packets that do not originate from the browser, for a
         // theoretical security benefit.
-        if (recvFromInfo.port !==
-            this.browserEndpoints_[recvFromInfo.address]) {
-          log.warn('%1: mirror socket for %2 ignoring incoming packet from %3 ' +
-              'which should have had source port %4',
+        if (!(recvFromInfo.address in this.browserEndpoints_)) {
+          log.warn('%1: mirror socket for %2 ignoring incoming packet from %3: ' +
+              'unknown source address',
               this.name_,
               remoteEndpoint, {
                 address: recvFromInfo.address,
                 port: recvFromInfo.port
-              },
-              this.browserEndpoints_[recvFromInfo.address]);
+              });
+        } else if (!(recvFromInfo.port in this.browserPorts_)) {
+          log.warn('%1: mirror socket for %2 ignoring incoming packet from %3: ' +
+              'unknown source port',
+              this.name_,
+              remoteEndpoint, {
+                address: recvFromInfo.address,
+                port: recvFromInfo.port
+              });
         } else {
           var publicSocket = this.publicSockets_[recvFromInfo.address] &&
               this.publicSockets_[recvFromInfo.address][index];
