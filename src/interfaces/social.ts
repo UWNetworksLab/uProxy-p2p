@@ -13,7 +13,7 @@ export interface UserPath {
 
 export interface SocialNetworkInfo {
   name :string;
-  userId :string; // ID for current user
+  userId ?:string; // ID for current user
 }
 
 export interface InstancePath extends UserPath {
@@ -115,8 +115,10 @@ export interface NetworkOptions {
   areAllContactsUproxy :boolean;
   supportsReconnect :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
+  metricsName ?:string;  // Name to use for metrics
   isExperimental ?:boolean;
   isEncrypted ?:boolean;
+  rosterFunction ?:(rosterNames:string[])=>number;
 }
 
 /**
@@ -363,4 +365,9 @@ export interface Network {
   isEncrypted : () => boolean;
 
   getKeyFromClientId : (clientId :string) => string;
+  
+  /**
+   * Removes user from the network's roster and storage
+   */
+  removeUserFromStorage : (userId :string) => Promise<void>;
 }

@@ -36,10 +36,10 @@
       "commit": "e95958ac847d9a343bdc8d7cbc796a5f6da29f71"
     },
     "chrome/chrome.d.ts": {
-      "commit": "1957eb54fbb7ef0d0397c2c78a5b5e638e813ec8"
+      "commit": "c268bd6d741595e9b850ee7fa2b9d2bc3d73f19a"
     },
     "chrome/chrome-app.d.ts": {
-      "commit": "de42bd4e87f3a8452775ffe36255b11c94579f7a"
+      "commit": "c268bd6d741595e9b850ee7fa2b9d2bc3d73f19a"
     },
     "circular-json/circular-json.d.ts": {
       "commit": "9c2d795cc1d98cd3e11186de9290776c66578ea0"

@@ -42,6 +42,7 @@ export interface GlobalSettings {
 }
 export interface InitialState {
   networkNames :string[];
+  cloudProviderNames :string[];
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
@@ -100,7 +101,10 @@ export enum Command {
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
-  INVITE_GITHUB_USER = 1028
+  INVITE_GITHUB_USER = 1028,
+  CLOUD_UPDATE = 1029,
+  UPDATE_ORG_POLICY = 1030,
+  REMOVE_CONTACT = 1031
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -135,7 +139,11 @@ export enum Update {
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
-  ONETIME_MESSAGE = 2026
+  ONETIME_MESSAGE = 2026,
+  CLOUD_INSTALL_STATUS = 2027,
+  REMOVE_FRIEND = 2028, // Removed friend from roster.
+  // Payload is an integer between 0 and 100.
+  CLOUD_INSTALL_PROGRESS = 2029
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -182,6 +190,11 @@ export interface LoginArgs {
   userName ?:string;
 }
 
+export interface LoginResult {
+  userId     :string;
+  instanceId :string;
+}
+
 export interface NetworkInfo {
   natType ?:string;
   pmpSupport :boolean;
@@ -213,6 +226,29 @@ export interface CreateInviteArgs {
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
+
+export enum CloudOperationType {
+  CLOUD_INSTALL = 0,
+  CLOUD_DESTROY = 1
+}
+
+// Arguments to cloudUpdate
+export interface CloudOperationArgs {
+  operation: CloudOperationType;
+  // Use this cloud computing provider to access a server.
+  providerName :string;
+  // Provider-specific region in which to locate a new server.
+  region ?:string;
+};
+
+// Argument to removeContact
+export interface RemoveContactArgs {
+  // Name of the network the contact is a part of
+  networkName :string,
+  // userId of the contact you want to remove
+  userId :string
+};
+
 
 /**
  * The primary interface to the uProxy Core.
@@ -266,7 +302,7 @@ export interface CoreApi {
   // TODO: Implement this or remove it.
   // changeOption(option :string) : void;
 
-  login(loginArgs :LoginArgs) : Promise<void>;
+  login(loginArgs :LoginArgs) : Promise<LoginResult>;
   logout(networkInfo :social.SocialNetworkInfo) : Promise<void>;
 
   // TODO: use Event instead of attaching manual handler. This allows event
@@ -277,6 +313,15 @@ export interface CoreApi {
   getVersion() :Promise<{ version :string }>;
 
   getInviteUrl(data :CreateInviteArgs): Promise<string>;
+
+  // Installs or destroys uProxy on a server. Generally a long-running operation, so
+  // callers should expose CLOUD_INSTALL_STATUS updates to the user.
+  // This may also invoke an OAuth flow, in order to perform operations
+  // with the cloud computing provider on the user's behalf.
+  cloudUpdate(args :CloudOperationArgs): Promise<void>;
+
+  // Removes contact from roster, storage, and friend list
+  removeContact(args :RemoveContactArgs) : Promise<void>;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }

@@ -13,7 +13,7 @@ Polymer({
   connectedNetworks: '',
   logOut: function() {
     // logout all networks asynchronously
-    ui.logoutAll();
+    ui.logoutAll(true);
     this.fire('core-signal', {name: 'close-settings'});
   },
   restart: function() {

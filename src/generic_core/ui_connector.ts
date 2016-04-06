@@ -102,6 +102,10 @@ export class UIConnector {
   public syncUser = (payload:social.UserData) => {
     this.update(uproxy_core_api.Update.USER_FRIEND, payload);
   }
+
+  public removeFriend = (args:{ networkName: string, userId :string }) => {
+    this.update(uproxy_core_api.Update.REMOVE_FRIEND, args);
+  }
 }
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
