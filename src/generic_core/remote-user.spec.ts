@@ -379,4 +379,30 @@ describe('remote_user.User', () => {
     expect(user.consent.remoteRequestsAccessFromLocal).toEqual(false);
   });
 
+  it('handleInvitePermissions creates new instance if needed', (done) => {
+    user = new remote_user.User(network, '123');
+    var inviteTokenData = {
+      v: 1,
+      networkName: 'GMail',
+      userName: 'Bob',
+      networkData: '',
+      permission: {
+        token: '999',
+        isRequesting: true,
+        isOffering: false
+      },
+      userId: '123',
+      instanceId: '456'
+    };
+    expect(user.getInstance(inviteTokenData.instanceId)).toBeUndefined();
+    user.handleInvitePermissions(inviteTokenData);
+    var instance = user.getInstance(inviteTokenData.instanceId);
+    expect(instance).toBeDefined();
+    instance.onceLoaded.then(() => {
+      expect(instance.wireConsentFromRemote.isRequesting).toEqual(true);
+      expect(instance.wireConsentFromRemote.isOffering).toEqual(false);
+      done();
+    });
+  });
+
 });  // uProxy.User
