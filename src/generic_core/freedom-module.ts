@@ -78,6 +78,7 @@ commands[uproxy_core_api.Command.ACCEPT_INVITATION] = core.acceptInvitation;
 commands[uproxy_core_api.Command.CLOUD_UPDATE] = core.cloudUpdate;
 commands[uproxy_core_api.Command.UPDATE_ORG_POLICY] = core.updateOrgPolicy;
 commands[uproxy_core_api.Command.REMOVE_CONTACT] = core.removeContact;
+commands[uproxy_core_api.Command.POST_REPORT] = core.postReport;
 
 for (var command in commands) {
   ui_connector.onCommand(command, commands[command]);
@@ -87,8 +88,6 @@ var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
     globals.metrics, globals.storage, core.getNetworkInfoObj,
     (payload :any) => {
       if (globals.settings.statsReportingEnabled) {
-        ui_connector.update(
-            uproxy_core_api.Update.POST_TO_CLOUDFRONT,
-            {payload: payload, cloudfrontPath: 'submit-rappor-stats'});
+        core.postReport({payload: payload, path: 'submit-rappor-stats'});
       }
     });

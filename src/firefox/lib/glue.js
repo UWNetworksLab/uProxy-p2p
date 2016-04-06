@@ -6,7 +6,6 @@
  */
 
 var proxyConfig = require('lib/firefox_proxy_config.js').proxyConfig;
-var xhr = require('lib/firefox_xhr.js').xhr;
 
 // TODO: rename uproxy.js/ts to uproxy-enums.js/ts
 var uproxy_core_api = require('./interfaces/uproxy_core_api.js');
@@ -128,15 +127,6 @@ function setUpConnection(freedom, panel, button) {
       promiseEmitHandler(args);
     }.bind(this));
   };
-
-  function post(data) {
-    return xhr.frontedPost(data.data, data.externalDomain,
-        data.cloudfrontDomain, data.cloudfrontPath);
-  };
-
-  // Ensure a fulfill or reject message will be sent back to the panel
-  // when required by registering messages that initiate async behaviour.
-  onPromiseEmit('frontedPost', post);
 
   /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
   pagemod.PageMod({

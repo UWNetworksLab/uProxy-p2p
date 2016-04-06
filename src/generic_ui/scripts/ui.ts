@@ -118,10 +118,6 @@ export class UserInterface implements ui_constants.UiApi {
   public i18n_t :Function = translator_module.i18n_t;
   public i18n_setLng :Function = translator_module.i18n_setLng;
 
-  /* Constants */
-  // Must be included in Chrome extension manifest's list of permissions.
-  public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
-
   /* About this uProxy installation */
   public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
   public browser :string = '';
@@ -303,12 +299,6 @@ export class UserInterface implements ui_constants.UiApi {
       this.instanceTryingToGetAccessFrom = null;
       this.proxyingId = info.proxyingId;
       this.bringUproxyToFront();
-    });
-
-    core.onUpdate(
-        uproxy_core_api.Update.POST_TO_CLOUDFRONT,
-        (data :uproxy_core_api.CloudfrontPostData) => {
-      this.postToCloudfrontSite(data.payload, data.cloudfrontPath);
     });
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
@@ -1200,33 +1190,6 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.reconnecting = false;
   }
 
-  private cloudfrontDomains_ = [
-    "d1wtwocg4wx1ih.cloudfront.net"
-  ]
-
-  public postToCloudfrontSite = (payload :Object, cloudfrontPath :string,
-                                 maxAttempts ?:number)
-      : Promise<void> => {
-    console.log('postToCloudfrontSite: ', payload, cloudfrontPath);
-    if (!maxAttempts || maxAttempts > this.cloudfrontDomains_.length) {
-      // default to trying every possible URL
-      maxAttempts = this.cloudfrontDomains_.length;
-    }
-    var attempts = 0;
-    var doAttempts = (error ?:Error) : Promise<void> => {
-      if (attempts < maxAttempts) {
-        // we want to keep trying this until we either run out of urls to
-        // send to or one of the requests succeeds.  We set this up by
-        // creating a lambda to call the post with failures set up to recurse
-        return this.browserApi.frontedPost(payload, this.AWS_FRONT_DOMAIN,
-          this.cloudfrontDomains_[attempts++], cloudfrontPath
-        ).catch(doAttempts);
-      }
-      throw error;
-    }
-    return doAttempts();
-  }
-
   public sendFeedback =
       (feedback :uproxy_core_api.UserFeedback) : Promise<void> => {
     var logsPromise :Promise<string>;
@@ -1247,7 +1210,7 @@ export class UserInterface implements ui_constants.UiApi {
         proxyingId: this.proxyingId
       };
 
-      return this.postToCloudfrontSite(payload, 'submit-feedback');
+      return this.core.postReport({payload: payload, path: 'submit-feedback'});
     });
   }
 
