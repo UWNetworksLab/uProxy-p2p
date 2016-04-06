@@ -412,6 +412,7 @@ describe('remote_user.User', () => {
     instance.onceLoaded.then(() => {
       expect(instance.wireConsentFromRemote.isRequesting).toEqual(true);
       expect(instance.wireConsentFromRemote.isOffering).toEqual(false);
+      expect(user.consent.remoteRequestsAccessFromLocal).toEqual(true);
       done();
     });
   });
