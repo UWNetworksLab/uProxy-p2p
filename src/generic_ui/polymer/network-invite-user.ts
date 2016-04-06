@@ -73,26 +73,18 @@ Polymer({
   },
   openInviteUserPanel: function() {
     this.initFields();
-    if (this.network === 'Quiver') {
-      this.generateInviteUrl('Quiver').then(() => {
-        this.$.networkInviteUserPanel.open();
-      });
-    } else {
-      this.$.networkInviteUserPanel.open();
-    }
+    this.$.networkInviteUserPanel.open();
   },
   closeInviteUserPanel: function() {
     this.$.networkInviteUserPanel.close();
   },
-  selectQuiverInvite: function(e :Event, d :Object, input :HTMLInputElement) {
+  select: function(e :Event, d :Object, input :HTMLInputElement) {
     input.focus();
     input.select();
-    this.quiverInviteMessage = '';
   },
   requestOrOfferChanged: function() {
     if (this.network === 'Quiver') {
       this.generateInviteUrl('Quiver');
-      this.quiverInviteMessage = ui.i18n_t('INVITE_URL_CHANGED');
     }
   },
   confirmClicked: function() {
@@ -103,7 +95,8 @@ Polymer({
     } else if (this.network === 'Facebook-Firebase-V2') {
       this.sendToFacebookFriend();
     } else if (this.network === 'Quiver') {
-      this.closeInviteUserPanel();
+      // Generate Quiver invite url.  Will set this.inviteUrl.
+      this.generateInviteUrl('Quiver');
     }
   },
   initFields: function() {
@@ -112,7 +105,6 @@ Polymer({
     this.inviteUserEmail = '';
     this.model = model;
     this.gitHubUserIdInput = '';
-    this.quiverInviteMessage = '';
     this.offerAccess = false;
     this.requestAccess = false;
     this.instructions = getInstructions(this.network)
@@ -141,7 +133,7 @@ function getConfirmText(networkName :string) {
     'GitHub': 'SEND_INVITATION',
     'GMail': 'SEND_INVITATION',
     'Facebook-Firebase-V2': 'SEND_INVITATION_FACEBOOK',
-    'Quiver': 'CLOSE'
+    'Quiver': 'GENERATE_LINK'
   })[networkName];
   return label ? ui.i18n_t(label) : '';
 }

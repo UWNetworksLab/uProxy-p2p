@@ -881,7 +881,7 @@
   },
   "SEND_INVITATION_FACEBOOK": {
     "description": "Button text to initiate sending an invitation for Facebook",
-    "message": "Open Facebook and send invite"
+    "message": "Invite on Facebook"
   },
   "INVITE_SENT_CONFIRMATION": {
     "description": "Dialog text to confirm that an invite was sent to the user's friend",
@@ -1359,8 +1359,8 @@
     "description": "Checkbox text for offering access as part of invite",
     "message": "Offer access"
   },
-  "INVITE_URL_CHANGED": {
-    "description": "Text alerting the user that the invite URL has been changed and needs to be copied again",
-    "message": "Invite URL has changed, please be sure to copy the last invitation"
+  "GENERATE_LINK": {
+    "description": "Button text, will generate a Quiver invite link when clicked",
+    "message": "Generate link"
   }
 }

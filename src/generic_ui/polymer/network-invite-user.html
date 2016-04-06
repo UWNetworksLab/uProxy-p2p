@@ -34,9 +34,6 @@
       paper-input-decorator /deep/ .underline div {
         background-color: #dddddd !important;
       }
-      paper-input-decorator.modified {
-        color: red;
-      }
       .section {
         padding: 2.3em 2.3em 0em 2.3em;
         line-height: 20px;
@@ -44,11 +41,6 @@
       .checkboxes {
         margin-top: 1em;
         margin-bottom: 2em;
-      }
-      #quiverWarning {
-        margin-top: 1em;
-        margin-bottom: 2em;
-        color: red;
       }
 
       /* Social network specific CSS */
@@ -102,21 +94,20 @@
           </paper-input-decorator>
         </div>
 
-        <!-- Quiver specific controls -->
-        <div hidden?="{{network !== 'Quiver'}}">
-          <paper-input-decorator layout vertical class='{{ quiverInviteMessage.length > 0 ? "modified" : ""}}'>
-            <input value='{{ inviteUrl }}' readonly is='core-input' on-tap='{{ selectQuiverInvite }}' />
-          </paper-input-decorator>
-        </div>
-
         <div class='checkboxes'>
           <p><paper-checkbox label='{{ "REQUEST_ACCESS" | $$ }}' checked='{{ requestAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
           <p><paper-checkbox label='{{ "OFFER_ACCESS" | $$ }}' checked='{{ offerAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
         </div>
 
-        <p id='quiverWarning' hidden?='{{ network !== "Quiver" || !quiverInviteMessage }}'>{{ quiverInviteMessage }}</p>
-
         <uproxy-button affirmative on-tap='{{ confirmClicked }}'>{{ confirmText }}</uproxy-button>
+
+        <!-- Quiver specific controls -->
+        <div hidden?="{{network !== 'Quiver'}}">
+          <paper-input-decorator layout vertical hidden?='{{ inviteUrl.length === 0}}'>
+            <input value='{{ inviteUrl }}' readonly is='core-input' on-tap='{{ select }}' />
+          </paper-input-decorator>
+        </div>
+
       </div>  <!-- end of .section -->
     </core-overlay>
 
