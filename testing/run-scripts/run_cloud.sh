@@ -11,7 +11,8 @@
 set -e
 
 PREBUILT=
-IMAGE="uproxy/zork"
+ZORK_IMAGE="uproxy/zork"
+SSHD_IMAGE="uproxy/sshd"
 INVITE_CODE=
 UPDATE=false
 WIPE=false
@@ -22,9 +23,10 @@ AUTOMATED=false
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-m image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
+  echo "$0 [-p path] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
   echo "  -p: use a pre-built uproxy-lib"
-  echo "  -m: use a specified Docker Hub image (defaults to uproxy/zork)"
+  echo "  -z: use a specified Zork image (defaults to uproxy/zork)"
+  echo "  -s: use a specified sshd image (defaults to uproxy/sshd)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
@@ -32,15 +34,14 @@ function usage () {
   echo "  -b: name to use in contacts list"
   echo "  -a: do not output complete invite URL"
   echo "  -h, -?: this help message"
-  echo
-  echo "Example browser-version: chrome-stable, firefox-canary"
   exit 1
 }
 
-while getopts p:m:i:uwd:b:ah? opt; do
+while getopts p:z:s:i:uwd:b:ah? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
-    m) IMAGE="$OPTARG" ;;
+    z) ZORK_IMAGE="$OPTARG" ;;
+    s) SSHD_IMAGE="$OPTARG" ;;
     i) INVITE_CODE="$OPTARG" ;;
     u) UPDATE=true ;;
     w) WIPE=true ;;
@@ -139,10 +140,10 @@ if [ "$UPDATE" = true ]
 then
   docker rm -f uproxy-sshd || true
   docker rm -f uproxy-zork || true
-  docker rmi uproxy/sshd || true
+  docker rmi $SSHD_IMAGE || true
   # TODO: This will fail if there are any containers using the
   #       image, e.g. run_pair.sh. Regular cloud users won't be.
-  docker rmi $IMAGE || true
+  docker rmi $ZORK_IMAGE || true
 fi
 
 # IP of the host machine.
@@ -161,7 +162,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
   #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
-  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d $IMAGE /test/bin/load-zork.sh -z
+  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d $ZORK_IMAGE /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
   echo "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY"
@@ -174,21 +175,16 @@ fi
 echo "CLOUD_INSTALL_STATUS_INSTALLING_SSH"
 echo "CLOUD_INSTALL_PROGRESS 60"
 if ! docker ps -a | grep uproxy-sshd >/dev/null; then
-  if ! docker images | grep uproxy/sshd >/dev/null; then
-    TMP_DIR=/tmp/uproxy-sshd
-    rm -fR $TMP_DIR
-    cp -R ${BASH_SOURCE%/*}/../../sshd/ $TMP_DIR
-
-    echo -n "$BANNER" > $TMP_DIR/banner
-    echo -n "$PUBLIC_IP" > $TMP_DIR/hostname
-
-    docker build -t uproxy/sshd $TMP_DIR
-  fi
-
   # Add an /etc/hosts entry to the Zork container.
   # Because the Zork container runs with --net=host, we can't use the
   # regular, ever-so-slightly-more-elegant Docker notation.
-  docker run --restart=always -d -p $SSHD_PORT:22 --name uproxy-sshd --add-host zork:$HOST_IP uproxy/sshd > /dev/null
+  docker run --restart=always -d -p $SSHD_PORT:22 --name uproxy-sshd --add-host zork:$HOST_IP $SSHD_IMAGE > /dev/null
+  docker exec uproxy-sshd sh -c "echo \"$BANNER\" > /banner"
+  docker exec uproxy-sshd chmod 644 /banner
+  docker exec uproxy-sshd chown giver: /banner
+  docker exec uproxy-sshd sh -c "echo \"$PUBLIC_IP\" > /hostname"
+  docker exec uproxy-sshd chmod 644 /hostname
+  docker exec uproxy-sshd chown giver: /hostname
 
   # Configure access.
   # In descending order of preference:
