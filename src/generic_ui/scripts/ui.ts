@@ -1053,6 +1053,20 @@ export class UserInterface implements ui_constants.UiApi {
     console.log('Removed user from contacts', user);
   }
 
+  public getCloudUserCreatedByLocal = () : Promise<Object> => {
+    const network = this.model.getNetwork('Cloud');
+    if (!network) {
+      return Promise.reject('not logged into cloud network');
+    }
+    for (let userId in network.roster) {
+      let user = this.model.getUser(network, userId);
+      if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+        return Promise.resolve(user);
+      }
+    }
+    return Promise.reject('locally created cloud contact does not exist');
+  }
+
   public openTab = (url: string) => {
     this.browserApi.openTab(url);
   }

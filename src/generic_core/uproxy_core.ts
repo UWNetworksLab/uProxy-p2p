@@ -636,15 +636,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       freedom['cloudinstall'].close(installer);
     };
 
-    log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
-    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
-
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
 
+        log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
+        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
         ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
 
         return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
@@ -693,10 +692,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
               networkData: JSON.stringify(cloudNetworkData)
             });
           });
-        }, (installError: Error) => {
-          log.error('install failed, cleaning up');
+        }, (installError: any) => {
+          // Tell user if the server already exists
+          if (installError.errcode === "VM_AE") {
+            return Promise.reject(new Error('server already exists'));
+          }
 
           // Destroy the server we just created so that the user isn't billed.
+          log.error('install failed, cleaning up');
           return provisioner.stop(DROPLET_NAME).then((unused: Object) => {
             log.info('destroyed server on digitalocean');
             destroyModules();

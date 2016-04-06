@@ -203,6 +203,26 @@
       </div>
     </core-overlay>
 
+    <core-overlay id='serverExistsOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/error-circle-ic.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE' | $$ }}</h1>
+        <p>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE' | $$ }}</p>
+        <uproxy-button raised on-tap='{{ removeServerAndInstallAgain }}'>
+          {{ 'REMOVE_SERVER_AND_TRY_AGAIN' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ closeOverlays }}'>
+          {{ 'CANCEL' | $$ }}
+        </uproxy-button>
+      </div>
+    </core-overlay>
+
   </template>
   <script src='cloud-install.js'></script>
 </polymer-element>
