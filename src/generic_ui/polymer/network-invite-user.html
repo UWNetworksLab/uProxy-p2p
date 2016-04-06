@@ -95,11 +95,11 @@
         </div>
 
         <div class='checkboxes'>
-          <p><paper-checkbox label='{{ "REQUEST_ACCESS" | $$ }}' checked='{{ requestAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
-          <p><paper-checkbox label='{{ "OFFER_ACCESS" | $$ }}' checked='{{ offerAccess }}' on-change='{{ requestOrOfferChanged }}'></paper-checkbox></p>
+          <p><paper-checkbox id='requestAccessCheckbox' label='{{ "REQUEST_ACCESS" | $$ }}' checked='{{ requestAccess }}'></paper-checkbox></p>
+          <p><paper-checkbox id='offerAccessCheckbox' label='{{ "OFFER_ACCESS" | $$ }}' checked='{{ offerAccess }}'></paper-checkbox></p>
         </div>
 
-        <uproxy-button affirmative on-tap='{{ confirmClicked }}'>{{ confirmText }}</uproxy-button>
+        <uproxy-button id='confirmButton' affirmative on-tap='{{ confirmClicked }}'>{{ confirmText }}</uproxy-button>
 
         <!-- Quiver specific controls -->
         <div hidden?="{{network !== 'Quiver'}}">

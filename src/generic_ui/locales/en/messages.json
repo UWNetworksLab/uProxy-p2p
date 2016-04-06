@@ -817,7 +817,7 @@
   },
   "QUIVER_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for the uProxy Network (aka Quiver)",
-    "message": "Send this link to your friends so they can find you on uProxy.  You can optionally choose to request or offer access to your friends."
+    "message": "Generate a link and send it to your friends so they can find you on uProxy.  You can request access, offer access or both."
   },
   "ADD_A_CLOUD_FRIEND": {
     "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
@@ -1196,10 +1196,6 @@
   "CHOOSE_A_SOCIAL_NETWORK": {
     "description": "Text prompting user to log into social networks and invite their friends.",
     "message": "Choose a social network"
-  },
-  "QUIVER_LINK_INSTRUCTIONS": {
-    "description": "Instructions telling user how to use link for the uProxy network (aka Quiver).",
-    "message": "Send this link to your friends so they can find you on uProxy"
   },
   "INVITATION_PLACEHOLDER_TEXT": {
     "description": "Invitation placeholder text, instructing users to enter an invite in this field",
