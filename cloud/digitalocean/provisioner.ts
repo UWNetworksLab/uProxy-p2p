@@ -71,23 +71,20 @@ class Provisioner {
     }).then((keys: KeyPair) => {
        // Get SSH keys
       this.state_.ssh = keys;
-      return this.getDroplet_(name).catch((e: Error) => {
-        // Droplet does not exist so continue creating new server
-        return Promise.resolve<void>();
-      });
-    }).then((resp: any) => {
-      if (resp) {
-        // Droplet exists so return error
+      return this.getDroplet_(name).then((unused :any) => {
+        // Droplet exists so raise error
         return Promise.reject({
           'errcode': 'VM_AE',
           'message': 'Droplet ' + name + ' already exists'
         });
-      }
-      return this.setupDigitalOcean_(name, region, image, size);
-      // Setup Digital Ocean (SSH key + droplet)
+      }, (e: Error) => {
+        // Droplet does not exist so continue creating new server
+        // Setup Digital Ocean (SSH key + droplet)
+        return this.setupDigitalOcean_(name, region, image, size);
+      });
     }).then(() => {
-      return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id);
       // Get the droplet's configuration
+      return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id);
     }).then((resp: any) => {
       this.sendStatus_('CLOUD_DONE_VM');
       this.state_.cloud.vm = resp.droplet;
@@ -147,16 +144,14 @@ class Provisioner {
       } else {
         return Promise.reject(new Error('error deleting droplet'));
       }
-    }).then(() => {
-      return Promise.resolve<void>();
     });
   }
 
   /**
    * Finds a droplet with this name
    * @param {String} droplet name, as a string
-   * @return {Promise.<Object>}, returns droplet if exists
-   * or undefined if it does not exist
+   * @return {Promise.<Object>}, resolves with {droplet: droplet_with_name}
+   * or rejects if droplet doesn't exist
    */
   private getDroplet_ = (name: string) : Promise<Object> => {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
