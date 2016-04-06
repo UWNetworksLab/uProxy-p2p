@@ -214,8 +214,11 @@
         </div>
         <h1>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE' | $$ }}</h1>
         <p>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE' | $$ }}</p>
-        <uproxy-button raised on-tap='{{ removeServerTapped }}'>
+        <uproxy-button raised on-tap='{{ removeServerAndInstallAgain }}'>
           {{ 'REMOVE_SERVER_AND_TRY_AGAIN' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ closeOverlays }}'>
+          {{ 'CANCEL' | $$ }}
         </uproxy-button>
       </div>
     </core-overlay>

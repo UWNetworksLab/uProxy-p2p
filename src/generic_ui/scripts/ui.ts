@@ -1053,7 +1053,7 @@ export class UserInterface implements ui_constants.UiApi {
     console.log('Removed user from contacts', user);
   }
 
-  public getCloudUser = () : Promise<Object> => {
+  public getCloudUserCreatedByLocal = () : Promise<Object> => {
     const network = this.model.getNetwork('Cloud');
     if (!network) {
       return Promise.reject('not logged into cloud network');

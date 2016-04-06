@@ -718,7 +718,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         return provisioner.stop(DROPLET_NAME).then(() => {
           destroyModules();
           log.debug('stopped cloud server on', args.providerName);
-          return Promise.resolve<void>();
         }, (e: Error) => {
           destroyModules();
           log.error('error destroying cloud server:', e.message);

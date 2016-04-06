@@ -84,7 +84,7 @@ Polymer({
       }
     });
   },
-  removeServerTapped: function() {
+  removeServerAndInstallAgain: function() {
     this.closeOverlays();
     ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
     this.$.installingOverlay.open();
@@ -94,7 +94,7 @@ Polymer({
       providerName: DEFAULT_PROVIDER
     }).then(() => {
       // Get locally created cloud contact if there is one
-      return ui.getCloudUser().then((user: user.User) => {
+      return ui.getCloudUserCreatedByLocal().then((user: user.User) => {
         return ui_context.core.removeContact({
           networkName: user.network.name,
           userId: user.userId
