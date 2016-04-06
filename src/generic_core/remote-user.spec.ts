@@ -380,24 +380,35 @@ describe('remote_user.User', () => {
   });
 
   it('handleInvitePermissions creates new instance if needed', (done) => {
-    user = new remote_user.User(network, '123');
+    const USER_ID = '123';
+    const INSTANCE_ID = '456';
+    const PERMISSION_TOKEN = '999';
+    user = new remote_user.User(network, USER_ID);
     var inviteTokenData = {
       v: 1,
       networkName: 'GMail',
       userName: 'Bob',
       networkData: '',
       permission: {
-        token: '999',
+        token: PERMISSION_TOKEN,
         isRequesting: true,
         isOffering: false
       },
-      userId: '123',
-      instanceId: '456'
+      userId: USER_ID,
+      instanceId: INSTANCE_ID
     };
-    expect(user.getInstance(inviteTokenData.instanceId)).toBeUndefined();
+    expect(user.getInstance(INSTANCE_ID)).toBeUndefined();
     user.handleInvitePermissions(inviteTokenData);
-    var instance = user.getInstance(inviteTokenData.instanceId);
+
+    // Check that instance is created.
+    var instance = user.getInstance(INSTANCE_ID);
     expect(instance).toBeDefined();
+
+    // Check that instance is offline and unusedPermissionToken is set
+    expect(user.isInstanceOnline(INSTANCE_ID)).toEqual(false);
+    expect(instance.unusedPermissionToken).toEqual(PERMISSION_TOKEN);
+
+    // Wait for instance.update to be complete beore checking consent.
     instance.onceLoaded.then(() => {
       expect(instance.wireConsentFromRemote.isRequesting).toEqual(true);
       expect(instance.wireConsentFromRemote.isOffering).toEqual(false);
