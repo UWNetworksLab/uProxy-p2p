@@ -78,6 +78,7 @@ then
   # While any apt-get install command would ordinarily be run at
   # image creation time, we do this here because npm is huge (>150MB)
   # and only manual users need a copy/paste-able URL.
+  apt-get update -qq
   apt-get install -qq nodejs npm
   npm install jsurl &>/dev/null
   CLOUD_INSTANCE_DETAILS_JSURL=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS_JSON');"`
