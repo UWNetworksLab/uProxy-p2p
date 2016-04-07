@@ -1,6 +1,4 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import net = require('../net/net.types');
 import messages = require('./messages');

@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/node/node.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 // Byte-wise equality check of array buffers by comparison of each byte's
 // value.

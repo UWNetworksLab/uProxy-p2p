@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 // This module provides a pool for managing data channels.  It mimics the
 // interface for creating data channels in uproxy-lib's PeerConnection,

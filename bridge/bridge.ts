@@ -1,5 +1,4 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import churn = require('../churn/churn');
 import churn_types = require('../churn/churn.types');
@@ -7,6 +6,8 @@ import handler = require('../handler/queue');
 import logging = require('../logging/logging');
 import peerconnection = require('../webrtc/peerconnection');
 import peerconnection_types = require('../webrtc/signals');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('bridge');
 

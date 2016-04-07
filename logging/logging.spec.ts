@@ -1,10 +1,11 @@
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 import MockFreedomEventHandler = require('../freedom/mocks/mock-eventhandler');
 import loggingProviderTypes = require('../loggingprovider/loggingprovider.types');
 import Logging = require('./logging');
+
+declare var freedom: freedom.FreedomInModuleEnv;
 
 describe('Client logging shim using Freedom', () => {
   var logginglistener :MockFreedomEventHandler;

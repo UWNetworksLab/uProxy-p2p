@@ -1,5 +1,4 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
-/// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import socks = require('../../socks-common/socks-headers');
@@ -7,6 +6,8 @@ import socks = require('../../socks-common/socks-headers');
 import proxyintegrationtesttypes = require('./proxy-integration-test.types');
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
+
+declare const freedom: freedom.FreedomInCoreEnv;
 
 // Integration test for the whole proxying system.
 // The real work is done in the Freedom module which performs each test.
@@ -28,11 +29,12 @@ export function socksEchoTestDescription(useChurn:boolean) {
   };
 
   beforeEach((done) => {
-    freedom('files/freedom-module.json', { 'debug': 'debug' })
-        .then((freedomModuleFactoryManager) => {
-          testerFactoryManager = freedomModuleFactoryManager;
-          done();
-        });
+    freedom('files/freedom-module.json', {
+      debug: 'debug'
+    }).then((freedomModuleFactoryManager:any) => {
+      testerFactoryManager = freedomModuleFactoryManager;
+      done();
+    });
   });
 
   afterEach(() => {

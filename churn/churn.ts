@@ -1,6 +1,5 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import caesar = require('../transformers/caesar');
@@ -22,6 +21,8 @@ import TransformerConfig = churn_types.TransformerConfig;
 
 import Candidate = candidate.Candidate;
 import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('churn');
 

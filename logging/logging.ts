@@ -1,9 +1,9 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/typings/circular-json/circular-json.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import loggingProviderTypes = require('../loggingprovider/loggingprovider.types');
 import CircularJSON = require('circular-json');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 // Perform log message formatting. Formats an array of arguments to a
 // single string.

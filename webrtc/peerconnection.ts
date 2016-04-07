@@ -1,12 +1,13 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
+import datachannel = require('./datachannel');
 import djb2 = require('../crypto/djb2hash');
 import handler = require('../handler/queue');
-import datachannel = require('./datachannel');
+import logging = require('../logging/logging');
 import signals = require('./signals');
 
-import logging = require('../logging/logging');
+declare const freedom: freedom.FreedomInModuleEnv;
+
 var log :logging.Log = new logging.Log('PeerConnection');
 
 // These are exported for convenience so that typescript tools that use

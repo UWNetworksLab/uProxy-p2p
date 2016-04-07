@@ -1,5 +1,4 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
-/// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import socks = require('../../socks-common/socks-headers');
 
@@ -8,6 +7,8 @@ import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
+
+declare const freedom: freedom.FreedomInCoreEnv;
 
 function slowTestDescription(useChurn:boolean) {
   var testerFactoryManager
