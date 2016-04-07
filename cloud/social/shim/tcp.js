@@ -82,8 +82,8 @@ FreedomTCP.prototype._writeNative = function(req, data) {
 };
 
 FreedomTCP.prototype.writeBuffer = function(req, buf) {
-  var data = buf.toArrayBuffer();
-  this._writeNative(req, data);
+  // buf is a NodeJS Buffer, the buffer field of which is a Uint8Array.
+  this._writeNative(req, buf.buffer);
 };
 
 FreedomTCP.prototype.writeAsciiString = function(req, s) {
