@@ -31,7 +31,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   beforeEach((done) => {
     freedom('files/freedom-module.json', {
       debug: 'debug'
-    }).then((freedomModuleFactoryManager:any) => {
+    }).then((freedomModuleFactoryManager: any) => {
       testerFactoryManager = freedomModuleFactoryManager;
       done();
     });

@@ -19,11 +19,12 @@ function slowTestDescription(useChurn:boolean) {
   };
 
   beforeEach((done) => {
-    freedom('files/freedom-module.json', { 'debug': 'debug' })
-        .then((freedomModuleFactoryManager) => {
-          testerFactoryManager = freedomModuleFactoryManager;
-          done();
-        });
+    freedom('files/freedom-module.json', {
+      debug: 'debug'
+    }).then((freedomModuleFactoryManager: any) => {
+      testerFactoryManager = freedomModuleFactoryManager;
+      done();
+    });
   });
 
   afterEach(() => {
