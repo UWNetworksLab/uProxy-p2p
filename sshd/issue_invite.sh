@@ -12,16 +12,15 @@ USERNAME=getter
 AUTOMATED=false
 
 function usage () {
-  echo "$0 [-u username] [-i invite code] [-c] [-a]"
+  echo "$0 [-u username] [-i invite code] [-a]"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
-  echo "  -c: output complete invite URL (for manual installs)"
   echo "  -a: do not output complete invite URL"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts i:u:cah? opt; do
+while getopts i:u:ah? opt; do
   case $opt in
     i) INVITE_CODE="$OPTARG" ;;
     u) USERNAME="$OPTARG" ;;
@@ -79,6 +78,7 @@ then
   # While any apt-get install command would ordinarily be run at
   # image creation time, we do this here because npm is huge (>150MB)
   # and only manual users need a copy/paste-able URL.
+  apt-get update -qq
   apt-get install -qq nodejs npm
   npm install jsurl &>/dev/null
   CLOUD_INSTANCE_DETAILS_JSURL=`nodejs -p -e "require('jsurl').stringify('$CLOUD_INSTANCE_DETAILS_JSON');"`

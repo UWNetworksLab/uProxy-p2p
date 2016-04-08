@@ -56,7 +56,6 @@ do_install() {
       show_deps
     fi
     echo "Docker not found, running Docker installer."
-    echo "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER"
     curl -fsSL https://get.docker.com/ | sh
   fi
   # We depend on --build-arg, introduced in Docker 1.9.
