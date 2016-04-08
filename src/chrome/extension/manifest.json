@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extName__",
-  "version": "0.8.38",
+  "version": "0.8.40",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
   "minimum_chrome_version": "41.0.2272.63",

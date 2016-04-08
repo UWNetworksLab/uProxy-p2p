@@ -104,12 +104,21 @@ export class Model {
     return null;
   }
 
-  public updateGlobalSettings = (settings :Object) => {
+  public removeContact = (user :User) : void => {
+    var userCategories = user.getCategories();
+    // Remove user from its getTab category
+    categorizeUser(user, this.contacts.getAccessContacts,
+      userCategories.getTab, null);
+    // Remove user from its shareTab category
+    categorizeUser(user, this.contacts.shareAccessContacts,
+      userCategories.shareTab, null);
+  }
+
+  public updateGlobalSettings = (settings: Object) => {
     _.merge(this.globalSettings, settings, (a :any, b :any) => {
       if (_.isArray(a) && _.isArray(b)) {
         return b;
       }
-
       return undefined;
     });
   }

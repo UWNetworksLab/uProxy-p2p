@@ -28,6 +28,15 @@
     .nameRow {
       margin: 18px 24px 0px 24px;
     }
+    .nameTable {
+      width: 100%;
+    }
+    .nameTable .nameCell {
+      width: 80%;
+    }
+    .nameTable .iconCell {
+      width: 10%;
+    }
     .expandable {
       cursor: pointer;
     }
@@ -40,11 +49,14 @@
     }
     .nameRow .iconWrapper {
       text-align: end;
-      margin: 0px 8px;
+      margin: 0px 1px;
     }
     .nameRow .iconWrapper core-icon[icon=open-in-new] {
       width: 16px !important;
       height: 16px !important;
+    }
+    .nameRow .iconWrapper core-icon[icon=delete] {
+      width: 20px !important;
     }
     .nameRow:hover core-icon.expand {
       opacity: 1;
@@ -135,7 +147,22 @@
         top horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
       <div flex>
-        <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
+        <table class="nameTable">
+          <td class="nameCell">
+            <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
+          </td>
+          <td class="iconCell">
+            <div class="iconWrapper" hidden?="{{ contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">
+              <core-icon icon="open-in-new"
+          title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
+            </div>
+          </td>
+          <td class="iconCell">
+            <div class="iconWrapper" hidden?="{{contact.network.name!='Cloud'}}">
+              <core-icon icon="delete" title="{{ contact.url }}" on-tap="{{ removeCloudFriend }}"></core-icon>
+            </div>
+          </td>
+        </table>
         <div class='{{ (isOnline || contact.status!=UserStatus.FRIEND) ? "onlineStatus" : "offlineStatus" }}'
           hidden?="{{ hideOnlineStatus }}" on-tap='{{ toggle }}'>
           <span hidden?='{{contact.status==UserStatus.LOCAL_INVITED_BY_REMOTE || contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL}}'>{{ (isOnline ? "ONLINE" : "OFFLINE") | $$ }}</span>
@@ -255,11 +282,6 @@
             </uproxy-button>
           </div>
         </core-collapse> <!-- end of shareControls -->
-      </div>
-
-      <div class="iconWrapper" hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">
-        <core-icon icon="open-in-new"
-            title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
       </div>
 
       <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->
