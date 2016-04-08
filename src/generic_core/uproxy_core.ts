@@ -642,7 +642,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // Percentage of cloud install progress devoted to deploying.
     // The remainder is devoted to the install script.
     const DEPLOY_PROGRESS = 20;
-    
+
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
@@ -776,13 +776,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return null;
   }
 
-  public updateOrgPolicy(policy :Object) :void {
+  public updateOrgPolicy(policy :{[key :string] :Object}) :void {
     // TODO(eholder): Might need to map policy as :{[value :string] :Object}
     // for iteration to work correctly, though that should be implied.
     for (var key in policy) {
       var key_string: string = key;
       if (globals.settings.hasOwnProperty(key_string)) {
-        globals.settings[key_string] = policy[key];
+        (<{[key :string] :Object}><any>globals.settings)[key_string] = policy[key];
       }
     }
     this.updateGlobalSettings(globals.settings);
@@ -795,7 +795,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.removeUserFromStorage(args.userId).then(() => {
       return ui.removeFriend({
         networkName: args.networkName,
-        userId: args.userId 
+        userId: args.userId,
       });
     }).then(() => {
       // If we removed the only cloud friend, logout of the cloud network
