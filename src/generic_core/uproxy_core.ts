@@ -724,7 +724,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         globals.settings[key_string] = policy[key];
       }
     }
-    updateGlobalSettings(globals.settings);
+    this.updateGlobalSettings(globals.settings);
   }
 }  // class uProxyCore
 
