@@ -189,7 +189,7 @@ coreDistFiles = [
 
 # this should always be added to arrays of files to copy last
 universalDistFiles = [
-  'icons/*'
+  'icons/**/*'
   'bower/webcomponentsjs/webcomponents.min.js'
   'bower/polymer/polymer.js'
 
@@ -405,6 +405,9 @@ gruntConfig = {
             'polymer/vulcanized.{html,js}'
 
             'freedom-for-chrome/freedom-for-chrome.js'
+
+            # for cloud social provider
+            'forge-min/forge.min.js'
           ].concat(coreDistFiles, universalDistFiles)
           dest: 'build/dist/chrome/app'
         }
@@ -427,6 +430,9 @@ gruntConfig = {
             'data/scripts/content-proxy.js'
 
             'data/freedom-for-firefox/freedom-for-firefox.jsm'
+
+            # for cloud social provider
+            'data/forge-min/forge.min.js'
           ].concat(
             getWithBasePath(uiDistFiles, 'data'),
             getWithBasePath(coreDistFiles, 'data'),

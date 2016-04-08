@@ -348,17 +348,6 @@
           </div>
         </core-toolbar>
 
-        <!--
-          core-header class ensures this gets inserted in the header portion of
-          core-header-panel and it is positioned below the toolbar (see
-          https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
-        -->
-        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}' noclear="true">
-          <p>
-            {{ "WELCOME_MESSAGE" | $$ }}
-          </p>
-        </uproxy-bubble>
-
         <div class='content' fit>
 
           <div id='rosterContainer' vertical layout>

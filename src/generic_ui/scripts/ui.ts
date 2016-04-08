@@ -118,10 +118,6 @@ export class UserInterface implements ui_constants.UiApi {
   public i18n_t :Function = translator_module.i18n_t;
   public i18n_setLng :Function = translator_module.i18n_setLng;
 
-  /* Constants */
-  // Must be included in Chrome extension manifest's list of permissions.
-  public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
-
   /* About this uProxy installation */
   public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
   public browser :string = '';
@@ -136,6 +132,7 @@ export class UserInterface implements ui_constants.UiApi {
   private isConnectedToCellular_ :boolean = false;
 
   public cloudInstallStatus :string = '';
+  public cloudInstallProgress = 0;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -177,6 +174,8 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.USER_SELF, this.syncUserSelf_);
 
     core.onUpdate(uproxy_core_api.Update.USER_FRIEND, this.syncUser);
+
+    core.onUpdate(uproxy_core_api.Update.REMOVE_FRIEND, this.removeFriend);
 
     core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
       this.copyPasteState.message = message;
@@ -302,19 +301,17 @@ export class UserInterface implements ui_constants.UiApi {
       this.bringUproxyToFront();
     });
 
-    core.onUpdate(
-        uproxy_core_api.Update.POST_TO_CLOUDFRONT,
-        (data :uproxy_core_api.CloudfrontPostData) => {
-      this.postToCloudfrontSite(data.payload, data.cloudfrontPath);
-    });
-
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
     core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                   this.setPortControlSupport_);
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.cloudInstallStatus = status;
+      this.cloudInstallStatus = this.i18n_t(status);
+    });
+
+    core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
+      this.cloudInstallProgress = progress;
     });
 
     browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
@@ -595,21 +592,16 @@ export class UserInterface implements ui_constants.UiApi {
     var networkName = tokenObj.networkName;
 
     if (networkName == 'Cloud') {
-      // Cloud confirmation is the same regardless of whether the user is
-      // logged into cloud yet.
-      return this.getConfirmation('', this.i18n_t('CLOUD_INVITE_CONFIRM'))
-      .then(() => {
-        // Log into cloud if needed.
-        var loginPromise = Promise.resolve<void>();
-        if (!this.model.getNetwork('Cloud')) {
-          loginPromise = this.login('Cloud');
-        }
-        return loginPromise.then(() => {
-          // Cloud contacts only appear on the GET tab.
-          this.setMode(ui_constants.Mode.GET);
-          // Don't show an additional confirmation for Cloud.
-          return this.addUser_(tokenObj, false).catch(showTokenError);
-        });
+      // Log into cloud if needed.
+      var loginPromise = Promise.resolve<void>();
+      if (!this.model.getNetwork('Cloud')) {
+        loginPromise = this.login('Cloud');
+      }
+      return loginPromise.then(() => {
+        // Cloud contacts only appear on the GET tab.
+        this.setMode(ui_constants.Mode.GET);
+        // Don't show an additional confirmation for Cloud.
+        return this.addUser_(tokenObj, false).catch(showTokenError);
       });
     }
 
@@ -1034,12 +1026,38 @@ export class UserInterface implements ui_constants.UiApi {
       model.categorizeUser(user, this.model.contacts.shareAccessContacts,
           oldUserCategories.shareTab, newUserCategories.shareTab);
     }
+
     this.updateBadgeNotification_();
 
     console.log('Synchronized user.', user);
   };
 
-  public openTab = (url :string) => {
+  /**
+   * Remove a friend from the friend list by removing it from 
+   * model.contacts
+   */
+  public removeFriend = (args:{ networkName: string, userId: string }) => {
+    var network = this.model.getNetwork(args.networkName);
+    var user = this.model.getUser(network, args.userId);
+    this.model.removeContact(user);
+    console.log('Removed user from contacts', user);
+  }
+
+  public getCloudUserCreatedByLocal = () : Promise<Object> => {
+    const network = this.model.getNetwork('Cloud');
+    if (!network) {
+      return Promise.reject('not logged into cloud network');
+    }
+    for (let userId in network.roster) {
+      let user = this.model.getUser(network, userId);
+      if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+        return Promise.resolve(user);
+      }
+    }
+    return Promise.reject('locally created cloud contact does not exist');
+  }
+
+  public openTab = (url: string) => {
     this.browserApi.openTab(url);
   }
 
@@ -1172,33 +1190,6 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.reconnecting = false;
   }
 
-  private cloudfrontDomains_ = [
-    "d1wtwocg4wx1ih.cloudfront.net"
-  ]
-
-  public postToCloudfrontSite = (payload :Object, cloudfrontPath :string,
-                                 maxAttempts ?:number)
-      : Promise<void> => {
-    console.log('postToCloudfrontSite: ', payload, cloudfrontPath);
-    if (!maxAttempts || maxAttempts > this.cloudfrontDomains_.length) {
-      // default to trying every possible URL
-      maxAttempts = this.cloudfrontDomains_.length;
-    }
-    var attempts = 0;
-    var doAttempts = (error ?:Error) : Promise<void> => {
-      if (attempts < maxAttempts) {
-        // we want to keep trying this until we either run out of urls to
-        // send to or one of the requests succeeds.  We set this up by
-        // creating a lambda to call the post with failures set up to recurse
-        return this.browserApi.frontedPost(payload, this.AWS_FRONT_DOMAIN,
-          this.cloudfrontDomains_[attempts++], cloudfrontPath
-        ).catch(doAttempts);
-      }
-      throw error;
-    }
-    return doAttempts();
-  }
-
   public sendFeedback =
       (feedback :uproxy_core_api.UserFeedback) : Promise<void> => {
     var logsPromise :Promise<string>;
@@ -1219,7 +1210,7 @@ export class UserInterface implements ui_constants.UiApi {
         proxyingId: this.proxyingId
       };
 
-      return this.postToCloudfrontSite(payload, 'submit-feedback');
+      return this.core.postReport({payload: payload, path: 'submit-feedback'});
     });
   }
 
@@ -1352,7 +1343,11 @@ export class UserInterface implements ui_constants.UiApi {
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
-  public cloudInstall = (args:uproxy_core_api.CloudInstallArgs): Promise<void> => {
-    return this.core.cloudInstall(args);
+  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
+    return this.core.cloudUpdate(args);
+  }
+
+  public removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
+    return this.core.removeContact(args);
   }
 } // class UserInterface
