@@ -60,6 +60,7 @@ Polymer({
     this.$.successOverlay.close();
     this.$.failureOverlay.close();
     this.$.serverExistsOverlay.close();
+    this.$.cancelingOverlay.close();
   },
   loginTapped: function() {
     if (!this.$.installingOverlay.opened) {
@@ -79,7 +80,7 @@ Polymer({
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
         this.$.serverExistsOverlay.open();
-      } else {
+      } else if (e !== 'Error: canceled') {
         this.$.failureOverlay.open();
       }
     });
@@ -106,6 +107,19 @@ Polymer({
       });
     }).then(() => {
       return this.loginTapped();
+    });
+  },
+  cancelCloudInstall: function() {
+    this.$.cancelingOverlay.open();
+    return ui.cloudUpdate({
+      operation: uproxy_core_api.CloudOperationType.CLOUD_INSTALL_CANCEL,
+      providerName: DEFAULT_PROVIDER
+    }).then(() => {
+      this.closeOverlays();
+      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_SUCCESS');
+    }).catch((e: Error) => {
+      this.$.cancelingOverlay.close();
+      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_FAILURE');
     });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {
