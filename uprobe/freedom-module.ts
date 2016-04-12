@@ -1,9 +1,10 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import nat_probe = require('../nat/probe');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 export var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,

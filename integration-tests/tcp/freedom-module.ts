@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import tcp = require('../../net/tcp');
@@ -6,6 +6,8 @@ import net = require('../../net/net.types');
 
 import logging = require('../../logging/logging');
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 export var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,

@@ -1,8 +1,7 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
 import arraybuffers = require('../arraybuffers/arraybuffers');

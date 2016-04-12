@@ -1,8 +1,6 @@
 // benchmark.ts benchmarks the proxy.  It should be running on localhost:9999
 
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/request/request.d.ts' />
-//// <reference path='../../../third_party/typings/node/node.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import request = require('request');
 import util = require('util');

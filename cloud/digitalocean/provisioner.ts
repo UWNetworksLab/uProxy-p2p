@@ -1,6 +1,6 @@
-/// <reference path='../../../../third_party/typings/node/node.d.ts' />
-/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 // TODO: https://github.com/uProxy/uproxy/issues/2051
 declare var forge: any;

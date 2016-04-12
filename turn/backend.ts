@@ -1,12 +1,13 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 import messages = require('./messages');
 import net = require('../net/net.types');
 
-var log :logging.Log = new logging.Log('TURN backend');
+declare const freedom: freedom.FreedomInModuleEnv;
+
+var log: logging.Log = new logging.Log('TURN backend');
 
 /**
  * Represents a client known to the server. One of these objects is created

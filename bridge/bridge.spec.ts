@@ -1,8 +1,7 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
-import mockFreedomRtcPeerConnection = require('../freedom/mocks/mock-rtcpeerconnection');
+declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); }
 });
@@ -10,6 +9,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 import bridge = require('./bridge');
 import datachannel = require('../webrtc/datachannel');
 import handler = require('../handler/queue');
+import mockFreedomRtcPeerConnection = require('../freedom/mocks/mock-rtcpeerconnection');
 import peerconnection = require('../webrtc/peerconnection');
 import peerconnection_types = require('../webrtc/signals');
 

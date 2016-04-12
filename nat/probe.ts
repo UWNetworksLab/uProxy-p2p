@@ -1,8 +1,9 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 // NAT detection needs the help of an external server.
 // We keep this running on Amazon EC2 and the source

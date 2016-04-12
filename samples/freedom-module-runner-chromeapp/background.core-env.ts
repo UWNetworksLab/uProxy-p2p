@@ -1,4 +1,6 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
+
+declare const freedom: freedom.FreedomInCoreEnv;
 
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends

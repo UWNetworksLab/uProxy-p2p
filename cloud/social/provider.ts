@@ -1,7 +1,4 @@
-/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-/// <reference path='../../../../third_party/typings/node/node.d.ts' />
-/// <reference path='../../../../third_party/typings/ssh2/ssh2.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import linefeeder = require('../../net/linefeeder');
@@ -12,6 +9,8 @@ import queue = require('../../handler/queue');
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
 import * as ssh2 from 'ssh2';
 var Client = require('ssh2').Client;
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 var log: logging.Log = new logging.Log('cloud social');
 

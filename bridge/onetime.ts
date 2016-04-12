@@ -1,6 +1,5 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/browserify-zlib/browserify-zlib.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import bridge = require('./bridge');
 import churn_types = require('../churn/churn.types');

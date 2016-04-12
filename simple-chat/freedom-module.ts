@@ -1,10 +1,12 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import churn = require('../churn/churn');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import peerconnection = require('../webrtc/peerconnection');
 import signals = require('../webrtc/signals');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 export var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(

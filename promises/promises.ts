@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 // Invokes f up to maxAttempts number of times, resolving with its result
 // on the first success and rejecting on maxAttempts-th failure.

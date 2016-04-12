@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 var startButton = document.getElementById('startButton');
 var copyTextarea = <HTMLInputElement>document.getElementById('copy');

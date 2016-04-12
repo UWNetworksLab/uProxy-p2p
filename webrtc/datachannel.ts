@@ -1,5 +1,4 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 // DataPeer - a class that wraps peer connections and data channels.
 //
@@ -9,9 +8,11 @@
 
 import handler = require('../handler/queue');
 import arraybuffers = require('../arraybuffers/arraybuffers');
-
 import logging = require('../logging/logging');
-var log :logging.Log = new logging.Log('DataChannel');
+
+declare const freedom: freedom.FreedomInModuleEnv;
+
+var log: logging.Log = new logging.Log('DataChannel');
 
 // Messages are limited to a 16KB length by SCTP. For maximum efficiency,
 // this size should match the buffer size used by Freedom's TCP connection.

@@ -1,11 +1,12 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
 import turn_frontend = require('../turn/frontend');
 import turn_backend = require('../turn/backend');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 var loggingController = freedom['loggingcontroller']();
 loggingController = loggingController.setDefaultFilter(

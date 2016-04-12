@@ -1,8 +1,9 @@
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 // Setup freedom mock environment.
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+
+declare var freedom: freedom.FreedomInModuleEnv;
 
 // We need null mock freedom console (not one that raises errors). The
 // loggingprovider in this file ignore freedom's calls to the core console

@@ -1,9 +1,10 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
-import mockFreedomRtcPeerConnection = require('../freedom/mocks/mock-rtcpeerconnection');
+declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
+
+import mockFreedomRtcPeerConnection = require('../freedom/mocks/mock-rtcpeerconnection');
 import onetime = require('./onetime');
 
 interface Clown {

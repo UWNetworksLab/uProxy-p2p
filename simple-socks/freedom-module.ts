@@ -1,5 +1,4 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import bridge = require('../bridge/bridge');
 import logging = require('../logging/logging');
@@ -8,6 +7,8 @@ import net = require('../net/net.types');
 import rtc_to_net = require('../rtc-to-net/rtc-to-net');
 import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
 import tcp = require('../net/tcp');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 const loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,

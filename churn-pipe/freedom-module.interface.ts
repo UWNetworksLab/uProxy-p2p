@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import churn_types = require('../churn/churn.types');
 import net = require('../net/net.types');
