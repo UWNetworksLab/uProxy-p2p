@@ -27,6 +27,9 @@ const PROGRESS_PREFIX = 'CLOUD_INSTALL_PROGRESS';
 // Prefix for status updates.
 const STATUS_PREFIX = 'CLOUD_INSTALL_STATUS';
 
+// Status indicating that the installer has been canceled.
+const CANCELED_STATUS = 'CANCELED';
+
 // Retry timing for SSH connection establishment.
 const INITIAL_CONNECTION_INTERVAL_MS = 500;
 const MAX_CONNECTION_INTERVAL_MS = 10000;
@@ -36,6 +39,7 @@ const MAX_CONNECTION_INTERVAL_MS = 10000;
 // so that we have fewer paths to test.
 class CloudInstaller {
   constructor(private dispatchEvent_: (name: string, args: Object) => void) {}
+  private status_ :string = undefined;
 
   // Runs the install command via SSH, resolving with the invitation URL.
   public install = (
@@ -57,6 +61,10 @@ class CloudInstaller {
 
     let numAttempts = 0;
     return promises.retryWithExponentialBackoff(() => {
+      if (this.status_ === CANCELED_STATUS) {
+        log.debug('Canceling cloud installer...');
+        return Promise.reject(new Error('canceled'));
+      } 
       log.debug('connection attempt %1...', (++numAttempts));
       return new Promise<string>((F, R) => {
         const connection = new Client();
@@ -88,6 +96,7 @@ class CloudInstaller {
                 this.dispatchEvent_('progress', progress);
               }
             } else if (line.indexOf(STATUS_PREFIX) === 0) {
+              this.status_ = line;
               this.dispatchEvent_('status', line);
             }
           });
@@ -139,6 +148,10 @@ class CloudInstaller {
         }).connect(connectConfig);
       });
     }, MAX_CONNECTION_INTERVAL_MS, INITIAL_CONNECTION_INTERVAL_MS);
+  }
+
+  public cancel = () : void => {
+    this.status_ = CANCELED_STATUS;
   }
 }
 
