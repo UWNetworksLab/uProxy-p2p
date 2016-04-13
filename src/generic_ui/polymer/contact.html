@@ -152,7 +152,7 @@
             <div class='name' on-tap='{{ toggle }}'><bdi>{{ contact.name }}</bdi></div>
           </td>
           <td class="iconCell">
-            <div class="iconWrapper" hidden?="{{ contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">
+            <div class="iconWrapper" hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}">
               <core-icon icon="open-in-new"
           title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
             </div>
