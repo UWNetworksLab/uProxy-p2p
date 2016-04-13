@@ -777,12 +777,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public updateOrgPolicy(policy :uproxy_core_api.ManagedPolicyUpdate) :void {
-    for (var key in policy) {
-      var key_string: string = key;
-      if (globals.settings.hasOwnProperty(key_string)) {
-        globals.settings[key_string] = policy[key];
-      }
-    }
+    globals.settings.enforceProxyServerValidity = policy.
+      enforceProxyServerValidity;
+    globals.settings.validProxyServers = policy.validProxyServers;
     this.updateGlobalSettings(globals.settings);
   }
 
