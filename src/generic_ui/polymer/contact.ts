@@ -111,6 +111,12 @@ Polymer({
         name: this.contact.network.name,
         userId: this.contact.network.userId // Local userId
       },
+      // isOffering is false because we are not offering access to proxy
+      // through this local instance of uProxy, rather we are sharing access
+      // to a cloud server which we own.  All permissioning is done at the
+      // cloud social provider layer, not in uProxy.
+      isOffering: false,
+      isRequesting: false,
       userId: this.contact.userId // Cloud instance userId
     }).then((cloudInviteUrl: string) => {
       this.ui.showDialog(this.ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"), '', this.ui.i18n_t("OK"),
