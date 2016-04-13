@@ -687,6 +687,8 @@ export function notifyUI(networkName :string, userId :string) {
     // For other social networks, the url adds the local user as a uproxy
     // contact for friends who use the url. The userId isn't used.
     public getInviteUrl = (data :uproxy_core_api.CreateInviteArgs) : Promise<string> => {
+      // data.userId is expected to be defined for cloud, but not Quiver,
+      // Facebook, or GMail
       return this.freedomApi_.inviteUser(data.userId || '')
           .then((networkData: Object) => {
         // Set permissionData only if the user is requesting / granting access.
@@ -827,7 +829,7 @@ export function notifyUI(networkName :string, userId :string) {
       };
     }
 
-    public removeUserFromStorage = (userId :string) : Promise<void> => {    
+    public removeUserFromStorage = (userId :string) : Promise<void> => {
       // Remove user from roster.
       this.removeUser(userId);
       // Remove user from storage.
