@@ -87,7 +87,7 @@ import storage = globals.storage;
 
     /**
      * TODO: Come up with a better typing for this.
-     * This does not return a LocalInstanceState because it does we don't want
+     * This does not return a LocalInstanceState because we don't want
      * to save the exchangeInviteToken method to storage.
      */
     public currentState = () => {
