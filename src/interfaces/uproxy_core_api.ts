@@ -104,7 +104,8 @@ export enum Command {
   INVITE_GITHUB_USER = 1028,
   CLOUD_UPDATE = 1029,
   UPDATE_ORG_POLICY = 1030,
-  REMOVE_CONTACT = 1031
+  REMOVE_CONTACT = 1031,
+  POST_REPORT = 1032
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -132,7 +133,7 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
-  POST_TO_CLOUDFRONT = 2021,
+  // 2021 was POST_TO_CLOUDFRONT.  Replaced by Command.POST_REPORT.
   // Legacy one-time connection string. Unused, do not send.
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
@@ -249,6 +250,10 @@ export interface RemoveContactArgs {
   userId :string
 };
 
+export interface PostReportArgs {
+  payload: Object;
+  path: string;
+};
 
 /**
  * The primary interface to the uProxy Core.
@@ -322,6 +327,9 @@ export interface CoreApi {
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;
+
+  // Make a domain-fronted POST request to the uProxy logs/stats server.
+  postReport(args:PostReportArgs) : Promise<void>;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }

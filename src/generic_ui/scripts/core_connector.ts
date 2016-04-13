@@ -253,6 +253,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.REMOVE_CONTACT, args);
   }
+
+  postReport = (args:uproxy_core_api.PostReportArgs) : Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.POST_REPORT, args);
+  }
 }  // class CoreConnector
 
 export = CoreConnector;

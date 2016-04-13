@@ -17,6 +17,7 @@ import StoredValue = require('./stored_value');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import version = require('../generic/version');
+import freedomXhr = require('freedom-xhr');
 
 import ui = ui_connector.connector;
 import storage = globals.storage;
@@ -355,6 +356,23 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     network.sendEmail(data.to, data.subject, data.body);
   }
 
+  public postReport = (args :uproxy_core_api.PostReportArgs) : Promise<void> => {
+    let host = 'd1wtwocg4wx1ih.cloudfront.net';
+    let front = 'https://a0.awsstatic.com/';
+    let request:XMLHttpRequest = new freedomXhr.auto();
+    return new Promise<any>((F, R) => {
+      request.onload = F;
+      request.onerror = R;
+      // Only the front domain is exposed on the wire. The host and path
+      // should be encrypted. The path needs to be here and not
+      // in the Host header, which can only take a host name.
+      request.open('POST', front + args.path, true);
+      // The true destination address is set as the Host in the header.
+      request.setRequestHeader('Host', host);
+      request.send(JSON.stringify(args.payload));
+    });
+  }
+
   /**
    * Begin using a peer as a proxy server.
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
@@ -617,7 +635,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // Percentage of cloud install progress devoted to deploying.
     // The remainder is devoted to the install script.
     const DEPLOY_PROGRESS = 20;
-    
+
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
@@ -631,15 +649,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       freedom['cloudinstall'].close(installer);
     };
 
-    log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
-    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
-
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
 
+        log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
+        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
         ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
 
         return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
@@ -688,10 +705,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
               networkData: JSON.stringify(cloudNetworkData)
             });
           });
-        }, (installError: Error) => {
-          log.error('install failed, cleaning up');
+        }, (installError: any) => {
+          // Tell user if the server already exists
+          if (installError.errcode === "VM_AE") {
+            return Promise.reject(new Error('server already exists'));
+          }
 
           // Destroy the server we just created so that the user isn't billed.
+          log.error('install failed, cleaning up');
           return provisioner.stop(DROPLET_NAME).then((unused: Object) => {
             log.info('destroyed server on digitalocean');
             destroyModules();
@@ -759,7 +780,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.removeUserFromStorage(args.userId).then(() => {
       return ui.removeFriend({
         networkName: args.networkName,
-        userId: args.userId 
+        userId: args.userId
       });
     }).then(() => {
       // If we removed the only cloud friend, logout of the cloud network

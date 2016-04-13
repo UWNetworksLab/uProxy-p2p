@@ -80,18 +80,6 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.on(name, callback);
   }
 
-  public frontedPost = (data :any,
-                        externalDomain :string,
-                        cloudfrontDomain :string,
-                        cloudfrontPath = "") : Promise<void> => {
-    return this.promiseEmit('frontedPost', {
-        data: data,
-        externalDomain: externalDomain,
-        cloudfrontDomain: cloudfrontDomain,
-        cloudfrontPath: cloudfrontPath
-      });
-  }
-
   /**
    * Emit a message to the add-on that initiates asynchronous behaviour
    * in the add-on. Return a promise that fulfills/rejects upon the async
