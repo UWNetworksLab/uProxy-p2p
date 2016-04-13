@@ -82,11 +82,6 @@ Polymer({
     input.focus();
     input.select();
   },
-  requestOrOfferChanged: function() {
-    if (this.network === 'Quiver') {
-      this.generateInviteUrl('Quiver');
-    }
-  },
   confirmClicked: function() {
     if (this.network === 'GitHub') {
       this.inviteGithubFriend();
@@ -97,6 +92,11 @@ Polymer({
     } else if (this.network === 'Quiver') {
       // Generate Quiver invite url.  Will set this.inviteUrl.
       this.generateInviteUrl('Quiver');
+      // Disable controls so user can't generate a different link with
+      // modified permissions.
+      this.$.requestAccessCheckbox.disabled = true;
+      this.$.offerAccessCheckbox.disabled = true;
+      this.$.confirmButton.disabled = true;
     }
   },
   initFields: function() {
@@ -112,6 +112,10 @@ Polymer({
     // Forces the placeholder text to be visible again.
     this.$.GitHubPlaceholder.updateLabelVisibility('');
     this.$.GMailPlaceholder.updateLabelVisibility('');
+    // Enable checkboxes and buttons.
+    this.$.requestAccessCheckbox.disabled = false;
+    this.$.offerAccessCheckbox.disabled = false;
+    this.$.confirmButton.disabled = false;
   },
   ready: function() {
     this.initFields();
