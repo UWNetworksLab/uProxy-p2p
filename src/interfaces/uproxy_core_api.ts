@@ -57,6 +57,11 @@ export interface ValidProxyServerIdentity {
   public_key :string;
 }
 
+export interface ManagedPolicyUpdate {
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
+}
+
 export interface ConnectionState {
   localGettingFromRemote :social.GettingState;
   localSharingWithRemote :social.SharingState;
