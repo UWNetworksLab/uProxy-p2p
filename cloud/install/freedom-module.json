@@ -15,11 +15,6 @@
         "value": ["string", "number", "string", "string"],
         "ret": "object"
       },
-      "cancel": {
-        "type": "method",
-        "value": [],
-        "ret": []
-      },
       "err": {
         "message": "string"
       },

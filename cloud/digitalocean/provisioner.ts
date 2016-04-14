@@ -132,10 +132,11 @@ class Provisioner {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
       // Find and delete the server with the same name
       return this.getDroplet_(name);
-    }).then((resp :any) => {
+    }).then((resp: any) => {
       this.state_.cloud = this.state_.cloud || {};
       this.state_.cloud.vm = this.state_.cloud.vm || resp.droplet;
       // Make sure there are no actions in progress before deleting
+      this.sendStatus_('CLOUD_WAITING_VM');
       return this.waitDigitalOceanActions_();
     }).then(() => {
       return this.doRequest_('DELETE', 'droplets/' + this.state_.cloud.vm.id);
@@ -147,6 +148,12 @@ class Provisioner {
       } else {
         return Promise.reject(new Error('error deleting droplet'));
       }
+    }).catch((e: any) => {
+      if (e.errcode === 'VM_DNE') {
+        // Don't return an error if droplet doesn't exist
+        return Promise.resolve<void>();
+      }
+      return Promise.reject(e);
     });
   }
 
