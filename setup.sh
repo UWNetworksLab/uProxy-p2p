@@ -28,6 +28,7 @@ function runCmd ()
 
 function clean ()
 {
+  runCmd "$NPM_BIN_DIR/grunt clean"
   runCmd "rm -rf $ROOT_DIR/node_modules $ROOT_DIR/build $ROOT_DIR/.tscache"
 }
 
