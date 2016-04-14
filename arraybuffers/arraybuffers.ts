@@ -121,24 +121,16 @@ export function stringToUtf8EncodedArrayBuffer(str:string) :ArrayBuffer {
   return ab.buffer;
 }
 
-// Converts a node.js Buffer to an ArrayBuffer
-export function bufferToArrayBuffer(buffer:Buffer) :ArrayBuffer {
-    var ab = new ArrayBuffer(buffer.length);
-    var bytes = new Uint8Array(ab);
-    for (var i = 0; i < buffer.length; ++i) {
-        bytes[i] = buffer[i];
-    }
-    return bytes.buffer;
+// Returns an ArrayBuffer backed by the same memory as the supplied
+// Node.js Buffer.
+export function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {
+  return buffer.buffer;
 }
 
-// Converts an ArrayBuffer to a node.js Buffer
-export function arrayBufferToBuffer(ab:ArrayBuffer) :Buffer {
-    var buffer = new Buffer(ab.byteLength);
-    var bytes = new Uint8Array(ab);
-    for (var i = 0; i < buffer.length; ++i) {
-        buffer[i] = bytes[i];
-    }
-    return buffer;
+// Returns a Node.js Buffer backed by the same memory as the supplied
+// ArrayBuffer.
+export function arrayBufferToBuffer(ab: ArrayBuffer): Buffer {
+  return new Buffer(ab);
 }
 
 // Splits an ArrayBuffer into two at a given offset
