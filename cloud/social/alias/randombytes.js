@@ -14,7 +14,7 @@ try {
   cryptoAvailable = false;
 }
 
-module.exports = function(size) {
+module.exports = function(size, cb) {
   var buffer = new Buffer(size);
   if (cryptoAvailable) {
     // Although this looks weird, it's how crypto-browserify does it too:
@@ -25,5 +25,9 @@ module.exports = function(size) {
       buffer[i] = Math.floor(Math.random() * 256);
     }
   }
-  return buffer;
+  if (cb) {
+    cb(undefined, buffer);
+  } else {
+    return buffer;
+  }
 }

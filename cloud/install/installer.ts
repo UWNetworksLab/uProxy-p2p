@@ -1,7 +1,6 @@
-/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-/// <reference path='../../../../third_party/typings/node/node.d.ts' />
-/// <reference path='../../../../third_party/typings/ssh2/ssh2.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
+
+require('../social/monkey/process');
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import linefeeder = require('../../net/linefeeder');
@@ -114,9 +113,11 @@ class CloudInstaller {
                 message: 'invitation URL not found'
               });
             }).on('data', (data: Buffer) => {
-              stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(data));
+              // Make a copy before passing to the async queue.
+              stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(new Buffer(data)));
             }).stderr.on('data', (data: Buffer) => {
-              stderrRaw.handle(arraybuffers.bufferToArrayBuffer(data));
+              // Make a copy before passing to the async queue.
+              stderrRaw.handle(arraybuffers.bufferToArrayBuffer(new Buffer(data)));
             });
           });
         }).on('error', (e: Error) => {

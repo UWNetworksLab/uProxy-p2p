@@ -1,10 +1,12 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
 import tcp = require('../net/tcp');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 // Endpoint on which the server will listen.
 var requestedEndpoint: net.Endpoint = {

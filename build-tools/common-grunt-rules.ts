@@ -1,6 +1,6 @@
 // common-grunt-rules
 
-/// <reference path='../../../third_party/typings/node/node.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import fs = require('fs');
 import path = require('path');

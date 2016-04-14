@@ -1,12 +1,13 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import logging = require('../logging/logging');
 import handler = require('../handler/queue');
 import net = require('./net.types');
 import counter = require('./counter');
 
-var log :logging.Log = new logging.Log('tcp');
+declare const freedom: freedom.FreedomInModuleEnv;
+
+var log: logging.Log = new logging.Log('tcp');
 
 // Indicates how a socket (server or client) terminated.
 export enum SocketCloseKind {

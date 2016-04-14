@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 // Wraps asycnronous function calls, tracking the number of calls still
 // resolving and invoking a function once that number reaches zero *and* a

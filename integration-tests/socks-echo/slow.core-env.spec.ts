@@ -1,5 +1,4 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
-/// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import socks = require('../../socks-common/socks-headers');
 
@@ -8,6 +7,8 @@ import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
+
+declare const freedom: freedom.FreedomInCoreEnv;
 
 function slowTestDescription(useChurn:boolean) {
   var testerFactoryManager
@@ -18,11 +19,12 @@ function slowTestDescription(useChurn:boolean) {
   };
 
   beforeEach((done) => {
-    freedom('files/freedom-module.json', { 'debug': 'debug' })
-        .then((freedomModuleFactoryManager) => {
-          testerFactoryManager = freedomModuleFactoryManager;
-          done();
-        });
+    freedom('files/freedom-module.json', {
+      debug: 'debug'
+    }).then((freedomModuleFactoryManager: any) => {
+      testerFactoryManager = freedomModuleFactoryManager;
+      done();
+    });
   });
 
   afterEach(() => {
@@ -31,9 +33,9 @@ function slowTestDescription(useChurn:boolean) {
     testerFactoryManager.close();
   });
 
-  // The default TCP SYN timeout is two minutes, so to be safe we
-  // set a test timeout of four minutes.
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 240000;
+  // 100 MB download through CHURN takes about 10 minutes.
+  // Set the limit to 20 minutes for safety.
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 20 * 60 * 1000;
 
   // Opens 200 connections, sends 1 KB on each, and receives 250 KB on each
   it('download load test', (done) => {
@@ -49,26 +51,29 @@ function slowTestDescription(useChurn:boolean) {
       }
       return Promise.all(connectionPromises);
     }).then((connectionIds:string[]) => {
-      var completions = connectionIds.map((connectionId:string) : Promise<void> => {
-        var resolve :Function;
-        var result :Promise<void> = new Promise<void>((F, R) => { resolve = F; });
-        var isDone = false;
-        var outputString = '';
-        testModule.on('receivedData', (event:ReceivedDataEvent) => {
-          if (event.connectionId != connectionId) {
-            return;
+      // Maps connectionIds to the number of bytes received so far.  Counters
+      // start at 0, and entries are deleted when all data has been received
+      // for a connection.  When all entries have been deleted, the test passes.
+      let counters :{[id:string]: number} = {};
+      testModule.on('receivedData', (event:ReceivedDataEvent) => {
+        const id = event.connectionId;
+        if (id in counters) {
+          counters[id] += event.response.byteLength;
+        } else {
+          throw new Error('Unexpected connectionId ' + id);
+        }
+        if (counters[id] === repeat * blockSize) {
+          delete counters[id];
+          // Check if we have deleted the last id.
+          if (Object.keys(counters).length === 0) {
+            done();
           }
-          expect(isDone).toBe(false);
-          if (event.response.byteLength === repeat * blockSize) {
-            isDone = true;
-            resolve();
-          }
-        });
-        return testModule.sendData(connectionId, testBlock).then(() => {
-          return result;
-        });
+        }
       });
-      Promise.all(completions).then(done);
+      connectionIds.map((id:string) => {
+        counters[id] = 0;
+        testModule.sendData(id, testBlock);
+      });
     });
   });
 

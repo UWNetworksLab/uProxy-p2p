@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 // This enum describes a simple signal message protocol for establishing P2P
 // connections. TODO: rename to more accurately describe the intended

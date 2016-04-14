@@ -1,6 +1,8 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import logging = require('./loggingprovider.types');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 // The freedom console provider.
 export var freedomConsole = freedom['core.console']();

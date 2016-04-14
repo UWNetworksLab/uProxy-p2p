@@ -1,6 +1,9 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 export import logging_provider = require('./loggingprovider');
+
+declare const freedom: freedom.FreedomInModuleEnv;
+
 export var moduleName = 'loggingprovider'
 
 // Register the interfaces with freedom. Note: |freedom().provideSynchronous| is

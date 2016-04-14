@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import queue = require('./queue');
 import Queue = queue.Queue;

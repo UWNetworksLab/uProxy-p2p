@@ -1,7 +1,7 @@
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
@@ -16,7 +16,7 @@ import socks = require('../socks-common/socks-headers');
 
 import logging = require('../logging/logging');
 
-var log :logging.Log = new logging.Log('socks-to-rtc spec');
+var log: logging.Log = new logging.Log('socks-to-rtc spec');
 
 var mockEndpoint :net.Endpoint = {
   address: '127.0.0.1',

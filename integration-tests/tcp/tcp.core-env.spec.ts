@@ -1,5 +1,6 @@
-/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
-/// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
+
+declare const freedom: freedom.FreedomInCoreEnv;
 
 // Coarse-grained tests for tcp.ts.
 // The real work is done in the Freedom module which starts a test in response

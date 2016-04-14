@@ -1,6 +1,4 @@
-/// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import aqm = require('../aqm/aqm');
 import caesar = require('../transformers/caesar');
@@ -17,6 +15,8 @@ import protean = require('../transformers/protean');
 import sequence = require('../transformers/byteSequenceShaper');
 
 import Socket = freedom.UdpSocket.Socket;
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('churn-pipe');
 
