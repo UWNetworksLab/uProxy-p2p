@@ -188,14 +188,8 @@ export function parse(buffer:ArrayBuffer, lengths:number[]) :ArrayBuffer[] {
   return parts;
 }
 
-// Finds the index of a character in an ArrayBuffer
-export function indexOf(ab :ArrayBuffer, char :number) :number {
-    let bytes = new Uint8Array(ab);
-    for(let i = 0; i < bytes.length; ++i) {
-      if (bytes[i]==char) {
-        return i;
-      }
-    }
-
-    return -1;
+// Returns the index of the first appearance of i in ab, or -1 if not found.
+export function indexOf(ab: ArrayBuffer, i: number): number {
+  // The Buffer instance shares memory with the source ArrayBuffer.
+  return new Buffer(ab).indexOf(i);
 }
