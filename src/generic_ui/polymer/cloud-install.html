@@ -163,7 +163,7 @@
           <paper-progress id='installProgress' value='{{ ui.cloudInstallProgress }}'></paper-progress>
         </div>
         <p>{{ ui.cloudInstallStatus }}</p>
-        <uproxy-button on-tap='{{ cancelCloudInstall }}'>{{ 'CANCEL' | $$ }}</uproxy-button>
+        <uproxy-button disabled?='{{ ui.cloudInstallCancelDisabled }}' on-tap='{{ cancelCloudInstall }}'>{{ 'CANCEL' | $$ }}</uproxy-button>
       </div>
     </core-overlay>
 

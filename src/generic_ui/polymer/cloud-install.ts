@@ -88,6 +88,7 @@ Polymer({
   removeServerAndInstallAgain: function() {
     this.closeOverlays();
     ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
+    ui.cloudInstallCancelDisabled = true;
     this.$.installingOverlay.open();
     // Destroy uProxy cloud server
     return ui.cloudUpdate({

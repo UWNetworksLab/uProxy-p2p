@@ -133,6 +133,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public cloudInstallStatus :string = '';
   public cloudInstallProgress = 0;
+  public cloudInstallCancelDisabled :boolean = false;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -308,6 +309,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
       this.cloudInstallStatus = this.i18n_t(status);
+      this.cloudInstallCancelDisabled = (status === 'CLOUD_INSTALL_STATUS_CONFIGURING_SSH') ? true : false;
     });
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
