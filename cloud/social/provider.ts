@@ -1,5 +1,7 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
+require('../social/monkey/process');
+
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
