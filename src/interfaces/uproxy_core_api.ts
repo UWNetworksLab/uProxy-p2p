@@ -113,7 +113,7 @@ export enum Command {
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
-  SEND_INVITATION = 1028,
+  INVITE_GITHUB_USER = 1028,
   CLOUD_UPDATE = 1029,
   UPDATE_ORG_POLICY = 1030,
   REMOVE_CONTACT = 1031,
@@ -223,11 +223,19 @@ export interface EmailData {
   body :string;
 };
 
-// Data needed to accept user invites or to get an invite URL.
-export interface InvitationData {
+// Data needed to accept user invites.
+export interface AcceptInvitationData {
   network :social.SocialNetworkInfo;
   tokenObj ?:any;
   userId ?:string;
+};
+
+// Data needed to generate an invite URL.
+export interface CreateInviteArgs {
+  network :social.SocialNetworkInfo;
+  isRequesting :boolean;
+  isOffering :boolean;
+  userId ?:string;  // for GitHub only
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
@@ -321,6 +329,8 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
+  getInviteUrl(data :CreateInviteArgs): Promise<string>;
+
   // Installs or destroys uProxy on a server. Generally a long-running operation, so
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
@@ -332,5 +342,6 @@ export interface CoreApi {
 
   // Make a domain-fronted POST request to the uProxy logs/stats server.
   postReport(args:PostReportArgs) : Promise<void>;
-}
 
+  inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
+}
