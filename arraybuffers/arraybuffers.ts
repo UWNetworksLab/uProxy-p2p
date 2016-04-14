@@ -1,16 +1,9 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-// Byte-wise equality check of array buffers by comparison of each byte's
-// value.
-export function byteEquality(b1 :ArrayBuffer, b2 :ArrayBuffer)
-    :boolean {
-  var a1 = new Uint8Array(b1);
-  var a2 = new Uint8Array(b2);
-  if(a1.byteLength !== a2.byteLength) return false;
-  for(var i:number = 0; i < a1.byteLength; ++i) {
-    if(a1[i] !== a2[i]) return false;
-  }
-  return true;
+// Returns true if b1 and b2 have exactly the same bytes.
+export function byteEquality(b1: ArrayBuffer, b2: ArrayBuffer): boolean {
+  // The Buffer instances share memory with their source ArrayBuffers.
+  return new Buffer(b1).equals(new Buffer(b2));
 }
 
 // Concat |ArrayBuffer|s into a single ArrayBuffer. If size is given, then
