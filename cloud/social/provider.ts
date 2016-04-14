@@ -524,7 +524,8 @@ class Connection {
 
             this.tunnel_ = tunnel;
             tunnel.on('data', (buffer: Buffer) => {
-              bufferQueue.handle(arraybuffers.bufferToArrayBuffer(buffer));
+              // Make a copy before passing to the async queue.
+              bufferQueue.handle(arraybuffers.bufferToArrayBuffer(new Buffer(buffer)));
             }).on('end', () => {
               log.debug('%1: tunnel end', this.name_);
             }).on('close', (hadError: boolean) => {
@@ -603,7 +604,8 @@ class Connection {
         });
 
         stream.on('data', (data: Buffer) => {
-          stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(data));
+          // Make a copy before passing to the async queue.
+          stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(new Buffer(data)));
         }).stderr.on('data', (data: Buffer) => {
           R({
             message: 'output received on STDERR: ' + data.toString()

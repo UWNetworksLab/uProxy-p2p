@@ -113,9 +113,11 @@ class CloudInstaller {
                 message: 'invitation URL not found'
               });
             }).on('data', (data: Buffer) => {
-              stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(data));
+              // Make a copy before passing to the async queue.
+              stdoutRaw.handle(arraybuffers.bufferToArrayBuffer(new Buffer(data)));
             }).stderr.on('data', (data: Buffer) => {
-              stderrRaw.handle(arraybuffers.bufferToArrayBuffer(data));
+              // Make a copy before passing to the async queue.
+              stderrRaw.handle(arraybuffers.bufferToArrayBuffer(new Buffer(data)));
             });
           });
         }).on('error', (e: Error) => {
