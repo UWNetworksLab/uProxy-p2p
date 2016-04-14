@@ -113,7 +113,7 @@ Polymer({
   cancelCloudInstall: function() {
     this.$.cancelingOverlay.open();
     return ui.cloudUpdate({
-      operation: uproxy_core_api.CloudOperationType.CLOUD_INSTALL_CANCEL,
+      operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
       providerName: DEFAULT_PROVIDER
     }).then(() => {
       this.closeOverlays();

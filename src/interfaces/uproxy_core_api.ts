@@ -222,8 +222,7 @@ export enum PortControlSupport {PENDING, TRUE, FALSE};
 
 export enum CloudOperationType {
   CLOUD_INSTALL = 0,
-  CLOUD_DESTROY = 1,
-  CLOUD_INSTALL_CANCEL = 2
+  CLOUD_DESTROY = 1
 }
 
 // Arguments to cloudUpdate

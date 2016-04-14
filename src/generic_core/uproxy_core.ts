@@ -68,15 +68,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
-  // Cloud installers and provisioners that are currently installing
-  // or destroying a server
+  // Cloud installers and provisioners that are 
+  // currently installing or destroying a server
   // ex: {'digitalocean': {
   //  'installer':installer, 
-  //  'provisioner':provisioner, 
-  //  'status': 'STATUS'
-  //  }
+  //  'provisioner':provisioner
+  // }
   private cloudInterfaces :any = {};
-  
+
   constructor() {
     log.debug('Preparing uProxy Core');
     copyPasteConnection = new remote_connection.RemoteConnection(
@@ -678,14 +677,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
         ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
         ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
-        this.cloudInterfaces[args.providerName].status = 'CLOUD_INSTALL_STATUS_CREATING_SERVER';
 
         return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
           log.info('created server on digitalocean: %1', serverInfo);
 
           ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, DEPLOY_PROGRESS);
           ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_LOGGING_IN');
-          this.cloudInterfaces[args.providerName].status = 'CLOUD_INSTALL_STATUS_LOGGING_IN';
 
           const host = serverInfo.network.ipv4;
           const port = serverInfo.network.ssh_port;
@@ -693,7 +690,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           log.debug('installing cloud on %1:%2', host, port);
 
           installer.on('status', (status: number) => {
-            this.cloudInterfaces[args.providerName].status = status;
             ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, status);
           });
 
@@ -764,18 +760,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         }, (e: Error) => {
           destroyModules();
           log.error('error destroying cloud server:', e.message);
-          return Promise.reject(e);
-        });
-      case uproxy_core_api.CloudOperationType.CLOUD_INSTALL_CANCEL:
-        installer.cancel();
-        return provisioner.stop(DROPLET_NAME).then(() => {
-          destroyModules();
-        }, (e: Error) => {
-          log.debug('error destroying cloud server during install:', e);
-          destroyModules();
-          if (e.message === 'Droplet uproxy-cloud-server doesnt exist') {
-            return Promise.resolve<void>();
-          }
           return Promise.reject(e);
         });
       default:
