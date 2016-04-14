@@ -68,48 +68,12 @@ describe('ArrayBuffers <-> Hex Strings', function() {
   });
 });
 
-describe('ArrayBuffers concat & chunk', function() {
+describe('ArrayBuffers chunk', function() {
   it('chunk(array12, 6).length == 3', function() {
     expect(arraybuffers.chunk(array12,6).length).toBe(3);
   });
   it('chunk(array12, 1).length == 15', function() {
     expect(arraybuffers.chunk(array12,1).length).toBe(15);
-  });
-  it('concat(array1,array2) == array12', function() {
-    expect(arraybuffers.byteEquality(
-        arraybuffers.concat([array1, array2]),
-        array12))
-      .toBe(true);
-  });
-  it('concat(chunk(array12, 1)) == array12', function() {
-    expect(arraybuffers.byteEquality(
-        arraybuffers.concat(arraybuffers.chunk(array12,1)),
-        array12))
-      .toBe(true);
-  });
-  it('concat(chunk(array12, 4)) == array12', function() {
-    expect(arraybuffers.byteEquality(
-        arraybuffers.concat(arraybuffers.chunk(array12,4)),
-        array12))
-      .toBe(true);
-  });
-  it('concat(chunk(array12, 5)) == array12', function() {
-    expect(arraybuffers.byteEquality(
-        arraybuffers.concat(arraybuffers.chunk(array12,5)),
-        array12))
-      .toBe(true);
-  });
-  it('concat(chunk(array12, array12.byteLength)) == array12', function() {
-    expect(arraybuffers.byteEquality(
-        arraybuffers.concat(arraybuffers.chunk(array12,array12.byteLength)),
-        array12))
-      .toBe(true);
-  });
-  it('concat(chunk(array12, 20)) == array12', function() {
-    expect(arraybuffers.byteEquality(
-        arraybuffers.concat(arraybuffers.chunk(array12,20)),
-        array12))
-      .toBe(true);
   });
 });
 
