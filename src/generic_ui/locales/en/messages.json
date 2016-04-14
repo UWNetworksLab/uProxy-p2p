@@ -1365,18 +1365,18 @@
   },
   "CLOUD_INSTALL_CANCEL_TITLE": {
     "description": "Title shown on overlay when user cancels a cloud server install.",
-    "message": "We're canceling your cloud server install."
+    "message": "Hold tight! We're canceling the creation of a cloud server."
   },
   "CLOUD_INSTALL_CANCEL_MESSAGE": {
     "description": "Message shown on overlay when user cancels a cloud server install.",
-    "message": "Please hold tight. Canceling a cloud server install could take up to 2 minutes."
+    "message": "Canceling the creation of a cloud server can take up to 2 minutes. Sorry for the wait."
   },
   "CLOUD_INSTALL_CANCEL_SUCCESS": {
     "description": "Message shown on toast when a could server install is completed.",
-    "message": "Successfully canceled the cloud server install."
+    "message": "Successfully canceled cloud server creation."
   },
   "CLOUD_INSTALL_CANCEL_FAILURE": {
     "description": "Message shown on toast when a could server install fails.",
-    "message": "We could not cancel the cloud install at this time. You can delete the server once it's ready."
+    "message": "We cannot cancel the creation of your cloud server right now. You can delete the server once it's ready."
   }
 }
