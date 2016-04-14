@@ -31,11 +31,20 @@ export interface StopProxyInfo {
   error      :boolean;
 }
 
+export interface PermissionTokenInfo {
+  isRequesting :boolean;
+  isOffering :boolean;
+  createdAt :number;
+  acceptedByUserIds :string[];
+}
+
 export interface LocalInstanceState {
   instanceId       :string;
   userId           :string;
   userName         :string;
   imageData        :string;
+  invitePermissionTokens :{ [token :string] :PermissionTokenInfo };
+  exchangeInviteToken : (token :string, userId :string) => PermissionTokenInfo;
 }
 
 export interface NetworkMessage {
@@ -97,7 +106,6 @@ export interface UserData {
 export interface NetworkState {
   name         :string;
   profile      :UserProfileMessage;
-  // TODO: bad smell: UI data should not be
   roster       :{[userId :string] :UserData };
 }
 
@@ -129,7 +137,8 @@ export enum PeerMessageType {
   SIGNAL_FROM_CLIENT_PEER,
   SIGNAL_FROM_SERVER_PEER,
   // Request that an instance message be sent back from a peer.
-  INSTANCE_REQUEST
+  INSTANCE_REQUEST,
+  PERMISSION_TOKEN
 }
 
 export interface PeerMessage {
@@ -161,12 +170,16 @@ export interface InstanceHandshake {
   instanceId  :string;
   consent     :ConsentWireState;
   description ?:string;
-  name        :string;
-  userId      :string;
   // publicKey is not set for networks which include the public key in their
   // clientId (Quiver).
   publicKey   ?:string;
 }
+
+// This is only used for sending the received permission token back to the
+// user who generated the token.
+export interface PermissionTokenMessage {
+  token :string;
+};
 
 // Describing whether or not a remote instance is currently accessing or not,
 // assuming consent is GRANTED for that particular pathway.
@@ -237,11 +250,20 @@ export interface SignallingMetadata {
   proxyingId ?:string;
 }
 
+export interface InviteTokenPermissions {
+  token :string;
+  isRequesting :boolean;
+  isOffering :boolean;
+}
+
 export interface InviteTokenData {
   v :number;  // version
   networkName :string;
   userName :string;
   networkData :string|Object;
+  permission ?:InviteTokenPermissions;
+  userId ?:string;  // Only included if permissions also set
+  instanceId ?:string;  // Only included if permissions also set
 }
 
 /**
@@ -302,14 +324,14 @@ export interface Network {
   acceptInvitation: (token ?:InviteTokenData, userId ?:string) => Promise<void>;
 
   /**
-   * Send an invite to a friend to use uProxy
+   * Send an invite to a GitHub friend to use uProxy
    */
-  inviteUser: (optionalUserId :string) => Promise<void>;
+  inviteGitHubUser: (data :uproxy_core_api.CreateInviteArgs) => Promise<void>;
 
   /**
    * Generates an invite token
    */
-  getInviteUrl: (userId ?:string) => Promise<string>;
+  getInviteUrl: (data :uproxy_core_api.CreateInviteArgs) => Promise<string>;
 
   /**
    * Generates an invite token
@@ -349,4 +371,3 @@ export interface Network {
    */
   removeUserFromStorage : (userId :string) => Promise<void>;
 }
-

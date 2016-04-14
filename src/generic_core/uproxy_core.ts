@@ -336,17 +336,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
-    // TODO: clean this up - hack to find the one network
-    var network: social.Network;
-    for (var userId in social_network.networks[data.networkId]) {
-      network = social_network.networks[data.networkId][userId];
-      break;
-    }
-    return network.inviteUser(data.userName);
+  public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
+    var network = social_network.networks[data.network.name][data.network.userId];
+    return network.inviteGitHubUser(data);
   }
 
-  public acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void> => {
+  public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
     var networkName = data.network.name;
     var networkUserId = data.network.userId;
     if (!networkUserId) {
@@ -358,9 +353,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.acceptInvitation(data.tokenObj, data.userId);
   }
 
-  public getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {
+  public getInviteUrl = (data :uproxy_core_api.CreateInviteArgs): Promise<string> => {
     var network = social_network.networks[data.network.name][data.network.userId];
-    return network.getInviteUrl(data.userId || '');
+    return network.getInviteUrl(data);
   }
 
   public sendEmail = (data :uproxy_core_api.EmailData) : void => {
@@ -648,7 +643,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // Percentage of cloud install progress devoted to deploying.
     // The remainder is devoted to the install script.
     const DEPLOY_PROGRESS = 20;
-    
+
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
@@ -806,7 +801,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.removeUserFromStorage(args.userId).then(() => {
       return ui.removeFriend({
         networkName: args.networkName,
-        userId: args.userId 
+        userId: args.userId
       });
     }).then(() => {
       // If we removed the only cloud friend, logout of the cloud network
