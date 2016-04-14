@@ -70,10 +70,6 @@ export function stringToArrayBuffer(s:string) :ArrayBuffer {
   return buffer;
 }
 
-// Escape and unescape are actually globally defined functions.
-declare function escape(s:string):string;
-declare function unescape(s:string):string;
-
 // Converts an ArrayBuffer to a string of hex codes (of the regexp form
 // /(hh\.)*hh/).
 export function arrayBufferToHexString(buffer:ArrayBuffer) :string {
@@ -96,29 +92,6 @@ export function hexStringToArrayBuffer(hexString:string) :ArrayBuffer {
       bytes[i] = parseInt('0x' + hexChars[i]);
   }
   return buffer;
-}
-
-// Converts arrayBuffer which has a string encoded in UTF8 to a
-// Javascript string.
-//
-// Note: the array buffer should have a valid string with no zero inside.
-export function arrayBufferDecodedAsUtf8String(buffer:ArrayBuffer) :string {
-  var bytes = new Uint8Array(buffer);
-  var a :string[] = [];
-  for (var i = 0; i < bytes.length; ++i) {
-    a.push(String.fromCharCode(bytes[i]));
-  }
-  return decodeURIComponent(escape(a.join('')));
-}
-
-// Converts javascript string to array buffer using UTF8 encoding.
-export function stringToUtf8EncodedArrayBuffer(str:string) :ArrayBuffer {
-  var strUtf8 = unescape(encodeURIComponent(str));
-  var ab = new Uint8Array(strUtf8.length);
-  for (var i = 0; i < strUtf8.length; i++) {
-      ab[i] = strUtf8.charCodeAt(i);
-  }
-  return ab.buffer;
 }
 
 // Returns an ArrayBuffer backed by the same memory as the supplied
