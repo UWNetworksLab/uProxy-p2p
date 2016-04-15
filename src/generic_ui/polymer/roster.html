@@ -55,11 +55,14 @@
       position: absolute;
       font-size: 16px;
       line-height: 22px;
-      margin: 2em;
+      padding: 24px 24px 140px 24px;
+      box-sizing: border-box;
+      height: 100%;
+      width: 100%;
     }
     .instructions {
       padding-right: 1em;  /* no left padding so img is properly centered */
-      height: 156px;
+      height: 50%;
     }
     .instructions.cloud {
       background-color: rgba(51,187,206,0.15);
@@ -69,26 +72,21 @@
       background-color: rgba(51,206,185,0.15);
       color: #12A391;
     }
-    .instructions .helpText {
-      display: inline-block;
-      width: 60%;
-      vertical-align: middle;
-    }
     .instructions .imageWrapper {
-      display: inline-block;
-      width: 38%;  /* TODO: why do 39 and 40 wrap? */
+      min-width: 60px;
       text-align: center;
-      vertical-align: middle;
       height: 100%;
+    }
+    .instructions .textWrapper {
+      height: 100%;
+      flex-basis: 35%;
     }
     .instructions img {
       height: 50px;
-      position: relative;
-      top: 58px;  /* instructions height - (.5 * img height) */
     }
     .downArrow {
       position: absolute;
-      right: 15px;
+      right: 44px;
       width: 0px;
       height: 0px;
       border-left: 20px solid transparent;
@@ -105,10 +103,13 @@
       border-color: rgb(238, 238, 238);
     }
     #orWrapper {
-      position: absolute;
-      top: 136px;  /* instructions height - (.5 * orCircle height) */
+      position: absolute;  /* take out of the flow */
+      top: 50%;
+      /* compensate for padding at the bottom and orCircle height */
+      transform: translateY(-77px);
       width: 100%;
       text-align: center;
+      left: 0;  /* needed for proper centering */
     }
     #orCircle {
       display: inline-block;
@@ -119,8 +120,13 @@
     }
     #orText {
       font-size: 14px;
-      padding-top: 10px;
+      padding-top: 9px;
       color: #12A391;
+    }
+    .centerVertical {
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
     }
     </style>
 
@@ -130,27 +136,32 @@
     <!-- Shown if there are no contacts found so far -->
     <div id='loadContacts' hidden?='{{ hasContacts }}'>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
+        <core-icon icon="social:person" class="no-friends"></core-icon>
         {{ "LOADING_FRIENDS" | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
     </div>
 
     <div id="connectWithFriendsInstruction" hidden?="{{ loadingContacts || hasContacts }}">
-      <div class='instructions cloud'>
-        <div class='imageWrapper'>
-          <img src='../../icons/emptybuddylist-cloud.svg'>
+      <div class='instructions cloud' horizontal layout>
+        <div class='imageWrapper' flex>
+          <img src='../../icons/emptybuddylist-cloud.svg' class='centerVertical'>
         </div>
-        <div class='helpText'>
-          {{ "EMPTY_ROSTER_CLOUD_INSTRUCTIONS" | $$ }}
+        <div class='textWrapper' flex>
+          <div class='centerVertical'>
+            {{ "EMPTY_ROSTER_CLOUD_INSTRUCTIONS" | $$ }}
+          </div>
         </div>
       </div>
       <div id='orWrapper'><div id='orCircle'><div id='orText'>or</div></div></div>
-      <div class='instructions peerToPeer' style='margin-top:3px;'>
-        <div class='imageWrapper'>
-          <img src='../../icons/emptybuddylist-friend.svg'>
+      <div class='instructions peerToPeer' style='margin-top:3px;' horizontal layout>
+        <div class='imageWrapper' flex>
+          <img src='../../icons/emptybuddylist-friend.svg' class='centerVertical'>
         </div>
-        <div class='helpText'>
-          {{ "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS" | $$ }}
+        <div class='textWrapper' flex>
+          <div class='centerVertical'>
+            {{ "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS" | $$ }}
+          </div>
         </div>
       </div>
       <div class='downArrow'></div>

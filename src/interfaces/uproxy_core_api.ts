@@ -39,6 +39,8 @@ export interface GlobalSettings {
   quiverUserName :string;
   showCloud :boolean;
   proxyBypass: string[];
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
 }
 export interface InitialState {
   networkNames :string[];
@@ -48,6 +50,16 @@ export interface InitialState {
   availableVersion :string;
   copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
+}
+
+export interface ValidProxyServerIdentity {
+  ip :string;
+  public_key :string;
+}
+
+export interface ManagedPolicyUpdate {
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
 }
 
 export interface ConnectionState {
@@ -101,10 +113,11 @@ export enum Command {
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
-  SEND_INVITATION = 1028,
+  INVITE_GITHUB_USER = 1028,
   CLOUD_UPDATE = 1029,
   UPDATE_ORG_POLICY = 1030,
-  REMOVE_CONTACT = 1031
+  REMOVE_CONTACT = 1031,
+  POST_REPORT = 1032
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -132,7 +145,7 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
-  POST_TO_CLOUDFRONT = 2021,
+  // 2021 was POST_TO_CLOUDFRONT.  Replaced by Command.POST_REPORT.
   // Legacy one-time connection string. Unused, do not send.
   COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
@@ -210,11 +223,19 @@ export interface EmailData {
   body :string;
 };
 
-// Data needed to accept user invites or to get an invite URL.
-export interface InvitationData {
+// Data needed to accept user invites.
+export interface AcceptInvitationData {
   network :social.SocialNetworkInfo;
   tokenObj ?:any;
   userId ?:string;
+};
+
+// Data needed to generate an invite URL.
+export interface CreateInviteArgs {
+  network :social.SocialNetworkInfo;
+  isRequesting :boolean;
+  isOffering :boolean;
+  userId ?:string;  // for GitHub only
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
@@ -241,6 +262,10 @@ export interface RemoveContactArgs {
   userId :string
 };
 
+export interface PostReportArgs {
+  payload: Object;
+  path: string;
+};
 
 /**
  * The primary interface to the uProxy Core.
@@ -304,6 +329,8 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
+  getInviteUrl(data :CreateInviteArgs): Promise<string>;
+
   // Installs or destroys uProxy on a server. Generally a long-running operation, so
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
@@ -312,5 +339,9 @@ export interface CoreApi {
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;
-}
 
+  // Make a domain-fronted POST request to the uProxy logs/stats server.
+  postReport(args:PostReportArgs) : Promise<void>;
+
+  inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
+}

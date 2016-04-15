@@ -26,6 +26,7 @@ import firewall = require('./firewall');
 import globals = require('./globals');
 import local_instance = require('./local-instance');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import metrics = require('./metrics');
 import network_options = require('../generic/network-options');
 import remote_user = require('./remote-user');
 import social = require('../interfaces/social');
@@ -145,7 +146,7 @@ export function notifyUI(networkName :string, userId :string) {
       ME: 'me'
     }
 
-    constructor(public name :string) {
+    constructor(public name :string, private metrics_ :metrics.Metrics) {
       this.roster = {};
     }
 
@@ -171,6 +172,32 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
+    /**
+     * Updates metrics on login state/user count
+     */
+    protected updateMetrics() {
+      if (this.metrics_) {
+        // One of the users will be us.  Take that one out
+        var networkName = this.name;
+        var numUsers:number;
+        numUsers = Object.keys(this.roster).length - 1;
+        if (NETWORK_OPTIONS[this.name]) {
+          if (NETWORK_OPTIONS[this.name].metricsName) {
+            networkName = NETWORK_OPTIONS[this.name].metricsName;
+          }
+          if (NETWORK_OPTIONS[this.name].rosterFunction) {
+            numUsers = NETWORK_OPTIONS[this.name].rosterFunction(
+              Object.keys(this.roster));
+          }
+        }
+
+        this.metrics_.userCount(
+          networkName,
+          this.myInstance.getUserProfile().userId,
+          numUsers);
+      }
+    }
+
     //===================== Social.Network implementation ====================//
 
     /**
@@ -183,6 +210,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
       var newUser = new remote_user.User(this, userId);
       this.roster[userId] = newUser;
+      this.updateMetrics();
       return newUser;
     }
 
@@ -229,7 +257,7 @@ export function notifyUI(networkName :string, userId :string) {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
-    public inviteUser = (userName: string): Promise<void> => {
+    public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
       throw new Error("Operation not implemented.");
     }
 
@@ -252,7 +280,7 @@ export function notifyUI(networkName :string, userId :string) {
       throw new Error('Operation not implemented');
     }
 
-    public getInviteUrl = (userId ?:string) : Promise<string> => {
+    public getInviteUrl = (data :uproxy_core_api.CreateInviteArgs) : Promise<string> => {
       throw new Error('Operation not implemented');
     }
 
@@ -320,8 +348,8 @@ export function notifyUI(networkName :string, userId :string) {
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
      */
-    constructor(public name :string) {
-      super(name);
+    constructor(public name :string, metrics :metrics.Metrics) {
+      super(name, metrics);
 
       this.provider_ = freedom[PREFIX + name];
       this.onceLoggedIn_ = null;
@@ -606,35 +634,75 @@ export function notifyUI(networkName :string, userId :string) {
       var networkData :Object = null;
       if (tokenObj) {
         networkData = tokenObj.networkData;
+        if (this.name === 'Cloud' && (typeof networkData) !== 'string') {
+          networkData = JSON.stringify(networkData);
+        }
       } else if (userId) {
         networkData = userId;
       }
-      return this.freedomApi_.acceptUserInvitation(networkData).catch((e) => {
+      return this.freedomApi_.acceptUserInvitation(networkData).then(() => {
+        if (tokenObj && tokenObj.permission && tokenObj.userId &&
+            // Cloud doesn't require invite permissions at the uProxy layer.
+            this.name !== 'Cloud') {
+          var user = this.getOrAddUser_(tokenObj.userId);
+          user.handleInvitePermissions(tokenObj);
+        }
+      }).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' +
             JSON.stringify(networkData), e.message);
       });
     }
 
     // Sends an in-band invite to a friend to be a uProxy contact.
-    public inviteUser = (userName: string): Promise<void> => {
-      return this.freedomApi_.inviteUser(userName).catch((e) => {
-        log.error('Error calling inviteUser: ' + userName, e.message);
-        return Promise.reject('Error calling inviteUser: ' + userName + e.message);
+    public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
+      if (!data.userId) {
+        // Sanity check failed.
+        return Promise.reject('userId not set for inviteGitHubUser');
+      }
+
+      return this.freedomApi_.inviteUser(data.userId).catch((e) => {
+        log.error('Error calling inviteUser: ', data, e.message);
+        return Promise.reject('Error calling inviteUser: ' + data.userId + e.message);
       }).then(() => {
+        if (data.isOffering || data.isRequesting) {
+          var user = this.getOrAddUser_(data.userId);
+          if (data.isOffering) {
+            user.consent.localGrantsAccessToRemote = true;
+          }
+          if (data.isRequesting) {
+            user.consent.localRequestsAccessFromRemote = true;
+          }
+          user.saveToStorage();
+          // No need to update UI until they accept our invite.
+        }
         return Promise.resolve<void>();
       });
     }
 
     // Returns an invite url for the user to send to friends out-of-band.
     //
-    // For cloud, the url gives friends access to a cloud server. The userId
+    // For cloud, the url gives friends access to a cloud server. The data.userId
     // identifies a cloud server owned by the user, which is being shared
     // with someone else.
     // For other social networks, the url adds the local user as a uproxy
     // contact for friends who use the url. The userId isn't used.
-    public getInviteUrl = (userId ?:string) : Promise<string> => {
-      return this.freedomApi_.inviteUser(userId || '')
+    public getInviteUrl = (data :uproxy_core_api.CreateInviteArgs) : Promise<string> => {
+      // data.userId is expected to be defined for cloud, but not Quiver,
+      // Facebook, or GMail
+      return this.freedomApi_.inviteUser(data.userId || '')
           .then((networkData: Object) => {
+        // Set permissionData only if the user is requesting / granting access.
+        var permissionData :social.InviteTokenPermissions;
+        if (data.isRequesting || data.isOffering) {
+          var token = this.myInstance.generateInvitePermissionToken(
+              data.isRequesting, data.isOffering);
+          permissionData = {
+            token: token,
+            isRequesting: data.isRequesting,
+            isOffering: data.isOffering
+          };
+        }
+
         if (this.name === 'Quiver') {
           // TODO: once we think all/most users have versions of uProxy
           // that support jsurl style invites, we should update all our
@@ -645,14 +713,24 @@ export function notifyUI(networkName :string, userId :string) {
             'userName=' + encodeURIComponent(this.myInstance.userName),
             'networkData=' + jsurl.stringify(networkData)
           ];
+          if (permissionData) {
+            urlParams.push('permission=' + jsurl.stringify(permissionData));
+            urlParams.push('userId=' + this.myInstance.userId);
+            urlParams.push('instanceId=' + this.myInstance.instanceId);
+          }
           return 'https://www.uproxy.org/invite?' + urlParams.join('&');
         } else {
-          var tokenObj = {
+          var tokenObj :any = {
             v: 1,
             networkName: this.name,
             userName: this.myInstance.userName,
             networkData: networkData
           };
+          if (permissionData) {
+            tokenObj['permission'] = permissionData;
+            tokenObj['userId'] = this.myInstance.userId;
+            tokenObj['instanceId'] = this.myInstance.instanceId;
+          }
           return 'https://www.uproxy.org/invite/' +
               btoa(JSON.stringify(tokenObj));
         }
@@ -702,6 +780,7 @@ export function notifyUI(networkName :string, userId :string) {
       }
 
       var monitorCallback = () => {
+        this.updateMetrics();
         for (var userId in this.roster) {
           this.getUser(userId).monitor();
         }
@@ -750,7 +829,7 @@ export function notifyUI(networkName :string, userId :string) {
       };
     }
 
-    public removeUserFromStorage = (userId :string) : Promise<void> => {    
+    public removeUserFromStorage = (userId :string) : Promise<void> => {
       // Remove user from roster.
       this.removeUser(userId);
       // Remove user from storage.

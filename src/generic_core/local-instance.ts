@@ -25,6 +25,7 @@ import storage = globals.storage;
     public clientId :string;
     public userName :string;
     public imageData :string;
+    public invitePermissionTokens :{ [token :string] :social.PermissionTokenInfo } = {};
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -85,14 +86,17 @@ import storage = globals.storage;
     }
 
     /**
-     * TODO: Come up with a better typing for this.
+     * This does not return a LocalInstanceState because we don't want
+     * to save the exchangeInviteToken method to storage.
+     * TODO: consider removing exchangeInviteToken from LocalInstanceState
      */
-    public currentState = () :social.LocalInstanceState => {
+    public currentState = () => {
       return {
         instanceId: this.instanceId,
         userId: this.userId,
         userName: this.userName,
-        imageData: this.imageData
+        imageData: this.imageData,
+        invitePermissionTokens: this.invitePermissionTokens
       };
     }
     public restoreState = (state:social.LocalInstanceState) :void => {
@@ -100,6 +104,9 @@ import storage = globals.storage;
       if (typeof this.userName === 'undefined') {
         this.userName = state.userName;
         this.imageData = state.imageData;
+      }
+      if (typeof state.invitePermissionTokens !== 'undefined') {
+        this.invitePermissionTokens = state.invitePermissionTokens;
       }
     }
 
@@ -109,6 +116,39 @@ import storage = globals.storage;
         log.error('Could not save new LocalInstance: ',
             this.instanceId, e.toString());
       });
+    }
+
+    public generateInvitePermissionToken = (isRequesting :boolean, isOffering :boolean) : string => {
+      if (!isRequesting && !isOffering) {
+        // sanity check
+        throw Error('Not generating permission token with !isRequesting && !isOffering');
+      }
+      var permissionToken = String(Math.random());
+      this.invitePermissionTokens[permissionToken] = {
+        isRequesting: isRequesting,
+        isOffering: isOffering,
+        createdAt: Date.now(),
+        acceptedByUserIds: []
+      };
+      this.saveToStorage();
+      return permissionToken;
+    }
+
+    public exchangeInviteToken = (token :string, userId :string) : social.PermissionTokenInfo => {
+      var tokenData = this.invitePermissionTokens[token];
+      if (!tokenData) {
+        log.warn('Permission token ' + token + ' not found.');
+        return null;
+      } else if (tokenData.acceptedByUserIds.indexOf(userId) >= 0) {
+        // Tokens can only be used once per userId.  This is so that if someone
+        // gets a token that offers them access, I can later revoke their access
+        // and they can't re-use the same token again to re-gain permission.
+        log.warn('Permission token ' + token + ' already used by ' + userId);
+        return null;
+      }
+      tokenData.acceptedByUserIds.push(userId);
+      this.saveToStorage();
+      return tokenData;
     }
 
   }  // class local_instance.LocalInstance

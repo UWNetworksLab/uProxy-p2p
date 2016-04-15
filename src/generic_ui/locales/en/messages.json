@@ -803,10 +803,6 @@
     "description": "Invite instructions for Facebook",
     "message": "Click below to send a uProxy invite to your Facebook friends.  When they open this link with uProxy, they will appear in your uProxy contact list."
   },
-  "FACEBOOK_INVITE_IN_BROWSER": {
-    "description": "Dialog message instructing user to complete Facebook invitation in their browser",
-    "message": "Please complete invitation in Facebook"
-  },
   "GMAIL_INVITE_INSTRUCTIONS": {
     "description": "Invite instructions for GMail",
     "message": "Enter your friend's email address to send them a friend request by email.  When they accept the invitation, they will appear on your contact list."
@@ -818,6 +814,10 @@
   "GITHUB_INVITE_PLACEHOLDER": {
     "description": "Placeholder in input box for the GitHub username of the friend the user is inviting",
     "message": "Friend's GitHub username"
+  },
+  "QUIVER_INVITE_INSTRUCTIONS": {
+    "description": "Invite instructions for the uProxy Network (aka Quiver)",
+    "message": "Generate a link and send it to your friends so they can find you on uProxy.  You can request access, offer access or both."
   },
   "ADD_A_CLOUD_FRIEND": {
     "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
@@ -878,6 +878,10 @@
   "SEND_INVITATION": {
     "description": "Button text to initiate sending an invitation",
     "message": "Send invitation"
+  },
+  "SEND_INVITATION_FACEBOOK": {
+    "description": "Button text to initiate sending an invitation for Facebook",
+    "message": "Invite on Facebook"
   },
   "INVITE_SENT_CONFIRMATION": {
     "description": "Dialog text to confirm that an invite was sent to the user's friend",
@@ -1193,10 +1197,6 @@
     "description": "Text prompting user to log into social networks and invite their friends.",
     "message": "Choose a social network"
   },
-  "QUIVER_LINK_INSTRUCTIONS": {
-    "description": "Instructions telling user how to use link for the uProxy network (aka Quiver).",
-    "message": "Send this link to your friends so they can find you on uProxy"
-  },
   "INVITATION_PLACEHOLDER_TEXT": {
     "description": "Invitation placeholder text, instructing users to enter an invite in this field",
     "message": "Have an invitation code?  Enter it here"
@@ -1275,9 +1275,13 @@
     "description": "Message shown during DigitalOcean server deployment",
     "message": "Hold tight, we're creating a new cloud server."
   },
+  "CLOUD_INSTALL_INSTALLING_WARNING": {
+    "description": "Message shown during DigitalOcean server deployment.",
+    "message": "This process can take up to ten minutes. Please keep the browser open and stay online."
+  },
   "CLOUD_INSTALL_INSTALLING_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "This process can take up to 15 minutes.  Please leave the browser open during setup.  Once you're connected, you can share access with friends and family from your private server."
+    "message": "Once you're connected, you can share access with friends and family from your private server."
   },
   "CLOUD_INSTALL_LOGIN_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
@@ -1301,7 +1305,7 @@
   },
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "Create a new account or sign in to connect and share access. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+    "message": "For $10 per month you can get and share access with your friends and family. If you sign up with uProxy, your first month is free! Create a new account or sign in to connect and share access. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
   },
   "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
     "description": "Instructions link for users who already have an existing cloud server.",
@@ -1313,7 +1317,7 @@
   },
   "CLOUD_INSTALL_INVITE_SCREEN_MESSAGE": {
     "description": "Message shown on invite screen for DigitalOcean server deployment",
-    "message": "For $10 a month you can get and share access with friends and family from your own private server."
+    "message": "Get and share access with friends and family from your own private server."
   },
   "I_HAVE_AN_ACCOUNT": {
     "description": "Button text shown during DigitalOcean server deployment",
@@ -1342,5 +1346,33 @@
   "NORTH_AMERICA_NEW_YORK": {
     "description": "Region option for deploying a DigitalOcean server",
     "message": "North America (New York)"
+  },
+  "REQUEST_ACCESS": {
+    "description": "Checkbox text for requesting access as part of invite",
+    "message": "Request access"
+  },
+  "OFFER_ACCESS": {
+    "description": "Checkbox text for offering access as part of invite",
+    "message": "Offer access"
+  },
+  "GENERATE_LINK": {
+    "description": "Button text, will generate a Quiver invite link when clicked",
+    "message": "Generate link"
+  },
+  "CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE": {
+    "description": "Message shown after failed server deployment because uproxy-cloud-server already exists",
+    "message": "Oops! You already have a uProxy cloud server."
+  },
+  "CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE": {
+    "description": "Message shown after failed server deployment because uproxy-cloud-server already exists",
+    "message": "We discovered that you already have a server named 'uproxy-cloud-server'. We can remove it and create a new one for you, or you can go back to your friend list."
+  },
+  "REMOVE_SERVER_AND_TRY_AGAIN": {
+    "description": "Button text for removing cloud server and trying again (e.g. connecting to DigitalOcean)",
+    "message": "Remove server and try again"
+  },
+  "REMOVING_UPROXY_CLOUD_STATUS": {
+    "description": "Label to indicate that we are removing a uproxy cloud server.",
+    "message": "Removing uProxy cloud server..."
   }
 }

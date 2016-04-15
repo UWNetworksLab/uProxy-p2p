@@ -88,8 +88,7 @@ describe('remote_instance.RemoteInstance', () => {
     it ('update waits for loading to complete', (done) => {
       instance0.update({
         instanceId : 'newInstanceId', publicKey : 'key', description: 'desc',
-        consent: {isRequesting: true, isOffering: true},
-        name: 'name', userId: 'userId'
+        consent: {isRequesting: true, isOffering: true}
       }, globals.MESSAGE_VERSION).then(() => {
         expect(instance0.publicKey).toEqual('key');
         expect(instance0.description).toEqual('desc');
@@ -132,8 +131,7 @@ describe('remote_instance.RemoteInstance', () => {
       expect(userConsent.remoteRequestsAccessFromLocal).toEqual(false);
       instance.update({
         instanceId: INSTANCE_ID, description: '', publicKey: '',
-        consent: {isOffering: true, isRequesting: true},
-        name: 'name', userId: 'userId'
+        consent: {isOffering: true, isRequesting: true}
       }, globals.MESSAGE_VERSION).then(() => {
         expect(instance.wireConsentFromRemote.isOffering).toEqual(true);
         expect(instance.wireConsentFromRemote.isRequesting).toEqual(true);
