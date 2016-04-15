@@ -29,10 +29,9 @@ interface Message {
 }
 
 var english_source = require('../locales/en/messages.json');
-var turkish_source = require('../locales/tr/messages.json');
-var vietnamese_source = require('../locales/vi/messages.json');
 var arabic_source = require('../locales/ar/messages.json');
 var farsi_source = require('../locales/fa/messages.json');
+var chinese_source = require('../locales/zh/messages.json');
 
 function createI18nDictionary(sourceFile :MessageResource) : IResourceStoreKey {
   var i18nDictionary :IResourceStoreKey = {};
@@ -49,8 +48,7 @@ i18n.init({
 });
 
 i18n.addResources('en', 'translation', createI18nDictionary(english_source));
-i18n.addResources('tr', 'translation', createI18nDictionary(turkish_source));
-i18n.addResources('vi', 'translation', createI18nDictionary(vietnamese_source));
+i18n.addResources('zh', 'translation', createI18nDictionary(chinese_source));
 i18n.addResources('ar', 'translation', createI18nDictionary(arabic_source));
 i18n.addResources('fa', 'translation', createI18nDictionary(farsi_source));
 
