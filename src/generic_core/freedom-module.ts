@@ -81,7 +81,7 @@ commands[uproxy_core_api.Command.REMOVE_CONTACT] = core.removeContact;
 commands[uproxy_core_api.Command.POST_REPORT] = core.postReport;
 
 for (var command in commands) {
-  ui_connector.onCommand(command, commands[command]);
+  ui_connector.onCommand(parseInt(command, 10), commands[command]);
 }
 
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
