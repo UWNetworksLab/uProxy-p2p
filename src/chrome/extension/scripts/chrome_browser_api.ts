@@ -178,8 +178,8 @@ class ChromeBrowserApi implements BrowserAPI {
       chrome.windows.update(this.popupWindowId_, {focused: true});
       return Promise.resolve<void>();
     } else {
-      return this.onceLaunched_;
       console.log("Waiting for popup to launch...");
+      return this.onceLaunched_;
     }
   }
 
