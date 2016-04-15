@@ -53,97 +53,74 @@ while getopts p:z:s:i:uwd:b:ah? opt; do
 done
 shift $((OPTIND-1))
 
-if [ "$WIPE" = true ] && [ "$UPDATE" = false ]
+if [ "$UPDATE" = true ]
+then
+  # Wipe any existing containers, first backing up data from the sshd
+  # container, if one exists, unless -w was used.
+  if [ "$WIPE" = false ]
+  then
+    if docker ps -a | grep uproxy-sshd >/dev/null
+    then
+      # Start the container, if necessary.
+      if [ `docker inspect --format='{{ .State.Status }}' uproxy-sshd` != "running" ]
+      then
+        docker start uproxy-sshd > /dev/null
+      fi
+
+      # Banner and hostname/IP.
+      if [ -z "$BANNER" ]
+      then
+        BANNER=`docker exec uproxy-sshd cat /banner || echo -n ""`
+      fi
+      if [ -z "$PUBLIC_IP" ]
+      then
+        PUBLIC_IP=`docker exec uproxy-sshd cat /hostname || echo -n ""`
+      fi
+
+      # giver and getter accounts' authorized_keys.
+      GIVER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/giver/.ssh/authorized_keys | base64 -w 0 || echo -n ""`
+      GETTER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys | base64 -w 0|| echo -n ""`
+
+      # Because it's unclear what it would mean to migrate authorized_keys files
+      # when -i is supplied, restrict use of -i to new or wiping (-w) installs.
+      if [ -n "$INVITE_CODE" ]
+      then
+        echo "-i can only be used for new installs or with -w"
+        usage
+      fi
+    fi
+  fi
+
+  docker rm -f uproxy-sshd uproxy-zork || true
+  docker rmi $SSHD_IMAGE $ZORK_IMAGE || true
+elif [ "$WIPE" = true ]
 then
   echo "-u must be used when -w is used"
   usage
 fi
 
-# Set the cloud instance's banner.
-# In descending order of preference:
-#  - command-line option
-#  - pull from existing container
-#  - automatic, using provider-specific APIs
-#  - server's hostname
+# Set banner and hostname/IP if none were specified on the command line or
+# migrated from the previous installation.
 if [ -z "$BANNER" ]
 then
-  if docker ps -a | grep uproxy-sshd >/dev/null
+  # Quickly try (timeout after two seconds) DigitalOcean's
+  # metadata API which can tell us the region in which a
+  # droplet is located:
+  #   https://developers.digitalocean.com/documentation/metadata/#metadata-api-endpoints
+  BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region || echo -n ""`
+  if [ -n "$BANNER" ]
   then
-    if [ `docker inspect --format='{{ .State.Status }}' uproxy-sshd` != "running" ]
-    then
-      docker start uproxy-sshd > /dev/null
-    fi
-    BANNER=`docker exec uproxy-sshd cat /banner`
+    BANNER=`echo "$BANNER"|sed 's/ams./Amsterdam/;s/sgp./Singapore/;s/fra./Frankfurt/;s/tor./Toronto/;s/nyc./New York/;s/sfo./San Francisco/;s/lon./London/'`
+    BANNER="$BANNER (DigitalOcean)"
   else
-    # Quickly try (timeout after two seconds) DigitalOcean's
-    # metadata API which can tell us the region in which a
-    # droplet is located:
-    #   https://developers.digitalocean.com/documentation/metadata/#metadata-api-endpoints
-    BANNER=`curl -s -m 2 http://169.254.169.254/metadata/v1/region || echo -n ""`
-    if [ -n "$BANNER" ]
-    then
-      BANNER=`echo "$BANNER"|sed 's/ams./Amsterdam/;s/sgp./Singapore/;s/fra./Frankfurt/;s/tor./Toronto/;s/nyc./New York/;s/sfo./San Francisco/;s/lon./London/'`
-      BANNER="$BANNER (DigitalOcean)"
-    else
-      BANNER=`hostname`
-    fi
+    BANNER=`hostname`
   fi
 fi
-
-# Set the cloud instance's hostname.
-# In descending order of preference:
-#  - command-line option
-#  - pull from existing container
-#  - pull from DNS
 if [ -z "$PUBLIC_IP" ]
 then
-  if docker ps -a | grep uproxy-sshd >/dev/null
-  then
-    if [ `docker inspect --format='{{ .State.Status }}' uproxy-sshd` != "running" ]
-    then
-      docker start uproxy-sshd > /dev/null
-    fi
-    # Don't fail if the current installation has no /hostname.
-    PUBLIC_IP=`docker exec uproxy-sshd cat /hostname || echo -n ""`
-  fi
-  if [ -z "$PUBLIC_IP" ]
-  then
-    # Beautiful cross-platform one-liner cogged from:
-    #   http://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-bash
-    PUBLIC_IP=`dig +short myip.opendns.com @resolver1.opendns.com`
-  fi
-fi
-
-# Migrate the giver and getter accounts' authorized_keys.
-if [ "$WIPE" = false ]
-then
-  if docker ps -a | grep uproxy-sshd >/dev/null
-  then
-    if [ `docker inspect --format='{{ .State.Status }}' uproxy-sshd` != "running" ]
-    then
-      docker start uproxy-sshd > /dev/null
-    fi
-    GIVER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/giver/.ssh/authorized_keys | base64 -w 0 || echo -n ""`
-    GETTER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys | base64 -w 0|| echo -n ""`
-
-    # Because it's unclear what it would mean to migrate authorized_keys files
-    # when -i is supplied, restrict use of -i to new or wiping (-w) installs.
-    if [ -n "$INVITE_CODE" ]
-    then
-      echo "-i can only be used for new installs or with -w"
-      usage
-    fi
-  fi
-fi
-
-if [ "$UPDATE" = true ]
-then
-  docker rm -f uproxy-sshd || true
-  docker rm -f uproxy-zork || true
-  docker rmi $SSHD_IMAGE || true
-  # TODO: This will fail if there are any containers using the
-  #       image, e.g. run_pair.sh. Regular cloud users won't be.
-  docker rmi $ZORK_IMAGE || true
+  # Beautiful cross-platform one-liner cogged from:
+  #   http://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-bash
+  PUBLIC_IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 fi
 
 # IP of the host machine.
