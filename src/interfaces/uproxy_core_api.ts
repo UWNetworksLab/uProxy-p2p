@@ -39,6 +39,8 @@ export interface GlobalSettings {
   quiverUserName :string;
   showCloud :boolean;
   proxyBypass: string[];
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
 }
 export interface InitialState {
   networkNames :string[];
@@ -48,6 +50,16 @@ export interface InitialState {
   availableVersion :string;
   copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
+}
+
+export interface ValidProxyServerIdentity {
+  ip :string;
+  public_key :string;
+}
+
+export interface ManagedPolicyUpdate {
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
 }
 
 export interface ConnectionState {

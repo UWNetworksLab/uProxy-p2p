@@ -68,6 +68,8 @@ export class Model {
     quiverUserName: '',
     showCloud: false,
     proxyBypass: [],
+    enforceProxyServerValidity: false,
+    validProxyServers: [],
   };
 
   public reconnecting = false;

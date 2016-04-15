@@ -53,6 +53,8 @@ export var settings :uproxy_core_api.GlobalSettings = {
   quiverUserName: '',
   showCloud: false,
   proxyBypass: DEFAULT_PROXY_BYPASS.slice(0),
+  enforceProxyServerValidity: false,
+  validProxyServers: [],
 };
 
 export var natType :string = '';
