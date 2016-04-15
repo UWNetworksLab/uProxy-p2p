@@ -444,6 +444,7 @@ import ui = ui_connector.connector;
         instanceId:             this.instanceId,
         description:            this.description,
         isOnline:               this.user.isInstanceOnline(this.instanceId),
+        verifyState:            social.VerifyState.VERIFY_NONE,
         localGettingFromRemote: connectionState.localGettingFromRemote,
         localSharingWithRemote: connectionState.localSharingWithRemote,
         bytesSent:              connectionState.bytesSent,

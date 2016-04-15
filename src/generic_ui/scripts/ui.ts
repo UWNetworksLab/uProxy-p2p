@@ -397,7 +397,11 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public getUserInput(heading :string, message :string, placeholderText :string, defaultValue :string, buttonText :string) : Promise<string> {
+  public getUserInput(heading :string, 
+                      message :string, 
+                      placeholderText :string, 
+                      defaultValue :string, 
+                      buttonText :string) : Promise<string> {
     return new Promise<string>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
@@ -417,7 +421,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public showDialog(heading :string, message :string, buttonText ?:string,
-      signal ?:string, displayData ?:string) {
+                    signal ?:string, displayData ?:string) {
     var button :ui_constants.DialogButtonDescription = {
       text: buttonText || this.i18n_t("OK")
     };
@@ -1386,5 +1390,10 @@ export class UserInterface implements ui_constants.UiApi {
 
   public removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
     return this.core.removeContact(args);
+  }
+  
+  // I don't know why these are all member declarations of function values.
+  public startVerifying = (inst :social.InstanceData) :Promise<void> => {
+
   }
 } // class UserInterface
