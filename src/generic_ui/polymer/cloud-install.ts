@@ -4,6 +4,7 @@
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import ui_constants = require('../../interfaces/ui');
+import user = require('../scripts/user');
 
 var ui = ui_context.ui;
 
@@ -37,7 +38,7 @@ Polymer({
     this.$.loginOverlay.open();
   },
   launchDigitalOceanSignup: function() {
-    ui.openTab('https://cloud.digitalocean.com/registrations/new');
+    ui.openTab('https://m.do.co/c/5ddb4219b716');
   },
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
@@ -58,12 +59,14 @@ Polymer({
     this.$.installingOverlay.close();
     this.$.successOverlay.close();
     this.$.failureOverlay.close();
+    this.$.serverExistsOverlay.close();
   },
   loginTapped: function() {
-    this.closeOverlays();
-    ui.cloudInstallStatus = '';
-    this.$.installingOverlay.open();
-
+    if (!this.$.installingOverlay.opened) {
+      this.closeOverlays();
+      ui.cloudInstallStatus = '';
+      this.$.installingOverlay.open();
+    }
     ui.cloudUpdate({
       operation: uproxy_core_api.CloudOperationType.CLOUD_INSTALL,
       providerName: DEFAULT_PROVIDER,
@@ -71,10 +74,38 @@ Polymer({
     }).then(() => {
       this.closeOverlays();
       this.$.successOverlay.open();
-    }).catch((e: Error) => {
-      // TODO: Figure out which fields in e are set, because message isn't.
+    }).catch((e :any) => {
       this.closeOverlays();
-      this.$.failureOverlay.open();
+      // TODO: Figure out why e.message is not set
+      if (e === 'Error: server already exists') {
+        this.$.serverExistsOverlay.open();
+      } else {
+        this.$.failureOverlay.open();
+      }
+    });
+  },
+  removeServerAndInstallAgain: function() {
+    this.closeOverlays();
+    ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
+    this.$.installingOverlay.open();
+    // Destroy uProxy cloud server
+    return ui.cloudUpdate({
+      operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
+      providerName: DEFAULT_PROVIDER
+    }).then(() => {
+      // Get locally created cloud contact if there is one
+      return ui.getCloudUserCreatedByLocal().then((user: user.User) => {
+        return ui_context.core.removeContact({
+          networkName: user.network.name,
+          userId: user.userId
+        });
+      }).catch((e: Error) => {
+        // Locally created cloud server does not exist
+        // so no need to remove contact
+        return Promise.resolve<void>();
+      });
+    }).then(() => {
+      return this.loginTapped();
     });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {

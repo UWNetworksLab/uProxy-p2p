@@ -17,6 +17,7 @@ import StoredValue = require('./stored_value');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import version = require('../generic/version');
+import freedomXhr = require('freedom-xhr');
 
 import ui = ui_connector.connector;
 import storage = globals.storage;
@@ -142,7 +143,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     var network = this.pendingNetworks_[networkName];
     if (typeof network === 'undefined') {
-      network = new social_network.FreedomNetwork(networkName);
+      network = new social_network.FreedomNetwork(networkName, globals.metrics);
       this.pendingNetworks_[networkName] = network;
     }
 
@@ -327,17 +328,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
-  public inviteUser = (data: {networkId: string; userName: string}): Promise<void> => {
-    // TODO: clean this up - hack to find the one network
-    var network: social.Network;
-    for (var userId in social_network.networks[data.networkId]) {
-      network = social_network.networks[data.networkId][userId];
-      break;
-    }
-    return network.inviteUser(data.userName);
+  public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
+    var network = social_network.networks[data.network.name][data.network.userId];
+    return network.inviteGitHubUser(data);
   }
 
-  public acceptInvitation = (data :uproxy_core_api.InvitationData) : Promise<void> => {
+  public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
     var networkName = data.network.name;
     var networkUserId = data.network.userId;
     if (!networkUserId) {
@@ -349,15 +345,32 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.acceptInvitation(data.tokenObj, data.userId);
   }
 
-  public getInviteUrl = (data :uproxy_core_api.InvitationData): Promise<string> => {
+  public getInviteUrl = (data :uproxy_core_api.CreateInviteArgs): Promise<string> => {
     var network = social_network.networks[data.network.name][data.network.userId];
-    return network.getInviteUrl(data.userId || '');
+    return network.getInviteUrl(data);
   }
 
   public sendEmail = (data :uproxy_core_api.EmailData) : void => {
     var networkInfo = data.networkInfo;
     var network = social_network.networks[networkInfo.name][networkInfo.userId];
     network.sendEmail(data.to, data.subject, data.body);
+  }
+
+  public postReport = (args :uproxy_core_api.PostReportArgs) : Promise<void> => {
+    let host = 'd1wtwocg4wx1ih.cloudfront.net';
+    let front = 'https://a0.awsstatic.com/';
+    let request:XMLHttpRequest = new freedomXhr.auto();
+    return new Promise<any>((F, R) => {
+      request.onload = F;
+      request.onerror = R;
+      // Only the front domain is exposed on the wire. The host and path
+      // should be encrypted. The path needs to be here and not
+      // in the Host header, which can only take a host name.
+      request.open('POST', front + args.path, true);
+      // The true destination address is set as the Host in the header.
+      request.setRequestHeader('Host', host);
+      request.send(JSON.stringify(args.payload));
+    });
   }
 
   /**
@@ -622,7 +635,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // Percentage of cloud install progress devoted to deploying.
     // The remainder is devoted to the install script.
     const DEPLOY_PROGRESS = 20;
-    
+
     if (args.providerName !== 'digitalocean') {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
@@ -636,15 +649,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       freedom['cloudinstall'].close(installer);
     };
 
-    log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
-    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
-
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
 
+        log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
+        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
         ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
 
         return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
@@ -667,15 +679,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
                 DEPLOY_PROGRESS + (progress * ((100 - DEPLOY_PROGRESS) / 100)));
           });
 
-          // Attempt to install.  If install fails, retry will attempt again
-          // up to MAX_INSTALLS times.  Failure may occur because we have just
-          // created the server and it is not yet ready for SSH.
           // TODO: The provisioning module should return the username!
-          const install = () => {
-            return installer.install(host, port, 'root', serverInfo.ssh.private);
-          };
-          const MAX_INSTALLS = 5;
-          return retry(install, MAX_INSTALLS);
+          return installer.install(host, port, 'root', serverInfo.ssh.private);
         }).then((cloudNetworkData: any) => {
           // TODO: make cloudNetworkData an Invite type.  This requires the cloud
           // social provider to export the Invite interface, and also to cleanup
@@ -700,10 +705,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
               networkData: JSON.stringify(cloudNetworkData)
             });
           });
-        }, (installError: Error) => {
-          log.error('install failed, cleaning up');
+        }, (installError: any) => {
+          // Tell user if the server already exists
+          if (installError.errcode === "VM_AE") {
+            return Promise.reject(new Error('server already exists'));
+          }
 
           // Destroy the server we just created so that the user isn't billed.
+          log.error('install failed, cleaning up');
           return provisioner.stop(DROPLET_NAME).then((unused: Object) => {
             log.info('destroyed server on digitalocean');
             destroyModules();
@@ -771,7 +780,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return network.removeUserFromStorage(args.userId).then(() => {
       return ui.removeFriend({
         networkName: args.networkName,
-        userId: args.userId 
+        userId: args.userId
       });
     }).then(() => {
       // If we removed the only cloud friend, logout of the cloud network
@@ -792,16 +801,3 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return Promise.resolve<void>();
   }
 }  // class uProxyCore
-
-// Invoke an async function, and retry on error, calling func up to
-// maxAttempts number of times.
-export var retry = <T>(func :() => Promise<T>, maxAttempts :number) : Promise<T> => {
-  return func().catch((err) => {
-    --maxAttempts;
-    if (maxAttempts > 0) {
-      return retry(func, maxAttempts);
-    } else {
-      return Promise.reject(err)
-    }
-  });
-}

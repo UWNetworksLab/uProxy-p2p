@@ -31,16 +31,6 @@ export interface BrowserAPI {
    */
   showNotification(text :string, tag :string) :void;
 
-  /*
-   * Make a domain fronted POST request to cloudfrontDomain/cloudfrontPath.
-   *
-   * externalDomain is visible on the wire, and used to 'front' the request
-   * to Cloudfront. externalDomain should end in a forward slash.
-   * cloudfrontPath should not start with a leading forward slash.
-   */
-  frontedPost(data :any, externalDomain :string, cloudfrontDomain :string,
-           cloudfrontPath ?:string) : Promise<void>;
-
   on(name: string, callback: Function): void;
   on(name: 'inviteUrlData', callback: (url: string) => void): void;
   on(name: 'copyPasteUrlData', callback: (url: string) => void): void;
