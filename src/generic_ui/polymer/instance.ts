@@ -40,6 +40,13 @@ Polymer({
   fireChanged: function() {
     this.fire('instance-changed');
   },
+  verify: function() {
+    if (this.instance.verifyState != VERIFY_COMPLETE) {
+      ui.startVerifying(this.instance);
+    } else {
+      console.log("instance is already verified.");
+    }
+  }
   observe: {
     'instance.isOnline': 'fireChanged',
   },
