@@ -12,11 +12,6 @@ var array2 = uint8Array2.buffer;
 var string2 = '\x00\x02\x81\x80\x00\x01\x00\x05\x00';
 var hexString2 = '0.2.81.80.0.1.0.5.0';
 
-var uint8Array3 = new Uint8Array(
-    [0xE5, 0xA4, 0xA7, 0xE7, 0xBA, 0xAA, 0xE5, 0x85, 0x83]);
-var array3 = uint8Array3.buffer;
-var string3 = '大纪元';
-
 var uint8Array12 = new Uint8Array(
     [12,118,101,114,105,115,0,2,129,128,0,1,0,5,0]);
 var array12 = uint8Array12.buffer;
@@ -104,38 +99,5 @@ describe('ArrayBuffers <-> strings', function() {
         .toEqual(string2);
     expect(arraybuffers.arrayBufferToString(arraybuffers.stringToArrayBuffer(string1)))
         .not.toEqual(string2);
-  });
-});
-
-describe('ArrayBuffers(UTF8) <-> strings', function() {
-  it('Empty Buffer -> Empty String', function() {
-    expect(arraybuffers.arrayBufferDecodedAsUtf8String(emptyArray)).toEqual(emptyString);
-  });
-  it('Empty String -> Empty Buffer', function() {
-    expect(arraybuffers.stringToUtf8EncodedArrayBuffer(emptyString).byteLength).toEqual(0);
-  });
-
-  it('Buffer(UTF8) -> String', function() {
-    expect(arraybuffers.arrayBufferDecodedAsUtf8String(emptyArray)).toEqual(emptyString);
-    expect(arraybuffers.arrayBufferDecodedAsUtf8String(array1)).toEqual(string1);
-    expect(arraybuffers.arrayBufferDecodedAsUtf8String(array3)).toEqual(string3);
-  });
-
-  it('String -> Buffer(UTF8)', function() {
-    expect(arraybuffers.byteEquality(
-        arraybuffers.stringToUtf8EncodedArrayBuffer(emptyString), emptyArray)).toBe(true);
-    expect(arraybuffers.byteEquality(
-        arraybuffers.stringToUtf8EncodedArrayBuffer(string1), array1)).toBe(true);
-    expect(arraybuffers.byteEquality(
-        arraybuffers.stringToUtf8EncodedArrayBuffer(string3), array3)).toBe(true);
-  });
-
-  it('String -> Buffer(UTF8) -> String = identity', function() {
-    expect(arraybuffers.arrayBufferDecodedAsUtf8String(
-        arraybuffers.stringToUtf8EncodedArrayBuffer(emptyString))).toEqual(emptyString);
-    expect(arraybuffers.arrayBufferDecodedAsUtf8String(
-        arraybuffers.stringToUtf8EncodedArrayBuffer(string1))).toEqual(string1);
-    expect(arraybuffers.arrayBufferDecodedAsUtf8String(
-        arraybuffers.stringToUtf8EncodedArrayBuffer(string3))).toEqual(string3);
   });
 });
