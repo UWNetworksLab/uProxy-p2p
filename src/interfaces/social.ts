@@ -73,12 +73,20 @@ export interface ConsentState {
   remoteRequestsAccessFromLocal :boolean;
 }
 
+export enum VerifyState {
+  VERIFY_NONE = 0,
+  VERIFY_BEGIN = 1,
+  VERIFY_COMPLETE = 2,
+  VERIFY_FAILED = 3
+}
+
 export interface InstanceData {
   bytesReceived          :number;
   bytesSent              :number;
   description            :string;
   instanceId             :string;
   isOnline               :boolean;
+  verifyState            :VerifyState;
   localGettingFromRemote :GettingState;
   localSharingWithRemote :SharingState;
   activeEndpoint         :net.Endpoint;

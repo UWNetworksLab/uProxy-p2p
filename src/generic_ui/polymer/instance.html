@@ -39,6 +39,10 @@
         <bdi>{{ instance.description }}</bdi>
       </p>
 
+      <uproxy-button on-tap='{{ verify }}'>
+        {{ "VERIFY" | $$ }}
+      </uproxy-button>
+
       <!-- It is assumed that all uproxy-instances are taken from
          user.offeringInstances and are therefore giving us access -->
 

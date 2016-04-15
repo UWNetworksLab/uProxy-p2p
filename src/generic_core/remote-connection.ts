@@ -151,7 +151,8 @@ var generateProxyingSessionId_ = (): string => {
         allowNonUnicast: globals.settings.allowNonUnicast
       }, pc);
 
-      this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
+      this.rtcToNet_.signalsForPeer.setSyncHandler(
+        this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
       this.rtcToNet_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);
 
@@ -211,7 +212,7 @@ var generateProxyingSessionId_ = (): string => {
       }
 
       // TODO: sync properly between the extension and the app on proxy settings
-      // rather than this cooincidentally the same data.
+      // rather than this coincidentally the same data.
       if (null != this.socksToRtc_) {
         log.error('socksToRtc_ already exists');
         throw new Error('socksToRtc_ already exists');
@@ -232,7 +233,8 @@ var generateProxyingSessionId_ = (): string => {
       this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
 
       // set up basic handlers
-      this.socksToRtc_.on('signalForPeer', this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
+      //this.socksToRtc_.on('signalForPeer', this.createSender_(
+      // social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
       this.socksToRtc_.on('bytesReceivedFromPeer', this.handleBytesReceived_);
       this.socksToRtc_.on('bytesSentToPeer', this.handleBytesSent_);
 
@@ -302,7 +304,9 @@ var generateProxyingSessionId_ = (): string => {
           pc = bridge.best('sockstortc', config, this.portControl_);
         }
 
-        globals.metrics.increment('attempt');
+      peerconnection.setupPeerConnection(
+        pc, this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
+      globals.metrics.increment('attempt');
       return this.socksToRtc_.start(tcpServer, pc).then(
           (endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
