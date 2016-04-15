@@ -769,8 +769,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return null;
   }
 
-  public updateOrgPolicy(policy :Object) :void {
-    /* TODO(xwsxethan) handle updating org policy */
+  public updateOrgPolicy(policy :uproxy_core_api.ManagedPolicyUpdate) :void {
+    globals.settings.enforceProxyServerValidity = policy.
+      enforceProxyServerValidity;
+    globals.settings.validProxyServers = policy.validProxyServers;
+    this.updateGlobalSettings(globals.settings);
   }
 
   // Remove contact from friend list and storage
