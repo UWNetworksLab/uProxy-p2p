@@ -7,12 +7,12 @@ import xregexp = require('xregexp');
 // Example usage of these tests:
 //   isRightToLeft('hi') -> false
 //   isRightToLeft('لك الوص') -> true
-function isRightToLeft(lang: string): boolean {
+function isRightToLeft(lang :string): boolean {
   return xregexp.XRegExp('[\\p{Arabic}\\p{Hebrew}]').test(lang);
 }
 
-declare const window: I18nWindow;
-declare const require: (path: string) => MessageResource;
+declare const window :I18nWindow;
+declare const require :(path: string) => MessageResource;
 
 interface I18nWindow extends Window {
   i18nResources: any;
@@ -29,8 +29,8 @@ var vietnamese_source = require('../locales/vi/messages.json');
 var arabic_source = require('../locales/ar/messages.json');
 var farsi_source = require('../locales/fa/messages.json');
 
-function createI18nDictionary(sourceFile: MessageResource): IResourceStoreKey {
-  let i18nDictionary: IResourceStoreKey = {};
+function createI18nDictionary(sourceFile :MessageResource): IResourceStoreKey {
+  let i18nDictionary :IResourceStoreKey = {};
   for (let key in sourceFile) {
     i18nDictionary[key] = sourceFile[key]['message'];
   }
@@ -49,7 +49,7 @@ i18next.addResources('vi', 'translation', createI18nDictionary(vietnamese_source
 i18next.addResources('ar', 'translation', createI18nDictionary(arabic_source));
 i18next.addResources('fa', 'translation', createI18nDictionary(farsi_source));
 
-export const i18n_t = (placeholder: string, params?: any): string => {
+export const i18n_t = (placeholder :string, params ?:any): string => {
   for (let p in params) {
     if (isRightToLeft(params[p])) {
       params[p] = "\u200F" + params[p] + "\u200F";
