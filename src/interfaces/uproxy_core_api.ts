@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import net = require('../../../third_party/uproxy-lib/net/net.types');

@@ -1,11 +1,11 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * remote-connection.ts
  *
  * This file defines a class for a direct remote connection to another machine.
  * It handles the signaling channel between two peers, regardless of permission.
  */
-
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import globals = require('./globals');
@@ -17,6 +17,8 @@ import social = require('../interfaces/social');
 import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
 import tcp = require('../../../third_party/uproxy-lib/net/tcp');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+
+declare var freedom: freedom.FreedomInModuleEnv;
 
 var PROXYING_SESSION_ID_LENGTH = 16;
 

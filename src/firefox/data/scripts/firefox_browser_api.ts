@@ -1,10 +1,10 @@
+/// <reference path='../../../../../third_party/typings/firefox/firefox.d.ts' />
+
 /**
  * firefox_browser_api.ts
  *
  * Firefox-specific implementation of the Browser API.
  */
-
-/// <reference path='../../../../../third_party/typings/firefox/firefox.d.ts' />
 
 import browser_api =  require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;

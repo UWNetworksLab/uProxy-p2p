@@ -1,12 +1,14 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * storage.ts
  *
  * Provides a promise-based interface to the storage provider.
  */
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+
+declare var freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('storage');
 

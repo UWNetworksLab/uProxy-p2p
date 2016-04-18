@@ -1,3 +1,6 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/generic/jsurl.d.ts' />
+
 /**
  * social.ts
  *
@@ -18,10 +21,6 @@
  *    ...
  */
 
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/typings/generic/jsurl.d.ts' />
-
 import firewall = require('./firewall');
 import globals = require('./globals');
 import local_instance = require('./local-instance');
@@ -35,8 +34,9 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import ui = ui_connector.connector;
 import jsurl = require('jsurl');
-
 import storage = globals.storage;
+
+declare var freedom: freedom.FreedomInModuleEnv;
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 
