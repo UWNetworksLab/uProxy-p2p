@@ -234,8 +234,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         if (_.isArray(a) && _.isArray(b)) {
           var arrayA = <Object[]>a;
           arrayA.splice(0, arrayA.length);
+          var arrayB = <Object[]>b;
           for (var i in b) {
-            arrayA.push((<Object[]>b)[i]);
+            arrayA.push(arrayB[parseInt(i)]);
           }
           return a;
         }
