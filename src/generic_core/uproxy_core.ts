@@ -241,8 +241,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         if (_.isArray(a) && _.isArray(b)) {
           var arrayA = <Object[]>a;
           arrayA.splice(0, arrayA.length);
+          var arrayB = <Object[]>b;
           for (var i in b) {
-            arrayA.push((<Object[]>b)[i]);
+            arrayA.push(arrayB[parseInt(i)]);
           }
           return a;
         }
@@ -787,8 +788,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return null;
   }
 
-  public updateOrgPolicy(policy :Object) :void {
-    /* TODO(xwsxethan) handle updating org policy */
+  public updateOrgPolicy(policy: uproxy_core_api.ManagedPolicyUpdate) :void {
+    globals.settings.enforceProxyServerValidity = policy.
+      enforceProxyServerValidity;
+    globals.settings.validProxyServers = policy.validProxyServers;
+    this.updateGlobalSettings(globals.settings);
   }
 
   // Remove contact from friend list and storage
