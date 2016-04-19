@@ -66,6 +66,7 @@ Polymer({
     if (!this.$.installingOverlay.opened) {
       this.closeOverlays();
       ui.cloudInstallStatus = '';
+      ui.cloudInstallCancelDisabled = false;
       this.$.installingOverlay.open();
     }
     ui.cloudUpdate({

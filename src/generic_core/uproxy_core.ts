@@ -74,7 +74,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   //  'installer':installer, 
   //  'provisioner':provisioner
   // }
-  private cloudInterfaces :any = {};
+  private cloudInterfaces :{
+    [cloudProvider :string]:{
+      'installer': [cloudInstaller :any],
+      'provisioner': [cloudProvisioner :any]
+    }
+  } = {};
 
   constructor() {
     log.debug('Preparing uProxy Core');
