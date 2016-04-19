@@ -1,5 +1,3 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
-
 /**
  * background.ts
  *
@@ -8,6 +6,8 @@
  */
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
+
+/// <reference path='../../../../../third_party/typings/compare-version/compare-version.d.ts'/>
 
 import ChromeBrowserApi = require('./chrome_browser_api');
 import ChromeCoreConnector = require('./chrome_core_connector');

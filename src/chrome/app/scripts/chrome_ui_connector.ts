@@ -1,4 +1,6 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
 import browser_connector = require('../../../interfaces/browser_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');

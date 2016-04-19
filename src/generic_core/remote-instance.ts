@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
-
 /**
  * remote-instance.ts
  *
@@ -7,6 +5,9 @@
  * allows any pair of uProxy installations to speak to one another regarding
  * consent, proxying status, and any other signalling information.
  */
+
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
 import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');

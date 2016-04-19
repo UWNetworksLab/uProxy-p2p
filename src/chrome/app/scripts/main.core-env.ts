@@ -1,5 +1,3 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
-
 /**
  * background.ts
  *
@@ -7,12 +5,16 @@
  * loaded.
  */
 
+/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../../../third_party/typings/lodash/lodash.d.ts' />
+
+
+
 import Chrome_oauth = require('./chrome_oauth');
 import ChromeUIConnector = require('./chrome_ui_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import _ = require('lodash');
-
-declare const freedom: freedom.FreedomInCoreEnv;
 
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends

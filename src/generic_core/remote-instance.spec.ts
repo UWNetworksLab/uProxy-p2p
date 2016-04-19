@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
-
 /*
  * remote-instance.spec.ts
  *
@@ -8,11 +6,11 @@
  * they've been disconnected. This must ensure that we resolve the
  * correct consent values between remote instances.
  */
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
 
 import freedom_mocks = require('../mocks/freedom-mocks');
-declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
   'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },

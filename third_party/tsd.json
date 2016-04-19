@@ -1,0 +1,69 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "../build/third_party/typings",
+  "bundle": "../build/third_party/typings/tsd.d.ts",
+  "installed": {
+    "es6-promise/es6-promise.d.ts": {
+      "commit": "31370adcb0d0941b3b6a27d3cbec04e94b0f95d9"
+    },
+    "jasmine/jasmine.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "webcrypto/WebCrypto.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "form-data/form-data.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "node/node.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "request/request.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "filewriter/filewriter.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    },
+    "filesystem/filesystem.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    },
+    "webrtc/MediaStream.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    },
+    "lodash/lodash.d.ts": {
+      "commit": "e95958ac847d9a343bdc8d7cbc796a5f6da29f71"
+    },
+    "chrome/chrome.d.ts": {
+      "commit": "c268bd6d741595e9b850ee7fa2b9d2bc3d73f19a"
+    },
+    "chrome/chrome-app.d.ts": {
+      "commit": "c268bd6d741595e9b850ee7fa2b9d2bc3d73f19a"
+    },
+    "circular-json/circular-json.d.ts": {
+      "commit": "9c2d795cc1d98cd3e11186de9290776c66578ea0"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "7d2f0aa875cc3bc41f3567e3ff99d344df986155"
+    },
+    "xregexp/xregexp.d.ts": {
+      "commit": "7d2f0aa875cc3bc41f3567e3ff99d344df986155"
+    },
+    "i18next/i18next.d.ts": {
+      "commit": "dbf51fe545993d6c8ef06601edd65555b669a566"
+    },
+    "compare-version/compare-version.d.ts": {
+      "commit": "be03157bace6e6465e63f13073d7b68e8ea1303c"
+    },
+    "freedom/freedom.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    },
+    "freedom/freedom-module-env.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    },
+    "freedom/freedom-core-env.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    }
+  }
+}

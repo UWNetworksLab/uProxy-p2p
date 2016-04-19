@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import ChromeCoreConnector = require('./chrome_core_connector');
 import ChromeBrowserApi = require('./chrome_browser_api');

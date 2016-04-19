@@ -1,5 +1,5 @@
 /// <reference path='../../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
 /// <reference path='../../../generic_ui/polymer/context.d.ts' />
 
 // Launch the Chrome webstore page for the uProxy app,

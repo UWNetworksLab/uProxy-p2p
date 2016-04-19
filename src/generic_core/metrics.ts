@@ -1,13 +1,10 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../third_party/typings/freedomjs-anonymized-metrics/index.d.ts' />
+/// <reference path='../../../third_party/freedomjs-anonymized-metrics/freedomjs-anonymized-metrics.d.ts' />
 
 import _ = require('lodash');
 import crypto = require('../../../third_party/uproxy-lib/crypto/random');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import storage = require('../interfaces/storage');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-
-declare const freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('metrics');
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;

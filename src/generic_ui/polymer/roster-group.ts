@@ -1,5 +1,5 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 /// <reference path='context.d.ts' />
 
 import _ = require('lodash');
@@ -23,7 +23,7 @@ Polymer({
   },
   contactsChanged: function() {
     var property = (this.mode == ui_constants.Mode.GET) ? 'isSharingWithMe' : 'isGettingFromMe';
-    // TODO: upgrade to lodash 4.x
-    this.sortedContacts = (<any>_).sortByOrder(this.contacts, [property, 'isOnline'], ['desc', 'desc']);
+    // TODO add typing for this to DefinitelyTyped
+    this.sortedContacts = _.sortByOrder(this.contacts, [property, 'isOnline'], ['desc', 'desc']);
   },
 });

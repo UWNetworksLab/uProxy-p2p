@@ -1,4 +1,5 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 import globals = require('./globals');

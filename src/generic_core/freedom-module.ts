@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
-
 /**
  * core.ts
  *
@@ -11,6 +9,8 @@
  *  - Roster, which is a list of contacts, always synced with friend lists.
  *  - Instances, which is a list of active uProxy installs.
  */
+
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import browser_connector = require('../interfaces/browser_connector');
 import globals = require('./globals');
@@ -81,7 +81,7 @@ commands[uproxy_core_api.Command.REMOVE_CONTACT] = core.removeContact;
 commands[uproxy_core_api.Command.POST_REPORT] = core.postReport;
 
 for (var command in commands) {
-  ui_connector.onCommand(parseInt(command, 10), commands[command]);
+  ui_connector.onCommand(command, commands[command]);
 }
 
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(

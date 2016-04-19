@@ -40,7 +40,7 @@ function installTools ()
 function installThirdParty ()
 {
   runAndAssertCmd "$NPM_BIN_DIR/bower install --allow-root"
-  runAndAssertCmd "pushd third_party && $NPM_BIN_DIR/typings install && popd"
+  runAndAssertCmd "$NPM_BIN_DIR/tsd reinstall --config ./third_party/tsd.json"
   runAndAssertCmd "$NPM_BIN_DIR/grunt copy:thirdParty"
 }
 

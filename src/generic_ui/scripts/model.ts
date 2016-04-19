@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
 import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');
@@ -68,8 +68,6 @@ export class Model {
     quiverUserName: '',
     showCloud: false,
     proxyBypass: [],
-    enforceProxyServerValidity: false,
-    validProxyServers: [],
   };
 
   public reconnecting = false;

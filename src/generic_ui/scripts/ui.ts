@@ -1,3 +1,4 @@
+/// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/md5.d.ts' />
@@ -213,7 +214,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.stoppedGetting(data);
     });
 
-    var checkConnectivityIntervalId: NodeJS.Timer;
+    var checkConnectivityIntervalId = -1;
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
         (instanceId :string) => {
       // TODO (lucyhe): Update instancesGivingAccessTo before calling
@@ -258,9 +259,9 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
-      if (checkConnectivityIntervalId && Object.keys(this.instancesGivingAccessTo).length === 0) {
+      if (checkConnectivityIntervalId !== -1 && Object.keys(this.instancesGivingAccessTo).length === 0) {
         clearInterval(checkConnectivityIntervalId);
-        checkConnectivityIntervalId = undefined;
+        checkConnectivityIntervalId = -1;
         this.isConnectedToCellular_ = false;
       }
     });
