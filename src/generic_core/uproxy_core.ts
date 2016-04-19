@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import globals = require('./globals');
@@ -21,6 +21,8 @@ import freedomXhr = require('freedom-xhr');
 
 import ui = ui_connector.connector;
 import storage = globals.storage;
+
+declare var freedom: freedom.FreedomInModuleEnv;
 
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.
@@ -247,8 +249,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         if (_.isArray(a) && _.isArray(b)) {
           var arrayA = <Object[]>a;
           arrayA.splice(0, arrayA.length);
+          var arrayB = <Object[]>b;
           for (var i in b) {
-            arrayA.push((<Object[]>b)[i]);
+            arrayA.push(arrayB[parseInt(i)]);
           }
           return a;
         }
@@ -795,8 +798,11 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return null;
   }
 
-  public updateOrgPolicy(policy :Object) :void {
-    /* TODO(xwsxethan) handle updating org policy */
+  public updateOrgPolicy(policy :uproxy_core_api.ManagedPolicyUpdate) :void {
+    globals.settings.enforceProxyServerValidity = policy.
+      enforceProxyServerValidity;
+    globals.settings.validProxyServers = policy.validProxyServers;
+    this.updateGlobalSettings(globals.settings);
   }
 
   // Remove contact from friend list and storage

@@ -1,10 +1,10 @@
+/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+
 /**
  * chrome_core_connector.ts
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
-/// <reference path='../../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
 import browser_connector = require('../../../interfaces/browser_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import chrome_api = require('../../../interfaces/chrome');

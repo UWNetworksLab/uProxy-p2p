@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import browser_connector = require('../interfaces/browser_connector');
 import globals = require('./globals');
@@ -6,6 +6,8 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import social_network = require('./social');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+
+declare var freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('ui_connector');
 

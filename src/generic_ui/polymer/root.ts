@@ -1,6 +1,6 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../../third_party/typings/xregexp/xregexp.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import social = require('../../interfaces/social');
 import ui_types = require('../../interfaces/ui');

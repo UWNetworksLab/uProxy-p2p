@@ -316,17 +316,6 @@ gruntConfig = {
     # Copy all needed third party libraries to appropriate locations.
     thirdParty:
       files: [
-        # Copy local |third_party| files into dev: so that the third_party
-        # dependencies are always in the common |build/third_party| location.
-        # This allows path to reference typescript definitions for ambient
-        # contexts to always be found, even in generated `.d.ts` files..
-        {
-            nonull: true,
-            expand: true,
-            cwd: 'third_party'
-            src: ['**/*'],
-            dest: thirdPartyBuildPath,
-        }
         # Copy distribution directory of uproxy-lib so all paths can always
         # find their dependencies. Note that this also requires uproxy-lib
         # references to find those in |build/third_party/|. These paths
@@ -348,6 +337,17 @@ gruntConfig = {
             cwd: path.join(uproxyLibPath, 'third_party'),
             src: ['**/*'],
             dest: thirdPartyBuildPath
+        }
+        # Copy local |third_party| files into dev: so that the third_party
+        # dependencies are always in the common |build/third_party| location.
+        # This allows path to reference typescript definitions for ambient
+        # contexts to always be found, even in generated `.d.ts` files..
+        {
+            nonull: true,
+            expand: true,
+            cwd: 'third_party'
+            src: ['**/*'],
+            dest: thirdPartyBuildPath,
         }
       ]
 

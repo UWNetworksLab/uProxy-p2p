@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
 
 /**
  * chrome_browser_api.ts
@@ -178,8 +178,8 @@ class ChromeBrowserApi implements BrowserAPI {
       chrome.windows.update(this.popupWindowId_, {focused: true});
       return Promise.resolve<void>();
     } else {
-      return this.onceLaunched_;
       console.log("Waiting for popup to launch...");
+      return this.onceLaunched_;
     }
   }
 

@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
@@ -39,6 +39,8 @@ export interface GlobalSettings {
   quiverUserName :string;
   showCloud :boolean;
   proxyBypass: string[];
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
 }
 export interface InitialState {
   networkNames :string[];
@@ -48,6 +50,16 @@ export interface InitialState {
   availableVersion :string;
   copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
+}
+
+export interface ValidProxyServerIdentity {
+  ip :string;
+  public_key :string;
+}
+
+export interface ManagedPolicyUpdate {
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
 }
 
 export interface ConnectionState {
