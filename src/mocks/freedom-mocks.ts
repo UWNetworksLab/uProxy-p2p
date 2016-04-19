@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * freedom-mocks.ts
  *
@@ -5,10 +7,6 @@
  * implement different freedom interfaces found in freedom/typings/freedom.d.ts.
  * This file must be compiled independently of all other typescript in uProxy.
  */
-
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import MockEventHandler = require('../../../third_party/uproxy-lib/freedom/mocks/mock-eventhandler');
 import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');

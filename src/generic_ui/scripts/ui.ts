@@ -212,7 +212,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.stoppedGetting(data);
     });
 
-    var checkConnectivityIntervalId = -1;
+    var checkConnectivityIntervalId: NodeJS.Timer;
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
         (instanceId :string) => {
       // TODO (lucyhe): Update instancesGivingAccessTo before calling
@@ -257,9 +257,9 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
-      if (checkConnectivityIntervalId !== -1 && Object.keys(this.instancesGivingAccessTo).length === 0) {
+      if (checkConnectivityIntervalId && Object.keys(this.instancesGivingAccessTo).length === 0) {
         clearInterval(checkConnectivityIntervalId);
-        checkConnectivityIntervalId = -1;
+        checkConnectivityIntervalId = undefined;
         this.isConnectedToCellular_ = false;
       }
     });

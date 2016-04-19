@@ -63,9 +63,9 @@
     "md5": "^2.0.0",
     "regex2dfa": "^0.1.6",
     "typescript": "~1.8.10",
-    "tsd": "^0.6.3",
+    "typings": "^0.7.12",
     "uparams": "^1.2.0",
-    "uproxy-lib": "^37.0.0",
+    "uproxy-lib": "^38.0.0",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
   },

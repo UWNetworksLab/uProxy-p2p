@@ -1,9 +1,9 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 // TODO: move this file elsewhere..  this was copied from freedom-social-github
 
 // Typescript file for:
 // social.github.json
-
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 export interface ClientState {
   userId    :string;

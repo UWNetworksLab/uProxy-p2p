@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * firewall.ts
  *
@@ -13,8 +15,6 @@
  *    Some displayed data may be made to impersonate a user with some
  *    visual trickery.  See http://www.unicode.org/reports/tr36/#visual_spoofing
  */
-
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 

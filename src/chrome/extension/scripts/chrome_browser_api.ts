@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
 
 /**
  * chrome_browser_api.ts

@@ -1,6 +1,6 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import ui_constants = require('../../interfaces/ui');
 import social = require('../../interfaces/social');
@@ -83,7 +83,8 @@ Polymer({
   ignoreRequest: function() { this.modifyConsent(uproxy_core_api.ConsentUserAction.IGNORE_REQUEST) },
   unignoreRequest: function() { this.modifyConsent(uproxy_core_api.ConsentUserAction.UNIGNORE_REQUEST) },
   hasInstance: function(instanceId :string) {
-    return instanceId && _.contains(this.contact.allInstanceIds, instanceId);
+    // TODO: upgrade to lodash 4.x
+    return instanceId && (<any>_).contains(this.contact.allInstanceIds, instanceId);
   },
   fireChanged: function() {
     // this is needed as a slight hack since the observer on the contacts array
@@ -102,7 +103,8 @@ Polymer({
   },
   offeringInstancesChanged: function() {
     // instanceId arbitrarily chosen
-    this.sortedInstances = _.sortByOrder(this.contact.offeringInstances,
+    // TODO: upgrade to lodash 4.x
+    this.sortedInstances = (<any>_).sortByOrder(this.contact.offeringInstances,
                                          ['isOnline', 'instanceId'], ['desc', 'asc']);
   },
   shareCloudFriend: function() {
