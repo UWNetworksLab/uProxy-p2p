@@ -70,16 +70,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
-  // Cloud installers and provisioners that are 
-  // currently installing or destroying a server
-  // ex: {'digitalocean': {
-  //  'installer':installer, 
-  //  'provisioner':provisioner
-  // }
-  private cloudInterfaces :{
-    [cloudProvider :string]:{
-      'installer': [cloudInstaller :any],
-      'provisioner': [cloudProvisioner :any]
+  private cloudInterfaces_ :{
+    [cloudProvider :string] :{
+      installer :any,
+      provisioner :any
     }
   } = {};
 
@@ -656,19 +650,17 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
 
-    this.cloudInterfaces[args.providerName] = this.cloudInterfaces[args.providerName] || {};
-
+    this.cloudInterfaces_[args.providerName] = this.cloudInterfaces_[args.providerName] || { installer: undefined, provisioner: undefined};
     const provisionerName = CLOUD_PROVIDER_MODULE_PREFIX + args.providerName;
-    const provisioner = this.cloudInterfaces[args.providerName].provisioner || freedom[provisionerName]();
-    this.cloudInterfaces[args.providerName].provisioner = provisioner;
+    const provisioner = this.cloudInterfaces_[args.providerName].provisioner || freedom[provisionerName]();
+    const installer = this.cloudInterfaces_[args.providerName].installer || freedom['cloudinstall']();
+    this.cloudInterfaces_[args.providerName] = { installer: installer, provisioner: provisioner};
 
-    const installer = this.cloudInterfaces[args.providerName].installer || freedom['cloudinstall']();
-    this.cloudInterfaces[args.providerName].installer = installer;
 
     const destroyModules = () => {
       freedom[provisionerName].close(provisioner);
       freedom['cloudinstall'].close(installer);
-      delete this.cloudInterfaces[args.providerName];
+      delete this.cloudInterfaces_[args.providerName];
     };
 
     switch (args.operation) {
