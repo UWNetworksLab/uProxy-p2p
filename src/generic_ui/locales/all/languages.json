@@ -15,13 +15,8 @@
     "languageCode": "ar"
   },
   {
-    "description": "Turkish language.",
-    "language": "Türkçe",
-    "languageCode": "tr"
-  },
-  {
-    "description": "Vietnamese language.",
-    "language": "Tiếng Việt",
-    "languageCode": "vi"
+    "description": "Chinese language.",
+    "language": "中文",
+    "languageCode": "zh"
   }
 ]
