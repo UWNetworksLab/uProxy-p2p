@@ -1,9 +1,10 @@
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
+
 /**
  * user.ts
  *
  * This is the UI-specific representation of a User.
  */
-/// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
 import model = require('./model');
 import social = require('../../interfaces/social');

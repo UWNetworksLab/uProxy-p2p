@@ -1,5 +1,4 @@
-/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
 
 /**
@@ -181,8 +180,8 @@ class CordovaBrowserApi implements BrowserAPI {
     } else {
       // Once the app has started, all subsequent calls to bringUproxyToFront
       // are no-ops.
-      return this.onceLaunched_;
       console.log("Waiting for popup to launch...");
+      return this.onceLaunched_;
     }
   }
 

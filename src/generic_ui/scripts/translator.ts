@@ -1,31 +1,26 @@
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
-/// <reference path='../../../../third_party/typings/xregexp/xregexp.d.ts' />
+/// <reference path='../../../../../node_modules/i18next-client/typescript/i18next.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
-// IMPORTANT:
-// In order for this to compile, add two definitions to I18nextStatic in i18next.d.ts:
-// addResources(language: string, namespace: string, resources :IResourceStoreKey): void;
-// addResourceBundle(language: string, namespace: string, resources :IResourceStoreKey): void;
-
-import i18n = require('i18next-client');
-import regEx = require('xregexp');
-import XRegExp = regEx.XRegExp;
+import i18next = require('i18next-client');
+import xregexp = require('xregexp');
 
 // Example usage of these tests:
-// isRightToLeft('hi') --> false
-// isRightToLeft('لك الوص') --> true
-function isRightToLeft(lang :string) :boolean {
-  return XRegExp('[\\p{Arabic}\\p{Hebrew}]').test(lang);
+//   isRightToLeft('hi') -> false
+//   isRightToLeft('لك الوص') -> true
+function isRightToLeft(lang :string): boolean {
+  return xregexp.XRegExp('[\\p{Arabic}\\p{Hebrew}]').test(lang);
 }
 
-declare var window: I18nWindow;
-declare var require :(path :string) => MessageResource;
+declare const window :I18nWindow;
+declare const require :(path: string) => MessageResource;
 
-interface I18nWindow extends Window { i18nResources: any; }
+interface I18nWindow extends Window {
+  i18nResources: any;
+}
 interface MessageResource { [key: string]: Message }
 interface Message {
-  description :string;
-  message :string;
+  description: string;
+  message: string;
 }
 
 var english_source = require('../locales/en/messages.json');
@@ -33,16 +28,16 @@ var arabic_source = require('../locales/ar/messages.json');
 var farsi_source = require('../locales/fa/messages.json');
 var chinese_source = require('../locales/zh/messages.json');
 
-function createI18nDictionary(sourceFile :MessageResource) : IResourceStoreKey {
-  var i18nDictionary :IResourceStoreKey = {};
-  for (var key in sourceFile) {
+function createI18nDictionary(sourceFile :MessageResource): IResourceStoreKey {
+  let i18nDictionary :IResourceStoreKey = {};
+  for (let key in sourceFile) {
     i18nDictionary[key] = sourceFile[key]['message'];
   }
   return i18nDictionary;
 }
 
 window.i18nResources = {};
-i18n.init({
+i18next.init({
   resStore: window.i18nResources,
   fallbackLng: 'en'
 });
@@ -52,14 +47,15 @@ i18n.addResources('zh', 'translation', createI18nDictionary(chinese_source));
 i18n.addResources('ar', 'translation', createI18nDictionary(arabic_source));
 i18n.addResources('fa', 'translation', createI18nDictionary(farsi_source));
 
-export var i18n_t = (placeholder :string, params?: any) :string => {
-  for (var p in params) {
+export const i18n_t = (placeholder :string, params ?:any): string => {
+  for (let p in params) {
     if (isRightToLeft(params[p])) {
       params[p] = "\u200F" + params[p] + "\u200F";
     } else {
       params[p] = "\u200E" + params[p] + "\u200E";
     }
   }
-  return i18n.t(placeholder, params);
+  return i18next.t(placeholder, params);
 };
-export var i18n_setLng = i18n.setLng;
+
+export const i18n_setLng = i18next.setLng;

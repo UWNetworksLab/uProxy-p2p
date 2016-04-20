@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * user.ts
  *
@@ -20,7 +22,6 @@
  * The tricky bit is that the Instance is associated not with the 'human' chat
  * client, but with the 'uProxy' non-human client.
  */
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import consent = require('./consent');
