@@ -73,6 +73,12 @@
     .warning {
       font-weight: bold;
     }
+    #newAccount {
+      margin: 15px 0 8px;
+    }
+    #haveAccount {
+      margin: 0 0 15px;
+    }
     </style>
 
     <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
@@ -88,10 +94,11 @@
         </div>
         <h1>{{ 'CLOUD_INSTALL_GET_STARTED_TITLE' | $$ }}</h1>
         <p id='getStartedMessage'></p>
-        <uproxy-button raised on-tap='{{ showDigitalOceanAccountHelpOverlay }}'>
+        <uproxy-button raised on-tap='{{ showDigitalOceanAccountHelpOverlay }}'
+          id="newAccount">
           {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
         </uproxy-button>
-        <uproxy-button raised on-tap='{{ showLoginOverlay }}'>
+        <uproxy-button raised on-tap='{{ showLoginOverlay }}' id="haveAccount">
           {{ 'I_HAVE_AN_ACCOUNT' | $$ }}
         </uproxy-button>
         <p id='existingServerMessage'></p>

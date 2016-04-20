@@ -268,6 +268,13 @@
         width: 56px;
         padding: 15px;
       }
+      #inviteButton /deep/ core-icon {
+        /* Override default styles which result in a 24x24 icon */
+        height: 18px;
+        width: 18px;
+        /* Necessary to position our smaller icon correctly */
+        margin: 4px auto 0;
+      }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
@@ -399,7 +406,7 @@
         </div>
         <!-- Elements (like the paper fab) that determine position based on proxying/error statuses, must come after the status elements above. Otherwise the positioning will be incorrect. -->
         <paper-fab id="inviteButton"
-          mini icon='icons:add'
+          mini src='../icons/plus_white.svg'
           on-tap='{{ fireOpenInviteUserPanel }}'
           style='bottom: {{ $.status.offsetHeight + 35 }}px;'></paper-fab>
       </core-header-panel>
