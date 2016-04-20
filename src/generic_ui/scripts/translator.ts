@@ -38,6 +38,7 @@ function createI18nDictionary(sourceFile :MessageResource): IResourceStoreKey {
 
 window.i18nResources = {};
 i18next.init({
+  resStore: window.i18nResources,
   fallbackLng: 'en'
 });
 
