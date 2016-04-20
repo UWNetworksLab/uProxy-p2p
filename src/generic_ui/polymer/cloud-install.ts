@@ -60,11 +60,13 @@ Polymer({
     this.$.successOverlay.close();
     this.$.failureOverlay.close();
     this.$.serverExistsOverlay.close();
+    this.$.cancelingOverlay.close();
   },
   loginTapped: function() {
     if (!this.$.installingOverlay.opened) {
       this.closeOverlays();
       ui.cloudInstallStatus = '';
+      ui.cloudInstallCancelDisabled = false;
       this.$.installingOverlay.open();
     }
     ui.cloudUpdate({
@@ -79,7 +81,7 @@ Polymer({
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
         this.$.serverExistsOverlay.open();
-      } else {
+      } else if (e !== 'Error: canceled') {
         this.$.failureOverlay.open();
       }
     });
@@ -87,6 +89,7 @@ Polymer({
   removeServerAndInstallAgain: function() {
     this.closeOverlays();
     ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
+    ui.cloudInstallCancelDisabled = true;
     this.$.installingOverlay.open();
     // Destroy uProxy cloud server
     return ui.cloudUpdate({
@@ -106,6 +109,19 @@ Polymer({
       });
     }).then(() => {
       return this.loginTapped();
+    });
+  },
+  cancelCloudInstall: function() {
+    this.$.cancelingOverlay.open();
+    return ui.cloudUpdate({
+      operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
+      providerName: DEFAULT_PROVIDER
+    }).then(() => {
+      this.closeOverlays();
+      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_SUCCESS');
+    }).catch((e: Error) => {
+      this.$.cancelingOverlay.close();
+      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_FAILURE');
     });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {

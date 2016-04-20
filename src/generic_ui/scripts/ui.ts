@@ -132,6 +132,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public cloudInstallStatus :string = '';
   public cloudInstallProgress = 0;
+  public cloudInstallCancelDisabled :boolean = false;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -311,6 +312,9 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
       this.cloudInstallProgress = progress;
+      // Don't allow user to cancel during last stage of cloud install
+      // because user may have already accepted cloud invitation
+      this.cloudInstallCancelDisabled = (status === 'CLOUD_INSTALL_STATUS_CONFIGURING_SSH') ? true : false;
     });
 
     browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);

@@ -163,6 +163,7 @@
           <paper-progress id='installProgress' value='{{ ui.cloudInstallProgress }}'></paper-progress>
         </div>
         <p>{{ ui.cloudInstallStatus }}</p>
+        <uproxy-button disabled?='{{ ui.cloudInstallCancelDisabled }}' on-tap='{{ cancelCloudInstall }}'>{{ 'CANCEL' | $$ }}</uproxy-button>
       </div>
     </core-overlay>
 
@@ -220,6 +221,21 @@
         <uproxy-button raised on-tap='{{ closeOverlays }}'>
           {{ 'CANCEL' | $$ }}
         </uproxy-button>
+      </div>
+    </core-overlay>
+
+
+    <core-overlay id='cancelingOverlay'>
+      <uproxy-app-bar color='#34AFCE' disableback="true">
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='imgWrapper'>
+          <img src='../../icons/cloud/error-circle-ic.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_CANCEL_TITLE' | $$ }}</h1>
+        <p>{{ 'CLOUD_INSTALL_CANCEL_MESSAGE' | $$ }}</p>
       </div>
     </core-overlay>
 
