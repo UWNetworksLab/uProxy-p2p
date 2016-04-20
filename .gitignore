@@ -28,5 +28,3 @@ npm-debug.log
 test_output
 tmp
 keys
-third_party/typings/main*
-third_party/typings/browser*

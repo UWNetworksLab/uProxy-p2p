@@ -1,8 +1,10 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
 import mockFreedomRtcPeerConnection = require('../../../third_party/uproxy-lib/freedom/mocks/mock-rtcpeerconnection');
-declare var freedom: freedom.FreedomInModuleEnv;
+
+import freedom_mocks = require('../mocks/freedom-mocks');
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
   'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); },
@@ -13,7 +15,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'portControl': () => { return new Object },
 });
 
-import freedom_mocks = require('../mocks/freedom-mocks');
+
 import firewall = require('./firewall');
 
 class MockPolicy implements firewall.ResponsePolicy {

@@ -132,6 +132,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public cloudInstallStatus :string = '';
   public cloudInstallProgress = 0;
+  public cloudInstallCancelDisabled :boolean = false;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -212,7 +213,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.stoppedGetting(data);
     });
 
-    var checkConnectivityIntervalId: NodeJS.Timer;
+    var checkConnectivityIntervalId = -1;
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
         (instanceId :string) => {
       // TODO (lucyhe): Update instancesGivingAccessTo before calling
@@ -257,9 +258,9 @@ export class UserInterface implements ui_constants.UiApi {
       user.isGettingFromMe = isGettingFromMe;
 
       this.updateSharingStatusBar_();
-      if (checkConnectivityIntervalId && Object.keys(this.instancesGivingAccessTo).length === 0) {
+      if (checkConnectivityIntervalId !== -1 && Object.keys(this.instancesGivingAccessTo).length === 0) {
         clearInterval(checkConnectivityIntervalId);
-        checkConnectivityIntervalId = undefined;
+        checkConnectivityIntervalId = -1;
         this.isConnectedToCellular_ = false;
       }
     });
@@ -307,6 +308,9 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
       this.cloudInstallStatus = this.i18n_t(status);
+      // Don't allow user to cancel during last stage of cloud install
+      // because user may have already accepted cloud invitation
+      this.cloudInstallCancelDisabled = (status === 'CLOUD_INSTALL_STATUS_CONFIGURING_SSH') ? true : false;
     });
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {

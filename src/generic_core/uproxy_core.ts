@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import globals = require('./globals');
@@ -21,8 +21,6 @@ import freedomXhr = require('freedom-xhr');
 
 import ui = ui_connector.connector;
 import storage = globals.storage;
-
-declare var freedom: freedom.FreedomInModuleEnv;
 
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.
@@ -69,6 +67,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   private availableVersion_ :string = null;
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
+
+  private cloudInterfaces_ :{
+    [cloudProvider :string] :{
+      installer :any,
+      provisioner :any
+    }
+  } = {};
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -643,13 +648,17 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
 
+    this.cloudInterfaces_[args.providerName] = this.cloudInterfaces_[args.providerName] || { installer: undefined, provisioner: undefined};
     const provisionerName = CLOUD_PROVIDER_MODULE_PREFIX + args.providerName;
-    const provisioner = freedom[provisionerName]();
-    const installer = freedom['cloudinstall']();
+    const provisioner = this.cloudInterfaces_[args.providerName].provisioner || freedom[provisionerName]();
+    const installer = this.cloudInterfaces_[args.providerName].installer || freedom['cloudinstall']();
+    this.cloudInterfaces_[args.providerName] = { installer: installer, provisioner: provisioner};
+
 
     const destroyModules = () => {
       freedom[provisionerName].close(provisioner);
       freedom['cloudinstall'].close(installer);
+      delete this.cloudInterfaces_[args.providerName];
     };
 
     switch (args.operation) {
@@ -709,8 +718,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
             });
           });
         }, (installError: any) => {
+          // When we cancel the cloud install we close the connection
+          // to the installer by destroying the modules
+          if (installError === 'closed') {
+            return Promise.reject(new Error('canceled'));
+          }
+
           // Tell user if the server already exists
-          if (installError.errcode === "VM_AE") {
+          if (installError.errcode === 'VM_AE') {
+            destroyModules();
             return Promise.reject(new Error('server already exists'));
           }
 
@@ -772,7 +788,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return null;
   }
 
-  public updateOrgPolicy(policy :uproxy_core_api.ManagedPolicyUpdate) :void {
+  public updateOrgPolicy(policy: uproxy_core_api.ManagedPolicyUpdate) :void {
     globals.settings.enforceProxyServerValidity = policy.
       enforceProxyServerValidity;
     globals.settings.validProxyServers = policy.validProxyServers;

@@ -1,4 +1,5 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
 import _ = require('lodash');
 import local_storage = require('./storage');
@@ -7,8 +8,6 @@ import loggingprovider = require('../../../third_party/uproxy-lib/loggingprovide
 import metrics_module = require('./metrics');
 import user_interface = require('../interfaces/ui');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-
-declare const freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('globals');
 

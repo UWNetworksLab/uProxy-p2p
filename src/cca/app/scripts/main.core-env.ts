@@ -1,6 +1,3 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
-/// <reference path='../../../../../third_party/typings/cordova/splashscreen.d.ts'/>
-
 /**
  * background.ts
  *
@@ -8,11 +5,13 @@
  * loaded.
  */
 
+/// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/splashscreen.d.ts'/>
+
 import CordovaBrowserApi = require('./cordova_browser_api');
 
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
-
-declare const freedom: freedom.FreedomInCoreEnv;
 
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends

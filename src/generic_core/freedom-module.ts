@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
-
 /**
  * core.ts
  *
@@ -11,6 +9,8 @@
  *  - Roster, which is a list of contacts, always synced with friend lists.
  *  - Instances, which is a list of active uProxy installs.
  */
+
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import browser_connector = require('../interfaces/browser_connector');
 import globals = require('./globals');

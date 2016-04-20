@@ -1,16 +1,17 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
-
 /**
  * cordova_core_connector.ts
  *
  * Runs in the UI context, proxying on() and emit() calls to the Freedom app in the
  * core context.
  */
-
+/// <reference path='../../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
+/// <reference path='../../../../../third_party/typings/freedom/freedom.d.ts' />
 import browser_connector = require('../../../interfaces/browser_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 import user_interface = require('../../../generic_ui/scripts/ui');
+
 
 class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
 

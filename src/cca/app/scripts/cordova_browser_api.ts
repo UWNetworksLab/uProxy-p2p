@@ -1,4 +1,5 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
 
 /**

@@ -1,10 +1,9 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
-
 /**
  * core_connector.ts
  *
  * Handles all connection and communication with the uProxy core.
  */
+/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_connector = require('../../interfaces/browser_connector');

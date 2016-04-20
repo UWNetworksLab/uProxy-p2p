@@ -1374,5 +1374,21 @@
   "REMOVING_UPROXY_CLOUD_STATUS": {
     "description": "Label to indicate that we are removing a uproxy cloud server.",
     "message": "Removing uProxy cloud server..."
+  },
+  "CLOUD_INSTALL_CANCEL_TITLE": {
+    "description": "Title shown on overlay when user cancels a cloud server install.",
+    "message": "Hold tight! We're canceling the creation of a cloud server."
+  },
+  "CLOUD_INSTALL_CANCEL_MESSAGE": {
+    "description": "Message shown on overlay when user cancels a cloud server install.",
+    "message": "Canceling the creation of a cloud server can take up to 2 minutes. Sorry for the wait."
+  },
+  "CLOUD_INSTALL_CANCEL_SUCCESS": {
+    "description": "Message shown on toast when a could server install is completed.",
+    "message": "Successfully canceled cloud server creation."
+  },
+  "CLOUD_INSTALL_CANCEL_FAILURE": {
+    "description": "Message shown on toast when a could server install fails.",
+    "message": "We cannot cancel the creation of your cloud server right now. You can delete the server once it's ready."
   }
 }
