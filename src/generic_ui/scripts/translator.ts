@@ -38,14 +38,13 @@ function createI18nDictionary(sourceFile :MessageResource): IResourceStoreKey {
 
 window.i18nResources = {};
 i18next.init({
-  resStore: window.i18nResources,
   fallbackLng: 'en'
 });
 
-i18n.addResources('en', 'translation', createI18nDictionary(english_source));
-i18n.addResources('zh', 'translation', createI18nDictionary(chinese_source));
-i18n.addResources('ar', 'translation', createI18nDictionary(arabic_source));
-i18n.addResources('fa', 'translation', createI18nDictionary(farsi_source));
+i18next.addResources('en', 'translation', createI18nDictionary(english_source));
+i18next.addResources('zh', 'translation', createI18nDictionary(chinese_source));
+i18next.addResources('ar', 'translation', createI18nDictionary(arabic_source));
+i18next.addResources('fa', 'translation', createI18nDictionary(farsi_source));
 
 export const i18n_t = (placeholder :string, params ?:any): string => {
   for (let p in params) {
