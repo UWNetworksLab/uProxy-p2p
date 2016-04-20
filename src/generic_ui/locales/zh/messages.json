@@ -1,0 +1,1350 @@
+{
+    "OFFERED_YOU_ACCESS": {
+        "message": "他们已向您提供网络连接。",
+        "description": "A friend has offered their Internet access to the user."
+    },
+    "CLOUD_INSTALL_STATUS_CONFIGURING_SSH": {
+        "message": "正在配置 SSH……",
+        "description": "Progress bar label shown during cloud install indicating that we are configuring SSH."
+    },
+    "NO": {
+        "message": "否",
+        "description": "Button label."
+    },
+    "ONE_TIME_SHARING_SUCCESS": {
+        "message": "你现在正在和你的朋友分享访问。",
+        "description": "Inform the user that they are now successfully sharing access through a one-time connection"
+    },
+    "SET_UP_ONE_TIME": {
+        "message": "设置一次性连接",
+        "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link."
+    },
+    "ERROR_PARSING_LINK": {
+        "message": "解析 uProxy 连接链接时出错，请重新尝试导航到该链接，或者向好友请求新链接。",
+        "description": "Error shown if a one-time connection link did not work."
+    },
+    "CLOUD_INVITE_FAILED": {
+        "message": "哎呀，连接失败了。请检查邀请码。",
+        "description": "Dialog text informing user that a connection could not be made to their cloud instance"
+    },
+    "WHAT_DO_GET_ACCESS_ANSWER": {
+        "message": "<p>当你从一个朋友那里<strong>获得访问权</strong>，所有从你的浏览器发送的流量首先经过加密传送到你朋友的电脑上，然后从那里再流向互联网。这意味着，对于大部分网站来说这些请求看起来是从你朋友的电脑上发送的，那些监视你的网络连接的人只能看到你和你的朋友之间有一个安全连接。</p><p>当你<strong>分享访问权的时候</strong>，经过授权的朋友将可以发送他们的网络流量到你的电脑，然后再从那里流向互联网。你的朋友只能和经过你授权的电脑进行连接，并且你可以随时取消他们的授权。</p>",
+        "description": ""
+    },
+    "UPROXY_NETWORK_LOGIN_TITLE": {
+        "message": "登录到 uProxy 网络",
+        "description": "Title for when the user is logging into the uProxy network (via settings or a link)"
+    },
+    "ANALYZE_NAT": {
+        "message": "分析 NAT",
+        "description": "The text for a button in the settings pane the user can click to check their NAT settings and view the latest logs uProxy has collected"
+    },
+    "SAVE": {
+        "message": "保存",
+        "description": "Label for button that saves the user's text input."
+    },
+    "STOP_ONE_TIME_INSTRUCTION": {
+        "message": "为了结束从朋友处获得的访问，请点击下面的按钮。",
+        "description": ""
+    },
+    "ATTEMPTING_RECONNECT": {
+        "message": "正在尝试再次连接。",
+        "description": "uProxy was disconnected from the social network and is trying to reconnect."
+    },
+    "DISCONNECT": {
+        "message": "断开连接",
+        "description": "User clicks this to disconnect from a network"
+    },
+    "EXT_MISSING_TITLE": {
+        "message": "您就快准备好使用 uProxy 了！",
+        "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
+    },
+    "ADD_CLOUD_INSTRUCTIONS": {
+        "message": "如果您有云邀请码，请单击下面的链接，然后在目标页上输入您的邀请。",
+        "description": "If the user is trying to add a Cloud friend, instruct them to click on the link to enter an invitation."
+    },
+    "I_HAVE_AN_ACCOUNT": {
+        "message": "我有帐户",
+        "description": "Button text shown during DigitalOcean server deployment"
+    },
+    "THANK_YOU": {
+        "message": "感谢！",
+        "description": ""
+    },
+    "WHO_KNOWS_THAT": {
+        "message": "都有谁知道我正在使用 uProxy？",
+        "description": ""
+    },
+    "SUBMIT_ONE_TIME_LINK": {
+        "message": "提交",
+        "description": "Text for a button the user may click after pasting in a (probably valid) one-time connection link into a textbox above the button."
+    },
+    "TRY_AGAIN": {
+        "message": "重试",
+        "description": "Button text for trying again (e.g. connecting to DigitalOcean)"
+    },
+    "RESPOND_TO_FRIEND_REQUEST": {
+        "message": "响应好友请求",
+        "description": "Shown in roster under contacts who have requested to be the user's uProxy friend."
+    },
+    "LOGS_TITLE": {
+        "message": "日志和网络分析",
+        "description": "Title for the page that displays a user's network information and uProxy logs."
+    },
+    "WHY_IS_UPROXY_ASKING_ANSWER": {
+        "message": "<p>在安装适用于 Chrome 的 uProxy 时，将需要以下权限：(1)读取和更改您在网站上访问的所有数据，(2) 与合作网站通信。这些权限是 uProxy 通过您好友的连接路由您的通信时所必需的。不会将有关您访问的网站的任何数据发送给 uProxy 团队或您连接到的社交网络。</p>",
+        "description": ""
+    },
+    "FRIEND_NEEDS_TO_CLICK": {
+        "message": "在您的好友打开该链接后，他们会向您返回一个链接。请单击该链接或者将其粘贴在下面。",
+        "description": "Instructions telling the user their friend needs to take an action to finish setting up the one-time connection and then their friend will send back a link."
+    },
+    "WHAT_ISNT_PROXIED_ANSWER": {
+        "message": "<p>uProxy 仅为其运行所在的 Web 浏览器代理通信，不为其他应用程序代理通信。在一些不常见的情况下，浏览器可能会进行无代理请求；有些 Web 技术（尤其是 Flash 和 WebRTC）可以进行不通过代理的请求。同样的注意事项通常也适用于 VPN。具有强烈隐私需求的用户建议考虑使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor Browser</a>；该浏览器经过专门设计，可以最大程度地减少您的通信观察者对您的活动的了解。</p>",
+        "description": ""
+    },
+    "SHARING_ACCESS_WITH_ONE": {
+        "message": "正在和 __名字 __分享访问",
+        "description": "Message in a status bar that is visible when one friend is getting access through the user."
+    },
+    "FACEBOOK_INVITE_INSTRUCTIONS": {
+        "message": "点击下面的链接发送 uProxy 邀请给你的 Facebook 朋友。当他们使用 uProxy 打开这个链接的时候，他们会出现在你的 uProxy 联系人列表中。",
+        "description": "Invite instructions for Facebook"
+    },
+    "LOGGED_OUT": {
+        "message": "您已从 __network__ 注销",
+        "description": "Notification for when the user has been logged out of the social network."
+    },
+    "UNLIKELY": {
+        "message": "可能不",
+        "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
+    },
+    "EMPTY_ROSTER_CLOUD_INSTRUCTIONS": {
+        "message": "创建私有云服务器，与亲友共享网络连接",
+        "description": "Instructions shown for cloud when the user has an empty roster"
+    },
+    "CHOOSE_A_SOCIAL_NETWORK": {
+        "message": "选择社交网络",
+        "description": "Text prompting user to log into social networks and invite their friends."
+    },
+    "CLOUD_INSTALL_SUCCESS_TITLE": {
+        "message": "成功！您的新云服务器已准备就绪。",
+        "description": "Message shown after successful DigitalOcean server deployment"
+    },
+    "CLOUD_INVITE_PLACEHOLDER": {
+        "message": "邀请码",
+        "description": "Placeholder in input box for the invite code."
+    },
+    "LANGUAGE": {
+        "message": "语言",
+        "description": "Language used by the application."
+    },
+    "DOES_UPROXY_LOG_DATA_SHORT": {
+        "message": "uProxy 是否会收集有关我的数据？",
+        "description": ""
+    },
+    "SENDING_FEEDBACK": {
+        "message": "发送反馈",
+        "description": "Message in dialog indicating feedback is being sent to the uProxy team."
+    },
+    "ACCEPTED_OFFER_NOTIFICATION": {
+        "message": "__名字__已经接受了你的访问邀请",
+        "description": "Notification for when a friend has accepted the user's offer to share their Internet with that friend."
+    },
+    "GETTING_ACCESS_FROM": {
+        "message": "从 __name__ 获取网络连接",
+        "description": "Message in a status bar that is visible when the user is getting access from a friend."
+    },
+    "DESTROY_CLOUD_SERVER_FAILURE": {
+        "message": "我们很抱歉。我们此时无法销毁您的云服务器。您可能需要登录云提供程序自己将其销毁。",
+        "description": "Message that tells users we failed to destroy their cloud server"
+    },
+    "TRYING_TO_CONNECT": {
+        "message": "尝试连接到 __name__",
+        "description": "The user is trying to connect to the Internet through their friend."
+    },
+    "WHAT_IS_DIGITAL_OCEAN": {
+        "message": "什么是 DigitalOcean？",
+        "description": ""
+    },
+    "WHEN_I_AM_SHARING_ACCESS": {
+        "message": "我在与某人共享网络连接时，他们能访问什么？",
+        "description": ""
+    },
+    "LEARN_MORE_SOCIAL": {
+        "message": "进一步了解社交网络",
+        "description": "Label for button that brings user to more information about why social networks are used for uProxy."
+    },
+    "WHO_KNOWS_THAT_ANSWER": {
+        "message": "<p>与您连接的任何人都知道您在使用 uProxy。此外，如果您选择将 uProxy 连接到社交网络（如 Facebook），则社交网络的管理员可以知道您在使用 uProxy，您在该网络上的使用 uProxy 的好友也可能知道。</p><p>对于使用 Gmail 或 Facebook 帐户连接的用户，uProxy 采用了 Google 运营的 Firebase 服务。因此，Firebase 团队和管理 uProxy Firebase 帐户的的 uProxy 团队可以访问有关正在使用 uProxy 的帐户的信息。</p><p>如果您对通过个人帐户使用 uProxy 有顾虑，可以创建一个专用假名帐户，然后改用该帐户来使用 uProxy。</p><p>请注意，其中任何服务都不会看到您在使用 uProxy 期间访问的网站或网页。只有您从其获取网络连接的用户有可能会监视您的通信。因此，如前所述，请仅通过您信任可共享 Internet 连接的好友那里获取网络连接。</p>",
+        "description": ""
+    },
+    "GO_BACK": {
+        "message": "返回？",
+        "description": "Go back to the main page from the one-time connection page."
+    },
+    "WHAT_IS_DIGITAL_OCEAN_ANSWER": {
+        "message": "<p>DigitalOcean 是一个云服务提供商。一旦你创建了一个账户并且设置了支付方式，uProxy 将可以在你的账户下创建一个服务器。uProxy 将会默认设置一个费用为每月 $10 美元的服务器。（DigitalOcean 提供的服务器最低标准为 $5 美元 / 月，我们也计划在将来支持这些服务器，但是为了实际的使用性能，现阶段仍需要使用高一级的服务器。）除了信用卡之外，DigitalOcean 也接受 PayPal，PayPal 和很多的支付系统已经进行了整合，其中包括银联。你可以随时中断你的服务器或者终止你的 DigitalOcean 账号。</p>",
+        "description": ""
+    },
+    "GITHUB_INVITE_SEND_FAILED": {
+        "message": "哎呀，您只能邀请此前已通过 GitHub 登录 uProxy 的好友。",
+        "description": "Dialog text informing user that a GitHub friend request failed."
+    },
+    "CLOUD_INSTALL_INSTALLING_TITLE": {
+        "message": "抓紧了，我们将创建新的云服务器。",
+        "description": "Message shown during DigitalOcean server deployment"
+    },
+    "WHICH_SOCIAL_NETWORK": {
+        "message": "在哪里能最快地找到你的联系人？",
+        "description": "Question seen at the top of uProxy's login page. Asks which social network should be used to find the user's friends."
+    },
+    "REMOVE_CLOUD_SERVER": {
+        "message": "删除云服务器",
+        "description": "Title for the dialogs that instruct users on deleting a cloud server"
+    },
+    "FEEDBACK_SUBMITTED": {
+        "message": "已将您的反馈提交给 uProxy 开发团队。",
+        "description": "User feedback was successfully submitted."
+    },
+    "OFFERS": {
+        "message": "提供",
+        "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted."
+    },
+    "WHAT_IS_UPROXY": {
+        "message": "什么是 uProxy？",
+        "description": "FAQ"
+    },
+    "STOPPED_PROXYING": {
+        "message": "__name__ 停止了通过您代理",
+        "description": "Notification for when a friend has stopped accessing the Internet through the user."
+    },
+    "CONFIRM_LOGOUT_FOR_COPYPASTE": {
+        "message": "要启动一次性连接，您将从已连接的社交网络注销。是否要立即注销？",
+        "description": "If a user is signed in to social network(s) and attempt to start a one-time connection, this message informs them that they must first log out of all social networks."
+    },
+    "WAITING_FOR_ACCESS": {
+        "message": "当__名字__接受之后，你就可以获得访问。",
+        "description": "User will be able to access the Internet through their friend, once that friend gives the user permission."
+    },
+    "FRIENDS_WHO_SHARE": {
+        "message": "可从其获取网络连接的好友",
+        "description": "Title for the group of friends who the user can get Internet access from."
+    },
+    "SIGN_IN_TO_NETWORK": {
+        "message": "登录到 __network__",
+        "description": "Title for dialog that appears after users choose a social network for finding friends."
+    },
+    "LOGIN_REQUIRED_TITLE": {
+        "message": "需要登录",
+        "description": "Title for confirmation that the user must login to a network to accept an invitation"
+    },
+    "WHAT_IS_GITHUB_ANSWER": {
+        "message": "<p>GitHub 是一个帮助开发人员共享代码的网站；但是，uProxy 可以利用 GitHub 共享设置好友间直接连接所需的信息，就跟利用社交网络一样。对于有些用户，GitHub 的可访问性比许多社交网络好，并且可免费<a href=\"https://github.com/join\">注册</a>。</p><p>请注意，GitHub 帐户是否在使用 uProxy 是可知的。如果您不希望将现有 GitHub 帐户与 uProxy 关联，可创建一个假名 GitHub 帐户，然后将其用于 uProxy。</p>",
+        "description": ""
+    },
+    "CONNECTED_ACCOUNTS": {
+        "message": "已连接帐户",
+        "description": "In settings, title for the social networks you can connect to."
+    },
+    "DESCRIPTION_DEFAULT": {
+        "message": "计算机 __number__",
+        "description": "If a friend has more than one computer, the computers are given this default name (with increasing numbers) to differentiate them."
+    },
+    "OFFER_ACCESS": {
+        "message": "提供网络连接",
+        "description": "Label for button that will offer a friend access to the Internet through the user, even though the friend has not requested access."
+    },
+    "OFFLINE": {
+        "message": "离线",
+        "description": "Shown under your contact's who are offline"
+    },
+    "DESCRIPTION": {
+        "message": "描述",
+        "description": "Placeholder for the input field for the name of the user's device."
+    },
+    "RESTART": {
+        "message": "重新启动",
+        "description": "Restart uProxy completely."
+    },
+    "SIGN_ME_IN": {
+        "message": "我要登录！",
+        "description": "Button text shown during DigitalOcean server deployment"
+    },
+    "BACK_TO_TOP": {
+        "message": "回到顶部",
+        "description": ""
+    },
+    "RESTART_UPROXY_UPDATE": {
+        "message": "重启程序进行更新",
+        "description": "A link the user can click on to restart uProxy and permorm an update"
+    },
+    "FEEDBACK_ERROR_PLACEHOLDER": {
+        "message": "请输入一些反馈",
+        "description": "Error that apears if you try to submit an empty feedback."
+    },
+    "DOES_UPROXY_PROTECT_ANSWER": {
+        "message": "<p>uProxy 可以帮助保护你避免被重新定向到恶意网站或者故意篡改你的网络内容。然而，uProxy’s 的主要目的是让用户能够分享对开放互联网的访问。</p>",
+        "description": ""
+    },
+    "WHAT_ARE_CLOUD_SERVERS": {
+        "message": "什么是 uProxy 云服务器？",
+        "description": ""
+    },
+    "OFFERED_ACCESS_NOTIFICATION": {
+        "message": "__name__ 向您提供了网络连接",
+        "description": "Notification for when the user receives an offer from a friend to access the Internet through them."
+    },
+    "FACEBOOK_INVITE_IN_BROWSER": {
+        "message": "请完成 Facebook 上的邀请",
+        "description": "Dialog message instructing user to complete Facebook invitation in their browser"
+    },
+    "TRYING_TO_SHARE_ONE_TIME": {
+        "message": "您当前正在尝试共享网络连接。如果您想改为获取网络连接，请单击上面的链接。",
+        "description": "Instructions for user if they want to get access instead, while attempting to share access."
+    },
+    "ERROR_SIGNING_IN": {
+        "message": "登录到 __network__ 时出现问题。请再试一次。",
+        "description": "Notification for when the user could not be signed in to a social network."
+    },
+    "EDIT_ADVANCED_SETTINGS": {
+        "message": "请在下面编辑您的设置。",
+        "description": "Instruction for the user to edit their advanced settings (by typing JSON in a textbox)."
+    },
+    "MORE_INFO": {
+        "message": "更多信息",
+        "description": "Link to 'Does uProxy log data about me?' question in the FAQ."
+    },
+    "SHARING_ENABLED_MESSAGE": {
+        "message": "此图标表示您可以与您曾提供网络连接的好友共享网络连接。",
+        "description": "Text in a popup that explains what the sharing icon (on the toolbar) is."
+    },
+    "WHERE_TO_GET": {
+        "message": "我应该在哪里获取 uProxy？",
+        "description": "FAQ"
+    },
+    "CLOUD_INSTALL_CREATE_ACCOUNT_TITLE": {
+        "message": "只需提供您的电子邮件地址以及信用卡或 Paypal 帐户，即可启动。",
+        "description": "Message shown during DigitalOcean server deployment"
+    },
+    "LEARN_MORE": {
+        "message": "了解更多",
+        "description": "Generic label for links to FAQ."
+    },
+    "REMOVE_CLOUD_SERVER_CONFIRMATION": {
+        "message": "是否确定要删除此云服务器？",
+        "description": "Message that warns users their cloud server will be destroyed"
+    },
+    "UPROXY_FRIENDS": {
+        "message": "使用 uProxy 的朋友",
+        "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups."
+    },
+    "RECONNECTING": {
+        "message": "正在重新连接...",
+        "description": "Indicate that uProxy is attempting to reconnect automatically after a failure.  A progress indicator is also visible."
+    },
+    "WHAT_IS_UPROXY_NETWORK_ANSWER": {
+        "message": "<p>uProxy 网络被设计为用最简单的方式可靠地和你的朋友进行连接，同时很难进行封锁。为了使用 uProxy 网络，你只需要输入一个名字（不需要是唯一的名字）然后当你登录之后就可以与朋友分享邀请了。现在个人身份和一个单独的机器进行绑定；如果你希望在一台新的电脑上设置 uProxy，为了从那台新电脑和你的朋友连接，你需要重新邀请你的朋友。</p><p>uProxy 团队在对 uProxy 网络进行管理，尽管将来可能会由第三方通过更多的服务器来扩大这个网络。所有通过 uProxy 网络发送的的信息对于连接双方来说都是端对端加密的，所以没有人可以进行干预。然而，网络操作员仍然可以分辨出哪些 IP 地址相互连接着。</p>",
+        "description": ""
+    },
+    "WILL_UPROXY_WORK": {
+        "message": "uProxy 在哪儿运行？",
+        "description": ""
+    },
+    "SHARING_ENABLED_TITLE": {
+        "message": "已启用共享",
+        "description": "Title for popup that points to the sharing icon in uProxy's top toolbar. The popup appears when the user first grants access to one of their friends. The sharing icon is visible as long as there are friends who can get access to the user's Internet."
+    },
+    "CONTINUE_BROWSING": {
+        "message": "不使用 uProxy 继续浏览",
+        "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."
+    },
+    "CONNECTED_WITH_NUMBER": {
+        "message": "连接到 __数字 __网络",
+        "description": "Text in settings informing the user of how many networks they're connected to."
+    },
+    "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER": {
+        "message": "正在安装 Docker……",
+        "description": "Progress bar label shown during cloud install indicating that we are installing Docker, a pre-requisite."
+    },
+    "UPROXY_NETWORK_CHOOSE_A_USER_NAME": {
+        "message": "选择一个用户名",
+        "description": "Placeholder text for user name on uProxy network"
+    },
+    "WHERE_TO_GET_ANSWER": {
+        "message": "<p>获得 uProxy 最简单的方式就是访问<a href=\"install\">安装</a>页面。你也可以在 <a href=\"https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj\">Chrome 网上应用店</a>和 <a href=\"https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/\">Firefox Add-Ons site</a> 上找到 uProxy。这些是仅有的可以获得 uProxy 的网站。永远不要从其它地方下载 uProxy，那些可能是假的软件并且可能产生风险。</p>",
+        "description": ""
+    },
+    "DEVICE_DESCRIPTION": {
+        "message": "设备描述",
+        "description": "Title for the section in Settings where the user can edit the name of their device."
+    },
+    "NORTH_AMERICA_NEW_YORK": {
+        "message": "北美（纽约）",
+        "description": "Region option for deploying a DigitalOcean server"
+    },
+    "COPY_CONNECTION_LINK": {
+        "message": "要请求好友提供网络连接，请复制并粘贴此链接，并通过您信任的通道将其提供给好友。",
+        "description": "Instructions for the user to request access from a friend with a one-time link."
+    },
+    "SIGN_IN_AND_CONNECT": {
+        "message": "登录并连接",
+        "description": "Button text for signing into DigitalOcean"
+    },
+    "START_ONE_TIME": {
+        "message": "启动一次性连接",
+        "description": "Start an Internet connection using a link that will only work once."
+    },
+    "WHO_MADE_UPROXY": {
+        "message": "谁在开发 uProxy？",
+        "description": ""
+    },
+    "CANNOT_OPEN_ONE_TIME_TITLE": {
+        "message": "无法打开一次性连接",
+        "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
+    },
+    "CREATE_A_CLOUD_SERVER": {
+        "message": "创建一个云服务器",
+        "description": "Title on cloud deployment screens, where the user can set up a new server that allows them proxy access."
+    },
+    "SET": {
+        "message": "设置",
+        "description": "Label for button that saves the user's advanced settings."
+    },
+    "ASK_TO_SUBMIT_ANALYSIS": {
+        "message": "是否要将您的 NAT 类型提交给 uProxy 团队以帮助我们更好地了解我们的用户所在的网络？",
+        "description": "Asks the user if they are willing to share their network analysis results with uProxy, to help the development of uProxy."
+    },
+    "FRIEND_OFFLINE": {
+        "message": "__name__ 已下线",
+        "description": "Message shown when trying to get access from a friend who is offline."
+    },
+    "UNABLE_TO_GET": {
+        "message": "无法获取网络连接",
+        "description": "Title for popup that appears when an attempt to access the Internet through a friend fails."
+    },
+    "ADD_A_CLOUD_FRIEND": {
+        "message": "添加云好友",
+        "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with"
+    },
+    "HOW_DO_I_FIND": {
+        "message": "我如何在 uProxy 上找到我的好友？",
+        "description": ""
+    },
+    "ONE_TIME_SHARING_STOP_DIRECTIONS": {
+        "message": "要停止共享网络连接，请单击下面的按钮。",
+        "description": "Directions for how to stop sharing access; should refer to the act of clicking the button below which should also have a fairly obvious label."
+    },
+    "WHAT_DO_GET_ACCESS": {
+        "message": "“获取网络连接”和“共享网络连接”是指什么？",
+        "description": ""
+    },
+    "FRIEND_ADDED": {
+        "message": "朋友已添加",
+        "description": "Confirmation message after adding a friend to the roster."
+    },
+    "HAVE_AN_INVITE_CODE": {
+        "message": "有邀请码吗？",
+        "description": "Text above a button that asks the user if they already have a uProxy invite code"
+    },
+    "WHY_DOES_UPROXY_CONNECT_ANSWER": {
+        "message": "<p>uProxy 需要通过某种方式来查看您的好友是否在线，并且需要在双方之间交换信息（IP 地址、端口和加密密钥）以设置直接连接。uProxy 不运行可以轻松封锁的中心服务，而是连接到您与好友已在使用的社交网络。这些社交网络仅用于帮助建立用户间的直接连接；经过代理的 Internet 通信不会通过社交网络发送。<strong>uProxy 绝不会代表您进行公开发布。</strong>它仅与您选择的也在运行 uProxy 的好友交换私密消息。您可在<a href=\"https://github.com/uProxy/uproxy/wiki/Trust\">此处</a>阅读有关信任社交网络的更多信息。</p>",
+        "description": ""
+    },
+    "EMAIL_PLACEHOLDER": {
+        "message": "电子邮件地址",
+        "description": ""
+    },
+    "CONNECTED_WITH": {
+        "message": "已与 __network__ 连接",
+        "description": "Text in settings that informs the user which social network they're connected to."
+    },
+    "FRIEND_REQUESTS_ACCESS": {
+        "message": "__name__ 请求您提供网络连接。",
+        "description": "A friend has requested to access the Internet through the user."
+    },
+    "CLOUD_SHARE_INSTRUCTIONS": {
+        "message": "通过将此链接发送给好友，共享您的云实例的网络连接。",
+        "description": "Message shown in a dialog, with a Cloud invite code, to let users know how they can allow their friends to proxy through their Cloud instance."
+    },
+    "UNABLE_TO_SHARE_WITH": {
+        "message": "无法与 __name__ 共享网络连接",
+        "description": "Error message seen in uProxy when a friend failed to get access to the Internet through the user."
+    },
+    "YES": {
+        "message": "是",
+        "description": "Button label."
+    },
+    "ASK_FOR_ACCESS": {
+        "message": "请求网络连接",
+        "description": "Button label that sends a request to the user's friend, asking if the user can access the Internet through them."
+    },
+    "WHAT_IS_PORT_CONTROL": {
+        "message": "什么是端口控制？",
+        "description": ""
+    },
+    "REMOVE_CLOUD_SERVER_SUCCESS": {
+        "message": "成功！你的云服务器已经被删除。",
+        "description": "Message that tells users a cloud server was sucessfully deleted from their friend list"
+    },
+    "VERY_LIKELY": {
+        "message": "极有可能",
+        "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
+    },
+    "ACCEPT_INVITE_CONFIRMATION": {
+        "message": "你希望增加__名字__到你的 uProxy 联系人吗？",
+        "description": "Confirmation message when accepting an invite."
+    },
+    "ASK_TO_ANALYZE": {
+        "message": "这可能是因为您网络的 NAT 类型与 uProxy 不兼容。是否需要 uProxy 分析您的网络？",
+        "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails."
+    },
+    "FRIEND_REQUEST_SENT": {
+        "message": "已发送好友请求",
+        "description": "Shown in roster under contacts who the user has requested to be a uProxy friend."
+    },
+    "STOP_GETTING": {
+        "message": "停止获取网络连接",
+        "description": "Stop accessing the Internet through a friend's connection."
+    },
+    "ANALYSIS_RESULTS": {
+        "message": "看起来您似乎在 __natType__ 上，这是会干扰您与好友连接的能力的 __natImpact__。",
+        "description": "A summary of the user's network analysis."
+    },
+    "GITHUB_LOGIN_CONFIRMATION": {
+        "message": "uProxy 可以使用 GitHub——一个开发工具——来帮助你和你的朋友进行联络。<br><br>因为它可能让别人知道是哪个 GitHub 账户在使用 uProxy，<strong>我们推荐你创建一个新的 GitHub 匿名账号</strong>，即使你已经在使用 GitHub。<strong>在连接之前，你需要在 GitHub 认证你的电子邮件。</strong>",
+        "description": "Confirmation message the user sees prior to logging into GitHub"
+    },
+    "SUBMIT_FEEDBACK": {
+        "message": "提交反馈",
+        "description": "Submit feedback to the uProxy team."
+    },
+    "BETA_MESSAGE": {
+        "message": "这是 Beta 版的 uProxy，有时可能会不稳定。",
+        "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
+    },
+    "CANCEL": {
+        "message": "取消",
+        "description": "Button label that rejects a proposed action."
+    },
+    "CLOUD_INVITE_INSTRUCTIONS": {
+        "message": "输入您的邀请码。在建立了连接后，建立的连接将出现在您的联系人列表中。",
+        "description": "Invite instructions for Cloud"
+    },
+    "ANALYZING_NETWORK": {
+        "message": "分析网络",
+        "description": "Message shown when the user's network is being analyzed."
+    },
+    "EMAIL_INSTEAD_MESSAGE": {
+        "message": "糟糕！我们无法把你的反馈提交到 uproxy.org。请复制粘贴你的反馈信息到电子邮件中并发送到  info@uproxy.org。",
+        "description": "Seen if feedback submission through uProxy fails. Message asks users to email their feedback instead."
+    },
+    "LEARN_MORE_UPROXY": {
+        "message": "进一步了解 uProxy",
+        "description": "Label for button that brings user to more information about uProxy."
+    },
+    "ADVANCED_SETTINGS_SENTENCE_CASE": {
+        "message": "高级设置",
+        "description": "Title for the advanced settings screen."
+    },
+    "START_NEW_CONNECTION": {
+        "message": "开始获取新连接",
+        "description": "Label for button that takes user back to the 'Start a one-time connection' page."
+    },
+    "ACCEPT_OFFER": {
+        "message": "接受提供",
+        "description": "Accept a friend's offer that would allow the user to access the Internet through their friend."
+    },
+    "WHAT_ARE_CLOUD_SERVERS_ANSWER": {
+        "message": "<p>uProxy 用户可通过两种方式获得网络连接：通过好友代理其通信，以及连接到运行 uProxy 的服务器。uProxy 可以自动完成在云托管平台上创建私有服务器的过程。当前，我们支持 DigitalOcean，但也可以在其他服务器上进行手动安装。创建之后，只需转到“共享”选项卡，就可以轻松地与您的亲朋好友共享您服务器的网络连接。</p>",
+        "description": ""
+    },
+    "SUBMIT_FEEDBACK_SENTENCE_CASE": {
+        "message": "提交反馈",
+        "description": "Submit feedback to the uProxy team."
+    },
+    "P_I_I_MESSAGE": {
+        "message": "你的反馈和电子邮件地址将会被发送到 uProxy.org。你的日志、网络信息和电子邮件可能会包含个人身份信息。",
+        "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy."
+    },
+    "ACCESS_NOT_GRANTED": {
+        "message": "您尚未授予他们访问权限。",
+        "description": "The user has not permissioned a friend to access the Internet through the user."
+    },
+    "NEXT": {
+        "message": "下一步",
+        "description": "Label for button that proceeds from the introduction page to the login page."
+    },
+    "FRIEND_ADD_ERROR": {
+        "message": "添加您的好友时出现错误。",
+        "description": "Error message when a friend cannot be added to the roster."
+    },
+    "STOP_ONE_TIME_GETTING_BEFORE_NEW": {
+        "message": "如果您想启动新的一次性连接，请先按“停止获取网络连接”。",
+        "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
+    },
+    "WHAT_IS_UPROXY_ANSWER": {
+        "message": "<p>uProxy 是适用于 Chrome 和 Firefox 的开源浏览器扩展，允许用户互相路由或通过私有云服务器路由其 Internet 连接。uProxy 可以让第三方（如政府或 ISP）更难监视或干扰获取了网络连接的用户的通信。它就像一种个性化的 VPN 服务，可用于为亲朋好友以及为旅行中的自己提供安全的网络连接。</p>",
+        "description": ""
+    },
+    "ENABLE_METRICS": {
+        "message": "您是否要启用匿名指标收集？",
+        "description": "Asks the user if they want to send anonymous metrics about their uProxy usage."
+    },
+    "WHO_MADE_UPROXY_ANSWER": {
+        "message": "<p>uProxy 是由华盛顿大学开发的。项目获得了 Google Ideas 的资金支持并得到了谷歌、Brave New Software 和开源社区的帮助。</p>",
+        "description": ""
+    },
+    "DISCONNECTED_TITLE": {
+        "message": "糟糕！你和你朋友的连接被中断了。",
+        "description": "Title for error that appears when the user was getting access to the Internet through their friend, but that connection was terminated."
+    },
+    "SHARE_ONE_TIME": {
+        "message": "分享一个一次性连接",
+        "description": "Share access to the user's Internet using a link that will only work once."
+    },
+    "FRIENDS_WHO_CAN_GET": {
+        "message": "可从您这儿获取网络连接的好友",
+        "description": "Title for the group of friends who can access the Internet through the user."
+    },
+    "FEEDBACK_PLACEHOLDER": {
+        "message": "撰写您的反馈",
+        "description": "The default text that appears in the user feedback textbox."
+    },
+    "NO_LONGER_GETTING": {
+        "message": "您不再获取网络连接。要请求连接，请单击下面的按钮。",
+        "description": "Message shown when a one-time connection ends."
+    },
+    "INVITE_SENT_CONFIRMATION": {
+        "message": "邀请已发送给 __name__！",
+        "description": "Dialog text to confirm that an invite was sent to the user's friend"
+    },
+    "GET_ACCESS": {
+        "message": "获取网络连接",
+        "description": "Text for the tab on the toolbar. When the user is on the 'Get Access' tab, they are looking to get access to the Internet through a friend."
+    },
+    "REVOKE_ACCESS": {
+        "message": "取消访问",
+        "description": "Label for button that takes back an offer to a friend who has already accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
+    },
+    "RETRIEVING_LOGS": {
+        "message": "正在检索日志并分析您的网络...",
+        "description": "Message shown while uProxy is analyzing the user's network settings."
+    },
+    "DISCONNECTED_MESSAGE": {
+        "message": "如果你关闭代理，你的网络流量将不再通过你朋友的服务器。你可能希望在继续进行操作之前关闭所有敏感页面。",
+        "description": "Instruction informing the user that if they want to browse the Internet and stop waiting for reconnection, the user will need to use their local (potentially unsafe and/or censored) connection."
+    },
+    "WHAT_IS_UPROXY_NETWORK": {
+        "message": "什么是 uProxy 网络？",
+        "description": ""
+    },
+    "ENTER_INVITATION_DESCRIPTION": {
+        "message": "如果您收到了您愿与之一起使用 uProxy 的好友的邀请，请将其粘贴在此处：",
+        "description": "Instructions for user to enter an invitation"
+    },
+    "HOW_DO_I_FIND_ANSWER": {
+        "message": "<p>您可以使用联系人列表右下方的“连接到好友”按钮邀请好友使用我们支持的社交网络之一为您提供代理。</p><p>要查看好友是否在线，你们双方必须同时使用相同的社交网络登录 uProxy。通过转到菜单（左上的 ≡ 图标）并展开标题 (▾)，您可以同时登录多个社交网络。</p>",
+        "description": ""
+    },
+    "CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE": {
+        "message": "不要担心在 DigitalOcean 上生成小程序的事情，我们会为您完成。<uproxy-faq-link anchor='whatIsDigitalOcean'>了解更多。</uproxy-faq-link><br>在创建了帐户并更新了帐单后，单击“让我登录”。",
+        "description": "Message shown during DigitalOcean server deployment, references text for SIGN_ME_IN button"
+    },
+    "CONNECT": {
+        "message": "连接",
+        "description": "User clicks this to connect to a network"
+    },
+    "EMAIL_TITLE": {
+        "message": "电子邮件（可选）",
+        "description": ""
+    },
+    "PORT_CONTROL_TITLE": {
+        "message": "端口控制状态",
+        "description": "Title for the port control section in advanced settings"
+    },
+    "FRIEND_REQUEST": {
+        "message": "您的好友 __name__ 想跟您一起使用 uProxy！",
+        "description": "Message above button for user to accept a uProxy friend request"
+    },
+    "INVITE_A_FRIEND": {
+        "message": "邀请好友",
+        "description": "Title for screen where user invites a friend to uProxy"
+    },
+    "CONNECT_WITH_A_FRIEND": {
+        "message": "与好友连接",
+        "description": "Title of screen for user to send invites or enter received invites."
+    },
+    "CONFIRM_LOGOUT_SHARING": {
+        "message": "你确定想要退出吗？你将不能和你的朋友分享访问。",
+        "description": "Confirmation when user logs out from a social network while they are sharing access with users on that network"
+    },
+    "ADVANCED_SETTINGS": {
+        "message": "高级设置",
+        "description": "Clickable text from the Settings menu. Clicking this opens the advanced settings screen."
+    },
+    "SHARING_ACCESS_WITH_TWO": {
+        "message": "与 __name1__ 和 __name2__ 共享网络连接",
+        "description": "Message in a status bar that is visible when two friends are getting access through the user."
+    },
+    "SIGN_IN_TO_INVITE_FRIENDS": {
+        "message": "为了邀请一个__网络__的朋友到 uProxy，请登录到你的__网络__账户。",
+        "description": "Text for dialog that appears if users choose an invite-only social network to find uProxy friends. Text explains that users must sign in before inviting friends."
+    },
+    "FAQ_SENTENCE_CASE": {
+        "message": "获取帮助",
+        "description": "Title of the FAQ window"
+    },
+    "NETWORK_AND_LOGS": {
+        "message": "分析网络并且包括日志",
+        "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team."
+    },
+    "INVITE_LINK_FROM_ACCEPT_PAGE": {
+        "message": "我想改为发送邀请。",
+        "description": "Link to send an invite if the user is already on the accept-invite page."
+    },
+    "UPROXY_NETWORK_SIGN_IN": {
+        "message": "登录",
+        "description": "Sign in button for the uProxy network"
+    },
+    "HOW_DOES_UPROXY_COMPARE": {
+        "message": "uProxy 与 VPN 相比如何？",
+        "description": ""
+    },
+    "CLOUD_INSTALL_INVITE_SCREEN_MESSAGE": {
+        "message": "每月 $10 美元的服务让你可以和朋友及家人从你自己私人的服务器获得和分享访问。",
+        "description": "Message shown on invite screen for DigitalOcean server deployment"
+    },
+    "SHARE_ACCESS": {
+        "message": "共享访问",
+        "description": "Text for the tab on the toolbar. When the user is on the 'Share Access' tab, they are looking to share access to their Internet with a friend."
+    },
+    "REQUESTS": {
+        "message": "请求",
+        "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
+    },
+    "PORT_CONTROL_NOT_SUPPORTED_INFO": {
+        "message": "您也许可以启用端口控制来提高 uProxy 的可靠性。",
+        "description": "Extra information displayed when port control is not supported"
+    },
+    "SHARING_ENABLED_TOOLTIP": {
+        "message": "您现在可提供共享。",
+        "description": "Text that appears in a tooltip when the user hovers over the sharing icon."
+    },
+    "ARE_YOU_SURE": {
+        "message": "是否确定要结束此一次性连接？",
+        "description": "Question confirming if the user wants to end an active connection to a friend."
+    },
+    "MORE_ABOUT_METRICS": {
+        "message": "进一步了解匿名指标",
+        "description": ""
+    },
+    "START_GETTING": {
+        "message": "开始获取网络连接",
+        "description": "Start accessing the Internet through a friend's connection."
+    },
+    "CLOUD_INSTALL_INSTALLING_MESSAGE": {
+        "message": "此过程最多可能需要 15 分钟。在安装过程中，请保持浏览器打开状态。连接之后，可以通过您的私有服务器与亲友共享网络连接。",
+        "description": "Message shown during DigitalOcean server deployment"
+    },
+    "CLOUD_INSTALL_LOGIN_MESSAGE": {
+        "message": "一旦点击“登录并连接”，你将会被 DigitalOcean 收取每月 $10 美元的费用。你可以在任何时间终止服务器。 <uproxy-faq-link anchor='whatIsDigitalOcean'>了解更多。</uproxy-faq-link>",
+        "description": "Message shown during DigitalOcean server deployment, references text for SIGN_IN_AND_CONNECT button"
+    },
+    "QUIVER_LINK_INSTRUCTIONS": {
+        "message": "将此链接发给您的好友，让他们能在 uProxy 上找到您",
+        "description": "Instructions telling user how to use link for the uProxy network (aka Quiver)."
+    },
+    "PORT_CONTROL_PENDING": {
+        "message": "正在探测路由器的端口控制支持...",
+        "description": "uProxy is currently probing router for port control support"
+    },
+    "IM_IN": {
+        "message": "我加入",
+        "description": "Agree to submitting anonymous metrics to uProxy."
+    },
+    "DOES_UPROXY_GIVE_ME_ANSWER": {
+        "message": "<p>uProxy 不是一个匿名工具；它可以帮助在 ISP 那里隐藏你的浏览，但是不能在你的访问的网站上隐藏个人身份。通过 uProxy 访问的网站将会看到分享这个访问的人的 IP 地址，也可能会进一步发现这个使用者的 IP 地址。如果你需要在被访问的网站上隐藏你的个人身份，我们推荐你使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor 浏览器</a>。</p>",
+        "description": ""
+    },
+    "SHARING_ACCESS_WITH_MANY": {
+        "message": "与 __name__ 及其他 __numOthers__ 个人共享网络连接",
+        "description": "Message in a status bar that is visible when three or more friends are getting access through the user."
+    },
+    "LOGOUT": {
+        "message": "从 uProxy 注销",
+        "description": "Log-out of uProxy."
+    },
+    "ONE_TIME_GETTING_SUCCESS": {
+        "message": "成功！已成功设置了一次性连接。",
+        "description": "Inform the user that they have now successfully set up a connection through which they can get access.  This message should in no way imply that they are actually getting access (there will be another message prompting them to start using the connection)."
+    },
+    "CLOUD_INSTALL_ERROR_TITLE": {
+        "message": "糟糕！在创建云服务器的时候遇到了问题。",
+        "description": "Message shown after failed DigitalOcean server deployment"
+    },
+    "ACCEPT_LINK_FROM_INVITE_PAGE": {
+        "message": "我想改为输入邀请。",
+        "description": "Link to accept an invite if the user is already on the send an invite page"
+    },
+    "ABOUT_UPROXY": {
+        "message": "uProxy 帮助你通过朋友或者通过一个安全的云连接获得以及分享对网络的访问。",
+        "description": "Description on uProxy's introduction screen explaining what uProxy is."
+    },
+    "ONLINE": {
+        "message": "在线",
+        "description": "Shown under your contact's who are online"
+    },
+    "INVITE_EMAIL_SUBJECT": {
+        "message": "邀请在 uProxy 与 __name__ 连接",
+        "description": "Default email subject for sending an uProxy invite"
+    },
+    "HOW_TO_OFFER_ONE_TIME": {
+        "message": "如果你希望给他们访问权，请复制并粘贴这个 URL 给他们。",
+        "description": "Instructions for user if they'd like to share their Internet connection with a one-time link."
+    },
+    "WELCOME": {
+        "message": "欢迎使用 uProxy",
+        "description": ""
+    },
+    "ONE_TIME_LINK_INPUT_DESCRIPTION": {
+        "message": "来自您好友的链接",
+        "description": "Text (appearing within the input box) informing the user that they can paste the one-time connection link they get back from their friend here.  It should be clear that it is the link from the friend and not the link they just copied above."
+    },
+    "EMAIL_INSTEAD_TITLE": {
+        "message": "改为通过电子邮件提供反馈？",
+        "description": "Title for error that appears if feedback submission failed."
+    },
+    "HOW_DOES_UPROXY_COMPARE_ANSWER": {
+        "message": "<p>uProxy 采用了可靠的抗阻断设计。</p><p>VPN 用户一般连接到可轻易识别的服务器，因此可轻易识别及阻断 VPN 通信。而 uProxy 用户则相反，他们互相连接，而不是连接到公用服务器，因此 uProxy 可使通信难以识别，从而难以阻断。</p><p>此外，VPN 服务还能监视您访问的网站，而其中许多服务不对此数据保密。uProxy 用户通过好友保证连接可信，而不是托付给可能知之甚少的 VPN 服务。</p><p>除了不知道 VPN 对其用户的浏览数据做了什么以外，VPN 客户端和服务器软件（尤其是不开源的软件也可能难以了解和信任）。相比之下，uProxy 是开源的，会不断地面对公众的审查。uProxy 会尽可能避免要求用户盲目相信可信度得不到保证的软件。</p>",
+        "description": ""
+    },
+    "UNABLE_TO_GET_FROM": {
+        "message": "不能从__名字__获得访问",
+        "description": "Error message seen in uProxy when the user failed to get access to the Internet through a friend."
+    },
+    "SHARING_UNAVAILABLE_TITLE": {
+        "message": "分享功能不可用",
+        "description": "Title for error that appears when the user can not share their Internet access with friends."
+    },
+    "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS": {
+        "message": "获取或与亲友共享网络连接。",
+        "description": "Instructions shown for peer-to-peer when the user has an empty roster"
+    },
+    "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY": {
+        "message": "正在等待 uProxy 启动...",
+        "description": "Progress bar label shown during cloud install indicating that we are waiting for uProxy to start."
+    },
+    "SEND_INVITATION": {
+        "message": "发送邀请",
+        "description": "Button text to initiate sending an invitation"
+    },
+    "STATS_ENABLED_TITLE": {
+        "message": "已启用匿名统计数据",
+        "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team."
+    },
+    "REQUIRED_FIELD": {
+        "message": "必填字段。",
+        "description": "Error message indicating that a field is required (e.g. user name)"
+    },
+    "CLOSE": {
+        "message": "关闭",
+        "description": "Button label to close a popup."
+    },
+    "CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING": {
+        "message": "为了开始一个一次性连接，你将会退出已连接的社交网络并且你的连接会中断。你希望现在退出吗？",
+        "description": "If a user is signed in to social network(s) and is getting or sharing, and attempt to start a one-time connection, this message informs them that they must first log out of all social networks."
+    },
+    "LOADING": {
+        "message": "正在加载……",
+        "description": "Message show when something is taking time to load."
+    },
+    "WE_WONT_POST_LEARN_MORE": {
+        "message": "没有你的同意我们不会与人分享或者公开张贴你的数据。<uproxy-faq-link anchor='whyDoesUproxyConnect'>了解更多</uproxy-faq-link>",
+        "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user."
+    },
+    "EDIT_ADVANCED_SETTINGS_PLACEHOLDER": {
+        "message": "编辑你的设置",
+        "description": "Default text in the advanced settings textbox."
+    },
+    "INVITE_EMAIL_BODY": {
+        "message": "__name__ 已邀请您在 uProxy 上与其连接。为此，请单击下面的邀请链接或者将其粘贴到 uProxy 中。<br><br>__url__<br><br>如果您尚未安装 uProxy，则可从 <a href='uproxy.org'>uproxy.org</a> 直接获取，或者直接从 Chrome 应用商店（<a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>part 1</a> 和 <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>part 2</a>）以及 Firefox 市场（<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'>此处</a>）获取。",
+        "description": "Default email body for sending an uProxy invite"
+    },
+    "LAUNCH_DIGITAL_OCEAN_SETTINGS": {
+        "message": "打开 DigitalOcean 设置",
+        "description": "Button text for launching user's DigitalOcean settings page."
+    },
+    "GITHUB_INVITE_PLACEHOLDER": {
+        "message": "好友的 GitHub 用户名",
+        "description": "Placeholder in input box for the GitHub username of the friend the user is inviting"
+    },
+    "INVITE_EMAIL_SENT": {
+        "message": "已发送邀请电子邮件",
+        "description": "Confirmation message after an invite email has been sent"
+    },
+    "APP_MISSING_MESSAGE": {
+        "message": "下载并启用 uProxy 的 part 2 以开始。",
+        "description": "Shown in Chrome to instruct the user to install part 2 of uProxy."
+    },
+    "ONE_TIME_SHARING": {
+        "message": "您当前在共享网络连接。",
+        "description": "The user is sharing their Internet access with a friend."
+    },
+    "REMOVE_CLOUD_SERVER_FAILURE": {
+        "message": "我们很抱歉。我们此时无法删除您的云服务器。",
+        "description": "Message that tells users we failed to destroy their cloud server"
+    },
+    "NAME_THIS_DEVICE": {
+        "message": "为此设备指定名称",
+        "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel."
+    },
+    "CLOUD_INSTALL_GET_STARTED_TITLE": {
+        "message": "uProxy 现在允许您通过 DigitalOcean 创建私有云服务器。",
+        "description": "Message shown during DigitalOcean server deployment"
+    },
+    "DOES_UPROXY_LOG_DATA_ANSWER": {
+        "message": "<p>如果您不选择加入 uProxy 的数据报告，则不会报告有关您使用情况的任何数据。如果您选择加入，则任何使用情况数据在离开您的计算机前，都会采用与 Google Chrome 所用<a href=\"http://googleresearch.blogspot.com/2014/10/learning-statistics-with-privacy-aided.html\">算法</a>相同的一流隐私保护算法，对这些数据进行匿名化处理。</p><p>如果您在设置菜单中手动使用“提交反馈”工具，则可选择加入您最近 uProxy 使用情况的日志。日志可能包含个人可识别信息 (PII)。PII 绝不会在 uProxy 团队以外共享，包含 PII 的任何日志最多保留三个月，之后将被删除。</p><p>所有报告的提交方式都会让通信观察者难以检测到您在使用 uProxy。</p><p>您可在<a href=\"https://github.com/uProxy/uproxy/wiki/Data-Collection\">此处</a>阅读有关 uProxy 数据收集的更多信息。<p>",
+        "description": ""
+    },
+    "HOW_DO_I_INSTALL_UPROXY_ON_SERVER": {
+        "message": "如何在我的现有服务器上安装 uProxy？",
+        "description": ""
+    },
+    "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY": {
+        "message": "正在下载并安装 uProxy 映像...",
+        "description": "Progress bar label shown during cloud install indicating that we are downloading a Docker image for uProxy."
+    },
+    "ACCEPT_INVITE": {
+        "message": "接受邀请",
+        "description": "Text for button for user to accept a uProxy friend request"
+    },
+    "UPROXY_NETWORK_INVITE_LOGIN_MESSAGE": {
+        "message": "要将 __name__ 添加为好友，请登录 uProxy 网络",
+        "description": "Message instructing user to login to the uProxy network to accept an invitation."
+    },
+    "SHARING_ACCESS_WITH_FRIEND": {
+        "message": "当前正与好友共享网络连接",
+        "description": "Message in a status bar that is visible when the user is sharing access with a nameless friend"
+    },
+    "SEND_CONNECTION_LINK": {
+        "message": "为了分享你的连接，请让你的朋友发给你他们的链接。",
+        "description": "Instructions for the user to share their connection with a one-time link."
+    },
+    "GMAIL_INVITE_INSTRUCTIONS": {
+        "message": "输入您好友的电子邮件地址以通过电子邮件向其发送请求。如果他们接受了邀请，则将出现在您的联系人列表中。",
+        "description": "Invite instructions for GMail"
+    },
+    "WHAT_ISNT_PROXIED": {
+        "message": "什么通信不经过代理？uProxy 可能泄露有关我访问的网站的信息吗？",
+        "description": ""
+    },
+    "DOES_UPROXY_LOG_DATA": {
+        "message": "uProxy 会记录有关我的数据吗？uProxy 的隐私政策是什么？",
+        "description": ""
+    },
+    "APP_MISSING_TITLE": {
+        "message": "您就快准备好使用 uProxy 了！",
+        "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
+    },
+    "WHAT_IS_PORT_CONTROL_ANSWER": {
+        "message": "<p>网络地址转换 (NAT) 通常由路由器实施，目的是允许网络上的多个设备共享一个公共 IP 地址。但是，这可能会增加用户相互之间建立直接连接的难度，有些类型的 NAT（尤其是对称 NAT）可能会妨碍 uProxy 成功建立连接。</p><p>如果您的路由器启用了端口控制（UPnP、NAT-PMP 或 PCP），则 uProxy 可以指示路由器专门允许来自其他 uProxy 用户的传入连接。如果 uProxy 连接的任何一端都能使用端口控制，则不管 NAT 配置如何，连接几乎总会成功。有关在路由器上启用端口控制的信息，请查看路由器手册或者在网上搜索“（路由器名称）启用 UPnP”。</p>",
+        "description": ""
+    },
+    "WHAT_IS_ALPHA": {
+        "message": "什么是 Alpha 版本？",
+        "description": ""
+    },
+    "ERROR_STARTING_CONNECTION": {
+        "message": "启动连接时存在错误，必须终止连接。请尝试启动其他连接。",
+        "description": "Error shown if a one-time connection failed to start."
+    },
+    "TO_SEND_LOGS": {
+        "message": "想要发送你的日志给 uProxy 团队寻求帮助，请打开 uProxy 并且点击”提交反馈“",
+        "description": "Instructions guiding the user through how to submit their logs to uProxy."
+    },
+    "ONE_TIME_LINK_INPUT_ERROR": {
+        "message": "无法识别此链接。请检查是否准确，然后重试。",
+        "description": "Error message to show the user if they paste a poorly-formatted link into a texbox.  Should prompt them to try pasting the link again."
+    },
+    "WHEN_I_AM_SHARING_ACCESS_ANSWER": {
+        "message": "<p>从您这里获取网络连接的用户只能使用您的 Internet 连接。他们不能查看您计算机上的文件、看到您在 Internet 上的操作或者使用您的身份登录网站。他们也不能访问您本地家庭或工作网络上的设备（如共享打印机或文件服务器）。</p>",
+        "description": ""
+    },
+    "SETTINGS_SAVED": {
+        "message": "已保存设置",
+        "description": "Message that confirms to the user that their advanced settings were saved."
+    },
+    "WHY_IS_IT_IMPORTANT": {
+        "message": "为什么我相信正在连接的人如此重要？",
+        "description": ""
+    },
+    "CONFIRM_LOGOUT_GETTING": {
+        "message": "是否确定要注销？您将不再从您的好友那里获取网络连接。",
+        "description": "Confirmation when user logs out from a social network while they are getting access from users on that network"
+    },
+    "NOT_CONNECTED_LOGIN_TO_START": {
+        "message": "登录并开始",
+        "description": "Text in settings that informs the user they should sign in to a social network to get started."
+    },
+    "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
+        "message": "已有云服务器？<uproxy-faq-link anchor='howDoInstallUproxyOnServer'>了解如何</uproxy-faq-link>将其与 uProxy 配合使用。",
+        "description": "Instructions link for users who already have an existing cloud server."
+    },
+    "INVITE_ERROR": {
+        "message": "您的邀请存在错误。",
+        "description": "Error message shown for invalid invite URLs or tokens"
+    },
+    "STOP_IGNORING_REQUESTS": {
+        "message": "停止忽略请求",
+        "description": "Button label for if the user wants to stop ignoring requests."
+    },
+    "GET_ONE_TIME_INSTEAD": {
+        "message": "改为获取网络连接",
+        "description": "Label for a link to the 'Start a one-time connection' page."
+    },
+    "REQUESTING_ACCESS_NOTIFICATION": {
+        "message": "__name__ 正在请求网络连接",
+        "description": "Notification for when a friend sends a request to access the Internet through the user."
+    },
+    "WHAT_IS_BETA_ANSWER": {
+        "message": "<p>此 Beta 版 uProxy 仍在开发中，但我们相信，对于至少能访问其支持的一个社交网络的用户，它应该很有效。我们希望您能试试，然后通过提供您愿意共享的反馈来帮助我们改进。您可以发布到我们在<a href=\"https://groups.google.com/forum/#!forum/uproxy-discuss\">此处</a>的公共讨论列表；也可以私下发送电子邮件给我们：<a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>。如果您对后续进展感兴趣，或者愿意为该开源项目做贡献，请参见我们<a href=\"https://github.com/uProxy/uproxy/issues\">在 GitHub 上的问题跟踪器</a>。</p>",
+        "description": ""
+    },
+    "STOP_IGNORING_OFFERS": {
+        "message": "停止忽略邀请",
+        "description": "Button label for if the user wants to stop ignoring offers."
+    },
+    "HOW_TO_INVITE_FRIENDS": {
+        "message": "您希望如何邀请您的好友？",
+        "description": "Question above network select dropdown on invite screen"
+    },
+    "SELECT_LANGUAGE": {
+        "message": "选择语言",
+        "description": "Instruction to select language used by the application."
+    },
+    "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
+        "message": "更多信息。",
+        "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text"
+    },
+    "FEEDBACK_TITLE": {
+        "message": "在下面输入你的反馈",
+        "description": "Label for textbox for user's to submit feedback and comments to uProxy."
+    },
+    "CANCEL_OFFER": {
+        "message": "取消提供",
+        "description": "Label for button that takes back an offer to a friend who has not yet accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
+    },
+    "UNABLE_TO_SHARE": {
+        "message": "无法共享网络连接",
+        "description": "Title for popup that appears when an attempt to share the Internet with a friend fails."
+    },
+    "EXPERIMENTAL": {
+        "message": "实验",
+        "description": "Label below social networks (on the login page) indicating that a social network is experimental."
+    },
+    "WHAT_IS_GITHUB": {
+        "message": "什么是 GitHub，我如何才能使用？",
+        "description": ""
+    },
+    "HOW_DO_I_INSTALL_UPROXY_ON_SERVER_ANSWER": {
+        "message": "<p>uProxy 服务器在 Docker 容器中运行。高级用户可以改写<a href=\"https://blog.uproxy.org/2016/02/get-access-24x7-through-your-own-uproxy.html\">此发布内容</a>中的指令将 uProxy 安装在自己的服务器上。</p>",
+        "description": ""
+    },
+    "SETTINGS_BAD_FORMAT_ERROR": {
+        "message": "无法设置：格式错误",
+        "description": "Error shown to the user if their input for advanced settings is badly formed JSON."
+    },
+    "CHANGE_STATS_CHOICE": {
+        "message": "通过共享匿名指标，您可以帮助我们改进 uProxy。客户端会对所有数据进行匿名化处理并以安全的方式传输。",
+        "description": "Informs the user that they can opt in and out of sending anonymous statistics at any time they choose, from the Settings menu."
+    },
+    "HOW_DO_I_SUBMIT_ANSWER": {
+        "message": "<p>要在 uProxy 中提交反馈，请进入菜单（≡ 图标），然后选择“提交反馈”。您也可以给我们发送电子邮件：<a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>。</p>",
+        "description": ""
+    },
+    "ENTER_IT_HERE": {
+        "message": "在此处将其输入",
+        "description": "Text for button that opens a view for the user to enter their uProxy invite code"
+    },
+    "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK": {
+        "message": "查找您在社交网络上的好友。",
+        "description": "Title above social network icons on the page to find and/or invite friends."
+    },
+    "STARTED_PROXYING": {
+        "message": "__name__ 启动了通过您代理",
+        "description": "Notification for when a friend has started accessing the Internet through the user."
+    },
+    "STOP_ONE_TIME_SHARING": {
+        "message": "停止共享网络连接",
+        "description": "Label for button to terminate your connection to a friend who is accessing the Internet through you."
+    },
+    "LOGIN_REQUIRED_MESSAGE": {
+        "message": "要接受此邀请与 __name__ 连接，您需要使用 __network__ 登录 uProxy。单击“是”继续。",
+        "description": "Message for confirmation that the user must login to a network to accept an invitation"
+    },
+    "ASIA_SINGAPORE": {
+        "message": "亚洲（新加坡）",
+        "description": "Region option for deploying a DigitalOcean server"
+    },
+    "HOW_DO_I_SUBMIT": {
+        "message": "我如何提交反馈？",
+        "description": ""
+    },
+    "GET_ONE_TIME_INSTEAD_INSTRUCTION": {
+        "message": "如果你希望和其他人开始一个一次性的连接，点击”返回“按钮，然后点击”开始一个一次性连接“来开始一个新的会话。",
+        "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection."
+    },
+    "PORT_CONTROL_SUPPORTED": {
+        "message": "您的路由器启用了端口控制。",
+        "description": "NAT-PMP, PCP, or UPnP is supported in the router"
+    },
+    "HOW_DOES_UPROXY_HELP": {
+        "message": "uProxy 如何帮助保护我的 Internet 连接？",
+        "description": ""
+    },
+    "FRIEND_REQUESTED_ACCESS": {
+        "message": "他们请求通过您连接网络。",
+        "description": "A friend has requested to access the Internet through the user."
+    },
+    "PRIVACY_POLICY": {
+        "message": "隐私政策",
+        "description": "Link to uProxy's privacy policy."
+    },
+    "CLOUD_INSTALL_STATUS_CREATING_SERVER": {
+        "message": "正在创建服务器...",
+        "description": "Progress bar label shown during cloud install indicating that a new server is being provisioned."
+    },
+    "GITHUB_INVITE_INSTRUCTIONS": {
+        "message": "输入您好友的 GitHub 用户名。当他们接受您的请求时，您会在您的联系人列表中看到。",
+        "description": "Invite instructions for GitHub"
+    },
+    "HOW_DOES_UPROXY_HELP_ANSWER": {
+        "message": "<p>在正常使用 Internet 时，您的 Internet 服务提供商 (ISP) 可以知道您在访问的网站，并可通过阻止访问某些网站或者甚至篡改网站内容来尝试干扰您的连接。在不需要密码的 Wi-Fi 网络上，甚至网络上的其他用户都可以知道您在访问的网站；对于 HTTP（非 HTTPS）网站，他们还可以看到您的通信内容。</p><p>在通过 uProxy 获取网络连接时，您与好友之间的连接是加密的。您的浏览器的通信通过该连接发送，然后再从您好友的计算机外发到 Internet。在通过 uProxy 获取网络连接时，您的 ISP 将无法知道您在访问的网站，uProxy 特意使您的 ISP 难以识别和封锁您的 uProxy 通信。</p>",
+        "description": ""
+    },
+    "GETTING_ACCESS_FROM_FRIEND": {
+        "message": "现在有一个朋友正在通过你的服务器访问",
+        "description": "Message in a status bar that is visible when the user is getting access from a nameless friend"
+    },
+    "ASKING_FOR_ACCESS": {
+        "message": "正在要求访问",
+        "description": "The user is asking for permission to access the Internet through their friend; user is waiting for the friend's reply."
+    },
+    "GET_HELP": {
+        "message": "获得帮助",
+        "description": "Get help from the frequently asked questions page."
+    },
+    "SHARE_WITH_A_FRIEND": {
+        "message": "与好友共享",
+        "description": "Button text shown below each Cloud friend in the Share tab to open a dialog with a Cloud invite code."
+    },
+    "INVITATION_PLACEHOLDER_TEXT": {
+        "message": "有邀请码？请在此处输入邀请码",
+        "description": "Invitation placeholder text, instructing users to enter an invite in this field"
+    },
+    "ENTER_INVITATION": {
+        "message": "输入一个邀请",
+        "description": "Title for screen where user enters an invitation"
+    },
+    "CANCEL_REQUEST": {
+        "message": "取消请求",
+        "description": "Label for button which will take back a request to get Internet access through a friend."
+    },
+    "WHY_DOES_UPROXY_CONNECT": {
+        "message": "uProxy 为什么连接到社交网络？",
+        "description": ""
+    },
+    "CLOUD_VIRTUAL_MACHINE": {
+        "message": "虚拟机",
+        "description": "Refers to a remote server users can proxy from"
+    },
+    "IGNORE": {
+        "message": "忽略",
+        "description": "Button label that ignores an offer or request."
+    },
+    "STOP_ONE_TIME_SHARING_BEFORE_NEW": {
+        "message": "如果你想开始一个新的一次性的连接，请先点击“停止共享访问“。",
+        "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
+    },
+    "QUIVER_LOGIN_TEXT": {
+        "message": "uProxy 是一种简单可靠的方式用来寻找并且和你的朋友连接。<uproxy-faq-link anchor='whatIsUproxyNetwork'>了解更多。</uproxy-faq-link>",
+        "description": "Text shown to the user when they are about to login to the uProxy Network (aka Quiver)"
+    },
+    "REQUEST_ONE_TIME": {
+        "message": "请求一次性连接",
+        "description": "Request access to the user's friend's Internet using a link that will only work once."
+    },
+    "DONE": {
+        "message": "完成",
+        "description": "Button label that suggests acknowledgement and that closes a popup."
+    },
+    "SETTINGS_JSON_ERROR": {
+        "message": "无法设置：JSON 值不匹配",
+        "description": "Error shown to the user if their input for advanced settings is incomplete or incompatible with expected settings configurations."
+    },
+    "WHAT_IS_ALPHA_ANSWER": {
+        "message": "此 Alpha 版 uProxy 仍在开发中，有时可能不稳定；有些功能不完整，在 GitHub 上有一个<a href=\"https://github.com/uProxy/uproxy/issues\">待解决问题列表</a>。我们希望您去试试，然后提供反馈来帮助我们改进。",
+        "description": ""
+    },
+    "LOADING_FRIENDS": {
+        "message": "加载 uProxy 好友",
+        "description": "User's friends are being loaded from a social network."
+    },
+    "OK": {
+        "message": "确定",
+        "description": "Button label."
+    },
+    "GRANT": {
+        "message": "授权",
+        "description": "Label for button that accepts a friend's request to access the Internet through the user."
+    },
+    "NO_LONGER_SHARING": {
+        "message": "您不再共享网络连接。请单击下面的按钮请求连接，或者粘贴来自好友的请求链接以再次共享网络连接。",
+        "description": "Message shown when a one-time connection ends and the user was sharing."
+    },
+    "START_ONE_TIME_INSTRUCTION": {
+        "message": "要开始从好友那里获取网络连接，请单击下面的按钮。",
+        "description": ""
+    },
+    "CONFIRM_LOGOUT_GETTING_AND_SHARING": {
+        "message": "是否确定要注销？您将不再获取网络连接或与好友共享网络连接。",
+        "description": "Confirmation when user logs out from a social network while they are getting and sharing access with users on that network"
+    },
+    "DIGITAL_OCEAN_ERROR_MESSAGE": {
+        "message": "请检查您的 DigitalOcean 设置，然后重试。如果不想重试，请确认您没有名为 uproxy-cloud-server 的小程序。这将确保不会对您收取任何月费。",
+        "description": "Following a failed DigitalOcean install, instruct the user to consult DigitalOcean's website where they can check their settings or remove a half-installed server."
+    },
+    "CLOUD_INSTALL_LOGIN_TITLE": {
+        "message": "选择您附近的位置以创建云服务器。",
+        "description": "Message shown during DigitalOcean server deployment"
+    },
+    "RESTART_PROXYING": {
+        "message": "重试",
+        "description": "Displayed on a button next to the RECONNECT_FAILED message"
+    },
+    "WILL_UPROXY_WORK_ANSWER": {
+        "message": "<p>如果对 uProxy 支持的所有社交网络的访问都被封锁，则您将无法使用社交网络来帮助您设置与好友的连接。您仍可手动设置一次性连接，即通过安全的通道交换 uProxy 生成的链接，但每次要与好友连接时，都必须重复此交换操作。使用社交网络的优势在于得到授权后会自动建立连接。</p>",
+        "description": ""
+    },
+    "CLOUD_INSTALL_SUCCESS_MESSAGE": {
+        "message": "现在，您可以通过您的私有服务器与亲友共享网络连接了。",
+        "description": "Message shown after successful DigitalOcean server deployment"
+    },
+    "CLOUD_INSTALL_STATUS_LOGGING_IN": {
+        "message": "正在写入新的服务器……",
+        "description": "Progress bar label shown during cloud install indicating that we are logging into the newly created server."
+    },
+    "WHY_IS_IT_IMPORTANT_ANSWER": {
+        "message": "<p>uProxy 的设计目的是帮助互相信任的好友共享 Internet 连接。与您不信任的人连接存在风险，因此不建议这样做。</p><p>如果获取了某些恶意人员提供的网络连接，则他们也许能窥探您的上网行为，甚至篡改您的通信内容。除了信任为您提供网络连接的人之外，您还应信任他们的 Internet 连接也是安全的。因此，如果他们正从可能不安全的未知公共 Wi-Fi 热点连接，那么最好等到他们回家后从安全的网络连接。</p><p>如果您与不认识、不信任的人共享网络连接，则他们可能利用您的连接参与违法活动，那么根据地方法律，您可能会因为促成了该活动而承担法律责任。<p>不管是家庭 Wi-Fi 网络上的客人，还是世界另一端的 uProxy 好友，信任与其共享 Internet 连接的人很重要。</p>",
+        "description": ""
+    },
+    "DOES_UPROXY_PROTECT": {
+        "message": "uProxy 是否会保护我免受病毒、钓鱼攻击或黑客的侵害？",
+        "description": ""
+    },
+    "WHY_IS_UPROXY_ASKING": {
+        "message": "为什么 uProxy 需要这些 Chrome 权限？",
+        "description": ""
+    },
+    "RECONNECT_FAILED": {
+        "message": "重新连接失败",
+        "description": "Indicate that uProxy attempted to reconnect automatically but it failed."
+    },
+    "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
+        "message": "创建新帐户或者登录以连接并共享网络连接。<uproxy-faq-link anchor='whatAreCloudServers'>了解更多。</uproxy-faq-link>",
+        "description": "Message shown during DigitalOcean server deployment"
+    },
+    "DESTROY_CLOUD_SERVER_CONFIRMATION": {
+        "message": "这将会破坏你的 uProxy 云服务器。请记住，一旦你的云服务器被破坏，你的朋友和家人将无法使用它。",
+        "description": "Message that warns users their cloud server will be destroyed"
+    },
+    "EUROPE_AMSTERDAM": {
+        "message": "欧洲（阿姆斯特丹）",
+        "description": "Region option for deploying a DigitalOcean server"
+    },
+    "CONTINUE": {
+        "message": "继续",
+        "description": "Button label."
+    },
+    "EXT_MISSING_MESSAGE": {
+        "message": "下载并启用 uProxy 的 part 1 以开始。",
+        "description": "Shown in Chrome to instruct the user to install part 1 of uProxy."
+    },
+    "WHAT_IS_BETA": {
+        "message": "什么是 Beta 版本？",
+        "description": ""
+    },
+    "GRANTED_ACCESS_NOTIFICATION": {
+        "message": "__名字__授权了你的访问",
+        "description": "Notification for when a user's request to access the Internet through a friend has been accepted by that friend."
+    },
+    "CREATE_A_NEW_ACCOUNT": {
+        "message": "创建新账户",
+        "description": "Button text for creating a new account (e.g. for DigitalOcean)"
+    },
+    "WE_WONT_POST": {
+        "message": "未经您同意，我们不会公开共享您的数据或发布的内容",
+        "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user."
+    },
+    "PORT_CONTROL_NOT_SUPPORTED": {
+        "message": "您的路由器未启用端口控制。",
+        "description": "NAT-PMP, PCP, and UPnP are not supported in the router"
+    },
+    "ONE_TIME_GETTING": {
+        "message": "您当前正在获取网络连接。",
+        "description": "The user is connected to the Internet through their friend."
+    },
+    "WHY_SOCIAL_NETWORK": {
+        "message": "uProxy 使用社交网络帮助你和你的朋友设置连接",
+        "description": "Explains why uProxy needs social networks. (Friends need to login with the same social network on uProxy for friends to see each other.)"
+    },
+    "CANT_OPEN_ONE_TIME_MESSAGE": {
+        "message": "当前无法在登录到社交网络的同时打开手动连接。要启动手动连接，请通过设置菜单注销，然后重新粘贴链接。",
+        "description": "Text for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
+    },
+    "CLOUD_INSTALL_STATUS_INSTALLING_SSH": {
+        "message": "正在下载并安装 SSH 服务器映像...",
+        "description": "Progress bar label shown during cloud install indicating that we are downloading a Docker image for an SSH server."
+    },
+    "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS": {
+        "message": "正在下载安装脚本...",
+        "description": "Progress bar label shown during cloud install indicating that we are downloading scripts which will install uProxy."
+    },
+    "SHARING_UNAVAILABLE_MESSAGE": {
+        "message": "哎呀！您使用的是 Firefox 37；此版本有一个缺陷会妨碍共享（请参见 git.io/vf5x1）。此缺陷在 Firefox 38 中已修复，因此，您可以通过升级 Firefox 或改用 Chrome 来实现共享。",
+        "description": "Text for error that appears when the user can not share their Internet access with friends."
+    },
+    "UPDATE_AVAILABLE": {
+        "message": "有可用更新",
+        "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link."
+    },
+    "DOES_UPROXY_GIVE_ME": {
+        "message": "uProxy 提供匿名浏览吗？",
+        "description": ""
+    },
+    "POSSIBLY": {
+        "message": "可能",
+        "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
+    },
+    "NO_THANKS": {
+        "message": "不，谢谢",
+        "description": "Do not agree to submitting anonymous metrics to uProxy."
+    },
+    "SUBMIT_BUTTON_TEXT": {
+        "message": "提交",
+        "description": "Button that submits some data entered by the user, e.g. entering a friend invite"
+    },
+    "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
+        "message": "用 DigitalOcean 创建一个云服务器",
+        "description": "Message shown on invite screen for DigitalOcean server deployment"
+    },
+    "STATS_ENABLED_TOOLTIP": {
+        "message": "您将共享匿名统计数据。",
+        "description": "Text that appears in a tooltip when the user hovers over the 'anonymous stats enabled' icon."
+    },
+    "FRIEND_REQUESTED_ONE_TIME": {
+        "message": "您的好友已请求使用您的 Internet 连接。",
+        "description": "A friend has requested to access the Internet through the user."
+    }
+}
