@@ -26,7 +26,8 @@ Polymer({
     this.injectBoundHTML(
         ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
         this.$.loginMessage);
-
+    
+    ui.cloudInstallCancelDisabled = false;
     this.$.getStartedOverlay.open();
   },
   showDigitalOceanAccountHelpOverlay: function() {
@@ -66,7 +67,6 @@ Polymer({
     if (!this.$.installingOverlay.opened) {
       this.closeOverlays();
       ui.cloudInstallStatus = '';
-      ui.cloudInstallCancelDisabled = false;
       this.$.installingOverlay.open();
     }
     ui.cloudUpdate({
