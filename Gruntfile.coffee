@@ -853,7 +853,7 @@ taskManager.add 'build_chrome_app', [
   'copy:chrome_app'
 ].concat fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')
 
-taskManager.add 'build_chrome_ext', [
+taskManager.add('build_chrome_ext', [
   'base'
   'ts:chrome_extension'
   'copy:chrome_extension'
@@ -861,7 +861,7 @@ taskManager.add 'build_chrome_ext', [
   'browserify:chromeExtMain'
   'browserify:chromeContext'
 ].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)
-.concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true)
+.concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true))
 
 taskManager.add 'build_chrome', [
   'build_chrome_app'
@@ -869,14 +869,14 @@ taskManager.add 'build_chrome', [
 ]
 
 # Firefox build tasks.
-taskManager.add 'build_firefox', [
+taskManager.add('build_firefox', [
   'base'
   'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'
   'browserify:firefoxContext'
 ].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)
-.concat fullyVulcanize('firefox/data/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true)
+.concat fullyVulcanize('firefox/data/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true))
 
 # CCA build tasks.
 taskManager.add 'build_cca', [

@@ -70,6 +70,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
+  private cloudInterfaces_ :{
+    [cloudProvider: string] :{
+      installer :any,
+      provisioner :any
+    }
+  } = {};
+
   constructor() {
     log.debug('Preparing uProxy Core');
     copyPasteConnection = new remote_connection.RemoteConnection(
@@ -643,13 +650,16 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
 
+    this.cloudInterfaces_[args.providerName] = this.cloudInterfaces_[args.providerName] || { installer: undefined, provisioner: undefined};
     const provisionerName = CLOUD_PROVIDER_MODULE_PREFIX + args.providerName;
-    const provisioner = freedom[provisionerName]();
-    const installer = freedom['cloudinstall']();
+    const provisioner = this.cloudInterfaces_[args.providerName].provisioner || freedom[provisionerName]();
+    const installer = this.cloudInterfaces_[args.providerName].installer || freedom['cloudinstall']();
+    this.cloudInterfaces_[args.providerName] = { installer: installer, provisioner: provisioner};
 
     const destroyModules = () => {
       freedom[provisionerName].close(provisioner);
       freedom['cloudinstall'].close(installer);
+      delete this.cloudInterfaces_[args.providerName];
     };
 
     switch (args.operation) {
@@ -709,8 +719,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
             });
           });
         }, (installError: any) => {
+          // When we cancel the cloud install we close the connection
+          // to the installer by destroying the modules
+          if (installError === 'closed') {
+            return Promise.reject(new Error('canceled'));
+          }
+          
           // Tell user if the server already exists
           if (installError.errcode === "VM_AE") {
+            destroyModules();
             return Promise.reject(new Error('server already exists'));
           }
 
