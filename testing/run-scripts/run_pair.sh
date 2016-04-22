@@ -40,6 +40,7 @@ function usage () {
   exit 1
 }
 
+# TODO: replace browser-version with a Docker image name, ala run_cloud.sh
 while getopts gb:p:kvr:m:l:s:u:h? opt; do
   case $opt in
     g) GIT=true ;;
@@ -86,37 +87,6 @@ for role in getter giver; do
     docker rm -f $CONTAINER_PREFIX-$role > /dev/null
   fi
 done
-
-function make_image () {
-  if [ "X$(docker images | tail -n +2 | awk '{print $1}' | grep uproxy/$1 )" == "Xuproxy/$1" ]
-  then
-    echo "Reusing existing image uproxy/$1"
-  else
-    BROWSER=$(echo $1 | cut -d - -f 1)
-    VERSION=$(echo $1 | cut -d - -f 2)
-    IMAGEARGS=
-    if [ -n "$PREBUILT" ]
-    then
-      IMAGEARGS="-p"
-    elif [ "$GIT" = true ]
-    then
-      IMAGEARGS="-g -b $BRANCH"
-    fi
-    ./image_make.sh $IMAGEARGS $BROWSER $VERSION
-  fi
-}
-
-if ! make_image $1
-then
-  echo "FAILED: Could not make docker image for $1."
-  exit 1
-fi
-
-if ! make_image $2
-then
-  echo "FAILED: Could not make docker image for $2."
-  exit 1
-fi
 
 # $1 is the name of the resulting container.
 # $2 is the image to run, and the rest are flags.
