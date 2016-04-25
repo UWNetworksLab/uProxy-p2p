@@ -1,9 +1,9 @@
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
 /// <reference path='../../../third_party/aes-js/aes-js.d.ts' />
 
 import aes = require('aes-js');
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
+import transformer = require('./transformer');
 
 var log :logging.Log = new logging.Log('encryption shaper');
 
@@ -25,17 +25,11 @@ export var sampleConfig = () : EncryptionConfig => {
 }
 
 // A packet shaper that encrypts the packets with AES CBC.
-export class EncryptionShaper implements Transformer {
+export class EncryptionShaper implements transformer.Transformer {
   private key_ :ArrayBuffer;
 
   public constructor() {
     this.configure(JSON.stringify(sampleConfig()));
-  }
-
-  // This method is required to implement the Transformer API.
-  // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key:ArrayBuffer) :void => {
-    throw new Error('setKey unimplemented');
   }
 
   public configure = (json:string) :void => {
@@ -72,9 +66,6 @@ export class EncryptionShaper implements Transformer {
     var ciphertext = parts[1];
     return [this.decrypt_(iv, ciphertext)];
   }
-
-  // No-op (we have no state or any resources to dispose).
-  public dispose = () :void => {}
 
   static makeIV = () :ArrayBuffer => {
     var randomBytes = new Uint8Array(IV_SIZE);

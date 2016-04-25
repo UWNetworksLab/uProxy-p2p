@@ -1,11 +1,9 @@
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
+import transformer = require('./transformer');
 
 /** An obfuscator which does nothing. */
-class PassThrough implements Transformer {
+class PassThrough implements transformer.Transformer {
 
   public constructor() {}
-
-  public setKey = (key:ArrayBuffer) => {}
 
   public configure = (json:string) : void => {}
 
@@ -16,8 +14,6 @@ class PassThrough implements Transformer {
   public restore = (buffer:ArrayBuffer) : ArrayBuffer[] => {
     return [buffer];
   }
-
-  public dispose = () : void => {}
 }
 
 export = PassThrough;

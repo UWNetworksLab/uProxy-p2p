@@ -1,7 +1,6 @@
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-
 import logging = require('../logging/logging');
 import random = require('../crypto/random');
+import transformer = require('./transformer');
 
 var log :logging.Log = new logging.Log('caesar');
 
@@ -19,16 +18,12 @@ export var sampleConfig = () : Config => {
 }
 
 // Caesar cipher.
-export class CaesarCipher implements Transformer {
+export class CaesarCipher implements transformer.Transformer {
   /** Value by which bytes' values are shifted. */
   private shift_ :number;
 
   public constructor() {
     this.configure(JSON.stringify(sampleConfig()));
-  }
-
-  public setKey = (key:ArrayBuffer) => {
-    throw new Error('setKey unimplemented');
   }
 
   public configure = (json:string) : void => {
@@ -51,9 +46,6 @@ export class CaesarCipher implements Transformer {
     this.map_(buffer, this.restoreByte);
     return [buffer];
   }
-
-  // No-op (we have no state or any resources to dispose).
-  public dispose = () : void => {}
 
   /** Applies mapper to each byte of buffer. */
   private map_ = (
