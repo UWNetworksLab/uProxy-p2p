@@ -1,4 +1,3 @@
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
 /// <reference path='../../../third_party/aes-js/aes-js.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
@@ -7,6 +6,7 @@ import encryption = require('./encryptionShaper');
 import fragmentation = require('./fragmentationShaper');
 import logging = require('../logging/logging');
 import sequence = require('./byteSequenceShaper');
+import transformer = require('./transformer');
 
 const log :logging.Log = new logging.Log('protean');
 
@@ -40,7 +40,7 @@ function flatMap<T,E>(input :Array<T>, mappedFunction :(element :T) => Array<E>)
 // - AES encryption
 // - decompression using arithmetic coding
 // - byte sequence injection
-export class Protean implements Transformer {
+export class Protean implements transformer.Transformer {
   // Fragmentation transformer
   private fragmenter_ :fragmentation.FragmentationShaper;
 
@@ -55,12 +55,6 @@ export class Protean implements Transformer {
 
   public constructor() {
     this.configure(JSON.stringify(sampleConfig()));
-  }
-
-  // This method is required to implement the Transformer API.
-  // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key :ArrayBuffer) :void => {
-    throw new Error('setKey unimplemented');
   }
 
   public configure = (json :string) :void => {
@@ -119,7 +113,4 @@ export class Protean implements Transformer {
     let defragmented = flatMap(decrypted, this.fragmenter_.restore);
     return defragmented;
   }
-
-  // No-op (we have no state or any resources to dispose).
-  public dispose = () :void => {}
 }

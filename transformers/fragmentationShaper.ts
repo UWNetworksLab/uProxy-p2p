@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import defragmenter = require('./defragmenter');
 import encryption = require('./encryptionShaper');
@@ -29,12 +27,6 @@ export class FragmentationShaper {
 
   public constructor() {
     this.configure(JSON.stringify(sampleConfig()));
-  }
-
-  // This method is required to implement the Transformer API.
-  // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key :ArrayBuffer) :void => {
-    throw new Error('setKey unimplemented');
   }
 
   // Configure with the target length.
@@ -81,9 +73,6 @@ export class FragmentationShaper {
       return [];
     }
   }
-
-  // No-op (we have no state or any resources to dispose).
-  public dispose = () :void => {}
 
   // Perform the following steps:
   // - Break buffer into one or more fragments

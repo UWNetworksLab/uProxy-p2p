@@ -1,9 +1,8 @@
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-
 import arithmetic = require('./arithmetic');
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import decompression = require('./decompressionShaper');
 import logging = require('../logging/logging');
+import transformer = require('./transformer');
 
 const log :logging.Log = new logging.Log('decompression shaper');
 
@@ -51,7 +50,7 @@ export function sampleConfig() :decompression.DecompressionConfig {
 //
 // The important thing to realize is that the compression algorithm is being
 // run in reverse, contrary to normal expectations.
-export class DecompressionShaper implements Transformer {
+export class DecompressionShaper implements transformer.Transformer {
   private frequencies_ :number[];
 
   private encoder_ :arithmetic.Encoder;
@@ -60,12 +59,6 @@ export class DecompressionShaper implements Transformer {
 
   public constructor() {
     this.configure(JSON.stringify(sampleConfig()));
-  }
-
-  // This method is required to implement the Transformer API.
-  // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key :ArrayBuffer) :void => {
-    throw new Error('setKey unimplemented');
   }
 
   // Configure using the target byte frequencies.
@@ -125,7 +118,4 @@ export class DecompressionShaper implements Transformer {
     // Slice off the extra bytes and only return the data.
     return [encoded.slice(1, -4)];
   }
-
-  // No-op (we have no state or any resources to dispose).
-  public dispose = () :void => {}
 }
