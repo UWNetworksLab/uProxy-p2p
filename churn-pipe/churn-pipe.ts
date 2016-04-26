@@ -12,6 +12,7 @@ import net = require('../net/net.types');
 import PassThrough = require('../transformers/passthrough');
 import promises = require('../promises/promises');
 import protean = require('../transformers/protean');
+import rc4 = require('../transformers/rc4');
 import sequence = require('../transformers/byteSequenceShaper');
 import transformer = require('../transformers/transformer');
 
@@ -29,6 +30,7 @@ var transformers :{[name:string] : new() => transformer.Transformer} = {
   'fragmentationShaper': fragmentation.FragmentationShaper,
   'none': PassThrough,
   'protean': protean.Protean,
+  'rc4': rc4.Rc4Transformer,
   'sequenceShaper': sequence.ByteSequenceShaper
 };
 
