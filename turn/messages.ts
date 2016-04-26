@@ -1,10 +1,8 @@
-/// <reference path='../../../third_party/sha1/sha1.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
-
+import crypto = require('crypto');
 import net = require('../net/net.types');
-
-import sha1 = require('crypto/sha1');
 
 /**
  * Utilities for decoding and encoding STUN messages.
@@ -125,9 +123,7 @@ export var REALM = 'myrealm';
  * supply our crypto library with a UTF-8 string generated from the 16 bytes.
  */
  // TODO: dynamic username/password would be pretty easy to implement
- // TODO: would be nice to run uint8array -> string on boot but the files
- //       don't seem to load in the right order...might be a typescript bug
- var HMAC_KEY = new Uint8Array([
+ const HMAC_KEY = new Buffer([
    0xbd, 0x8a, 0xdb, 0x31,
    0x7d, 0x5d, 0x54, 0x2e,
    0x5e, 0x2a, 0xba, 0x5b,
@@ -328,25 +324,10 @@ export function formatStunMessageWithIntegrity(message:StunMessage) : Uint8Array
  * supplied byte array.
  */
 export function computeHash(bytes:Uint8Array) : Uint8Array {
-  var keyAsString = arraybuffers.arrayBufferToString(HMAC_KEY.buffer);
   // MESSAGE-INTEGRITY attributes are always 24 bytes long:
   // 4 bytes header + 20 bytes hash
-  var bytesToBeHashed = bytes.subarray(0, bytes.byteLength - 24);
-  // Think of the next few lines as uint8ArrayToString().
-  // This is necessary because, depending on how b is constructed,
-  // b.buffer is not guaranteed to equal a, where b is a Uint8Array
-  // view on an ArrayBuffer a (in particular, views created with
-  // subarray will share the same parent ArrayBuffer).
-  // TODO: add uint8ArrayToString to uproxy-build-tools
-  var a :string[] = [];
-  for (var i = 0; i < bytesToBeHashed.length; ++i) {
-    a.push(String.fromCharCode(bytes[i]));
-  }
-  var bytesToBeHashedAsString = a.join('');
-
-  var hashAsString = sha1.str_hmac_sha1(keyAsString,
-      bytesToBeHashedAsString);
-  return new Uint8Array(arraybuffers.stringToArrayBuffer(hashAsString));
+  const bytesToBeHashed = bytes.subarray(0, bytes.byteLength - 24);
+  return crypto.createHmac('sha1', HMAC_KEY).update(bytesToBeHashed).digest();
 }
 
 /**

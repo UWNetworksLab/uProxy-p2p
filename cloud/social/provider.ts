@@ -1,15 +1,13 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../../third_party/sha1/sha1.d.ts' />
 
 require('../social/monkey/process');
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
+import crypto = require('crypto');
 import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
 import promises = require('../../promises/promises');
 import queue = require('../../handler/queue');
-
-import sha1 = require('crypto/sha1');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
 import * as ssh2 from 'ssh2';
@@ -483,7 +481,7 @@ class Connection {
     if (this.invite_.hostKey) {
       connectConfig.hostHash = 'sha1';
       let keyBuffer = new Buffer(this.invite_.hostKey, 'base64');
-      let expectedHash = sha1.hex_sha1(keyBuffer.toString('binary'));
+      let expectedHash = crypto.createHash('sha1').update(keyBuffer).digest('hex');
       connectConfig.hostVerifier = (keyHash :string) => {
         return keyHash === expectedHash;
       };
