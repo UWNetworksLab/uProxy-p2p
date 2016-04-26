@@ -15,7 +15,7 @@ var requestedEndpoint: net.Endpoint = {
 
 // Character code for CTRL-D.
 // When received, we close the connection.
-var CTRL_D_CODE_HEX = '04';
+const CTRL_D_CODE = 4;
 
 var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
@@ -42,7 +42,7 @@ server.listen().then((actualEndpoint) => {
 
     connection.dataFromSocketQueue.setSyncHandler((data:ArrayBuffer): void => {
       log.info('%1: received %2 bytes', id, data.byteLength);
-      if (new Buffer(data).toString('hex') === CTRL_D_CODE_HEX) {
+      if (data.byteLength === 1 && new Uint8Array(data)[0] === CTRL_D_CODE) {
         connection.close();
       } else {
         connection.send(data);
