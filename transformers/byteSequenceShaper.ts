@@ -49,7 +49,7 @@ export interface SequenceModel {
 // Creates a sample (non-random) config, suitable for testing.
 export var sampleConfig = () : SequenceConfig => {
   var buffer = arraybuffers.stringToArrayBuffer('OH HELLO');
-  var hex = arraybuffers.arrayBufferToHexString(buffer);
+  var hex = new Buffer(buffer).toString('hex');
   var sequence = {
     index: 0,
     offset: 0,
@@ -170,10 +170,10 @@ export class ByteSequenceShaper implements transformer.Transformer {
   // Decode the byte sequence from a string in the sequence model
   static deserializeModel(model :SerializedSequenceModel) :SequenceModel {
     return {
-      index:model.index,
-      offset:model.offset,
-      sequence:arraybuffers.hexStringToArrayBuffer(model.sequence),
-      length:model.length
+      index: model.index,
+      offset: model.offset,
+      sequence: new Buffer(model.sequence, 'hex'),
+      length: model.length
     };
   }
 

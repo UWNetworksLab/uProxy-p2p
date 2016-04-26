@@ -53,30 +53,6 @@ export function stringToArrayBuffer(s:string) :ArrayBuffer {
   return buffer;
 }
 
-// Converts an ArrayBuffer to a string of hex codes (of the regexp form
-// /(hh\.)*hh/).
-export function arrayBufferToHexString(buffer:ArrayBuffer) :string {
-  var bytes = new Uint8Array(buffer);
-  var a :string[] = [];
-  for (var i = 0; i < buffer.byteLength; ++i) {
-    a.push(bytes[i].toString(16));
-  }
-  return a.join('.');
-}
-
-// Converts a HexString of the regexp form /(hh\.)*hh/ (where `h` is a
-// hex-character) to an ArrayBuffer.
-export function hexStringToArrayBuffer(hexString:string) :ArrayBuffer {
-  if(hexString === '') { return new ArrayBuffer(0); }
-  var hexChars = hexString.split('.');
-  var buffer = new ArrayBuffer(hexChars.length);
-  var bytes = new Uint8Array(buffer);
-  for (var i = 0; i < hexChars.length; ++i) {
-      bytes[i] = parseInt('0x' + hexChars[i]);
-  }
-  return buffer;
-}
-
 // Returns an ArrayBuffer backed by the same memory as the supplied
 // Node.js Buffer.
 export function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {

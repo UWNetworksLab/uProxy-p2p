@@ -17,10 +17,8 @@ export interface EncryptionConfig {
 
 // Creates a sample (non-random) config, suitable for testing.
 export var sampleConfig = () : EncryptionConfig => {
-  var bytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-  var hex = arraybuffers.arrayBufferToHexString(bytes.buffer);
   return {
-    key: hex
+    key: new Buffer(16).fill(0).toString('hex')
   };
 }
 
@@ -38,7 +36,7 @@ export class EncryptionShaper implements transformer.Transformer {
     // Required parameter
     if ('key' in config) {
       var encryptionConfig = <EncryptionConfig>config;
-      this.key_ = arraybuffers.hexStringToArrayBuffer(encryptionConfig.key);
+      this.key_ = new Buffer(encryptionConfig.key, 'hex');
     } else {
       throw new Error('Encryption shaper requires key parameter');
     }

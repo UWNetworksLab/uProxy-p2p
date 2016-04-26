@@ -1,6 +1,5 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
@@ -16,7 +15,7 @@ var requestedEndpoint: net.Endpoint = {
 
 // Character code for CTRL-D.
 // When received, we close the connection.
-var CTRL_D_HEX_STR_CODE = '4';
+var CTRL_D_CODE_HEX = '04';
 
 var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
@@ -43,7 +42,7 @@ server.listen().then((actualEndpoint) => {
 
     connection.dataFromSocketQueue.setSyncHandler((data:ArrayBuffer): void => {
       log.info('%1: received %2 bytes', id, data.byteLength);
-      if (arraybuffers.arrayBufferToHexString(data) === CTRL_D_HEX_STR_CODE) {
+      if (new Buffer(data).toString('hex') === CTRL_D_CODE_HEX) {
         connection.close();
       } else {
         connection.send(data);

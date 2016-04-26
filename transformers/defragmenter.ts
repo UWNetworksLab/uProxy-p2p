@@ -44,7 +44,7 @@ export class Defragmenter {
   //     This fragment a new fragment for a new packet.
   public addFragment(fragment:fragments.Fragment) {
     // Convert ArrayBuffer to hex string so that it can be used as a map key
-    var hexid = arraybuffers.arrayBufferToHexString(fragment.id);
+    var hexid = new Buffer(fragment.id).toString('hex');
 
     if (hexid in this.tracker_) {
       // A fragment for an existing packet
