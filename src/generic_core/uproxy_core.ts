@@ -3,6 +3,7 @@
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
 import _ = require('lodash');
+import key_verify = require('./key-verify');
 import logging = require('../lib/logging/logging');
 import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
 import net = require('../lib/net/net.types');
@@ -111,7 +112,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
-
+  private verifySessions_ :{ [instanceId:string]:key_verify.KeyVerify } = {};
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
   constructor() {
@@ -798,6 +799,37 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       enforceProxyServerValidity;
     globals.settings.validProxyServers = policy.validProxyServers;
     this.updateGlobalSettings(globals.settings);
+  }
+
+  // Figure out what the returned promise is for.  Probably nothing.
+  public verifyUser(inst:social.InstancePath) :void {
+    console.log("app.core: verifyUser:", inst);
+    // This only works for Quiver right now.  We have to plumb in the
+    // other networks' public key hashes.
+
+    // Open question: does one of these mean a lingering old
+    // verification session or a double-attempt by the UI?
+    if (this.verifySessions_[inst.instanceId] !== undefined) {
+      console.log("app.core: verifyUser: already in verification session.");
+      return;
+    }
+    var network = this.getNetworkByName_(inst.network.name);
+    var user = network.getUser(inst.userId);
+    //network.getKeyFromClientId(inst.
+    // Pull these out of our own and the peer's instances.
+    var ourPubKey = "";
+    var peerPubKey = "";
+    var delegate = <key_verify.Delegate>{
+      sendMessage : function(msg:any) :Promise<boolean> { return Promise.resolve<boolean>(true)},
+      showSAS : function(sas:string) :Promise<boolean> { 
+        console.log("Got SAS " + sas); 
+        return Promise.resolve<boolean>(true);
+      } 
+    };
+
+    this.verifySessions_[inst.instanceId] = new key_verify.KeyVerify(ourPubKey, peerPubKey, delegate);
+    this.verifySessions_[inst.instanceId].start().then(function(succeeded) {
+    });
   }
 
   // Remove contact from friend list and storage

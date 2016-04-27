@@ -180,7 +180,7 @@
               </div>
               <template repeat='{{ instance in sortedInstances }}' vertical layout>
                 <uproxy-instance
-                    userName='{{ contact.name }}'
+                    user='{{ contact }}'
                     instance='{{ instance }}'
                     on-instance-changed='{{ offeringInstancesChanged }}'>
                 </uproxy-instance>
