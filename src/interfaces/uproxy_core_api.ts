@@ -117,7 +117,9 @@ export enum Command {
   CLOUD_UPDATE = 1029,
   UPDATE_ORG_POLICY = 1030,
   REMOVE_CONTACT = 1031,
-  POST_REPORT = 1032
+  POST_REPORT = 1032,
+  VERIFY_USER = 1033,
+  VERIFY_USER_SAS = 1034
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -156,7 +158,11 @@ export enum Update {
   CLOUD_INSTALL_STATUS = 2027,
   REMOVE_FRIEND = 2028, // Removed friend from roster.
   // Payload is an integer between 0 and 100.
-  CLOUD_INSTALL_PROGRESS = 2029
+  CLOUD_INSTALL_PROGRESS = 2029,
+  // User verification startup, with peer's SAS
+  VERIFY_LOCAL_CHECK = 2030,
+  // Verification succeeded or failed.
+  VERIFY_USER_COMPLETE = 2031
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -343,6 +349,10 @@ export interface CoreApi {
 
   // Make a domain-fronted POST request to the uProxy logs/stats server.
   postReport(args:PostReportArgs) : Promise<void>;
+
+  // Start a ZRTP key-verification session.
+  verifyUser(inst :social.InstancePath) :Promise<void>;
+}
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }

@@ -1393,7 +1393,9 @@ export class UserInterface implements ui_constants.UiApi {
   }
   
   // I don't know why these are all member declarations of function values.
-  public startVerifying = (inst :social.InstanceData) :Promise<void> => {
-
+  public startVerifying = (network: string, inst :social.InstanceData) :Promise<void> => {
+    console.log('ui:startVerifying on ['+network+']' + JSON.stringify(inst) + ' started.');
+    // Look up 'inst' and get an instance path.
+    return this.core.verifyUser(this.getInstancePath_(inst.instanceId));
   }
 } // class UserInterface

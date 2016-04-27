@@ -5,11 +5,17 @@ import ui_constants = require('../../interfaces/ui');
 import net = require('../../../../third_party/uproxy-lib/net/net.types');
 import user_interface = require('../scripts/ui');
 
+// generic_ui/scripts/ui.ts: UserInterface
 var ui = ui_context.ui;
+// generic_ui/scripts/core_connector.ts: CoreConnector
 var core = ui_context.core;
+// generic_ui/scripts/ui.ts: Model
 var model = ui_context.model;
 
 Polymer({
+  // Two component constructor arguments:
+  //  user :User (generic_ui/scripts/user.ts)
+  //  instance :InstanceData (interfaces/social.ts)
   ready: function() {
     // Expose global ui object and UI module in this context. This allows the
     // hidden? watch for the get/give toggle to actually update.
@@ -20,7 +26,7 @@ Polymer({
   },
   start: function() {
     if (!this.instance.isOnline) {
-      this.ui.toastMessage = ui.i18n_t("FRIEND_OFFLINE", { name: this.userName });
+      this.ui.toastMessage = ui.i18n_t("FRIEND_OFFLINE", { name: this.user.name });
       return;
     }
 
@@ -41,12 +47,13 @@ Polymer({
     this.fire('instance-changed');
   },
   verify: function() {
-    if (this.instance.verifyState != VERIFY_COMPLETE) {
-      ui.startVerifying(this.instance);
+    if (this.instance.verifyState != social.VerifyState.VERIFY_COMPLETE) {
+      console.log("Starting verify.");
+      core.startVerifying(this.user.network, this.instance);
     } else {
       console.log("instance is already verified.");
     }
-  }
+  },
   observe: {
     'instance.isOnline': 'fireChanged',
   },
