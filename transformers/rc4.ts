@@ -1,4 +1,3 @@
-/// <reference path='../../../third_party/sha1/sha1.d.ts' />
 /// <reference path='../../../third_party/simple-rc4/simple-rc4.d.ts' />
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
