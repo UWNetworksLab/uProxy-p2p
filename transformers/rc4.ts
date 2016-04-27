@@ -55,7 +55,7 @@ export class Rc4Transformer implements transformer.Transformer {
     try {
       const config = <Config>JSON.parse(json);
       if (config.key === undefined) {
-        throw new Error("must set key parameter");
+        throw new Error('must set key parameter');
       }
       const key = new Buffer(config.key, 'hex');
       if (key.byteLength !== KEY_LENGTH_BYTES) {
