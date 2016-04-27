@@ -831,9 +831,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     var verifySession = new key_verify.KeyVerify(ourPubKey, peerPubKey, delegate);
     this.verifySessions_[inst.instanceId] = verifySession;
     console.log("app.core: verifyUser: ", 
-                { "network":network, "remoteUser":remoteUser, "remoteInstance":remoteInstance,
+                { "network":network, "remoteUser":remoteUser,
+                  "remoteInstance":remoteInstance,
                   "ourPubKey":ourPubKey, "peerPubKey":peerPubKey });
-                                            
+
     verifySession.start().then(function() {
       console.log("verifySession: succeeded.");
     }, function () { 

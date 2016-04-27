@@ -392,7 +392,6 @@ export class KeyVerify {
     return true;
   }
 
-
   private set(message: Messages.Tagged) :boolean {
     if (this.messages_[message.type] !== null) {
       return false;
@@ -665,6 +664,6 @@ export class KeyVerify {
     let valueB64 = new Buffer(value).toString('base64');
     let full_hmac = this.fullHmac(key, value);
     let result = new Buffer([full_hmac.slice(0,2)]).toString('base64');
-    return result; 
+    return result;
   }
 };
