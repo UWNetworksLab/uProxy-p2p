@@ -1,7 +1,6 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import datachannel = require('./datachannel');
-import djb2 = require('../crypto/djb2hash');
 import handler = require('../handler/queue');
 import logging = require('../logging/logging');
 import signals = require('./signals');
@@ -21,6 +20,16 @@ export enum State {
   CONNECTING,   // Can move to CONNECTED or CLOSED.
   CONNECTED,    // Can move to CLOSED.
   CLOSED  // End-state, cannot change.
+}
+
+// Quick port of djb2 to TypeScript:
+//   http://www.cse.yorku.ca/~oz/hash.html
+function djb2(s: string): number {
+  let hash = 5381;
+  for (let i = 0; i < s.length; i++) {
+    hash = ((hash << 5) + hash) + s.charCodeAt(i); // hash * 33 + c
+  }
+  return hash;
 }
 
 export interface PeerConnection<TSignallingMessage> {
@@ -353,8 +362,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       if (state === 'have-local-offer') {
         return this.pc_.getLocalDescription().then(
             (localOffer:freedom.RTCPeerConnection.RTCSessionDescription) => {
-          if (djb2.stringHash(JSON.stringify(remoteOffer.sdp)) <
-              djb2.stringHash(JSON.stringify(localOffer.sdp))) {
+          if (djb2(JSON.stringify(remoteOffer.sdp)) <
+              djb2(JSON.stringify(localOffer.sdp))) {
             // TODO: implement reset and use their offer.
             return Promise.reject('Simultaneous offers not yet implemented.');
           } else {
