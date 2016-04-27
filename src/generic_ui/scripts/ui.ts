@@ -346,6 +346,8 @@ export class UserInterface implements ui_constants.UiApi {
       }).catch((e: Error) => {
         this.showDialog(this.i18n_t("RESTART_FAILURE_TITLE"), this.i18n_t("RESTART_FAILURE_TEXT"));
       });
+    }).then(() => {
+      this.bringUproxyToFront();
     });
   }
 
