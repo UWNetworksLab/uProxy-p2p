@@ -332,19 +332,20 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public restartServer_ = (providerName :string) => {
-    this.getConfirmationWithOptions(
+    this.getConfirmation(
       this.i18n_t('RESTART_SERVER_TITLE'),
       this.i18n_t('RESTART_SERVER_TEXT'),
+      this.i18n_t('CANCEL'),
       this.i18n_t('RESTART_SERVER')
     ).then(() => {
-      this.toastMessage = this.i18n_t("RESTARTING_SERVER");
+      this.toastMessage = this.i18n_t('RESTARTING_SERVER');
       return this.core.cloudUpdate({
         operation: uproxy_core_api.CloudOperationType.CLOUD_REBOOT,
         providerName: providerName
       }).then(() => {
-        this.toastMessage = this.i18n_t("RESTART_SUCCESS");
+        this.toastMessage = this.i18n_t('RESTART_SUCCESS');
       }).catch((e: Error) => {
-        this.showDialog(this.i18n_t("RESTART_FAILURE_TITLE"), this.i18n_t("RESTART_FAILURE_TEXT"));
+        this.showDialog(this.i18n_t('RESTART_FAILURE_TITLE'), this.i18n_t('RESTART_FAILURE_TEXT'));
       });
     }).then(() => {
       this.bringUproxyToFront();
@@ -376,7 +377,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public getConfirmation(heading :string,
                          text :string,
-                         cancelContinueButtons :boolean = false) :Promise<void> {
+                         dismissButtonText ?:string,
+                         fulfillButtonText ?:string): Promise<void> {
     return new Promise<void>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
@@ -384,35 +386,11 @@ export class UserInterface implements ui_constants.UiApi {
         heading: heading,
         message: text,
         buttons: [{
-          text: cancelContinueButtons ?
-              this.i18n_t('CANCEL') : this.i18n_t('NO'),
+          text: dismissButtonText ? dismissButtonText : this.i18n_t('NO'),
           callbackIndex: callbackIndex,
           dismissive: true
         }, {
-          text: cancelContinueButtons ?
-              this.i18n_t('CONTINUE') : this.i18n_t('YES'),
-          callbackIndex: callbackIndex
-        }]
-      });
-    });
-  }
-
-  public getConfirmationWithOptions(heading :string,
-                                    text :string,
-                                    fulfillButtonText :string,
-                                    dismissButtonText ?:string) :Promise<void> {
-    return new Promise<void>((F, R) => {
-      var callbackIndex = ++this.confirmationCallbackIndex_;
-      this.confirmationCallbacks_[callbackIndex] = { fulfill: F, reject: R };
-      this.fireSignal('open-dialog', {
-        heading: heading,
-        message: text,
-        buttons: [{
-          text: dismissButtonText ? dismissButtonText : this.i18n_t('CANCEL'),
-          callbackIndex: callbackIndex,
-          dismissive: true
-        },{
-          text: fulfillButtonText,
+          text: fulfillButtonText ? fulfillButtonText : this.i18n_t('YES'),
           callbackIndex: callbackIndex
         }]
       });

@@ -1400,7 +1400,7 @@
     "message": "If you get this error repeatedly, try restarting your server."
   },
   "RESTART_SERVER": {
-    "description": "Text shown on dialog button that allows you to restart a server.",
+    "description": "Label for button that confirms user wants to restart a server.",
     "message": "Restart now"
   },
   "RESTARTING_SERVER": {
