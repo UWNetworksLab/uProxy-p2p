@@ -40,9 +40,9 @@ export function sampleConfig(): Config {
 //     IV = SHA1(K || R)
 //     RET R || RC4(IV[0,...,7], P)
 //
-//   def Decrypt(K1, C):
+//   def Decrypt(K, C):
 //     R = C[0,...,7]
-//     IV = SHA1(K1 || R)
+//     IV = SHA1(K || R)
 //     RET RC4(IV[0,...,7], C[8,...,|C | -1])
 export class Rc4Transformer implements transformer.Transformer {
   private key_: Buffer;
