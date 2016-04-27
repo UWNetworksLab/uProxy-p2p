@@ -20,6 +20,7 @@ const DEFAULT_SIZE: string = '1gb';
 const STATUS_CODES: { [k: string]: string; } = {
   'START': 'Starting provisioner',
   'STOP': 'Stopping cloud server',
+  'REBOOT': 'Rebooting cloud server',
   'OAUTH_INIT': 'Initializing oauth flow',
   'OAUTH_ERROR': 'Error getting oauth token',
   'OAUTH_COMPLETE': 'Got oauth token',
@@ -154,6 +155,36 @@ class Provisioner {
         return Promise.resolve<void>();
       }
       return Promise.reject(e);
+    });
+  }
+
+  /**
+   * Reboots a droplet with this name
+   * @param {String} droplet name, as a string
+   * @return {Promise.<void>}, resolves after waiting for reboot action
+   * to complete or rejects if droplet doesn't exist
+   */
+  public reboot = (name: string) : Promise<void> => {
+    this.sendStatus_('REBOOT');
+    return this.doOAuth_().then((oauthObj: any) => {
+      this.state_.oauth = oauthObj;
+    }).then(() => {
+      return this.getDroplet_(name);
+    }).then((resp: any) => {
+      this.state_.cloud = this.state_.cloud || {};
+      this.state_.cloud.vm = this.state_.cloud.vm || resp.droplet;
+      // Make sure there are no actions in progress before rebooting
+      this.sendStatus_('CLOUD_WAITING_VM');
+      return this.waitDigitalOceanActions_();
+    }).then(() => {
+      console.log('Rebooting cloud server');
+      return this.doRequest_('POST', 'droplets/' + this.state_.cloud.vm.id + '/actions', JSON.stringify({
+        type: 'reboot',
+      }));
+    }).then((unused: any) => {
+      // Wait until reboot server is completed
+      this.sendStatus_('CLOUD_WAITING_VM');
+      return this.waitDigitalOceanActions_();
     });
   }
 
