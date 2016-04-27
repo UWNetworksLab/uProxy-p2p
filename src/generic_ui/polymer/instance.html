@@ -2,7 +2,9 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel="import" href="button.html">
 
-<polymer-element name='uproxy-instance' attributes='userName, instance'>
+<polymer-element name='uproxy-instance' attributes='user, instance'>
+  <!-- user:User (generic_ui/scripts/user.ts),
+       instance:InstanceData (interfaces/social.ts)-->
   <template>
     <style>
     #wrapper.offline {
@@ -39,9 +41,14 @@
         <bdi>{{ instance.description }}</bdi>
       </p>
 
-      <uproxy-button on-tap='{{ verify }}'>
-        {{ "VERIFY" | $$ }}
-      </uproxy-button>
+      <div id='verification' hidden?='{{ instance.verifyState != VerifyState.VERIFY_BEGIN }}'>
+        Verification UI Here.
+      </div>
+      <div id='verification' hidden?='{{ instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
+        <uproxy-button raised on-tap='{{ verify }}'>
+          {{ "VERIFY" | $$ }}
+        </uproxy-button>
+      </div>
 
       <!-- It is assumed that all uproxy-instances are taken from
          user.offeringInstances and are therefore giving us access -->
