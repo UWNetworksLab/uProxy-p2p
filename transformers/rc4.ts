@@ -2,9 +2,9 @@
 /// <reference path='../../../third_party/simple-rc4/simple-rc4.d.ts' />
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
+import crypto = require('crypto');
 import logging = require('../logging/logging');
 import rc4 = require('simple-rc4');
-import sha1 = require('crypto/sha1');
 import transformer = require('./transformer');
 
 const log = new logging.Log('rc4 transformer');
@@ -69,18 +69,16 @@ export class Rc4Transformer implements transformer.Transformer {
 
   // Applies RC4(IV[0,...,7] to bytes, as described in the pseudocode above.
   private update_ = (r: Buffer, bytes:Buffer): void => {
-    // TODO: use the crypto module and avoid string conversion
-    const iv = sha1.str_sha1(Buffer.concat([this.key_, r]).toString('binary'));
-    const truncatedIv = new Buffer(iv, 'binary').slice(0, TRUNCATED_IV_LENGTH_BYTES);
+    const hasher = crypto.createHash('sha1');
+    const iv = hasher.update(Buffer.concat([this.key_, r]));
+    const truncatedIv = iv.digest().slice(0, TRUNCATED_IV_LENGTH_BYTES);
     new rc4(truncatedIv).update(bytes);
   }
 
   public transform = (ab: ArrayBuffer): ArrayBuffer[] => {
     const p = new Buffer(ab);
 
-    const r = new Buffer(R_LENGTH_BYTES);
-    crypto.getRandomValues(r);
-
+    const r = crypto.randomBytes(R_LENGTH_BYTES);
     this.update_(r, p);
 
     return [Buffer.concat([r, p]).buffer];
