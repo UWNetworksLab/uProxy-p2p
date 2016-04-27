@@ -1390,5 +1390,33 @@
   "CLOUD_INSTALL_CANCEL_FAILURE": {
     "description": "Message shown on toast when a could server install fails.",
     "message": "We cannot cancel the creation of your cloud server right now. You can delete the server once it's ready."
+  },
+  "RESTART_SERVER_TITLE": {
+    "description": "Title shown on dialog when connecting to a server fails.",
+    "message": "Oops! We had trouble getting access."
+  },
+  "RESTART_SERVER_TEXT": {
+    "description": "Text shown on dialog when connecting to a server fails.",
+    "message": "If you get this error repeatedly, try restarting your server."
+  },
+  "RESTART_SERVER": {
+    "description": "Text shown on dialog button that allows you to restart a server.",
+    "message": "Restart now"
+  },
+  "RESTARTING_SERVER": {
+    "description": "Toast message to confirm that server is restarting.",
+    "message": "Restarting server..."
+  },
+  "RESTART_SUCCESS": {
+    "description": "Toast indicating a successful server restart.",
+    "message": "Successfully restarted server!"
+  },
+  "RESTART_FAILURE_TITLE": {
+    "description": "Dialog title indicating a failure to restart server.",
+    "message": "Uh oh! We could not restart your server."
+  },
+  "RESTART_FAILURE_TEXT": {
+    "description": "Dialog text indicating a failure to restart server.",
+    "message": "You may want to delete your cloud server and create a new one."
   }
 }
