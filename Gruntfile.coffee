@@ -247,8 +247,8 @@ gruntConfig = {
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
   ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
 
-  # Temporarily remove cordova-plugin-chrome-apps-proxy and add gitlaura's forked version until the new version is released
-  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/gitlaura/cordova-plugin-chrome-apps-proxy.git'
+  # Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released
+  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git'
 
   # Hook needed to use 'cca run ios' command. Can only run after cordova-plugin-iosrtc has been added.
   addIosrtcHookCmd: 'cp plugins/cordova-plugin-iosrtc/extra/hooks/iosrtc-swift-support.js hooks/iosrtc-swift-support.js'
