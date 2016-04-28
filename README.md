@@ -180,15 +180,15 @@ Android app release builds must be signed.  To create a release build:
    * This allows us to have a smaller build (~10 MB) for modern Android, and a larger build (~33 MB) for older Android versions that need [Crosswalk](https://crosswalk-project.org/) because the system webview is too old to run uProxy.
 
 ### uProxy for iOS
-uProxy can be built on iOS by using CCA, similarly to uProxy on Android. You can only run uProxy for iOS on an OS X operating system with Xcode and the iOS SDK installed. 
+uProxy can be built on iOS by using CCA, similarly to uProxy on Android. You can only run uProxy for iOS on OS X with Xcode and the iOS SDK installed.
 
 * Install [Xcode](https://developer.apple.com/xcode/download/) 6.0 or higher
-* Once Xcode is installed, several command-line tools need to be enabled for CCA to run. From the Xcode menu, select Preferences, then the Downloads tab. From the Components panel, press the Install button next to the Command Line Tools listing if it's there. Next select the Locations tab and select a version of xcode from the Command Line Tools select box.
+* Once Xcode is installed, several Command Line Tools need to be enabled for CCA to run. From the Xcode menu, select Preferences, then the Downloads tab. From the Components panel, press the Install button next to the Command Line Tools listing if it's there. Next select the Locations tab and select a version of xcode from the Command Line Tools select box.
 * Install the Android SDK.  The easiest way to get it is as part of [Android Studio](https://developer.android.com/sdk/index.html). 
 * `sudo npm install -g cca`
 * `npm install xcode` (npm install locally)
 
-Note: In order for uProxy to work on a device right now, crypto must be disabled for both the getter and the sharer. You need to use this version of uProxy for both the iOS instance and the other instance you're connecting to.
+Note: In order for uProxy to work on an iOS device right now, crypto must be disabled in the global settings for both the getter and the sharer.
 
 #### Running on an iOS emulator
 * `sudo npm install -g ios-sim`
@@ -197,6 +197,7 @@ Note: In order for uProxy to work on a device right now, crypto must be disabled
 * `cca run ios --emulator`
 
 #### Running on an iOS device
+* In order to run an app on your iOS device, you need to have an [Apple Developer Account](https://developer.apple.com/programs/) and an [iOS Development Certificate](https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html). Once you have these set up you can continue with the following steps.
 * Attach a device to your Mac through a USB 
 * `sudo npm install -g --unsafe-perm ios-deploy`
 * `grunt build_ios`
@@ -212,7 +213,7 @@ Because we use cordova-plugin-iosrtc to implement the WebRTC protocol, there are
 * Within the project Build Settings set "Enable Bitcode" to "No"
 * Within the project Build Settings set "Objective-C Bridging Header" to "uProxy/Plugins/cordova-plugin-iosrtc/cordova-plugin-iosrtc-Bridging-Header.h"
 * Within the project Build Settings add an entry to the "Runpath Search Paths" setting with value "@executable_path/Frameworks"
-* Now you can update uProxy and run it through xcode from either an emulator or device
+* Now you can update uProxy and run it with xcode from either an emulator or device
 
 ### Fixing compilation and setup
 
