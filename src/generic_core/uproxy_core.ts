@@ -756,6 +756,16 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           log.error('error destroying cloud server:', e.message);
           return Promise.reject(e);
         });
+      case uproxy_core_api.CloudOperationType.CLOUD_REBOOT:
+        // OAuth into provider and reboot cloud server
+        return provisioner.reboot(DROPLET_NAME).then(() => {
+          destroyModules();
+          log.debug('rebooted cloud server on', args.providerName);
+        }, (e: Error) => {
+          destroyModules();
+          log.error('error rebooting cloud server:', e.message);
+          return Promise.reject(e);
+        });
       default:
         return Promise.reject(new Error('cloud operation not supported'));
     }

@@ -289,13 +289,17 @@ export class UserInterface implements ui_constants.UiApi {
           // This is an immediate failure, i.e. failure of a connection attempt
           // that never connected.  It is not a retry.
           // Show the error toast indicating that a get attempt failed.
-          this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
-            name: info.name
-          });
-          this.unableToGet = true;
+          var user = this.mapInstanceIdToUser_[info.name];
+          if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+            this.restartServer_('digitalocean');
+          } else {
+            this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
+              name: info.name
+            });
+            this.unableToGet = true;
+          }
         }
       }
-
       this.instanceTryingToGetAccessFrom = null;
       this.proxyingId = info.proxyingId;
       this.bringUproxyToFront();
@@ -327,6 +331,27 @@ export class UserInterface implements ui_constants.UiApi {
         .then(this.browserApi.handlePopupLaunch);
   }
 
+  public restartServer_ = (providerName :string) => {
+    this.getConfirmation(
+      this.i18n_t('RESTART_SERVER_TITLE'),
+      this.i18n_t('RESTART_SERVER_TEXT'),
+      this.i18n_t('CANCEL'),
+      this.i18n_t('RESTART_SERVER')
+    ).then(() => {
+      this.toastMessage = this.i18n_t('RESTARTING_SERVER');
+      return this.core.cloudUpdate({
+        operation: uproxy_core_api.CloudOperationType.CLOUD_REBOOT,
+        providerName: providerName
+      }).then(() => {
+        this.toastMessage = this.i18n_t('RESTART_SUCCESS');
+      }).catch((e: Error) => {
+        this.showDialog(this.i18n_t('RESTART_FAILURE_TITLE'), this.i18n_t('RESTART_FAILURE_TEXT'));
+      });
+    }).then(() => {
+      this.bringUproxyToFront();
+    });
+  }
+
   private notifyUserIfConnectedToCellular_ = () => {
     this.browserApi.isConnectedToCellular().then((isConnectedToCellular) => {
       if (isConnectedToCellular && !this.isConnectedToCellular_) {
@@ -352,7 +377,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public getConfirmation(heading :string,
                          text :string,
-                         cancelContinueButtons :boolean = false) :Promise<void> {
+                         dismissButtonText ?:string,
+                         fulfillButtonText ?:string): Promise<void> {
     return new Promise<void>((F, R) => {
       var callbackIndex = ++this.confirmationCallbackIndex_;
       this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
@@ -360,13 +386,11 @@ export class UserInterface implements ui_constants.UiApi {
         heading: heading,
         message: text,
         buttons: [{
-          text: cancelContinueButtons ?
-              this.i18n_t('CANCEL') : this.i18n_t('NO'),
+          text: dismissButtonText ? dismissButtonText : this.i18n_t('NO'),
           callbackIndex: callbackIndex,
           dismissive: true
         }, {
-          text: cancelContinueButtons ?
-              this.i18n_t('CONTINUE') : this.i18n_t('YES'),
+          text: fulfillButtonText ? fulfillButtonText : this.i18n_t('YES'),
           callbackIndex: callbackIndex
         }]
       });

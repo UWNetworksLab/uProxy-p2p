@@ -703,7 +703,7 @@ export function notifyUI(networkName :string, userId :string) {
           };
         }
 
-        if (this.name === 'Quiver') {
+        if (this.name === 'Quiver' || this.name === 'Cloud') {
           // TODO: once we think all/most users have versions of uProxy
           // that support jsurl style invites, we should update all our
           // social networks to generate those invites.
