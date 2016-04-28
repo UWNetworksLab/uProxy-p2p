@@ -94,9 +94,6 @@ import ui = ui_connector.connector;
     // we accepted their invite).
     public unusedPermissionToken :string;
 
-    // Disable crypto for iOS testing
-    private cryptoDisabled = true;
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
