@@ -45,11 +45,19 @@ export namespace Messages {
   };
 };
 
+class Hashes {
+  public static h0 :number = 3;
+  public static h1 :number = 2;
+  public static h2 :number = 1;
+  public static h3 :number = 0;
+};
+
 export class KeyVerify {
   // Only written by set(), after verifying the message.
   private messages_: {[type:string]:Messages.Tagged}; // indexed by Type.
-  // Zero or 1.  role_ 0 sends Hello1.  role_ 1 sends Hello2.  Doesn't
-  // determine who's sending 'Commit'.
+  // Zero or 1.  role_ 0 sends Hello1.  role_ 1 sends Hello2.  Generally, it
+  // shouldn't determine who's sending 'Commit', but right now, we only support
+  // role_ == 0 sending Commit.
   private role_:number;
   private ourKey_:freedom.PgpProvider.PublicKey;
   private peerPubKey_:string;
@@ -59,8 +67,12 @@ export class KeyVerify {
   private resolve_ : () => void;
   private reject_ : () => void;
 
-  private pgp_self_ :freedom.PgpProvider.PgpProvider;
-//  private pgp_peer_ :freedom.PgpProvider.PgpProvider;
+  private pgp_ :freedom.PgpProvider.PgpProvider;
+  // Data that requires expensive calculations to make.  These are a innately
+  // hackey, and I don't like them.
+  private s0_ :Buffer = null;
+  private totalHash_ :Buffer = null;
+
   private static kPgpPassword :string = '';
   private static kPgpUser :string = '<uproxy>';
   private static kClientVersion :string = '1.0';
@@ -87,19 +99,23 @@ export class KeyVerify {
 
   private generatorMap_ : {[msg:string]:((type:Type) =>Messages.Tagged)} = {
     'Hello1': this.makeHello,
-    'Hello2': this.makeHello
+    'Hello2': this.makeHello,
+    'Commit': this.makeCommit,
+    'DHPart1': this.makeDHPart,
+    'DHPart2': this.makeDHPart,
+    'Confirm1': this.makeConfirm,
+    'Confirm2': this.makeConfirm,
+    'Conf2Ack': this.makeConf2Ack
   };
 
   // Messages are existing messages received or sent in the
   // conversation.  Useful both for testing and for when this Verifier
   // is being created in response to a received message.
-  constructor(ourPubKey: string,
-              peerPubKey: string,
+  constructor(peerPubKey: string,
               delegate: Delegate,
               messages?: {[type:string]:Messages.Tagged},
               ourHashes?: string[],
               role?: number) {
-//    this.ourPubKey_ = ourPubKey;
     this.peerPubKey_ = peerPubKey;
     this.delegate_ = delegate;
     if (messages === undefined) {
@@ -108,7 +124,8 @@ export class KeyVerify {
       this.role_ = 0;
       this.ourHashes_ = this.generateHashes();
     } else {
-      // Peer started conversation, or this is a resumption.
+      // Peer started conversation, or this is a resumption (say, from a test
+      // case).
       this.messages_ = messages;
       this.role_ = role;
       // See if we're a resumption.
@@ -191,8 +208,7 @@ export class KeyVerify {
 
         this.set(new Messages.Tagged(Type.DHPart1,
                             new Messages.DHPartMessage(msg.type, msg.h1, msg.pkey, msg.mac)));
-        // TODO(mling): Calculate SAS and verify with user.
-        let sas = "CALCULATE ME";
+
         // There's an explicit choice here to treat the primary failure
         // mode - a failed SAS verification, the same as an I/O error.
         // Attackers may just kill the connection to look like an I/O
@@ -200,15 +216,16 @@ export class KeyVerify {
         // interface messaging here.  Instead, let them try again and
         // be more careful about the numbers.  If the numbers don't
         // match up, they know that they're under attack.
-        this.delegate_.showSAS(sas).then(function (result) {
-          if (result) {
-            this.sendNextMessage();
-          } else {
-            console.log("Failed SAS verification.");
-            this.resolve(false);
-          }
+        this.calculateSAS().then((sas:number) => {
+          this.delegate_.showSAS(sas.toString()).then((result:boolean) => {
+            if (result) {
+              this.sendNextMessage();
+            } else {
+              console.log("Failed SAS verification.");
+              this.resolve(false);
+            }
+          });
         });
-        
       } else if (type == 'DHPart2') {
         // Verify that this is the sam ehk.
         let commit = <Messages.CommitMessage>this.messages_[Type.Commit].value;
@@ -230,15 +247,15 @@ export class KeyVerify {
         this.set(new Messages.Tagged(Type.DHPart2,
                             new Messages.DHPartMessage(msg.type, msg.h1, msg.pkey,
                                               msg.mac)));
-        // TODO(mling): Calculate SAS and verify with user.
-        let sas = "CALCULATE ME";
-        this.delegate_.showSAS(sas).then(function (result) {
-          if (result) {
-            this.sendNextMessage();
-          } else {
-            console.log("Failed SAS verification.");
-            this.resolve(false);
-          }
+        this.calculateSAS().then((sas:number) => {
+          this.delegate_.showSAS(sas.toString()).then((result:boolean) => {
+            if (result) {
+              this.sendNextMessage();
+            } else {
+              console.log("Failed SAS verification.");
+              this.resolve(false);
+            }
+          });
         });
       } else if (type == 'Confirm1') {
         // Validate DHpart1
@@ -296,12 +313,11 @@ export class KeyVerify {
   }
 
   private loadKeys() :Promise<void> {
-    this.pgp_self_ = <freedom.PgpProvider.PgpProvider>globals.pgp;
-//    this.pgp_peer_ = <freedom.PgpProvider.PgpProvider>freedom['pgp']();
+    this.pgp_ = <freedom.PgpProvider.PgpProvider>globals.pgp;
 
     // our public key is globals.publicKey, but we need the fingerprint, so
     // import the one in globals here, and get the higher-level object here.
-    return this.pgp_self_.exportKey().then((key:freedom.PgpProvider.PublicKey) => {
+    return this.pgp_.exportKey().then((key:freedom.PgpProvider.PublicKey) => {
       this.ourKey_ = key;
       return Promise.resolve<void>();
     });
@@ -350,7 +366,7 @@ export class KeyVerify {
     }
   }
 
-  private structuralVerify(msg:any) :boolean{
+  private structuralVerify(msg:any) :boolean {
     // Verify that none of the values are blank.
     let allKeys = Object.keys(msg);
     for (let k in allKeys) {
@@ -386,6 +402,75 @@ export class KeyVerify {
     }
   }
 
+  private generate(type: Type) :Messages.Tagged {
+    if (this.generatorMap_[type.toString()] !== undefined) {
+      return this.generatorMap_[type.toString()](type);
+    } else {
+      throw (new Error("generate(" + type.toString() + ") not yet implemented."));
+    }
+  }
+
+  private makeHello(type: Type) :Messages.Tagged {
+    let h3 = this.ourHashes_[Hashes.h3],
+        hk = this.ourKey_.fingerprint.replace(/ /g, ''),
+        mac = this.mac(this.ourHashes_[Hashes.h2],
+                   h3 + hk + KeyVerify.kClientVersion);
+
+    let message = new Messages.Tagged( type, new Messages.HelloMessage(
+      type.toString(), '1.0', h3, hk, KeyVerify.kClientVersion, mac));
+
+    return message;
+  }
+
+  private makeDHPart(type:Type) :Messages.Tagged {
+    if (type !== (this.role_ == 0 ? Type.DHPart2 : Type.DHPart1)) {
+      throw (new Error("makeDHPart: Bad type " + type.toString() + " for role " + this.role_));
+    }
+    let h1 = this.ourHashes_[Hashes.h1];
+    let pkey = this.ourKey_.key;
+    let mac = this.mac(this.ourHashes_[Hashes.h0], h1 + pkey);
+    let message = new Messages.Tagged(type, new Messages.DHPartMessage(
+      type.toString(), h1, pkey, mac));
+    return message;
+  }
+
+  private makeCommit(type:Type) :Messages.Tagged {
+    if (this.role_ !== 0 || type != Type.Commit) {
+      throw (new Error("makeCommit: only supports making Commit messages " +
+                       "with role 0 being initiator."));
+    }
+    let dhpart2Msg = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
+    let dhpart2 = dhpart2Msg.h1 + dhpart2Msg.pkey + dhpart2Msg.mac;
+    let hello_obj = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
+    let hello = hello_obj.h3 + hello_obj.hk + hello_obj.mac;
+    let hvi = crypto.createHash('sha256').update(dhpart2 + hello).digest('base64');
+    let h2 = this.ourHashes_[Hashes.h2];
+    let hk = crypto.createHash('sha256').update(this.ourKey_.key).digest('base64');
+    let version = '0.1';
+    return new Messages.Tagged(Type.Commit, new Messages.CommitMessage(
+      Type.Commit.toString(), h2, hk, KeyVerify.kClientVersion, hvi,
+      this.mac(this.ourHashes_[Hashes.h1], h2+hk+version+hvi)));
+  }
+
+  private makeConfirm(type:Type) :Messages.Tagged {
+    if (this.s0_ === null) {
+      throw (new Error("Cannot make Confirm message without s0 already calculated."));
+    }
+    if (type !== Type.Confirm1 && type !== Type.Confirm2) {
+      throw (new Error("makeConfirm cannot make " + type.toString() + " messages"));
+    }
+    let h0 = this.ourHashes_[Hashes.h0];
+    return new Messages.Tagged(type, new Messages.ConfirmMessage(
+      type.toString(), h0, this.mac(this.s0_.toString('base64'), h0)));
+  }
+
+  private makeConf2Ack(type:Type) :Messages.Tagged {
+    if (type !== Type.Conf2Ack) {
+      throw (new Error("makeConf2Ack can only make Conf2Ack."));
+    }
+    return new Messages.Tagged(type, new Messages.ConfAckMessage('Conf2Ack'));
+  };
+
   // --- Begin Crypto Stuff --
   //
   // This is based off of ZRTP (RFC 6189), with keys that don't
@@ -408,27 +493,62 @@ export class KeyVerify {
             h1.toString('base64'), h0.toString('base64')];
   }
 
-  private generate(type: Type) :Messages.Tagged {
-    if (this.generatorMap_[type.toString()] !== undefined) {
-      return this.generatorMap_[type.toString()](type);
-    } else {
-      throw ("generate(" + type.toString() + ") not yet implemented.");
+  private calculateS0() :Promise<Buffer> {
+    if (this.s0_ !== null) {
+      return Promise.resolve<Buffer>(this.s0_);
     }
+    return this.pgp_.ecdhBob('P_256', this.peerPubKey_).then(
+      (result:ArrayBuffer) => {
+        let be64Zero = new Buffer(8),
+            beZero = new Buffer(4),
+            beOne = new Buffer(4);
+        be64Zero.fill(0);
+        beZero.fill(0);
+        beOne.writeInt32BE(1,0);
+        // RFC6189-4.4.1.4
+        let total_hash = this.totalHash();
+        let resultBuffer = new Buffer(new Uint8Array(result));
+        let s0_input = Buffer.concat([
+          beOne, resultBuffer, new Buffer("ZRTP-HMAC-KDF"), be64Zero,
+          be64Zero, total_hash, beZero, beZero, beZero]);
+        log.debug("s0_inputs: result:", resultBuffer.toString());
+        log.debug("s0_inputs: total_hash:", total_hash);
+        log.debug("so_inputs: beOne:", beOne);
+        log.debug("so_inputs: be64Zero:", be64Zero);
+        log.debug("so_inputs: beZero:", beZero);
+
+        let s0 = crypto.createHash('sha256').update(s0_input).digest();
+        log.debug("s0: ", s0);
+        return Promise.resolve<Buffer>(s0);
+      });
   }
 
-  private makeHello(type: Type) :Messages.Tagged {
-    let h3 = this.ourHashes_[0],
-        hk = this.ourKey_.fingerprint.replace(/ /g, ''),
-        mac = this.mac(this.ourHashes_[1],
-                   h3 + hk + KeyVerify.kClientVersion);
-
-    let message = new Messages.Tagged( type, new Messages.HelloMessage(
-      type.toString(), '1.0', h3, hk, KeyVerify.kClientVersion, mac));
-
-    return message;
+  private calculateSAS() :Promise<number> {
+    return this.calculateS0().then(
+      (s0:Buffer) => {
+        let be64Zero = new Buffer(8),
+            beZero = new Buffer(4),
+            beOne = new Buffer(4);
+        be64Zero.fill(0);
+        beZero.fill(0);
+        beOne.writeInt32BE(1,0);
+        let total_hash = this.totalHash();
+        let kdf_context = Buffer.concat([ be64Zero, be64Zero, total_hash ]);
+        log.debug("kdf_context: ", kdf_context);
+        // RFC6189-4.5.2
+        let sashash = this.kdf(s0, "SAS", kdf_context, 256);
+        log.debug("sashash: ", sashash);
+        let sasvalue = sashash.slice(0, 4);
+        log.debug("sasvalue: ", sasvalue);
+        let sasHumanInt :number = sasvalue.slice(0,2).readUInt16BE(0);
+        return Promise.resolve<number>(sasHumanInt);
+    });
   }
 
   private totalHash() :Buffer {
+    if (this.totalHash_ !== null) {
+      return this.totalHash_;
+    }
     let hello_r :Messages.HelloMessage;
     if (this.role_ == 0) {
       hello_r = <Messages.HelloMessage>this.messages_[Type.Hello1].value;
@@ -454,7 +574,29 @@ export class KeyVerify {
     log.debug("totalHash: dhpart2: h1:", dhpart2.h1, ", pkey:", dhpart2.pkey, ", mac:", dhpart2.mac);
 
     let hashed = crypto.createHash('sha256').update(total_hash_buf).digest();
+    this.totalHash_ = hashed;
     return hashed;
+  }
+
+  // 'key' is a regular buffer, that we re-encode into a base64 string for fullHmac.
+  private kdf(key :Buffer, label :string, context :Buffer, numbits :number) :Buffer{
+    var oneBuf = new Buffer(4);
+    var lenBuf = new Buffer(4);
+    oneBuf.writeInt32BE(1, 0);
+    lenBuf.writeInt32BE(numbits, 0);
+    log.debug("kdf: key", key);
+    log.debug("kdf: oneBuf", oneBuf);
+    log.debug("kdf: label", label);
+    log.debug("kdf: context", context.toString('hex'));
+    log.debug("kdf: lenBuf", lenBuf);
+    var b64Key = key.toString('base64');
+    var zeroByte :Buffer= new Buffer(1);
+    zeroByte.fill(0);
+    var completeValue = Buffer.concat([ oneBuf, new Buffer(label), zeroByte, 
+                                        new Buffer([context]), lenBuf]);
+    var full_hmac = this.fullHmac(b64Key, completeValue.toString('base64'));
+    log.debug("kdf: full_hmac: ", full_hmac);
+    return full_hmac.slice(0, Math.ceil(numbits / 8));
   }
 
   // key and value are both base64-encoded.
