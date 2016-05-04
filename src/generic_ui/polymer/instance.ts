@@ -49,7 +49,7 @@ Polymer({
   verify: function() {
     if (this.instance.verifyState != social.VerifyState.VERIFY_COMPLETE) {
       console.log("Starting verify.");
-      core.startVerifying(this.user.network, this.instance);
+      ui.startVerifying(this.user.network, this.instance);
     } else {
       console.log("instance is already verified.");
     }
