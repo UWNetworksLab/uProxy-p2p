@@ -392,6 +392,7 @@ export class KeyVerify {
     return true;
   }
 
+
   private set(message: Messages.Tagged) :boolean {
     if (this.messages_[message.type] !== null) {
       return false;
@@ -573,6 +574,7 @@ export class KeyVerify {
     log.debug("totalHash: dhpart2: h1:", dhpart2.h1, ", pkey:", dhpart2.pkey, ", mac:", dhpart2.mac);
 
     let hashed = crypto.createHash('sha256').update(total_hash_buf).digest();
+<<<<<<< cd009a5d65bef0c6cd3eb9d0a8f821b04fd3978a
     this.totalHash_ = hashed;
     return hashed;
   }
