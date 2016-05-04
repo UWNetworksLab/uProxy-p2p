@@ -117,6 +117,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   constructor() {
     log.debug('Preparing uProxy Core');
+    this.verifySessions_ = {};
     copyPasteConnection = new remote_connection.RemoteConnection(
         (update:uproxy_core_api.Update, message?:social.PeerMessage) => {
       if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
@@ -802,7 +803,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   // Figure out what the returned promise is for.  Probably nothing.
-  public verifyUser(inst:social.InstancePath) :void {
+  public verifyUser = (inst:social.InstancePath) :Promise<void> => {
     console.log("app.core: verifyUser:", inst);
     // This only works for Quiver right now.  We have to plumb in the
     // other networks' public key hashes.
@@ -811,14 +812,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // verification session or a double-attempt by the UI?
     if (this.verifySessions_[inst.instanceId] !== undefined) {
       console.log("app.core: verifyUser: already in verification session.");
-      return;
+      return Promise.resolve<void>();
     }
-    var network = this.getNetworkByName_(inst.network.name);
-    var user = network.getUser(inst.userId);
+    var network = <social_network.AbstractNetwork>this.getNetworkByName_(inst.network.name);
+    var remoteUser = network.getUser(inst.userId);
+    var remoteInstance = remoteUser.getInstance(inst.instanceId);
     //network.getKeyFromClientId(inst.
     // Pull these out of our own and the peer's instances.
-    var ourPubKey = "";
-    var peerPubKey = "";
+    var ourPubKey = globals.publicKey;
+    var peerPubKey = remoteInstance.publicKey;
     var delegate = <key_verify.Delegate>{
       sendMessage : function(msg:any) :Promise<boolean> { return Promise.resolve<boolean>(true)},
       showSAS : function(sas:string) :Promise<boolean> { 
@@ -826,10 +828,18 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         return Promise.resolve<boolean>(true);
       } 
     };
-
-    this.verifySessions_[inst.instanceId] = new key_verify.KeyVerify(ourPubKey, peerPubKey, delegate);
-    this.verifySessions_[inst.instanceId].start().then(function(succeeded) {
+    var verifySession = new key_verify.KeyVerify(ourPubKey, peerPubKey, delegate);
+    this.verifySessions_[inst.instanceId] = verifySession;
+    console.log("app.core: verifyUser: ", 
+                { "network":network, "remoteUser":remoteUser, "remoteInstance":remoteInstance,
+                  "ourPubKey":ourPubKey, "peerPubKey":peerPubKey });
+                                            
+    verifySession.start().then(function() {
+      console.log("verifySession: succeeded.");
+    }, function () { 
+      console.log("verifySession: failed."); 
     });
+    return Promise.resolve<void>();
   }
 
   // Remove contact from friend list and storage

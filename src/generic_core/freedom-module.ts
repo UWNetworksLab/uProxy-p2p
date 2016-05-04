@@ -52,6 +52,11 @@ var exported = {
 };
 export = exported;
 
+// Note: Our mechanism for dispatching commands requires that the
+// members of core are bound closures.  E.g.:
+//    public foo = (args) => {..}
+// And NOT:
+//    public foo (args) {..}
 var commands :{[command :number] :((data?:any) => (Promise<any>|void))} = {};
 commands[uproxy_core_api.Command.LOGIN] = core.login;
 commands[uproxy_core_api.Command.LOGOUT] = core.logout;
