@@ -463,6 +463,9 @@ gruntConfig = {
             'freedom-social-quiver/socketio.quiver.js'
 
             'freedom-for-chrome/freedom-for-chrome.js'
+
+            # for cloud social provider
+            'forge-min/forge.min.js'
           ].concat(uiDistFiles, coreDistFiles, universalDistFiles)
           dest: ccaDistPath
         }
@@ -603,6 +606,7 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: [
           'freedom-for-chrome'
+          'forge-min'
         ]
         pathsFromDevBuild: [
           'generic_core'
