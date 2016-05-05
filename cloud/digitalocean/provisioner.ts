@@ -43,7 +43,7 @@ const ERR_CODES: { [k: string]: string; } = {
 };
 
 const REDIRECT_URIS: [string] = [
-  'https://pjpcdnccaekokkkeheolmpkfifcbibnj.chromiumapp.org'
+  'https://fmdppkkepalnkeommjadgbhiohihdhii.chromiumapp.org',
   //  'http://localhost:10101'
 ];
 
@@ -257,7 +257,7 @@ class Provisioner {
       this.sendStatus_('OAUTH_INIT');
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
         var url = 'https://cloud.digitalocean.com/v1/oauth/authorize?' +
-            'client_id=c16837b5448cd6cf2582d2c2f767cfb7d11844ec395a91b43f26ca72513416c8&' +
+            'client_id=41f77ea7aa94311a2337027eb238591db9e98c6e2c1067b3b2c7c3420901703f&' +
             'response_type=token&' +
             'redirect_uri=' + encodeURIComponent(obj.redirect) + '&' +
             'state=' + encodeURIComponent(obj.state) + '&' +
