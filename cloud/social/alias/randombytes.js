@@ -1,33 +1,55 @@
 // Alternative to crypto-browserify's randombytes shim which
-// falls back to Math.random when crypto.getRandomValues is
+// falls back to freedom.js core.crypto when crypto.getRandomValues is
 // unavailable, which is currently the case in Firefox web workers.
-// TODO: Fallback to something better such as freedomjs' core.crypto
-//       module (difficult because it is an asynchronous API).
+// TODO: post FF48 (2016-08-02) switch to just native crypto.getRandomValues
 
-// Firefox raises an error if we so much as even try
-// to *access* crypto, hence this bizarre construction.
-var cryptoAvailable = true;
-try {
-  if (crypto) {}
-} catch(e) {
-  console.warn('crypto unavailable, falling back to Math.random');
-  cryptoAvailable = false;
+var nativeCrypto = typeof crypto !== 'undefined';
+var refreshBuffer, bufferRemaining;
+if (!nativeCrypto) {
+  // Filling with freedom.js core.crypto, which requires a buffer due to async
+  var rand = freedom['core.crypto'](),
+      buf,
+      offset = 0;
+  refreshBuffer = function (size) {
+    return rand.getRandomBytes(size).then(function (bytes) {
+      buf = new Uint8Array(bytes);
+      offset = 0;
+    }, function (err) {
+      console.log(err);
+    });
+  }.bind(this);
+  refreshBuffer(10000);  // initial randomness
+  bufferRemaining = 10000;
+
+  crypto = {};
+  crypto.getRandomValues = function (buffer) {
+    if (buffer.buffer) {
+      buffer = buffer.buffer;
+    }
+    var size = buffer.byteLength,
+        view = new Uint8Array(buffer),
+        i;
+    if (offset + size > buf.length) {
+      throw new Error("Insufficient Randomness Allocated.");
+    }
+    for (i = 0; i < size; i += 1) {
+      view[i] = buf[offset + i];
+    }
+    offset += size;
+    bufferRemaining -= size;
+  };
 }
 
 module.exports = function(size, cb) {
   var buffer = new Buffer(size);
-  if (cryptoAvailable) {
-    // Although this looks weird, it's how crypto-browserify does it too:
-    //   https://github.com/crypto-browserify/randombytes/blob/master/browser.js
-    crypto.getRandomValues(buffer);
-  } else {
-    for (var i = 0; i < size; i++) {
-      buffer[i] = Math.floor(Math.random() * 256);
-    }
+  if (!nativeCrypto && bufferRemaining < size*10) {
+    // using freedom.js core.crypto, may need to refresh buffer
+    refreshBuffer(size*100);
   }
+  crypto.getRandomValues(buffer);
   if (cb) {
     cb(undefined, buffer);
   } else {
     return buffer;
   }
-}
+};

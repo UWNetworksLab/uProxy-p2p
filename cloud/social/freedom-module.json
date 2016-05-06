@@ -118,6 +118,7 @@
     }
   },
   "permissions": [
+    "core.crypto",
     "core.tcpsocket",
     "core.udpsocket",
     "core.storage"
