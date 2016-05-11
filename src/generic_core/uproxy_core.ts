@@ -356,7 +356,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
     this.resetBatcher_();
-    return copyPasteConnection.startGet(globals.effectiveMessageVersion());
+    return Promise.all([copyPasteConnection.startConnection(globals.effectiveMessageVersion())]).then( 
+      () => {
+      return copyPasteConnection.startGet();
+      });
   }
 
   public stopCopyPasteGet = () :Promise<void> => {
@@ -817,18 +820,23 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(inst.network.name);
     var remoteUser = network.getUser(inst.userId);
     var remoteInstance = remoteUser.getInstance(inst.instanceId);
-    //network.getKeyFromClientId(inst.
     // Pull these out of our own and the peer's instances.
-    var ourPubKey = globals.publicKey;
     var peerPubKey = remoteInstance.publicKey;
     var delegate = <key_verify.Delegate>{
-      sendMessage : function(msg:any) :Promise<boolean> { return Promise.resolve<boolean>(true)},
-      showSAS : function(sas:string) :Promise<boolean> { 
+      sendMessage : (msg:any) :Promise<void> => { 
+        console.log("sendMessage:", msg);
+        return remoteInstance.sendMessage('Control.Verify', msg);
+      },
+      showSAS : (sas:string) :Promise<boolean> => { 
         console.log("Got SAS " + sas); 
         return Promise.resolve<boolean>(true);
       } 
     };
-    var verifySession = new key_verify.KeyVerify(ourPubKey, peerPubKey, delegate);
+    var verifySession = new key_verify.KeyVerify(peerPubKey, delegate);
+    remoteInstance.registerMessageHandler(
+      'Control.Verify', (unused :string, msg:any) => {
+        verifySession.readMessage(msg);
+      });
     this.verifySessions_[inst.instanceId] = verifySession;
     console.log("app.core: verifyUser: ", 
                 { "network":network, "remoteUser":remoteUser,
@@ -837,8 +845,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     verifySession.start().then(function() {
       console.log("verifySession: succeeded.");
-    }, function () { 
+      delete this.verifySessions_[inst.instanceId];
+    }, () => { 
       console.log("verifySession: failed."); 
+      delete this.verifySessions_[inst.instanceId];
     });
     return Promise.resolve<void>();
   }

@@ -6,7 +6,7 @@ import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/l
 var log :logging.Log = new logging.Log('KeyVerify');
 
 export interface Delegate {
-  sendMessage(msg:any) :Promise<boolean>;
+  sendMessage(msg:any) :Promise<void>;
   showSAS(sas:string) :Promise<boolean>;
 };
 
@@ -97,16 +97,7 @@ export class KeyVerify {
     'Conf2Ack':[Type.Confirm2]
   };
 
-  private generatorMap_ : {[msg:string]:((type:Type) =>Messages.Tagged)} = {
-    'Hello1': this.makeHello,
-    'Hello2': this.makeHello,
-    'Commit': this.makeCommit,
-    'DHPart1': this.makeDHPart,
-    'DHPart2': this.makeDHPart,
-    'Confirm1': this.makeConfirm,
-    'Confirm2': this.makeConfirm,
-    'Conf2Ack': this.makeConf2Ack
-  };
+  private generatorMap_ : {[msg:string]:((type:Type) =>Messages.Tagged)};
 
   // Messages are existing messages received or sent in the
   // conversation.  Useful both for testing and for when this Verifier
@@ -135,6 +126,18 @@ export class KeyVerify {
         this.ourHashes_ = this.generateHashes();
       }
     }
+
+    // These are all closed on 'this' now, so we have to init this here.
+    this.generatorMap_ = {
+      'Hello1': this.makeHello,
+      'Hello2': this.makeHello,
+      'Commit': this.makeCommit,
+      'DHPart1': this.makeDHPart,
+      'DHPart2': this.makeDHPart,
+      'Confirm1': this.makeConfirm,
+      'Confirm2': this.makeConfirm,
+      'Conf2Ack': this.makeConf2Ack
+    };
   }
 
   private hashString(s:string) :string {
@@ -294,6 +297,7 @@ export class KeyVerify {
   }
 
   private resolve(res:boolean) {
+    console.log("resolve("+res+")");
     if (res) {
       this.resolve_();
     } else {
@@ -302,9 +306,12 @@ export class KeyVerify {
   }
 
   public start() :Promise<void>{
-    return this.loadKeys().then(function () {
+    console.log("start() starting.");
+    return this.loadKeys().then(() => {
+      console.log("start() callback invoked.");
       this.sendNextMessage();
       this.result_ = new Promise<void>(function (resolve, reject) {
+        console.log("start(): initializing result_.");
         this.resolve_ = resolve;
         this.reject_ = reject;
       });
@@ -314,16 +321,18 @@ export class KeyVerify {
 
   private loadKeys() :Promise<void> {
     this.pgp_ = <freedom.PgpProvider.PgpProvider>globals.pgp;
-
+    console.log("loadKeys(): starting.");
     // our public key is globals.publicKey, but we need the fingerprint, so
     // import the one in globals here, and get the higher-level object here.
     return this.pgp_.exportKey().then((key:freedom.PgpProvider.PublicKey) => {
+      console.log("loadKeys: got key ", key);
       this.ourKey_ = key;
       return Promise.resolve<void>();
     });
   }
 
   public sendNextMessage() {
+    console.log("sendNextMessage(): starting.");
     // Look at where we are in the conversation.
     // - figure out the latest message that isn't in the set.
     // - see if we have its prereq.
@@ -357,11 +366,9 @@ export class KeyVerify {
     if (!this.messages_[msgType]) {
       let msg = this.generate(msgType);
       this.set(msg);
-      this.delegate_.sendMessage(msg).then(function(succeeded) {
-        if (!succeeded) {
-          console.log("Failed to send message in ZRTP message.  Resolving as failure.");
-          this.resolve(false);
-        }
+      this.delegate_.sendMessage(msg).catch((e) => {
+        console.log("Failed to send message in ZRTP message.  Resolving as failure.", e);
+        this.resolve(false);
       });
     }
   }
@@ -403,38 +410,40 @@ export class KeyVerify {
   }
 
   private generate(type: Type) :Messages.Tagged {
-    if (this.generatorMap_[type.toString()] !== undefined) {
-      return this.generatorMap_[type.toString()](type);
+    if (this.generatorMap_[Type[type]] !== undefined) {
+      return this.generatorMap_[Type[type]](type);
     } else {
-      throw (new Error("generate(" + type.toString() + ") not yet implemented."));
+      console.log("generate(" + type + "<" + Type[type] + ">): can't generate this type.");
+      throw (new Error("generate(" + Type[type] + ") not yet implemented."));
     }
   }
 
-  private makeHello(type: Type) :Messages.Tagged {
+  private makeHello =  (type: Type) :Messages.Tagged => {
+    console.log("makeHello(" + type + " <" + Type[type] + ">)");
     let h3 = this.ourHashes_[Hashes.h3],
         hk = this.ourKey_.fingerprint.replace(/ /g, ''),
         mac = this.mac(this.ourHashes_[Hashes.h2],
                    h3 + hk + KeyVerify.kClientVersion);
 
     let message = new Messages.Tagged( type, new Messages.HelloMessage(
-      type.toString(), '1.0', h3, hk, KeyVerify.kClientVersion, mac));
+      Type[type], '1.0', h3, hk, KeyVerify.kClientVersion, mac));
 
     return message;
   }
 
-  private makeDHPart(type:Type) :Messages.Tagged {
+  private makeDHPart = (type:Type) :Messages.Tagged => {
     if (type !== (this.role_ == 0 ? Type.DHPart2 : Type.DHPart1)) {
-      throw (new Error("makeDHPart: Bad type " + type.toString() + " for role " + this.role_));
+      throw (new Error("makeDHPart: Bad type " + Type[type] + " for role " + this.role_));
     }
     let h1 = this.ourHashes_[Hashes.h1];
     let pkey = this.ourKey_.key;
     let mac = this.mac(this.ourHashes_[Hashes.h0], h1 + pkey);
     let message = new Messages.Tagged(type, new Messages.DHPartMessage(
-      type.toString(), h1, pkey, mac));
+      Type[type], h1, pkey, mac));
     return message;
   }
 
-  private makeCommit(type:Type) :Messages.Tagged {
+  private makeCommit = (type:Type) :Messages.Tagged => {
     if (this.role_ !== 0 || type != Type.Commit) {
       throw (new Error("makeCommit: only supports making Commit messages " +
                        "with role 0 being initiator."));
@@ -452,19 +461,19 @@ export class KeyVerify {
       this.mac(this.ourHashes_[Hashes.h1], h2+hk+version+hvi)));
   }
 
-  private makeConfirm(type:Type) :Messages.Tagged {
+  private makeConfirm = (type:Type) :Messages.Tagged => {
     if (this.s0_ === null) {
       throw (new Error("Cannot make Confirm message without s0 already calculated."));
     }
     if (type !== Type.Confirm1 && type !== Type.Confirm2) {
-      throw (new Error("makeConfirm cannot make " + type.toString() + " messages"));
+      throw (new Error("makeConfirm cannot make " + Type[type] + " messages"));
     }
     let h0 = this.ourHashes_[Hashes.h0];
     return new Messages.Tagged(type, new Messages.ConfirmMessage(
-      type.toString(), h0, this.mac(this.s0_.toString('base64'), h0)));
+      Type[type], h0, this.mac(this.s0_.toString('base64'), h0)));
   }
 
-  private makeConf2Ack(type:Type) :Messages.Tagged {
+  private makeConf2Ack = (type:Type) :Messages.Tagged => {
     if (type !== Type.Conf2Ack) {
       throw (new Error("makeConf2Ack can only make Conf2Ack."));
     }
