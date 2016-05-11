@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/node/node.d.ts' />
+
 import crypto = require('crypto');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
@@ -310,7 +310,7 @@ export class KeyVerify {
     return this.loadKeys().then(() => {
       console.log("start() callback invoked.");
       this.sendNextMessage();
-      this.result_ = new Promise<void>(function (resolve, reject) {
+      this.result_ = new Promise<void>((resolve:any, reject:any) => {
         console.log("start(): initializing result_.");
         this.resolve_ = resolve;
         this.reject_ = reject;
