@@ -32,7 +32,6 @@ console.log('Instantiating UI');
 // This instantiation, before the core has even started, should reduce the
 // apparent startup time, but runs the risk of leaving the UI non-responsive
 // until the core catches up.
-// TODO: Add a loading screen, for slow systems.
 browserApi.bringUproxyToFront().then(() => {
   console.log('UI instantiation complete');
   if (navigator.splashscreen) {
