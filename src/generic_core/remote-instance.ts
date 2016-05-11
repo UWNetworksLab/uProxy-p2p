@@ -316,7 +316,9 @@ import ui = ui_connector.connector;
     }
 
     public registerMessageHandler = (channel :string, fn:(channel:string, msg:any) => void) :void => {
-      this.connection_.registerMessageHandler(channel, fn);
+      this.connection_.startConnection(this.messageVersion).then(() => {
+        this.connection_.registerMessageHandler(channel, fn);
+      });
     }
 
     /**

@@ -352,7 +352,6 @@ export interface CoreApi {
 
   // Start a ZRTP key-verification session.
   verifyUser(inst :social.InstancePath) :Promise<void>;
-}
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }

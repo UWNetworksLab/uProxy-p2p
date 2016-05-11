@@ -319,7 +319,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
     this.resetBatcher_();
-    return Promise.all([copyPasteConnection.startConnection(globals.effectiveMessageVersion())]).then( 
+    return Promise.all([copyPasteConnection.startConnection(globals.effectiveMessageVersion())]).then(
       () => {
       return copyPasteConnection.startGet();
       });
@@ -729,7 +729,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           if (installError === 'closed') {
             return Promise.reject(new Error('canceled'));
           }
-          
+
           // Tell user if the server already exists
           if (installError.errcode === "VM_AE") {
             destroyModules();
@@ -829,30 +829,31 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // Pull these out of our own and the peer's instances.
     var peerPubKey = remoteInstance.publicKey;
     var delegate = <key_verify.Delegate>{
-      sendMessage : (msg:any) :Promise<void> => { 
+      sendMessage : (msg:any) :Promise<void> => {
         console.log("sendMessage:", msg);
         return remoteInstance.sendMessage('Control.Verify', msg);
       },
-      showSAS : (sas:string) :Promise<boolean> => { 
-        console.log("Got SAS " + sas); 
+      showSAS : (sas:string) :Promise<boolean> => {
+        console.log("Got SAS " + sas);
         return Promise.resolve<boolean>(true);
-      } 
+      }
     };
     var verifySession = new key_verify.KeyVerify(peerPubKey, delegate);
+    console.log("app.core: verifyUser: ",
+                { "network":network, "remoteUser":remoteUser, "remoteInstance":remoteInstance,
+                  "peerPubKey":peerPubKey });
+
     remoteInstance.registerMessageHandler(
       'Control.Verify', (unused :string, msg:any) => {
         verifySession.readMessage(msg);
       });
     this.verifySessions_[inst.instanceId] = verifySession;
-    console.log("app.core: verifyUser: ", 
-                { "network":network, "remoteUser":remoteUser, "remoteInstance":remoteInstance,
-                  "peerPubKey":peerPubKey });
-                                            
+
     verifySession.start().then(() => {
       console.log("verifySession: succeeded.");
       delete this.verifySessions_[inst.instanceId];
-    }, () => { 
-      console.log("verifySession: failed."); 
+    }, () => {
+      console.log("verifySession: failed.");
       delete this.verifySessions_[inst.instanceId];
     });
     return Promise.resolve<void>();
