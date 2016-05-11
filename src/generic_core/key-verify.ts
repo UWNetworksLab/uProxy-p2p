@@ -1,4 +1,3 @@
-
 import crypto = require('crypto');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
@@ -97,7 +96,20 @@ export class KeyVerify {
     'Conf2Ack':[Type.Confirm2]
   };
 
+<<<<<<< HEAD
   private generatorMap_ : {[msg:string]:((type:Type) =>Messages.Tagged)};
+=======
+  private generatorMap_ : {[msg:string]:((type:Type) =>Messages.Tagged)} = {
+    'Hello1': this.makeHello,
+    'Hello2': this.makeHello,
+    'Commit': this.makeCommit,
+    'DHPart1': this.makeDHPart,
+    'DHPart2': this.makeDHPart,
+    'Confirm1': this.makeConfirm,
+    'Confirm2': this.makeConfirm,
+    'Conf2Ack': this.makeConf2Ack
+  };
+>>>>>>> faae4dfe14bbcf593da2dacd41108f183d85b491
 
   // Messages are existing messages received or sent in the
   // conversation.  Useful both for testing and for when this Verifier
@@ -126,6 +138,7 @@ export class KeyVerify {
         this.ourHashes_ = this.generateHashes();
       }
     }
+<<<<<<< HEAD
 
     // These are all closed on 'this' now, so we have to init this here.
     this.generatorMap_ = {
@@ -138,6 +151,8 @@ export class KeyVerify {
       'Confirm2': this.makeConfirm,
       'Conf2Ack': this.makeConf2Ack
     };
+=======
+>>>>>>> faae4dfe14bbcf593da2dacd41108f183d85b491
   }
 
   private hashString(s:string) :string {
