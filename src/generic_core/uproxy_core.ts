@@ -859,45 +859,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return Promise.resolve<void>();
   }
 
-  // Figure out what the returned promise is for.  Probably nothing.
-  public verifyUser = (inst:social.InstancePath) :Promise<void> => {
-    console.log("app.core: verifyUser:", inst);
-    // This only works for Quiver right now.  We have to plumb in the
-    // other networks' public key hashes.
-
-    // Open question: does one of these mean a lingering old
-    // verification session or a double-attempt by the UI?
-    if (this.verifySessions_[inst.instanceId] !== undefined) {
-      console.log("app.core: verifyUser: already in verification session.");
-      return Promise.resolve<void>();
-    }
-    var network = <social_network.AbstractNetwork>this.getNetworkByName_(inst.network.name);
-    var remoteUser = network.getUser(inst.userId);
-    var remoteInstance = remoteUser.getInstance(inst.instanceId);
-    //network.getKeyFromClientId(inst.
-    // Pull these out of our own and the peer's instances.
-    var ourPubKey = globals.publicKey;
-    var peerPubKey = remoteInstance.publicKey;
-    var delegate = <key_verify.Delegate>{
-      sendMessage : function(msg:any) :Promise<boolean> { return Promise.resolve<boolean>(true)},
-      showSAS : function(sas:string) :Promise<boolean> { 
-        console.log("Got SAS " + sas); 
-        return Promise.resolve<boolean>(true);
-      } 
-    };
-    var verifySession = new key_verify.KeyVerify(ourPubKey, peerPubKey, delegate);
-    this.verifySessions_[inst.instanceId] = verifySession;
-    console.log("app.core: verifyUser: ", 
-                { "network":network, "remoteUser":remoteUser, "remoteInstance":remoteInstance,
-                  "ourPubKey":ourPubKey, "peerPubKey":peerPubKey });
-                                            
-    verifySession.start().then(function() {
-      console.log("verifySession: succeeded.");
-    }, function () { 
-      console.log("verifySession: failed."); 
-    });
-    return Promise.resolve<void>();
-  }
 
   // Remove contact from friend list and storage
   public removeContact = (args :uproxy_core_api.RemoveContactArgs) : Promise<void> => {
