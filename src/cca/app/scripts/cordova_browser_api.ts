@@ -1,5 +1,6 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/webintents.d.ts'/>
 
 /**
  * cordova_browser_api.ts
@@ -53,6 +54,46 @@ class CordovaBrowserApi implements BrowserAPI {
     chrome.notifications.onClicked.addListener((tag) => {
       this.emit_('notificationclicked', tag);
     });
+
+    // Cordova APIs are not guaranteed to be available until after the
+    // deviceready event firest.  This is a special event: if you miss it,
+    // and add your listener after the event has already fired, Cordova
+    // guarantees that your listener will run immediately.
+    // We listen to window.top because CCA runs application code in an iframe,
+    // but deviceready never fires on the iframe.
+    window.top.document.addEventListener('deviceready', () => {
+      // We use the copy of webintent attached to the top-level window, instead
+      // of the window for this iframe, because the iframe's copy of webintent
+      // is populated asynchronously and may not be ready yet when deviceready
+      // fires.
+      window.top.webintent.getUri(this.onUrl_);  // Handle URL already received.
+      window.top.webintent.onNewIntent(this.onUrl_);  // Handle future URLs.
+    }, false);
+  }
+
+  private onUrl_ = (url:string) => {
+    // "request/" and "offer/" require trailing slashes. "invite" does not.
+    var urlMatch = /(?:http|https)\:\/\/(?:www\.)?uproxy\.org\/(request\/|offer\/|invite).*/;
+    if (!url) {
+      // This is expected because webintent.getUri() calls back with null if
+      // there is no URI for this startup, i.e. normal startup.
+      return;
+    }
+    var match = url.match(urlMatch);
+    if (!match) {
+      // Unrecognized URL.  This is an error, because only matching URLs are
+      // listed in our <intent-filter> in config.xml.
+      console.warn('Unmatched intent URL: ' + url);
+      return;
+    }
+    if (match[1] === 'invite') {
+      this.emit_('inviteUrlData', url);
+    } else if (match[1] === 'request/' || match[1] === 'offer/') {
+      this.emit_('copyPasteUrlData', url);
+    } else {
+      // This code is unreachable.
+      console.warn('Bug encountered while processing url: ' + url);
+    }
   }
 
   public isConnectedToCellular = () : Promise<boolean> => {
@@ -212,15 +253,33 @@ class CordovaBrowserApi implements BrowserAPI {
 
   private events_ :{[name :string] :Function} = {};
 
+  // Queue of any events emitted that don't have listeners yet.  This is needed
+  // for the 'inviteUrlData' event, if the invite URL caused uProxy to open,
+  // because otherwise the event would be emitted before UserInterface has a
+  // chance to set a listener on it.
+  private pendingEvents_ :{[name :string] :Object[][]} = {};
+
   public on = (name :string, callback :Function) => {
+    if (name in this.events_) {
+      console.warn('Overwriting Cordova Browser API event listener: ' + name);
+    }
     this.events_[name] = callback;
+    if (name in this.pendingEvents_) {
+      this.pendingEvents_[name].forEach((args:Object[]) => {
+        callback.apply(null, args);
+      });
+      delete this.pendingEvents_[name];
+    }
   }
 
   private emit_ = (name :string, ...args :Object[]) => {
     if (name in this.events_) {
       this.events_[name].apply(null, args);
     } else {
-      console.error('Attempted to trigger an unknown event', name);
+      if (!(name in this.pendingEvents_)) {
+        this.pendingEvents_[name] = [];
+      }
+      this.pendingEvents_[name].push(args);
     }
   }
 }
