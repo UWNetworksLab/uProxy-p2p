@@ -11,6 +11,7 @@ import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
+import datachannel = require('../../../third_party/uproxy-lib/webrtc/datachannel');
 import peerconnection = require('../../../third_party/uproxy-lib/webrtc/peerconnection');
 import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
 import social = require('../interfaces/social');
@@ -54,6 +55,13 @@ var generateProxyingSessionId_ = (): string => {
     private rtcToNet_ :rtc_to_net.RtcToNet = null;
 
     private isUpdatePending_ = false;
+
+    // Separately keep access to the raw peer connection, for
+    // non-proxying traffic.
+    private underlyingPeerConnection_ :peerconnection.PeerConnection<Object> = null;
+
+    // and non-proxying data channels.
+    private nonproxyChannels_ :{[name:string]:peerconnection.DataChannel} = null;
 
     // Resolve this promise when rtcToNet is created and therefore not null.
     // Used to help determine when to call handleSignal (which relies
@@ -205,7 +213,27 @@ var generateProxyingSessionId_ = (): string => {
       return this.sharingReset_;
     }
 
-    public startGet = (remoteVersion:number) :Promise<net.Endpoint> => {
+    // A separate messaging api for non-stream uses.
+    public sendMessage = (name :string, msg:any) :Promise<void> => {
+      if (this.underlyingPeerConnection_ === null) {
+        throw (new Error("No underlying peer connection."));
+      }
+      return this.underlyingPeerConnection_.onceConnected.then(() => {
+        this.underlyingPeerConnection_.sendMessage(name, msg);
+      });
+    }
+
+    public registerMessageHandler = (name :string, fn:(name:string, msg:any) => void) => {
+      this.underlyingPeerConnection_.onceConnected.then(() => {
+        this.underlyingPeerConnection_.registerMessageHandler(name, fn);
+      });
+    }
+
+    public startConnection = (remoteVersion:number) :Promise<void> => {
+      // this part is hacky.
+      if (this.underlyingPeerConnection_ !== null) {
+        return Promise.resolve<void>();
+      }
       if (this.localGettingFromRemote !== social.GettingState.NONE) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
@@ -271,11 +299,6 @@ var generateProxyingSessionId_ = (): string => {
       this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
       this.stateRefresh_();
 
-      var tcpServer = new tcp.Server({
-        address: '127.0.0.1',
-        port: 0
-      });
-
       var config :freedom.RTCPeerConnection.RTCConfiguration = {
         iceServers: globals.settings.stunServers
       };
@@ -308,8 +331,26 @@ var generateProxyingSessionId_ = (): string => {
 
       peerconnection.setupPeerConnection(
         pc, this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
+      this.underlyingPeerConnection_ = pc;
+      pc.onceClosed.then(() => { 
+        this.underlyingPeerConnection_ = null; 
+        this.nonproxyChannels_ = null;
+      });
+      return Promise.resolve<void>();
+    };
+
+    // requires that startConnection() has completed successfully.
+    public startGet = () :Promise<net.Endpoint> => {
+      if (this.underlyingPeerConnection_ == null) {
+        return Promise.reject(new Error("Not connected."));
+      }
+      var tcpServer = new tcp.Server({
+        address: '127.0.0.1',
+        port: 0
+      });
+
       globals.metrics.increment('attempt');
-      return this.socksToRtc_.start(tcpServer, pc).then(
+      return this.socksToRtc_.start(tcpServer, this.underlyingPeerConnection_).then(
           (endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
         this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
