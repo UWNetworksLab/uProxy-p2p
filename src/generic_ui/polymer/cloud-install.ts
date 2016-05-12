@@ -39,7 +39,7 @@ Polymer({
     this.$.loginOverlay.open();
   },
   launchDigitalOceanSignup: function() {
-    ui.openTab('https://m.do.co/c/5ddb4219b716');
+    ui.openTab('https://cloud.digitalocean.com/registrations/new?refcode=5ddb4219b716');
   },
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
