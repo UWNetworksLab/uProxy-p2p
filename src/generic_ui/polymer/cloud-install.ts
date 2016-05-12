@@ -64,6 +64,9 @@ Polymer({
     this.$.cancelingOverlay.close();
   },
   loginTapped: function() {
+    const createId = Math.floor((Math.random() * 1000000)) + 1;
+    this.mostRecentCreateId = createId;
+
     if (!this.$.installingOverlay.opened) {
       this.closeOverlays();
       ui.cloudInstallStatus = '';
@@ -81,12 +84,13 @@ Polymer({
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
         this.$.serverExistsOverlay.open();
-      } else if (e !== 'Error: canceled') {
+      } else if (this.mostRecentCreateId === createId) {
         this.$.failureOverlay.open();
       }
     });
   },
   removeServerAndInstallAgain: function() {
+    this.mostRecentCreateId = 0;
     this.closeOverlays();
     ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
     ui.cloudInstallCancelDisabled = true;
@@ -112,6 +116,7 @@ Polymer({
     });
   },
   cancelCloudInstall: function() {
+    this.mostRecentCreateId = 0;
     this.$.cancelingOverlay.open();
     return ui.cloudUpdate({
       operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
@@ -130,5 +135,9 @@ Polymer({
   },
   ready: function() {
     this.ui = ui;
+    // ID of the latest attempt to create a server, used to distinguish
+    // between install failures that should be flagged to the user and
+    // failures owing to cancellation.
+    this.mostRecentCreateId = 0;
   }
 });
