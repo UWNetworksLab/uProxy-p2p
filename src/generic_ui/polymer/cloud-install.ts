@@ -85,6 +85,12 @@ Polymer({
       if (e === 'Error: server already exists') {
         this.$.serverExistsOverlay.open();
       } else if (this.mostRecentCreateId === createId) {
+        // The user did not cancel: clean up the now-useless droplet
+        // and show a sad-face, rainy day dialog.
+        ui.cloudUpdate({
+          operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
+          providerName: DEFAULT_PROVIDER
+        });
         this.$.failureOverlay.open();
       }
     });

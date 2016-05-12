@@ -740,18 +740,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
             userName: cloudNetworkData['host'],
             networkData: JSON.stringify(cloudNetworkData)
           });
-        }, (e: Error) => {
-          log.error('install failed, cleaning up');
-          return this.destroyCloudServer_().then(() => {
-            log.info('removed new droplet after failed cloud install');
-            throw e;
-          }, (e: Error) => {
-            // This is bad: the user will be charged for a useless droplet.
-            // This is why the UI instructs the user to check the DigitalOcean
-            // control panel whenever install fails.
-            log.error('failed to remove droplet after failed cloud install: %1', e.message);
-            throw e;
-          });
         });
       });
     });
