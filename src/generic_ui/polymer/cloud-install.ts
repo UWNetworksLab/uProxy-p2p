@@ -39,7 +39,13 @@ Polymer({
     this.$.loginOverlay.open();
   },
   launchDigitalOceanSignup: function() {
-    ui.openTab('https://cloud.digitalocean.com/registrations/new?refcode=5ddb4219b716');
+    params = '';
+    // TODO: Going to uproxy.org/OFF should stash a flag somewhere that we
+    // need to check here to determine whether to include the `refcode` param
+    if (false) {
+      params += 'refcode=5ddb4219b716'
+    }
+    ui.openTab('https://cloud.digitalocean.com/registrations/new?' + params);
   },
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');

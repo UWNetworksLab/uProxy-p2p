@@ -21,6 +21,12 @@
     },
     "default_title": "__MSG_extTitle__"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://cloud.digitalocean.com/*"],
+      "js": ["scripts/content_digitalocean.js"]
+    }
+  ],
   "permissions": [
     "background",
     "tabs",
