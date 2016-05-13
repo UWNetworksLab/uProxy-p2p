@@ -97,12 +97,14 @@ class Provisioner {
       for (var i = 0; i < droplet.networks.v4.length; i++) {
         if (droplet.networks.v4[i].type === 'public') {
           this.state_.network['ipv4'] = droplet.networks.v4[i].ip_address;
+          break;
         }
       }
       // Retrieve public IPv6 address
       for (var i = 0; i < droplet.networks.v6.length; i++) {
         if (droplet.networks.v6[i].type === 'public') {
           this.state_.network['ipv6'] = droplet.networks.v6[i].ip_address;
+          break;
         }
       }
       console.log(this.state_);
