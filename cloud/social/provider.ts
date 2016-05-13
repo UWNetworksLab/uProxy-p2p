@@ -289,7 +289,9 @@ export class CloudSocialProvider {
       log.debug('saved contacts');
     }).catch((e) => {
       log.error('could not save contacts: %1', e);
-      Promise.reject(e);
+      Promise.reject({
+        message: e.message
+      });
     });
   }
 
@@ -322,7 +324,9 @@ export class CloudSocialProvider {
           //       the instance (safe because all we've done is run ping).
           log.info('new proxying session %1', payload.proxyingId);
           if (!(destinationClientId in this.savedContacts_)) {
-            return Promise.reject(new Error('unknown client ' + destinationClientId));
+            return Promise.reject({
+              message: 'unknown client ' + destinationClientId
+            });
           }
           return this.reconnect_(this.savedContacts_[destinationClientId].invite).then(
               (connection: Connection) => {
@@ -335,30 +339,39 @@ export class CloudSocialProvider {
               connection.sendMessage(JSON.stringify(payload));
             });
           } else {
-            return Promise.reject(new Error('unknown client ' + destinationClientId));
+            return Promise.reject({
+              message: 'unknown client ' + destinationClientId
+            });
           }
         }
       } else {
-        return Promise.reject(new Error('message has no or wrong type field'));
+        return Promise.reject({
+          message: 'message has no or wrong type field'
+        });
       }
     } catch (e) {
-      return Promise.reject(new Error('could not de-serialise message: ' + e.message));
+      return Promise.reject({
+        message: 'could not de-serialise message: ' + e.message
+      });
     }
   }
 
   public clearCachedCredentials = (): Promise<void> => {
-    return Promise.reject(
-        new Error('clearCachedCredentials unimplemented'));
+    return Promise.reject({
+      message: 'clearCachedCredentials unimplemented'
+    });
   }
 
   public getUsers = (): Promise<freedom.Social.Users> => {
-    return Promise.reject(
-        new Error('getUsers unimplemented'));
+    return Promise.reject({
+      message: 'getUsers unimplemented'
+    });
   }
 
   public getClients = (): Promise<freedom.Social.Clients> => {
-    return Promise.reject(
-        new Error('getClients unimplemented'));
+    return Promise.reject({
+      message: 'getClients unimplemented'
+    });
   }
 
   public logout = (): Promise<void> => {
@@ -398,17 +411,21 @@ export class CloudSocialProvider {
     log.debug('acceptUserInvitation');
     try {
       var invite = <Invite>JSON.parse(inviteJson);
+      log.debug('decoded invite: %1', invite);
       return this.reconnect_(invite).then((connection: Connection) => {
         // Return nothing for type checking purposes.
       });
     } catch (e) {
-      return Promise.reject(new Error('could not parse invite code: ' + e.message));
+      return Promise.reject({
+        message: 'could not parse invite code: ' + e.message
+      });
     }
   }
 
   public blockUser = (userId: string): Promise<void> => {
-    return Promise.reject(
-        new Error('blockUser unimplemented'));
+    return Promise.reject({
+      message: 'blockUser unimplemented'
+    });
   }
 
   // Removes a cloud contact from storage
@@ -599,7 +616,9 @@ class Connection {
   private exec_ = (command: string): Promise<string> => {
     log.debug('%1: execute command: %2', this.name_, command);
     if (this.state_ !== ConnectionState.ESTABLISHED) {
-      return Promise.reject(new Error('can only execute commands in ESTABLISHED state'));
+      return Promise.reject({
+        message: 'can only execute commands in ESTABLISHED state'
+      });
     }
     return new Promise<string>((F, R) => {
       this.connection_.exec(command, (e: Error, stream: ssh2.Channel) => {
