@@ -68,7 +68,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
-  private verifySessions_ :{ [instanceId:string]:key_verify.KeyVerify } = {};
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
   private cloudInterfaces_ :{
@@ -80,7 +79,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   constructor() {
     log.debug('Preparing uProxy Core');
-    this.verifySessions_ = {};
     copyPasteConnection = new remote_connection.RemoteConnection(
         (update:uproxy_core_api.Update, message?:social.PeerMessage) => {
       if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
@@ -819,13 +817,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     // Open question: does one of these mean a lingering old
     // verification session or a double-attempt by the UI?
-    if (this.verifySessions_[inst.instanceId] !== undefined) {
+/*    if (this.verifySessions_[inst.instanceId] !== undefined) {
       console.log("app.core: verifyUser: already in verification session.");
       return Promise.resolve<void>();
-    }
+    } */
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(inst.network.name);
     var remoteUser = network.getUser(inst.userId);
     var remoteInstance = remoteUser.getInstance(inst.instanceId);
+    remoteInstance.verifyUser();
+/*
     // Pull these out of our own and the peer's instances.
     var peerPubKey = remoteInstance.publicKey;
     var delegate = <key_verify.Delegate>{
@@ -855,7 +855,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }, () => {
       console.log("verifySession: failed.");
       delete this.verifySessions_[inst.instanceId];
-    });
+    }); */
     return Promise.resolve<void>();
   }
 
