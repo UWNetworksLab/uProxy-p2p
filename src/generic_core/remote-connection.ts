@@ -90,6 +90,7 @@ var generateProxyingSessionId_ = (): string => {
 
     private createSender_ = (type :social.PeerMessageType) => {
       return (signal :bridge.SignallingMessage) => {
+        console.log("Sending signal: ", signal);
         this.sendUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
           type: type,
           data: signal
@@ -126,8 +127,8 @@ var generateProxyingSessionId_ = (): string => {
           && this.rtcToNet_) {
         this.rtcToNet_.handleSignalFromPeer(signal);
       } else if (social.PeerMessageType.SIGNAL_FROM_SERVER_PEER === type
-                 && this.socksToRtc_) {
-        this.socksToRtc_.handleSignalFromPeer(signal);
+                 && this.underlyingPeerConnection_ != null) {
+        this.underlyingPeerConnection_.handleSignalMessage(signal);
       } else {
         log.warn('Invalid signal: ', social.PeerMessageType[type]);
         return;
@@ -231,6 +232,8 @@ var generateProxyingSessionId_ = (): string => {
     public startConnection = (remoteVersion:number) :Promise<void> => {
       // this part is hacky.
       if (this.underlyingPeerConnection_ !== null) {
+//        return this.underlyingPeerConnection_.onceConnected;
+        // Like below.
         return Promise.resolve<void>();
       }
       if (this.localGettingFromRemote !== social.GettingState.NONE) {

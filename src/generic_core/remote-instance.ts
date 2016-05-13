@@ -14,6 +14,7 @@ import consent = require('./consent');
 import crypto = require('./crypto');
 import datachannel = require('../../../third_party/uproxy-lib/webrtc/datachannel');
 import globals = require('./globals');
+import key_verify = require('./key-verify');
 import _ = require('lodash');
 import logging = require('../lib/logging/logging');
 import net = require('../lib/net/net.types');
@@ -66,6 +67,9 @@ import ui = ui_connector.connector;
     // Used to prevent saving state while we have not yet loaded the state
     // from storage.
     private fulfillStorageLoad_ : () => void;
+
+    // Any key-verify session set up.
+    private keyVerifySession_ :key_verify.KeyVerify = null;
 
     public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
@@ -120,7 +124,18 @@ import ui = ui_connector.connector;
             log.info('No stored state for instance', instanceId);
             this.fulfillStorageLoad_();
           });
+      this.registerMessageHandler('Control.Verify', this.keyVerifyHandler_);
     }
+
+    private keyVerifyHandler_ = (unused :string, msg:any) => {
+      if (this.keyVerifySession_ !== null) {
+        this.keyVerifySession_.readMessage(msg);
+      } else {
+        // Create a key verify session and give it this message.
+        this.verifyUser(msg);
+      }
+    };
+
 
     private handleConnectionUpdate_ = (update :uproxy_core_api.Update, data?:any) => {
       log.debug('connection update: %1', uproxy_core_api.Update[update]);
@@ -187,7 +202,7 @@ import ui = ui_connector.connector;
      * instance, and pass it along to the relevant socks-rtc module.
      * TODO: spec
      * TODO: assuming that signal is valid, should we remove signal?
-     * TODO: return a boolean on success/failure
+     * TODO: return a boolean on success/failureg
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
       if (typeof this.publicKey !== 'undefined' &&
@@ -258,6 +273,43 @@ import ui = ui_connector.connector;
       });
       return Promise.resolve<void>();
     }
+
+    public verifyUser = (firstMsg ?: any) : void => {
+      var inst = this;
+      var delegate = <key_verify.Delegate>{
+        sendMessage : (msg:any) :Promise<void> => {
+          console.log("sendMessage:", msg);
+          return inst.sendMessage('Control.Verify', msg);
+        },
+        showSAS : (sas:string) :Promise<boolean> => {
+          console.log("Got SAS " + sas);
+          return Promise.resolve<boolean>(true);
+        }
+      };
+      var parsedFirstMsg = key_verify.KeyVerify.readFirstMessage(firstMsg);
+      if (firstMsg !== null && parsedFirstMsg !== null) {
+        this.keyVerifySession_ = new key_verify.KeyVerify(
+          this.publicKey, delegate, parsedFirstMsg, 1);
+      } else if (firstMsg === null) {
+        this.keyVerifySession_ = new key_verify.KeyVerify(this.publicKey, delegate);
+      } else {
+        // Immediately fail - bad initial message from peer.
+        console.log("verifyUser: peer-initiated session had bad message: ", firstMsg);
+        return;
+      }
+      this.keyVerifySession_.start().then(() => {
+        console.log("verifySession: succeeded.");
+        inst.keyVerified = true;
+        inst.keyVerifySession_ = null
+      }, () => {
+        console.log("verifySession: failed.");
+        // Fun question: do we allow failed sessions to leave the
+        // prior state unaltered?  So far, yes, so the line below is
+        // commented out.
+        // inst.keyVerified = false;
+        inst.keyVerifySession_ = null
+      });
+    };
 
     /**
       * When our peer sends us a signal that they'd like to be a client,
