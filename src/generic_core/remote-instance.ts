@@ -286,17 +286,20 @@ import ui = ui_connector.connector;
           return Promise.resolve<boolean>(true);
         }
       };
-      var parsedFirstMsg = key_verify.KeyVerify.readFirstMessage(firstMsg);
-      if (firstMsg !== null && parsedFirstMsg !== null) {
-        this.keyVerifySession_ = new key_verify.KeyVerify(
-          this.publicKey, delegate, parsedFirstMsg, 1);
-      } else if (firstMsg === null) {
-        this.keyVerifySession_ = new key_verify.KeyVerify(this.publicKey, delegate);
+      if (firstMsg !== undefined) {
+        var parsedFirstMsg = key_verify.KeyVerify.readFirstMessage(firstMsg);
+        if (parsedFirstMsg !== null) {
+          this.keyVerifySession_ = new key_verify.KeyVerify(
+            this.publicKey, delegate, parsedFirstMsg, 1);
+        } else {
+          // Immediately fail - bad initial message from peer.
+          console.log("verifyUser: peer-initiated session had bad message: ", firstMsg);
+          return;
+        }
       } else {
-        // Immediately fail - bad initial message from peer.
-        console.log("verifyUser: peer-initiated session had bad message: ", firstMsg);
-        return;
+        this.keyVerifySession_ = new key_verify.KeyVerify(this.publicKey, delegate);
       }
+
       this.keyVerifySession_.start().then(() => {
         console.log("verifySession: succeeded.");
         inst.keyVerified = true;
