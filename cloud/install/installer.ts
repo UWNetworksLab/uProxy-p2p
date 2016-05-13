@@ -30,6 +30,13 @@ const STATUS_PREFIX = 'CLOUD_INSTALL_STATUS';
 const INITIAL_CONNECTION_INTERVAL_MS = 500;
 const MAX_CONNECTION_INTERVAL_MS = 10000;
 
+// Timeouts for established SSH connections.
+// We define these chiefly so that the installer fails quickly
+// in case the server is destroyed during installation, e.g.
+// when the user cancels install.
+const KEEPALIVE_INTERVAL_MS = 1000;
+const KEEPALIVE_MAX_FAILURES = 5;
+
 // Installs uProxy on a server, via SSH.
 // The process is as close as possible to a manual install
 // so that we have fewer paths to test.
@@ -49,6 +56,8 @@ class CloudInstaller {
       port: port,
       username: username,
       privateKey: key,
+      keepaliveInterval: KEEPALIVE_INTERVAL_MS,
+      keepaliveCountMax: KEEPALIVE_MAX_FAILURES,
       // Remaining fields only for type-correctness.
       tryKeyboard: false,
       debug: undefined
