@@ -158,6 +158,7 @@ uiDistFiles = [
   'generic_ui/polymer/vulcanized*.{html,js}'
   'generic_ui/fonts/*'
   'generic_ui/icons/*'
+  'generic_ui/scripts/get_logs.js'
 ]
 
 coreDistFiles = [
@@ -185,6 +186,8 @@ coreDistFiles = [
   'freedom-pgp-e2e/hex2words.js'
   'freedom-pgp-e2e/e2e.js'
   'freedom-pgp-e2e/pgpapi.json'
+
+  'forge-min/forge.min.js'  # for cloud social provider
 
   '**/freedom-module.json'
   '**/*.static.js'
@@ -395,7 +398,6 @@ gruntConfig = {
             '_locales/**'
 
             'generic_ui/scripts/copypaste.js'
-            'generic_ui/scripts/get_logs.js'
             'scripts/context.static.js'
             'scripts/background.static.js'
           ].concat(uiDistFiles, universalDistFiles)
@@ -413,9 +415,6 @@ gruntConfig = {
             'polymer/vulcanized.{html,js}'
 
             'freedom-for-chrome/freedom-for-chrome.js'
-
-            # for cloud social provider
-            'forge-min/forge.min.js'
           ].concat(coreDistFiles, universalDistFiles)
           dest: 'build/dist/chrome/app'
         }
@@ -434,13 +433,9 @@ gruntConfig = {
             # addon sdk scripts
             'lib/**/*.js'
 
-            'data/generic_ui/scripts/get_logs.js'
             'data/scripts/content-proxy.js'
 
             'data/freedom-for-firefox/freedom-for-firefox.jsm'
-
-            # for cloud social provider
-            'data/forge-min/forge.min.js'
           ].concat(
             getWithBasePath(uiDistFiles, 'data'),
             getWithBasePath(coreDistFiles, 'data'),
@@ -463,17 +458,7 @@ gruntConfig = {
             # This is not browserified so we use .js instead of .static.js
             'polymer/vulcanized.{html,js}'
 
-            'generic_ui/scripts/copypaste.js'
-            'generic_ui/scripts/get_logs.js'
-
-            # TODO move to universalDistFiles once supported on other platforms
-            'freedom-social-quiver/socketio.quiver.json'
-            'freedom-social-quiver/socketio.quiver.js'
-
             'freedom-for-chrome/freedom-for-chrome.js'
-
-            # for cloud social provider
-            'forge-min/forge.min.js'
           ].concat(uiDistFiles, coreDistFiles, universalDistFiles)
           dest: ccaDistPath
         }
