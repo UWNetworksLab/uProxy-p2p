@@ -694,8 +694,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   private createCloudServer_ = (region: string) => {
     log.debug('creating cloud server in %1', region);
 
+    // Since this step can take a while, start >0 so there's less confusion
+    // that this is a progress bar.
     ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
-    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
+    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, CLOUD_DEPLOY_PROGRESS / 2);
 
     return this.loginIfNeeded_('Cloud').then((cloudNetwork) => {
       return oneShotModule_(CLOUD_PROVIDER_MODULE_NAME, (provider: any) => {
