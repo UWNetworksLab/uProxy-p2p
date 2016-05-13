@@ -259,6 +259,7 @@ export interface InviteTokenPermissions {
 export interface InviteTokenData {
   v :number;  // version
   networkName :string;
+  // TODO: make this optional, it's not used by cloud social provider (and maybe others)
   userName :string;
   networkData :string|Object;
   permission ?:InviteTokenPermissions;
