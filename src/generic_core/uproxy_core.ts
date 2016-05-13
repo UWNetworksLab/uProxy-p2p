@@ -738,12 +738,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           // user, who just created the server.
           cloudNetworkData['isAdmin'] = true;
 
+          // We cast to any because InviteTokenData currently has a required userName
+          // field which is unused by the cloud social provider.
           // TODO: what if this fails?
-          return cloudNetwork.acceptInvitation({
+          return cloudNetwork.acceptInvitation(<any>{
             v: 2,
             networkName: 'Cloud',
-            // TODO: huh? cloud social provider doesn't use this
-            userName: cloudNetworkData['host'],
             networkData: JSON.stringify(cloudNetworkData)
           });
         });
