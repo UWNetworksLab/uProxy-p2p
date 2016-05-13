@@ -85,13 +85,17 @@ function oneShotModule_<T>(moduleName: string, f: (provider: any) => Promise<T>)
       }
     };
 
-    return f(m).then((result: T) => {
-      destructor();
-      return result;
-    }, (e: Error) => {
-      destructor();
-      throw e;
-    });
+    try {
+      return f(m).then((result: T) => {
+        destructor();
+        return result;
+      }, (e: Error) => {
+        destructor();
+        throw e;
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
   } catch (e) {
     return Promise.reject(new Error('error creating ' + moduleName + ' module: ' + e.message));
   }
