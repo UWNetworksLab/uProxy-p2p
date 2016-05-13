@@ -404,21 +404,28 @@ export class CloudSocialProvider {
     });
   }
 
-  // Parses an invite code, received from uProxy in JSON format.
-  // This is the networkData field of the invite codes distributed
-  // to uProxy users.
+  // Parses the networkData field, serialised to JSON, of invites.
+  // The contact is immediately saved and added to the contacts list.
   public acceptUserInvitation = (inviteJson: string): Promise<void> => {
     log.debug('acceptUserInvitation');
     try {
-      var invite = <Invite>JSON.parse(inviteJson);
-      log.debug('decoded invite: %1', invite);
-      return this.reconnect_(invite).then((connection: Connection) => {
-        // Return nothing for type checking purposes.
+      const invite = <Invite>JSON.parse(inviteJson);
+
+      this.notifyOfUser_(invite);
+      this.savedContacts_[invite.host] = {
+        invite: invite
+      };
+      this.saveContacts_();
+
+      // Connect in the background in order to fetch metadata such as
+      // the banner (description).
+      this.reconnect_(invite).catch((e: Error) => {
+        log.warn('failed to log into cloud server during invite accept: %1', e.message);
       });
+
+      return Promise.resolve<void>();
     } catch (e) {
-      return Promise.reject({
-        message: 'could not parse invite code: ' + e.message
-      });
+      return Promise.reject(new Error('could not parse invite code: ' + e.message));
     }
   }
 
