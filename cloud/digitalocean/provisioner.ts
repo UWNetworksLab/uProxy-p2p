@@ -1,5 +1,7 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
+import promises = require('../../promises/promises');
+
 declare const freedom: freedom.FreedomInModuleEnv;
 
 // TODO: https://github.com/uProxy/uproxy/issues/2051
@@ -43,7 +45,7 @@ const ERR_CODES: { [k: string]: string; } = {
 };
 
 const REDIRECT_URIS: [string] = [
-  'https://pjpcdnccaekokkkeheolmpkfifcbibnj.chromiumapp.org'
+  'https://fmdppkkepalnkeommjadgbhiohihdhii.chromiumapp.org',
   //  'http://localhost:10101'
 ];
 
@@ -72,7 +74,8 @@ class Provisioner {
     }).then((keys: KeyPair) => {
        // Get SSH keys
       this.state_.ssh = keys;
-      return this.getDroplet_(name).then((unused :any) => {
+
+      return this.getDropletByName_(name).then((unused :any) => {
         // Droplet exists so raise error
         return Promise.reject({
           'errcode': 'VM_AE',
@@ -85,27 +88,53 @@ class Provisioner {
       });
     }).then(() => {
       // Get the droplet's configuration
-      return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id);
-    }).then((resp: any) => {
+      return this.getDropletByName_(name);
+    }).then((droplet:any) => {
       this.sendStatus_('CLOUD_DONE_VM');
-      this.state_.cloud.vm = resp.droplet;
+      this.state_.cloud.vm = droplet;
       this.state_.network = {
         'ssh_port': 22
       };
       // Retrieve public IPv4 address
-      for (var i = 0; i < resp.droplet.networks.v4.length; i++) {
-        if (resp.droplet.networks.v4[i].type === 'public') {
-          this.state_.network['ipv4'] = resp.droplet.networks.v4[i].ip_address;
+      for (var i = 0; i < droplet.networks.v4.length; i++) {
+        if (droplet.networks.v4[i].type === 'public') {
+          this.state_.network['ipv4'] = droplet.networks.v4[i].ip_address;
+          break;
         }
       }
       // Retrieve public IPv6 address
-      for (var i = 0; i < resp.droplet.networks.v6.length; i++) {
-        if (resp.droplet.networks.v6[i].type === 'public') {
-          this.state_.network['ipv6'] = resp.droplet.networks.v6[i].ip_address;
+      for (var i = 0; i < droplet.networks.v6.length; i++) {
+        if (droplet.networks.v6[i].type === 'public') {
+          this.state_.network['ipv6'] = droplet.networks.v6[i].ip_address;
+          break;
         }
       }
-      console.log(this.state_);
-      return this.state_;
+
+      // Spin until the server is truly up.
+      // Give it one minute before declaring bankruptcy.
+      console.log('waiting for activity on port 22');
+      return promises.retry(() => {
+        const socket = freedom['core.tcpsocket']();
+
+        const destructor = () => {
+          try {
+            freedom['core.tcpsocket'].close(socket);
+          } catch (e) {
+            console.warn('error destroying socket: ' + e.message);
+          }
+        };
+
+        // TODO: Worth thinking about timeouts here but because this times
+        //       out almost immediately if nothing is listening on the port,
+        //       it works well for our purposes.
+        return socket.connect(this.state_.network['ipv4'], 22).then((unused: any) => {
+          destructor();
+          return this.state_;
+        }, (e: Error) => {
+          destructor();
+          throw e;
+        });
+      }, 60, 1000);
     });
   }
 
@@ -132,10 +161,10 @@ class Provisioner {
   private destroyServer_ = (name: string): Promise<void> => {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
       // Find and delete the server with the same name
-      return this.getDroplet_(name);
-    }).then((resp: any) => {
+      return this.getDropletByName_(name);
+    }).then((droplet: any) => {
       this.state_.cloud = this.state_.cloud || {};
-      this.state_.cloud.vm = this.state_.cloud.vm || resp.droplet;
+      this.state_.cloud.vm = this.state_.cloud.vm || droplet;
       // Make sure there are no actions in progress before deleting
       this.sendStatus_('CLOUD_WAITING_VM');
       return this.waitDigitalOceanActions_();
@@ -169,10 +198,10 @@ class Provisioner {
     return this.doOAuth_().then((oauthObj: any) => {
       this.state_.oauth = oauthObj;
     }).then(() => {
-      return this.getDroplet_(name);
-    }).then((resp: any) => {
+      return this.getDropletByName_(name);
+    }).then((droplet: any) => {
       this.state_.cloud = this.state_.cloud || {};
-      this.state_.cloud.vm = this.state_.cloud.vm || resp.droplet;
+      this.state_.cloud.vm = this.state_.cloud.vm || droplet;
       // Make sure there are no actions in progress before rebooting
       this.sendStatus_('CLOUD_WAITING_VM');
       return this.waitDigitalOceanActions_();
@@ -188,20 +217,12 @@ class Provisioner {
     });
   }
 
-  /**
-   * Finds a droplet with this name
-   * @param {String} droplet name, as a string
-   * @return {Promise.<Object>}, resolves with {droplet: droplet_with_name}
-   * or rejects if droplet doesn't exist
-   */
-  private getDroplet_ = (name: string) : Promise<Object> => {
+  // Resolves with the (de-serialised) droplet, rejecting if not found.
+  private getDropletByName_ = (name: string) : Promise<Object> => {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
-      // Find and delete the server with the same name
-      for (var i = 0; i < resp.droplets.length; i++) {
+      for (let i = 0; i < resp.droplets.length; i++) {
         if (resp.droplets[i].name === name) {
-          return Promise.resolve({
-            droplet: resp.droplets[i]
-          });
+          return Promise.resolve(resp.droplets[i]);
         }
       }
       return Promise.reject({
@@ -257,7 +278,7 @@ class Provisioner {
       this.sendStatus_('OAUTH_INIT');
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
         var url = 'https://cloud.digitalocean.com/v1/oauth/authorize?' +
-            'client_id=c16837b5448cd6cf2582d2c2f767cfb7d11844ec395a91b43f26ca72513416c8&' +
+            'client_id=41f77ea7aa94311a2337027eb238591db9e98c6e2c1067b3b2c7c3420901703f&' +
             'response_type=token&' +
             'redirect_uri=' + encodeURIComponent(obj.redirect) + '&' +
             'state=' + encodeURIComponent(obj.state) + '&' +

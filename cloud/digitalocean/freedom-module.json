@@ -67,6 +67,7 @@
   "permissions": [
     "core.xhr",
     "core.oauth",
-    "core.storage"
+    "core.storage",
+    "core.tcpsocket"
   ]
 }

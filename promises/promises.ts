@@ -1,15 +1,15 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
 // Invokes f up to maxAttempts number of times, resolving with its result
-// on the first success and rejecting on maxAttempts-th failure.
-export const retry = <T>(f: () => Promise<T>, maxAttempts: number): Promise<T> => {
-  return f().catch((e:Error) => {
-    --maxAttempts;
-    if (maxAttempts > 0) {
-      return retry(f, maxAttempts);
-    } else {
-      return Promise.reject(e);
-    }
+// on the first success and rejecting on the maxAttempts-th failure, waiting,
+// if specified, intervalMs ms between each attempt.
+export const retry = <T>(f: () => Promise<T>, maxAttempts: number, intervalMs = 0): Promise<T> => {
+  return f().catch((e: Error) => {
+    return maxAttempts <= 1 ? Promise.reject(e) : new Promise<T>((F, R) => {
+      setTimeout(() => {
+        retry(f, maxAttempts - 1, intervalMs).then(F, R);
+      }, intervalMs);
+    });
   });
 };
 
