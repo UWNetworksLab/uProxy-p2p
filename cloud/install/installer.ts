@@ -35,7 +35,7 @@ const MAX_CONNECTION_INTERVAL_MS = 10000;
 // in case the server is destroyed during installation, e.g.
 // when the user cancels install.
 const KEEPALIVE_INTERVAL_MS = 1000;
-const KEEPALIVE_MAX_FAILURES = 5;
+const KEEPALIVE_MAX_FAILURES = 120;
 
 // Installs uProxy on a server, via SSH.
 // The process is as close as possible to a manual install
