@@ -42,6 +42,8 @@ genericPath = path.join(devBuildPath, 'generic/')
 ccaDistPath = path.join(distBuildPath, 'cca/app/')
 androidDistPath = path.join(distBuildPath, 'android/')
 iosDistPath = path.join(distBuildPath, 'ios/')
+
+
 #-------------------------------------------------------------------------
 browserifyIntegrationTest = (path) ->
   Rule.browserifySpec(path, {
@@ -49,7 +51,8 @@ browserifyIntegrationTest = (path) ->
   })
 
 #-------------------------------------------------------------------------
-ccaPath = path.dirname(require.resolve('cca/package.json'))
+basePath = process.cwd()
+ccaPath = path.join(basePath, 'node_modules/cca/')
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
 
@@ -155,6 +158,7 @@ uiDistFiles = [
   'generic_ui/polymer/vulcanized*.{html,js}'
   'generic_ui/fonts/*'
   'generic_ui/icons/*'
+  'generic_ui/scripts/get_logs.js'
 ]
 
 coreDistFiles = [
@@ -182,6 +186,8 @@ coreDistFiles = [
   'freedom-pgp-e2e/hex2words.js'
   'freedom-pgp-e2e/e2e.js'
   'freedom-pgp-e2e/pgpapi.json'
+
+  'forge-min/forge.min.js'  # for cloud social provider
 
   '**/freedom-module.json'
   '**/*.static.js'
@@ -243,7 +249,12 @@ gruntConfig = {
   # Create commands to run in different directories
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
   ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
-  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin add https://github.com/gitlaura/cordova-plugin-iosrtc.git'
+
+  # Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released
+  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git'
+
+  # Hook needed to use 'cca run ios' command. Can only run after cordova-plugin-iosrtc has been added.
+  addIosrtcHookCmd: 'cp plugins/cordova-plugin-iosrtc/extra/hooks/iosrtc-swift-support.js hooks/iosrtc-swift-support.js'
 
   exec: {
     ccaCreateDev: {
@@ -295,6 +306,10 @@ gruntConfig = {
       cwd: '<%= iosDevPath %>'
       command: '<%= ccaAddPluginsIosCmd %>'
     }
+    addIosrtcHook: {
+      cwd: '<%= iosDevPath %>'
+      command: '<%= addIosrtcHookCmd %>'
+    }
     ccaPrepareIosDev: {
       cwd: '<%= iosDevPath %>'
       command: '<%= ccaJsPath %> prepare'
@@ -302,10 +317,6 @@ gruntConfig = {
     ccaPrepareIosDist: {
       cwd: '<%= iosDistPath %>'
       command: '<%= ccaJsPath %> prepare'
-    }
-    ccaEmulateIos: {
-      cwd: '<%= iosDevPath %>'
-      command: '<%= ccaJsPath %> run ios --emulator'
     }
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
@@ -387,7 +398,6 @@ gruntConfig = {
             '_locales/**'
 
             'generic_ui/scripts/copypaste.js'
-            'generic_ui/scripts/get_logs.js'
             'scripts/context.static.js'
             'scripts/background.static.js'
           ].concat(uiDistFiles, universalDistFiles)
@@ -405,9 +415,6 @@ gruntConfig = {
             'polymer/vulcanized.{html,js}'
 
             'freedom-for-chrome/freedom-for-chrome.js'
-
-            # for cloud social provider
-            'forge-min/forge.min.js'
           ].concat(coreDistFiles, universalDistFiles)
           dest: 'build/dist/chrome/app'
         }
@@ -426,13 +433,9 @@ gruntConfig = {
             # addon sdk scripts
             'lib/**/*.js'
 
-            'data/generic_ui/scripts/get_logs.js'
             'data/scripts/content-proxy.js'
 
             'data/freedom-for-firefox/freedom-for-firefox.jsm'
-
-            # for cloud social provider
-            'data/forge-min/forge.min.js'
           ].concat(
             getWithBasePath(uiDistFiles, 'data'),
             getWithBasePath(coreDistFiles, 'data'),
@@ -455,17 +458,7 @@ gruntConfig = {
             # This is not browserified so we use .js instead of .static.js
             'polymer/vulcanized.{html,js}'
 
-            'generic_ui/scripts/copypaste.js'
-            'generic_ui/scripts/get_logs.js'
-
-            # TODO move to universalDistFiles once supported on other platforms
-            'freedom-social-quiver/socketio.quiver.json'
-            'freedom-social-quiver/socketio.quiver.js'
-
             'freedom-for-chrome/freedom-for-chrome.js'
-
-            # for cloud social provider
-            'forge-min/forge.min.js'
           ].concat(uiDistFiles, coreDistFiles, universalDistFiles)
           dest: ccaDistPath
         }
@@ -925,13 +918,8 @@ taskManager.add 'build_ios', [
   'build_cca'
   'exec:ccaCreateIosDev'
   'exec:ccaAddPluginsIosBuild'
+  'exec:addIosrtcHook'
   'exec:ccaPrepareIosDev'
-]
-
-# Emulate the mobile client for ios
-taskManager.add 'emulate_ios', [
- 'build_ios'
- 'exec:ccaEmulateIos'
 ]
 
 # --- Testing tasks ---

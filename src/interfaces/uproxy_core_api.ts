@@ -41,6 +41,7 @@ export interface GlobalSettings {
   proxyBypass: string[];
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
+  crypto: boolean;
 }
 export interface InitialState {
   networkNames :string[];
