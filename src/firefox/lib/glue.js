@@ -170,6 +170,13 @@ function setUpConnection(freedom, panel, button) {
       });
     }
   });
+
+  pagemod.PageMod({
+    include: ['https://cloud.digitalocean.com/*'],
+    contentScriptFile: self.data.url('generic_ui/scripts/content_digitalocean.js'),
+    onAttach: function(worker) {
+    }
+  });
 }
 
 exports.setUpConnection = setUpConnection

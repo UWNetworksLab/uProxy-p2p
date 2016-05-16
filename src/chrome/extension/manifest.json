@@ -24,7 +24,7 @@
   "content_scripts": [
     {
       "matches": ["https://cloud.digitalocean.com/*"],
-      "js": ["scripts/content_digitalocean.js"]
+      "js": ["generic_ui/scripts/content_digitalocean.js"]
     }
   ],
   "permissions": [
