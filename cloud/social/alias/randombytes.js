@@ -1,15 +1,14 @@
 // Alternative to crypto-browserify's randombytes shim which
 // falls back to freedom.js core.crypto when crypto.getRandomValues is
 // unavailable, which is currently the case in Firefox web workers.
-// TODO: post FF48 (2016-08-02) switch to just native crypto.getRandomValues
+// TODO: post FF48 (2016-08-02) remove fill and just use built-in crypto
 
-var nativeCrypto = typeof crypto !== 'undefined';
-var refreshBuffer, bufferRemaining;
-if (!nativeCrypto) {
+const cryptoAvailable = typeof crypto !== 'undefined';
+var refreshBuffer, offset;
+if (!cryptoAvailable) {
   // Filling with freedom.js core.crypto, which requires a buffer due to async
   var rand = freedom['core.crypto'](),
       buf,
-      offset = 0;
   refreshBuffer = function (size) {
     return rand.getRandomBytes(size).then(function (bytes) {
       buf = new Uint8Array(bytes);
@@ -19,7 +18,7 @@ if (!nativeCrypto) {
     });
   }.bind(this);
   refreshBuffer(10000);  // initial randomness
-  bufferRemaining = 10000;
+  offset = 0;
 
   crypto = {};
   crypto.getRandomValues = function (buffer) {
@@ -36,13 +35,12 @@ if (!nativeCrypto) {
       view[i] = buf[offset + i];
     }
     offset += size;
-    bufferRemaining -= size;
   };
 }
 
 module.exports = function(size, cb) {
   var buffer = new Buffer(size);
-  if (!nativeCrypto && bufferRemaining < size*10) {
+  if (!cryptoAvailable && (size*100) - offset < size*10) {
     // using freedom.js core.crypto, may need to refresh buffer
     refreshBuffer(size*100);
   }
