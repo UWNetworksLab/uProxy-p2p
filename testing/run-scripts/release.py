@@ -19,10 +19,9 @@ import subprocess
 parser = argparse.ArgumentParser(
     description='Cross-browser tests for uproxy-lib release process.')
 parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
+parser.add_argument('--browsers', help='browsers to test', nargs='+', default=['chrome', 'firefox'])
+parser.add_argument('--versions', help='browser versions to test', nargs='+', default=['stable', 'beta', 'canary'])
 args = parser.parse_args()
-
-browsers = ['chrome', 'firefox']
-versions = ['stable', 'beta', 'canary']
 
 test_url = 'http://www.example.com/'
 
@@ -49,7 +48,7 @@ print('** large transfer known md5sum: ' + known_large_md5sum)
 
 # Iterate through every browser/version combination.
 results = {}
-combos = [('-'.join(x)) for x in itertools.product(browsers, versions)]
+combos = [('-'.join(x)) for x in itertools.product(args.browsers, args.versions)]
 for getter_spec, giver_spec in itertools.product(combos, combos):
   passed = False
   try:
