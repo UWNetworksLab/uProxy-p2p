@@ -129,8 +129,10 @@ import ui = ui_connector.connector;
 
     private keyVerifyHandler_ = (unused :string, msg:any) => {
       if (this.keyVerifySession_ !== null) {
+      log.debug('keyVerifyHandler_(%1,%2): going to existing session', unused, msg);
         this.keyVerifySession_.readMessage(msg);
       } else {
+        log.debug('keyVerifyHandler_(%1,%2): creating new session.', unused, msg);
         // Create a key verify session and give it this message.
         this.verifyUser(msg);
       }
@@ -143,7 +145,7 @@ import ui = ui_connector.connector;
         case uproxy_core_api.Update.SIGNALLING_MESSAGE:
           var clientId = this.user.instanceToClient(this.instanceId);
           if (!clientId) {
-            log.error('Could not find clientId for instance', this);
+            log.error('Could not find clientId for instance', this.instanceId);
             return;
           }
           if (typeof this.publicKey !== 'undefined' &&
@@ -203,6 +205,7 @@ import ui = ui_connector.connector;
      * TODO: return a boolean on success/failureg
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
+      console.log("RemoteInstance.HandleSignal: ", msg);
       if (typeof this.publicKey !== 'undefined' &&
           typeof globals.publicKey !== 'undefined' &&
           // signal data is not encrypted for Quiver, because entire message
@@ -224,6 +227,8 @@ import ui = ui_connector.connector;
         type:social.PeerMessageType,
         messageVersion:number,
         signalFromRemote:bridge.SignallingMessage) : Promise<void> => {
+      log.debug('handleDecryptedSignal_(%1, %2, %3)', type, messageVersion, 
+                signalFromRemote);
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -271,14 +276,15 @@ import ui = ui_connector.connector;
     }
 
     public verifyUser = (firstMsg ?: any) : void => {
+      log.debug('verifyUser(%1)', firstMsg);
       var inst = this;
       var delegate = <key_verify.Delegate>{
         sendMessage : (msg:any) :Promise<void> => {
-          console.log("sendMessage:", msg);
+          console.log("verifyUser: sendMessage:", msg);
           return inst.sendMessage('Control.Verify', msg);
         },
         showSAS : (sas:string) :Promise<boolean> => {
-          console.log("Got SAS " + sas);
+          console.log("verifyUser: Got SAS " + sas);
           return Promise.resolve<boolean>(true);
         }
       };
@@ -316,6 +322,7 @@ import ui = ui_connector.connector;
       */
     private startShare_ = () : void => {
       var sharingStopped :Promise<void>;
+      log.debug('startShare_');
       if (this.connection_.localSharingWithRemote === social.SharingState.NONE) {
         // Stop any existing sharing attempts with this instance.
         sharingStopped = Promise.resolve<void>();
@@ -328,6 +335,7 @@ import ui = ui_connector.connector;
 
       // Start sharing only after an existing connection is stopped.
       sharingStopped.then(() => {
+        log.debug('sharingStopped.then()');
         // Set timeout to close rtcToNet_ if start() takes too long.
         // Calling stopShare() at the end of the timeout makes the
         // assumption that our peer failed to start getting access.
@@ -337,6 +345,7 @@ import ui = ui_connector.connector;
         }, this.RTC_TO_NET_TIMEOUT);
 
         this.connection_.startShare(this.messageVersion).then(() => {
+          log.debug('this.connection_.startShare().then()');
           clearTimeout(this.startRtcToNetTimeout_);
         }, () => {
           log.warn('Could not start sharing.');
@@ -353,6 +362,7 @@ import ui = ui_connector.connector;
     }
 
     public stopShare = () :Promise<void> => {
+      log.debug('stopShare()');
       if (this.connection_.localSharingWithRemote === social.SharingState.NONE) {
         log.warn('Cannot stop sharing while currently not sharing.');
         return Promise.resolve<void>();
@@ -365,13 +375,17 @@ import ui = ui_connector.connector;
     }
 
     public sendMessage = (channel :string, message :any) :Promise<void> => {
+      log.debug('sendMessage(%1, %2)', channel, message);
       return this.connection_.startConnection(this.messageVersion).then(() =>  {
+        log.debug('this.connection_.startConnection().then() -> sendMessage(%1, %2)', channel, message);
         this.connection_.sendMessage(channel, message);
       });
     }
 
     public registerMessageHandler = (channel :string, fn:(channel:string, msg:any) => void) :void => {
+      log.debug('registerMessageHandler(%1, fun())', channel);
       this.connection_.startConnection(this.messageVersion).then(() => {
+        log.debug('this.connection_.startConnection().then() -> registerMessageHandler(%1, fun())', channel);
         this.connection_.registerMessageHandler(channel, fn);
       });
     }
@@ -381,6 +395,7 @@ import ui = ui_connector.connector;
      * currently granted.
      */
     public start = () :Promise<net.Endpoint> => {
+      log.debug('start()');
       if (!this.wireConsentFromRemote.isOffering) {
         log.warn('Lacking permission to proxy');
         return Promise.reject(Error('Lacking permission to proxy'));
@@ -394,17 +409,21 @@ import ui = ui_connector.connector;
 
       return this.connection_.startConnection(this.messageVersion).then(
         () => {
+          log.debug('start(): this.connection_.startConnection().then() ...');
           this.connection_.startGet().then(
             (endpoints :net.Endpoint) => {
+              log.debug('start(): this.connection_.startConnection().then() ... startGet().then()...');
               clearTimeout(this.startSocksToRtcTimeout_);
               return endpoints;
             }).catch((e) => {
+              log.debug('start(): this.connection_.startConnection().then() ... startGet().CATCH()...');
               return Promise.reject(e);
             });
       }).catch((e) => {
         // Tell the UI that sharing failed. It will show a toast.
         // TODO: Send this update from remote-connection.ts
         //       https://github.com/uProxy/uproxy/issues/1861
+        log.debug('start(): this.connection_.startConnection().CATCH()...');
         ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()
@@ -417,6 +436,7 @@ import ui = ui_connector.connector;
      * Stop using this remote instance as a proxy server.
      */
     public stop = () :Promise<void> => {
+      log.debug('stop()');
       return this.connection_.stopGet();
     }
 
@@ -427,7 +447,9 @@ import ui = ui_connector.connector;
      */
     public update = (data:social.InstanceHandshake,
         messageVersion:number) :Promise<void> => {
+      log.debug('update(%1, %2)', data, messageVersion);
       return this.onceLoaded.then(() => {
+        log.debug('update(%1, %2).onceLoaded.then()', data, messageVersion);
         if (data.publicKey &&
             (typeof this.publicKey === 'undefined' || !this.keyVerified)) {
           this.publicKey = data.publicKey;
@@ -440,6 +462,7 @@ import ui = ui_connector.connector;
     }
 
     private updateConsentFromWire_ = (bits :social.ConsentWireState) => {
+      log.debug('updateConsentFromWire_(%1)', bits);
       var userConsent = this.user.consent;
 
       if (!bits.isOffering &&
@@ -455,7 +478,9 @@ import ui = ui_connector.connector;
     }
 
     public saveToStorage = () => {
+      log.debug('saveToStorage()');
       return this.onceLoaded.then(() => {
+      log.debug('saveToStorage() this.onceLoaded.then()');
         var state = this.currentState();
         return storage.save(this.getStorePath(), state)
         .then(() => {
@@ -527,6 +552,7 @@ import ui = ui_connector.connector;
     }
 
     public handleLogout = () => {
+      log.debug('handleLogout()');
       if (this.connection_.localSharingWithRemote !== social.SharingState.NONE) {
         log.info('Closing rtcToNet_ for logout');
         this.connection_.stopShare();

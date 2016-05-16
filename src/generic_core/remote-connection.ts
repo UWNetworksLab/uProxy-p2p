@@ -90,8 +90,9 @@ var generateProxyingSessionId_ = (): string => {
     }
 
     private createSender_ = (type :social.PeerMessageType) => {
+      log.debug('createSender_(%1)', type);
       return (signal :bridge.SignallingMessage) => {
-        console.log("Sending signal: ", signal);
+        console.log("[from remote-connection.createSender] Sending signal: ", signal);
         this.sendUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
           type: type,
           data: signal
@@ -101,6 +102,7 @@ var generateProxyingSessionId_ = (): string => {
 
     // Handles signals received on the signalling channel from the remote peer.
     public handleSignal = (message:social.PeerMessage) :Promise<void> => {
+      log.debug('handleSignal(%1)', message);
       // TODO: forward messages from pre-bridge clients
       if ((<any>message.data).signals !== undefined) {
         return this.forwardSignal_(message.type, message.data);
@@ -112,6 +114,7 @@ var generateProxyingSessionId_ = (): string => {
 
     private handleMetadataSignal_ = (
         message:social.SignallingMetadata) :Promise<void> => {
+      log.debug('handleMetadataSignal_(%1)', message);
       if (message.proxyingId) {
         log.info('proxying session %1 initiated by remote peer', message.proxyingId);
         this.proxyingId_ = message.proxyingId;
@@ -124,6 +127,8 @@ var generateProxyingSessionId_ = (): string => {
         type:social.PeerMessageType,
         signal:Object)
         :Promise<void> => {
+      log.debug('forwardSignal_(%1, %2)', type, signal);
+
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type
           && this.rtcToNet_) {
         this.rtcToNet_.handleSignalFromPeer(signal);
@@ -137,6 +142,7 @@ var generateProxyingSessionId_ = (): string => {
     };
 
     public startShare = (remoteVersion:number) :Promise<void> => {
+      log.debug('startShare_(%1)', remoteVersion);
       if (this.rtcToNet_) {
         log.error('rtcToNet_ already exists');
         throw new Error('rtcToNet_ already exists');
@@ -168,6 +174,7 @@ var generateProxyingSessionId_ = (): string => {
       this.rtcToNet_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);
 
       this.sharingReset_ = this.rtcToNet_.onceStopped.then(() => {
+        log.debug('rtcToNet_.onceStopped.then()');
         this.localSharingWithRemote = social.SharingState.NONE;
         this.sendUpdate_(uproxy_core_api.Update.STOP_GIVING);
         this.rtcToNet_ = null;
@@ -181,10 +188,12 @@ var generateProxyingSessionId_ = (): string => {
       this.fulfillRtcToNetCreated_();
 
       this.rtcToNet_.onceReady.then(() => {
+        log.debug('rtcToNet_.onceReady.then()');
         this.localSharingWithRemote = social.SharingState.SHARING_ACCESS;
         this.sendUpdate_(uproxy_core_api.Update.START_GIVING);
         this.stateRefresh_();
       }).catch((e) => {
+        log.debug('rtcToNet_.onceReady.catch()');
         this.stopShare();
       });
 
@@ -197,12 +206,14 @@ var generateProxyingSessionId_ = (): string => {
     // for a new rtcToNet_ instance to be created. Otherwise, CANDIDATE signals can be
     // dropped or handled by old rtcToNet_ instances.
     public resetSharerCreated = () :void => {
+      log.debug('resetSharerCreated');
       this.onceSharerCreated = new Promise<void>((F, R) => {
         this.fulfillRtcToNetCreated_ = F;
       });
     }
 
     public stopShare = () :Promise<void> => {
+      log.debug('stopShare');
       if (this.localSharingWithRemote === social.SharingState.NONE) {
         log.warn('Cannot stop sharing when neither sharing nor trying to share.');
         return Promise.resolve<void>();
@@ -216,6 +227,7 @@ var generateProxyingSessionId_ = (): string => {
 
     // A separate messaging api for non-stream uses.
     public sendMessage = (name :string, msg:any) :Promise<void> => {
+      log.debug('sendMessage(%1, %2)', name, msg);
       if (this.underlyingPeerConnection_ === null) {
         throw (new Error("No underlying peer connection."));
       }
@@ -225,17 +237,24 @@ var generateProxyingSessionId_ = (): string => {
     }
 
     public registerMessageHandler = (name :string, fn:(name:string, msg:any) => void) => {
+      log.debug('registerMessageHandler(%1, function(...))', name);
       this.underlyingPeerConnection_.onceConnected.then(() => {
+        log.debug('this.underlyingPeerConnection_.onceConnected.then())');
         this.underlyingPeerConnection_.registerMessageHandler(name, fn);
       });
     }
 
     public startConnection = (remoteVersion:number) :Promise<void> => {
+      log.debug('startConnection(%1)', remoteVersion);
       // this part is hacky.
+      // Super hack!
       if (this.underlyingPeerConnection_ !== null) {
 //        return this.underlyingPeerConnection_.onceConnected;
         // Like below.
-        return Promise.resolve<void>();
+        log.debug('startConnection(%1): already have an underlyingPeerConnection_ HACK: nuking it.', remoteVersion);
+        this.underlyingPeerConnection_ = null;
+
+//        return Promise.resolve<void>();
       }
       if (this.localGettingFromRemote !== social.GettingState.NONE) {
         // This should not happen. If it does, something else is broken. Still, we
@@ -288,6 +307,7 @@ var generateProxyingSessionId_ = (): string => {
         // or not (based on whether they clicked stop/logout, or based on
         // whether the browser's proxy was set).
 
+        log.debug('this.socksToRtc_[onceStopping_].then()');
         var isError = social.GettingState.GETTING_ACCESS === this.localGettingFromRemote;
         this.sendUpdate_(uproxy_core_api.Update.STOP_GETTING, isError);
 
@@ -336,6 +356,7 @@ var generateProxyingSessionId_ = (): string => {
         pc, this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
       this.underlyingPeerConnection_ = pc;
       pc.onceClosed.then(() => { 
+        log.debug('pc.onceClosed.then()');
         this.underlyingPeerConnection_ = null; 
         this.nonproxyChannels_ = null;
       });
@@ -344,6 +365,7 @@ var generateProxyingSessionId_ = (): string => {
 
     // requires that startConnection() has completed successfully.
     public startGet = () :Promise<net.Endpoint> => {
+      log.debug('startGet');
       if (this.underlyingPeerConnection_ == null) {
         return Promise.reject(new Error("Not connected."));
       }
@@ -369,6 +391,7 @@ var generateProxyingSessionId_ = (): string => {
     }
 
     public stopGet = () :Promise<void> => {
+      log.debug('stopGet');
       if (this.localGettingFromRemote === social.GettingState.NONE) {
         log.warn('Cannot stop proxying when neither proxying nor trying to proxy.');
         return;
@@ -386,6 +409,7 @@ var generateProxyingSessionId_ = (): string => {
      * a second and we will not do any other updates in the meantime.
      */
     private delayedUpdate_ = () => {
+      log.debug('delayedUpdate_');
       if (!this.isUpdatePending_) {
         setTimeout(() => {
           this.stateRefresh_();
@@ -396,20 +420,24 @@ var generateProxyingSessionId_ = (): string => {
     }
 
     private handleBytesReceived_ = (bytes :number) => {
+      log.debug('handleBytesReceived_(%1)', bytes);
       this.bytesReceived_ += bytes;
       this.delayedUpdate_();
     }
 
     private handleBytesSent_ = (bytes :number) => {
+      log.debug('handleBytesSent_(%1)', bytes);
       this.bytesSent_ += bytes;
       this.delayedUpdate_();
     }
 
     private stateRefresh_ = () => {
+      log.debug('stateRefresh_');
       this.sendUpdate_(uproxy_core_api.Update.STATE, this.getCurrentState());
     }
 
     public getCurrentState = () :uproxy_core_api.ConnectionState => {
+      log.debug('getCurrentState');
       return {
         bytesSent: this.bytesSent_,
         bytesReceived: this.bytesReceived_,
@@ -420,6 +448,7 @@ var generateProxyingSessionId_ = (): string => {
     }
 
     public getProxyingId = () : string => {
+      log.debug('getProxyingId');
       return this.proxyingId_;
     }
   }
