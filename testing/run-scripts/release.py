@@ -69,7 +69,7 @@ for getter_spec, giver_spec in itertools.product(combos, combos):
       try:
         subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
         subprocess.call(['./run_pair.sh', '-p', args.clone_path,
-            getter_spec, giver_spec], timeout=15)
+            getter_spec, giver_spec], timeout=30)
         running = True
       except Exception as e:
         if attempt < max_attempts:
