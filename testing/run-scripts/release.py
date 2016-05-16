@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 # This is a major part of the uproxy-lib release process:
 #   https://github.com/uProxy/uproxy-lib
