@@ -26,13 +26,6 @@ versions = ['stable', 'beta', 'canary']
 
 test_url = 'http://www.example.com/'
 
-# Number of times to try a browser configuration before giving up.
-# We do this because Chrome startup - at least when apps are
-# involved - is flaky on Docker, and we haven't been able to find
-# a reliable workaround:
-#   https://github.com/uProxy/uproxy/issues/2174
-max_attempts = 3
-
 # Compute a hash of the page without using any proxy.
 known_small_md5sum = subprocess.check_output(
     'curl ' + test_url + ' 2>/dev/null|md5sum -|cut -d\' \' -f1',
@@ -61,21 +54,9 @@ for getter_spec, giver_spec in itertools.product(combos, combos):
   passed = False
   try:
     # Start the browsers.
-    running = False
-    attempt = 0
-    while not running:
-      attempt += 1
-      print('** ' + getter_spec + ' <- ' + giver_spec + ' (attempt ' + str(attempt) + ')')
-      try:
-        subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
-        subprocess.call(['./run_pair.sh', '-p', args.clone_path,
-            getter_spec, giver_spec], timeout=30)
-        running = True
-      except Exception as e:
-        if attempt < max_attempts:
-          print('** browser failed to start...re-trying')
-        else:
-          raise e
+    print('** ' + getter_spec + ' <- ' + giver_spec)
+    subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
+    subprocess.call(['./run_pair.sh', '-p', args.clone_path, getter_spec, giver_spec])
 
     # small HTTP download.
     small_md5sum = subprocess.check_output(
