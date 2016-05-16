@@ -5,6 +5,7 @@ require('../social/monkey/process');
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
+import Pinger = require('../../net/pinger');
 import queue = require('../../handler/queue');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
@@ -143,6 +144,12 @@ class CloudInstaller {
           message: 'connection close without invitation URL'
         });
       }).connect(connectConfig);
+    }).then((invite: any) => {
+      // It can take several seconds before the SSH server running
+      // in the new Docker container becomes active.
+      return new Pinger(host, 5000).ping().then(() => {
+        return invite;
+      });
     });
   }
 }

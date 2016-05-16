@@ -6,7 +6,6 @@ import arraybuffers = require('../../arraybuffers/arraybuffers');
 import crypto = require('crypto');
 import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
-import promises = require('../../promises/promises');
 import queue = require('../../handler/queue');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
@@ -209,24 +208,15 @@ export class CloudSocialProvider {
       });
     }
 
-    let numAttempts = 0;
-    const connect = () => {
-      log.debug('connection attempt %1...', (++numAttempts));
-      const connection = new Connection(invite, (message: Object) => {
-        this.dispatchEvent_('onMessage', {
-          from: makeClientState(invite.host),
-          // SIGNAL_FROM_SERVER_PEER,
-          message: JSON.stringify(makeVersionedPeerMessage(3002, message))
-        });
+    const connection = new Connection(invite, (message: Object) => {
+      this.dispatchEvent_('onMessage', {
+        from: makeClientState(invite.host),
+        // SIGNAL_FROM_SERVER_PEER,
+        message: JSON.stringify(makeVersionedPeerMessage(3002, message))
       });
-      return connection.connect().then(() => {
-        return connection;
-      });
-    };
-        
-    this.clients_[invite.host] = promises.retryWithExponentialBackoff(connect,
-        MAX_CONNECTION_INTERVAL_MS, INITIAL_CONNECTION_INTERVAL_MS).then(
-        (connection:Connection) => {
+    });
+
+    this.clients_[invite.host] = connection.connect().then(() => {
       log.info('connected to zork on %1', invite.host);
 
       // Fetch the banner, if available, then emit an instance message.

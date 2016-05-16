@@ -1,6 +1,6 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
-import promises = require('../../promises/promises');
+import Pinger = require('../../net/pinger');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
@@ -110,31 +110,11 @@ class Provisioner {
         }
       }
 
-      // Spin until the server is truly up.
-      // Give it one minute before declaring bankruptcy.
-      console.log('waiting for activity on port 22');
-      return promises.retry(() => {
-        const socket = freedom['core.tcpsocket']();
-
-        const destructor = () => {
-          try {
-            freedom['core.tcpsocket'].close(socket);
-          } catch (e) {
-            console.warn('error destroying socket: ' + e.message);
-          }
-        };
-
-        // TODO: Worth thinking about timeouts here but because this times
-        //       out almost immediately if nothing is listening on the port,
-        //       it works well for our purposes.
-        return socket.connect(this.state_.network['ipv4'], 22).then((unused: any) => {
-          destructor();
-          return this.state_;
-        }, (e: Error) => {
-          destructor();
-          throw e;
-        });
-      }, 60, 1000);
+      // It usually takes several seconds after the API reports success for
+      // SSH on a new droplet to become responsive.
+      return new Pinger(this.state_.network['ipv4'], 22, 60).ping().then(() => {
+        return this.state_;
+      });
     });
   }
 
