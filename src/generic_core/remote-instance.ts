@@ -385,10 +385,7 @@ import ui = ui_connector.connector;
 
     public registerMessageHandler = (channel :string, fn:(channel:string, msg:any) => void) :void => {
       log.debug('registerMessageHandler(%1, fun())', channel);
-      this.connection_.startConnection(this.messageVersion).then(() => {
-        log.debug('this.connection_.startConnection().then() -> registerMessageHandler(%1, fun())', channel);
-        this.connection_.registerMessageHandler(channel, fn);
-      });
+      this.connection_.registerMessageHandler(channel, fn);
     }
 
     /**
