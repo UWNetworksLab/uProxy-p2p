@@ -217,6 +217,7 @@ import ui = ui_connector.connector;
           globals.settings.crypto) {
         return crypto.verifyDecrypt(<string>msg.data, this.publicKey)
         .then((plainText :string) => {
+          console.log("RemoteInstance.HandleSignal.verifyDecrypt(): ", msg);
           return this.handleDecryptedSignal_(
               msg.type, msg.version, JSON.parse(plainText));
         }).catch((e) => {
