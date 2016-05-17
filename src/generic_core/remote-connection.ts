@@ -104,6 +104,7 @@ var generateProxyingSessionId_ = (): string => {
     public handleSignal = (message:social.PeerMessage) :Promise<void> => {
       log.debug('handleSignal(%1)', message);
       // TODO: forward messages from pre-bridge clients
+      // MLING: This doesn't seem to be true when force_message_version is 1.
       if ((<any>message.data).signals !== undefined) {
         return this.forwardSignal_(message.type, message.data);
       } else {
@@ -317,6 +318,9 @@ var generateProxyingSessionId_ = (): string => {
         this.stateRefresh_();
         this.socksToRtc_ = null;
         this.activeEndpoint = null;
+        this.underlyingPeerConnection_.close().then( () => {
+          this.underlyingPeerConnection_ = null;
+        });
       });
 
       this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
