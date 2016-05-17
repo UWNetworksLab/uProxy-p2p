@@ -54,11 +54,15 @@ chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.Messa
 chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runtime.MessageSender, sendResponse :Function) => {
   // Reply to pings from the uproxy website that are checking if the
   // extension is installed.
-  if (request && request.checkIfInstalled) {
-    sendResponse({ extensionInstalled: true });
-  } else if (request && request.openWindow) {
-    browserApi.bringUproxyToFront();
-    sendResponse({ launchedUproxy: true });
+  if (request) {
+    if (request.checkIfInstalled) {
+      sendResponse({ extensionInstalled: true });
+    } else if (request.openWindow) {
+      browserApi.bringUproxyToFront();
+      sendResponse({ launchedUproxy: true });
+    } else if (request.promo) {
+      browserApi.emit('promo', request.promo);
+    }
   }
   return true;
 });

@@ -39,7 +39,13 @@ Polymer({
     this.$.loginOverlay.open();
   },
   launchDigitalOceanSignup: function() {
-    ui.openTab('https://cloud.digitalocean.com/registrations/new?refcode=5ddb4219b716');
+    // DigitalOcean referral codes trump promo codes,
+    // so only add our refcode to the url if the user has no promo code.
+    // TODO: move 'promoDigitalOcean' to a constant
+    const hasPromo = ui_context.model.globalSettings.promo === 'promoDigitalOcean';
+    const urlHasPromo = 'https://cloud.digitalocean.com/registrations/new';
+    const urlNoPromo = urlHasPromo + '?refcode=5ddb4219b716';
+    ui.openTab(hasPromo ? urlHasPromo : urlNoPromo);
   },
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');

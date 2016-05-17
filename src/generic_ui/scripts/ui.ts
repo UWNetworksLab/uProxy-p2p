@@ -325,6 +325,10 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
+    browserApi.on('promo', function (promo: string) {
+      this.model.globalSettings.promo = promo;
+      this.core.updateGlobalSettings(this.model.globalSettings);
+    }.bind(this));
 
     core.getFullState()
         .then(this.updateInitialState)
