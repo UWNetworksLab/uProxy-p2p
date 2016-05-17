@@ -26,7 +26,7 @@ Polymer({
     this.injectBoundHTML(
         ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
         this.$.loginMessage);
-    
+
     ui.cloudInstallCancelDisabled = false;
     this.$.getStartedOverlay.open();
   },
@@ -39,10 +39,10 @@ Polymer({
     this.$.loginOverlay.open();
   },
   launchDigitalOceanSignup: function() {
-    params = '';
+    var params = '';
     // TODO: Going to uproxy.org/OFF should stash a flag somewhere that we
     // need to check here to determine whether to include the `refcode` param
-    if (false) {
+    if (!this.disableDigitalOcean /* TODO real variable */) {
       params += 'refcode=5ddb4219b716'
     }
     ui.openTab('https://cloud.digitalocean.com/registrations/new?' + params);
