@@ -285,8 +285,8 @@ var generateProxyingSessionId_ = (): string => {
       this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
 
       // set up basic handlers
-      //this.socksToRtc_.on('signalForPeer', this.createSender_(
-      // social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
+//      this.socksToRtc_.on('signalForPeer', this.createSender_(
+//        social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
       this.socksToRtc_.on('bytesReceivedFromPeer', this.handleBytesReceived_);
       this.socksToRtc_.on('bytesSentToPeer', this.handleBytesSent_);
 
@@ -386,6 +386,7 @@ var generateProxyingSessionId_ = (): string => {
       }).catch((e :Error) => {
         this.localGettingFromRemote = social.GettingState.NONE;
         this.stateRefresh_();
+        log.debug('startGet failed socksToRtc_.start(): %1', e);
         return Promise.reject(Error('Could not start proxy'));
       });
     }
