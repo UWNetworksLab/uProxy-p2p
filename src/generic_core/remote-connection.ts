@@ -62,6 +62,8 @@ var generateProxyingSessionId_ = (): string => {
     // and non-proxying data channels.
     private nonproxyChannels_ :{[name:string]:peerconnection.DataChannel} = null;
 
+    private queuedHandlers_ :{[name:string]:(name:string, msg:any)=>void} = {};
+
     // Resolve this promise when rtcToNet is created and therefore not null.
     // Used to help determine when to call handleSignal (which relies
     // on rtcToNet or socksToRtc being not null).
@@ -163,6 +165,18 @@ var generateProxyingSessionId_ = (): string => {
         pc = bridge.best('rtctonet', config, this.portControl_);
       }
 
+      this.underlyingPeerConnection_ = pc;
+      this.underlyingPeerConnection_.onceConnected.then( () => {
+        for (var n in this.queuedHandlers_) {
+          this.underlyingPeerConnection_.registerMessageHandler(n, this.queuedHandlers_[n]);
+        }
+      });
+      pc.onceClosed.then(() => {
+        log.debug('pc.onceClosed.then()');
+        this.underlyingPeerConnection_ = null; 
+        this.nonproxyChannels_ = null;
+      });
+
       this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
       this.rtcToNet_.start({
         allowNonUnicast: globals.settings.allowNonUnicast
@@ -238,10 +252,13 @@ var generateProxyingSessionId_ = (): string => {
 
     public registerMessageHandler = (name :string, fn:(name:string, msg:any) => void) => {
       log.debug('registerMessageHandler(%1, function(...))', name);
-      this.underlyingPeerConnection_.onceConnected.then(() => {
-        log.debug('this.underlyingPeerConnection_.onceConnected.then())');
-        this.underlyingPeerConnection_.registerMessageHandler(name, fn);
-      });
+      this.queuedHandlers_[name] = fn;
+      if (this.underlyingPeerConnection_ !== null) {
+        this.underlyingPeerConnection_.onceConnected.then(() => {
+          log.debug('this.underlyingPeerConnection_.onceConnected.then())');
+          this.underlyingPeerConnection_.registerMessageHandler(name, fn);
+        });
+      }
     }
 
     public startConnection = (remoteVersion:number) :Promise<void> => {
@@ -358,6 +375,11 @@ var generateProxyingSessionId_ = (): string => {
       peerconnection.setupPeerConnection(
         pc, this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
       this.underlyingPeerConnection_ = pc;
+      this.underlyingPeerConnection_.onceConnected.then( () => {
+        for (var n in this.queuedHandlers_) {
+          this.underlyingPeerConnection_.registerMessageHandler(n, this.queuedHandlers_[n]);
+        }
+      });
       pc.onceClosed.then(() => { 
         log.debug('pc.onceClosed.then()');
         this.underlyingPeerConnection_ = null; 
