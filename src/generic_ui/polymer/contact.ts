@@ -125,7 +125,7 @@ Polymer({
         undefined, cloudInviteUrl);
     });
   },
-  removeCloudFriend: function() {
+  removeCloudFriend: function(event: Event) {
     this.displayCloudRemovalConfirmation().then(() => {
       // Destroy cloud server if created by user
       return this.destroyCloudServerIfNeeded();
@@ -138,6 +138,10 @@ Polymer({
     }).then(() => {
       this.ui.toastMessage = this.ui.i18n_t('REMOVE_CLOUD_SERVER_SUCCESS');
     }).catch((e: Error) => {
+      if (!e) {
+        return;
+      }
+
       if (e.name === 'CLOUD_ERR') {
          this.ui.showDialog(this.ui.i18n_t('REMOVE_CLOUD_SERVER'),
            this.ui.i18n_t('DESTROY_CLOUD_SERVER_FAILURE'));
@@ -146,6 +150,8 @@ Polymer({
           this.ui.i18n_t('REMOVE_CLOUD_SERVER_FAILURE'));
       }
     });
+
+    event.stopPropagation();
   },
   displayCloudRemovalConfirmation: function() {
     if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
