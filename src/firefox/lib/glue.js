@@ -14,6 +14,15 @@ var self = require("sdk/self");
 var events = require("sdk/system/events");
 var notifications = require('sdk/notifications')
 var pagemod = require('sdk/page-mod');
+var tabs = require('sdk/tabs');
+
+
+// If these values change in the uproxy-website source, they must
+// be changed here as well. TODO: de-deduplicate?
+var UPROXY_DOMAINS = ['www.uproxy.org', 'test-dot-uproxysite.appspot.com'];
+var INSTALL_PAGE_PATH = '/install';
+var PROMO_PARAM = 'pr';
+
 
 // TODO: rename freedom to uProxyFreedomModule
 function setUpConnection(freedom, panel, button) {
@@ -170,6 +179,44 @@ function setUpConnection(freedom, panel, button) {
       });
     }
   });
+
+
+  // Check if user already has a tab open with a uProxy install promo in effect.
+  for (var tab of tabs) {
+    emitPromoIfFound(tab.url);
+  }
+
+  // Attach a handler to check if a tab is opened in the future with a promo.
+  tabs.on('pageshow', function (tab) {
+    emitPromoIfFound(tab.url);
+  });
+
+  /*
+   * Emit a promo event to the panel if a uProxy install promo is in
+   * effect for the given URL.
+   */
+  function emitPromoIfFound(url) {
+    var onInstallPage = false;
+    for (var i=0, ii=UPROXY_DOMAINS[i]; ii; ii=UPROXY_DOMAINS[++i])
+      onInstallPage |= url.startsWith('https://' + ii + INSTALL_PAGE_PATH);
+    if (!onInstallPage) return;
+
+    var iq = url.indexOf('?');
+    if (iq === -1) return;
+
+    var qs = url.substring(iq + 1);
+    var params = qs.split('&');
+    var promo = null;
+    for (var i=0, ii=params[i]; ii; ii=params[++i]) {
+      var keyval = ii.split('=');
+      if (keyval[0] === PROMO_PARAM) {
+        promo = keyval[1];
+        panel.port.emit('promo', promo);
+        break;
+      }
+    }
+  }
 }
 
-exports.setUpConnection = setUpConnection
+
+exports.setUpConnection = setUpConnection;

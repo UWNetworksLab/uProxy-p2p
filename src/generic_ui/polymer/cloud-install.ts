@@ -41,8 +41,7 @@ Polymer({
   launchDigitalOceanSignup: function() {
     // DigitalOcean referral codes trump promo codes,
     // so only add our refcode to the url if the user has no promo code.
-    // TODO: move 'promoDigitalOcean' to a constant
-    const hasPromo = ui_context.model.globalSettings.promo === 'promoDigitalOcean';
+    const hasPromo = ui_context.model.globalSettings.promo === 'off2016'; // TODO: move to constant
     const urlHasPromo = 'https://cloud.digitalocean.com/registrations/new';
     const urlNoPromo = urlHasPromo + '?refcode=5ddb4219b716';
     ui.openTab(hasPromo ? urlHasPromo : urlNoPromo);
