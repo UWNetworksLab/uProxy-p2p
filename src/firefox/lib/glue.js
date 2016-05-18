@@ -2,7 +2,7 @@
  * Forwards data from content script to freedom;
  * TODO(salomegeo): rewrite in typescript;
  * Figure out a way to avoid freeom -> add-on env -> content script -> add-on
- * for proxy setting and setiing a main icon.
+ * for proxy setting and setting a main icon.
  */
 
 var proxyConfig = require('lib/firefox_proxy_config.js').proxyConfig;
@@ -181,9 +181,11 @@ function setUpConnection(freedom, panel, button) {
   });
 
 
-  // Check if user already has a tab open with a uProxy install promo in effect.
+  // Check if user already has a tab open to the uProxy install page.
   for (var tab of tabs) {
-    emitPromoIfFound(tab.url);
+    if (isInstallPage(tab.url)) {
+      emitPromoIfFound(tab.url);
+    }
   }
 
   // Attach a handler to check if a tab is opened in the future with a promo.
@@ -192,26 +194,35 @@ function setUpConnection(freedom, panel, button) {
   });
 
   /*
+   * Return true iff the given URL corresponds to the uProxy install page.
+   */
+  function isInstallPage(url) {
+    for (var domain of UPROXY_DOMAINS) {
+      if (url.startsWith('https://' + domain + INSTALL_PAGE_PATH)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /*
    * Emit a promo event to the panel if a uProxy install promo is in
    * effect for the given URL.
    */
   function emitPromoIfFound(url) {
-    var onInstallPage = false;
-    for (var i=0, ii=UPROXY_DOMAINS[i]; ii; ii=UPROXY_DOMAINS[++i])
-      onInstallPage |= url.startsWith('https://' + ii + INSTALL_PAGE_PATH);
-    if (!onInstallPage) return;
-
-    var iq = url.indexOf('?');
-    if (iq === -1) return;
-
-    var qs = url.substring(iq + 1);
+    if (!isInstallPage(url)) {
+      return;
+    }
+    var iq = url.indexOf('?') + 1;
+    if (!iq) {
+      return;
+    }
+    var qs = url.substring(iq);
     var params = qs.split('&');
-    var promo = null;
-    for (var i=0, ii=params[i]; ii; ii=params[++i]) {
-      var keyval = ii.split('=');
+    for (var param of params) {
+      var keyval = param.split('=');
       if (keyval[0] === PROMO_PARAM) {
-        promo = keyval[1];
-        panel.port.emit('promo', promo);
+        panel.port.emit('promo', keyval[1]);
         break;
       }
     }
