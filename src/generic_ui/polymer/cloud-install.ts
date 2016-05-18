@@ -26,8 +26,7 @@ Polymer({
     this.injectBoundHTML(
         ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
         this.$.loginMessage);
-    
-    ui.cloudInstallCancelDisabled = false;
+
     this.$.getStartedOverlay.open();
   },
   showDigitalOceanAccountHelpOverlay: function() {
@@ -99,7 +98,6 @@ Polymer({
     this.mostRecentCreateId = 0;
     this.closeOverlays();
     ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
-    ui.cloudInstallCancelDisabled = true;
     this.$.installingOverlay.open();
     // Destroy uProxy cloud server
     return ui.cloudUpdate({
