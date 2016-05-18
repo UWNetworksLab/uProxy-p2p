@@ -38,11 +38,45 @@
       var promoInput = document.createElement('input');
       promoInput.style.width = '300px';
       promoInput.placeholder = _('Have a promo code? Enter it here.');
-      promoInput.id = '__uProxyPromoInput';
-      // TODO: add 'apply' button which copies this input's value into
-      // the `id=promo_code` input, submits the 'id=new_promo' ajax form,
-      // and calls `setHavePromoCode(1)` if the submission succeeds.
+      var applyButton = document.createElement('button');
+      applyButton.innerText = 'Apply';
+      var DOtoken = document.querySelector('input[name="authenticity_token"]');
+      if (!DOtoken) {
+        console.log('Missing DOtoken. DigitalOcean UI changed?');
+        return;
+      }
+      applyButton.onclick = function (evt) {
+        var data = new FormData();
+        data.append('code', promoInput.value);
+        data.append('authenticity_token', DOtoken.value);
+        var req = new Request('/promos', {
+          method: 'post',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'x-csrf-token': DOtoken.value,
+            'x-requested-with': 'XMLHttpRequest'
+          },
+          body: data,
+          credentials: 'include'
+        });
+        fetch(req).then(function (resp) {
+          return resp.json();
+        }).then(function (data) {
+          if (typeof data !== 'object' || data.status === 'invalid') {
+            // TODO: handle failure
+            return;
+          }
+          debugger;
+          // TODO: call `setPromoCodeApplied(1)` if the submission succeeds.
+          //setPromoCodeApplied(1);
+        }).catch(function (e) {
+          debugger;
+          // TODO: handle failure
+        });
+      };
+
       promoContainer.appendChild(promoInput);
+      promoContainer.appendChild(applyButton);
       overlay.appendChild(promoContainer);
     }
 
@@ -55,10 +89,10 @@
     proceedLink.innerText = 'Proceed';
     // This url should close the tab and open the uProxy extension, which
     // instructs the user to click 'sign in' after creating the DO account.
-    // TODO: requires https://github.com/uproxy/uproxy/tree/bemasc-autoclose
+    // Requires: https://github.com/uproxy/uproxy/tree/bemasc-autoclose
     // Eventually we should save the user this extra click, and have this
     // trigger oauth directly.
-    proceedLink.href = 'https://www.uproxy.org/autoclose'
+    proceedLink.href = 'https://www.uproxy.org/autoclose';
     proceedContainer.appendChild(proceedLink);
     overlay.appendChild(proceedContainer);
 
@@ -66,24 +100,25 @@
   }
 
   function shouldPromptPromoCode() {
-    return wantPromoCode() && !havePromoCode();
-  }
-
-  function wantPromoCode() {
-    // TODO: Going to uproxy.org/OFF should stash a flag somewhere that we
-    // need to check here to determine this value
-    return true;
+    return havePromoCode() && !isPromoCodeApplied();
   }
 
   function havePromoCode() {
-    return !!localStorage['__uProxyHavePromoCode'];
+    // TODO: grab this from ui_context.model.globalSettings.promo
+    return true;
   }
 
-  function setHavePromoCode(val) {
+  var _PROMO_CODE_APPLIED_KEY = '__uProxyPromoCodeApplied';
+
+  function isPromoCodeApplied() {
+    return !!localStorage[_PROMO_CODE_APPLIED_KEY];
+  }
+
+  function setPromoCodeApplied(val) {
     if (val) {
-      localStorage['__uProxyHavePromoCode'] = 1;
+      localStorage[_PROMO_CODE_APPLIED_KEY] = 1;
     } else {
-      delete localStorage['__uProxyHavePromoCode'];
+      delete localStorage[_PROMO_CODE_APPLIED_KEY];
     }
   }
 
