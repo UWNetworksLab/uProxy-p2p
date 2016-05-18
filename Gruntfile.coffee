@@ -42,6 +42,8 @@ genericPath = path.join(devBuildPath, 'generic/')
 ccaDistPath = path.join(distBuildPath, 'cca/app/')
 androidDistPath = path.join(distBuildPath, 'android/')
 iosDistPath = path.join(distBuildPath, 'ios/')
+
+
 #-------------------------------------------------------------------------
 browserifyIntegrationTest = (path) ->
   Rule.browserifySpec(path, {
@@ -49,7 +51,8 @@ browserifyIntegrationTest = (path) ->
   })
 
 #-------------------------------------------------------------------------
-ccaPath = path.dirname(require.resolve('cca/package.json'))
+basePath = process.cwd()
+ccaPath = path.join(basePath, 'node_modules/cca/')
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
 
@@ -247,7 +250,12 @@ gruntConfig = {
   # Create commands to run in different directories
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
   ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen'
-  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin add https://github.com/gitlaura/cordova-plugin-iosrtc.git'
+
+  # Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released
+  ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git'
+
+  # Hook needed to use 'cca run ios' command. Can only run after cordova-plugin-iosrtc has been added.
+  addIosrtcHookCmd: 'cp plugins/cordova-plugin-iosrtc/extra/hooks/iosrtc-swift-support.js hooks/iosrtc-swift-support.js'
 
   exec: {
     ccaCreateDev: {
@@ -299,6 +307,10 @@ gruntConfig = {
       cwd: '<%= iosDevPath %>'
       command: '<%= ccaAddPluginsIosCmd %>'
     }
+    addIosrtcHook: {
+      cwd: '<%= iosDevPath %>'
+      command: '<%= addIosrtcHookCmd %>'
+    }
     ccaPrepareIosDev: {
       cwd: '<%= iosDevPath %>'
       command: '<%= ccaJsPath %> prepare'
@@ -306,10 +318,6 @@ gruntConfig = {
     ccaPrepareIosDist: {
       cwd: '<%= iosDistPath %>'
       command: '<%= ccaJsPath %> prepare'
-    }
-    ccaEmulateIos: {
-      cwd: '<%= iosDevPath %>'
-      command: '<%= ccaJsPath %> run ios --emulator'
     }
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
@@ -911,13 +919,8 @@ taskManager.add 'build_ios', [
   'build_cca'
   'exec:ccaCreateIosDev'
   'exec:ccaAddPluginsIosBuild'
+  'exec:addIosrtcHook'
   'exec:ccaPrepareIosDev'
-]
-
-# Emulate the mobile client for ios
-taskManager.add 'emulate_ios', [
- 'build_ios'
- 'exec:ccaEmulateIos'
 ]
 
 # --- Testing tasks ---
