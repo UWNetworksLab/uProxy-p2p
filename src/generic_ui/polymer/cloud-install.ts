@@ -26,8 +26,7 @@ Polymer({
     this.injectBoundHTML(
         ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
         this.$.loginMessage);
-    
-    ui.cloudInstallCancelDisabled = false;
+
     this.$.getStartedOverlay.open();
   },
   showDigitalOceanAccountHelpOverlay: function() {
@@ -80,9 +79,9 @@ Polymer({
       this.closeOverlays();
       this.$.successOverlay.open();
     }).catch((e :any) => {
-      this.closeOverlays();
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
+        this.closeOverlays();
         this.$.serverExistsOverlay.open();
       } else if (this.mostRecentCreateId === createId) {
         // The user did not cancel: clean up the now-useless droplet
@@ -91,6 +90,7 @@ Polymer({
           operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
           providerName: DEFAULT_PROVIDER
         });
+        this.closeOverlays();
         this.$.failureOverlay.open();
       }
     });
@@ -99,7 +99,6 @@ Polymer({
     this.mostRecentCreateId = 0;
     this.closeOverlays();
     ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
-    ui.cloudInstallCancelDisabled = true;
     this.$.installingOverlay.open();
     // Destroy uProxy cloud server
     return ui.cloudUpdate({
