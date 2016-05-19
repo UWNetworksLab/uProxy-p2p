@@ -26,8 +26,7 @@ Polymer({
     this.injectBoundHTML(
         ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
         this.$.loginMessage);
-    
-    ui.cloudInstallCancelDisabled = false;
+
     this.$.getStartedOverlay.open();
   },
   showDigitalOceanAccountHelpOverlay: function() {
@@ -39,7 +38,7 @@ Polymer({
     this.$.loginOverlay.open();
   },
   launchDigitalOceanSignup: function() {
-    ui.openTab('https://m.do.co/c/5ddb4219b716');
+    ui.openTab('https://cloud.digitalocean.com/registrations/new?refcode=5ddb4219b716');
   },
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
@@ -64,6 +63,9 @@ Polymer({
     this.$.cancelingOverlay.close();
   },
   loginTapped: function() {
+    const createId = Math.floor((Math.random() * 1000000)) + 1;
+    this.mostRecentCreateId = createId;
+
     if (!this.$.installingOverlay.opened) {
       this.closeOverlays();
       ui.cloudInstallStatus = '';
@@ -77,19 +79,26 @@ Polymer({
       this.closeOverlays();
       this.$.successOverlay.open();
     }).catch((e :any) => {
-      this.closeOverlays();
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
+        this.closeOverlays();
         this.$.serverExistsOverlay.open();
-      } else if (e !== 'Error: canceled') {
+      } else if (this.mostRecentCreateId === createId) {
+        // The user did not cancel: clean up the now-useless droplet
+        // and show a sad-face, rainy day dialog.
+        ui.cloudUpdate({
+          operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
+          providerName: DEFAULT_PROVIDER
+        });
+        this.closeOverlays();
         this.$.failureOverlay.open();
       }
     });
   },
   removeServerAndInstallAgain: function() {
+    this.mostRecentCreateId = 0;
     this.closeOverlays();
     ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
-    ui.cloudInstallCancelDisabled = true;
     this.$.installingOverlay.open();
     // Destroy uProxy cloud server
     return ui.cloudUpdate({
@@ -112,6 +121,7 @@ Polymer({
     });
   },
   cancelCloudInstall: function() {
+    this.mostRecentCreateId = 0;
     this.$.cancelingOverlay.open();
     return ui.cloudUpdate({
       operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
@@ -130,5 +140,12 @@ Polymer({
   },
   ready: function() {
     this.ui = ui;
+    // ID of the latest attempt to create a server, used to distinguish
+    // between install failures that should be flagged to the user and
+    // failures owing to cancellation. We use a random number rather
+    // than a simple boolean because, in the event of cancellation, it
+    // can take *several* seconds for the installer to fail by which time
+    // the user could have initiated a whole new install.
+    this.mostRecentCreateId = 0;
   }
 });

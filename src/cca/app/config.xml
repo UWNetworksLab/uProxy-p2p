@@ -5,5 +5,6 @@
     <preference name="SplashMaintainAspectRatio" value="true" />
     <platform name="ios">
         <preference name="deployment-target" value="7.0"/> 
+        <hook type="before_run" src="hooks/iosrtc-swift-support.js"/>
     </platform>
 </widget>

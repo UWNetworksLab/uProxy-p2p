@@ -154,6 +154,14 @@ class CordovaBrowserApi implements BrowserAPI {
       this.stopUsingProxy();
       this.emit_('proxyDisconnected', {deliberate: true});
     });
+    this.browser_.addEventListener('loadstart', (e:any) => {
+      // If the browser opens the autoclose URL, kill it.
+      if (e.url.indexOf('https://www.uproxy.org/autoclose') === 0) {
+        this.browser_.close();
+        this.browser_ = null;
+        // TODO: What if this happens during a proxying session?
+      }
+    });
   }
 
   public launchTabIfNotOpen = (relativeUrl :string) => {

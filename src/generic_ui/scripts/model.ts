@@ -70,6 +70,7 @@ export class Model {
     proxyBypass: [],
     enforceProxyServerValidity: false,
     validProxyServers: [],
+    crypto: true
   };
 
   public reconnecting = false;

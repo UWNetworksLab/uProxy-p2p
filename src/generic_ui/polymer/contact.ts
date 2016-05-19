@@ -121,11 +121,11 @@ Polymer({
       isRequesting: false,
       userId: this.contact.userId // Cloud instance userId
     }).then((cloudInviteUrl: string) => {
-      this.ui.showDialog(this.ui.i18n_t("CLOUD_SHARE_INSTRUCTIONS"), '', this.ui.i18n_t("OK"),
+      this.ui.showDialog(this.ui.i18n_t('CLOUD_SHARE_INSTRUCTIONS'), '', this.ui.i18n_t('OK'),
         undefined, cloudInviteUrl);
     });
   },
-  removeCloudFriend: function() {
+  removeCloudFriend: function(event: Event) {
     this.displayCloudRemovalConfirmation().then(() => {
       // Destroy cloud server if created by user
       return this.destroyCloudServerIfNeeded();
@@ -136,36 +136,50 @@ Polymer({
         userId: this.contact.userId
       });
     }).then(() => {
-      this.ui.toastMessage = this.ui.i18n_t("REMOVE_CLOUD_SERVER_SUCCESS");
+      this.ui.toastMessage = this.ui.i18n_t('REMOVE_CLOUD_SERVER_SUCCESS');
     }).catch((e: Error) => {
+      if (!e) {
+        return;
+      }
+
       if (e.name === 'CLOUD_ERR') {
-         this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
-           this.ui.i18n_t("DESTROY_CLOUD_SERVER_FAILURE"));
+         this.ui.showDialog(this.ui.i18n_t('REMOVE_CLOUD_SERVER'),
+           this.ui.i18n_t('DESTROY_CLOUD_SERVER_FAILURE'));
       } else {
-        this.ui.showDialog(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
-          this.ui.i18n_t("REMOVE_CLOUD_SERVER_FAILURE"));
+        this.ui.showDialog(this.ui.i18n_t('REMOVE_CLOUD_SERVER'),
+          this.ui.i18n_t('REMOVE_CLOUD_SERVER_FAILURE'));
       }
     });
+
+    event.stopPropagation();
   },
   displayCloudRemovalConfirmation: function() {
     if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-      return this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
-        this.ui.i18n_t('DESTROY_CLOUD_SERVER_CONFIRMATION'), true);
+      return this.ui.getConfirmation(
+        this.ui.i18n_t('REMOVE_CLOUD_SERVER'),
+        this.ui.i18n_t('DESTROY_CLOUD_SERVER_CONFIRMATION'),
+        this.ui.i18n_t('CANCEL'),
+        this.ui.i18n_t('CONTINUE')
+      );
     } else {
-      return this.ui.getConfirmation(this.ui.i18n_t("REMOVE_CLOUD_SERVER"),
-        this.ui.i18n_t('REMOVE_CLOUD_SERVER_CONFIRMATION'), true);
+      return this.ui.getConfirmation(
+        this.ui.i18n_t('REMOVE_CLOUD_SERVER'),
+        this.ui.i18n_t('REMOVE_CLOUD_SERVER_CONFIRMATION'),
+        this.ui.i18n_t('CANCEL'),
+        this.ui.i18n_t('CONTINUE')
+      );
     }
   },
   destroyCloudServerIfNeeded: function() {
     if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-      this.ui.toastMessage = this.ui.i18n_t("REMOVING_UPROXY_CLOUD_STATUS");
+      this.ui.toastMessage = this.ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
       return ui_context.core.cloudUpdate({
         operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
         providerName: DEFAULT_PROVIDER
       }).catch((e: Error) => {
         return Promise.reject({
-          "name":"CLOUD_ERR",
-          "message":"Could not destroy cloud server."
+          'name':'CLOUD_ERR',
+          'message':'Could not destroy cloud server.'
         });
       });
     }

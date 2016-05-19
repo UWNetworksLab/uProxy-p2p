@@ -44,18 +44,62 @@ loggingController.setDefaultFilter(
 var portControl = globals.portControl;
 
 // Prefix for freedomjs modules which interface with cloud computing providers.
-const CLOUD_PROVIDER_MODULE_PREFIX: string = 'CLOUDPROVIDER-';
+const CLOUD_PROVIDER_MODULE_NAME_PREFIX: string = 'CLOUDPROVIDER-';
+const CLOUD_PROVIDER_NAME = 'digitalocean';
+const CLOUD_PROVIDER_MODULE_NAME = CLOUD_PROVIDER_MODULE_NAME_PREFIX + CLOUD_PROVIDER_NAME;
+const CLOUD_INSTALLER_MODULE_NAME = 'cloudinstall';
 
 const getCloudProviderNames = (): string[] => {
   let results: string[] = [];
   for (var dependency in freedom) {
     if (freedom.hasOwnProperty(dependency) &&
-        dependency.indexOf(CLOUD_PROVIDER_MODULE_PREFIX) === 0) {
-      results.push(dependency.substr(CLOUD_PROVIDER_MODULE_PREFIX.length));
+        dependency.indexOf(CLOUD_PROVIDER_MODULE_NAME_PREFIX) === 0) {
+      results.push(dependency.substr(CLOUD_PROVIDER_MODULE_NAME_PREFIX.length));
     }
   }
   return results;
 };
+
+// This is the name recommended by the blog post.
+const CLOUD_DROPLET_NAME = 'uproxy-cloud-server';
+
+// Percentage of cloud install progress devoted to deploying.
+// The remainder is devoted to the install script.
+const CLOUD_DEPLOY_PROGRESS = 20;
+
+// Invokes f with an instance of the specified freedomjs module.
+// The module instance will be destroyed before the function resolves
+// or rejects. Intended for use with heavy-weight modules such as
+// those used for cloud.
+function oneShotModule_<T>(moduleName: string, f: (provider: any) => Promise<T>): Promise<T> {
+  try {
+    const m = freedom[moduleName]();
+    log.debug('created ' + moduleName + ' module');
+
+    const destructor = () => {
+      try {
+        freedom[moduleName].close(m);
+        log.debug('destroyed ' + moduleName + ' module');
+      } catch (e) {
+        log.debug('error destroying ' + moduleName + ' module: ' + e.message);
+      }
+    };
+
+    try {
+      return f(m).then((result: T) => {
+        destructor();
+        return result;
+      }, (e: Error) => {
+        destructor();
+        throw e;
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  } catch (e) {
+    return Promise.reject(new Error('error creating ' + moduleName + ' module: ' + e.message));
+  }
+}
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
@@ -69,13 +113,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   private availableVersion_ :string = null;
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
-
-  private cloudInterfaces_ :{
-    [cloudProvider: string] :{
-      installer :any,
-      provisioner :any
-    }
-  } = {};
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -638,128 +675,95 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
-    // This is the server name recommended by the blog post.
-    const DROPLET_NAME = 'uproxy-cloud-server';
-
-    // Percentage of cloud install progress devoted to deploying.
-    // The remainder is devoted to the install script.
-    const DEPLOY_PROGRESS = 20;
-
-    if (args.providerName !== 'digitalocean') {
+  public cloudUpdate = (args: uproxy_core_api.CloudOperationArgs): Promise<void> => {
+    if (args.providerName !== CLOUD_PROVIDER_NAME) {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
-
-    this.cloudInterfaces_[args.providerName] = this.cloudInterfaces_[args.providerName] || { installer: undefined, provisioner: undefined};
-    const provisionerName = CLOUD_PROVIDER_MODULE_PREFIX + args.providerName;
-    const provisioner = this.cloudInterfaces_[args.providerName].provisioner || freedom[provisionerName]();
-    const installer = this.cloudInterfaces_[args.providerName].installer || freedom['cloudinstall']();
-    this.cloudInterfaces_[args.providerName] = { installer: installer, provisioner: provisioner};
-
-    const destroyModules = () => {
-      freedom[provisionerName].close(provisioner);
-      freedom['cloudinstall'].close(installer);
-      delete this.cloudInterfaces_[args.providerName];
-    };
 
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
+        return this.createCloudServer_(args.region);
+      case uproxy_core_api.CloudOperationType.CLOUD_DESTROY:
+        return this.destroyCloudServer_();
+      case uproxy_core_api.CloudOperationType.CLOUD_REBOOT:
+        return this.rebootCloudServer_();
+      default:
+        return Promise.reject(new Error('cloud operation not supported'));
+    }
+  }
 
-        log.debug('deploying cloud server on %1 in %2', args.providerName, args.region);
-        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
-        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, 0);
+  private createCloudServer_ = (region: string) => {
+    log.debug('creating cloud server in %1', region);
 
-        return provisioner.start(DROPLET_NAME, args.region).then((serverInfo: any) => {
-          log.info('created server on digitalocean: %1', serverInfo);
+    // Since this step can take a while, start >0 so there's less confusion
+    // that this is a progress bar.
+    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_CREATING_SERVER');
+    ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, CLOUD_DEPLOY_PROGRESS / 2);
 
-          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, DEPLOY_PROGRESS);
-          ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_LOGGING_IN');
+    return this.loginIfNeeded_('Cloud').then((cloudNetwork) => {
+      return oneShotModule_(CLOUD_PROVIDER_MODULE_NAME, (provider: any) => {
+        return provider.start(CLOUD_DROPLET_NAME, region);
+      }).catch((e: any) => {
+        if (e.errcode === 'VM_AE') {
+          // This string has special meaning for the polymer template.
+          return Promise.reject(new Error('server already exists'));
+        } else {
+          return Promise.reject(e);
+        }
+      }).then((serverInfo: any) => {
+        const host = serverInfo.network.ipv4;
+        const port = serverInfo.network.ssh_port;
 
-          const host = serverInfo.network.ipv4;
-          const port = serverInfo.network.ssh_port;
+        log.debug('installing cloud on new droplet at %1:%2 (server details: %3)', host, port, serverInfo);
 
-          log.debug('installing cloud on %1:%2', host, port);
+        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, CLOUD_DEPLOY_PROGRESS);
+        ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, 'CLOUD_INSTALL_STATUS_LOGGING_IN');
 
+        return oneShotModule_(CLOUD_INSTALLER_MODULE_NAME, (installer: any) => {
           installer.on('status', (status: number) => {
             ui.update(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, status);
           });
 
-          installer.on('progress', (progress:number) => {
+          installer.on('progress', (progress: number) => {
             ui.update(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS,
-                DEPLOY_PROGRESS + (progress * ((100 - DEPLOY_PROGRESS) / 100)));
+              CLOUD_DEPLOY_PROGRESS + (progress * ((100 - CLOUD_DEPLOY_PROGRESS) / 100)));
           });
 
-          // TODO: The provisioning module should return the username!
           return installer.install(host, port, 'root', serverInfo.ssh.private);
         }).then((cloudNetworkData: any) => {
-          // TODO: make cloudNetworkData an Invite type.  This requires the cloud
-          // social provider to export the Invite interface, and also to cleanup
-          // reference paths so that uProxy doesn't need to include modules like
-          // ssh2.
-          destroyModules();
+          // Set flag so Cloud social provider knows this invite is for the admin
+          // user, who just created the server.
+          cloudNetworkData['isAdmin'] = true;
 
-          // Login to the Cloud network if the user isn't already so that
-          // we can add the new cloud server to the roster.
-          return this.loginIfNeeded_('Cloud').then((cloudNetwork) => {
-            // Set flag so Cloud social provider knows this invite is for the admin
-            // user, who just created the server.
-            cloudNetworkData['isAdmin'] = true;
-
-            // Synthesize an invite token based on cloudNetworkData.
-            // CONSIDER: if we had a social.acceptInvitation that only took
-            // networkData we wouldn't need to fake the other fields.
-            return cloudNetwork.acceptInvitation({
-              v: 2,
-              networkName: 'Cloud',
-              userName: cloudNetworkData['host'],
-              networkData: JSON.stringify(cloudNetworkData)
-            });
-          });
-        }, (installError: any) => {
-          // When we cancel the cloud install we close the connection
-          // to the installer by destroying the modules
-          if (installError === 'closed') {
-            return Promise.reject(new Error('canceled'));
-          }
-          
-          // Tell user if the server already exists
-          if (installError.errcode === "VM_AE") {
-            destroyModules();
-            return Promise.reject(new Error('server already exists'));
-          }
-
-          // Destroy the server we just created so that the user isn't billed.
-          log.error('install failed, cleaning up');
-          return provisioner.stop(DROPLET_NAME).then((unused: Object) => {
-            log.info('destroyed server on digitalocean');
-            destroyModules();
-            return Promise.reject(installError);
-          }, (destroyError: Error) => {
-            // This is bad: the user will be billed for a broken server.
-            // TODO: direct the user at the digitalocean console
-            log.error('failed to destroy new server after install failure: %1',
-              destroyError.message);
-            destroyModules();
-            return Promise.reject(installError);
+          // We cast to any because InviteTokenData currently has a required userName
+          // field which is unused by the cloud social provider.
+          // TODO: what if this fails?
+          return cloudNetwork.acceptInvitation(<any>{
+            v: 2,
+            networkName: 'Cloud',
+            networkData: JSON.stringify(cloudNetworkData)
           });
         });
-      case uproxy_core_api.CloudOperationType.CLOUD_DESTROY:
-        // OAuth into provider and destroy cloud server
-        return provisioner.stop(DROPLET_NAME).then(() => {
-          destroyModules();
-          log.debug('stopped cloud server on', args.providerName);
-        }, (e: Error) => {
-          destroyModules();
-          log.error('error destroying cloud server:', e.message);
-          return Promise.reject(e);
-        });
-      default:
-        return Promise.reject(new Error('cloud operation not supported'));
-    }
-  }  // end of cloudUpdate
+      });
+    });
+  }
+
+  private destroyCloudServer_ = () => {
+    log.debug('destroying cloud server');
+    return oneShotModule_<void>(CLOUD_PROVIDER_MODULE_NAME, (provider: any) => {
+      return provider.stop(CLOUD_DROPLET_NAME);
+    });
+  }
+
+  private rebootCloudServer_ = () => {
+    log.debug('rebooting cloud server');
+    return oneShotModule_<void>(CLOUD_PROVIDER_MODULE_NAME, (provider: any) => {
+      return provider.reboot(CLOUD_DROPLET_NAME);
+    });
+  }
 
   // Gets a social.Network, and logs the user in if they aren't yet logged in.
   private loginIfNeeded_ = (networkName :string) : Promise<social.Network> => {
