@@ -61,7 +61,7 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
       browserApi.bringUproxyToFront();
       sendResponse({ launchedUproxy: true });
     } else if (request.promoId) {
-      browserApi.emit('promoId', request.promoId);
+      browserApi.emit('promoIdDetected', request.promoId);
     }
   }
   return true;
