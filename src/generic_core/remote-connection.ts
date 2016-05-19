@@ -335,9 +335,11 @@ var generateProxyingSessionId_ = (): string => {
         this.stateRefresh_();
         this.socksToRtc_ = null;
         this.activeEndpoint = null;
-        this.underlyingPeerConnection_.close().then( () => {
-          this.underlyingPeerConnection_ = null;
-        });
+        if (this.underlyingPeerConnection_) {
+          this.underlyingPeerConnection_.close().then( () => {
+            this.underlyingPeerConnection_ = null;
+          });
+        }
       });
 
       this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
