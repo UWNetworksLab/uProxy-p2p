@@ -40,6 +40,7 @@
     "webRequestBlocking"
   ],
   "web_accessible_resources": [
+    "icons/*",
     "copypaste.html"
   ],
   "externally_connectable": {
