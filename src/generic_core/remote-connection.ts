@@ -167,11 +167,11 @@ var generateProxyingSessionId_ = (): string => {
       }
 
       this.underlyingPeerConnection_ = pc;
-      this.underlyingPeerConnection_.onceConnected.then( () => {
+//      this.underlyingPeerConnection_.then( () => {
         for (var n in this.queuedHandlers_) {
           this.underlyingPeerConnection_.registerMessageHandler(n, this.queuedHandlers_[n]);
         }
-      });
+//      });
       pc.onceClosed.then(() => {
         log.debug('pc.onceClosed.then()');
         this.underlyingPeerConnection_ = null; 
@@ -255,10 +255,10 @@ var generateProxyingSessionId_ = (): string => {
       log.debug('registerMessageHandler(%1, function(...))', name);
       this.queuedHandlers_[name] = fn;
       if (this.underlyingPeerConnection_ !== null) {
-        this.underlyingPeerConnection_.onceConnected.then(() => {
-          log.debug('this.underlyingPeerConnection_.onceConnected.then())');
+//        this.underlyingPeerConnection_..then(() => {
+//          log.debug('this.underlyingPeerConnection_.onceConnected.then())');
           this.underlyingPeerConnection_.registerMessageHandler(name, fn);
-        });
+//        });
       }
     }
 
@@ -376,12 +376,12 @@ var generateProxyingSessionId_ = (): string => {
       peerconnection.setupPeerConnection(
         pc, this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
       this.underlyingPeerConnection_ = pc;
-      this.underlyingPeerConnection_.onceConnected.then( () => {
+//      this.underlyingPeerConnection_.onceConnected.then( () => {
         for (var n in this.queuedHandlers_) {
           this.underlyingPeerConnection_.registerMessageHandler(n, this.queuedHandlers_[n]);
         }
-      });
-      pc.onceClosed.then(() => { 
+//      });
+      pc.onceClosed.then(() => {
         log.debug('pc.onceClosed.then()');
         this.underlyingPeerConnection_ = null; 
         this.nonproxyChannels_ = null;
