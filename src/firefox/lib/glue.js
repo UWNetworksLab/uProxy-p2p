@@ -2,7 +2,7 @@
  * Forwards data from content script to freedom;
  * TODO(salomegeo): rewrite in typescript;
  * Figure out a way to avoid freeom -> add-on env -> content script -> add-on
- * for proxy setting and setiing a main icon.
+ * for proxy setting and setting a main icon.
  */
 
 var proxyConfig = require('lib/firefox_proxy_config.js').proxyConfig;
@@ -14,6 +14,14 @@ var self = require("sdk/self");
 var events = require("sdk/system/events");
 var notifications = require('sdk/notifications')
 var pagemod = require('sdk/page-mod');
+var tabs = require('sdk/tabs');
+
+
+// If these values change in the uproxy-website source, they must
+// be changed here as well. TODO: de-deduplicate?
+var UPROXY_DOMAINS = ['www.uproxy.org', 'test-dot-uproxysite.appspot.com'];
+var INSTALL_PAGE_PATH = '/install';
+var PROMO_PARAM = 'pr';
 
 // TODO: rename freedom to uProxyFreedomModule
 function setUpConnection(freedom, panel, button) {
@@ -129,11 +137,15 @@ function setUpConnection(freedom, panel, button) {
   };
 
   /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
+  var contentProxyFile = self.data.url('scripts/content-proxy.js');
+  var urlsToProxyTo = [
+    self.data.url('*'),
+    'https://www.uproxy.org/*',
+    'https://test-dot-uproxysite.appspot.com/*'
+  ];
   pagemod.PageMod({
-    include: [ self.data.url('*'),
-               "https://www.uproxy.org/*",
-               "https://test-dot-uproxysite.appspot.com/*"],
-    contentScriptFile: self.data.url('scripts/content-proxy.js'),
+    include: urlsToProxyTo,
+    contentScriptFile: contentProxyFile,
     onAttach: function(worker) {
       worker.port.on('update', function(data) {
         panel.port.emit(uproxy_core_api.Update[data.update], data.data);
@@ -170,6 +182,70 @@ function setUpConnection(freedom, panel, button) {
       });
     }
   });
+
+
+  // Check if user already has a tab open to the uProxy install page.
+  for (var tab of tabs) {
+    if (matchesUrlSet(tab.url, urlsToProxyTo)) {
+      // Attach our content script to the existing tab.
+      tab.attach({contentScriptFile: contentProxyFile});
+
+      emitPromoIfFound(tab.url);
+    }
+  }
+
+  // Attach a handler to check if a tab is opened in the future with a promo.
+  tabs.on('pageshow', function (tab) {
+    emitPromoIfFound(tab.url);
+  });
+
+  function matchesUrlSet(url, urlSet) {
+    for (var u of urlSet) {
+      if (u.endsWith('*')) {
+        u = u.slice(0, -1);
+      }
+      if (url.startsWith(u)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /*
+   * Return true iff the given URL corresponds to the uProxy install page.
+   */
+  function isInstallPage(url) {
+    for (var domain of UPROXY_DOMAINS) {
+      if (url.startsWith('https://' + domain + INSTALL_PAGE_PATH)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /*
+   * Emit a promo event to the panel if a uProxy install promo is in
+   * effect for the given URL.
+   */
+  function emitPromoIfFound(url) {
+    if (!isInstallPage(url)) {
+      return;
+    }
+    var iq = url.indexOf('?') + 1;
+    if (!iq) {
+      return;
+    }
+    var qs = url.substring(iq);
+    var params = qs.split('&');
+    for (var param of params) {
+      var keyval = param.split('=');
+      if (keyval[0] === PROMO_PARAM) {
+        panel.port.emit('promoIdDetected', keyval[1]);
+        break;
+      }
+    }
+  }
 }
 
-exports.setUpConnection = setUpConnection
+
+exports.setUpConnection = setUpConnection;

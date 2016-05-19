@@ -38,7 +38,12 @@ Polymer({
     this.$.loginOverlay.open();
   },
   launchDigitalOceanSignup: function() {
-    ui.openTab('https://cloud.digitalocean.com/registrations/new?refcode=5ddb4219b716');
+    // DigitalOcean referral codes trump promo codes,
+    // so only add our refcode to the url if the user has no promo code.
+    const hasPromo = this.$.havePromoCode.checked;
+    const registerUrl = 'https://cloud.digitalocean.com/registrations/new';
+    const registerUrlWithRefcode = registerUrl + '?refcode=5ddb4219b716';
+    ui.openTab(hasPromo ? registerUrl : registerUrlWithRefcode);
   },
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
@@ -147,5 +152,14 @@ Polymer({
     // can take *several* seconds for the installer to fail by which time
     // the user could have initiated a whole new install.
     this.mostRecentCreateId = 0;
+  },
+  promoIdChanged: function() {
+    // do not uncheck the box if we no longer have the promo id set
+    if (ui.model.globalSettings.activePromoId === 'off') {
+      this.$.havePromoCode.checked = true;
+    }
+  },
+  observe: {
+    'ui.model.globalSettings.activePromoId': 'promoIdChanged'
   }
 });
