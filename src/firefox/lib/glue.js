@@ -138,12 +138,12 @@ function setUpConnection(freedom, panel, button) {
   };
 
   /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
-  var contentScriptFile = self.data.url('scripts/content-proxy.js');
+  var contentProxyFile = self.data.url('scripts/content-proxy.js');
   pagemod.PageMod({
     include: [ self.data.url('*'),
                "https://www.uproxy.org/*",
                "https://test-dot-uproxysite.appspot.com/*"],
-    contentScriptFile: contentScriptFile,
+    contentScriptFile: contentProxyFile,
     onAttach: function(worker) {
       worker.port.on('update', function(data) {
         panel.port.emit(uproxy_core_api.Update[data.update], data.data);
@@ -186,7 +186,7 @@ function setUpConnection(freedom, panel, button) {
   for (var tab of tabs) {
     if (isInstallPage(tab.url)) {
       // Attach our content script to the existing tab.
-      tab.attach({contentScriptFile: contentScriptFile});
+      tab.attach({contentScriptFile: contentProxyFile});
 
       emitPromoIfFound(tab.url);
     }
