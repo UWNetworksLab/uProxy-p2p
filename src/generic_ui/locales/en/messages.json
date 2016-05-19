@@ -1418,5 +1418,9 @@
   "RESTART_FAILURE_TEXT": {
     "description": "Dialog text indicating a failure to restart server.",
     "message": "You may want to delete your cloud server and create a new one."
+  },
+  "HAVE_PROMO_CODE": {
+    "description": "Label for a checkbox indicating that you have a promo code",
+    "message": "I have a promo code"
   }
 }
