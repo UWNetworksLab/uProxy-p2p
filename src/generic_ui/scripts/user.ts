@@ -110,6 +110,14 @@ export class User implements social.BaseUser {
 
     this.name = profile.name;
     this.url = profile.url;
+
+    // We want to make it obvious that cloud friends are sharable to others.
+    // Normally, friends will only have share expanded if they are requesting
+    // access, but that will never be the case for a cloud server.
+    if (!this.status && profile.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+      this.shareExpanded = true;
+    }
+
     this.status = profile.status;
 
     this.imageData = user_interface.getImageData(this.userId, this.imageData,
