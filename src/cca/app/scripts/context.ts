@@ -35,3 +35,9 @@ chrome.runtime.getBackgroundPage((bgPage) => {
   document.head.appendChild(link);
 });
 
+// Force a repaint every 300 ms.
+// Extremely hacky workaround for https://crbug.com/612836
+setInterval(function() {
+  window.top.dispatchEvent(new Event('resize'));
+}, 300);
+
