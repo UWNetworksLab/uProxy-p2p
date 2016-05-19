@@ -29,7 +29,7 @@
     overlay.style.padding    = '180px 0 0';
 
     var closeBtn = document.createElement('img');
-    closeBtn.src = chrome.extension.getURL('icons/cloud/ic_close_white_24dp.svg'); 
+    closeBtn.src = uProxyAssetAbsolueUrl('icons/cloud/ic_close_white_24dp.svg'); 
     closeBtn.style.cursor = 'pointer';
     closeBtn.style.position = 'fixed';
     closeBtn.style.top = '15px';
@@ -39,12 +39,12 @@
     overlay.appendChild(closeBtn);
 
     var img = document.createElement('img');
-    img.src = chrome.extension.getURL('icons/cloud/overlay_uproxy_do.svg');
+    img.src = uProxyAssetAbsolueUrl('icons/cloud/overlay_uproxy_do.svg');
     img.style.width = '218px';
     overlay.appendChild(img);
 
     var h1 = document.createElement('h1');
-    h1.innerText = _('Authorize uProxy to connect\u000Awith DigitalOcean');
+    h1.textContent = _('Authorize uProxy to connect\u000Awith DigitalOcean');
     h1.style.color = '#fff';
     h1.style.fontFamily = 'Roboto';
     h1.style.fontSize = '24px';
@@ -54,6 +54,7 @@
     h1.style.maxWidth = '600px';
     h1.style.minWidth = '360px';
     overlay.appendChild(h1);
+    overlay.id = '__uProxyOverlay';
 
     if (shouldPromptPromo()) {
       var DOtoken = document.querySelector('input[name="authenticity_token"]');
@@ -74,7 +75,7 @@
     proceedLink.style.fontSize = '16px';
     proceedLink.style.fontWeight = 'bold';
     proceedLink.style.padding = '16px 36px';
-    proceedLink.innerText = _('Proceed to uProxy');
+    proceedLink.textContent = _('Proceed to uProxy');
     // This url should close the tab and open the uProxy extension, which
     // instructs the user to click 'sign in' after creating the DO account.
     // Requires: https://github.com/uproxy/uproxy/tree/bemasc-autoclose
@@ -114,7 +115,7 @@
       } catch (e) { }
 
       var applyButton = document.createElement('button');
-      applyButton.innerText = 'Apply';
+      applyButton.textContent = 'Apply';
       applyButton.style.backgroundColor = '#155160';
       applyButton.style.border = '0';
       applyButton.style.borderRadius = '2px';
@@ -132,7 +133,7 @@
       promoInput.style.fontSize = '16px';
       resultText.style.color = '#fff';
       promoInput.style.margin = '16px auto';
-      resultText.innerText = ' ';  // no-break space
+      resultText.textContent = ' ';  // no-break space
       promoContainer.appendChild(resultText);
 
       applyButton.onclick = handleApply;
@@ -158,7 +159,7 @@
           if (typeof data !== 'object' || data.status === 'invalid') {
             return handlePromoFailure();
           }
-          resultText.innerText = _('Promo code accepted!');
+          resultText.textContent = _('Promo code accepted!');
           promoInput.disabled = true;
           applyButton.disabled = true;
           promoInput.style.opacity = '0.5';
@@ -168,7 +169,7 @@
           handlePromoFailure();
         });
         function handlePromoFailure() {
-          resultText.innerText = _('Could not apply promo.');
+          resultText.textContent = _('Could not apply promo.');
         }
       }
     }
@@ -242,6 +243,15 @@
       }
     }
     return false;
+  }
+
+  function uProxyAssetAbsolueUrl(relativeUrl) {
+    if (typeof chrome !== 'undefined') {
+      return chrome.extension.getURL(relativeUrl);
+    }
+    // Assume Firefox
+    // TODO: can we get this from glue.js, which can call self.data.url?
+    return 'https://rawgit.com/uProxy/uproxy/master/src/' + relativeUrl;
   }
 
   (function modifyUI() {
