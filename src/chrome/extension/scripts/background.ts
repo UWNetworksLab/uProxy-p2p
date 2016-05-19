@@ -152,9 +152,18 @@ chrome.webRequest.onBeforeRequest.addListener(
     function() {
         return { cancel: true };
     },
-    { urls: ['https://www.uproxy.org/oauth-redirect-uri*'] },
+    { urls: ['https://www.uproxy.org/oauth-redirect-uri*',
+        'https://www.uproxy.org/autoclose*'] },
     ['blocking']
     );
+
+chrome.tabs.onUpdated.addListener((tabId :number,
+    changeInfo :chrome.tabs.TabChangeInfo, tab :chrome.tabs.Tab) => {
+  if (tab.url.indexOf('https://www.uproxy.org/autoclose') === 0) {
+    chrome.tabs.remove(tabId);
+    browserApi.bringUproxyToFront();
+  }
+});
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
