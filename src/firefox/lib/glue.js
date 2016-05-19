@@ -23,7 +23,6 @@ var UPROXY_DOMAINS = ['www.uproxy.org', 'test-dot-uproxysite.appspot.com'];
 var INSTALL_PAGE_PATH = '/install';
 var PROMO_PARAM = 'pr';
 
-
 // TODO: rename freedom to uProxyFreedomModule
 function setUpConnection(freedom, panel, button) {
   function connect(command, from, to) {
@@ -139,13 +138,13 @@ function setUpConnection(freedom, panel, button) {
 
   /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
   var contentProxyFile = self.data.url('scripts/content-proxy.js');
-  var contentProxyAppliedUrls = [
+  var urlsToProxyTo = [
     self.data.url('*'),
     'https://www.uproxy.org/*',
     'https://test-dot-uproxysite.appspot.com/*'
   ];
   pagemod.PageMod({
-    include: contentProxyAppliedUrls,
+    include: urlsToProxyTo,
     contentScriptFile: contentProxyFile,
     onAttach: function(worker) {
       worker.port.on('update', function(data) {
@@ -187,7 +186,7 @@ function setUpConnection(freedom, panel, button) {
 
   // Check if user already has a tab open to the uProxy install page.
   for (var tab of tabs) {
-    if (matchesContentProxyAppliedUrls(tab.url)) {
+    if (matchesUrlSet(tab.url, urlsToProxyTo)) {
       // Attach our content script to the existing tab.
       tab.attach({contentScriptFile: contentProxyFile});
 
@@ -200,12 +199,12 @@ function setUpConnection(freedom, panel, button) {
     emitPromoIfFound(tab.url);
   });
 
-  function matchesContentProxyAppliedUrls(url) {
-    for (var appliedUrl of contentProxyAppliedUrls) {
-      if (appliedUrl.endsWith('*')) {
-        appliedUrl = appliedUrl.slice(0, -1);
+  function matchesUrlSet(url, urlSet) {
+    for (var u of urlSet) {
+      if (u.endsWith('*')) {
+        u = u.slice(0, -1);
       }
-      if (url.startsWith(appliedUrl)) {
+      if (url.startsWith(u)) {
         return true;
       }
     }
@@ -241,7 +240,7 @@ function setUpConnection(freedom, panel, button) {
     for (var param of params) {
       var keyval = param.split('=');
       if (keyval[0] === PROMO_PARAM) {
-        panel.port.emit('promo', keyval[1]);
+        panel.port.emit('promoIdDetected', keyval[1]);
         break;
       }
     }

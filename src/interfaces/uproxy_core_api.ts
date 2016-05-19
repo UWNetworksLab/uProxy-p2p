@@ -41,7 +41,7 @@ export interface GlobalSettings {
   proxyBypass: string[];
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
-  promo: string;
+  activePromoId: string;
   crypto: boolean;
 }
 export interface InitialState {

@@ -70,7 +70,7 @@ export class Model {
     proxyBypass: [],
     enforceProxyServerValidity: false,
     validProxyServers: [],
-    promo: null,
+    activePromoId: null,
     crypto: true
   };
 
