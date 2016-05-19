@@ -251,7 +251,6 @@ function setUpConnection(freedom, panel, button) {
       }
     }
   }
->>>>>>> master
 }
 
 
