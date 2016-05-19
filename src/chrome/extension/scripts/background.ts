@@ -60,6 +60,8 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
     } else if (request.openWindow) {
       browserApi.bringUproxyToFront();
       sendResponse({ launchedUproxy: true });
+    } else if (request.promoId) {
+      browserApi.emit('promoId', request.promoId);
     }
   }
   return true;
