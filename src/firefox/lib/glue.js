@@ -183,6 +183,12 @@ function setUpConnection(freedom, panel, button) {
     }
   });
 
+  pagemod.PageMod({
+    include: ['https://cloud.digitalocean.com/*'],
+    contentScriptFile: self.data.url('generic_ui/scripts/content_digitalocean.js'),
+    onAttach: function(worker) {
+    }
+  });
 
   // Check if user already has a tab open to the uProxy install page.
   for (var tab of tabs) {
@@ -245,6 +251,7 @@ function setUpConnection(freedom, panel, button) {
       }
     }
   }
+>>>>>>> master
 }
 
 

@@ -21,6 +21,12 @@
     },
     "default_title": "__MSG_extTitle__"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://cloud.digitalocean.com/*"],
+      "js": ["generic_ui/scripts/content_digitalocean.js"]
+    }
+  ],
   "permissions": [
     "background",
     "tabs",
@@ -34,6 +40,7 @@
     "webRequestBlocking"
   ],
   "web_accessible_resources": [
+    "icons/*",
     "copypaste.html"
   ],
   "externally_connectable": {

@@ -159,6 +159,7 @@ uiDistFiles = [
   'generic_ui/fonts/*'
   'generic_ui/icons/*'
   'generic_ui/scripts/get_logs.js'
+  'generic_ui/scripts/content_digitalocean.js'
 ]
 
 coreDistFiles = [
