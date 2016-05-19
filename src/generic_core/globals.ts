@@ -56,6 +56,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   proxyBypass: DEFAULT_PROXY_BYPASS.slice(0),
   enforceProxyServerValidity: false,
   validProxyServers: [],
+  activePromoId: null,  // set on promoIdDetected
   crypto: true
 };
 

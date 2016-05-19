@@ -321,6 +321,7 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
+    browserApi.on('promoIdDetected', this.setActivePromoId);
 
     core.getFullState()
         .then(this.updateInitialState)
@@ -750,6 +751,11 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
+  }
+
+  public setActivePromoId = (promoId :string) => {
+    this.model.globalSettings.activePromoId = promoId;
+    this.core.updateGlobalSettings(this.model.globalSettings);
   }
 
   /**

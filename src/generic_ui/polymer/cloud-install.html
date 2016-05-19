@@ -119,6 +119,9 @@
         <h1>{{ 'CLOUD_INSTALL_CREATE_ACCOUNT_TITLE' | $$ }}</h1>
         <!-- TODO: some of this text needs to be bold - need to set the HTML element rather than use $$ to translate -->
         <p id='createAccountMessage'></p>
+
+        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}"></paper-checkbox>
+
         <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
           {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
         </uproxy-button>
