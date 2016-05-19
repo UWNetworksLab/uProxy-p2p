@@ -626,6 +626,32 @@ export function notifyUI(networkName :string, userId :string) {
       });
     }
 
+    public processCloudNetworkData(networkData :any) :string {
+      if ((typeof networkData) === 'string') {
+        networkData = JSON.parse(networkData);
+      }
+
+      // If we are enforcing validity, we require that the proxy server be
+      // in our list of approved servers.  If it's not, trigger an error
+      if (globals.settings.enforceProxyServerValidity &&
+          !(networkData.host in globals.settings.validProxyServers)) {
+        throw new Error('Domain policy prohibits unknown proxy servers');
+      }
+
+      // if we have a host key saved, make sure there is no conflict with
+      // the invitation, then used the saved version
+      if (networkData.host in globals.settings.validProxyServers) {
+        if ('hostKey' in networkData &&
+            networkData.hostKey !== globals.settings.validProxyServers[networkData.host]) {
+          throw new Error('Conflict between saved key in settings and key in invitation');
+        }
+
+        networkData.hostKey = globals.settings.validProxyServers[networkData.host];
+      }
+
+      return JSON.stringify(networkData);
+    }
+
     public acceptInvitation = (tokenObj ?:social.InviteTokenData, userId ?:string) : Promise<void> => {
       // TODO: networkData will be an Object for Quiver, but a string (userId)
       // for GitHub, and a string (JSON format) for Firebase networks.  We
@@ -634,8 +660,9 @@ export function notifyUI(networkName :string, userId :string) {
       var networkData :Object = null;
       if (tokenObj) {
         networkData = tokenObj.networkData;
-        if (this.name === 'Cloud' && (typeof networkData) !== 'string') {
-          networkData = JSON.stringify(networkData);
+
+        if (this.name === 'Cloud') {
+          networkData = this.processCloudNetworkData(networkData);
         }
       } else if (userId) {
         networkData = userId;
