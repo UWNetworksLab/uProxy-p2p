@@ -38,16 +38,12 @@ Polymer({
     this.$.loginOverlay.open();
   },
   launchDigitalOceanSignup: function() {
-<<<<<<< HEAD
-    ui.openTab('https://cloud.digitalocean.com/registrations/new');
-=======
     // DigitalOcean referral codes trump promo codes,
     // so only add our refcode to the url if the user has no promo code.
     const hasPromo = this.$.havePromoCode.checked;
     const registerUrl = 'https://cloud.digitalocean.com/registrations/new';
     const registerUrlWithRefcode = registerUrl + '?refcode=5ddb4219b716';
     ui.openTab(hasPromo ? registerUrl : registerUrlWithRefcode);
->>>>>>> master
   },
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
