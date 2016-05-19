@@ -139,10 +139,13 @@ function setUpConnection(freedom, panel, button) {
 
   /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
   var contentProxyFile = self.data.url('scripts/content-proxy.js');
+  var contentProxyAppliedUrls = [
+    self.data.url('*'),
+    'https://www.uproxy.org/*',
+    'https://test-dot-uproxysite.appspot.com/*'
+  ];
   pagemod.PageMod({
-    include: [ self.data.url('*'),
-               "https://www.uproxy.org/*",
-               "https://test-dot-uproxysite.appspot.com/*"],
+    include: contentProxyAppliedUrls,
     contentScriptFile: contentProxyFile,
     onAttach: function(worker) {
       worker.port.on('update', function(data) {
@@ -184,7 +187,7 @@ function setUpConnection(freedom, panel, button) {
 
   // Check if user already has a tab open to the uProxy install page.
   for (var tab of tabs) {
-    if (isInstallPage(tab.url)) {
+    if (matchesContentProxyAppliedUrls(tab.url)) {
       // Attach our content script to the existing tab.
       tab.attach({contentScriptFile: contentProxyFile});
 
@@ -196,6 +199,18 @@ function setUpConnection(freedom, panel, button) {
   tabs.on('pageshow', function (tab) {
     emitPromoIfFound(tab.url);
   });
+
+  function matchesContentProxyAppliedUrls(url) {
+    for (var appliedUrl of contentProxyAppliedUrls) {
+      if (appliedUrl.endsWith('*')) {
+        appliedUrl = appliedUrl.slice(0, -1);
+      }
+      if (url.startsWith(appliedUrl)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /*
    * Return true iff the given URL corresponds to the uProxy install page.
