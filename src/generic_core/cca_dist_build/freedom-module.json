@@ -15,6 +15,14 @@
       "url": "../freedom-social-firebase/social.firebase-google.json",
       "api": "social2"
     },
+    "SOCIAL-Facebook-Firebase-V2": {
+      "url": "../freedom-social-firebase/social.firebase-facebook.json",
+      "api": "social2"
+    },
+    "SOCIAL-GitHub": {
+      "url": "../freedom-social-github/social.github.json",
+      "api": "social2"
+    },
     "SOCIAL-Cloud": {
       "url": "../uproxy-lib/cloud/social/freedom-module.json",
       "api": "social2"
@@ -42,6 +50,14 @@
     "portControl": {
       "url": "../freedom-port-control/port-control.json",
       "api": "portControl"
+    },
+    "CLOUDPROVIDER-digitalocean": {
+      "url": "../uproxy-lib/cloud/digitalocean/freedom-module.json",
+      "api": "digitalocean"
+    },
+    "cloudinstall": {
+      "url": "../uproxy-lib/cloud/install/freedom-module.json",
+      "api": "cloudinstall"
     }
   },
   "permissions": [
