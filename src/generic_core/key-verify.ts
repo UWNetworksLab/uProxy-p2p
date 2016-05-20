@@ -460,7 +460,7 @@ export class KeyVerify {
                    h3 + hk + KeyVerify.kClientVersion);
 
     let message = new Messages.Tagged( type, new Messages.HelloMessage(
-      Type[type], KeyVerify.kClientVersion, h3, hk, KeyVerify.kProtocolVersion, mac));
+      Type[type], KeyVerify.kProtocolVersion, h3, hk, KeyVerify.kClientVersion, mac));
 
     return message;
   }
