@@ -187,6 +187,8 @@ function setUpConnection(freedom, panel, button) {
     include: ['https://cloud.digitalocean.com/*'],
     contentScriptFile: self.data.url('generic_ui/scripts/content_digitalocean.js'),
     onAttach: function (worker) {
+      // Get an existing asset's absolute url to determine the Firefox
+      // extension's base url.
       var testUrlRelative = 'icons/uproxy_logo.svg',
           testUrlAbsolute = self.data.url(testUrlRelative),
           i = testUrlAbsolute.indexOf(testUrlRelative),

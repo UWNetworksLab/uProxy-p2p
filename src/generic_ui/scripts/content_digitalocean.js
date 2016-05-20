@@ -3,7 +3,7 @@
   // and only proceed if it hasn't.
 
   var baseUrlFF = '';  // base url for local uProxy assets in Firefox
-  if (typeof self !== 'undefined' && self.port && self.port.on) {
+  if (typeof self !== 'undefined' && self.port && self.port.on) {  // Firefox
     self.port.on('baseUrlFF', function (baseUrl) {
       baseUrlFF = baseUrl;
     });
@@ -13,10 +13,8 @@
   } else if (typeof chrome !== 'undefined' && chrome.extension && chrome.extension.getURL) {
     var getLocalAssetUrl = chrome.extension.getURL;
   } else {
-    var getLocalAssetUrl = function (relativeUrl) {
-      // Fall back to GitHub
-      return 'https://rawgit.com/uProxy/uproxy/master/src/' + relativeUrl;
-    };
+    console.log('Neither Firefox nor Chrome?');
+    var getLocalAssetUrl = function (relativeUrl) { return relativeUrl };
   }
 
   var pageUrl = document.location.href,
