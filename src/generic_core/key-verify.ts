@@ -162,6 +162,7 @@ export class KeyVerify {
                                                msg.clientVersion, msg.mac));
       return result;
     }
+    return null;
   }
 
   public readMessage(msg:any) {
