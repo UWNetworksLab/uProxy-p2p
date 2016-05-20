@@ -74,7 +74,8 @@ export class KeyVerify {
 
   private static kPgpPassword :string = '';
   private static kPgpUser :string = '<uproxy>';
-  private static kClientVersion :string = '1.0';
+  private static kClientVersion :string = '0.1';
+  private static kProtocolVersion :string = '1.0';
   private static seqno :number = 1;
   private static emptyPreReq :Type[] = [];
   private static keyMap_ :{[type:string]:string}= {
@@ -150,7 +151,7 @@ export class KeyVerify {
   // them.
   public static readFirstMessage(msg:any) : {[type:string]:Messages.Tagged} {
     if (msg['type'] && KeyVerify.structuralVerify_(msg) && msg.type == 'Hello1') {
-      if (msg.clientVersion !== "0.1" || msg.version !== "1.0") {
+      if (msg.clientVersion !== KeyVerify.kClientVersion || msg.version !== KeyVerify.kProtocolVersion) {
         console.log("Invalid Hello message (versions): ", msg);
         return null;
       }
@@ -166,8 +167,10 @@ export class KeyVerify {
     if (msg['type'] && KeyVerify.structuralVerify_(msg) && this.protoVerify_(msg)) {
       let type = msg.type;
       if (type == 'Hello1' || type == 'Hello2') {
-        // Validate this Hello message.
-        if (msg.clientVersion !== "0.1" || msg.version !== "1.0") {
+        // Validate this Hello message.  Later versions may set some
+        // local state to maintain compatability with prior versions
+        // of uProxy.
+        if (msg.clientVersion !== KeyVerify.kClientVersion || msg.version !== KeyVerify.kProtocolVersion) {
           console.log("Invalid Hello message (versions): ", msg);
           this.resolve_(false);
           return;
@@ -186,7 +189,7 @@ export class KeyVerify {
                                     msg.clientVersion, msg.mac)));
 
       } else if (type == 'Commit') {
-        if (msg.clientVersion !== "0.1") {
+        if (msg.clientVersion !== KeyVerify.kClientVersion) {
           console.log("Invalid Commit message (clientVersion)", msg);
           this.resolve_(false);
           return;
@@ -429,7 +432,7 @@ export class KeyVerify {
       }
     }
     return true;
-  } 
+  }
 
   private set_(message: Messages.Tagged) :boolean {
     if (this.messages_[message.type] !== null) {
@@ -457,7 +460,7 @@ export class KeyVerify {
                    h3 + hk + KeyVerify.kClientVersion);
 
     let message = new Messages.Tagged( type, new Messages.HelloMessage(
-      Type[type], '1.0', h3, hk, KeyVerify.kClientVersion, mac));
+      Type[type], KeyVerify.kClientVersion, h3, hk, KeyVerify.kProtocolVersion, mac));
 
     return message;
   }
@@ -486,7 +489,7 @@ export class KeyVerify {
     let hvi = crypto.createHash('sha256').update(dhpart2 + hello).digest('base64');
     let h2 = this.ourHashes_[Hashes.h2];
     let hk = crypto.createHash('sha256').update(this.ourKey_.key).digest('base64');
-    let version = '0.1';
+    let version = KeyVerify.kClientVersion;
     return new Messages.Tagged(Type.Commit, new Messages.CommitMessage(
       Type.Commit.toString(), h2, hk, KeyVerify.kClientVersion, hvi,
       this.mac_(this.ourHashes_[Hashes.h1], h2+hk+version+hvi)));
