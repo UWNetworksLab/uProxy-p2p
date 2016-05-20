@@ -5,7 +5,7 @@ pushd node_modules
 ln -s ../../uproxy-lib .
 pushd uproxy-lib
 grunt base copy:dist
-popdg
+popd
 popd
 ./setup.sh install
 grunt
