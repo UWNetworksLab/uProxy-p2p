@@ -78,7 +78,8 @@ export class KeyVerify {
   private static seqno :number = 1;
   private static emptyPreReq :Type[] = [];
   private static keyMap_ :{[type:string]:string}= {
-    'Hello':'clientVersion,h3,hk,mac,type,version',
+    'Hello1':'clientVersion,h3,hk,mac,type,version',
+    'Hello2':'clientVersion,h3,hk,mac,type,version',
     'Commit':'clientVersion,h2,hk,hvi,mac,type',
     'DHPart1':'h1,mac,pkey,type',
     'DHPart2':'h1,mac,pkey,type',
@@ -87,7 +88,8 @@ export class KeyVerify {
     'Conf2Ack':'type'
   };
   private static prereqMap_ :{[msg:string]:[Type]} = {
-    'Hello': <[Type]>[],
+    'Hello1': <[Type]>[],
+    'Hello2': <[Type]>[],
     'Commit':[Type.Hello1, Type.Hello2],
     'DHPart1':[Type.Commit],
     'DHPart2':[Type.DHPart1],
@@ -420,7 +422,8 @@ export class KeyVerify {
   private protoVerify_ (msg:any) :boolean {
     let type :string = msg.type.toString();
     for (let m in KeyVerify.prereqMap_[type]) {
-      if (!this.messages_[m]) {
+      let t = KeyVerify.prereqMap_[type][m];
+      if (!this.messages_[Type[m]]) {
         console.log("Verify msg ", msg, " missing prerequisite ", m);
         return false;
       }
