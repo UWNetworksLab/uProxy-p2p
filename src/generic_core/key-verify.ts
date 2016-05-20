@@ -390,7 +390,7 @@ export class KeyVerify {
     if (!this.messages_[msgType]) {
       let msg = this.generate_(msgType);
       this.set_(msg);
-      this.delegate_.sendMessage(msg).catch((e) => {
+      this.delegate_.sendMessage(msg.value).catch((e) => {
         console.log("Failed to send message in ZRTP message.  Resolving as failure.", e);
         this.resolve_(false);
       });
