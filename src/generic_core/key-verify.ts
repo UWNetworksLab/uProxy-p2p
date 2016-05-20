@@ -402,7 +402,7 @@ export class KeyVerify {
     // Verify that none of the values are blank.
     let allKeys = Object.keys(msg);
     for (let k in allKeys) {
-      if (msg[k].length == '') {
+      if (msg[allKeys[k]].length == '') {
         console.log("Verify msg ", msg, " got empty value for key ", k);
         return false;
       }
