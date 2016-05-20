@@ -186,7 +186,12 @@ function setUpConnection(freedom, panel, button) {
   pagemod.PageMod({
     include: ['https://cloud.digitalocean.com/*'],
     contentScriptFile: self.data.url('generic_ui/scripts/content_digitalocean.js'),
-    onAttach: function(worker) {
+    onAttach: function (worker) {
+      var testUrlRelative = 'icons/uproxy_logo.svg',
+          testUrlAbsolute = self.data.url(testUrlRelative),
+          i = testUrlAbsolute.indexOf(testUrlRelative),
+          baseUrl = testUrlAbsolute.substring(0, i);
+      worker.port.emit('baseUrlFF', baseUrl);
     }
   });
 

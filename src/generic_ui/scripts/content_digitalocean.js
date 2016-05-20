@@ -1,35 +1,54 @@
-(function () {
+(function improveDOWelcomeFlow() {
+  // TODO: check if cloud server setup has ever been completed successfully,
+  // and only proceed if it hasn't.
+
+  var baseUrlFF = '';  // base url for local uProxy assets in Firefox
+  if (typeof self !== 'undefined' && self.port && self.port.on) {
+    self.port.on('baseUrlFF', function (baseUrl) {
+      baseUrlFF = baseUrl;
+    });
+    var getLocalAssetUrl = function (relativeUrl) {
+      return baseUrlFF + relativeUrl;
+    };
+  } else if (typeof chrome !== 'undefined' && chrome.extension && chrome.extension.getURL) {
+    var getLocalAssetUrl = chrome.extension.getURL;
+  } else {
+    var getLocalAssetUrl = function (relativeUrl) {
+      // Fall back to GitHub
+      return 'https://rawgit.com/uProxy/uproxy/master/src/' + relativeUrl;
+    };
+  }
+
   var pageUrl = document.location.href,
       pageId = getPageId(pageUrl),
       pmntAdded = isPmntAdded();
 
-  console.log('pageId:', pageId);
-  console.log('pmntAdded:', pmntAdded);
-
   if (pageId === 'welcome' && pmntAdded) {
     if (shouldPromptPromo()) {
+      // We need to redirect to the billing page to use its promo form.
       document.location.href = 'https://cloud.digitalocean.com/settings/billing';
     }
   }
   if (pageId === 'billing' && pmntAdded) {
-    showOverlay();
+    // Delay execution by a bit, so baseUrlFF has a chance to get set.
+    setTimeout(showOverlay, 500);
   }
 
   function showOverlay() {
     var overlay = document.createElement('div');
-    overlay.style.position   = 'fixed';
-    overlay.style.top        = '0';
-    overlay.style.left       = '0';
-    overlay.style.bottom     = '0';
-    overlay.style.right      = '0';
-    overlay.style.opacity    = '.95';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.bottom = '0';
+    overlay.style.right = '0';
+    overlay.style.opacity = '.95';
     overlay.style.background = '#12A391';
-    overlay.style.zIndex     = '10000';
-    overlay.style.textAlign  = 'center';
-    overlay.style.padding    = '180px 0 0';
+    overlay.style.zIndex = '10000';
+    overlay.style.textAlign = 'center';
+    overlay.style.padding = '180px 0 0';
 
     var closeBtn = document.createElement('img');
-    closeBtn.src = uProxyAssetAbsoluteUrl('icons/cloud/ic_close_white_24dp.svg'); 
+    closeBtn.src = getLocalAssetUrl('icons/cloud/ic_close_white_24dp.svg');
     closeBtn.style.cursor = 'pointer';
     closeBtn.style.position = 'fixed';
     closeBtn.style.top = '15px';
@@ -39,7 +58,7 @@
     overlay.appendChild(closeBtn);
 
     var img = document.createElement('img');
-    img.src = uProxyAssetAbsoluteUrl('icons/cloud/overlay_uproxy_do.svg');
+    img.src = getLocalAssetUrl('icons/cloud/overlay_uproxy_do.svg');
     img.style.width = '218px';
     overlay.appendChild(img);
 
@@ -242,15 +261,6 @@
       }
     }
     return false;
-  }
-
-  function uProxyAssetAbsoluteUrl(relativeUrl) {
-    if (typeof chrome !== 'undefined') {
-      return chrome.extension.getURL(relativeUrl);
-    }
-    // Assume Firefox
-    // TODO: can we get this from glue.js, which can call self.data.url?
-    return 'https://rawgit.com/uProxy/uproxy/master/src/' + relativeUrl;
   }
 
   (function modifyUI() {
