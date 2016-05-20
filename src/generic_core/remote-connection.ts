@@ -267,10 +267,10 @@ var generateProxyingSessionId_ = (): string => {
       // this part is hacky.
       // Super hack!
       if (this.underlyingPeerConnection_ !== null) {
-//        return this.underlyingPeerConnection_.onceConnected;
+        return this.underlyingPeerConnection_.onceConnected;
         // Like below.
-        log.debug('startConnection(%1): already have an underlyingPeerConnection_ HACK: nuking it.', remoteVersion);
-        this.underlyingPeerConnection_ = null;
+//        log.debug('startConnection(%1): already have an underlyingPeerConnection_ HACK: nuking it.', remoteVersion);
+//        this.underlyingPeerConnection_ = null;
 
 //        return Promise.resolve<void>();
       }
