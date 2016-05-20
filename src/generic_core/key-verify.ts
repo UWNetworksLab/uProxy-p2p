@@ -392,7 +392,7 @@ export class KeyVerify {
         msgType = Type.Hello2;
       }
     }
-    if (!this.messages_[msgType]) {
+    if (!this.messages_[Type[msgType]]) {
       let msg = this.generate_(msgType);
       this.set_(msg);
       this.delegate_.sendMessage(msg.value).catch((e) => {
