@@ -155,7 +155,7 @@ export class KeyVerify {
         console.log("Invalid Hello message (versions): ", msg);
         return null;
       }
-      var result :{[type:string]:Messages.Tagged};
+      var result :{[type:string]:Messages.Tagged} = {};
       result[msg.type] = new Messages.Tagged(
         Type.Hello1, new Messages.HelloMessage(msg.type, msg.version, msg.h3, msg.hk,
                                                msg.clientVersion, msg.mac));
