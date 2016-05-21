@@ -36,17 +36,29 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.MessageSender, sendResponse :Function) => {
+  if (!request) return;
+
   // handle requests from other pages (i.e. copypaste.html) to bring the
   // chrome popup to the front
-  if (request && request.openWindow) {
+  if (request.openWindow) {
     browserApi.bringUproxyToFront();
   }
 
   // handle requests to get logs
-  if (request && request.getLogs) {
+  if (request.getLogs) {
     core.getLogs().then((logs) => {
       sendResponse({ logs: logs });
     });
+    return true;
+  }
+
+  if (request.globalSettingsRequest) {
+    browserApi.emit('globalSettingsRequest', sendResponse);
+    return true;
+  }
+
+  if (request.translations) {
+    browserApi.emit('translationsRequest', request.translations, sendResponse);
     return true;
   }
 });
