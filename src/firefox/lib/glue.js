@@ -248,7 +248,8 @@ function setUpConnection(freedom, panel, button) {
     if (!iq) {
       return;
     }
-    var qs = url.substring(iq);
+    var ih = url.indexOf('#');
+    var qs = url.substring(iq, ih === -1 ? url.length : ih);
     var params = qs.split('&');
     for (var param of params) {
       var keyval = param.split('=');
