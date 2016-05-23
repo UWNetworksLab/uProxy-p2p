@@ -302,7 +302,7 @@ export class KeyVerify {
         this.set_(new Messages.Tagged(Type.Confirm1,
                                      new Messages.ConfirmMessage(msg.type, msg.h0, msg.mac)));
 
-      } else if (type == 'Comfirm2') {
+      } else if (type == 'Confirm2') {
         // Validate DHpart2
         let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (dhpart2.mac !== this.mac_(msg.h0, dhpart2.h1 + dhpart2.pkey)) {
@@ -313,13 +313,15 @@ export class KeyVerify {
         }
         this.set_(new Messages.Tagged(Type.Confirm2,
                                      new Messages.ConfirmMessage(msg.type, msg.h0, msg.mac)));
-        this.resolve_(true);
-
+//        this.resolve_(true);
       } else if (type == 'Conf2Ack') {
         this.set_(new Messages.Tagged(Type.Conf2Ack, new Messages.ConfAckMessage(msg.type)));
+        console.log ("EVERYTHING IS DONE!!");
         this.resolve_(true);
       }
-      this.sendNextMessage();
+      if (type !== 'Conf2Ack') {
+        this.sendNextMessage();
+      }
     } else {
       // reject the message for member key mismatch.
       console.log("Invalid message received: ", msg);
@@ -370,6 +372,7 @@ export class KeyVerify {
     let msgType:Type;
     if (this.role_ == 0) {
       if (this.messages_[Type.Conf2Ack]) {
+        console.log("sendNextMessage: done!");
         return; // all done.
       } else if (this.messages_[Type.Confirm1]) {
         msgType = Type.Confirm2;
@@ -382,6 +385,7 @@ export class KeyVerify {
       }
     } else {
       if (this.messages_[Type.Conf2Ack]) {
+        console.log("sendNextMessage: done!");
         return; // all done.
       } else if (this.messages_[Type.Confirm2]) {
         msgType = Type.Conf2Ack;
@@ -439,9 +443,12 @@ export class KeyVerify {
     // parseInt returns NaN for non-ints, and NaNs always compare
     // false in </>/= comparisons.
     if (!(parseInt(message.type.toString()) < 0) && !(parseInt(message.type.toString()) >= 0)) {
+      console.log("set_: bad type: ", message.type);
       return false;
     }
     if (this.messages_[message.type]) {
+      console.log("set_: already have a message of ", message.type, " (" + Type[message.type] + ")");
+      this.resolve_(false);
       return false;
     } else {
       this.messages_[message.type] = message;
@@ -552,6 +559,7 @@ export class KeyVerify {
     }
     return this.pgp_.ecdhBob('P_256', this.peerPubKey_).then(
       (result:ArrayBuffer) => {
+        console.log("CALCULATING s0");
         let be64Zero = new Buffer(8),
             beZero = new Buffer(4),
             beOne = new Buffer(4);
