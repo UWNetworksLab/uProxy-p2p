@@ -254,7 +254,6 @@ export class KeyVerify {
         // Verify that this is the sam ehk.
         let commit = <Messages.CommitMessage>this.messages_[Type.Commit].value;
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-        let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (commit.hk !== this.hashString_(msg.pkey)) {
           console.log("CHECK: hash(pkey)/hk mismatch for DHPart2 (",msg.pkey,") vs Commit (",
                       commit.hk, ")");
@@ -270,7 +269,7 @@ export class KeyVerify {
 //          return;
         }
         // Check that hvi is correct.
-        let hvi = this.hashString_((dhpart2.h1 + dhpart2.pkey + dhpart2.mac) + (
+        let hvi = this.hashString_((msg.h1 + msg.pkey + msg.mac) + (
           hello2.h3 + hello2.hk + hello2.mac));
         if (hvi !== msg.hvi) {
           console.log("CHECK: hvi Mismatch in commit. Wanted: ", hvi, " got: ", msg);
