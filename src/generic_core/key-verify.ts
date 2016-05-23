@@ -183,6 +183,7 @@ export class KeyVerify {
           console.log("Got the wrong Hello message (" + type + " [" + rawType +
                       "]) for this role (" + this.role_ + ")");
           this.resolve_(false);
+          return;
         }
         this.set_(new Messages.Tagged(
           rawType,
@@ -571,6 +572,7 @@ export class KeyVerify {
 
         let s0 = crypto.createHash('sha256').update(s0_input).digest();
         log.debug("s0: ", s0);
+        this.s0_ = s0;
         return Promise.resolve<Buffer>(s0);
       });
   }
