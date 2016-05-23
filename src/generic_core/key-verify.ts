@@ -198,7 +198,6 @@ export class KeyVerify {
         // Validate the Hello message's mac.
         let hello1 = <Messages.HelloMessage>this.messages_[Type.Hello1].value;
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-        let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (hello1.mac !== this.mac_(msg.h2, hello1.h3 + hello1.hk + msg.clientVersion)) {
           console.log("MAC mismatch for Hello1 found. h2: ", msg.h2, " and Hello1: ", hello1);
           this.resolve_(false);
@@ -213,14 +212,6 @@ export class KeyVerify {
         // Check that the peer can be the initiato.
         if (this.role_ !== 1) {
           console.log("Currently, we only support that role 0 is initiator.");
-          this.resolve_(false);
-          return;
-        }
-        // Check that hvi is correct.
-        let hvi = this.hashString_((dhpart2.h1 + dhpart2.pkey + dhpart2.mac) + (
-          hello2.h3 + hello2.hk + hello2.mac));
-        if (hvi !== msg.hvi) {
-          console.log("hvi Mismatch in commit. Wanted: ", hvi, " got: ", msg);
           this.resolve_(false);
           return;
         }
@@ -262,6 +253,8 @@ export class KeyVerify {
       } else if (type == 'DHPart2') {
         // Verify that this is the sam ehk.
         let commit = <Messages.CommitMessage>this.messages_[Type.Commit].value;
+        let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
+        let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (commit.hk !== this.hashString_(msg.pkey)) {
           console.log("hash(pkey)/hk mismatch for DHPart2 (",msg.pkey,") vs Commit (",
                       commit.hk, ")");
@@ -276,7 +269,14 @@ export class KeyVerify {
           this.resolve_(false);
           return;
         }
-
+        // Check that hvi is correct.
+        let hvi = this.hashString_((dhpart2.h1 + dhpart2.pkey + dhpart2.mac) + (
+          hello2.h3 + hello2.hk + hello2.mac));
+        if (hvi !== msg.hvi) {
+          console.log("hvi Mismatch in commit. Wanted: ", hvi, " got: ", msg);
+          this.resolve_(false);
+          return;
+        }
         this.set_(new Messages.Tagged(Type.DHPart2,
                             new Messages.DHPartMessage(msg.type, msg.h1, msg.pkey,
                                               msg.mac)));
