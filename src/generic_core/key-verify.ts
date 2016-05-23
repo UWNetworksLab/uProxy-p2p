@@ -198,7 +198,6 @@ export class KeyVerify {
         // Validate the Hello message's mac.
         let hello1 = <Messages.HelloMessage>this.messages_[Type.Hello1].value;
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-        let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (hello1.mac !== this.mac_(msg.h2, hello1.h3 + hello1.hk + msg.clientVersion)) {
           console.log("MAC mismatch for Hello1 found. h2: ", msg.h2, " and Hello1: ", hello1);
           this.resolve_(false);
