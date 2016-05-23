@@ -425,11 +425,11 @@ export class KeyVerify {
   }
 
   private protoVerify_ (msg:any) :boolean {
-    let type :string = msg.type.toString();
+    let type :Type = parseInt(Type[msg.type.toString()]);
     for (let m in KeyVerify.prereqMap_[type]) {
       let t = KeyVerify.prereqMap_[type][m];
-      if (!this.messages_[Type[m]]) {
-        console.log("Verify msg ", msg, " missing prerequisite ", m);
+      if (!this.messages_[t]) {
+        console.log("Verify msg ", msg, " missing prerequisite ", t);
         return false;
       }
     }
@@ -437,7 +437,12 @@ export class KeyVerify {
   }
 
   private set_(message: Messages.Tagged) :boolean {
-    if (this.messages_[message.type] !== null) {
+    // parseInt returns NaN for non-ints, and NaNs always compare
+    // false in </>/= comparisons.
+    if (!(parseInt(message.type.toString()) < 0) && !(parseInt(message.type.toString()) >= 0)) {
+      return false;
+    }
+    if (this.messages_[message.type]) {
       return false;
     } else {
       this.messages_[message.type] = message;
@@ -484,6 +489,10 @@ export class KeyVerify {
       throw (new Error("makeCommit: only supports making Commit messages " +
                        "with role 0 being initiator."));
     }
+    if (!this.messages_[Type.DHPart2]) {
+      this.set_(this.makeDHPart_(Type.DHPart2));
+    }
+
     let dhpart2Msg = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
     let dhpart2 = dhpart2Msg.h1 + dhpart2Msg.pkey + dhpart2Msg.mac;
     let hello_obj = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
@@ -493,7 +502,7 @@ export class KeyVerify {
     let hk = crypto.createHash('sha256').update(this.ourKey_.key).digest('base64');
     let version = KeyVerify.kClientVersion;
     return new Messages.Tagged(Type.Commit, new Messages.CommitMessage(
-      Type.Commit.toString(), h2, hk, KeyVerify.kClientVersion, hvi,
+      Type[Type.Commit], h2, hk, KeyVerify.kClientVersion, hvi,
       this.mac_(this.ourHashes_[Hashes.h1], h2+hk+version+hvi)));
   }
 
@@ -521,10 +530,10 @@ export class KeyVerify {
   // This is based off of ZRTP (RFC 6189), with keys that don't
   // expire, but no caching.
   private generateHashes_() :[string] {
-    let h0Hash =crypto.createHash('sha256'),
-        h1Hash =crypto.createHash('sha256'),
-        h2Hash =crypto.createHash('sha256'),
-        h3Hash =crypto.createHash('sha256');
+    let h0Hash = crypto.createHash('sha256'),
+        h1Hash = crypto.createHash('sha256'),
+        h2Hash = crypto.createHash('sha256'),
+        h3Hash = crypto.createHash('sha256');
     h0Hash.update(new Date().toISOString() + '--' + KeyVerify.seqno);
     KeyVerify.seqno++;
     let h0 = h0Hash.digest();
