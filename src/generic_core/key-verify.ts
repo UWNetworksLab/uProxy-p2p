@@ -192,23 +192,23 @@ export class KeyVerify {
 
       } else if (type == 'Commit') {
         if (msg.clientVersion !== KeyVerify.kClientVersion) {
-          console.log("Invalid Commit message (clientVersion)", msg);
-          this.resolve_(false);
-          return;
+          console.log("CHECK: Invalid Commit message (clientVersion)", msg);
+//          this.resolve_(false);
+//          return;
         }
         // Validate the Hello message's mac.
         let hello1 = <Messages.HelloMessage>this.messages_[Type.Hello1].value;
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
         if (hello1.mac !== this.mac_(msg.h2, hello1.h3 + hello1.hk + msg.clientVersion)) {
-          console.log("MAC mismatch for Hello1 found. h2: ", msg.h2, " and Hello1: ", hello1);
-          this.resolve_(false);
-          return;
+          console.log("CHECK: MAC mismatch for Hello1 found. h2: ", msg.h2, " and Hello1: ", hello1);
+//          this.resolve_(false);
+//          return;
         }
         // Validate that h3 is the hash of h2
         if (hello1.h3 !== this.hashString_(msg.h2)) {
-          console.log("Hash chain failure for h3: ", hello1.h3, " and h2: ", msg.h2);
-          this.resolve_(false);
-          return;
+          console.log("CHECK: Hash chain failure for h3: ", hello1.h3, " and h2: ", msg.h2, " (hashed to ", this.hashString_(msg.h2), ")");
+//          this.resolve_(false);
+//          return;
         }
         // Check that the peer can be the initiato.
         if (this.role_ !== 1) {
@@ -225,10 +225,10 @@ export class KeyVerify {
         // We don't have an h2 value to check the hello2 message.
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
         if (hello2.hk !== this.hashString_(msg.pkey)) {
-          console.log("hash(pkey)/hk mismatch for DHPart1 (",msg.pkey,") vs Hello2 (",
+          console.log("CHECK: hash(pkey)/hk mismatch for DHPart1 (",msg.pkey,") vs Hello2 (",
                       hello2.hk, ")");
-          this.resolve_(false);
-          return;
+//          this.resolve_(false);
+//          return;
         }
 
         this.set_(new Messages.Tagged(Type.DHPart1,
@@ -257,26 +257,26 @@ export class KeyVerify {
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
         let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (commit.hk !== this.hashString_(msg.pkey)) {
-          console.log("hash(pkey)/hk mismatch for DHPart2 (",msg.pkey,") vs Commit (",
+          console.log("CHECK: hash(pkey)/hk mismatch for DHPart2 (",msg.pkey,") vs Commit (",
                       commit.hk, ")");
-          this.resolve_(false);
-          return;
+//          this.resolve_(false);
+//          return;
         }
         // Verify the mac of the Commit.
         if (commit.mac !== this.mac_(msg.h1, commit.h2 + commit.hk +
                                     commit.clientVersion + commit.hvi)) {
-          console.log("MAC mismatch for Commit found. h1: ", msg.h1,
+          console.log("CHECK: MAC mismatch for Commit found. h1: ", msg.h1,
                       " and Commit: ", commit);
-          this.resolve_(false);
-          return;
+//          this.resolve_(false);
+//          return;
         }
         // Check that hvi is correct.
         let hvi = this.hashString_((dhpart2.h1 + dhpart2.pkey + dhpart2.mac) + (
           hello2.h3 + hello2.hk + hello2.mac));
         if (hvi !== msg.hvi) {
-          console.log("hvi Mismatch in commit. Wanted: ", hvi, " got: ", msg);
-          this.resolve_(false);
-          return;
+          console.log("CHECK: hvi Mismatch in commit. Wanted: ", hvi, " got: ", msg);
+//          this.resolve_(false);
+//          return;
         }
         this.set_(new Messages.Tagged(Type.DHPart2,
                             new Messages.DHPartMessage(msg.type, msg.h1, msg.pkey,
@@ -295,10 +295,10 @@ export class KeyVerify {
         // Validate DHpart1
         let dhpart1 = <Messages.DHPartMessage>this.messages_[Type.DHPart1].value;
         if (dhpart1.mac !== this.mac_(msg.h0, dhpart1.h1 + dhpart1.pkey)) {
-          console.log("MAC mismatch for DHPart1 found. h0: ", msg.h0,
+          console.log("CHECK: MAC mismatch for DHPart1 found. h0: ", msg.h0,
                       " and DHPart1: ", dhpart1);
-          this.resolve_(false);
-          return;
+//          this.resolve_(false);
+//          return;
         }
         this.set_(new Messages.Tagged(Type.Confirm1,
                                      new Messages.ConfirmMessage(msg.type, msg.h0, msg.mac)));
@@ -307,10 +307,10 @@ export class KeyVerify {
         // Validate DHpart2
         let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (dhpart2.mac !== this.mac_(msg.h0, dhpart2.h1 + dhpart2.pkey)) {
-          console.log("MAC mismatch for DHPart2 found. h0: ", msg.h0,
+          console.log("CHECK: MAC mismatch for DHPart2 found. h0: ", msg.h0,
                       " and DHPart2: ", dhpart2);
-          this.resolve_(false);
-          return;
+//          this.resolve_(false);
+//          return;
         }
         this.set_(new Messages.Tagged(Type.Confirm2,
                                      new Messages.ConfirmMessage(msg.type, msg.h0, msg.mac)));
