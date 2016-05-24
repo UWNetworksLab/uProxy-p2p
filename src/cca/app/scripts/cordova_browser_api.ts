@@ -56,7 +56,7 @@ class CordovaBrowserApi implements BrowserAPI {
     });
 
     // Cordova APIs are not guaranteed to be available until after the
-    // deviceready event firest.  This is a special event: if you miss it,
+    // deviceready event fires.  This is a special event: if you miss it,
     // and add your listener after the event has already fired, Cordova
     // guarantees that your listener will run immediately.
     // We listen to window.top because CCA runs application code in an iframe,
