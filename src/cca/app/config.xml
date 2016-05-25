@@ -1,10 +1,27 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="org.uproxy" version="0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="org.uproxy" version="0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <preference name="SplashScreen" value="splashscreen" />
     <preference name="SplashScreenDelay" value="20000" />
     <preference name="SplashMaintainAspectRatio" value="true" />
     <platform name="ios">
         <preference name="deployment-target" value="7.0"/> 
         <hook type="before_run" src="hooks/iosrtc-swift-support.js"/>
+    </platform>
+    <preference name="AndroidLaunchMode" value="singleInstance" />
+    <platform name="android">
+        <config-file target="AndroidManifest.xml" parent="./application/activity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="uproxy.org" />
+                <data android:host="www.uproxy.org" />
+                <data android:pathPrefix="/invite" />
+                <data android:pathPrefix="/request/" />
+                <data android:pathPrefix="/offer/" />
+            </intent-filter>
+        </config-file>
     </platform>
 </widget>
