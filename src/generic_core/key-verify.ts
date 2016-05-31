@@ -48,11 +48,72 @@ export namespace Messages {
   };
 };
 
-class Hashes {
-  public static h0 :number = 3;
-  public static h1 :number = 2;
-  public static h2 :number = 1;
-  public static h3 :number = 0;
+/*
+  Buffer utility functions
+ */
+
+function str2buf(s:string) :Buffer {
+  return new Buffer(s, 'utf8');
+}
+
+function unb64(s:string) :Buffer {
+  return new Buffer(s, 'base64');
+}
+
+function hexify(buf:Buffer) {
+  var linebuf = "";
+  for (var i = 0; i < buf.length; i++) {
+    var n :number = buf.readInt8(i);
+    if (n < 0) {
+      n = (-n ^ 0xff) + 1;
+    }
+    var c = n.toString(16);
+    if (c.length < 2) {
+      c = "0" + c;
+    }
+    linebuf = linebuf + ' ' + c;
+  }
+  return linebuf;
+}
+
+function logBuffer(name:string, buf:Buffer) {
+  var kBufWidth = 75;
+  var linebuf = name + ":";
+  var remain_size = kBufWidth - linebuf.length;
+  for (var i = 0; i < buf.length; i++) {
+    if (remain_size < 3) {
+      log.debug(linebuf);
+      linebuf = "";
+      remain_size = kBufWidth;
+    }
+    var n :number = buf.readInt8(i);
+    if (n < 0) {
+      n = (-n ^ 0xff) + 1;
+    }
+    var c = n.toString(16);
+    if (c.length < 2) {
+      c = "0" + c;
+    }
+    linebuf = linebuf + ' ' + c;
+    remain_size -= 3;
+  }
+  if (linebuf.length) {
+    log.debug(linebuf);
+  }
+}
+
+export class HashPair {
+  public b64 :string;
+  constructor(public bin:Buffer) {
+    this.b64 = bin.toString('base64');
+  }
+};
+
+export class Hashes {
+  public h0 :HashPair;
+  public h1 :HashPair;
+  public h2 :HashPair;
+  public h3 :HashPair;
 };
 
 export class KeyVerify {
@@ -64,7 +125,7 @@ export class KeyVerify {
   private role_:number;
   private ourKey_:freedom.PgpProvider.PublicKey;
   private peerPubKey_:string;
-  private ourHashes_:string[];
+  private ourHashes_:Hashes;
   private result_:Promise<void>;
   private delegate_:Delegate;
   private resolvePromise_ : () => void;
@@ -116,7 +177,7 @@ export class KeyVerify {
               delegate: Delegate,
               messages?: {[type:string]:Messages.Tagged},
               role?: number,
-              ourHashes?: string[]) {
+              ourHashes?: Hashes) {
     this.peerPubKey_ = peerPubKey;
     this.delegate_ = delegate;
     this.completed_ = false;
@@ -152,6 +213,17 @@ export class KeyVerify {
     };
   }
 
+  private makeHash(s:string) :HashPair {
+    let bin = crypto.createHash('sha256').update(s).digest();
+    return new HashPair(bin);
+  }
+
+  private hashBuffers_(...bufs:Buffer[]) :HashPair {
+    let buffer = Buffer.concat(bufs);
+    let bin = crypto.createHash('sha256').update(buffer).digest();
+    return new HashPair(bin);
+  }
+
   private hashString_(s:string) :string {
     return crypto.createHash('sha256').update(s).digest('base64');
   }
@@ -164,7 +236,6 @@ export class KeyVerify {
       return new Buffer(val, 'base64');
     });
     return Buffer.concat(buffers);
-//    return null;
   }
 
   // Create a Messages.Tagged from an arbitrary message.  Designed for
@@ -228,18 +299,31 @@ export class KeyVerify {
         // Validate the Hello message's mac.
         let hello1 = <Messages.HelloMessage>this.messages_[Type.Hello1].value;
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-        if (hello1.mac !== this.mac_(
-          msg.h2, hello1.h3 + hello1.hk + msg.clientVersion)) {
-          console.log("CHECK: MAC mismatch for Hello1 found. h2: ", msg.h2,
-                      " and Hello1: ", hello1);
+        if (msg.clientVersion !== hello1.clientVersion) {
+          console.log("CHECK: Client changed versions mid-conversation.", msg, hello1);
+//          this.resolve_(false);
+//          return;
+        }
+        let desiredMac = this.macNew_(msg.h2, unb64(hello1.h3), str2buf(hello1.hk),
+                                      str2buf(hello1.clientVersion));
+        if (hello1.mac !== desiredMac) {
+//          msg.h2, hello1.h3 + hello1.hk + msg.clientVersion)) {
+          console.log("CHECK: MAC mismatch (found " + hello1.mac + ", wanted " + desiredMac +
+                      ") for Hello1 found. h2: ", msg.h2, " and Hello1: ", hello1);
+          console.log("msg.h2", msg.h2);
+          logBuffer("unb64(hello1.h3)", unb64(hello1.h3));
+          logBuffer("unb64(hello1.hk)", unb64(hello1.hk));
+          logBuffer("str2buf(hello1.clientVersion)", str2buf(hello1.clientVersion));
 //          this.resolve_(false);
 //          return;
         }
         // Validate that h3 is the hash of h2
-        if (hello1.h3 !== this.hashString_(msg.h2)) {
+        // hello1.h3 is peer's ourHashes_.h3.b64.  msg.h2 is peer's ourHashes_.h2.b64.
+        // So, unb64 it, then hash it, then make a string of that.
+        let desiredH3 = this.hashBuffers_(unb64(msg.h2)).b64
+        if (hello1.h3 !== desiredH3) {
           console.log("CHECK: Hash chain failure for h3: ", hello1.h3,
-                      " and h2: ", msg.h2, " (hashed to ",
-                      this.hashString_(msg.h2), ")");
+                      " and h2: ", msg.h2, " (hashed to ", desiredH3, ")");
 //          this.resolve_(false);
 //          return;
         }
@@ -295,8 +379,12 @@ export class KeyVerify {
 //          return;
         }
         // Verify the mac of the Commit.
-        if (commit.mac !== this.mac_(msg.h1, commit.h2 + commit.hk +
-                                    commit.clientVersion + commit.hvi)) {
+        if (commit.mac !==
+            this.macNew_(msg.h1,
+                         unb64(commit.h2), unb64(commit.hk),
+                         str2buf(commit.clientVersion), unb64(commit.hvi))) {
+/*                         commit.h2 + commit.hk +
+                                    commit.clientVersion + commit.hvi)) { */
           console.log("CHECK: MAC mismatch for Commit found. h1: ", msg.h1,
                       " and Commit: ", commit);
 //          this.resolve_(false);
@@ -327,7 +415,8 @@ export class KeyVerify {
       } else if (type == 'Confirm1') {
         // Validate DHpart1
         let dhpart1 = <Messages.DHPartMessage>this.messages_[Type.DHPart1].value;
-        if (dhpart1.mac !== this.mac_(msg.h0, dhpart1.h1 + dhpart1.pkey)) {
+        if (dhpart1.mac !==
+            this.macNew_(msg.h0, unb64(dhpart1.h1), str2buf(dhpart1.pkey))) {
           console.log("CHECK: MAC mismatch for DHPart1 found. h0: ", msg.h0,
                       " and DHPart1: ", dhpart1);
 //          this.resolve_(false);
@@ -339,7 +428,8 @@ export class KeyVerify {
       } else if (type == 'Confirm2') {
         // Validate DHpart2
         let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
-        if (dhpart2.mac !== this.mac_(msg.h0, dhpart2.h1 + dhpart2.pkey)) {
+        if (dhpart2.mac !==
+            this.macNew_(msg.h0, unb64(dhpart2.h1), str2buf(dhpart2.pkey))) {
           console.log("CHECK: MAC mismatch for DHPart2 found. h0: ", msg.h0,
                       " and DHPart2: ", dhpart2);
 //          this.resolve_(false);
@@ -496,7 +586,7 @@ export class KeyVerify {
       console.log("set_: bad type: ", message.type);
     }
     if (this.messages_[message.type]) {
-      console.log("CHECK: set_: already have a message of ", message.type, " (" +
+      console.log("FIXME: set_: already have a message of ", message.type, " (" +
                   Type[message.type] + ")");
       // this.resolve_(false);
     } else {
@@ -526,14 +616,18 @@ export class KeyVerify {
 
   private makeHello_ =  (type: Type) :Promise<Messages.Tagged> => {
     console.log("makeHello(" + type + " <" + Type[type] + ">)");
-    let h3 = this.ourHashes_[Hashes.h3],
-        hk = this.ourKey_.fingerprint.replace(/ /g, ''),
-        mac = this.mac_(this.ourHashes_[Hashes.h2],
-                   h3 + hk + KeyVerify.kClientVersion);
-
-    let message = new Messages.Tagged( type, new Messages.HelloMessage(
-      Type[type], KeyVerify.kProtocolVersion, h3, hk, KeyVerify.kClientVersion,
-      mac));
+    let h3 = this.ourHashes_.h3,
+        hk = this.ourKey_.key;
+    logBuffer("makeHello: h3:", h3.bin);
+    logBuffer("makeHello: hk "+ hk + " and str2buf'd: ", str2buf(hk));
+    logBuffer("makeHello: clientVersion", str2buf(KeyVerify.kClientVersion));
+    let mac = this.macNew_(this.ourHashes_.h2.b64,
+                           h3.bin,str2buf(this.hashString_(hk)),
+                           str2buf(KeyVerify.kClientVersion));
+    console.log("makeHello: mac: ", mac);
+    let message = new Messages.Tagged(type, new Messages.HelloMessage(
+      Type[type], KeyVerify.kProtocolVersion, h3.b64, this.hashString_(hk),
+      KeyVerify.kClientVersion, mac));
 
     return Promise.resolve<Messages.Tagged>(message);
   }
@@ -543,29 +637,29 @@ export class KeyVerify {
       throw (new Error("makeDHPart: Bad type " + Type[type] + " for role " +
                        this.role_));
     }
-    let h1 = this.ourHashes_[Hashes.h1];
+    let h1 = this.ourHashes_.h1;
     let pkey = this.ourKey_.key;
-    let mac = this.mac_(this.ourHashes_[Hashes.h0], h1 + pkey);
+    let mac = this.macNew_(this.ourHashes_.h0.b64, h1.bin, str2buf(pkey));
     let message = new Messages.Tagged(type, new Messages.DHPartMessage(
-      Type[type], h1, pkey, mac));
+      Type[type], h1.b64, pkey, mac));
     return Promise.resolve<Messages.Tagged>(message);
   }
 
   private makeCommitWorker_(type:Type) :Promise<Messages.Tagged> {
-    let dhpart2Msg = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
-    let dhpart2 = dhpart2Msg.h1 + dhpart2Msg.pkey + dhpart2Msg.mac;
-    let hello_obj = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-    let hello = hello_obj.h3 + hello_obj.hk + hello_obj.mac;
-    let hvi =
-      crypto.createHash('sha256').update(dhpart2 + hello).digest('base64');
-    let h2 = this.ourHashes_[Hashes.h2];
-    let hk =
-      crypto.createHash('sha256').update(this.ourKey_.key).digest('base64');
+    let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
+    let hello = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
+    let hvi = this.hashBuffers_(
+      unb64(dhpart2.h1), str2buf(dhpart2.pkey), unb64(dhpart2.mac),
+      unb64(hello.h3), unb64(hello.hk), unb64(hello.mac)
+    );
+    let h2 = this.ourHashes_.h2;
+    let hk = this.makeHash(this.ourKey_.key);
     let version = KeyVerify.kClientVersion;
     return Promise.resolve<Messages.Tagged>(
       new Messages.Tagged(Type.Commit, new Messages.CommitMessage(
-        Type[Type.Commit], h2, hk, KeyVerify.kClientVersion, hvi,
-        this.mac_(this.ourHashes_[Hashes.h1], h2+hk+version+hvi))));
+        Type[Type.Commit], h2.b64, hk.b64, KeyVerify.kClientVersion, hvi.b64,
+        this.macNew_(this.ourHashes_.h1.b64, h2.bin, hk.bin, str2buf(version),
+                     hvi.bin))));
   }
 
   private makeCommit_ = (type:Type) :Promise<Messages.Tagged> => {
@@ -589,10 +683,10 @@ export class KeyVerify {
       throw (new Error("makeConfirm cannot make " + Type[type] + " messages"));
     }
     return this.calculateS0_().then( (s0 :Buffer) => {
-      let h0 = this.ourHashes_[Hashes.h0];
+      let h0 = this.ourHashes_.h0;
       return Promise.resolve<Messages.Tagged>(
         new Messages.Tagged(type, new Messages.ConfirmMessage(
-          Type[type], h0, this.mac_(s0.toString('base64'), h0))));
+          Type[type], h0.b64, this.macNew_(s0.toString('base64'), h0.bin))));
     });
   }
 
@@ -609,7 +703,8 @@ export class KeyVerify {
   //
   // This is all based off of ZRTP (RFC 6189), with keys that don't
   // expire, and no caching.
-  private generateHashes_() :[string] {
+  private generateHashes_() :Hashes {
+    var result : Hashes = new Hashes();
     let h0Hash = crypto.createHash('sha256'),
         h1Hash = crypto.createHash('sha256'),
         h2Hash = crypto.createHash('sha256'),
@@ -617,20 +712,26 @@ export class KeyVerify {
     h0Hash.update((new Date()).toISOString() + '--' + KeyVerify.seqno);
     KeyVerify.seqno++;
     let h0 = h0Hash.digest();
+    result.h0 = new HashPair(h0);
     h1Hash.update(h0);
     let h1 = h1Hash.digest();
+    result.h1 = new HashPair(h1);
     h2Hash.update(h1);
     let h2 = h2Hash.digest();
+    result.h2 = new HashPair(h2);
     h3Hash.update(h2);
     let h3 = h3Hash.digest();
+    result.h3 = new HashPair(h3);
     let hashes :[string] = [h3.toString('base64'), h2.toString('base64'),
                             h1.toString('base64'), h0.toString('base64')];
     console.log("Generated hashes: ", hashes);
-    return hashes;
+    return result;
   }
 
   private calculateS0_() :Promise<Buffer> {
     if (this.s0_ !== null) {
+      logBuffer("s0: calculateS0_: State=" + this.state_() + ", returning cached",
+                this.s0_);
       return Promise.resolve<Buffer>(this.s0_);
     }
     return this.pgp_.ecdhBob('P_256', this.peerPubKey_).then(
@@ -648,14 +749,14 @@ export class KeyVerify {
         let s0_input = Buffer.concat([
           beOne, resultBuffer, new Buffer("ZRTP-HMAC-KDF"), be64Zero,
           be64Zero, total_hash, beZero, beZero, beZero]);
-        log.debug("s0_inputs: result:", resultBuffer.toString());
-        log.debug("s0_inputs: total_hash:", total_hash);
-        log.debug("s0_inputs: beOne:", beOne);
-        log.debug("s0_inputs: be64Zero:", be64Zero);
-        log.debug("s0_inputs: beZero:", beZero);
+        logBuffer("s0: result", resultBuffer);
+        logBuffer("s0: total_hash", total_hash);
+        logBuffer("s0: beOne", beOne);
+        logBuffer("s0: be64Zero", be64Zero);
+        logBuffer("s0: beZero", beZero);
 
         let s0 = crypto.createHash('sha256').update(s0_input).digest();
-        log.debug("s0: ", s0);
+        logBuffer("s0", s0);
         this.s0_ = s0;
         return Promise.resolve<Buffer>(s0);
       });
@@ -665,19 +766,19 @@ export class KeyVerify {
     return this.calculateS0_().then(
       (s0:Buffer) => {
         let be64Zero = new Buffer(8),
-            beZero = new Buffer(4),
+            be32Zero = new Buffer(4),
             beOne = new Buffer(4);
         be64Zero.fill(0);
-        beZero.fill(0);
+        be32Zero.fill(0);
         beOne.writeInt32BE(1,0);
         let total_hash = this.calculateTotalHash_();
         let kdf_context = Buffer.concat([ be64Zero, be64Zero, total_hash ]);
-        log.debug("kdf_context: ", kdf_context);
+        logBuffer("kdf_context", kdf_context);
         // RFC6189-4.5.2
         let sashash = this.kdf_(s0, "SAS", kdf_context, 256);
-        log.debug("sashash: ", sashash);
+        logBuffer("sashash", sashash);
         let sasvalue = sashash.slice(0, 4);
-        log.debug("sasvalue: ", sasvalue);
+        logBuffer("sasvalue", sasvalue);
         let sasHumanInt :number = sasvalue.slice(0,2).readUInt16BE(0);
         return Promise.resolve<number>(sasHumanInt);
     });
@@ -715,26 +816,19 @@ export class KeyVerify {
       "dhpart2.mac": dhpart2.mac
     };
     console.log("totalHash: keys to total_hash_buf: ", elems);
+    let first_hash_buf = this.unbase64Concat_(hello_r.h3, hello_r.hk, hello_r.mac,
+                                              commit.h2, commit.hk);
+    let cv_buf = new Buffer(commit.clientVersion);
+    let second_hash_buf = this.unbase64Concat_(commit.hvi, dhpart1.h1);
+    let dh1k_buf = new Buffer(dhpart1.pkey);
+    let third_hash_buf = this.unbase64Concat_(dhpart1.mac, dhpart2.h1);
+    let dh2k_buf = new Buffer(dhpart2.pkey);
+    let fourth_hash_buf = this.unbase64Concat_(dhpart2.mac);
     let total_hash_buf = Buffer.concat(
-      [].concat(
-        this.unbase64Concat_(hello_r.h3, hello_r.hk, hello_r.mac,
-                             commit.h2, commit.hk),
-        new Buffer(commit.clientVersion),
-        this.unbase64Concat_(commit.hvi, dhpart1.h1),
-        new Buffer(dhpart1.pkey),
-        this.unbase64Concat_(dhpart1.mac, dhpart2.h1),
-        new Buffer(dhpart2.pkey),
-        this.unbase64Concat_(dhpart2.mac))
+      [].concat( first_hash_buf, cv_buf, second_hash_buf, dh1k_buf,
+                 third_hash_buf, dh2k_buf, fourth_hash_buf)
     );
-/*    let total_hash_buf = Buffer.concat([
-      new Buffer([hello_r.h3]), new Buffer([hello_r.hk]),
-      new Buffer([hello_r.mac]), new Buffer([commit.h2]),
-      new Buffer([commit.hk]), new Buffer([commit.clientVersion]),
-      new Buffer([commit.hvi]), new Buffer([dhpart1.h1]),
-      new Buffer([dhpart1.pkey]), new Buffer([dhpart1.mac]),
-      new Buffer([dhpart2.h1]), new Buffer([dhpart2.pkey]),
-      new Buffer([dhpart2.mac])
-    ]);*/
+    logBuffer("total_hash_buf", total_hash_buf);
     log.debug("totalHash: init-role: ", this.role_);
     log.debug("totalHash: hello_r: h3:", hello_r.h3, ", hk:",
               hello_r.hk, ", mac:", hello_r.mac);
@@ -747,9 +841,15 @@ export class KeyVerify {
               dhpart2.pkey, ", mac:", dhpart2.mac);
     log.debug("totalHash: total_hash_buf: ", total_hash_buf);
     let hashed = crypto.createHash('sha256').update(total_hash_buf).digest();
+    console.log("totalHash: resulting hash is ", hashed);
     this.totalHash_ = hashed;
     return hashed;
   }
+
+  // TODO:
+  // Fix new Buffer([item], length) syntax).  Wrap it in a function and implement that pads out.
+  // The new Buffer([x]) syntax 
+  
 
   // 'key' is a regular buffer, that we re-encode into a base64 string
   // for fullHmac.
@@ -768,7 +868,7 @@ export class KeyVerify {
     var zeroByte :Buffer= new Buffer(1);
     zeroByte.fill(0);
     var completeValue = Buffer.concat([ oneBuf, new Buffer(label), zeroByte, 
-                                        new Buffer([context]), lenBuf]);
+                                        Buffer.concat([context]), lenBuf]);
     var full_hmac = this.fullHmac_(b64Key, completeValue.toString('base64'));
     log.debug("kdf: full_hmac: ", full_hmac);
     return full_hmac.slice(0, Math.ceil(numbits / 8));
@@ -805,41 +905,57 @@ export class KeyVerify {
       return buf;
     };
 
-    let k_0 = new Buffer([key_buf]);
-    log.debug('fullHmac k_0:', strNBuffer(k_0));
+    let k_0 = Buffer.concat([key_buf]);
+    //logBuffer('fullHmac k_0', k_0);
 
     // ipad = 0x36.
-    let kb_step4 = xorBuffer(new Buffer([k_0]), 0x36);
-    log.debug('fullHmac A:',strNBuffer(kb_step4));
+    let kb_step4 = xorBuffer(Buffer.concat([k_0]), 0x36);
+    //logBuffer('fullHmac A', kb_step4);
 
     // Step 5
     let ki_text = Buffer.concat([kb_step4, new Buffer(value, 'base64')]);
-    log.debug('fullHmac B:',strNBuffer(ki_text));
+    //logBuffer('fullHmac B', ki_text);
 
     // Step 6
     let h_ki_text = crypto.createHash('sha256').update(ki_text).digest();
-    log.debug('fullHmac C:',h_ki_text);
+    //logBuffer('fullHmac C', ki_text);
 
     // Step 7 - xor with 0x5c.
-    let ko_text = xorBuffer(new Buffer([k_0]), 0x5c);
-    log.debug('fullHmac D:',strNBuffer(ko_text));
+    let ko_text = xorBuffer(Buffer.concat([k_0]), 0x5c);
+    //logBuffer('fullHmac D', ko_text);
 
     // Step 8 - concat steps 7 and 6
     let ki_h_ko_text = Buffer.concat([ko_text, h_ki_text]);
-    log.debug('fullHmac E:',strNBuffer(ki_h_ko_text));
+    //logBuffer('fullHmac E', ki_h_ko_text);
 
     // Final step: hash step 8.
-    let full_hmac =crypto.createHash('sha256').update(ki_h_ko_text).digest();
-    log.debug('fullHmac F:',full_hmac);
-
+    let full_hmac = crypto.createHash('sha256').update(ki_h_ko_text).digest();
+    //logBuffer('fullHmac F', full_hmac);
     return full_hmac;
   }
 
   // key is base64-encoded.  value is an arbitrary string.
-  private mac_(key:string, value:string) :string {
+/*  private mac_(key:string, value:string) :string {
     let valueB64 = new Buffer(value).toString('base64');
     let full_hmac = this.fullHmac_(key, value);
     let result = new Buffer([full_hmac.slice(0,2)]).toString('base64');
     return result;
+  } */
+
+  // key is base64 encoded.  values are buffers.
+  private macNew_(key:string, ...values:Buffer[]) :string {
+    let valueB64 = Buffer.concat(values).toString('base64');
+    let full_hmac = this.fullHmac_(key, valueB64);
+    let sliced = full_hmac.slice(0,2);
+    let result = Buffer.concat([sliced]).toString('base64');
+    console.log("macNew_(key <b64>:" + key + ", val <bin>:", values,
+                "): full_hmac: " + hexify(full_hmac) + ", sliced: " + hexify(sliced) + ", result: "+result);
+    return result;
+  }
+
+  private state_() :string {
+    return "{" + Object.keys(this.messages_).map( (key: any, index:number) => {
+      return Type[key];
+    }).join(",") + "}";
   }
 };
