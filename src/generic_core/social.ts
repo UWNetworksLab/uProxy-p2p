@@ -736,7 +736,7 @@ export function notifyUI(networkName :string, userId :string) {
           // social networks to generate those invites.
           var urlParams :string[] = [
             'v=2',
-            'networkName=Quiver',
+            'networkName=' + this.name,
             'userName=' + encodeURIComponent(this.myInstance.userName),
             'networkData=' + jsurl.stringify(networkData)
           ];
