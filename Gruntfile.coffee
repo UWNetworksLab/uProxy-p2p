@@ -70,20 +70,6 @@ FILES =
     'generic/version.js'
   ]
 
-  uproxy_lib_common: [
-    'ipaddrjs/ipaddr.min.js'
-    'logging/logging.js'
-    'loggingprovider/loggingprovider.js'
-    'loggingprovider/loggingprovider.json'
-    'arraybuffers/arraybuffers.js'
-    'handler/queue.js'
-    'rtc-to-net/rtc-to-net.js'
-    'socks-common/socks-headers.js'
-    'socks-to-rtc/socks-to-rtc.js'
-    'tcp/tcp.js'
-    'webrtc/datachannel.js'
-    'webrtc/peerconnection.js'
-  ]
   thirdPartyUi: [
     'platform/platform.js',
     'polymer/polymer.html',
@@ -144,6 +130,14 @@ getWithBasePath = (files, base = '') ->
 backendThirdPartyBuildPaths = [
   'bower'
   'sha1'
+]
+
+backendFreedomModulePaths = [
+  'lib/loggingprovider'
+  'lib/churn-pipe'
+  'lib/cloud/digitalocean'
+  'lib/cloud/install'
+  'lib/cloud/social'
 ]
 
 uiDistFiles = [
@@ -494,12 +488,7 @@ gruntConfig = {
         ]
         pathsFromDevBuild: [
           'generic_core'
-          'lib/loggingprovider'
-          'lib/churn-pipe'
-          'lib/cloud/digitalocean'
-          'lib/cloud/install'
-          'lib/cloud/social'
-        ]
+        ].concat(backendFreedomModulePaths)
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: getExtraFilesForCoreBuild(chromeAppDevPath).concat({ # uProxy Icons and fonts
           expand: true, cwd: 'src/'
@@ -535,7 +524,7 @@ gruntConfig = {
           'interfaces'
           'icons'
           'fonts'
-        ]
+        ].concat(backendFreedomModulePaths)
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: getExtraFilesForCoreBuild(path.join(firefoxDevPath, 'data')).concat({ #lib
           expand: true, cwd: devBuildPath
@@ -568,7 +557,7 @@ gruntConfig = {
           'interfaces'
           'icons'
           'fonts'
-        ]
+        ].concat(backendFreedomModulePaths)
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: getExtraFilesForCoreBuild(ccaDevPath).concat({ # uProxy Icons and fonts
           expand: true, cwd: 'src/'
