@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
+import arraybuffers = require('../lib/arraybuffers/arraybuffers');
 import globals = require('./globals');
 import pgp = globals.pgp;
 

@@ -23,11 +23,11 @@
  * client, but with the 'uProxy' non-human client.
  */
 
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import bridge = require('../lib/bridge/bridge');
 import consent = require('./consent');
 import globals = require('./globals');
 import _ = require('lodash');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 import Persistent = require('../interfaces/persistent');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');

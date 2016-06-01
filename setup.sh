@@ -40,9 +40,10 @@ function installTools ()
 
 function installThirdParty ()
 {
-  runAndAssertCmd "$NPM_BIN_DIR/bower install --allow-root"
+  runAndAssertCmd "$NPM_BIN_DIR/bower install --allow-root --config.interactive=false"
+  runAndAssertCmd "mkdir -p build/third_party"
   runAndAssertCmd "pushd third_party && $NPM_BIN_DIR/typings install && popd"
-  runAndAssertCmd "$NPM_BIN_DIR/grunt copy:thirdParty"
+  runAndAssertCmd "cp -r third_party/* build/third_party/"
 }
 
 function installDevDependencies ()
