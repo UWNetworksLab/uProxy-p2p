@@ -631,7 +631,6 @@ gruntConfig = {
           replacement: JSON.stringify
             version: '<%= pkg.version %>'
             gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
-            'uproxy-lib': '<%= pkgs.lib.version %>'
             freedom: '<%= pkgs.freedom.version %>'
             'freedom-for-chrome': '<%= pkgs.freedomchrome.version %>'
             'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
