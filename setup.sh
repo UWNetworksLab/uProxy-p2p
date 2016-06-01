@@ -49,8 +49,8 @@ function installThirdParty ()
 function installDevDependencies ()
 {
   runAndAssertCmd "npm install"
-  installTools
   installThirdParty
+  installTools
 }
 
 if [ "$1" == 'install' ]; then
