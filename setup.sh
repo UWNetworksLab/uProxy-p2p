@@ -34,7 +34,8 @@ function clean ()
 function installTools ()
 {
   runCmd "mkdir -p build/tools"
-  runCmd "cp -r node_modules/uproxy-lib/build/tools/* build/tools/"
+  runCmd "cp src/lib/build-tools/*.ts build/tools/"
+  runAndAssertCmd "$NPM_BIN_DIR/tsc --module commonjs --noImplicitAny ./build/tools/*.ts"
 }
 
 function installThirdParty ()
