@@ -25,7 +25,11 @@ FreedomTCP.prototype._onRead = function(readInfo) {
   //console.warn('read ' + len +': ' + str);
 
   if (this.reading) {
-    this.onread(len, buf);
+    try {
+      this.onread(len, buf);
+    } catch (e) {
+      console.error('nodejs socket read handler raised en error', e);
+    }
   } else {
     this.bufferedReads.push({buf: buf, len: len});
   }

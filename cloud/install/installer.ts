@@ -5,6 +5,7 @@ require('../social/monkey/process');
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
+import Pinger = require('../../net/pinger');
 import queue = require('../../handler/queue');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
@@ -34,7 +35,7 @@ const MAX_CONNECTION_INTERVAL_MS = 10000;
 // in case the server is destroyed during installation, e.g.
 // when the user cancels install.
 const KEEPALIVE_INTERVAL_MS = 1000;
-const KEEPALIVE_MAX_FAILURES = 5;
+const KEEPALIVE_MAX_FAILURES = 120;
 
 // Installs uProxy on a server, via SSH.
 // The process is as close as possible to a manual install
@@ -143,6 +144,12 @@ class CloudInstaller {
           message: 'connection close without invitation URL'
         });
       }).connect(connectConfig);
+    }).then((invite: any) => {
+      // It can take several seconds before the SSH server running
+      // in the new Docker container becomes active.
+      return new Pinger(host, 5000).ping().then(() => {
+        return invite;
+      });
     });
   }
 }

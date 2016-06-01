@@ -6,7 +6,6 @@ import arraybuffers = require('../../arraybuffers/arraybuffers');
 import crypto = require('crypto');
 import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
-import promises = require('../../promises/promises');
 import queue = require('../../handler/queue');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
@@ -209,24 +208,15 @@ export class CloudSocialProvider {
       });
     }
 
-    let numAttempts = 0;
-    const connect = () => {
-      log.debug('connection attempt %1...', (++numAttempts));
-      const connection = new Connection(invite, (message: Object) => {
-        this.dispatchEvent_('onMessage', {
-          from: makeClientState(invite.host),
-          // SIGNAL_FROM_SERVER_PEER,
-          message: JSON.stringify(makeVersionedPeerMessage(3002, message))
-        });
+    const connection = new Connection(invite, (message: Object) => {
+      this.dispatchEvent_('onMessage', {
+        from: makeClientState(invite.host),
+        // SIGNAL_FROM_SERVER_PEER,
+        message: JSON.stringify(makeVersionedPeerMessage(3002, message))
       });
-      return connection.connect().then(() => {
-        return connection;
-      });
-    };
-        
-    this.clients_[invite.host] = promises.retryWithExponentialBackoff(connect,
-        MAX_CONNECTION_INTERVAL_MS, INITIAL_CONNECTION_INTERVAL_MS).then(
-        (connection:Connection) => {
+    });
+
+    this.clients_[invite.host] = connection.connect().then(() => {
       log.info('connected to zork on %1', invite.host);
 
       // Fetch the banner, if available, then emit an instance message.
@@ -289,7 +279,9 @@ export class CloudSocialProvider {
       log.debug('saved contacts');
     }).catch((e) => {
       log.error('could not save contacts: %1', e);
-      Promise.reject(e);
+      Promise.reject({
+        message: e.message
+      });
     });
   }
 
@@ -322,7 +314,9 @@ export class CloudSocialProvider {
           //       the instance (safe because all we've done is run ping).
           log.info('new proxying session %1', payload.proxyingId);
           if (!(destinationClientId in this.savedContacts_)) {
-            return Promise.reject(new Error('unknown client ' + destinationClientId));
+            return Promise.reject({
+              message: 'unknown client ' + destinationClientId
+            });
           }
           return this.reconnect_(this.savedContacts_[destinationClientId].invite).then(
               (connection: Connection) => {
@@ -335,30 +329,39 @@ export class CloudSocialProvider {
               connection.sendMessage(JSON.stringify(payload));
             });
           } else {
-            return Promise.reject(new Error('unknown client ' + destinationClientId));
+            return Promise.reject({
+              message: 'unknown client ' + destinationClientId
+            });
           }
         }
       } else {
-        return Promise.reject(new Error('message has no or wrong type field'));
+        return Promise.reject({
+          message: 'message has no or wrong type field'
+        });
       }
     } catch (e) {
-      return Promise.reject(new Error('could not de-serialise message: ' + e.message));
+      return Promise.reject({
+        message: 'could not de-serialise message: ' + e.message
+      });
     }
   }
 
   public clearCachedCredentials = (): Promise<void> => {
-    return Promise.reject(
-        new Error('clearCachedCredentials unimplemented'));
+    return Promise.reject({
+      message: 'clearCachedCredentials unimplemented'
+    });
   }
 
   public getUsers = (): Promise<freedom.Social.Users> => {
-    return Promise.reject(
-        new Error('getUsers unimplemented'));
+    return Promise.reject({
+      message: 'getUsers unimplemented'
+    });
   }
 
   public getClients = (): Promise<freedom.Social.Clients> => {
-    return Promise.reject(
-        new Error('getClients unimplemented'));
+    return Promise.reject({
+      message: 'getClients unimplemented'
+    });
   }
 
   public logout = (): Promise<void> => {
@@ -391,24 +394,35 @@ export class CloudSocialProvider {
     });
   }
 
-  // Parses an invite code, received from uProxy in JSON format.
-  // This is the networkData field of the invite codes distributed
-  // to uProxy users.
+  // Parses the networkData field, serialised to JSON, of invites.
+  // The contact is immediately saved and added to the contacts list.
   public acceptUserInvitation = (inviteJson: string): Promise<void> => {
     log.debug('acceptUserInvitation');
     try {
-      var invite = <Invite>JSON.parse(inviteJson);
-      return this.reconnect_(invite).then((connection: Connection) => {
-        // Return nothing for type checking purposes.
+      const invite = <Invite>JSON.parse(inviteJson);
+
+      this.notifyOfUser_(invite);
+      this.savedContacts_[invite.host] = {
+        invite: invite
+      };
+      this.saveContacts_();
+
+      // Connect in the background in order to fetch metadata such as
+      // the banner (description).
+      this.reconnect_(invite).catch((e: Error) => {
+        log.warn('failed to log into cloud server during invite accept: %1', e.message);
       });
+
+      return Promise.resolve<void>();
     } catch (e) {
       return Promise.reject(new Error('could not parse invite code: ' + e.message));
     }
   }
 
   public blockUser = (userId: string): Promise<void> => {
-    return Promise.reject(
-        new Error('blockUser unimplemented'));
+    return Promise.reject({
+      message: 'blockUser unimplemented'
+    });
   }
 
   // Removes a cloud contact from storage
@@ -599,7 +613,9 @@ class Connection {
   private exec_ = (command: string): Promise<string> => {
     log.debug('%1: execute command: %2', this.name_, command);
     if (this.state_ !== ConnectionState.ESTABLISHED) {
-      return Promise.reject(new Error('can only execute commands in ESTABLISHED state'));
+      return Promise.reject({
+        message: 'can only execute commands in ESTABLISHED state'
+      });
     }
     return new Promise<string>((F, R) => {
       this.connection_.exec(command, (e: Error, stream: ssh2.Channel) => {
