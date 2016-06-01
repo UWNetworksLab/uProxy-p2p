@@ -144,11 +144,6 @@ getWithBasePath = (files, base = '') ->
 backendThirdPartyBuildPaths = [
   'bower'
   'sha1'
-  'uproxy-lib/loggingprovider'
-  'uproxy-lib/churn-pipe'
-  'uproxy-lib/cloud/digitalocean'
-  'uproxy-lib/cloud/install'
-  'uproxy-lib/cloud/social'
 ]
 
 uiDistFiles = [
@@ -499,6 +494,11 @@ gruntConfig = {
         ]
         pathsFromDevBuild: [
           'generic_core'
+          'lib/loggingprovider'
+          'lib/churn-pipe'
+          'lib/cloud/digitalocean'
+          'lib/cloud/install'
+          'lib/cloud/social'
         ]
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: getExtraFilesForCoreBuild(chromeAppDevPath).concat({ # uProxy Icons and fonts
@@ -721,6 +721,35 @@ gruntConfig = {
     integrationSpec: Rule.browserifySpec 'integration/core'
     integrationFreedomModule: Rule.browserify 'integration/test_connection'
 
+    # uproxy-lib
+    loggingProvider: Rule.browserify 'lib/loggingprovider/freedom-module'
+    churnPipeFreedomModule: Rule.browserify 'lib/churn-pipe/freedom-module'
+    cloudInstallerFreedomModule: Rule.browserify('lib/cloud/install/freedom-module', {
+      alias : [
+        # Shims for node's dns and net modules from freedom-social-xmpp,
+        # with a couple of fixes.
+        './src/lib/cloud/social/shim/net.js:net'
+        './src/lib/cloud/social/shim/dns.js:dns'
+        # Alternative that works for freedomjs modules.
+        './src/lib/cloud/social/alias/brorand.js:brorand'
+        # Fallback for crypto-browserify's randombytes, for Firefox.
+        './src/lib/cloud/social/alias/randombytes.js:randombytes'
+      ]
+    })
+    cloudSocialProviderFreedomModule: Rule.browserify('lib/cloud/social/freedom-module', {
+      alias : [
+        # Shims for node's dns and net modules from freedom-social-xmpp,
+        # with a couple of fixes.
+        './src/lib/cloud/social/shim/net.js:net'
+        './src/lib/cloud/social/shim/dns.js:dns'
+        # Alternative that works for freedomjs modules.
+        './src/lib/cloud/social/alias/brorand.js:brorand'
+        # Fallback for crypto-browserify's randombytes, for Firefox.
+        './src/lib/cloud/social/alias/randombytes.js:randombytes'
+      ]
+    })
+    digitalOceanFreedomModule: Rule.browserify 'lib/cloud/digitalocean/freedom-module'
+
   #-------------------------------------------------------------------------
   jasmine:
     chrome_extension: Rule.jasmineSpec('chrome/extension/scripts/',
@@ -799,6 +828,11 @@ taskManager.add 'base', [
   'browserify:chromeAppMain'
   'browserify:genericCoreFreedomModule'
   'browserify:ccaMain'
+  'browserify:loggingProvider'
+  'browserify:churnPipeFreedomModule'
+  'browserify:cloudInstallerFreedomModule'
+  'browserify:cloudSocialProviderFreedomModule'
+  'browserify:digitalOceanFreedomModule'
 ]
 
 taskManager.add 'version_file', [

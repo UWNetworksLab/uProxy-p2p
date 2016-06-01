@@ -1,0 +1,125 @@
+{
+  "name": "Cloud Social Provider",
+  "description": "Exposes Zork instances as friends.",
+  "app": {
+    "script": [
+      "freedom-module.static.js"
+    ]
+  },
+  "default": "social2",
+  "provides": [
+    "social2"
+  ],
+  "api": {
+    "social2": {
+      "login": {
+        "type": "method",
+        "value": [{
+          "agent": "string",
+          "version": "string",
+          "url": "string",
+          "interactive": "boolean",
+          "rememberLogin": "boolean"
+        }],
+        "ret": {
+          "userId": "string",
+          "clientId": "string",
+          "status": "string",
+          "timestamp": "number"
+        }
+      },
+
+      "sendMessage": {
+        "type": "method",
+        "value": ["string", "string"]
+      },
+
+      "clearCachedCredentials": {
+        "type": "method",
+        "value": []
+      },
+
+      "getUsers": {
+        "type": "method",
+        "value": [],
+        "ret": "object"
+      },
+
+      "getClients": {
+        "type": "method",
+        "value": [],
+        "ret": "object"
+      },
+
+      "logout": {
+        "type": "method",
+        "value": []
+      },
+
+      "inviteUser": {
+        "type": "method",
+        "value": ["string"],
+        "ret": "object"
+      },
+
+      "acceptUserInvitation": {
+        "type": "method",
+        "value": ["string"]
+      },
+
+      "blockUser": {
+       "type": "method",
+        "value": [{
+          "userId": "string"
+        }]
+      },
+
+      "removeUser": {
+       "type": "method",
+        "value": [ "string"]
+      },
+
+      "onMessage": {
+        "type": "event",
+        "value": {
+          "from": {
+            "userId": "string",
+            "clientId": "string",
+            "status": "string",
+            "lastUpdated": "number",
+            "lastSeen": "number"
+          },
+          "message": "string"
+        }
+      },
+
+      "onUserProfile": {
+        "type": "event",
+        "value": {
+          "userId": "string",
+          "lastUpdated": "number",
+          "name": "string",
+          "url": "string",
+          "imageData": "string",
+          "status": "number"
+        }
+      },
+
+      "onClientState": {
+        "type": "event",
+        "value": {
+          "userId": "string",
+          "clientId": "string",
+          "status": "string",
+          "lastUpdated": "number",
+          "lastSeen": "number"
+        }
+      }
+    }
+  },
+  "permissions": [
+    "core.tcpsocket",
+    "core.udpsocket",
+    "core.storage"
+  ]
+}
