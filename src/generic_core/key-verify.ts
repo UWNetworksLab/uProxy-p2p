@@ -5,8 +5,15 @@ import loggingTypes =
   require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 var log :logging.Log = new logging.Log('KeyVerify');
 
+// KeyVerify's callbacks API from ZRTP protocol.
 export interface Delegate {
+
+  // Send this message to the peer KeyVerify
   sendMessage(msg:any) :Promise<void>;
+
+  // Show this Short Authentication String to the user, and ask them
+  // if it's the same as what their peer sees.  resolve(true) if it
+  // is, resole(false) if not.
   showSAS(sas:string) :Promise<boolean>;
 };
 
@@ -115,9 +122,39 @@ export class Hashes {
   public h3 :HashPair;
 };
 
+
+function makeHash(s:string) :HashPair {
+  let bin = crypto.createHash('sha256').update(s).digest();
+  return new HashPair(bin);
+}
+
+function hashBuffers(...bufs:Buffer[]) :HashPair {
+  let buffer = Buffer.concat(bufs);
+  let bin = crypto.createHash('sha256').update(buffer).digest();
+  return new HashPair(bin);
+}
+
+function hashString(s:string) :string {
+  return crypto.createHash('sha256').update(s).digest('base64');
+}
+
+// Values from messages are base64 encoded, and many of the
+// cryptographic operations used in ZRTP require that they be
+// concatenated before we hash them.
+function unbase64Concat(...args:string[]) :Buffer {
+  let buffers = args.map( (val:string) => {
+    return new Buffer(val, 'base64');
+  });
+  return Buffer.concat(buffers);
+}
+
 export class KeyVerify {
   // Only written by set(), after verifying the message.
   private messages_: {[type:string]:Messages.Tagged}; // indexed by Type.
+  // Only written and read by sendNextMessage(), between the time we
+  // call generate_ and get its promise-return.
+  private queued_generations_: {[type:string]:boolean}; // indexed by Type.
+
   // Zero or 1.  role_ 0 sends Hello1.  role_ 1 sends Hello2.  Generally, it
   // shouldn't determine who's sending 'Commit', but right now, we only support
   // role_ == 0 sending Commit.
@@ -167,6 +204,20 @@ export class KeyVerify {
     'Conf2Ack':[Type.Confirm2]
   };
 
+  // Which role receives which kinds of messages.  Clearly this gets
+  // complicated if we ever want to let either side initiate
+  // verification.
+  private static roleMessageMap_ :{[msg:string]:number} = {
+    'Hello1': 1,
+    'Hello2': 0,
+    'Commit': 1,
+    'DHPart1': 0,
+    'DHPart2': 1,
+    'Confirm1': 0,
+    'Confirm2': 1,
+    'Conf2Ack': 0
+  };
+
   private generatorMap_ : {[msg:string]:((type:Type) =>Promise<Messages.Tagged>)};
 
   // Messages are existing messages received or sent in the
@@ -198,7 +249,7 @@ export class KeyVerify {
         this.ourHashes_ = this.generateHashes_();
       }
     }
-
+    this.queued_generations_ = {};
     // These are all closed on 'this' now, so we have to init this here.
     this.generatorMap_ = {
       'Hello1': this.makeHello_,
@@ -212,31 +263,6 @@ export class KeyVerify {
     };
   }
 
-  private makeHash(s:string) :HashPair {
-    let bin = crypto.createHash('sha256').update(s).digest();
-    return new HashPair(bin);
-  }
-
-  private hashBuffers_(...bufs:Buffer[]) :HashPair {
-    let buffer = Buffer.concat(bufs);
-    let bin = crypto.createHash('sha256').update(buffer).digest();
-    return new HashPair(bin);
-  }
-
-  private hashString_(s:string) :string {
-    return crypto.createHash('sha256').update(s).digest('base64');
-  }
-
-  // Values from messages are base64 encoded, and many of the
-  // cryptographic operations used in ZRTP require that they be
-  // concatenated before we hash them.
-  private unbase64Concat_(...args:string[]) :Buffer {
-    let buffers = args.map( (val:string) => {
-      return new Buffer(val, 'base64');
-    });
-    return Buffer.concat(buffers);
-  }
-
   // Create a Messages.Tagged from an arbitrary message.  Designed for
   // receiving Hello1 messages without the client having to know about
   // them.
@@ -244,7 +270,7 @@ export class KeyVerify {
     if (msg['type'] && KeyVerify.structuralVerify_(msg) && msg.type == 'Hello1') {
       if (msg.clientVersion !== KeyVerify.kClientVersion ||
           msg.version !== KeyVerify.kProtocolVersion) {
-        console.log("Invalid Hello message (versions): ", msg);
+        log.error("Invalid Hello message (versions): ", msg);
         return null;
       }
       var result :{[type:string]:Messages.Tagged} = {};
@@ -258,8 +284,9 @@ export class KeyVerify {
 
   public readMessage(msg:any) {
     if (msg['type'] && KeyVerify.structuralVerify_(msg) &&
-        this.protoVerify_(msg)) {
+        this.protoVerify_(msg) && this.appropriateForRole_(msg.type)) {
       let type = msg.type;
+      console.log("GOT MESSAGE TYPE " + type);
       // When verifying these messages:
       //  1. Compare the calculation of these values aginst the ones
       //     in the makeMSG_ methods.
@@ -291,40 +318,41 @@ export class KeyVerify {
 
       } else if (type == 'Commit') {
         if (msg.clientVersion !== KeyVerify.kClientVersion) {
-          console.log("CHECK: Invalid Commit message (clientVersion)", msg);
-//          this.resolve_(false);
-//          return;
+          console.log("Invalid Commit message (clientVersion)", msg);
+          this.resolve_(false);
+          return;
         }
         // Validate the Hello message's mac.
         let hello1 = <Messages.HelloMessage>this.messages_[Type.Hello1].value;
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
         if (msg.clientVersion !== hello1.clientVersion) {
-          console.log("CHECK: Client changed versions mid-conversation.", msg, hello1);
-//          this.resolve_(false);
-//          return;
+          log.error("Client changed versions mid-conversation.", msg,
+                    hello1);
+          this.resolve_(false);
+          return;
         }
-        let desiredMac = this.macNew_(msg.h2, unb64(hello1.h3), str2buf(hello1.hk),
+        let desiredMac = this.mac_(msg.h2, unb64(hello1.h3), str2buf(hello1.hk),
                                       str2buf(hello1.clientVersion));
         if (hello1.mac !== desiredMac) {
-//          msg.h2, hello1.h3 + hello1.hk + msg.clientVersion)) {
-          console.log("CHECK: MAC mismatch (found " + hello1.mac + ", wanted " + desiredMac +
-                      ") for Hello1 found. h2: ", msg.h2, " and Hello1: ", hello1);
+          console.log("MAC mismatch (found " + hello1.mac + ", wanted " +
+                      desiredMac + ") for Hello1 found. h2: ", msg.h2,
+                      " and Hello1: ", hello1);
           console.log("msg.h2", msg.h2);
           logBuffer("unb64(hello1.h3)", unb64(hello1.h3));
           logBuffer("unb64(hello1.hk)", unb64(hello1.hk));
           logBuffer("str2buf(hello1.clientVersion)", str2buf(hello1.clientVersion));
-//          this.resolve_(false);
-//          return;
+          this.resolve_(false);
+          return;
         }
-        // Validate that h3 is the hash of h2
-        // hello1.h3 is peer's ourHashes_.h3.b64.  msg.h2 is peer's ourHashes_.h2.b64.
+        // Validate that h3 is the hash of h2. hello1.h3 is peer's
+        // ourHashes_.h3.b64.  msg.h2 is peer's ourHashes_.h2.b64.
         // So, unb64 it, then hash it, then make a string of that.
-        let desiredH3 = this.hashBuffers_(unb64(msg.h2)).b64
+        let desiredH3 = hashBuffers(unb64(msg.h2)).b64
         if (hello1.h3 !== desiredH3) {
-          console.log("CHECK: Hash chain failure for h3: ", hello1.h3,
+          console.log("Hash chain failure for h3: ", hello1.h3,
                       " and h2: ", msg.h2, " (hashed to ", desiredH3, ")");
-//          this.resolve_(false);
-//          return;
+          this.resolve_(false);
+          return;
         }
         // Check that the peer can be the initiato.
         if (this.role_ !== 1) {
@@ -339,11 +367,11 @@ export class KeyVerify {
       } else if (type == 'DHPart1') {
         // We don't have an h2 value to check the hello2 message.
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-        if (hello2.hk !== this.hashString_(msg.pkey)) {
-          console.log("CHECK: hash(pkey)/hk mismatch for DHPart1 (",msg.pkey,
+        if (hello2.hk !== hashString(msg.pkey)) {
+          console.log("hash(pkey)/hk mismatch for DHPart1 (",msg.pkey,
                       ") vs Hello2 (", hello2.hk, ")");
-//          this.resolve_(false);
-//          return;
+          this.resolve_(false);
+          return;
         }
 
         this.set_(new Messages.Tagged(
@@ -371,32 +399,31 @@ export class KeyVerify {
         // Verify that this is the sam ehk.
         let commit = <Messages.CommitMessage>this.messages_[Type.Commit].value;
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-        if (commit.hk !== this.hashString_(msg.pkey)) {
-          console.log("CHECK: hash(pkey)/hk mismatch for DHPart2 (",msg.pkey,
+        if (commit.hk !== hashString(msg.pkey)) {
+          console.log("hash(pkey)/hk mismatch for DHPart2 (",msg.pkey,
                       ") vs Commit (", commit.hk, ")");
-//          this.resolve_(false);
-//          return;
+          this.resolve_(false);
+          return;
         }
         // Verify the mac of the Commit.
         if (commit.mac !==
-            this.macNew_(msg.h1,
+            this.mac_(msg.h1,
                          unb64(commit.h2), unb64(commit.hk),
                          str2buf(commit.clientVersion), unb64(commit.hvi))) {
-/*                         commit.h2 + commit.hk +
-                                    commit.clientVersion + commit.hvi)) { */
-          console.log("CHECK: MAC mismatch for Commit found. h1: ", msg.h1,
+          console.log("MAC mismatch for Commit found. h1: ", msg.h1,
                       " and Commit: ", commit);
-//          this.resolve_(false);
-//          return;
+          this.resolve_(false);
+          return;
         }
         // Check that hvi is correct.
-        let hvi = this.hashString_((msg.h1 + msg.pkey + msg.mac) + (
-          hello2.h3 + hello2.hk + hello2.mac));
-        if (hvi !== msg.hvi) {
-          console.log("CHECK: hvi Mismatch in commit. Wanted: ", hvi, " got: ",
+        let hvi = hashBuffers(
+          unb64(msg.h1), str2buf(msg.pkey), unb64(msg.mac),
+          unb64(hello2.h3), unb64(hello2.hk), unb64(hello2.mac)).b64;
+        if (hvi !== commit.hvi) {
+          console.log("hvi Mismatch in commit. Wanted: ", hvi, " got: ",
                       msg);
-//          this.resolve_(false);
-//          return;
+          this.resolve_(false);
+          return;
         }
         this.set_(new Messages.Tagged(
           Type.DHPart2, new Messages.DHPartMessage(msg.type, msg.h1, msg.pkey,
@@ -415,11 +442,11 @@ export class KeyVerify {
         // Validate DHpart1
         let dhpart1 = <Messages.DHPartMessage>this.messages_[Type.DHPart1].value;
         if (dhpart1.mac !==
-            this.macNew_(msg.h0, unb64(dhpart1.h1), str2buf(dhpart1.pkey))) {
+            this.mac_(msg.h0, unb64(dhpart1.h1), str2buf(dhpart1.pkey))) {
           console.log("CHECK: MAC mismatch for DHPart1 found. h0: ", msg.h0,
                       " and DHPart1: ", dhpart1);
-//          this.resolve_(false);
-//          return;
+          this.resolve_(false);
+          return;
         }
         this.set_(new Messages.Tagged(
           Type.Confirm1, new Messages.ConfirmMessage(msg.type, msg.h0, msg.mac)));
@@ -428,15 +455,16 @@ export class KeyVerify {
         // Validate DHpart2
         let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (dhpart2.mac !==
-            this.macNew_(msg.h0, unb64(dhpart2.h1), str2buf(dhpart2.pkey))) {
+            this.mac_(msg.h0, unb64(dhpart2.h1), str2buf(dhpart2.pkey))) {
           console.log("CHECK: MAC mismatch for DHPart2 found. h0: ", msg.h0,
                       " and DHPart2: ", dhpart2);
-//          this.resolve_(false);
-//          return;
+          this.resolve_(false);
+          return;
         }
         this.set_(new Messages.Tagged(
           Type.Confirm2, new Messages.ConfirmMessage(msg.type, msg.h0, msg.mac)));
-//        this.resolve_(true);
+
+        // Don't resolve here, wait until we've sent 
       } else if (type == 'Conf2Ack') {
         this.set_(new Messages.Tagged(
           Type.Conf2Ack, new Messages.ConfAckMessage(msg.type)));
@@ -469,11 +497,11 @@ export class KeyVerify {
     }
     return this.loadKeys_().then(() => {
       console.log("start() callback invoked.");
-      this.sendNextMessage();
       this.result_ = new Promise<void>((resolve:any, reject:any) => {
         console.log("start(): initializing result_.");
         this.resolvePromise_ = resolve;
         this.rejectPromise_ = reject;
+        this.sendNextMessage();
       });
       return this.result_;
     });
@@ -496,7 +524,7 @@ export class KeyVerify {
     if (this.completed_) {
       throw (new Error("KeyVerify.sendNextMessage: Already completed."));
     }
-    console.log("sendNextMessage(): starting.");
+    log.debug("sendNextMessage(): starting.");
     // Look at where we are in the conversation.
     // - figure out the latest message that isn't in the set.
     // - see if we have its prereq.
@@ -531,10 +559,19 @@ export class KeyVerify {
         msgType = Type.Hello2;
       }
     }
-    if (!this.messages_[Type[msgType]]) {
+
+    if (!this.messages_[msgType] &&
+        !this.queued_generations_[Type[msgType]]) {
+      this.queued_generations_[Type[msgType]] = true;
       this.generate_(msgType).then( (msg:Messages.Tagged) => {
+        this.queued_generations_[Type[msgType]] = false;
         this.set_(msg);
-        this.delegate_.sendMessage(msg.value).catch((e) => {
+        this.delegate_.sendMessage(msg.value).then(() => {
+          if (msgType == Type.Conf2Ack) {
+            console.log("EVERYTHING IS DONE ON THIS SIDE TOO");
+            this.resolve_(true);
+          }
+        }).catch((e) => {
           console.log("Failed to send message in ZRTP message.  Resolving as " +
                       "failure.", e);
           this.resolve_(false);
@@ -577,6 +614,19 @@ export class KeyVerify {
     return true;
   }
 
+  // Whether we should even receive the given message type.  If not,
+  // perhaps we're under attack?
+  private appropriateForRole_(type:string) :boolean {
+    if (KeyVerify.roleMessageMap_[type] !== undefined) {
+      return KeyVerify.roleMessageMap_[type] == this.role_;
+    } else {
+      return false;
+    }
+  }
+
+  // Register a message as an accepted part of the conversation.  The
+  // message must have been a validated received message, or a message
+  // we've sent.
   private set_(message: Messages.Tagged) :void {
     // parseInt returns NaN for non-ints, and NaNs always compare
     // false in </>/= comparisons.
@@ -585,10 +635,12 @@ export class KeyVerify {
       console.log("set_: bad type: ", message.type);
     }
     if (this.messages_[message.type]) {
-      console.log("FIXME: set_: already have a message of ", message.type, " (" +
+      console.log("set_: already have a message of ", message.type, " (" +
                   Type[message.type] + ")");
-      // this.resolve_(false);
+      this.resolve_(false);
     } else {
+      console.log("set_: setting message of ", message.type, " (" +
+                  Type[message.type] + ")");
       this.messages_[message.type] = message;
     }
   }
@@ -620,12 +672,12 @@ export class KeyVerify {
     logBuffer("makeHello: h3:", h3.bin);
     logBuffer("makeHello: hk "+ hk + " and str2buf'd: ", str2buf(hk));
     logBuffer("makeHello: clientVersion", str2buf(KeyVerify.kClientVersion));
-    let mac = this.macNew_(this.ourHashes_.h2.b64,
-                           h3.bin,str2buf(this.hashString_(hk)),
+    let mac = this.mac_(this.ourHashes_.h2.b64,
+                           h3.bin,str2buf(hashString(hk)),
                            str2buf(KeyVerify.kClientVersion));
     console.log("makeHello: mac: ", mac);
     let message = new Messages.Tagged(type, new Messages.HelloMessage(
-      Type[type], KeyVerify.kProtocolVersion, h3.b64, this.hashString_(hk),
+      Type[type], KeyVerify.kProtocolVersion, h3.b64, hashString(hk),
       KeyVerify.kClientVersion, mac));
 
     return Promise.resolve<Messages.Tagged>(message);
@@ -638,26 +690,30 @@ export class KeyVerify {
     }
     let h1 = this.ourHashes_.h1;
     let pkey = this.ourKey_.key;
-    let mac = this.macNew_(this.ourHashes_.h0.b64, h1.bin, str2buf(pkey));
+    let mac = this.mac_(this.ourHashes_.h0.b64, h1.bin, str2buf(pkey));
     let message = new Messages.Tagged(type, new Messages.DHPartMessage(
       Type[type], h1.b64, pkey, mac));
     return Promise.resolve<Messages.Tagged>(message);
   }
 
-  private makeCommitWorker_(type:Type) :Promise<Messages.Tagged> {
-    let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
+  private makeCommitWorker_(type:Type,
+                            dh2:Messages.Tagged) :Promise<Messages.Tagged> {
+    // Don't depend on dhpart2 being in our saved messages yet, as we
+    // may not have sent it out (just generated it).  Pass it in as an
+    // argument.
+    let dhpart2 = <Messages.DHPartMessage>dh2.value;
     let hello = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-    let hvi = this.hashBuffers_(
+    let hvi = hashBuffers(
       unb64(dhpart2.h1), str2buf(dhpart2.pkey), unb64(dhpart2.mac),
       unb64(hello.h3), unb64(hello.hk), unb64(hello.mac)
     );
     let h2 = this.ourHashes_.h2;
-    let hk = this.makeHash(this.ourKey_.key);
+    let hk = makeHash(this.ourKey_.key);
     let version = KeyVerify.kClientVersion;
     return Promise.resolve<Messages.Tagged>(
       new Messages.Tagged(Type.Commit, new Messages.CommitMessage(
         Type[Type.Commit], h2.b64, hk.b64, KeyVerify.kClientVersion, hvi.b64,
-        this.macNew_(this.ourHashes_.h1.b64, h2.bin, hk.bin, str2buf(version),
+        this.mac_(this.ourHashes_.h1.b64, h2.bin, hk.bin, str2buf(version),
                      hvi.bin))));
   }
 
@@ -668,11 +724,12 @@ export class KeyVerify {
     }
     if (!this.messages_[Type.DHPart2]) {
       return this.makeDHPart_(Type.DHPart2).then( (msg:Messages.Tagged) => {
-        this.set_(msg);
-        return this.makeCommitWorker_(type);
+        // this.set_(msg);  // don't set() unless we've sent or recevied it.
+        // TODO: consider caching this message for later transmission.
+        return this.makeCommitWorker_(type, msg);
       });
     } else {
-      return this.makeCommitWorker_(type);
+      return this.makeCommitWorker_(type, this.messages_[Type.DHPart2]);
     }
 
   }
@@ -685,7 +742,7 @@ export class KeyVerify {
       let h0 = this.ourHashes_.h0;
       return Promise.resolve<Messages.Tagged>(
         new Messages.Tagged(type, new Messages.ConfirmMessage(
-          Type[type], h0.b64, this.macNew_(s0.toString('base64'), h0.bin))));
+          Type[type], h0.b64, this.mac_(s0.toString('base64'), h0.bin))));
     });
   }
 
@@ -729,8 +786,8 @@ export class KeyVerify {
 
   private calculateS0_() :Promise<Buffer> {
     if (this.s0_ !== null) {
-      logBuffer("s0: calculateS0_: State=" + this.state_() + ", returning cached",
-                this.s0_);
+      logBuffer("s0: calculateS0_: State=" + this.state_() +
+                ", returning cached", this.s0_);
       return Promise.resolve<Buffer>(this.s0_);
     }
     return this.pgp_.ecdhBob('P_256', this.peerPubKey_).then(
@@ -814,15 +871,15 @@ export class KeyVerify {
       "dhpart2.pkey": dhpart2.pkey,
       "dhpart2.mac": dhpart2.mac
     };
-    console.log("totalHash: keys to total_hash_buf: ", elems);
-    let first_hash_buf = this.unbase64Concat_(hello_r.h3, hello_r.hk, hello_r.mac,
+    log.debug("totalHash: keys to total_hash_buf: ", elems);
+    let first_hash_buf = unbase64Concat(hello_r.h3, hello_r.hk, hello_r.mac,
                                               commit.h2, commit.hk);
     let cv_buf = new Buffer(commit.clientVersion);
-    let second_hash_buf = this.unbase64Concat_(commit.hvi, dhpart1.h1);
+    let second_hash_buf = unbase64Concat(commit.hvi, dhpart1.h1);
     let dh1k_buf = new Buffer(dhpart1.pkey);
-    let third_hash_buf = this.unbase64Concat_(dhpart1.mac, dhpart2.h1);
+    let third_hash_buf = unbase64Concat(dhpart1.mac, dhpart2.h1);
     let dh2k_buf = new Buffer(dhpart2.pkey);
-    let fourth_hash_buf = this.unbase64Concat_(dhpart2.mac);
+    let fourth_hash_buf = unbase64Concat(dhpart2.mac);
     let total_hash_buf = Buffer.concat(
       [].concat( first_hash_buf, cv_buf, second_hash_buf, dh1k_buf,
                  third_hash_buf, dh2k_buf, fourth_hash_buf)
@@ -840,15 +897,10 @@ export class KeyVerify {
               dhpart2.pkey, ", mac:", dhpart2.mac);
     log.debug("totalHash: total_hash_buf: ", total_hash_buf);
     let hashed = crypto.createHash('sha256').update(total_hash_buf).digest();
-    console.log("totalHash: resulting hash is ", hashed);
+    log.debug("totalHash: resulting hash is ", hashed);
     this.totalHash_ = hashed;
     return hashed;
   }
-
-  // TODO:
-  // Fix new Buffer([item], length) syntax).  Wrap it in a function and implement that pads out.
-  // The new Buffer([x]) syntax 
-  
 
   // 'key' is a regular buffer, that we re-encode into a base64 string
   // for fullHmac.
@@ -878,8 +930,8 @@ export class KeyVerify {
     let kBlockSize = 64;  // sha-256 block size is 512 bits - 64 bytes.
     let key_buf = new Buffer(key, 'base64');
 
-    console.log("fullHmac: key: ", key);
-    console.log("fullHmac: value: ", value);
+    log.debug("fullHmac: key: ", key);
+    log.debug("fullHmac: value: ", value);
 
     // Follow FIPS-198 quite literally.  I haven't found any docs on
     // createHmac(sha256,key) w.r.t. FIPS-198.
@@ -905,52 +957,43 @@ export class KeyVerify {
     };
 
     let k_0 = Buffer.concat([key_buf]);
-    //logBuffer('fullHmac k_0', k_0);
+    logBuffer('fullHmac k_0', k_0);
 
     // ipad = 0x36.
     let kb_step4 = xorBuffer(Buffer.concat([k_0]), 0x36);
-    //logBuffer('fullHmac A', kb_step4);
+    logBuffer('fullHmac A', kb_step4);
 
     // Step 5
     let ki_text = Buffer.concat([kb_step4, new Buffer(value, 'base64')]);
-    //logBuffer('fullHmac B', ki_text);
+    logBuffer('fullHmac B', ki_text);
 
     // Step 6
     let h_ki_text = crypto.createHash('sha256').update(ki_text).digest();
-    //logBuffer('fullHmac C', ki_text);
+    logBuffer('fullHmac C', ki_text);
 
     // Step 7 - xor with 0x5c.
     let ko_text = xorBuffer(Buffer.concat([k_0]), 0x5c);
-    //logBuffer('fullHmac D', ko_text);
+    logBuffer('fullHmac D', ko_text);
 
     // Step 8 - concat steps 7 and 6
     let ki_h_ko_text = Buffer.concat([ko_text, h_ki_text]);
-    //logBuffer('fullHmac E', ki_h_ko_text);
+    logBuffer('fullHmac E', ki_h_ko_text);
 
     // Final step: hash step 8.
     let full_hmac = crypto.createHash('sha256').update(ki_h_ko_text).digest();
-    //logBuffer('fullHmac F', full_hmac);
+    logBuffer('fullHmac F', full_hmac);
     return full_hmac;
   }
 
-  // key is base64-encoded.  value is an arbitrary string.
-/*  private mac_(key:string, value:string) :string {
-    let valueB64 = new Buffer(value).toString('base64');
-    let full_hmac = this.fullHmac_(key, valueB64);
-    let result = (Buffer.concat([full_hmac.slice(0,2)])).toString('base64');
-    console.log("mac_(" + key + ", (shouldn't be b64)" + value +
-                "): full_hmac: " + full_hmac + "result: "+result);
-    return result;
-  } */
-
   // key is base64 encoded.  values are buffers.
-  private macNew_(key:string, ...values:Buffer[]) :string {
+  private mac_(key:string, ...values:Buffer[]) :string {
     let valueB64 = Buffer.concat(values).toString('base64');
     let full_hmac = this.fullHmac_(key, valueB64);
     let sliced = full_hmac.slice(0,2);
     let result = Buffer.concat([sliced]).toString('base64');
-    console.log("macNew_(key <b64>:" + key + ", val <bin>:", values,
-                "): full_hmac: " + hexify(full_hmac) + ", sliced: " + hexify(sliced) + ", result: "+result);
+    log.debug("mac_(key <b64>:" + key + ", val <bin>:", values,
+              "): full_hmac: " + hexify(full_hmac) + ", sliced: " +
+              hexify(sliced) + ", result: " + result);
     return result;
   }
 
