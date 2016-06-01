@@ -22,8 +22,8 @@ if (!cryptoAvailable) {
   offset = 0;
 
   getBufferedRandomBytes = function(buffer) {
-    if (buffer.buffer) {
-      buffer = buffer.buffer;
+    if ((size * 100) - offset < size * 10) {
+      refreshBuffer(size*100);
     }
     var size = buffer.byteLength,
         view = new Uint8Array(buffer),
@@ -31,9 +31,7 @@ if (!cryptoAvailable) {
     if (offset + size > buf.length) {
       throw new Error('Insufficient Randomness Allocated.');
     }
-    for (i = 0; i < size; i += 1) {
-      view[i] = buf[offset + i];
-    }
+    view = buf.slice(offset, offset + size);
     offset += size;
   };
 }
@@ -59,6 +57,7 @@ module.exports = function(size, cb) {
     } else {
       const buffer = new Buffer(size);
       getBufferedRandomBytes(buffer);
+      return buffer;
     }
   }
 };
