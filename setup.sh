@@ -44,6 +44,8 @@ function installThirdParty ()
   runAndAssertCmd "mkdir -p build/third_party"
   runAndAssertCmd "pushd third_party && $NPM_BIN_DIR/typings install && popd"
   runAndAssertCmd "cp -r third_party/* build/third_party/"
+  runAndAssertCmd "mkdir -p build/third_party/freedom-port-control"
+  runAndAssertCmd "cp -r node_modules/freedom-port-control/dist build/third_party/freedom-port-control/"
 }
 
 function installDevDependencies ()

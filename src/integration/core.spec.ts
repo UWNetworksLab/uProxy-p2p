@@ -1,23 +1,21 @@
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
-/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts' />
-
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import _ = require('lodash');
-import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
+import arraybuffers = require('../lib/arraybuffers/arraybuffers');
 import CoreConnector = require('../generic_ui/scripts/core_connector');
 import credentials = require('./gtalk_credentials');
 import IntegrationTestConnector = require('./integration_test_connector');
-import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
 import mock_oauth = require('./mock_oauth');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import net = require('../lib/net/net.types');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
 
 import ALICE = credentials.ALICE;
 import BOB = credentials.BOB;
+
+declare var freedom: freedom.FreedomInCoreEnv;
 
 var testConnection = (socksEndpoint :net.Endpoint) : Promise<Boolean> => {
   return freedom('files/integration.json', {debug:'log'}).then((freedomInterface :any) => {

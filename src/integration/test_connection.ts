@@ -1,6 +1,10 @@
-import tcp = require('../../../third_party/uproxy-lib/net/tcp');
-import socks_common = require('../../../third_party/uproxy-lib/socks-common/socks-headers');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
+import tcp = require('../lib/net/tcp');
+import socks_common = require('../lib/socks-common/socks-headers');
+import net = require('../lib/net/net.types');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 class ProxyTester {
   private echoServer_ :tcp.Server;
