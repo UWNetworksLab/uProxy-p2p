@@ -58,11 +58,11 @@
         &cross; </span>
       <div id='verification'
            hidden?='{{ instance.verifyState != VerifyState.VERIFY_BEGIN }}'>
-        <span id='verification-inprogress' hidden?='{{ instance.verifySAS != null }}'>
+        <span id='verification-inprogress' hidden?='{{ sas != null }}'>
           Talking to peer....
         </span>
-        <span id='verification-sas' hidden?='{{ instance.verifySAS == null }}'>
-          SAS: {{ instance.verifySAS }}
+        <span id='verification-sas' hidden?='{{ sas == null }}'>
+          SAS: {{ sas }}, Do you both see the same SAS?
           <uproxy-button on-tap='{{ confirmSAS }}'>
             {{ "YES" }}
           </uproxy-button>

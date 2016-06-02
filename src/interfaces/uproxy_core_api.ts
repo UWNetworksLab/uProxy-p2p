@@ -159,11 +159,7 @@ export enum Update {
   CLOUD_INSTALL_STATUS = 2027,
   REMOVE_FRIEND = 2028, // Removed friend from roster.
   // Payload is an integer between 0 and 100.
-  CLOUD_INSTALL_PROGRESS = 2029,
-  // User verification startup, with peer's SAS
-  VERIFY_LOCAL_CHECK = 2030,
-  // Verification succeeded or failed.
-  VERIFY_USER_COMPLETE = 2031
+  CLOUD_INSTALL_PROGRESS = 2029
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -275,6 +271,11 @@ export interface PostReportArgs {
   path: string;
 };
 
+export interface FinishVerifyArgs {
+  inst: social.InstancePath,
+  sameSAS: boolean
+};
+
 /**
  * The primary interface to the uProxy Core.
  *
@@ -353,6 +354,9 @@ export interface CoreApi {
 
   // Start a ZRTP key-verification session.
   verifyUser(inst :social.InstancePath) :Promise<void>;
+
+  // Confirm or reject the SAS in a ZRTP key-verification session.
+  finishVerifyUser(args:FinishVerifyArgs) :Promise<void>;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }

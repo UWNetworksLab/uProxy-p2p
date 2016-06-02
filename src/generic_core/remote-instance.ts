@@ -68,12 +68,17 @@ import ui = ui_connector.connector;
     // from storage.
     private fulfillStorageLoad_ : () => void;
 
-    // Any key-verify session set up.
+    // Any key-verify session state.
+    // - In-progress protocol session.
     private keyVerifySession_ :key_verify.KeyVerify = null;
+    // - The Short Authentication String (SAS) if we're in the middle of
+    //   verification.
     private verifySAS_ :string = null;
+    // - The Verification-State-machine state.  See the type for
+    //   details -- mostly used for the UI.
     private verifyState_ = social.VerifyState.VERIFY_NONE;
-    private failedVerifySAS_ :() => void = null;
-    private succeededVerifySAS_ :() => void = null;
+    // - Promise resolution callback for user SAS verification.
+    private resolvedVerifySAS_ :(v:boolean) => void = null;
 
     public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
@@ -295,12 +300,15 @@ import ui = ui_connector.connector;
         },
         showSAS : (sas:string) :Promise<boolean> => {
           console.log("verifyUser: Got SAS " + sas);
-          inst.user.notifyUI();
           inst.verifySAS_ = sas;
-          let result = new Promise<boolean>((resolve:any, reject:any) => {
+          let result = new Promise<boolean>((resolve:any) => {
             // Send UPDATE message with SAS.
-            this.failedVerifySAS_ = reject;
-            this.succeededVerifySAS_ = resolve;
+            this.resolvedVerifySAS_ = resolve;
+            // The UI's now showing the SAS with a YES/NO prompt.  The
+            // user will hit one of those buttons and we'll send a
+            // command back that'll cause a resolution of the Promise
+            // from start() below.
+            inst.user.notifyUI();
             // SCAFFOLDING: Resolve TRUE until the UI's done.
 //            resolve(true);
           });
@@ -329,16 +337,24 @@ import ui = ui_connector.connector;
         inst.keyVerifySession_ = null
         inst.verifySAS_ = null;
         inst.verifyState_ = social.VerifyState.VERIFY_COMPLETE;
-        this.user.notifyUI();
+        inst.user.notifyUI();
       }, () => {
         console.log("verifySession: failed.");
         inst.keyVerified = false;
         inst.verifyState_ = social.VerifyState.VERIFY_FAILED;
         inst.keyVerifySession_ = null
         inst.verifySAS_ = null;
-        this.user.notifyUI();
+        inst.user.notifyUI();
       });
     };
+
+    public finishVerifyUser = (result :boolean) => {
+      if (this.resolvedVerifySAS_ !== null) {
+        this.resolvedVerifySAS_(result);
+      } else {
+        log.error("Getting a completed verification result when no session is open.");
+      }
+    }
 
     /**
       * When our peer sends us a signal that they'd like to be a client,
@@ -538,6 +554,13 @@ import ui = ui_connector.connector;
       }
       if (typeof state.keyVerified !== 'undefined') {
         this.keyVerified = state.keyVerified;
+        if (state.keyVerified) {
+          // There's an open question here on how to handle
+          // verification failures - do we remember them as explicit
+          // failures, or do we just treat them as not having
+          // succeeded? So far, treat as the latter.
+          this.verifyState_ = social.VerifyState.VERIFY_COMPLETE;
+        }
       }
       if (state.wireConsentFromRemote) {
         this.wireConsentFromRemote = state.wireConsentFromRemote
