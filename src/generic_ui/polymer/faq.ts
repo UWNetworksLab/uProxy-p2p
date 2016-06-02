@@ -44,7 +44,7 @@ Polymer({
       var regexToGetUrl =
           /href\s*=\s*(\"([^"]*\")|'[^']*'|([^'">\s]+))/g;
       var url = regexToGetUrl.exec(p1)[1];
-      return "<a on-tap='{{openTab}}' data-url=" + url + ">" + p2 + "</a>";
+      return '<a on-tap="{{openTab}}" data-url=' + url + '>' + p2 + '</a>';
     });
     return sanitizedMessage;
   },

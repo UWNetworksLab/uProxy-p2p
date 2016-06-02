@@ -110,8 +110,8 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
     browserApi.hasInstalledThenLoggedIn = false;
     chrome.browserAction.setIcon({
       path: {
-        "19" : "icons/19_" + Constants.DEFAULT_ICON,
-        "38" : "icons/38_" + Constants.DEFAULT_ICON,
+        '19' : 'icons/19_' + Constants.DEFAULT_ICON,
+        '38' : 'icons/38_' + Constants.DEFAULT_ICON,
       }
     });
   });
@@ -119,8 +119,8 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
   chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
       // Do not open the extension when it's installed if the user is
       // going through the inline install flow.
-      if ((tabs[0].url.indexOf("uproxysite.appspot.com/install") == -1) &&
-          (tabs[0].url.indexOf("uproxy.org/install") == -1)) {
+      if ((tabs[0].url.indexOf('uproxysite.appspot.com/install') == -1) &&
+          (tabs[0].url.indexOf('uproxy.org/install') == -1)) {
         browserApi.bringUproxyToFront();
       }
   });

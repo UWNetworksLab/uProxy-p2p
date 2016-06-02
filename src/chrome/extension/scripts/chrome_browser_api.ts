@@ -21,7 +21,7 @@ declare var Notification :any; //TODO remove this
 
 class ChromeBrowserApi implements BrowserAPI {
 
-  public browserSpecificElement = "uproxy-app-missing";
+  public browserSpecificElement = 'uproxy-app-missing';
 
   public canProxy = true;
   public hasInstalledThenLoggedIn = true;
@@ -33,8 +33,8 @@ class ChromeBrowserApi implements BrowserAPI {
   public setIcon = (iconFile :string) : void => {
     chrome.browserAction.setIcon({
       path: {
-        "19" : this.ICON_DIR + "19_" + iconFile,
-        "38" : this.ICON_DIR + "38_" + iconFile,
+        '19' : this.ICON_DIR + '19_' + iconFile,
+        '38' : this.ICON_DIR + '38_' + iconFile,
       }
     });
   }
@@ -49,7 +49,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private POPUP_URL = "generic_ui/index.html";
+  private POPUP_URL = 'generic_ui/index.html';
   // When we last called chrome.windows.create (for logging purposes).
   private popupCreationStartTime_ = Date.now();
 
@@ -88,7 +88,7 @@ class ChromeBrowserApi implements BrowserAPI {
       }
     });
 
-    chrome.browserAction.setBadgeBackgroundColor({color: "#009968"});
+    chrome.browserAction.setBadgeBackgroundColor({color: '#009968'});
   }
 
   private canControlProxy_ = (level :string) :boolean => {
@@ -98,10 +98,10 @@ class ChromeBrowserApi implements BrowserAPI {
 
   public startUsingProxy = (endpoint:net.Endpoint, bypass :string[]) => {
     var config = {
-      mode: "fixed_servers",
+      mode: 'fixed_servers',
       rules: {
         singleProxy: {
-          scheme: "socks5",
+          scheme: 'socks5',
           host: endpoint.address,
           port: endpoint.port,
         },
@@ -150,11 +150,11 @@ class ChromeBrowserApi implements BrowserAPI {
     chrome.tabs.query({currentWindow: true}, function(tabs){
       for (var i = 0; i < tabs.length; i++) {
         if (tabs[i].url == chrome.extension.getURL(relativeUrl)) {
-          chrome.tabs.update(tabs[i].id, {url: "../" + relativeUrl, active: true});
+          chrome.tabs.update(tabs[i].id, {url: '../' + relativeUrl, active: true});
           return;
         }
       }
-      chrome.tabs.create({url: "../" + relativeUrl});
+      chrome.tabs.create({url: '../' + relativeUrl});
     });
   }
 
@@ -169,7 +169,7 @@ class ChromeBrowserApi implements BrowserAPI {
         this.handlePopupLaunch = F;
       });
       chrome.windows.create({url: this.POPUP_URL,
-                     type: "popup",
+                     type: 'popup',
                      width: 371,
                      height: 600}, this.newPopupCreated_);
       return this.onceLaunched_;
@@ -178,7 +178,7 @@ class ChromeBrowserApi implements BrowserAPI {
       chrome.windows.update(this.popupWindowId_, {focused: true});
       return Promise.resolve<void>();
     } else {
-      console.log("Waiting for popup to launch...");
+      console.log('Waiting for popup to launch...');
       return this.onceLaunched_;
     }
   }
@@ -187,7 +187,7 @@ class ChromeBrowserApi implements BrowserAPI {
     * Callback passed to chrome.windows.create.
     */
   private newPopupCreated_ = (popup :chrome.windows.Window) => {
-    console.log("Time between browser icon click and popup launch (ms): " +
+    console.log('Time between browser icon click and popup launch (ms): ' +
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
     this.popupState_ = PopupState.LAUNCHED;

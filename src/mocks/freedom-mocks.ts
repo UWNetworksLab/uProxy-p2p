@@ -34,7 +34,7 @@ export class MockFreedomStorage implements freedom.Storage.Storage {
   }
 
   public remove = (key :string) => {
-    //console.log("\n  public remove(" + key + ").");
+    //console.log('\n  public remove(' + key + ').');
     var prev = this.store_[key];
     delete this.store_[key];
     return Promise.resolve(prev);

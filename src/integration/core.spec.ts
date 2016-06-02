@@ -24,7 +24,7 @@ var testConnection = (socksEndpoint :net.Endpoint) : Promise<Boolean> => {
     var testModule = new freedomInterface();
     var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
     return testModule.startEchoServer().then((port:number) => {
-      return testModule.connect(socksEndpoint, port, "").
+      return testModule.connect(socksEndpoint, port, '').
           then((connectionId :string) => {
         return testModule.echo(connectionId, input)
             .then((output :ArrayBuffer) => {

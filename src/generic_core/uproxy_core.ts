@@ -255,7 +255,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // onUpdate not needed in the real core.
   onUpdate = (update:uproxy_core_api.Update, handler:Function) => {
-    throw "uproxy_core onUpdate not implemented.";
+    throw 'uproxy_core onUpdate not implemented.';
   }
 
   /**
@@ -618,7 +618,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         var escapedRegex = new RegExp(
             // Escape all special regex characters, from
             // http://stackoverflow.com/questions/3446170/
-            value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"),
+            value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&'),
             'g');
         text = text.replace(escapedRegex, prefix + index);
         ++index;
