@@ -70,6 +70,10 @@ import ui = ui_connector.connector;
 
     // Any key-verify session set up.
     private keyVerifySession_ :key_verify.KeyVerify = null;
+    private verifySAS_ :string = null;
+    private verifyState_ = social.VerifyState.VERIFY_NONE;
+    private failedVerifySAS_ :() => void = null;
+    private succeededVerifySAS_ :() => void = null;
 
     public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
@@ -129,7 +133,7 @@ import ui = ui_connector.connector;
 
     private keyVerifyHandler_ = (unused :string, msg:any) => {
       if (this.keyVerifySession_ !== null) {
-      log.debug('keyVerifyHandler_(%1,%2): going to existing session', unused, msg);
+        log.debug('keyVerifyHandler_(%1,%2): going to existing session', unused, msg);
         this.keyVerifySession_.readMessage(msg);
       } else {
         log.debug('keyVerifyHandler_(%1,%2): creating new session.', unused, msg);
@@ -196,7 +200,8 @@ import ui = ui_connector.connector;
     }
 
     public isSharing = () => {
-      return this.connection_.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
+      return this.connection_.localSharingWithRemote ===
+        social.SharingState.SHARING_ACCESS;
     }
 
     /**
@@ -285,12 +290,21 @@ import ui = ui_connector.connector;
       var inst = this;
       var delegate = <key_verify.Delegate>{
         sendMessage : (msg:any) :Promise<void> => {
-          console.log("verifyUser: sendMessage:", msg);
+          log.debug("verifyUser: sendMessage:", msg);
           return inst.sendMessage('Control.Verify', msg);
         },
         showSAS : (sas:string) :Promise<boolean> => {
           console.log("verifyUser: Got SAS " + sas);
-          return Promise.resolve<boolean>(true);
+          inst.user.notifyUI();
+          inst.verifySAS_ = sas;
+          let result = new Promise<boolean>((resolve:any, reject:any) => {
+            // Send UPDATE message with SAS.
+            this.failedVerifySAS_ = reject;
+            this.succeededVerifySAS_ = resolve;
+            // SCAFFOLDING: Resolve TRUE until the UI's done.
+//            resolve(true);
+          });
+          return result;
         }
       };
       if (firstMsg !== undefined) {
@@ -300,24 +314,29 @@ import ui = ui_connector.connector;
             this.publicKey, delegate, parsedFirstMsg, 1);
         } else {
           // Immediately fail - bad initial message from peer.
-          console.log("verifyUser: peer-initiated session had bad message: ", firstMsg);
+          log.error("verifyUser: peer-initiated session had bad message: ", firstMsg);
           return;
         }
       } else {
         this.keyVerifySession_ = new key_verify.KeyVerify(this.publicKey, delegate);
       }
 
+      this.verifyState_ = social.VerifyState.VERIFY_BEGIN;
+      this.user.notifyUI();
       this.keyVerifySession_.start().then(() => {
         console.log("verifySession: succeeded.");
         inst.keyVerified = true;
         inst.keyVerifySession_ = null
+        inst.verifySAS_ = null;
+        inst.verifyState_ = social.VerifyState.VERIFY_COMPLETE;
+        this.user.notifyUI();
       }, () => {
         console.log("verifySession: failed.");
-        // Fun question: do we allow failed sessions to leave the
-        // prior state unaltered?  So far, yes, so the line below is
-        // commented out.
-        // inst.keyVerified = false;
+        inst.keyVerified = false;
+        inst.verifyState_ = social.VerifyState.VERIFY_FAILED;
         inst.keyVerifySession_ = null
+        inst.verifySAS_ = null;
+        this.user.notifyUI();
       });
     };
 
@@ -539,12 +558,12 @@ import ui = ui_connector.connector;
     // UI message data. Maybe rename to |getInstanceData|?
     public currentStateForUi = () :social.InstanceData => {
       var connectionState = this.connection_.getCurrentState();
-
       return {
         instanceId:             this.instanceId,
         description:            this.description,
         isOnline:               this.user.isInstanceOnline(this.instanceId),
-        verifyState:            social.VerifyState.VERIFY_NONE,
+        verifyState:            this.verifyState_,
+        verifySAS:              this.verifySAS_,
         localGettingFromRemote: connectionState.localGettingFromRemote,
         localSharingWithRemote: connectionState.localSharingWithRemote,
         bytesSent:              connectionState.bytesSent,

@@ -948,7 +948,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public isGivingAccess = () => {
     return Object.keys(this.instancesGivingAccessTo).length > 0 ||
-           this.copyPasteState.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
+      (this.copyPasteState.localSharingWithRemote ===
+         social.SharingState.SHARING_ACCESS);
   }
 
   /**

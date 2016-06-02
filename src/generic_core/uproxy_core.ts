@@ -806,16 +806,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // Figure out what the returned promise is for.  Probably nothing.
   public verifyUser = (inst:social.InstancePath) :Promise<void> => {
     console.log("app.core: verifyUser:", inst);
-    // This only works for Quiver right now.  We have to plumb in the
-    // other networks' public key hashes.
-
-    // Open question: does one of these mean a lingering old
-    // verification session or a double-attempt by the UI?
-/*    if (this.verifySessions_[inst.instanceId] !== undefined) {
-      console.log("app.core: verifyUser: already in verification session.");
-      return Promise.resolve<void>();
-    } */
-    var network = <social_network.AbstractNetwork>this.getNetworkByName_(inst.network.name);
+    var network = <social_network.AbstractNetwork>this.getNetworkByName_(
+      inst.network.name);
     var remoteUser = network.getUser(inst.userId);
     var remoteInstance = remoteUser.getInstance(inst.instanceId);
     remoteInstance.verifyUser();

@@ -96,6 +96,7 @@ export interface InstanceData {
   instanceId             :string;
   isOnline               :boolean;
   verifyState            :VerifyState;
+  verifySAS              :string;
   localGettingFromRemote :GettingState;
   localSharingWithRemote :SharingState;
   activeEndpoint         :net.Endpoint;

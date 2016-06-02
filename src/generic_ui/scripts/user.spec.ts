@@ -35,6 +35,7 @@ describe('UI.User', () => {
       bytesReceived: 0,
       activeEndpoint: null,
       verifyState: social.VerifyState.VERIFY_NONE,
+      verifySAS: null,
     };
   }
 
