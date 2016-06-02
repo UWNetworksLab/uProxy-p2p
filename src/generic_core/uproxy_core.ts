@@ -812,53 +812,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // Figure out what the returned promise is for.  Probably nothing.
   public verifyUser = (inst:social.InstancePath) :Promise<void> => {
     console.log("app.core: verifyUser:", inst);
-    // This only works for Quiver right now.  We have to plumb in the
-    // other networks' public key hashes.
-
-    // Open question: does one of these mean a lingering old
-    // verification session or a double-attempt by the UI?
-/*    if (this.verifySessions_[inst.instanceId] !== undefined) {
-      console.log("app.core: verifyUser: already in verification session.");
-      return Promise.resolve<void>();
-    } */
-    var network = <social_network.AbstractNetwork>this.getNetworkByName_(inst.network.name);
+    var network = <social_network.AbstractNetwork>this.getNetworkByName_(
+      inst.network.name);
     var remoteUser = network.getUser(inst.userId);
     var remoteInstance = remoteUser.getInstance(inst.instanceId);
     remoteInstance.verifyUser();
-/*
-    // Pull these out of our own and the peer's instances.
-    var peerPubKey = remoteInstance.publicKey;
-    var delegate = <key_verify.Delegate>{
-      sendMessage : (msg:any) :Promise<void> => {
-        console.log("sendMessage:", msg);
-        return remoteInstance.sendMessage('Control.Verify', msg);
-      },
-      showSAS : (sas:string) :Promise<boolean> => {
-        console.log("Got SAS " + sas);
-        return Promise.resolve<boolean>(true);
-      }
-    };
-    var verifySession = new key_verify.KeyVerify(peerPubKey, delegate);
-    console.log("app.core: verifyUser: ",
-                { "network":network, "remoteUser":remoteUser, "remoteInstance":remoteInstance,
-                  "peerPubKey":peerPubKey });
-
-    remoteInstance.registerMessageHandler(
-      'Control.Verify', (unused :string, msg:any) => {
-        verifySession.readMessage(msg);
-      });
-    this.verifySessions_[inst.instanceId] = verifySession;
-
-    verifySession.start().then(() => {
-      console.log("verifySession: succeeded.");
-      delete this.verifySessions_[inst.instanceId];
-    }, () => {
-      console.log("verifySession: failed.");
-      delete this.verifySessions_[inst.instanceId];
-    }); */
     return Promise.resolve<void>();
   }
-
 
   // Remove contact from friend list and storage
   public removeContact = (args :uproxy_core_api.RemoveContactArgs) : Promise<void> => {

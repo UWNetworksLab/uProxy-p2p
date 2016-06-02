@@ -1,4 +1,5 @@
 /// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');
@@ -23,6 +24,7 @@ Polymer({
     this.ui_constants = ui_constants;
     this.GettingState = social.GettingState;
     this.model = model;
+    this.VerifyState = social.VerifyState;
   },
   start: function() {
     if (!this.instance.isOnline) {
@@ -47,12 +49,18 @@ Polymer({
     this.fire('instance-changed');
   },
   verify: function() {
-    if (this.instance.verifyState != social.VerifyState.VERIFY_COMPLETE) {
+    if (this.instance.verifyState != social.VerifyState.VERIFY_BEGIN) {
       console.log("Starting verify.");
       ui.startVerifying(this.user.network, this.instance);
     } else {
       console.log("instance is already verified.");
     }
+  },
+  confirmSAS: function() {
+    console.log("Verified SAS");
+  },
+  rejectSAS: function() {
+    console.log("Rejected SAS");
   },
   observe: {
     'instance.isOnline': 'fireChanged',

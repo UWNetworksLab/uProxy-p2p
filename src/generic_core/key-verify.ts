@@ -162,10 +162,10 @@ export class KeyVerify {
   private ourKey_:freedom.PgpProvider.PublicKey;
   private peerPubKey_:string;
   private ourHashes_:Hashes;
-  private result_:Promise<void>;
   private delegate_:Delegate;
   private resolvePromise_ : () => void;
   private rejectPromise_ : () => void;
+  private sasApproved_ = false;
   // Explicitly mark when we've already fired a resolution promise, to
   // prevent an attacker from passing us extra stuff that might make
   // us change our minds.
@@ -387,6 +387,7 @@ export class KeyVerify {
         // match up, they know that they're under attack.
         this.calculateSAS_().then((sas:number) => {
           this.delegate_.showSAS(sas.toString()).then((result:boolean) => {
+            this.sasApproved_ = result;
             if (result) {
               this.sendNextMessage();
             } else {
@@ -430,6 +431,7 @@ export class KeyVerify {
                                                    msg.mac)));
         this.calculateSAS_().then((sas:number) => {
           this.delegate_.showSAS(sas.toString()).then((result:boolean) => {
+            this.sasApproved_ = result;
             if (result) {
               this.sendNextMessage();
             } else {
@@ -497,13 +499,13 @@ export class KeyVerify {
     }
     return this.loadKeys_().then(() => {
       console.log("start() callback invoked.");
-      this.result_ = new Promise<void>((resolve:any, reject:any) => {
-        console.log("start(): initializing result_.");
+      let result = new Promise<void>((resolve:any, reject:any) => {
+        console.log("start(): initializing result promises.");
         this.resolvePromise_ = resolve;
         this.rejectPromise_ = reject;
         this.sendNextMessage();
       });
-      return this.result_;
+      return result;
     });
   }
 
@@ -530,12 +532,14 @@ export class KeyVerify {
     // - see if we have its prereq.
     // - send it.
     let msgType:Type;
+    var shouldSend = true;
     if (this.role_ == 0) {
       if (this.messages_[Type.Conf2Ack]) {
         console.log("sendNextMessage: done!");
         this.resolve_(true);
         return; // all done.
       } else if (this.messages_[Type.Confirm1]) {
+        shouldSend = this.sasApproved_;
         msgType = Type.Confirm2;
       } else if (this.messages_[Type.DHPart1]) {
         msgType = Type.DHPart2;
@@ -552,6 +556,7 @@ export class KeyVerify {
       } else if (this.messages_[Type.Confirm2]) {
         msgType = Type.Conf2Ack;
       } else if (this.messages_[Type.DHPart2]) {
+        shouldSend = this.sasApproved_;
         msgType = Type.Confirm1;
       } else if (this.messages_[Type.Commit]) {
         msgType = Type.DHPart1;
@@ -560,7 +565,8 @@ export class KeyVerify {
       }
     }
 
-    if (!this.messages_[msgType] &&
+    if (shouldSend &&
+        !this.messages_[msgType] &&
         !this.queued_generations_[Type[msgType]]) {
       this.queued_generations_[Type[msgType]] = true;
       this.generate_(msgType).then( (msg:Messages.Tagged) => {

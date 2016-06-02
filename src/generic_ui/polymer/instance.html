@@ -10,6 +10,15 @@
     #wrapper.offline {
       opacity: 0.5;
     }
+    #wrapper.bad_verify {
+      opacity: 0.5;
+      color: #600;
+    }
+    #wrapper.verified {
+      color: #060;
+    }
+    #wrapper.unverified {
+    }
     uproxy-button {
       font-size: 1em;
       margin: 14px 5px 5px 2px;
@@ -34,17 +43,36 @@
     }
     </style>
 
-    <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
+    <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }} {{ instance.verifyState == VerifyState.VERIFY_FAILED ? "bad_verify" : (instance.verifyState == VerifyState.VERIFY_COMPLETE ? "verified" : "unverified") }}'
          hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'>
 
       <p id='description' hidden?='{{ !instance.description }}'>
         <bdi>{{ instance.description }}</bdi>
       </p>
 
-      <div id='verification' hidden?='{{ instance.verifyState != VerifyState.VERIFY_BEGIN }}'>
-        Verification UI Here.
+      <span id='verified'
+            hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'>
+        &check; </span>
+      <span id='notverified'
+            hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'>
+        &cross; </span>
+      <div id='verification'
+           hidden?='{{ instance.verifyState != VerifyState.VERIFY_BEGIN }}'>
+        <span id='verification-inprogress' hidden?='{{ instance.verifySAS != null }}'>
+          Talking to peer....
+        </span>
+        <span id='verification-sas' hidden?='{{ instance.verifySAS == null }}'>
+          SAS: {{ instance.verifySAS }}
+          <uproxy-button on-tap='{{ confirmSAS }}'>
+            {{ "YES" }}
+          </uproxy-button>
+          <uproxy-button on-tap='{{ rejectSAS }}'>
+            {{ "NO" }}
+          </uproxy-button>
+        </span>
       </div>
-      <div id='verification' hidden?='{{ instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
+      <div id='verification'
+           hidden?='{{ instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
         <uproxy-button raised on-tap='{{ verify }}'>
           {{ "VERIFY" | $$ }}
         </uproxy-button>
