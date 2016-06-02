@@ -760,6 +760,14 @@ gruntConfig = {
     integrationSpec: Rule.browserifySpec 'integration/core'
     integrationFreedomModule: Rule.browserify 'integration/test_connection'
 
+  tslint:
+    options:
+      configuration: 'src/tslint.json'
+    files:
+      src: [
+        'src/**/*.ts'
+      ]
+
   #-------------------------------------------------------------------------
   jasmine:
     chrome_extension: Rule.jasmineSpec('chrome/extension/scripts/',
@@ -974,8 +982,13 @@ taskManager.add 'build', [
   'build_cca'
 ]
 
+taskManager.add 'lint', [
+  'tslint'
+]
+
 taskManager.add 'dist', [
   'build'
+  'lint'
   'copy:dist'
   'jpm:xpi'
 ]
@@ -998,6 +1011,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-jpm'
   grunt.loadNpmTasks 'grunt-string-replace'
   grunt.loadNpmTasks 'grunt-ts'
+  grunt.loadNpmTasks 'grunt-tslint'
   grunt.loadNpmTasks 'grunt-vulcanize'
 
   #-------------------------------------------------------------------------
