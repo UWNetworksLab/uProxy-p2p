@@ -911,7 +911,7 @@ taskManager.add 'build_ios', [
 taskManager.add 'test_lib', [
   'base'
 ].concat _.flatten(
-  Rule.buildAndRunTest(spec, gruntConfig) for spec in Rule.getTests('src', 'lib')
+  Rule.buildAndRunTest(spec, gruntConfig) for spec in Rule.getTests('src', 'lib', 'build-tools')
 )
 
 taskManager.add 'test_core', [
