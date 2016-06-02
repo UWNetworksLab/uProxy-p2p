@@ -1392,11 +1392,18 @@ export class UserInterface implements ui_constants.UiApi {
   public removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
     return this.core.removeContact(args);
   }
-  
-  // I don't know why these are all member declarations of function values.
-  public startVerifying = (network: string, inst :social.InstanceData) :Promise<void> => {
-    console.log('ui:startVerifying on ['+network+']' + JSON.stringify(inst) + ' started.');
-    // Look up 'inst' and get an instance path.
+
+  public startVerifying = (inst :social.InstanceData) :Promise<void> => {
+    console.log('ui:startVerifying on ' + JSON.stringify(inst) +
+                ' started.');
     return this.core.verifyUser(this.getInstancePath_(inst.instanceId));
   }
+  public finishVerifying = (inst :social.InstanceData,
+                            sameSAS: boolean) :Promise<void> => {
+    var args = <uproxy_core_api.FinishVerifyArgs> {
+      'inst': this.getInstancePath_(inst.instanceId),
+      'sameSAS': sameSAS
+    };
+    return this.core.finishVerifyUser(args);
+  };
 } // class UserInterface

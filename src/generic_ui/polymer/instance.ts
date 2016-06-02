@@ -24,6 +24,7 @@ Polymer({
     this.ui_constants = ui_constants;
     this.GettingState = social.GettingState;
     this.model = model;
+    this.sas = null;
     this.VerifyState = social.VerifyState;
   },
   start: function() {
@@ -48,21 +49,29 @@ Polymer({
   fireChanged: function() {
     this.fire('instance-changed');
   },
+  sasUpdated: function() {
+    this.sas = this.instance.verifySAS;
+  },
   verify: function() {
     if (this.instance.verifyState != social.VerifyState.VERIFY_BEGIN) {
       console.log("Starting verify.");
-      ui.startVerifying(this.user.network, this.instance);
+      ui.startVerifying(this.instance);
     } else {
       console.log("instance is already verified.");
     }
   },
   confirmSAS: function() {
     console.log("Verified SAS");
+    this.sas = null;
+    ui.finishVerifying(this.instance, true);
   },
   rejectSAS: function() {
     console.log("Rejected SAS");
+    this.sas = null;
+    ui.finishVerifying(this.instance, false);
   },
   observe: {
     'instance.isOnline': 'fireChanged',
+    'instance.verifySAS': 'sasUpdated',
   },
 });
