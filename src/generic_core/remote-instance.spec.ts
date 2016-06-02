@@ -56,7 +56,7 @@ describe('remote_instance.RemoteInstance', () => {
   user.isInstanceOnline = function() {
     return true;
   };
-  user.onceNameReceived = Promise.resolve<string>("name");
+  user.onceNameReceived = Promise.resolve<string>('name');
 
   var socksToRtc =
       <socks_to_rtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [

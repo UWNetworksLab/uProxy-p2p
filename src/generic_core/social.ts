@@ -258,7 +258,7 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
     public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
-      throw new Error("Operation not implemented.");
+      throw new Error('Operation not implemented.');
     }
 
     //================ Subclasses must override these methods ================//

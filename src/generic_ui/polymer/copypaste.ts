@@ -67,13 +67,13 @@ Polymer({
     }
 
     this.fire('open-dialog', {
-      heading: ui.i18n_t("GO_BACK"),
-      message: ui.i18n_t("ARE_YOU_SURE"),
+      heading: ui.i18n_t('GO_BACK'),
+      message: ui.i18n_t('ARE_YOU_SURE'),
       buttons: [{
-        text: ui.i18n_t("YES"),
+        text: ui.i18n_t('YES'),
         signal: 'copypaste-back'
       }, {
-        text: ui.i18n_t("NO"),
+        text: ui.i18n_t('NO'),
         dismissive: true
       }]
     });
