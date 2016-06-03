@@ -755,16 +755,24 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public handleTranslationsRequest = (keys :string[], sendResp :Function) => {
+  public handleTranslationsRequest = (keys :string[], callback ?:Function) => {
     var vals :{[s :string]: string;} = {};
     for (let key of keys) {
       vals[key] = this.i18n_t(key);
     }
-    sendResp(vals);
+    if (callback) {
+      callback(vals);
+    } else {
+      this.browserApi.fire_('translations', vals);
+    }
   }
 
-  public handleGlobalSettingsRequest = (sendResp :Function) => {
-    sendResp(this.model.globalSettings);
+  public handleGlobalSettingsRequest = (callback ?:Function) => {
+    if (callback) {
+      callback(this.model.globalSettings);
+    } else {
+      this.browserApi.fire_('globalSettings', this.model.globalSettings);
+    }
   }
 
   public setActivePromoId = (promoId :string) => {

@@ -1,14 +1,27 @@
 (function improveDOWelcomeFlow(document, navigator) {
 
+  var isChrome = navigator.userAgent.indexOf('Chrome') !== -1;
+
   var globalSettingsP = new Promise(function (resolve) {
-    chrome.runtime.sendMessage({globalSettingsRequest: true},
-      function (resp) {
-        resolve(resp);
+    if (isChrome) {
+      /*
+      chrome.runtime.onMessage.addListener(function (request) {
+        if (request.globalSettings) {
+          resolve(request.globalSettings);
+        }
       });
+      chrome.runtime.sendMessage({globalSettingsRequest: true});
+      */
+      chrome.runtime.sendMessage({globalSettingsRequest: true}, resolve);
+    } else {
+      self.port.on('globalSettings', function (globalSettings) {
+        resolve(globalSettings);
+      });
+    }
   });
 
   globalSettingsP.then(function (globalSettings) {
-
+    
     if (!globalSettings.shouldHijackDO) return;
 
     function getPageId(url) {
@@ -45,15 +58,18 @@
       applyButton: 'APPLY',
     };
     var getLocalAssetUrlP, translationsP;
-    var isChrome = navigator.userAgent.indexOf('Chrome') !== -1;
-
     if (isChrome) {
       getLocalAssetUrlP = Promise.resolve(chrome.extension.getURL);
       translationsP = new Promise(function (resolve) {
-        chrome.runtime.sendMessage({translations: values(i18nKeyByUIKey)},
-          function (response) {
-            resolve(response);
-          });
+        /*
+        chrome.runtime.onMessage.addListener(function (request) {
+          if (request.translations) {
+            resolve(request.translations);
+          }
+        });
+        chrome.runtime.sendMessage({translationsRequest: values(i18nKeyByUIKey)});
+        */
+        chrome.runtime.sendMessage({translationsRequest: values(i18nKeyByUIKey)}, resolve);
       });
     } else {
       getLocalAssetUrlP = new Promise(function (resolve) {
@@ -61,7 +77,10 @@
           resolve(function (relUrl) { return baseUrl + relUrl; });
         });
       });
-      // TODO: get translations for Firefox
+      translationsP = new Promise(function (resolve) {
+        self.port.on('translations', resolve);
+        self.port.emit('translationsRequest', values(i18nKeyByUIKey));
+      });
     }
 
     var allP = [getLocalAssetUrlP, translationsP];

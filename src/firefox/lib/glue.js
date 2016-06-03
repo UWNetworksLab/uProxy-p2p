@@ -187,13 +187,38 @@ function setUpConnection(freedom, panel, button) {
     include: ['https://cloud.digitalocean.com/*'],
     contentScriptFile: self.data.url('generic_ui/scripts/content_digitalocean.js'),
     onAttach: function (worker) {
+
+      // Swallow errors like "Couldn't find the worker to receive this message.
+      // The script may not be initialized yet or may already have been unloaded."
+      function workerEmit(msg, payload) {
+        try {
+          worker.port.emit(msg, payload);
+        } catch (e) {
+          console.log('Swallowed error emitting message "'+msg+'" to worker:', e);
+        }
+      }
+
       // Get an existing asset's absolute url to determine the Firefox
-      // extension's base url.
+      // extension's base url, then send it to the content script below.
       var testUrlRelative = 'icons/uproxy_logo.svg',
           testUrlAbsolute = self.data.url(testUrlRelative),
           i = testUrlAbsolute.indexOf(testUrlRelative),
           baseUrl = testUrlAbsolute.substring(0, i);
-      worker.port.emit('baseUrlFF', baseUrl);
+
+      // Get the globalSettings and send to the content script.
+      panel.port.on('globalSettings', function (globalSettings) {
+        workerEmit('globalSettings', globalSettings);
+      });
+      panel.port.emit('globalSettingsRequest');
+
+      // Listen for and forward translations requests and responses.
+      worker.port.on('translationsRequest', function (i18nKeys) {
+        panel.port.emit('translationsRequest', i18nKeys);
+      });
+      panel.port.on('translations', function (translations) {
+        workerEmit('translations', translations);
+        workerEmit('baseUrlFF', baseUrl);
+      });
     }
   });
 

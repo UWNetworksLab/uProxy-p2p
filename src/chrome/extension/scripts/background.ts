@@ -57,8 +57,8 @@ chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.Messa
     return true;
   }
 
-  if (request.translations) {
-    browserApi.emit('translationsRequest', request.translations, sendResponse);
+  if (request.translationsRequest) {
+    browserApi.emit('translationsRequest', request.translationsRequest, sendResponse);
     return true;
   }
 });

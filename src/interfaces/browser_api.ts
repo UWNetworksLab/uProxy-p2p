@@ -43,6 +43,8 @@ export interface BrowserAPI {
   // Overlay the given text as a "badge" over the uProxy extension icon.
   // The notification can be up to 4 characters.
   setBadgeNotification(notification :string) :void;
+
+  fire_(message :string, data ?:any) :void;
 }
 
 // Info associated with the 'proxyDisconnect' event.
