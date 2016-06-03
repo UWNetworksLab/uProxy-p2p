@@ -67,7 +67,6 @@
     "typescript": "~1.8.10",
     "typings": "^0.7.12",
     "uparams": "^1.2.0",
-    "uproxy-lib": "^38.0.0",
     "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
   },
