@@ -9,16 +9,16 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
+import background_ui = require('../../../generic_ui/scripts/background_ui');
+import chrome_panel_connector = require('./chrome_panel_connector');
 import ChromeBrowserApi = require('./chrome_browser_api');
 import ChromeCoreConnector = require('./chrome_core_connector');
 import ChromeTabAuth = require('./chrome_tab_auth');
-
-import UiApi = require('../../../interfaces/ui');
-import user_interface = require('../../../generic_ui/scripts/ui');
-import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import Constants = require('../../../generic_ui/scripts/constants');
+import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+
 import compareVersion = require('compare-version');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
@@ -26,6 +26,7 @@ import compareVersion = require('compare-version');
 // --------------------- Communicating with the App ----------------------------
 export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
 export var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
+export var backgroundUi: background_ui.BackgroundUi;
 export var browserApi :ChromeBrowserApi;
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked
@@ -194,3 +195,6 @@ chrome.webRequest.onBeforeRequest.addListener(
   ['blocking']
 );
 
+backgroundUi = new background_ui.BackgroundUi(
+    new chrome_panel_connector.ChromePanelConnector(),
+    core);

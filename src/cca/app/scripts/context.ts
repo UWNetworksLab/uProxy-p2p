@@ -6,7 +6,6 @@ import user_interface = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
 import CordovaCoreConnector = require('./cordova_core_connector');
 
-var ui_context :UiGlobals;
 export var browserConnector = new CordovaCoreConnector({
   name: 'uproxy-ui-to-core-connector'
 });
@@ -15,8 +14,8 @@ export var ui :user_interface.UserInterface;
 export var model :ui_model.Model;
 
 chrome.runtime.getBackgroundPage((bgPage) => {
-  ui_context = (<any>bgPage).ui_context;
-  ui = new user_interface.UserInterface(core, ui_context.browserApi);
+  var ui_context = (<any>bgPage).ui_context;
+  ui = new user_interface.UserInterface(core, ui_context.browserApi, ui_context.backgroundUi);
   model = ui.model;
   console.log('Got references from background page; importing vulcanized');
 
