@@ -921,6 +921,12 @@ taskManager.add 'build_ios', [
 ]
 
 # --- Testing tasks ---
+taskManager.add 'test_lib', [
+  'base'
+].concat _.flatten(
+  Rule.buildAndRunTest(spec, gruntConfig) for spec in Rule.getTests('src', 'lib', ['build-tools', 'integration-tests'])
+)
+
 taskManager.add 'test_core', [
   'base'
 ].concat _.flatten(
@@ -958,6 +964,7 @@ taskManager.add 'everything', [
 # This is the target run by Travis. Targets in here should run locally
 # and on Travis/Sauce Labs.
 taskManager.add 'test', [
+  'test_lib'
   'test_core'
   'test_ui'
   'test_chrome'
