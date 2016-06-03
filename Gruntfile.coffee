@@ -6,7 +6,7 @@ _ = require('lodash')
 fs = require('fs')
 rules = require './build/tools/common-grunt-rules'
 path = require 'path'
-TaskManager = require 'uproxy-lib/build/tools/taskmanager'
+TaskManager = require './build/tools/taskmanager'
 
 #-------------------------------------------------------------------------
 
@@ -54,7 +54,6 @@ browserifyIntegrationTest = (path) ->
 basePath = process.cwd()
 ccaPath = path.join(basePath, 'node_modules/cca/')
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
-uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
 
 #-------------------------------------------------------------------------
 # TODO: Move more file lists here.
@@ -71,20 +70,6 @@ FILES =
     'generic/version.js'
   ]
 
-  uproxy_lib_common: [
-    'ipaddrjs/ipaddr.min.js'
-    'logging/logging.js'
-    'loggingprovider/loggingprovider.js'
-    'loggingprovider/loggingprovider.json'
-    'arraybuffers/arraybuffers.js'
-    'handler/queue.js'
-    'rtc-to-net/rtc-to-net.js'
-    'socks-common/socks-headers.js'
-    'socks-to-rtc/socks-to-rtc.js'
-    'tcp/tcp.js'
-    'webrtc/datachannel.js'
-    'webrtc/peerconnection.js'
-  ]
   thirdPartyUi: [
     'platform/platform.js',
     'polymer/polymer.html',
@@ -226,7 +211,6 @@ getExtraFilesForCoreBuild = (basePath) ->
 gruntConfig = {
   pkg: readJSONFile('package.json')
   pkgs:
-    lib: readJSONFile('node_modules/uproxy-lib/package.json')
     freedom: readJSONFile('node_modules/freedom/package.json')
     freedomchrome: readJSONFile('node_modules/freedom-for-chrome/package.json')
     freedomfirefox: readJSONFile('node_modules/freedom-for-firefox/package.json')
@@ -325,44 +309,6 @@ gruntConfig = {
   }
 
   copy: {
-    # Copy all needed third party libraries to appropriate locations.
-    thirdParty:
-      files: [
-        # Copy distribution directory of uproxy-lib so all paths can always
-        # find their dependencies. Note that this also requires uproxy-lib
-        # references to find those in |build/third_party/|. These paths
-        # are delicate.
-        {
-            nonull: true,
-            expand: true,
-            cwd: path.join(uproxyLibPath, 'build/dist'),
-            src: ['**/*'],
-            dest: path.join(thirdPartyBuildPath, 'uproxy-lib/'),
-        },
-        # Use the third_party definitions from uproxy-lib. Copied to the same
-        # location relative to their compiled location in uproxy-lib so they
-        # have the same relative path to the created `.d.ts` files from
-        # |build/dev|.
-        {
-            nonull: true,
-            expand: true,
-            cwd: path.join(uproxyLibPath, 'third_party'),
-            src: ['**/*'],
-            dest: thirdPartyBuildPath
-        }
-        # Copy local |third_party| files into dev: so that the third_party
-        # dependencies are always in the common |build/third_party| location.
-        # This allows path to reference typescript definitions for ambient
-        # contexts to always be found, even in generated `.d.ts` files..
-        {
-            nonull: true,
-            expand: true,
-            cwd: 'third_party'
-            src: ['**/*'],
-            dest: thirdPartyBuildPath,
-        }
-      ]
-
     # Copy releveant non-typescript src files to dev build.
     dev:
       files: [
@@ -630,8 +576,6 @@ gruntConfig = {
         }
       ]
 
-
-
     integration:
       files: [ {
         # Copy compiled Chrome App code, required for integration tests
@@ -671,7 +615,6 @@ gruntConfig = {
           replacement: JSON.stringify
             version: '<%= pkg.version %>'
             gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
-            'uproxy-lib': '<%= pkgs.lib.version %>'
             freedom: '<%= pkgs.freedom.version %>'
             'freedom-for-chrome': '<%= pkgs.freedomchrome.version %>'
             'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
