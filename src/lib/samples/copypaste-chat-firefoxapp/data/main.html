@@ -1,0 +1,35 @@
+<html>
+<head>
+  <title>Copy/paste chat</title>
+  <script src='freedom-for-firefox/freedom-for-firefox.js'></script>
+  <script src='glue.js'></script>
+</head>
+
+<body>
+  <div>
+    <button id="startButton">Start</button>
+  </div>
+  <div>
+    Copy this into the other browser window:
+  </div>
+  <textarea id="copy" readonly></textarea>
+
+  <div>
+    Paste text from the other window and click Receive:
+  </div>
+  <textarea id="paste"></textarea>
+  <div>
+    <button id="receiveButton">Receive</button>
+  </div>
+
+  <hr>
+
+  <textarea id="sendArea" disabled></textarea>
+  <textarea id="receiveArea" readonly></textarea>
+  <div>
+    <button id="sendButton">Send</button>
+  </div>
+
+  <script src='uproxy-lib/copypaste-chat/main.core-env.static.js'></script>
+</body>
+</html>

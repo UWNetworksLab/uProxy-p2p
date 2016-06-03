@@ -1,0 +1,35 @@
+{
+  "name": "zork",
+  "description": "SOCKS server with telnet-based signalling channel.",
+  "app": {
+    "script": [
+      "freedom-module.static.js"
+    ]
+  },
+  "dependencies": {
+    "loggingcontroller": {
+      "url": "../loggingprovider/freedom-module.json",
+      "api": "loggingcontroller"
+    },
+    "logginglistener": {
+      "url": "../loggingprovider/freedom-module.json",
+      "api": "logginglistener"
+    },
+    "churnPipe": {
+      "url": "../churn-pipe/freedom-module.json",
+      "api": "churnPipe"
+    },
+    "portControl": {
+      "url": "../../freedom-port-control/dist/port-control.json",
+      "api": "portControl"
+    }
+  },
+  "permissions": [
+    "core.console",
+    "core.storage",
+    "core.tcpsocket",
+    "core.udpsocket",
+    "core.rtcdatachannel",
+    "core.rtcpeerconnection"
+  ]
+}

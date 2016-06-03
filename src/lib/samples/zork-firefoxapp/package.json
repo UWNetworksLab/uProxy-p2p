@@ -1,0 +1,8 @@
+{
+  "name": "zork",
+  "title": "zork",
+  "description": "uProxy SOCKS server with telnet-based signalling channel.",
+  "author": "uProxy",
+  "license": "Apache 2",
+  "version": "0.0.1"
+}

@@ -1,0 +1,38 @@
+<link rel="import" href='../../../../third_party/bower/polymer/polymer.html'>
+<polymer-element name='copypaste-crypto'>
+
+  <template>
+    <style>
+      textarea {
+        width: 30em;
+        height: 5em;
+      }
+      .warning {
+        color: red;
+      }
+      .centered {
+        text-align: center;
+      }
+    </style>
+
+    <div id='cryptoPanel'>
+      <p class='centered'>
+        <bdi i18n-content='userPublicKey'></bdi><br>
+        <textarea id='userPublicKey' disabled value='{{ model.userPublicKey }}'></textarea>
+      </p><br><br>
+
+      <p class='centered'>
+        <bdi i18n-content='friendPublicKey'></bdi><br>
+        <textarea id='friendPublicKey' value='{{ model.friendPublicKey }}'></textarea>
+      </p><br><br>
+
+      <p class='centered'>
+        <bdi i18n-content='signed' hidden?='{{ !model.inputSigned || !inputIsWellFormed }}'></bdi>
+        <bdi i18n-content='incorrectlySigned' hidden?='{{ model.inputSigned || !inputIsWellFormed }}' class='warning'></bdi>
+      </p><br><br>
+    </div>
+  </template>
+
+  <script src='crypto.js'></script>
+
+</polymer-element>

@@ -1,0 +1,45 @@
+<link rel="import" href='../../../../third_party/bower/polymer/polymer.html'>
+<link rel="import" href='connection-state.html'>
+
+<polymer-element name='copypaste-giver'>
+
+  <template>
+    <style>
+      textarea {
+        width: 30em;
+        height: 5em;
+      }
+      .warning {
+        color: red;
+      }
+    </style>
+
+    <div id='giveAccessPanel'>
+      <div id='step1ContainerNode'>
+        <h1><bdi i18n-content='giveAccess'></bdi></h1>
+        <p><bdi i18n-content='pasteAndGenerateReply'></bdi></p>
+        <textarea id='inboundMessageNode' value='{{ model.inboundText }}' on-keyup='{{ parseInboundText }}'></textarea>
+        <p>
+
+        <button id='consumeMessageButton' disabled?='{{ !model.inputIsWellFormed }}' on-click='{{ consumeInboundText }}'><bdi i18n-content='generateReply'></bdi></button>
+        </p>
+      </div>
+
+      <br>
+      <div id='step2ContainerNode' style='display: {{ model.readyForStep2 ? "block" : "none" }};'>
+        <textarea id='outboundMessageNode' readonly value='{{ model.outboundMessageValue }}'></textarea>
+        <p><bdi i18n-content='copyPasteAndSend'></bdi></p>
+        <p class='warning'><bdi i18n-content='warning'></bdi></p>
+      </div>
+
+      <copypaste-connection-state></copypaste-connection-state>
+    </div>
+  </template>
+
+  <script src='../i18n-util.js'>
+  </script>
+
+  <script src='giver.js'>
+  </script>
+
+</polymer-element>

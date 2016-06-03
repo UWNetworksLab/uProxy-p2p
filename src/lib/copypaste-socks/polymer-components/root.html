@@ -1,0 +1,54 @@
+<link rel="import" href='../../../../third_party/bower/polymer/polymer.html'>
+<link rel="import" href='crypto.html'>
+<link rel="import" href='start.html'>
+<link rel="import" href='giver.html'>
+<link rel="import" href='getter.html'>
+
+<polymer-element name='copypaste-root'>
+
+  <template>
+    <style>
+      button {
+        text-decoration: none;
+        padding: 0.5em;
+        color: white;
+        background-color: #50C0E0;
+        border: 1px solid #40B0D0;
+        border-radius: 0.5em;
+      }
+      button:hover {
+        background-color: #60D0F0;
+        border: 1px solid #50C0E0;
+      }
+      .centered {
+        text-align: center;
+      }
+    </style>
+
+    <div><p class='centered'>
+      <select id='languageInput' on-change='{{ updateLanguage }}'>
+        <option value='en' i18n-content='english'></option>
+        <option value='it' i18n-content='italian'></option>
+        <option value='ar' i18n-content='arabic'></option>
+        <option value='fa' i18n-content='farsi'></option>
+      </select>
+    </p></div>
+
+    <p class='centered'>
+      <button on-tap='{{ useCrypto }}' hidden?='{{ model.usingCrypto }}'><bdi i18n-content='useCrypto'></bdi></button>
+    </p>
+    <copypaste-crypto id='crypto' hidden?='{{ !model.usingCrypto }}'></copypaste-crypto>
+
+    <copypaste-start id='start' hidden?='{{ model.givingOrGetting !== null }}'></copypaste-start>
+
+    <copypaste-giver id='giver' hidden?='{{ model.givingOrGetting !== "giving" }}'></copypaste-giver>
+
+    <copypaste-getter id='getter' hidden?='{{ model.givingOrGetting !== "getting" }}'></copypaste-getter>
+  </template>
+
+  <script src='../i18n-util.js'>
+  </script>
+
+  <script src='root.js'></script>
+
+</polymer-element>
