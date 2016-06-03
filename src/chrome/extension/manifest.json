@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extName__",
-  "version": "0.8.41",
+  "version": "0.8.42",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
   "minimum_chrome_version": "41.0.2272.63",
@@ -23,8 +23,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://cloud.digitalocean.com/*"],
-      "js": ["generic_ui/scripts/content_digitalocean.js"]
+      "matches": [
+        "https://cloud.digitalocean.com/*"
+      ],
+      "js": [
+        "generic_ui/scripts/content_digitalocean.js"
+      ]
     }
   ],
   "permissions": [
