@@ -280,6 +280,10 @@ class CordovaBrowserApi implements BrowserAPI {
     }
   }
 
+  public fire_ = (name :string, data ?:any) => {
+    chrome.runtime.sendMessage({name: data});
+  }
+
   private emit_ = (name :string, ...args :Object[]) => {
     if (name in this.events_) {
       this.events_[name].apply(null, args);
