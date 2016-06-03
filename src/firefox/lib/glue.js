@@ -12,7 +12,7 @@ var uproxy_core_api = require('./interfaces/uproxy_core_api.js');
 var { Ci, Cc, Cr } = require("chrome");
 var self = require("sdk/self");
 var events = require("sdk/system/events");
-var notifications = require('sdk/notifications')
+var notifications = require('sdk/notifications');
 var pagemod = require('sdk/page-mod');
 var tabs = require('sdk/tabs');
 
@@ -28,7 +28,7 @@ function setUpConnection(freedom, panel, button) {
   function connect(command, from, to) {
     from.on(command, function(data) {
       to.emit(command, data);
-    })
+    });
   }
 
   function openURL(url) {
@@ -134,7 +134,7 @@ function setUpConnection(freedom, panel, button) {
     panel.port.on(message, function(args) {
       promiseEmitHandler(args);
     }.bind(this));
-  };
+  }
 
   /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
   var contentProxyFile = self.data.url('scripts/content-proxy.js');
@@ -162,7 +162,7 @@ function setUpConnection(freedom, panel, button) {
       worker.port.on('getLogs', function(data) {
         freedom.emit(uproxy_core_api.Command.GET_LOGS, {data: data.data, promiseId: -1});
         var forwardLogsToContentScript = function(data) {
-          if (data['command'] == uproxy_core_api.Command.GET_LOGS) {
+          if (data.command === uproxy_core_api.Command.GET_LOGS) {
             // Forward logs to content-proxy.js
             worker.port.emit('message', {
               logs: true,

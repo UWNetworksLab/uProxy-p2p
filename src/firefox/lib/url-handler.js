@@ -13,7 +13,7 @@ var closeChannelTab = function(channel) {
     var tab = tabUtils.getTabForContentWindow(domWin.top);
     tabUtils.closeTab(tab);
   }
-}
+};
 
 var copyPasteRegEx = /^https:\/\/www.uproxy.org\/(request|offer)\/(.*)/;
 var inviteRegEx = /^https:\/\/www.uproxy.org\/invite(.*)/;
@@ -27,7 +27,7 @@ exports.setup = function(panel, button) {
       }
 
       subject.QueryInterface(Ci.nsIHttpChannel);
-      var url = subject.URI.spec
+      var url = subject.URI.spec;
 
       if (copyPasteRegEx.test(url)) {
         panel.port.emit('copyPasteUrlData', url);

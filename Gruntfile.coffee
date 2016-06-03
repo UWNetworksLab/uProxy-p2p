@@ -322,6 +322,9 @@ gruntConfig = {
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
+    lintFirefoxJs: {
+      command: 'jshint src/firefox/lib/*.js'
+    }
   }
 
   copy: {
@@ -869,6 +872,7 @@ taskManager.add 'build_chrome', [
 # Firefox build tasks.
 taskManager.add('build_firefox', [
   'base'
+  'exec:lintFirefoxJs'
   'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'

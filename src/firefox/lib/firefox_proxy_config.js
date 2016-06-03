@@ -22,7 +22,7 @@ var filter = {
 
     return proxyinfo;
   }
-}
+};
 
 var flags = Ci.nsIProxyInfo.TRANSPARENT_PROXY_RESOLVES_HOST;
 
@@ -41,4 +41,4 @@ var proxyConfig = {
   }
 };
 
-exports.proxyConfig = proxyConfig
+exports.proxyConfig = proxyConfig;

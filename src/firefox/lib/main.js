@@ -33,7 +33,7 @@ var init = freedom(manifest, {
     width: 371,
     height: 600,
     contentURL: self.data.url("generic_ui/index.html")
-  })
+  });
 
   // Set up connection between freedom and content script.
   require('lib/glue.js').setUpConnection(new uproxy(), panel, button);
