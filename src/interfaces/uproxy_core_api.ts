@@ -55,8 +55,7 @@ export interface InitialState {
 }
 
 export interface ValidProxyServerIdentity {
-  ip :string;
-  public_key :string;
+  [key: string]: string;
 }
 
 export interface ManagedPolicyUpdate {
