@@ -965,6 +965,7 @@ taskManager.add 'everything', [
 # This is the target run by Travis. Targets in here should run locally
 # and on Travis/Sauce Labs.
 taskManager.add 'test', [
+  'exec:lintFirefoxJs'
   'test_core'
   'test_ui'
   'test_chrome'
