@@ -758,7 +758,7 @@ export function notifyUI(networkName :string, userId :string) {
             tokenObj['userId'] = this.myInstance.userId;
             tokenObj['instanceId'] = this.myInstance.instanceId;
           }
-          return 'https://www.uproxy.org/invite/' +
+          return 'https://www.uproxy.org/invite/#' +
               btoa(JSON.stringify(tokenObj));
         }
       })
