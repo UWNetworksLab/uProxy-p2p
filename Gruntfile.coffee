@@ -586,6 +586,18 @@ gruntConfig = {
         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
         dest: devBuildPath + '/integration'
       }]
+
+    libsForIntegrationTcp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome']
+        pathsFromDevBuild: ['lib/loggingprovider']
+        localDestPath: 'lib/integration-tests/tcp'
+    libsForIntegrationSocksEcho:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome']
+        pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: ['freedom-port-control']
+        localDestPath: 'lib/integration-tests/socks-echo'
   }  # copy
 
   symlink: {
@@ -776,6 +788,55 @@ gruntConfig = {
         # keepRunner: true,
       }
     }
+    tcp:
+      files: [
+        {
+          cwd: devBuildPath + '/lib/integration-tests/tcp/',
+          src: ['**/*', '!jasmine_chromeapp/**/*']
+          dest: './',
+          expand: true
+        }
+      ]
+      scripts: [
+        'freedom-for-chrome/freedom-for-chrome.js'
+        'tcp.core-env.spec.static.js'
+      ]
+      options:
+        outDir: devBuildPath + '/lib/integration-tests/tcp/jasmine_chromeapp/'
+        keepRunner: false
+    socksEcho:
+      files: [
+        {
+          cwd: devBuildPath + '/lib/integration-tests/socks-echo/',
+          src: ['**/*', '!jasmine_chromeapp*/**']
+          dest: './',
+          expand: true
+        }
+      ]
+      scripts: [
+        'freedom-for-chrome/freedom-for-chrome.js'
+        'churn.core-env.spec.static.js'
+        'nochurn.core-env.spec.static.js'
+      ]
+      options:
+        outDir: devBuildPath + '/lib/integration-tests/socks-echo/jasmine_chromeapp/'
+        keepRunner: false
+    socksEchoSlow:
+      files: [
+        {
+          cwd: devBuildPath + '/lib/integration-tests/socks-echo/',
+          src: ['**/*', '!jasmine_chromeapp*/**']
+          dest: './',
+          expand: true
+        }
+      ]
+      scripts: [
+        'freedom-for-chrome/freedom-for-chrome.js'
+        'slow.core-env.spec.static.js'
+      ]
+      options:
+        outDir: devBuildPath + '/lib/integration-tests/socks-echo/jasmine_chromeapp_slow/'
+        keepRunner: true
   }
   'jpm':
     options:
@@ -945,14 +1006,36 @@ taskManager.add 'test_chrome', [
   'jasmine:chrome_extension'
 ]
 
+taskManager.add 'tcpIntegrationTestModule', [
+  'base'
+  'copy:libsForIntegrationTcp'
+  'browserify:integrationTcpFreedomModule'
+  'browserify:integrationTcpSpec'
+]
+
+taskManager.add 'tcpIntegrationTest', [
+  'tcpIntegrationTestModule'
+  'jasmine_chromeapp:tcp'
+]
+
+taskManager.add 'socksEchoIntegrationTestModule', [
+  'base'
+  'copy:libsForIntegrationSocksEcho'
+  'browserify:integrationSocksEchoFreedomModule'
+  'browserify:integrationSocksEchoChurnSpec'
+  'browserify:integrationSocksEchoNochurnSpec'
+  'browserify:integrationSocksEchoSlowSpec'
+]
+
+taskManager.add 'socksEchoIntegrationTest', [
+  'socksEchoIntegrationTestModule'
+  'jasmine_chromeapp:socksEcho'
+]
+
+# TODO: add test_chrome once it passes reliably
 taskManager.add 'integration_test', [
-  'build_chrome'
-  'copy:integration'
-  'ts:integration_specs'
-  'ts:integration_freedom_module'
-  'browserify:integrationSpec'
-  'browserify:integrationFreedomModule'
-  'jasmine_chromeapp'
+  'tcpIntegrationTest'
+  'socksEchoIntegrationTest'
 ]
 
 taskManager.add 'everything', [

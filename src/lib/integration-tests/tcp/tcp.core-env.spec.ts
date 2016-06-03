@@ -44,30 +44,22 @@ describe('core.tcpsocket wrapper', function() {
   // Loads the testing Freedom module, emits a signal and returns
   // a promise which fulfills once the signal is echoed.
   function loadFreedom(signalName:string) : Promise<void> {
-    var path: string;
-    if (typeof window == 'undefined') {
-      // Firefox addon
-      path = 'grunt-jasmine-firefoxaddon-runner/data/build/dev/uproxy-lib/integration-tests/tcp/';
-    } else {
-      // Chrome app
-      path = 'files/';
-    }
-    return freedom(path + 'freedom-module.json', {
+    return freedom('files/freedom-module.json', {
         'debug': 'debug'
-      }).then((integrationTestFactory) => {
-        return new Promise((F, R) => {
-          var testModule = integrationTestFactory();
-          testModule.emit(signalName);
-          testModule.on(signalName, () => {
-              F(testModule);
-          });
-        })
-        // Cleanup! Note: this will not run if the test times out... TODO: do
-        // we really want close on an promise rejection? better to error then?
-        .then(integrationTestFactory.close,
-          (e) => {
-            throw new Error('Failed to run test module: ' + e.toString());
-          });
-      });
+    }).then((integrationTestFactory) => {
+      return new Promise((F, R) => {
+        var testModule = integrationTestFactory();
+        testModule.emit(signalName);
+        testModule.on(signalName, () => {
+            F(testModule);
+        });
+      })
+      // Cleanup! Note: this will not run if the test times out... TODO: do
+      // we really want close on an promise rejection? better to error then?
+      .then(integrationTestFactory.close,
+        (e) => {
+          throw new Error('Failed to run test module: ' + e.toString());
+        });
+    });
   }
 });
