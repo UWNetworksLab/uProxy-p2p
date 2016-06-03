@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 # This is a major part of the uproxy-lib release process:
 #   https://github.com/uProxy/uproxy-lib
@@ -19,19 +19,11 @@ import subprocess
 parser = argparse.ArgumentParser(
     description='Cross-browser tests for uproxy-lib release process.')
 parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
+parser.add_argument('--browsers', help='browsers to test', nargs='+', default=['chrome', 'firefox'])
+parser.add_argument('--versions', help='browser versions to test', nargs='+', default=['stable', 'beta', 'canary'])
 args = parser.parse_args()
 
-browsers = ['chrome', 'firefox']
-versions = ['stable', 'beta', 'canary']
-
 test_url = 'http://www.example.com/'
-
-# Number of times to try a browser configuration before giving up.
-# We do this because Chrome startup - at least when apps are
-# involved - is flaky on Docker, and we haven't been able to find
-# a reliable workaround:
-#   https://github.com/uProxy/uproxy/issues/2174
-max_attempts = 3
 
 # Compute a hash of the page without using any proxy.
 known_small_md5sum = subprocess.check_output(
@@ -56,26 +48,14 @@ print('** large transfer known md5sum: ' + known_large_md5sum)
 
 # Iterate through every browser/version combination.
 results = {}
-combos = [('-'.join(x)) for x in itertools.product(browsers, versions)]
+combos = [('-'.join(x)) for x in itertools.product(args.browsers, args.versions)]
 for getter_spec, giver_spec in itertools.product(combos, combos):
   passed = False
   try:
     # Start the browsers.
-    running = False
-    attempt = 0
-    while not running:
-      attempt += 1
-      print('** ' + getter_spec + ' <- ' + giver_spec + ' (attempt ' + str(attempt) + ')')
-      try:
-        subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
-        subprocess.call(['./run_pair.sh', '-p', args.clone_path,
-            getter_spec, giver_spec], timeout=15)
-        running = True
-      except Exception as e:
-        if attempt < max_attempts:
-          print('** browser failed to start...re-trying')
-        else:
-          raise e
+    print('** ' + getter_spec + ' <- ' + giver_spec)
+    subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
+    subprocess.call(['./run_pair.sh', '-p', args.clone_path, getter_spec, giver_spec])
 
     # small HTTP download.
     small_md5sum = subprocess.check_output(
