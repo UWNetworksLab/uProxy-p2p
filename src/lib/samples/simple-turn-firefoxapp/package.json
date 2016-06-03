@@ -1,8 +1,0 @@
-{
-  "name": "simple-turn",
-  "title": "Simple TURN",
-  "description": "Single-page TURN server.",
-  "author": "uProxy",
-  "license": "Apache 2",
-  "version": "0.0.1"
-}
