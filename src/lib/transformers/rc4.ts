@@ -1,5 +1,5 @@
-/// <reference path='../../../third_party/simple-rc4/simple-rc4.d.ts' />
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/simple-rc4/simple-rc4.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import crypto = require('crypto');
 import logging = require('../logging/logging');

@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 // Returns true if b1 and b2 have exactly the same bytes.
 export function byteEquality(b1: ArrayBuffer, b2: ArrayBuffer): boolean {

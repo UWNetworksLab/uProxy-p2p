@@ -6,7 +6,7 @@
  */
 
 import globals = require('./globals');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 import Persistent = require('../interfaces/persistent');
 import social = require('../interfaces/social');
 

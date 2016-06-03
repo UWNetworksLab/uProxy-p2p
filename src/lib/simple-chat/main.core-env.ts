@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 var sendButtonA = document.getElementById('sendButtonA');
 var sendButtonB = document.getElementById('sendButtonB');

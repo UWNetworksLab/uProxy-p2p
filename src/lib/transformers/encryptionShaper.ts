@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/aes-js/aes-js.d.ts' />
+/// <reference path='../../../../third_party/aes-js/aes-js.d.ts' />
 
 import aes = require('aes-js');
 import arraybuffers = require('../arraybuffers/arraybuffers');

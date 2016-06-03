@@ -1,4 +1,4 @@
-import handler_queue = require('../../../third_party/uproxy-lib/handler/queue');
+import handler_queue = require('../lib/handler/queue');
 
 export class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
   public signalsForPeer = new handler_queue.Queue<Object, void>();

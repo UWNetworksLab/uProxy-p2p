@@ -9,7 +9,7 @@
  * correct consent values between remote instances.
  */
 
-import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
 
 import freedom_mocks = require('../mocks/freedom-mocks');
 declare var freedom: freedom.FreedomInModuleEnv;
@@ -25,13 +25,13 @@ import remote_user = require('./remote-user');
 import consent = require('./consent');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
-import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
-import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
+import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import globals = require('./globals');
 import local_storage = require('./storage');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import net = require('../lib/net/net.types');
 import local_instance = require('./local-instance');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import bridge = require('../lib/bridge/bridge');
 
 
 describe('remote_instance.RemoteInstance', () => {

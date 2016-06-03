@@ -630,8 +630,10 @@ gruntConfig = {
     # Compile all non-sample typescript code into the development build
     # directory.
     devInModuleEnv: compileTypescript [
+      devBuildPath + '/lib/**/*.ts'
       devBuildPath + '/interfaces/**/*.ts'
       devBuildPath + '/generic_core/**/*.ts'
+      '!' + devBuildPath + '/lib/build-tools/**/*.ts'
       '!' + devBuildPath + '/**/*.core-env.ts'
       '!' + devBuildPath + '/**/*.core-env.spec.ts'
     ]

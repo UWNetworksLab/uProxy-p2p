@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import loggingProviderTypes = require('../loggingprovider/loggingprovider.types');
 import CircularJSON = require('circular-json');

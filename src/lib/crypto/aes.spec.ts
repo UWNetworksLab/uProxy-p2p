@@ -1,5 +1,5 @@
-/// <reference path='../../../third_party/aes-js/aes-js.d.ts' />
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/aes-js/aes-js.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import aesjs = require('aes-js');
 import arraybuffers = require('../arraybuffers/arraybuffers');

@@ -12,7 +12,7 @@
 import browser_api = require('../../../interfaces/browser_api');
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
-import net = require('../../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../../lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
 
 enum PopupState {

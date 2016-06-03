@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 // A Handler abstraction for events. This abstraction allows all event handlers
 // to produce an output that can be passed back to the code that causes the

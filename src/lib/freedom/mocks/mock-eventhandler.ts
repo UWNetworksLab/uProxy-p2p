@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../../third_party/typings/browser.d.ts' />
 
 // A simple mock implementation of the freedom event handler that lets you cause
 // fake events. Useful for mocking out freedom freedom modules that will raise

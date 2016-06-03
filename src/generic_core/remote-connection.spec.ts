@@ -8,7 +8,7 @@
  * after that connection is established
  */
 
-import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
 
 import freedom_mocks = require('../mocks/freedom-mocks');
 declare var freedom: freedom.FreedomInModuleEnv;
@@ -24,8 +24,8 @@ import globals = require('./globals');
 import remote_connection = require('./remote-connection');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
+import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
 import rtc_to_net_mock = require('../mocks/rtc-to-net');
 import socks_to_rtc_mock = require('../mocks/socks-to-rtc');
 
