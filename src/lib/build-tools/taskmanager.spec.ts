@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../third_party/typings/browser.d.ts' />
 
 import TaskManager = require('./taskmanager');
 import Manager = TaskManager.Manager;
