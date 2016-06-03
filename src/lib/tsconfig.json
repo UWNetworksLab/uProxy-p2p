@@ -1,6 +1,0 @@
-{
-  "compilerOptions": {
-    "module": "amd",
-    "noEmit": true
-  }
-}
