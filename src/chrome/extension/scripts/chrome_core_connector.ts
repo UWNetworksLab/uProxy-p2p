@@ -137,8 +137,8 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         // Once connected, the extension popup should show its start page.
         chrome.browserAction.setIcon({
           path: {
-            "19": "icons/19_" + Constants.LOGGED_OUT_ICON,
-            "38": "icons/38_" + Constants.LOGGED_OUT_ICON
+            '19': 'icons/19_' + Constants.LOGGED_OUT_ICON,
+            '38': 'icons/38_' + Constants.LOGGED_OUT_ICON
           }
         });
         this.fulfillConnect_();

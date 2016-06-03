@@ -48,7 +48,7 @@ describe('Core', () => {
   var alice = new remote_instance.RemoteInstance(user, 'instance-alice');
   // Mock out the probeProtocolSupport function.
   globals.portControl.probeProtocolSupport = () => {
-    return Promise.resolve({"natPmp": false, "pcp": false, "upnp": false});
+    return Promise.resolve({'natPmp': false, 'pcp': false, 'upnp': false});
   };
   var core = new uproxy_core.uProxyCore();
 

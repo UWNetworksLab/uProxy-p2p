@@ -48,8 +48,8 @@ var DEFAULT_RESPONSE_POLICY = new DefaultResponsePolicy;
 // Whether |s| is some sort of keyword in JS.  We also include the
 // properties of Object.
 export function isReservedWord(s :string) : boolean {
-  var keywords = [ "__proto__", "__noSuchMethod__", "__defineGetter__",
-                   "__defineSetter__", "__lookupGetter__", "__lookupSetter__"];
+  var keywords = [ '__proto__', '__noSuchMethod__', '__defineGetter__',
+                   '__defineSetter__', '__lookupGetter__', '__lookupSetter__'];
   for (var k in keywords) {
     if (s == keywords[k]) {
       return true;
