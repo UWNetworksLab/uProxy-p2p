@@ -587,6 +587,170 @@ gruntConfig = {
         dest: devBuildPath + '/integration'
       }]
 
+    # uproxy-lib sample apps.
+    libsForDeployerChromeApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome', 'forge-min']
+        pathsFromDevBuild: ['lib/loggingprovider', 'lib/cloud/deployer', 'lib/cloud/digitalocean', 'lib/cloud/install']
+        localDestPath: 'lib/samples/deployer-chromeapp/'
+    libsForDeployerFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-firefox', 'forge-min']
+        pathsFromDevBuild: ['lib/loggingprovider', 'lib/cloud/deployer', 'lib/cloud/digitalocean', 'lib/cloud/install']
+        localDestPath: 'lib/samples/deployer-firefoxapp/data'
+
+    libsForZorkChromeApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome']
+        pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators',
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/zork-chromeapp/'
+    libsForZorkFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-firefox']
+        pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators',
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/zork-firefoxapp/data/'
+    libsForZorkNode:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-node']
+        pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators',
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/zork-node/'
+
+    libsForEchoServerChromeApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome']
+        pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider']
+        localDestPath: 'lib/samples/echo-server-chromeapp/'
+    libsForEchoServerFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-firefox']
+        pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider']
+        localDestPath: 'lib/samples/echo-server-firefoxapp/data/'
+
+    libsForCopypasteChatChromeApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome']
+        pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/copypaste-chat-chromeapp/'
+    libsForCopypasteChatFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-firefox']
+        pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/copypaste-chat-firefoxapp/data'
+    libsForCopypasteChatWebApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom']
+        pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/copypaste-chat-webapp/'
+
+    libsForCopyPasteSocksChromeApp:
+      Rule.copyLibs
+        npmLibNames: [
+          'freedom-for-chrome'
+        ]
+        pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators'
+          'i18n'
+          'bower/polymer'
+          'freedom-pgp-e2e'
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/copypaste-socks-chromeapp/'
+    libsForCopyPasteSocksFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: [
+          'freedom-for-firefox'
+        ]
+        pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators'
+          'i18n'
+          'bower'
+          'freedom-pgp-e2e'
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/copypaste-socks-firefoxapp/data'
+
+    libsForSimpleSocksChromeApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome']
+        pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators'
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/simple-socks-chromeapp/'
+    libsForSimpleSocksFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-firefox']
+        pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators'
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/simple-socks-firefoxapp/data/'
+
+    libsForSimpleChatChromeApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome']
+        pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/simple-chat-chromeapp/'
+    libsForSimpleChatFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-firefox']
+        pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/simple-chat-firefoxapp/data'
+    # While neither churn-pipe nor freedom-port-control can be used in a
+    # regular web page environment, they are included so that obfuscation
+    # may be easily enabled in the Chrome and Firefox samples.
+    libsForSimpleChatWebApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom']
+        pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/simple-chat-webapp/'
+
+    libsForUprobeChromeApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-chrome']
+        pathsFromDevBuild: ['lib/uprobe', 'lib/loggingprovider']
+        localDestPath: 'lib/samples/uprobe-chromeapp/'
+    libsForUprobeFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-firefox']
+        pathsFromDevBuild: ['lib/uprobe', 'lib/loggingprovider']
+        localDestPath: 'lib/samples/uprobe-firefoxapp/data/'
+
+    # uproxy-lib integration tests.
     libsForIntegrationTcp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
@@ -749,6 +913,20 @@ gruntConfig = {
     })
     digitalOceanFreedomModule: Rule.browserify 'lib/cloud/digitalocean/freedom-module'
 
+    # uproxy-lib sample apps.
+    copypasteChatFreedomModule: Rule.browserify 'lib/copypaste-chat/freedom-module'
+    copypasteSocksFreedomModule: Rule.browserify 'lib/copypaste-socks/freedom-module'
+    deployerFreedomModule: Rule.browserify 'lib/cloud/deployer/freedom-module'
+    echoServerFreedomModule: Rule.browserify 'lib/echo/freedom-module'
+    simpleChatFreedomModule: Rule.browserify 'lib/simple-chat/freedom-module'
+    simpleSocksFreedomModule: Rule.browserify 'lib/simple-socks/freedom-module'
+    uprobeFreedomModule: Rule.browserify 'lib/uprobe/freedom-module'
+    zorkFreedomModule: Rule.browserify 'lib/zork/freedom-module'
+    # uproxy-lib sample apps (with UI).
+    copypasteChatMain: Rule.browserify 'lib/copypaste-chat/main.core-env'
+    copypasteSocksMain: Rule.browserify 'lib/copypaste-socks/main.core-env'
+    simpleChatMain: Rule.browserify 'lib/simple-chat/main.core-env'
+
     integrationTcpFreedomModule: Rule.browserify 'lib/integration-tests/tcp/freedom-module'
     integrationTcpSpec: browserifyIntegrationTest 'lib/integration-tests/tcp/tcp.core-env'
     integrationSocksEchoFreedomModule: Rule.browserify 'lib/integration-tests/socks-echo/freedom-module'
@@ -844,7 +1022,17 @@ gruntConfig = {
       xpi: 'build/dist/'
       debug: true
 
-  vulcanize: {}
+  vulcanize:
+    copypasteSocks:
+      options:
+        inline: true
+        csp: true
+      files: [
+        {
+          src: path.join(devBuildPath, 'lib/copypaste-socks/polymer-components/root.html')
+          dest: path.join(devBuildPath, 'lib/copypaste-socks/polymer-components/vulcanized.html')
+        }
+      ]
 }  # grunt.initConfig
 
 #-------------------------------------------------------------------------
@@ -896,6 +1084,81 @@ taskManager.add 'base', [
   'browserify:cloudInstallerFreedomModule'
   'browserify:cloudSocialProviderFreedomModule'
   'browserify:digitalOceanFreedomModule'
+]
+
+# uproxy-lib sample apps.
+taskManager.add 'echoServer', [
+  'base'
+  'browserify:echoServerFreedomModule'
+  'copy:libsForEchoServerChromeApp'
+  'copy:libsForEchoServerFirefoxApp'
+]
+
+taskManager.add 'copypasteChat', [
+  'base'
+  'browserify:copypasteChatFreedomModule'
+  'browserify:copypasteChatMain'
+  'copy:libsForCopypasteChatChromeApp'
+  'copy:libsForCopypasteChatFirefoxApp'
+  'copy:libsForCopypasteChatWebApp'
+]
+
+taskManager.add 'copypasteSocks', [
+  'base'
+  'browserify:copypasteSocksFreedomModule'
+  'browserify:copypasteSocksMain'
+  'vulcanize:copypasteSocks'
+  'copy:libsForCopyPasteSocksChromeApp'
+  'copy:libsForCopyPasteSocksFirefoxApp'
+]
+
+taskManager.add 'deployer', [
+  'base'
+  'browserify:deployerFreedomModule'
+  'copy:libsForDeployerChromeApp'
+  'copy:libsForDeployerFirefoxApp'
+]
+
+taskManager.add 'simpleChat', [
+  'base'
+  'browserify:simpleChatFreedomModule'
+  'browserify:simpleChatMain'
+  'copy:libsForSimpleChatChromeApp'
+  'copy:libsForSimpleChatFirefoxApp'
+  'copy:libsForSimpleChatWebApp'
+]
+
+taskManager.add 'simpleSocks', [
+  'base'
+  'browserify:simpleSocksFreedomModule'
+  'copy:libsForSimpleSocksChromeApp'
+  'copy:libsForSimpleSocksFirefoxApp'
+]
+
+taskManager.add 'uprobe', [
+  'base'
+  'browserify:uprobeFreedomModule'
+  'copy:libsForUprobeChromeApp'
+  'copy:libsForUprobeFirefoxApp'
+]
+
+taskManager.add 'zork', [
+  'base'
+  'browserify:zorkFreedomModule'
+  'copy:libsForZorkChromeApp'
+  'copy:libsForZorkFirefoxApp'
+  'copy:libsForZorkNode'
+]
+
+taskManager.add 'samples', [
+  'echoServer'
+  'copypasteChat'
+  'copypasteSocks'
+  'deployer'
+  'simpleChat'
+  'simpleSocks'
+  'uprobe'
+  'zork'
 ]
 
 taskManager.add 'version_file', [

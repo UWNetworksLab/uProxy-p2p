@@ -6,8 +6,8 @@ var panels = require("sdk/panel");
 
 Cu.import(self.data.url("freedom-for-firefox/freedom-for-firefox.jsm"));
 
-var manifest = self.data.url("uproxy-lib/simple-chat/freedom-module.json");
-var loggingProviderManifest = self.data.url("uproxy-lib/loggingprovider/freedom-module.json");
+var manifest = self.data.url("lib/simple-chat/freedom-module.json");
+var loggingProviderManifest = self.data.url("lib/loggingprovider/freedom-module.json");
 freedom(manifest, {
   'logger': loggingProviderManifest,
   'debug': 'debug'

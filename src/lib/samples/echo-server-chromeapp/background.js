@@ -10,8 +10,8 @@ function keepAlive() {
 keepAlive();
 
 script.onload = function() {
-  freedom('uproxy-lib/echo/freedom-module.json', {
-    'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
+  freedom('lib/echo/freedom-module.json', {
+    'logger': 'lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
   }).then(function(moduleFactory) {
     moduleFactory();

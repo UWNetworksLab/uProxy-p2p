@@ -15,8 +15,8 @@ chrome.app.runtime.onLaunched.addListener(function() {
   document.head.appendChild(script);
   script.onload = function() {
     console.log('loading freedom!');
-    freedom('uproxy-lib/zork/freedom-module.json', {
-      'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
+    freedom('lib/zork/freedom-module.json', {
+      'logger': 'lib/loggingprovider/freedom-module.json',
       'debug': 'debug'
     }).then(function(moduleFactory) {
       moduleFactory();
