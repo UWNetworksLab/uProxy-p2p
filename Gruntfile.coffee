@@ -130,11 +130,14 @@ getWithBasePath = (files, base = '') ->
 backendThirdPartyBuildPaths = [
   'bower'
   'sha1'
-  'uproxy-lib/loggingprovider'
-  'uproxy-lib/churn-pipe'
-  'uproxy-lib/cloud/digitalocean'
-  'uproxy-lib/cloud/install'
-  'uproxy-lib/cloud/social'
+]
+
+backendFreedomModulePaths = [
+  'lib/loggingprovider'
+  'lib/churn-pipe'
+  'lib/cloud/digitalocean'
+  'lib/cloud/install'
+  'lib/cloud/social'
 ]
 
 uiDistFiles = [
@@ -485,7 +488,7 @@ gruntConfig = {
         ]
         pathsFromDevBuild: [
           'generic_core'
-        ]
+        ].concat(backendFreedomModulePaths)
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: getExtraFilesForCoreBuild(chromeAppDevPath).concat({ # uProxy Icons and fonts
           expand: true, cwd: 'src/'
@@ -521,7 +524,7 @@ gruntConfig = {
           'interfaces'
           'icons'
           'fonts'
-        ]
+        ].concat(backendFreedomModulePaths)
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: getExtraFilesForCoreBuild(path.join(firefoxDevPath, 'data')).concat({ #lib
           expand: true, cwd: devBuildPath
@@ -554,7 +557,7 @@ gruntConfig = {
           'interfaces'
           'icons'
           'fonts'
-        ]
+        ].concat(backendFreedomModulePaths)
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths
         files: getExtraFilesForCoreBuild(ccaDevPath).concat({ # uProxy Icons and fonts
           expand: true, cwd: 'src/'
@@ -705,6 +708,42 @@ gruntConfig = {
     integrationSpec: Rule.browserifySpec 'integration/core'
     integrationFreedomModule: Rule.browserify 'integration/test_connection'
 
+    # uproxy-lib
+    loggingProvider: Rule.browserify 'lib/loggingprovider/freedom-module'
+    churnPipeFreedomModule: Rule.browserify 'lib/churn-pipe/freedom-module'
+    cloudInstallerFreedomModule: Rule.browserify('lib/cloud/install/freedom-module', {
+      alias : [
+        # Shims for node's dns and net modules from freedom-social-xmpp,
+        # with a couple of fixes.
+        './src/lib/cloud/social/shim/net.js:net'
+        './src/lib/cloud/social/shim/dns.js:dns'
+        # Alternative that works for freedomjs modules.
+        './src/lib/cloud/social/alias/brorand.js:brorand'
+        # Fallback for crypto-browserify's randombytes, for Firefox.
+        './src/lib/cloud/social/alias/randombytes.js:randombytes'
+      ]
+    })
+    cloudSocialProviderFreedomModule: Rule.browserify('lib/cloud/social/freedom-module', {
+      alias : [
+        # Shims for node's dns and net modules from freedom-social-xmpp,
+        # with a couple of fixes.
+        './src/lib/cloud/social/shim/net.js:net'
+        './src/lib/cloud/social/shim/dns.js:dns'
+        # Alternative that works for freedomjs modules.
+        './src/lib/cloud/social/alias/brorand.js:brorand'
+        # Fallback for crypto-browserify's randombytes, for Firefox.
+        './src/lib/cloud/social/alias/randombytes.js:randombytes'
+      ]
+    })
+    digitalOceanFreedomModule: Rule.browserify 'lib/cloud/digitalocean/freedom-module'
+
+    integrationTcpFreedomModule: Rule.browserify 'lib/integration-tests/tcp/freedom-module'
+    integrationTcpSpec: browserifyIntegrationTest 'lib/integration-tests/tcp/tcp.core-env'
+    integrationSocksEchoFreedomModule: Rule.browserify 'lib/integration-tests/socks-echo/freedom-module'
+    integrationSocksEchoChurnSpec: browserifyIntegrationTest 'lib/integration-tests/socks-echo/churn.core-env'
+    integrationSocksEchoNochurnSpec: browserifyIntegrationTest 'lib/integration-tests/socks-echo/nochurn.core-env'
+    integrationSocksEchoSlowSpec: browserifyIntegrationTest 'lib/integration-tests/socks-echo/slow.core-env'
+
   tslint:
     options:
       configuration: 'src/tslint.json'
@@ -791,6 +830,11 @@ taskManager.add 'base', [
   'browserify:chromeAppMain'
   'browserify:genericCoreFreedomModule'
   'browserify:ccaMain'
+  'browserify:loggingProvider'
+  'browserify:churnPipeFreedomModule'
+  'browserify:cloudInstallerFreedomModule'
+  'browserify:cloudSocialProviderFreedomModule'
+  'browserify:digitalOceanFreedomModule'
 ]
 
 taskManager.add 'version_file', [

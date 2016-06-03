@@ -41,7 +41,7 @@ browserApi.bringUproxyToFront().then(() => {
 
 console.log('Loading core');
 freedom('generic_core/freedom-module.json', <freedom.FreedomInCoreEnvOptions>{
-  'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
+  'logger': 'lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
   'portType': 'worker'
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
