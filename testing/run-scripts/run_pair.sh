@@ -111,17 +111,11 @@ function run_docker () {
 run_docker $CONTAINER_PREFIX-getter $1 $VNCOPTS1 -p :9000 -p $PROXY_PORT:9999
 run_docker $CONTAINER_PREFIX-giver $2 $VNCOPTS2 -p :9000
 
-CONTAINER_IP=localhost
-if uname|grep Darwin > /dev/null
-then
-  CONTAINER_IP=`docker-machine ip default`
-fi
-
 GETTER_COMMAND_PORT=`docker port $CONTAINER_PREFIX-getter 9000|cut -d':' -f2`
 GIVER_COMMAND_PORT=`docker port $CONTAINER_PREFIX-giver 9000|cut -d':' -f2`
 
 echo -n "Waiting for getter to come up"
-while ! ((echo ping ; sleep 0.5) | nc -w 1 $CONTAINER_IP $GETTER_COMMAND_PORT | grep ping) > /dev/null; do echo -n .; done
+while ! ((echo ping ; sleep 0.5) | nc -w 1 localhost $GETTER_COMMAND_PORT | grep ping) > /dev/null; do echo -n .; done
 echo
 
 if [ -n "$MTU" ]
@@ -135,12 +129,12 @@ then
 fi
 
 echo -n "Waiting for giver to come up"
-while ! ((echo ping ; sleep 0.5) | nc -w 1 $CONTAINER_IP $GIVER_COMMAND_PORT | grep ping) > /dev/null; do echo -n .; done
+while ! ((echo ping ; sleep 0.5) | nc -w 1 localhost $GIVER_COMMAND_PORT | grep ping) > /dev/null; do echo -n .; done
 echo
 
 echo "Connecting pair..."
 sleep 2 # make sure nc is shutdown
-./connect-pair.py $CONTAINER_IP $GETTER_COMMAND_PORT $CONTAINER_IP $GIVER_COMMAND_PORT
+./connect-pair.py localhost $GETTER_COMMAND_PORT localhost $GIVER_COMMAND_PORT
 
 echo "SOCKS proxy should be available, sample command:"
-echo "  curl -x socks5h://$CONTAINER_IP:$PROXY_PORT www.example.com"
+echo "  curl -x socks5h://localhost:$PROXY_PORT www.example.com"
