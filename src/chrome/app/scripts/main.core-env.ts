@@ -46,7 +46,7 @@ export var moduleName = 'uProxy App Top Level';
 var chromeUIConnector :ChromeUIConnector;
 
 freedom('generic_core/freedom-module.json', <freedom.FreedomInCoreEnvOptions>{
-  'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
+  'logger': 'lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
   'portType': 'worker',
   'oauth': [() => { return new Chrome_oauth(oauthOptions); }]

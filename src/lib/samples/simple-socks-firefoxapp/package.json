@@ -1,0 +1,8 @@
+{
+  "name": "simple-socks",
+  "title": "Simple SOCKS",
+  "description": "Single-page SOCKS server.",
+  "author": "uProxy",
+  "license": "Apache 2",
+  "version": "0.0.1"
+}

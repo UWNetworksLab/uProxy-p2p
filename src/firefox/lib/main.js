@@ -23,7 +23,7 @@ var panel;
 
 // Load freedom.
 var manifest = self.data.url('generic_core/freedom-module.json');
-var loggingProviderManifest = self.data.url("uproxy-lib/loggingprovider/freedom-module.json");
+var loggingProviderManifest = self.data.url("lib/loggingprovider/freedom-module.json");
 var init = freedom(manifest, {
   'logger': loggingProviderManifest,
   'debug': 'debug'

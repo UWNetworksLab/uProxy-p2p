@@ -3,7 +3,7 @@
  * interface to be extended as classes specific to particular components.
  */
 
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import net = require('../lib/net/net.types');
 import uproxy_core_api = require('./uproxy_core_api');
 
 export interface UserPath {

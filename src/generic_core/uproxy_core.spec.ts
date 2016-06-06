@@ -9,7 +9,7 @@
  * requirement and ensures consistency.
  */
 
-import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
 
 import freedom_mocks = require('../mocks/freedom-mocks');
 declare var freedom: freedom.FreedomInModuleEnv;

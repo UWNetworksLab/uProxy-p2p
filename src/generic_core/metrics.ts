@@ -2,8 +2,8 @@
 /// <reference path='../../../third_party/typings/freedomjs-anonymized-metrics/index.d.ts' />
 
 import _ = require('lodash');
-import crypto = require('../../../third_party/uproxy-lib/crypto/random');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import crypto = require('../lib/crypto/random');
+import logging = require('../lib/logging/logging');
 import storage = require('../interfaces/storage');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
