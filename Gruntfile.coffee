@@ -271,7 +271,7 @@ gruntConfig = {
     # https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Publish.md
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk'
+      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
     }
     ccaReleaseAndroid: {
       cwd: '<%= androidDistPath %>'
