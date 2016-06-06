@@ -4,7 +4,6 @@ import aqm = require('../aqm/aqm');
 import caesar = require('../transformers/caesar');
 import churn_types = require('../churn/churn.types');
 import decompression = require('../transformers/decompressionShaper');
-import encryption = require('../transformers/encryptionShaper');
 import fragmentation = require('../transformers/fragmentationShaper');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
@@ -26,7 +25,6 @@ var log :logging.Log = new logging.Log('churn-pipe');
 var transformers :{[name:string] : new() => transformer.Transformer} = {
   'caesar': caesar.CaesarCipher,
   'decompressionShaper': decompression.DecompressionShaper,
-  'encryptionShaper': encryption.EncryptionShaper,
   'fragmentationShaper': fragmentation.FragmentationShaper,
   'none': PassThrough,
   'protean': protean.Protean,

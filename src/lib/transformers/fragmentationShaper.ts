@@ -1,10 +1,12 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import defragmenter = require('./defragmenter');
-import encryption = require('./encryptionShaper');
 import fragments = require('./fragment');
 import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('fragmentation shaper');
+
+export const CHUNK_SIZE: number = 16;
+export const IV_SIZE: number = 16;
 
 // Accepted in serialised form by configure().
 export interface FragmentationConfig {
@@ -79,8 +81,8 @@ export class FragmentationShaper {
   // - Add fragment headers to each fragment
   // - Add fill if necessary to pad each fragment to a multiple of CHUNK_SIZE
   private makeFragments_ = (buffer :ArrayBuffer) :fragments.Fragment[] => {
-    var payloadSize = buffer.byteLength + fragments.HEADER_SIZE + encryption.IV_SIZE;
-    var fillSize = encryption.CHUNK_SIZE - (payloadSize % encryption.CHUNK_SIZE);
+    var payloadSize = buffer.byteLength + fragments.HEADER_SIZE + IV_SIZE;
+    var fillSize = CHUNK_SIZE - (payloadSize % CHUNK_SIZE);
     var packetSize = payloadSize + fillSize;
 
     if (packetSize <= this.maxLength_) {
@@ -102,8 +104,7 @@ export class FragmentationShaper {
       return [fragment];
     } else {
       // Multiple fragments
-      var firstLength = this.maxLength_ - (fragments.HEADER_SIZE +
-        encryption.IV_SIZE + fillSize);
+      var firstLength = this.maxLength_ - (fragments.HEADER_SIZE + IV_SIZE + fillSize);
       var restLength = buffer.byteLength - firstLength;
       var parts = arraybuffers.split(buffer, firstLength);
       var first = this.makeFragments_(parts[0]);

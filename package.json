@@ -17,7 +17,6 @@
     }
   ],
   "devDependencies": {
-    "aes-js": "^0.2.1",
     "arraybuffer-slice": "^0.1.2",
     "bower": "^1.4.1",
     "browserify-zlib": "^0.1.4",
