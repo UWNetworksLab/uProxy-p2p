@@ -166,11 +166,11 @@ var generateProxyingSessionId_ = (): string => {
       }
 
       this.underlyingPeerConnection_ = pc;
-//      this.underlyingPeerConnection_.then( () => {
+      pc.getControlChannel().then( (ctrl:datachannel.ControlChannel) => {
         for (var n in this.queuedHandlers_) {
-          this.underlyingPeerConnection_.registerMessageHandler(n, this.queuedHandlers_[n]);
+          ctrl.registerMessageHandler(n, this.queuedHandlers_[n]);
         }
-//      });
+      });
       pc.onceClosed.then(() => {
         log.debug('pc.onceClosed.then()');
         this.underlyingPeerConnection_ = null; 
@@ -245,19 +245,20 @@ var generateProxyingSessionId_ = (): string => {
       if (this.underlyingPeerConnection_ === null) {
         throw (new Error("No underlying peer connection."));
       }
-      return this.underlyingPeerConnection_.onceConnected.then(() => {
-        this.underlyingPeerConnection_.sendMessage(name, msg);
-      });
+      return this.underlyingPeerConnection_.getControlChannel().then(
+        (ch:datachannel.ControlChannel) => {
+          ch.sendMessage(name, msg);
+        });
     }
 
     public registerMessageHandler = (name :string, fn:(name:string, msg:any) => void) => {
       log.debug('registerMessageHandler(%1, function(...))', name);
       this.queuedHandlers_[name] = fn;
       if (this.underlyingPeerConnection_ !== null) {
-//        this.underlyingPeerConnection_..then(() => {
-//          log.debug('this.underlyingPeerConnection_.onceConnected.then())');
-          this.underlyingPeerConnection_.registerMessageHandler(name, fn);
-//        });
+        this.underlyingPeerConnection_.getControlChannel().then(
+          (ch:datachannel.ControlChannel) => {
+          ch.registerMessageHandler(name, fn);
+        });
       }
     }
 
@@ -377,11 +378,11 @@ var generateProxyingSessionId_ = (): string => {
       peerconnection.setupPeerConnection(
         pc, this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
       this.underlyingPeerConnection_ = pc;
-//      this.underlyingPeerConnection_.onceConnected.then( () => {
+      pc.getControlChannel().then( (ctrl:datachannel.ControlChannel) => {
         for (var n in this.queuedHandlers_) {
-          this.underlyingPeerConnection_.registerMessageHandler(n, this.queuedHandlers_[n]);
+          ctrl.registerMessageHandler(n, this.queuedHandlers_[n]);
         }
-//      });
+      });
       pc.onceClosed.then(() => {
         log.debug('pc.onceClosed.then()');
         this.underlyingPeerConnection_ = null; 
