@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/aes-js/aes-js.d.ts' />
-
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import decompression = require('./decompressionShaper');
 import fragmentation = require('./fragmentationShaper');
