@@ -4,14 +4,6 @@
 
   var globalSettingsP = new Promise(function (resolve) {
     if (isChrome) {
-      /*
-      chrome.runtime.onMessage.addListener(function (request) {
-        if (request.globalSettings) {
-          resolve(request.globalSettings);
-        }
-      });
-      chrome.runtime.sendMessage({globalSettingsRequest: true});
-      */
       chrome.runtime.sendMessage({globalSettingsRequest: true}, resolve);
     } else {
       self.port.on('globalSettings', function (globalSettings) {
@@ -61,14 +53,6 @@
     if (isChrome) {
       getLocalAssetUrlP = Promise.resolve(chrome.extension.getURL);
       translationsP = new Promise(function (resolve) {
-        /*
-        chrome.runtime.onMessage.addListener(function (request) {
-          if (request.translations) {
-            resolve(request.translations);
-          }
-        });
-        chrome.runtime.sendMessage({translationsRequest: values(i18nKeyByUIKey)});
-        */
         chrome.runtime.sendMessage({translationsRequest: values(i18nKeyByUIKey)}, resolve);
       });
     } else {

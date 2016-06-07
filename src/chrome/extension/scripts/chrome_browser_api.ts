@@ -218,10 +218,6 @@ class ChromeBrowserApi implements BrowserAPI {
     this.events_[name] = callback;
   }
 
-  public emitCommon = (name :string, data ?:any) => {
-    chrome.runtime.sendMessage({name: data});
-  }
-
   public emit = (name :string, ...args :Object[]) => {
     this.bringUproxyToFront().then(() => {
       if (name in this.events_) {
@@ -230,6 +226,14 @@ class ChromeBrowserApi implements BrowserAPI {
         console.error('Attempted to trigger an unknown event', name);
       }
     });
+  }
+
+  public emitCommon = (name :string, data ?:any, callback ?:Function) : void => {
+    if (callback) {
+      callback(data);
+    } else {
+      chrome.runtime.sendMessage({name: data});
+    }
   }
 
   public setBadgeNotification = (notification :string) => {

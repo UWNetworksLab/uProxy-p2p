@@ -47,7 +47,7 @@ export interface BrowserAPI {
   // Cross-browser "emit" method
   // (i.e. abstracts `chrome.runtime.sendMessage`, FF's `self.port.emit`, etc.)
   // (Would name this "emit" or "fire", but those are already taken.)
-  emitCommon(message :string, data ?:any) :void;
+  emitCommon(message :string, data ?:any, callback ?:Function) :void;
 }
 
 // Info associated with the 'proxyDisconnect' event.

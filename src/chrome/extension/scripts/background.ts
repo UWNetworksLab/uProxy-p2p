@@ -53,12 +53,12 @@ chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.Messa
   }
 
   if (request.globalSettingsRequest) {
-    browserApi.emit('globalSettingsRequest', sendResponse);
+    ui.handleGlobalSettingsRequest(sendResponse);
     return true;
   }
 
   if (request.translationsRequest) {
-    browserApi.emit('translationsRequest', request.translationsRequest, sendResponse);
+    ui.handleTranslationsRequest(request.translationsRequest, sendResponse);
     return true;
   }
 });
@@ -146,6 +146,7 @@ core = new CoreConnector(browserConnector);
 var oAuth = new ChromeTabAuth();
 browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
                          oAuth.login.bind(oAuth));
+var ui = new user_interface.UserInterface(core, browserApi);
 
 // used for de-duplicating urls caught by the listeners
 var lastUrl = '';
