@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+ /// <reference path='../../../third_party/typings/browser.d.ts' />
 
 /**
  * remote-connection.ts
@@ -174,7 +174,7 @@ var generateProxyingSessionId_ = (): string => {
       });
       pc.onceClosed.then(() => {
         log.debug('pc.onceClosed.then()');
-        this.underlyingPeerConnection_ = null; 
+        this.underlyingPeerConnection_ = null;
         this.nonproxyChannels_ = null;
       });
 
@@ -252,7 +252,8 @@ var generateProxyingSessionId_ = (): string => {
         });
     }
 
-    public registerMessageHandler = (name :string, fn:(name:string, msg:any) => void) => {
+    public registerMessageHandler =
+      (name :string, fn:(name:string, msg:any) => void) => {
       log.debug('registerMessageHandler(%1, function(...))', name);
       this.queuedHandlers_[name] = fn;
       if (this.underlyingPeerConnection_ !== null) {
@@ -265,15 +266,8 @@ var generateProxyingSessionId_ = (): string => {
 
     public startConnection = (remoteVersion:number) :Promise<void> => {
       log.debug('startConnection(%1)', remoteVersion);
-      // this part is hacky.
-      // Super hack!
       if (this.underlyingPeerConnection_ !== null) {
         return this.underlyingPeerConnection_.onceConnected;
-        // Like below.
-//        log.debug('startConnection(%1): already have an underlyingPeerConnection_ HACK: nuking it.', remoteVersion);
-//        this.underlyingPeerConnection_ = null;
-
-//        return Promise.resolve<void>();
       }
       if (this.localGettingFromRemote !== social.GettingState.NONE) {
         // This should not happen. If it does, something else is broken. Still, we
@@ -304,8 +298,6 @@ var generateProxyingSessionId_ = (): string => {
       this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
 
       // set up basic handlers
-//      this.socksToRtc_.on('signalForPeer', this.createSender_(
-//        social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
       this.socksToRtc_.on('bytesReceivedFromPeer', this.handleBytesReceived_);
       this.socksToRtc_.on('bytesSentToPeer', this.handleBytesSent_);
 
@@ -327,7 +319,8 @@ var generateProxyingSessionId_ = (): string => {
         // whether the browser's proxy was set).
 
         log.debug('this.socksToRtc_[onceStopping_].then()');
-        var isError = social.GettingState.GETTING_ACCESS === this.localGettingFromRemote;
+        var isError =
+          social.GettingState.GETTING_ACCESS === this.localGettingFromRemote;
         this.sendUpdate_(uproxy_core_api.Update.STOP_GETTING, isError);
 
         this.localGettingFromRemote = social.GettingState.NONE;
@@ -386,7 +379,7 @@ var generateProxyingSessionId_ = (): string => {
       });
       pc.onceClosed.then(() => {
         log.debug('pc.onceClosed.then()');
-        this.underlyingPeerConnection_ = null; 
+        this.underlyingPeerConnection_ = null;
         this.nonproxyChannels_ = null;
       });
       return Promise.resolve<void>();
