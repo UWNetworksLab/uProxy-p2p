@@ -443,7 +443,7 @@ import ui = ui_connector.connector;
       return this.connection_.startConnection(this.messageVersion).then(
         () => {
           log.debug('start(): this.connection_.startConnection().then() ...');
-          this.connection_.startGet().then(
+          return this.connection_.startGet().then(
             (endpoints :net.Endpoint) => {
               log.debug('start(): this.connection_.startConnection().then() ... startGet().then()...');
               clearTimeout(this.startSocksToRtcTimeout_);
