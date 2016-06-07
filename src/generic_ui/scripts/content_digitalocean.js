@@ -1,4 +1,49 @@
-(function improveDOWelcomeFlow(document, navigator) {
+/*                       _____________________________
+ *                      |    States + Transitions:    |
+ *                      |                             |
+ *                      | legend:                     |
+ *                      |       user = the user       |
+ *                      |         DO = digitalocean   |
+ *                      |         us = this content   |
+ *                      |              script         |
+ *                       -----------------------------
+ *
+ *
+ *
+ *                            /{signup,login}
+ *                                   |
+ *                         (user: submit valid form)
+ *                                   |
+ *                             (DO: redirect)
+ *                                   |
+ *                               /droplets
+ *                                   |
+ *                         (DO: payment added?)
+ *                          /                \
+ *                        no                 yes
+ *                        /                    \
+ *                (DO: redirect)          (us: shouldPromptPromo?)
+ *                      /                     /            \
+ *                  /welcome                 no            yes
+ *                    /                     /                \
+ *      (DO: email confirmed?)      (us: show overlay)  (us: redirect)
+ *          /         \                   /                    |
+ *        no         yes       (user: click 'proceed')  /settings/billing
+ *       /              \                                      |
+ * (user: click )    (user: click)                (us: show overlay w/ promo input)
+ * (confirm link)    (add pmnt link)                           |
+ *         \            /                                      |
+ *       /settings/billing                          (user: enter promo code)
+ *               |                                             |
+ *  (user: add payment method)                    (user: click 'proceed to uproxy')
+ *               |
+ *        (DO: redirect)
+ *               |
+ *          /droplets (see above) ^^^
+ *
+ */
+
+(function (document, navigator) {
 
   var isChrome = navigator.userAgent.indexOf('Chrome') !== -1;
 
@@ -13,34 +58,42 @@
   });
 
   globalSettingsP.then(function (globalSettings) {
-    
-    if (!globalSettings.shouldHijackDO) return;
 
-    function getPageId(url) {
-      if (url.indexOf('cloud.digitalocean.com/welcome') !== -1)
-        return 'welcome';
-      if (url.indexOf('cloud.digitalocean.com/settings/billing') !== -1)
-        return 'billing';
-    }
-
-    // Check what page we're on, only proceed for pages we care about.
-    var pageId = getPageId(document.location.href);
-    if (pageId !== 'welcome' && pageId !== 'billing') {
+    if (!globalSettings.shouldHijackDO) {
       return;
     }
 
-    var pmntAdded = isPmntAdded();
-    if (pageId === 'welcome' && pmntAdded && shouldPromptPromo()) {
-      // We need to be on the billing page to be able to submit promo codes.
-      document.location.href = 'https://cloud.digitalocean.com/settings/billing';
+    function getPageId(url) {
+      if (url.indexOf('cloud.digitalocean.com/welcome') !== -1) {
+        return 'welcome';
+      } else if (url.indexOf('cloud.digitalocean.com/settings/billing') !== -1) {
+        return 'billing';
+      } else if (url.indexOf('cloud.digitalocean.com/droplets') !== -1) {
+        return 'droplets';
+      }
     }
-    if (pageId === 'billing' && !pmntAdded) {
-      // If we're on the billing page, only show overlay once payment added.
+
+    var pageId = getPageId(document.location.href);
+
+    if (pageId === 'droplets') {
+      if (shouldPromptPromo()) {
+        // Must be on billing page to submit promo codes, so redirect.
+        document.location.href = 'https://cloud.digitalocean.com/settings/billing';
+      }
+      // Proceed to showing the overlay.
+    } else if (pageId === 'billing') {
+      if (!isPmntAdded()) {
+        return;
+      }
+      // Proceed to showing the overlay.
+    } else {
       return;
     }
 
     // Interpose our overlay.
     var i18nKeyByUIKey = {
+      // TODO: Check if user has already completed oauth, if so use different
+      // test for this h1?
       h1: 'AUTHORIZE_DIGITALOCEAN',
       proceedLink: 'PROCEED_TO_UPROXY',
       promoInput: 'ENTER_PROMO',
@@ -256,13 +309,14 @@
         // we care about, not the one in the topnav.)
         var cdbtn = document.querySelector('a[href="/droplets/new"].action');
         return !hasClass(cdbtn, 'is-disabled');
-      }
-      if (pageId === 'billing') {
+      } else if (pageId === 'billing') {
         var pd = document.getElementById('Payment-details');
         if ('data-shelfid' in pd.attributes) {
           return !hasClass(pd, 'is-open');
         }
         return false;
+      } else if (pageId === 'droplets') {
+        return true;
       }
     }
 
