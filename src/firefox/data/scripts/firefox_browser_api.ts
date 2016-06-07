@@ -80,8 +80,12 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.on(name, callback);
   }
 
-  public emitCommon = (message :string, data ?:any) : void => {
-    port.emit(message, data);
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    msg && this.respond_(data, msg);
+  }
+
+  private respond_ = (data: any, msg :string) : void => {
+    port.emit(msg, data);
   }
 
   /**

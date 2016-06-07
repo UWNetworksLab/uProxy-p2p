@@ -228,12 +228,12 @@ class ChromeBrowserApi implements BrowserAPI {
     });
   }
 
-  public emitCommon = (name :string, data ?:any, callback ?:Function) : void => {
-    if (callback) {
-      callback(data);
-    } else {
-      chrome.runtime.sendMessage({name: data});
-    }
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    callback && this.respond_(data, callback);
+  }
+
+  private respond_ = (data :any, callback :Function) : void => {
+    callback(data);
   }
 
   public setBadgeNotification = (notification :string) => {

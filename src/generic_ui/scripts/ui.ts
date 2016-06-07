@@ -760,11 +760,11 @@ export class UserInterface implements ui_constants.UiApi {
     for (let key of keys) {
       vals[key] = this.i18n_t(key);
     }
-    this.browserApi.emitCommon('translations', vals, callback);
+    this.browserApi.respond(vals, callback, 'translations');
   }
 
   public handleGlobalSettingsRequest = (callback ?:Function) => {
-    this.browserApi.emitCommon('globalSettings', this.model.globalSettings, callback);
+    this.browserApi.respond(this.model.globalSettings, callback, 'globalSettings');
   }
 
   public setActivePromoId = (promoId :string) => {

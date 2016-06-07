@@ -280,10 +280,6 @@ class CordovaBrowserApi implements BrowserAPI {
     }
   }
 
-  public emitCommon = (name :string, data ?:any) => {
-    chrome.runtime.sendMessage({name: data});
-  }
-
   private emit_ = (name :string, ...args :Object[]) => {
     if (name in this.events_) {
       this.events_[name].apply(null, args);
@@ -293,6 +289,14 @@ class CordovaBrowserApi implements BrowserAPI {
       }
       this.pendingEvents_[name].push(args);
     }
+  }
+
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    callback && this.respond_(data, callback);
+  }
+
+  private respond_ = (data :any, callback :Function) : void => {
+    callback(data);
   }
 }
 
