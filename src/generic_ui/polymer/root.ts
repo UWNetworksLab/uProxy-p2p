@@ -36,7 +36,7 @@ Polymer({
     // this event.
     if (newView == ui_types.View.ROSTER && oldView == ui_types.View.SPLASH) {
       // TODO: can this be removed now that roster-before-login has launched?
-      this.fire('core-signal', {name: "login-success"});
+      this.fire('core-signal', {name: 'login-success'});
       this.closeSettings();
       this.$.modeTabs.updateBar();
 
@@ -196,9 +196,9 @@ Polymer({
   },
   openTroubleshoot: function() {
     if (this.ui.unableToGet) {
-      this.troubleshootTitle = ui.i18n_t("UNABLE_TO_GET");
+      this.troubleshootTitle = ui.i18n_t('UNABLE_TO_GET');
     } else {
-      this.troubleshootTitle = ui.i18n_t("UNABLE_TO_SHARE");
+      this.troubleshootTitle = ui.i18n_t('UNABLE_TO_SHARE');
     }
     this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});

@@ -24,7 +24,7 @@
 import firewall = require('./firewall');
 import globals = require('./globals');
 import local_instance = require('./local-instance');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 import metrics = require('./metrics');
 import network_options = require('../generic/network-options');
 import remote_user = require('./remote-user');
@@ -258,7 +258,7 @@ export function notifyUI(networkName :string, userId :string) {
     }
 
     public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
-      throw new Error("Operation not implemented.");
+      throw new Error('Operation not implemented.');
     }
 
     //================ Subclasses must override these methods ================//

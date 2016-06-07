@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "uProbe",
+  "description": "Guess-timates your NAT type.",
+  "version": "0.1",
+  "minimum_chrome_version": "41.0.2267.0",
+  "app": {
+    "background": {
+      "scripts": [
+        "background.js"
+      ]
+    }
+  },
+  "permissions": [],
+  "sockets": {
+    "tcp": {
+      "connect" : ""
+    },
+    "tcpServer": {
+      "listen": ""
+    },
+    "udp": {
+      "bind": "*",
+      "send": "*"
+    }
+  }
+}

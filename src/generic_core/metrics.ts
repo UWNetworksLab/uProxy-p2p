@@ -2,8 +2,8 @@
 /// <reference path='../../../third_party/typings/freedomjs-anonymized-metrics/index.d.ts' />
 
 import _ = require('lodash');
-import crypto = require('../../../third_party/uproxy-lib/crypto/random');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import crypto = require('../lib/crypto/random');
+import logging = require('../lib/logging/logging');
 import storage = require('../interfaces/storage');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
@@ -293,9 +293,9 @@ export class Metrics {
       platform = 'windows';
     }
 
-    log.info("getReport: chromeVersion: " + chromeVersion + ", firefoxVersion: "
-             + firefoxVersion + ", platform: " + platform + " from user agent '"
-             + navigator.userAgent + "'.");
+    log.info('getReport: chromeVersion: ' + chromeVersion + ', firefoxVersion: '
+             + firefoxVersion + ', platform: ' + platform + ' from user agent "'
+             + navigator.userAgent + '".');
     // Don't catch any Promise rejections here so that they can be handled
     // by the caller instead.
     return this.onceLoaded_.then(() => {
@@ -441,7 +441,7 @@ export class DailyMetricsReporter {
       },
       (err:any) => {
         this.sendReport_(null);
-        log.error("Daily metrics send: failed NetworkInfo: ", err);
+        log.error('Daily metrics send: failed NetworkInfo: ', err);
       });
   }
 

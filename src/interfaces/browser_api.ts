@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import net = require('../lib/net/net.types');
 
 // Describes the interface for functions that have different implications
 // for different browsers.

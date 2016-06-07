@@ -6,7 +6,7 @@
  * Provides a promise-based interface to the storage provider.
  */
 
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 
 declare var freedom: freedom.FreedomInModuleEnv;
 

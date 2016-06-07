@@ -9,7 +9,7 @@
 import browser_api =  require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import user_interface = require('../../../generic_ui/scripts/ui');
-import net = require('../../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../../lib/net/net.types');
 import port = require('./port');
 
 interface FullfillAndReject {
@@ -40,10 +40,10 @@ class FirefoxBrowserApi implements BrowserAPI {
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon',
         {
-          "18": "./icons/18_" + iconFile,
-          "36": "./icons/36_" + iconFile,
-          "32": "./icons/32_online.png",
-          "64": "./icons/64_online.png"
+          '18': './icons/18_' + iconFile,
+          '36': './icons/36_' + iconFile,
+          '32': './icons/32_online.png',
+          '64': './icons/64_online.png'
         });
   }
 

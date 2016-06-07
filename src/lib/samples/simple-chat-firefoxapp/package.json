@@ -1,0 +1,8 @@
+{
+  "name": "simple-chat",
+  "title": "Simple chat",
+  "description": "Single-page chat.",
+  "author": "uProxy",
+  "license": "Apache 2",
+  "version": "0.0.1"
+}

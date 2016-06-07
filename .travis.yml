@@ -6,5 +6,5 @@ before_install:
 install:
   - ./setup.sh install
 script:
-  - grunt test
+  - grunt lint test
 sudo: false

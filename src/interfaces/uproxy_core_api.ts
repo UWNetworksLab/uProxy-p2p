@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
+import net = require('../lib/net/net.types');
 import social = require('./social');
 import ui = require('./ui');
 
@@ -56,8 +56,7 @@ export interface InitialState {
 }
 
 export interface ValidProxyServerIdentity {
-  ip :string;
-  public_key :string;
+  [key: string]: string;
 }
 
 export interface ManagedPolicyUpdate {

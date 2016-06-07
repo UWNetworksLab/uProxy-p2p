@@ -14,13 +14,13 @@
 
 import browser_connector = require('../interfaces/browser_connector');
 import globals = require('./globals');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import loggingprovider = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import logging = require('../lib/logging/logging');
+import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
 import metrics_module = require('./metrics');
-import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
+import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import social_network = require('./social');
 import social = require('../interfaces/social');
-import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
+import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
 import ui = require('./ui_connector');
 import uproxy_core = require('./uproxy_core');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');

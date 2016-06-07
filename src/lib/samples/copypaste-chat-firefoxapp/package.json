@@ -1,0 +1,8 @@
+{
+  "name": "copypaste-chat",
+  "title": "copypaste chat",
+  "description": "WebRTC chat with copy/paste-based signalling channel.",
+  "author": "uProxy",
+  "license": "Apache 2",
+  "version": "0.0.1"
+}

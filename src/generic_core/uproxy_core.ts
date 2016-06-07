@@ -1,13 +1,13 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
 import _ = require('lodash');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
-import onetime = require('../../../third_party/uproxy-lib/bridge/onetime');
-import nat_probe = require('../../../third_party/uproxy-lib/nat/probe');
+import logging = require('../lib/logging/logging');
+import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
+import net = require('../lib/net/net.types');
+import onetime = require('../lib/bridge/onetime');
+import nat_probe = require('../lib/nat/probe');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
 import user = require('./remote-user');
@@ -255,7 +255,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // onUpdate not needed in the real core.
   onUpdate = (update:uproxy_core_api.Update, handler:Function) => {
-    throw "uproxy_core onUpdate not implemented.";
+    throw 'uproxy_core onUpdate not implemented.';
   }
 
   /**
@@ -618,7 +618,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         var escapedRegex = new RegExp(
             // Escape all special regex characters, from
             // http://stackoverflow.com/questions/3446170/
-            value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"),
+            value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&'),
             'g');
         text = text.replace(escapedRegex, prefix + index);
         ++index;

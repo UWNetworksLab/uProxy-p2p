@@ -1,0 +1,8 @@
+{
+  "name": "uprobe",
+  "title": "uProbe",
+  "description": "Guess-timates your NAT type.",
+  "author": "uProxy",
+  "license": "Apache 2",
+  "version": "0.0.1"
+}

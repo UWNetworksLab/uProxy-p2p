@@ -34,21 +34,25 @@ function clean ()
 function installTools ()
 {
   runCmd "mkdir -p build/tools"
-  runCmd "cp -r node_modules/uproxy-lib/build/tools/* build/tools/"
+  runCmd "cp src/lib/build-tools/*.ts build/tools/"
+  runAndAssertCmd "$NPM_BIN_DIR/tsc --module commonjs --noImplicitAny ./build/tools/*.ts"
 }
 
 function installThirdParty ()
 {
-  runAndAssertCmd "$NPM_BIN_DIR/bower install --allow-root"
+  runAndAssertCmd "$NPM_BIN_DIR/bower install --allow-root --config.interactive=false"
+  runAndAssertCmd "mkdir -p build/third_party"
   runAndAssertCmd "pushd third_party && $NPM_BIN_DIR/typings install && popd"
-  runAndAssertCmd "$NPM_BIN_DIR/grunt copy:thirdParty"
+  runAndAssertCmd "cp -r third_party/* build/third_party/"
+  runAndAssertCmd "mkdir -p build/third_party/freedom-port-control"
+  runAndAssertCmd "cp -r node_modules/freedom-port-control/dist build/third_party/freedom-port-control/"
 }
 
 function installDevDependencies ()
 {
   runAndAssertCmd "npm install"
-  installTools
   installThirdParty
+  installTools
 }
 
 if [ "$1" == 'install' ]; then
