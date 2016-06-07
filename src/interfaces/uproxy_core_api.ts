@@ -42,6 +42,7 @@ export interface GlobalSettings {
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
   activePromoId: string;
+  shouldHijackDO: boolean;
   crypto: boolean;
 }
 export interface InitialState {
