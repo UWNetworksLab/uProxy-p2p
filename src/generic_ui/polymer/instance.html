@@ -47,15 +47,18 @@
          hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'>
 
       <p id='description' hidden?='{{ !instance.description }}'>
-        <bdi>{{ instance.description }}</bdi>
+        <bdi class='display:inline'>{{ instance.description }}</bdi>
+        <span id='verified' class='display:inline'
+              hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'>
+          &check; </span>
+        <span id='notverified'
+              hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'>
+          &cross; </span>
       </p>
-
-      <span id='verified'
-            hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'>
-        &check; </span>
-      <span id='notverified'
-            hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'>
-        &cross; </span>
+      <div hidden?='{{ !(!instance.description) }}'>
+        <span hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'> Verified </span>
+        <span hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'> FAILED VERIFICATION </span>
+      </div>
       <div id='verification'
            hidden?='{{ instance.verifyState != VerifyState.VERIFY_BEGIN }}'>
         <span id='verification-inprogress' hidden?='{{ sas != null }}'>
@@ -70,12 +73,6 @@
             {{ "NO" }}
           </uproxy-button>
         </span>
-      </div>
-      <div id='verification'
-           hidden?='{{ instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
-        <uproxy-button raised on-tap='{{ verify }}'>
-          {{ "VERIFY" | $$ }}
-        </uproxy-button>
       </div>
 
       <!-- It is assumed that all uproxy-instances are taken from
@@ -97,6 +94,12 @@
 
       <!-- currently getting access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
+        <div id='verification' class='display:inline'
+             hidden?='{{ ENABLE_VERIFY && instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
+          <uproxy-button raised on-tap='{{ verify }}'>
+            {{ "VERIFY" | $$ }}
+          </uproxy-button>
+        </div>
         <uproxy-button class='grey' raised on-tap='{{ stop }}'>
           {{ "STOP_GETTING" | $$ }}
         </uproxy-button>

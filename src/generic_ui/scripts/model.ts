@@ -72,6 +72,7 @@ export class Model {
     validProxyServers: [],
     activePromoId: null,
     crypto: true
+    enabledExperiments: []
   };
 
   public reconnecting = false;

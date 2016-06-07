@@ -58,6 +58,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   validProxyServers: [],
   activePromoId: null,  // set on promoIdDetected
   crypto: true
+  enabledExperiments: [],
 };
 
 export var natType :string = '';

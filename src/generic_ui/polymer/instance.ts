@@ -4,6 +4,7 @@
 import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');
 import net = require('../../lib/net/net.types');
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import user_interface = require('../scripts/ui');
 
 // generic_ui/scripts/ui.ts: UserInterface
@@ -26,6 +27,10 @@ Polymer({
     this.model = model;
     this.sas = null;
     this.VerifyState = social.VerifyState;
+    // Feature code for verification
+    this.ENABLE_VERIFY =
+      model.globalSettings.enabledExperiments.indexOf(
+        uproxy_core_api.kFeatureVerify) >= 0;
   },
   start: function() {
     if (!this.instance.isOnline) {
