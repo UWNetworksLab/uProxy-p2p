@@ -1,10 +1,8 @@
-/// <reference path='../../../../third_party/aes-js/aes-js.d.ts' />
-
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import decompression = require('./decompressionShaper');
-import encryption = require('./encryptionShaper');
 import fragmentation = require('./fragmentationShaper');
 import logging = require('../logging/logging');
+import rc4 = require('./rc4');
 import sequence = require('./byteSequenceShaper');
 import transformer = require('./transformer');
 
@@ -13,7 +11,7 @@ const log :logging.Log = new logging.Log('protean');
 // Accepted in serialised form by configure().
 export interface ProteanConfig {
   decompression :decompression.DecompressionConfig;
-  encryption :encryption.EncryptionConfig;
+  encryption: rc4.Config;
   fragmentation :fragmentation.FragmentationConfig;
   injection :sequence.SequenceConfig
 }
@@ -22,7 +20,7 @@ export interface ProteanConfig {
 export function sampleConfig() :ProteanConfig {
   return {
     decompression: decompression.sampleConfig(),
-    encryption: encryption.sampleConfig(),
+    encryption: rc4.sampleConfig(),
     fragmentation: fragmentation.sampleConfig(),
     injection: sequence.sampleConfig()
   };
@@ -45,7 +43,7 @@ export class Protean implements transformer.Transformer {
   private fragmenter_ :fragmentation.FragmentationShaper;
 
   // Encryption transformer
-  private encrypter_ :encryption.EncryptionShaper;
+  private encrypter_: rc4.Rc4Transformer;
 
   // Decompression transformer
   private decompresser_ :decompression.DecompressionShaper;
@@ -70,7 +68,7 @@ export class Protean implements transformer.Transformer {
         'fragmentation' in config &&
         'injection' in config) {
       this.decompresser_ = new decompression.DecompressionShaper();
-      this.encrypter_ = new encryption.EncryptionShaper();
+      this.encrypter_ = new rc4.Rc4Transformer();
       this.injecter_ = new sequence.ByteSequenceShaper();
       this.fragmenter_ = new fragmentation.FragmentationShaper();
 

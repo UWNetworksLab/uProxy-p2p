@@ -1,6 +1,6 @@
 {
   "name": "uProxy",
-  "description": "Share your pathway to the Internet",
+  "description": "Internet without borders",
   "version": "0.8.42",
   "repository": {
     "type": "git",
@@ -17,7 +17,6 @@
     }
   ],
   "devDependencies": {
-    "aes-js": "^0.2.1",
     "arraybuffer-slice": "^0.1.2",
     "bower": "^1.4.1",
     "browserify-zlib": "^0.1.4",
@@ -64,15 +63,12 @@
     "jsurl": "^0.1.2",
     "lodash": "^3.7.0",
     "md5": "^2.0.0",
-    "regex2dfa": "^0.1.6",
     "simple-rc4": "0.0.1-b",
     "ssh2": "0.5.0",
     "tslint": "^3.10.2",
     "typescript": "~1.8.10",
     "typings": "^0.7.12",
     "uparams": "^1.2.0",
-    "utransformers": "^0.2.1",
     "xregexp": "^2.0.0"
-  },
-  "private": true
+  }
 }
