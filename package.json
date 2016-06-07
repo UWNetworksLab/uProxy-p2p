@@ -1,6 +1,6 @@
 {
   "name": "uProxy",
-  "description": "Share your pathway to the Internet",
+  "description": "Internet without borders",
   "version": "0.8.42",
   "repository": {
     "type": "git",
@@ -70,6 +70,5 @@
     "typings": "^0.7.12",
     "uparams": "^1.2.0",
     "xregexp": "^2.0.0"
-  },
-  "private": true
+  }
 }
