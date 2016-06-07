@@ -218,7 +218,7 @@ class ChromeBrowserApi implements BrowserAPI {
     this.events_[name] = callback;
   }
 
-  public fire_ = (name :string, data ?:any) => {
+  public emitCommon = (name :string, data ?:any) => {
     chrome.runtime.sendMessage({name: data});
   }
 

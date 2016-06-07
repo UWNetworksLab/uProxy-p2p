@@ -760,18 +760,20 @@ export class UserInterface implements ui_constants.UiApi {
     for (let key of keys) {
       vals[key] = this.i18n_t(key);
     }
+    // TODO: Use `emitCommon` API for Chrome too once we get it working
     if (callback) {
       callback(vals);
     } else {
-      this.browserApi.fire_('translations', vals);
+      this.browserApi.emitCommon('translations', vals);
     }
   }
 
   public handleGlobalSettingsRequest = (callback ?:Function) => {
+    // TODO: Use `emitCommon` API for Chrome too once we get it working
     if (callback) {
       callback(this.model.globalSettings);
     } else {
-      this.browserApi.fire_('globalSettings', this.model.globalSettings);
+      this.browserApi.emitCommon('globalSettings', this.model.globalSettings);
     }
   }
 

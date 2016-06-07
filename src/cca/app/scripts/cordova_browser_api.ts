@@ -280,7 +280,7 @@ class CordovaBrowserApi implements BrowserAPI {
     }
   }
 
-  public fire_ = (name :string, data ?:any) => {
+  public emitCommon = (name :string, data ?:any) => {
     chrome.runtime.sendMessage({name: data});
   }
 

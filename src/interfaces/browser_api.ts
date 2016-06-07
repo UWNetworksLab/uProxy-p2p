@@ -44,7 +44,10 @@ export interface BrowserAPI {
   // The notification can be up to 4 characters.
   setBadgeNotification(notification :string) :void;
 
-  fire_(message :string, data ?:any) :void;
+  // Cross-browser "emit" method
+  // (i.e. abstracts `chrome.runtime.sendMessage`, FF's `self.port.emit`, etc.)
+  // (Would name this "emit" or "fire", but those are already taken.)
+  emitCommon(message :string, data ?:any) :void;
 }
 
 // Info associated with the 'proxyDisconnect' event.
