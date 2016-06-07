@@ -853,6 +853,7 @@ export class UserInterface implements ui_constants.UiApi {
           this.instanceGettingAccessFrom_ != instanceId) {
         this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
       }
+      console.log('Got startGettingFromInstance: got endpoint: ', endpoint);
       this.startGettingInUiAndConfig(instanceId, endpoint);
     }, (err:Error) => {
       this.instanceTryingToGetAccessFrom = null;
@@ -894,6 +895,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateGettingStatusBar_();
 
+    console.log('startUsingProxy:', endpoint);
     this.browserApi.startUsingProxy(endpoint,
         this.model.globalSettings.proxyBypass);
   }
