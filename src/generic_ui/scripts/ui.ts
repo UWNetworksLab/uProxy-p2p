@@ -524,7 +524,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public parseUrlData = (url:string) : { type:social.PeerMessageType; message:string } => {
-    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/#?(.*)/)
+    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)[/#]+(.*)/)
     if (!match) {
       throw new Error('invalid URL format');
     }
@@ -587,10 +587,8 @@ export class UserInterface implements ui_constants.UiApi {
         }
       } else {
         // Old v1 invites are base64 encoded JSON
-        var token = invite.substr(invite.lastIndexOf('/') + 1);
-        if (token[0] === '#') {
-          token = token.substr(1);
-        }
+        var lastNonCodeCharacter = Math.max(invite.lastIndexOf('/'), invite.lastIndexOf('#'));
+        var token = invite.substr(lastNonCodeCharacter + 1);
 
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match('[A-Za-z0-9+/=_]+')[0];
