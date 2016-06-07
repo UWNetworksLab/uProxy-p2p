@@ -5,8 +5,8 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('fragmentation shaper');
 
-export const CHUNK_SIZE: number = 16;
-export const IV_SIZE: number = 16;
+const CHUNK_SIZE: number = 16;
+const IV_SIZE: number = 16;
 
 // Accepted in serialised form by configure().
 export interface FragmentationConfig {
