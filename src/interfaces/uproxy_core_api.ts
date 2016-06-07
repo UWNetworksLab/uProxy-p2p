@@ -41,7 +41,13 @@ export interface GlobalSettings {
   proxyBypass: string[];
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
+  // A list of strings, each represented as a constant below, with
+  // prefix 'kFeature'.
+  enabledExperiments :string[];
 }
+
+export const kFeatureVerify = 'verify';
+
 export interface InitialState {
   networkNames :string[];
   cloudProviderNames :string[];
