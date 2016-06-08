@@ -1303,11 +1303,6 @@ taskManager.add 'socksEchoIntegrationTest', [
   'jasmine_chromeapp:socksEcho'
 ]
 
-taskManager.add 'lint', [
-  'tslint'
-  'jshint'
-]
-
 taskManager.add 'unit_test', [
   'test_lib'
   'test_core'
@@ -1328,12 +1323,14 @@ taskManager.add 'test', [
 
 # Builds all code, including the "dist" build, but skips
 # linging and testing which can both be annoying and slow.
+# jshint is here because catches hard syntax errors, etc.
 taskManager.add 'build', [
   'exec:rmIosBuild'
   'exec:rmAndroidBuild'
   'build_chrome'
   'build_firefox'
   'build_cca'
+  'jshint'
   'copy:dist'
   'jpm:xpi'
 ]
@@ -1342,7 +1339,7 @@ taskManager.add 'build', [
 # building, tests and lints all code.
 taskManager.add 'dist', [
   'build'
-  'lint'
+  'tslint'
   'test'
 ]
 
