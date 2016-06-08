@@ -1316,6 +1316,7 @@ taskManager.add 'test', [
   'test_core'
   'test_ui'
   'test_chrome'
+  'integration_test'
 ]
 
 taskManager.add 'build', [
@@ -1334,6 +1335,7 @@ taskManager.add 'lint', [
 taskManager.add 'dist', [
   'build'
   'lint'
+  'test'
   'copy:dist'
   'jpm:xpi'
 ]
