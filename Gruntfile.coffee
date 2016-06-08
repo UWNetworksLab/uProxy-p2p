@@ -1303,10 +1303,9 @@ taskManager.add 'socksEchoIntegrationTest', [
   'jasmine_chromeapp:socksEcho'
 ]
 
-# TODO: add test_chrome once it passes reliably
-taskManager.add 'integration_test', [
-  'tcpIntegrationTest'
-  'socksEchoIntegrationTest'
+taskManager.add 'lint', [
+  'tslint'
+  'jshint'
 ]
 
 taskManager.add 'unit_test', [
@@ -1316,30 +1315,35 @@ taskManager.add 'unit_test', [
   'test_chrome'
 ]
 
+# TODO: add test_chrome once it passes reliably
+taskManager.add 'integration_test', [
+  'tcpIntegrationTest'
+  'socksEchoIntegrationTest'
+]
+
 taskManager.add 'test', [
   'unit_test'
   'integration_test'
 ]
 
+# Builds all code, including the "dist" build, but skips
+# linging and testing which can both be annoying and slow.
 taskManager.add 'build', [
   'exec:rmIosBuild'
   'exec:rmAndroidBuild'
   'build_chrome'
   'build_firefox'
   'build_cca'
+  'copy:dist'
+  'jpm:xpi'
 ]
 
-taskManager.add 'lint', [
-  'tslint'
-  'jshint'
-]
-
+# This is run prior to releasing uProxy and, in addition to
+# building, tests and lints all code.
 taskManager.add 'dist', [
   'build'
   'lint'
   'test'
-  'copy:dist'
-  'jpm:xpi'
 ]
 
 taskManager.add 'default', [
