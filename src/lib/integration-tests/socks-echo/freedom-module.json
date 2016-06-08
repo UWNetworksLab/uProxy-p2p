@@ -1,0 +1,88 @@
+{
+  "name": "fully proxying integration tests",
+  "app": {
+    "script": [
+      "freedom-module.static.js"
+    ]
+  },
+  "dependencies": {
+    "loggingcontroller": {
+      "url": "lib/loggingprovider/freedom-module.json",
+      "api": "loggingcontroller"
+    },
+    "logginglistener": {
+      "url": "lib/loggingprovider/freedom-module.json",
+      "api": "logginglistener"
+    },
+    "churnPipe": {
+      "url": "lib/churn-pipe/freedom-module.json",
+      "api": "churnPipe"
+    },
+    "portControl": {
+      "url": "freedom-port-control/dist/port-control.json",
+      "api": "portControl"
+    }
+  },
+  "provides": [
+    "ProxyIntegrationTest"
+  ],
+  "default": "ProxyIntegrationTest",
+  "api": {
+    "ProxyIntegrationTest": {
+      "constructor": {
+        "value": ["boolean", "boolean", "number", "boolean"]
+      },
+      "startEchoServer": {
+        "type": "method",
+        "value": [],
+        "ret": "number"
+      },
+      "connect": {
+        "type": "method",
+        "value": ["number", "string"],
+        "ret": "string"
+      },
+      "setRepeat": {
+        "type": "method",
+        "value": ["number"]
+      },
+      "echo": {
+        "type": "method",
+        "value": ["string", "buffer"],
+        "ret": "buffer"
+      },
+      "echoMultiple": {
+        "type": "method",
+        "value": ["string", ["array", "buffer"]],
+        "ret": ["array", "buffer"]
+      },
+      "sendData": {
+        "type": "method",
+        "value": ["string", "buffer"]
+      },
+      "receivedData": {
+        "type": "event",
+        "value": {
+          "connectionId": "string",
+          "response": "buffer"
+        }
+      },
+      "closeEchoConnections": {
+        "type": "method"
+      },
+      "shutdown": {
+        "type": "method"
+      },
+      "sockClosed": {
+          "type": "event",
+          "value": "string"
+      }
+    }
+  },
+  "permissions": [
+    "core.rtcpeerconnection",
+    "core.rtcdatachannel",
+    "core.tcpsocket",
+    "core.udpsocket"
+  ]
+}

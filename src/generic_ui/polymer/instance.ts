@@ -2,7 +2,7 @@
 
 import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');
-import net = require('../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../lib/net/net.types');
 import user_interface = require('../scripts/ui');
 
 var ui = ui_context.ui;
@@ -20,7 +20,7 @@ Polymer({
   },
   start: function() {
     if (!this.instance.isOnline) {
-      this.ui.toastMessage = ui.i18n_t("FRIEND_OFFLINE", { name: this.userName });
+      this.ui.toastMessage = ui.i18n_t('FRIEND_OFFLINE', { name: this.userName });
       return;
     }
 

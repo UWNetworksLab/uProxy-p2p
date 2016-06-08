@@ -154,8 +154,8 @@ describe('core-connector', () => {
       expect(chrome.browserAction['setIcon']).toHaveBeenCalledWith(
         {
           path: {
-            "19": "icons/19_" + Constants.LOGGED_OUT_ICON,
-            "38": "icons/38_" + Constants.LOGGED_OUT_ICON,
+            '19': 'icons/19_' + Constants.LOGGED_OUT_ICON,
+            '38': 'icons/38_' + Constants.LOGGED_OUT_ICON,
           }
         });
     }).then(done);

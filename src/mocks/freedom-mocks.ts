@@ -8,8 +8,8 @@
  * This file must be compiled independently of all other typescript in uProxy.
  */
 
-import MockEventHandler = require('../../../third_party/uproxy-lib/freedom/mocks/mock-eventhandler');
-import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
+import MockEventHandler = require('../lib/freedom/mocks/mock-eventhandler');
+import arraybuffers = require('../lib/arraybuffers/arraybuffers');
 
 export class MockFreedomStorage implements freedom.Storage.Storage {
 
@@ -34,7 +34,7 @@ export class MockFreedomStorage implements freedom.Storage.Storage {
   }
 
   public remove = (key :string) => {
-    //console.log("\n  public remove(" + key + ").");
+    //console.log('\n  public remove(' + key + ').');
     var prev = this.store_[key];
     delete this.store_[key];
     return Promise.resolve(prev);

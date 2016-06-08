@@ -2,7 +2,7 @@
 
 import browser_connector = require('../interfaces/browser_connector');
 import globals = require('./globals');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 import social_network = require('./social');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');

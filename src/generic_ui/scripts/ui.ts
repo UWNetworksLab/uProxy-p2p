@@ -17,7 +17,7 @@ import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
-import net = require('../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../lib/net/net.types');
 import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
@@ -224,7 +224,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       var user = this.mapInstanceIdToUser_[instanceId];
       user.isGettingFromMe = true;
-      this.showNotification(this.i18n_t("STARTED_PROXYING",
+      this.showNotification(this.i18n_t('STARTED_PROXYING',
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
       checkConnectivityIntervalId = setInterval(
           this.notifyUserIfConnectedToCellular_,
@@ -238,7 +238,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       // only show a notification if we knew we were prokying
       if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-        this.showNotification(this.i18n_t("STOPPED_PROXYING",
+        this.showNotification(this.i18n_t('STOPPED_PROXYING',
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
       }
       delete this.instancesGivingAccessTo[instanceId];
@@ -267,7 +267,7 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (giving)');
 
-      this.toastMessage = this.i18n_t("UNABLE_TO_SHARE_WITH", {
+      this.toastMessage = this.i18n_t('UNABLE_TO_SHARE_WITH', {
         name: info.name
       });
       this.unableToShare = true;
@@ -291,7 +291,7 @@ export class UserInterface implements ui_constants.UiApi {
           if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
             this.restartServer_('digitalocean');
           } else {
-            this.toastMessage = this.i18n_t("UNABLE_TO_GET_FROM", {
+            this.toastMessage = this.i18n_t('UNABLE_TO_GET_FROM', {
               name: info.name
             });
             this.unableToGet = true;
@@ -321,6 +321,8 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
     browserApi.on('promoIdDetected', this.setActivePromoId);
+    browserApi.on('translationsRequest', this.handleTranslationsRequest);
+    browserApi.on('globalSettingsRequest', this.handleGlobalSettingsRequest);
     backgroundUi.registerAsFakeBackground(this.panelMessageHandler);
 
     core.getFullState()
@@ -426,7 +428,7 @@ export class UserInterface implements ui_constants.UiApi {
   public showDialog(heading :string, message :string, buttonText ?:string,
       signal ?:string, displayData ?:string) {
     var button :ui_constants.DialogButtonDescription = {
-      text: buttonText || this.i18n_t("OK")
+      text: buttonText || this.i18n_t('OK')
     };
     if (signal) {
       button['signal'] = signal;
@@ -502,7 +504,7 @@ export class UserInterface implements ui_constants.UiApi {
   private updateGettingStatusBar_ = () => {
     // TODO: localize this.
     if (this.instanceGettingAccessFrom_) {
-      this.gettingStatus = this.i18n_t("GETTING_ACCESS_FROM", {
+      this.gettingStatus = this.i18n_t('GETTING_ACCESS_FROM', {
         name: this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].name
       });
     } else {
@@ -517,16 +519,16 @@ export class UserInterface implements ui_constants.UiApi {
     if (instanceIds.length === 0) {
       this.sharingStatus = null;
     } else if (instanceIds.length === 1) {
-      this.sharingStatus = this.i18n_t("SHARING_ACCESS_WITH_ONE", {
+      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_ONE', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name
       });
     } else if (instanceIds.length === 2) {
-      this.sharingStatus = this.i18n_t("SHARING_ACCESS_WITH_TWO", {
+      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_TWO', {
         name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
         name2: this.mapInstanceIdToUser_[instanceIds[1]].name
       });
     } else {
-      this.sharingStatus = this.i18n_t("SHARING_ACCESS_WITH_MANY", {
+      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_MANY', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name,
         numOthers: (instanceIds.length - 1)
       });
@@ -534,7 +536,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public parseUrlData = (url:string) : { type:social.PeerMessageType; message:string } => {
-    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
+    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)[/#]+(.*)/)
     if (!match) {
       throw new Error('invalid URL format');
     }
@@ -556,7 +558,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     var getConfirmation = Promise.resolve<void>();
     if (showConfirmation) {
-      if (networkName === "Cloud") {
+      if (networkName === 'Cloud') {
         userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
       }
       var confirmationMessage =
@@ -567,7 +569,7 @@ export class UserInterface implements ui_constants.UiApi {
     return getConfirmation.then(() => {
       var socialNetworkInfo :social.SocialNetworkInfo = {
         name: networkName,
-        userId: "" /* The current user's ID will be determined by the core. */
+        userId: '' /* The current user's ID will be determined by the core. */
       };
       return this.core.acceptInvitation(
           {network: socialNetworkInfo, tokenObj: tokenObj});
@@ -597,9 +599,11 @@ export class UserInterface implements ui_constants.UiApi {
         }
       } else {
         // Old v1 invites are base64 encoded JSON
-        var token = invite.substr(invite.lastIndexOf('/') + 1);
+        var lastNonCodeCharacter = Math.max(invite.lastIndexOf('/'), invite.lastIndexOf('#'));
+        var token = invite.substr(lastNonCodeCharacter + 1);
+
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
-        token = token.match("[A-Za-z0-9+/=_]+")[0];
+        token = token.match('[A-Za-z0-9+/=_]+')[0];
         var parsedObj = JSON.parse(atob(token));
         var networkData = parsedObj.networkData;
         if (typeof networkData === 'object' && networkData.networkData) {
@@ -761,6 +765,18 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
+  }
+
+  public handleTranslationsRequest = (keys :string[], callback ?:Function) => {
+    var vals :{[s :string]: string;} = {};
+    for (let key of keys) {
+      vals[key] = this.i18n_t(key);
+    }
+    this.browserApi.respond(vals, callback, 'translations');
+  }
+
+  public handleGlobalSettingsRequest = (callback ?:Function) => {
+    this.browserApi.respond(this.model.globalSettings, callback, 'globalSettings');
   }
 
   public setActivePromoId = (promoId :string) => {
@@ -987,7 +1003,7 @@ export class UserInterface implements ui_constants.UiApi {
           this.reconnect_(networkMsg.name);
         } else {
           this.showNotification(
-            this.i18n_t("LOGGED_OUT", { network: displayName }));
+            this.i18n_t('LOGGED_OUT', { network: displayName }));
 
           if (!this.model.onlineNetworks.length) {
             this.view = ui_constants.View.SPLASH;
@@ -1115,7 +1131,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string, userName ?:string) : Promise<void> => {
-    if (network === "Cloud") {
+    if (network === 'Cloud') {
       this.model.globalSettings.showCloud = true;
       this.core.updateGlobalSettings(this.model.globalSettings);
     }
@@ -1128,7 +1144,7 @@ export class UserInterface implements ui_constants.UiApi {
       this.browserApi.hasInstalledThenLoggedIn = true;
     }).catch((e :Error) => {
       this.showNotification(this.i18n_t(
-          "ERROR_SIGNING_IN", {network: this.getNetworkDisplayName(network)}));
+          'ERROR_SIGNING_IN', {network: this.getNetworkDisplayName(network)}));
       throw e;
     });
   }
@@ -1227,7 +1243,7 @@ export class UserInterface implements ui_constants.UiApi {
           // TODO: this may have only failed for 1 of multiple networks
           this.stopReconnect();
           this.showNotification(
-              this.i18n_t("LOGGED_OUT", { network: network }));
+              this.i18n_t('LOGGED_OUT', { network: network }));
 
           this.updateView_();
         });

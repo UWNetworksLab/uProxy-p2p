@@ -8,18 +8,18 @@
  * consent, proxying status, and any other signalling information.
  */
 
-import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import arraybuffers = require('../lib/arraybuffers/arraybuffers');
+import bridge = require('../lib/bridge/bridge');
 import consent = require('./consent');
 import crypto = require('./crypto');
 import globals = require('./globals');
 import _ = require('lodash');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import logging = require('../lib/logging/logging');
+import net = require('../lib/net/net.types');
 import Persistent = require('../interfaces/persistent');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import signals = require('../lib/webrtc/signals');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
 import user_interface = require('../interfaces/ui');

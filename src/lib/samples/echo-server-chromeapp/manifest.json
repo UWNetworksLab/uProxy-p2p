@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "name": "echo",
+  "description": "Echo server.",
+  "version": "0.1",
+  "app": {
+    "background": {
+      "scripts": [
+        "background.js"
+      ]
+    }
+  },
+  "permissions": [],
+  "sockets": {
+    "tcpServer": {
+      "listen": ""
+    }
+  }
+}

@@ -23,11 +23,11 @@
  * client, but with the 'uProxy' non-human client.
  */
 
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import bridge = require('../lib/bridge/bridge');
 import consent = require('./consent');
 import globals = require('./globals');
 import _ = require('lodash');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 import Persistent = require('../interfaces/persistent');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
@@ -104,7 +104,7 @@ var log :logging.Log = new logging.Log('remote-user');
       // Because it requires user action to add a cloud friend, and because
       // these cloud instances are only sharers, by default all users are
       // requesting access from cloud instances.
-      if (this.network.name === "Cloud") {
+      if (this.network.name === 'Cloud') {
         this.consent.localRequestsAccessFromRemote = true;
       }
 
@@ -129,9 +129,9 @@ var log :logging.Log = new logging.Log('remote-user');
       this.name = profile.name;
       this.fulfillNameReceived_(this.name);
       this.profile = profile;
-      if (!this.profile.status && this.network.name === "Cloud") {
+      if (!this.profile.status && this.network.name === 'Cloud') {
         this.profile.status = social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
-      } else if (typeof this.profile.status === "undefined") {
+      } else if (typeof this.profile.status === 'undefined') {
         this.profile.status = social.UserStatus.FRIEND;
       }
       this.saveToStorage();
@@ -496,10 +496,10 @@ var log :logging.Log = new logging.Log('remote-user');
         this.profile.url = state.url;
       }
 
-      if (typeof state.status === "undefined" &&
-          this.network.name === "Cloud") {
+      if (typeof state.status === 'undefined' &&
+          this.network.name === 'Cloud') {
         this.profile.status = social.UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
-      } else if (typeof state.status === "undefined") {
+      } else if (typeof state.status === 'undefined') {
         this.profile.status = social.UserStatus.FRIEND;
       } else {
         this.profile.status = state.status;

@@ -37,17 +37,29 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.MessageSender, sendResponse :Function) => {
+  if (!request) return;
+
   // handle requests from other pages (i.e. copypaste.html) to bring the
   // chrome popup to the front
-  if (request && request.openWindow) {
+  if (request.openWindow) {
     browserApi.bringUproxyToFront();
   }
 
   // handle requests to get logs
-  if (request && request.getLogs) {
+  if (request.getLogs) {
     core.getLogs().then((logs) => {
       sendResponse({ logs: logs });
     });
+    return true;
+  }
+
+  if (request.globalSettingsRequest) {
+    ui.handleGlobalSettingsRequest(sendResponse);
+    return true;
+  }
+
+  if (request.translationsRequest) {
+    ui.handleTranslationsRequest(request.translationsRequest, sendResponse);
     return true;
   }
 });
@@ -111,8 +123,8 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
     browserApi.hasInstalledThenLoggedIn = false;
     chrome.browserAction.setIcon({
       path: {
-        "19" : "icons/19_" + Constants.DEFAULT_ICON,
-        "38" : "icons/38_" + Constants.DEFAULT_ICON,
+        '19' : 'icons/19_' + Constants.DEFAULT_ICON,
+        '38' : 'icons/38_' + Constants.DEFAULT_ICON,
       }
     });
   });
@@ -120,8 +132,8 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
   chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
       // Do not open the extension when it's installed if the user is
       // going through the inline install flow.
-      if ((tabs[0].url.indexOf("uproxysite.appspot.com/install") == -1) &&
-          (tabs[0].url.indexOf("uproxy.org/install") == -1)) {
+      if ((tabs[0].url.indexOf('uproxysite.appspot.com/install') == -1) &&
+          (tabs[0].url.indexOf('uproxy.org/install') == -1)) {
         browserApi.bringUproxyToFront();
       }
   });
@@ -135,6 +147,7 @@ core = new CoreConnector(browserConnector);
 var oAuth = new ChromeTabAuth();
 browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
                          oAuth.login.bind(oAuth));
+var ui = new user_interface.UserInterface(core, browserApi);
 
 // used for de-duplicating urls caught by the listeners
 var lastUrl = '';

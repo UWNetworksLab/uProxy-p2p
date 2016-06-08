@@ -1,4 +1,4 @@
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import net = require('../lib/net/net.types');
 
 export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public events :{ [event :string] :(...args :Object[]) => void } = {};

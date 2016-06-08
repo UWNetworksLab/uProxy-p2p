@@ -44,8 +44,8 @@ Polymer({
     }).then(() => {
       // Reset the placeholders, which seem to be cleared after the
       // user types input in the input fields.
-      this.$.emailInput.placeholder = ui.i18n_t("EMAIL_PLACEHOLDER");
-      this.$.feedbackInput.placeholder = ui.i18n_t("FEEDBACK_PLACEHOLDER");
+      this.$.emailInput.placeholder = ui.i18n_t('EMAIL_PLACEHOLDER');
+      this.$.feedbackInput.placeholder = ui.i18n_t('FEEDBACK_PLACEHOLDER');
       // Clear the form.
       this.email = '';
       this.feedback = '';
@@ -58,7 +58,7 @@ Polymer({
       this.$.sendingFeedbackDialog.close();
     }).catch((e :Error) => {
       ui.showDialog(
-          ui.i18n_t("EMAIL_INSTEAD_TITLE"), ui.i18n_t("EMAIL_INSTEAD_MESSAGE"));
+          ui.i18n_t('EMAIL_INSTEAD_TITLE'), ui.i18n_t('EMAIL_INSTEAD_MESSAGE'));
       this.$.sendingFeedbackDialog.close();
     });
   },

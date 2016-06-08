@@ -9,7 +9,7 @@
 import browser_api =  require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import user_interface = require('../../../generic_ui/scripts/ui');
-import net = require('../../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../../lib/net/net.types');
 import port = require('./port');
 
 interface FullfillAndReject {
@@ -40,10 +40,10 @@ class FirefoxBrowserApi implements BrowserAPI {
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon',
         {
-          "18": "./icons/18_" + iconFile,
-          "36": "./icons/36_" + iconFile,
-          "32": "./icons/32_online.png",
-          "64": "./icons/64_online.png"
+          '18': './icons/18_' + iconFile,
+          '36': './icons/36_' + iconFile,
+          '32': './icons/32_online.png',
+          '64': './icons/64_online.png'
         });
   }
 
@@ -78,6 +78,14 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public on = (name :string, callback :Function) => {
     port.on(name, callback);
+  }
+
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    msg && this.respond_(data, msg);
+  }
+
+  private respond_ = (data: any, msg :string) : void => {
+    port.emit(msg, data);
   }
 
   /**

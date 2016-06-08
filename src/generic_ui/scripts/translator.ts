@@ -50,9 +50,9 @@ i18next.addResources('fa', 'translation', createI18nDictionary(farsi_source));
 export const i18n_t = (placeholder :string, params ?:any): string => {
   for (let p in params) {
     if (isRightToLeft(params[p])) {
-      params[p] = "\u200F" + params[p] + "\u200F";
+      params[p] = '\u200F' + params[p] + '\u200F';
     } else {
-      params[p] = "\u200E" + params[p] + "\u200E";
+      params[p] = '\u200E' + params[p] + '\u200E';
     }
   }
   return i18next.t(placeholder, params);

@@ -12,7 +12,7 @@
 import browser_api = require('../../../interfaces/browser_api');
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
-import net = require('../../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../../lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
 
 enum PopupState {
@@ -25,7 +25,7 @@ declare var Notification :any; //TODO remove this
 
 class CordovaBrowserApi implements BrowserAPI {
 
-  public browserSpecificElement = "";
+  public browserSpecificElement = '';
 
   public canProxy = true;
 
@@ -39,7 +39,7 @@ class CordovaBrowserApi implements BrowserAPI {
   // The URL for the page that renders the UI.  For terminological consistency,
   // the UI is referred to as the "popup", even though it is persistent and
   // full-screen.
-  private POPUP_URL = "index.html";
+  private POPUP_URL = 'index.html';
   // When we tried to create UI.
   private popupCreationStartTime_ = Date.now();
 
@@ -120,12 +120,12 @@ class CordovaBrowserApi implements BrowserAPI {
     }
 
     chrome.proxy.settings.set({
-      scope: "regular",
+      scope: 'regular',
       value: {
-        mode: "fixed_servers",
+        mode: 'fixed_servers',
         rules: {
           singleProxy: {
-            scheme: "socks5",
+            scheme: 'socks5',
             host: endpoint.address,
             port: endpoint.port
           }
@@ -144,7 +144,7 @@ class CordovaBrowserApi implements BrowserAPI {
       return;
     }
 
-    chrome.proxy.settings.clear({scope: "regular"}, () => {
+    chrome.proxy.settings.clear({scope: 'regular'}, () => {
       console.log('Cleared proxy settings');
     });
   };
@@ -229,7 +229,7 @@ class CordovaBrowserApi implements BrowserAPI {
     } else {
       // Once the app has started, all subsequent calls to bringUproxyToFront
       // are no-ops.
-      console.log("Waiting for popup to launch...");
+      console.log('Waiting for popup to launch...');
       return this.onceLaunched_;
     }
   }
@@ -238,7 +238,7 @@ class CordovaBrowserApi implements BrowserAPI {
     * Callback passed to chrome.app.window.create.
     */
   private newPopupCreated_ = (popup :chrome.app.window.AppWindow) => {
-    console.log("Time between browser icon click and popup launch (ms): " +
+    console.log('Time between browser icon click and popup launch (ms): ' +
         (Date.now() - this.popupCreationStartTime_));
     this.popupState_ = PopupState.LAUNCHED;
   }
@@ -289,6 +289,14 @@ class CordovaBrowserApi implements BrowserAPI {
       }
       this.pendingEvents_[name].push(args);
     }
+  }
+
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    callback && this.respond_(data, callback);
+  }
+
+  private respond_ = (data :any, callback :Function) : void => {
+    callback(data);
   }
 }
 

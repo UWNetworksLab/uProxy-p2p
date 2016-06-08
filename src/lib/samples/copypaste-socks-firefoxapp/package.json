@@ -1,0 +1,8 @@
+{
+  "name": "copypaste-socks",
+  "title": "Copy Paste SOCKS",
+  "description": "SOCKS server with copy paste-based signalling channel.",
+  "author": "uProxy",
+  "license": "Apache 2",
+  "version": "0.0.1"
+}

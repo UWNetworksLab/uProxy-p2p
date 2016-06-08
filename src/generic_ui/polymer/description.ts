@@ -20,6 +20,6 @@ Polymer({
     this.descriptionInput = '';
   },
   showDescription: function(description :string) {
-    return description ? description : ui_context.ui.i18n_t("NAME_THIS_DEVICE");
+    return description ? description : ui_context.ui.i18n_t('NAME_THIS_DEVICE');
   }
 });

@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import net = require('../lib/net/net.types');
 
 // Describes the interface for functions that have different implications
 // for different browsers.
@@ -43,6 +43,15 @@ export interface BrowserAPI {
   // Overlay the given text as a "badge" over the uProxy extension icon.
   // The notification can be up to 4 characters.
   setBadgeNotification(notification :string) :void;
+
+  // Cross-browser "respond" method, for responding to messages sent from
+  // content scripts.
+  // In Chrome, a callback will be supplied, which will be called with the
+  // given response data.
+  // In Firefox, since only JSON-serializable data (i.e. no callbacks) can be
+  // passed, a message will be supplied instead, which will be emitted with
+  // the given response data.
+  respond(data :any, callback ?:Function, msg ?:string) :void;
 }
 
 // Info associated with the 'proxyDisconnect' event.
