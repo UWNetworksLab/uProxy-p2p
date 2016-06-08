@@ -309,9 +309,6 @@ gruntConfig = {
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
-    lintFirefoxJs: {
-      command: 'jshint src/firefox/lib/*.js'
-    }
   }
 
   copy: {
@@ -945,6 +942,14 @@ gruntConfig = {
         'src/**/*.ts'
       ]
 
+  jshint:
+    firefox:
+      options:
+        moz: true
+      src: [
+        'src/firefox/lib/*.js'
+      ]
+
   #-------------------------------------------------------------------------
   jasmine:
     chrome_extension: Rule.jasmineSpec('chrome/extension/scripts/',
@@ -1193,7 +1198,6 @@ taskManager.add 'build_chrome', [
 # Firefox build tasks.
 taskManager.add('build_firefox', [
   'base'
-  'exec:lintFirefoxJs'
   'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'
@@ -1329,7 +1333,7 @@ taskManager.add 'build', [
 
 taskManager.add 'lint', [
   'tslint'
-  'exec:lintFirefoxJs'
+  'jshint'
 ]
 
 taskManager.add 'dist', [
@@ -1351,6 +1355,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-contrib-jshint'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'
