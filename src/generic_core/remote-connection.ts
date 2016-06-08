@@ -59,9 +59,6 @@ var generateProxyingSessionId_ = (): string => {
     // non-proxying traffic.
     private underlyingPeerConnection_ :peerconnection.PeerConnection<Object> = null;
 
-    // and non-proxying data channels.
-    private nonproxyChannels_ :{[name:string]:peerconnection.DataChannel} = null;
-
     private queuedHandlers_ :{[name:string]:(name:string, msg:any)=>void} = {};
 
     // Resolve this promise when rtcToNet is created and therefore not null.
@@ -174,7 +171,6 @@ var generateProxyingSessionId_ = (): string => {
       pc.onceClosed.then(() => {
         log.debug('pc.onceClosed.then()');
         this.underlyingPeerConnection_ = null;
-        this.nonproxyChannels_ = null;
       });
 
       this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
@@ -379,7 +375,6 @@ var generateProxyingSessionId_ = (): string => {
       pc.onceClosed.then(() => {
         log.debug('pc.onceClosed.then()');
         this.underlyingPeerConnection_ = null;
-        this.nonproxyChannels_ = null;
       });
       return Promise.resolve<void>();
     };

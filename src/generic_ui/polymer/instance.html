@@ -41,23 +41,39 @@
       margin-top: 2px;
       margin-right: 2px;
     }
+    .verified {
+    border-radius: 8px;
+      margin: 3px;
+      padding: 2px;
+      border: 1px solid green;
+      color: green;
+      display: inline-block;
+    }
+    .notverified {
+      border-radius: 8px;
+      margin: 3px;
+      padding: 2px;
+      border: 1px solid red;
+      color: red;
+      display: inline-block;
+    }
     </style>
 
-    <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }} {{ instance.verifyState == VerifyState.VERIFY_FAILED ? "bad_verify" : (instance.verifyState == VerifyState.VERIFY_COMPLETE ? "verified" : "unverified") }}'
+    <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
          hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'>
 
       <p id='description' hidden?='{{ !instance.description }}'>
-        <bdi class='display:inline'>{{ instance.description }}</bdi>
-        <span id='verified' class='display:inline'
+        <bdi style='display:inline'>{{ instance.description }}</bdi>
+        <span class='verified'
               hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'>
-          &check; </span>
-        <span id='notverified'
+          Verified </span>
+        <span class='notverified'
               hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'>
-          &cross; </span>
+          FAILED VERIFICATION </span>
       </p>
       <div hidden?='{{ !(!instance.description) }}'>
-        <span hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'> Verified </span>
-        <span hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'> FAILED VERIFICATION </span>
+        <span class='verified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'> Verified </span>
+        <span class='notverified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'> FAILED VERIFICATION </span>
       </div>
       <div id='verification'
            hidden?='{{ instance.verifyState != VerifyState.VERIFY_BEGIN }}'>
