@@ -287,7 +287,7 @@ export class KeyVerify {
     if (msg['type'] && KeyVerify.structuralVerify_(msg) &&
         this.protoVerify_(msg) && this.appropriateForRole_(msg.type)) {
       let type = msg.type;
-      console.log("GOT MESSAGE TYPE " + type);
+      log.debug("GOT MESSAGE TYPE " + type);
       // When verifying these messages:
       //  1. Compare the calculation of these values aginst the ones
       //     in the makeMSG_ methods.
@@ -299,7 +299,7 @@ export class KeyVerify {
         // of uProxy.
         if (msg.clientVersion !== KeyVerify.kClientVersion ||
             msg.version !== KeyVerify.kProtocolVersion) {
-          console.log("Invalid Hello message (versions): ", msg);
+          log.error("Invalid Hello message (versions): ", msg);
           this.resolve_(false);
           return;
         }
@@ -307,7 +307,7 @@ export class KeyVerify {
         // role 0 should receive hello2, and role 1 should receive hello1.
         if ((this.role_ == 0 && rawType !== Type.Hello2) ||
             (this.role_ == 1 && rawType !== Type.Hello1)) {
-          console.log("Got the wrong Hello message (" + type + " [" + rawType +
+          log.error("Got the wrong Hello message (" + type + " [" + rawType +
                       "]) for this role (" + this.role_ + ")");
           this.resolve_(false);
           return;
@@ -319,7 +319,7 @@ export class KeyVerify {
 
       } else if (type == 'Commit') {
         if (msg.clientVersion !== KeyVerify.kClientVersion) {
-          console.log("Invalid Commit message (clientVersion)", msg);
+          log.error("Invalid Commit message (clientVersion)", msg);
           this.resolve_(false);
           return;
         }
@@ -335,10 +335,10 @@ export class KeyVerify {
         let desiredMac = this.mac_(msg.h2, unb64(hello1.h3), str2buf(hello1.hk),
                                       str2buf(hello1.clientVersion));
         if (hello1.mac !== desiredMac) {
-          console.log("MAC mismatch (found " + hello1.mac + ", wanted " +
+          log.error("MAC mismatch (found " + hello1.mac + ", wanted " +
                       desiredMac + ") for Hello1 found. h2: ", msg.h2,
                       " and Hello1: ", hello1);
-          console.log("msg.h2", msg.h2);
+          log.debug("msg.h2", msg.h2);
           logBuffer("unb64(hello1.h3)", unb64(hello1.h3));
           logBuffer("unb64(hello1.hk)", unb64(hello1.hk));
           logBuffer("str2buf(hello1.clientVersion)", str2buf(hello1.clientVersion));
@@ -350,14 +350,14 @@ export class KeyVerify {
         // So, unb64 it, then hash it, then make a string of that.
         let desiredH3 = hashBuffers(unb64(msg.h2)).b64
         if (hello1.h3 !== desiredH3) {
-          console.log("Hash chain failure for h3: ", hello1.h3,
+          log.error("Hash chain failure for h3: ", hello1.h3,
                       " and h2: ", msg.h2, " (hashed to ", desiredH3, ")");
           this.resolve_(false);
           return;
         }
         // Check that the peer can be the initiato.
         if (this.role_ !== 1) {
-          console.log("Currently, we only support that role 0 is initiator.");
+          log.error("Currently, we only support that role 0 is initiator.");
           this.resolve_(false);
           return;
         }
@@ -369,7 +369,7 @@ export class KeyVerify {
         // We don't have an h2 value to check the hello2 message.
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
         if (hello2.hk !== hashString(msg.pkey)) {
-          console.log("hash(pkey)/hk mismatch for DHPart1 (",msg.pkey,
+          log.error("hash(pkey)/hk mismatch for DHPart1 (",msg.pkey,
                       ") vs Hello2 (", hello2.hk, ")");
           this.resolve_(false);
           return;
@@ -392,7 +392,7 @@ export class KeyVerify {
             if (result) {
               this.sendNextMessage();
             } else {
-              console.log("Failed SAS verification.");
+              log.error("Failed SAS verification.");
               this.resolve_(false);
             }
           });
@@ -402,7 +402,7 @@ export class KeyVerify {
         let commit = <Messages.CommitMessage>this.messages_[Type.Commit].value;
         let hello2 = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
         if (commit.hk !== hashString(msg.pkey)) {
-          console.log("hash(pkey)/hk mismatch for DHPart2 (",msg.pkey,
+          log.error("hash(pkey)/hk mismatch for DHPart2 (",msg.pkey,
                       ") vs Commit (", commit.hk, ")");
           this.resolve_(false);
           return;
@@ -412,7 +412,7 @@ export class KeyVerify {
             this.mac_(msg.h1,
                          unb64(commit.h2), unb64(commit.hk),
                          str2buf(commit.clientVersion), unb64(commit.hvi))) {
-          console.log("MAC mismatch for Commit found. h1: ", msg.h1,
+          log.error("MAC mismatch for Commit found. h1: ", msg.h1,
                       " and Commit: ", commit);
           this.resolve_(false);
           return;
@@ -422,7 +422,7 @@ export class KeyVerify {
           unb64(msg.h1), str2buf(msg.pkey), unb64(msg.mac),
           unb64(hello2.h3), unb64(hello2.hk), unb64(hello2.mac)).b64;
         if (hvi !== commit.hvi) {
-          console.log("hvi Mismatch in commit. Wanted: ", hvi, " got: ",
+          log.error("hvi Mismatch in commit. Wanted: ", hvi, " got: ",
                       msg);
           this.resolve_(false);
           return;
@@ -436,7 +436,7 @@ export class KeyVerify {
             if (result) {
               this.sendNextMessage();
             } else {
-              console.log("Failed SAS verification.");
+              log.error("Failed SAS verification.");
               this.resolve_(false);
             }
           });
@@ -446,7 +446,7 @@ export class KeyVerify {
         let dhpart1 = <Messages.DHPartMessage>this.messages_[Type.DHPart1].value;
         if (dhpart1.mac !==
             this.mac_(msg.h0, unb64(dhpart1.h1), str2buf(dhpart1.pkey))) {
-          console.log("CHECK: MAC mismatch for DHPart1 found. h0: ", msg.h0,
+          log.error("CHECK: MAC mismatch for DHPart1 found. h0: ", msg.h0,
                       " and DHPart1: ", dhpart1);
           this.resolve_(false);
           return;
@@ -459,7 +459,7 @@ export class KeyVerify {
         let dhpart2 = <Messages.DHPartMessage>this.messages_[Type.DHPart2].value;
         if (dhpart2.mac !==
             this.mac_(msg.h0, unb64(dhpart2.h1), str2buf(dhpart2.pkey))) {
-          console.log("CHECK: MAC mismatch for DHPart2 found. h0: ", msg.h0,
+          log.error("CHECK: MAC mismatch for DHPart2 found. h0: ", msg.h0,
                       " and DHPart2: ", dhpart2);
           this.resolve_(false);
           return;
@@ -471,7 +471,7 @@ export class KeyVerify {
       } else if (type == 'Conf2Ack') {
         this.set_(new Messages.Tagged(
           Type.Conf2Ack, new Messages.ConfAckMessage(msg.type)));
-        console.log ("EVERYTHING IS DONE!!");
+        log.debug ("EVERYTHING IS DONE!!");
         this.resolve_(true);
       }
       if (type !== 'Conf2Ack') {
@@ -479,12 +479,12 @@ export class KeyVerify {
       }
     } else {
       // reject the message for member key mismatch.
-      console.log("Invalid message received: ", msg);
+      log.error("Invalid message received: ", msg);
     }
   }
 
   private resolve_(res:boolean) {
-    console.log("resolve("+res+")");
+    log.debug("resolve("+res+")");
     this.completed_ = true;
     if (res) {
       this.resolvePromise_();
@@ -494,14 +494,14 @@ export class KeyVerify {
   }
 
   public start() :Promise<void>{
-    console.log("start() starting.");
+    log.debug("start() starting.");
     if (this.completed_) {
       throw (new Error("KeyVerify.start: Already completed."));
     }
     return this.loadKeys_().then(() => {
-      console.log("start() callback invoked.");
+      log.debug("start() callback invoked.");
       let result = new Promise<void>((resolve:any, reject:any) => {
-        console.log("start(): initializing result promises.");
+        log.debug("start(): initializing result promises.");
         this.resolvePromise_ = resolve;
         this.rejectPromise_ = reject;
         this.sendNextMessage();
@@ -512,11 +512,11 @@ export class KeyVerify {
 
   private loadKeys_() :Promise<void> {
     this.pgp_ = <freedom.PgpProvider.PgpProvider>globals.pgp;
-    console.log("loadKeys(): starting.");
+    log.debug("loadKeys(): starting.");
     // our public key is globals.publicKey, but we need the fingerprint, so
     // import the one in globals here, and get the higher-level object here.
     return this.pgp_.exportKey().then((key:freedom.PgpProvider.PublicKey) => {
-      console.log("loadKeys: got key ", key);
+      log.debug("loadKeys: got key ", key);
       this.ourKey_ = key;
       return Promise.resolve<void>();
     });
@@ -536,7 +536,7 @@ export class KeyVerify {
     var shouldSend = true;
     if (this.role_ == 0) {
       if (this.messages_[Type.Conf2Ack]) {
-        console.log("sendNextMessage: done!");
+        log.debug("sendNextMessage: done!");
         this.resolve_(true);
         return; // all done.
       } else if (this.messages_[Type.Confirm1]) {
@@ -551,7 +551,7 @@ export class KeyVerify {
       }
     } else {
       if (this.messages_[Type.Conf2Ack]) {
-        console.log("sendNextMessage: done!");
+        log.debug("sendNextMessage: done!");
         this.resolve_(true);
         return; // all done.
       } else if (this.messages_[Type.Confirm2]) {
@@ -575,11 +575,11 @@ export class KeyVerify {
         this.set_(msg);
         this.delegate_.sendMessage(msg.value).then(() => {
           if (msgType == Type.Conf2Ack) {
-            console.log("EVERYTHING IS DONE ON THIS SIDE TOO");
+            log.debug("EVERYTHING IS DONE ON THIS SIDE TOO");
             this.resolve_(true);
           }
         }).catch((e) => {
-          console.log("Failed to send message in ZRTP message.  Resolving as " +
+          log.error("Failed to send message in ZRTP message.  Resolving as " +
                       "failure.", e);
           this.resolve_(false);
         });
@@ -593,14 +593,14 @@ export class KeyVerify {
     let allKeys = Object.keys(msg);
     for (let k in allKeys) {
       if (msg[allKeys[k]].length == '') {
-        console.log("Verify msg ", msg, " got empty value for key ", k);
+        log.error("Verify msg ", msg, " got empty value for key ", k);
         return false;
       }
     }
     // Verify that we only have the keys we're expecting.
     let type :string = msg.type.toString();
     if (allKeys.sort().join() !== KeyVerify.keyMap_[type]) {
-      console.log("Verify msg ", msg, " bad key set.  Wanted ", 
+      log.error("Verify msg ", msg, " bad key set.  Wanted ", 
                   KeyVerify.keyMap_[type], " got ", allKeys.sort().join());
       return false;
     }
@@ -614,7 +614,7 @@ export class KeyVerify {
     for (let m in KeyVerify.prereqMap_[type]) {
       let t = KeyVerify.prereqMap_[type][m];
       if (!this.messages_[t]) {
-        console.log("Verify msg ", msg, " missing prerequisite ", t);
+        log.error("Verify msg ", msg, " missing prerequisite ", t);
         return false;
       }
     }
@@ -639,14 +639,14 @@ export class KeyVerify {
     // false in </>/= comparisons.
     if (!(parseInt(message.type.toString()) < 0) &&
         !(parseInt(message.type.toString()) >= 0)) {
-      console.log("set_: bad type: ", message.type);
+      log.error("set_: bad type: ", message.type);
     }
     if (this.messages_[message.type]) {
-      console.log("set_: already have a message of ", message.type, " (" +
+      log.error("set_: already have a message of ", message.type, " (" +
                   Type[message.type] + ")");
       this.resolve_(false);
     } else {
-      console.log("set_: setting message of ", message.type, " (" +
+      log.error("set_: setting message of ", message.type, " (" +
                   Type[message.type] + ")");
       this.messages_[message.type] = message;
     }
@@ -666,14 +666,14 @@ export class KeyVerify {
     if (this.generatorMap_[Type[type]] !== undefined) {
       return this.generatorMap_[Type[type]](type);
     } else {
-      console.log("generate(" + type + "<" + Type[type] +
+      log.error("generate(" + type + "<" + Type[type] +
                   ">): can't generate this type.");
       throw (new Error("generate(" + Type[type] + ") not yet implemented."));
     }
   }
 
   private makeHello_ =  (type: Type) :Promise<Messages.Tagged> => {
-    console.log("makeHello(" + type + " <" + Type[type] + ">)");
+    log.debug("makeHello(" + type + " <" + Type[type] + ">)");
     let h3 = this.ourHashes_.h3,
         hk = this.ourKey_.key;
     logBuffer("makeHello: h3:", h3.bin);
@@ -682,7 +682,7 @@ export class KeyVerify {
     let mac = this.mac_(this.ourHashes_.h2.b64,
                            h3.bin,str2buf(hashString(hk)),
                            str2buf(KeyVerify.kClientVersion));
-    console.log("makeHello: mac: ", mac);
+    log.debug("makeHello: mac: ", mac);
     let message = new Messages.Tagged(type, new Messages.HelloMessage(
       Type[type], KeyVerify.kProtocolVersion, h3.b64, hashString(hk),
       KeyVerify.kClientVersion, mac));
@@ -787,7 +787,7 @@ export class KeyVerify {
     result.h3 = new HashPair(h3);
     let hashes :[string] = [h3.toString('base64'), h2.toString('base64'),
                             h1.toString('base64'), h0.toString('base64')];
-    console.log("Generated hashes: ", hashes);
+    log.debug("Generated hashes: ", hashes);
     return result;
   }
 
@@ -799,7 +799,7 @@ export class KeyVerify {
     }
     return this.pgp_.ecdhBob('P_256', this.peerPubKey_).then(
       (result:ArrayBuffer) => {
-        console.log("CALCULATING s0");
+        log.debug("CALCULATING s0");
         let be64Zero = new Buffer(8),
             beZero = new Buffer(4),
             beOne = new Buffer(4);
@@ -848,17 +848,10 @@ export class KeyVerify {
   }
 
   private calculateTotalHash_() :Buffer {
-//    if (this.totalHash_ !== null) {
-//      return this.totalHash_;
-//    }
     let hello_r :Messages.HelloMessage;
     // We only support role 0 committing, making role 1 (who sent
     // hello2) the responder.
-//    if (this.role_ == 0) {
-//      hello_r = <Messages.HelloMessage>this.messages_[Type.Hello1].value;
-//    } else {
-      hello_r = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
-//    }
+    hello_r = <Messages.HelloMessage>this.messages_[Type.Hello2].value;
 
     let commit = <Messages.CommitMessage> this.messages_[Type.Commit].value;
     let dhpart1 = <Messages.DHPartMessage> this.messages_[Type.DHPart1].value;

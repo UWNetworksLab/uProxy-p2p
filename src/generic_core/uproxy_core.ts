@@ -112,6 +112,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
+
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
   constructor() {
@@ -354,9 +355,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public startCopyPasteGet = () : Promise<net.Endpoint> => {
     this.resetBatcher_();
-    return Promise.all([copyPasteConnection.startConnection(globals.effectiveMessageVersion())]).then(
+    return copyPasteConnection.startConnection(globals.effectiveMessageVersion()).then(
       () => {
-      return copyPasteConnection.startGet();
+        return copyPasteConnection.startGet();
       });
   }
 

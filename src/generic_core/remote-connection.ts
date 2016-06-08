@@ -90,7 +90,7 @@ var generateProxyingSessionId_ = (): string => {
     private createSender_ = (type :social.PeerMessageType) => {
       log.debug('createSender_(%1)', type);
       return (signal :bridge.SignallingMessage) => {
-        console.log("[from remote-connection.createSender] Sending signal: ", signal);
+        log.debug("[from remote-connection.createSender] Sending signal: ", signal);
         this.sendUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
           type: type,
           data: signal

@@ -214,10 +214,10 @@ import ui = ui_connector.connector;
      * instance, and pass it along to the relevant socks-rtc module.
      * TODO: spec
      * TODO: assuming that signal is valid, should we remove signal?
-     * TODO: return a boolean on success/failureg
+     * TODO: return a boolean on success/failure
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
-      console.log("RemoteInstance.HandleSignal: ", msg);
+      log.debug("RemoteInstance.HandleSignal: ", msg);
       if (typeof this.publicKey !== 'undefined' &&
           typeof globals.publicKey !== 'undefined' &&
           // signal data is not encrypted for Quiver, because entire message
@@ -227,7 +227,7 @@ import ui = ui_connector.connector;
           globals.settings.crypto) {
         return crypto.verifyDecrypt(<string>msg.data, this.publicKey)
         .then((plainText :string) => {
-          console.log("RemoteInstance.HandleSignal.verifyDecrypt(): ", msg);
+          log.debug("RemoteInstance.HandleSignal.verifyDecrypt(): ", msg);
           return this.handleDecryptedSignal_(
               msg.type, msg.version, JSON.parse(plainText));
         }).catch((e) => {
@@ -299,7 +299,7 @@ import ui = ui_connector.connector;
           return inst.sendMessage('Control.Verify', msg);
         },
         showSAS : (sas:string) :Promise<boolean> => {
-          console.log("verifyUser: Got SAS " + sas);
+          log.debug("verifyUser: Got SAS " + sas);
           inst.verifySAS_ = sas;
           let result = new Promise<boolean>((resolve:any) => {
             // Send UPDATE message with SAS.
@@ -309,8 +309,6 @@ import ui = ui_connector.connector;
             // command back that'll cause a resolution of the Promise
             // from start() below.
             inst.user.notifyUI();
-            // SCAFFOLDING: Resolve TRUE until the UI's done.
-//            resolve(true);
           });
           return result;
         }
@@ -332,14 +330,14 @@ import ui = ui_connector.connector;
       this.verifyState_ = social.VerifyState.VERIFY_BEGIN;
       this.user.notifyUI();
       this.keyVerifySession_.start().then(() => {
-        console.log("verifySession: succeeded.");
+        log.debug("verifySession: succeeded.");
         inst.keyVerified = true;
         inst.keyVerifySession_ = null
         inst.verifySAS_ = null;
         inst.verifyState_ = social.VerifyState.VERIFY_COMPLETE;
         inst.user.notifyUI();
       }, () => {
-        console.log("verifySession: failed.");
+        log.debug("verifySession: failed.");
         inst.keyVerified = false;
         inst.verifyState_ = social.VerifyState.VERIFY_FAILED;
         inst.keyVerifySession_ = null
@@ -417,7 +415,6 @@ import ui = ui_connector.connector;
     public sendMessage = (channel :string, message :any) :Promise<void> => {
       log.debug('sendMessage(%1, %2)', channel, message);
       return this.connection_.startConnection(this.messageVersion).then(() =>  {
-        log.debug('this.connection_.startConnection().then() -> sendMessage(%1, %2)', channel, message);
         this.connection_.sendMessage(channel, message);
       });
     }
@@ -446,21 +443,17 @@ import ui = ui_connector.connector;
 
       return this.connection_.startConnection(this.messageVersion).then(
         () => {
-          log.debug('start(): this.connection_.startConnection().then() ...');
           return this.connection_.startGet().then(
             (endpoints :net.Endpoint) => {
-              log.debug('start(): this.connection_.startConnection().then() ... startGet().then()...');
               clearTimeout(this.startSocksToRtcTimeout_);
               return endpoints;
             }).catch((e) => {
-              log.debug('start(): this.connection_.startConnection().then() ... startGet().CATCH()...');
               return Promise.reject(e);
             });
       }).catch((e) => {
         // Tell the UI that sharing failed. It will show a toast.
         // TODO: Send this update from remote-connection.ts
         //       https://github.com/uProxy/uproxy/issues/1861
-        log.debug('start(): this.connection_.startConnection().CATCH()...');
         ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()
