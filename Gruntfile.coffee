@@ -1311,8 +1311,6 @@ taskManager.add 'everything', [
   'integration_test'
 ]
 
-# This is the target run by Travis. Targets in here should run locally
-# and on Travis/Sauce Labs.
 taskManager.add 'test', [
   'test_lib'
   'test_core'
