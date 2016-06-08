@@ -1309,12 +1309,6 @@ taskManager.add 'integration_test', [
   'socksEchoIntegrationTest'
 ]
 
-taskManager.add 'everything', [
-  'build'
-  'test'
-  'integration_test'
-]
-
 taskManager.add 'test', [
   'test_lib'
   'test_core'
