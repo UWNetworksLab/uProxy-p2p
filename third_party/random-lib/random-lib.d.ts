@@ -2,27 +2,16 @@
 
 // TypeScript definitions for random-lib:
 //   https://github.com/fardog/node-random-lib
+//
+// Note that there are other functions in random-lib; this is
+// just what's needed by uproxy-lib.
 
 declare module 'random-lib' {
-  interface MinMaxOptions {
+  function randomInt(options?: {
     min?: number; // Minimum bound, inclusive.
     max?: number; // Maximum bound, exclusive.
-  }
-
-  interface MultiOptions {
-    num?: number;
-    unique?: boolean;
-  }
-
-  interface RandomIntsOptions extends MinMaxOptions, MultiOptions { }
-
-  function randomInt(options?: MinMaxOptions,
-      callback?: (e: Error, result: number) => any): number;
-  function randomInts(options?: RandomIntsOptions,
-      callback?: (e: Error, results: number[]) => any): number[];
+  }, callback?: (e: Error, result: number) => any): number;
 
   function randomFloat(options?: {},
       callback?: (e: Error, result: number) => any): number;
-  function randomFloats(options?: MultiOptions,
-      callback?: (e: Error, results: number[]) => any): number[];
 }
