@@ -1,4 +1,4 @@
-import net = require('../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../lib/net/net.types');
 import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');

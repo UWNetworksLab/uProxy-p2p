@@ -8,7 +8,7 @@
 
 import browser_api = require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
-import net = require('../../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../../lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
 
 enum PopupState {
@@ -226,6 +226,14 @@ class ChromeBrowserApi implements BrowserAPI {
         console.error('Attempted to trigger an unknown event', name);
       }
     });
+  }
+
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    callback && this.respond_(data, callback);
+  }
+
+  private respond_ = (data :any, callback :Function) : void => {
+    callback(data);
   }
 
   public setBadgeNotification = (notification :string) => {

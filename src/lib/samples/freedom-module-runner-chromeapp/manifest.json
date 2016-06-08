@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Freedom Module Runner",
+  "description": "Open the background page and use the console to load and interact with freedom modules.",
+  "version": "0.1",
+  "app": {
+    "background": {
+      "scripts": [
+        "background.core-env.static.js"
+      ]
+    }
+  },
+  "permissions": [],
+  "sockets": {
+    "tcp": {
+      "connect" : ""
+    },
+    "tcpServer": {
+      "listen": ""
+    },
+    "udp": {
+      "bind": "*",
+      "send": "*"
+    }
+  }
+}

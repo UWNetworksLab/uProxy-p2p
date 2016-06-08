@@ -16,7 +16,7 @@
  *    visual trickery.  See http://www.unicode.org/reports/tr36/#visual_spoofing
  */
 
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 
 var log :logging.Log = new logging.Log('firewall');
 

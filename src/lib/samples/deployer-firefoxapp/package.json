@@ -1,0 +1,8 @@
+{
+  "name": "deployer",
+  "title": "deployer",
+  "description": "Provision a uProxy cloud instance.",
+  "author": "uProxy",
+  "license": "Apache 2",
+  "version": "0.0.1"
+}

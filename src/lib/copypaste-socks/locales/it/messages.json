@@ -1,0 +1,95 @@
+{
+  "intro" : {
+    "message" : "Questa applicazione di esempio stabilisce SOCKS proxy tra due utenti. Lo scambio intial di messaggi di segnalazione avviene manualmente (ad esempio, via e-mail o la chat), mentre il successivo inoltro utilizza WebRTC."
+  },
+  "useCrypto" : {
+    "message" : "Usare la crittografia di firmare / cifrare scambio?"
+  },
+  "userPublicKey" : {
+    "message" : "La chiave pubblica è: "
+  },
+  "friendPublicKey" : {
+    "message" : "La chiave pubblica del tuo amico è: "
+  },
+  "signed" : {
+    "message" : "Segnalazione messaggio ha firma valida!"
+  },
+  "incorrectlySigned" : {
+    "message" : "Segnalazione messaggio non ha firma valida!"
+  },
+  "giveAccess" : {
+    "message" : "Dare accesso"
+  },
+  "giveDescription" : {
+    "message" : "Autorizzare una persona per condividere la connessione Internet."
+  },
+  "getAccess" : {
+    "message" : "Ottenere l'accesso"
+  },
+  "getDescription" : {
+    "message" : "Bypass blocco utilizzando la connessione Internet di qualcun altro."
+  },
+  "italian" : {
+    "message" : "Italiano"
+  },
+  "english" : {
+    "message" : "English"
+  },
+  "arabic" : {
+    "message" : "العربية"
+  },  
+  "farsi" : {
+    "message" : "فارسی"
+  },  
+  "pasteAndGenerateReply" : {
+    "message" : "Incollare il testo ricevuto dall'altra parte sottostante e fare clic su 'Generate risposta'."
+  },
+  "generateReply" : {
+    "message" : "Generate risposta"
+  },
+  "copyPasteAndSend" : {
+    "message" : "Copia / incolla il testo completo sopra e inviarlo alla controparte."
+  },
+  "warning" : {
+    "message" : "ATTENZIONE: Un osservatore che vede questo messaggio può essere in grado di determinare che si sta utilizzando uProxy, quindi inviarlo tramite un canale privato di fiducia."
+  },
+  "bytesSent" : {
+    "message" : " byte inviati al partecipante remoto."
+  },
+  "bytesReceived" : {
+    "message" : " byte ricevuti dal partecipante remoto."
+  },
+  "generateHandshakeAndSend" : {
+    "message" : "Fare clic sul pulsante qui sotto per generare un messaggio di handshake per inviare all'altra parte. Questo messaggio indica l'altra parte come individuare voi sulla rete. Queste informazioni possono scadere rapidamente, in modo da procedere solo quando si e l'altra parte è pronti."
+  },
+  "generate" : {
+    "message" : "Generare"
+  },
+  "pasteAndStartProxying" : {
+    "message" : "Incollare il testo ricevuto dalla parte sottostante e fare clic su 'Avvia proxying'."
+  },
+  "startProxying" : {
+    "message" : "Inizia proxying"
+  },
+  "proxyingStateNotYetAttempted" : {
+    "message" : "Stato condivisione: In attesa di input da parte dell'utente"
+  },
+  "proxyingStateConnecting" : {
+    "message" : "Stato condivisione: In attesa di connessione ..."
+  },
+  "proxyingStateStarted" : {
+    "message" : "Stato condivisione: Attivo"
+  },
+  "proxyingStateStopped" : {
+    "message" : "Stato condivisione: Arrestato"
+  },
+  "proxyEndpoint" : {
+    "message" : "Proxy SOCKS è in ascolto "
+  },
+  "proxyEndpointUsageExample" : {
+    "message" : "Esempio di utilizzo: "
+  },
+  "stopProxying" : {
+    "message" : "Smettere di proxying"
+  }
+}

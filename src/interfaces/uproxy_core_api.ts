@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
+import net = require('../lib/net/net.types');
 import social = require('./social');
 import ui = require('./ui');
 
@@ -42,6 +42,7 @@ export interface GlobalSettings {
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
   activePromoId: string;
+  shouldHijackDO: boolean;
   crypto: boolean;
 }
 export interface InitialState {

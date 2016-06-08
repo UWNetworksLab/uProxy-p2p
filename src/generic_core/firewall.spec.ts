@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
-import mockFreedomRtcPeerConnection = require('../../../third_party/uproxy-lib/freedom/mocks/mock-rtcpeerconnection');
+import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
+import mockFreedomRtcPeerConnection = require('../lib/freedom/mocks/mock-rtcpeerconnection');
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },

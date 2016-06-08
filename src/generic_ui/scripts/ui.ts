@@ -16,7 +16,7 @@ import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
-import net = require('../../../../third_party/uproxy-lib/net/net.types');
+import net = require('../../lib/net/net.types');
 import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
@@ -322,6 +322,8 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
     browserApi.on('promoIdDetected', this.setActivePromoId);
+    browserApi.on('translationsRequest', this.handleTranslationsRequest);
+    browserApi.on('globalSettingsRequest', this.handleGlobalSettingsRequest);
 
     core.getFullState()
         .then(this.updateInitialState)
@@ -753,6 +755,18 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
+  }
+
+  public handleTranslationsRequest = (keys :string[], callback ?:Function) => {
+    var vals :{[s :string]: string;} = {};
+    for (let key of keys) {
+      vals[key] = this.i18n_t(key);
+    }
+    this.browserApi.respond(vals, callback, 'translations');
+  }
+
+  public handleGlobalSettingsRequest = (callback ?:Function) => {
+    this.browserApi.respond(this.model.globalSettings, callback, 'globalSettings');
   }
 
   public setActivePromoId = (promoId :string) => {
