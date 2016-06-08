@@ -14,20 +14,15 @@ declare module 'random-lib' {
     unique?: boolean;
   }
 
-  interface RandomIntsOptions extends MinMaxOptions, MultiOptions {
-    num?: number;
-    unique?: boolean;
-  }
+  interface RandomIntsOptions extends MinMaxOptions, MultiOptions { }
 
-  interface RandomFloatsOptions extends MultiOptions { }
+  function randomInt(options?: MinMaxOptions,
+      callback?: (e: Error, result: number) => any): number;
+  function randomInts(options?: RandomIntsOptions,
+      callback?: (e: Error, results: number[]) => any): number[];
 
-  function randomInt(options: MinMaxOptions,
-  	  callback?: (e:Error, result: number) => any): number;
-  function randomInts(options: RandomIntsOptions,
-  	  callback?: (e: Error, results: number[]) => any): number[];
-
-  function randomFloat(options: {},
-  	  callback?: (e: Error, result: number) => any): number;
-  function randomFloats(options: RandomFloatsOptions,
-  	  callback?: (e: Error, results: number[]) => any): number[];
+  function randomFloat(options?: {},
+      callback?: (e: Error, result: number) => any): number;
+  function randomFloats(options?: MultiOptions,
+      callback?: (e: Error, results: number[]) => any): number[];
 }
