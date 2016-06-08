@@ -1309,11 +1309,15 @@ taskManager.add 'integration_test', [
   'socksEchoIntegrationTest'
 ]
 
-taskManager.add 'test', [
+taskManager.add 'unit_test', [
   'test_lib'
   'test_core'
   'test_ui'
   'test_chrome'
+]
+
+taskManager.add 'test', [
+  'unit_test'
   'integration_test'
 ]
 
