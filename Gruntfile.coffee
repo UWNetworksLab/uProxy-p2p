@@ -309,6 +309,9 @@ gruntConfig = {
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
+    lintFirefoxJs: {
+      command: 'jshint src/firefox/lib/*.js'
+    }
   }
 
   copy: {
@@ -1168,6 +1171,7 @@ taskManager.add 'build_chrome', [
 # Firefox build tasks.
 taskManager.add('build_firefox', [
   'base'
+  'exec:lintFirefoxJs'
   'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'
@@ -1288,6 +1292,7 @@ taskManager.add 'everything', [
 # This is the target run by Travis. Targets in here should run locally
 # and on Travis/Sauce Labs.
 taskManager.add 'test', [
+  'exec:lintFirefoxJs'
   'test_lib'
   'test_core'
   'test_ui'

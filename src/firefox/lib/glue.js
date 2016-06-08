@@ -12,7 +12,7 @@ var uproxy_core_api = require('./interfaces/uproxy_core_api.js');
 var { Ci, Cc, Cr } = require("chrome");
 var self = require("sdk/self");
 var events = require("sdk/system/events");
-var notifications = require('sdk/notifications')
+var notifications = require('sdk/notifications');
 var pagemod = require('sdk/page-mod');
 var tabs = require('sdk/tabs');
 
@@ -28,7 +28,7 @@ function setUpConnection(freedom, panel, button) {
   function connect(command, from, to) {
     from.on(command, function(data) {
       to.emit(command, data);
-    })
+    });
   }
 
   function openURL(url) {
@@ -134,7 +134,7 @@ function setUpConnection(freedom, panel, button) {
     panel.port.on(message, function(args) {
       promiseEmitHandler(args);
     }.bind(this));
-  };
+  }
 
   /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
   var contentProxyFile = self.data.url('scripts/content-proxy.js');
@@ -162,7 +162,7 @@ function setUpConnection(freedom, panel, button) {
       worker.port.on('getLogs', function(data) {
         freedom.emit(uproxy_core_api.Command.GET_LOGS, {data: data.data, promiseId: -1});
         var forwardLogsToContentScript = function(data) {
-          if (data['command'] == uproxy_core_api.Command.GET_LOGS) {
+          if (data.command === uproxy_core_api.Command.GET_LOGS) {
             // Forward logs to content-proxy.js
             worker.port.emit('message', {
               logs: true,
@@ -186,7 +186,39 @@ function setUpConnection(freedom, panel, button) {
   pagemod.PageMod({
     include: ['https://cloud.digitalocean.com/*'],
     contentScriptFile: self.data.url('generic_ui/scripts/content_digitalocean.js'),
-    onAttach: function(worker) {
+    onAttach: function (worker) {
+
+      // Swallow errors like "Couldn't find the worker to receive this message.
+      // The script may not be initialized yet or may already have been unloaded."
+      function workerEmit(msg, payload) {
+        try {
+          worker.port.emit(msg, payload);
+        } catch (e) {
+          console.log('Swallowed error emitting message "'+msg+'" to worker:', e);
+        }
+      }
+
+      // Get an existing asset's absolute url to determine the Firefox
+      // extension's base url, then send it to the content script below.
+      var testUrlRelative = 'icons/uproxy_logo.svg',
+          testUrlAbsolute = self.data.url(testUrlRelative),
+          i = testUrlAbsolute.indexOf(testUrlRelative),
+          baseUrl = testUrlAbsolute.substring(0, i);
+
+      // Get the globalSettings and send to the content script.
+      panel.port.on('globalSettings', function (globalSettings) {
+        workerEmit('globalSettings', globalSettings);
+      });
+      panel.port.emit('globalSettingsRequest');
+
+      // Listen for and forward translations requests and responses.
+      worker.port.on('translationsRequest', function (i18nKeys) {
+        panel.port.emit('translationsRequest', i18nKeys);
+      });
+      panel.port.on('translations', function (translations) {
+        workerEmit('translations', translations);
+        workerEmit('baseUrlFF', baseUrl);
+      });
     }
   });
 
@@ -241,7 +273,8 @@ function setUpConnection(freedom, panel, button) {
     if (!iq) {
       return;
     }
-    var qs = url.substring(iq);
+    var ih = url.indexOf('#');
+    var qs = url.substring(iq, ih === -1 ? url.length : ih);
     var params = qs.split('&');
     for (var param of params) {
       var keyval = param.split('=');

@@ -40,10 +40,10 @@ Polymer({
   launchDigitalOceanSignup: function() {
     // DigitalOcean referral codes trump promo codes,
     // so only add our refcode to the url if the user has no promo code.
-    const hasPromo = this.$.havePromoCode.checked;
+    const havePromo = this.$.havePromoCode.checked;
     const registerUrl = 'https://cloud.digitalocean.com/registrations/new';
     const registerUrlWithRefcode = registerUrl + '?refcode=5ddb4219b716';
-    ui.openTab(hasPromo ? registerUrl : registerUrlWithRefcode);
+    ui.openTab(havePromo ? registerUrl : registerUrlWithRefcode);
   },
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
@@ -83,6 +83,7 @@ Polymer({
     }).then(() => {
       this.closeOverlays();
       this.$.successOverlay.open();
+      ui.model.globalSettings.shouldHijackDO = false;
     }).catch((e :any) => {
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
@@ -155,9 +156,12 @@ Polymer({
   },
   promoIdChanged: function() {
     // do not uncheck the box if we no longer have the promo id set
-    if (ui.model.globalSettings.activePromoId === 'off') {
+    if (ui.model.globalSettings.activePromoId) {
       this.$.havePromoCode.checked = true;
     }
+  },
+  havePromoChanged: function () {
+    ui.model.globalSettings.activePromoId = this.$.havePromoCode.checked;
   },
   observe: {
     'ui.model.globalSettings.activePromoId': 'promoIdChanged'

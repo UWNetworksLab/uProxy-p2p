@@ -290,6 +290,14 @@ class CordovaBrowserApi implements BrowserAPI {
       this.pendingEvents_[name].push(args);
     }
   }
+
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    callback && this.respond_(data, callback);
+  }
+
+  private respond_ = (data :any, callback :Function) : void => {
+    callback(data);
+  }
 }
 
 export = CordovaBrowserApi;
