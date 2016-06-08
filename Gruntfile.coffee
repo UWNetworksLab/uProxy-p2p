@@ -1314,7 +1314,6 @@ taskManager.add 'everything', [
 # This is the target run by Travis. Targets in here should run locally
 # and on Travis/Sauce Labs.
 taskManager.add 'test', [
-  'exec:lintFirefoxJs'
   'test_lib'
   'test_core'
   'test_ui'
@@ -1331,6 +1330,7 @@ taskManager.add 'build', [
 
 taskManager.add 'lint', [
   'tslint'
+  'exec:lintFirefoxJs'
 ]
 
 taskManager.add 'dist', [
