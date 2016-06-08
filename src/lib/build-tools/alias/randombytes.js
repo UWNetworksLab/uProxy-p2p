@@ -8,9 +8,16 @@ const cryptoAvailable = typeof crypto !== 'undefined';
 var getBufferedRandomBytes, refreshBuffer, offset;
 if (!cryptoAvailable) {
   // Filling with freedom.js core.crypto, which requires a buffer due to async
-  var rand = freedom['core.crypto'](),
-      buf;
-  refreshBuffer = function(size) {
+  var rand;
+  try {
+    rand = freedom['core.crypto']();
+  } catch (e) {
+    console.error('could not instantiate core.crypto: ', e);
+    return;
+  }
+
+  var buf;
+  var refreshBuffer = function(size) {
     return rand.getRandomBytes(size).then(function (bytes) {
       buf = new Uint8Array(bytes);
       offset = 0;
