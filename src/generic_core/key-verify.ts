@@ -54,9 +54,42 @@ export namespace Messages {
   };
 };
 
-/*
-  Buffer utility functions
- */
+//
+// Hash facilities
+//
+export class HashPair {
+  public b64 :string;
+  constructor(public bin:Buffer) {
+    this.b64 = bin.toString('base64');
+  }
+};
+
+export class Hashes {
+  public h0 :HashPair;
+  public h1 :HashPair;
+  public h2 :HashPair;
+  public h3 :HashPair;
+};
+
+
+function makeHash(s:string) :HashPair {
+  let bin = crypto.createHash('sha256').update(s).digest();
+  return new HashPair(bin);
+}
+
+function hashBuffers(...bufs:Buffer[]) :HashPair {
+  let buffer = Buffer.concat(bufs);
+  let bin = crypto.createHash('sha256').update(buffer).digest();
+  return new HashPair(bin);
+}
+
+function hashString(s:string) :string {
+  return crypto.createHash('sha256').update(s).digest('base64');
+}
+
+//
+// Buffer utility functions
+//
 
 function str2buf(s:string) :Buffer {
   return new Buffer(s, 'utf8');
@@ -108,36 +141,6 @@ function logBuffer(name:string, buf:Buffer) {
   }
 }
 
-export class HashPair {
-  public b64 :string;
-  constructor(public bin:Buffer) {
-    this.b64 = bin.toString('base64');
-  }
-};
-
-export class Hashes {
-  public h0 :HashPair;
-  public h1 :HashPair;
-  public h2 :HashPair;
-  public h3 :HashPair;
-};
-
-
-function makeHash(s:string) :HashPair {
-  let bin = crypto.createHash('sha256').update(s).digest();
-  return new HashPair(bin);
-}
-
-function hashBuffers(...bufs:Buffer[]) :HashPair {
-  let buffer = Buffer.concat(bufs);
-  let bin = crypto.createHash('sha256').update(buffer).digest();
-  return new HashPair(bin);
-}
-
-function hashString(s:string) :string {
-  return crypto.createHash('sha256').update(s).digest('base64');
-}
-
 // Values from messages are base64 encoded, and many of the
 // cryptographic operations used in ZRTP require that they be
 // concatenated before we hash them.
@@ -148,9 +151,16 @@ function unbase64Concat(...args:string[]) :Buffer {
   return Buffer.concat(buffers);
 }
 
+// A ZRTP Key Verification Session.  After construction, its only
+// interface points are in readMessage() and in the delegate API
+// (Delegate above).  For the side starting the session, to construct,
+// just pass in the peer's public key to verify, and the delegate.
+// For the other side, first parse the message with readFirstMessage()
+// (it's static), and pass that in as a constructor argument.
 export class KeyVerify {
   // Only written by set(), after verifying the message.
   private messages_: {[type:string]:Messages.Tagged}; // indexed by Type.
+
   // Only written and read by sendNextMessage(), between the time we
   // call generate_ and get its promise-return.
   private queued_generations_: {[type:string]:boolean}; // indexed by Type.
@@ -166,12 +176,14 @@ export class KeyVerify {
   private resolvePromise_ : () => void;
   private rejectPromise_ : () => void;
   private sasApproved_ = false;
+
   // Explicitly mark when we've already fired a resolution promise, to
   // prevent an attacker from passing us extra stuff that might make
   // us change our minds.
   private completed_:boolean;
 
   private pgp_ :freedom.PgpProvider.PgpProvider;
+
   // Data that requires expensive calculations to make.  These are a innately
   // hackey, and I don't like them.
   private s0_ :Buffer = null;
@@ -466,11 +478,11 @@ export class KeyVerify {
         this.set_(new Messages.Tagged(
           Type.Confirm2, new Messages.ConfirmMessage(msg.type, msg.h0, msg.mac)));
 
-        // Don't resolve here, wait until we've sent 
+        // Don't resolve here, wait until we've sent Conf2Ack.
       } else if (type == 'Conf2Ack') {
         this.set_(new Messages.Tagged(
           Type.Conf2Ack, new Messages.ConfAckMessage(msg.type)));
-        log.debug ("EVERYTHING IS DONE!!");
+        log.debug ("ZRTP: EVERYTHING IS DONE!!");
         this.resolve_(true);
       }
       if (type !== 'Conf2Ack') {
@@ -574,7 +586,7 @@ export class KeyVerify {
         this.set_(msg);
         this.delegate_.sendMessage(msg.value).then(() => {
           if (msgType == Type.Conf2Ack) {
-            log.debug("EVERYTHING IS DONE ON THIS SIDE TOO");
+            log.debug("ZRTP: EVERYTHING IS DONE ON THIS SIDE TOO");
             this.resolve_(true);
           }
         }).catch((e) => {
@@ -599,7 +611,7 @@ export class KeyVerify {
     // Verify that we only have the keys we're expecting.
     let type :string = msg.type.toString();
     if (allKeys.sort().join() !== KeyVerify.keyMap_[type]) {
-      log.error("Verify msg ", msg, " bad key set.  Wanted ", 
+      log.error("Verify msg ", msg, " bad key set.  Wanted ",
                   KeyVerify.keyMap_[type], " got ", allKeys.sort().join());
       return false;
     }
