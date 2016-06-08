@@ -1,5 +1,4 @@
 import logging = require('../logging/logging');
-import random = require('../crypto/random');
 import transformer = require('./transformer');
 
 var log :logging.Log = new logging.Log('caesar');

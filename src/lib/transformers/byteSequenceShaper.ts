@@ -1,6 +1,6 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import crypto = require('crypto');
 import logging = require('../logging/logging');
-import random = require('../crypto/random');
 import transformer = require('./transformer');
 
 const log :logging.Log = new logging.Log('byte sequence shaper');
@@ -223,9 +223,7 @@ export class ByteSequenceShaper implements transformer.Transformer {
     // Add the bytes before the sequence.
     if (model.offset > 0) {
       let length = model.offset;
-      let randomBytes = new Uint8Array(length);
-      crypto.getRandomValues(randomBytes);
-      parts.push(randomBytes.buffer);
+      parts.push(crypto.randomBytes(length).buffer);
     }
 
     // Add the sequence
@@ -234,9 +232,7 @@ export class ByteSequenceShaper implements transformer.Transformer {
     // Add the bytes after the sequnece
     if (model.offset < model.length) {
       length = model.length - (model.offset + model.sequence.byteLength);
-      let randomBytes = new Uint8Array(length);
-      crypto.getRandomValues(randomBytes);
-      parts.push(randomBytes.buffer);
+      parts.push(crypto.randomBytes(length).buffer);
     }
 
     return arraybuffers.concat(parts);
