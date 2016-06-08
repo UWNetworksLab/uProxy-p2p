@@ -37,7 +37,7 @@ class ChromePanel implements panel_connector.Panel {
     });
   }
 
-  public sendMessage(name: string, data: Object = null) {
+  public sendMessage(name: string, data?: Object) {
     var message: MessageFormat = { name: name, data: data };
 
     this._port.postMessage(message);

@@ -39,7 +39,7 @@ export class BackgroundUi {
   }
 
   private handleSignalFromPanel = (name: string, data: Object) => {
-    switch(name) {
+    switch (name) {
       case 'update-global-settings':
         this.core_.updateGlobalSettings(<uproxy_core_api.GlobalSettings>data);
         break;
@@ -70,7 +70,7 @@ class PanelConnector {
         });
   }
 
-  public send(name: string, data: Object = null): void {
+  public send(name: string, data?: Object): void {
     //TODO error checking
     this.panels_.forEach((panel) => {
       panel.sendMessage(name, data);
