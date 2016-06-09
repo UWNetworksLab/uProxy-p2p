@@ -46,6 +46,11 @@ export class BackgroundUi {
       case 'restart':
         this.core_.restart();
         break;
+      /*
+       * We do not have a generic error case here because we expect other
+       * handlers to deal with events that are not programmed here yet.  In the
+       * future, we may add that kind of error-checking.
+       */
     }
   }
 
