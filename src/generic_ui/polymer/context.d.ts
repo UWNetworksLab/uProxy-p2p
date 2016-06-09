@@ -18,7 +18,10 @@ interface UiGlobals {
   browserApi :any;
 
   // Corresponds to interfaces/browser_connector.ts Interface: CoreBrowserConnector
-  browserConnector :any
+  browserConnector :any;
+
+  // Firefox only, hack for background UI
+  panelConnector: any;
 }
 
 // Defined in: firefox and chrome specific background pages.

@@ -8,7 +8,6 @@ import user_interface = require('../scripts/ui');
 import user_module = require('../scripts/user');
 
 var ui = ui_context.ui;
-var core = ui_context.core;
 var model = ui_context.model;
 var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 
@@ -44,7 +43,7 @@ Polymer({
       // uproxy-bubble, now the only welcome content is on the splash screen
       // and the empty roster text.
       model.globalSettings.hasSeenWelcome = true;
-      core.updateGlobalSettings(model.globalSettings);
+      this.$.state.updateGlobalSettings(model.globalSettings);
     }
   },
   statsIconClicked: function() {
@@ -63,7 +62,7 @@ Polymer({
   },
   closedSharing: function() {
     model.globalSettings.hasSeenSharingEnabledScreen = true;
-    core.updateGlobalSettings(model.globalSettings);
+    this.$.state.updateGlobalSettings(model.globalSettings);
   },
   dismissCopyPasteError: function() {
     ui.copyPasteError = ui_types.CopyPasteError.NONE;
@@ -147,7 +146,7 @@ Polymer({
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
-    this.core = core;
+    this.core = ui_context.core;
     this.ui_constants = ui_types;
     this.user_interface = user_interface;
     this.model = model;
@@ -167,7 +166,7 @@ Polymer({
     } else {
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core
-      core.updateGlobalSettings(model.globalSettings);
+      this.$.state.updateGlobalSettings(model.globalSettings);
     }
   },
   signalToFireChanged: function() {
@@ -245,7 +244,7 @@ Polymer({
     }
   },
   restart: function() {
-    core.restart();
+    this.$.state.restart();
   },
   fireOpenInviteUserPanel: function() {
     this.fire('core-signal', { name: 'open-invite-user-dialog' });

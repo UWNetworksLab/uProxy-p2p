@@ -10,6 +10,7 @@
  */
 
 import ui_constants = require('../../interfaces/ui');
+import background_ui = require('./background_ui');
 import CopyPasteState = require('./copypaste-state');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
@@ -122,9 +123,6 @@ export class UserInterface implements ui_constants.UiApi {
   public browser :string = '';
   public availableVersion :string = null;
 
-  // Changing this causes root.ts to fire a core-signal with the new value.
-  public signalToFire :Object = null;
-
   public toastMessage :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
@@ -139,7 +137,8 @@ export class UserInterface implements ui_constants.UiApi {
    */
   constructor(
       public core   :CoreConnector,
-      public browserApi :BrowserAPI) {
+      public browserApi :BrowserAPI,
+      public backgroundUi: background_ui.BackgroundUi) {
     this.updateView_();
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
@@ -324,10 +323,24 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('promoIdDetected', this.setActivePromoId);
     browserApi.on('translationsRequest', this.handleTranslationsRequest);
     browserApi.on('globalSettingsRequest', this.handleGlobalSettingsRequest);
+    backgroundUi.registerAsFakeBackground(this.panelMessageHandler);
 
     core.getFullState()
         .then(this.updateInitialState)
         .then(this.browserApi.handlePopupLaunch);
+  }
+
+  public panelMessageHandler = (name: string, data: Object) => {
+    /*
+     * This will handle a subset of the signals for the actual background UI,
+     * we will try to handle most of the signals in the actual background
+     * though
+     */
+    switch(name) {
+      case 'logout-all':
+        this.logoutAll((<any>data).getConfirmation);
+        break;
+    }
   }
 
   public restartServer_ = (providerName :string) => {
@@ -363,11 +376,8 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  // Because of an observer (in root.ts) watching the value of
-  // signalToFire, this function simulates firing a core-signal
-  // from the background page.
   public fireSignal = (signalName :string, data ?:Object) => {
-    this.signalToFire = {name: signalName, data: data};
+    this.backgroundUi.fireSignal(signalName, data);
   }
 
   private confirmationCallbacks_ :{[index :number] :PromiseCallbacks} = {};

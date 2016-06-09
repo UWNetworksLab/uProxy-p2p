@@ -1,5 +1,6 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts'/>
 
+import background_ui = require('../../../generic_ui/scripts/background_ui');
 import ChromeCoreConnector = require('./chrome_core_connector');
 import ChromeBrowserApi = require('./chrome_browser_api');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
@@ -31,6 +32,7 @@ var mockAppPort = () => {
 
 var chromeBrowserApi :ChromeBrowserApi;
 var chromeCoreConnector = new ChromeCoreConnector();
+var backgroundUi :background_ui.BackgroundUi;
 var core = new CoreConnector(chromeCoreConnector);
 
 // The ordering of the specs matter, as they provide a connect / disconnect
@@ -42,12 +44,15 @@ describe('core-connector', () => {
      'on',
     'handlePopupLaunch']);
 
-
+  backgroundUi = jasmine.createSpyObj('BackgroundUi', [
+      'registerAsFakeBackground',
+      'fireSignal'
+  ]);
 
   var connectPromise :Promise<void>;
 
   beforeEach(() => {
-    ui = new UI.UserInterface(core, chromeBrowserApi);
+    ui = new UI.UserInterface(core, chromeBrowserApi, backgroundUi);
     spyOn(console, 'log');
     spyOn(console, 'warn');
   });
