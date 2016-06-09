@@ -80,6 +80,7 @@
     }
   },
   "permissions": [
+    "core.crypto",
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
     "core.tcpsocket",

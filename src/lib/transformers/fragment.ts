@@ -1,4 +1,5 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import crypto = require('crypto');
 import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('fragment');
@@ -21,9 +22,7 @@ export interface Fragment {
 // A 32-byte size was chosen as this is a common hash function output size.
 // In the future, a hash could perhaps be used instead of a random identifier.
 export function makeRandomId() :ArrayBuffer {
-  var randomBytes = new Uint8Array(32);
-  crypto.getRandomValues(randomBytes);
-  return randomBytes.buffer;
+  return crypto.randomBytes(4).buffer;
 }
 
 // Deserialize the content of a packet into a Fragment object

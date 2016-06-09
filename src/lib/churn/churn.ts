@@ -1,4 +1,5 @@
 /// <reference path='../../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
+/// <reference path='../../../../third_party/random-lib/random-lib.d.ts' />
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
@@ -11,7 +12,7 @@ import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
-import random = require('../crypto/random');
+import random = require('random-lib');
 import signals = require('../webrtc/signals');
 
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
@@ -116,17 +117,12 @@ export var selectBestPublicAddress = (candidates:Candidate[])
 
 // Generates a key suitable for use with CaesarCipher, viz. 1-255.
 var generateCaesarConfig_ = (): caesar.Config => {
-  try {
-    return {
-      key: (random.randomUint32() % 255) + 1
-    };
-  } catch (e) {
-    // https://github.com/uProxy/uproxy/issues/1593
-    log.warn('crypto unavailable, using Math.random');
-    return {
-      key: Math.floor((Math.random() * 255)) + 1
-    };
-  }
+  return {
+    key: random.randomInt({
+      min: 1,
+      max: 255
+    })
+  };
 }
 
 /**

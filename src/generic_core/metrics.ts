@@ -1,9 +1,10 @@
+/// <reference path='../../../third_party/random-lib/random-lib.d.ts' />
 /// <reference path='../../../third_party/typings/browser.d.ts' />
 /// <reference path='../../../third_party/typings/freedomjs-anonymized-metrics/index.d.ts' />
 
 import _ = require('lodash');
-import crypto = require('../lib/crypto/random');
 import logging = require('../lib/logging/logging');
+import random = require('random-lib');
 import storage = require('../interfaces/storage');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
@@ -459,9 +460,7 @@ export class DailyMetricsReporter {
 
   private static getNextSendTimestamp_ = () => {
     // Use Poisson distrubtion to calculate offset_ms in approx 24 hours.
-    // TODO: use crypto.randomUint32 once it's available everywhere
-    // var randomFloat = crypto.randomUint32() / Math.pow(2, 32);
-    var randomFloat = Math.random();
+    const randomFloat = random.randomFloat();
     // 1 day, rough send interval.
     var MEAN_SEND_INTERVAL_MS = ONE_DAY_MS;
     var offset_ms = -Math.floor(Math.log(randomFloat) / (1 / MEAN_SEND_INTERVAL_MS));
