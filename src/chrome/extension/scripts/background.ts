@@ -16,6 +16,7 @@ import ChromeCoreConnector = require('./chrome_core_connector');
 import ChromeTabAuth = require('./chrome_tab_auth');
 import Constants = require('../../../generic_ui/scripts/constants');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+import user_interface = require('../../../generic_ui/scripts/ui');
 
 import compareVersion = require('compare-version');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
@@ -147,7 +148,20 @@ core = new CoreConnector(browserConnector);
 var oAuth = new ChromeTabAuth();
 browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
                          oAuth.login.bind(oAuth));
-var ui = new user_interface.UserInterface(core, browserApi);
+
+backgroundUi = new background_ui.BackgroundUi(
+    new chrome_panel_connector.ChromePanelConnector(),
+    core);
+
+/*
+ * TODO: this is a separate user_interface object from the one we refer to
+ * elsewhere in the code.  It will register listeners for all events and
+ * commands, however, these listeners will immediately be unbound after the
+ * panel is opened for the first time.  Its version of any data should not be
+ * relied upon as canonical and no updates made to data here should be expected
+ * to persist within the general UI.
+ */
+var ui = new user_interface.UserInterface(core, browserApi, backgroundUi);
 
 // used for de-duplicating urls caught by the listeners
 var lastUrl = '';
@@ -207,7 +221,3 @@ chrome.webRequest.onBeforeRequest.addListener(
   { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
   ['blocking']
 );
-
-backgroundUi = new background_ui.BackgroundUi(
-    new chrome_panel_connector.ChromePanelConnector(),
-    core);
