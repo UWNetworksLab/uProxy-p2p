@@ -233,6 +233,7 @@ gruntConfig = {
   androidDistPath: androidDistPath
   ccaDistPath: ccaDistPath
   iosDistPath: iosDistPath
+  nodeBinPath: './node_modules/.bin'
 
   # Create commands to run in different directories
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
@@ -310,7 +311,7 @@ gruntConfig = {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
     lintFirefoxJs: {
-      command: 'jshint src/firefox/lib/*.js'
+      command: '<%= nodeBinPath %>/jshint src/firefox/lib/*.js'
     }
   }
 
