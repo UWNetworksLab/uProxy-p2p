@@ -887,30 +887,8 @@ gruntConfig = {
     # uproxy-lib
     loggingProvider: Rule.browserify 'lib/loggingprovider/freedom-module'
     churnPipeFreedomModule: Rule.browserify 'lib/churn-pipe/freedom-module'
-    cloudInstallerFreedomModule: Rule.browserify('lib/cloud/install/freedom-module', {
-      alias : [
-        # Shims for node's dns and net modules from freedom-social-xmpp,
-        # with a couple of fixes.
-        './src/lib/cloud/social/shim/net.js:net'
-        './src/lib/cloud/social/shim/dns.js:dns'
-        # Alternative that works for freedomjs modules.
-        './src/lib/cloud/social/alias/brorand.js:brorand'
-        # Fallback for crypto-browserify's randombytes, for Firefox.
-        './src/lib/cloud/social/alias/randombytes.js:randombytes'
-      ]
-    })
-    cloudSocialProviderFreedomModule: Rule.browserify('lib/cloud/social/freedom-module', {
-      alias : [
-        # Shims for node's dns and net modules from freedom-social-xmpp,
-        # with a couple of fixes.
-        './src/lib/cloud/social/shim/net.js:net'
-        './src/lib/cloud/social/shim/dns.js:dns'
-        # Alternative that works for freedomjs modules.
-        './src/lib/cloud/social/alias/brorand.js:brorand'
-        # Fallback for crypto-browserify's randombytes, for Firefox.
-        './src/lib/cloud/social/alias/randombytes.js:randombytes'
-      ]
-    })
+    cloudInstallerFreedomModule: Rule.browserify 'lib/cloud/install/freedom-module'
+    cloudSocialProviderFreedomModule: Rule.browserify 'lib/cloud/social/freedom-module'
     digitalOceanFreedomModule: Rule.browserify 'lib/cloud/digitalocean/freedom-module'
 
     # uproxy-lib sample apps.
