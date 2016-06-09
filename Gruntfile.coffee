@@ -309,9 +309,6 @@ gruntConfig = {
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
-    lintFirefoxJs: {
-      command: 'jshint src/firefox/lib/*.js'
-    }
   }
 
   copy: {
@@ -923,6 +920,14 @@ gruntConfig = {
         'src/**/*.ts'
       ]
 
+  jshint:
+    firefox:
+      options:
+        moz: true
+      src: [
+        'src/firefox/lib/*.js'
+      ]
+
   #-------------------------------------------------------------------------
   jasmine:
     chrome_extension: Rule.jasmineSpec('chrome/extension/scripts/',
@@ -1171,7 +1176,6 @@ taskManager.add 'build_chrome', [
 # Firefox build tasks.
 taskManager.add('build_firefox', [
   'base'
-  'exec:lintFirefoxJs'
   'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'
@@ -1277,45 +1281,44 @@ taskManager.add 'socksEchoIntegrationTest', [
   'jasmine_chromeapp:socksEcho'
 ]
 
-# TODO: add test_chrome once it passes reliably
-taskManager.add 'integration_test', [
-  'tcpIntegrationTest'
-  'socksEchoIntegrationTest'
-]
-
-taskManager.add 'everything', [
-  'build'
-  'test'
-  'integration_test'
-]
-
-# This is the target run by Travis. Targets in here should run locally
-# and on Travis/Sauce Labs.
-taskManager.add 'test', [
-  'exec:lintFirefoxJs'
+taskManager.add 'unit_test', [
   'test_lib'
   'test_core'
   'test_ui'
   'test_chrome'
 ]
 
+# TODO: add test_chrome once it passes reliably
+taskManager.add 'integration_test', [
+  'tcpIntegrationTest'
+  'socksEchoIntegrationTest'
+]
+
+taskManager.add 'test', [
+  'unit_test'
+  'integration_test'
+]
+
+# Builds all code, including the "dist" build, but skips
+# linging and testing which can both be annoying and slow.
+# jshint is here because catches hard syntax errors, etc.
 taskManager.add 'build', [
   'exec:rmIosBuild'
   'exec:rmAndroidBuild'
   'build_chrome'
   'build_firefox'
   'build_cca'
-]
-
-taskManager.add 'lint', [
-  'tslint'
-]
-
-taskManager.add 'dist', [
-  'build'
-  'lint'
+  'jshint'
   'copy:dist'
   'jpm:xpi'
+]
+
+# This is run prior to releasing uProxy and, in addition to
+# building, tests and lints all code.
+taskManager.add 'dist', [
+  'build'
+  'tslint'
+  'test'
 ]
 
 taskManager.add 'default', [
@@ -1329,6 +1332,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-contrib-jshint'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'
