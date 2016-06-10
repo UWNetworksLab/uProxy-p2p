@@ -10,7 +10,7 @@ function usage () {
   echo "$0 [-g] [-b branch] [-p] [-h] browser version"
   echo "  -g: pull code from git (conflicts with -p)"
   echo "  -b: git branch to pull (default: HEAD's referant)"
-  echo "  -p: use a pre-built uproxy-lib (conflicts with -g)"
+  echo "  -p: use a pre-built uproxy (conflicts with -g)"
   echo "  -h, -?: this help message"
   echo
   echo "Without -g or -p the latest uproxy-lib NPM will be run."
@@ -66,7 +66,7 @@ EXPOSE 5900
 EOF
 
 # load-zork.sh needs a copy of Zork in:
-#   /test/src/uproxy-lib/build/dist/samples/zork-{chrome|firefox}app.
+#   /test/src/uproxy/build/dev/uproxy/lib/samples/zork-{chrome|firefox}app.
 # Unless -p was specified, we need to pull it down.
 if [ "$GIT" = true ]
 then
