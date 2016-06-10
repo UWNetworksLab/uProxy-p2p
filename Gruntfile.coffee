@@ -887,30 +887,8 @@ gruntConfig = {
     # uproxy-lib
     loggingProvider: Rule.browserify 'lib/loggingprovider/freedom-module'
     churnPipeFreedomModule: Rule.browserify 'lib/churn-pipe/freedom-module'
-    cloudInstallerFreedomModule: Rule.browserify('lib/cloud/install/freedom-module', {
-      alias : [
-        # Shims for node's dns and net modules from freedom-social-xmpp,
-        # with a couple of fixes.
-        './src/lib/cloud/social/shim/net.js:net'
-        './src/lib/cloud/social/shim/dns.js:dns'
-        # Alternative that works for freedomjs modules.
-        './src/lib/cloud/social/alias/brorand.js:brorand'
-        # Fallback for crypto-browserify's randombytes, for Firefox.
-        './src/lib/cloud/social/alias/randombytes.js:randombytes'
-      ]
-    })
-    cloudSocialProviderFreedomModule: Rule.browserify('lib/cloud/social/freedom-module', {
-      alias : [
-        # Shims for node's dns and net modules from freedom-social-xmpp,
-        # with a couple of fixes.
-        './src/lib/cloud/social/shim/net.js:net'
-        './src/lib/cloud/social/shim/dns.js:dns'
-        # Alternative that works for freedomjs modules.
-        './src/lib/cloud/social/alias/brorand.js:brorand'
-        # Fallback for crypto-browserify's randombytes, for Firefox.
-        './src/lib/cloud/social/alias/randombytes.js:randombytes'
-      ]
-    })
+    cloudInstallerFreedomModule: Rule.browserify 'lib/cloud/install/freedom-module'
+    cloudSocialProviderFreedomModule: Rule.browserify 'lib/cloud/social/freedom-module'
     digitalOceanFreedomModule: Rule.browserify 'lib/cloud/digitalocean/freedom-module'
 
     # uproxy-lib sample apps.
@@ -940,6 +918,14 @@ gruntConfig = {
     files:
       src: [
         'src/**/*.ts'
+      ]
+
+  jshint:
+    firefox:
+      options:
+        moz: true
+      src: [
+        'src/firefox/lib/*.js'
       ]
 
   #-------------------------------------------------------------------------
@@ -1295,44 +1281,45 @@ taskManager.add 'socksEchoIntegrationTest', [
   'jasmine_chromeapp:socksEcho'
 ]
 
-# TODO: add test_chrome once it passes reliably
-taskManager.add 'integration_test', [
-  'tcpIntegrationTest'
-  'socksEchoIntegrationTest'
-]
-
-taskManager.add 'everything', [
-  'build'
-  'test'
-  'integration_test'
-]
-
-# This is the target run by Travis. Targets in here should run locally
-# and on Travis/Sauce Labs.
-taskManager.add 'test', [
+taskManager.add 'unit_test', [
   'test_lib'
   'test_core'
   'test_ui'
   'test_chrome'
 ]
 
+# TODO: add test_chrome once it passes reliably
+taskManager.add 'integration_test', [
+  'tcpIntegrationTest'
+  'socksEchoIntegrationTest'
+]
+
+taskManager.add 'test', [
+  'unit_test'
+  'integration_test'
+]
+
+# Builds all code, including the "dist" build, but skips
+# linting and testing which can both be annoying and slow.
+# jshint is here because catches hard syntax errors, etc.
 taskManager.add 'build', [
   'exec:rmIosBuild'
   'exec:rmAndroidBuild'
   'build_chrome'
   'build_firefox'
   'build_cca'
-]
-
-taskManager.add 'lint', [
-  'tslint'
-]
-
-taskManager.add 'dist', [
-  'build'
-  'lint'
+  'samples'
+  'jshint'
   'copy:dist'
   'jpm:xpi'
+]
+
+# This is run prior to releasing uProxy and, in addition to
+# building, tests and lints all code.
+taskManager.add 'dist', [
+  'build'
+  'tslint'
+  'test'
 ]
 
 taskManager.add 'default', [
@@ -1346,6 +1333,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-contrib-jshint'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'

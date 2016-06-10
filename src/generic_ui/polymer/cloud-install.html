@@ -120,7 +120,7 @@
         <!-- TODO: some of this text needs to be bold - need to set the HTML element rather than use $$ to translate -->
         <p id='createAccountMessage'></p>
 
-        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}"></paper-checkbox>
+        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}" on-change="{{havePromoChanged}}"></paper-checkbox>
 
         <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
           {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}

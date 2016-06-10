@@ -10,6 +10,7 @@
  */
 
 import ui_constants = require('../../interfaces/ui');
+import background_ui = require('./background_ui');
 import CopyPasteState = require('./copypaste-state');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
@@ -122,9 +123,6 @@ export class UserInterface implements ui_constants.UiApi {
   public browser :string = '';
   public availableVersion :string = null;
 
-  // Changing this causes root.ts to fire a core-signal with the new value.
-  public signalToFire :Object = null;
-
   public toastMessage :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
@@ -139,7 +137,8 @@ export class UserInterface implements ui_constants.UiApi {
    */
   constructor(
       public core   :CoreConnector,
-      public browserApi :BrowserAPI) {
+      public browserApi :BrowserAPI,
+      public backgroundUi: background_ui.BackgroundUi) {
     this.updateView_();
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
@@ -322,10 +321,26 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
     browserApi.on('promoIdDetected', this.setActivePromoId);
+    browserApi.on('translationsRequest', this.handleTranslationsRequest);
+    browserApi.on('globalSettingsRequest', this.handleGlobalSettingsRequest);
+    backgroundUi.registerAsFakeBackground(this.panelMessageHandler);
 
     core.getFullState()
         .then(this.updateInitialState)
         .then(this.browserApi.handlePopupLaunch);
+  }
+
+  public panelMessageHandler = (name: string, data: Object) => {
+    /*
+     * This will handle a subset of the signals for the actual background UI,
+     * we will try to handle most of the signals in the actual background
+     * though
+     */
+    switch(name) {
+      case 'logout-all':
+        this.logoutAll((<any>data).getConfirmation);
+        break;
+    }
   }
 
   public restartServer_ = (providerName :string) => {
@@ -361,11 +376,8 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  // Because of an observer (in root.ts) watching the value of
-  // signalToFire, this function simulates firing a core-signal
-  // from the background page.
   public fireSignal = (signalName :string, data ?:Object) => {
-    this.signalToFire = {name: signalName, data: data};
+    this.backgroundUi.fireSignal(signalName, data);
   }
 
   private confirmationCallbacks_ :{[index :number] :PromiseCallbacks} = {};
@@ -524,7 +536,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public parseUrlData = (url:string) : { type:social.PeerMessageType; message:string } => {
-    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
+    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)[/#]+(.*)/)
     if (!match) {
       throw new Error('invalid URL format');
     }
@@ -587,7 +599,9 @@ export class UserInterface implements ui_constants.UiApi {
         }
       } else {
         // Old v1 invites are base64 encoded JSON
-        var token = invite.substr(invite.lastIndexOf('/') + 1);
+        var lastNonCodeCharacter = Math.max(invite.lastIndexOf('/'), invite.lastIndexOf('#'));
+        var token = invite.substr(lastNonCodeCharacter + 1);
+
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match('[A-Za-z0-9+/=_]+')[0];
         var parsedObj = JSON.parse(atob(token));
@@ -751,6 +765,18 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
+  }
+
+  public handleTranslationsRequest = (keys :string[], callback ?:Function) => {
+    var vals :{[s :string]: string;} = {};
+    for (let key of keys) {
+      vals[key] = this.i18n_t(key);
+    }
+    this.browserApi.respond(vals, callback, 'translations');
+  }
+
+  public handleGlobalSettingsRequest = (callback ?:Function) => {
+    this.browserApi.respond(this.model.globalSettings, callback, 'globalSettings');
   }
 
   public setActivePromoId = (promoId :string) => {

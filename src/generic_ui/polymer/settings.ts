@@ -2,7 +2,6 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 var ui = ui_context.ui;
-var core = ui_context.core;
 var model = ui_context.model;
 
 import _ = require('lodash');
@@ -13,11 +12,11 @@ Polymer({
   connectedNetworks: '',
   logOut: function() {
     // logout all networks asynchronously
-    ui.logoutAll(true);
+    this.$.state.logoutAll(true); //TODO move logic for prompting the user to Polymer
     this.fire('core-signal', {name: 'close-settings'});
   },
   restart: function() {
-    core.restart();
+    this.$.state.restart();
   },
   openFeedbackForm: function() {
     this.fire('core-signal', {name: 'open-feedback'});
@@ -39,7 +38,7 @@ Polymer({
     }
   },
   updateStatsReportingEnabled: function() {
-    core.updateGlobalSettings(model.globalSettings);
+    this.$.state.updateGlobalSettings(model.globalSettings);
   },
   toggleAccountChooser: function() {
     this.accountChooserOpen = !this.accountChooserOpen;

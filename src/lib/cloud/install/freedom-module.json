@@ -29,6 +29,7 @@
     }
   },
   "permissions": [
+    "core.crypto",
     "core.tcpsocket"
   ]
 }

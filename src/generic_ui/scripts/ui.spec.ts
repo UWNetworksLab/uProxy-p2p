@@ -3,6 +3,7 @@
 import user_interface = require('./ui');
 import ui_constants = require('../../interfaces/ui');
 import browser_api = require('../../interfaces/browser_api');
+import background_ui = require('./background_ui');
 import BrowserAPI = browser_api.BrowserAPI;
 import browser_connector = require('../../interfaces/browser_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
@@ -18,6 +19,7 @@ describe('UI.UserInterface', () => {
   var mockBrowserApi :BrowserAPI;
   var updateToHandlerMap :{[name :string] :Function} = {};
   var mockCore :CoreConnector;
+  var mockBackgroundUi :background_ui.BackgroundUi;
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
@@ -65,7 +67,13 @@ describe('UI.UserInterface', () => {
          'setBadgeNotification',
          'isConnectedToCellular'
          ]);
-    ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
+
+    mockBackgroundUi = jasmine.createSpyObj('backgroundUi', [
+        'registerAsFakeBackground',
+        'fireSignal'
+    ]);
+
+    ui = new user_interface.UserInterface(mockCore, mockBrowserApi, mockBackgroundUi);
     spyOn(console, 'log');
   });
 
@@ -141,7 +149,8 @@ describe('UI.UserInterface', () => {
 
   function activateConfirmationButton(shouldConfirm :boolean) {
     var text = ui.i18n_t(shouldConfirm ? 'YES' : 'NO');
-    var buttons = (<any>ui.signalToFire).data.buttons;
+    var buttons = (<jasmine.Spy>mockBackgroundUi.fireSignal).calls.mostRecent().args[1].buttons;
+
     var buttonInfo = <any>_.find(buttons, {text: text});
     var index = buttonInfo.callbackIndex;
 
@@ -383,7 +392,8 @@ describe('UI.UserInterface', () => {
         done();
       });
 
-      expect(ui.signalToFire).toEqual(jasmine.objectContaining({name: 'open-dialog'}));
+      expect((<jasmine.Spy>mockBackgroundUi.fireSignal).calls.mostRecent().args[0])
+          .toEqual('open-dialog');
       expect(mockCore.logout).not.toHaveBeenCalled();
 
       // pretend the confirmaiton button was clicked
