@@ -60,27 +60,19 @@ describe('remote_connection.RemoteConnection', () => {
     it('basic setup', () => {
       spyOn(socksToRtc, 'start').and.callThrough();
 
-      connection.startConnection(globals.MESSAGE_VERSION).then( () => {
-        connection.startGet();
-      });
+      connection.startGet(globals.MESSAGE_VERSION);
 
       expect(socksToRtc.start).toHaveBeenCalled();
       expect(connection.localGettingFromRemote).toEqual(social.GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('starting get twice fails', () => {
-            connection.startConnection(globals.MESSAGE_VERSION).then( () => {
-        connection.startGet();
-      });
-
+      connection.startGet(globals.MESSAGE_VERSION);
       expect(connection.startGet).toThrow();
     });
 
     it('getting access after success', (done) => {
-      var start = connection.startConnection(globals.MESSAGE_VERSION).then( () => {
-        return connection.startGet();
-      });
-
+      var start = connection.startGet(globals.MESSAGE_VERSION);
       socksToRtc.resolveStart(null);
 
       start.then(() => {
@@ -90,10 +82,7 @@ describe('remote_connection.RemoteConnection', () => {
     });
 
     it('cleanup after failure to start', (done) => {
-      var start = connection.startConnection(globals.MESSAGE_VERSION).then( () => {
-        return connection.startGet();
-      });
-
+      var start = connection.startGet(globals.MESSAGE_VERSION);
 
       socksToRtc.rejectStart(Error('fake rejection'));
 
@@ -152,10 +141,7 @@ describe('remote_connection.RemoteConnection', () => {
   describe('bytes sent/received', () => {
     it('getting connection', (done) => {
       jasmine.clock().install();
-      var start = connection.startConnection(globals.MESSAGE_VERSION).then( () => {
-        return connection.startGet();
-      });
-
+      var start = connection.startGet(globals.MESSAGE_VERSION);
       socksToRtc.resolveStart(null);
 
       start.then(() => {

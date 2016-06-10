@@ -420,18 +420,6 @@ import ui = ui_connector.connector;
       return this.connection_.stopShare();
     }
 
-    public sendMessage = (channel :string, message :any) :Promise<void> => {
-      log.debug('sendMessage(%1, %2)', channel, message);
-      return this.connection_.startConnection(this.messageVersion).then(() =>  {
-        this.connection_.sendMessage(channel, message);
-      });
-    }
-
-    public registerMessageHandler = (channel :string, fn:(channel:string, msg:any) => void) :void => {
-      log.debug('registerMessageHandler(%1, fun())', channel);
-      this.connection_.registerMessageHandler(channel, fn);
-    }
-
     /**
      * Begin to use this remote instance as a proxy server, if permission is
      * currently granted.
@@ -449,15 +437,10 @@ import ui = ui_connector.connector;
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection_.startConnection(this.messageVersion).then(
-        () => {
-          return this.connection_.startGet().then(
-            (endpoints :net.Endpoint) => {
-              clearTimeout(this.startSocksToRtcTimeout_);
-              return endpoints;
-            }).catch((e) => {
-              return Promise.reject(e);
-            });
+      return this.connection_.startGet(this.messageVersion).then(
+        (endpoints :net.Endpoint) => {
+          clearTimeout(this.startSocksToRtcTimeout_);
+          return endpoints;
       }).catch((e) => {
         // Tell the UI that sharing failed. It will show a toast.
         // TODO: Send this update from remote-connection.ts
