@@ -437,15 +437,14 @@ import ui = ui_connector.connector;
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection_.startGet(this.messageVersion).then(
-        (endpoints :net.Endpoint) => {
-          clearTimeout(this.startSocksToRtcTimeout_);
-          return endpoints;
+      return this.connection_.startGet(this.messageVersion)
+          .then((endpoints :net.Endpoint) => {
+        clearTimeout(this.startSocksToRtcTimeout_);
+        return endpoints;
       }).catch((e) => {
         // Tell the UI that sharing failed. It will show a toast.
         // TODO: Send this update from remote-connection.ts
         //       https://github.com/uProxy/uproxy/issues/1861
-
         ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()

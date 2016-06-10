@@ -169,7 +169,7 @@ var log :logging.Log = new logging.Log('remote-user');
         case social.ClientStatus.ONLINE:
           if (!(client.clientId in this.clientIdToStatusMap) ||
               (this.clientIdToStatusMap[client.clientId] !=
-               social.ClientStatus.ONLINE)) {
+                  social.ClientStatus.ONLINE)) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
             this.sendInstanceHandshake(client.clientId);
           }
