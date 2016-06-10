@@ -713,7 +713,7 @@ gruntConfig = {
     libsForSimpleSocksNode:
       Rule.copyLibs
         npmLibNames: ['freedom-for-node']
-        pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
+        pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: [
           'uproxy-obfuscators'
           'freedom-port-control'
