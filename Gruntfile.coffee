@@ -1308,6 +1308,7 @@ taskManager.add 'build', [
   'build_chrome'
   'build_firefox'
   'build_cca'
+  'samples'
   'jshint'
   'copy:dist'
   'jpm:xpi'
