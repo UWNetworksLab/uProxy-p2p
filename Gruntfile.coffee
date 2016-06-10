@@ -1300,7 +1300,7 @@ taskManager.add 'test', [
 ]
 
 # Builds all code, including the "dist" build, but skips
-# linging and testing which can both be annoying and slow.
+# linting and testing which can both be annoying and slow.
 # jshint is here because catches hard syntax errors, etc.
 taskManager.add 'build', [
   'exec:rmIosBuild'
