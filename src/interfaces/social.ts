@@ -147,6 +147,8 @@ export enum PeerMessageType {
   SIGNAL_FROM_SERVER_PEER,
   // Request that an instance message be sent back from a peer.
   INSTANCE_REQUEST,
+  // Key Verification
+  KEY_VERIFY_MESSAGE,
   PERMISSION_TOKEN
 }
 

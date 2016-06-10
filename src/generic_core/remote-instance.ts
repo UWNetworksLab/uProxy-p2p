@@ -133,22 +133,23 @@ import ui = ui_connector.connector;
             log.info('No stored state for instance', instanceId);
             this.fulfillStorageLoad_();
           });
-      this.registerMessageHandler('Control.Verify', this.keyVerifyHandler_);
     }
 
-    private keyVerifyHandler_ = (unused :string, msg:any) => {
+    public handleKeyVerifyMessage = (msg:any) => {
       if (this.keyVerifySession_ !== null) {
-        log.debug('keyVerifyHandler_(%1,%2): going to existing session', unused, msg);
+        log.debug('handleKeyVerifyMessage(%1): going to existing session',
+                  msg);
         this.keyVerifySession_.readMessage(msg);
       } else {
-        log.debug('keyVerifyHandler_(%1,%2): creating new session.', unused, msg);
+        log.debug('handleKeyVerifyMessage(%1): creating new session.', msg);
         // Create a key verify session and give it this message.
         this.verifyUser(msg);
       }
     };
 
 
-    private handleConnectionUpdate_ = (update :uproxy_core_api.Update, data?:any) => {
+    private handleConnectionUpdate_ = (update :uproxy_core_api.Update,
+                                       data?:any) => {
       log.debug('connection update: %1', uproxy_core_api.Update[update]);
       switch (update) {
         case uproxy_core_api.Update.SIGNALLING_MESSAGE:
@@ -290,13 +291,18 @@ import ui = ui_connector.connector;
       return Promise.resolve<void>();
     }
 
-    public verifyUser = (firstMsg ?: any) : void => {
+    public verifyUser = (firstMsg ?:any) : void => {
       log.debug('verifyUser(%1)', firstMsg);
-      var inst = this;
-      var delegate = <key_verify.Delegate>{
+      let inst = this;
+      let clientId = this.user.instanceToClient(this.instanceId);
+      let delegate = <key_verify.Delegate>{
         sendMessage : (msg:any) :Promise<void> => {
           log.debug("verifyUser: sendMessage:", msg);
-          return inst.sendMessage('Control.Verify', msg);
+          let instanceMessage :social.PeerMessage = {
+            type: social.PeerMessageType.KEY_VERIFY_MESSAGE,
+            data: msg
+          };
+          return inst.user.network.send(inst.user, clientId, instanceMessage);
         },
         showSAS : (sas:string) :Promise<boolean> => {
           log.debug("verifyUser: Got SAS " + sas);
@@ -314,17 +320,19 @@ import ui = ui_connector.connector;
         }
       };
       if (firstMsg !== undefined) {
-        var parsedFirstMsg = key_verify.KeyVerify.readFirstMessage(firstMsg);
+        let parsedFirstMsg = key_verify.KeyVerify.readFirstMessage(firstMsg);
         if (parsedFirstMsg !== null) {
           this.keyVerifySession_ = new key_verify.KeyVerify(
             this.publicKey, delegate, parsedFirstMsg, 1);
         } else {
           // Immediately fail - bad initial message from peer.
-          log.error("verifyUser: peer-initiated session had bad message: ", firstMsg);
+          log.error("verifyUser: peer-initiated session had bad message: ",
+                    firstMsg);
           return;
         }
       } else {
-        this.keyVerifySession_ = new key_verify.KeyVerify(this.publicKey, delegate);
+        this.keyVerifySession_ = new key_verify.KeyVerify(this.publicKey,
+                                                          delegate);
       }
 
       this.verifyState_ = social.VerifyState.VERIFY_BEGIN;
@@ -454,6 +462,7 @@ import ui = ui_connector.connector;
         // Tell the UI that sharing failed. It will show a toast.
         // TODO: Send this update from remote-connection.ts
         //       https://github.com/uProxy/uproxy/issues/1861
+
         ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
           name: this.user.name,
           proxyingId: this.connection_.getProxyingId()

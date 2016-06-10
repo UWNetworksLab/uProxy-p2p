@@ -90,6 +90,12 @@
           </uproxy-button>
         </span>
       </div>
+        <div id='verification' class='display:inline'
+             hidden?='{{ ENABLE_VERIFY && instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
+          <uproxy-button raised on-tap='{{ verify }}'>
+            {{ "VERIFY" | $$ }}
+          </uproxy-button>
+        </div>
 
       <!-- It is assumed that all uproxy-instances are taken from
          user.offeringInstances and are therefore giving us access -->
@@ -110,12 +116,6 @@
 
       <!-- currently getting access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
-        <div id='verification' class='display:inline'
-             hidden?='{{ ENABLE_VERIFY && instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
-          <uproxy-button raised on-tap='{{ verify }}'>
-            {{ "VERIFY" | $$ }}
-          </uproxy-button>
-        </div>
         <uproxy-button class='grey' raised on-tap='{{ stop }}'>
           {{ "STOP_GETTING" | $$ }}
         </uproxy-button>
