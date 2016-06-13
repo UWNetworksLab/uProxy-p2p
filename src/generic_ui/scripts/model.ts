@@ -71,7 +71,7 @@ export class Model {
     enforceProxyServerValidity: false,
     validProxyServers: [],
     activePromoId: null,
-    crypto: true
+    crypto: true,
     enabledExperiments: []
   };
 
