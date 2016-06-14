@@ -26,33 +26,24 @@ RUN apt-get install curl && \
 RUN npm install -g grunt-cli
 
 ###############################################################################
-# Set up prerequisite local tools
+# Install local build dependencies
 ###############################################################################
 
 ENV BUILD_ROOT /root/build_root
 RUN mkdir -p $BUILD_ROOT
 WORKDIR $BUILD_ROOT
 
-# Install node_modules/
-COPY package.json .
-RUN npm install
+# Copy files needed by setup.sh install
+# TODO(fortuna): Remove .bowerrc once #2477 is merged.
+COPY .bowerrc bower.json package.json setup.sh ./
+COPY third_party third_party/
+# TODO(fortuna): Move all build dependencies out of src/
+COPY src/lib/build-tools src/lib/build-tools/
 
-# Install build/third_party
-COPY third_party/ build/third_party/
-COPY bower.json .
-RUN node_modules/.bin/bower install --allow-root --config.interactive=false \
-  --config.directory=build/third_party/bower
+RUN ./setup.sh install
 
-RUN cd build/third_party && $BUILD_ROOT/node_modules/.bin/typings install
-RUN mkdir -p build/third_party/freedom-port-control
-RUN cp -r node_modules/freedom-port-control/dist build/third_party/freedom-port-control/
-
-# Install tools/
-COPY src/lib/build-tools/*.ts build/tools/
-RUN node_modules/.bin/tsc --module commonjs --noImplicitAny build/tools/*.ts
-
-# Clean up all hidden files
-RUN rm -rf .[^.] .??*
+# Clean up all hidden files and src/
+RUN rm -rf .[^.] .??* src
 
 ###############################################################################
 # Setup grunt entry point
