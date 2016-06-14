@@ -28,7 +28,7 @@ Polymer({
 
     confirmLogout.then(() => {
       return Promise.all(ui_context.model.onlineNetworks.map((network: model.Network) => {
-        return this.$.state.logout({
+        return this.$.state.background.logout({
           name: network.name,
           userId: network.userId
         });
@@ -38,7 +38,7 @@ Polymer({
     this.fire('core-signal', {name: 'close-settings'});
   },
   restart: function() {
-    this.$.state.restart();
+    this.$.state.background.restart();
   },
   openFeedbackForm: function() {
     this.fire('core-signal', {name: 'open-feedback'});
@@ -60,7 +60,7 @@ Polymer({
     }
   },
   updateStatsReportingEnabled: function() {
-    this.$.state.updateGlobalSettings(ui_context.model.globalSettings);
+    this.$.state.background.updateGlobalSettings(ui_context.model.globalSettings);
   },
   toggleAccountChooser: function() {
     this.accountChooserOpen = !this.accountChooserOpen;
