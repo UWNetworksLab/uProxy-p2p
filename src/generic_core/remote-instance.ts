@@ -12,7 +12,7 @@ import arraybuffers = require('../lib/arraybuffers/arraybuffers');
 import bridge = require('../lib/bridge/bridge');
 import consent = require('./consent');
 import crypto = require('./crypto');
-import datachannel = require('../../../third_party/uproxy-lib/webrtc/datachannel');
+import datachannel = require('../lib/webrtc/datachannel');
 import globals = require('./globals');
 import key_verify = require('./key-verify');
 import _ = require('lodash');
@@ -293,6 +293,13 @@ import ui = ui_connector.connector;
 
     public verifyUser = (firstMsg ?:any) : void => {
       log.debug('verifyUser(%1)', firstMsg);
+      // The only time you'd want to do a second key verification is
+      // if an attacker is trying to kill an existing trust
+      // relationship.
+      if (this.verifyState_ === social.VerifyState.VERIFY_COMPLETE) {
+        log.debug('verifyUser(%1): already verified, skipping.', firstMsg);
+        return;
+      }
       let inst = this;
       let clientId = this.user.instanceToClient(this.instanceId);
       let delegate = <key_verify.Delegate>{
@@ -320,19 +327,16 @@ import ui = ui_connector.connector;
         }
       };
       if (firstMsg !== undefined) {
-        let parsedFirstMsg = key_verify.KeyVerify.readFirstMessage(firstMsg);
-        if (parsedFirstMsg !== null) {
-          this.keyVerifySession_ = new key_verify.KeyVerify(
-            this.publicKey, delegate, parsedFirstMsg, 1);
-        } else {
+        this.keyVerifySession_ = key_verify.RespondToVerify(
+            this.publicKey, delegate, firstMsg);
+        if (this.keyVerifySession_ !== null) {
           // Immediately fail - bad initial message from peer.
           log.error("verifyUser: peer-initiated session had bad message: ",
                     firstMsg);
           return;
         }
       } else {
-        this.keyVerifySession_ = new key_verify.KeyVerify(this.publicKey,
-                                                          delegate);
+        this.keyVerifySession_ = key_verify.InitiateVerify(this.publicKey, delegate);
       }
 
       this.verifyState_ = social.VerifyState.VERIFY_BEGIN;
