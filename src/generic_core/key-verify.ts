@@ -190,41 +190,41 @@ export class KeyVerify {
 
   // For message verification, the alphabetized list of keys in each message.
   private static keyMap_ :{[type:string]:string} = {
-    HELLO1:'clientVersion,h3,hk,mac,type,version',
-    HELLO2:'clientVersion,h3,hk,mac,type,version',
-    COMMIT:'clientVersion,h2,hk,hvi,mac,type',
-    DHPART1:'h1,mac,pkey,type',
-    DHPART2:'h1,mac,pkey,type',
-    CONFIRM1:'h0,mac,type',
-    CONFIRM2:'h0,mac,type',
-    CONF2ACK:'type'
+    Hello1:'clientVersion,h3,hk,mac,type,version',
+    Hello2:'clientVersion,h3,hk,mac,type,version',
+    Commit:'clientVersion,h2,hk,hvi,mac,type',
+    DHPart1:'h1,mac,pkey,type',
+    DHPart2:'h1,mac,pkey,type',
+    Confirm1:'h0,mac,type',
+    Confirm2:'h0,mac,type',
+    Conf2Ack:'type'
   };
 
   // For message verification, the list of prerequisite messages for
   // each message.
   private static prereqMap_ :{[msg:string]:[Type]} = {
-    HELLO1: <[Type]>[],
-    HELLO2: <[Type]>[],
-    COMMIT:[Type.Hello1, Type.Hello2],
-    DHPART1:[Type.Commit],
-    DHPART2:[Type.DHPart1],
-    CONFIRM1:[Type.DHPart2],
-    CONFIRM2:[Type.Confirm1],
-    CONF2ACK:[Type.Confirm2]
+    Hello1: <[Type]>[],
+    Hello2: <[Type]>[],
+    Commit:[Type.Hello1, Type.Hello2],
+    DHPart1:[Type.Commit],
+    DHPart2:[Type.DHPart1],
+    Confirm1:[Type.DHPart2],
+    Confirm2:[Type.Confirm1],
+    Conf2Ack:[Type.Confirm2]
   };
 
   // Which role receives which kinds of messages.  Clearly this gets
   // complicated if we ever want to let either side initiate
   // verification.
   private static roleMessageMap_ :{[msg:string]:boolean} = {
-    HELLO1: true,
-    HELLO2: false,
-    COMMIT: true,
-    DHPART1: false,
-    DHPART2: true,
-    CONFIRM1: false,
-    CONFIRM2: true,
-    CONF2ACK: false
+    Hello1: false,
+    Hello2: true,
+    Commit: false,
+    DHPart1: true,
+    DHPart2: false,
+    Confirm1: true,
+    Confirm2: false,
+    Conf2Ack: true
   };
 
   private generatorMap_ : {[msg:string]:((type:Type) =>Promise<Messages.Tagged>)};
@@ -260,25 +260,25 @@ export class KeyVerify {
     this.queuedGenerations_ = {};
     // These are all closed on 'this' now, so we have to init them here.
     this.generatorMap_ = {
-      HELLO1: this.makeHello_,
-      HELLO2: this.makeHello_,
-      COMMIT: this.makeCommit_,
-      DHPART1: this.makeDHPart_,
-      DHPART2: this.makeDHPart_,
-      CONFIRM1: this.makeConfirm_,
-      CONFIRM2: this.makeConfirm_,
-      CONF2ACK: this.makeConf2Ack_
+      Hello1: this.makeHello_,
+      Hello2: this.makeHello_,
+      Commit: this.makeCommit_,
+      DHPart1: this.makeDHPart_,
+      DHPart2: this.makeDHPart_,
+      Confirm1: this.makeConfirm_,
+      Confirm2: this.makeConfirm_,
+      Conf2Ack: this.makeConf2Ack_
     };
 
     this.messageReadMap_ = {
-      HELLO1: this.readHello_,
-      HELLO2: this.readHello_,
-      COMMIT: this.readCommit_,
-      DHPART1: this.readDHPart1_,
-      DHPART2: this.readDHPart2_,
-      CONFIRM1: this.readConfirm1_,
-      CONFIRM2: this.readConfirm2_,
-      CONF2ACK: this.readConf2Ack_
+      Hello1: this.readHello_,
+      Hello2: this.readHello_,
+      Commit: this.readCommit_,
+      DHPart1: this.readDHPart1_,
+      DHPart2: this.readDHPart2_,
+      Confirm1: this.readConfirm1_,
+      Confirm2: this.readConfirm2_,
+      Conf2Ack: this.readConf2Ack_
     };
   }
 

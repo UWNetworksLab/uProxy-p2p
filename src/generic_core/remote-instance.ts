@@ -297,8 +297,8 @@ import ui = ui_connector.connector;
       // if an attacker is trying to kill an existing trust
       // relationship.
       if (this.verifyState_ === social.VerifyState.VERIFY_COMPLETE) {
-        log.debug('verifyUser(%1): already verified, skipping.', firstMsg);
-        return;
+        log.debug('verifyUser(%1): ALREADY VERIFIED.', firstMsg);
+//        return;
       }
       let inst = this;
       let clientId = this.user.instanceToClient(this.instanceId);
@@ -329,7 +329,7 @@ import ui = ui_connector.connector;
       if (firstMsg !== undefined) {
         this.keyVerifySession_ = key_verify.RespondToVerify(
             this.publicKey, delegate, firstMsg);
-        if (this.keyVerifySession_ !== null) {
+        if (this.keyVerifySession_ === null) {
           // Immediately fail - bad initial message from peer.
           log.error("verifyUser: peer-initiated session had bad message: ",
                     firstMsg);
