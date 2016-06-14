@@ -124,7 +124,7 @@ var inviteUser = {
 
     getConfirmation.then(() => {
       return Promise.all(ui_context.model.onlineNetworks.map((network: model.Network) => {
-        return this.$.state.logout({
+        return this.$.state.background.logout({
           name: network.name,
           userId: network.userId
         });

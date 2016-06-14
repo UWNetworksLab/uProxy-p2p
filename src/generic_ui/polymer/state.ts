@@ -28,19 +28,11 @@ Polymer({
        * not matter which one.  If it turns out it does matter which one, we'll
        * put an attribute for that.
        */
+      this.background = background;
       return;
     }
 
-    background = new Background(this);
-  },
-  updateGlobalSettings: function(settings: uproxy_core_api.GlobalSettings) {
-    return background.updateGlobalSettings(settings);
-  },
-  restart: function() {
-    return background.restart();
-  },
-  logout: function(networkInfo: social.SocialNetworkInfo): Promise<void> {
-    return background.logout(networkInfo);
+    this.background = background = new Background(this);
   },
   handleDialogClick: function(fulfill: boolean, data: Object = null) {
     dialogClickFn(fulfill, data);
