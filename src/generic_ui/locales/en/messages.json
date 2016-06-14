@@ -1335,13 +1335,13 @@
     "description": "Instructions shown for peer-to-peer when the user has an empty roster",
     "message": "Get or share access with family & friends."
   },
-  "ASIA_BANGALORE": {
-    "description": "Region option for deploying a DigitalOcean server",
-    "message": "Asia (Bangalore)"
-  },
   "ASIA_SINGAPORE": {
     "description": "Region option for deploying a DigitalOcean server",
     "message": "Asia (Singapore)"
+  },
+  "ASIA_BANGALORE": {
+    "description": "Region option for deploying a DigitalOcean server",
+    "message": "Asia (Bangalore)"
   },
   "EUROPE_AMSTERDAM": {
     "description": "Region option for deploying a DigitalOcean server",
