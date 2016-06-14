@@ -26,6 +26,7 @@
   },
   "permissions": [
     "core.console",
+    "core.crypto",
     "core.storage",
     "core.tcpsocket",
     "core.udpsocket",

@@ -80,6 +80,14 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.on(name, callback);
   }
 
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    msg && this.respond_(data, msg);
+  }
+
+  private respond_ = (data: any, msg :string) : void => {
+    port.emit(msg, data);
+  }
+
   /**
    * Emit a message to the add-on that initiates asynchronous behaviour
    * in the add-on. Return a promise that fulfills/rejects upon the async

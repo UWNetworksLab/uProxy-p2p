@@ -42,6 +42,7 @@ export interface GlobalSettings {
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
   activePromoId: string;
+  shouldHijackDO: boolean;
   crypto: boolean;
   // A list of strings, each represented as a constant below, with
   // prefix 'kFeature'.

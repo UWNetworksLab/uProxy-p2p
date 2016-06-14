@@ -9,16 +9,17 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
+import background_ui = require('../../../generic_ui/scripts/background_ui');
+import chrome_panel_connector = require('./chrome_panel_connector');
 import ChromeBrowserApi = require('./chrome_browser_api');
 import ChromeCoreConnector = require('./chrome_core_connector');
 import ChromeTabAuth = require('./chrome_tab_auth');
-
-import UiApi = require('../../../interfaces/ui');
-import user_interface = require('../../../generic_ui/scripts/ui');
-import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import Constants = require('../../../generic_ui/scripts/constants');
+import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+import user_interface = require('../../../generic_ui/scripts/ui');
+
 import compareVersion = require('compare-version');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
@@ -26,6 +27,7 @@ import compareVersion = require('compare-version');
 // --------------------- Communicating with the App ----------------------------
 export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
 export var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
+export var backgroundUi: background_ui.BackgroundUi;
 export var browserApi :ChromeBrowserApi;
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked
@@ -36,17 +38,29 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.MessageSender, sendResponse :Function) => {
+  if (!request) return;
+
   // handle requests from other pages (i.e. copypaste.html) to bring the
   // chrome popup to the front
-  if (request && request.openWindow) {
+  if (request.openWindow) {
     browserApi.bringUproxyToFront();
   }
 
   // handle requests to get logs
-  if (request && request.getLogs) {
+  if (request.getLogs) {
     core.getLogs().then((logs) => {
       sendResponse({ logs: logs });
     });
+    return true;
+  }
+
+  if (request.globalSettingsRequest) {
+    ui.handleGlobalSettingsRequest(sendResponse);
+    return true;
+  }
+
+  if (request.translationsRequest) {
+    ui.handleTranslationsRequest(request.translationsRequest, sendResponse);
     return true;
   }
 });
@@ -135,6 +149,20 @@ var oAuth = new ChromeTabAuth();
 browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
                          oAuth.login.bind(oAuth));
 
+backgroundUi = new background_ui.BackgroundUi(
+    new chrome_panel_connector.ChromePanelConnector(),
+    core);
+
+/*
+ * TODO: this is a separate user_interface object from the one we refer to
+ * elsewhere in the code.  It will register listeners for all events and
+ * commands, however, these listeners will immediately be unbound after the
+ * panel is opened for the first time.  Its version of any data should not be
+ * relied upon as canonical and no updates made to data here should be expected
+ * to persist within the general UI.
+ */
+var ui = new user_interface.UserInterface(core, browserApi, backgroundUi);
+
 // used for de-duplicating urls caught by the listeners
 var lastUrl = '';
 var lastUrlTime = 0;
@@ -193,4 +221,3 @@ chrome.webRequest.onBeforeRequest.addListener(
   { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
   ['blocking']
 );
-

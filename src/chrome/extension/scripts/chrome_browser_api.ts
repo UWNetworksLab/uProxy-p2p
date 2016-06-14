@@ -228,6 +228,14 @@ class ChromeBrowserApi implements BrowserAPI {
     });
   }
 
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    callback && this.respond_(data, callback);
+  }
+
+  private respond_ = (data :any, callback :Function) : void => {
+    callback(data);
+  }
+
   public setBadgeNotification = (notification :string) => {
     chrome.browserAction.setBadgeText({text: notification});
   }

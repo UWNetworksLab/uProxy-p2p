@@ -71,8 +71,9 @@ export class Model {
     enforceProxyServerValidity: false,
     validProxyServers: [],
     activePromoId: null,
-    crypto: true,
-    enabledExperiments: []
+    enabledExperiments: [],
+    shouldHijackDO: true,
+    crypto: true
   };
 
   public reconnecting = false;

@@ -9,24 +9,25 @@
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
 <link rel="import" href="../../bower/core-overlay/core-overlay.html">
-<link rel='import' href='invite-user.html'>
-<link rel="import" href="i18n-filter.html">
-<link rel="import" href='splash.html'>
+<link rel='import' href='advanced-settings.html'>
+<link rel='import' href='browser-elements.html'>
+<link rel='import' href='bubble.html'>
+<link rel='import' href='button.html'>
+<link rel='import' href='copypaste.html'>
+<link rel='import' href='dialog.html'>
 <link rel="import" href='faq.html'>
+<link rel='import' href='feedback.html'>
+<link rel="import" href="i18n-filter.html">
+<link rel='import' href='icons.html'>
+<link rel='import' href='invite-user.html'>
+<link rel="import" href='logs.html'>
+<link rel='import' href='proxy-error.html'>
+<link rel='import' href='reconnect.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
-<link rel="import" href='logs.html'>
-<link rel='import' href='copypaste.html'>
-<link rel='import' href='bubble.html'>
-<link rel='import' href='feedback.html'>
-<link rel='import' href='advanced-settings.html'>
-<link rel='import' href='reconnect.html'>
+<link rel="import" href='splash.html'>
+<link rel='import' href='state.html'>
 <link rel='import' href='troubleshoot.html'>
-<link rel='import' href='dialog.html'>
-<link rel='import' href='browser-elements.html'>
-<link rel='import' href='icons.html'>
-<link rel='import' href='proxy-error.html'>
-<link rel='import' href='button.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-open-dialog='{{ openDialog }}'>
 
@@ -278,6 +279,7 @@
         margin: 4px auto 0;
       }
     </style>
+    <uproxy-state id="state"></uproxy-state>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
 

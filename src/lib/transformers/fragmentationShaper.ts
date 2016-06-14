@@ -1,4 +1,5 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import crypto = require('crypto');
 import defragmenter = require('./defragmenter');
 import fragments = require('./fragment');
 import logging = require('../logging/logging');
@@ -86,10 +87,7 @@ export class FragmentationShaper {
     var packetSize = payloadSize + fillSize;
 
     if (packetSize <= this.maxLength_) {
-      var fill = new Uint8Array(fillSize);
-      if (fillSize > 0) {
-        crypto.getRandomValues(fill);
-      }
+      var fill = crypto.randomBytes(fillSize);
 
       // One fragment
       var fragment = {
