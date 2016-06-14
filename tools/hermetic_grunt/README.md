@@ -12,35 +12,30 @@ You first need to install Docker: https://docs.docker.com/engine/installation/.
 
 Then, **from your uProxy repository root** (where the .git directory is), run:
 ````
-docker build -f tools/hermetic_grunt/Dockerfile -t hermetic-grunt . &&
-docker run --rm -v $(pwd):/root/repository_root -it hermetic-grunt
+./tools/hermetic_grunt/hermetic_grunt.sh
 ````
 
-This will build the Docker image and then run grunt.
+This will:
+1. Build a Docker image named `hermetic-grunt`
+1. Start a new Docker container with that image
+1. Run grunt in the container
+1. Delete the container when done
 
-You can pass regular grunt parameters to the run call:
+You can pass regular grunt parameters to the call:
 ````
-docker run --rm -v $(pwd):/root/repository_root -it hermetic-grunt --verbose build_chrome
+./tools/hermetic_grunt/hermetic_grunt.sh --verbose build_chrome
 ````
-
-### Details
-
-The `docker build` command builds a new image named `hermetic-grunt` according
-to the `tools/hermetic_grunt/Dockerfile` specification. It uses the current
-directory as the source for `COPY` commands.
-
-The `docker run` command starts a new Docker container using the
-`hermetic-grunt` image and runs grunt. The current host directory is
-mounted as `/root/repository_root` in the container. The container is deleted
-when grunt is done (`--rm`).
 
 ## Image Caching
 
 The first time the command is run, the image will be built from scratch, which
-takes a couple of minutes. Subsequent calls will use the cached image and be
+takes a minute or so. Subsequent calls will use the cached image and be
 much faster. If you make changes that affect the image, it will be rebuilt.
 
-Notice that the image cache key is the image name. So if you are working on
-branches with differing files that affect the image, you will be rebuilding the
-image multiple times. In that case you may want to give them different names,
-based on your branch.
+Notice that the image name globally identifies an image. So if you are working
+on branches that modify files that affect the image, you will be rebuilding the
+image whenever you switch branches. In that case you can specify the image name
+by setting the `GRUNT_IMAGE` environment variable:
+````
+GRUNT_IMAGE=deps-change-grunt ./tools/hermetic_grunt/hermetic_grunt.sh
+````
