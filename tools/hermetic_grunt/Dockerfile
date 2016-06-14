@@ -34,8 +34,7 @@ RUN mkdir -p $BUILD_ROOT
 WORKDIR $BUILD_ROOT
 
 # Copy files needed by setup.sh install
-# TODO(fortuna): Remove .bowerrc once #2477 is merged.
-COPY .bowerrc bower.json package.json setup.sh ./
+COPY bower.json package.json setup.sh ./
 COPY third_party third_party/
 # TODO(fortuna): Move all build dependencies out of src/
 COPY src/lib/build-tools src/lib/build-tools/
