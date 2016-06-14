@@ -25,6 +25,7 @@ import Constants = require('./constants');
 import translator_module = require('./translator');
 import network_options = require('../../generic/network-options');
 import model = require('./model');
+import util = require('./util');
 import jsurl = require('jsurl');
 import uparams = require('uparams');
 import md5 = require('md5');
@@ -224,7 +225,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       var user = this.mapInstanceIdToUser_[instanceId];
       user.isGettingFromMe = true;
-      this.showNotification(this.i18n_t('STARTED_PROXYING',
+      this.showNotification(translator_module.i18n_t('STARTED_PROXYING',
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
       checkConnectivityIntervalId = setInterval(
           this.notifyUserIfConnectedToCellular_,
@@ -238,7 +239,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       // only show a notification if we knew we were prokying
       if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-        this.showNotification(this.i18n_t('STOPPED_PROXYING',
+        this.showNotification(translator_module.i18n_t('STOPPED_PROXYING',
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
       }
       delete this.instancesGivingAccessTo[instanceId];
@@ -330,15 +331,15 @@ export class UserInterface implements ui_constants.UiApi {
         .then(this.browserApi.handlePopupLaunch);
   }
 
-  public panelMessageHandler = (name: string, data: Object) => {
+  public panelMessageHandler = (name: string, data: any) => {
     /*
      * This will handle a subset of the signals for the actual background UI,
      * we will try to handle most of the signals in the actual background
      * though
      */
     switch(name) {
-      case 'logout-all':
-        this.logoutAll((<any>data).getConfirmation);
+      case 'logout':
+        this.logout(data.data.networkInfo);
         break;
     }
   }
@@ -380,78 +381,23 @@ export class UserInterface implements ui_constants.UiApi {
     this.backgroundUi.fireSignal(signalName, data);
   }
 
-  private confirmationCallbacks_ :{[index :number] :PromiseCallbacks} = {};
-  // Don't use index 0 as it may be treated as false in confirmation code.
-  private confirmationCallbackIndex_ = 1;
-
   public getConfirmation(heading :string,
                          text :string,
                          dismissButtonText ?:string,
                          fulfillButtonText ?:string): Promise<void> {
-    return new Promise<void>((F, R) => {
-      var callbackIndex = ++this.confirmationCallbackIndex_;
-      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
-      this.fireSignal('open-dialog', {
-        heading: heading,
-        message: text,
-        buttons: [{
-          text: dismissButtonText ? dismissButtonText : this.i18n_t('NO'),
-          callbackIndex: callbackIndex,
-          dismissive: true
-        }, {
-          text: fulfillButtonText ? fulfillButtonText : this.i18n_t('YES'),
-          callbackIndex: callbackIndex
-        }]
-      });
-    });
+    return this.backgroundUi.openDialog(util.getConfirmationObject(
+        heading, text, dismissButtonText, fulfillButtonText));
   }
 
   public getUserInput(heading :string, message :string, placeholderText :string, defaultValue :string, buttonText :string) : Promise<string> {
-    return new Promise<string>((F, R) => {
-      var callbackIndex = ++this.confirmationCallbackIndex_;
-      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
-      this.fireSignal('open-dialog', {
-        heading: heading,
-        message: message,
-        buttons: [{
-          text: buttonText,
-          callbackIndex: callbackIndex
-        }],
-        userInputData: {
-          placeholderText: placeholderText,
-          initInputValue: defaultValue
-        }
-      });
-    });
+    return this.backgroundUi.openDialog(util.getInputObject(
+        heading, message, placeholderText, defaultValue, buttonText));
   }
 
   public showDialog(heading :string, message :string, buttonText ?:string,
-      signal ?:string, displayData ?:string) {
-    var button :ui_constants.DialogButtonDescription = {
-      text: buttonText || this.i18n_t('OK')
-    };
-    if (signal) {
-      button['signal'] = signal;
-    }
-    this.fireSignal('open-dialog', {
-      heading: heading,
-      message: message,
-      buttons: [button],
-      displayData: displayData || null
-    });
-  }
-
-  public invokeConfirmationCallback = (index :number, fulfill :boolean, data ?:any) => {
-    if (index > this.confirmationCallbackIndex_) {
-      console.error('Confirmation callback not found: ' + index);
-      return;
-    }
-    if (fulfill) {
-      this.confirmationCallbacks_[index].fulfill(data);
-    } else {
-      this.confirmationCallbacks_[index].reject(data);
-    }
-    delete this.confirmationCallbacks_[index];
+      displayData ?:string) {
+    return this.backgroundUi.openDialog(util.getConfirmationObject(
+        heading, message, buttonText, displayData));
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -1149,21 +1095,7 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  private getLogoutConfirmation_ = (isGetting :boolean, isSharing :boolean) : Promise<void> => {
-    if (isGetting && isSharing) {
-      return this.getConfirmation(
-          '', this.i18n_t('CONFIRM_LOGOUT_GETTING_AND_SHARING'));
-    } else if (isGetting) {
-      return this.getConfirmation('', this.i18n_t('CONFIRM_LOGOUT_GETTING'));
-    } else if (isSharing) {
-      return this.getConfirmation('', this.i18n_t('CONFIRM_LOGOUT_SHARING'));
-    } else {
-      return Promise.resolve<void>();
-    }
-  }
-
-  public logout = (networkInfo :social.SocialNetworkInfo,
-                   showConfirmation :boolean = true) : Promise<void> => {
+  public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var network = this.model.getNetwork(networkInfo.name);
     // Check if the user is connected to a network
     if (!network) {
@@ -1174,54 +1106,8 @@ export class UserInterface implements ui_constants.UiApi {
       return Promise.resolve<void>();
     }
 
-    var getConfirmation = Promise.resolve<void>();
-    if (showConfirmation) {
-      // Check if we are getting or sharing on this network.
-      var isGettingForThisNetwork = false;
-      if (this.instanceGettingAccessFrom_) {
-        var user = this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_];
-        if (user && user.network.name === networkInfo.name) {
-          isGettingForThisNetwork = true;
-        }
-      }
-      var isSharingForThisNetwork = false;
-      var sharingTo = Object.keys(this.instancesGivingAccessTo);
-      for (var i = 0; i < sharingTo.length; ++i) {
-        user = this.mapInstanceIdToUser_[sharingTo[i]];
-        if (user && user.network.name === networkInfo.name) {
-          isSharingForThisNetwork = true;
-          break;
-        }
-      }
-      getConfirmation = this.getLogoutConfirmation_(
-          isGettingForThisNetwork, isSharingForThisNetwork);
-    }
-
-    return getConfirmation.then(() => {
-      network.logoutExpected = true;
-      return this.core.logout(networkInfo);
-    }, () => { /* MT */ });
-  }
-
-  public logoutAll = (showConfirmation :boolean) : Promise<void[]> => {
-    var getConfirmation = Promise.resolve<void>();
-    if (showConfirmation) {
-      getConfirmation = this.getLogoutConfirmation_(
-          this.isGettingAccess(), this.isGivingAccess());
-    }
-
-    return getConfirmation.then(() => {
-      var logoutPromises :Promise<void>[] = [];
-      for (var i in this.model.onlineNetworks) {
-        logoutPromises.push(
-            this.logout({
-              name: this.model.onlineNetworks[i].name,
-              userId: this.model.onlineNetworks[i].userId
-            }, false)  // Don't show duplicate confirmation messages.
-        );
-      }
-      return Promise.all(logoutPromises);
-    }, () => { /* MT */ });
+    network.logoutExpected = true;
+    return this.core.logout(networkInfo);
   }
 
   private reconnect_ = (network :string) => {

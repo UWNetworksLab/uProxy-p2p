@@ -53,6 +53,9 @@ export class BackgroundUi {
       case 'restart':
         this.core_.restart();
         break;
+      case 'logout':
+        this.wrapPromise_(this.core_.logout(data.data), data.promiseId);
+        break;
       case 'promise-response':
         this.handlePromiseResponse_(data.promiseId, data.data);
         break;
@@ -67,6 +70,10 @@ export class BackgroundUi {
   /* actual BackgroundUi methods */
   public fireSignal(signalName: string, data?: Object): void {
     this.doInPanel_('fire-signal', { name: signalName, data: data });
+  }
+
+  public openDialog(data?: Object): Promise<any> {
+    return this.doInPanel_('open-dialog', data, true);
   }
 
   private wrapPromise_ = (promise: Promise<any>, promiseId: number) => {
@@ -103,7 +110,7 @@ export class BackgroundUi {
     delete this.promisesMap_[promiseId];
   }
 
-  private doInPanel_ = (name: string, data: Object, expectResponse: boolean = false) => {
+  private doInPanel_ = (name: string, data: Object, expectResponse: boolean = false): any => {
     var promise: Promise<any> = null;
     var payload: panel_connector.CommandPayload = {
       data: data,
