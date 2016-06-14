@@ -5,7 +5,13 @@
 import panel_connector = require('../../interfaces/panel_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
-var background: panel_connector.BackgroundUiConnector = null;
+//TODO standardize
+interface FullfillAndReject {
+  fulfill: Function;
+  reject: Function;
+};
+
+var background: Background = null;
 
 Polymer({
   ready: function() {
@@ -14,36 +20,116 @@ Polymer({
     this.model = ui_context.model;
 
     if (background) {
+      /*
+       * one of these elements should be bound as a message listener, it should
+       * not matter which one.  If it turns out it does matter which one, we'll
+       * put an attribute for that.
+       */
       return;
     }
 
-    /*
-     * one of these elements should be bound as a message listener, it should
-     * not matter which one.  If it turns out it does matter which one, we'll
-     * put an attribute for that.
-     */
-    if (window.chrome) {
-      background = new ChromeBackgroundUiConnector(this.handleMessage.bind(this));
-    } else {
-      background = new FirefoxBackgroundUiConnector(this.handleMessage.bind(this));
-    }
+    background = new Background(this);
   },
-  handleMessage: function(name: string, data: Object) {
-    if (name === 'fire-signal') {
-      this.fire('core-signal', data);
-    }
-  },
-
   updateGlobalSettings: function(settings: uproxy_core_api.GlobalSettings) {
-    background.sendMessage('update-global-settings', settings);
+    return background.updateGlobalSettings(settings);
   },
   restart: function() {
-    background.sendMessage('restart', null);
+    return background.restart();
   },
-  logoutAll: function(getConfirmation: boolean) {
-    background.sendMessage('logout-all', { getConfirmation: getConfirmation });
+  logoutAll: function(getConfirmation: boolean): Promise<void> {
+    return background.logoutAll(getConfirmation);
   }
 });
+
+class Background {
+  private state_: any;
+  private connector_: panel_connector.BackgroundUiConnector;
+  private promisesMap_: {[id: number]: FullfillAndReject} = {};
+
+  constructor(state: any) {
+    if (window.chrome) {
+      this.connector_ = new ChromeBackgroundUiConnector(this.handleMessage_);
+    } else {
+      this.connector_ = new FirefoxBackgroundUiConnector(this.handleMessage_);
+    }
+
+    this.state_ = state;
+  }
+
+  public updateGlobalSettings = (settings: uproxy_core_api.GlobalSettings): void => {
+    this.connector_.sendMessage('update-global-settings', settings);
+  }
+
+  public restart = (): void => {
+    this.doInBackground_('restart', null);
+  }
+
+  public logoutAll = (getConfirmation: boolean): Promise<void> => {
+    return <Promise<void>>this.doInBackground_('logout-all', { getConfirmation: getConfirmation }, true);
+  }
+
+  private wrapPromise_ = (promise: Promise<any>, promiseId: number) => {
+    promise.then((data) => {
+      this.connector_.sendMessage('promise-response', {
+        promiseId: promiseId,
+        data: {
+          success: true,
+          response: data
+        }
+      });
+    }, (data) => {
+      this.connector_.sendMessage('promise-response', {
+        promiseId: promiseId,
+        data: {
+          success: false,
+          response: data
+        }
+      });
+    });
+  }
+
+  private handleMessage_ = (name: string, data: panel_connector.CommandPayload) => {
+    if (name === 'fire-signal') {
+      this.state_.fire('core-signal', data.data); // a bit hacky, but oh well
+    } else if (name === 'promise-response') {
+      this.handlePromiseResponse_(data.promiseId, data.data);
+    }
+  }
+
+  private handlePromiseResponse_ = (promiseId: number, data: { success: boolean, response: Object}) => {
+    if (!this.promisesMap_[promiseId]) {
+      console.error('Unexpected promise received');
+      return;
+    }
+
+    if (data.success) {
+      this.promisesMap_[promiseId].fulfill(data.response);
+    } else {
+      this.promisesMap_[promiseId].reject(data.response);
+    }
+    delete this.promisesMap_[promiseId];
+  }
+
+  private doInBackground_ = (name: string, data: Object, expectResponse: boolean = false): (Promise<any>|void) => {
+    var payload :panel_connector.CommandPayload = {
+      data: data,
+      promiseId: null
+    };
+
+    if (expectResponse) {
+      var promiseId = new Date().valueOf(); // approximately unique
+      payload.promiseId = promiseId;
+    }
+
+    this.connector_.sendMessage(name, payload);
+
+    if (expectResponse) {
+      return new Promise((F, R) => {
+        this.promisesMap_[promiseId] = { fulfill: F, reject: R };
+      });
+    }
+  }
+}
 
 class FirefoxBackgroundUiConnector implements panel_connector.BackgroundUiConnector {
   constructor(listener: panel_connector.MessageHandler) {
