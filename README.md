@@ -8,6 +8,8 @@
 [![Travis Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
 [![Shippable Status](https://img.shields.io/shippable/54c823bf5ab6cc135289fbdc/dev.svg)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
 
+Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit) to learn more about contributing to uProxy. For a high level technical overview of uProxy, see the [uProxy Design Doc](https://docs.google.com/document/d/1t_30vX7RcrEGuWwcg0Jub-HiNI0Ko3kBOyqXgrQN3Kw/edit#).
+
 ## Tools
 
 uProxy is built using the following tools:
@@ -23,63 +25,29 @@ To manage dependencies we use:
  - [Bower](http://bower.io) to install libraries that we use in the UI
    (specified in `bower.json`) including Polymer.
 
+## Build
 
-## Development setup
+### Prerequisites
 
-Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit) to learn more about contributing to uProxy. For a high level technical overview of uProxy, see the [uProxy Design Doc](https://docs.google.com/document/d/1t_30vX7RcrEGuWwcg0Jub-HiNI0Ko3kBOyqXgrQN3Kw/edit#).
+ * NPM. The easiest way to install this is as part of [Node.js](http://nodejs.org/).
+ * [grunt-cli](https://www.npmjs.com/package/grunt-cli) (once you've installed NPM, simply execute `npm install -g grunt-cli`)
 
-### Prerequisites to build uProxy
+### Building
 
-Note: you will either need to run these as root, or set the directories they
-modify (`/usr/local`) to being editable by your user (`sudo chown -R $USER /usr/local`)
+First, to install required NPMs and configure the `build/` directory for TypeScript compilation, execute:
+```bash
+./setup.sh install
+```
 
-- [git](https://git-scm.com/)
-    - Most machines will have git pre-installed. If you need to install git, you can find instructions from the [git website](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
-    - For Windows, install the [desktop git app](https://desktop.github.com/), which provides an easy-to-use interface for git.
+Then, to compile the TypeScript code and build uProxy and all of the demo apps, execute:
+```bash
+grunt
+```
 
-- [node](http://nodejs.org/) and npm (Node's package manager):
-
-    - On **Mac** with Brew, you can do: `brew install node` (You may need to update your brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
-        - If you do not have [Homebrew](http://brew.sh), you can install it by running `ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
-
-    - On **Ubuntu**, you can do `apt-get install nodejs`.
-    - You may need to create a symlink (if we are not running legacy node) <br>
-      Use this: <br>
-      ln -s /usr/bin/nodejs /usr/bin/node
-
-    - On **Archlinux**, you can do 'pacman -S nodejs'.
-
-    - On **Windows**, you can download the installer from the [NodeJS Website](http://nodejs.org/).
-
-    - You may need to set your `$NODE_PATH` environment variable appropriately
-      (e.g. it might be: `/usr/local/share/npm/lib/node_modules`).
-
-    - To run binaries from globally-installed npm packages without
-      fully-qualifying paths, make sure you have added your npm bin directory to your path
-        - on Mac or Ubuntu, e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`
-        - on Windows,
-            - Open Control Panel > System and Security > System > Advanced System Settings
-            - In the Advanced tab, click on "Environment Variables"
-            - In System Variables, click on "Path" (or "PATH")
-            - At the end of the "Variable value:" string, append a ";" and the path to your bin directory, e.g. "C:\Program Files\nodejs\node_modules\npm\lib;C:\Users\<YOUR_PATH>\AppData\Roaming\npm\node_modules\grunt-cli\bin"
-
-- [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
-    - To install globally on Windows, open the command prompt as admin and then run the command
-
-### Building uProxy from source
-
- 1. In your terminal, navigate to a directory where you would like to download uProxy. E.g., `cd ~/uProxy`
-
- 1. Clone the uProxy repository: `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to GitHub set up (useful if you use 2-step auth for GitHub, which you should do).
-
- 1. Navigate into uProxy's root directory with `cd uproxy`
-
- 1. Setup build tools and third-party dependencies:
-   * In OS X or Linux, run `./setup.sh install`
-   * In Windows, run `.\setup.cmd install` instead (in cmd or PowerShell).
- 1. Run `grunt` - this will build everything, including uProxy for Chrome and Firefox.
-
-Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `./setup.sh install` to update these dependencies, then rerun `grunt`
+Having problems? To clean up from a partial, broken, or extremely out-dated build, try executing this command before repeating the above steps:
+```bash
+./setup.sh clean
+```
 
 ### IDE
 
@@ -98,7 +66,9 @@ Several compile errors will remain, namely imports from `../../../third_party`. 
 
 Re-compile, with F7 (and perhaps restart Sublime, just to be sure) to resolve these errors.
 
-### Installing and running
+## Run
+
+### uProxy
 
 #### Chrome
 
@@ -125,6 +95,41 @@ Instructions can be found here: https://developer.mozilla.org/en-US/Add-ons/SDK/
 - Run `cfx run` and Firefox should launch with the uProxy add-on installed
 
 You can use `grunt build_firefox` from the root directory of the repository to compile just Firefox comonents.
+
+### Demo apps
+
+These can be found at `build/dev/uproxy-lib/samples/`. They are a mix of web sites, browser extensions (Chrome and Firefox), and Node.js apps.
+
+To run web apps:
+ * start a webserver, e.g. `python -m SimpleHTTPServer`
+ * open the relevant HTML file in your browser, e.g. http://localhost:8000/build/dev/uproxy-lib/samples/simple-freedom-chat/main.html.
+
+To run Chrome apps:
+ - open `chrome://extensions`, enable check Developer Mode, and load the unpacked extension from the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-chromeapp/`.
+
+To run Firefox add-ons:
+- install [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) via NPM, e.g. `npm install jpm -g`, `cd` to the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-firefoxapp/`, and execute ``jpm run -b `which firefox` ``.
+
+To run Node.js apps:
+ - Directly run `node` with the entry point, e.g. `node build/dev/uproxy-lib/samples/zork-node/index.js`
+
+**Note: until freedom-for-node supports core.rtcpeerconnection, this sample will not work**
+
+More on the demo apps themselves:
+
+ * **simple-freedom-chat** is a WebRTC-powered chat client, with both peers on the same page. This is the simplest possible demo `src/peerconnection`.
+ * **copypaste-freedom-chat** is the simplest possible, distributed, `src/peerconnection` demo in which text boxes
+act as the signalling channel between two peers. Messages can be exchanged by
+email, IM, shared doc, etc.
+ * **echo-server** starts a TCP echo server on port 9998. Run `telnet 127.0.0.1 9998` and then
+type some stuff to verify that echo server echoes what you send it. Press ctrl-D to have the echo server terminate the connection or press `ctrl-]` then type `quit` to exit telnet.
+ * **Simple SOCKS** is the simplest possible, single-page, demo of the SOCKS proxy (`socks-to-rtc` and
+`rtc-to-net` directories). This command may be used to test the proxy: `curl -x socks5h://localhost:9999 www.example.com` (`-h` indicates that DNS requests are made through the proxy too)
+ * **Zork** is a distributed SOCKS proxy with a telnet-based signalling channel, intended for use with [our Docker-based integration testing](https://github.com/uProxy/uproxy-docker). Try connecting to Zork with `telnet localhost 9000`.
+ * **uProbe** guess-timates your NAT type.
+ * **copypaste-socks** is a distributed SOCKS proxy demo. This is essentially uProxy without any social network integration.
+ * **simple-churn-chat** is just like simple-freedom-chat, except WebRTC traffic between the two peers is obfuscated. Wireshark may be used to verify that the traffic is obfuscated; the endpoints in use - along with a lot of debugging information - may be determined by examining the Javascript console.
+ * **copypaste-freedom-chat** is just like copypaste-fredom-chat, except WebRTC traffic between the two peers is obfuscated.
 
 ### Development and re-building uProxy
 
@@ -231,14 +236,6 @@ Because we use cordova-plugin-iosrtc to implement the WebRTC protocol, there are
 * Within the project Build Settings set "Objective-C Bridging Header" to "uProxy/Plugins/cordova-plugin-iosrtc/cordova-plugin-iosrtc-Bridging-Header.h"
 * Within the project Build Settings add an entry to the "Runpath Search Paths" setting with value "@executable_path/Frameworks"
 * Now you can update uProxy and run it with xcode from either an emulator or device
-
-### Fixing compilation and setup
-
-- If something is going wrong during the build process, please try running `grunt
-clean`, `./setup.sh clean`, and re-running `./setup.sh install`
-
-- If things are not working, check that you have recent versions of bower, npm, and node.
-
 
 ## Layout of files
 
