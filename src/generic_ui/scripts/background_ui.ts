@@ -6,6 +6,11 @@ import CoreConnector = require('./core_connector');
 import panel_connector = require('../../interfaces/panel_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
+interface FullfillAndReject {
+  fulfill: Function;
+  reject: Function;
+};
+
 /**
  * The BackgroundUI class
  *
@@ -23,10 +28,12 @@ export class BackgroundUi {
   private fakeBackgroundCallback_: panel_connector.MessageHandler;
   private panelConnector_: PanelConnector;
 
+  private promisesMap_: {[id: number]: FullfillAndReject} = {};
+
   constructor(browserPanelConnector: panel_connector.BrowserPanelConnector,
       core: CoreConnector) {
     this.panelConnector_ = new PanelConnector(browserPanelConnector);
-    this.panelConnector_.addListener(this.handleSignalFromPanel);
+    this.panelConnector_.addListener(this.handleMessage_);
     this.core_ = core;
   }
 
@@ -38,13 +45,16 @@ export class BackgroundUi {
     this.panelConnector_.addListener(this.fakeBackgroundCallback_);
   }
 
-  private handleSignalFromPanel = (name: string, data: Object) => {
+  private handleMessage_ = (name: string, data: panel_connector.CommandPayload) => {
     switch (name) {
       case 'update-global-settings':
-        this.core_.updateGlobalSettings(<uproxy_core_api.GlobalSettings>data);
+        this.core_.updateGlobalSettings(<uproxy_core_api.GlobalSettings>data.data);
         break;
       case 'restart':
         this.core_.restart();
+        break;
+      case 'promise-response':
+        this.handlePromiseResponse_(data.promiseId, data.data);
         break;
       /*
        * We do not have a generic error case here because we expect other
@@ -56,7 +66,61 @@ export class BackgroundUi {
 
   /* actual BackgroundUi methods */
   public fireSignal(signalName: string, data?: Object): void {
-    this.panelConnector_.send('fire-signal', { name: signalName, data: data });
+    this.doInPanel_('fire-signal', { name: signalName, data: data });
+  }
+
+  private wrapPromise_ = (promise: Promise<any>, promiseId: number) => {
+    promise.then((data) => {
+      this.panelConnector_.send('promise-response', {
+        promiseId: promiseId,
+        data: {
+          success: true,
+          response: data
+        }
+      });
+    }, (data) => {
+      this.panelConnector_.send('promise-response', {
+        promiseId: promiseId,
+        data: {
+          success: false,
+          response: data
+        }
+      });
+    });
+  }
+
+  private handlePromiseResponse_ = (promiseId: number, data: { success: boolean, response: Object }) => {
+    if (!this.promisesMap_[promiseId]) {
+      console.error('Unexpected promise received');
+      return;
+    }
+
+    if (data.success) {
+      this.promisesMap_[promiseId].fulfill(data.response);
+    } else {
+      this.promisesMap_[promiseId].reject(data.response);
+    }
+    delete this.promisesMap_[promiseId];
+  }
+
+  private doInPanel_ = (name: string, data: Object, expectResponse: boolean = false) => {
+    var promise: Promise<any> = null;
+    var payload: panel_connector.CommandPayload = {
+      data: data,
+      promiseId: null
+    };
+
+    if (expectResponse) {
+      var promiseId = new Date().valueOf(); // approximately unique
+      payload.promiseId = promiseId;
+
+      promise = new Promise((F, R) => {
+        this.promisesMap_[promiseId] = { fulfill: F, reject: R };
+      });
+    }
+
+    this.panelConnector_.send(name, payload);
+    return promise;
   }
 }
 
@@ -75,7 +139,7 @@ class PanelConnector {
         });
   }
 
-  public send(name: string, data?: Object): void {
+  public send(name: string, data: panel_connector.CommandPayload): void {
     //TODO error checking
     this.panels_.forEach((panel) => {
       panel.sendMessage(name, data);
