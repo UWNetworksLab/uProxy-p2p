@@ -3,6 +3,8 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import panel_connector = require('../../interfaces/panel_connector');
+import social = require('../../interfaces/social');
+import ui = require('../../interfaces/ui');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 //TODO standardize
@@ -12,6 +14,7 @@ interface FullfillAndReject {
 };
 
 var background: Background = null;
+var dialogClickFn: (fulfill: boolean, data?: Object) => void = null;
 
 Polymer({
   ready: function() {
@@ -36,8 +39,32 @@ Polymer({
   restart: function() {
     return background.restart();
   },
-  logoutAll: function(getConfirmation: boolean): Promise<void> {
-    return background.logoutAll(getConfirmation);
+  logout: function(networkInfo: social.SocialNetworkInfo): Promise<void> {
+    return background.logout(networkInfo);
+  },
+  handleDialogClick: function(fulfill: boolean, data: Object = null) {
+    dialogClickFn(fulfill, data);
+    dialogClickFn = null;
+  },
+  openDialog: function(data: ui.DialogDescription) {
+    return new Promise<Object>((F, R) => {
+      if (dialogClickFn) {
+        console.error('Previous dialog was not cleaned up');
+        dialogClickFn(false);
+      }
+      dialogClickFn = (fulfill: boolean, data?: Object) => {
+        if (fulfill) {
+          F(data);
+        } else {
+          R(data);
+        }
+      };
+
+      this.fire('core-signal', {
+        name: 'open-dialog',
+        data: data
+      });
+    });
   }
 });
 
@@ -64,8 +91,8 @@ class Background {
     this.doInBackground_('restart', null);
   }
 
-  public logoutAll = (getConfirmation: boolean): Promise<void> => {
-    return <Promise<void>>this.doInBackground_('logout-all', { getConfirmation: getConfirmation }, true);
+  public logout = (networkInfo: social.SocialNetworkInfo): Promise<void> => {
+    return this.doInBackground_('logout', networkInfo, true);
   }
 
   private wrapPromise_ = (promise: Promise<any>, promiseId: number) => {
@@ -93,6 +120,8 @@ class Background {
       this.state_.fire('core-signal', data.data); // a bit hacky, but oh well
     } else if (name === 'promise-response') {
       this.handlePromiseResponse_(data.promiseId, data.data);
+    } else if (name === 'open-dialog') {
+      this.wrapPromise_(this.state_.openDialog(data.data), data.promiseId);
     }
   }
 
@@ -110,7 +139,7 @@ class Background {
     delete this.promisesMap_[promiseId];
   }
 
-  private doInBackground_ = (name: string, data: Object, expectResponse: boolean = false): (Promise<any>|void) => {
+  private doInBackground_ = (name: string, data: Object, expectResponse: boolean = false): any => {
     var promise: Promise<any> = null;
     var payload :panel_connector.CommandPayload = {
       data: data,

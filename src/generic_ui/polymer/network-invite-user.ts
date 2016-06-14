@@ -2,7 +2,9 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import social = require('../../interfaces/social');
+import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import dialogs = require('../scripts/dialogs');
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -60,7 +62,7 @@ Polymer({
           body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
       });
       this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('INVITE_EMAIL_SENT'));
+      this.$.state.openDialog(dialogs.getDialogObject('', translator.i18n_t('INVITE_EMAIL_SENT')));
     });
   },
   inviteGithubFriend: function() {
@@ -75,12 +77,13 @@ Polymer({
       userId: this.gitHubUserIdInput
     }).then(() => {
       this.closeInviteUserPanel();
-      ui.showDialog('',
-          ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.gitHubUserIdInput }));
+      this.$.state.openDialog(dialogs.getDialogObject('',
+            translator.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.gitHubUserIdInput })));
     }).catch(() => {
       // TODO: The message in this dialog should be passed from the social provider.
       // https://github.com/uProxy/uproxy/issues/1923
-      ui.showDialog('', ui.i18n_t('GITHUB_INVITE_SEND_FAILED'));
+      this.$.state.openDialog(dialogs.getDialogObject('',
+            translator.i18n_t('GITHUB_INVITE_SEND_FAILED')));
     });
   },
   openInviteUserPanel: function() {
