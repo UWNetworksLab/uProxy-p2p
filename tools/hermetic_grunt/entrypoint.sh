@@ -3,7 +3,7 @@ set -e
 
 # Clean the tscache while we figure out how to make it work across calls.
 # TODO(fortuna): Fix this.
-rm -r $REPOSITORY_ROOT/out/.tscache
+rm -rf $REPOSITORY_ROOT/out/.tscache
 
 # We can't link the Gruntfile because grunt resolves the link before using its
 # directory as the base to run.
