@@ -1,7 +1,8 @@
-# Hermetic Grunt
+# Hermetic Grunt (Beta)
 
 This directory contains the files needed to create a Docker image that runs
-grunt without the need to install any tools other than Docker.
+grunt without the need to install any tools other than Docker. The only
+dependencies for the hermetic grunt call is Docker and the uProxy repository.
 
 This allows us to reproduce the build the same way in any machine, and makes it
 easier to set up the development environment for new uProxy developers.
