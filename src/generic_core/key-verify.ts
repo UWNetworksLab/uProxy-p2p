@@ -189,16 +189,7 @@ export class KeyVerify {
   private static emptyPreReq :Type[] = [];
 
   // For message verification, the alphabetized list of keys in each message.
-  private static keyMap_ :{[type:string]:string} = {
-    Hello1:'clientVersion,h3,hk,mac,type,version',
-    Hello2:'clientVersion,h3,hk,mac,type,version',
-    Commit:'clientVersion,h2,hk,hvi,mac,type',
-    DHPart1:'h1,mac,pkey,type',
-    DHPart2:'h1,mac,pkey,type',
-    Confirm1:'h0,mac,type',
-    Confirm2:'h0,mac,type',
-    Conf2Ack:'type'
-  };
+  private static keyMap_ :{[type:string]:string} = {};
 
   // For message verification, the list of prerequisite messages for
   // each message.
