@@ -158,19 +158,19 @@
               <core-icon icon='help'></core-icon>
             </uproxy-faq-link>
           </p>
-          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.TRUE }}'>
+          <span class='label' hidden?='{{ !_supportsPortControl(ui.portControlSupport) }}'>
             {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
           </span>
-          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
+          <span class='label' hidden?='{{ !_doesNotSupportPortControl(ui.portControlSupport) }}'>
             {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
           </span>
-          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.PENDING }}'>
+          <span class='label' hidden?='{{ !_portControlStatusPending(ui.portControlSupport) }}'>
             {{ 'PORT_CONTROL_PENDING' | $$ }}
           </span>
           <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
             <core-icon icon='refresh'></core-icon>
           </uproxy-link>
-          <p class='label info' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
+          <p class='label info' hidden?='{{ !_doesNotSupportPortControl(ui.portControlSupport) }}'>
             {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>
               {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$ }}
@@ -183,13 +183,13 @@
             <textarea value='{{ settings }}' fit>
             </textarea>
           </paper-input-decorator>
-          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>
+          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
             {{ "SETTINGS_SAVED" | $$ }}
           </p>
-          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>
+          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
             {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
           </p>
-          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>
+          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
             {{ "SETTINGS_JSON_ERROR" | $$ }}
           </p>
         </div> <!-- end of form container -->
