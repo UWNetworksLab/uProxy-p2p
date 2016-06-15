@@ -838,17 +838,13 @@ export class KeyVerify {
         be64Zero.fill(0);
         beZero.fill(0);
         beOne.writeInt32BE(1,0);
+        
         // RFC6189-4.4.1.4
         let total_hash = this.calculateTotalHash_();
         let resultBuffer = new Buffer(new Uint8Array(result));
         let s0_input = Buffer.concat([
           beOne, resultBuffer, new Buffer('ZRTP-HMAC-KDF'), be64Zero,
           be64Zero, total_hash, beZero, beZero, beZero]);
-        logBuffer('s0: result', resultBuffer);
-        logBuffer('s0: total_hash', total_hash);
-        logBuffer('s0: beOne', beOne);
-        logBuffer('s0: be64Zero', be64Zero);
-        logBuffer('s0: beZero', beZero);
 
         let s0 = crypto.createHash('sha256').update(s0_input).digest();
         logBuffer('s0', s0);
@@ -918,8 +914,8 @@ export class KeyVerify {
     let dh2k_buf = new Buffer(dhpart2.pkey);
     let fourth_hash_buf = unbase64Concat(dhpart2.mac);
     let total_hash_buf = Buffer.concat(
-      [].concat( first_hash_buf, cv_buf, second_hash_buf, dh1k_buf,
-                 third_hash_buf, dh2k_buf, fourth_hash_buf)
+      [ first_hash_buf, cv_buf, second_hash_buf, dh1k_buf,
+        third_hash_buf, dh2k_buf, fourth_hash_buf ]
     );
     logBuffer('total_hash_buf', total_hash_buf);
     log.debug('totalHash: init-role: ', this.isInitiator_);
@@ -947,11 +943,7 @@ export class KeyVerify {
     var lenBuf = new Buffer(4);
     oneBuf.writeInt32BE(1, 0);
     lenBuf.writeInt32BE(numbits, 0);
-    log.debug('kdf: key', key);
-    log.debug('kdf: oneBuf', oneBuf);
-    log.debug('kdf: label', label);
-    log.debug('kdf: context', context.toString('hex'));
-    log.debug('kdf: lenBuf', lenBuf);
+
     var b64Key = key.toString('base64');
     var zeroByte :Buffer= new Buffer(1);
     zeroByte.fill(0);
@@ -964,62 +956,8 @@ export class KeyVerify {
 
   // key and value are both base64-encoded.
   private fullHmac_(key:string, value:string) :Buffer {
-    let kBlockSize = 64;  // sha-256 block size is 512 bits - 64 bytes.
-    let key_buf = new Buffer(key, 'base64');
-
-    log.debug('fullHmac: key: ', key);
-    log.debug('fullHmac: value: ', value);
-
-    // Follow FIPS-198 quite literally.  I haven't found any docs on
-    // createHmac(sha256,key) w.r.t. FIPS-198.
-    if (key_buf.length > kBlockSize) {
-      let hmac = crypto.createHash('sha256');
-      hmac.update(key_buf);
-      let hash_key = hmac.digest();
-      let zerobuf = new Buffer(key_buf.length - kBlockSize);
-      zerobuf.fill(0);
-      key_buf = Buffer.concat([hmac.digest(), zerobuf], kBlockSize);
-    } else if (key_buf.length < kBlockSize) {
-      let zerobuf = new Buffer(kBlockSize - key_buf.length);
-      zerobuf.fill(0);
-      key_buf = Buffer.concat([key_buf, zerobuf], kBlockSize);
-    }
-
-    let strNBuffer = (s:Buffer) :string => { return s.toString(); }
-    let xorBuffer = (buf:Buffer, value:number) :Buffer => {
-      for (var i = 0; i < buf.length; i++) {
-        buf.writeInt8(buf.readInt8(i) ^ (+value), i);
-      }
-      return buf;
-    };
-
-    let k_0 = Buffer.concat([key_buf]);
-    logBuffer('fullHmac k_0', k_0);
-
-    // ipad = 0x36.
-    let kb_step4 = xorBuffer(Buffer.concat([k_0]), 0x36);
-    logBuffer('fullHmac A', kb_step4);
-
-    // Step 5
-    let ki_text = Buffer.concat([kb_step4, new Buffer(value, 'base64')]);
-    logBuffer('fullHmac B', ki_text);
-
-    // Step 6
-    let h_ki_text = crypto.createHash('sha256').update(ki_text).digest();
-    logBuffer('fullHmac C', ki_text);
-
-    // Step 7 - xor with 0x5c.
-    let ko_text = xorBuffer(Buffer.concat([k_0]), 0x5c);
-    logBuffer('fullHmac D', ko_text);
-
-    // Step 8 - concat steps 7 and 6
-    let ki_h_ko_text = Buffer.concat([ko_text, h_ki_text]);
-    logBuffer('fullHmac E', ki_h_ko_text);
-
-    // Final step: hash step 8.
-    let full_hmac = crypto.createHash('sha256').update(ki_h_ko_text).digest();
-    logBuffer('fullHmac F', full_hmac);
-    return full_hmac;
+    return crypto.createHmac('sha256', new Buffer(key, 'base64'))
+      .update(new Buffer(value, 'base64')).digest();
   }
 
   // key is base64 encoded.  values are buffers.
