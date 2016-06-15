@@ -593,7 +593,7 @@ export class KeyVerify {
     }
     // Verify that we only have the keys we're expecting.
     let type :string = msg.type.toString();
-    if (allKeys.sort().join() !== KeyVerify.keyMap_[type]) {
+    if (JSON.stringify(allKeys.sort()) !== KeyVerify.keyMap_[type]) {
       log.error('Verify msg ', msg, ' bad key set.  Wanted ',
                   KeyVerify.keyMap_[type], ' got ', allKeys.sort().join());
       return false;
@@ -616,7 +616,7 @@ export class KeyVerify {
         // to make the list that we use for comparison in
         // structuralVerify_().
         let obj = new proto();
-        KeyVerify.keyMap_[type] = Object.keys(obj).sort().join();
+        KeyVerify.keyMap_[type] = JSON.stringify(Object.keys(obj).sort());
         KeyVerify.prereqMap_[type] = prereqs;
         KeyVerify.roleMessageMap_[type] = initiatorReceives;
       }
