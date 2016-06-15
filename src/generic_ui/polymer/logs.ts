@@ -29,11 +29,11 @@ Polymer({
   ready: function() {
     // Expose global ui object in this context.
 
-    let fulfill: Function;
-    let reject: Function;
+    let fulfillGetLogs: Function;
+    let rejectGetLogs: Function;
     const getLogs = new Promise<string>((F, R) => {
-      fulfill = F;
-      reject = R;
+      fulfillGetLogs = F;
+      rejectGetLogs = R;
     });
 
     if (window.chrome) {
@@ -41,9 +41,9 @@ Polymer({
         getLogs: true
       }, (reply) => {
         if (reply) {
-          fulfill(reply.logs);
+          fulfillGetLogs(reply.logs);
         } else {
-          reject('Could not get logs');
+          rejectGetLogs('Could not get logs');
         }
       });
     } else {
@@ -54,7 +54,7 @@ Polymer({
       // TODO: reject after a timeout
       window.addEventListener('message', (event) => {
         if (event.data.logs) {
-          fulfill(event.data.logs);
+          fulfillGetLogs(event.data.logs);
         }
       }, false);
     }
