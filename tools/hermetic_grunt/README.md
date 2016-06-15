@@ -40,3 +40,12 @@ by setting the `GRUNT_IMAGE` environment variable:
 ````
 GRUNT_IMAGE=deps-change-grunt ./tools/hermetic_grunt/hermetic_grunt.sh
 ````
+
+## Known Issues
+
+1. Tests using the browser are not working yet. We need to install the browsers
+and tweak the display port.
+
+1. Every image build generates a bunch of intermediate images that take a lot of
+disk space. You currently need to manually remove them. We need to find a better
+way to not let them accumulate.

@@ -1,5 +1,6 @@
+#!/bin/bash
 if ! which docker > /dev/null; then
-  echo "You must install docker first"
+  echo "You must install docker first. See https://docs.docker.com/engine/installation/"
   exit 1
 fi
 
