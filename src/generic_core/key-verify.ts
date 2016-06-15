@@ -151,10 +151,9 @@ function unbase64Concat(...args:string[]) :Buffer {
 
 // A ZRTP Key Verification Session.  After construction, its only
 // interface points are in readMessage() and in the delegate API
-// (Delegate above).  For the side starting the session, to construct,
-// just pass in the peer's public key to verify, and the delegate.
-// For the other side, first parse the message with readFirstMessage()
-// (it's static), and pass that in as a constructor argument.
+// (Delegate above).  There are two factory methods below:
+// InitiateVerify() and RespondToVerify() for the ZRTP initiator and
+// responder.
 export class KeyVerify {
   // Only written by set(), after verifying the message.
   private messages_: {[type:string]:Messages.Tagged}; // indexed by Type.
@@ -1045,6 +1044,9 @@ export class KeyVerify {
   }
 };
 
+// Create a ZRTP verificaiton session in response to an incoming
+// message.  To send the first response, invoke start() on the
+// returned object.
 export function RespondToVerify(peerPubKey :string,
                                 delegate :Delegate,
                                 firstMessage:any) :KeyVerify {
@@ -1057,6 +1059,8 @@ export function RespondToVerify(peerPubKey :string,
   }
 }
 
+// Create a ZRTP verification session.  To send the first message,
+// invoke start() on the returned object.
 export function InitiateVerify(peerPubKey :string, delegate :Delegate) :KeyVerify {
   return new KeyVerify(peerPubKey, delegate);
 }
