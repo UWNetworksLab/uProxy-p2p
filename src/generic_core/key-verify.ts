@@ -200,8 +200,8 @@ export class KeyVerify {
   // verification.
   private static roleMessageMap_ :{[msg:string]:boolean} = {};
 
-  private generatorMap_ : {[msg:string]:((type:Type) =>Promise<Messages.Tagged>)};
-  private messageReadMap_ :{[msg:string]:((msg:Object) => void )};
+  private generatorMap_ : {[msg:string]:((type:Type) =>Promise<Messages.Tagged>)} = {};
+  private messageReadMap_ :{[msg:string]:((msg:Object) => void )} = {};
 
   // Messages are existing messages received or sent in the
   // conversation.  Useful both for testing and for when this Verifier
@@ -239,6 +239,7 @@ export class KeyVerify {
   // receiving Hello1 messages without the client having to know about
   // them.
   public static readFirstMessage(msg:any) : {[type:string]:Messages.Tagged} {
+    KeyVerify.initStaticTables_();
     if (msg['type'] && KeyVerify.structuralVerify_(msg) &&
         msg.type == HELLO1) {
       if (msg.clientVersion !== KeyVerify.CLIENT_VERSION ||
@@ -627,9 +628,9 @@ export class KeyVerify {
 
   private initDynamicTables_() {
     // These are all closed on 'this' now, so we have to init them per-instance.
-    let setTableEntry = function(type: string,
-                                 genFn:((type:Type) =>Promise<Messages.Tagged>),
-                                 readFn:((msg:Object) => void)) {
+    let setTableEntry = (type: string,
+                         genFn:((type:Type) =>Promise<Messages.Tagged>),
+                         readFn:((msg:Object) => void)) => {
       this.generatorMap_[type] = genFn;
       this.messageReadMap_[type] = readFn;
     }
