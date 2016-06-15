@@ -7,6 +7,8 @@ function setup() {
   mkdir -p $REPOSITORY_ROOT/out/.tscache &&
   ln -s $REPOSITORY_ROOT/{version.py,.git,src,out/.tscache} . &&
   cp --archive --recursive $REPOSITORY_ROOT/out/. build/
+  Xvfb :10 -screen 0 1280x1024x24 &
+  export DISPLAY=:10
 }
 
 # Copy build output to the out/ directory.

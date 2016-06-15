@@ -5,13 +5,14 @@
 # You have to run from the repository root. The output is written to the out/
 # directory.
 
-FROM ubuntu:trusty
+FROM selenium/node-chrome
 
 LABEL description="Docker container for hermetic grunt runs"
 
 ###############################################################################
 # Install prerequisite global tools
 ###############################################################################
+USER root
 
 ADD https://deb.nodesource.com/setup_4.x /tmp/add_nodejs_repository.sh
 RUN bash /tmp/add_nodejs_repository.sh && \
