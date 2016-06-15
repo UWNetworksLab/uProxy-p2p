@@ -212,7 +212,7 @@ export class KeyVerify {
               isInitiator?: boolean,
               ourHashes?: Hashes) {
     KeyVerify.initStaticTables_();
-    this.initDynamicTables_;
+    this.initDynamicTables_();
     this.completed_ = false;
     this.totalHash_ = null;
     if (messages === undefined) {
