@@ -193,30 +193,12 @@ export class KeyVerify {
 
   // For message verification, the list of prerequisite messages for
   // each message.
-  private static prereqMap_ :{[msg:string]:[Type]} = {
-    Hello1: <[Type]>[],
-    Hello2: <[Type]>[],
-    Commit:[Type.Hello1, Type.Hello2],
-    DHPart1:[Type.Commit],
-    DHPart2:[Type.DHPart1],
-    Confirm1:[Type.DHPart2],
-    Confirm2:[Type.Confirm1],
-    Conf2Ack:[Type.Confirm2]
-  };
+  private static prereqMap_ :{[msg:string]:[Type]} = {}
 
   // Which role receives which kinds of messages.  Clearly this gets
   // complicated if we ever want to let either side initiate
   // verification.
-  private static roleMessageMap_ :{[msg:string]:boolean} = {
-    Hello1: false,
-    Hello2: true,
-    Commit: false,
-    DHPart1: true,
-    DHPart2: false,
-    Confirm1: true,
-    Confirm2: false,
-    Conf2Ack: true
-  };
+  private static roleMessageMap_ :{[msg:string]:boolean} = {};
 
   private generatorMap_ : {[msg:string]:((type:Type) =>Promise<Messages.Tagged>)};
   private messageReadMap_ :{[msg:string]:((msg:Object) => void )};
@@ -229,6 +211,8 @@ export class KeyVerify {
               messages?: {[type:string]:Messages.Tagged},
               isInitiator?: boolean,
               ourHashes?: Hashes) {
+    KeyVerify.initStaticTables_();
+    this.initDynamicTables_;
     this.completed_ = false;
     this.totalHash_ = null;
     if (messages === undefined) {
@@ -249,28 +233,6 @@ export class KeyVerify {
       }
     }
     this.queuedGenerations_ = {};
-    // These are all closed on 'this' now, so we have to init them here.
-    this.generatorMap_ = {
-      Hello1: this.makeHello_,
-      Hello2: this.makeHello_,
-      Commit: this.makeCommit_,
-      DHPart1: this.makeDHPart_,
-      DHPart2: this.makeDHPart_,
-      Confirm1: this.makeConfirm_,
-      Confirm2: this.makeConfirm_,
-      Conf2Ack: this.makeConf2Ack_
-    };
-
-    this.messageReadMap_ = {
-      Hello1: this.readHello_,
-      Hello2: this.readHello_,
-      Commit: this.readCommit_,
-      DHPart1: this.readDHPart1_,
-      DHPart2: this.readDHPart2_,
-      Confirm1: this.readConfirm1_,
-      Confirm2: this.readConfirm2_,
-      Conf2Ack: this.readConf2Ack_
-    };
   }
 
   // Create a Messages.Tagged from an arbitrary message.  Designed for
@@ -621,7 +583,6 @@ export class KeyVerify {
       }
     }
     // Verify that we only have the keys we're expecting.
-    KeyVerify.initKeyMap_();
     let type :string = msg.type.toString();
     if (allKeys.sort().join() !== KeyVerify.keyMap_[type]) {
       log.error('Verify msg ', msg, ' bad key set.  Wanted ',
@@ -632,13 +593,16 @@ export class KeyVerify {
     return true;
   }
 
-  // Initialize KeyVerify.keyMap_ for use.  It's safe to call this repeatedly.
-  private static initKeyMap_() {
+  // Initialize KeyVerify.keyMap_ and other static tables for use.
+  // It's safe to call this repeatedly.
+  private static initStaticTables_() {
     if (KeyVerify.keyMap_[HELLO1]) {
       return;
     } else {
+      // Initialize static maps used for message validation.
       // The key map isn't initialized yet, so build it.
-      let procKeys = function(type: string, proto:any) {
+      let setTableEntry = function(type: string, proto:any, prereqs:[Type],
+                                   initiatorReceives:boolean) {
         // Each subclass of Message takes strings as all values, and
         // the message type is the first value (again, as a string).
         // So, pass enough strings to initialize all the arguments to
@@ -647,16 +611,36 @@ export class KeyVerify {
         let obj = new proto('', '', '', '', '', '', '', '', '', '', '', '', '',
                             '', '', '');
         KeyVerify.keyMap_[type] = Object.keys(obj).sort().join();
+        KeyVerify.prereqMap_[type] = prereqs;
+        KeyVerify.roleMessageMap_[type] = initiatorReceives;
       }
-      procKeys(HELLO1, Messages.HelloMessage);
-      procKeys(HELLO2, Messages.HelloMessage);
-      procKeys(COMMIT, Messages.CommitMessage);
-      procKeys(DHPART1, Messages.DHPartMessage);
-      procKeys(DHPART2, Messages.DHPartMessage);
-      procKeys(CONFIRM1, Messages.ConfirmMessage);
-      procKeys(CONFIRM2, Messages.ConfirmMessage);
-      procKeys(CONF2ACK, Messages.ConfAckMessage);
+      setTableEntry(HELLO1, Messages.HelloMessage, <[Type]>[], false);
+      setTableEntry(HELLO2, Messages.HelloMessage, <[Type]>[], true);
+      setTableEntry(COMMIT, Messages.CommitMessage, [Type.Hello1, Type.Hello2],false);
+      setTableEntry(DHPART1, Messages.DHPartMessage, [Type.Commit], true);
+      setTableEntry(DHPART2, Messages.DHPartMessage, [Type.DHPart1], false);
+      setTableEntry(CONFIRM1, Messages.ConfirmMessage, [Type.DHPart2], true);
+      setTableEntry(CONFIRM2, Messages.ConfirmMessage, [Type.Confirm1], false);
+      setTableEntry(CONF2ACK, Messages.ConfAckMessage, [Type.Confirm2], true);
     }
+  }
+
+  private initDynamicTables_() {
+    // These are all closed on 'this' now, so we have to init them per-instance.
+    let setTableEntry = function(type: string,
+                                 genFn:((type:Type) =>Promise<Messages.Tagged>),
+                                 readFn:((msg:Object) => void)) {
+      this.generatorMap_[type] = genFn;
+      this.messageReadMap_[type] = readFn;
+    }
+    setTableEntry(HELLO1, this.makeHello_, this.readHello_);
+    setTableEntry(HELLO2, this.makeHello_, this.readHello_);
+    setTableEntry(COMMIT, this.makeCommit_, this.readCommit_);
+    setTableEntry(DHPART1, this.makeDHPart_, this.readDHPart1_);
+    setTableEntry(DHPART2, this.makeDHPart_, this.readDHPart2_);
+    setTableEntry(CONFIRM1, this.makeConfirm_, this.readConfirm1_);
+    setTableEntry(CONFIRM2, this.makeConfirm_, this.readConfirm2_);
+    setTableEntry(CONF2ACK, this.makeConf2Ack_, this.readConf2Ack_);
   }
 
   // Message protocol-order verification.
