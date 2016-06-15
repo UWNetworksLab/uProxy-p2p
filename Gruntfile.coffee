@@ -809,8 +809,6 @@ gruntConfig = {
   ts:
     moduleEnv: compileTypescript [
       devBuildPath + '/**/*.ts'
-      devBuildPath + '/interfaces/**/*.ts'
-      devBuildPath + '/generic_core/**/*.ts'
       '!' + devBuildPath + '/lib/build-tools/**/*.ts'
       '!' + devBuildPath + '/integration/**/*.ts'
       '!' + devBuildPath + '/**/*.core-env.ts'
