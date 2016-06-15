@@ -33,6 +33,15 @@ export namespace Messages {
   // Exported empty parent type.  Keeps actual protocol messages
   // opaque to outside modules.
   export class Message { };
+
+  //
+  // Protocol Messages.  These are just type wrappers around the JSON
+  // message formats.  Their constructors should be trivial, and must
+  // not have optional arguments.  They are dynamically instantiated
+  // in initStaticTables_() below, and the mechanism of dynamic
+  // instantiation precludes optional args.
+  //
+
   export class HelloMessage extends Message {
     constructor(public type: string, public version: string, public h3: string,
                 public hk: string, public clientVersion: string,
@@ -603,13 +612,10 @@ export class KeyVerify {
       // The key map isn't initialized yet, so build it.
       let setTableEntry = function(type: string, proto:any, prereqs:[Type],
                                    initiatorReceives:boolean) {
-        // Each subclass of Message takes strings as all values, and
-        // the message type is the first value (again, as a string).
-        // So, pass enough strings to initialize all the arguments to
-        // the constructor.  Then grab the keys out to make the list
-        // that we use for comparison in structuralVerify_().
-        let obj = new proto('', '', '', '', '', '', '', '', '', '', '', '', '',
-                            '', '', '');
+        // Create a new instance of the object, then grab the keys out
+        // to make the list that we use for comparison in
+        // structuralVerify_().
+        let obj = new proto();
         KeyVerify.keyMap_[type] = Object.keys(obj).sort().join();
         KeyVerify.prereqMap_[type] = prereqs;
         KeyVerify.roleMessageMap_[type] = initiatorReceives;
