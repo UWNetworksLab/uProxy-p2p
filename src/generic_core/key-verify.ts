@@ -499,7 +499,7 @@ export class KeyVerify {
     return this.pgp_.exportKey().then((key:freedom.PgpProvider.PublicKey) => {
       log.debug('loadKeys: got key ', key);
       this.ourKey_ = key;
-      return Promise.resolve<void>();
+      return;
     });
   }
 
@@ -756,7 +756,7 @@ export class KeyVerify {
       new Messages.Tagged(Type.Commit, new Messages.CommitMessage(
         Type[Type.Commit], h2.b64, hk.b64, KeyVerify.CLIENT_VERSION, hvi.b64,
         this.mac_(this.ourHashes_.h1.b64, h2.bin, hk.bin, str2buf(version),
-                     hvi.bin))));
+                  hvi.bin))));
   }
 
   private makeCommit_ = (type:Type) :Promise<Messages.Tagged> => {
@@ -782,9 +782,8 @@ export class KeyVerify {
     }
     return this.calculateS0_().then( (s0 :Buffer) => {
       let h0 = this.ourHashes_.h0;
-      return Promise.resolve<Messages.Tagged>(
-        new Messages.Tagged(type, new Messages.ConfirmMessage(
-          Type[type], h0.b64, this.mac_(s0.toString('base64'), h0.bin))));
+      return new Messages.Tagged(type, new Messages.ConfirmMessage(
+        Type[type], h0.b64, this.mac_(s0.toString('base64'), h0.bin)));
     });
   }
 
@@ -807,8 +806,7 @@ export class KeyVerify {
         h1Hash = crypto.createHash('sha256'),
         h2Hash = crypto.createHash('sha256'),
         h3Hash = crypto.createHash('sha256');
-    h0Hash.update(crypto.randomBytes(256 / 8));
-    let h0 = h0Hash.digest();
+    let h0 = crypto.randomBytes(256 / 8);
     result.h0 = new HashPair(h0);
     h1Hash.update(h0);
     let h1 = h1Hash.digest();
@@ -855,7 +853,7 @@ export class KeyVerify {
         let s0 = crypto.createHash('sha256').update(s0_input).digest();
         logBuffer('s0', s0);
         this.s0_ = s0;
-        return Promise.resolve<Buffer>(s0);
+        return s0;
       });
   }
 
@@ -882,7 +880,7 @@ export class KeyVerify {
         let sasvalue = sashash.slice(0, 4);
         logBuffer('sasvalue', sasvalue);
         let sasHumanInt :number = sasvalue.slice(0,2).readUInt16BE(0);
-        return Promise.resolve<number>(sasHumanInt);
+        return sasHumanInt;
     });
   }
 
