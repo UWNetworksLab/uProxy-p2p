@@ -803,7 +803,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   // Figure out what the returned promise is for.  Probably nothing.
   public verifyUser = (inst:social.InstancePath) :Promise<void> => {
-    console.log("app.core: verifyUser:", inst);
+    console.log('app.core: verifyUser:', inst);
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(
       inst.network.name);
     var remoteUser = network.getUser(inst.userId);
@@ -814,7 +814,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public finishVerifyUser = (args:uproxy_core_api.FinishVerifyArgs) :Promise<void> => {
     let inst = args.inst;
-    console.log("app.core: finishVerifyUser:", inst, " with result ", args.sameSAS);
+    console.log('app.core: finishVerifyUser:', inst, ' with result ', args.sameSAS);
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(
       inst.network.name);
     var remoteUser = network.getUser(inst.userId);

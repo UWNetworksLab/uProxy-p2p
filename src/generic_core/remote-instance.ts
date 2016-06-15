@@ -218,7 +218,6 @@ import ui = ui_connector.connector;
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (msg :social.VersionedPeerMessage) :Promise<void> => {
-      log.debug("RemoteInstance.HandleSignal: ", msg);
       if (typeof this.publicKey !== 'undefined' &&
           typeof globals.publicKey !== 'undefined' &&
           // signal data is not encrypted for Quiver, because entire message
@@ -228,7 +227,6 @@ import ui = ui_connector.connector;
           globals.settings.crypto) {
         return crypto.verifyDecrypt(<string>msg.data, this.publicKey)
         .then((plainText :string) => {
-          log.debug("RemoteInstance.HandleSignal.verifyDecrypt(): ", msg);
           return this.handleDecryptedSignal_(
               msg.type, msg.version, JSON.parse(plainText));
         }).catch((e) => {
@@ -304,7 +302,6 @@ import ui = ui_connector.connector;
       let clientId = this.user.instanceToClient(this.instanceId);
       let delegate = <key_verify.Delegate>{
         sendMessage : (msg:any) :Promise<void> => {
-          log.debug("verifyUser: sendMessage:", msg);
           let instanceMessage :social.PeerMessage = {
             type: social.PeerMessageType.KEY_VERIFY_MESSAGE,
             data: msg
@@ -312,7 +309,7 @@ import ui = ui_connector.connector;
           return inst.user.network.send(inst.user, clientId, instanceMessage);
         },
         showSAS : (sas:string) :Promise<boolean> => {
-          log.debug("verifyUser: Got SAS " + sas);
+          log.debug('verifyUser: Got SAS ' + sas);
           inst.verifySAS_ = sas;
           let result = new Promise<boolean>((resolve:any) => {
             // Send UPDATE message with SAS.
@@ -331,7 +328,7 @@ import ui = ui_connector.connector;
             this.publicKey, delegate, firstMsg);
         if (this.keyVerifySession_ === null) {
           // Immediately fail - bad initial message from peer.
-          log.error("verifyUser: peer-initiated session had bad message: ",
+          log.error('verifyUser: peer-initiated session had bad message: ',
                     firstMsg);
           return;
         }
@@ -342,14 +339,14 @@ import ui = ui_connector.connector;
       this.verifyState_ = social.VerifyState.VERIFY_BEGIN;
       this.user.notifyUI();
       this.keyVerifySession_.start().then(() => {
-        log.debug("verifySession: succeeded.");
+        log.debug('verifyUser: succeeded.');
         inst.keyVerified = true;
         inst.keyVerifySession_ = null
         inst.verifySAS_ = null;
         inst.verifyState_ = social.VerifyState.VERIFY_COMPLETE;
         inst.user.notifyUI();
       }, () => {
-        log.debug("verifySession: failed.");
+        log.debug('verifyUser: failed.');
         inst.keyVerified = false;
         inst.verifyState_ = social.VerifyState.VERIFY_FAILED;
         inst.keyVerifySession_ = null
@@ -362,7 +359,7 @@ import ui = ui_connector.connector;
       if (this.resolvedVerifySAS_ !== null) {
         this.resolvedVerifySAS_(result);
       } else {
-        log.error("Getting a completed verification result when no session is open.");
+        log.error('Getting a completed verification result when no session is open.');
       }
     }
 

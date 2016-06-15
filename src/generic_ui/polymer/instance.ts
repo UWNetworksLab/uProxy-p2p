@@ -34,7 +34,7 @@ Polymer({
   },
   start: function() {
     if (!this.instance.isOnline) {
-      this.ui.toastMessage = ui.i18n_t("FRIEND_OFFLINE", { name: this.user.name });
+      this.ui.toastMessage = ui.i18n_t('FRIEND_OFFLINE', { name: this.user.name });
       return;
     }
 
@@ -59,19 +59,18 @@ Polymer({
   },
   verify: function() {
     if (this.instance.verifyState != social.VerifyState.VERIFY_BEGIN) {
-      console.log("Starting verify.");
       ui.startVerifying(this.instance);
     } else {
-      console.log("instance is already verified.");
+      console.log('instance is already in verification.');
     }
   },
   confirmSAS: function() {
-    console.log("Verified SAS");
+    console.log('Verified SAS');
     this.sas = null;
     ui.finishVerifying(this.instance, true);
   },
   rejectSAS: function() {
-    console.log("Rejected SAS");
+    console.log('Rejected SAS');
     this.sas = null;
     ui.finishVerifying(this.instance, false);
   },

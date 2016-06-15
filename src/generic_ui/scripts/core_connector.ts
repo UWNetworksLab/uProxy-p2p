@@ -260,7 +260,6 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   }
 
   verifyUser = (inst :social.InstancePath) :Promise<void> => {
-    console.log("core: startVerify(" + JSON.stringify(inst) + ")");
     return this.promiseCommand(uproxy_core_api.Command.VERIFY_USER, inst );
   }
 
