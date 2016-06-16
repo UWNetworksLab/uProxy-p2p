@@ -149,13 +149,6 @@ Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are enough to immediately
 reject submissions. :)
 
-### uProxy for Mobile
-
-The development for mobile platforms uses the Cordova Chrome Apps (CCA) tool, also known as the [Chrome Apps for Mobile Toolchain](https://github.com/MobileChromeApps/mobile-chrome-apps). You can find the platform-specific information below:
-
-* [Android Development](https://github.com/uProxy/uproxy/wiki/Android-Development)
-* [iOS Development](https://github.com/uProxy/uproxy/wiki/iOS-Development)
-
 ### Fixing compilation and setup
 
 - If something is going wrong during the build process, please try running `grunt
@@ -163,6 +156,12 @@ clean`, `./setup.sh clean`, and re-running `./setup.sh install`
 
 - If things are not working, check that you have recent versions of bower, npm, and node.
 
+## uProxy for Mobile
+
+The development for mobile platforms uses the Cordova Chrome Apps (CCA) tool, also known as the [Chrome Apps for Mobile Toolchain](https://github.com/MobileChromeApps/mobile-chrome-apps). You can find the platform-specific information below:
+
+* [Android Development](https://github.com/uProxy/uproxy/wiki/Android-Development)
+* [iOS Development](https://github.com/uProxy/uproxy/wiki/iOS-Development)
 
 ## Layout of files
 
