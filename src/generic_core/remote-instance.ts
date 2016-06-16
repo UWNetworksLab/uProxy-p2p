@@ -296,11 +296,10 @@ import ui = ui_connector.connector;
       // relationship.
       if (this.verifyState_ === social.VerifyState.VERIFY_COMPLETE) {
         log.debug('verifyUser(%1): ALREADY VERIFIED.', firstMsg);
-//        return;
       }
       let inst = this;
       let clientId = this.user.instanceToClient(this.instanceId);
-      let delegate = <key_verify.Delegate>{
+      let delegate :key_verify.Delegate = {
         sendMessage : (msg:any) :Promise<void> => {
           let instanceMessage :social.PeerMessage = {
             type: social.PeerMessageType.KEY_VERIFY_MESSAGE,
@@ -333,7 +332,8 @@ import ui = ui_connector.connector;
           return;
         }
       } else {
-        this.keyVerifySession_ = key_verify.InitiateVerify(this.publicKey, delegate);
+        this.keyVerifySession_ = key_verify.InitiateVerify(this.publicKey,
+                                                           delegate);
       }
 
       this.verifyState_ = social.VerifyState.VERIFY_BEGIN;
@@ -359,7 +359,8 @@ import ui = ui_connector.connector;
       if (this.resolvedVerifySAS_ !== null) {
         this.resolvedVerifySAS_(result);
       } else {
-        log.error('Getting a completed verification result when no session is open.');
+        log.error('Getting a completed verification result when no session ' +
+                  'is open.');
       }
     }
 

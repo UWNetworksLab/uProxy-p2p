@@ -1428,7 +1428,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
   public finishVerifying = (inst :social.InstanceData,
                             sameSAS: boolean) :Promise<void> => {
-    var args = <uproxy_core_api.FinishVerifyArgs> {
+    var args :uproxy_core_api.FinishVerifyArgs = {
       'inst': this.getInstancePath_(inst.instanceId),
       'sameSAS': sameSAS
     };

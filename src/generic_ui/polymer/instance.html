@@ -66,14 +66,14 @@
         <bdi style='display:inline'>{{ instance.description }}</bdi>
         <span class='verified'
               hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'>
-          Verified </span>
+          &nbsp; {{ "Verified" | $$ }} </span>
         <span class='notverified'
               hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'>
-          FAILED VERIFICATION </span>
+          &nbsp; {{ "FAILED VERIFICATION" | $$ }} </span>
       </p>
       <div hidden?='{{ !(!instance.description) }}'>
-        <span class='verified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'> Verified </span>
-        <span class='notverified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'> FAILED VERIFICATION </span>
+        <span class='verified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'> {{ "Verified" || $$ }} </span>
+        <span class='notverified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'> {{ "FAILED VERIFICATION" || $$ }} </span>
       </div>
       <div id='verification'
            hidden?='{{ instance.verifyState != VerifyState.VERIFY_BEGIN }}'>
@@ -81,7 +81,7 @@
           Talking to peer....
         </span>
         <span id='verification-sas' hidden?='{{ sas == null }}'>
-          SAS: {{ sas }}, Do you both see the same SAS?
+          {{ "SAS:" || $$ }} {{ sas }} {{ ", Do you both see the same SAS?" || $$ }}
           <uproxy-button on-tap='{{ confirmSAS }}'>
             {{ "YES" }}
           </uproxy-button>

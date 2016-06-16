@@ -196,7 +196,8 @@ export class KeyVerify {
   private static PROTOCOL_VERSION :string = '1.0';
   private static emptyPreReq :Type[] = [];
 
-  // For message verification, the alphabetized list of keys in each message.
+  // For message verification, the JSONification of an alphabetized
+  // list of keys in each message.
   private static keyMap_ :{[type:string]:string} = {};
 
   // For message verification, the list of prerequisite messages for
@@ -808,8 +809,7 @@ export class KeyVerify {
   // expire, and no caching.
   private generateHashes_() :Hashes {
     var result : Hashes = new Hashes();
-    let h0Hash = crypto.createHash('sha256'),
-        h1Hash = crypto.createHash('sha256'),
+    let h1Hash = crypto.createHash('sha256'),
         h2Hash = crypto.createHash('sha256'),
         h3Hash = crypto.createHash('sha256');
     let h0 = crypto.randomBytes(256 / 8);
@@ -844,7 +844,7 @@ export class KeyVerify {
         be64Zero.fill(0);
         beZero.fill(0);
         beOne.writeInt32BE(1,0);
-        
+
         // RFC6189-4.4.1.4
         let total_hash = this.calculateTotalHash_();
         let resultBuffer = new Buffer(new Uint8Array(result));
