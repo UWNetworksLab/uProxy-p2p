@@ -53,8 +53,13 @@ it:
 This will create a new image with the changes and update the `IMAGE_VERSION.txt`
 file.
 
-Before submitting code that affects the image, you must publish it, so that
-the image is available available to other developers:
+If you pull an upstream change that also affects the image, you will get a
+conflict on `IMAGE_VERSION.txt`. Resolve the conflict by calling `update_image`
+after the pull.
+
+Before submitting code that affects the image, you must publish the
+corresponding image, so that the image is available available to other
+developers:
 ````
 docker login  # If you are not yet authenticated
 ./tools/build_env/build_env.sh publish_image
