@@ -239,7 +239,7 @@ Polymer({
     this.dir = 'ltr';
   },
   languageChanged: function(oldLanguage :string, newLanguage :string) {
-    if (typeof oldLanguage != 'undefined') {
+    if (oldLanguage && oldLanguage !== newLanguage) {
       window.location.reload();
     }
   },

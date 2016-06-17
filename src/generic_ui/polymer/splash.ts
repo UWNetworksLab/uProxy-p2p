@@ -46,9 +46,12 @@ var splash = {
   },
   updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
     if (detail.isSelected) {
+      var curLanguage = this.model.globalSettings.language;
       var newLanguage = detail.item.getAttribute('languageCode');
-      ui.updateLanguage(newLanguage);
-      window.location.reload();
+      if (newLanguage !== curLanguage) {
+        ui.updateLanguage(newLanguage);
+        window.location.reload();
+      }
     }
   },
   updateSeenMetrics: function(val :Boolean) {
@@ -66,6 +69,13 @@ var splash = {
   ready: function() {
     this.model = model;
     this.languages = languages;
+    var curLanguage = this.model.globalSettings.language;
+    for (var i=0, lang=languages[0]; lang; lang=languages[++i]) {
+      if (lang.languageCode === curLanguage) {
+        this.langIndex = i;
+        break;
+      }
+    }
   },
 };
 
