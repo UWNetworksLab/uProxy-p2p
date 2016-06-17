@@ -10,5 +10,5 @@ if [[ ! -d .git ]]; then
 fi
 
 image_name=${GRUNT_IMAGE:-hermetic-grunt}
-docker build -f $(dirname $0)/Dockerfile -t $image_name . &&
+docker build --rm=true -f $(dirname $0)/Dockerfile -t $image_name . &&
 docker run --rm -v $(pwd):/root/repository_root -it $image_name "$@"
