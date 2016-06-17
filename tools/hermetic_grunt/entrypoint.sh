@@ -20,6 +20,7 @@ function output() {
   cp --archive --recursive build/. $REPOSITORY_ROOT/out/
 }
 
-setup && grunt "$@" && output
+setup && grunt "$@"
+output
 # Fix out/ ownership
 chown --recursive $(stat -c "%u:%g" $REPOSITORY_ROOT) $REPOSITORY_ROOT/out
