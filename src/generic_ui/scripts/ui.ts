@@ -121,7 +121,6 @@ export class UserInterface implements ui_constants.UiApi {
 
   /* About this uProxy installation */
   public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
-  public browser :string = '';
   public availableVersion :string = null;
 
   public toastMessage :string = null;

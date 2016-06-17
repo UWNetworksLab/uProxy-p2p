@@ -10,6 +10,7 @@ import user_interface = require('../scripts/ui');
 Polymer({
   accountChooserOpen: false,
   connectedNetworks: '',
+  showRestartButton: false,
   logOut: function() {
     // logout all networks asynchronously
     this.$.state.logoutAll(true); //TODO move logic for prompting the user to Polymer
@@ -46,6 +47,7 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = model;
+    this.showRestartButton = (typeof window.chrome) !== 'undefined';
   },
   observe: {
     'model.onlineNetworks': 'networksChanged'
