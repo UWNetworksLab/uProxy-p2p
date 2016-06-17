@@ -13,6 +13,7 @@ import dialogs = require('../scripts/dialogs');
 Polymer({
   accountChooserOpen: false,
   connectedNetworks: '',
+  showRestartButton: false,
   logOut: function() {
     // logout all networks asynchronously
 
@@ -68,6 +69,7 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = ui_context.model;
+    this.showRestartButton = (typeof window.chrome) !== 'undefined';
   },
   observe: {
     'model.onlineNetworks': 'networksChanged'

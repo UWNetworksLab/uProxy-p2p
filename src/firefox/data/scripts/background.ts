@@ -30,8 +30,6 @@ if (undefined === ui) {
     model = ui.model;
 }
 
-ui.browser = 'firefox';
-
 port.on('newlyInstalled', function() {
   firefoxBrowserApi.hasInstalledThenLoggedIn = false;
 });
