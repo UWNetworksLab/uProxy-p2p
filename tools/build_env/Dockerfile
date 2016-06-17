@@ -1,13 +1,8 @@
-# To build and run the hermetic grunt:
-# docker build -f tools/hermetic_grunt/Dockerfile -t uproxy-grunt . && \
-# docker run --rm -v $(pwd):/root/repository_root -it uproxy-grunt
-#
-# You have to run from the repository root. The output is written to the out/
-# directory.
+# See README.md file for how this image is used.
 
 FROM selenium/node-chrome
 
-LABEL description="Docker container for hermetic grunt runs"
+LABEL description="Docker container for uProxy build environment"
 
 ###############################################################################
 # Install prerequisite global tools
@@ -44,6 +39,6 @@ RUN rm -rf bower.json setup.sh src
 ###############################################################################
 
 ENV REPOSITORY_ROOT /root/repository_root
-COPY tools/hermetic_grunt/entrypoint.sh .
+COPY tools/build_env/entrypoint.sh .
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]

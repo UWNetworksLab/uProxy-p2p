@@ -18,7 +18,8 @@ build environment. You must **call `build_env.sh` from your uProxy repository
 root** (where the .git directory is).
 
 In the first usage, `build_env` will fetch `uproxy/build` Docker image tagged
-with the value from `IMAGE_VERSION.txt`, if it's not yet in your machine.
+with the value from `IMAGE_VERSION.txt`, if it's not yet in your machine. A new
+image will also be fetch as needed whenever `IMAGE_VERSION.txt` is modified.
 
 ### Entering the environment
 
@@ -69,3 +70,6 @@ docker login  # If you are not yet authenticated
 
 1. Tests with Jasmine and PhantomJS are not working yet. We get some `property
 'pid' not found` error.
+
+1. Not every uProxy committer have permission to submit to the uproxy Docker
+   repository.
