@@ -102,8 +102,6 @@ export class UserInterface implements ui_constants.UiApi {
   /* Getting and sharing */
   public gettingStatus :string = null;
   public sharingStatus :string = null;
-  public unableToGet :boolean = false;
-  public unableToShare :boolean = false;
   public isSharingDisabled :boolean = false;
   public proxyingId: string; // ID of the most recent failed proxying attempt.
   private userCancelledGetAttempt_ :boolean = false;
@@ -124,8 +122,6 @@ export class UserInterface implements ui_constants.UiApi {
   public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
   public browser :string = '';
   public availableVersion :string = null;
-
-  public toastMessage :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
@@ -269,10 +265,8 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (giving)');
 
-      this.toastMessage = this.i18n_t('UNABLE_TO_SHARE_WITH', {
-        name: info.name
-      });
-      this.unableToShare = true;
+      let toastMessage = translator_module.i18n_t('UNABLE_TO_SHARE_WITH', { name: info.name });
+      this.backgroundUi.showToast(toastMessage, false, true);
       this.proxyingId = info.proxyingId;
     });
 
@@ -293,10 +287,8 @@ export class UserInterface implements ui_constants.UiApi {
           if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
             this.restartServer_('digitalocean');
           } else {
-            this.toastMessage = this.i18n_t('UNABLE_TO_GET_FROM', {
-              name: info.name
-            });
-            this.unableToGet = true;
+            let toastMessage = translator_module.i18n_t('UNABLE_TO_GET_FROM', { name: info.name });
+            this.backgroundUi.showToast(toastMessage, true, false);
           }
         }
       }
@@ -352,12 +344,12 @@ export class UserInterface implements ui_constants.UiApi {
       this.i18n_t('CANCEL'),
       this.i18n_t('RESTART_SERVER')
     ).then(() => {
-      this.toastMessage = this.i18n_t('RESTARTING_SERVER');
+      this.backgroundUi.showToast(translator_module.i18n_t('RESTARTING_SERVER'));
       return this.core.cloudUpdate({
         operation: uproxy_core_api.CloudOperationType.CLOUD_REBOOT,
         providerName: providerName
       }).then(() => {
-        this.toastMessage = this.i18n_t('RESTART_SUCCESS');
+        this.backgroundUi.showToast(translator_module.i18n_t('RESTART_SUCCESS'));
       }).catch((e: Error) => {
         this.showDialog(this.i18n_t('RESTART_FAILURE_TITLE'), this.i18n_t('RESTART_FAILURE_TEXT'));
       });
