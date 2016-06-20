@@ -12,7 +12,6 @@ import arraybuffers = require('../lib/arraybuffers/arraybuffers');
 import bridge = require('../lib/bridge/bridge');
 import consent = require('./consent');
 import crypto = require('./crypto');
-import datachannel = require('../lib/webrtc/datachannel');
 import globals = require('./globals');
 import key_verify = require('./key-verify');
 import _ = require('lodash');
@@ -302,15 +301,17 @@ import ui = ui_connector.connector;
       let clientId = this.user.instanceToClient(this.instanceId);
       let delegate = <key_verify.Delegate>{
         sendMessage : (msg:any) :Promise<void> => {
-          let instanceMessage :social.PeerMessage = {
+          let verifyMessage :social.PeerMessage = {
             type: social.PeerMessageType.KEY_VERIFY_MESSAGE,
             data: msg
           };
-          return inst.user.network.send(inst.user, clientId, instanceMessage);
+          return inst.user.network.send(inst.user, clientId, verifyMessage);
         },
         showSAS : (sas:string) :Promise<boolean> => {
           log.debug('verifyUser: Got SAS ' + sas);
-          inst.verifySAS_ = sas;
+          if (sas) {
+            inst.verifySAS_ = sas;
+          }
           let result = new Promise<boolean>((resolve:any) => {
             // Send UPDATE message with SAS.
             this.resolvedVerifySAS_ = resolve;
@@ -356,6 +357,8 @@ import ui = ui_connector.connector;
     };
 
     public finishVerifyUser = (result :boolean) => {
+      console.log('finishVerifyuser: ', result, " promise resolution is ",
+                  this.resolvedVerifySAS_);
       if (this.resolvedVerifySAS_ !== null) {
         this.resolvedVerifySAS_(result);
       } else {

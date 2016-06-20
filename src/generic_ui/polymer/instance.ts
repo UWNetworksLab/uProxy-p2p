@@ -26,7 +26,13 @@ Polymer({
     this.GettingState = social.GettingState;
     this.model = model;
     this.sas = null;
+
+    // Whether this is the side that started verification.  The sides
+    // of the verification show different UIs.
+    this.startedVerify = false;
+
     this.VerifyState = social.VerifyState;
+    this.self = this;
     // Feature code for verification
     this.ENABLE_VERIFY =
       model.globalSettings.enabledExperiments.indexOf(
@@ -38,6 +44,7 @@ Polymer({
       return;
     }
 
+    this.sas = null;
     ui.startGettingFromInstance(this.instance.instanceId).catch((e: Error) => {
       console.error('could not get access: ' + e.message);
     });
@@ -55,11 +62,24 @@ Polymer({
     this.fire('instance-changed');
   },
   sasUpdated: function() {
-    this.sas = this.instance.verifySAS;
+    // We don't use instance.verifySAS directly.  Instead, we use
+    // this.sas to mean:
+    //  - When null, there is no SAS to verify.  Hide the
+    //    Confirm/Reject buttons.
+    //  - When non-null, show the number and ask for confirmation.
+    //
+    // So we watch instance.verifySAS for null -> number transitions
+    // here, and show our buttons as needed.  We can immedatiately set
+    // this.sas back to null when the user hits confirm/reject, and
+    // hide the buttons then.
+    if (this.instance.verifySAS !== undefined) {
+      this.sas = this.instance.verifySAS;
+    }
   },
   verify: function() {
     if (this.instance.verifyState != social.VerifyState.VERIFY_BEGIN) {
       ui.startVerifying(this.instance);
+      this.startedVerify = true;
     } else {
       console.log('instance is already in verification.');
     }
@@ -68,11 +88,13 @@ Polymer({
     console.log('Verified SAS');
     this.sas = null;
     ui.finishVerifying(this.instance, true);
+    this.startedVerify = false;
   },
   rejectSAS: function() {
     console.log('Rejected SAS');
     this.sas = null;
     ui.finishVerifying(this.instance, false);
+    this.startedVerify = false;
   },
   observe: {
     'instance.isOnline': 'fireChanged',
