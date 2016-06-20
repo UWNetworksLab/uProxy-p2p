@@ -2,11 +2,22 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel="import" href="button.html">
 
-<polymer-element name='uproxy-instance' attributes='userName, instance'>
+<polymer-element name='uproxy-instance' attributes='user, instance'>
+  <!-- user:User (generic_ui/scripts/user.ts),
+       instance:InstanceData (interfaces/social.ts)-->
   <template>
     <style>
     #wrapper.offline {
       opacity: 0.5;
+    }
+    #wrapper.bad_verify {
+      opacity: 0.5;
+      color: #600;
+    }
+    #wrapper.verified {
+      color: #060;
+    }
+    #wrapper.unverified {
     }
     uproxy-button {
       font-size: 1em;
@@ -30,14 +41,54 @@
       margin-top: 2px;
       margin-right: 2px;
     }
+    .verified {
+      color: green;
+      display: inline-block;
+    }
+    .notverified {
+      color: red;
+      display: inline-block;
+    }
     </style>
 
     <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
          hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'>
-
       <p id='description' hidden?='{{ !instance.description }}'>
-        <bdi>{{ instance.description }}</bdi>
+        <bdi style='display:inline'>{{ instance.description }}</bdi>
+        <span class='verified'
+              hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'>
+          &nbsp; {{ "Verified" | $$ }} </span>
+        <span class='notverified'
+              hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'>
+          {{ "FAILED VERIFICATION" | $$ }} </span>
+        <div class='verify-code' hidden?='{{ sas === null || startedVerify }}'> SAS: {{ sas }} <br />
+          <uproxy-button on-tap='{{ confirmSAS }}'>
+            {{ "Confirm" }}
+          </uproxy-button>
+          <uproxy-button on-tap='{{ rejectSAS }}'>
+            {{ "Cancel" }}
+          </uproxy-button>
+        </div>
       </p>
+      <div hidden?='{{ !(!instance.description) }}'>
+        <span class='verified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'> {{ "Verified" || $$ }} </span>
+        <span class='notverified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'> {{ "FAILED VERIFICATION" || $$ }} </span>
+        <div class='verify-code' hidden?='{{ sas === null || startedVerify }}'> (lower) SAS: {{ sas }} <br />
+          <uproxy-button on-tap='{{ confirmSAS }}'>
+            {{ "Confirm" }}
+          </uproxy-button>
+          <uproxy-button on-tap='{{ rejectSAS }}'>
+            {{ "Cancel" }}
+          </uproxy-button>
+        </div>
+
+      </div>
+      <div id='verification' class='display:inline'
+           hidden?='{{ !ENABLE_VERIFY || instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
+        <uproxy-button raised on-tap='{{ verify }}'>
+          {{ "VERIFY" | $$ }}
+        </uproxy-button>
+      </div>
 
       <!-- It is assumed that all uproxy-instances are taken from
          user.offeringInstances and are therefore giving us access -->

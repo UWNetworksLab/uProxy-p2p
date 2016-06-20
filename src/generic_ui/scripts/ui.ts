@@ -107,7 +107,6 @@ export class UserInterface implements ui_constants.UiApi {
   public isSharingDisabled :boolean = false;
   public proxyingId: string; // ID of the most recent failed proxying attempt.
   private userCancelledGetAttempt_ :boolean = false;
-
   /* Copypaste */
   /*
    * This is used to store the information for setting up a copy+paste
@@ -917,7 +916,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public isGivingAccess = () => {
     return Object.keys(this.instancesGivingAccessTo).length > 0 ||
-           this.copyPasteState.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
+      (this.copyPasteState.localSharingWithRemote ===
+         social.SharingState.SHARING_ACCESS);
   }
 
   /**
@@ -1302,4 +1302,39 @@ export class UserInterface implements ui_constants.UiApi {
   public removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
     return this.core.removeContact(args);
   }
+
+  public startVerifying = (inst :social.InstanceData) :Promise<void> => {
+    console.log('ui:startVerifying on ' + JSON.stringify(inst) +
+                ' started.');
+    // TODO: when doing the final UI, we need something that we can
+    // cancel.  For user cancellation, peer cancellation, and timeout.
+    return this.getConfirmation(
+      'Verify this User',
+      'Please contact them personally, live.  Preferably on a voice ' +
+        'or video chat.  Then press Next',
+      'Do this later', 'I\'m Ready').then( () => {
+        // TODO: this really just needs a cancel button.
+        this.getUserInput(
+          'Verify this User',
+          'Please type in the SAS code that they see for you.  Any other ' +
+            'value cancels.',
+          'SAS:', '', 'Next').then( (sas:string) => {
+            console.log('Got SAS: ' + sas + ', against desired: ' +
+                        inst.verifySAS);
+            this.finishVerifying(inst,
+                                 parseInt(inst.verifySAS) === parseInt(sas));
+          });
+        return this.core.verifyUser(this.getInstancePath_(inst.instanceId));
+      });
+  }
+
+  public finishVerifying = (inst :social.InstanceData,
+                            sameSAS: boolean) :Promise<void> => {
+    var args :uproxy_core_api.FinishVerifyArgs = {
+      'inst': this.getInstancePath_(inst.instanceId),
+      'sameSAS': sameSAS
+    };
+    console.log('VERIFYING SAS AS ' + sameSAS);
+    return this.core.finishVerifyUser(args);
+  };
 } // class UserInterface
