@@ -188,7 +188,7 @@ export class KeyVerify {
 
   private pgp_ :freedom.PgpProvider.PgpProvider;
 
-  // Data that requires expensive calculations to make.  These are a innately
+  // Data that requires expensive calculations to make.  These are innately
   // hackey, and I don't like them.
   private s0_ :Buffer = null;
   private totalHash_ :Buffer = null;
