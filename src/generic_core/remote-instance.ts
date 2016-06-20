@@ -34,7 +34,7 @@ import ui = ui_connector.connector;
 
 // module Core {
   var log :logging.Log = new logging.Log('remote-instance');
-
+  const VERIFY_TIMEOUT = 120000;
   /**
    * RemoteInstance - represents a remote uProxy installation.
    *
@@ -339,7 +339,7 @@ import ui = ui_connector.connector;
 
       this.verifyState_ = social.VerifyState.VERIFY_BEGIN;
       this.user.notifyUI();
-      this.keyVerifySession_.start().then(() => {
+      this.keyVerifySession_.start(VERIFY_TIMEOUT).then(() => {
         log.debug('verifyUser: succeeded.');
         inst.keyVerified = true;
         inst.keyVerifySession_ = null

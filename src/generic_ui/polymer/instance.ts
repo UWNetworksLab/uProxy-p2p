@@ -72,7 +72,14 @@ Polymer({
     // here, and show our buttons as needed.  We can immedatiately set
     // this.sas back to null when the user hits confirm/reject, and
     // hide the buttons then.
-    if (this.instance.verifySAS !== undefined) {
+
+    // First check for cancellation
+    if (this.instance.verifySAS === null &&
+        this.sas !== null) {
+      console.log("App or remote cancellation.");
+      this.rejectSAS();
+    } else if (this.instance.verifySAS !== undefined) {
+      // Nope, the app-level KeyVerify session has a SAS to show.
       this.sas = this.instance.verifySAS;
     }
   },

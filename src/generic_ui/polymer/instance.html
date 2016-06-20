@@ -99,7 +99,7 @@
         </span>
       </div>
         <div id='verification' class='display:inline'
-             hidden?='{{ ENABLE_VERIFY && instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
+             hidden?='{{ !ENABLE_VERIFY || instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
           <uproxy-button raised on-tap='{{ verify }}'>
             {{ "VERIFY" | $$ }}
           </uproxy-button>

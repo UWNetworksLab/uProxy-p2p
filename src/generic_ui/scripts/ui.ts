@@ -1423,6 +1423,8 @@ export class UserInterface implements ui_constants.UiApi {
   public startVerifying = (inst :social.InstanceData) :Promise<void> => {
     console.log('ui:startVerifying on ' + JSON.stringify(inst) +
                 ' started.');
+    // TODO: when doing the final UI, we need something that we can
+    // cancel.  For user cancellation, peer cancellation, and timeout.
     return this.getConfirmation(
       'Verify this User',
       'Please contact them personally, live.  Preferably on a voice ' +

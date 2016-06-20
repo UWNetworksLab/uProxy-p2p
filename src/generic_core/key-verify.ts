@@ -179,6 +179,7 @@ export class KeyVerify {
   private resolvePromise_ : () => void;
   private rejectPromise_ : () => void;
   private sasApproved_ = false;
+  private timeoutId_ :any = null;
 
   // Explicitly mark when we've already fired a resolution promise, to
   // prevent an attacker from passing us extra stuff that might make
@@ -477,6 +478,10 @@ export class KeyVerify {
   private resolve_(res:boolean) {
     log.debug('resolve('+res+')');
     this.completed_ = true;
+    if (this.timeoutId_) {
+      clearTimeout(this.timeoutId_);
+      this.timeoutId_ = null;
+    }
     if (res) {
       this.resolvePromise_();
     } else {
@@ -484,7 +489,8 @@ export class KeyVerify {
     }
   }
 
-  public start() :Promise<void>{
+  // timeout_ms is a timeout, in milliseconds, to auto-reject.
+  public start(timeout_ms ?:number) :Promise<void>{
     log.debug('start() starting.');
     if (this.completed_) {
       throw (new Error('KeyVerify.start: Already completed.'));
@@ -495,6 +501,18 @@ export class KeyVerify {
         log.debug('start(): initializing result promises.');
         this.resolvePromise_ = resolve;
         this.rejectPromise_ = reject;
+        if (timeout_ms !== undefined && timeout_ms >= 0) {
+          this.timeoutId_ = setTimeout( () => {
+            if (!this.completed_) {
+              log.info("Verification Timeout.");
+              this.resolve_(false);
+            } else {
+              log.error('Timeout occurred when already finished.');
+            }
+          }, timeout_ms);
+        } else {
+          this.timeoutId_ = null;
+        }
         this.sendNextMessage();
       });
       return result;
