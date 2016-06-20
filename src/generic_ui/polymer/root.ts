@@ -66,6 +66,9 @@ Polymer({
     model.globalSettings.hasSeenSharingEnabledScreen = true;
     this.$.state.background.updateGlobalSettings(model.globalSettings);
   },
+  closeDialog: function() {
+    this.$.dialog.close();
+  },
   dismissCopyPasteError: function() {
     ui.copyPasteError = ui_types.CopyPasteError.NONE;
   },
