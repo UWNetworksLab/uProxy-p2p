@@ -1,6 +1,6 @@
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/md5.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
 
 /**
@@ -28,7 +28,7 @@ import model = require('./model');
 import dialogs = require('./dialogs');
 import jsurl = require('jsurl');
 import uparams = require('uparams');
-import md5 = require('md5');
+import crypto = require('crypto');
 import jdenticon = require('jdenticon');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
@@ -66,8 +66,9 @@ export function getImageData(userId :string, oldImageData :string,
     // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
     // scales the image to fit the space, so this parameter has no effect.
     // We must also replace # with %23 for Firefox support.
+    const userIdHash = crypto.createHash('md5').update(userId).digest('hex');
     return '\'data:image/svg+xml;utf8,' +
-        jdenticon.toSvg(md5(userId), 100).replace(/#/g, '%23') + '\'';
+        jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
   } else if (!newImageData) {
     // This case is hit when we've already generated a jdenticon for a user
     // who doesn't have any image in uProxy core.
