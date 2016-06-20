@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-# This is a major part of the uproxy-lib release process:
-#   https://github.com/uProxy/uproxy-lib
+# Part of the uProxy release process:
+#   https://github.com/uProxy/uproxy
 # Currently, this performs two important tests on every
 # getter/giver combination of the stable, beta, and canary
 # releases of Chrome and Firefox:
@@ -17,7 +17,7 @@ import itertools
 import subprocess
 
 parser = argparse.ArgumentParser(
-    description='Cross-browser tests for uproxy-lib release process.')
+    description='Cross-browser tests for uproxy release process.')
 parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
 parser.add_argument('--browsers', help='browsers to test', nargs='+', default=['chrome', 'firefox'])
 parser.add_argument('--versions', help='browser versions to test', nargs='+', default=['stable', 'beta', 'canary'])

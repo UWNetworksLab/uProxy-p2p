@@ -25,7 +25,7 @@ function usage () {
   echo "$0 [-g] [-b branch] [-p path] [-v] [-k] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
   echo "  -g: pull code from git (conflicts with -p)"
   echo "  -b: git branch to pull (default: HEAD's referant)"
-  echo "  -p: use a pre-built uproxy-lib (conflicts with -g)"
+  echo "  -p: use a pre-built uproxy (conflicts with -g)"
   echo "  -v: enable VNC on containers.  They will be ports 5900 and 5901."
   echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
   echo "  -m MTU: set the MTU on the getter's network interface."
@@ -103,7 +103,7 @@ function run_docker () {
   fi
   if [ ! -z "$PREBUILT" ]
   then
-    HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy-lib"
+    HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy"
   fi
   docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /sbin/my_init -- /test/bin/load-zork.sh $RUNARGS
 }
