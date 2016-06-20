@@ -11,6 +11,7 @@ import onetime = require('../lib/bridge/onetime');
 import nat_probe = require('../lib/nat/probe');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
+import remote_user = require('./remote-user');
 import user = require('./remote-user');
 import social_network = require('./social');
 import social = require('../interfaces/social');
@@ -803,10 +804,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public verifyUser = (inst:social.InstancePath) :void => {
     log.info('app.core: verifyUser:', inst);
+    // There are additional things our social_network system supports
+    // beyond what the freedom social api supports.  So we have to
+    // cast into our local API's types to get access to RemoteInstance
+    // (which implements no related interfaces).
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(
       inst.network.name);
-    var remoteUser = network.getUser(inst.userId);
-    var remoteInstance = remoteUser.getInstance(inst.instanceId);
+    var remoteUser :remote_user.User = network.getUser(inst.userId);
+    var remoteInstance :remote_instance.RemoteInstance =
+      remoteUser.getInstance(inst.instanceId);
     remoteInstance.verifyUser();
   }
 
@@ -815,8 +821,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     log.info('app.core: finishVerifyUser:', inst, ' with result ', args.sameSAS);
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(
       inst.network.name);
-    var remoteUser = network.getUser(inst.userId);
-    var remoteInstance = remoteUser.getInstance(inst.instanceId);
+    var remoteUser :remote_user.User = network.getUser(inst.userId);
+    var remoteInstance :remote_instance.RemoteInstance =
+      remoteUser.getInstance(inst.instanceId);
     remoteInstance.finishVerifyUser(args.sameSAS);
   }
 
