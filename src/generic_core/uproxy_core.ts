@@ -802,7 +802,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public verifyUser = (inst:social.InstancePath) :void => {
-    console.log('app.core: verifyUser:', inst);
+    log.info('app.core: verifyUser:', inst);
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(
       inst.network.name);
     var remoteUser = network.getUser(inst.userId);
