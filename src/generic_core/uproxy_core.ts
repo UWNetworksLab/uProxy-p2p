@@ -801,26 +801,23 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     this.updateGlobalSettings(globals.settings);
   }
 
-  // Figure out what the returned promise is for.  Probably nothing.
-  public verifyUser = (inst:social.InstancePath) :Promise<void> => {
+  public verifyUser = (inst:social.InstancePath) :void => {
     console.log('app.core: verifyUser:', inst);
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(
       inst.network.name);
     var remoteUser = network.getUser(inst.userId);
     var remoteInstance = remoteUser.getInstance(inst.instanceId);
     remoteInstance.verifyUser();
-    return Promise.resolve<void>();
   }
 
-  public finishVerifyUser = (args:uproxy_core_api.FinishVerifyArgs) :Promise<void> => {
+  public finishVerifyUser = (args:uproxy_core_api.FinishVerifyArgs) :void => {
     let inst = args.inst;
-    console.log('app.core: finishVerifyUser:', inst, ' with result ', args.sameSAS);
+    log.info('app.core: finishVerifyUser:', inst, ' with result ', args.sameSAS);
     var network = <social_network.AbstractNetwork>this.getNetworkByName_(
       inst.network.name);
     var remoteUser = network.getUser(inst.userId);
     var remoteInstance = remoteUser.getInstance(inst.instanceId);
     remoteInstance.finishVerifyUser(args.sameSAS);
-    return Promise.resolve<void>();
   }
 
   // Remove contact from friend list and storage

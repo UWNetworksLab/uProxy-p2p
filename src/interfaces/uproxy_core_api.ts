@@ -45,11 +45,11 @@ export interface GlobalSettings {
   shouldHijackDO: boolean;
   crypto: boolean;
   // A list of strings, each represented as a constant below, with
-  // prefix 'kFeature'.
+  // prefix 'FEATURE_'.
   enabledExperiments :string[];
 }
 
-export const kFeatureVerify = 'verify';
+export const FEATURE_VERIFY = 'verify';
 
 export interface InitialState {
   networkNames :string[];
@@ -360,10 +360,10 @@ export interface CoreApi {
   postReport(args:PostReportArgs) : Promise<void>;
 
   // Start a ZRTP key-verification session.
-  verifyUser(inst :social.InstancePath) :Promise<void>;
+  verifyUser(inst :social.InstancePath) :void;
 
   // Confirm or reject the SAS in a ZRTP key-verification session.
-  finishVerifyUser(args:FinishVerifyArgs) :Promise<void>;
+  finishVerifyUser(args:FinishVerifyArgs) :void;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }

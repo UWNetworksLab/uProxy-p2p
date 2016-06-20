@@ -57,10 +57,10 @@
         <bdi style='display:inline'>{{ instance.description }}</bdi>
         <span class='verified'
               hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'>
-          Verified </span>
+          &nbsp; {{ "Verified" | $$ }} </span>
         <span class='notverified'
               hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'>
-          FAILED VERIFICATION </span>
+          {{ "FAILED VERIFICATION" | $$ }} </span>
         <div class='verify-code' hidden?='{{ sas === null || startedVerify }}'> SAS: {{ sas }} <br />
           <uproxy-button on-tap='{{ confirmSAS }}'>
             {{ "Confirm" }}
@@ -71,8 +71,8 @@
         </div>
       </p>
       <div hidden?='{{ !(!instance.description) }}'>
-        <span class='verified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'> Verified </span>
-        <span class='notverified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'> FAILED VERIFICATION </span>
+        <span class='verified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_COMPLETE }}'> {{ "Verified" || $$ }} </span>
+        <span class='notverified' hidden?='{{ instance.verifyState != VerifyState.VERIFY_FAILED }}'> {{ "FAILED VERIFICATION" || $$ }} </span>
         <div class='verify-code' hidden?='{{ sas === null || startedVerify }}'> (lower) SAS: {{ sas }} <br />
           <uproxy-button on-tap='{{ confirmSAS }}'>
             {{ "Confirm" }}
@@ -81,14 +81,15 @@
             {{ "Cancel" }}
           </uproxy-button>
         </div>
+
       </div>
       <div id='verification'
            hidden?='{{ true || (instance.verifyState != VerifyState.VERIFY_BEGIN) }}'>
         <span id='verification-inprogress' hidden?='{{ sas != null }}'>
           Talking to peer....
         </span>
-        <span id='verification-sas' hidden?='{{ sas === null }}'>
-          SAS: {{ sas }}, Do you both see the same SAS?
+        <span id='verification-sas' hidden?='{{ sas == null }}'>
+          {{ "SAS:" || $$ }} {{ sas }} {{ ", Do you both see the same SAS?" || $$ }}
           <uproxy-button on-tap='{{ confirmSAS }}'>
             {{ "YES" }}
           </uproxy-button>

@@ -36,7 +36,7 @@ Polymer({
     // Feature code for verification
     this.ENABLE_VERIFY =
       model.globalSettings.enabledExperiments.indexOf(
-        uproxy_core_api.kFeatureVerify) >= 0;
+        uproxy_core_api.FEATURE_VERIFY) >= 0;
   },
   start: function() {
     if (!this.instance.isOnline) {
@@ -77,7 +77,7 @@ Polymer({
     }
   },
   verify: function() {
-    if (this.instance.verifyState != social.VerifyState.VERIFY_BEGIN) {
+    if (this.instance.verifyState !== social.VerifyState.VERIFY_BEGIN) {
       ui.startVerifying(this.instance);
       this.startedVerify = true;
     } else {
