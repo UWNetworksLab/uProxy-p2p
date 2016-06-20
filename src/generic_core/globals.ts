@@ -57,6 +57,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   enforceProxyServerValidity: false,
   validProxyServers: [],
   activePromoId: null,  // set on promoIdDetected
+  enabledExperiments: [],
   shouldHijackDO: true,
   crypto: true
 };

@@ -168,7 +168,8 @@ var log :logging.Log = new logging.Log('remote-user');
         // Send an instance message to newly ONLINE remote uProxy clients.
         case social.ClientStatus.ONLINE:
           if (!(client.clientId in this.clientIdToStatusMap) ||
-              this.clientIdToStatusMap[client.clientId] != social.ClientStatus.ONLINE) {
+              (this.clientIdToStatusMap[client.clientId] !=
+                  social.ClientStatus.ONLINE)) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
             this.sendInstanceHandshake(client.clientId);
           }
@@ -177,8 +178,8 @@ var log :logging.Log = new logging.Log('remote-user');
         case social.ClientStatus.OFFLINE:
         case social.ClientStatus.ONLINE_WITH_OTHER_APP:
           // Just delete OFFLINE clients, because they will never be ONLINE
-          // again as the same clientID (removes clientId from clientIdToStatusMap
-          // and related data structures).
+          // again as the same clientID (removes clientId from
+          // clientIdToStatusMap and related data structures).
           this.removeClient_(client.clientId);
           break;
         default:
@@ -208,7 +209,8 @@ var log :logging.Log = new logging.Log('remote-user');
               msg.version).then((instance: remote_instance.RemoteInstance) => {
               // Check if we have an unusedPermissionToken for this instance.
               if (instance.unusedPermissionToken) {
-                this.sendPermissionToken(clientId, instance.unusedPermissionToken);
+                this.sendPermissionToken(clientId,
+                                         instance.unusedPermissionToken);
                 instance.unusedPermissionToken = null;
                 instance.saveToStorage();
               }
@@ -254,7 +256,20 @@ var log :logging.Log = new logging.Log('remote-user');
           this.sendInstanceHandshake(clientId);
           this.saveToStorage();  // Save new consent to storage.
           this.notifyUI();  // Notify UI that consent has changed
-          return;
+        return;
+
+        case social.PeerMessageType.KEY_VERIFY_MESSAGE:
+          log.debug('got instance key-verify mssage', msg);
+          // Find the RemoteInstance representing the peer, and relay
+          // the message there.
+          var instance = this.getInstance(this.clientToInstance(clientId));
+          if (!instance) {
+            // issues: https://github.com/uProxy/uproxy/pull/732
+            log.error('failed to get instance', clientId);
+            return;
+          }
+         instance.handleKeyVerifyMessage(msg.data);
+        return;
 
         default:
           log.error('received invalid message', {
@@ -264,7 +279,8 @@ var log :logging.Log = new logging.Log('remote-user');
       }
     }
 
-    public getInstance = (instanceId:string) : remote_instance.RemoteInstance => {
+    public getInstance = (instanceId:string)
+      : remote_instance.RemoteInstance => {
       return this.instances_[instanceId];
     }
 
