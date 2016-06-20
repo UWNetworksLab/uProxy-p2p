@@ -29,8 +29,7 @@
 <link rel='import' href='state.html'>
 <link rel='import' href='troubleshoot.html'>
 
-<polymer-element name='uproxy-root' attributes='model' on-open-dialog='{{ openDialog }}'>
-
+<polymer-element name='uproxy-root' attributes='model'>
   <template>
     <style>
       :host {
@@ -432,10 +431,11 @@
         </paper-input-decorator>
       </div>
       <template repeat='{{ button in dialog.buttons }}'>
-        <uproxy-button affirmative?='{{ !button.dismissive }}'
-          dismissive?='{{ button.dismissive }}' class='dialogButton'
-          on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'
-          data-callbackIndex='{{ button.callbackIndex }}'>
+        <uproxy-button
+          affirmative?='{{ !button.dismissive }}'
+          dismissive?='{{ button.dismissive }}'
+          class='dialogButton'
+          on-tap='{{ dialogButtonClick }}'>
           {{button.text}}
         </uproxy-button>
       </template>

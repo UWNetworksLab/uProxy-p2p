@@ -129,6 +129,8 @@
     }
     </style>
 
+    <uproxy-state id="state"></uproxy-state>
+
     <div tabindex='-1'
         class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
         top horizontal layout>

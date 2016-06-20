@@ -1339,6 +1339,10 @@
     "description": "Region option for deploying a DigitalOcean server",
     "message": "Asia (Singapore)"
   },
+  "ASIA_BANGALORE": {
+    "description": "Region option for deploying a DigitalOcean server",
+    "message": "Asia (Bangalore)"
+  },
   "EUROPE_AMSTERDAM": {
     "description": "Region option for deploying a DigitalOcean server",
     "message": "Europe (Amsterdam)"
