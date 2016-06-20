@@ -504,7 +504,7 @@ export class KeyVerify {
         if (timeout_ms !== undefined && timeout_ms >= 0) {
           this.timeoutId_ = setTimeout( () => {
             if (!this.completed_) {
-              log.info("Verification Timeout.");
+              log.info('Verification Timeout.');
               this.resolve_(false);
             } else {
               log.error('Timeout occurred when already finished.');

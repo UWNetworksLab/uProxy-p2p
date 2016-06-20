@@ -358,7 +358,7 @@ import ui = ui_connector.connector;
     };
 
     public finishVerifyUser = (result :boolean) => {
-      console.log('finishVerifyuser: ', result, " promise resolution is ",
+      console.log('finishVerifyuser: ', result, ' promise resolution is ',
                   this.resolvedVerifySAS_);
       if (this.resolvedVerifySAS_ !== null) {
         this.resolvedVerifySAS_(result);

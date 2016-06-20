@@ -74,7 +74,7 @@ Polymer({
     // First check for cancellation
     if (this.instance.verifySAS === null &&
         this.sas !== null) {
-      console.log("App or remote cancellation.");
+      console.log('App or remote cancellation.');
       this.rejectSAS();
     } else if (this.instance.verifySAS !== undefined) {
       // Nope, the app-level KeyVerify session has a SAS to show.
