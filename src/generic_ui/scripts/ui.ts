@@ -1433,14 +1433,18 @@ export class UserInterface implements ui_constants.UiApi {
         // TODO: this really just needs a cancel button.
         this.getUserInput(
           'Verify this User',
-          'Please type in the SAS code that they see for you.  Any other value cancels.',
+          'Please type in the SAS code that they see for you.  Any other ' +
+            'value cancels.',
           'SAS:', '', 'Next').then( (sas:string) => {
-            console.log('Got SAS: ' + sas + ', against desired: ' + inst.verifySAS);
-            this.finishVerifying(inst, parseInt(inst.verifySAS) == parseInt(sas));
+            console.log('Got SAS: ' + sas + ', against desired: ' +
+                        inst.verifySAS);
+            this.finishVerifying(inst,
+                                 parseInt(inst.verifySAS) === parseInt(sas));
           });
         return this.core.verifyUser(this.getInstancePath_(inst.instanceId));
       });
   }
+
   public finishVerifying = (inst :social.InstanceData,
                             sameSAS: boolean) :Promise<void> => {
     var args :uproxy_core_api.FinishVerifyArgs = {

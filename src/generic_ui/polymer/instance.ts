@@ -26,13 +26,10 @@ Polymer({
     this.GettingState = social.GettingState;
     this.model = model;
     this.sas = null;
-
     // Whether this is the side that started verification.  The sides
     // of the verification show different UIs.
     this.startedVerify = false;
-
     this.VerifyState = social.VerifyState;
-    this.self = this;
     // Feature code for verification
     this.ENABLE_VERIFY =
       model.globalSettings.enabledExperiments.indexOf(
@@ -40,7 +37,8 @@ Polymer({
   },
   start: function() {
     if (!this.instance.isOnline) {
-      this.ui.toastMessage = ui.i18n_t('FRIEND_OFFLINE', { name: this.user.name });
+      this.ui.toastMessage = ui.i18n_t('FRIEND_OFFLINE',
+                                       { name: this.user.name });
       return;
     }
 

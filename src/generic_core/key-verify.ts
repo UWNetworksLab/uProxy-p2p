@@ -251,7 +251,7 @@ export class KeyVerify {
   public static readFirstMessage(msg:any) : {[type:string]:Messages.Tagged} {
     KeyVerify.initStaticTables_();
     if (msg['type'] && KeyVerify.structuralVerify_(msg) &&
-        msg.type == HELLO1) {
+        msg.type === HELLO1) {
       if (msg.clientVersion !== KeyVerify.CLIENT_VERSION ||
           msg.version !== KeyVerify.PROTOCOL_VERSION) {
         log.error('Invalid Hello message (versions): ', msg);
@@ -583,7 +583,7 @@ export class KeyVerify {
         this.queuedGenerations_[Type[msgType]] = false;
         this.set_(msg);
         this.delegate_.sendMessage(msg.value).then(() => {
-          if (msgType == Type.Conf2Ack) {
+          if (msgType === Type.Conf2Ack) {
             log.debug('ZRTP: EVERYTHING IS DONE ON THIS SIDE TOO');
             this.resolve_(true);
           }
@@ -598,14 +598,15 @@ export class KeyVerify {
 
   // Message schema verification.
   private static structuralVerify_ (msg:any) :boolean {
-    if (!msg.type || Object.keys(KeyVerify.roleMessageMap_).indexOf(msg['type']) < 0) {
+    if (!msg.type ||
+        Object.keys(KeyVerify.roleMessageMap_).indexOf(msg['type']) < 0) {
       // Unknown type.
       return false;
     }
     // Verify that none of the values are blank.
     let allKeys = Object.keys(msg);
     for (let k in allKeys) {
-      if (msg[allKeys[k]].length == '') {
+      if (msg[allKeys[k]].length === '') {
         log.error('Verify msg ', msg, ' got empty value for key ', k);
         return false;
       }
@@ -641,7 +642,8 @@ export class KeyVerify {
       }
       setTableEntry(HELLO1, Messages.HelloMessage, <[Type]>[], false);
       setTableEntry(HELLO2, Messages.HelloMessage, <[Type]>[], true);
-      setTableEntry(COMMIT, Messages.CommitMessage, [Type.Hello1, Type.Hello2],false);
+      setTableEntry(COMMIT, Messages.CommitMessage, [Type.Hello1, Type.Hello2],
+                    false);
       setTableEntry(DHPART1, Messages.DHPartMessage, [Type.Commit], true);
       setTableEntry(DHPART2, Messages.DHPartMessage, [Type.DHPart1], false);
       setTableEntry(CONFIRM1, Messages.ConfirmMessage, [Type.DHPart2], true);
@@ -685,7 +687,7 @@ export class KeyVerify {
   // perhaps we're under attack?
   private appropriateForRole_(type:string) :boolean {
     if (KeyVerify.roleMessageMap_[type] !== undefined) {
-      return KeyVerify.roleMessageMap_[type] == this.isInitiator_;
+      return KeyVerify.roleMessageMap_[type] === this.isInitiator_;
     } else {
       return false;
     }
@@ -1021,6 +1023,7 @@ export function RespondToVerify(peerPubKey :string,
 
 // Create a ZRTP verification session.  To send the first message,
 // invoke start() on the returned object.
-export function InitiateVerify(peerPubKey :string, delegate :Delegate) :KeyVerify {
+export function InitiateVerify(peerPubKey :string,
+                               delegate :Delegate) :KeyVerify {
   return new KeyVerify(peerPubKey, delegate);
 }

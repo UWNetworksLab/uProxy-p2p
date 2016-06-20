@@ -83,27 +83,12 @@
         </div>
 
       </div>
-      <div id='verification'
-           hidden?='{{ true || (instance.verifyState != VerifyState.VERIFY_BEGIN) }}'>
-        <span id='verification-inprogress' hidden?='{{ sas != null }}'>
-          Talking to peer....
-        </span>
-        <span id='verification-sas' hidden?='{{ sas == null }}'>
-          {{ "SAS:" || $$ }} {{ sas }} {{ ", Do you both see the same SAS?" || $$ }}
-          <uproxy-button on-tap='{{ confirmSAS }}'>
-            {{ "YES" }}
-          </uproxy-button>
-          <uproxy-button on-tap='{{ rejectSAS }}'>
-            {{ "NO" }}
-          </uproxy-button>
-        </span>
+      <div id='verification' class='display:inline'
+           hidden?='{{ !ENABLE_VERIFY || instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
+        <uproxy-button raised on-tap='{{ verify }}'>
+          {{ "VERIFY" | $$ }}
+        </uproxy-button>
       </div>
-        <div id='verification' class='display:inline'
-             hidden?='{{ !ENABLE_VERIFY || instance.verifyState == VerifyState.VERIFY_BEGIN }}'>
-          <uproxy-button raised on-tap='{{ verify }}'>
-            {{ "VERIFY" | $$ }}
-          </uproxy-button>
-        </div>
 
       <!-- It is assumed that all uproxy-instances are taken from
          user.offeringInstances and are therefore giving us access -->
