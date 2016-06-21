@@ -43,6 +43,9 @@
     "https://a0.awsstatic.com/",
     "webRequestBlocking"
   ],
+  "storage": {
+    "managed_schema": "managed_policy_schema.json"
+  },
   "web_accessible_resources": [
     "icons/*",
     "copypaste.html"

@@ -17,6 +17,9 @@
     "storage",
     "<all_urls>"
   ],
+  "storage": {
+    "managed_schema": "managed_policy_schema.json"
+  },
   "sockets": {
     "tcp": {
       "connect": ""

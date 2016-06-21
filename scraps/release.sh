@@ -50,7 +50,7 @@ function updateWithRelease {
 
   git checkout -b "version-$versionNext"
   python version.py "$versionNext"
-  git add bower.json package.json src/chrome/app/manifest.json src/chrome/extension/manifest.json src/firefox/package.json
+  git add bower.json package.json src/chrome/app/manifest.json src/chrome/extension/manifest.json src/chrome/app/managed_policy_schema.json src/chrome/extension/managed_policy_schema.json src/firefox/package.json
   git commit -m "Bump versions"
   gitPush origin "version-$versionNext:version-$versionNext"
 
