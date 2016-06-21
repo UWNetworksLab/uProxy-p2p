@@ -21,7 +21,8 @@ export var STORAGE_VERSION = 1;
 // 3: caesar obfuscation
 // 4: holographic ICE
 // 5: encrypted signalling messages
-export var MESSAGE_VERSION = 5;
+// 6: RC4 obfuscation
+export var MESSAGE_VERSION = 6;
 
 export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},

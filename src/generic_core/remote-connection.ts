@@ -296,12 +296,19 @@ var generateProxyingSessionId_ = (): string => {
           pc = bridge.preObfuscation('sockstortc', config, this.portControl_);
           break;
         case 3:
-          log.debug('using bridge with basicObfuscation');
+          log.debug('using bridge with caesar obfuscation');
           pc = bridge.basicObfuscation('sockstortc', config, this.portControl_);
           break;
+        case 4:
+        case 5:
+          log.debug('using holographic ICE with caesar obfuscation');
+          pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_);
+          break;
         default:
-          log.debug('using holographic ICE');
-          pc = bridge.best('sockstortc', config, this.portControl_);
+          log.debug('using holographic ICE with RC4 obfuscation');
+          pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_, {
+            name: 'rc4'
+          });
         }
 
         globals.metrics.increment('attempt');
