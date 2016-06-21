@@ -673,6 +673,8 @@ export function notifyUI(networkName :string, userId :string) {
             this.name !== 'Cloud') {
           var user = this.getOrAddUser_(tokenObj.userId);
           user.handleInvitePermissions(tokenObj);
+          user.modifyConsent(uproxy_core_api.ConsentUserAction.OFFER);
+          user.notifyUI();
         }
       }).catch((e) => {
         log.error('Error calling acceptUserInvitation: ' +
