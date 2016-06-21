@@ -17,9 +17,10 @@ export var storage = new local_storage.Storage();
 export var STORAGE_VERSION = 1;
 
 // 1: initial release
-// 2: uproxy-lib v27, move to bridge but no obfuscation yet
-// 3: offer basicObfuscation
+// 2: introduce BridgingPeerConnection (no obfuscation)
+// 3: caesar obfuscation
 // 4: holographic ICE
+// 5: encrypted signalling messages
 export var MESSAGE_VERSION = 5;
 
 export var DEFAULT_STUN_SERVERS = [
