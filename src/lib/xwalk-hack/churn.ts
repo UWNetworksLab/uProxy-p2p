@@ -7,7 +7,7 @@ import churn_types = require('../churn/churn.types');
 import handler = require('../handler/queue');
 import logging = require('../logging/logging');
 import peerconnection = require('../webrtc/peerconnection');
-import random = require('../crypto/random');
+import random = require('random-lib');
 import signals = require('../webrtc/signals');
 
 import Candidate = candidate.Candidate;
@@ -33,17 +33,12 @@ export var getMidFromSdp = (sdp:string) : string => {
 
 // Generates a key suitable for use with CaesarCipher, viz. 1-255.
 var generateCaesarConfig_ = (): caesar.Config => {
-  try {
-    return {
-      key: (random.randomUint32() % 255) + 1
-    };
-  } catch (e) {
-    // https://github.com/uProxy/uproxy/issues/1593
-    log.warn('crypto unavailable, using Math.random');
-    return {
-      key: Math.floor((Math.random() * 255)) + 1
-    };
-  }
+  return {
+    key: random.randomInt({
+      min: 1,
+      max: 255
+    })
+  };
 }
 
 /**
