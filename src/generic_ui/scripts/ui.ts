@@ -638,22 +638,9 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public loginToQuiver = (message ?:string) : Promise<void> => {
-    if (message) {
-      message += '<p>' + this.i18n_t('QUIVER_LOGIN_TEXT') + '</p>';
-    } else {
-      message = this.i18n_t('QUIVER_LOGIN_TEXT');
-    }
-    return this.getUserInput(
-        this.i18n_t('UPROXY_NETWORK_LOGIN_TITLE'),
-        message || '',
-        this.i18n_t('UPROXY_NETWORK_CHOOSE_A_USER_NAME'),
-        this.model.globalSettings.quiverUserName,
-        this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
-    .then((quiverUserName :string) => {
-      this.model.globalSettings.quiverUserName = quiverUserName;
-      this.core.updateGlobalSettings(this.model.globalSettings);
-      return this.login('Quiver', quiverUserName);
-    });
+    this.model.globalSettings.quiverUserName = "";
+    this.core.updateGlobalSettings(this.model.globalSettings);
+    return this.login('Quiver', "");
   }
 
   public handleCopyPasteUrlData = (url: string) => {
@@ -1045,7 +1032,7 @@ export class UserInterface implements ui_constants.UiApi {
   };
 
   /**
-   * Remove a friend from the friend list by removing it from 
+   * Remove a friend from the friend list by removing it from
    * model.contacts
    */
   public removeFriend = (args:{ networkName: string, userId: string }) => {

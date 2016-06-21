@@ -5,6 +5,7 @@ import social = require('../../interfaces/social');
 import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import dialogs = require('../scripts/dialogs');
+import ui_types = require('../../interfaces/ui');
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -120,8 +121,8 @@ Polymer({
     this.inviteUserEmail = '';
     this.model = model;
     this.gitHubUserIdInput = '';
-    this.offerAccess = false;
-    this.requestAccess = false;
+    this.offerAccess = (model.globalSettings.mode === ui_types.Mode.SHARE);
+    this.requestAccess = (model.globalSettings.mode === ui_types.Mode.GET);
     this.instructions = getInstructions(this.network)
     this.confirmText = getConfirmText(this.network);
     // Forces the placeholder text to be visible again.

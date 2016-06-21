@@ -22,7 +22,14 @@ var inviteUser = {
         ui.i18nSanitizeHtml(ui.i18n_t('WE_WONT_POST_LEARN_MORE')),
         this.$.weWontPostLearnMore);
 
-    this.$.inviteUserPanel.open();
+    // this.$.inviteUserPanel.open();
+    if (ui_context.model.getNetwork('Quiver')) {
+      this.initInviteForNetwork('Quiver');
+    } else {
+      return ui.loginToQuiver().then(() => {
+        this.initInviteForNetwork('Quiver');
+      })
+    }
   },
   closeInviteUserPanel: function() {
     this.$.inviteUserPanel.close();
