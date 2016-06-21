@@ -275,7 +275,7 @@ gruntConfig = {
     }
     ccaReleaseAndroid: {
       cwd: '<%= androidDistPath %>'
-      command: '<%= ccaJsPath %> build android --release --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --release --webview=crosswalk'
+      command: '<%= ccaJsPath %> build android --release --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
