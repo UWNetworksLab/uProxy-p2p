@@ -602,7 +602,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (this.model.getNetwork(networkName)) {
       // User is already logged into the right network (other than Cloud).
-      return this.addUser_(tokenObj, true).catch(showTokenError);
+      return this.addUser_(tokenObj, false).catch(showTokenError);
     }
 
     // loginPromise should resolve when the use is logged into networkName.
