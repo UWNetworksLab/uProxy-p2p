@@ -7,6 +7,7 @@ import model = require('../scripts/model');
 import translator = require('../scripts/translator');
 import user_interface = require('../scripts/ui');
 import dialogs = require('../scripts/dialogs');
+import ui_types = require('../../interfaces/ui');
 
 var ui = ui_context.ui;
 var core = ui_context.core;
@@ -22,13 +23,16 @@ var inviteUser = {
         ui.i18nSanitizeHtml(ui.i18n_t('WE_WONT_POST_LEARN_MORE')),
         this.$.weWontPostLearnMore);
 
-    // this.$.inviteUserPanel.open();
-    if (ui_context.model.getNetwork('Quiver')) {
-      this.initInviteForNetwork('Quiver');
-    } else {
-      return ui.loginToQuiver().then(() => {
+    if (ui_context.model.globalSettings.mode == ui_types.Mode.GET) {
+      if (ui_context.model.getNetwork('Quiver')) {
         this.initInviteForNetwork('Quiver');
-      })
+      } else {
+        return ui.loginToQuiver().then(() => {
+          this.initInviteForNetwork('Quiver');
+        })
+      }
+    } else {
+      this.$.inviteUserPanel.open();
     }
   },
   closeInviteUserPanel: function() {
@@ -107,7 +111,7 @@ var inviteUser = {
     this.$.loginToInviteFriendDialog.close();
   },
   acceptInvite: function() {
-    ui.handleInvite(this.inviteCode).then(() => {
+    ui.handleInvite(this.inviteCode, this.connectionName).then(() => {
       this.closeInviteUserPanel();
 
       this.$.state.openDialog(dialogs.getMessageDialogDescription(

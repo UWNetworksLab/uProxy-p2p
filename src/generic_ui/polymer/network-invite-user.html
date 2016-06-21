@@ -75,40 +75,42 @@
 
     <core-overlay id='networkInviteUserPanel' class='{{ network }}'>
       <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-        {{ 'INVITE_A_FRIEND' | $$ }}
+        Create Request Code
       </uproxy-app-bar>
 
       <div class='section'>
-        <p>{{ instructions }}</p>
+        <p>
+          Send the <b>Connection Request Code</b> below to your friend over a
+          communication channel (e.g. email, WhatsApp, Facebook) that you trust.
+          Your friend will use it to create a private connection for you.
+        </p>
+        <paper-input-decorator layout vertical>
+          <p><b>Connection Request Code:</b></p>
+          <input value='{{ inviteUrl }}' readonly is='core-input' on-tap='{{ select }}' />
+        </paper-input-decorator>
 
-        <!-- GitHub specific controls -->
-        <div hidden?="{{network !== 'GitHub'}}">
-          <paper-input-decorator id='GitHubPlaceholder' label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
-            <input is='core-input' value='{{ gitHubUserIdInput }}'>
-          </paper-input-decorator>
+        <div hidden=true>
+          <!-- GitHub specific controls -->
+          <div hidden?="{{network !== 'GitHub'}}">
+            <paper-input-decorator id='GitHubPlaceholder' label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
+              <input is='core-input' value='{{ gitHubUserIdInput }}'>
+            </paper-input-decorator>
+          </div>
+
+          <!-- GMail specific controls -->
+          <div hidden?="{{network !== 'GMail'}}">
+            <paper-input-decorator id='GMailPlaceholder' label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
+              <input is='core-input' value='{{ inviteUserEmail }}' />
+            </paper-input-decorator>
+          </div>
+
+          <div class='checkboxes'>
+            <p><paper-checkbox id='requestAccessCheckbox' label='{{ "REQUEST_ACCESS" | $$ }}' checked='{{ requestAccess }}'></paper-checkbox></p>
+            <p><paper-checkbox id='offerAccessCheckbox' label='{{ "OFFER_ACCESS" | $$ }}' checked='{{ offerAccess }}'></paper-checkbox></p>
+          </div>
+
+          <uproxy-button id='confirmButton' affirmative on-tap='{{ confirmClicked }}'>{{ confirmText }}</uproxy-button>
         </div>
-
-        <!-- GMail specific controls -->
-        <div hidden?="{{network !== 'GMail'}}">
-          <paper-input-decorator id='GMailPlaceholder' label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
-            <input is='core-input' value='{{ inviteUserEmail }}' />
-          </paper-input-decorator>
-        </div>
-
-        <div class='checkboxes'>
-          <p><paper-checkbox id='requestAccessCheckbox' label='{{ "REQUEST_ACCESS" | $$ }}' checked='{{ requestAccess }}'></paper-checkbox></p>
-          <p><paper-checkbox id='offerAccessCheckbox' label='{{ "OFFER_ACCESS" | $$ }}' checked='{{ offerAccess }}'></paper-checkbox></p>
-        </div>
-
-        <uproxy-button id='confirmButton' affirmative on-tap='{{ confirmClicked }}'>{{ confirmText }}</uproxy-button>
-
-        <!-- Quiver specific controls -->
-        <div hidden?="{{network !== 'Quiver'}}">
-          <paper-input-decorator layout vertical hidden?='{{ inviteUrl.length === 0}}'>
-            <input value='{{ inviteUrl }}' readonly is='core-input' on-tap='{{ select }}' />
-          </paper-input-decorator>
-        </div>
-
       </div>  <!-- end of .section -->
     </core-overlay>
 

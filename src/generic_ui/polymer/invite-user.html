@@ -208,19 +208,22 @@
 
     <core-overlay id='inviteUserPanel'>
       <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-        {{ 'CONNECT_WITH_A_FRIEND' | $$ }}
+        Share Internet Connection
       </uproxy-app-bar>
 
       <div class='view' flex>
         <div id="allInviteMethods">
           <div class='acceptInvite'>
-            <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$ }}' layout vertical>
-              <input is='core-input' value='{{ inviteCode }}' />
+            <paper-input-decorator id='inviteCodeDecorator' floatingLabel label='Name' layout vertical>
+              <input is='core-input' value='{{ connectionName }}' placeholder='Give a name to this connection' />
             </paper-input-decorator>
-            <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
+            <paper-input-decorator id='inviteCodeDecorator' floatingLabel label='Request Code' layout vertical>
+              <input is='core-input' value='{{ inviteCode }}' placeholder='Enter the code sent by your friend' />
+            </paper-input-decorator>
+            <uproxy-button id='acceptInviteButton' disabled='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
           </div>
 
-          <div id='allNetworkButtons'>
+          <div id='allNetworkButtons' hidden=true>
 
             <div id='cloudInstall' hidden?='{{ model.cloudProviderNames.length < 1 }}' on-tap='{{ cloudInstall }}'>
               <div class='content'>

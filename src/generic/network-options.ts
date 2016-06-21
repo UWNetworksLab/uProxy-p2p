@@ -9,42 +9,6 @@ function length(keys:string[]) :number {
 }
 
 export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
-  'Facebook-Firebase-V2': {
-    displayName: 'Facebook',
-    metricsName: 'facebook',
-    rosterFunction: lenMinusOne,
-    isFirebase: true,
-    enableMonitoring: true,
-    areAllContactsUproxy: true,
-    supportsReconnect: true
-  },
-  'GMail': {
-    displayName: 'Gmail',  // fix incorrect capitalization "GMail"
-    metricsName: 'gmail',
-    rosterFunction: lenMinusOne,
-    isFirebase: true,
-    enableMonitoring: true,
-    areAllContactsUproxy: true,
-    supportsReconnect: true
-  },
-  'WeChat': {
-    isFirebase: false,
-    metricsName: 'wechat',
-    rosterFunction: lenMinusOne,
-    enableMonitoring: false,
-    areAllContactsUproxy: false,
-    supportsReconnect: false,
-    isExperimental: true
-  },
-  'GitHub': {
-    metricsName: 'github',
-    rosterFunction: lenMinusOne,
-    isFirebase: false,
-    enableMonitoring: false,
-    areAllContactsUproxy: true,
-    supportsReconnect: false,
-    isExperimental: true
-  },
   'Quiver': {
     displayName: 'uProxy',
     metricsName: 'quiver',

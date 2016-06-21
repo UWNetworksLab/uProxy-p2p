@@ -89,6 +89,7 @@ Polymer({
   },
   openInviteUserPanel: function() {
     this.initFields();
+    this.generateInviteUrl('Quiver');
     this.$.networkInviteUserPanel.open();
   },
   closeInviteUserPanel: function() {

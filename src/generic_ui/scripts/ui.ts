@@ -572,12 +572,13 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public handleInvite = (invite :string) : Promise<void> => {
+  public handleInvite = (invite :string, connectionName :string) : Promise<void> => {
     var showTokenError = () => {
       this.showDialog('', this.i18n_t('INVITE_ERROR'));
     };
 
     var tokenObj = this.parseInviteUrl_(invite);
+    tokenObj.userName = connectionName;
     if (!tokenObj) {
       showTokenError();
       return;
