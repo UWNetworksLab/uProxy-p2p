@@ -345,6 +345,7 @@ gruntConfig = {
           cwd: chromeExtDevPath
           src: [
             'manifest.json'
+            'managed_policy_schema.json'
             '_locales/**'
 
             'generic_ui/scripts/copypaste.js'
@@ -358,6 +359,7 @@ gruntConfig = {
           cwd: chromeAppDevPath
           src: [
             'manifest.json'
+            'managed_policy_schema.json'
             '_locales/**'
 
             # UI for not-connected
