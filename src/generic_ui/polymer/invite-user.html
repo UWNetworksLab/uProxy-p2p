@@ -220,6 +220,7 @@
             <paper-input-decorator id='inviteCodeDecorator' floatingLabel label='Request Code' layout vertical>
               <input is='core-input' value='{{ inviteCode }}' placeholder='Enter the code sent by your friend' />
             </paper-input-decorator>
+            <p><paper-checkbox id='statsCheckbox' label='Report Usage Stats ' checked='true'></paper-checkbox></p>
             <uproxy-button id='acceptInviteButton' disabled='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
           </div>
 

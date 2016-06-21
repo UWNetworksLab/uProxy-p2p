@@ -35,11 +35,8 @@ var splash = {
     core.updateGlobalSettings(model.globalSettings);
   },
   next: function() {
-    if (model.globalSettings.splashState == this.SPLASH_STATES.METRICS_OPT_IN) {
-      ui.view = ui_constants.View.ROSTER;
-    } else {
-      this.setState(model.globalSettings.splashState + 1);
-    }
+    this.updateSeenMetrics(false);
+    ui.view = ui_constants.View.ROSTER;
   },
   prev: function() {
     this.setState(model.globalSettings.splashState - 1);
@@ -55,7 +52,6 @@ var splash = {
     model.globalSettings.hasSeenMetrics = true;
     model.globalSettings.statsReportingEnabled = val;
     core.updateGlobalSettings(model.globalSettings);
-    this.next();
   },
   enableStats: function() {
     return this.updateSeenMetrics(true);
