@@ -113,9 +113,6 @@ var inviteUser = {
   acceptInvite: function() {
     ui.handleInvite(this.inviteCode, this.connectionName).then(() => {
       this.closeInviteUserPanel();
-
-      this.$.state.openDialog(dialogs.getMessageDialogDescription(
-          '', translator.i18n_t('FRIEND_ADDED')));
     }).catch(() => {
       this.$.state.openDialog(dialogs.getMessageDialogDescription(
           '', translator.i18n_t('FRIEND_ADD_ERROR')));
