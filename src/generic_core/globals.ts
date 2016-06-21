@@ -20,7 +20,7 @@ export var STORAGE_VERSION = 1;
 // 2: introduce BridgingPeerConnection (no obfuscation)
 // 3: caesar obfuscation
 // 4: holographic ICE
-// 5: encrypted signalling messages
+// 5: encrypted signalling messages (long since replaced by Network#isEncrypted)
 // 6: RC4 obfuscation
 export var MESSAGE_VERSION = 6;
 
