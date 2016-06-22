@@ -68,7 +68,7 @@ Polymer({
     }
   },
   viewLogs: function() {
-   // this.ui.openTab('generic_ui/view-logs.html?lang=' + this.model.globalSettings.language);
+   // calls logs.html to open the logs
     this.fire('core-signal', { name: 'open-logs' });
   },
   ready: function() {
