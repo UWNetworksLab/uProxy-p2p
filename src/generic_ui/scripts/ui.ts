@@ -639,9 +639,9 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public loginToQuiver = (message ?:string) : Promise<void> => {
-    this.model.globalSettings.quiverUserName = "";
+    this.model.globalSettings.quiverUserName = '';
     this.core.updateGlobalSettings(this.model.globalSettings);
-    return this.login('Quiver', "");
+    return this.login('Quiver', '');
   }
 
   public handleCopyPasteUrlData = (url: string) => {

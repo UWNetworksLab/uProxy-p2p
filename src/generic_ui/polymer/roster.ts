@@ -18,7 +18,7 @@ Polymer({
     // and then display the "no online friends" message.
     if (!this.hasContacts) {
       this.loadingContacts = true;
-      setTimeout(function(){ this.loadingContacts = false; }.bind(this), 5000);
+      setTimeout(function(){ this.loadingContacts = false; }.bind(this), 1000);
     }
   },
   computed: {

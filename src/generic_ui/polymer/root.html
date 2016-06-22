@@ -408,12 +408,10 @@
           </div>
         </div>
         <!-- Elements (like the paper fab) that determine position based on proxying/error statuses, must come after the status elements above. Otherwise the positioning will be incorrect. -->
-        <!-- core-tooltip label='Create a connection request' position='left' -->
-          <paper-fab id="inviteButton"
-            mini src='../icons/plus_white.svg'
-            on-tap='{{ fireOpenInviteUserPanel }}'
-            style='bottom: {{ $.status.offsetHeight + 35 }}px;'></paper-fab>
-        <!-- /core-tooltip -->
+        <paper-fab id="inviteButton"
+          mini src='../icons/plus_white.svg'
+          on-tap='{{ fireOpenInviteUserPanel }}'
+          style='bottom: {{ $.status.offsetHeight + 35 }}px;'></paper-fab>
       </core-header-panel>
     </core-drawer-panel>
 
