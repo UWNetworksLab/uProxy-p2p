@@ -26,6 +26,9 @@ Polymer({
     var language = window.location.href.split('lang=')[1] || 'en';
     translator_module.i18n_setLng(language.substring(0, 2));
   },
+  openLogs: function() {
+    this.$.hitesting.open();
+  },
   ready: function() {
     const handleLogs = (logs: string) => {
       if (logs) {

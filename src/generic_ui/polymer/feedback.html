@@ -8,6 +8,7 @@
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='dialog.html'>
+<link rel='import' href='logs.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
   <template>
@@ -145,7 +146,7 @@
 
     <!-- Listen for the 'open-feedback' event, which is fired by the settings and splash pages. -->
     <core-signals on-core-signal-open-feedback="{{ open }}"></core-signals>
-
+    <uproxy-logs></uproxy-logs>
     <core-overlay id='feedbackPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>

@@ -63,7 +63,10 @@ Polymer({
     });
   },
   viewLogs: function() {
-    this.ui.openTab('generic_ui/view-logs.html?lang=' + model.globalSettings.language);
+    //this.ui.openTab('generic_ui/view-logs.html?lang=' + model.globalSettings.language);
+    //this.$.feedbackPanel.close();
+    //this.$.feedbackPanel.close();
+    this.fire('core-signal', { name: 'open-logs' });
   },
   ready: function() {
     this.ui = ui_context.ui;
