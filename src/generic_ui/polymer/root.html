@@ -346,7 +346,7 @@
           </uproxy-bubble>
 
           <div class='bottom fit' dir="ltr">
-            <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
+            <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}' hidden?="{{ loadingContacts || hasContacts }}">
               <paper-tab>
                 <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$ }}</span>
                 <span class='tabNotificationNumber'

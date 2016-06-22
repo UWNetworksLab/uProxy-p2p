@@ -1331,13 +1331,9 @@
     "description": "Button text shown during DigitalOcean server deployment",
     "message": "Sign me in!"
   },
-  "EMPTY_ROSTER_CLOUD_INSTRUCTIONS": {
-    "description": "Instructions shown for cloud when the user has an empty roster",
-    "message": "Create a private cloud server and share access with friends & family"
-  },
-  "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS": {
-    "description": "Instructions shown for peer-to-peer when the user has an empty roster",
-    "message": "Get or share access with family & friends."
+  "EMPTY_ROSTER_INSTRUCTIONS": {
+    "description": "Instructions shown when the user has an empty roster",
+    "message": "Get and share access from a friend or a private cloud server."
   },
   "ASIA_SINGAPORE": {
     "description": "Region option for deploying a DigitalOcean server",
