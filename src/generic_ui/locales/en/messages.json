@@ -1301,15 +1301,15 @@
   },
   "CLOUD_INSTALL_GET_STARTED_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "uProxy now allows you to create a private cloud server through DigitalOcean."
+    "message": "Create a private cloud server on DigitalOcean through uProxy."
   },
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "For $10 per month you can get and share access with your friends and family. If you sign up with uProxy, your first month is free! Create a new account or sign in to connect and share access. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+    "message": "For $10 per month you can get and share access with your friends and family. If you sign up for DigitalOcean with uProxy, your first month is free! <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
   },
   "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
     "description": "Instructions link for users who already have an existing cloud server.",
-    "message": "Already have a cloud server? <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link> to use it with uProxy."
+    "message": "Already have a cloud server? You can manually set up your own uProxy server. <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link>"
   },
   "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
     "description": "Message shown on invite screen for DigitalOcean server deployment",
