@@ -53,9 +53,12 @@
       }
     </style>
     <core-signals on-core-signal-open-logs="{{ openLogs }}"></core-signals>
-    
+
     <core-overlay id='hitesting'>
     <div id='container'>
+    <uproxy-app-bar on-go-back='{{ close }}'>
+          {{ "LOGS_TITLE" | $$ }}
+        </uproxy-app-bar>
       <h1><bdi>{{ "LOGS_TITLE" | $$ }}</bdi></h1>
       <p><bdi>{{ "TO_SEND_LOGS" | $$ }}</bdi></p>
       <div id='logs'>

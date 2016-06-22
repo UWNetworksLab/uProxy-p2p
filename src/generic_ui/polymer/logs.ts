@@ -30,6 +30,9 @@ Polymer({
     this.$.hitesting.open();
     //This is a test
   },
+  close: function() {
+    this.$.hitesting.close();
+  },
   ready: function() {
     const handleLogs = (logs: string) => {
       if (logs) {
