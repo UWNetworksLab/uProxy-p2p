@@ -78,6 +78,7 @@ Polymer({
       this.closeOverlays();
       this.$.successOverlay.open();
       ui.model.globalSettings.shouldHijackDO = false;
+      ui.core.updateGlobalSettings(ui.model.globalSettings);
     }).catch((e :any) => {
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
