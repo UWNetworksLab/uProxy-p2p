@@ -2,6 +2,7 @@
 
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
+import constants = require('./constants');
 import _ = require('lodash');
 import key_verify = require('./key-verify');
 import logging = require('../lib/logging/logging');
@@ -267,9 +268,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    * instances.
    */
   public updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
-    newSettings.version = globals.STORAGE_VERSION;
+    newSettings.version = constants.STORAGE_VERSION;
     if (newSettings.stunServers.length === 0) {
-      newSettings.stunServers = globals.DEFAULT_STUN_SERVERS;
+      newSettings.stunServers = constants.DEFAULT_STUN_SERVERS;
     }
     var oldDescription = globals.settings.description;
     globals.storage.save('globalSettings', newSettings)

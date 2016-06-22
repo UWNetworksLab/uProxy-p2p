@@ -16,7 +16,7 @@ import rappor_metrics = require('./metrics');
 import social_network = require('./social');
 import local_storage = require('./storage');
 import local_instance = require('./local-instance');
-import globals = require('./globals');
+import constants = require('./constants');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 import ui_connector = require('./ui_connector');
@@ -359,12 +359,12 @@ describe('social_network.FreedomNetwork', () => {
       data: {
         'tigers': 'are also cats'
       },
-      version: globals.MESSAGE_VERSION
+      version: constants.MESSAGE_VERSION
     };
     spyOn(JSON, 'stringify').and.callThrough();
     network.send(network.getUser('mockuser'), 'fakeclient', outMsg)
     expect(JSON.stringify).toHaveBeenCalledWith(
-      {type: outMsg.type, data: outMsg.data, version: globals.MESSAGE_VERSION});
+      { type: outMsg.type, data: outMsg.data, version: constants.MESSAGE_VERSION });
   });
 
   // TODO: get this unit test to pass.
