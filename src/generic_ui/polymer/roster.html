@@ -31,13 +31,6 @@
     ::-webkit-input-placeholder {
       color: #ccc;
     }
-    #loadContacts {
-      text-align: center;
-      margin: 110px 80px;
-    }
-    #loadContacts div {
-      font-size: 17px;
-    }
     .no-friends {
       width: 150px !important;
       height: 150px !important;
@@ -129,18 +122,6 @@
       transform: translateY(-50%);
     }
     </style>
-
-    <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
-    <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
-
-    <!-- Shown if there are no contacts found so far -->
-    <div id='loadContacts' hidden?='{{ hasContacts }}'>
-      <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
-        <core-icon icon="social:person" class="no-friends"></core-icon>
-        {{ "LOADING_FRIENDS" | $$ }}<br>
-        <paper-progress indeterminate='true'></paper-progress>
-      </div>
-    </div>
 
     <div id="connectWithFriendsInstruction" hidden?="{{ loadingContacts || hasContacts }}">
       <div class='instructions cloud' horizontal layout>
