@@ -27,11 +27,11 @@ Polymer({
     translator_module.i18n_setLng(language.substring(0, 2));
   },
   openLogs: function() {
-    this.$.hitesting.open();
+    this.$.logsPanel.open();
     //This is a test
   },
   close: function() {
-    this.$.hitesting.close();
+    this.$.logsPanel.close();
   },
   ready: function() {
     const handleLogs = (logs: string) => {
