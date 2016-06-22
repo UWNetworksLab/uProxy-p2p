@@ -28,6 +28,7 @@ Polymer({
   },
   openLogs: function() {
     this.$.hitesting.open();
+    //This is a test
   },
   ready: function() {
     const handleLogs = (logs: string) => {
