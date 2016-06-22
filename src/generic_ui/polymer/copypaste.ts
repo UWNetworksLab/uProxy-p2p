@@ -8,6 +8,8 @@
  */
 import ui_constants = require('../../interfaces/ui');
 import social = require('../../interfaces/social');
+import translator = require('../scripts/translator');
+import dialogs = require('../scripts/dialogs');
 
 var ui = ui_context.ui;
 var core = ui_context.core;
@@ -66,17 +68,11 @@ Polymer({
       return;
     }
 
-    this.fire('open-dialog', {
-      heading: ui.i18n_t('GO_BACK'),
-      message: ui.i18n_t('ARE_YOU_SURE'),
-      buttons: [{
-        text: ui.i18n_t('YES'),
-        signal: 'copypaste-back'
-      }, {
-        text: ui.i18n_t('NO'),
-        dismissive: true
-      }]
-    });
+    this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
+        translator.i18n_t('GO_BACK'),
+        translator.i18n_t('ARE_YOU_SURE'))).then(() => {
+      this.fire('core-signal', { name: 'copypaste-back' });
+    }, () => {/*MT*/});
   },
   stopGetting: function() {
     ui.stopUsingProxy();
