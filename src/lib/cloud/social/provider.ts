@@ -31,6 +31,11 @@ const CONNECT_TIMEOUT_MS = 10000;
 const INITIAL_CONNECTION_INTERVAL_MS = 500;
 const MAX_CONNECTION_INTERVAL_MS = 10000;
 
+// Servers prior to MESSAGE_VERSION 6 (which introduced RC4 obfuscation) didn't
+// support the message_version command. Assume such servers are running
+// MESSAGE_VERSION=4 (caesar obfuscation).
+const DEFAULT_MESSAGE_VERSION = 4;
+
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
 interface Invite {
@@ -63,6 +68,7 @@ interface SavedContacts {
 interface SavedContact {
   invite?: Invite;
   description?: string;
+  version?: number;
 }
 
 // State of remote user's relationship to local user.
@@ -86,12 +92,12 @@ enum UserStatus {
 // TODO: use typings from the uProxy repo
 function makeVersionedPeerMessage(
     type:number,
-    payload:Object) : any {
+    payload:Object,
+    version?:number) : any {
   return {
     type: type,
     data: payload,
-    // TODO: remote-instance assumes client versions >= 5 can do PGP, yuck
-    version: 4
+    version: version || DEFAULT_MESSAGE_VERSION
   };
 }
 
@@ -179,19 +185,19 @@ export class CloudSocialProvider {
 
   // Emits the messages necessary to make the user appear online
   // in the contacts list.
-  private notifyOfUser_ = (invite: Invite, description?: string) => {
-    this.dispatchEvent_('onUserProfile',
-        makeUserProfile(invite.host, invite.isAdmin));
+  private notifyOfUser_ = (contact: SavedContact) : void => {
+    this.dispatchEvent_('onUserProfile', makeUserProfile(
+        contact.invite.host, contact.invite.isAdmin));
 
-    var clientState = makeClientState(invite.host);
+    var clientState = makeClientState(contact.invite.host);
     this.dispatchEvent_('onClientState', clientState);
 
     // Pretend that we received a message from a remote uProxy client.
     this.dispatchEvent_('onMessage', {
       from: clientState,
       // INSTANCE
-      message: JSON.stringify(makeVersionedPeerMessage(
-        3000, makeInstanceMessage(invite.host, description)))
+      message: JSON.stringify(makeVersionedPeerMessage(3000, makeInstanceMessage(
+          contact.invite.host, contact.description), contact.version))
     });
   }
 
@@ -212,7 +218,8 @@ export class CloudSocialProvider {
       this.dispatchEvent_('onMessage', {
         from: makeClientState(invite.host),
         // SIGNAL_FROM_SERVER_PEER,
-        message: JSON.stringify(makeVersionedPeerMessage(3002, message))
+        message: JSON.stringify(makeVersionedPeerMessage(3002,
+            message, connection.getVersion()))
       });
     });
 
@@ -228,12 +235,13 @@ export class CloudSocialProvider {
       }, (e: Error) => {
         log.warn('failed to fetch banner: %1', e);
         return '';
-      }).then((banner: string) => {
-        this.notifyOfUser_(invite, banner);
+      }).then((banner: string) => {        
         this.savedContacts_[invite.host] = {
           invite: invite,
-          description: banner
+          description: banner,
+          version: connection.getVersion()
         };
+        this.notifyOfUser_(this.savedContacts_[invite.host]);
         this.saveContacts_();
       });
 
@@ -259,7 +267,7 @@ export class CloudSocialProvider {
         if (savedContacts.contacts) {
           for (let contact of savedContacts.contacts) {
             this.savedContacts_[contact.invite.host] = contact;
-            this.notifyOfUser_(contact.invite, contact.description);
+            this.notifyOfUser_(contact);
           }
         }
       } catch (e) {
@@ -401,10 +409,10 @@ export class CloudSocialProvider {
     try {
       const invite = <Invite>JSON.parse(inviteJson);
 
-      this.notifyOfUser_(invite);
       this.savedContacts_[invite.host] = {
         invite: invite
       };
+      this.notifyOfUser_(this.savedContacts_[invite.host]);
       this.saveContacts_();
 
       // Connect in the background in order to fetch metadata such as
@@ -446,6 +454,7 @@ enum ConnectionState {
   CONNECTING,
   ESTABLISHING_TUNNEL,
   WAITING_FOR_PING,
+  WAITING_FOR_VERSION,
   ESTABLISHED,
   TERMINATED
 }
@@ -463,6 +472,9 @@ class Connection {
 
   // The tunneled connection, i.e. secure link to Zork.
   private tunnel_ :ssh2.Channel;
+
+  // Server's MESSAGE_VERSION.
+  private version_ = DEFAULT_MESSAGE_VERSION;
 
   constructor(
       private invite_: Invite,
@@ -525,14 +537,28 @@ class Connection {
               switch (this.state_) {
                 case ConnectionState.WAITING_FOR_PING:
                   if (reply === 'ping') {
-                    this.setState_(ConnectionState.ESTABLISHED);
-                    F();
+                    this.setState_(ConnectionState.WAITING_FOR_VERSION);
+                    tunnel.write('version\n');
                   } else {
                     this.end();
                     R({
                       message: 'did not receive ping from server on login: ' + reply
                     });
                   }
+                  break;
+                case ConnectionState.WAITING_FOR_VERSION:
+                  const parsedVersion = parseInt(reply, 10);                  
+                  if (isNaN(parsedVersion)) {
+                    log.debug('%1: server does not support message_version, assuming %2',
+                      this.name_, this.version_);
+                    this.version_ = DEFAULT_MESSAGE_VERSION;
+                  } else {
+                    log.debug('%1: server is running MESSAGE_VERSION %2',
+                      this.name_, this.version_);
+                    this.version_ = parsedVersion;
+                  }
+                  this.setState_(ConnectionState.ESTABLISHED);
+                  F();
                   break;
                 case ConnectionState.ESTABLISHED:
                   try {
@@ -655,5 +681,9 @@ class Connection {
 
   public getState = (): ConnectionState => {
     return this.state_;
+  }
+
+  public getVersion = (): number => {
+    return this.version_;
   }
 }
