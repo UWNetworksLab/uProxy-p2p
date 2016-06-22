@@ -29,6 +29,9 @@ var inviteUser = {
   },
   networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
+    if (networkName === 'Cloud') {
+      return this.cloudInstall();
+    }
     this.selectedNetworkName = networkName;
     // TODO: Consider moving this 'if logged in' logic inside
     // initInviteForNetwork. This would require ui.ts login to be fixed first

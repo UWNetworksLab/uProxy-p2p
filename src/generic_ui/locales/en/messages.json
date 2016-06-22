@@ -1241,7 +1241,7 @@
   },
   "CREATE_A_NEW_ACCOUNT": {
     "description": "Button text for creating a new account (e.g. for DigitalOcean)",
-    "message": "Create a new account"
+    "message": "Create a DigitalOcean account"
   },
   "SIGN_IN_AND_CONNECT": {
     "description": "Button text for signing into DigitalOcean",
@@ -1307,9 +1307,13 @@
     "description": "Message shown during DigitalOcean server deployment",
     "message": "For $10 per month you can get and share access with your friends and family. If you sign up for DigitalOcean with uProxy, your first month is free! <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
   },
+  "CLOUD_INSTALL_EXISTING_SERVER_TITLE": {
+    "description": "Title for 'already have a cloud server' section",
+    "message": "Already have a cloud server?"
+  },
   "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
     "description": "Instructions link for users who already have an existing cloud server.",
-    "message": "Already have a cloud server? You can manually set up your own uProxy server. <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link>"
+    "message": "You can manually set up your own uProxy server. <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link>"
   },
   "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
     "description": "Message shown on invite screen for DigitalOcean server deployment",
@@ -1321,7 +1325,7 @@
   },
   "I_HAVE_AN_ACCOUNT": {
     "description": "Button text shown during DigitalOcean server deployment",
-    "message": "I have an account"
+    "message": "I have a DigitalOcean account"
   },
   "SIGN_ME_IN": {
     "description": "Button text shown during DigitalOcean server deployment",
