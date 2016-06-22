@@ -13,7 +13,12 @@ Polymer({
     // Since opening the FAQ panel is async, set the openingAnchor,
     // and then scrollAfterOpening will scroll to openingAnchor after
     // the panel has finished opening.
-    this.openingAnchor = detail.anchor;
+    if (detail.anchor === '') {
+      this.openingAnchor = 'header';
+    } else {
+      this.openingAnchor = detail.anchor;
+    }
+
     this.$.faqPanel.open();
   },
   scrollAfterOpening: function() {

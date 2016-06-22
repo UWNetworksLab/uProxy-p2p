@@ -603,28 +603,19 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-chromeapp/'
     libsForZorkFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-firefoxapp/data/'
     libsForZorkNode:
       Rule.copyLibs
         npmLibNames: ['freedom-for-node']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-node/'
 
     libsForEchoServerChromeApp:
@@ -642,25 +633,19 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-chromeapp/'
     libsForCopypasteChatFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-firefoxapp/data'
     libsForCopypasteChatWebApp:
       Rule.copyLibs
         npmLibNames: ['freedom']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-webapp/'
 
     libsForCopyPasteSocksChromeApp:
@@ -670,7 +655,6 @@ gruntConfig = {
         ]
         pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
           'i18n'
           'bower/polymer'
           'freedom-pgp-e2e'
@@ -684,7 +668,6 @@ gruntConfig = {
         ]
         pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
           'i18n'
           'bower'
           'freedom-pgp-e2e'
@@ -696,36 +679,26 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-socks-chromeapp/'
     libsForSimpleSocksFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-socks-firefoxapp/data/'
 
     libsForSimpleChatChromeApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-chromeapp/'
     libsForSimpleChatFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-firefoxapp/data'
     # While neither churn-pipe nor freedom-port-control can be used in a
     # regular web page environment, they are included so that obfuscation
@@ -734,9 +707,7 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-webapp/'
 
     libsForUprobeChromeApp:
@@ -802,51 +773,24 @@ gruntConfig = {
             'freedom-social-wechat': '<%= pkgs.freedomwechat.version %>'
             'freedom-social-quiver': '<%= pkgs.freedomquiver.version %>'
         }]
-  #-------------------------------------------------------------------------
-  # All typescript compiles to locations in `build/`
-  # Typescript compilation rules
+
+  # One pass for code running inside freedom.js modules and another
+  # for code running outside, due to the differences in the meaning
+  # of the (global) freedom object between the two environments.
   ts:
-    # Compile all non-sample typescript code into the development build
-    # directory.
-    devInModuleEnv: compileTypescript [
-      devBuildPath + '/lib/**/*.ts'
-      devBuildPath + '/interfaces/**/*.ts'
-      devBuildPath + '/generic_core/**/*.ts'
+    moduleEnv: compileTypescript [
+      devBuildPath + '/**/*.ts'
       '!' + devBuildPath + '/lib/build-tools/**/*.ts'
+      '!' + devBuildPath + '/integration/**/*.ts'
       '!' + devBuildPath + '/**/*.core-env.ts'
       '!' + devBuildPath + '/**/*.core-env.spec.ts'
     ]
-
-    generic_ui: compileTypescript [
-      devBuildPath + '/generic_ui/**/*.ts'
-      devBuildPath + '/**/*.core-env.spec.ts'
+    coreEnv: compileTypescript [
       devBuildPath + '/**/*.core-env.ts'
+      devBuildPath + '/**/*.core-env.spec.ts'
+      '!' + devBuildPath + '/lib/build-tools/**/*.ts'
+      '!' + devBuildPath + '/integration/**/*.ts'
     ]
-
-    chrome_extension: compileTypescript [
-      devBuildPath + '/chrome/extension/**/*.ts'
-    ]
-
-    chrome_app: compileTypescript [
-      devBuildPath + '/chrome/app/**/*.ts'
-    ]
-
-    firefox: compileTypescript [
-      devBuildPath + '/firefox/**/*.ts'
-    ]
-
-    cca: compileTypescript [
-      devBuildPath + '/cca/**/*.ts'
-    ]
-
-    integration_specs: compileTypescript [
-      devBuildPath + '/integration/*.ts'
-      '!' + devBuildPath + '/integration/test_connection.ts'
-    ]
-    integration_freedom_module: compileTypescript [
-      devBuildPath + '/integration/test_connection.ts'
-    ]
-
 
   browserify:
     chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
@@ -1059,8 +1003,7 @@ taskManager = new TaskManager.Manager()
 
 taskManager.add 'base', [
   'copy:dev'
-  'ts:devInModuleEnv'
-  'ts:generic_ui'
+  'ts'
   'version_file'
   'browserify:chromeAppMain'
   'browserify:genericCoreFreedomModule'
@@ -1154,13 +1097,11 @@ taskManager.add 'version_file', [
 
 taskManager.add 'build_chrome_app', [
   'base'
-  'ts:chrome_app'
   'copy:chrome_app'
 ].concat fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')
 
 taskManager.add('build_chrome_ext', [
   'base'
-  'ts:chrome_extension'
   'copy:chrome_extension'
   'copy:chrome_extension_additional'
   'browserify:chromeExtMain'
@@ -1176,7 +1117,6 @@ taskManager.add 'build_chrome', [
 # Firefox build tasks.
 taskManager.add('build_firefox', [
   'base'
-  'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'
   'browserify:firefoxContext'
@@ -1186,7 +1126,6 @@ taskManager.add('build_firefox', [
 # CCA build tasks.
 taskManager.add 'build_cca', [
   'base'
-  'ts:cca'
   'copy:cca'
   'copy:cca_additional'
   'browserify:ccaMain'

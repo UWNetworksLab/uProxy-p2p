@@ -6,6 +6,11 @@ export type PanelConnectHandler = (panel: Panel) => void;
 export type MessageHandler = (name: string, data: Object) => void;
 export type PanelDisconnectHandler = (panel: Panel) => void;
 
+export interface CommandPayload {
+  data: any;
+  promiseId: number;
+}
+
 /*
  * Connector from the background context to panels
  */
