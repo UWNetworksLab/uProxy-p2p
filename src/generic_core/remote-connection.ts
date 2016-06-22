@@ -12,6 +12,7 @@ import globals = require('./globals');
 import logging = require('../lib/logging/logging');
 import net = require('../lib/net/net.types');
 import peerconnection = require('../lib/webrtc/peerconnection');
+import rc4 = require('../lib/transformers/rc4');
 import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import social = require('../interfaces/social');
 import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
@@ -307,7 +308,8 @@ var generateProxyingSessionId_ = (): string => {
         default:
           log.debug('using holographic ICE with RC4 obfuscation');
           pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_, {
-            name: 'rc4'
+            name: 'rc4',
+            config: JSON.stringify(rc4.randomConfig())
           });
         }
 

@@ -24,6 +24,13 @@ export function sampleConfig(): Config {
   };
 }
 
+// Creates a cryptographically secure random config, suitable for real-world use.
+export function randomConfig(): Config {
+  return {
+    key: crypto.randomBytes(KEY_LENGTH_BYTES).toString('hex')
+  };
+}
+
 // Fast, uniformly random transformer with minimal length expansion, via RC4.
 // From a proposal by kpdyer.
 //
