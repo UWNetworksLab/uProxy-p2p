@@ -6,5 +6,10 @@ before_install:
 install:
   - ./setup.sh install
 script:
-  - grunt lint test
+  - grunt build tslint unit_test
 sudo: false
+cache:
+  directories:
+    - node_modules
+before_script:
+  - npm prune

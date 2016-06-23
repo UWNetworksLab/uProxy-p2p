@@ -46,7 +46,7 @@ socksToRtc.on('signalForPeer', rtcToNet.handleSignalFromPeer);
 socksToRtc.start(new tcp.Server(socksEndpoint),
     bridge.best('sockstortc', pcConfig, undefined, {
       // See churn pipe source for the full list of transformer names.
-      name: 'caesar'
+      name: 'rc4'
     })).then((endpoint:net.Endpoint) => {
   log.info('SocksToRtc listening on %1', endpoint);
   log.info('curl -x socks5h://%1:%2 www.example.com',

@@ -9,27 +9,27 @@
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
 <link rel="import" href="../../bower/core-overlay/core-overlay.html">
-<link rel='import' href='invite-user.html'>
-<link rel="import" href="i18n-filter.html">
-<link rel="import" href='splash.html'>
+<link rel='import' href='advanced-settings.html'>
+<link rel='import' href='browser-elements.html'>
+<link rel='import' href='bubble.html'>
+<link rel='import' href='button.html'>
+<link rel='import' href='copypaste.html'>
+<link rel='import' href='dialog.html'>
 <link rel="import" href='faq.html'>
+<link rel='import' href='feedback.html'>
+<link rel="import" href="i18n-filter.html">
+<link rel='import' href='icons.html'>
+<link rel='import' href='invite-user.html'>
+<link rel="import" href='logs.html'>
+<link rel='import' href='proxy-error.html'>
+<link rel='import' href='reconnect.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
-<link rel="import" href='logs.html'>
-<link rel='import' href='copypaste.html'>
-<link rel='import' href='bubble.html'>
-<link rel='import' href='feedback.html'>
-<link rel='import' href='advanced-settings.html'>
-<link rel='import' href='reconnect.html'>
+<link rel="import" href='splash.html'>
+<link rel='import' href='state.html'>
 <link rel='import' href='troubleshoot.html'>
-<link rel='import' href='dialog.html'>
-<link rel='import' href='browser-elements.html'>
-<link rel='import' href='icons.html'>
-<link rel='import' href='proxy-error.html'>
-<link rel='import' href='button.html'>
 
-<polymer-element name='uproxy-root' attributes='model' on-open-dialog='{{ openDialog }}'>
-
+<polymer-element name='uproxy-root' attributes='model'>
   <template>
     <style>
       :host {
@@ -56,8 +56,10 @@
         opacity: .4;
       }
       /* Since notification number should always be opacity = 1, we force
-         the .tab-content to be opacity = 1 and instead add the .notSelected class to just tab text. There's no way to have .tab-content opacity
-         of 0.6 while its child element (the number) has opacity 1.  */
+         the .tab-content to be opacity = 1 and instead add the
+         .notSelected class to just tab text. There's no way to have
+         .tab-content opacity of 0.6 while its child element (the
+         number) has opacity 1.  */
       paper-tab::shadow .tab-content{
         font-size: 14px;
         text-transform: uppercase;
@@ -275,7 +277,15 @@
         /* Necessary to position our smaller icon correctly */
         margin: 4px auto 0;
       }
+      core-icon[icon=clear] {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: rgb(180,180,180);
+        cursor: pointer;
+      }
     </style>
+    <uproxy-state id="state"></uproxy-state>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
 
@@ -415,6 +425,7 @@
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
     <uproxy-action-dialog backdrop layered="false" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}" closeSelector=''>
+      <core-icon icon="clear" on-tap='{{ closeDialog }}'></core-icon>
       <h1 id='dialogHeading'></h1>
       <p id='dialogMessage'></p>
       <div hidden?='{{ !dialog.userInputData }}'>
@@ -428,10 +439,11 @@
         </paper-input-decorator>
       </div>
       <template repeat='{{ button in dialog.buttons }}'>
-        <uproxy-button affirmative?='{{ !button.dismissive }}'
-          dismissive?='{{ button.dismissive }}' class='dialogButton'
-          on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'
-          data-callbackIndex='{{ button.callbackIndex }}'>
+        <uproxy-button
+          affirmative?='{{ !button.dismissive }}'
+          dismissive?='{{ button.dismissive }}'
+          class='dialogButton'
+          on-tap='{{ dialogButtonClick }}'>
           {{button.text}}
         </uproxy-button>
       </template>

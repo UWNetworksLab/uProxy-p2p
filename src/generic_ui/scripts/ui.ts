@@ -1,6 +1,6 @@
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/md5.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
 
 /**
@@ -10,6 +10,7 @@
  */
 
 import ui_constants = require('../../interfaces/ui');
+import background_ui = require('./background_ui');
 import CopyPasteState = require('./copypaste-state');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
@@ -24,9 +25,10 @@ import Constants = require('./constants');
 import translator_module = require('./translator');
 import network_options = require('../../generic/network-options');
 import model = require('./model');
+import dialogs = require('./dialogs');
 import jsurl = require('jsurl');
 import uparams = require('uparams');
-import md5 = require('md5');
+import crypto = require('crypto');
 import jdenticon = require('jdenticon');
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
@@ -64,8 +66,9 @@ export function getImageData(userId :string, oldImageData :string,
     // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
     // scales the image to fit the space, so this parameter has no effect.
     // We must also replace # with %23 for Firefox support.
+    const userIdHash = crypto.createHash('md5').update(userId).digest('hex');
     return '\'data:image/svg+xml;utf8,' +
-        jdenticon.toSvg(md5(userId), 100).replace(/#/g, '%23') + '\'';
+        jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
   } else if (!newImageData) {
     // This case is hit when we've already generated a jdenticon for a user
     // who doesn't have any image in uProxy core.
@@ -104,7 +107,6 @@ export class UserInterface implements ui_constants.UiApi {
   public isSharingDisabled :boolean = false;
   public proxyingId: string; // ID of the most recent failed proxying attempt.
   private userCancelledGetAttempt_ :boolean = false;
-
   /* Copypaste */
   /*
    * This is used to store the information for setting up a copy+paste
@@ -122,9 +124,6 @@ export class UserInterface implements ui_constants.UiApi {
   public browser :string = '';
   public availableVersion :string = null;
 
-  // Changing this causes root.ts to fire a core-signal with the new value.
-  public signalToFire :Object = null;
-
   public toastMessage :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
@@ -139,7 +138,8 @@ export class UserInterface implements ui_constants.UiApi {
    */
   constructor(
       public core   :CoreConnector,
-      public browserApi :BrowserAPI) {
+      public browserApi :BrowserAPI,
+      public backgroundUi: background_ui.BackgroundUi) {
     this.updateView_();
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
@@ -225,7 +225,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       var user = this.mapInstanceIdToUser_[instanceId];
       user.isGettingFromMe = true;
-      this.showNotification(this.i18n_t('STARTED_PROXYING',
+      this.showNotification(translator_module.i18n_t('STARTED_PROXYING',
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
       checkConnectivityIntervalId = setInterval(
           this.notifyUserIfConnectedToCellular_,
@@ -239,7 +239,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       // only show a notification if we knew we were prokying
       if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-        this.showNotification(this.i18n_t('STOPPED_PROXYING',
+        this.showNotification(translator_module.i18n_t('STOPPED_PROXYING',
           { name: user.name }), { mode: 'share', network: user.network.name, user: user.userId });
       }
       delete this.instancesGivingAccessTo[instanceId];
@@ -322,10 +322,26 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
     browserApi.on('promoIdDetected', this.setActivePromoId);
+    browserApi.on('translationsRequest', this.handleTranslationsRequest);
+    browserApi.on('globalSettingsRequest', this.handleGlobalSettingsRequest);
+    backgroundUi.registerAsFakeBackground(this.panelMessageHandler);
 
     core.getFullState()
         .then(this.updateInitialState)
         .then(this.browserApi.handlePopupLaunch);
+  }
+
+  public panelMessageHandler = (name: string, data: any) => {
+    /*
+     * This will handle a subset of the signals for the actual background UI,
+     * we will try to handle most of the signals in the actual background
+     * though
+     */
+    switch(name) {
+      case 'logout':
+        this.logout(data.data.networkInfo);
+        break;
+    }
   }
 
   public restartServer_ = (providerName :string) => {
@@ -361,85 +377,27 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  // Because of an observer (in root.ts) watching the value of
-  // signalToFire, this function simulates firing a core-signal
-  // from the background page.
   public fireSignal = (signalName :string, data ?:Object) => {
-    this.signalToFire = {name: signalName, data: data};
+    this.backgroundUi.fireSignal(signalName, data);
   }
-
-  private confirmationCallbacks_ :{[index :number] :PromiseCallbacks} = {};
-  // Don't use index 0 as it may be treated as false in confirmation code.
-  private confirmationCallbackIndex_ = 1;
 
   public getConfirmation(heading :string,
                          text :string,
                          dismissButtonText ?:string,
                          fulfillButtonText ?:string): Promise<void> {
-    return new Promise<void>((F, R) => {
-      var callbackIndex = ++this.confirmationCallbackIndex_;
-      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
-      this.fireSignal('open-dialog', {
-        heading: heading,
-        message: text,
-        buttons: [{
-          text: dismissButtonText ? dismissButtonText : this.i18n_t('NO'),
-          callbackIndex: callbackIndex,
-          dismissive: true
-        }, {
-          text: fulfillButtonText ? fulfillButtonText : this.i18n_t('YES'),
-          callbackIndex: callbackIndex
-        }]
-      });
-    });
+    return this.backgroundUi.openDialog(dialogs.getConfirmationDialogDescription(
+        heading, text, dismissButtonText, fulfillButtonText));
   }
 
   public getUserInput(heading :string, message :string, placeholderText :string, defaultValue :string, buttonText :string) : Promise<string> {
-    return new Promise<string>((F, R) => {
-      var callbackIndex = ++this.confirmationCallbackIndex_;
-      this.confirmationCallbacks_[callbackIndex] = {fulfill: F, reject: R};
-      this.fireSignal('open-dialog', {
-        heading: heading,
-        message: message,
-        buttons: [{
-          text: buttonText,
-          callbackIndex: callbackIndex
-        }],
-        userInputData: {
-          placeholderText: placeholderText,
-          initInputValue: defaultValue
-        }
-      });
-    });
+    return this.backgroundUi.openDialog(dialogs.getInputDialogDescription(
+        heading, message, placeholderText, defaultValue, buttonText));
   }
 
   public showDialog(heading :string, message :string, buttonText ?:string,
-      signal ?:string, displayData ?:string) {
-    var button :ui_constants.DialogButtonDescription = {
-      text: buttonText || this.i18n_t('OK')
-    };
-    if (signal) {
-      button['signal'] = signal;
-    }
-    this.fireSignal('open-dialog', {
-      heading: heading,
-      message: message,
-      buttons: [button],
-      displayData: displayData || null
-    });
-  }
-
-  public invokeConfirmationCallback = (index :number, fulfill :boolean, data ?:any) => {
-    if (index > this.confirmationCallbackIndex_) {
-      console.error('Confirmation callback not found: ' + index);
-      return;
-    }
-    if (fulfill) {
-      this.confirmationCallbacks_[index].fulfill(data);
-    } else {
-      this.confirmationCallbacks_[index].reject(data);
-    }
-    delete this.confirmationCallbacks_[index];
+      displayData ?:string) {
+    return this.backgroundUi.openDialog(dialogs.getConfirmationDialogDescription(
+        heading, message, buttonText, displayData));
   }
 
   public showNotification = (text :string, data ?:NotificationData) => {
@@ -524,7 +482,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public parseUrlData = (url:string) : { type:social.PeerMessageType; message:string } => {
-    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
+    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)[/#]+(.*)/)
     if (!match) {
       throw new Error('invalid URL format');
     }
@@ -587,7 +545,9 @@ export class UserInterface implements ui_constants.UiApi {
         }
       } else {
         // Old v1 invites are base64 encoded JSON
-        var token = invite.substr(invite.lastIndexOf('/') + 1);
+        var lastNonCodeCharacter = Math.max(invite.lastIndexOf('/'), invite.lastIndexOf('#'));
+        var token = invite.substr(lastNonCodeCharacter + 1);
+
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match('[A-Za-z0-9+/=_]+')[0];
         var parsedObj = JSON.parse(atob(token));
@@ -751,6 +711,18 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('open-proxy-error');
       this.bringUproxyToFront();
     }
+  }
+
+  public handleTranslationsRequest = (keys :string[], callback ?:Function) => {
+    var vals :{[s :string]: string;} = {};
+    for (let key of keys) {
+      vals[key] = this.i18n_t(key);
+    }
+    this.browserApi.respond(vals, callback, 'translations');
+  }
+
+  public handleGlobalSettingsRequest = (callback ?:Function) => {
+    this.browserApi.respond(this.model.globalSettings, callback, 'globalSettings');
   }
 
   public setActivePromoId = (promoId :string) => {
@@ -944,7 +916,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public isGivingAccess = () => {
     return Object.keys(this.instancesGivingAccessTo).length > 0 ||
-           this.copyPasteState.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
+      (this.copyPasteState.localSharingWithRemote ===
+         social.SharingState.SHARING_ACCESS);
   }
 
   /**
@@ -1123,21 +1096,7 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  private getLogoutConfirmation_ = (isGetting :boolean, isSharing :boolean) : Promise<void> => {
-    if (isGetting && isSharing) {
-      return this.getConfirmation(
-          '', this.i18n_t('CONFIRM_LOGOUT_GETTING_AND_SHARING'));
-    } else if (isGetting) {
-      return this.getConfirmation('', this.i18n_t('CONFIRM_LOGOUT_GETTING'));
-    } else if (isSharing) {
-      return this.getConfirmation('', this.i18n_t('CONFIRM_LOGOUT_SHARING'));
-    } else {
-      return Promise.resolve<void>();
-    }
-  }
-
-  public logout = (networkInfo :social.SocialNetworkInfo,
-                   showConfirmation :boolean = true) : Promise<void> => {
+  public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var network = this.model.getNetwork(networkInfo.name);
     // Check if the user is connected to a network
     if (!network) {
@@ -1148,54 +1107,8 @@ export class UserInterface implements ui_constants.UiApi {
       return Promise.resolve<void>();
     }
 
-    var getConfirmation = Promise.resolve<void>();
-    if (showConfirmation) {
-      // Check if we are getting or sharing on this network.
-      var isGettingForThisNetwork = false;
-      if (this.instanceGettingAccessFrom_) {
-        var user = this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_];
-        if (user && user.network.name === networkInfo.name) {
-          isGettingForThisNetwork = true;
-        }
-      }
-      var isSharingForThisNetwork = false;
-      var sharingTo = Object.keys(this.instancesGivingAccessTo);
-      for (var i = 0; i < sharingTo.length; ++i) {
-        user = this.mapInstanceIdToUser_[sharingTo[i]];
-        if (user && user.network.name === networkInfo.name) {
-          isSharingForThisNetwork = true;
-          break;
-        }
-      }
-      getConfirmation = this.getLogoutConfirmation_(
-          isGettingForThisNetwork, isSharingForThisNetwork);
-    }
-
-    return getConfirmation.then(() => {
-      network.logoutExpected = true;
-      return this.core.logout(networkInfo);
-    }, () => { /* MT */ });
-  }
-
-  public logoutAll = (showConfirmation :boolean) : Promise<void[]> => {
-    var getConfirmation = Promise.resolve<void>();
-    if (showConfirmation) {
-      getConfirmation = this.getLogoutConfirmation_(
-          this.isGettingAccess(), this.isGivingAccess());
-    }
-
-    return getConfirmation.then(() => {
-      var logoutPromises :Promise<void>[] = [];
-      for (var i in this.model.onlineNetworks) {
-        logoutPromises.push(
-            this.logout({
-              name: this.model.onlineNetworks[i].name,
-              userId: this.model.onlineNetworks[i].userId
-            }, false)  // Don't show duplicate confirmation messages.
-        );
-      }
-      return Promise.all(logoutPromises);
-    }, () => { /* MT */ });
+    network.logoutExpected = true;
+    return this.core.logout(networkInfo);
   }
 
   private reconnect_ = (network :string) => {
@@ -1389,4 +1302,39 @@ export class UserInterface implements ui_constants.UiApi {
   public removeContact = (args:uproxy_core_api.RemoveContactArgs): Promise<void> => {
     return this.core.removeContact(args);
   }
+
+  public startVerifying = (inst :social.InstanceData) :Promise<void> => {
+    console.log('ui:startVerifying on ' + JSON.stringify(inst) +
+                ' started.');
+    // TODO: when doing the final UI, we need something that we can
+    // cancel.  For user cancellation, peer cancellation, and timeout.
+    return this.getConfirmation(
+      'Verify this User',
+      'Please contact them personally, live.  Preferably on a voice ' +
+        'or video chat.  Then press Next',
+      'Do this later', 'I\'m Ready').then( () => {
+        // TODO: this really just needs a cancel button.
+        this.getUserInput(
+          'Verify this User',
+          'Please type in the SAS code that they see for you.  Any other ' +
+            'value cancels.',
+          'SAS:', '', 'Next').then( (sas:string) => {
+            console.log('Got SAS: ' + sas + ', against desired: ' +
+                        inst.verifySAS);
+            this.finishVerifying(inst,
+                                 parseInt(inst.verifySAS) === parseInt(sas));
+          });
+        return this.core.verifyUser(this.getInstancePath_(inst.instanceId));
+      });
+  }
+
+  public finishVerifying = (inst :social.InstanceData,
+                            sameSAS: boolean) :Promise<void> => {
+    var args :uproxy_core_api.FinishVerifyArgs = {
+      'inst': this.getInstancePath_(inst.instanceId),
+      'sameSAS': sameSAS
+    };
+    console.log('VERIFYING SAS AS ' + sameSAS);
+    return this.core.finishVerifyUser(args);
+  };
 } // class UserInterface

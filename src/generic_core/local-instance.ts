@@ -15,17 +15,13 @@ import storage = globals.storage;
 // module Core {
   var log :logging.Log = new logging.Log('local-instance');
 
-  // Small convenience wrapper for random Uint8.
-  //
-  // TODO: gather up uses of random and put them into a common directory in
-  // uproxy-lib, or directly use end-to-end implementation.
   export class LocalInstance implements social.LocalInstanceState, Persistent {
-
     public instanceId :string;
     public clientId :string;
     public userName :string;
     public imageData :string;
-    public invitePermissionTokens :{ [token :string] :social.PermissionTokenInfo } = {};
+    public invitePermissionTokens
+      :{ [token :string] :social.PermissionTokenInfo } = {};
 
     /**
      * Generate an instance for oneself, either from scratch or based on some

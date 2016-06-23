@@ -3,12 +3,13 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import social = require('../../interfaces/social');
+import translator = require('../scripts/translator');
 import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 import user_module = require('../scripts/user');
+import dialogs = require('../scripts/dialogs');
 
 var ui = ui_context.ui;
-var core = ui_context.core;
 var model = ui_context.model;
 var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 
@@ -44,7 +45,7 @@ Polymer({
       // uproxy-bubble, now the only welcome content is on the splash screen
       // and the empty roster text.
       model.globalSettings.hasSeenWelcome = true;
-      core.updateGlobalSettings(model.globalSettings);
+      this.$.state.background.updateGlobalSettings(model.globalSettings);
     }
   },
   statsIconClicked: function() {
@@ -63,7 +64,10 @@ Polymer({
   },
   closedSharing: function() {
     model.globalSettings.hasSeenSharingEnabledScreen = true;
-    core.updateGlobalSettings(model.globalSettings);
+    this.$.state.background.updateGlobalSettings(model.globalSettings);
+  },
+  closeDialog: function() {
+    this.$.dialog.close();
   },
   dismissCopyPasteError: function() {
     ui.copyPasteError = ui_types.CopyPasteError.NONE;
@@ -76,7 +80,6 @@ Polymer({
      *   message: 'main message for the dialog',
      *   buttons: [{
      *     text: 'button text, e.g. Done',
-     *     signal: 'core-signal to fire when button is clicked (optional)',
      *     dismissive: boolean, whether button is dismissive (optional)
      *   }]
      * }
@@ -112,16 +115,6 @@ Polymer({
       });
     });
   },
-  selectAll: function(e :Event, d :Object, input :HTMLInputElement) {
-    input.focus();
-    input.select();
-  },
-  reusableDialogClosed: function() {
-    fulfillReusableDialogClosed();
-  },
-  openProxyError: function() {
-    this.$.proxyError.open();
-  },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     // Get userInput, or set to undefined if it is '', null, etc
     var userInput = this.$.dialogInput.value || undefined;
@@ -133,21 +126,24 @@ Polymer({
 
     this.isUserInputInvalid = false;
 
-    var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
-    if (callbackIndex) {
-      var fulfill = (target.getAttribute('affirmative') != null);
-      ui.invokeConfirmationCallback(callbackIndex, fulfill, userInput);
-    }
-    var signal = target.getAttribute('data-signal');
-    if (signal) {
-      this.fire('core-signal', { name: signal });
-    }
+    var fulfill = (target.getAttribute('affirmative') !== null);
+    this.$.state.handleDialogClick(fulfill, userInput);
     this.$.dialog.close();
+  },
+  selectAll: function(e :Event, d :Object, input :HTMLInputElement) {
+    input.focus();
+    input.select();
+  },
+  reusableDialogClosed: function() {
+    fulfillReusableDialogClosed();
+  },
+  openProxyError: function() {
+    this.$.proxyError.open();
   },
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
-    this.core = core;
+    this.core = ui_context.core;
     this.ui_constants = ui_types;
     this.user_interface = user_interface;
     this.model = model;
@@ -162,12 +158,14 @@ Polymer({
         this.model.globalSettings.mode == ui_types.Mode.SHARE) {
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
-      ui.showDialog(ui.i18n_t('SHARING_UNAVAILABLE_TITLE'),
-          ui.i18n_t('SHARING_UNAVAILABLE_MESSAGE'), ui.i18n_t('CLOSE'));
+      this.$.state.openDialog(dialogs.getMessageDialogDescription(
+          translator.i18n_t('SHARING_UNAVAILABLE_TITLE'),
+          translator.i18n_t('SHARING_UNAVAILABLE_MESSAGE'),
+          translator.i18n_t('CLOSE')));
     } else {
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core
-      core.updateGlobalSettings(model.globalSettings);
+      this.$.state.background.updateGlobalSettings(model.globalSettings);
     }
   },
   signalToFireChanged: function() {
@@ -245,7 +243,7 @@ Polymer({
     }
   },
   restart: function() {
-    core.restart();
+    this.$.state.background.restart();
   },
   fireOpenInviteUserPanel: function() {
     this.fire('core-signal', { name: 'open-invite-user-dialog' });

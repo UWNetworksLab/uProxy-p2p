@@ -2,10 +2,13 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-import user_interface = require('../scripts/ui');
 import _ = require('lodash');
+import model = require('../scripts/model');
+import translator = require('../scripts/translator');
+import user_interface = require('../scripts/ui');
+import dialogs = require('../scripts/dialogs');
+
 var ui = ui_context.ui;
-var model = ui_context.model;
 var core = ui_context.core;
 
 var inviteUser = {
@@ -31,7 +34,7 @@ var inviteUser = {
     // initInviteForNetwork. This would require ui.ts login to be fixed first
     // to remove possible race conditions:
     // https://github.com/uProxy/uproxy/issues/2064
-    if (model.getNetwork(networkName)) {
+    if (ui_context.model.getNetwork(networkName)) {
       this.initInviteForNetwork(networkName);
     } else {
       if (networkName === 'Quiver') {
@@ -99,24 +102,33 @@ var inviteUser = {
   acceptInvite: function() {
     ui.handleInvite(this.inviteCode).then(() => {
       this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
+
+      this.$.state.openDialog(dialogs.getMessageDialogDescription(
+          '', translator.i18n_t('FRIEND_ADDED')));
     }).catch(() => {
-      ui.showDialog('', ui.i18n_t('FRIEND_ADD_ERROR'));
+      this.$.state.openDialog(dialogs.getMessageDialogDescription(
+          '', translator.i18n_t('FRIEND_ADD_ERROR')));
     });
   },
   copypaste: function() {
     // Logout of all other social networks before starting
     // copypaste connection.
     var getConfirmation = Promise.resolve<void>();
-    if (model.onlineNetworks.length > 0) {
+    if (ui_context.model.onlineNetworks.length > 0) {
       var confirmationMessage = (ui.isGettingAccess() || ui.isGivingAccess()) ?
-          ui.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING') :
-          ui.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE');
-      getConfirmation = ui.getConfirmation('', confirmationMessage);
+          translator.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING') :
+          translator.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE');
+      getConfirmation = this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
+          '', confirmationMessage));
     }
 
     getConfirmation.then(() => {
-      return ui.logoutAll(false);  // Don't show confirmation again.
+      return Promise.all(ui_context.model.onlineNetworks.map((network: model.Network) => {
+        return this.$.state.background.logout({
+          name: network.name,
+          userId: network.userId
+        });
+      }));
     }).then(() => {
       if (this.closeInviteUserPanel) {
         this.closeInviteUserPanel();
@@ -127,7 +139,7 @@ var inviteUser = {
   ready: function() {
     this.selectedNetworkName = '';
     this.ui = ui;
-    this.model = model;
+    this.model = ui_context.model;
     this.inviteCode = '';
   }
 };

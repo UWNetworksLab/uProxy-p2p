@@ -258,6 +258,15 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   postReport = (args:uproxy_core_api.PostReportArgs) : Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.POST_REPORT, args);
   }
+
+  verifyUser = (inst :social.InstancePath) :Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.VERIFY_USER, inst );
+  }
+
+  finishVerifyUser = (args: uproxy_core_api.FinishVerifyArgs)
+      :Promise<void> => {
+    return this.promiseCommand(uproxy_core_api.Command.VERIFY_USER_SAS, args);
+  }
 }  // class CoreConnector
 
 export = CoreConnector;

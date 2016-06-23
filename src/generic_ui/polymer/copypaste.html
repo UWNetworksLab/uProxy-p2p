@@ -53,6 +53,7 @@
     }
     </style>
 
+    <uproxy-state id="state"></uproxy-state>
     <core-signals on-core-signal-copypaste-back='{{ exitMode }}'></core-signals>
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
@@ -107,7 +108,7 @@
                   </p>
 
                   <paper-input-decorator label="{{ 'LOADING' | $$ }}" layout vertical>
-                    <input readonly is='core-input' on-tap='{{ select }}' value='https://www.uproxy.org/request/{{ ui.copyPasteState.message | encodeMessage }}' />
+                    <input readonly is='core-input' on-tap='{{ select }}' value='https://www.uproxy.org/request#{{ ui.copyPasteState.message | encodeMessage }}' />
                   </paper-input-decorator>
                 </div>
 
@@ -171,7 +172,7 @@
 
 
                 <paper-input-decorator label="{{ 'LOADING' | $$ }}" layout vertical>
-                  <input readonly is='core-input' on-tap='{{ select }}' value='https://www.uproxy.org/offer/{{ ui.copyPasteState.message | encodeMessage }}' />
+                  <input readonly is='core-input' on-tap='{{ select }}' value='https://www.uproxy.org/offer#{{ ui.copyPasteState.message | encodeMessage }}' />
                 </paper-input-decorator>
 
                 <div>

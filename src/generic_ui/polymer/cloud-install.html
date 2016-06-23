@@ -120,7 +120,7 @@
         <!-- TODO: some of this text needs to be bold - need to set the HTML element rather than use $$ to translate -->
         <p id='createAccountMessage'></p>
 
-        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}"></paper-checkbox>
+        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}" on-change="{{havePromoChanged}}"></paper-checkbox>
 
         <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
           {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
@@ -145,6 +145,7 @@
           <paper-radio-group id='regionMenu' selected='sgp1'>
             <!-- TODO: get available regions from DigitalOcean -->
             <paper-radio-button name='sgp1' label='{{ "ASIA_SINGAPORE" | $$ }}'></paper-radio-button>
+            <paper-radio-button name='blr1' label='{{ "ASIA_BANGALORE" | $$ }}'></paper-radio-button>
             <paper-radio-button name='ams2' label='{{ "EUROPE_AMSTERDAM" | $$ }}'></paper-radio-button>
             <paper-radio-button name='nyc2' label='{{ "NORTH_AMERICA_NEW_YORK" | $$ }}'></paper-radio-button>
           </paper-radio-group>

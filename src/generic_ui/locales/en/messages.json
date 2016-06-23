@@ -1339,6 +1339,10 @@
     "description": "Region option for deploying a DigitalOcean server",
     "message": "Asia (Singapore)"
   },
+  "ASIA_BANGALORE": {
+    "description": "Region option for deploying a DigitalOcean server",
+    "message": "Asia (Bangalore)"
+  },
   "EUROPE_AMSTERDAM": {
     "description": "Region option for deploying a DigitalOcean server",
     "message": "Europe (Amsterdam)"
@@ -1422,5 +1426,26 @@
   "HAVE_PROMO_CODE": {
     "description": "Label for a checkbox indicating that you have a promo code",
     "message": "I have a promo code"
+  },
+  "AUTHORIZE_DIGITALOCEAN": {
+    "message": "Authorize uProxy to connect with DigitalOcean"
+  },
+  "PROCEED_TO_UPROXY": {
+    "message": "Proceed to uProxy"
+  },
+  "ENTER_PROMO": {
+    "message": "Have a promo code? Enter it here."
+  },
+  "PROMO_ACCEPTED": {
+    "message": "Promo code accepted!"
+  },
+  "PROMO_FAILED": {
+    "message": "Could not apply promo code."
+  },
+  "PROCESSING": {
+    "message": "processing..."
+  },
+  "APPLY": {
+    "message": "Apply"
   }
 }

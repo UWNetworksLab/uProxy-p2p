@@ -42,8 +42,15 @@ export interface GlobalSettings {
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
   activePromoId: string;
+  shouldHijackDO: boolean;
   crypto: boolean;
+  // A list of strings, each represented as a constant below, with
+  // prefix 'FEATURE_'.
+  enabledExperiments :string[];
 }
+
+export const FEATURE_VERIFY = 'verify';
+
 export interface InitialState {
   networkNames :string[];
   cloudProviderNames :string[];
@@ -118,7 +125,9 @@ export enum Command {
   CLOUD_UPDATE = 1029,
   UPDATE_ORG_POLICY = 1030,
   REMOVE_CONTACT = 1031,
-  POST_REPORT = 1032
+  POST_REPORT = 1032,
+  VERIFY_USER = 1033,
+  VERIFY_USER_SAS = 1034
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -269,6 +278,11 @@ export interface PostReportArgs {
   path: string;
 };
 
+export interface FinishVerifyArgs {
+  inst: social.InstancePath,
+  sameSAS: boolean
+};
+
 /**
  * The primary interface to the uProxy Core.
  *
@@ -344,6 +358,12 @@ export interface CoreApi {
 
   // Make a domain-fronted POST request to the uProxy logs/stats server.
   postReport(args:PostReportArgs) : Promise<void>;
+
+  // Start a ZRTP key-verification session.
+  verifyUser(inst :social.InstancePath) :void;
+
+  // Confirm or reject the SAS in a ZRTP key-verification session.
+  finishVerifyUser(args:FinishVerifyArgs) :void;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }
