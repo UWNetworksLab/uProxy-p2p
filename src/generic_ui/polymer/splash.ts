@@ -70,7 +70,7 @@ var splash = {
     this.model = model;
     this.languages = languages;
     var curLanguage = this.model.globalSettings.language;
-    for (var i=0, lang=languages[0]; lang; lang=languages[++i]) {
+    for (let i = 0, lang = languages[0]; lang; lang = languages[++i]) {
       if (lang.languageCode === curLanguage) {
         this.langIndex = i;
         break;
