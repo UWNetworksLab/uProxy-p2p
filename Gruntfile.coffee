@@ -603,28 +603,19 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-chromeapp/'
     libsForZorkFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-firefoxapp/data/'
     libsForZorkNode:
       Rule.copyLibs
         npmLibNames: ['freedom-for-node']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-node/'
 
     libsForEchoServerChromeApp:
@@ -647,25 +638,19 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-chromeapp/'
     libsForCopypasteChatFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-firefoxapp/data'
     libsForCopypasteChatWebApp:
       Rule.copyLibs
         npmLibNames: ['freedom']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-webapp/'
 
     libsForCopyPasteSocksChromeApp:
@@ -675,7 +660,6 @@ gruntConfig = {
         ]
         pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
           'i18n'
           'bower/polymer'
           'freedom-pgp-e2e'
@@ -689,7 +673,6 @@ gruntConfig = {
         ]
         pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
           'i18n'
           'bower'
           'freedom-pgp-e2e'
@@ -701,36 +684,26 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-socks-chromeapp/'
     libsForSimpleSocksFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-socks-firefoxapp/data/'
 
     libsForSimpleChatChromeApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-chromeapp/'
     libsForSimpleChatFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-firefoxapp/data'
     # While neither churn-pipe nor freedom-port-control can be used in a
     # regular web page environment, they are included so that obfuscation
@@ -739,9 +712,7 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-webapp/'
 
     libsForUprobeChromeApp:
