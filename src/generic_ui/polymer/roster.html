@@ -116,7 +116,7 @@
         <h1>{{ "EMPTY_ROSTER_INSTRUCTIONS" | $$ }}</h1>
       </div>
     </div>
-    <div class='downArrow'>▼</div>
+    <div class='downArrow' hidden?="{{ loadingContacts || hasContacts }}">▼</div>
 
     <div hidden?='{{ !hasContacts }}'>
       <!-- Intentionally hiding search box. May decide to readd it later. -->
