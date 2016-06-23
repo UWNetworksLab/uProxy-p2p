@@ -314,14 +314,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       let moveToFront = (array :string[], element :string) :void => {
         let i = array.indexOf(element);
         if (i < 1) return;
-        let tmp = array[0];
-        array[0] = array[i];
-        array[i] = tmp;
+        array.splice(0, 0, array.splice(i, 1)[0] );
       };
 
       let networkNames = Object.keys(social_network.networks);
 
-      for (let name in ['Quiver', 'Cloud']) {
+      for (let name of ['Quiver', 'Cloud']) {
         if (name in social_network.networks) {
           moveToFront(networkNames, name);
         }
