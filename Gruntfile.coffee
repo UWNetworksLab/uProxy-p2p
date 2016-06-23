@@ -628,6 +628,11 @@ gruntConfig = {
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider']
         localDestPath: 'lib/samples/echo-server-firefoxapp/data/'
+    libsForEchoServerNode:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-node']
+        pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider']
+        localDestPath: 'lib/samples/echo-server-node/'
 
     libsForCopypasteChatChromeApp:
       Rule.copyLibs
@@ -1030,6 +1035,7 @@ taskManager.add 'echoServer', [
   'browserify:echoServerFreedomModule'
   'copy:libsForEchoServerChromeApp'
   'copy:libsForEchoServerFirefoxApp'
+  'copy:libsForEchoServerNode'
 ]
 
 taskManager.add 'copypasteChat', [
