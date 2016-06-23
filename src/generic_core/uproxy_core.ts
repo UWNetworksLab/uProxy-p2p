@@ -311,8 +311,24 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return globals.loadSettings.then(() => {
       var copyPasteConnectionState = copyPasteConnection.getCurrentState();
 
+      let moveToFront = (array :string[], element :string) :void => {
+        let i = array.indexOf(element);
+        if (i < 1) return;
+        let tmp = array[0];
+        array[0] = array[i];
+        array[i] = tmp;
+      };
+
+      let networkNames = Object.keys(social_network.networks);
+
+      for (let name in ['Quiver', 'Cloud']) {
+        if (name in social_network.networks) {
+          moveToFront(networkNames, name);
+        }
+      }
+
       return {
-        networkNames: Object.keys(social_network.networks),
+        networkNames: networkNames,
         cloudProviderNames: getCloudProviderNames(),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
