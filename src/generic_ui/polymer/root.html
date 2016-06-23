@@ -90,10 +90,12 @@
         box-shadow: inset 0px 5px 6px -3px rgba(0,0,0,0.13);
       }
       core-toolbar {
-        height: 105px;
         width: 100%;
         background-color: #12A391;
         color: white;
+      }
+      core-toolbar.hasContacts {
+        height: 105px;
       }
       core-toolbar::shadow #topBar {
         padding: 0px 16px;
@@ -227,7 +229,6 @@
         padding-top: 1em;
         padding-bottom: 1em;
         border-top: 1px solid rgb(221, 221, 221);
-        text-transform: uppercase;
         display: block;
         text-align: center;
         font-size: 1.1em;
@@ -256,7 +257,6 @@
         font-size: 12px;
       }
       paper-toast #toastHelpLink {
-        text-transform: uppercase;
         color: #47B5AA;
       }
       #inviteButton {
@@ -317,7 +317,7 @@
       <core-header-panel main
           hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
 
-        <core-toolbar>
+        <core-toolbar class="{{ {hasContacts: hasContacts} | tokenList }}">
 
           <core-icon icon="menu" core-drawer-toggle></core-icon>
           <div id='title' flex>uProxy</div>
@@ -345,7 +345,7 @@
             <p>{{ "SHARING_ENABLED_MESSAGE" | $$ }}</p>
           </uproxy-bubble>
 
-          <div class='bottom fit' dir="ltr">
+          <div class='bottom fit' dir="ltr" hidden?='{{ !hasContacts }}'>
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
                 <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$ }}</span>

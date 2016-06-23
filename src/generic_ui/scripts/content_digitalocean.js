@@ -338,14 +338,12 @@
 
     (function modifyUI() {
       (function hideEls() {
-        // hide elements for the following selectors on all pages
-        ['a.create_droplet'   // 'Create Droplet' button in topnav
-        ].map(hideEl);
-
         if (pageId === 'welcome') {
           // hide the 'Create Droplet' box
           // (there's no more-specific selector for it than this, unfortunately)
           hideEl('div.small-4:last-child');
+          // hide the 'Create Droplet' button in the topnav
+          hideEl('a.create_droplet');
         }
 
         function hideEl(selector) {

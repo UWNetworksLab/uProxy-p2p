@@ -29,10 +29,6 @@ Polymer({
 
     this.$.getStartedOverlay.open();
   },
-  showDigitalOceanAccountHelpOverlay: function() {
-    this.closeOverlays();
-    this.$.digitalOceanAccountHelpOverlay.open();
-  },
   showLoginOverlay: function() {
     this.closeOverlays();
     this.$.loginOverlay.open();
@@ -49,8 +45,7 @@ Polymer({
     ui.openTab('https://cloud.digitalocean.com/droplets');
   },
   back: function() {
-    if (this.$.digitalOceanAccountHelpOverlay.opened ||
-        this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
+    if (this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
       this.closeOverlays();
       this.$.getStartedOverlay.open();
     } else {
@@ -59,7 +54,6 @@ Polymer({
   },
   closeOverlays: function() {
     this.$.getStartedOverlay.close();
-    this.$.digitalOceanAccountHelpOverlay.close();
     this.$.loginOverlay.close();
     this.$.installingOverlay.close();
     this.$.successOverlay.close();
@@ -84,6 +78,7 @@ Polymer({
       this.closeOverlays();
       this.$.successOverlay.open();
       ui.model.globalSettings.shouldHijackDO = false;
+      ui.core.updateGlobalSettings(ui.model.globalSettings);
     }).catch((e :any) => {
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
