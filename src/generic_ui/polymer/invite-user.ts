@@ -94,6 +94,9 @@ var inviteUser = {
     this.$.loginToInviteFriendDialog.resizeHandler();
   },
   getNetworkDisplayName: function(networkName :string) {
+    if (networkName === 'Cloud') {
+      return ui.i18n_t('NETWORK_LIST_CLOUD_LABEL');
+    }
     return ui.getNetworkDisplayName(networkName);
   },
   isExperimentalNetwork: function(networkName :string) {

@@ -57,7 +57,6 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     isEncrypted: true
   },
   'Cloud': {
-    displayName: 'Create a private cloud server',
     metricsName: 'cloud',
     rosterFunction: length,
     isFirebase: false,
