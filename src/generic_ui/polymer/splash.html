@@ -130,7 +130,7 @@
           <core-icon icon='language'></core-icon>
           <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
             <paper-dropdown class="dropdown" valign="bottom">
-                <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
+                <core-menu selected="{{ langIndex }}" class="menu" on-core-select='{{ updateLanguage }}'>
                     <template repeat='{{ l in languages }}'>
                       <paper-item languageCode='{{ l.languageCode }}'>
                         <bdi>{{ l.language }}</bdi>

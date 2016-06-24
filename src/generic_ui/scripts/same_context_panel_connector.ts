@@ -1,12 +1,12 @@
 /**
- * In Firefox, we have a very strict singleton way of handling the panel where
- * we can guarantee that only one panel will ever be created and its state will
- * never be altered.  Given that all scripts are running in the same
- * environment, we have an insanely simple way of representing that here
+ * In some environments, we have a very strict singleton way of handling the
+ * panel where we can guarantee that only one panel will ever be created and
+ * its state will never be altered.  Given that all scripts are running in the
+ * same environment, we have an insanely simple way of representing that here
  */
-import panel_connector = require('../../../interfaces/panel_connector');
+import panel_connector = require('../../interfaces/panel_connector');
 
-export class FirefoxPanelConnector implements panel_connector.BrowserPanelConnector {
+export class SameContextPanelConnector implements panel_connector.BrowserPanelConnector {
   private connectHandler: panel_connector.PanelConnectHandler;
   private messageHandler: panel_connector.MessageHandler;
   private disconnectHandler: panel_connector.PanelDisconnectHandler;
