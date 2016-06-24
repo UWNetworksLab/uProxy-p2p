@@ -176,7 +176,7 @@ Polymer({
   restartProxying: function() {
     this.ui.restartProxying();
   },
-  showToastMessage: function(e: Event, detail: { toastMessage: string, unableToGet?: boolean, unableToShare?: boolean }) {
+  showToast: function(e: Event, detail: { toastMessage: string, unableToGet?: boolean, unableToShare?: boolean }) {
     this.toastMessage = detail.toastMessage;
     this.unableToGet = detail.unableToGet || false;
     this.unableToShare = detail.unableToShare || false;
