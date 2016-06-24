@@ -345,7 +345,6 @@ gruntConfig = {
           cwd: chromeExtDevPath
           src: [
             'manifest.json'
-            'managed_policy_schema.json'
             '_locales/**'
 
             'generic_ui/scripts/copypaste.js'
