@@ -37,3 +37,7 @@ body /deep/ paper-input-decorator input[is="core-input"] {
 body /deep/ uproxy-action-dialog::shadow #actions {
   padding: 24px;
 }
+
+body /deep/ uproxy-faq-link {
+  white-space: nowrap;
+}

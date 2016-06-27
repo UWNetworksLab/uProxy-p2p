@@ -79,7 +79,7 @@ class Background {
   }
 
   public updateGlobalSettings = (settings: uproxy_core_api.GlobalSettings): void => {
-    this.connector_.sendMessage('update-global-settings', settings);
+    this.doInBackground_('update-global-settings', settings);
   }
 
   public restart = (): void => {
@@ -87,6 +87,14 @@ class Background {
   }
 
   public logout = (networkInfo: social.SocialNetworkInfo): Promise<void> => {
+    var network = ui_context.model.getNetwork(networkInfo.name);
+    if (!network) {
+      console.warn('Network is not logged in');
+      return Promise.resolve<void>();
+    }
+
+    network.logoutExpected = true;
+
     return this.doInBackground_('logout', networkInfo, true);
   }
 

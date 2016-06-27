@@ -819,6 +819,9 @@
     "description": "Invite instructions for the uProxy Network (aka Quiver)",
     "message": "Generate a link and send it to your friends so they can find you on uProxy.  You can request access, offer access or both."
   },
+  "NETWORK_LIST_CLOUD_LABEL": {
+    "message": "Create a private cloud server"
+  },
   "ADD_A_CLOUD_FRIEND": {
     "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
     "message": "Add a Cloud friend"
@@ -1241,7 +1244,7 @@
   },
   "CREATE_A_NEW_ACCOUNT": {
     "description": "Button text for creating a new account (e.g. for DigitalOcean)",
-    "message": "Create a new account"
+    "message": "Create a DigitalOcean account"
   },
   "SIGN_IN_AND_CONNECT": {
     "description": "Button text for signing into DigitalOcean",
@@ -1301,15 +1304,19 @@
   },
   "CLOUD_INSTALL_GET_STARTED_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "uProxy now allows you to create a private cloud server through DigitalOcean."
+    "message": "Create a private cloud server on DigitalOcean through uProxy."
   },
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "For $10 per month you can get and share access with your friends and family. If you sign up with uProxy, your first month is free! Create a new account or sign in to connect and share access. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+    "message": "For $10 per month you can get and share access with your friends and family. If you sign up for DigitalOcean with uProxy, your first month is free! <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+  },
+  "CLOUD_INSTALL_EXISTING_SERVER_TITLE": {
+    "description": "Title for 'already have a cloud server' section",
+    "message": "Already have a cloud server?"
   },
   "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
     "description": "Instructions link for users who already have an existing cloud server.",
-    "message": "Already have a cloud server? <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link> to use it with uProxy."
+    "message": "You can manually set up your own uProxy server. <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link>"
   },
   "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
     "description": "Message shown on invite screen for DigitalOcean server deployment",
@@ -1321,19 +1328,15 @@
   },
   "I_HAVE_AN_ACCOUNT": {
     "description": "Button text shown during DigitalOcean server deployment",
-    "message": "I have an account"
+    "message": "I have a DigitalOcean account"
   },
   "SIGN_ME_IN": {
     "description": "Button text shown during DigitalOcean server deployment",
     "message": "Sign me in!"
   },
-  "EMPTY_ROSTER_CLOUD_INSTRUCTIONS": {
-    "description": "Instructions shown for cloud when the user has an empty roster",
-    "message": "Create a private cloud server and share access with friends & family"
-  },
-  "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS": {
-    "description": "Instructions shown for peer-to-peer when the user has an empty roster",
-    "message": "Get or share access with family & friends."
+  "EMPTY_ROSTER_INSTRUCTIONS": {
+    "description": "Instructions shown when the user has an empty roster",
+    "message": "Get and share access from a friend or a private cloud server."
   },
   "ASIA_SINGAPORE": {
     "description": "Region option for deploying a DigitalOcean server",
