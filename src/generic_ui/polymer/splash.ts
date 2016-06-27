@@ -63,6 +63,13 @@ var splash = {
   disableStats: function() {
     return this.updateSeenMetrics(false);
   },
+  // ElleTest begin
+  open: function() {
+    this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
+    //this.status = StatusState.EMPTY;
+    //this.$.advancedSettingsPanel.open();
+  },
+  // ElleTest end
   ready: function() {
     this.model = model;
     this.languages = languages;

@@ -133,6 +133,24 @@
     #accountChooser div {
       margin-top: 30px;
     }
+
+    /*ElleTest begin*/
+    #languageLink paper-dropdown-menu {
+      border-bottom: 0px;
+      font-size: 13px;
+      margin-top: 1.5em;
+    }
+    #languageLink core-icon {
+      height: 18px !important;
+      width: 18px !important;
+    }
+    #languageLink paper-item {
+      font-size: 13px;
+    }
+    #languageLink paper-item::shadow .button-content {
+      padding: 0;
+    }
+    /*ElleTest end*/
     </style>
     <uproxy-state id="state"></uproxy-state>
 
@@ -188,6 +206,30 @@
           <core-icon icon="settings"></core-icon>
           <span class='label'>{{ "ADVANCED_SETTINGS" | $$ }}</span>
         </uproxy-link>
+
+        <!-- Elletest begin -->
+       <!--  <div id='languageLink'>
+          <core-icon icon='language'></core-icon>
+          <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
+            <paper-dropdown class="dropdown" valign="bottom">
+                <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
+                    <template repeat='{{ l in languages }}'>
+                      <paper-item languageCode='{{ l.languageCode }}'>
+                        <bdi>{{ l.language }}</bdi>
+                      </paper-item>
+                    </template>
+                </core-menu>
+            </paper-dropdown>
+          </paper-dropdown-menu> -->
+        <!-- </div> end of #languageLink -->
+        <!-- ElleTest end -->
+
+        <!-- ElleTest begin -->
+        <uproxy-link on-tap='{{ openLanguageForm }}' role='button'>
+          <core-icon icon="language"></core-icon>
+          <span class='label'>{{ "Change Language" | $$ }}</span>
+        </uproxy-link>
+        <!-- ElleTest end -->
 
         <div id='metricsCheckbox'>
           <paper-checkbox label='{{ "STATS_ENABLED_TITLE" | $$ }}' checked='{{ model.globalSettings.statsReportingEnabled }}' on-change='{{updateStatsReportingEnabled}}'></paper-checkbox>
