@@ -289,8 +289,9 @@
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
 
-    <!-- Required for cases where an open-dialog signal is sent from the UI via ui.fireSignal -->
     <core-signals on-core-signal-open-dialog="{{ openDialog }}"></core-signals>
+
+    <core-signals on-core-signal-show-toast="{{ showToast }}"></core-signal>
 
     <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
