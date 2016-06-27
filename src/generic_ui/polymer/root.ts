@@ -179,21 +179,14 @@ Polymer({
   restartProxying: function() {
     this.ui.restartProxying();
   },
-  toastMessageChanged: function(oldVal :string, newVal :string) {
-    if (newVal) {
-      this.toastMessage = newVal;
-      this.unableToShare = ui.unableToShare;
-      this.unableToGet = ui.unableToGet;
-      this.$.toast.show();
-
-      // clear the message so we can pick up on other changes
-      ui.toastMessage = null;
-      ui.unableToShare = false;
-      ui.unableToGet = false;
-    }
+  showToast: function(e: Event, detail: { toastMessage: string, unableToGet?: boolean, unableToShare?: boolean }) {
+    this.toastMessage = detail.toastMessage;
+    this.unableToGet = detail.unableToGet || false;
+    this.unableToShare = detail.unableToShare || false;
+    this.$.toast.show();
   },
   openTroubleshoot: function() {
-    if (this.ui.unableToGet) {
+    if (this.unableToGet) {
       this.troubleshootTitle = ui.i18n_t('UNABLE_TO_GET');
     } else {
       this.troubleshootTitle = ui.i18n_t('UNABLE_TO_SHARE');
@@ -238,7 +231,7 @@ Polymer({
     this.dir = 'ltr';
   },
   languageChanged: function(oldLanguage :string, newLanguage :string) {
-    if (typeof oldLanguage != 'undefined') {
+    if (oldLanguage && oldLanguage !== newLanguage) {
       window.location.reload();
     }
   },
@@ -250,7 +243,6 @@ Polymer({
   },
   observe: {
     '$.mainPanel.selected': 'drawerToggled',
-    'ui.toastMessage': 'toastMessageChanged',
     'ui.view': 'viewChanged',
     // Use an observer on model.contacts.shareAccessContacts.trustedUproxy
     // so that we can detect any time elements are added or removed from this

@@ -58,24 +58,24 @@ interface PromiseCallbacks {
   reject :Function;
 }
 
-export function getImageData(userId :string, oldImageData :string,
-                             newImageData :string) : string {
-  if (!oldImageData && !newImageData) {
-    // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
-    // as long as jdenticon only uses '"' in the generated code...
-    // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
-    // scales the image to fit the space, so this parameter has no effect.
-    // We must also replace # with %23 for Firefox support.
-    const userIdHash = crypto.createHash('md5').update(userId).digest('hex');
-    return '\'data:image/svg+xml;utf8,' +
-        jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
-  } else if (!newImageData) {
+export function getImageData(userId: string, oldImageData: string,
+                             newImageData: string): string {
+  if (newImageData) {
+    return newImageData;
+  } else if (oldImageData) {
     // This case is hit when we've already generated a jdenticon for a user
     // who doesn't have any image in uProxy core.
     return oldImageData;
-  } else {
-    return newImageData;
   }
+
+  // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
+  // as long as jdenticon only uses '"' in the generated code...
+  // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
+  // scales the image to fit the space, so this parameter has no effect.
+  // We must also replace # with %23 for Firefox support.
+  const userIdHash = crypto.createHash('md5').update(userId).digest('hex');
+  return '\'data:image/svg+xml;utf8,' +
+      jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
 }
 
 /**
@@ -102,8 +102,6 @@ export class UserInterface implements ui_constants.UiApi {
   /* Getting and sharing */
   public gettingStatus :string = null;
   public sharingStatus :string = null;
-  public unableToGet :boolean = false;
-  public unableToShare :boolean = false;
   public isSharingDisabled :boolean = false;
   public proxyingId: string; // ID of the most recent failed proxying attempt.
   private userCancelledGetAttempt_ :boolean = false;
@@ -121,10 +119,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   /* About this uProxy installation */
   public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
-  public browser :string = '';
   public availableVersion :string = null;
-
-  public toastMessage :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
@@ -268,10 +263,8 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (giving)');
 
-      this.toastMessage = this.i18n_t('UNABLE_TO_SHARE_WITH', {
-        name: info.name
-      });
-      this.unableToShare = true;
+      let toastMessage = translator_module.i18n_t('UNABLE_TO_SHARE_WITH', { name: info.name });
+      this.backgroundUi.showToast(toastMessage, false, true);
       this.proxyingId = info.proxyingId;
     });
 
@@ -292,10 +285,8 @@ export class UserInterface implements ui_constants.UiApi {
           if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
             this.restartServer_('digitalocean');
           } else {
-            this.toastMessage = this.i18n_t('UNABLE_TO_GET_FROM', {
-              name: info.name
-            });
-            this.unableToGet = true;
+            let toastMessage = translator_module.i18n_t('UNABLE_TO_GET_FROM', { name: info.name });
+            this.backgroundUi.showToast(toastMessage, true, false);
           }
         }
       }
@@ -349,12 +340,12 @@ export class UserInterface implements ui_constants.UiApi {
       this.i18n_t('CANCEL'),
       this.i18n_t('RESTART_SERVER')
     ).then(() => {
-      this.toastMessage = this.i18n_t('RESTARTING_SERVER');
+      this.backgroundUi.showToast(translator_module.i18n_t('RESTARTING_SERVER'));
       return this.core.cloudUpdate({
         operation: uproxy_core_api.CloudOperationType.CLOUD_REBOOT,
         providerName: providerName
       }).then(() => {
-        this.toastMessage = this.i18n_t('RESTART_SUCCESS');
+        this.backgroundUi.showToast(translator_module.i18n_t('RESTART_SUCCESS'));
       }).catch((e: Error) => {
         this.showDialog(this.i18n_t('RESTART_FAILURE_TITLE'), this.i18n_t('RESTART_FAILURE_TEXT'));
       });

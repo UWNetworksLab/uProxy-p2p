@@ -66,17 +66,20 @@ class Background {
   private promisesMap_: {[id: number]: FullfillAndReject} = {};
 
   constructor(state: any) {
-    if (window.chrome) {
+    if (typeof ui_context.panelConnector !== 'undefined' &&
+      typeof ui_context.panelConnector.sendMessageFromPanel === 'function') {
+      this.connector_ = new SameContextBackgroundUiConnector(this.handleMessage_);
+    } else if (window.chrome) {
       this.connector_ = new ChromeBackgroundUiConnector(this.handleMessage_);
     } else {
-      this.connector_ = new FirefoxBackgroundUiConnector(this.handleMessage_);
+      console.error('Cannot talk to background UI');
     }
 
     this.state_ = state;
   }
 
   public updateGlobalSettings = (settings: uproxy_core_api.GlobalSettings): void => {
-    this.connector_.sendMessage('update-global-settings', settings);
+    this.doInBackground_('update-global-settings', settings);
   }
 
   public restart = (): void => {
@@ -160,7 +163,7 @@ class Background {
   }
 }
 
-class FirefoxBackgroundUiConnector implements panel_connector.BackgroundUiConnector {
+class SameContextBackgroundUiConnector implements panel_connector.BackgroundUiConnector {
   constructor(listener: panel_connector.MessageHandler) {
     ui_context.panelConnector.panelConnect(listener);
   }
