@@ -1156,6 +1156,7 @@ export class UserInterface implements ui_constants.UiApi {
     return logsPromise.then((logs) => {
       var payload = {
         email: feedback.email,
+        error: feedback.error,
         feedback: feedback.feedback,
         logs: logs,
         feedbackType: uproxy_core_api.UserFeedbackType[feedback.feedbackType],

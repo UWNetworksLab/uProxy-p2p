@@ -9,6 +9,7 @@ import ui = require('./ui');
 
 export interface UserFeedback {
   email        :string;
+  error        :string;
   feedback     :string;
   logs         :string;
   browserInfo  ?:string;

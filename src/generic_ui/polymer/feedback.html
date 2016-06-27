@@ -9,6 +9,12 @@
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='dialog.html'>
 
+<link rel="import" href="../../bower/paper-button/paper-button.html">
+<link rel='import' href='../../bower/paper-item/paper-item.html'>
+<link rel="import" href="../../bower/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../../bower/core-menu/core-menu.html">
+
 <polymer-element name='uproxy-feedback' attributes=''>
   <template>
     <style>
@@ -70,6 +76,28 @@
       background-color: #ffffff;
       text-transform: uppercase;
     }
+    #errorLink paper-dropdown-menu {
+      border-bottom: 0px;
+      font-size: 16px;
+      margin-top: 0em;
+      margin-bottom: 0em;
+    }
+    #errorLink core-icon {
+      height: 18px !important;
+      width: 18px !important;
+    }
+    #errorLink paper-item {
+      font-size: 16px;
+    }
+    #errorLink paper-item::shadow .button-content {
+      padding: 0;
+    }
+    #label:not(.selectedItem) {
+      color: grey;
+      opacity: 0.6;
+    }
+
+    
     core-icon {
       height: 15px !important;
       color: grey;
@@ -86,6 +114,18 @@
       /* Without this, the first time you view the
          tooltip, it appears off center. */
       left: -64px !important;
+    }
+    paper-input-decorator[id=errorDecorator] /deep/ .unfocused-underline,
+    paper-input-decorator[id=errorDecorator] /deep/ .focused-underline {
+      /* Remove the underline from the errorDecorator textbox, which is there to throw the error for not selecting
+      an option from the dropdown menu */
+      height: 0px;
+    }
+    paper-input-decorator[id=errorDecorator] {
+      margin-top: 0em;
+      margin-bottom: 1.5em;
+      padding-top: 0em;
+      padding-bottom: 0em;
     }
     paper-input-decorator[id=feedbackDecorator] /deep/ .unfocused-underline,
     paper-input-decorator[id=feedbackDecorator] /deep/ .focused-underline {
@@ -124,6 +164,9 @@
       text-align: center;
       font-size: 16px;
     }
+    #feedbackTitle {
+      margin-top: .5;
+    }
     #feedbackDecorator {
       height: 190px;
     }
@@ -140,6 +183,11 @@
     paper-autogrow-textarea::shadow .mirror-text {
       white-space: pre-wrap; /* css-3 */
       white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    }
+    .dropdown.colored::shadow #ripple,
+    .dropdown.colored::shadow #background {
+      border: 1px solid #0f9d58;
+      background-color: #b7e1cd;
     }
     </style>
 
@@ -160,7 +208,27 @@
                    is="core-input"
                    value='{{ email }}'>
           </paper-input-decorator>
-          <p class='inputLabel'>{{ "FEEDBACK_TITLE" | $$ }}</p>
+          <p class='inputLabel'>{{"CUSTOM_ERROR_TITLE" | $$ }}</p>
+          <div id='errorLink'>
+          <paper-dropdown-menu label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}' error='{{"NO_CUSTOM_ERROR_PLACEHOLDER" | $$ }}'>
+            <paper-dropdown class="dropdown" valign="bottom">
+                <core-menu class="menu" on-core-select='{{ updateError }}' selected=null id='errorInput'>
+                      <paper-item errorCode = 'Cloud gets disconnected'> My cloud connections get disconnected.</paper-item>
+                      <paper-item errorCode = 'Cloud fails to connect'> My cloud server fails to connect.</paper-item>
+                      <paper-item errorCode = 'Trouble signing in'> I'm having trouble signing in.</paper-item>
+                      <paper-item errorCode = 'No friends to proxy from'> I don't have any friends to proxy from. </paper-item>
+                      <paper-item errorCode = 'Cannot start a connection'> I can't start a connection. </paper-item>
+                      <paper-item errorCode = 'Get disconnected from friends'> I get disconnected from my friend</paper-item>
+                      <paper-item errorCode = 'Other'> Other </paper-item>
+                </core-menu>
+            </paper-dropdown>
+          </paper-dropdown-menu>
+          </div>
+
+          <!-- because dropdown menus have no 'error' attribute, this is an invisible decorator that has an error if nothing is selected from the dropdown -->
+          <paper-input-decorator id='errorDecorator' label = '{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}' error='{{ "NO_CUSTOM_ERROR_PLACEHOLDER" | $$ }}'></paper-input-decorator>
+
+          <p class='inputLabel' id='feedbackTitle'>{{ "FEEDBACK_TITLE" | $$ }}</p>
           <paper-input-decorator id='feedbackDecorator'
               label='{{ "FEEDBACK_PLACEHOLDER" | $$ }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$ }}'>
             <paper-autogrow-textarea id="feedbackPaperTextarea">

@@ -11,6 +11,7 @@ var model = ui_context.model;
 
 Polymer({
   email: '',
+  error: '',
   feedback: '',
   logs: '',
   feedbackType: '',
@@ -30,15 +31,15 @@ Polymer({
   },
   sendFeedback: function() {
     this.feedback = this.feedback.trim();
-    this.$.feedbackDecorator.isInvalid = !this.feedback.length;
-
-    if (this.$.feedbackDecorator.isInvalid) {
-      return;
+    if (this.$.errorInput.selected == 'null') {
+        this.$.errorDecorator.isInvalid = true;
+        return;
     }
 
     this.$.sendingFeedbackDialog.open();
     ui_context.ui.sendFeedback({
       email: this.email,
+      error: this.error,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,
       browserInfo: navigator.userAgent,
@@ -48,8 +49,11 @@ Polymer({
       // user types input in the input fields.
       this.$.emailInput.placeholder = ui.i18n_t('EMAIL_PLACEHOLDER');
       this.$.feedbackInput.placeholder = ui.i18n_t('FEEDBACK_PLACEHOLDER');
+      this.$.errorInput.selected = 'null';
+      this.$.errorDecorator.isInvalid = false;
       // Clear the form.
       this.email = '';
+      this.error = '';
       this.feedback = '';
       this.$.logCheckbox.checked = false;
       // root.ts listens for open-dialog signals and shows a popup
@@ -68,6 +72,12 @@ Polymer({
           translator.i18n_t('EMAIL_INSTEAD_MESSAGE')));
       this.$.sendingFeedbackDialog.close();
     });
+  },
+  updateError: function(event: Event, detail: any, sender: HTMLElement) {
+    if (detail.isSelected) {
+      this.error = detail.item.getAttribute('errorCode');
+      
+    }
   },
   viewLogs: function() {
     this.ui.openTab('generic_ui/view-logs.html?lang=' + model.globalSettings.language);

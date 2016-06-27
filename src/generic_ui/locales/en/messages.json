@@ -289,7 +289,7 @@
   },
   "FEEDBACK_TITLE": {
     "description": "Label for textbox for user's to submit feedback and comments to uProxy.",
-    "message": "Enter your feedback below"
+    "message": "Enter your additional feedback below (optional)"
   },
   "FEEDBACK_PLACEHOLDER": {
     "description": "The default text that appears in the user feedback textbox.",
@@ -1447,5 +1447,14 @@
   },
   "APPLY": {
     "message": "Apply"
+  },
+  "CUSTOM_ERROR_PLACEHOLDER": {
+    "message": "Pick the feedback"
+  },
+  "CUSTOM_ERROR_TITLE": {
+    "message": "Choose the feedback most similar to yours, or choose 'other' (required)"
+  },"NO_CUSTOM_ERROR_PLACEHOLDER": {
+    "description": "Error that apears if you try to submit an empty error.",
+    "message": "Please choose feedback most similar to yours"
   }
 }
