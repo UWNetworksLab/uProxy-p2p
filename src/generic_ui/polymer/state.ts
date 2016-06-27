@@ -79,7 +79,7 @@ class Background {
   }
 
   public updateGlobalSettings = (settings: uproxy_core_api.GlobalSettings): void => {
-    this.connector_.sendMessage('update-global-settings', settings);
+    this.doInBackground_('update-global-settings', settings);
   }
 
   public restart = (): void => {
