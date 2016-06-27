@@ -15,7 +15,6 @@ var closeChannelTab = function(channel) {
   }
 };
 
-var copyPasteRegEx = /^https:\/\/www.uproxy.org\/(request|offer)\/(.*)/;
 var inviteRegEx = /^https:\/\/www.uproxy.org\/invite(.*)/;
 var autocloseRegEx = /^https:\/\/www.uproxy.org\/autoclose(.*)/;
 
@@ -29,9 +28,7 @@ exports.setup = function(panel, button) {
       subject.QueryInterface(Ci.nsIHttpChannel);
       var url = subject.URI.spec;
 
-      if (copyPasteRegEx.test(url)) {
-        panel.port.emit('copyPasteUrlData', url);
-      } else if (inviteRegEx.test(url)) {
+      if (inviteRegEx.test(url)) {
         panel.port.emit('inviteUrlData', url);
       } else if (autocloseRegEx.test(url)) {
         closeChannelTab(subject);
