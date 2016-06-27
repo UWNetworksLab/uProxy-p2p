@@ -58,24 +58,24 @@ interface PromiseCallbacks {
   reject :Function;
 }
 
-export function getImageData(userId :string, oldImageData :string,
-                             newImageData :string) : string {
-  if (!oldImageData && !newImageData) {
-    // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
-    // as long as jdenticon only uses '"' in the generated code...
-    // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
-    // scales the image to fit the space, so this parameter has no effect.
-    // We must also replace # with %23 for Firefox support.
-    const userIdHash = crypto.createHash('md5').update(userId).digest('hex');
-    return '\'data:image/svg+xml;utf8,' +
-        jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
-  } else if (!newImageData) {
+export function getImageData(userId: string, oldImageData: string,
+                             newImageData: string): string {
+  if (newImageData) {
+    return newImageData;
+  } else if (oldImageData) {
     // This case is hit when we've already generated a jdenticon for a user
     // who doesn't have any image in uProxy core.
     return oldImageData;
-  } else {
-    return newImageData;
   }
+
+  // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
+  // as long as jdenticon only uses '"' in the generated code...
+  // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
+  // scales the image to fit the space, so this parameter has no effect.
+  // We must also replace # with %23 for Firefox support.
+  const userIdHash = crypto.createHash('md5').update(userId).digest('hex');
+  return '\'data:image/svg+xml;utf8,' +
+      jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
 }
 
 /**
