@@ -18,4 +18,4 @@ install:
   - "firefox -v || echo 'No firefox installed.'"
   - "shippable_retry ./setup.sh install"
 script:
-  - "grunt test"
+  - "grunt test && grunt integration_test"
