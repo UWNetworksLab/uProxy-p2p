@@ -84,7 +84,6 @@ Polymer({
   updateError: function(event: Event, detail: any, sender: HTMLElement) {
     if (detail.isSelected) {
       this.error = detail.item.getAttribute('errorCode');
-      
     }
   },
   viewLogs: function() {
