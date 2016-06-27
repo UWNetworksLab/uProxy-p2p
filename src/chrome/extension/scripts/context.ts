@@ -19,5 +19,4 @@ export var ui :user_interface.UserInterface =
 
 export var model :ui_model.Model = ui.model;
 
-ui.browser = 'chrome';
 console.log('Loaded dependencies for Chrome Extension.');
