@@ -693,6 +693,15 @@ gruntConfig = {
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-socks-firefoxapp/data/'
+    libsForSimpleSocksNode:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-node']
+        pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators'
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/simple-socks-node/'
 
     libsForSimpleChatChromeApp:
       Rule.copyLibs
@@ -1069,6 +1078,7 @@ taskManager.add 'simpleSocks', [
   'browserify:simpleSocksFreedomModule'
   'copy:libsForSimpleSocksChromeApp'
   'copy:libsForSimpleSocksFirefoxApp'
+  'copy:libsForSimpleSocksNode'
 ]
 
 taskManager.add 'uprobe', [

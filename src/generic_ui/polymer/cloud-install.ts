@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
+import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import ui_constants = require('../../interfaces/ui');
 import user = require('../scripts/user');
@@ -129,10 +130,20 @@ Polymer({
       providerName: DEFAULT_PROVIDER
     }).then(() => {
       this.closeOverlays();
-      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_SUCCESS');
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('CLOUD_INSTALL_CANCEL_SUCCESS')
+        }
+      });
     }).catch((e: Error) => {
       this.$.cancelingOverlay.close();
-      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_FAILURE');
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('CLOUD_INSTALL_CANCEL_FAILURE')
+        }
+      });
     });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {
