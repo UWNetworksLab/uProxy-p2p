@@ -13,20 +13,19 @@
       }
       #container {
         text-align: center;
-        /*margin: 50px;*/
          height: 100%;
          width: 100%;
          background-color: white;
       }
       #logsPanel {
-      height: 100%;
-      width: 100%;
-      background-color: white;
-    }
+        height: 100%;
+        width: 100%;
+        background-color: white;
+      }
       uproxy-app-bar {
-      text-align: left;
-      font-size: 18px;
-    }
+        text-align: left;
+        font-size: 18px;
+      }
       #openUproxy {
         color: #12A391;
         cursor: pointer;
@@ -67,9 +66,9 @@
     <core-signals on-core-signal-open-logs="{{ openLogs }}"></core-signals>
       <core-overlay id='logsPanel'>
       <div id='container' vertical layout>
-      <uproxy-app-bar on-go-back='{{ close }}'>
-            {{ "LOGS_TITLE" | $$ }}
-          </uproxy-app-bar>
+        <uproxy-app-bar on-go-back='{{ close }}'>
+              {{ "LOGS_TITLE" | $$ }}
+        </uproxy-app-bar>
         <h1><bdi>{{ "LOGS_TITLE" | $$ }}</bdi></h1>
         <p><bdi>{{ "TO_SEND_LOGS" | $$ }}</bdi></p>
         <div id='logs'>

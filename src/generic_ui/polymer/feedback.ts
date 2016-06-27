@@ -70,7 +70,7 @@ Polymer({
     });
   },
   viewLogs: function() {
-    //calls to logs.html to view logs
+    // calls to logs.html to view logs
     this.fire('core-signal', { name: 'open-logs' });
   },
   ready: function() {
