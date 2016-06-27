@@ -329,9 +329,7 @@ export class UserInterface implements ui_constants.UiApi {
      * though
      */
     switch(name) {
-      case 'logout':
-        this.logout(data.data.networkInfo);
-        break;
+      /* holding for more operations as needed */
     }
   }
 
@@ -1085,21 +1083,6 @@ export class UserInterface implements ui_constants.UiApi {
           'ERROR_SIGNING_IN', {network: this.getNetworkDisplayName(network)}));
       throw e;
     });
-  }
-
-  public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
-    var network = this.model.getNetwork(networkInfo.name);
-    // Check if the user is connected to a network
-    if (!network) {
-      // If the user is not connected to the network, then don't log him out,
-      // you probably won't reach this point anyways. EVER. Probably.
-      console.warn('User is trying to log out of not-logged-in-network ' +
-                   networkInfo.name);
-      return Promise.resolve<void>();
-    }
-
-    network.logoutExpected = true;
-    return this.core.logout(networkInfo);
   }
 
   private reconnect_ = (network :string) => {
