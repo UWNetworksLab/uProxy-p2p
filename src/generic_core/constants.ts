@@ -7,8 +7,8 @@ export const STORAGE_VERSION = 1;
 // 3: caesar obfuscation
 // 4: holographic ICE
 // 5: encrypted signalling messages (long since replaced by Network#isEncrypted)
-// 6: RC4 obfuscation
-export const MESSAGE_VERSION = 6;
+// 6: RC4 obfuscation (TODO: enable once FF48 is released)
+export const MESSAGE_VERSION = 5;
 
 export const DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
