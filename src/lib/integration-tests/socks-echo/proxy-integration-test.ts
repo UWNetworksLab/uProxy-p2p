@@ -2,6 +2,7 @@
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import bridge = require('../../bridge/bridge');
+import logging = require('../../logging/logging');
 import net = require('../../net/net.types');
 import peerconnection = require('../../webrtc/peerconnection');
 import proxyintegrationtesttypes = require('./proxy-integration-test.types');
@@ -13,6 +14,8 @@ import tcp = require('../../net/tcp');
 import ProxyConfig = require('../../rtc-to-net/proxyconfig');
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
+
+  var log :logging.Log = new logging.Log('SocksClient');
 
 // This abstract class is converted into a real class by Freedom, which
 // fills in the unimplemented on(...) method in the process of
@@ -114,6 +117,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   }
 
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
+    log.info('%1: Connecting to the local tor proxy: %2', ["TEST", socksEndpoint]);
     var connection = new tcp.Connection({endpoint: socksEndpoint});
     connection.onceClosed.then(() => {
       console.log('Socket ' + connection.connectionId + ' has closed');
@@ -121,6 +125,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     });
 
     var authRequest = socks.composeAuthHandshakeBuffer([socks.Auth.NOAUTH]);
+    log.info('%1: Creating auth handshake: %2', ["TEST", authRequest]);
     connection.send(authRequest);
     var connected = new Promise<tcp.ConnectionInfo>((F, R) => {
       connection.onceConnected.then(F);
@@ -128,22 +133,27 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     });
     var firstBufferPromise :Promise<ArrayBuffer> = connection.receiveNext();
     return connected.then((i:tcp.ConnectionInfo) => {
+      log.info('%1: Connected to local tor proxy: %2', ["TEST", i]);
       return firstBufferPromise;
     }).then((buffer:ArrayBuffer) : Promise<ArrayBuffer> => {
       var auth = socks.interpretAuthResponse(buffer);
+      log.info('%1: Received auth handshake reply: %2', ["TEST", auth]);
       if (auth != socks.Auth.NOAUTH) {
         throw new Error('SOCKS server returned unexpected AUTH response.  ' +
                         'Expected NOAUTH (' + socks.Auth.NOAUTH + ') but got ' + auth);
       }
+      log.info('%1: Connecting through socks to: %2', ["TEST", webEndpoint]);
 
       var request :socks.Request = {
         command: socks.Command.TCP_CONNECT,
         endpoint: webEndpoint,
       };
+      log.info('%1: Making socks request: %2', ["TEST", request]);
       connection.send(socks.composeRequestBuffer(request));
       return connection.receiveNext();
     }).then((buffer:ArrayBuffer) : Promise<tcp.Connection> => {
       var response = socks.interpretResponseBuffer(buffer);
+      log.info('%1: Received request response: %2', ["TEST", response]);
       if (response.reply != socks.Reply.SUCCEEDED) {
         // TODO: Fix bad style: reject should only and always be an error.
         // We should be resolving with result status.
