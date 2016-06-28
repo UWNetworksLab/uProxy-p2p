@@ -210,13 +210,13 @@
             <paper-dropdown-menu label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}'>
               <paper-dropdown class="dropdown" valign="bottom">
                   <core-menu class="menu" on-core-select="{{ updateError }}" selected=null id="errorInput">
-                        <paper-item errorCode='{{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
-                        <paper-item errorCode='{{ "CLOUD_SERVER_NO_CONNECT" | $$ }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
-                        <paper-item errorCode='{{ "TROUBLE_SIGNING_IN" | $$ }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
-                        <paper-item errorCode='{{ "NO_FRIENDS" | $$ }}'> {{ "NO_FRIENDS" | $$ }} </paper-item>
-                        <paper-item errorCode='{{ "TROUBLE_STARTING_CONNECTION" | $$ }}'> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
-                        <paper-item errorCode='{{ "DISCONNECTED_FROM_FRIEND" | $$ }}'> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
-                        <paper-item errorCode="Other"> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
+                        <paper-item data-errorCode='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
+                        <paper-item data-errorCode='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
+                        <paper-item data-errorCode='{{ UserFeedbackType.TROUBLE_SIGNING_IN }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
+                        <paper-item data-errorCode='{{ UserFeedbackType.NO_FRIENDS }}'> {{ "NO_FRIENDS" | $$ }} </paper-item>
+                        <paper-item data-errorCode='{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}'> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
+                        <paper-item data-errorCode='{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}'> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
+                        <paper-item data-errorCode='{{ UserFeedbackType.OTHER_FEEDBACK }}'> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
                   </core-menu>
               </paper-dropdown>
             </paper-dropdown-menu>

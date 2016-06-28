@@ -11,7 +11,6 @@ var model = ui_context.model;
 
 Polymer({
   email: '',
-  error: '', //didn't get rid of this yet
   feedback: '',
   logs: '',
   feedbackType: '',
@@ -44,7 +43,6 @@ Polymer({
     this.$.sendingFeedbackDialog.open();
     ui_context.ui.sendFeedback({
       email: this.email,
-      error: this.error,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,
       browserInfo: navigator.userAgent,
@@ -59,8 +57,8 @@ Polymer({
       this.$.feedbackDecorator.isInvalid = false;
       // Clear the form.
       this.email = '';
-      this.error = '';
       this.feedback = '';
+      this.feedbackType = '';
       this.$.logCheckbox.checked = false;
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
@@ -81,24 +79,7 @@ Polymer({
   },
   updateError: function(event: Event, detail: any, sender: HTMLElement) {
     if (detail.isSelected) {
-      this.error = detail.item.getAttribute('errorCode');
-      if (this.$.errorInput.selected == 0) {
-        this.feedbackType = uproxy_core_api.UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED;
-      } else if (this.$.errorInput.selected ==  1) {
-        this.feedbackType = uproxy_core_api.UserFeedbackType.CLOUD_SERVER_NO_CONNECT;
-      } else if (this.$.errorInput.selected ==  2) {
-        this.feedbackType = uproxy_core_api.UserFeedbackType.TROUBLE_SIGNING_IN;
-      } else if (this.$.errorInput.selected ==  3) {
-        this.feedbackType = uproxy_core_api.UserFeedbackType.NO_FRIENDS;
-      } else if (this.$.errorInput.selected ==  4) {
-        this.feedbackType = uproxy_core_api.UserFeedbackType.TROUBLE_STARTING_CONNECTION;
-      } else if (this.$.errorInput.selected ==  5) {
-        this.feedbackType = uproxy_core_api.UserFeedbackType.DISCONNECTED_FROM_FRIEND;
-      } else if (this.$.errorInput.selected ==  6) {
-        this.feedbackType = uproxy_core_api.UserFeedbackType.OTHER_FEEDBACK;
-      } else {
-        this.feedbackType = uproxy_core_api.UserFeedbackType.USER_INITIATED;
-      }
+      this.feedbackType = detail.item.getAttribute('data-errorCode');
     }
   },
   viewLogs: function() {
@@ -107,6 +88,7 @@ Polymer({
   ready: function() {
     this.ui = ui_context.ui;
     this.model = ui_context.model;
+    this.UserFeedbackType = uproxy_core_api.UserFeedbackType;
   },
   computed: {
     'opened': '$.feedbackPanel.opened'
