@@ -204,7 +204,7 @@
           <div id="commonFeedbackOptions">
             <paper-dropdown-menu label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}'>
               <paper-dropdown class="dropdown" valign="bottom">
-                  <core-menu class="menu" on-core-select="{{ updateError }}" selected=null id="errorInput">
+                  <core-menu class="menu" selected="{{ feedbackType }}" valueattr="data-feedbackOption" id="errorInput">
                         <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
                         <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
                         <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_SIGNING_IN }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>

@@ -13,7 +13,7 @@ Polymer({
   email: '',
   feedback: '',
   logs: '',
-  feedbackType: '',
+  feedbackType: null,
   close: function() {
     this.$.feedbackPanel.close();
   },
@@ -29,13 +29,13 @@ Polymer({
   sendFeedback: function() {
     this.feedback = this.feedback.trim();
     //if user does not select something from dropdown
-    if (this.$.errorInput.selected == 'null') {
+    if (this.$.errorInput.selected == null) {
         this.$.errorDecorator.isInvalid = true;
         return;
     }
 
     //if user selects 'other', make sure that additional feedback is required
-    if (this.$.errorInput.selected == 6 && !this.feedback.length) {
+    if (this.feedbackType == uproxy_core_api.UserFeedbackType.OTHER_FEEDBACK && !this.feedback.length) {
       this.$.errorDecorator.isInvalid = false;
       this.$.feedbackDecorator.isInvalid = true;
       return;
@@ -58,7 +58,7 @@ Polymer({
       // Clear the form.
       this.email = '';
       this.feedback = '';
-      this.feedbackType = '';
+      this.feedbackType = null;
       this.$.logCheckbox.checked = false;
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
