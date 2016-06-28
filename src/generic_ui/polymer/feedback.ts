@@ -79,7 +79,7 @@ Polymer({
   },
   updateError: function(event: Event, detail: any, sender: HTMLElement) {
     if (detail.isSelected) {
-      this.feedbackType = detail.item.getAttribute('data-errorCode');
+      this.feedbackType = detail.item.getAttribute('data-feedbackOption');
     }
   },
   viewLogs: function() {

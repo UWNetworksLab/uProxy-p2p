@@ -76,23 +76,18 @@
       background-color: #ffffff;
       text-transform: uppercase;
     }
-    #feedbackDropdown paper-dropdown-menu {
+    #commonFeedbackOptions paper-dropdown-menu {
       border-bottom: 0px;
       font-size: 16px;
       margin-top: 0em;
       margin-bottom: 0em;
     }
-    #feedbackDropdown core-icon {
+    #commonFeedbackOptions core-icon {
       height: 18px;
       width: 18px;
     }
-    #feedbackDropdown paper-item::shadow .button-content {
+    #commonFeedbackOptions paper-item::shadow .button-content {
       padding: 0;
-    }
-    /* Makes the default selected item of the dropdown opaque and grey */
-    #label:not(.selectedItem) {
-      color: grey;
-      opacity: 0.6;
     }
     core-icon {
       height: 15px !important;
@@ -206,17 +201,17 @@
           </paper-input-decorator>
           <!-- Dropdown menu that provides user with some common feedbacks -->
           <p class="inputLabel">{{"CUSTOM_ERROR_TITLE" | $$ }}</p>
-          <div id="feedbackDropdown">
+          <div id="commonFeedbackOptions">
             <paper-dropdown-menu label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}'>
               <paper-dropdown class="dropdown" valign="bottom">
                   <core-menu class="menu" on-core-select="{{ updateError }}" selected=null id="errorInput">
-                        <paper-item data-errorCode='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
-                        <paper-item data-errorCode='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
-                        <paper-item data-errorCode='{{ UserFeedbackType.TROUBLE_SIGNING_IN }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
-                        <paper-item data-errorCode='{{ UserFeedbackType.NO_FRIENDS }}'> {{ "NO_FRIENDS" | $$ }} </paper-item>
-                        <paper-item data-errorCode='{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}'> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
-                        <paper-item data-errorCode='{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}'> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
-                        <paper-item data-errorCode='{{ UserFeedbackType.OTHER_FEEDBACK }}'> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
+                        <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
+                        <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
+                        <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_SIGNING_IN }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
+                        <paper-item data-feedbackOption='{{ UserFeedbackType.NO_FRIENDS }}'> {{ "NO_FRIENDS" | $$ }} </paper-item>
+                        <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}'> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
+                        <paper-item data-feedbackOption='{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}'> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
+                        <paper-item data-feedbackOption='{{ UserFeedbackType.OTHER_FEEDBACK }}'> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
                   </core-menu>
               </paper-dropdown>
             </paper-dropdown-menu>
