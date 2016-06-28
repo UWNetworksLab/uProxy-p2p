@@ -58,7 +58,7 @@ Polymer({
     }
 
     confirmLogout.then(() => {
-      ui.logout({
+      this.$.state.background.logout({
         name: this.name,
         userId: this.networkInfo.userId
       });

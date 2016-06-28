@@ -138,7 +138,12 @@ Polymer({
         userId: this.contact.userId
       });
     }).then(() => {
-      this.ui.toastMessage = translator.i18n_t('REMOVE_CLOUD_SERVER_SUCCESS');
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('REMOVE_CLOUD_SERVER_SUCCESS')
+        }
+      });
     }).catch((e: Error) => {
       if (!e) {
         return;
@@ -174,7 +179,12 @@ Polymer({
   },
   destroyCloudServerIfNeeded: function() {
     if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-      this.ui.toastMessage = translator.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('REMOVING_UPROXY_CLOUD_STATUS')
+        }
+      });
       return ui_context.core.cloudUpdate({
         operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
         providerName: DEFAULT_PROVIDER
