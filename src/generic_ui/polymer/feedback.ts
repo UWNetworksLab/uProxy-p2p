@@ -11,7 +11,7 @@ var model = ui_context.model;
 
 Polymer({
   email: '',
-  error: '',
+  error: '', //didn't get rid of this yet
   feedback: '',
   logs: '',
   feedbackType: '',
