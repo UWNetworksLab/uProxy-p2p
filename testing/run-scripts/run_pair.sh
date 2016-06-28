@@ -21,7 +21,7 @@ CONTAINER_PREFIX="uproxy"
 
 function usage () {
   echo "$0 [-p path] [-v] [-k] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
-  echo "  -p: use a pre-built uproxy (conflicts with -g)"
+  echo "  -p: path to uproxy repo"
   echo "  -v: enable VNC on containers.  They will be ports 5900 and 5901."
   echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
   echo "  -m MTU: set the MTU on the getter's network interface."
@@ -85,7 +85,7 @@ function run_docker () {
   fi
   if [ ! -z "$PREBUILT" ]
   then
-    HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy"
+    HOSTARGS="$HOSTARGS -v $PREBUILT/build/dev/uproxy/lib/samples:/test/zork"
   fi
   docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /sbin/my_init -- /test/bin/load-zork.sh $RUNARGS
 }

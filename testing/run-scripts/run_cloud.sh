@@ -24,7 +24,7 @@ SSHD_PORT=5000
 
 function usage () {
   echo "$0 [-p path] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
-  echo "  -p: use a pre-built uproxy"
+  echo "  -p: path to uproxy repo"
   echo "  -z: use a specified Zork image (defaults to uproxy/zork)"
   echo "  -s: use a specified sshd image (defaults to uproxy/sshd)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
@@ -134,7 +134,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   HOSTARGS=
   if [ -n "$PREBUILT" ]
   then
-    HOSTARGS="$HOSTARGS -v $PREBUILT:/test/src/uproxy"
+    HOSTARGS="$HOSTARGS -v $PREBUILT/build/dev/uproxy/lib/samples:/test/zork"
   fi
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
