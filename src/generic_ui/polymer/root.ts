@@ -207,6 +207,8 @@ Polymer({
       this.$.settings.accountChooserOpen = false;
     } else {
       // Drawer was closed.
+      // Cancel the user's edits to the description, if they haven't saved
+      this.$.settings.$.description.cancelEditing();
       this.$.statsTooltip.disabled = false;
     }
   },
