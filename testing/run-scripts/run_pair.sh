@@ -11,8 +11,6 @@ set -e
 
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
-GIT=false
-BRANCH=
 PREBUILT=
 VNC=false
 KEEP=false
@@ -22,9 +20,7 @@ PROXY_PORT=9999
 CONTAINER_PREFIX="uproxy"
 
 function usage () {
-  echo "$0 [-g] [-b branch] [-p path] [-v] [-k] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
-  echo "  -g: pull code from git (conflicts with -p)"
-  echo "  -b: git branch to pull (default: HEAD's referant)"
+  echo "$0 [-p path] [-v] [-k] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
   echo "  -p: use a pre-built uproxy (conflicts with -g)"
   echo "  -v: enable VNC on containers.  They will be ports 5900 and 5901."
   echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
@@ -41,10 +37,8 @@ function usage () {
 }
 
 # TODO: replace browser-version with a Docker image name, ala run_cloud.sh
-while getopts gb:p:kvr:m:l:s:u:h? opt; do
+while getopts p:kvr:m:l:s:u:h? opt; do
   case $opt in
-    g) GIT=true ;;
-    b) BRANCH="$OPTARG" ;;
     p) PREBUILT="$OPTARG" ;;
     k) KEEP=true ;;
     v) VNC=true ;;
@@ -56,18 +50,6 @@ while getopts gb:p:kvr:m:l:s:u:h? opt; do
   esac
 done
 shift $((OPTIND-1))
-
-if [ "$GIT" = true ] && [ "$PREBUILT" = true ]
-then
-  echo "cannot use both -g and -p"
-  usage
-fi
-
-if [ -n "$BRANCH" ] && [ "$GIT" = false ]
-then
-  echo "-g must be used when -b is used"
-  usage
-fi
 
 if [ $# -lt 2 ]
 then
