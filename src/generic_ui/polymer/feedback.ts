@@ -25,8 +25,6 @@ Polymer({
     if (data && data.includeLogs) {
       this.$.logCheckbox.checked = true;
     }
-    this.feedbackType = (data && data.feedbackType) ? data.feedbackType :
-        uproxy_core_api.UserFeedbackType.USER_INITIATED;
     this.$.feedbackPanel.open();
   },
   sendFeedback: function() {
@@ -84,6 +82,23 @@ Polymer({
   updateError: function(event: Event, detail: any, sender: HTMLElement) {
     if (detail.isSelected) {
       this.error = detail.item.getAttribute('errorCode');
+      if (this.$.errorInput.selected == 0) {
+        this.feedbackType = uproxy_core_api.UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED;
+      } else if (this.$.errorInput.selected ==  1) {
+        this.feedbackType = uproxy_core_api.UserFeedbackType.CLOUD_SERVER_NO_CONNECT;
+      } else if (this.$.errorInput.selected ==  2) {
+        this.feedbackType = uproxy_core_api.UserFeedbackType.TROUBLE_SIGNING_IN;
+      } else if (this.$.errorInput.selected ==  3) {
+        this.feedbackType = uproxy_core_api.UserFeedbackType.NO_FRIENDS;
+      } else if (this.$.errorInput.selected ==  4) {
+        this.feedbackType = uproxy_core_api.UserFeedbackType.TROUBLE_STARTING_CONNECTION;
+      } else if (this.$.errorInput.selected ==  5) {
+        this.feedbackType = uproxy_core_api.UserFeedbackType.DISCONNECTED_FROM_FRIEND;
+      } else if (this.$.errorInput.selected ==  6) {
+        this.feedbackType = uproxy_core_api.UserFeedbackType.OTHER_FEEDBACK;
+      } else {
+        this.feedbackType = uproxy_core_api.UserFeedbackType.USER_INITIATED;
+      }
     }
   },
   viewLogs: function() {
