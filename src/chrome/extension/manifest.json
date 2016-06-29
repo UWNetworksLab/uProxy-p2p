@@ -42,7 +42,7 @@
     "webRequestBlocking"
   ],
   "web_accessible_resources": [
-    "icons/*",
+    "icons/*"
   ],
   "externally_connectable": {
     "ids": [
