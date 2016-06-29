@@ -271,11 +271,13 @@ gruntConfig = {
     # https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Publish.md
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
+#      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
+      command: '<%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
     }
     ccaReleaseAndroid: {
       cwd: '<%= androidDistPath %>'
-      command: '<%= ccaJsPath %> build android --release --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
+#      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
+      command: '<%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
@@ -311,6 +313,9 @@ gruntConfig = {
     }
     androidCrosswalkHackDev: {
       command: 'sh android_xwalk_hack.sh'
+    }
+    androidCrosswalkHackDist: {
+      command: 'sh android_xwalk_hack_dist.sh'
     }
   }
 
@@ -1173,6 +1178,7 @@ taskManager.add 'release_android', [
   'copy:cca_splash_dist'
   'symlink:cca_keys'
   'exec:ccaReleaseAndroid'
+  'exec:androidCrosswalkHackDist'
 ]
 
 # Emulate the mobile client for android
