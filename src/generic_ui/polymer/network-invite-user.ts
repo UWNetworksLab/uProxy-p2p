@@ -28,19 +28,21 @@ Polymer({
   },
   sendToFacebookFriend: function() {
     this.generateInviteUrl('Facebook-Firebase-V2').then(() => {
+      var encodedInviteUrl = encodeURIComponent(this.inviteUrl);
+
       // Open a "Send Message" dialog to send a Facebook Message.
       // See https://developers.facebook.com/docs/sharing/reference/send-dialog
       // This is our preferred dialog, but it is not available on mobile web.
       var facebookSendUrl =
           'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
-          + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/autoclose';
+          + encodedInviteUrl + '&redirect_uri=https://www.uproxy.org/autoclose';
       // Open a "Share" dialog to produce a timeline post.
       // See https://developers.facebook.com/docs/sharing/reference/share-dialog
       // This is available on mobile, but only offers timeline posts, which may
       // not notify their recipients.
       var facebookShareUrl =
           'https://m.facebook.com/dialog/share?app_id=%20161927677344933&href='
-          + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/autoclose';
+          + encodedInviteUrl + '&redirect_uri=https://www.uproxy.org/autoclose';
       var facebookUrl = navigator.userAgent.indexOf('Mobile Safari') === -1 ?
           facebookSendUrl : facebookShareUrl;
       ui.openTab(facebookUrl);
