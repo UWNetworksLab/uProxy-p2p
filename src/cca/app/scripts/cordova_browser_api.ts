@@ -73,7 +73,7 @@ class CordovaBrowserApi implements BrowserAPI {
 
   private onUrl_ = (url:string) => {
     // "request/" and "offer/" require trailing slashes. "invite" does not.
-    var urlMatch = /(?:http|https)\:\/\/(?:www\.)?uproxy\.org\/(request\/|offer\/|invite).*/;
+    var urlMatch = /(?:http|https)\:\/\/(?:www\.)?uproxy\.org\/invite.*/;
     if (!url) {
       // This is expected because webintent.getUri() calls back with null if
       // there is no URI for this startup, i.e. normal startup.
@@ -86,14 +86,8 @@ class CordovaBrowserApi implements BrowserAPI {
       console.warn('Unmatched intent URL: ' + url);
       return;
     }
-    if (match[1] === 'invite') {
-      this.emit_('inviteUrlData', url);
-    } else if (match[1] === 'request/' || match[1] === 'offer/') {
-      this.emit_('copyPasteUrlData', url);
-    } else {
-      // This code is unreachable.
-      console.warn('Bug encountered while processing url: ' + url);
-    }
+
+    this.emit_('inviteUrlData', url);
   }
 
   public isConnectedToCellular = () : Promise<boolean> => {

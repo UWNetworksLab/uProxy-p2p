@@ -10,10 +10,10 @@
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
 <link rel="import" href="../../bower/core-overlay/core-overlay.html">
 <link rel='import' href='advanced-settings.html'>
+<link rel='import' href='app-bar.html'>
 <link rel='import' href='browser-elements.html'>
 <link rel='import' href='bubble.html'>
 <link rel='import' href='button.html'>
-<link rel='import' href='copypaste.html'>
 <link rel='import' href='dialog.html'>
 <link rel="import" href='faq.html'>
 <link rel='import' href='feedback.html'>
@@ -295,9 +295,6 @@
 
     <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
-    <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
-    </uproxy-copypaste>
-
     <!-- core-overlays, launched using core-signals -->
     <uproxy-invite-user></uproxy-invite-user>
     <uproxy-google-invite></uproxy-google-invite>
@@ -322,13 +319,6 @@
 
           <core-icon icon="menu" core-drawer-toggle></core-icon>
           <div id='title' flex>uProxy</div>
-
-          <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
-            <h3>{{ "CANNOT_OPEN_ONE_TIME_TITLE" | $$ }}</h3>
-            <p>
-              {{ "CANT_OPEN_ONE_TIME_MESSAGE" | $$ }}
-            </p>
-          </uproxy-bubble>
 
           <core-tooltip id='statsTooltip' label='{{ "STATS_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
