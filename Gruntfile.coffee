@@ -358,6 +358,7 @@ gruntConfig = {
           cwd: chromeAppDevPath
           src: [
             'manifest.json'
+            'managed_policy_schema.json'
             '_locales/**'
 
             # UI for not-connected
@@ -628,6 +629,11 @@ gruntConfig = {
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider']
         localDestPath: 'lib/samples/echo-server-firefoxapp/data/'
+    libsForEchoServerNode:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-node']
+        pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider']
+        localDestPath: 'lib/samples/echo-server-node/'
 
     libsForCopypasteChatChromeApp:
       Rule.copyLibs
@@ -687,6 +693,15 @@ gruntConfig = {
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-socks-firefoxapp/data/'
+    libsForSimpleSocksNode:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-node']
+        pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: [
+          'uproxy-obfuscators'
+          'freedom-port-control'
+        ]
+        localDestPath: 'lib/samples/simple-socks-node/'
 
     libsForSimpleChatChromeApp:
       Rule.copyLibs
@@ -1021,6 +1036,7 @@ taskManager.add 'echoServer', [
   'browserify:echoServerFreedomModule'
   'copy:libsForEchoServerChromeApp'
   'copy:libsForEchoServerFirefoxApp'
+  'copy:libsForEchoServerNode'
 ]
 
 taskManager.add 'copypasteChat', [
@@ -1062,6 +1078,7 @@ taskManager.add 'simpleSocks', [
   'browserify:simpleSocksFreedomModule'
   'copy:libsForSimpleSocksChromeApp'
   'copy:libsForSimpleSocksFirefoxApp'
+  'copy:libsForSimpleSocksNode'
 ]
 
 taskManager.add 'uprobe', [

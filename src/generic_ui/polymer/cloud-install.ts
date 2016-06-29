@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
+import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import ui_constants = require('../../interfaces/ui');
 import user = require('../scripts/user');
@@ -29,10 +30,6 @@ Polymer({
 
     this.$.getStartedOverlay.open();
   },
-  showDigitalOceanAccountHelpOverlay: function() {
-    this.closeOverlays();
-    this.$.digitalOceanAccountHelpOverlay.open();
-  },
   showLoginOverlay: function() {
     this.closeOverlays();
     this.$.loginOverlay.open();
@@ -49,8 +46,7 @@ Polymer({
     ui.openTab('https://cloud.digitalocean.com/droplets');
   },
   back: function() {
-    if (this.$.digitalOceanAccountHelpOverlay.opened ||
-        this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
+    if (this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
       this.closeOverlays();
       this.$.getStartedOverlay.open();
     } else {
@@ -59,7 +55,6 @@ Polymer({
   },
   closeOverlays: function() {
     this.$.getStartedOverlay.close();
-    this.$.digitalOceanAccountHelpOverlay.close();
     this.$.loginOverlay.close();
     this.$.installingOverlay.close();
     this.$.successOverlay.close();
@@ -84,6 +79,7 @@ Polymer({
       this.closeOverlays();
       this.$.successOverlay.open();
       ui.model.globalSettings.shouldHijackDO = false;
+      ui.core.updateGlobalSettings(ui.model.globalSettings);
     }).catch((e :any) => {
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
@@ -134,10 +130,20 @@ Polymer({
       providerName: DEFAULT_PROVIDER
     }).then(() => {
       this.closeOverlays();
-      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_SUCCESS');
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('CLOUD_INSTALL_CANCEL_SUCCESS')
+        }
+      });
     }).catch((e: Error) => {
       this.$.cancelingOverlay.close();
-      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_FAILURE');
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('CLOUD_INSTALL_CANCEL_FAILURE')
+        }
+      });
     });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {

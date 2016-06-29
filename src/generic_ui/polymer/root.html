@@ -10,10 +10,10 @@
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
 <link rel="import" href="../../bower/core-overlay/core-overlay.html">
 <link rel='import' href='advanced-settings.html'>
+<link rel='import' href='app-bar.html'>
 <link rel='import' href='browser-elements.html'>
 <link rel='import' href='bubble.html'>
 <link rel='import' href='button.html'>
-<link rel='import' href='copypaste.html'>
 <link rel='import' href='dialog.html'>
 <link rel="import" href='faq.html'>
 <link rel='import' href='feedback.html'>
@@ -90,10 +90,12 @@
         box-shadow: inset 0px 5px 6px -3px rgba(0,0,0,0.13);
       }
       core-toolbar {
-        height: 105px;
         width: 100%;
         background-color: #12A391;
         color: white;
+      }
+      core-toolbar.hasContacts {
+        height: 105px;
       }
       core-toolbar::shadow #topBar {
         padding: 0px 16px;
@@ -227,7 +229,6 @@
         padding-top: 1em;
         padding-bottom: 1em;
         border-top: 1px solid rgb(221, 221, 221);
-        text-transform: uppercase;
         display: block;
         text-align: center;
         font-size: 1.1em;
@@ -256,7 +257,6 @@
         font-size: 12px;
       }
       paper-toast #toastHelpLink {
-        text-transform: uppercase;
         color: #47B5AA;
       }
       #inviteButton {
@@ -289,13 +289,11 @@
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
 
-    <!-- Required for cases where an open-dialog signal is sent from the UI via ui.fireSignal -->
     <core-signals on-core-signal-open-dialog="{{ openDialog }}"></core-signals>
 
-    <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
+    <core-signals on-core-signal-show-toast="{{ showToast }}"></core-signal>
 
-    <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
-    </uproxy-copypaste>
+    <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
     <!-- core-overlays, launched using core-signals -->
     <uproxy-invite-user></uproxy-invite-user>
@@ -317,17 +315,10 @@
       <core-header-panel main
           hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
 
-        <core-toolbar>
+        <core-toolbar class="{{ {hasContacts: hasContacts} | tokenList }}">
 
           <core-icon icon="menu" core-drawer-toggle></core-icon>
           <div id='title' flex>uProxy</div>
-
-          <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
-            <h3>{{ "CANNOT_OPEN_ONE_TIME_TITLE" | $$ }}</h3>
-            <p>
-              {{ "CANT_OPEN_ONE_TIME_MESSAGE" | $$ }}
-            </p>
-          </uproxy-bubble>
 
           <core-tooltip id='statsTooltip' label='{{ "STATS_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
@@ -345,7 +336,7 @@
             <p>{{ "SHARING_ENABLED_MESSAGE" | $$ }}</p>
           </uproxy-bubble>
 
-          <div class='bottom fit' dir="ltr">
+          <div class='bottom fit' dir="ltr" hidden?='{{ !hasContacts }}'>
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
                 <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$ }}</span>
