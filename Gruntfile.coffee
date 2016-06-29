@@ -312,10 +312,10 @@ gruntConfig = {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
     androidCrosswalkHackDev: {
-      command: 'sh android_xwalk_hack.sh'
+      command: './android_xwalk_hack.sh debug'
     }
     androidCrosswalkHackDist: {
-      command: 'sh android_xwalk_hack_dist.sh'
+      command: './android_xwalk_hack.sh release'
     }
   }
 
