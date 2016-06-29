@@ -309,6 +309,9 @@ gruntConfig = {
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
+    androidCrosswalkHackDev: {
+      command: 'sh android_xwalk_hack.sh'
+    }
   }
 
   copy: {
@@ -1158,6 +1161,7 @@ taskManager.add 'build_android', [
   'exec:ccaAddPluginsAndroidDev'
   'copy:cca_splash_dev'
   'exec:ccaBuildAndroid'
+  'exec:androidCrosswalkHackDev'
 ]
 
 taskManager.add 'release_android', [
