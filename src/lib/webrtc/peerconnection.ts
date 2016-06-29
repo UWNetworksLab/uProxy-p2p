@@ -200,6 +200,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Maximum number of channels.
   private maxChannels_ = 65536;
 
+  // This method is null by default.  If it is not null, it will be used to
+  // modify the RTCSessionDescription produced by createOffer before it is
+  // passed to setLocalDescription.  Consumers of PeerConnectionClass that
+  // want to use this capability should set this method to a function that
+  // implements the desired transform before initiating signaling.
   public mungeLocalDescription :
       (sdp:RTCSessionDescription) => Promise<RTCSessionDescription> = null;
 

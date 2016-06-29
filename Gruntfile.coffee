@@ -267,16 +267,14 @@ gruntConfig = {
       cwd: '<%= androidDistPath %>'
       command: '<%= ccaAddPluginsCmd %>'
     }
-    # This pair of "cca build" commands is exactly as recommended at
-    # https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Publish.md
+    # Note: The fixed crosswalk version here is pinned in order to maintain
+    # compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-#      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
       command: '<%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
     }
     ccaReleaseAndroid: {
       cwd: '<%= androidDistPath %>'
-#      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
       command: '<%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
     }
     ccaEmulateAndroid: {

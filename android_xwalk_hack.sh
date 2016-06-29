@@ -24,12 +24,13 @@ mkdir -p "$TMPDIR/$LIB_PATH"
 # -L ensures that curl follows the redirect
 curl $LIB_URL -o "$TMPDIR/$LIB_PATH/$LIB_NAME" -L
 
-# Replace the Crosswalk library
+# Replace the Crosswalk library inside the apk
 jar -ufv $APK_FILE -C $TMPDIR "$LIB_PATH/$LIB_NAME"
 
 # Delete the META-INF directory to allow re-signing
 zip -d $APK_FILE "META-INF/*"
 
+# Re-sign
 if [ "$1" = "debug" ]; then
   KEY_DIR="$HOME/.android"
   storeFile="debug.keystore"
@@ -39,13 +40,11 @@ if [ "$1" = "debug" ]; then
 elif [ "$1" = "release" ]; then
   # Release owners should symlink the key directory onto keys/
   KEY_DIR="keys"
-  # Load key/password info
+  # Load $storeFile, $storePassword, $keyAlias, and $keyPassword
   source "$KEY_DIR/android-release-keys.properties"
 else
   echo "Unknown build type $1"
   exit 1
 fi
 
-# Re-sign
 jarsigner -keystore "$KEY_DIR/$storeFile" -storepass $storePassword -keypass $keyPassword $APK_FILE $keyAlias
-
