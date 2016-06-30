@@ -60,7 +60,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   enabledExperiments: [],
   shouldHijackDO: true,
   crypto: true,
-  torOn: true,
+  torOn: false,
   torPort: 9050,
 };
 
