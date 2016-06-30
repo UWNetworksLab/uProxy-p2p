@@ -1,5 +1,14 @@
 #!/bin/bash
 
+#
+# Script for replacing the copy of Crosswalk in an APK with our modified build.
+#
+# Our modified build of Crosswalk includes support for obfuscating WebRTC output
+# in native code.  This is how we implement obfuscation on Android, where we
+# have the ability to provide our own modified browser runtime and the CPU is
+# not fast enough for our implementation of CHURN in javascript to perform well.
+#
+
 # Get the directory where this script is and set ROOT_DIR to that path. This
 # allows script to be run from different directories but always act on the
 # directory of the project (which is where this script is located).
