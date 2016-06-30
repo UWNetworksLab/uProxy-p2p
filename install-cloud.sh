@@ -14,17 +14,20 @@ set -e
 REQUIRED_COMMANDS="docker git nc"
 
 AUTOMATED=false
+UPDATE=false
 
 usage() {
-  echo "$0 [-a] [-h]"
+  echo "$0 [-a] [-u] [-h]"
   echo "  -a: do not output complete invite URL"
+  echo "  -u: update Docker images (preserves invites and metadata)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts ah? opt; do
+while getopts auh? opt; do
   case $opt in
     a) AUTOMATED=true ;;
+    u) UPDATE=true ;;
     *) usage ;;
   esac
 done
@@ -82,11 +85,14 @@ do_install() {
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
   cd $TMP_DIR/testing/run-scripts
 
-  # TODO: pass other run_cloud.sh arguments, e.g. -u
   RUN_CLOUD_ARGS=
   if [ "$AUTOMATED" = true ]
   then
-    RUN_CLOUD_ARGS="$RUNARGS -a"
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -a"
+  fi
+  if [ "$UPDATE" = true ]
+  then
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -u"
   fi
   ./run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
