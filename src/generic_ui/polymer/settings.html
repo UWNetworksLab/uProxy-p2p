@@ -168,7 +168,7 @@
       <div id='mainSettings' class='settingsContent' hidden?='{{ accountChooserOpen }}'>
         <div class='smalltext'>
           {{ "DEVICE_DESCRIPTION" | $$ }}
-          <uproxy-description></uproxy-description>
+          <uproxy-description id='description'></uproxy-description>
         </div>
 
         <hr>
@@ -198,7 +198,7 @@
 
         <hr>
 
-        <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
+        <uproxy-link on-tap='{{ restart }}' hidden?='{{ !showRestartButton }}' role='button'>
           <core-icon icon='refresh'></core-icon>
           <span class='label'>{{ "RESTART" | $$ }}</span>
         </uproxy-link>
