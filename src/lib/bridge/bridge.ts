@@ -6,7 +6,7 @@ import handler = require('../handler/queue');
 import logging = require('../logging/logging');
 import peerconnection = require('../webrtc/peerconnection');
 import peerconnection_types = require('../webrtc/signals');
-import xchurn = require('../xwalk-hack/churn');
+import xchurn = require('../churn/xwalk');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

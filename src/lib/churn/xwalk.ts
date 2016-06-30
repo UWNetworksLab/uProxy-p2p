@@ -17,20 +17,6 @@ import TransformerConfig = churn_types.TransformerConfig;
 
 var log :logging.Log = new logging.Log('xchurn');
 
-export var getMidFromSdp = (sdp:string) : string => {
-  var mids :string[] = [];
-  sdp.split('\n').forEach((s) => {
-    var match = s.match(/^a=mid:(\S+)\s*$/);
-    if (match) {
-      mids.push(match[1]);
-    }
-  });
-  if (mids.length !== 1) {
-    throw new Error('Expected 1 mid, but there are actually ' + mids.length);
-  }
-  return mids[0];
-}
-
 // Generates a key suitable for use with CaesarCipher, viz. 1-255.
 var generateCaesarConfig_ = (): caesar.Config => {
   return {
@@ -42,8 +28,10 @@ var generateCaesarConfig_ = (): caesar.Config => {
 }
 
 /**
- * A CHURN implementation for hacked crosswalk browsers.
- * Caesar only.  Sets caesar parameter by SDP munging.
+ * A CHURN implementation that works when running in a modified crosswalk
+ * runtimes that includes built-in caesar cipher support.
+ * This class only supports the 'caesar' obfuscator.  The caesar parameter is
+ * communicated to the browser by inserting it into the localDescription SDP.
  */
 export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
@@ -69,7 +57,7 @@ export class Connection implements peerconnection.PeerConnection<ChurnSignalling
   });
 
   constructor(rtcPc:freedom.RTCPeerConnection.RTCPeerConnection,
-              private name_ = 'unnamed-churn-' + Connection.id_,
+              private name_ = 'unnamed-xchurn-' + Connection.id_,
               private skipPublicEndpoint_?:boolean,
               private portControl_?:freedom.PortControl.PortControl,
               private preferredTransformerConfig_?:TransformerConfig) {
@@ -95,6 +83,8 @@ export class Connection implements peerconnection.PeerConnection<ChurnSignalling
 
     this.pc_.signalForPeerQueue.setSyncHandler(
         (message:signals.Message) => {
+      // TODO: Move this functionality into PeerConnectionClass, so it doesn't
+      // have to be copy-pasted here from churn.ts.
       if (message.type === signals.Type.CANDIDATE) {
         var c = Candidate.fromRTCIceCandidate(message.candidate);
         if (c.protocol === 'udp') {
@@ -200,6 +190,6 @@ export class Connection implements peerconnection.PeerConnection<ChurnSignalling
   }
 
   public toString = () : string => {
-    return 'xwalk hack wrapper around ' + this.pc_.toString();
+    return 'Wrapper around ' + this.pc_.toString() + ' using modified xwalk';
   };
 }

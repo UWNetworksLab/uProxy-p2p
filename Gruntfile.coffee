@@ -309,11 +309,11 @@ gruntConfig = {
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
     }
-    androidCrosswalkHackDev: {
-      command: './android_xwalk_hack.sh debug'
+    androidReplaceXwalkDev: {
+      command: './replace_xwalk_in_apk.sh debug'
     }
-    androidCrosswalkHackDist: {
-      command: './android_xwalk_hack.sh release'
+    androidReplaceXwalkDist: {
+      command: './replace_xwalk_in_apk.sh release'
     }
   }
 
@@ -1164,7 +1164,7 @@ taskManager.add 'build_android', [
   'exec:ccaAddPluginsAndroidDev'
   'copy:cca_splash_dev'
   'exec:ccaBuildAndroid'
-  'exec:androidCrosswalkHackDev'
+  'exec:androidReplaceXwalkDev'
 ]
 
 taskManager.add 'release_android', [
@@ -1176,7 +1176,7 @@ taskManager.add 'release_android', [
   'copy:cca_splash_dist'
   'symlink:cca_keys'
   'exec:ccaReleaseAndroid'
-  'exec:androidCrosswalkHackDist'
+  'exec:androidReplaceXwalkDist'
 ]
 
 # Emulate the mobile client for android
