@@ -59,7 +59,9 @@ export var settings :uproxy_core_api.GlobalSettings = {
   activePromoId: null,  // set on promoIdDetected
   enabledExperiments: [],
   shouldHijackDO: true,
-  crypto: true
+  crypto: true,
+  torOn: true,
+  torPort: 9050,
 };
 
 export var natType :string = '';

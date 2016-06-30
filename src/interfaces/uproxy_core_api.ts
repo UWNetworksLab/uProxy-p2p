@@ -44,6 +44,8 @@ export interface GlobalSettings {
   activePromoId: string;
   shouldHijackDO: boolean;
   crypto: boolean;
+  torOn: boolean;
+  torPort: number;
   // A list of strings, each represented as a constant below, with
   // prefix 'FEATURE_'.
   enabledExperiments :string[];

@@ -447,13 +447,14 @@ import ProxyConfig = require('./proxyconfig');
                         endpoint.address);
       }
       this.webEndpoint_ = endpoint;
+      log.debug('%1: Creating tcp connection with tor settings: torOn: %2, torPort: %3', [this.longId(), this.proxyConfig_.torOn, this.proxyConfig_.torPort]);
 
-      if (usingTor) {
+      if (this.proxyConfig_.torOn) {
         // Return TCP connection to local Tor proxy
         // and endpoint of request to be forwarded
         var localTorEndpoint :net.Endpoint = {
           address: '127.0.0.1',
-          port: torPort //default 9050
+          port: this.proxyConfig_.torPort //default 9050
         };
         log.debug('%1: Connecting to the local tor proxy: %2',
                  [this.longId(), localTorEndpoint]);
@@ -468,7 +469,7 @@ import ProxyConfig = require('./proxyconfig');
     private waitForTcpConnection_ = (connection :tcp.Connection)
           :Promise<tcp.ConnectionInfo> => {
       this.tcpConnection_ = connection;
-      log.debug('%1: Connection instantiated to local tor proxy: %2', 
+      log.debug('%1: Connection instantiated to local tor proxy: %2',
                [this.longId(), this.tcpConnection_]);
 
       return this.tcpConnection_.onceConnected
@@ -481,12 +482,12 @@ import ProxyConfig = require('./proxyconfig');
 
     // Relays reply of successful tcp connection to web endpoint to getter
     // If using Tor, socks is used to connect to web endpoint
-    private handleTcpConnection_ = (connectionInfo :tcp.ConnectionInfo) 
+    private handleTcpConnection_ = (connectionInfo :tcp.ConnectionInfo)
         :Promise<void> => {
       var info :tcp.ConnectionInfo = connectionInfo;
-      log.debug('%1: Connected to local tor proxy', [this.longId()]);
 
-      if (usingTor) {
+      if (this.proxyConfig_.torOn) {
+        log.debug('%1: Connected to local tor proxy', [this.longId()]);
         //Send request through Socks protocol
         return this.connectThroughSocks_();
       } else {
@@ -509,7 +510,7 @@ import ProxyConfig = require('./proxyconfig');
       log.debug('%1: Creating auth handshake: %2',
                 [this.longId(), authRequest]);
       this.tcpConnection_.send(authRequest);
-      
+
       // Wait for auth handshake response
       return this.tcpConnection_.receiveNext()
         .then((buffer:ArrayBuffer) :Promise<ArrayBuffer> => {
