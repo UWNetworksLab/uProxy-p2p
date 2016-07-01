@@ -26,6 +26,22 @@ enum PopupState {
 
 declare var Notification :any; //TODO remove this
 
+// Returns whether the device supports VPN mode.
+function deviceSupportsVpn() : boolean {
+  if (window.tun2socks === undefined || window.device === undefined) {
+    // We only add the device and tun2socks plugins to Android.
+    // Other platforms should fail here.
+    return false;
+  }
+  // tun2socks requires Android version >= Marshmallow (6)
+  let majorVersionMatch = window.device.version.match(/^[0-9]+/);
+  if (majorVersionMatch === null) {
+    return false;
+  }
+  let majorVersion = parseInt(majorVersionMatch[0]);
+  return majorVersion >= 6;
+};
+
 class CordovaBrowserApi implements BrowserAPI {
 
   public browserSpecificElement = '';
@@ -36,11 +52,7 @@ class CordovaBrowserApi implements BrowserAPI {
   // https://github.com/uProxy/uproxy/issues/1832
   public hasInstalledThenLoggedIn = true;
 
-  // If tun2socks is in namespace and Android version is >= Marshmallow (6), we
-  // have VPN support. Note that we only add the device plugin to Android.
-  public supportsVpn = window.tun2socks !== undefined
-                       && window.device !== undefined
-                       && window.device.version.match(/^[6-9]/) != null;
+  public supportsVpn = deviceSupportsVpn();
 
   // Mode to start/stop proxying.
   private proxyAccessMode_ = ProxyAccessMode.NONE;
