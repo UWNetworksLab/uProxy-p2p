@@ -178,11 +178,12 @@
         <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
+
         <div id='formContainer' flex>
-          <span id="hi" on-click='{{hiTesting}}'> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
-          <core-collapse id="collapse1">
+          <span id="dropdownContainer" on-click='{{toggleDropdown}}'> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
+          <core-collapse id="collapse">
             <div class="content">
-              <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{hiTesting2}}" valueattr="data-feedbackOption" id="errorInput">
+              <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{ changePlaceholder }}" valueattr="data-feedbackOption" id="errorInput">
                 <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
                 <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
                 <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_SIGNING_IN }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>

@@ -55,6 +55,8 @@ Polymer({
       this.$.errorInput.selected = 'null';
       this.$.errorDecorator.isInvalid = false;
       this.$.feedbackDecorator.isInvalid = false;
+      this.$.dropdownContainer.textContent = ui.i18n_t('CUSTOM_ERROR_PLACEHOLDER');
+      this.$.collapse.opened = false;
       // Clear the form.
       this.email = '';
       this.feedback = '';
@@ -82,11 +84,11 @@ Polymer({
       this.feedbackType = detail.item.getAttribute('data-feedbackOption');
     }
   },
-  hiTesting: function() {
-    this.$.collapse1.toggle();
+  toggleDropdown: function() {
+    this.$.collapse.toggle();
   },
-  hiTesting2: function() {
-    this.$.hi.textContent=this.$.errorInput.children.array()[this.$.errorInput.selected - 2].textContent; //Because errorInput.selected returns values starting from 2 instead of 0 (not sure why)
+  changePlaceholder: function() {
+    this.$.dropdownContainer.textContent=this.$.errorInput.children.array()[this.$.errorInput.selected - 2].textContent; //Because errorInput.selected returns values starting from 2 instead of 0 (not sure why)
   },
   viewLogs: function() {
     this.ui.openTab('generic_ui/view-logs.html?lang=' + model.globalSettings.language);

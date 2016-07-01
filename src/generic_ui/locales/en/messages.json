@@ -285,7 +285,7 @@
   },
   "EMAIL_PLACEHOLDER": {
     "description": "",
-    "message": "Email address"
+    "message": "Email address (optional)"
   },
   "FEEDBACK_TITLE": {
     "description": "Label for textbox for user's to submit feedback and comments to uProxy.",
@@ -293,7 +293,7 @@
   },
   "FEEDBACK_PLACEHOLDER": {
     "description": "The default text that appears in the user feedback textbox.",
-    "message": "Write your feedback"
+    "message": "Your feedback (optional)"
   },
   "FEEDBACK_ERROR_PLACEHOLDER": {
     "description": "Error that apears if you try to submit an empty feedback.",
