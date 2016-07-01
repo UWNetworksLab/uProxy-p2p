@@ -1,6 +1,8 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/webintents.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/tun2socks.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/device.d.ts'/>
 
 /**
  * cordova_browser_api.ts
@@ -10,6 +12,7 @@
  */
 
 import browser_api = require('../../../interfaces/browser_api');
+import ProxyAccessMode = browser_api.ProxyAccessMode;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../lib/net/net.types');
@@ -32,6 +35,15 @@ class CordovaBrowserApi implements BrowserAPI {
   // TODO: Set this to false if we detect that uProxy has just been installed.
   // https://github.com/uProxy/uproxy/issues/1832
   public hasInstalledThenLoggedIn = true;
+
+  // If tun2socks is in namespace and Android version is >= Marshmallow (6), we
+  // have VPN support. Note that we only add the device plugin to Android.
+  public supportsVpn = window.tun2socks !== undefined
+                       && window.device !== undefined
+                       && window.device.version.match(/^6/) != null;
+
+  // Mode to start/stop proxying.
+  private proxyAccessMode_ = ProxyAccessMode.NONE;
 
   public setIcon = (iconFile :string) : void => {
   }
@@ -107,12 +119,27 @@ class CordovaBrowserApi implements BrowserAPI {
       });
   }
 
-  public startUsingProxy = (endpoint:net.Endpoint) => {
+  public startUsingProxy = (endpoint: net.Endpoint, bypass: string[],
+                            opts: browser_api.ProxyConnectOptions) => {
     if (!chrome.proxy) {
       console.log('No proxy setting support; ignoring start command');
       return;
     }
 
+    if (!opts.accessMode || opts.accessMode == ProxyAccessMode.NONE) {
+      console.log('Cannot start proxying with unknown access mode.');
+      return;
+    }
+    // Remember access mode so we can stop proxying appropriately.
+    this.proxyAccessMode_ = opts.accessMode;
+    if (this.proxyAccessMode_ == ProxyAccessMode.IN_APP) {
+      this.startInAppProxy_(endpoint);
+    } else if (this.proxyAccessMode_ == ProxyAccessMode.VPN) {
+      this.startVpnProxy_(endpoint);
+    }
+  };
+
+  private startInAppProxy_ = (endpoint: net.Endpoint) => {
     chrome.proxy.settings.set({
       scope: 'regular',
       value: {
@@ -130,7 +157,27 @@ class CordovaBrowserApi implements BrowserAPI {
       // Open the in-app browser through the proxy.
       this.openTab('https://news.google.com/');
     });
-  };
+  }
+
+  private startVpnProxy_ = (endpoint: net.Endpoint) => {
+    // Set a callback for disconnect event before starting proxying.
+    var browser = this;
+    window.tun2socks.onDisconnect().then(function(msg: string) {
+      // UI will call browser.stopUsingProxy()
+      browser.emit_('proxyDisconnected', { deliberate: false });
+    }).catch(function(err: string) {
+      // Event callbacks are never rejected in the plugin.
+      // We should never reach this.
+      console.log('Tun2Socks onDisconnect error: ', err);
+    });
+
+    var socksServerAddress = '127.0.0.1:' + endpoint.port;
+    window.tun2socks.start(socksServerAddress).then(function(msg: string) {
+      console.log('Tun2Socks start: ', msg);
+    }).catch(function(err: string) {
+      console.log('Tun2Socks start error: ', err);
+    });
+  }
 
   public stopUsingProxy = () => {
     if (!chrome.proxy) {
@@ -138,9 +185,20 @@ class CordovaBrowserApi implements BrowserAPI {
       return;
     }
 
-    chrome.proxy.settings.clear({scope: 'regular'}, () => {
-      console.log('Cleared proxy settings');
-    });
+    if (this.proxyAccessMode_ == ProxyAccessMode.IN_APP) {
+      chrome.proxy.settings.clear({scope: 'regular'}, () => {
+        console.log('Cleared proxy settings');
+      });
+    } else if (this.proxyAccessMode_ == ProxyAccessMode.VPN) {
+      window.tun2socks.stop().then(function(msg: string) {
+        console.log('Tun2Socks stop: ', msg);
+      }).catch(function(err: string) {
+        console.log('Tun2Socks stop error: ', err);
+      });
+    } else {
+      console.log('Cannot stop proxying with unkown start access mode.');
+    }
+    this.proxyAccessMode_ = ProxyAccessMode.NONE;
   };
 
   public openTab = (url :string) => {

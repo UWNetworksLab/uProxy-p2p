@@ -14,6 +14,7 @@ import background_ui = require('./background_ui');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
+import ProxyAccessMode = browser_api.ProxyAccessMode;
 import BrowserAPI = browser_api.BrowserAPI;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import net = require('../../lib/net/net.types');
@@ -118,6 +119,9 @@ export class UserInterface implements ui_constants.UiApi {
 
   public cloudInstallStatus :string = '';
   public cloudInstallProgress = 0;
+
+  // User-initiated proxy access mode.
+  private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -655,6 +659,7 @@ export class UserInterface implements ui_constants.UiApi {
       // In the case where the user clicked stop, this will have no effect
       // (this function is idempotent).
       this.browserApi.stopUsingProxy();
+      this.proxyAccessMode_ = ProxyAccessMode.NONE;
     }
 
     this.updateGettingStatusBar_();
@@ -670,6 +675,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     this.browserApi.stopUsingProxy();
+    this.proxyAccessMode_ = ProxyAccessMode.NONE;
     this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
 
@@ -695,10 +701,12 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public restartProxying = () => {
-    this.startGettingFromInstance(this.core.disconnectedWhileProxying);
+    this.startGettingFromInstance(this.core.disconnectedWhileProxying,
+                                  this.proxyAccessMode_);
   }
 
-  public startGettingFromInstance = (instanceId :string) :Promise<void> => {
+  public startGettingFromInstance =
+      (instanceId :string, accessMode: ProxyAccessMode): Promise<void> => {
     this.instanceTryingToGetAccessFrom = instanceId;
 
     return this.core.start(this.getInstancePath_(instanceId))
@@ -710,7 +718,9 @@ export class UserInterface implements ui_constants.UiApi {
           this.instanceGettingAccessFrom_ != instanceId) {
         this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
       }
-      this.startGettingInUiAndConfig(instanceId, endpoint);
+      // Remember access mode in case of reconnect.
+      this.proxyAccessMode_ = accessMode;
+      this.startGettingInUiAndConfig(instanceId, endpoint, accessMode);
     }, (err:Error) => {
       this.instanceTryingToGetAccessFrom = null;
       throw err;
@@ -739,10 +749,15 @@ export class UserInterface implements ui_constants.UiApi {
     * Sets extension icon to default and undoes proxy configuration.
     */
   public startGettingInUiAndConfig =
-      (instanceId :string, endpoint :net.Endpoint) => {
+      (instanceId :string, endpoint :net.Endpoint, accessMode: ProxyAccessMode) => {
     if (instanceId) {
       this.instanceGettingAccessFrom_ = instanceId;
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
+    }
+
+    if (!accessMode || accessMode === ProxyAccessMode.NONE) {
+      console.log("Cannot start using proxy: unknown proxy acccess mode.");
+      return;
     }
 
     this.core.disconnectedWhileProxying = null;
@@ -752,7 +767,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateGettingStatusBar_();
 
     this.browserApi.startUsingProxy(endpoint,
-        this.model.globalSettings.proxyBypass);
+        this.model.globalSettings.proxyBypass, {accessMode: accessMode});
   }
 
   /**
@@ -903,7 +918,9 @@ export class UserInterface implements ui_constants.UiApi {
       var gettingState = payload.offeringInstances[i].localGettingFromRemote;
       var instanceId = payload.offeringInstances[i].instanceId;
       if (gettingState === social.GettingState.GETTING_ACCESS) {
-        this.startGettingInUiAndConfig(instanceId, payload.offeringInstances[i].activeEndpoint);
+        this.startGettingInUiAndConfig(
+            instanceId, payload.offeringInstances[i].activeEndpoint,
+            this.proxyAccessMode_);
         break;
       } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
         this.instanceTryingToGetAccessFrom = instanceId;
@@ -932,7 +949,7 @@ export class UserInterface implements ui_constants.UiApi {
   };
 
   /**
-   * Remove a friend from the friend list by removing it from 
+   * Remove a friend from the friend list by removing it from
    * model.contacts
    */
   public removeFriend = (args:{ networkName: string, userId: string }) => {

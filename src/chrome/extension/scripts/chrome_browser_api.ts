@@ -25,6 +25,7 @@ class ChromeBrowserApi implements BrowserAPI {
 
   public canProxy = true;
   public hasInstalledThenLoggedIn = true;
+  public supportsVpn = false;
 
   // For browser action.
 
@@ -96,7 +97,9 @@ class ChromeBrowserApi implements BrowserAPI {
            level === 'controlled_by_this_extension';
   }
 
-  public startUsingProxy = (endpoint:net.Endpoint, bypass :string[]) => {
+  public startUsingProxy =
+      (endpoint: net.Endpoint, bypass: string[],
+       opts: browser_api.ProxyConnectOptions) => {
     var config = {
       mode: 'fixed_servers',
       rules: {

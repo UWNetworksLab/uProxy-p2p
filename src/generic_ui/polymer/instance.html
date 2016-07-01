@@ -49,6 +49,9 @@
       color: red;
       display: inline-block;
     }
+    .button-wrapper div {
+      display: inline;
+    }
     </style>
 
     <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
@@ -92,28 +95,37 @@
 
       <!-- It is assumed that all uproxy-instances are taken from
          user.offeringInstances and are therefore giving us access -->
+      <div class="button-wrapper">
+        <!-- not getting or trying to get access -->
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
+          <uproxy-button raised on-tap='{{ startBrowsing }}' disabled?='{{ !ui.browserApi.canProxy  }}'>
+            <!-- TODO(alalama): localize {{ "START_GETTING" | $$ }} -->
+            Start browsing
+          </uproxy-button>
+        </div>
 
-      <!-- not getting or trying to get access -->
-      <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
-        <uproxy-button raised on-tap='{{ start }}' disabled?='{{ !ui.browserApi.canProxy }}'>
-          {{ "START_GETTING" | $$ }}
-        </uproxy-button>
-      </div>
+        <!-- VPN mode -->
+        <div hidden?='{{ !ui.browserApi.supportsVpn || instance.localGettingFromRemote != GettingState.NONE }}'>
+          <uproxy-button raised on-tap='{{ startVpn }}' disabled?='{{ !ui.browserApi.canProxy }}'>
+            <!-- TODO(alalama): localize -->
+            Start VPN
+          </uproxy-button>
+        </div>
 
-      <!-- trying to get access -->
-      <div hidden?='{{ instance.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
-        <uproxy-button class='grey' raised on-tap='{{ stop }}'>
-          {{ "CANCEL" | $$ }}
-        </uproxy-button>
-      </div>
+        <!-- trying to get access -->
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
+          <uproxy-button class='grey' raised on-tap='{{ stop }}'>
+            {{ "CANCEL" | $$ }}
+          </uproxy-button>
+        </div>
 
-      <!-- currently getting access -->
-      <div hidden?='{{ instance.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
-        <uproxy-button class='grey' raised on-tap='{{ stop }}'>
-          {{ "STOP_GETTING" | $$ }}
-        </uproxy-button>
-      </div>
-
+        <!-- currently getting access -->
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
+          <uproxy-button class='grey' raised on-tap='{{ stop }}'>
+            {{ "STOP_GETTING" | $$ }}
+          </uproxy-button>
+        </div>
+      </div> <!-- end of button-wrapper -->
     </div> <!-- end of wrapper -->
 
   </template>
