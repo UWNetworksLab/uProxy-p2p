@@ -33,7 +33,9 @@ function deviceSupportsVpn() : boolean {
     // Other platforms should fail here.
     return false;
   }
-  // tun2socks requires Android version >= Marshmallow (6)
+  // tun2socks calls bindProcessToNetwork so that the application traffic
+  // bypasses the VPN in order to avoid a loop-back.
+  // This API requires Android version >= Marshmallow (6).
   let majorVersionMatch = window.device.version.match(/^[0-9]+/);
   if (majorVersionMatch === null) {
     return false;
