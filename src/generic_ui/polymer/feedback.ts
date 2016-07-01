@@ -82,6 +82,12 @@ Polymer({
       this.feedbackType = detail.item.getAttribute('data-feedbackOption');
     }
   },
+  hiTesting: function() {
+    this.$.collapse1.toggle();
+  },
+  hiTesting2: function() {
+    this.$.hi.textContent=this.$.errorInput.children.array()[this.$.errorInput.selected - 2].textContent; //Because errorInput.selected returns values starting from 2 instead of 0 (not sure why)
+  },
   viewLogs: function() {
     this.ui.openTab('generic_ui/view-logs.html?lang=' + model.globalSettings.language);
   },

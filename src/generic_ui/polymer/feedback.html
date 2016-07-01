@@ -14,6 +14,7 @@
 <link rel="import" href="../../bower/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../bower/paper-dropdown/paper-dropdown.html">
 <link rel="import" href="../../bower/core-menu/core-menu.html">
+<link rel="import" href="../../bower/core-collapse/core-collapse.html">
 
 <polymer-element name='uproxy-feedback' attributes=''>
   <template>
@@ -118,16 +119,11 @@
       padding-top: 0em;
       padding-bottom: 0em;
     }
-    paper-input-decorator[id=feedbackDecorator] /deep/ .unfocused-underline,
-    paper-input-decorator[id=feedbackDecorator] /deep/ .focused-underline {
-      /* Remove the underline from the Feedback textbox. */
-      height: 0px;
-    }
     paper-input-decorator[id=emailDecorator] {
       padding: 13px 0px 32px 0px;
     }
     paper-input-decorator[id=feedbackDecorator] {
-      padding: 13px 0px 24px 0px;
+      padding: 13px 0px 32px 0px;
     }
 
     paper-input-decorator {
@@ -135,7 +131,6 @@
     }
     paper-input-decorator::shadow .input-body {
       color: #707070;
-      padding-bottom: 4px;
     }
     paper-checkbox::shadow #ink[checked] {
       color: white;
@@ -158,16 +153,8 @@
     #feedbackTitle {
       margin-top: .5;
     }
-    #feedbackDecorator {
-      height: 190px;
-    }
-    #feedbackPaperTextarea {
-      height: 190px;
-      margin: 0em;
-    }
     paper-autogrow-textarea::shadow .textarea-container {
-      padding: 0.25em;
-      background-color: rgb(240,240,240);
+      background-color: white;
       border-radius: 2px;
       color: #707070;
     }
@@ -192,35 +179,24 @@
           {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
         <div id='formContainer' flex>
-          <p class='inputLabel'>{{ "EMAIL_TITLE" | $$ }}</p>
-          <paper-input-decorator id='emailDecorator'
-              label='{{ "EMAIL_PLACEHOLDER" | $$ }}'>
-            <input id="emailInput"
-                   is="core-input"
-                   value='{{ email }}'>
-          </paper-input-decorator>
-          <!-- Dropdown menu that provides user with some common feedbacks -->
-          <p class="inputLabel">{{"CUSTOM_ERROR_TITLE" | $$ }}</p>
-          <div id="commonFeedbackOptions">
-            <paper-dropdown-menu label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}'>
-              <paper-dropdown class="dropdown" valign="bottom">
-                  <core-menu class="menu" selected="{{ feedbackType }}" valueattr="data-feedbackOption" id="errorInput">
-                        <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
-                        <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
-                        <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_SIGNING_IN }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
-                        <paper-item data-feedbackOption='{{ UserFeedbackType.NO_FRIENDS }}'> {{ "NO_FRIENDS" | $$ }} </paper-item>
-                        <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}'> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
-                        <paper-item data-feedbackOption='{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}'> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
-                        <paper-item data-feedbackOption='{{ UserFeedbackType.OTHER_FEEDBACK }}'> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
-                  </core-menu>
-              </paper-dropdown>
-            </paper-dropdown-menu>
-          </div>
+          <span id="hi" on-click='{{hiTesting}}'> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
+          <core-collapse id="collapse1">
+            <div class="content">
+              <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{hiTesting2}}" valueattr="data-feedbackOption" id="errorInput">
+                <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
+                <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
+                <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_SIGNING_IN }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
+                <paper-item data-feedbackOption='{{ UserFeedbackType.NO_FRIENDS }}'> {{ "NO_FRIENDS" | $$ }} </paper-item>
+                <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}'> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
+                <paper-item data-feedbackOption='{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}'> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
+                 <paper-item data-feedbackOption='{{ UserFeedbackType.OTHER_FEEDBACK }}'> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
+              </core-menu>
+            </div>
+          </core-collapse>
 
           <!-- because dropdown menus have no 'error' attribute, this is an invisible decorator that has an error if nothing is selected from the dropdown -->
           <paper-input-decorator id="errorDecorator" label = '{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}' error='{{ "NO_CUSTOM_ERROR_PLACEHOLDER" | $$ }}'></paper-input-decorator>
 
-          <p class='inputLabel' id='feedbackTitle'>{{ "FEEDBACK_TITLE" | $$ }}</p>
           <paper-input-decorator id='feedbackDecorator'
               label='{{ "FEEDBACK_PLACEHOLDER" | $$ }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$ }}'>
             <paper-autogrow-textarea id="feedbackPaperTextarea">
@@ -229,6 +205,14 @@
               </textarea>
             </paper-autogrow-textarea>
           </paper-input-decorator>
+
+          <paper-input-decorator id='emailDecorator'
+              label='{{ "EMAIL_PLACEHOLDER" | $$ }}'>
+            <input id="emailInput"
+                   is="core-input"
+                   value='{{ email }}'>
+          </paper-input-decorator>
+
           <div id='logCheckboxContainer'>
             <paper-checkbox for id='logCheckbox'></paper-checkbox>
             <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>

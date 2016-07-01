@@ -1453,12 +1453,9 @@
   },
   "CUSTOM_ERROR_PLACEHOLDER": {
     "description": "The default text that appears in the dropdown menu in feedback. ",
-    "message": "Pick the feedback"
+    "message": "Choose a topic for feedback"
   },
-  "CUSTOM_ERROR_TITLE": {
-    "description": "Label for dropdown for users to select feedback to send to uProxy.",
-    "message": "Choose the feedback most similar to yours, or choose 'other' (required)"
-  },"NO_CUSTOM_ERROR_PLACEHOLDER": {
+  "NO_CUSTOM_ERROR_PLACEHOLDER": {
     "description": "Error that apears if you do not select any feedback in the dropdown menu .",
     "message": "Please choose feedback most similar to yours"
   }, "CLOUD_CONNECTIONS_DISCONNECTED": {
