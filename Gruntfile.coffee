@@ -271,11 +271,11 @@ gruntConfig = {
     # compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
+      command: '<%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:20.50.533.6'
     }
     ccaReleaseAndroid: {
       cwd: '<%= androidDistPath %>'
-      command: '<%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:19.49.514.2'
+      command: '<%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:20.50.533.6'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'

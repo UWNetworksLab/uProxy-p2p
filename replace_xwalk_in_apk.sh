@@ -23,7 +23,7 @@ else
   exit 1
 fi
 
-LIB_URL="https://github.com/uProxy/uproxy/releases/download/v0.9.1/libxwalkcore.so"
+LIB_URL="https://github.com/uProxy/webrtc-mod/releases/download/20-1/libxwalkcore.so"
 if [ -z "$TMPDIR" ]; then TMPDIR="/tmp"; fi
 LIB_PATH="lib/armeabi-v7a"
 LIB_NAME="libxwalkcore.so"
