@@ -45,8 +45,18 @@
       margin: 0;
       font-weight: 600;
     }
+    #dropdownContainer {
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #dropdownArrow {
+      cursor: pointer;
+      height: 28px;
+      width: 28px;
+    }
     #emailInput {
       margin: 0;
+      padding-bottom: 4px;
     }
     #logCheckboxContainer {
       margin: 0.5em 0em;
@@ -91,7 +101,6 @@
       padding: 0;
     }
     core-icon {
-      height: 15px !important;
       color: grey;
       opacity: 0.6;
       margin-bottom: 2px;
@@ -118,6 +127,9 @@
       margin-bottom: 1.5em;
       padding-top: 0em;
       padding-bottom: 0em;
+    }
+    #errorInput {
+      font-size: 10px;
     }
     paper-input-decorator[id=emailDecorator] {
       padding: 13px 0px 32px 0px;
@@ -146,12 +158,16 @@
       top: 30%;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
     }
+    paper-item {
+      font-size: 14px;
+    }
+    #helpIcon {
+      height: 15px;
+      width: 15px;
+    } 
     #sendingFeedback {
       text-align: center;
       font-size: 16px;
-    }
-    #feedbackTitle {
-      margin-top: .5;
     }
     paper-autogrow-textarea::shadow .textarea-container {
       background-color: white;
@@ -180,7 +196,8 @@
         </uproxy-app-bar>
 
         <div id='formContainer' flex>
-          <span id="dropdownContainer" on-click='{{toggleDropdown}}'> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
+          <span id="dropdownContainer" on-click='{{ toggleDropdown }}'> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
+          <core-icon icon="expand-more" id="dropdownArrow" on-click = '{{ toggleDropdown }}'></core-icon>
           <core-collapse id="collapse">
             <div class="content">
               <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{ changePlaceholder }}" valueattr="data-feedbackOption" id="errorInput">
@@ -220,7 +237,7 @@
               {{ "NETWORK_AND_LOGS" | $$ }}
             </span>
             <uproxy-faq-link anchor='doesUproxyLogData'>
-              <core-icon icon="help"></core-icon>
+              <core-icon icon="help" id="helpIcon"></core-icon>
             </uproxy-faq-link>
           </div>
           <p id='moreInfo'>

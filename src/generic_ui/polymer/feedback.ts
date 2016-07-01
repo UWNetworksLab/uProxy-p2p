@@ -38,6 +38,8 @@ Polymer({
     if (this.feedbackType == uproxy_core_api.UserFeedbackType.OTHER_FEEDBACK && !this.feedback.length) {
       this.$.errorDecorator.isInvalid = false;
       this.$.feedbackDecorator.isInvalid = true;
+      this.$.collapse.opened = false;
+      this.$.dropdownArrow.icon="expand-more";
       return;
     }
     this.$.sendingFeedbackDialog.open();
@@ -57,6 +59,7 @@ Polymer({
       this.$.feedbackDecorator.isInvalid = false;
       this.$.dropdownContainer.textContent = ui.i18n_t('CUSTOM_ERROR_PLACEHOLDER');
       this.$.collapse.opened = false;
+      this.$.dropdownArrow.icon="expand-more";
       // Clear the form.
       this.email = '';
       this.feedback = '';
@@ -86,6 +89,11 @@ Polymer({
   },
   toggleDropdown: function() {
     this.$.collapse.toggle();
+    if (this.$.collapse.opened) {
+      this.$.dropdownArrow.icon="expand-less";
+    } else {
+      this.$.dropdownArrow.icon="expand-more";
+    }
   },
   changePlaceholder: function() {
     this.$.dropdownContainer.textContent=this.$.errorInput.children.array()[this.$.errorInput.selected - 2].textContent; //Because errorInput.selected returns values starting from 2 instead of 0 (not sure why)
