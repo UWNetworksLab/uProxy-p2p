@@ -236,7 +236,7 @@ gruntConfig = {
 
   # Create commands to run in different directories
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
-  ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git'
+  ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git cordova-plugin-device https://github.com/albertolalama/cordova-plugin-tun2socks.git#alalama-tun2socks'
 
   # Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released
   ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git'

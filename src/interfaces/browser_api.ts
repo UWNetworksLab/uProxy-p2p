@@ -7,7 +7,8 @@ import net = require('../lib/net/net.types');
 
 export interface BrowserAPI {
   // Configuration and control of the browsers proxy settings.
-  startUsingProxy(endpoint:net.Endpoint, bypass :string[]) :void;
+  startUsingProxy(
+    endpoint: net.Endpoint, bypass: string[], opts: ProxyConnectOptions): void;
   stopUsingProxy() :void;
   // Set the browser icon for the extension/add-on.
   setIcon(iconFile :string) :void;
@@ -23,6 +24,8 @@ export interface BrowserAPI {
   canProxy :boolean;
   // Whether user has installed and logged into uProxy.
   hasInstalledThenLoggedIn :boolean;
+  // Whether platform supports VPN mode.
+  supportsVpn: boolean;
 
   /*
    * tag is used to uniquely identify notifications.  If it is a json-encoded
@@ -52,6 +55,19 @@ export interface BrowserAPI {
   // passed, a message will be supplied instead, which will be emitted with
   // the given response data.
   respond(data :any, callback ?:Function, msg ?:string) :void;
+}
+
+// Describes the user-initiated mode to access a proxy.
+export enum ProxyAccessMode {
+  NONE = 100,
+  IN_APP,
+  VPN
+};
+
+// User options for connecting to a proxy.
+// Packaged as an interface for forward-compatibility.
+export interface ProxyConnectOptions {
+  accessMode: ProxyAccessMode;
 }
 
 // Info associated with the 'proxyDisconnect' event.
