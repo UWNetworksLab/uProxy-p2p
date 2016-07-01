@@ -97,9 +97,16 @@
          user.offeringInstances and are therefore giving us access -->
       <div class="button-wrapper">
         <!-- not getting or trying to get access -->
-        <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
+        <div hidden?='{{ ui.browserApi.supportsVpn || instance.localGettingFromRemote != GettingState.NONE }}'>
+          <uproxy-button raised on-tap='{{ startBrowsing }}' disabled?='{{ !ui.browserApi.canProxy }}'>
+            {{ "START_GETTING" | $$ }}
+          </uproxy-button>
+        </div>
+
+        <!-- Browsing mode -->
+        <div hidden?='{{ !ui.browserApi.supportsVpn || instance.localGettingFromRemote != GettingState.NONE }}'>
           <uproxy-button raised on-tap='{{ startBrowsing }}' disabled?='{{ !ui.browserApi.canProxy  }}'>
-            <!-- TODO(alalama): localize {{ "START_GETTING" | $$ }} -->
+            <!-- TODO(alalama): localize -->
             Start browsing
           </uproxy-button>
         </div>

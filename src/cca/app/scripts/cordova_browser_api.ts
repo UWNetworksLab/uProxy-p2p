@@ -40,7 +40,7 @@ class CordovaBrowserApi implements BrowserAPI {
   // have VPN support. Note that we only add the device plugin to Android.
   public supportsVpn = window.tun2socks !== undefined
                        && window.device !== undefined
-                       && window.device.version.match(/^6/) != null;
+                       && window.device.version.match(/^[6-9]/) != null;
 
   // Mode to start/stop proxying.
   private proxyAccessMode_ = ProxyAccessMode.NONE;
@@ -126,15 +126,15 @@ class CordovaBrowserApi implements BrowserAPI {
       return;
     }
 
-    if (!opts.accessMode || opts.accessMode == ProxyAccessMode.NONE) {
+    if (!opts.accessMode || opts.accessMode === ProxyAccessMode.NONE) {
       console.log('Cannot start proxying with unknown access mode.');
       return;
     }
     // Remember access mode so we can stop proxying appropriately.
     this.proxyAccessMode_ = opts.accessMode;
-    if (this.proxyAccessMode_ == ProxyAccessMode.IN_APP) {
+    if (this.proxyAccessMode_ === ProxyAccessMode.IN_APP) {
       this.startInAppProxy_(endpoint);
-    } else if (this.proxyAccessMode_ == ProxyAccessMode.VPN) {
+    } else if (this.proxyAccessMode_ === ProxyAccessMode.VPN) {
       this.startVpnProxy_(endpoint);
     }
   };
@@ -161,10 +161,9 @@ class CordovaBrowserApi implements BrowserAPI {
 
   private startVpnProxy_ = (endpoint: net.Endpoint) => {
     // Set a callback for disconnect event before starting proxying.
-    var browser = this;
-    window.tun2socks.onDisconnect().then(function(msg: string) {
-      // UI will call browser.stopUsingProxy()
-      browser.emit_('proxyDisconnected', { deliberate: false });
+    window.tun2socks.onDisconnect().then((msg: string) => {
+      // UI will call stopUsingProxy, on proxyDisconnected event.
+      this.emit_('proxyDisconnected', { deliberate: false });
     }).catch(function(err: string) {
       // Event callbacks are never rejected in the plugin.
       // We should never reach this.
@@ -185,11 +184,11 @@ class CordovaBrowserApi implements BrowserAPI {
       return;
     }
 
-    if (this.proxyAccessMode_ == ProxyAccessMode.IN_APP) {
+    if (this.proxyAccessMode_ === ProxyAccessMode.IN_APP) {
       chrome.proxy.settings.clear({scope: 'regular'}, () => {
         console.log('Cleared proxy settings');
       });
-    } else if (this.proxyAccessMode_ == ProxyAccessMode.VPN) {
+    } else if (this.proxyAccessMode_ === ProxyAccessMode.VPN) {
       window.tun2socks.stop().then(function(msg: string) {
         console.log('Tun2Socks stop: ', msg);
       }).catch(function(err: string) {
