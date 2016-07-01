@@ -73,7 +73,9 @@ export class Model {
     activePromoId: null,
     enabledExperiments: [],
     shouldHijackDO: true,
-    crypto: true
+    crypto: true,
+    torOn: false,
+    torPort: 9050,
   };
 
   public reconnecting = false;

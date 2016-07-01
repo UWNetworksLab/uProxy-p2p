@@ -88,8 +88,6 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     };
     var rtcToNetProxyConfig :ProxyConfig = {
       allowNonUnicast: !denyLocalhost,  // Allow RtcToNet to contact the localhost server.
-      torOn: false, // Unused
-      torPort: 0,   // Unused
     };
 
     if (typeof sessionLimit === 'number') {
