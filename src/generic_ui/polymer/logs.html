@@ -69,14 +69,14 @@
         <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "LOGS_TITLE" | $$ }}
         </uproxy-app-bar>
-        <h1><bdi> {{ "LOGS_TITLE" | $$ }} </bdi></h1>
-        <p><bdi> {{ "TO_SEND_LOGS" | $$ }} </bdi></p>
+        <h1><bdi>{{ "LOGS_TITLE" | $$ }}</bdi></h1>
+        <p><bdi>{{ "TO_SEND_LOGS" | $$ }}</bdi></p>
         <div id='logs'>
           <div id="loadingLogs" hidden?="{{ !loadingLogs }}">
-            <p> {{ "RETRIEVING_LOGS" | $$ }} </p>
+            <p>{{ "RETRIEVING_LOGS" | $$ }}</p>
             <paper-progress indeterminate='true'></paper-progress>
           </div>
-          <pre> {{ logs }} </pre>
+          <pre>{{ logs }}</pre>
         </div> <!-- end of errorText -->
       </div>
     </core-overlay>
