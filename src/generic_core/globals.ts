@@ -61,7 +61,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   shouldHijackDO: true,
   crypto: true,
   torOn: false,
-  torPort: 9050,
+  torPort: 9050
 };
 
 export var natType :string = '';

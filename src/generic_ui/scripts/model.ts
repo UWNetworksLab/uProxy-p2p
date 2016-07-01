@@ -75,7 +75,7 @@ export class Model {
     shouldHijackDO: true,
     crypto: true,
     torOn: false,
-    torPort: 9050,
+    torPort: 9050
   };
 
   public reconnecting = false;

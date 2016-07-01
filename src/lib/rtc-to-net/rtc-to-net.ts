@@ -18,8 +18,6 @@ import ProxyConfig = require('./proxyconfig');
 // module RtcToNet {
 
   var log :logging.Log = new logging.Log('RtcToNet');
-  var usingTor :boolean = true;
-  var torPort  :number  = 9050;
 
   export interface SessionSnapshot {
     name :string;
@@ -265,7 +263,6 @@ import ProxyConfig = require('./proxyconfig');
     // Since its close() method should never throw, this should never reject.
     // TODO: close all sessions before fulfilling
     private stopResources_ = () : Promise<void> => {
-      log.debug('freeing resources');
       // TODO(ldixon): explore why not not just return
       // this.peerConnection_.close(); call the PeerConnection's close and
       // return synchronously.
@@ -382,7 +379,6 @@ import ProxyConfig = require('./proxyconfig');
     // closed, fulfilling once both have closed. Since neither object's
     // close() methods should ever reject, this should never reject.
     private stopResources_ = () : Promise<void> => {
-      log.info('%1: freeing resources', [this.longId()]);
       // DataChannel.close() returns void, implying that the shutdown is
       // effectively immediate.  However, we wrap it in a promise to ensure
       // that any exception is sent to the Promise.catch, rather than
@@ -447,14 +443,16 @@ import ProxyConfig = require('./proxyconfig');
                         endpoint.address);
       }
       this.webEndpoint_ = endpoint;
-      log.debug('%1: Creating tcp connection with tor settings: torOn: %2, torPort: %3', [this.longId(), this.proxyConfig_.torOn, this.proxyConfig_.torPort]);
+      log.debug('%1: Creating tcp connection with tor settings: ' +
+                'torOn: %2, torPort: %3', [this.longId(),
+                  this.proxyConfig_.torOn, this.proxyConfig_.torPort]);
 
       if (this.proxyConfig_.torOn) {
         // Return TCP connection to local Tor proxy
         // and endpoint of request to be forwarded
         var localTorEndpoint :net.Endpoint = {
           address: '127.0.0.1',
-          port: this.proxyConfig_.torPort //default 9050
+          port: this.proxyConfig_.torPort // default 9050
         };
         log.debug('%1: Connecting to the local tor proxy: %2',
                  [this.longId(), localTorEndpoint]);
@@ -488,7 +486,7 @@ import ProxyConfig = require('./proxyconfig');
 
       if (this.proxyConfig_.torOn) {
         log.debug('%1: Connected to local tor proxy', [this.longId()]);
-        //Send request through Socks protocol
+        // Send request through Socks protocol
         return this.connectThroughSocks_();
       } else {
         // Receive and return reply to peer from destination
@@ -498,7 +496,6 @@ import ProxyConfig = require('./proxyconfig');
         var reply = this.getReplyFromInfo_(info);
         this.replyToPeer_(reply, info);
       }
-
     }
 
     // Completes socks authentication protocol
@@ -524,7 +521,7 @@ import ProxyConfig = require('./proxyconfig');
           // Send socks connection request
           var request :socks.Request = {
             command: socks.Command.TCP_CONNECT,
-            endpoint: this.webEndpoint_,
+            endpoint: this.webEndpoint_
           };
           log.debug('%1: Making socks request: %2', [this.longId(), request]);
           this.tcpConnection_.send(socks.composeRequestBuffer(request));
@@ -534,7 +531,7 @@ import ProxyConfig = require('./proxyconfig');
           var response = socks.interpretResponseBuffer(buffer);
           log.debug('%1: Received request response: %2',
                     [this.longId(), response]);
-          if (response.reply != socks.Reply.SUCCEEDED) {
+          if (response.reply !== socks.Reply.SUCCEEDED) {
             return Promise.reject(
               new Error('Socks connection to local Tor failed'));
           }
@@ -549,7 +546,7 @@ import ProxyConfig = require('./proxyconfig');
         : Promise<void> => {
       var response :socks.Response = {
         reply: reply,
-        endpoint: info ? info.bound : {"address":"0.0.0.0","port":0}
+        endpoint: info ? info.bound :{'address':'0.0.0.0','port':0}
       };
       log.debug('%1: Sending response to Peer: %2', [this.longId(), response]);
       return this.dataChannel_.send({
@@ -615,12 +612,11 @@ import ProxyConfig = require('./proxyconfig');
     // and vice versa. Should only be called once both socket and channel have
     // been successfully established.
     private linkSocketAndChannel_ = () : void => {
-      log.info('%1: linking socket and channel', this.longId());
+      log.debug('%1: linking socket and channel', this.longId());
       var socketReader = (data:ArrayBuffer) => {
         this.sendOnChannel_(data);
         this.bytesSentToPeer_.handle(data.byteLength);
         this.channelSentBytes_ += data.byteLength;
-
       };
       this.tcpConnection_.dataFromSocketQueue.setSyncHandler(socketReader);
 
@@ -663,7 +659,6 @@ import ProxyConfig = require('./proxyconfig');
           log.debug('%1: Exited  overflow, resuming socket', this.longId());
         }
       });
-      log.info('%1: Leaving linking socket and channel', [this.longId()]);
     }
 
     private isAllowedAddress_ = (addressString:string) : boolean => {
