@@ -116,32 +116,6 @@ var inviteUser = {
           '', translator.i18n_t('FRIEND_ADD_ERROR')));
     });
   },
-  copypaste: function() {
-    // Logout of all other social networks before starting
-    // copypaste connection.
-    var getConfirmation = Promise.resolve<void>();
-    if (ui_context.model.onlineNetworks.length > 0) {
-      var confirmationMessage = (ui.isGettingAccess() || ui.isGivingAccess()) ?
-          translator.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING') :
-          translator.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE');
-      getConfirmation = this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
-          '', confirmationMessage));
-    }
-
-    getConfirmation.then(() => {
-      return Promise.all(ui_context.model.onlineNetworks.map((network: model.Network) => {
-        return this.$.state.background.logout({
-          name: network.name,
-          userId: network.userId
-        });
-      }));
-    }).then(() => {
-      if (this.closeInviteUserPanel) {
-        this.closeInviteUserPanel();
-      }
-      this.fire('core-signal', { name: 'copypaste-init' });
-    });
-  },
   ready: function() {
     this.selectedNetworkName = '';
     this.ui = ui;

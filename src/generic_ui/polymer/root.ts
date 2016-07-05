@@ -69,9 +69,6 @@ Polymer({
   closeDialog: function() {
     this.$.dialog.close();
   },
-  dismissCopyPasteError: function() {
-    ui.copyPasteError = ui_types.CopyPasteError.NONE;
-  },
   openDialog: function(e :Event, detail :ui_types.DialogDescription) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
      * signal was fired. It should be of the form:
@@ -207,6 +204,8 @@ Polymer({
       this.$.settings.accountChooserOpen = false;
     } else {
       // Drawer was closed.
+      // Cancel the user's edits to the description, if they haven't saved
+      this.$.settings.$.description.cancelEditing();
       this.$.statsTooltip.disabled = false;
     }
   },
