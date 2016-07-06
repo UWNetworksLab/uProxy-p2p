@@ -358,6 +358,7 @@ gruntConfig = {
           cwd: chromeAppDevPath
           src: [
             'manifest.json'
+            'managed_policy_schema.json'
             '_locales/**'
 
             # UI for not-connected
