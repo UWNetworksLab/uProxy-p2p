@@ -351,25 +351,4 @@ describe('UI.UserInterface', () => {
       expect(ui.gettingStatus).toEqual(null);
     });
   });  // Update giving and/or getting state in UI
-
-  describe('logout', () => {
-    it('No networks', (done) => {
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
-        expect(mockCore.logout).not.toHaveBeenCalled();
-        done();
-      });
-    });
-
-    it('Single network', (done) => {
-      login();
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {;
-        expect(mockCore.logout).toHaveBeenCalled();
-        logout(); //cleanup
-        done();
-      }).catch(() => {
-        logout();
-        expect('Error: rejected promise').toEqual(false);
-      });
-    });
-  });
 });  // UI.UserInterface

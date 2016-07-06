@@ -76,7 +76,6 @@
         cursor: pointer;
         vertical-align: top;
         padding: 1em 2em 1em 2em;
-        border-bottom: 1px solid rgba(0, 0, 0, .10);
       }
       .networkLoginButton:last-child {
         border-bottom: none;
@@ -131,12 +130,7 @@
       }
       /* uproxy-faq-link is used in the translation for weWontPostLearnMore */
       uproxy-faq-link {
-        font-weight: bold;
-      }
-      /* underline is not applied unless we do this hack.  TODO: find out why */
-      uproxy-faq-link::shadow span {
-        text-decoration: underline;
-        color: rgb(112, 112, 112);
+        color: #12A391;
       }
       .paleText {
         color: #9e9e9e;
@@ -221,40 +215,20 @@
           </div>
 
           <div id='allNetworkButtons'>
-
-            <div id='cloudInstall' hidden?='{{ model.cloudProviderNames.length < 1 }}' on-tap='{{ cloudInstall }}'>
-              <div class='content'>
-                <img src='../../icons/cloud/connect-cloud.png'>
-                <h1>{{ 'CLOUD_INSTALL_INVITE_SCREEN_TITLE' | $$ }}</h1>
-                <p>{{ 'CLOUD_INSTALL_INVITE_SCREEN_MESSAGE' | $$ }}</p>
-              </div>
-              <div class='chevronWrapper'>
-                <core-icon icon="chevron-right"></core-icon>
-              </div>
-            </div> <!-- end of cloud -->
-
-            <div class='categoryHeader'>{{ "CHOOSE_A_SOCIAL_NETWORK" | $$ }}</div>
-
             <template repeat='{{ n in model.networkNames }}' vertical layout>
-              <div hidden?='{{ n == "Cloud" }}' on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
+              <div on-tap='{{networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
                 <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
+                <!--
                 <span class='experimental paleText' hidden?='{{!isExperimentalNetwork(n)}}'>
                   (Experimental)
                 </span>
+                -->
                 <div class='chevronWrapper'>
                   <core-icon icon="chevron-right"></core-icon>
                 </div>
               </div>
             </template>
-
-            <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}'>
-              <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
-              <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$ }}</div>
-              <div class='chevronWrapper'>
-                <core-icon icon="chevron-right"></core-icon>
-              </div>
-            </div>
 
           </div> <!-- end of #allNetworkButtons -->
 

@@ -11,7 +11,6 @@
 
 import ui_constants = require('../../interfaces/ui');
 import background_ui = require('./background_ui');
-import CopyPasteState = require('./copypaste-state');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
@@ -58,24 +57,24 @@ interface PromiseCallbacks {
   reject :Function;
 }
 
-export function getImageData(userId :string, oldImageData :string,
-                             newImageData :string) : string {
-  if (!oldImageData && !newImageData) {
-    // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
-    // as long as jdenticon only uses '"' in the generated code...
-    // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
-    // scales the image to fit the space, so this parameter has no effect.
-    // We must also replace # with %23 for Firefox support.
-    const userIdHash = crypto.createHash('md5').update(userId).digest('hex');
-    return '\'data:image/svg+xml;utf8,' +
-        jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
-  } else if (!newImageData) {
+export function getImageData(userId: string, oldImageData: string,
+                             newImageData: string): string {
+  if (newImageData) {
+    return newImageData;
+  } else if (oldImageData) {
     // This case is hit when we've already generated a jdenticon for a user
     // who doesn't have any image in uProxy core.
     return oldImageData;
-  } else {
-    return newImageData;
   }
+
+  // Extra single-quotes are needed for CSS/Polymer parsing.  This is safe
+  // as long as jdenticon only uses '"' in the generated code...
+  // The size is arbitrarily set to 100 pixels.  SVG is scalable and our CSS
+  // scales the image to fit the space, so this parameter has no effect.
+  // We must also replace # with %23 for Firefox support.
+  const userIdHash = crypto.createHash('md5').update(userId).digest('hex');
+  return '\'data:image/svg+xml;utf8,' +
+      jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
 }
 
 /**
@@ -102,18 +101,9 @@ export class UserInterface implements ui_constants.UiApi {
   /* Getting and sharing */
   public gettingStatus :string = null;
   public sharingStatus :string = null;
-  public unableToGet :boolean = false;
-  public unableToShare :boolean = false;
   public isSharingDisabled :boolean = false;
   public proxyingId: string; // ID of the most recent failed proxying attempt.
   private userCancelledGetAttempt_ :boolean = false;
-  /* Copypaste */
-  /*
-   * This is used to store the information for setting up a copy+paste
-   * connection between establishing the connection and the user confirming
-   * the start of proxying
-   */
-  public copyPasteState :CopyPasteState = new CopyPasteState();
 
   /* Translation */
   public i18n_t :Function = translator_module.i18n_t;
@@ -121,10 +111,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   /* About this uProxy installation */
   public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
-  public browser :string = '';
   public availableVersion :string = null;
-
-  public toastMessage :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
@@ -175,37 +162,6 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.USER_FRIEND, this.syncUser);
 
     core.onUpdate(uproxy_core_api.Update.REMOVE_FRIEND, this.removeFriend);
-
-    core.onUpdate(uproxy_core_api.Update.ONETIME_MESSAGE, (message:string) => {
-      this.copyPasteState.message = message;
-    });
-
-    // indicates the current getting connection has ended
-    core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
-      this.copyPasteState.activeEndpoint = null;
-      this.copyPasteState.active = false;
-      this.stoppedGetting({instanceId: null, error: error});
-    });
-
-    // indicates we just started offering access through copy+paste
-    core.onUpdate(uproxy_core_api.Update.START_GIVING, () => {
-      if (!this.isGivingAccess()) {
-        this.startGivingInUi();
-      }
-    });
-
-    // indicates we just stopped offering access through copy+paste
-    core.onUpdate(uproxy_core_api.Update.STOP_GIVING, () => {
-      this.copyPasteState.localSharingWithRemote = social.SharingState.NONE;
-      if (!this.isGivingAccess()) {
-        this.stopGivingInUi();
-      }
-    });
-
-    // status of the current copy+paste connection
-    core.onUpdate(uproxy_core_api.Update.STATE, (state :uproxy_core_api.ConnectionState) => {
-      this.copyPasteState.updateFromConnectionState(state);
-    });
 
     core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
         (data :social.StopProxyInfo) => { // TODO better type
@@ -268,10 +224,8 @@ export class UserInterface implements ui_constants.UiApi {
         (info:uproxy_core_api.FailedToGetOrGive) => {
       console.error('proxying attempt ' + info.proxyingId + ' failed (giving)');
 
-      this.toastMessage = this.i18n_t('UNABLE_TO_SHARE_WITH', {
-        name: info.name
-      });
-      this.unableToShare = true;
+      let toastMessage = translator_module.i18n_t('UNABLE_TO_SHARE_WITH', { name: info.name });
+      this.backgroundUi.showToast(toastMessage, false, true);
       this.proxyingId = info.proxyingId;
     });
 
@@ -292,10 +246,8 @@ export class UserInterface implements ui_constants.UiApi {
           if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
             this.restartServer_('digitalocean');
           } else {
-            this.toastMessage = this.i18n_t('UNABLE_TO_GET_FROM', {
-              name: info.name
-            });
-            this.unableToGet = true;
+            let toastMessage = translator_module.i18n_t('UNABLE_TO_GET_FROM', { name: info.name });
+            this.backgroundUi.showToast(toastMessage, true, false);
           }
         }
       }
@@ -317,7 +269,6 @@ export class UserInterface implements ui_constants.UiApi {
       this.cloudInstallProgress = progress;
     });
 
-    browserApi.on('copyPasteUrlData', this.handleCopyPasteUrlData);
     browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
@@ -338,9 +289,7 @@ export class UserInterface implements ui_constants.UiApi {
      * though
      */
     switch(name) {
-      case 'logout':
-        this.logout(data.data.networkInfo);
-        break;
+      /* holding for more operations as needed */
     }
   }
 
@@ -351,12 +300,12 @@ export class UserInterface implements ui_constants.UiApi {
       this.i18n_t('CANCEL'),
       this.i18n_t('RESTART_SERVER')
     ).then(() => {
-      this.toastMessage = this.i18n_t('RESTARTING_SERVER');
+      this.backgroundUi.showToast(translator_module.i18n_t('RESTARTING_SERVER'));
       return this.core.cloudUpdate({
         operation: uproxy_core_api.CloudOperationType.CLOUD_REBOOT,
         providerName: providerName
       }).then(() => {
-        this.toastMessage = this.i18n_t('RESTART_SUCCESS');
+        this.backgroundUi.showToast(translator_module.i18n_t('RESTART_SUCCESS'));
       }).catch((e: Error) => {
         this.showDialog(this.i18n_t('RESTART_FAILURE_TITLE'), this.i18n_t('RESTART_FAILURE_TEXT'));
       });
@@ -479,19 +428,6 @@ export class UserInterface implements ui_constants.UiApi {
         numOthers: (instanceIds.length - 1)
       });
     }
-  }
-
-  public parseUrlData = (url:string) : { type:social.PeerMessageType; message:string } => {
-    var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)[/#]+(.*)/)
-    if (!match) {
-      throw new Error('invalid URL format');
-    }
-    return {
-      type: match[1] === 'request' ?
-          social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER :
-          social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
-      message: decodeURIComponent(match[2])
-    };
   }
 
   private addUser_ = (tokenObj :social.InviteTokenData, showConfirmation :boolean) : Promise<void> => {
@@ -656,52 +592,6 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public handleCopyPasteUrlData = (url: string) => {
-    console.log('received one-time URL from browser');
-
-    if (this.model.onlineNetworks.length > 0) {
-      console.log('Ignoring URL since we have an active network');
-      this.copyPasteState.error = ui_constants.CopyPasteError.LOGGED_IN;
-      return;
-    }
-
-    if (social.SharingState.NONE !== this.copyPasteState.localSharingWithRemote) {
-      console.info('should not be processing a URL while in the middle of sharing');
-      this.copyPasteState.error = ui_constants.CopyPasteError.UNEXPECTED;
-      return;
-    }
-
-    // do not use the updateView function here, actual state may not have been
-    // processed yet
-    this.view = ui_constants.View.COPYPASTE;
-    this.copyPasteState.error = ui_constants.CopyPasteError.NONE;
-
-    try {
-      var parsed = this.parseUrlData(url);
-
-      // at this point, we assume everything is good, so let's check state
-      switch (parsed.type) {
-        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
-          this.core.startCopyPasteShare();
-          break;
-        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          if (social.GettingState.TRYING_TO_GET_ACCESS
-              !== this.copyPasteState.localGettingFromRemote) {
-            console.warn('currently not expecting any information, aborting');
-            this.copyPasteState.error = ui_constants.CopyPasteError.UNEXPECTED;
-            return;
-          }
-          break;
-      }
-
-      console.log('sending one-time string to app');
-      this.core.sendCopyPasteSignal(parsed.message);
-    } catch (e) {
-      console.error('invalid one-time URL: ' + e.message);
-      this.copyPasteState.error = ui_constants.CopyPasteError.BAD_URL;
-    }
-  }
-
   public proxyDisconnected = (info?:ProxyDisconnectInfo) => {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
@@ -754,8 +644,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.core.disconnectedWhileProxying = instanceId;
         this.restartProxying();
       } else {
-        // this handles the case where it was a one-time connection
-        this.core.disconnectedWhileProxying = 'unknown';
+        console.error('Received error on getting without a current instance');
       }
 
       // regardless, let the user know
@@ -915,9 +804,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public isGivingAccess = () => {
-    return Object.keys(this.instancesGivingAccessTo).length > 0 ||
-      (this.copyPasteState.localSharingWithRemote ===
-         social.SharingState.SHARING_ACCESS);
+    return Object.keys(this.instancesGivingAccessTo).length > 0;
   }
 
   /**
@@ -1096,21 +983,6 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
-    var network = this.model.getNetwork(networkInfo.name);
-    // Check if the user is connected to a network
-    if (!network) {
-      // If the user is not connected to the network, then don't log him out,
-      // you probably won't reach this point anyways. EVER. Probably.
-      console.warn('User is trying to log out of not-logged-in-network ' +
-                   networkInfo.name);
-      return Promise.resolve<void>();
-    }
-
-    network.logoutExpected = true;
-    return this.core.logout(networkInfo);
-  }
-
   private reconnect_ = (network :string) => {
     this.model.reconnecting = true;
     // TODO: add wechat, quiver, github URLs
@@ -1187,9 +1059,6 @@ export class UserInterface implements ui_constants.UiApi {
     }
     this.model.updateGlobalSettings(state.globalSettings);
 
-    // Maybe refactor this to be copyPasteState.
-    this.copyPasteState.updateFromConnectionState(state.copyPasteConnection);
-
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];
 
@@ -1198,15 +1067,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     for (var network in state.onlineNetworks) {
       this.addOnlineNetwork_(state.onlineNetworks[network]);
-    }
-
-    if (state.onlineNetworks.length > 0) {
-      // Check that we dont' have copy paste connection
-      if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
-          this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
-        console.error(
-            'User cannot be online while having a copy-paste connection');
-      }
     }
 
     this.portControlSupport = state.portControlSupport;
@@ -1282,9 +1142,6 @@ export class UserInterface implements ui_constants.UiApi {
     if (this.model.onlineNetworks.length > 0 ||
         this.model.globalSettings.hasSeenWelcome) {
       this.view = ui_constants.View.ROSTER;
-    } else if (this.copyPasteState.localGettingFromRemote !== social.GettingState.NONE ||
-               this.copyPasteState.localSharingWithRemote !== social.SharingState.NONE) {
-      this.view = ui_constants.View.COPYPASTE;
     } else {
       this.view = ui_constants.View.SPLASH;
     }

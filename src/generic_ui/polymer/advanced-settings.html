@@ -5,6 +5,7 @@
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
+<link rel='import' href='logs.html'>
 <link rel='import' href='link.html'>
 
 <polymer-element name='uproxy-advanced-settings'>
@@ -134,7 +135,6 @@
 
     <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
     <core-signals on-core-signal-open-advanced-settings='{{ open }}'></core-signals>
-
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
