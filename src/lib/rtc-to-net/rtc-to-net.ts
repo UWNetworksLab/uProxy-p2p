@@ -443,20 +443,15 @@ import ProxyConfig = require('./proxyconfig');
                         endpoint.address);
       }
       this.webEndpoint_ = endpoint;
-      log.debug('%1: Creating tcp connection with tor settings: ' +
-                'torOn: %2, torPort: %3', [this.longId(),
-                  this.proxyConfig_.torOn, this.proxyConfig_.torPort]);
+      log.debug('%1: Creating tcp connection with tor settings: %2',
+                [this.longId(), this.proxyConfig_.socksProxySettings]);
 
-      if (this.proxyConfig_.torOn) {
+      if (this.proxyConfig_.socksProxySettings.socksProxyOn) {
         // Return TCP connection to local Tor proxy
         // and endpoint of request to be forwarded
-        var localTorEndpoint :net.Endpoint = {
-          address: '127.0.0.1',
-          port: this.proxyConfig_.torPort // default 9050
-        };
         log.debug('%1: Connecting to the local tor proxy: %2',
-                 [this.longId(), localTorEndpoint]);
-        return new tcp.Connection({endpoint: localTorEndpoint});
+                 [this.longId(), this.proxyConfig_.socksProxySettings.socksEndpoint]);
+        return new tcp.Connection({endpoint: this.proxyConfig_.socksProxySettings.socksEndpoint});
       } else {
         // Return TCP connection to endpoint
         return new tcp.Connection({endpoint: endpoint}, true /* startPaused */);
@@ -484,7 +479,7 @@ import ProxyConfig = require('./proxyconfig');
         :Promise<void> => {
       var info :tcp.ConnectionInfo = connectionInfo;
 
-      if (this.proxyConfig_.torOn) {
+      if (this.proxyConfig_.socksProxySettings.socksProxyOn) {
         log.debug('%1: Connected to local tor proxy', [this.longId()]);
         // Send request through Socks protocol
         return this.connectThroughSocks_();

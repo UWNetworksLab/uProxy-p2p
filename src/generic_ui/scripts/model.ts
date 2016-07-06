@@ -74,8 +74,7 @@ export class Model {
     enabledExperiments: [],
     shouldHijackDO: true,
     crypto: true,
-    torOn: false,
-    torPort: 9050
+    socksProxySettings: null
   };
 
   public reconnecting = false;

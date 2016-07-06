@@ -44,8 +44,7 @@ export interface GlobalSettings {
   activePromoId: string;
   shouldHijackDO: boolean;
   crypto: boolean;
-  torOn: boolean;
-  torPort: number;
+  socksProxySettings: SocksProxySettings;
   // A list of strings, each represented as a constant below, with
   // prefix 'FEATURE_'.
   enabledExperiments :string[];
@@ -78,6 +77,14 @@ export interface ConnectionState {
   bytesSent :number;
   bytesReceived :number;
   activeEndpoint :net.Endpoint;
+}
+
+// Contains settings directing rtc-to-net server to go directly to net or
+// go through a socks proxy server (such as local Tor proxy).
+export interface SocksProxySettings {
+  socksProxyOn  :boolean;
+  socksEndpoint :net.Endpoint;
+  isTor         :boolean; // using tor requires additional logic
 }
 
 //TODO(jpevarnek) remove this interface

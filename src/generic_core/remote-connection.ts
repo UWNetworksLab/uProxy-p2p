@@ -151,8 +151,7 @@ var generateProxyingSessionId_ = (): string => {
       this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
       this.rtcToNet_.start({
         allowNonUnicast: globals.settings.allowNonUnicast,
-        torOn: globals.settings.torOn,
-        torPort: globals.settings.torPort
+        socksProxySettings: globals.settings.socksProxySettings
       }, pc);
 
       this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
