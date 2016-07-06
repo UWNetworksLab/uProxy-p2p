@@ -756,7 +756,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     if (!accessMode || accessMode === ProxyAccessMode.NONE) {
-      console.log('Cannot start using proxy: unknown proxy acccess mode.');
+      console.error('Cannot start using proxy: unknown proxy acccess mode.');
       return;
     }
 

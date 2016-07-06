@@ -17,6 +17,7 @@ import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
+import compareVersion = require('compare-version');
 
 enum PopupState {
     NOT_LAUNCHED,
@@ -36,12 +37,7 @@ function deviceSupportsVpn() : boolean {
   // tun2socks calls bindProcessToNetwork so that the application traffic
   // bypasses the VPN in order to avoid a loop-back.
   // This API requires Android version >= Marshmallow (6).
-  let majorVersionMatch = window.device.version.match(/^[0-9]+/);
-  if (majorVersionMatch === null) {
-    return false;
-  }
-  let majorVersion = parseInt(majorVersionMatch[0]);
-  return majorVersion >= 6;
+  return compareVersion(window.device.version, '6.0.0') >= 0;
 };
 
 class CordovaBrowserApi implements BrowserAPI {
@@ -181,20 +177,20 @@ class CordovaBrowserApi implements BrowserAPI {
     }).catch(function(err: string) {
       // Event callbacks are never rejected in the plugin.
       // We should never reach this.
-      console.log('Tun2Socks onDisconnect error: ', err);
+      console.error('Tun2Socks onDisconnect, unexpected callback error: ', err);
     });
 
     var socksServerAddress = '127.0.0.1:' + endpoint.port;
     window.tun2socks.start(socksServerAddress).then(function(msg: string) {
       console.log('Tun2Socks start: ', msg);
     }).catch(function(err: string) {
-      console.log('Tun2Socks start error: ', err);
+      console.error('Tun2Socks start error: ', err);
     });
   }
 
   public stopUsingProxy = () => {
     if (!chrome.proxy) {
-      console.log('No proxy setting support; ignoring stop command');
+      console.error('No proxy setting support; ignoring stop command');
       return;
     }
 
@@ -206,10 +202,10 @@ class CordovaBrowserApi implements BrowserAPI {
       window.tun2socks.stop().then(function(msg: string) {
         console.log('Tun2Socks stop: ', msg);
       }).catch(function(err: string) {
-        console.log('Tun2Socks stop error: ', err);
+        console.error('Tun2Socks stop error: ', err);
       });
     } else {
-      console.log('Cannot stop proxying with unkown start access mode.');
+      console.error('Unexpected proxy acccess mode ', this.proxyAccessMode_);
     }
     this.proxyAccessMode_ = ProxyAccessMode.NONE;
   };

@@ -97,23 +97,20 @@
          user.offeringInstances and are therefore giving us access -->
       <div class="button-wrapper">
         <!-- not getting or trying to get access -->
-        <div hidden?='{{ ui.browserApi.supportsVpn || instance.localGettingFromRemote != GettingState.NONE }}'>
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
+          <!-- Browsing mode -->
           <uproxy-button raised on-tap='{{ startBrowsing }}' disabled?='{{ !ui.browserApi.canProxy }}'>
-            {{ "START_GETTING" | $$ }}
+            <span hidden?='{{ ui.browserApi.supportsVpn }}'>
+              {{ "START_GETTING" | $$ }}
+            </span>
+            <span hidden?='{{ !ui.browserApi.supportsVpn }}'>
+              <!-- TODO(alalama): localize -->
+              Start browsing
+            </span>
           </uproxy-button>
-        </div>
 
-        <!-- Browsing mode -->
-        <div hidden?='{{ !ui.browserApi.supportsVpn || instance.localGettingFromRemote != GettingState.NONE }}'>
-          <uproxy-button raised on-tap='{{ startBrowsing }}' disabled?='{{ !ui.browserApi.canProxy  }}'>
-            <!-- TODO(alalama): localize -->
-            Start browsing
-          </uproxy-button>
-        </div>
-
-        <!-- VPN mode -->
-        <div hidden?='{{ !ui.browserApi.supportsVpn || instance.localGettingFromRemote != GettingState.NONE }}'>
-          <uproxy-button raised on-tap='{{ startVpn }}' disabled?='{{ !ui.browserApi.canProxy }}'>
+          <!-- VPN mode -->
+          <uproxy-button raised on-tap='{{ startVpn }}' hidden?='{{ !ui.browserApi.supportsVpn }}' disabled?='{{ !ui.browserApi.canProxy }}'>
             <!-- TODO(alalama): localize -->
             Start VPN
           </uproxy-button>
