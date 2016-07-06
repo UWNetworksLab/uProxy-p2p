@@ -300,7 +300,6 @@ import ProxyConfig = require('./proxyconfig');
   // common parts into a super-class this inherits from?
   export class Session {
     private tcpConnection_ :tcp.Connection;
-    private webEndpoint_   :net.Endpoint;
 
     // Fulfills once a connection has been established with the remote peer.
     // Rejects if a connection cannot be made for any reason.
@@ -344,10 +343,26 @@ import ProxyConfig = require('./proxyconfig');
           // TODO: Add a unit test for this case.
           this.replyToPeer_(socks.Reply.UNSUPPORTED_COMMAND);
           return Promise.reject(e);
-        })
-        .then(this.getTcpConnection_)
-        .then(this.waitForTcpConnection_)
-        .then(this.handleTcpConnection_);
+        }).then((webEndpoint :net.Endpoint)
+              :Promise<[socks.Reply, net.Endpoint]> => {
+          // Returns socks reply and bound endpoint of connection
+          if (!this.isWebEndpointValid_(webEndpoint)) {
+            throw new Error('tried to connect to disallowed address: ' +
+                            webEndpoint.address);
+          }
+          log.debug('%1: Creating tcp connection with socks proxy settings: %2',
+                    [this.longId(), this.proxyConfig_.socksProxySettings]);
+
+          // Connect to web endpoint directly or through socks proxy
+          if (this.proxyConfig_.socksProxySettings.socksProxyOn) {
+            return this.connectToEndpointThroughSocks_(webEndpoint);
+          } else {
+            return this.connectToEndpointDirectly_(webEndpoint);
+          }
+        }).then((reply :[socks.Reply, net.Endpoint]) :Promise<void> => {
+          log.info('%1: connected to remote web endpoint', [this.longId()]);
+          return this.replyToPeer_(reply[0], reply[1]);
+        });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
 
@@ -434,28 +449,29 @@ import ProxyConfig = require('./proxyconfig');
       });
     }
 
-    // Initiates tcp connection to endpoint
-    private getTcpConnection_ = (endpoint:net.Endpoint) :tcp.Connection => {
-      if (ipaddr.isValid(endpoint.address) &&
-          !this.isAllowedAddress_(endpoint.address)) {
-        this.replyToPeer_(socks.Reply.NOT_ALLOWED);
-        throw new Error('tried to connect to disallowed address: ' +
-                        endpoint.address);
-      }
-      this.webEndpoint_ = endpoint;
-      log.debug('%1: Creating tcp connection with tor settings: %2',
-                [this.longId(), this.proxyConfig_.socksProxySettings]);
+    private connectToEndpointDirectly_ = (endpoint: net.Endpoint)
+          :Promise<[socks.Reply, net.Endpoint]> => {
+      return this.getTcpConnection_(endpoint, true) // start paused
+        .then(this.waitForTcpConnection_)
+        .then((info :tcp.ConnectionInfo) :[socks.Reply, net.Endpoint] => {
+          return [this.getReplyFromInfo_(info), info.bound];
+        });
+    }
 
-      if (this.proxyConfig_.socksProxySettings.socksProxyOn) {
-        // Return TCP connection to local Tor proxy
-        // and endpoint of request to be forwarded
-        log.debug('%1: Connecting to the local tor proxy: %2',
-                 [this.longId(), this.proxyConfig_.socksProxySettings.socksEndpoint]);
-        return new tcp.Connection({endpoint: this.proxyConfig_.socksProxySettings.socksEndpoint});
-      } else {
-        // Return TCP connection to endpoint
-        return new tcp.Connection({endpoint: endpoint}, true /* startPaused */);
-      }
+    private connectToEndpointThroughSocks_ = (endpoint: net.Endpoint)
+          :Promise<[socks.Reply, net.Endpoint]> => {
+      return this.getTcpConnection_(this.proxyConfig_.socksProxySettings.socksEndpoint, false)
+        .then(this.waitForTcpConnection_)
+        .then((info :tcp.ConnectionInfo) :Promise<[socks.Reply, net.Endpoint]> => {
+          return this.connectWithSocksAuth_(endpoint);
+        });
+    }
+
+    // Initiates tcp connection to endpoint
+    private getTcpConnection_ = (endpoint:net.Endpoint, paused:boolean)
+          :Promise<tcp.Connection> => {
+      // Return TCP connection to endpoint
+      return Promise.resolve(new tcp.Connection({endpoint: endpoint}, paused));
     }
 
     // Waits for tcp connection to complete
@@ -473,30 +489,11 @@ import ProxyConfig = require('./proxyconfig');
         });
     }
 
-    // Relays reply of successful tcp connection to web endpoint to getter
-    // If using Tor, socks is used to connect to web endpoint
-    private handleTcpConnection_ = (connectionInfo :tcp.ConnectionInfo)
-        :Promise<void> => {
-      var info :tcp.ConnectionInfo = connectionInfo;
-
-      if (this.proxyConfig_.socksProxySettings.socksProxyOn) {
-        log.debug('%1: Connected to local tor proxy', [this.longId()]);
-        // Send request through Socks protocol
-        return this.connectThroughSocks_();
-      } else {
-        // Receive and return reply to peer from destination
-        log.info('%1: connected to remote endpoint', [this.longId()]);
-        log.debug('%1: bound address: %2', [this.longId(),
-            JSON.stringify(info.bound)]);
-        var reply = this.getReplyFromInfo_(info);
-        this.replyToPeer_(reply, info);
-      }
-    }
-
     // Completes socks authentication protocol
-    private connectThroughSocks_ = () :Promise<void> => {
+    private connectWithSocksAuth_ = (webEndpoint :net.Endpoint)
+          :Promise<[socks.Reply, net.Endpoint]> => {
       log.debug('%1: Connecting through socks to: %2',
-                [this.longId(), this.webEndpoint_]);
+                [this.longId(), webEndpoint]);
       // Complete socks auth handshake
       var authRequest = socks.composeAuthHandshakeBuffer([socks.Auth.NOAUTH]);
       log.debug('%1: Creating auth handshake: %2',
@@ -516,32 +513,31 @@ import ProxyConfig = require('./proxyconfig');
           // Send socks connection request
           var request :socks.Request = {
             command: socks.Command.TCP_CONNECT,
-            endpoint: this.webEndpoint_
+            endpoint: webEndpoint
           };
           log.debug('%1: Making socks request: %2', [this.longId(), request]);
           this.tcpConnection_.send(socks.composeRequestBuffer(request));
           return this.tcpConnection_.receiveNext();
-        }).then((buffer:ArrayBuffer) :Promise<void> => {
+        }).then((buffer:ArrayBuffer) :[socks.Reply, net.Endpoint] => {
           // Wait for socks connection response
           var response = socks.interpretResponseBuffer(buffer);
           log.debug('%1: Received request response: %2',
                     [this.longId(), response]);
           if (response.reply !== socks.Reply.SUCCEEDED) {
-            return Promise.reject(
-              new Error('Socks connection to local Tor failed'));
+            throw new Error('Socks connection to local Tor failed');
           }
-          // Reply to peer
-          this.replyToPeer_(response.reply);
+          var nullEndpoint :net.Endpoint = {'address':'0.0.0.0', 'port':0};
+          return [response.reply, nullEndpoint];
         });
     }
 
     // Fulfills once the connected endpoint has been returned to the SOCKS
     // client. Rejects if the endpoint cannot be sent to the SOCKS client.
-    private replyToPeer_ = (reply:socks.Reply, info?:tcp.ConnectionInfo)
+    private replyToPeer_ = (reply:socks.Reply, bound?:net.Endpoint)
         : Promise<void> => {
       var response :socks.Response = {
         reply: reply,
-        endpoint: info ? info.bound :{'address':'0.0.0.0','port':0}
+        endpoint: bound ? bound :{'address':'0.0.0.0','port':0}
       };
       log.debug('%1: Sending response to Peer: %2', [this.longId(), response]);
       return this.dataChannel_.send({
@@ -654,6 +650,16 @@ import ProxyConfig = require('./proxyconfig');
           log.debug('%1: Exited  overflow, resuming socket', this.longId());
         }
       });
+    }
+
+    // Checks validity of web endpoint of getter request
+    private isWebEndpointValid_ = (endpoint :net.Endpoint) :boolean => {
+      if (ipaddr.isValid(endpoint.address) &&
+          !this.isAllowedAddress_(endpoint.address)) {
+        this.replyToPeer_(socks.Reply.NOT_ALLOWED);
+        return false;
+      }
+      return true;
     }
 
     private isAllowedAddress_ = (addressString:string) : boolean => {
