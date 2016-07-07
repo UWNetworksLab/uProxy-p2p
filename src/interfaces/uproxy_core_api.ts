@@ -308,32 +308,6 @@ export interface CoreApi {
 
   getLogs() :Promise<string>;
 
-  // CopyPaste interactions
-
-  /*
-   * The promise fulfills with an endpoint that can be used to proxy through
-   * if sucessfully started or rejects otherwise
-   */
-  startCopyPasteGet() :Promise<net.Endpoint>;
-
-  /*
-   * The promise fulfills when the connection is fully closed and state has
-   * been cleaned up
-   */
-  stopCopyPasteGet() :Promise<void>;
-
-  startCopyPasteShare() :void;
-
-  /*
-   * The promise fulfills when the connection is fully closed and state has
-   * been cleaned up
-   */
-  stopCopyPasteShare() :Promise<void>;
-
-  // Decodes an encoded batch of signalling messages and forwards each signal
-  // to the RemoteConnection.
-  sendCopyPasteSignal(signal:string) :void;
-
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
   stop (path :social.InstancePath) : void;

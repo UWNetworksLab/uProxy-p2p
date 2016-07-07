@@ -6,6 +6,7 @@ import handler = require('../handler/queue');
 import logging = require('../logging/logging');
 import peerconnection = require('../webrtc/peerconnection');
 import peerconnection_types = require('../webrtc/signals');
+import xchurn = require('../churn/xwalk');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
@@ -261,6 +262,10 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       pc:freedom.RTCPeerConnection.RTCPeerConnection)
       :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
     log.debug('%1: constructing holographic ICE peerconnection', this.name_);
+    if (navigator.userAgent.indexOf('Android') !== -1) {
+      return new xchurn.Connection(pc, this.name_, true,
+          this.portControl_, this.transformerConfig_);
+    }
     return new churn.Connection(pc, this.name_, true,
         this.portControl_, this.transformerConfig_);
   }

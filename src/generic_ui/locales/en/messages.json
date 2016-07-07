@@ -147,134 +147,6 @@
     "description": "Label for button that will offer a friend access to the Internet through the user, even though the friend has not requested access.",
     "message": "Offer Access"
   },
-  "SHARE_ONE_TIME": {
-    "description": "Share access to the user's Internet using a link that will only work once.",
-    "message": "Share a one-time connection"
-  },
-  "REQUEST_ONE_TIME": {
-    "description": "Request access to the user's friend's Internet using a link that will only work once.",
-    "message": "Request a one-time connection"
-  },
-  "START_ONE_TIME": {
-    "description": "Start an Internet connection using a link that will only work once.",
-    "message": "Start a one-time connection"
-  },
-  "ERROR_PARSING_LINK": {
-    "description": "Error shown if a one-time connection link did not work.",
-    "message": "There was an error parsing the uproxy connection link, please try navigating to the link again or asking your friend for a new link."
-  },
-  "NO_LONGER_GETTING": {
-    "description": "Message shown when a one-time connection ends.",
-    "message": "You are no longer getting access. To request a connection, click the button below."
-  },
-  "NO_LONGER_SHARING": {
-    "description": "Message shown when a one-time connection ends and the user was sharing.",
-    "message": "You are no longer sharing access.  Click the button below to request a connection or paste a request link from a friend to share access again."
-  },
-  "START_NEW_CONNECTION": {
-    "description": "Label for button that takes user back to the 'Start a one-time connection' page.",
-    "message": "Start getting a new connection"
-  },
-  "ERROR_STARTING_CONNECTION": {
-    "description": "Error shown if a one-time connection failed to start.",
-    "message": "There was an error starting the connection and it had to be terminated. Please try starting another connection."
-  },
-  "SEND_CONNECTION_LINK": {
-    "description": "Instructions for the user to share their connection with a one-time link.",
-    "message": "To share your connection, please ask your friend to send you their link."
-  },
-  "COPY_CONNECTION_LINK": {
-    "description": "Instructions for the user to request access from a friend with a one-time link.",
-    "message": "To request access from a friend, copy and paste this link to them over a channel you trust."
-  },
-  "LOADING": {
-    "description": "Message show when something is taking time to load.",
-    "message": "Loading..."
-  },
-  "FRIEND_NEEDS_TO_CLICK": {
-    "description": "Instructions telling the user their friend needs to take an action to finish setting up the one-time connection and then their friend will send back a link.",
-    "message": "After your friend has opened the link, they'll send a link to you in return. Click on the link or paste it below."
-  },
-  "ONE_TIME_SHARING_SUCCESS": {
-    "description": "Inform the user that they are now successfully sharing access through a one-time connection",
-    "message": "You are now sharing access with your friend."
-  },
-  "ONE_TIME_SHARING_STOP_DIRECTIONS": {
-    "description": "Directions for how to stop sharing access; should refer to the act of clicking the button below which should also have a fairly obvious label.",
-    "message": "To stop sharing access, click the button below."
-  },
-  "ONE_TIME_GETTING_SUCCESS": {
-    "description": "Inform the user that they have now successfully set up a connection through which they can get access.  This message should in no way imply that they are actually getting access (there will be another message prompting them to start using the connection).",
-    "message": "Success! A one time connection has been set up successfully."
-  },
-  "START_ONE_TIME_INSTRUCTION": {
-    "description": "",
-    "message": "To start getting access from your friend, click the button below."
-  },
-  "STOP_ONE_TIME_INSTRUCTION": {
-    "description": "",
-    "message": "To stop getting access from your friend, click the button below."
-  },
-  "ONE_TIME_GETTING": {
-    "description": "The user is connected to the Internet through their friend.",
-    "message": "You are currently getting access."
-  },
-  "STOP_ONE_TIME_GETTING_BEFORE_NEW": {
-    "description": "Instruction for the user to stop a current one-time connection if they want to start a new one.",
-    "message": "If you would like to start a new one-time connection, press \"Stop Getting Access\" first."
-  },
-  "FRIEND_REQUESTED_ONE_TIME": {
-    "description": "A friend has requested to access the Internet through the user.",
-    "message": "Your friend has requested to use your Internet connection."
-  },
-  "HOW_TO_OFFER_ONE_TIME": {
-    "description": "Instructions for user if they'd like to share their Internet connection with a one-time link.",
-    "message": "If you'd like to give them access, copy and paste this URL back to them."
-  },
-  "GET_ONE_TIME_INSTEAD": {
-    "description": "Label for a link to the 'Start a one-time connection' page.",
-    "message": "Get access instead"
-  },
-  "TRYING_TO_SHARE_ONE_TIME": {
-    "description": "Instructions for user if they want to get access instead, while attempting to share access.",
-    "message": "You are currently in the process of trying to share access. If you would like to get access instead, click the link above."
-  },
-  "GET_ONE_TIME_INSTEAD_INSTRUCTION": {
-    "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection.",
-    "message": "If you would like to start a one-time connection with someone else, press the \"Back\" button and then \"Start a one-time connection\" to start a new session."
-  },
-  "ONE_TIME_SHARING": {
-    "description": "The user is sharing their Internet access with a friend.",
-    "message": "You are currently sharing access."
-  },
-  "STOP_ONE_TIME_SHARING": {
-    "description": "Label for button to terminate your connection to a friend who is accessing the Internet through you.",
-    "message": "Stop sharing access"
-  },
-  "STOP_ONE_TIME_SHARING_BEFORE_NEW": {
-    "description": "Instruction for the user to stop a current one-time connection if they want to start a new one.",
-    "message": "If you would like to start a new one-time connection, press \"Stop Sharing Access\" first."
-  },
-  "ONE_TIME_LINK_INPUT_DESCRIPTION": {
-    "description": "Text (appearing within the input box) informing the user that they can paste the one-time connection link they get back from their friend here.  It should be clear that it is the link from the friend and not the link they just copied above.",
-    "message": "Link from your friend"
-  },
-  "ONE_TIME_LINK_INPUT_ERROR": {
-    "description": "Error message to show the user if they paste a poorly-formatted link into a texbox.  Should prompt them to try pasting the link again.",
-    "message": "Unable to recognize this link. Please check for accuracy and try again."
-  },
-  "SUBMIT_ONE_TIME_LINK": {
-    "description": "Text for a button the user may click after pasting in a (probably valid) one-time connection link into a textbox above the button.",
-    "message": "Submit"
-  },
-  "GO_BACK": {
-    "description": "Go back to the main page from the one-time connection page.",
-    "message": "Go back?"
-  },
-  "ARE_YOU_SURE": {
-    "description": "Question confirming if the user wants to end an active connection to a friend.",
-    "message": "Are you sure you want to end this one-time connection?"
-  },
   "SUBMIT_FEEDBACK_SENTENCE_CASE": {
     "description": "Submit feedback to the uProxy team.",
     "message": "Submit feedback"
@@ -338,14 +210,6 @@
   "ATTEMPTING_RECONNECT": {
     "description": "uProxy was disconnected from the social network and is trying to reconnect.",
     "message": "Attempting to re-connect."
-  },
-  "CANNOT_OPEN_ONE_TIME_TITLE": {
-    "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network.",
-    "message": "Cannot open one-time connection"
-  },
-  "CANT_OPEN_ONE_TIME_MESSAGE": {
-    "description": "Text for an error popup that appears if the user tries to open a one-time link while signed in to a social network.",
-    "message": "It is not currently possible to open a manual connection at the same time as being signed in to a social network.  To launch a manual connection, please log out through the settings menu and re-paste the link."
   },
   "STATS_ENABLED_TITLE": {
     "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team.",
@@ -542,10 +406,6 @@
   "WHY_SOCIAL_NETWORK": {
     "description": "Explains why uProxy needs social networks. (Friends need to login with the same social network on uProxy for friends to see each other.)",
     "message": "uProxy uses social networks to help you set up connections with your friends"
-  },
-  "SET_UP_ONE_TIME": {
-    "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link.",
-    "message": "Set up a 1-time connection"
   },
   "WE_WONT_POST": {
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",

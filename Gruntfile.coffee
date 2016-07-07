@@ -267,15 +267,15 @@ gruntConfig = {
       cwd: '<%= androidDistPath %>'
       command: '<%= ccaAddPluginsCmd %>'
     }
-    # This pair of "cca build" commands is exactly as recommended at
-    # https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Publish.md
+    # Note: The fixed crosswalk version here is pinned in order to maintain
+    # compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk'
+      command: '<%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:20.50.533.6'
     }
     ccaReleaseAndroid: {
       cwd: '<%= androidDistPath %>'
-      command: '<%= ccaJsPath %> build android --release --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --release --webview=crosswalk'
+      command: '<%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:20.50.533.6'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
@@ -308,6 +308,12 @@ gruntConfig = {
     }
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
+    }
+    androidReplaceXwalkDev: {
+      command: './replace_xwalk_in_apk.sh debug'
+    }
+    androidReplaceXwalkDist: {
+      command: './replace_xwalk_in_apk.sh release'
     }
   }
 
@@ -358,6 +364,7 @@ gruntConfig = {
           cwd: chromeAppDevPath
           src: [
             'manifest.json'
+            'managed_policy_schema.json'
             '_locales/**'
 
             # UI for not-connected
@@ -1157,6 +1164,7 @@ taskManager.add 'build_android', [
   'exec:ccaAddPluginsAndroidDev'
   'copy:cca_splash_dev'
   'exec:ccaBuildAndroid'
+  'exec:androidReplaceXwalkDev'
 ]
 
 taskManager.add 'release_android', [
@@ -1168,6 +1176,7 @@ taskManager.add 'release_android', [
   'copy:cca_splash_dist'
   'symlink:cca_keys'
   'exec:ccaReleaseAndroid'
+  'exec:androidReplaceXwalkDist'
 ]
 
 # Emulate the mobile client for android
