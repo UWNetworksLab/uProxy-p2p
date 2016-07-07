@@ -1310,5 +1310,11 @@
   },
   "APPLY": {
     "message": "Apply"
+  },
+  "START_VPN": {
+    "message": "Start VPN"
+  },
+  "START_BROWSING": {
+    "message": "Start browsing"
   }
 }
