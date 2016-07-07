@@ -478,7 +478,7 @@ import ProxyConfig = require('./proxyconfig');
     private waitForTcpConnection_ = (connection :tcp.Connection)
           :Promise<tcp.ConnectionInfo> => {
       this.tcpConnection_ = connection;
-      log.debug('%1: Connection instantiated to local tor proxy: %2',
+      log.debug('%1: Connection instantiated: %2',
                [this.longId(), this.tcpConnection_]);
 
       return this.tcpConnection_.onceConnected

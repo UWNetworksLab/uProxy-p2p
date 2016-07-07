@@ -117,7 +117,6 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   }
 
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
-    log.debug('Connecting to the local tor proxy: %1', [socksEndpoint]);
     var connection = new tcp.Connection({endpoint: socksEndpoint});
     connection.onceClosed.then(() => {
       console.log('Socket ' + connection.connectionId + ' has closed');
@@ -133,7 +132,6 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     });
     var firstBufferPromise :Promise<ArrayBuffer> = connection.receiveNext();
     return connected.then((i:tcp.ConnectionInfo) => {
-      log.debug('Connected to local tor proxy: %1', [i]);
       return firstBufferPromise;
     }).then((buffer:ArrayBuffer) : Promise<ArrayBuffer> => {
       var auth = socks.interpretAuthResponse(buffer);
