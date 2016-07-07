@@ -105,14 +105,14 @@
             </span>
             <span hidden?='{{ !ui.browserApi.supportsVpn }}'>
               <!-- TODO(alalama): localize -->
-              Start browsing
+              {{ "START_BROWSING" | $$ }}
             </span>
           </uproxy-button>
 
           <!-- VPN mode -->
           <uproxy-button raised on-tap='{{ startVpn }}' hidden?='{{ !ui.browserApi.supportsVpn }}' disabled?='{{ !ui.browserApi.canProxy }}'>
             <!-- TODO(alalama): localize -->
-            Start VPN
+            {{ "START_VPN" | $$ }}
           </uproxy-button>
         </div>
 
