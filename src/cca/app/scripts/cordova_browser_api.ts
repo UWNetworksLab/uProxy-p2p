@@ -180,6 +180,7 @@ class CordovaBrowserApi implements BrowserAPI {
       console.error('Tun2Socks onDisconnect, unexpected callback error: ', err);
     });
 
+    // Convert local endpoint ipv6 address ("::") to ipv4 for tun2socks.
     var socksServerAddress = '127.0.0.1:' + endpoint.port;
     window.tun2socks.start(socksServerAddress).then(function(msg: string) {
       console.log('Tun2Socks start: ', msg);
