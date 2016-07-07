@@ -189,70 +189,71 @@
     <!-- Listen for the 'open-feedback' event, which is fired by the settings and splash pages. -->
     <core-signals on-core-signal-open-feedback="{{ open }}"></core-signals>
 
-    <core-overlay id='feedbackPanel'>
-      <div id='container' vertical layout>
-        <uproxy-app-bar on-go-back='{{ close }}'>
+    <core-overlay id="feedbackPanel">
+      <div id="container" vertical layout>
+        <uproxy-app-bar on-go-back="{{ close }}">
           {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
 
-        <div id='formContainer' flex>
-          <span id="dropdownContainer" on-click='{{ toggleDropdown }}'> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
-          <core-icon icon="expand-more" id="dropdownArrow" on-click = '{{ toggleDropdown }}'></core-icon>
+        <div id="formContainer" flex>
+          <span id="dropdownContainer" on-click="{{ toggleDropdown }}"> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
+          <core-icon icon="expand-more" on-click="{{ toggleDropdown }}" hidden?="{{$.collapse.opened}}"></core-icon>
+          <core-icon icon="expand-less" on-click="{{ toggleDropdown }}" hidden?="{{!$.collapse.opened}}"></core-icon>
           <core-collapse id="collapse">
-            <div class='content'>
+            <div class="content">
               <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{ changePlaceholder }}" valueattr="data-feedbackOption" id="errorInput">
-                <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
-                <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
-                <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_SIGNING_IN }}'> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
-                <paper-item data-feedbackOption='{{ UserFeedbackType.NO_FRIENDS }}'> {{ "NO_FRIENDS" | $$ }} </paper-item>
-                <paper-item data-feedbackOption='{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}'> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
-                <paper-item data-feedbackOption='{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}'> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
-                 <paper-item data-feedbackOption='{{ UserFeedbackType.OTHER_FEEDBACK }}'> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}"> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}"> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_SIGNING_IN }}"> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.NO_FRIENDS }}"> {{ "NO_FRIENDS" | $$ }} </paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}"> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}"> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
+                 <paper-item data-feedbackOption="{{ UserFeedbackType.OTHER_FEEDBACK }}"> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
               </core-menu>
             </div>
           </core-collapse>
 
           <!-- because dropdown menus have no 'error' attribute, this is an invisible decorator that has an error if nothing is selected from the dropdown -->
-          <paper-input-decorator id="errorDecorator" label = '{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}' error='{{ "NO_CUSTOM_ERROR_PLACEHOLDER" | $$ }}'></paper-input-decorator>
+          <paper-input-decorator id="errorDecorator" label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}' error='{{ "NO_CUSTOM_ERROR_PLACEHOLDER" | $$ }}'></paper-input-decorator>
 
-          <paper-input-decorator id='feedbackDecorator'
+          <paper-input-decorator id="feedbackDecorator"
               label='{{ "FEEDBACK_PLACEHOLDER" | $$ }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$ }}'>
             <paper-autogrow-textarea id="feedbackPaperTextarea">
               <textarea id="feedbackInput"
-                     value='{{ feedback }}'>
+                     value="{{ feedback }}">
               </textarea>
             </paper-autogrow-textarea>
           </paper-input-decorator>
 
-          <paper-input-decorator id='emailDecorator'
+          <paper-input-decorator id="emailDecorator"
               label='{{ "EMAIL_PLACEHOLDER" | $$ }}'>
             <input id="emailInput"
                    is="core-input"
-                   value='{{ email }}'>
+                   value="{{ email }}">
           </paper-input-decorator>
 
-          <div id='logCheckboxContainer'>
-            <paper-checkbox for id='logCheckbox'></paper-checkbox>
-            <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
+          <div id="logCheckboxContainer">
+            <paper-checkbox for id="logCheckbox"></paper-checkbox>
+            <span id="logCheckboxLabel" on-tap="{{ viewLogs }}">
               {{ "NETWORK_AND_LOGS" | $$ }}
             </span>
-            <uproxy-faq-link anchor='doesUproxyLogData'>
+            <uproxy-faq-link anchor="doesUproxyLogData">
               <core-icon icon="help" id="helpIcon"></core-icon>
             </uproxy-faq-link>
           </div>
-          <p id='moreInfo'>
+          <p id="moreInfo">
             {{ "P_I_I_MESSAGE" | $$ }}
           </p>
         </div> <!-- end of form container -->
-        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>{{ "SUBMIT_FEEDBACK" | $$ }}</div>
+        <div id="sendFeedback" on-tap="{{ sendFeedback }}">{{ "SUBMIT_FEEDBACK" | $$ }}</div>
       </div>
     </core-overlay>
-    <uproxy-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
+    <uproxy-action-dialog backdrop layered="false" id="sendingFeedbackDialog" autoCloseDisabled="true">
       <div id="SENDING_FEEDBACK">
         {{ "SENDING_FEEDBACK" | $$ }}<br>
-        <paper-progress indeterminate='true'></paper-progress>
+        <paper-progress indeterminate="true"></paper-progress>
       </div>
     </uproxy-action-dialog>
   </template>
-  <script src='feedback.js'></script>
+  <script src="feedback.js"></script>
 </polymer-element>

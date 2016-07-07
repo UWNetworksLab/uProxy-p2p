@@ -39,7 +39,6 @@ Polymer({
       this.$.errorDecorator.isInvalid = false;
       this.$.feedbackDecorator.isInvalid = true;
       this.$.collapse.opened = false;
-      this.changeDropdownArrow();
       return;
     }
     this.$.sendingFeedbackDialog.open();
@@ -59,7 +58,6 @@ Polymer({
       this.$.feedbackDecorator.isInvalid = false;
       this.$.dropdownContainer.textContent = ui.i18n_t('CUSTOM_ERROR_PLACEHOLDER');
       this.$.collapse.opened = false;
-      this.changeDropdownArrow();
       // Clear the form.
       this.email = '';
       this.feedback = '';
@@ -84,20 +82,11 @@ Polymer({
   },
   toggleDropdown: function() {
     this.$.collapse.toggle();
-    this.changeDropdownArrow();
   },
   changePlaceholder: function(event: Event, detail: any, sender: HTMLElement) {
     if (detail.isSelected) {
-      this.$.dropdownContainer.textContent= detail.item.textContent;
+      this.$.dropdownContainer.textContent = detail.item.textContent;
       this.$.collapse.opened = false;
-      this.changeDropdownArrow();
-    }
-  },
-  changeDropdownArrow: function() {
-    if (this.$.collapse.opened) {
-      this.$.dropdownArrow.icon='expand-less';
-    } else {
-      this.$.dropdownArrow.icon='expand-more';
     }
   },
   viewLogs: function() {
