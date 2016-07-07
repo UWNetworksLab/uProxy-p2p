@@ -39,7 +39,7 @@ Polymer({
       this.$.errorDecorator.isInvalid = false;
       this.$.feedbackDecorator.isInvalid = true;
       this.$.collapse.opened = false;
-      this.$.dropdownArrow.icon='expand-more';
+      this.changeDropdownArrow();
       return;
     }
     this.$.sendingFeedbackDialog.open();
@@ -59,7 +59,7 @@ Polymer({
       this.$.feedbackDecorator.isInvalid = false;
       this.$.dropdownContainer.textContent = ui.i18n_t('CUSTOM_ERROR_PLACEHOLDER');
       this.$.collapse.opened = false;
-      this.$.dropdownArrow.icon='expand-more';
+      this.changeDropdownArrow();
       // Clear the form.
       this.email = '';
       this.feedback = '';
@@ -82,21 +82,23 @@ Polymer({
       this.$.sendingFeedbackDialog.close();
     });
   },
-  updateError: function(event: Event, detail: any, sender: HTMLElement) {
-    if (detail.isSelected) {
-      this.feedbackType = detail.item.getAttribute('data-feedbackOption');
-    }
-  },
   toggleDropdown: function() {
     this.$.collapse.toggle();
+    this.changeDropdownArrow();
+  },
+  changePlaceholder: function(event: Event, detail: any, sender: HTMLElement) {
+    if (detail.isSelected) {
+      this.$.dropdownContainer.textContent= detail.item.textContent;
+      this.$.collapse.opened = false;
+      this.changeDropdownArrow();
+    }
+  },
+  changeDropdownArrow: function() {
     if (this.$.collapse.opened) {
       this.$.dropdownArrow.icon='expand-less';
     } else {
       this.$.dropdownArrow.icon='expand-more';
     }
-  },
-  changePlaceholder: function() {
-    this.$.dropdownContainer.textContent=this.$.errorInput.children.array()[this.$.errorInput.selected - 2].textContent; //Because errorInput.selected returns values starting from 2 instead of 0 (not sure why)
   },
   viewLogs: function() {
     this.ui.openTab('generic_ui/view-logs.html?lang=' + model.globalSettings.language);

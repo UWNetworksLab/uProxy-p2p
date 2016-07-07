@@ -199,7 +199,7 @@
           <span id="dropdownContainer" on-click='{{ toggleDropdown }}'> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
           <core-icon icon="expand-more" id="dropdownArrow" on-click = '{{ toggleDropdown }}'></core-icon>
           <core-collapse id="collapse">
-            <div class="content">
+            <div class='content'>
               <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{ changePlaceholder }}" valueattr="data-feedbackOption" id="errorInput">
                 <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}'> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
                 <paper-item data-feedbackOption='{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}'> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
