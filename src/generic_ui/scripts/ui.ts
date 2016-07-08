@@ -9,6 +9,7 @@
  * Common User Interface state holder and changer.
  */
 
+import _ = require('lodash');
 import ui_constants = require('../../interfaces/ui');
 import background_ui = require('./background_ui');
 import CoreConnector = require('./core_connector');
@@ -76,6 +77,12 @@ export function getImageData(userId: string, oldImageData: string,
   return '\'data:image/svg+xml;utf8,' +
       jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
 }
+
+
+/* Suppress `error TS2339: Property 'languages' does not exist on type
+ * 'Navigator'` triggered by `navigator.languages` reference below.
+ */
+declare var navigator :any;
 
 /**
  * The User Interface class.
@@ -1054,6 +1061,21 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.networkNames = state.networkNames;
     this.model.cloudProviderNames = state.cloudProviderNames;
     this.availableVersion = state.availableVersion;
+    if (!state.globalSettings.language) {
+      // Set state.globalSettings.language based on browser settings:
+      // Choose the first language in navigator.languages we have available.
+      let lang :string;
+      try {
+        lang = _(navigator.languages).map((langCode :string) => {
+          return langCode.substring(0, 2).toLowerCase();  // Normalize
+        }).find((langCode :string) => {  // Return first lang we have available.
+          return _.includes(translator_module.i18n_languagesAvailable, langCode);
+        });
+      } catch (e) {
+        lang = 'en';
+      }
+      state.globalSettings.language = lang || 'en';
+    }
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.updateLanguage(state.globalSettings.language);
     }
