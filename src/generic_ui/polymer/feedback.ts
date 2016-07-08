@@ -24,6 +24,7 @@ Polymer({
     if (data && data.includeLogs) {
       this.$.logCheckbox.checked = true;
     }
+    this.feedbackType = (data && data.feedbackType) ? data.feedbackType : this.feedbackType;
     this.$.feedbackPanel.open();
   },
   sendFeedback: function() {

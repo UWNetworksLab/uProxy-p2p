@@ -1308,7 +1308,7 @@
     "message": "Choose a topic for feedback"
   },
   "NO_CUSTOM_ERROR_PLACEHOLDER": {
-    "description": "Error that apears if you do not select any feedback in the dropdown menu .",
+    "description": "Error that apears if you do not select any feedback in the dropdown menu.",
     "message": "Please choose feedback most similar to yours"
   }, 
   "CLOUD_CONNECTIONS_DISCONNECTED": {
