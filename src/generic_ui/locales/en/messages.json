@@ -151,25 +151,17 @@
     "description": "Submit feedback to the uProxy team.",
     "message": "Submit feedback"
   },
-  "EMAIL_TITLE": {
-    "description": "",
-    "message": "Email (optional)"
-  },
   "EMAIL_PLACEHOLDER": {
     "description": "",
-    "message": "Email address"
-  },
-  "FEEDBACK_TITLE": {
-    "description": "Label for textbox for user's to submit feedback and comments to uProxy.",
-    "message": "Enter your feedback below"
+    "message": "Email address (optional)"
   },
   "FEEDBACK_PLACEHOLDER": {
     "description": "The default text that appears in the user feedback textbox.",
-    "message": "Write your feedback"
+    "message": "Your feedback"
   },
   "FEEDBACK_ERROR_PLACEHOLDER": {
     "description": "Error that apears if you try to submit an empty feedback.",
-    "message": "Please enter some feedback"
+    "message": "Please specify your feedback"
   },
   "NETWORK_AND_LOGS": {
     "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team.",
@@ -1310,5 +1302,41 @@
   },
   "APPLY": {
     "message": "Apply"
+  },
+  "CUSTOM_ERROR_PLACEHOLDER": {
+    "description": "The default text that appears in the dropdown menu in feedback. ",
+    "message": "Choose a topic for feedback"
+  },
+  "NO_CUSTOM_ERROR_PLACEHOLDER": {
+    "description": "Error that apears if you do not select any feedback in the dropdown menu.",
+    "message": "Please choose feedback most similar to yours"
+  }, 
+  "CLOUD_CONNECTIONS_DISCONNECTED": {
+    "descripton": "One of the feedback options in the dropdown menu",
+    "message": "My cloud connections get disconnected."
+  }, 
+  "CLOUD_SERVER_NO_CONNECT": {
+    "description": "One of the feedback options in the dropdown menu", 
+    "message": "My cloud server fails to connect."
+  }, 
+  "TROUBLE_SIGNING_IN": {
+    "description": "One of the feedback options in the dropdown menu", 
+    "message": "I'm having trouble signing in."
+  }, 
+  "NO_FRIENDS": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "I don't have any friends to proxy from."
+  }, 
+  "TROUBLE_STARTING_CONNECTION": {
+    "description": "One of the feedback options in the dropdown menu", 
+    "message": "I can't start a connection." 
+  }, 
+  "DISCONNECTED_FROM_FRIEND": { 
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "I get disconnected from my friend."
+  }, 
+  "OTHER_FEEDBACK": {
+    "description": "One of the feedback options in the dropdown menu", 
+    "message": "Other (please specify below)"
   }
 }

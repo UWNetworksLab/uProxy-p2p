@@ -9,6 +9,7 @@ import ui = require('./ui');
 
 export interface UserFeedback {
   email        :string;
+  error        :string;
   feedback     :string;
   logs         :string;
   browserInfo  ?:string;
@@ -18,7 +19,14 @@ export interface UserFeedback {
 
 export enum UserFeedbackType {
   USER_INITIATED = 0,
-  PROXYING_FAILURE = 1
+  PROXYING_FAILURE = 1,
+  CLOUD_CONNECTIONS_DISCONNECTED = 2,
+  CLOUD_SERVER_NO_CONNECT = 3, 
+  TROUBLE_SIGNING_IN = 4, 
+  NO_FRIENDS = 5, 
+  TROUBLE_STARTING_CONNECTION = 6, 
+  DISCONNECTED_FROM_FRIEND = 7, 
+  OTHER_FEEDBACK = 8
 }
 
 // Object containing description so it can be saved to storage.
