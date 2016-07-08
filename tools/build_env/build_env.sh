@@ -29,6 +29,7 @@ function update_image() {
 
 function publish_image() {
   docker push $(get_image_version)
+  echo "Find the new image at https://hub.docker.com/r/uproxy/build/tags/"
 }
 
 function enter() {
@@ -51,7 +52,14 @@ function run() {
 
 function main() {
   check_prerequisites || return
-  IMAGE_DIR="$(dirname $0)" "$@"
+  (
+    IMAGE_DIR="$(dirname $0)"
+    if (( $# > 0 )); then
+      "$@"
+    else
+      enter
+    fi
+  )
 }
 
 main "$@"

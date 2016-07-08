@@ -65,6 +65,9 @@ developers:
 docker login  # If you are not yet authenticated
 ./tools/build_env/build_env.sh publish_image
 ````
+Go to the [`uproxy/build` image page on
+Dockerhub](https://hub.docker.com/r/uproxy/build/tags/) to check if the new
+image is there.
 
 ## Known Issues
 

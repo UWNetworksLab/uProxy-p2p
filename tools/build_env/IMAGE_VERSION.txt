@@ -1,1 +1,1 @@
-uproxy/build:33fc009
+uproxy/build:5ed57e4
