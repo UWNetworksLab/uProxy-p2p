@@ -1340,9 +1340,11 @@
     "message": "Other (please specify below)"
   },
   "START_VPN": {
+    "description": "Button label for starting a connection in VPN mode, where all device traffic is routed through uProxy.",
     "message": "Start VPN"
   },
   "START_BROWSING": {
+    "description": "Button label for starting an in-app browser connected to a uProxy peer.",
     "message": "Start browsing"
   }
 }
