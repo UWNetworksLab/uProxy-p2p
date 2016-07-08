@@ -118,8 +118,10 @@
     }
     #errorDecorator /deep/ .unfocused-underline,
     #errorDecorator /deep/ .focused-underline {
-      /* Remove the underline from the errorDecorator textbox, which is there to throw the error for not selecting
-      an option from the dropdown menu */
+      /* 
+        Remove the underline from the errorDecorator textbox, which is there to throw the error for not selecting
+        an option from the dropdown menu 
+      */
       height: 0px;
     }
     #errorDecorator {
@@ -164,7 +166,7 @@
     #helpIcon {
       height: 15px;
       width: 15px;
-    } 
+    }
     #sendingFeedback {
       text-align: center;
       font-size: 16px;
@@ -201,13 +203,13 @@
           <core-collapse id="collapse">
             <div class="content">
               <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{ changePlaceholder }}" valueattr="data-feedbackOption" id="errorInput">
-                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}"> {{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}"> {{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_SIGNING_IN }}"> {{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.NO_FRIENDS }}"> {{ "NO_FRIENDS" | $$ }} </paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}"> {{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}"> {{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
-                 <paper-item data-feedbackOption="{{ UserFeedbackType.OTHER_FEEDBACK }}"> {{ "OTHER_FEEDBACK" | $$ }} </paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}">{{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}">{{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_SIGNING_IN }}">{{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.NO_FRIENDS }}">{{ "NO_FRIENDS" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}">{{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}">{{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
+                 <paper-item data-feedbackOption="{{ UserFeedbackType.OTHER_FEEDBACK }}">{{ "OTHER_FEEDBACK" | $$ }}</paper-item>
               </core-menu>
             </div>
           </core-collapse>
