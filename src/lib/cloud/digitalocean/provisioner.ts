@@ -8,7 +8,15 @@ declare const freedom: freedom.FreedomInModuleEnv;
 // TODO: https://github.com/uProxy/uproxy/issues/2051
 declare var forge: any;
 
-const log = new logging.Log('digitalocean');
+//const log = new logging.Log('digitalocean');
+//TODO: Logging is not working with the above, which causes:
+//
+//          freedom-for-chrome.js:1114 digitalocean [2016-07-11T18:45:28.013Z]
+//          Freedom module logginglistener is not available, IPCs will be issued
+//          for all logging statements
+//
+//      to show up in the console. Alias `log` to `console` instead for now:
+let log = console;
 
 const POLL_TIMEOUT: number = 5000; //milliseconds
 
@@ -33,6 +41,9 @@ const REDIRECT_URIS: [string] = [
   //  'http://localhost:10101'
 ];
 
+const STORAGE_KEY_OAUTH = 'DigitalOcean-OAuth';
+const MAX_OAUTH_TRIES = 1;
+
 interface KeyPair {
   private: string;
   public: string;
@@ -40,6 +51,16 @@ interface KeyPair {
 
 class Provisioner {
   constructor(private dispatch_: Function, private state_: any = {}) {}
+
+  /*
+   * Returns whether a DO OAuth token is saved in storage.
+   */
+  public hasOAuth = () : Promise<boolean> => {
+    const storage = freedom['core.storage']();
+    return new Promise((F, R) => {
+      storage.get(STORAGE_KEY_OAUTH).then((result) => { F(!!result); });
+    });
+  }
 
   /**
    * One-click setup of a VM
@@ -51,10 +72,7 @@ class Provisioner {
   public start = (name: string, region = DEFAULT_REGION, image = DEFAULT_IMAGE, size = DEFAULT_SIZE): Promise<Object> => {
     log.debug('start %1', name);
 
-    return this.doOAuth_().then((oauthObj: any) => {
-      this.state_.oauth = oauthObj;
-      return this.getSshKey_(name);
-    }).then((keys: KeyPair) => {
+    return this.getSshKey_(name).then((keys: KeyPair) => {
       this.state_.ssh = keys;
 
       return this.getDropletByName_(name).then((unused :any) => {
@@ -106,11 +124,7 @@ class Provisioner {
    */
   public stop = (name: string): Promise<void> => {
     log.debug('stop %1', name);
-    return this.doOAuth_().then((oauthObj: any) => {
-      this.state_.oauth = oauthObj;
-    }).then(() => {
-      return this.destroyServer_(name);
-    });
+    return this.destroyServer_(name);
   }
 
   /**
@@ -131,7 +145,7 @@ class Provisioner {
     }).then(() => {
       return this.doRequest_('DELETE', 'droplets/' + this.state_.cloud.vm.id);
     }).then((resp: any) => {
-      if (resp.status.startsWith('204')) {
+      if (resp.statusCode === 204) {
         // Wait until server is deleted
         return this.waitDigitalOceanActions_();
       } else {
@@ -154,11 +168,7 @@ class Provisioner {
    */
   public reboot = (name: string) : Promise<void> => {
     log.debug('reboot %1', name);
-    return this.doOAuth_().then((oauthObj: any) => {
-      this.state_.oauth = oauthObj;
-    }).then(() => {
-      return this.getDropletByName_(name);
-    }).then((droplet: any) => {
+    return this.getDropletByName_(name).then((droplet: any) => {
       this.state_.cloud = this.state_.cloud || {};
       this.state_.cloud.vm = this.state_.cloud.vm || droplet;
       // Make sure there are no actions in progress before rebooting
@@ -207,8 +217,9 @@ class Provisioner {
   }
 
   /**
-   * Initiates a Digital Ocean oAuth flow
-   * @return {Promise.<Object>} oAuth response from Digital Ocean
+   * Initiates a Digital Ocean OAuth flow.
+   * OAuth response saved in storage upon receipt for future use.
+   * @return {Promise.<Object>} OAuth response from Digital Ocean
    *  {
    *    access_token: '..',
    *    expires_in: '..',
@@ -217,7 +228,7 @@ class Provisioner {
    *  }
    */
   private doOAuth_ = () : Promise<Object> => {
-    log.debug('doOAuth_');
+    const storage = freedom['core.storage']();
     return new Promise((F, R) => {
       var oauth = freedom['core.oauth']();
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
@@ -238,8 +249,11 @@ class Provisioner {
           param = keys[i].substr(0, keys[i].indexOf('='));
           params[param] = keys[i].substr(keys[i].indexOf('=') + 1);
         }
+        log.debug('Got OAuth, saving in storage:', params);
+        storage.set(STORAGE_KEY_OAUTH, JSON.stringify(params)),
         F(params);
       }).catch((err: Error) => {
+        log.debug('caught error in doOAuth_:', err);
         R(err);
       });
     });
@@ -296,44 +310,92 @@ class Provisioner {
   }
   
   /**
-   * Make a request to Digital Ocean
+   * Make a request to Digital Ocean.
+   * Uses OAuth token saved in storage, if available, otherwise initiates
+   * an OAuth flow, awaits authorization (which is then saved in storage),
+   * and then makes a recursive call. Keeps a count of how many tries were
+   * attempted and rejects if it exceeds MAX_OAUTH_TRIES to prevent infinite
+   * recursion.
+   *
+   * TODO: Automatically exchange expired oauth tokens for fresh ones?
+   *       Looks like this is supported:
+   *       https://developers.digitalocean.com/documentation/oauth/#refresh-token-flow
+   *
    * @param {String} method - GET/POST/DELETE etc
    * @param {String} actionPath - e.g. 'droplets/'
    * @param {String} body - if POST, contents to post
    * @return {Promise.<Object>} - JSON object of response body
    */
-  private doRequest_ = (method: string, actionPath: string, body?: string) :
+  private doRequest_ = (method: string, actionPath: string, body?: string, ntries = 0) :
       Promise<Object> => {
+    const storage = freedom['core.storage']();
     return new Promise((F, R) => {
-      var url = 'https://api.digitalocean.com/v2/' + actionPath;
-      var xhr = freedom['core.xhr']();
-      xhr.on('onload', (loadInfo: any) => {
-        // DELETE method doesn't return a reponse body. Success
-        // is indicated by 204 response code in header.
-        if (method === 'DELETE') {
-          xhr.getResponseHeader('status').then((response: string) => {
-            F({'status': response});
-          });
+      let maybeRetry = () => {
+        ntries++;
+        if (ntries > MAX_OAUTH_TRIES) {
+          return Promise.reject({errcode: 'REACHED_MAX_OAUTH_TRIES'});
+        }
+        log.debug('Awaiting OAuth before "/' + actionPath + '" retry', ntries, '...');
+        return storage.remove(STORAGE_KEY_OAUTH).then(this.doOAuth_).then(() => {
+          this.doRequest_(method, actionPath, body, ntries);
+        });
+      };
+      storage.get(STORAGE_KEY_OAUTH).then((oauthJson) => {
+        let oauthObj :any = null;
+        if (!oauthJson) {
+          log.debug('Missing oauthJson');
         } else {
-          xhr.getResponseText().then((response: string) => {
-            try {
-              F(JSON.parse(response));
-            } catch (e) {
-              R(e);
+          try {
+            oauthObj = JSON.parse(oauthJson);
+          } catch (e) {
+            log.debug('Invalid oauthJson:', oauthJson);
+          }
+          if (oauthObj && !oauthObj.access_token) {
+            log.debug('Missing oauthObj.access_token, oauthObj:', oauthObj);
+          }
+        }
+        if (!oauthObj || !oauthObj.access_token) {
+          return maybeRetry();
+        }
+        log.debug('Making request:', actionPath);
+        var url = 'https://api.digitalocean.com/v2/' + actionPath;
+        var xhr = freedom['core.xhr']();
+        xhr.on('onload', (loadInfo: any) => {
+          xhr.getStatus().then((statusCode :number) => {
+            if (statusCode === 401) {
+              log.debug('401 response. Invalid access token?');
+              // User could have gone to
+              // https://cloud.digitalocean.com/settings/api/access
+              // to revoke authorization. Prompt
+              return maybeRetry();
+            }
+            // DELETE method doesn't return a reponse body. Success
+            // is indicated by 204 response code in header.
+            if (method === 'DELETE') {
+              F({'statusCode': statusCode});
+            } else {
+              xhr.getResponseText().then((response: any) => {
+                try {
+                  response = JSON.parse(response);
+                } catch (e) {
+                  R({message: 'Could not parse response', error: e, response: response});
+                }
+                F(response);
+              });
             }
           });
+        });
+        xhr.on('onerror', R);
+        xhr.on('ontimeout', R);
+        xhr.open(method, url, true);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + oauthObj.access_token);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        if (body !== null && typeof body !== 'undefined') {
+          xhr.send({ string: body });
+        } else {
+          xhr.send(null);
         }
       });
-      xhr.on('onerror', R);
-      xhr.on('ontimeout', R);
-      xhr.open(method, url, true);
-      xhr.setRequestHeader('Authorization', 'Bearer ' + this.state_.oauth.access_token);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      if (body !== null && typeof body !== 'undefined') {
-        xhr.send({ string: body });
-      } else {
-        xhr.send(null);
-      }
     });
   }
   
