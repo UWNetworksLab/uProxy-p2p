@@ -354,7 +354,8 @@ import ProxyConfig = require('./proxyconfig');
                     [this.longId(), this.proxyConfig_.socksProxySettings]);
 
           // Connect to web endpoint directly or through socks proxy
-          if (this.proxyConfig_.socksProxySettings.socksProxyOn) {
+          if (typeof this.proxyConfig_.socksProxySettings !== 'undefined' &&
+              this.proxyConfig_.socksProxySettings.socksProxyOn) {
             return this.connectToEndpointThroughSocks_(webEndpoint);
           } else {
             return this.connectToEndpointDirectly_(webEndpoint);
@@ -537,7 +538,7 @@ import ProxyConfig = require('./proxyconfig');
         : Promise<void> => {
       var response :socks.Response = {
         reply: reply,
-        endpoint: bound ? bound :{'address':'0.0.0.0','port':0}
+        endpoint: bound ? bound : undefined
       };
       log.debug('%1: Sending response to Peer: %2', [this.longId(), response]);
       return this.dataChannel_.send({
