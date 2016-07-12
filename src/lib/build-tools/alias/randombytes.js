@@ -7,14 +7,6 @@
 const cryptoAvailable = typeof crypto !== 'undefined';
 
 let coreCrypto;
-if (!cryptoAvailable) {
-  try {
-    coreCrypto = freedom['core.crypto']();
-  } catch (e) {
-    console.error('crypto and core.crypto unavailable - there can be no randomness in this web worker')
-  }
-}
-
 let bufferedRandomness = new Buffer(0);
 let offset = 0;
 
@@ -27,7 +19,6 @@ const refreshBufferedRandomness = function() {
     console.error('could not generate randomness', e);
   });
 }
-refreshBufferedRandomness();
 
 const getBufferedRandomness = function(size) {
   if (offset + size > bufferedRandomness.length * 0.75) {
@@ -41,6 +32,15 @@ const getBufferedRandomness = function(size) {
   offset += size;
   return bufferedRandomness.slice(offset, offset + size);
 };
+
+if (!cryptoAvailable) {
+  try {
+    coreCrypto = freedom['core.crypto']();
+  } catch (e) {
+    console.error('crypto and core.crypto unavailable - there can be no randomness in this web worker')
+  }
+  refreshBufferedRandomness();
+}
 
 module.exports = function(size, cb) {
   if (cryptoAvailable) {
