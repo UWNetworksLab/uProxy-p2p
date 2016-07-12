@@ -1,51 +1,48 @@
-// Alternative to crypto-browserify's randombytes shim
-// https://github.com/crypto-browserify/randombytes
-// Falls back to freedom.js core.crypto when crypto.getRandomValues is
-// unavailable, which is currently the case in Firefox web workers.
-// TODO: post FF48 (2016-08-02) remove fill and just use built-in crypto
+// Alternative to crypto-browserify's randombytes shim which falls back
+// to freedom.js' core.crypto module, if available. For Firefox <48.
+//
+// Original:
+//   https://github.com/crypto-browserify/randombytes
 
 const cryptoAvailable = typeof crypto !== 'undefined';
-var getBufferedRandomBytes, refreshBuffer, offset;
+
+let coreCrypto;
 if (!cryptoAvailable) {
-  // Filling with freedom.js core.crypto, which requires a buffer due to async
   try {
-    const rand = freedom['core.crypto']();
-
-    var buf;
-    var refreshBuffer = function(size) {
-      return rand.getRandomBytes(size).then(function (bytes) {
-        buf = new Uint8Array(bytes);
-        offset = 0;
-      }, function (err) {
-        console.log(err);
-      });
-    }.bind(this);
-    refreshBuffer(10000);  // initial randomness
-    offset = 0;
-
-    getBufferedRandomBytes = function(buffer) {
-      if ((size * 100) - offset < size * 10) {
-        refreshBuffer(size*100);
-      }
-      var size = buffer.byteLength,
-          view = new Uint8Array(buffer),
-          i;
-      if (offset + size > buf.length) {
-        throw new Error('Insufficient Randomness Allocated.');
-      }
-      view = buf.slice(offset, offset + size);
-      offset += size;
-    };
+    coreCrypto = freedom['core.crypto']();
   } catch (e) {
-    console.error('could not instantiate core.crypto: ', e);
+    console.error('crypto and core.crypto unavailable - there can be no randomness in this web worker')
   }
 }
 
-module.exports = function(size, cb) {
-  if (!cryptoAvailable && (size*100) - offset < size*10) {
-    // using freedom.js core.crypto, may need to refresh buffer
-    refreshBuffer(size*100);
+let bufferedRandomness = new Buffer(0);
+let offset = 0;
+
+const refreshBufferedRandomness = function() {
+  // 65536 is the maximum value supported by crypto.getRandomValues on Chrome.
+  coreCrypto.getRandomBytes(65536).then(function(ab) {
+    bufferedRandomness = new Buffer(ab);
+    offset = 0;
+  }, function(e) {
+    console.error('could not generate randomness', e);
+  });
+}
+refreshBufferedRandomness();
+
+const getBufferedRandomness = function(size) {
+  if (offset + size > bufferedRandomness.length * 0.75) {
+    refreshBufferedRandomness();
   }
+
+  if (offset + size > bufferedRandomness.length) {
+    throw new Error('insufficient randomness available');
+  }
+
+  offset += size;
+  return bufferedRandomness.slice(offset, offset + size);
+};
+
+module.exports = function(size, cb) {
   if (cryptoAvailable) {
     const buffer = new Buffer(size);
     crypto.getRandomValues(buffer);
@@ -56,13 +53,11 @@ module.exports = function(size, cb) {
     }
   } else {
     if (cb) {
-      rand.getRandomBytes(size).then(function(ab) {
-        cb(new Buffer(ab));
+      coreCrypto.getRandomBytes(size).then(function(ab) {
+        cb(null, new Buffer(ab));
       });
     } else {
-      const buffer = new Buffer(size);
-      getBufferedRandomBytes(buffer);
-      return buffer;
+      return getBufferedRandomness(size);
     }
   }
 };
