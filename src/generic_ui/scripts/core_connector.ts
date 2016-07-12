@@ -213,6 +213,10 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.REFRESH_PORT_CONTROL);
   }
 
+  getPortControlSupport = (): Promise<uproxy_core_api.PortControlSupport> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_PORT_CONTROL_SUPPORT);
+  }
+
   pingUntilOnline = (pingUrl :string) : Promise<void> => {
     return this.promiseCommand(
         uproxy_core_api.Command.PING_UNTIL_ONLINE, pingUrl);
