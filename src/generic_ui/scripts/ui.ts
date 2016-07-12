@@ -114,8 +114,9 @@ export class UserInterface implements ui_constants.UiApi {
   private userCancelledGetAttempt_ :boolean = false;
 
   /* Translation */
-  public i18n_t :Function = translator_module.i18n_t;
-  public i18n_setLng :Function = translator_module.i18n_setLng;
+  public i18n_t = translator_module.i18n_t;
+  public i18n_setLng = translator_module.i18n_setLng;
+  public i18nSanitizeHtml = translator_module.i18nSanitizeHtml;
 
   /* About this uProxy installation */
   public availableVersion :string = null;
@@ -1170,11 +1171,6 @@ export class UserInterface implements ui_constants.UiApi {
     } else {
       this.view = ui_constants.View.SPLASH;
     }
-  }
-
-  public i18nSanitizeHtml = (i18nMessage :string) => {
-    // Remove all HTML other than supported tags like strong, a, p, etc.
-    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
   public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
