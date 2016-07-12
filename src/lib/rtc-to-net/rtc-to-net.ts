@@ -362,9 +362,16 @@ import ProxyConfig = require('./proxyconfig');
             return this.connectToEndpointDirectly_(webEndpoint);
           }
         }).catch((e :freedom.Error) => {
+          // Error while connecting to remote endpoint - send reply to peer
+          // Error can be freedom error or regular error
           log.info('%1: failed to connect to remote endpoint', [this.longId()]);
-          this.replyToPeer_(this.getReplyFromError_(e));
-          return Promise.reject(new Error(e.errcode));
+          if (e.errcode !== undefined) { // Error is freedom error
+            this.replyToPeer_(this.getReplyFromError_(e));
+            return Promise.reject(new Error(e.errcode));
+          } else {
+            this.replyToPeer_(socks.Reply.FAILURE);
+            return Promise.reject(e);
+          }
         }).then((reply :[socks.Reply, net.Endpoint]) :Promise<void> => {
           log.info('%1: connected to remote web endpoint', [this.longId()]);
           return this.replyToPeer_(reply[0], reply[1]);
@@ -657,7 +664,6 @@ import ProxyConfig = require('./proxyconfig');
     private isWebEndpointValid_ = (endpoint :net.Endpoint) :boolean => {
       if (ipaddr.isValid(endpoint.address) &&
           !this.isAllowedAddress_(endpoint.address)) {
-        this.replyToPeer_(socks.Reply.NOT_ALLOWED);
         return false;
       }
       return true;
