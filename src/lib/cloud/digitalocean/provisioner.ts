@@ -1,22 +1,11 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts' />
 
-import logging = require('../../logging/logging');
 import Pinger = require('../../net/pinger');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
 // TODO: https://github.com/uProxy/uproxy/issues/2051
 declare var forge: any;
-
-//const log = new logging.Log('digitalocean');
-//TODO: Logging is not working with the above, which causes:
-//
-//          freedom-for-chrome.js:1114 digitalocean [2016-07-11T18:45:28.013Z]
-//          Freedom module logginglistener is not available, IPCs will be issued
-//          for all logging statements
-//
-//      to show up in the console. Alias `log` to `console` instead for now:
-let log = console;
 
 const POLL_TIMEOUT: number = 5000; //milliseconds
 
@@ -70,7 +59,7 @@ class Provisioner {
    * @return {Promise.<Object>}
    */
   public start = (name: string, region = DEFAULT_REGION, image = DEFAULT_IMAGE, size = DEFAULT_SIZE): Promise<Object> => {
-    log.debug('start %1', name);
+    console.debug('start %1', name);
 
     return this.getSshKey_(name).then((keys: KeyPair) => {
       this.state_.ssh = keys;
@@ -110,7 +99,7 @@ class Provisioner {
 
       // It usually takes several seconds after the API reports success for
       // SSH on a new droplet to become responsive.
-      log.debug('waiting for SSH port to become active');
+      console.debug('waiting for SSH port to become active');
       return new Pinger(this.state_.network['ipv4'], 22, 60).ping().then(() => {
         return this.state_;
       });
@@ -123,7 +112,7 @@ class Provisioner {
    * @return {Promise.<void>}
    */
   public stop = (name: string): Promise<void> => {
-    log.debug('stop %1', name);
+    console.debug('stop %1', name);
     return this.destroyServer_(name);
   }
 
@@ -167,7 +156,7 @@ class Provisioner {
    * to complete or rejects if droplet doesn't exist
    */
   public reboot = (name: string) : Promise<void> => {
-    log.debug('reboot %1', name);
+    console.debug('reboot %1', name);
     return this.getDropletByName_(name).then((droplet: any) => {
       this.state_.cloud = this.state_.cloud || {};
       this.state_.cloud.vm = this.state_.cloud.vm || droplet;
@@ -249,11 +238,11 @@ class Provisioner {
           param = keys[i].substr(0, keys[i].indexOf('='));
           params[param] = keys[i].substr(keys[i].indexOf('=') + 1);
         }
-        log.debug('Got OAuth, saving in storage:', params);
+        console.debug('Got OAuth, saving in storage:', params);
         storage.set(STORAGE_KEY_OAUTH, JSON.stringify(params)),
         F(params);
       }).catch((err: Error) => {
-        log.debug('caught error in doOAuth_:', err);
+        console.debug('caught error in doOAuth_:', err);
         R(err);
       });
     });
@@ -268,7 +257,7 @@ class Provisioner {
    * storage or if a keypair cannot be generated
    */
   private getSshKey_ = (name: string) : Promise<KeyPair> => {
-    log.debug('getSshKey_ %1', name);
+    console.debug('getSshKey_ %1', name);
     const publicKeyIndex = 'DigitalOcean-' + name + '-PublicKey';
     const privateKeyIndex = 'DigitalOcean-' + name + '-PrivateKey';
     const storage = freedom['core.storage']();
@@ -277,7 +266,7 @@ class Provisioner {
         storage.get(privateKeyIndex)
     ]).then((results: string[]) => {
       if (results[0] !== null && results[1] !== null) {
-        log.debug('found SSH keys for %1 in storage', name);
+        console.debug('found SSH keys for %1 in storage', name);
         return {
           public: results[0],
           private: results[1]
@@ -285,7 +274,7 @@ class Provisioner {
       }
 
       try {
-        log.debug('generating SSH keys for %1', name);
+        console.debug('generating SSH keys for %1', name);
         const result = Provisioner.generateKeyPair_();
         return Promise.all([
           storage.set(publicKeyIndex, result.public),
@@ -335,7 +324,7 @@ class Provisioner {
         if (ntries > MAX_OAUTH_TRIES) {
           return Promise.reject({errcode: 'REACHED_MAX_OAUTH_TRIES'});
         }
-        log.debug('Awaiting OAuth before "/' + actionPath + '" retry', ntries, '...');
+        console.debug('Awaiting OAuth before "/' + actionPath + '" retry', ntries, '...');
         return storage.remove(STORAGE_KEY_OAUTH).then(this.doOAuth_).then(() => {
           this.doRequest_(method, actionPath, body, ntries);
         });
@@ -343,30 +332,30 @@ class Provisioner {
       storage.get(STORAGE_KEY_OAUTH).then((oauthJson) => {
         let oauthObj :any = null;
         if (!oauthJson) {
-          log.debug('Missing oauthJson');
+          console.debug('Missing oauthJson');
         } else {
           try {
             oauthObj = JSON.parse(oauthJson);
           } catch (e) {
-            log.debug('Invalid oauthJson:', oauthJson);
+            console.debug('Invalid oauthJson:', oauthJson);
           }
           if (oauthObj && !oauthObj.access_token) {
-            log.debug('Missing oauthObj.access_token, oauthObj:', oauthObj);
+            console.debug('Missing oauthObj.access_token, oauthObj:', oauthObj);
           }
         }
         if (!oauthObj || !oauthObj.access_token) {
           return maybeRetry();
         }
-        log.debug('Making request:', actionPath);
+        console.debug('Making request:', actionPath);
         var url = 'https://api.digitalocean.com/v2/' + actionPath;
         var xhr = freedom['core.xhr']();
         xhr.on('onload', (loadInfo: any) => {
           xhr.getStatus().then((statusCode :number) => {
             if (statusCode === 401) {
-              log.debug('401 response. Invalid access token?');
+              console.debug('401 response. Invalid access token?');
               // User could have gone to
               // https://cloud.digitalocean.com/settings/api/access
-              // to revoke authorization. Prompt
+              // to revoke authorization.
               return maybeRetry();
             }
             // DELETE method doesn't return a reponse body. Success
@@ -411,14 +400,14 @@ class Provisioner {
     return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id + '/actions').then((resp: any) => {
       for (var i = 0; i < resp.actions.length; i++) {
         if (resp.actions[i].status === 'in-progress') {
-          log.debug('waiting for operations to complete...');
+          console.debug('waiting for operations to complete...');
           return new Promise<void>((F, R) => {
             setTimeout(() => {
               this.waitDigitalOceanActions_().then(F, R);
             }, POLL_TIMEOUT);
           });
         }
-        log.debug('all operations complete');
+        console.debug('all operations complete');
       }
     }).catch((e: Error) => {
       throw e;
@@ -435,7 +424,7 @@ class Provisioner {
    * @return {Promise.<void>} resolves on success, rejects on failure
    */
   private setupDigitalOcean_ = (name: string, region: string, image: string, size: string):  Promise<void> => {
-    log.info('creating %1 droplet in %2', image, region);
+    console.info('creating %1 droplet in %2', image, region);
     return new Promise<void>((F, R) => {
       this.state_.cloud = {};
       // Get SSH keys in account
