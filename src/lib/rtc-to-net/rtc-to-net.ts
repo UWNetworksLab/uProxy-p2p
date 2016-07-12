@@ -360,6 +360,10 @@ import ProxyConfig = require('./proxyconfig');
           } else {
             return this.connectToEndpointDirectly_(webEndpoint);
           }
+        }).catch((e :freedom.Error) => {
+          log.info('%1: failed to connect to remote endpoint', [this.longId()]);
+          this.replyToPeer_(this.getReplyFromError_(e));
+          return Promise.reject(new Error(e.errcode));
         }).then((reply :[socks.Reply, net.Endpoint]) :Promise<void> => {
           log.info('%1: connected to remote web endpoint', [this.longId()]);
           return this.replyToPeer_(reply[0], reply[1]);
@@ -483,11 +487,6 @@ import ProxyConfig = require('./proxyconfig');
                [this.longId(), this.tcpConnection_]);
 
       return this.tcpConnection_.onceConnected
-        .catch((e:freedom.Error) => {
-          log.info('%1: failed to connect to remote endpoint', [this.longId()]);
-          this.replyToPeer_(this.getReplyFromError_(e));
-          return Promise.reject(new Error(e.errcode));
-        });
     }
 
     // Completes socks authentication protocol
