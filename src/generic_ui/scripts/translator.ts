@@ -59,3 +59,8 @@ export const i18n_t = (placeholder :string, params ?:any): string => {
 };
 
 export const i18n_setLng = i18next.setLng;
+
+export const i18nSanitizeHtml = (i18nMessage: string) => {
+  // Remove all HTML other than supported tags like strong, a, p, etc.
+  return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
+}
