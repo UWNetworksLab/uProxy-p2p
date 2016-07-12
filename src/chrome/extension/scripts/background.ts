@@ -46,14 +46,6 @@ chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.Messa
     browserApi.bringUproxyToFront();
   }
 
-  // handle requests to get logs
-  if (request.getLogs) {
-    core.getLogs().then((logs) => {
-      sendResponse({ logs: logs });
-    });
-    return true;
-  }
-
   if (request.globalSettingsRequest) {
     ui.handleGlobalSettingsRequest(sendResponse);
     return true;

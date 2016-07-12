@@ -1129,8 +1129,7 @@ taskManager.add('build_chrome_ext', [
   'copy:chrome_extension_additional'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
-].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)
-.concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true))
+].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true))
 
 taskManager.add 'build_chrome', [
   'build_chrome_app'
@@ -1143,8 +1142,7 @@ taskManager.add('build_firefox', [
   'copy:firefox'
   'copy:firefox_additional'
   'browserify:firefoxContext'
-].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)
-.concat fullyVulcanize('firefox/data/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true))
+].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true))
 
 # CCA build tasks.
 taskManager.add 'build_cca', [
