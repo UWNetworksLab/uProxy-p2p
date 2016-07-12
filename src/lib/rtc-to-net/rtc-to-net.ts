@@ -347,8 +347,9 @@ import ProxyConfig = require('./proxyconfig');
               :Promise<[socks.Reply, net.Endpoint]> => {
           // Returns socks reply and bound endpoint of connection
           if (!this.isWebEndpointValid_(webEndpoint)) {
-            throw new Error('tried to connect to disallowed address: ' +
-                            webEndpoint.address);
+            this.replyToPeer_(socks.Reply.NOT_ALLOWED);
+            Promise.reject(new Error('tried to connect to disallowed address: ' +
+                            webEndpoint.address));
           }
           log.debug('%1: Creating tcp connection with socks proxy settings: %2',
                     [this.longId(), this.proxyConfig_.socksProxySettings]);
@@ -524,7 +525,7 @@ import ProxyConfig = require('./proxyconfig');
           log.debug('%1: Received request response: %2',
                     [this.longId(), response]);
           if (response.reply !== socks.Reply.SUCCEEDED) {
-            throw new Error('Socks connection to local Tor failed');
+            throw new Error('Socks connection through reproxy failed');
           }
           var nullEndpoint :net.Endpoint = {'address':'0.0.0.0', 'port':0};
           return [response.reply, nullEndpoint];
