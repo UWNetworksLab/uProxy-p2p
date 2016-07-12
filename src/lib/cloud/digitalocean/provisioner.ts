@@ -31,6 +31,10 @@ const REDIRECT_URIS: [string] = [
 ];
 
 const STORAGE_KEY_OAUTH = 'DigitalOcean-OAuth';
+// If we try to make a DO request and either don't have an OAuth token saved,
+// or the one we have saved is not valid, we try initiating an OAuth flow and
+// (if fulfilled) retry the request this many times before giving up (see
+// `doRequest_()` below):
 const MAX_OAUTH_TRIES = 1;
 
 interface KeyPair {
