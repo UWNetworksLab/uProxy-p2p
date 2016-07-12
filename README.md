@@ -2,7 +2,7 @@
 
 [uProxy](https://www.uproxy.org) is a browser extension that lets users share their internet connection.
 
-## Status
+## Status YAY!!
 
 [![Slack Status](https://uproxy-slack.herokuapp.com/badge.svg)](https://uproxy-slack.herokuapp.com/)
 [![Travis Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
