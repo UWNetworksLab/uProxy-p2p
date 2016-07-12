@@ -43,15 +43,18 @@ interface KeyPair {
 }
 
 class Provisioner {
-  constructor(private dispatch_: Function, private state_: any = {}) {}
+  constructor(
+    private dispatch_ :Function,
+    private state_ :any = {},
+    private storage_ = freedom['core.storage']()
+  ) {}
 
   /*
    * Returns whether a DO OAuth token is saved in storage.
    */
   public hasOAuth = () : Promise<boolean> => {
-    const storage = freedom['core.storage']();
     return new Promise((F, R) => {
-      storage.get(STORAGE_KEY_OAUTH).then((result) => { F(!!result); });
+      this.storage_.get(STORAGE_KEY_OAUTH).then((result) => { F(!!result); });
     });
   }
 
@@ -221,7 +224,6 @@ class Provisioner {
    *  }
    */
   private doOAuth_ = () : Promise<Object> => {
-    const storage = freedom['core.storage']();
     return new Promise((F, R) => {
       var oauth = freedom['core.oauth']();
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
@@ -243,7 +245,7 @@ class Provisioner {
           params[param] = keys[i].substr(keys[i].indexOf('=') + 1);
         }
         console.debug('Got OAuth, saving in storage:', params);
-        storage.set(STORAGE_KEY_OAUTH, JSON.stringify(params)),
+        this.storage_.set(STORAGE_KEY_OAUTH, JSON.stringify(params)),
         F(params);
       }).catch((err: Error) => {
         console.debug('caught error in doOAuth_:', err);
@@ -264,10 +266,9 @@ class Provisioner {
     console.debug('getSshKey_ %1', name);
     const publicKeyIndex = 'DigitalOcean-' + name + '-PublicKey';
     const privateKeyIndex = 'DigitalOcean-' + name + '-PrivateKey';
-    const storage = freedom['core.storage']();
     return Promise.all([
-        storage.get(publicKeyIndex),
-        storage.get(privateKeyIndex)
+        this.storage_.get(publicKeyIndex),
+        this.storage_.get(privateKeyIndex)
     ]).then((results: string[]) => {
       if (results[0] !== null && results[1] !== null) {
         console.debug('found SSH keys for %1 in storage', name);
@@ -281,8 +282,8 @@ class Provisioner {
         console.debug('generating SSH keys for %1', name);
         const result = Provisioner.generateKeyPair_();
         return Promise.all([
-          storage.set(publicKeyIndex, result.public),
-          storage.set(privateKeyIndex, result.private)
+          this.storage_.set(publicKeyIndex, result.public),
+          this.storage_.set(privateKeyIndex, result.private)
         ]).then((ignored: any) => {
           return result;
         }, (e: Error) => {
@@ -321,7 +322,6 @@ class Provisioner {
    */
   private doRequest_ = (method: string, actionPath: string, body?: string, ntries = 0) :
       Promise<Object> => {
-    const storage = freedom['core.storage']();
     return new Promise((F, R) => {
       let maybeRetry = () => {
         ntries++;
@@ -329,11 +329,11 @@ class Provisioner {
           return Promise.reject({errcode: 'REACHED_MAX_OAUTH_TRIES'});
         }
         console.debug('Awaiting OAuth before "/' + actionPath + '" retry', ntries, '...');
-        return storage.remove(STORAGE_KEY_OAUTH).then(this.doOAuth_).then(() => {
+        return this.storage_.remove(STORAGE_KEY_OAUTH).then(this.doOAuth_).then(() => {
           this.doRequest_(method, actionPath, body, ntries);
         });
       };
-      storage.get(STORAGE_KEY_OAUTH).then((oauthJson) => {
+      this.storage_.get(STORAGE_KEY_OAUTH).then((oauthJson) => {
         let oauthObj :any = null;
         if (!oauthJson) {
           console.debug('Missing oauthJson');
@@ -350,9 +350,11 @@ class Provisioner {
         if (!oauthObj || !oauthObj.access_token) {
           return maybeRetry();
         }
-        console.debug('Making request:', actionPath);
-        var url = 'https://api.digitalocean.com/v2/' + actionPath;
-        var xhr = freedom['core.xhr']();
+        console.debug('Found oauth in storage:', oauthObj);
+
+        const xhr = freedom['core.xhr']();
+        const url = 'https://api.digitalocean.com/v2/' + actionPath;
+        console.debug('Making request:', url);
         xhr.on('onload', (loadInfo: any) => {
           xhr.getStatus().then((statusCode :number) => {
             if (statusCode === 401) {
