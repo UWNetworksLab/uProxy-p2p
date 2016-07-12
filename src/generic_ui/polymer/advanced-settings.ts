@@ -21,7 +21,6 @@ export enum StatusState {
 };
 
 Polymer({
-  StatusState: StatusState,
   settings: '',
   status: StatusState.EMPTY,
   jsonifySettings_: function(settingsObject :Object) {
@@ -69,11 +68,11 @@ Polymer({
     }
   },
   viewLogs: function() {
-    this.ui.openTab('generic_ui/view-logs.html?lang=' + this.model.globalSettings.language);
+   // calls logs.html to open the logs
+    this.fire('core-signal', { name: 'open-logs' });
   },
   ready: function() {
     this.ui = ui;
-    this.uproxy_core_api = uproxy_core_api;
     this.model = model;
   },
   refreshPortControl: function() {
@@ -82,4 +81,22 @@ Polymer({
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
   },
+  _supportsPortControl: function(supportStatus: uproxy_core_api.PortControlSupport) {
+    return supportStatus === uproxy_core_api.PortControlSupport.TRUE;
+  },
+  _doesNotSupportPortControl: function(supportStatus: uproxy_core_api.PortControlSupport) {
+    return supportStatus === uproxy_core_api.PortControlSupport.FALSE;
+  },
+  _portControlStatusPending: function(supportStatus: uproxy_core_api.PortControlSupport) {
+    return supportStatus === uproxy_core_api.PortControlSupport.PENDING;
+  },
+  _statusStateIsSet: function(statusState: StatusState) {
+    return statusState === StatusState.SET;
+  },
+  _statusStateIsParseErorr: function(statusState: StatusState) {
+    return statusState === StatusState.PARSE_ERROR;
+  },
+  _statusStateIsKeyValueError: function(statusState: StatusState) {
+    return statusState === StatusState.KEY_VALUE_ERROR;
+  }
 });

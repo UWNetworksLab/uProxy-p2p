@@ -17,9 +17,6 @@
       width: 100%;
       background-color: white;
     }
-    uproxy-button {
-      margin: 15px 0px;
-    }
     paper-progress {
       width: 100%;
     }
@@ -32,19 +29,24 @@
     }
     uproxy-button {
       background-color: #34AFCE;  /* blue */
+      margin: 4px 0;
       padding: 0.5em;
       width: 100%;
       font-size: 14px;
     }
+    paper-checkbox {
+      margin: 0 0 4px;
+    }
+    hr {
+      margin: 20px 0;
+      color: #eee;
+      border-style: solid;
+    }
     h1 {
-      color: #34AFCE;  /* blue */
+      color: #003C48;
       font-weight: 400;
       font-size: 20px;
       line-height: 30px;
-    }
-    h2 {
-      font-weight: 400;
-      font-size: 23px;
     }
     p {
       line-height: 1.75em;
@@ -73,12 +75,6 @@
     .warning {
       font-weight: bold;
     }
-    #newAccount {
-      margin: 15px 0 8px;
-    }
-    #haveAccount {
-      margin: 0 0 15px;
-    }
     </style>
 
     <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
@@ -90,44 +86,20 @@
 
       <div class='content'>
         <div class='imgWrapper'>
-          <img src='../../icons/cloud/create-circle-ic.svg'>
+          <img src='../../icons/cloud/uproxy+digitalocean.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_GET_STARTED_TITLE' | $$ }}</h1>
         <p id='getStartedMessage'></p>
-        <uproxy-button raised on-tap='{{ showDigitalOceanAccountHelpOverlay }}'
-          id="newAccount">
-          {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
-        </uproxy-button>
-        <uproxy-button raised on-tap='{{ showLoginOverlay }}' id="haveAccount">
-          {{ 'I_HAVE_AN_ACCOUNT' | $$ }}
-        </uproxy-button>
-        <p id='existingServerMessage'></p>
-      </div>
-    </core-overlay>
-
-    <core-overlay id='digitalOceanAccountHelpOverlay'>
-      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
-      </uproxy-app-bar>
-
-      <div class='content'>
-        <div class='imgWrapper'>
-          <img src='../../icons/cloud/getstarted-step1.svg'>
-          <img src='../../icons/cloud/getstarted-step2.svg'>
-          <img src='../../icons/cloud/getstarted-step3.svg'>
-        </div>
-        <h1>{{ 'CLOUD_INSTALL_CREATE_ACCOUNT_TITLE' | $$ }}</h1>
-        <!-- TODO: some of this text needs to be bold - need to set the HTML element rather than use $$ to translate -->
-        <p id='createAccountMessage'></p>
-
         <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}" on-change="{{havePromoChanged}}"></paper-checkbox>
-
         <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
           {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
         </uproxy-button>
         <uproxy-button raised on-tap='{{ showLoginOverlay }}'>
-          {{ 'SIGN_ME_IN' | $$}}
+          {{ 'I_HAVE_AN_ACCOUNT' | $$ }}
         </uproxy-button>
+        <hr>
+        <h1>{{ 'CLOUD_INSTALL_EXISTING_SERVER_TITLE' | $$ }}</h1>
+        <p id='existingServerMessage'></p>
       </div>
     </core-overlay>
 
@@ -145,6 +117,7 @@
           <paper-radio-group id='regionMenu' selected='sgp1'>
             <!-- TODO: get available regions from DigitalOcean -->
             <paper-radio-button name='sgp1' label='{{ "ASIA_SINGAPORE" | $$ }}'></paper-radio-button>
+            <paper-radio-button name='blr1' label='{{ "ASIA_BANGALORE" | $$ }}'></paper-radio-button>
             <paper-radio-button name='ams2' label='{{ "EUROPE_AMSTERDAM" | $$ }}'></paper-radio-button>
             <paper-radio-button name='nyc2' label='{{ "NORTH_AMERICA_NEW_YORK" | $$ }}'></paper-radio-button>
           </paper-radio-group>

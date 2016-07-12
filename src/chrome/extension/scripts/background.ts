@@ -46,14 +46,6 @@ chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.Messa
     browserApi.bringUproxyToFront();
   }
 
-  // handle requests to get logs
-  if (request.getLogs) {
-    core.getLogs().then((logs) => {
-      sendResponse({ logs: logs });
-    });
-    return true;
-  }
-
   if (request.globalSettingsRequest) {
     ui.handleGlobalSettingsRequest(sendResponse);
     return true;
@@ -163,10 +155,6 @@ backgroundUi = new background_ui.BackgroundUi(
  */
 var ui = new user_interface.UserInterface(core, browserApi, backgroundUi);
 
-// used for de-duplicating urls caught by the listeners
-var lastUrl = '';
-var lastUrlTime = 0;
-
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
       browserApi.emit('inviteUrlData', details.url);
@@ -196,28 +184,3 @@ chrome.tabs.onUpdated.addListener((tabId :number,
     browserApi.bringUproxyToFront();
   }
 });
-
-chrome.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    var url = details.url;
-
-    // Chrome seems to sometimes send the same url to us twice, we never
-    // should be receiving the exact same data twice so de-dupe any url
-    // with the last one we received before processing it.  We also want
-    // to allow a url to be pasted twice if there has been at least a second
-    // delay in order to allow users to try connecting again.
-    if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-      browserApi.emit('copyPasteUrlData', url);
-    } else {
-      console.warn('Received duplicate url events', url);
-    }
-    lastUrl = url;
-    lastUrlTime = Date.now();
-
-    return {
-      redirectUrl: chrome.extension.getURL('generic_ui/copypaste.html')
-    };
-  },
-  { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
-  ['blocking']
-);

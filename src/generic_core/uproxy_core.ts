@@ -3,6 +3,7 @@
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
 import _ = require('lodash');
+import key_verify = require('./key-verify');
 import logging = require('../lib/logging/logging');
 import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
 import net = require('../lib/net/net.types');
@@ -10,6 +11,7 @@ import onetime = require('../lib/bridge/onetime');
 import nat_probe = require('../lib/nat/probe');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
+import remote_user = require('./remote-user');
 import user = require('./remote-user');
 import social_network = require('./social');
 import social = require('../interfaces/social');
@@ -309,8 +311,22 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return globals.loadSettings.then(() => {
       var copyPasteConnectionState = copyPasteConnection.getCurrentState();
 
+      let moveToFront = (array :string[], element :string) :void => {
+        let i = array.indexOf(element);
+        if (i < 1) return;
+        array.splice(0, 0, array.splice(i, 1)[0] );
+      };
+
+      let networkNames = Object.keys(social_network.networks);
+
+      for (let name of ['Quiver', 'Cloud']) {
+        if (name in social_network.networks) {
+          moveToFront(networkNames, name);
+        }
+      }
+
       return {
-        networkNames: Object.keys(social_network.networks),
+        networkNames: networkNames,
         cloudProviderNames: getCloudProviderNames(),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
@@ -798,6 +814,31 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       enforceProxyServerValidity;
     globals.settings.validProxyServers = policy.validProxyServers;
     this.updateGlobalSettings(globals.settings);
+  }
+
+  public verifyUser = (inst:social.InstancePath) :void => {
+    log.info('app.core: verifyUser:', inst);
+    // There are additional things our social_network system supports
+    // beyond what the freedom social api supports.  So we have to
+    // cast into our local API's types to get access to RemoteInstance
+    // (which implements no related interfaces).
+    var network = <social_network.AbstractNetwork>this.getNetworkByName_(
+      inst.network.name);
+    var remoteUser :remote_user.User = network.getUser(inst.userId);
+    var remoteInstance :remote_instance.RemoteInstance =
+      remoteUser.getInstance(inst.instanceId);
+    remoteInstance.verifyUser();
+  }
+
+  public finishVerifyUser = (args:uproxy_core_api.FinishVerifyArgs) :void => {
+    let inst = args.inst;
+    log.info('app.core: finishVerifyUser:', inst, ' with result ', args.sameSAS);
+    var network = <social_network.AbstractNetwork>this.getNetworkByName_(
+      inst.network.name);
+    var remoteUser :remote_user.User = network.getUser(inst.userId);
+    var remoteInstance :remote_instance.RemoteInstance =
+      remoteUser.getInstance(inst.instanceId);
+    remoteInstance.finishVerifyUser(args.sameSAS);
   }
 
   // Remove contact from friend list and storage

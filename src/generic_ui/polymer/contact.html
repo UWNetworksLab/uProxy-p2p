@@ -127,13 +127,18 @@
       line-height: 20px;
       color: #333;
     }
+    #contactDiv {
+      cursor: default;
+    }
     </style>
+
+    <uproxy-state id="state"></uproxy-state>
 
     <div tabindex='-1'
         class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
         top horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
-      <div flex>
+      <div id='contactDiv' flex>
         <div horizontal layout class='nameLine' on-tap='{{ toggle }}'>
           <div flex class='name'><bdi>{{ contact.name }}</bdi></div>
           <core-icon icon="open-in-new"
@@ -180,7 +185,7 @@
               </div>
               <template repeat='{{ instance in sortedInstances }}' vertical layout>
                 <uproxy-instance
-                    userName='{{ contact.name }}'
+                    user='{{ contact }}'
                     instance='{{ instance }}'
                     on-instance-changed='{{ offeringInstancesChanged }}'>
                 </uproxy-instance>

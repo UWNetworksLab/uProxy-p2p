@@ -70,7 +70,8 @@ describe('UI.UserInterface', () => {
 
     mockBackgroundUi = jasmine.createSpyObj('backgroundUi', [
         'registerAsFakeBackground',
-        'fireSignal'
+        'fireSignal',
+        'openDialog'
     ]);
 
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi, mockBackgroundUi);
@@ -145,16 +146,6 @@ describe('UI.UserInterface', () => {
   function startProxyingForRemotePeer() {
     updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
         .call(ui, 'testInstance');
-  }
-
-  function activateConfirmationButton(shouldConfirm :boolean) {
-    var text = ui.i18n_t(shouldConfirm ? 'YES' : 'NO');
-    var buttons = (<jasmine.Spy>mockBackgroundUi.fireSignal).calls.mostRecent().args[1].buttons;
-
-    var buttonInfo = <any>_.find(buttons, {text: text});
-    var index = buttonInfo.callbackIndex;
-
-    ui.invokeConfirmationCallback(index, shouldConfirm);
   }
 
   describe('synced users are correctly exposed', () => {
@@ -360,58 +351,4 @@ describe('UI.UserInterface', () => {
       expect(ui.gettingStatus).toEqual(null);
     });
   });  // Update giving and/or getting state in UI
-
-  describe('logout', () => {
-    it('No networks', (done) => {
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
-        expect(mockCore.logout).not.toHaveBeenCalled();
-        done();
-      });
-    });
-
-    it('Single network', (done) => {
-      login();
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {;
-        expect(mockCore.logout).toHaveBeenCalled();
-        logout(); //cleanup
-        done();
-      }).catch(() => {
-        logout();
-        expect('Error: rejected promise').toEqual(false);
-      });
-    });
-
-    it('Waits for confirmation while sharing', (done) => {
-      login();
-      addRemotePeer();
-      startProxyingForRemotePeer();
-
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
-        expect(mockCore.logout).toHaveBeenCalled();
-        logout();
-        done();
-      });
-
-      expect((<jasmine.Spy>mockBackgroundUi.fireSignal).calls.mostRecent().args[0])
-          .toEqual('open-dialog');
-      expect(mockCore.logout).not.toHaveBeenCalled();
-
-      // pretend the confirmaiton button was clicked
-      activateConfirmationButton(true);
-    });
-
-    it('Will not logout if user rejects', (done) => {
-      login();
-      addRemotePeer();
-      startProxyingForRemotePeer();
-
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
-        expect(mockCore.logout).not.toHaveBeenCalled();
-        logout();
-        done();
-      });
-
-      activateConfirmationButton(false);
-    });
-  });
 });  // UI.UserInterface

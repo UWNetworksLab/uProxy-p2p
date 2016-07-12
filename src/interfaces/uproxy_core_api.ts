@@ -9,6 +9,7 @@ import ui = require('./ui');
 
 export interface UserFeedback {
   email        :string;
+  error        :string;
   feedback     :string;
   logs         :string;
   browserInfo  ?:string;
@@ -18,7 +19,14 @@ export interface UserFeedback {
 
 export enum UserFeedbackType {
   USER_INITIATED = 0,
-  PROXYING_FAILURE = 1
+  PROXYING_FAILURE = 1,
+  CLOUD_CONNECTIONS_DISCONNECTED = 2,
+  CLOUD_SERVER_NO_CONNECT = 3, 
+  TROUBLE_SIGNING_IN = 4, 
+  NO_FRIENDS = 5, 
+  TROUBLE_STARTING_CONNECTION = 6, 
+  DISCONNECTED_FROM_FRIEND = 7, 
+  OTHER_FEEDBACK = 8
 }
 
 // Object containing description so it can be saved to storage.
@@ -44,7 +52,13 @@ export interface GlobalSettings {
   activePromoId: string;
   shouldHijackDO: boolean;
   crypto: boolean;
+  // A list of strings, each represented as a constant below, with
+  // prefix 'FEATURE_'.
+  enabledExperiments :string[];
 }
+
+export const FEATURE_VERIFY = 'verify';
+
 export interface InitialState {
   networkNames :string[];
   cloudProviderNames :string[];
@@ -119,7 +133,9 @@ export enum Command {
   CLOUD_UPDATE = 1029,
   UPDATE_ORG_POLICY = 1030,
   REMOVE_CONTACT = 1031,
-  POST_REPORT = 1032
+  POST_REPORT = 1032,
+  VERIFY_USER = 1033,
+  VERIFY_USER_SAS = 1034
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -270,6 +286,11 @@ export interface PostReportArgs {
   path: string;
 };
 
+export interface FinishVerifyArgs {
+  inst: social.InstancePath,
+  sameSAS: boolean
+};
+
 /**
  * The primary interface to the uProxy Core.
  *
@@ -286,32 +307,6 @@ export interface CoreApi {
   modifyConsent(command :ConsentCommand) :void;
 
   getLogs() :Promise<string>;
-
-  // CopyPaste interactions
-
-  /*
-   * The promise fulfills with an endpoint that can be used to proxy through
-   * if sucessfully started or rejects otherwise
-   */
-  startCopyPasteGet() :Promise<net.Endpoint>;
-
-  /*
-   * The promise fulfills when the connection is fully closed and state has
-   * been cleaned up
-   */
-  stopCopyPasteGet() :Promise<void>;
-
-  startCopyPasteShare() :void;
-
-  /*
-   * The promise fulfills when the connection is fully closed and state has
-   * been cleaned up
-   */
-  stopCopyPasteShare() :Promise<void>;
-
-  // Decodes an encoded batch of signalling messages and forwards each signal
-  // to the RemoteConnection.
-  sendCopyPasteSignal(signal:string) :void;
 
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
@@ -345,6 +340,12 @@ export interface CoreApi {
 
   // Make a domain-fronted POST request to the uProxy logs/stats server.
   postReport(args:PostReportArgs) : Promise<void>;
+
+  // Start a ZRTP key-verification session.
+  verifyUser(inst :social.InstancePath) :void;
+
+  // Confirm or reject the SAS in a ZRTP key-verification session.
+  finishVerifyUser(args:FinishVerifyArgs) :void;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 }

@@ -267,15 +267,15 @@ gruntConfig = {
       cwd: '<%= androidDistPath %>'
       command: '<%= ccaAddPluginsCmd %>'
     }
-    # This pair of "cca build" commands is exactly as recommended at
-    # https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Publish.md
+    # Note: The fixed crosswalk version here is pinned in order to maintain
+    # compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
     ccaBuildAndroid: {
       cwd: '<%= androidDevPath %>'
-      command: '<%= ccaJsPath %> build android --debug --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --debug --webview=crosswalk'
+      command: '<%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:20.50.533.6'
     }
     ccaReleaseAndroid: {
       cwd: '<%= androidDistPath %>'
-      command: '<%= ccaJsPath %> build android --release --webview=system --android-minSdkVersion=21; <%= ccaJsPath %> build android --release --webview=crosswalk'
+      command: '<%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:20.50.533.6'
     }
     ccaEmulateAndroid: {
       cwd: '<%= androidDevPath %>'
@@ -308,6 +308,12 @@ gruntConfig = {
     }
     rmIosBuild: {
       command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
+    }
+    androidReplaceXwalkDev: {
+      command: './replace_xwalk_in_apk.sh debug'
+    }
+    androidReplaceXwalkDist: {
+      command: './replace_xwalk_in_apk.sh release'
     }
   }
 
@@ -358,6 +364,7 @@ gruntConfig = {
           cwd: chromeAppDevPath
           src: [
             'manifest.json'
+            'managed_policy_schema.json'
             '_locales/**'
 
             # UI for not-connected
@@ -603,28 +610,19 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-chromeapp/'
     libsForZorkFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-firefoxapp/data/'
     libsForZorkNode:
       Rule.copyLibs
         npmLibNames: ['freedom-for-node']
         pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators',
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/zork-node/'
 
     libsForEchoServerChromeApp:
@@ -637,30 +635,29 @@ gruntConfig = {
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider']
         localDestPath: 'lib/samples/echo-server-firefoxapp/data/'
+    libsForEchoServerNode:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-node']
+        pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider']
+        localDestPath: 'lib/samples/echo-server-node/'
 
     libsForCopypasteChatChromeApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-chromeapp/'
     libsForCopypasteChatFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-firefoxapp/data'
     libsForCopypasteChatWebApp:
       Rule.copyLibs
         npmLibNames: ['freedom']
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/copypaste-chat-webapp/'
 
     libsForCopyPasteSocksChromeApp:
@@ -670,7 +667,6 @@ gruntConfig = {
         ]
         pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
           'i18n'
           'bower/polymer'
           'freedom-pgp-e2e'
@@ -684,7 +680,6 @@ gruntConfig = {
         ]
         pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
           'i18n'
           'bower'
           'freedom-pgp-e2e'
@@ -696,36 +691,35 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'uproxy-obfuscators'
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-socks-chromeapp/'
     libsForSimpleSocksFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
+        pathsFromThirdPartyBuild: ['freedom-port-control']
+        localDestPath: 'lib/samples/simple-socks-firefoxapp/data/'
+    libsForSimpleSocksNode:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-node']
+        pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider']
         pathsFromThirdPartyBuild: [
           'uproxy-obfuscators'
           'freedom-port-control'
         ]
-        localDestPath: 'lib/samples/simple-socks-firefoxapp/data/'
+        localDestPath: 'lib/samples/simple-socks-node/'
 
     libsForSimpleChatChromeApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-chromeapp/'
     libsForSimpleChatFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-firefoxapp/data'
     # While neither churn-pipe nor freedom-port-control can be used in a
     # regular web page environment, they are included so that obfuscation
@@ -734,9 +728,7 @@ gruntConfig = {
       Rule.copyLibs
         npmLibNames: ['freedom']
         pathsFromDevBuild: ['lib/simple-chat', 'lib/churn-pipe', 'lib/loggingprovider']
-        pathsFromThirdPartyBuild: [
-          'freedom-port-control'
-        ]
+        pathsFromThirdPartyBuild: ['freedom-port-control']
         localDestPath: 'lib/samples/simple-chat-webapp/'
 
     libsForUprobeChromeApp:
@@ -802,51 +794,24 @@ gruntConfig = {
             'freedom-social-wechat': '<%= pkgs.freedomwechat.version %>'
             'freedom-social-quiver': '<%= pkgs.freedomquiver.version %>'
         }]
-  #-------------------------------------------------------------------------
-  # All typescript compiles to locations in `build/`
-  # Typescript compilation rules
+
+  # One pass for code running inside freedom.js modules and another
+  # for code running outside, due to the differences in the meaning
+  # of the (global) freedom object between the two environments.
   ts:
-    # Compile all non-sample typescript code into the development build
-    # directory.
-    devInModuleEnv: compileTypescript [
-      devBuildPath + '/lib/**/*.ts'
-      devBuildPath + '/interfaces/**/*.ts'
-      devBuildPath + '/generic_core/**/*.ts'
+    moduleEnv: compileTypescript [
+      devBuildPath + '/**/*.ts'
       '!' + devBuildPath + '/lib/build-tools/**/*.ts'
+      '!' + devBuildPath + '/integration/**/*.ts'
       '!' + devBuildPath + '/**/*.core-env.ts'
       '!' + devBuildPath + '/**/*.core-env.spec.ts'
     ]
-
-    generic_ui: compileTypescript [
-      devBuildPath + '/generic_ui/**/*.ts'
-      devBuildPath + '/**/*.core-env.spec.ts'
+    coreEnv: compileTypescript [
       devBuildPath + '/**/*.core-env.ts'
+      devBuildPath + '/**/*.core-env.spec.ts'
+      '!' + devBuildPath + '/lib/build-tools/**/*.ts'
+      '!' + devBuildPath + '/integration/**/*.ts'
     ]
-
-    chrome_extension: compileTypescript [
-      devBuildPath + '/chrome/extension/**/*.ts'
-    ]
-
-    chrome_app: compileTypescript [
-      devBuildPath + '/chrome/app/**/*.ts'
-    ]
-
-    firefox: compileTypescript [
-      devBuildPath + '/firefox/**/*.ts'
-    ]
-
-    cca: compileTypescript [
-      devBuildPath + '/cca/**/*.ts'
-    ]
-
-    integration_specs: compileTypescript [
-      devBuildPath + '/integration/*.ts'
-      '!' + devBuildPath + '/integration/test_connection.ts'
-    ]
-    integration_freedom_module: compileTypescript [
-      devBuildPath + '/integration/test_connection.ts'
-    ]
-
 
   browserify:
     chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
@@ -1059,8 +1024,7 @@ taskManager = new TaskManager.Manager()
 
 taskManager.add 'base', [
   'copy:dev'
-  'ts:devInModuleEnv'
-  'ts:generic_ui'
+  'ts'
   'version_file'
   'browserify:chromeAppMain'
   'browserify:genericCoreFreedomModule'
@@ -1078,6 +1042,7 @@ taskManager.add 'echoServer', [
   'browserify:echoServerFreedomModule'
   'copy:libsForEchoServerChromeApp'
   'copy:libsForEchoServerFirefoxApp'
+  'copy:libsForEchoServerNode'
 ]
 
 taskManager.add 'copypasteChat', [
@@ -1119,6 +1084,7 @@ taskManager.add 'simpleSocks', [
   'browserify:simpleSocksFreedomModule'
   'copy:libsForSimpleSocksChromeApp'
   'copy:libsForSimpleSocksFirefoxApp'
+  'copy:libsForSimpleSocksNode'
 ]
 
 taskManager.add 'uprobe', [
@@ -1154,19 +1120,16 @@ taskManager.add 'version_file', [
 
 taskManager.add 'build_chrome_app', [
   'base'
-  'ts:chrome_app'
   'copy:chrome_app'
 ].concat fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')
 
 taskManager.add('build_chrome_ext', [
   'base'
-  'ts:chrome_extension'
   'copy:chrome_extension'
   'copy:chrome_extension_additional'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
-].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)
-.concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true))
+].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true))
 
 taskManager.add 'build_chrome', [
   'build_chrome_app'
@@ -1176,17 +1139,14 @@ taskManager.add 'build_chrome', [
 # Firefox build tasks.
 taskManager.add('build_firefox', [
   'base'
-  'ts:firefox'
   'copy:firefox'
   'copy:firefox_additional'
   'browserify:firefoxContext'
-].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)
-.concat fullyVulcanize('firefox/data/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true))
+].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true))
 
 # CCA build tasks.
 taskManager.add 'build_cca', [
   'base'
-  'ts:cca'
   'copy:cca'
   'copy:cca_additional'
   'browserify:ccaMain'
@@ -1202,6 +1162,7 @@ taskManager.add 'build_android', [
   'exec:ccaAddPluginsAndroidDev'
   'copy:cca_splash_dev'
   'exec:ccaBuildAndroid'
+  'exec:androidReplaceXwalkDev'
 ]
 
 taskManager.add 'release_android', [
@@ -1213,6 +1174,7 @@ taskManager.add 'release_android', [
   'copy:cca_splash_dist'
   'symlink:cca_keys'
   'exec:ccaReleaseAndroid'
+  'exec:androidReplaceXwalkDist'
 ]
 
 # Emulate the mobile client for android

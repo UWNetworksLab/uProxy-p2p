@@ -2,7 +2,9 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import social = require('../../interfaces/social');
+import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import dialogs = require('../scripts/dialogs');
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -26,19 +28,21 @@ Polymer({
   },
   sendToFacebookFriend: function() {
     this.generateInviteUrl('Facebook-Firebase-V2').then(() => {
+      var encodedInviteUrl = encodeURIComponent(this.inviteUrl);
+
       // Open a "Send Message" dialog to send a Facebook Message.
       // See https://developers.facebook.com/docs/sharing/reference/send-dialog
       // This is our preferred dialog, but it is not available on mobile web.
       var facebookSendUrl =
           'https://www.facebook.com/dialog/send?app_id=%20161927677344933&link='
-          + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/autoclose';
+          + encodedInviteUrl + '&redirect_uri=https://www.uproxy.org/autoclose';
       // Open a "Share" dialog to produce a timeline post.
       // See https://developers.facebook.com/docs/sharing/reference/share-dialog
       // This is available on mobile, but only offers timeline posts, which may
       // not notify their recipients.
       var facebookShareUrl =
           'https://m.facebook.com/dialog/share?app_id=%20161927677344933&href='
-          + this.inviteUrl + '&redirect_uri=https://www.uproxy.org/autoclose';
+          + encodedInviteUrl + '&redirect_uri=https://www.uproxy.org/autoclose';
       var facebookUrl = navigator.userAgent.indexOf('Mobile Safari') === -1 ?
           facebookSendUrl : facebookShareUrl;
       ui.openTab(facebookUrl);
@@ -60,7 +64,7 @@ Polymer({
           body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
       });
       this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('INVITE_EMAIL_SENT'));
+      this.$.state.openDialog(dialogs.getMessageDialogDescription('', translator.i18n_t('INVITE_EMAIL_SENT')));
     });
   },
   inviteGithubFriend: function() {
@@ -75,12 +79,13 @@ Polymer({
       userId: this.gitHubUserIdInput
     }).then(() => {
       this.closeInviteUserPanel();
-      ui.showDialog('',
-          ui.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.gitHubUserIdInput }));
+      this.$.state.openDialog(dialogs.getMessageDialogDescription('',
+            translator.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.gitHubUserIdInput })));
     }).catch(() => {
       // TODO: The message in this dialog should be passed from the social provider.
       // https://github.com/uProxy/uproxy/issues/1923
-      ui.showDialog('', ui.i18n_t('GITHUB_INVITE_SEND_FAILED'));
+      this.$.state.openDialog(dialogs.getMessageDialogDescription('',
+            translator.i18n_t('GITHUB_INVITE_SEND_FAILED')));
     });
   },
   openInviteUserPanel: function() {

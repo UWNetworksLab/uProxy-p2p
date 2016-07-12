@@ -3,9 +3,18 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import panel_connector = require('../../interfaces/panel_connector');
+import social = require('../../interfaces/social');
+import ui = require('../../interfaces/ui');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
-var background: panel_connector.BackgroundUiConnector = null;
+//TODO standardize
+interface FullfillAndReject {
+  fulfill: Function;
+  reject: Function;
+};
+
+var background: Background = null;
+var dialogClickFn: (fulfill: boolean, data?: Object) => void = null;
 
 Polymer({
   ready: function() {
@@ -14,38 +23,147 @@ Polymer({
     this.model = ui_context.model;
 
     if (background) {
+      /*
+       * one of these elements should be bound as a message listener, it should
+       * not matter which one.  If it turns out it does matter which one, we'll
+       * put an attribute for that.
+       */
+      this.background = background;
       return;
     }
 
-    /*
-     * one of these elements should be bound as a message listener, it should
-     * not matter which one.  If it turns out it does matter which one, we'll
-     * put an attribute for that.
-     */
-    if (window.chrome) {
-      background = new ChromeBackgroundUiConnector(this.handleMessage.bind(this));
-    } else {
-      background = new FirefoxBackgroundUiConnector(this.handleMessage.bind(this));
-    }
+    this.background = background = new Background(this);
   },
-  handleMessage: function(name: string, data: Object) {
-    if (name === 'fire-signal') {
-      this.fire('core-signal', data);
-    }
+  handleDialogClick: function(fulfill: boolean, data: Object = null) {
+    dialogClickFn(fulfill, data);
+    dialogClickFn = null;
   },
+  openDialog: function(data: ui.DialogDescription) {
+    return new Promise<Object>((F, R) => {
+      if (dialogClickFn) {
+        console.error('Previous dialog was not cleaned up');
+        dialogClickFn(false);
+      }
+      dialogClickFn = (fulfill: boolean, data?: Object) => {
+        if (fulfill) {
+          F(data);
+        } else {
+          R(data);
+        }
+      };
 
-  updateGlobalSettings: function(settings: uproxy_core_api.GlobalSettings) {
-    background.sendMessage('update-global-settings', settings);
-  },
-  restart: function() {
-    background.sendMessage('restart', null);
-  },
-  logoutAll: function(getConfirmation: boolean) {
-    background.sendMessage('logout-all', { getConfirmation: getConfirmation });
+      this.fire('core-signal', {
+        name: 'open-dialog',
+        data: data
+      });
+    });
   }
 });
 
-class FirefoxBackgroundUiConnector implements panel_connector.BackgroundUiConnector {
+class Background {
+  private state_: any;
+  private connector_: panel_connector.BackgroundUiConnector;
+  private promisesMap_: {[id: number]: FullfillAndReject} = {};
+
+  constructor(state: any) {
+    if (typeof ui_context.panelConnector !== 'undefined' &&
+      typeof ui_context.panelConnector.sendMessageFromPanel === 'function') {
+      this.connector_ = new SameContextBackgroundUiConnector(this.handleMessage_);
+    } else if (window.chrome) {
+      this.connector_ = new ChromeBackgroundUiConnector(this.handleMessage_);
+    } else {
+      console.error('Cannot talk to background UI');
+    }
+
+    this.state_ = state;
+  }
+
+  public updateGlobalSettings = (settings: uproxy_core_api.GlobalSettings): void => {
+    this.doInBackground_('update-global-settings', settings);
+  }
+
+  public restart = (): void => {
+    this.doInBackground_('restart', null);
+  }
+
+  public logout = (networkInfo: social.SocialNetworkInfo): Promise<void> => {
+    var network = ui_context.model.getNetwork(networkInfo.name);
+    if (!network) {
+      console.warn('Network is not logged in');
+      return Promise.resolve<void>();
+    }
+
+    network.logoutExpected = true;
+
+    return this.doInBackground_('logout', networkInfo, true);
+  }
+
+  private wrapPromise_ = (promise: Promise<any>, promiseId: number) => {
+    promise.then((data) => {
+      this.connector_.sendMessage('promise-response', {
+        promiseId: promiseId,
+        data: {
+          success: true,
+          response: data
+        }
+      });
+    }, (data) => {
+      this.connector_.sendMessage('promise-response', {
+        promiseId: promiseId,
+        data: {
+          success: false,
+          response: data
+        }
+      });
+    });
+  }
+
+  private handleMessage_ = (name: string, data: panel_connector.CommandPayload) => {
+    if (name === 'fire-signal') {
+      this.state_.fire('core-signal', data.data); // a bit hacky, but oh well
+    } else if (name === 'promise-response') {
+      this.handlePromiseResponse_(data.promiseId, data.data);
+    } else if (name === 'open-dialog') {
+      this.wrapPromise_(this.state_.openDialog(data.data), data.promiseId);
+    }
+  }
+
+  private handlePromiseResponse_ = (promiseId: number, data: { success: boolean, response: Object}) => {
+    if (!this.promisesMap_[promiseId]) {
+      console.error('Unexpected promise received');
+      return;
+    }
+
+    if (data.success) {
+      this.promisesMap_[promiseId].fulfill(data.response);
+    } else {
+      this.promisesMap_[promiseId].reject(data.response);
+    }
+    delete this.promisesMap_[promiseId];
+  }
+
+  private doInBackground_ = (name: string, data: Object, expectResponse: boolean = false): any => {
+    var promise: Promise<any> = null;
+    var payload :panel_connector.CommandPayload = {
+      data: data,
+      promiseId: null
+    };
+
+    if (expectResponse) {
+      var promiseId = new Date().valueOf(); // approximately unique
+      payload.promiseId = promiseId;
+
+      promise = new Promise((F, R) => {
+        this.promisesMap_[promiseId] = { fulfill: F, reject: R };
+      });
+    }
+
+    this.connector_.sendMessage(name, payload);
+    return promise;
+  }
+}
+
+class SameContextBackgroundUiConnector implements panel_connector.BackgroundUiConnector {
   constructor(listener: panel_connector.MessageHandler) {
     ui_context.panelConnector.panelConnect(listener);
   }

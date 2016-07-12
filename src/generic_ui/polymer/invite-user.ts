@@ -2,10 +2,13 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-import user_interface = require('../scripts/ui');
 import _ = require('lodash');
+import model = require('../scripts/model');
+import translator = require('../scripts/translator');
+import user_interface = require('../scripts/ui');
+import dialogs = require('../scripts/dialogs');
+
 var ui = ui_context.ui;
-var model = ui_context.model;
 var core = ui_context.core;
 
 var inviteUser = {
@@ -26,12 +29,15 @@ var inviteUser = {
   },
   networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
+    if (networkName === 'Cloud') {
+      return this.cloudInstall();
+    }
     this.selectedNetworkName = networkName;
     // TODO: Consider moving this 'if logged in' logic inside
     // initInviteForNetwork. This would require ui.ts login to be fixed first
     // to remove possible race conditions:
     // https://github.com/uProxy/uproxy/issues/2064
-    if (model.getNetwork(networkName)) {
+    if (ui_context.model.getNetwork(networkName)) {
       this.initInviteForNetwork(networkName);
     } else {
       if (networkName === 'Quiver') {
@@ -88,6 +94,9 @@ var inviteUser = {
     this.$.loginToInviteFriendDialog.resizeHandler();
   },
   getNetworkDisplayName: function(networkName :string) {
+    if (networkName === 'Cloud') {
+      return ui.i18n_t('NETWORK_LIST_CLOUD_LABEL');
+    }
     return ui.getNetworkDisplayName(networkName);
   },
   isExperimentalNetwork: function(networkName :string) {
@@ -99,35 +108,18 @@ var inviteUser = {
   acceptInvite: function() {
     ui.handleInvite(this.inviteCode).then(() => {
       this.closeInviteUserPanel();
-      ui.showDialog('', ui.i18n_t('FRIEND_ADDED'));
-    }).catch(() => {
-      ui.showDialog('', ui.i18n_t('FRIEND_ADD_ERROR'));
-    });
-  },
-  copypaste: function() {
-    // Logout of all other social networks before starting
-    // copypaste connection.
-    var getConfirmation = Promise.resolve<void>();
-    if (model.onlineNetworks.length > 0) {
-      var confirmationMessage = (ui.isGettingAccess() || ui.isGivingAccess()) ?
-          ui.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING') :
-          ui.i18n_t('CONFIRM_LOGOUT_FOR_COPYPASTE');
-      getConfirmation = ui.getConfirmation('', confirmationMessage);
-    }
 
-    getConfirmation.then(() => {
-      return ui.logoutAll(false);  // Don't show confirmation again.
-    }).then(() => {
-      if (this.closeInviteUserPanel) {
-        this.closeInviteUserPanel();
-      }
-      this.fire('core-signal', { name: 'copypaste-init' });
+      this.$.state.openDialog(dialogs.getMessageDialogDescription(
+          '', translator.i18n_t('FRIEND_ADDED')));
+    }).catch(() => {
+      this.$.state.openDialog(dialogs.getMessageDialogDescription(
+          '', translator.i18n_t('FRIEND_ADD_ERROR')));
     });
   },
   ready: function() {
     this.selectedNetworkName = '';
     this.ui = ui;
-    this.model = model;
+    this.model = ui_context.model;
     this.inviteCode = '';
   }
 };
