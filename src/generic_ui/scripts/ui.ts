@@ -118,9 +118,6 @@ export class UserInterface implements ui_constants.UiApi {
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
-  public cloudInstallStatus :string = '';
-  public cloudInstallProgress = 0;
-
   // User-initiated proxy access mode.
   private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
 
@@ -267,11 +264,11 @@ export class UserInterface implements ui_constants.UiApi {
                   this.setPortControlSupport_);
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.cloudInstallStatus = this.i18n_t(status);
+      this.fireSignal('cloud-install-status', status);
     });
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
-      this.cloudInstallProgress = progress;
+      this.fireSignal('cloud-install-progress', progress);
     });
 
     browserApi.on('inviteUrlData', this.handleInvite);
