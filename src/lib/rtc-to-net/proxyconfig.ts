@@ -6,7 +6,7 @@ interface ProxyConfig {
   // If |allowNonUnicast === false| then any proxy attempt that results
   // in a non-unicast (e.g. local network) address will fail.
   allowNonUnicast :boolean;
-  socksProxySettings ?:uproxy_core_api.SocksProxySettings;
+  reproxy        ?:uproxy_core_api.reproxySettings;
 }
 
 export = ProxyConfig;

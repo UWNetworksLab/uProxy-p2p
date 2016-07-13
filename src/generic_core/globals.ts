@@ -60,9 +60,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   enabledExperiments: [],
   shouldHijackDO: true,
   crypto: true,
-  socksProxySettings: {socksProxyOn: false,
-    socksEndpoint: {address: '127.0.0.1', port: 9050},
-    isTor: true}
+  reproxy: {enabled: false, socksEndpoint: {address: '127.0.0.1', port: 9050}}
 };
 
 export var natType :string = '';

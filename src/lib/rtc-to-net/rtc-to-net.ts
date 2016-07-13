@@ -352,11 +352,11 @@ import ProxyConfig = require('./proxyconfig');
                             webEndpoint.address));
           }
           log.debug('%1: Creating tcp connection with socks proxy settings: %2',
-                    [this.longId(), this.proxyConfig_.socksProxySettings]);
+                    [this.longId(), this.proxyConfig_.reproxy]);
 
           // Connect to web endpoint directly or through socks proxy
-          if (typeof this.proxyConfig_.socksProxySettings !== 'undefined' &&
-              this.proxyConfig_.socksProxySettings.socksProxyOn) {
+          if (typeof this.proxyConfig_.reproxy !== 'undefined' &&
+              this.proxyConfig_.reproxy.enabled) {
             return this.connectToEndpointThroughSocks_(webEndpoint);
           } else {
             return this.connectToEndpointDirectly_(webEndpoint);
@@ -473,7 +473,7 @@ import ProxyConfig = require('./proxyconfig');
 
     private connectToEndpointThroughSocks_ = (endpoint: net.Endpoint)
           :Promise<[socks.Reply, net.Endpoint]> => {
-      return this.getTcpConnection_(this.proxyConfig_.socksProxySettings.socksEndpoint, false)
+      return this.getTcpConnection_(this.proxyConfig_.reproxy.socksEndpoint, false)
         .then(this.waitForTcpConnection_)
         .then((info :tcp.ConnectionInfo) :Promise<[socks.Reply, net.Endpoint]> => {
           return this.connectWithSocksAuth_(endpoint);
@@ -534,7 +534,7 @@ import ProxyConfig = require('./proxyconfig');
           if (response.reply !== socks.Reply.SUCCEEDED) {
             throw new Error('Socks connection through reproxy failed');
           }
-          var nullEndpoint :net.Endpoint = {'address':'0.0.0.0', 'port':0};
+          var nullEndpoint :net.Endpoint = {'address': '0.0.0.0', 'port': 0};
           return [response.reply, nullEndpoint];
         });
     }
