@@ -62,6 +62,7 @@ class Provisioner {
    * TODO: Automatically exchange expired oauth tokens for fresh ones?
    * Looks like this is supported:
    * https://developers.digitalocean.com/documentation/oauth/#refresh-token-flow
+   * ref: https://github.com/uProxy/uproxy/issues/2565
    */
   private getOAuthFromStorage_ = () :Promise<any> => {
     return new Promise((F, R) => {
