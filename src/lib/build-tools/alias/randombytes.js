@@ -36,10 +36,10 @@ const getBufferedRandomness = function(size) {
 if (!cryptoAvailable) {
   try {
     coreCrypto = freedom['core.crypto']();
+    refreshBufferedRandomness();
   } catch (e) {
     console.error('crypto and core.crypto unavailable - there can be no randomness in this web worker')
   }
-  refreshBufferedRandomness();
 }
 
 module.exports = function(size, cb) {
@@ -52,7 +52,9 @@ module.exports = function(size, cb) {
       return buffer;
     }
   } else {
-    if (cb) {
+    if (!coreCrypto) {
+      console.warn('randomness requested but unavailable in this web worker')
+    } else if (cb) {
       coreCrypto.getRandomBytes(size).then(function(ab) {
         cb(null, new Buffer(ab));
       });
