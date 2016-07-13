@@ -165,11 +165,6 @@ Polymer({
       this.$.state.background.updateGlobalSettings(model.globalSettings);
     }
   },
-  signalToFireChanged: function() {
-    if (ui.signalToFire) {
-      this.fire('core-signal', { name: ui.signalToFire.name, data: ui.signalToFire.data });
-    }
-  },
   revertProxySettings: function() {
     this.ui.stopUsingProxy(true);
   },
@@ -250,7 +245,6 @@ Polymer({
     // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
-    'ui.signalToFire': 'signalToFireChanged',
     'model.globalSettings.language': 'languageChanged'
   },
   computed: {
