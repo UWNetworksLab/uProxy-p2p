@@ -4,6 +4,10 @@
       true,
       "single"
     ],
-    "curly": true
+    "curly": true,
+    "indent": [
+      true,
+      "spaces"
+    ]
   }
 }
