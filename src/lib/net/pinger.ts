@@ -5,8 +5,6 @@ import promises = require('../promises/promises');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
-var log: logging.Log = new logging.Log('pinger');
-
 const DEFAULT_TIMEOUT_SECS = 60;
 const DEFAULT_INTERVAL_MS = 1000;
 
@@ -20,7 +18,7 @@ class Pinger {
   // Resolves once a connection has been established, rejecting if
   // no connection can be made within the timeout.
   public ping = (): Promise<void> => {
-    log.debug('pinging %1:%2...', this.host_, this.port_);
+    console.debug('pinging ' + this.host_ + ':' + this.port_ + '...');
 
     return promises.retry(() => {
       const socket = freedom['core.tcpsocket']();
@@ -37,10 +35,10 @@ class Pinger {
       //       out almost immediately if nothing is listening on the port,
       //       it works well for our purposes.
       return socket.connect(this.host_, this.port_).then((unused: any) => {
-        log.debug('connected to %1:%2', this.host_, this.port_);
+        console.debug('connected to ' + this.host_ + ':' + this.port_ + '...');
         destructor();
       }, (e: Error) => {
-        log.debug('connection failed to %1:%2', this.host_, this.port_);
+        console.debug('connection failed to ' + this.host_ + ':' + this.port_ + '...');
         destructor();
         throw e;
       });
