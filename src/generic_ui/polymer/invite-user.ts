@@ -99,9 +99,6 @@ var inviteUser = {
     }
     return ui.getNetworkDisplayName(networkName);
   },
-  isExperimentalNetwork: function(networkName :string) {
-    return ui.isExperimentalNetwork(networkName);
-  },
   closeLoginDialog: function() {
     this.$.loginToInviteFriendDialog.close();
   },
@@ -118,7 +115,6 @@ var inviteUser = {
   },
   ready: function() {
     this.selectedNetworkName = '';
-    this.ui = ui;
     this.model = ui_context.model;
     this.inviteCode = '';
   }
