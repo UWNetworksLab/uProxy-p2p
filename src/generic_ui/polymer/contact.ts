@@ -33,9 +33,9 @@ Polymer({
       setTimeout(() => { this.hideOnlineStatus = false; }, 400);
     }
 
-    if (this.model.globalSettings.mode == ui_constants.Mode.SHARE) {
+    if (this.mode == ui_constants.Mode.SHARE) {
       this.contact.shareExpanded = !this.contact.shareExpanded;
-    } else if (this.model.globalSettings.mode == ui_constants.Mode.GET) {
+    } else if (this.mode == ui_constants.Mode.GET) {
       this.contact.getExpanded = !this.contact.getExpanded;
     }
   },
