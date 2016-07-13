@@ -119,14 +119,11 @@
     <div class='downArrow' hidden?="{{ hasContacts }}">▼</div>
 
     <div hidden?='{{ !hasContacts }}'>
-      <!-- Intentionally hiding search box. May decide to readd it later. -->
-      <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}' hidden></input>
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
           groupTitle='{{ (mode == ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$ }}'
           contacts='{{ contacts.pending }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Trusted if there are no Trusted contacts, or if there are no Pending contacts -->
@@ -137,7 +134,6 @@
       <uproxy-roster-group
           groupTitle='{{ (mode == ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$ }}'
           contacts='{{ contacts.trustedUproxy }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Untrusted if there are no Untrusted contacts, or if there are no Trusted & Pending contacts -->
@@ -148,7 +144,6 @@
       <uproxy-roster-group
           groupTitle='{{ "UPROXY_FRIENDS" | $$ }}'
           contacts='{{ contacts.untrustedUproxy }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
     </div>
 
