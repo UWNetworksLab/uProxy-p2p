@@ -58,7 +58,6 @@ export class Model {
     hasSeenSharingEnabledScreen: false,
     hasSeenWelcome: false,
     hasSeenMetrics: false,
-    splashState : 0,
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
     statsReportingEnabled: false,

@@ -46,7 +46,6 @@ export var settings :uproxy_core_api.GlobalSettings = {
   allowNonUnicast: false,
   mode: user_interface.Mode.GET,
   version: STORAGE_VERSION,
-  splashState: 0,
   statsReportingEnabled: false,
   consoleFilter: loggingprovider.Level.warn,
   language: 'en',
