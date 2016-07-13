@@ -348,7 +348,7 @@ import ProxyConfig = require('./proxyconfig');
           // Returns socks reply and bound endpoint of connection
           if (!this.isWebEndpointValid_(webEndpoint)) {
             this.replyToPeer_(socks.Reply.NOT_ALLOWED);
-            Promise.reject(new Error('tried to connect to disallowed address: ' +
+            return Promise.reject(new Error('tried to connect to disallowed address: ' +
                             webEndpoint.address));
           }
           log.debug('%1: Creating tcp connection with socks proxy settings: %2',
