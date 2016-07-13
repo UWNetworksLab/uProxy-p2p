@@ -54,8 +54,7 @@
     }
     </style>
 
-    <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
-         hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'>
+    <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'>
       <p id='description' hidden?='{{ !instance.description }}'>
         <bdi style='display:inline'>{{ instance.description }}</bdi>
         <span class='verified'
