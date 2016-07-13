@@ -22,6 +22,7 @@ const DEFAULT_SIZE: string = '1gb';
 const ERR_CODES: { [k: string]: string; } = {
   'VM_AE': 'VM already exists.',
   'VM_DNE': 'VM does not exist',
+  'OAUTH_ERR': 'Error handling OAuth',
   'CLOUD_ERR': 'Error from cloud provider'
 };
 
@@ -31,11 +32,6 @@ const REDIRECT_URIS: [string] = [
 ];
 
 const STORAGE_KEY_OAUTH = 'DigitalOcean-OAuth';
-// If we try to make a DO request and either don't have an OAuth token saved,
-// or the one we have saved is not valid, we try initiating an OAuth flow and
-// (if fulfilled) retry the request this many times before giving up (see
-// `doRequest_()` below):
-const MAX_OAUTH_TRIES = 1;
 
 interface KeyPair {
   private: string;
@@ -46,6 +42,7 @@ class Provisioner {
   constructor(
     private dispatch_ :Function,
     private state_ :any = {},
+    private promiseOAuth_ :Promise<any> = null,
     private storage_ = freedom['core.storage']()
   ) {}
 
@@ -54,7 +51,57 @@ class Provisioner {
    */
   public hasOAuth = () : Promise<boolean> => {
     return new Promise((F, R) => {
-      this.storage_.get(STORAGE_KEY_OAUTH).then((result) => { F(!!result); });
+      this.getOAuthFromStorage_().then(
+        (result) => { F(!!result); },
+        () => { F(false); }
+      );
+    });
+  }
+
+  /*
+   * TODO: Automatically exchange expired oauth tokens for fresh ones?
+   * Looks like this is supported:
+   * https://developers.digitalocean.com/documentation/oauth/#refresh-token-flow
+   */
+  private getOAuthFromStorage_ = () :Promise<any> => {
+    return new Promise((F, R) => {
+      let reject = (errcode :string, message :string, data? :any, exc? :any) => {
+        let err = {errcode: errcode, message: message, data: data, exc: exc};
+        console.debug(message, data);
+        this.storage_.remove(STORAGE_KEY_OAUTH).then(() => {
+          this.promiseOAuth_ = null;
+          R(err);
+        });
+      }
+      console.debug('Looking for oauthJson in storage...');
+      this.storage_.get(STORAGE_KEY_OAUTH).then((oauthJson) => {
+        if (!oauthJson) {
+          return reject('OAUTH_ERR', 'Missing oauthJson', oauthJson);
+        }
+        let oauthObj :any;
+        try {
+          oauthObj = JSON.parse(oauthJson);
+        } catch (e) {
+          return reject('OAUTH_ERR', 'Error parsing oauthJson', oauthJson, e);
+        }
+        console.debug('Retrieved saved OAuth from storage:', oauthObj);
+        if (!oauthObj.access_token) {
+          return reject('OAUTH_ERR', 'Missing access_token field', oauthObj);
+        }
+        if (oauthObj.expires_at) {
+          const now = Date.now() / 1000 | 0;  // Seconds since epoch.
+          const validFor = oauthObj.expires_at - now;  // Valid seconds left.
+          if (validFor <= 0) {
+            return reject('OAUTH_ERR', 'Stored OAuth expired', validFor);
+          } else {
+            console.debug('Stored OAuth valid for another ' + validFor + 's');
+          }
+        } else {
+          console.debug('Missing expired_at field. Assuming unexpired.');
+        }
+        console.debug('Resolving: oauthObj:', oauthObj);
+        F(oauthObj);
+      });
     });
   }
 
@@ -66,7 +113,7 @@ class Provisioner {
    * @return {Promise.<Object>}
    */
   public start = (name: string, region = DEFAULT_REGION, image = DEFAULT_IMAGE, size = DEFAULT_SIZE): Promise<Object> => {
-    console.debug('start %1', name);
+    console.debug('start', name);
 
     return this.getSshKey_(name).then((keys: KeyPair) => {
       this.state_.ssh = keys;
@@ -119,7 +166,7 @@ class Provisioner {
    * @return {Promise.<void>}
    */
   public stop = (name: string): Promise<void> => {
-    console.debug('stop %1', name);
+    console.debug('stop', name);
     return this.destroyServer_(name);
   }
 
@@ -163,7 +210,7 @@ class Provisioner {
    * to complete or rejects if droplet doesn't exist
    */
   public reboot = (name: string) : Promise<void> => {
-    console.debug('reboot %1', name);
+    console.debug('reboot', name);
     return this.getDropletByName_(name).then((droplet: any) => {
       this.state_.cloud = this.state_.cloud || {};
       this.state_.cloud.vm = this.state_.cloud.vm || droplet;
@@ -215,17 +262,26 @@ class Provisioner {
   /**
    * Initiates a Digital Ocean OAuth flow.
    * OAuth response saved in storage upon receipt for future use.
+   * The promise returned is cached so that multiple concurrent calls all
+   * wait on the same promise.
    * @return {Promise.<Object>} OAuth response from Digital Ocean
    *  {
    *    access_token: '..',
    *    expires_in: '..',
+   *    expires_at: <unix timestamp calculated from expires_in>,
    *    state: '..',
    *    token_type: '..'
    *  }
    */
-  private doOAuth_ = () : Promise<Object> => {
-    return new Promise((F, R) => {
+  private doOAuth_ = () : Promise<any> => {
+    console.debug('In doOAuth_');
+    if (this.promiseOAuth_) {
+      console.debug('Returning cached promiseOAuth_', this.promiseOAuth_);
+      return this.promiseOAuth_;
+    }
+    return this.promiseOAuth_ = new Promise((F, R) => {
       var oauth = freedom['core.oauth']();
+      console.debug('Initiating OAuth...');
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
         var url = 'https://cloud.digitalocean.com/v1/oauth/authorize?' +
             'client_id=41f77ea7aa94311a2337027eb238591db9e98c6e2c1067b3b2c7c3420901703f&' +
@@ -233,23 +289,43 @@ class Provisioner {
             'redirect_uri=' + encodeURIComponent(obj.redirect) + '&' +
             'state=' + encodeURIComponent(obj.state) + '&' +
             'scope=read%20write';
-        return oauth.launchAuthFlow(url, obj);
-      }).then((responseUrl: string) => {
-        var query = responseUrl.substr(responseUrl.indexOf('#') + 1),
-            param: string,
-            params: { [k: string]: string } = {},
-            keys = query.split('&'),
-            i = 0;
-        for (i = 0; i < keys.length; i++) {
-          param = keys[i].substr(0, keys[i].indexOf('='));
-          params[param] = keys[i].substr(keys[i].indexOf('=') + 1);
-        }
-        console.debug('Got OAuth, saving in storage:', params);
-        this.storage_.set(STORAGE_KEY_OAUTH, JSON.stringify(params)),
-        F(params);
-      }).catch((err: Error) => {
-        console.debug('caught error in doOAuth_:', err);
-        R(err);
+        console.debug('Launching OAuth flow...');
+        oauth.launchAuthFlow(url, obj).then((responseUrl: string) => {
+          console.debug('Got OAuth response:', responseUrl);
+          let query = responseUrl.substr(responseUrl.indexOf('#') + 1),
+              keys = query.split('&'),
+              params :any = {};
+          for (let i = 0, keyi = keys[i]; keyi; keyi = keys[++i]) {
+            const idxeq = keyi.indexOf('=');
+            const param = keyi.substring(0, idxeq);
+            params[param] = keyi.substring(idxeq + 1);
+          }
+          if (params.expires_in) {
+            // params.expires_in gives the number of seconds before the token
+            // expires. Use this to calculate the absolute expiration time for
+            // later comparison (see getOAuthFromStorage_() above). Don't ask
+            // why DO doesn't just give an absolute time to begin with.¯\_(ツ)_/¯
+
+            // First calculate the current time (in seconds since the epoch),
+            // then add it to the expires_in delta to get the absolute expiration
+            // time, and finally subtract some epsilon for wiggle room to be
+            // conservative.
+            const now = Date.now() / 1000 | 0;  // Unix timestamp in seconds.
+            const delta = parseInt(params.expires_in);  // Convert from string.
+            if (isNaN(delta)) {
+              console.debug('Could not parse expires_in:', params.expires_in);
+            } else {
+              const epsilon = -60;
+              params.expires_at = now + delta + epsilon;
+              console.debug('Calculated expires_at:', params.expires_at);
+            }
+          }
+          console.debug('Saving OAuth:', params);
+          this.storage_.set(STORAGE_KEY_OAUTH, JSON.stringify(params)).then(() => {
+            console.debug('OAuth saved in storage, resolving:', params);
+            F(params);
+          });
+        });
       });
     });
   }
@@ -263,7 +339,7 @@ class Provisioner {
    * storage or if a keypair cannot be generated
    */
   private getSshKey_ = (name: string) : Promise<KeyPair> => {
-    console.debug('getSshKey_ %1', name);
+    console.debug('getSshKey_', name);
     const publicKeyIndex = 'DigitalOcean-' + name + '-PublicKey';
     const privateKeyIndex = 'DigitalOcean-' + name + '-PrivateKey';
     return Promise.all([
@@ -271,7 +347,7 @@ class Provisioner {
         this.storage_.get(privateKeyIndex)
     ]).then((results: string[]) => {
       if (results[0] !== null && results[1] !== null) {
-        console.debug('found SSH keys for %1 in storage', name);
+        console.debug('found SSH keys for', name, 'in storage');
         return {
           public: results[0],
           private: results[1]
@@ -279,7 +355,7 @@ class Provisioner {
       }
 
       try {
-        console.debug('generating SSH keys for %1', name);
+        console.debug('generating SSH keys for', name);
         const result = Provisioner.generateKeyPair_();
         return Promise.all([
           this.storage_.set(publicKeyIndex, result.public),
@@ -307,53 +383,36 @@ class Provisioner {
    * Make a request to Digital Ocean.
    * Uses OAuth token saved in storage, if available, otherwise initiates
    * an OAuth flow, awaits authorization (which is then saved in storage),
-   * and then makes a recursive call. Keeps a count of how many tries were
-   * attempted and rejects if it exceeds MAX_OAUTH_TRIES to prevent infinite
-   * recursion.
-   *
-   * TODO: Automatically exchange expired oauth tokens for fresh ones?
-   *       Looks like this is supported:
-   *       https://developers.digitalocean.com/documentation/oauth/#refresh-token-flow
-   *
+   * and then tries again.
    * @param {String} method - GET/POST/DELETE etc
    * @param {String} actionPath - e.g. 'droplets/'
    * @param {String} body - if POST, contents to post
    * @return {Promise.<Object>} - JSON object of response body
    */
-  private doRequest_ = (method: string, actionPath: string, body?: string, ntries = 0) :
+  private doRequest_ = (method: string, actionPath: string, body?: string, retry = true) :
       Promise<Object> => {
+    const url = 'https://api.digitalocean.com/v2/' + actionPath;
+    console.debug('Request for:', url);
     return new Promise((F, R) => {
-      let maybeRetry = () => {
-        ntries++;
-        if (ntries > MAX_OAUTH_TRIES) {
-          return Promise.reject({errcode: 'REACHED_MAX_OAUTH_TRIES'});
+      let maybeRetryAfterOAuth = () => {
+        if (!retry) {
+          R({errcode: 'CLOUD_ERR', message: 'Request failed', url: url});
+          return;
         }
-        console.debug('Awaiting OAuth before "/' + actionPath + '" retry', ntries, '...');
-        return this.storage_.remove(STORAGE_KEY_OAUTH).then(this.doOAuth_).then(() => {
-          this.doRequest_(method, actionPath, body, ntries);
+        console.debug('Awaiting OAuth before retrying', url);
+        this.doOAuth_().then(() => {
+          console.debug('Got OAuth, retrying', url);
+          this.doRequest_(method, actionPath, body, false).then((result :any) => {
+            console.debug('Request succeeded on retry', url);
+            F(result);
+          });
+        }).catch((e) => {
+          console.debug('doOAuth_ failed:', e);
+          R(e);
         });
       };
-      this.storage_.get(STORAGE_KEY_OAUTH).then((oauthJson) => {
-        let oauthObj :any = null;
-        if (!oauthJson) {
-          console.debug('Missing oauthJson');
-        } else {
-          try {
-            oauthObj = JSON.parse(oauthJson);
-          } catch (e) {
-            console.debug('Invalid oauthJson:', oauthJson);
-          }
-          if (oauthObj && !oauthObj.access_token) {
-            console.debug('Missing oauthObj.access_token, oauthObj:', oauthObj);
-          }
-        }
-        if (!oauthObj || !oauthObj.access_token) {
-          return maybeRetry();
-        }
-        console.debug('Found oauth in storage:', oauthObj);
-
+      this.getOAuthFromStorage_().then((oauthObj :any) => {
         const xhr = freedom['core.xhr']();
-        const url = 'https://api.digitalocean.com/v2/' + actionPath;
         console.debug('Making request:', url);
         xhr.on('onload', (loadInfo: any) => {
           xhr.getStatus().then((statusCode :number) => {
@@ -362,7 +421,8 @@ class Provisioner {
               // User could have gone to
               // https://cloud.digitalocean.com/settings/api/access
               // to revoke authorization.
-              return maybeRetry();
+              maybeRetryAfterOAuth();
+              return;
             }
             // DELETE method doesn't return a reponse body. Success
             // is indicated by 204 response code in header.
@@ -374,6 +434,7 @@ class Provisioner {
                   response = JSON.parse(response);
                 } catch (e) {
                   R({message: 'Could not parse response', error: e, response: response});
+                  return;
                 }
                 F(response);
               });
@@ -390,7 +451,8 @@ class Provisioner {
         } else {
           xhr.send(null);
         }
-      });
+      },
+      (e :any) => { maybeRetryAfterOAuth(); });
     });
   }
   
@@ -430,7 +492,7 @@ class Provisioner {
    * @return {Promise.<void>} resolves on success, rejects on failure
    */
   private setupDigitalOcean_ = (name: string, region: string, image: string, size: string):  Promise<void> => {
-    console.info('creating %1 droplet in %2', image, region);
+    console.info('creating', image, 'droplet in', region);
     return new Promise<void>((F, R) => {
       this.state_.cloud = {};
       // Get SSH keys in account
