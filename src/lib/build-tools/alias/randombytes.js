@@ -4,6 +4,8 @@
 // Original:
 //   https://github.com/crypto-browserify/randombytes
 
+"use strict";
+
 const cryptoAvailable = typeof crypto !== 'undefined';
 
 let coreCrypto;
