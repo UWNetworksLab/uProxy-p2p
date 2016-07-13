@@ -5,7 +5,6 @@ import ui_constants = require('../../interfaces/ui');
 
 Polymer({
   loadingContacts: false,
-  searchQuery: '',
   ready: function() {
     console.log('initializing roster');
 
