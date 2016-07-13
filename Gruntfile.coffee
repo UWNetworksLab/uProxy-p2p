@@ -1276,11 +1276,16 @@ taskManager.add 'build', [
   'jpm:xpi'
 ]
 
+taskManager.add 'lint', [
+  'copy:dev'
+  'tslint'
+]
+
 # This is run prior to releasing uProxy and, in addition to
 # building, tests and lints all code.
 taskManager.add 'dist', [
   'build'
-  'tslint'
+  'lint'
   'test'
 ]
 
