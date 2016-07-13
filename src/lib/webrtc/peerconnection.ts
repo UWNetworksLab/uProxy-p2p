@@ -5,6 +5,8 @@ import handler = require('../handler/queue');
 import logging = require('../logging/logging');
 import signals = require('./signals');
 
+import RTCSessionDescription = freedom.RTCPeerConnection.RTCSessionDescription;
+
 declare const freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('PeerConnection');
@@ -198,6 +200,14 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Maximum number of channels.
   private maxChannels_ = 65536;
 
+  // This method is null by default.  If it is not null, it will be used to
+  // modify the RTCSessionDescription produced by createOffer before it is
+  // passed to setLocalDescription.  Consumers of PeerConnectionClass that
+  // want to use this capability should set this method to a function that
+  // implements the desired transform before initiating signaling.
+  public mungeLocalDescription :
+      (sdp:RTCSessionDescription) => Promise<RTCSessionDescription> = null;
+
   constructor(
       private pc_:freedom.RTCPeerConnection.RTCPeerConnection,
       private peerName_ = ('unnamed-' + PeerConnectionClass.numCreations_)) {
@@ -327,53 +337,59 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // Or only for the initiator?
     if (this.state_ === State.WAITING || this.state_ === State.CONNECTED) {
       this.state_ = State.CONNECTING;
-      this.pc_.createOffer().then(
-        (d:freedom.RTCPeerConnection.RTCSessionDescription) => {
-          log.debug('%1: created offer: %2', this.peerName_, d);
+      this.pc_.createOffer().then((d:RTCSessionDescription) => {
+        log.debug('%1: created offer: %2', this.peerName_, d);
 
-          // Emit the offer signal before calling setLocalDescription, which
-          // initiates ICE candidate gathering. If we did the reverse then
-          // we may emit ICE candidate signals before the offer, confusing
-          // some clients:
-          //   https://github.com/uProxy/uproxy/issues/784
-          this.emitSignalForPeer_({
-            type: signals.Type.OFFER,
-            description: {
-              type: d.type,
-              sdp: d.sdp
-            }
-          });
-          this.pc_.setLocalDescription(d);
-          this.updateMaxChannels_(d.sdp);
-        }).catch((e:Error) => {
-          this.closeWithError_('failed to set local description: ' + e.message);
+        // Emit the offer signal before calling setLocalDescription, which
+        // initiates ICE candidate gathering. If we did the reverse then
+        // we may emit ICE candidate signals before the offer, confusing
+        // some clients:
+        //   https://github.com/uProxy/uproxy/issues/784
+        this.emitSignalForPeer_({
+          type: signals.Type.OFFER,
+          description: {
+            type: d.type,
+            sdp: d.sdp
+          }
         });
+
+        if (this.mungeLocalDescription) {
+          return this.mungeLocalDescription(d);
+        } else {
+          return d;
+        }
+      }).then((d:RTCSessionDescription) => {
+        this.pc_.setLocalDescription(d);
+        this.updateMaxChannels_(d.sdp);
+      }).catch((e:Error) => {
+        this.closeWithError_('failed to set local description: ' + e.message);
+      });
     } else {
       // This should never happen, but in Firefox 40+, we get a redundant
       // event because both the browser and the polyfill generate one.
       // TODO: Remove the polyfill, and make this warning an error, once
       // Firefox <40 is no longer supported.
       log.warn('onnegotiationneeded fired in unexpected state ' +
-               State[this.state_]);
+          State[this.state_]);
     }
   }
 
   // Fulfills if it is OK to proceed with setting this remote offer, or
   // rejects if there is a local offer with higher hash-precedence.
-  private breakOfferTie_ = (remoteOffer:freedom.RTCPeerConnection.RTCSessionDescription)
-  : Promise<void> => {
+  private breakOfferTie_ = (remoteOffer:RTCSessionDescription)
+      : Promise<void> => {
     return this.pc_.getSignalingState().then((state:string) => {
       if (state === 'have-local-offer') {
         return this.pc_.getLocalDescription().then(
-          (localOffer:freedom.RTCPeerConnection.RTCSessionDescription) => {
-            if (djb2(JSON.stringify(remoteOffer.sdp)) <
-                djb2(JSON.stringify(localOffer.sdp))) {
-              // TODO: implement reset and use their offer.
-              return Promise.reject('Simultaneous offers not yet implemented.');
-            } else {
-              return Promise.resolve();
-            }
-          });
+            (localOffer:RTCSessionDescription) => {
+          if (djb2(JSON.stringify(remoteOffer.sdp)) <
+              djb2(JSON.stringify(localOffer.sdp))) {
+            // TODO: implement reset and use their offer.
+            return Promise.reject('Simultaneous offers not yet implemented.');
+          } else {
+            return Promise.resolve();
+          }
+        });
       } else {
         return Promise.resolve();
       }
@@ -383,7 +399,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   private onIceCandidate_ = (candidate?:freedom.RTCPeerConnection.OnIceCandidateEvent) => {
     if(candidate.candidate) {
       log.debug('%1: local ice candidate: %2',
-                this.peerName_, candidate.candidate);
+          this.peerName_, candidate.candidate);
       this.emitSignalForPeer_({
         type: signals.Type.CANDIDATE,
         candidate: candidate.candidate
@@ -396,54 +412,57 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     }
   }
 
-  private handleOfferSignalMessage_ = (
-    description:freedom.RTCPeerConnection.RTCSessionDescription)
-  : Promise<void> => {
+  private handleOfferSignalMessage_ = (description:RTCSessionDescription)
+      : Promise<void> => {
     return this.breakOfferTie_(description).then(() => {
       this.state_ = State.CONNECTING;
       this.updateMaxChannels_(description.sdp);
       // initial offer from peer
       return this.pc_.setRemoteDescription(description)
-    }).then(this.pc_.createAnswer).then(
-      (d:freedom.RTCPeerConnection.RTCSessionDescription) => {
-        log.debug('%1: created answer: %2', this.peerName_, d);
+    }).then(this.pc_.createAnswer).then((d:RTCSessionDescription) => {
+      log.debug('%1: created answer: %2', this.peerName_, d);
 
-        // As with the offer, we must emit the signal before
-        // setting the local description to ensure that we send the
-        // ANSWER before any ICE candidates.
-        this.emitSignalForPeer_({
-          type: signals.Type.ANSWER,
-          description: {
-            type: d.type,
-            sdp: d.sdp
-          }
-        });
-        this.updateMaxChannels_(d.sdp);
-        return this.pc_.setLocalDescription(d);
-      }).catch((e) => {
-        this.closeWithError_('Failed to connect to offer:' +
-                             e.toString());
+      // As with the offer, we must emit the signal before
+      // setting the local description to ensure that we send the
+      // ANSWER before any ICE candidates.
+      this.emitSignalForPeer_({
+        type: signals.Type.ANSWER,
+        description: {
+          type: d.type,
+          sdp: d.sdp
+        }
       });
+      this.updateMaxChannels_(d.sdp);
+      if (this.mungeLocalDescription) {
+        return this.mungeLocalDescription(d);
+      } else {
+        return d;
+      }
+    }).then((d:RTCSessionDescription) => {
+      return this.pc_.setLocalDescription(d);
+    }).catch((e) => {
+      this.closeWithError_('Failed to connect to offer:' +
+          e.toString());
+    });
   }
 
-  private handleAnswerSignalMessage_ = (
-    description:freedom.RTCPeerConnection.RTCSessionDescription)
-  : Promise<void> => {
+  private handleAnswerSignalMessage_ = (description:RTCSessionDescription)
+      : Promise<void> => {
     this.updateMaxChannels_(description.sdp);
     return this.pc_.setRemoteDescription(description).catch((e) => {
       this.closeWithError_('Failed to set remote description: ' +
-                           JSON.stringify(description) + '; Error: ' + e.toString());
+        JSON.stringify(description) + '; Error: ' + e.toString());
     });
   }
 
   private handleCandidateSignalMessage_ = (
-    candidate:freedom.RTCPeerConnection.RTCIceCandidate)
-  : Promise<void> => {
+      candidate:freedom.RTCPeerConnection.RTCIceCandidate)
+      : Promise<void> => {
     // CONSIDER: Should we be passing/getting the SDP line index?
     // e.g. https://code.google.com/p/webrtc/source/browse/stable/samples/js/apprtc/js/main.js#331
     return this.pc_.addIceCandidate(candidate).catch((e: Error) => {
       log.error('%1: addIceCandidate: %2; Error: %3', this.peerName_, candidate,
-                e.toString());
+        e.toString());
     });
   }
 
@@ -465,49 +484,49 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // TODO: Instead of hash, we could use the IP/port candidate list which
     //       is guaranteed to be unique for 2 peers.
     switch(message.type) {
-    case signals.Type.OFFER:
-      return this.handleOfferSignalMessage_(message.description).then(
-        this.fulfillHaveRemoteDescription_);
+      case signals.Type.OFFER:
+        return this.handleOfferSignalMessage_(message.description).then(
+            this.fulfillHaveRemoteDescription_);
       // Answer to an offer we sent
-    case signals.Type.ANSWER:
-      return this.handleAnswerSignalMessage_(message.description).then(
-        this.fulfillHaveRemoteDescription_);
+      case signals.Type.ANSWER:
+        return this.handleAnswerSignalMessage_(message.description).then(
+            this.fulfillHaveRemoteDescription_);
       // Add remote ice candidate.
-    case signals.Type.CANDIDATE:
-      return this.onceHaveRemoteDescription_.then(() => {
-        return this.handleCandidateSignalMessage_(message.candidate);
-      });
-    case signals.Type.NO_MORE_CANDIDATES:
-      return Promise.resolve<void>();
-    default:
-      return Promise.reject(new Error(
-        'unexpected signalling message type ' + message.type));
+      case signals.Type.CANDIDATE:
+        return this.onceHaveRemoteDescription_.then(() => {
+          return this.handleCandidateSignalMessage_(message.candidate);
+        });
+      case signals.Type.NO_MORE_CANDIDATES:
+        return Promise.resolve<void>();
+      default:
+        return Promise.reject(new Error(
+            'unexpected signalling message type ' + message.type));
     }
   }
 
   // Open a new data channel with the peer.
   public openDataChannel = (channelLabel:string,
-                            options?:freedom.RTCPeerConnection.RTCDataChannelInit)
-  : Promise<DataChannel> => {
+      options?:freedom.RTCPeerConnection.RTCDataChannelInit)
+      : Promise<DataChannel> => {
     if (channelLabel === '') {
       throw new Error('label cannot be an empty string');
     }
 
     if (Object.keys(this.channels_).length >= this.maxChannels_) {
       return Promise.reject(new Error('maximum number of channels reached (' +
-                                      this.maxChannels_ + ')'));
+          this.maxChannels_ + ')'));
     }
 
     if (options && options.id && options.id >= this.maxChannels_) {
       return Promise.reject(new Error('requested channel id higher than ' +
-                                      'maximum (' + this.maxChannels_ + ')'));
+          'maximum (' + this.maxChannels_ + ')'));
     }
 
     log.debug('%1: creating channel %2 with options: %3',
-              this.peerName_, channelLabel, options);
+        this.peerName_, channelLabel, options);
 
     return this.pc_.createDataChannel(channelLabel, options).then(
-      this.addRtcDataChannel_);
+        this.addRtcDataChannel_);
   }
 
   // When a peer creates a data channel, this function is called with the
@@ -515,7 +534,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // the new |DataChannel| to the |this.peerOpenedChannelQueue| to be
   // handled.
   private onPeerStartedDataChannel_ =
-    (channelInfo:{channel:string}) : void => {
+      (channelInfo:{channel:string}) : void => {
       this.addRtcDataChannel_(channelInfo.channel).then((dc:DataChannel) => {
         var label :string = dc.getLabel();
         log.debug('%1: peer created channel %2', this.peerName_, label);
@@ -533,22 +552,22 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Add a rtc data channel and return the it wrapped as a DataChannel
   private addRtcDataChannel_ = (id:string)
-  : Promise<DataChannel> => {
+      : Promise<DataChannel> => {
     return datachannel.createFromFreedomId(id)
-      .then((dataChannel:DataChannel) => {
-        var label = dataChannel.getLabel();
-        this.channels_[label] = dataChannel;
-        dataChannel.onceClosed.then(() => {
-          delete this.channels_[label];
-          if (label === '') {
-            log.debug('%1: discarded control channel', this.peerName_);
-          } else {
-            log.debug('%1: discarded channel %2 (%3 remaining)',
-                      this.peerName_, label, Object.keys(this.channels_).length);
-          }
-        });
-        return dataChannel;
+        .then((dataChannel:DataChannel) => {
+      var label = dataChannel.getLabel();
+      this.channels_[label] = dataChannel;
+      dataChannel.onceClosed.then(() => {
+        delete this.channels_[label];
+        if (label === '') {
+          log.debug('%1: discarded control channel', this.peerName_);
+        } else {
+          log.debug('%1: discarded channel %2 (%3 remaining)',
+              this.peerName_, label, Object.keys(this.channels_).length);
+        }
       });
+      return dataChannel;
+    });
   }
 
   // Saves the given data channel as the control channel for this peer
@@ -561,7 +580,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       this.fulfillConnected_();
     }).catch((e: Error) => {
       log.debug('%1: control channel failed to open: %2',
-                this.peerName_, e.message);
+          this.peerName_, e.message);
     });
     channel.onceClosed.then(this.close);
   }
@@ -582,7 +601,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         lastPingTimestamp = Date.now();
       } else {
         log.warn('%1: unexpected data on control channel: %2',
-                 this.peerName_, data);
+            this.peerName_, data);
       }
     });
 
@@ -592,13 +611,13 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         str: HEARTBEAT_MESSAGE_
       }).catch((e:Error) => {
         log.error('%1: error sending heartbeat: %2',
-                  this.peerName_, e.message);
+            this.peerName_, e.message);
       });
 
       if (Date.now() - lastPingTimestamp > HEARTBEAT_TIMEOUT_MS_) {
         log.debug('%1: heartbeat timeout, terminating', this.peerName_);
         this.closeWithError_('no heartbeat received for >' +
-                             HEARTBEAT_TIMEOUT_MS_ + 'ms');
+            HEARTBEAT_TIMEOUT_MS_ + 'ms');
         clearInterval(loop);
       }
     }, HEARTBEAT_INTERVAL_MS_);
@@ -615,7 +634,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       }
     } catch (e) {
       log.warn('%1: cannot extract max channels from SDP: %2 (%3)',
-               this.peerName_, sdp, e.message);
+          this.peerName_, sdp, e.message);
     }
   }
 
@@ -626,7 +645,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     var channelLabel :string;
     for (channelLabel in this.channels_) {
       s += '  ' + channelLabel + ': ' +
-        this.channels_[channelLabel].toString() + '\n';
+          this.channels_[channelLabel].toString() + '\n';
     }
     s += '}';
     return s;
@@ -634,8 +653,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 }  // class PeerConnectionClass
 
 export function createPeerConnection(
-  config:freedom.RTCPeerConnection.RTCConfiguration, debugPcName?:string)
-: PeerConnection<signals.Message> {
+    config:freedom.RTCPeerConnection.RTCConfiguration, debugPcName?:string)
+    : PeerConnection<signals.Message> {
   var freedomRtcPc = freedom['core.rtcpeerconnection'](config);
   // Note: |peerConnection| will take responsibility for freeing memory and
   // closing down of |freedomRtcPc| once the underlying peer connection is
