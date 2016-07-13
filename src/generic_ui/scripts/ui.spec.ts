@@ -291,7 +291,8 @@ describe('UI.UserInterface', () => {
       // if the core.start promise fulfills. (see polymer/instance.ts)
       syncUserAndInstance('userId', 'userName', 'testInstanceId');
       ui.startGettingInUiAndConfig(
-          'testInstanceId', { address : 'testAddress' , port : 0 });
+          'testInstanceId', { address : 'testAddress' , port : 0 },
+          browser_api.ProxyAccessMode.IN_APP);
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
       ui.stoppedGetting({instanceId: null, error: false});
@@ -300,7 +301,8 @@ describe('UI.UserInterface', () => {
     it('Extension icon changes when you stop getting access', () => {
       syncUserAndInstance('userId', 'userName', 'testGiverId');
       ui.startGettingInUiAndConfig(
-          'testGiverId', { address : 'testAddress' , port : 0 });
+          'testGiverId', { address : 'testAddress' , port : 0 },
+          browser_api.ProxyAccessMode.IN_APP);
       ui['instanceGettingAccessFrom_'] = 'testGiverId';
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
