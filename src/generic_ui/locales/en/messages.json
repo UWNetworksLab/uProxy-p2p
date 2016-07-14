@@ -175,9 +175,17 @@
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
     "message": "Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information."
   },
-  "THANK_YOU": {
+  "FEEDBACK_TITLE": {
     "description": "",
     "message": "Thank you!"
+  },
+  "FEEDBACK_TITLE_4": {
+    "description": "",
+    "message": "Trouble signing in"
+  },
+  "FEEDBACK_TITLE_5": {
+    "description": "",
+    "message": "No friends to proxy from"
   },
   "FEEDBACK_SUBMITTED": {
     "description": "User feedback was successfully submitted.",
@@ -189,7 +197,7 @@
   },
   "FEEDBACK_SUBMITTED_5": {
     "description": "User feedback was successfully submitted.",
-    "message": "Consider using uProxy cloud servers. Additional information can be found Click <uproxy-faq-link anchor='whatAreCloudServers'>here</uproxy-faq-link> ."
+    "message": "Consider using uProxy cloud servers. Click <uproxy-faq-link anchor='whatAreCloudServers'>here</uproxy-faq-link> for additional help."
   },
   "EMAIL_INSTEAD_TITLE": {
     "description": "Title for error that appears if feedback submission failed.",

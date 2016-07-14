@@ -52,20 +52,22 @@ Polymer({
       browserInfo: navigator.userAgent,
       feedbackType: this.feedbackType
     }).then(() => {
+    var messages : {[key: number]: [string, string]} = {
+      0: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
+      1: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
+      2: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
+      3: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
+      4: ['FEEDBACK_SUBMITTED_4', 'FEEDBACK_TITLE_4'],
+      5: ['FEEDBACK_SUBMITTED_5', 'FEEDBACK_TITLE_5'],
+      6: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
+      7: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
+      8: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE']
+    };
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
-      if (this.$.errorInput.selected == 4) {
-        var feedbackTypeDialog = translator.i18n_t('FEEDBACK_SUBMITTED_4');
-      }
-      else if (this.$.errorInput.selected == 5) {
-        var feedbackTypeDialog = translator.i18n_t('FEEDBACK_SUBMITTED_5');
-      }
-      else {
-        var feedbackTypeDialog = translator.i18n_t('FEEDBACK_SUBMITTED');
-      }
       this.$.state.openDialog(dialogs.getMessageDialogDescription(
-          translator.i18n_t('THANK_YOU'),
-          feedbackTypeDialog,
+          translator.i18n_t(messages[this.$.errorInput.selected][1]),
+          translator.i18n_t(messages[this.$.errorInput.selected][0]),
           translator.i18n_t('DONE'))).then(() => {
         this.fire('core-signal', { name: 'close-settings' });
       }, () => {/*MT*/});
