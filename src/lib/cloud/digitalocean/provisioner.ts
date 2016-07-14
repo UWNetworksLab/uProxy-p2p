@@ -40,10 +40,19 @@ interface KeyPair {
 
 class Provisioner {
   constructor(
-    private dispatch_ :Function,
-    private state_ :any = {},
-    private promiseOAuth_ :Promise<any> = null,
-    private storage_ = freedom['core.storage']()
+    private sshKeyPair_ :any = {},
+    private network_ :any = {},
+    private storage_ = freedom['core.storage'](),
+
+    // TODO: give this concept a better name, or use a different abstraction?
+    private cloud_ :any = null,
+
+    // doOAuth_() may be called multiple times concurrently before an OAuth
+    // flow has been completed. In order to ensure that each call doesn't
+    // trigger an additional OAuth flow in a new tab, the promise returned by
+    // the first call is cached in this field, and this cached promise is
+    // returned for subsequent calls.
+    private promiseOAuth_ :Promise<Object> = null
   ) {}
 
   /*
@@ -116,8 +125,8 @@ class Provisioner {
   public start = (name: string, region = DEFAULT_REGION, image = DEFAULT_IMAGE, size = DEFAULT_SIZE): Promise<Object> => {
     console.debug('start', name);
 
-    return this.getSshKey_(name).then((keys: KeyPair) => {
-      this.state_.ssh = keys;
+    return this.getSshKey_(name).then((keypair: KeyPair) => {
+      this.sshKeyPair_ = keypair;
 
       return this.getDropletByName_(name).then((unused :any) => {
         return Promise.reject({
@@ -133,21 +142,21 @@ class Provisioner {
       // Get the droplet's configuration
       return this.getDropletByName_(name);
     }).then((droplet:any) => {
-      this.state_.cloud.vm = droplet;
-      this.state_.network = {
+      this.cloud_.vm = droplet;
+      this.network_ = {
         'ssh_port': 22
       };
       // Retrieve public IPv4 address
       for (var i = 0; i < droplet.networks.v4.length; i++) {
         if (droplet.networks.v4[i].type === 'public') {
-          this.state_.network['ipv4'] = droplet.networks.v4[i].ip_address;
+          this.network_['ipv4'] = droplet.networks.v4[i].ip_address;
           break;
         }
       }
       // Retrieve public IPv6 address
       for (var i = 0; i < droplet.networks.v6.length; i++) {
         if (droplet.networks.v6[i].type === 'public') {
-          this.state_.network['ipv6'] = droplet.networks.v6[i].ip_address;
+          this.network_['ipv6'] = droplet.networks.v6[i].ip_address;
           break;
         }
       }
@@ -155,8 +164,8 @@ class Provisioner {
       // It usually takes several seconds after the API reports success for
       // SSH on a new droplet to become responsive.
       console.debug('waiting for SSH port to become active');
-      return new Pinger(this.state_.network['ipv4'], 22, 60).ping().then(() => {
-        return this.state_;
+      return new Pinger(this.network_['ipv4'], 22, 60).ping().then(() => {
+        return {ssh: this.sshKeyPair_, cloud: this.cloud_, network: this.network_};
       });
     });
   }
@@ -182,12 +191,12 @@ class Provisioner {
       // Find and delete the server with the same name
       return this.getDropletByName_(name);
     }).then((droplet: any) => {
-      this.state_.cloud = this.state_.cloud || {};
-      this.state_.cloud.vm = this.state_.cloud.vm || droplet;
+      this.cloud_ = this.cloud_ || {};
+      this.cloud_.vm = this.cloud_.vm || droplet;
       // Make sure there are no actions in progress before deleting
       return this.waitDigitalOceanActions_();
     }).then(() => {
-      return this.doRequest_('DELETE', 'droplets/' + this.state_.cloud.vm.id);
+      return this.doRequest_('DELETE', 'droplets/' + this.cloud_.vm.id);
     }).then((resp: any) => {
       if (resp.statusCode === 204) {
         // Wait until server is deleted
@@ -213,12 +222,12 @@ class Provisioner {
   public reboot = (name: string) : Promise<void> => {
     console.debug('reboot', name);
     return this.getDropletByName_(name).then((droplet: any) => {
-      this.state_.cloud = this.state_.cloud || {};
-      this.state_.cloud.vm = this.state_.cloud.vm || droplet;
+      this.cloud_ = this.cloud_ || {};
+      this.cloud_.vm = this.cloud_.vm || droplet;
       // Make sure there are no actions in progress before rebooting
       return this.waitDigitalOceanActions_();
     }).then(() => {
-      return this.doRequest_('POST', 'droplets/' + this.state_.cloud.vm.id + '/actions', JSON.stringify({
+      return this.doRequest_('POST', 'droplets/' + this.cloud_.vm.id + '/actions', JSON.stringify({
         type: 'reboot',
       }));
     }).then((unused: any) => {
@@ -265,16 +274,16 @@ class Provisioner {
    * OAuth response saved in storage upon receipt for future use.
    * The promise returned is cached so that multiple concurrent calls all
    * wait on the same promise.
-   * @return {Promise.<Object>} OAuth response from Digital Ocean
-   *  {
-   *    access_token: '..',
-   *    expires_in: '..',
-   *    expires_at: <unix timestamp calculated from expires_in>,
-   *    state: '..',
-   *    token_type: '..'
-   *  }
+   * @return {Promise.<Object>} OAuth data from DigitalOcean:
+   * {
+   *   access_token :string;
+   *   expires_in :number;
+   *   expires_at :number;  // <unix timestamp calculated from expires_in>
+   *   state :string;
+   *   token_type :string;
+   * }
    */
-  private doOAuth_ = () : Promise<any> => {
+  private doOAuth_ = () : Promise<Object> => {
     console.debug('In doOAuth_');
     if (this.promiseOAuth_) {
       console.debug('Returning cached promiseOAuth_', this.promiseOAuth_);
@@ -314,8 +323,9 @@ class Provisioner {
             const now = Date.now() / 1000 | 0;  // Unix timestamp in seconds.
             const delta = parseInt(params.expires_in);  // Convert from string.
             if (isNaN(delta)) {
-              console.debug('Could not parse expires_in:', params.expires_in);
+              console.debug('parseInt(expires_in) failed:', params.expires_in);
             } else {
+              params.expires_in = delta;
               const epsilon = -60;
               params.expires_at = now + delta + epsilon;
               console.debug('Calculated expires_at:', params.expires_at);
@@ -466,7 +476,7 @@ class Provisioner {
   //       to find a way to detect when the machine is *really*
   //       ready.
   private waitDigitalOceanActions_ = () : Promise<void> => {
-    return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id + '/actions').then((resp: any) => {
+    return this.doRequest_('GET', 'droplets/' + this.cloud_.vm.id + '/actions').then((resp: any) => {
       for (var i = 0; i < resp.actions.length; i++) {
         if (resp.actions[i].status === 'in-progress') {
           console.debug('waiting for operations to complete...');
@@ -485,7 +495,7 @@ class Provisioner {
   
   /**
    * Properly configure Digital Ocean with a single droplet of name:name
-   * Assumes we already have oAuth token and  SSH key in this.state_
+   * Assumes we already have an OAuth token and SSH keys.
    * This method will use this.waitDigitalOceanActions_() to wait until all actions complete
    * before resolving
    * @param {String} name of droplet
@@ -495,11 +505,11 @@ class Provisioner {
   private setupDigitalOcean_ = (name: string, region: string, image: string, size: string):  Promise<void> => {
     console.info('creating', image, 'droplet in', region);
     return new Promise<void>((F, R) => {
-      this.state_.cloud = {};
+      this.cloud_ = {};
       // Get SSH keys in account
       this.doRequest_('GET', 'account/keys').then((resp: any) => {
         for (var i = 0; i < resp.ssh_keys.length; i++) {
-          if (resp.ssh_keys[i].public_key === this.state_.ssh.public) {
+          if (resp.ssh_keys[i].public_key === this.sshKeyPair_.public) {
             return Promise.resolve({
               message: 'SSH Key is already in use on your account',
               ssh_key: resp.ssh_keys[i]
@@ -508,11 +518,11 @@ class Provisioner {
         }
         return this.doRequest_('POST', 'account/keys', JSON.stringify({
           name: name,
-          public_key: this.state_.ssh.public
+          public_key: this.sshKeyPair_.public
         }));
         // If missing, put SSH key into account
       }).then((resp: any) => {
-        this.state_.cloud.ssh = resp.ssh_key;
+        this.cloud_.ssh = resp.ssh_key;
         return this.doRequest_('GET', 'droplets');
         // Get list of droplets
       }).then((resp: any) => {
@@ -529,11 +539,11 @@ class Provisioner {
           region: region,
           size: size,
           image: image,
-          ssh_keys: [ this.state_.cloud.ssh.id ]
+          ssh_keys: [ this.cloud_.ssh.id ]
         }));
         // If missing, create the droplet
       }).then((resp: any) => {
-        this.state_.cloud.vm = resp.droplet;
+        this.cloud_.vm = resp.droplet;
         if (resp.droplet.status == 'off') {
           // Need to power on VM
           return this.doRequest_(
