@@ -127,6 +127,9 @@
       line-height: 20px;
       color: #333;
     }
+    #contactDiv {
+
+    }
     </style>
 
     <uproxy-state id="state"></uproxy-state>
@@ -135,7 +138,8 @@
         class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
         top horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
-      <div flex>
+      <!-- ElleTest on-mouseover -->
+      <div id='contactDiv' on-mouseover='{{ setCursor }}' flex>
         <div horizontal layout class='nameLine' on-tap='{{ toggle }}'>
           <div flex class='name'><bdi>{{ contact.name }}</bdi></div>
           <core-icon icon="open-in-new"
