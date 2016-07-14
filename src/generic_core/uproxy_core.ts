@@ -313,7 +313,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
       let moveToFront = (array :string[], element :string) :void => {
         let i = array.indexOf(element);
-        if (i < 1) return;
+        if (i < 1) {
+          return;
+        }
         array.splice(0, 0, array.splice(i, 1)[0] );
       };
 

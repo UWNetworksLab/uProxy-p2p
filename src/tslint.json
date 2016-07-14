@@ -3,6 +3,12 @@
     "quotemark": [
       true,
       "single"
-    ]
+    ],
+    "curly": true,
+    "indent": [
+      true,
+      "spaces"
+    ],
+    "no-trailing-whitespace": true
   }
 }

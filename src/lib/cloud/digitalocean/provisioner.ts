@@ -294,7 +294,7 @@ class Provisioner {
       });
     });
   }
-  
+
   /**
    * Make a request to Digital Ocean
    * @param {String} method - GET/POST/DELETE etc
@@ -336,7 +336,7 @@ class Provisioner {
       }
     });
   }
-  
+
   /** 
    * Waits for all in-progress Digital Ocean actions to complete
    * e.g. after powering on a machine, or creating a VM
@@ -362,7 +362,7 @@ class Provisioner {
       throw e;
     });
   }
-  
+
   /**
    * Properly configure Digital Ocean with a single droplet of name:name
    * Assumes we already have oAuth token and  SSH key in this.state_
@@ -384,7 +384,7 @@ class Provisioner {
               message: 'SSH Key is already in use on your account',
               ssh_key: resp.ssh_keys[i]
             });
-          } 
+          }
         }
         return this.doRequest_('POST', 'account/keys', JSON.stringify({
           name: name,
@@ -417,7 +417,7 @@ class Provisioner {
         if (resp.droplet.status == 'off') {
           // Need to power on VM
           return this.doRequest_(
-            'POST', 
+            'POST',
             'droplets/' + resp.droplet.id + '/actions',
             JSON.stringify({ 'type': 'power_on' })
           );

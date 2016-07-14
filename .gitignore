@@ -25,6 +25,7 @@ build
 editor_support/*/*.sublime-workspace
 node_modules
 npm-debug.log
+out
 test_output
 tmp
 keys
