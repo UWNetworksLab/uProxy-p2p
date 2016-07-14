@@ -36,7 +36,7 @@ describe('pool', function() {
       }),
       peerOpenedChannelQueue: new handler.Queue<peerconnection.DataChannel, void>()
     };
-      
+
     pool = new Pool(mockPeerConnection, 'test');
   });
 
