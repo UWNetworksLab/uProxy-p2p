@@ -63,7 +63,7 @@ export class Model {
     allowNonUnicast: false,
     statsReportingEnabled: false,
     consoleFilter: 0,
-    language: 'en',
+    language: null,  // sentinel indicating lang should be calculated from browser settings
     force_message_version: 0,
     quiverUserName: '',
     showCloud: false,

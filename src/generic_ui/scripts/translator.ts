@@ -59,3 +59,5 @@ export const i18n_t = (placeholder :string, params ?:any): string => {
 };
 
 export const i18n_setLng = i18next.setLng;
+
+export const i18n_languagesAvailable :string[] = Object.keys(window.i18nResources);

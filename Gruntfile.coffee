@@ -236,7 +236,7 @@ gruntConfig = {
 
   # Create commands to run in different directories
   ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
-  ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git'
+  ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git cordova-plugin-device https://github.com/albertolalama/cordova-plugin-tun2socks.git#alalama-tun2socks'
 
   # Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released
   ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git'
@@ -1129,8 +1129,7 @@ taskManager.add('build_chrome_ext', [
   'copy:chrome_extension_additional'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
-].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)
-.concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true))
+].concat fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true))
 
 taskManager.add 'build_chrome', [
   'build_chrome_app'
@@ -1143,8 +1142,7 @@ taskManager.add('build_firefox', [
   'copy:firefox'
   'copy:firefox_additional'
   'browserify:firefoxContext'
-].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)
-.concat fullyVulcanize('firefox/data/generic_ui/polymer', 'logs', 'vulcanized-view-logs', true))
+].concat fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true))
 
 # CCA build tasks.
 taskManager.add 'build_cca', [
@@ -1278,11 +1276,16 @@ taskManager.add 'build', [
   'jpm:xpi'
 ]
 
+taskManager.add 'lint', [
+  'copy:dev'
+  'tslint'
+]
+
 # This is run prior to releasing uProxy and, in addition to
 # building, tests and lints all code.
 taskManager.add 'dist', [
   'build'
-  'tslint'
+  'lint'
   'test'
 ]
 

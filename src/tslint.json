@@ -3,6 +3,7 @@
     "quotemark": [
       true,
       "single"
-    ]
+    ],
+    "curly": true
   }
 }

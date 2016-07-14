@@ -38,20 +38,14 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.MessageSender, sendResponse :Function) => {
-  if (!request) return;
+  if (!request) {
+    return;
+  }
 
   // handle requests from other pages (i.e. copypaste.html) to bring the
   // chrome popup to the front
   if (request.openWindow) {
     browserApi.bringUproxyToFront();
-  }
-
-  // handle requests to get logs
-  if (request.getLogs) {
-    core.getLogs().then((logs) => {
-      sendResponse({ logs: logs });
-    });
-    return true;
   }
 
   if (request.globalSettingsRequest) {

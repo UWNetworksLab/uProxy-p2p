@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
+import _ = require('lodash');
 import social = require('../../interfaces/social');
 import translator = require('../scripts/translator');
 import ui_types = require('../../interfaces/ui');
@@ -148,7 +149,7 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
-    this.updateDirectionality();
+    this.setDirectionality();
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&
@@ -163,11 +164,6 @@ Polymer({
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core
       this.$.state.background.updateGlobalSettings(model.globalSettings);
-    }
-  },
-  signalToFireChanged: function() {
-    if (ui.signalToFire) {
-      this.fire('core-signal', { name: ui.signalToFire.name, data: ui.signalToFire.data });
     }
   },
   revertProxySettings: function() {
@@ -219,15 +215,15 @@ Polymer({
       this.isSharingEnabledWithOthers = trustedContacts.length > 0;
     }
   },
-  updateDirectionality: function() {
-    // Update the directionality of the UI.
-    for (var i = 0; i < RTL_LANGUAGES.length; i++) {
-      if (RTL_LANGUAGES[i] == model.globalSettings.language.substring(0,2)) {
-        this.dir = 'rtl';
-        return;
-      }
+  /*
+   * Set our `dir` value to 'ltr' or 'rtl' based on current language.
+   */
+  setDirectionality: function() {
+    if (_.includes(RTL_LANGUAGES, model.globalSettings.language)) {
+      this.dir = 'rtl';
+    } else {
+      this.dir = 'ltr';
     }
-    this.dir = 'ltr';
   },
   languageChanged: function(oldLanguage :string, newLanguage :string) {
     if (oldLanguage && oldLanguage !== newLanguage) {
@@ -250,7 +246,6 @@ Polymer({
     // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
-    'ui.signalToFire': 'signalToFireChanged',
     'model.globalSettings.language': 'languageChanged'
   },
   computed: {
