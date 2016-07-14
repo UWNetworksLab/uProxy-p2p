@@ -52,6 +52,25 @@ Polymer({
       browserInfo: navigator.userAgent,
       feedbackType: this.feedbackType
     }).then(() => {
+      // root.ts listens for open-dialog signals and shows a popup
+      // when it receives these events.
+      if (this.$.errorInput.selected == 4) {
+        var feedbackTypeDialog = translator.i18n_t('FEEDBACK_SUBMITTED_4');
+      }
+      else if (this.$.errorInput.selected == 5) {
+        var feedbackTypeDialog = translator.i18n_t('FEEDBACK_SUBMITTED_5');
+      }
+      else {
+        var feedbackTypeDialog = translator.i18n_t('FEEDBACK_SUBMITTED');
+      }
+      this.$.state.openDialog(dialogs.getMessageDialogDescription(
+          translator.i18n_t('THANK_YOU'),
+          feedbackTypeDialog,
+          translator.i18n_t('DONE'))).then(() => {
+        this.fire('core-signal', { name: 'close-settings' });
+      }, () => {/*MT*/});
+      this.close();
+      this.$.sendingFeedbackDialog.close();
       // Reset the placeholders, which seem to be cleared after the
       // user types input in the input fields.
       this.$.emailInput.placeholder = ui.i18n_t('EMAIL_PLACEHOLDER');
@@ -61,21 +80,14 @@ Polymer({
       this.$.feedbackDecorator.isInvalid = false;
       this.$.dropdownContainer.textContent = ui.i18n_t('CUSTOM_ERROR_PLACEHOLDER');
       this.$.collapse.opened = false;
+
+
+
       // Clear the form.
       this.email = '';
       this.feedback = '';
       this.feedbackType = null;
       this.$.logCheckbox.checked = false;
-      // root.ts listens for open-dialog signals and shows a popup
-      // when it receives these events.
-      this.$.state.openDialog(dialogs.getMessageDialogDescription(
-          translator.i18n_t('THANK_YOU'),
-          translator.i18n_t('FEEDBACK_SUBMITTED'),
-          translator.i18n_t('DONE'))).then(() => {
-        this.fire('core-signal', { name: 'close-settings' });
-      }, () => {/*MT*/});
-      this.close();
-      this.$.sendingFeedbackDialog.close();
     }).catch((e :Error) => {
       this.$.state.openDialog(dialogs.getMessageDialogDescription(
           translator.i18n_t('EMAIL_INSTEAD_TITLE'),

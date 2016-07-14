@@ -183,6 +183,14 @@
     "description": "User feedback was successfully submitted.",
     "message": "Your feedback has been submitted to the uProxy development team."
   },
+  "FEEDBACK_SUBMITTED_4": {
+    "description": "User feedback was successfully submitted.",
+    "message": "Login will fail if user's are trying a social network that's banned in their region. Click <uproxy-faq-link anchor='willUproxyWork'>here</uproxy-faq-link> for additional help."
+  },
+  "FEEDBACK_SUBMITTED_5": {
+    "description": "User feedback was successfully submitted.",
+    "message": "Consider using uProxy cloud servers. Additional information can be found Click <uproxy-faq-link anchor='whatAreCloudServers'>here</uproxy-faq-link> ."
+  },
   "EMAIL_INSTEAD_TITLE": {
     "description": "Title for error that appears if feedback submission failed.",
     "message": "Email feedback instead?"
@@ -1338,5 +1346,13 @@
   "OTHER_FEEDBACK": {
     "description": "One of the feedback options in the dropdown menu", 
     "message": "Other (please specify below)"
+  },
+  "ELLE_TEST_LINK": {
+    "description": "Elle's test link button thing",
+    "message": "Elle!!!"
+  },
+  "ELLE_MORE_TESTS": {
+    "description": "bleh bleh bleh",
+    "message": "bleh bleh bleh bleh bleh bleh bleh"
   }
 }
