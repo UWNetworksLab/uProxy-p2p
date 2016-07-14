@@ -125,7 +125,6 @@ export interface NetworkOptions {
   supportsReconnect :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
   metricsName ?:string;  // Name to use for metrics
-  isExperimental ?:boolean;
   isEncrypted ?:boolean;
   rosterFunction ?:(rosterNames:string[])=>number;
 }

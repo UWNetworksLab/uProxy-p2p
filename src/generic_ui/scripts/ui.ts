@@ -1164,10 +1164,6 @@ export class UserInterface implements ui_constants.UiApi {
     return this.getProperty_<boolean>(networkName, 'supportsReconnect') || false;
   }
 
-  public isExperimentalNetwork = (networkName :string) : boolean => {
-    return this.getProperty_<boolean>(networkName, 'isExperimental') || false;
-  }
-
   private getProperty_ = <T>(networkName :string, propertyName :string) : T => {
     if (NETWORK_OPTIONS[networkName]) {
       return (<any>(NETWORK_OPTIONS[networkName]))[propertyName];
