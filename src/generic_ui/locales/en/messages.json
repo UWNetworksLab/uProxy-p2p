@@ -193,7 +193,7 @@
   },
   "FEEDBACK_SUBMITTED_4": {
     "description": "User feedback was successfully submitted.",
-    "message": "Login will fail if users are trying a social network that's banned in their region. Click <uproxy-faq-link anchor='willUproxyWork'>here</uproxy-faq-link> for additional help."
+    "message": "Login will fail if you try a social network that is banned. Click <uproxy-faq-link anchor='willUproxyWork'>here</uproxy-faq-link> for additional help."
   },
   "FEEDBACK_SUBMITTED_5": {
     "description": "User feedback was successfully submitted.",
