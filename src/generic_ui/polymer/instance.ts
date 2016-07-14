@@ -26,7 +26,6 @@ Polymer({
     this.ui = ui;
     this.ui_constants = ui_constants;
     this.GettingState = social.GettingState;
-    this.model = model;
     this.sas = null;
     // Whether this is the side that started verification.  The sides
     // of the verification show different UIs.
