@@ -20,11 +20,6 @@ Polymer({
     // Must adhere to the typescript interface UI.User.
     name: 'unknown'
   },
-  setCursor: function() {
-    if (this.contact.network.name == 'GitHub') {
-      this.element.style.cursor = 'default';
-    }
-  },
   toggle: function() {
     if (this.contact.status == this.UserStatus.REMOTE_INVITED_BY_LOCAL) {
       return;
