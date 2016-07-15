@@ -300,6 +300,7 @@ import ProxyConfig = require('./proxyconfig');
   // common parts into a super-class this inherits from?
   export class Session {
     private tcpConnection_ :tcp.Connection;
+    private webEndpoint_   :net.Endpoint;
 
     // Fulfills once a connection has been established with the remote peer.
     // Rejects if a connection cannot be made for any reason.
@@ -343,34 +344,50 @@ import ProxyConfig = require('./proxyconfig');
           // TODO: Add a unit test for this case.
           this.replyToPeer_(socks.Reply.UNSUPPORTED_COMMAND);
           return Promise.reject(e);
-        }).then((webEndpoint :net.Endpoint)
-              :Promise<[socks.Reply, net.Endpoint]> => {
+        }).then((webEndpoint :net.Endpoint) :Promise<tcp.Connection> => {
+          this.webEndpoint_ = webEndpoint;
           // Returns socks reply and bound endpoint of connection
           if (!this.isWebEndpointValid_(webEndpoint)) {
             this.replyToPeer_(socks.Reply.NOT_ALLOWED);
-            return Promise.reject(new Error('tried to connect to disallowed address: ' +
-                            webEndpoint.address));
+            return Promise.reject(new Error(
+                'tried to connect to disallowed address: ' +
+                webEndpoint.address));
           }
-          log.debug('%1: Creating tcp connection with socks proxy settings: %2',
+          log.debug('%1: Creating tcp connection with reproxy settings: %2',
                     [this.longId(), this.proxyConfig_.reproxy]);
 
           // Connect to web endpoint directly or through socks proxy
           if (typeof this.proxyConfig_.reproxy !== 'undefined' &&
               this.proxyConfig_.reproxy.enabled) {
-            return this.connectToEndpointThroughSocks_(webEndpoint);
+            return Promise.resolve(this.getTcpConnection_(
+                this.proxyConfig_.reproxy.socksEndpoint, false));
           } else {
-            return this.connectToEndpointDirectly_(webEndpoint);
+            return Promise.resolve(this.getTcpConnection_(
+                webEndpoint, true)); // start paused
           }
-        }).catch((e :freedom.Error) => {
-          // Error while connecting to remote endpoint - send reply to peer
-          // Error can be freedom error or regular error
-          log.info('%1: failed to connect to remote endpoint', [this.longId()]);
-          if (e.errcode !== undefined) { // Error is freedom error
-            this.replyToPeer_(this.getReplyFromError_(e));
-            return Promise.reject(new Error(e.errcode));
+        }).then((connection :tcp.Connection) :Promise<tcp.ConnectionInfo> => {
+          this.tcpConnection_ = connection;
+          return this.tcpConnection_.onceConnected
+            .catch((e :freedom.Error) => {
+              log.info('%1: failed to connect to remote endpoint',
+                       [this.longId()]);
+              this.replyToPeer_(this.getReplyFromError_(e));
+              return Promise.reject(new Error(e.errcode));
+            });
+        }).then((info :tcp.ConnectionInfo)
+            :Promise<[socks.Reply, net.Endpoint]> => {
+          // Receive reply from web endpoint directly or through socks proxy
+          if (typeof this.proxyConfig_.reproxy !== 'undefined' &&
+              this.proxyConfig_.reproxy.enabled) {
+            return this.connectWithSocksAuth_(this.webEndpoint_)
+              .catch((e :Error) => {
+                log.debug('%1: Failed to complete reproxy socks auth',
+                          [this.longId()]);
+                this.replyToPeer_(socks.Reply.FAILURE);
+                return Promise.reject(e);
+              });
           } else {
-            this.replyToPeer_(socks.Reply.FAILURE);
-            return Promise.reject(e);
+            return Promise.resolve([this.getReplyFromInfo_(info), info.bound]);
           }
         }).then((reply :[socks.Reply, net.Endpoint]) :Promise<void> => {
           log.info('%1: connected to remote web endpoint', [this.longId()]);
@@ -462,35 +479,16 @@ import ProxyConfig = require('./proxyconfig');
       });
     }
 
-    private connectToEndpointDirectly_ = (endpoint: net.Endpoint)
-          :Promise<[socks.Reply, net.Endpoint]> => {
-      return this.getTcpConnection_(endpoint, true) // start paused
-        .then(this.waitForTcpConnection_)
-        .then((info :tcp.ConnectionInfo) :[socks.Reply, net.Endpoint] => {
-          return [this.getReplyFromInfo_(info), info.bound];
-        });
-    }
-
-    private connectToEndpointThroughSocks_ = (endpoint: net.Endpoint)
-          :Promise<[socks.Reply, net.Endpoint]> => {
-      return this.getTcpConnection_(this.proxyConfig_.reproxy.socksEndpoint, false)
-        .then(this.waitForTcpConnection_)
-        .then((info :tcp.ConnectionInfo) :Promise<[socks.Reply, net.Endpoint]> => {
-          return this.connectWithSocksAuth_(endpoint);
-        });
-    }
-
     // Initiates tcp connection to endpoint
     private getTcpConnection_ = (endpoint:net.Endpoint, paused:boolean)
-          :Promise<tcp.Connection> => {
+          :tcp.Connection => {
       // Return TCP connection to endpoint
-      return Promise.resolve(new tcp.Connection({endpoint: endpoint}, paused));
+      return new tcp.Connection({endpoint: endpoint}, paused);
     }
 
     // Waits for tcp connection to complete
     private waitForTcpConnection_ = (connection :tcp.Connection)
           :Promise<tcp.ConnectionInfo> => {
-      this.tcpConnection_ = connection;
       log.debug('%1: Connection instantiated: %2',
                [this.longId(), this.tcpConnection_]);
 
