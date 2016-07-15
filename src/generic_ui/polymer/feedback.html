@@ -62,7 +62,7 @@
       margin: 0.5em 0em;
     }
     #logCheckboxLabel {
-      cursor: pointer;
+      color: grey;
       text-indent: 10px;
       display: inline-block;
     }
@@ -167,6 +167,11 @@
       height: 15px;
       width: 15px;
     }
+    #logsLink {
+      cursor: pointer;
+      padding-top: 10px;
+      padding-bottom: 16px;
+    }
     #sendingFeedback {
       text-align: center;
       font-size: 16px;
@@ -235,13 +240,17 @@
 
           <div id="logCheckboxContainer">
             <paper-checkbox for id="logCheckbox"></paper-checkbox>
-            <span id="logCheckboxLabel" on-tap="{{ viewLogs }}">
-              {{ "NETWORK_AND_LOGS" | $$ }}
-            </span>
+            <span id="logCheckboxLabel"> {{ "NETWORK_AND_LOGS" | $$ }} </span>
             <uproxy-faq-link anchor="doesUproxyLogData">
               <core-icon icon="help" id="helpIcon"></core-icon>
             </uproxy-faq-link>
           </div>
+          <div id="logsLink">
+            <span id="logsLink" on-tap="{{ viewLogs }}">
+              {{ "SHOW_LOGS" | $$ }}
+            </span>
+          </div>
+
           <p id="moreInfo">
             {{ "P_I_I_MESSAGE" | $$ }}
           </p>
