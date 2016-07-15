@@ -40,12 +40,15 @@ interface KeyPair {
 
 class Provisioner {
   constructor(
-    private sshKeyPair_ :any = {},
-    private network_ :any = {},
-    private storage_ = freedom['core.storage'](),
+    // This argument is passed implicitly to all freedomjs module constructors:
+    private dispatch_ :Function,
+
+    private sshKeyPair_ :any,
+    private network_ :any,
+    private storage_ :freedom.Storage.Storage,
 
     // TODO: give this concept a better name, or use a different abstraction?
-    private cloud_ :any = null,
+    private cloud_ :any,
 
     // doOAuth_() may be called multiple times concurrently before an OAuth
     // flow has been completed. In order to ensure that each call doesn't
@@ -54,8 +57,9 @@ class Provisioner {
     // returned for subsequent calls. The cached promise is invalidated if
     // getOAuthFromStorage_() is called and it rejects (e.g. due to the saved
     // OAuth token having expired).
-    private promiseOAuth_ :Promise<Object> = null
-  ) {}
+    private promiseOAuth_ :Promise<Object>) {
+      this.storage_ = freedom['core.storage']();
+    }
 
   /*
    * Returns whether a DO OAuth token is saved in storage.
@@ -84,7 +88,7 @@ class Provisioner {
         });
       }
       console.debug('Looking for oauthJson in storage...');
-      this.storage_.get(STORAGE_KEY_OAUTH).then((oauthJson) => {
+      this.storage_.get(STORAGE_KEY_OAUTH).then((oauthJson :string) => {
         if (!oauthJson) {
           return reject('OAUTH_ERR', 'Missing oauthJson', oauthJson);
         }
