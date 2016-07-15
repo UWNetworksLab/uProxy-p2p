@@ -40,7 +40,6 @@ export interface GlobalSettings {
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
-  splashState : number;
   consoleFilter    :loggingTypes.Level;
   language         :string;
   force_message_version :number;
