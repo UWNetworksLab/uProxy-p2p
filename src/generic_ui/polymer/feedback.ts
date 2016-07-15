@@ -82,9 +82,6 @@ Polymer({
       this.$.feedbackDecorator.isInvalid = false;
       this.$.dropdownContainer.textContent = ui.i18n_t('CUSTOM_ERROR_PLACEHOLDER');
       this.$.collapse.opened = false;
-
-
-
       // Clear the form.
       this.email = '';
       this.feedback = '';
