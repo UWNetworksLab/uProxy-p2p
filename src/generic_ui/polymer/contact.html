@@ -142,24 +142,24 @@
         <div horizontal layout class='nameLine' on-tap='{{ toggle }}'>
           <div flex class='name'><bdi>{{ contact.name }}</bdi></div>
           <core-icon icon="open-in-new"
-              hidden?="{{ !contact.url || (mode==ui_constants.Mode.GET && !contact.getExpanded) || (mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}"
+              hidden?="{{ !contact.url || (isGetter && !contact.getExpanded) || (isSharer && !contact.shareExpanded) }}"
               title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
 
           <core-icon icon="delete" hidden?='{{ contact.network.name !== "Cloud" }}' title="{{ contact.url }}" on-tap="{{ removeCloudFriend }}"></core-icon>
 
           <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->
           <img src='../icons/getting_animated.gif' class='accessIcon'
-              hidden?='{{ mode!=ui_constants.Mode.GET || !contact.isSharingWithMe }}'>
+              hidden?='{{ isSharer || !contact.isSharingWithMe }}'>
           <img src='../icons/sharing_animated.gif' class='accessIcon'
-              hidden?='{{ mode!=ui_constants.Mode.SHARE || !contact.isGettingFromMe }}'>
+              hidden?='{{ isGetter || !contact.isGettingFromMe }}'>
           <!-- If you are sharing with or getting from a contact, the glowing sharing/getting icon will replace the expand/collapse chevron. -->
           <!-- Show expand chevron in only two cases: when contact is collapsed in GET mode and you're not getting from them OR when contact is collapsed in SHARE mode and you're not sharing with them. -->
           <core-icon icon="expand-more" class="expand"
-            hidden?='{{ (!(mode==ui_constants.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(mode==ui_constants.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe)) || contact.status == UserStatus.REMOTE_INVITED_BY_LOCAL }}'>
+            hidden?='{{ (!(isGetter && !contact.getExpanded && !contact.isSharingWithMe) && !(isSharer && !contact.shareExpanded && !contact.isGettingFromMe)) || contact.status == UserStatus.REMOTE_INVITED_BY_LOCAL }}'>
           </core-icon>
           <!-- Show collapse chevron in only two cases: when contact is expanded in GET mode and you're not getting from them OR when contact is expanded in SHARE mode and you're not sharing with them. -->
           <core-icon icon="expand-less" class="expand"
-            hidden?='{{ !(mode==ui_constants.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(mode==ui_constants.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
+            hidden?='{{ !(isGetter && contact.getExpanded && !contact.isSharingWithMe) && !(isSharer && contact.shareExpanded && !contact.isGettingFromMe) }}'>
           </core-icon>
         </div>
 
@@ -172,7 +172,7 @@
 
         <!-- beginning of getControls -->
         <core-collapse id='getControls' class='expandedControls'
-          hidden?='{{mode!=ui_constants.Mode.GET}}'
+          hidden?='{{isSharer}}'
           opened='{{ contact.getExpanded }}'>
 
           <div class='friendControls' hidden?='{{contact.status==UserStatus.LOCAL_INVITED_BY_REMOTE || contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL}}'>
@@ -233,7 +233,7 @@
 
         <!-- beginning of shareControls -->
         <core-collapse id='shareControls' class='expandedControls'
-          hidden?='{{mode!=ui_constants.Mode.SHARE}}'
+          hidden?='{{isGetter}}'
           opened='{{ contact.shareExpanded }}'>
 
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.FRIEND}}'>

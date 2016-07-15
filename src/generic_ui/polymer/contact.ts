@@ -33,9 +33,9 @@ Polymer({
       setTimeout(() => { this.hideOnlineStatus = false; }, 400);
     }
 
-    if (this.mode == ui_constants.Mode.SHARE) {
+    if (this.isSharer) {
       this.contact.shareExpanded = !this.contact.shareExpanded;
-    } else if (this.mode == ui_constants.Mode.GET) {
+    } else if (this.isGetter) {
       this.contact.getExpanded = !this.contact.getExpanded;
     }
   },
@@ -216,6 +216,8 @@ Polymer({
     'contact.offeringInstances': 'offeringInstancesChanged',
   },
   computed: {
-    'isExpanded': '(mode === ui_constants.Mode.GET && contact.getExpanded) || (mode === ui_constants.Mode.SHARE && contact.shareExpanded)'
+    'isGetter': 'mode === ui_constants.Mode.GET',
+    'isSharer': 'mode === ui_constants.Mode.SHARE',
+    'isExpanded': '(isGetter && contact.getExpanded) || (isSharer && contact.shareExpanded)',
   }
 });
