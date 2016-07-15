@@ -61,12 +61,10 @@ class Provisioner {
    * Returns whether a DO OAuth token is saved in storage.
    */
   public hasOAuth = () : Promise<boolean> => {
-    return new Promise((F, R) => {
-      this.getOAuthFromStorage_().then(
-        (result) => { F(!!result); },
-        () => { F(false); }
-      );
-    });
+    return this.getOAuthFromStorage_().then(
+      (result) => { return !!result; },
+      () => { return false; }
+    );
   }
 
   /*
