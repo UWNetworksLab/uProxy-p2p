@@ -51,7 +51,9 @@ class Provisioner {
     // flow has been completed. In order to ensure that each call doesn't
     // trigger an additional OAuth flow in a new tab, the promise returned by
     // the first call is cached in this field, and this cached promise is
-    // returned for subsequent calls.
+    // returned for subsequent calls. The cached promise is invalidated if
+    // getOAuthFromStorage_() is called and it rejects (e.g. due to the saved
+    // OAuth token having expired).
     private promiseOAuth_ :Promise<Object> = null
   ) {}
 
@@ -79,7 +81,7 @@ class Provisioner {
         let err = {errcode: errcode, message: message, data: data, exc: exc};
         console.debug(message, data);
         this.storage_.remove(STORAGE_KEY_OAUTH).then(() => {
-          this.promiseOAuth_ = null;
+          this.promiseOAuth_ = null;  // Invalidate any cached promise
           R(err);
         });
       }

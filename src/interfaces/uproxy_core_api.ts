@@ -274,6 +274,11 @@ export interface CloudOperationArgs {
   region ?:string;
 };
 
+// Result of cloudUpdate
+export interface CloudOperationResult {
+  hasOAuth? :boolean;
+};
+
 // Argument to removeContact
 export interface RemoveContactArgs {
   // Name of the network the contact is a part of
@@ -334,7 +339,9 @@ export interface CoreApi {
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudUpdate(args :CloudOperationArgs): Promise<any>;
+  // Update: This is also now used for CloudOperationType.CLOUD_HAS_OAUTH,
+  // which is neither long-running nor potentially triggers an OAuth flow.
+  cloudUpdate(args :CloudOperationArgs): Promise<CloudOperationResult>;
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;
