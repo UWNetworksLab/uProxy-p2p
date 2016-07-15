@@ -277,6 +277,9 @@
         /* Necessary to position our smaller icon correctly */
         margin: 4px auto 0;
       }
+      #askForFeedback {
+        text-align: center;
+      }
       core-icon[icon=clear] {
         position: absolute;
         top: 15px;
@@ -461,6 +464,17 @@
         </p>
       </div>
       <uproxy-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ "CONTINUE_BROWSING" | $$ }}</uproxy-button>
+    </uproxy-action-dialog>
+
+    <uproxy-action-dialog id="askForFeedback" backdrop layered="false" opened="false">
+      <div id="askForFeedbackTitle">
+        <h1>{{ "ASK_FOR_FEEDBACK_TITLE" | $$ }}</h1>
+      </div>
+      <div id="askForFeedbackBody">
+        <p>{{ "ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED" | $$ }}</p>
+        <uproxy-button class="dialogButton" on-tap="{{ openFeedbackPanel }}"> Yes </uproxy-button>
+        <uproxy-button class="dialogButton" on-tap="{{ closeAskForFeedback }}"> No </uproxy-button>
+      </div>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
