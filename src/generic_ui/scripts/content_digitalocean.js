@@ -155,7 +155,7 @@
 
       var textContainer = document.createElement('div');
       textContainer.style.margin = '26px auto';
-      textContainer.style.maxWidth = '600px';
+      textContainer.style.maxWidth = '700px';
       textContainer.style.minWidth = '360px';
       textContainer.style.padding = '0 30px';
       overlay.appendChild(textContainer);
