@@ -139,7 +139,7 @@ export class Candidate {
       if (tokens[10] !== 'rport') {
         throw new Error('Missing rport: ' + rtcIceCandidate);
       }
-      
+
       c.relatedPort = stringToNumber(tokens[11]);
       i = 12;
     }
