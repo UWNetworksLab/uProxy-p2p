@@ -61,23 +61,6 @@ export interface CopyRule {
 export class Rule {
   constructor(public config :RuleConfig) {}
 
-  // Note: argument is modified (and returned for conveniece);
-  public addCoverageToSpec(spec:JasmineRule) :JasmineRule {
-    var basePath = path.dirname(spec.options.outfile);
-
-    spec.options.template = require('grunt-template-jasmine-istanbul');
-    spec.options.templateOptions = {
-      files: ['**/*', '!node_modules/**'],
-      // Output location for coverage results
-      coverage: path.join(basePath, 'coverage/results.json'),
-      report: [
-        { type: 'html', options: { dir: path.join(basePath, 'coverage') } },
-        { type: 'lcov', options: { dir: path.join(basePath, 'coverage') } }
-      ]
-    };
-    return spec;
-  }
-
   // Grunt Jasmine target creator
   // Assumes that the each spec file is a fully browserified js file.
   public jasmineSpec(name:string, morefiles?:string[]) :JasmineRule {
@@ -139,16 +122,6 @@ export class Rule {
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
       options: options
     };
-  }
-
-  // Note: argument is modified (and returned for conveniece);
-  public addCoverageToBrowserify(rule:BrowserifyRule) :BrowserifyRule {
-    if(!rule.options.transform) {
-      rule.options.transform = [];
-    }
-    rule.options.transform.push(
-      ['browserify-istanbul', { ignore: ['**/mocks/**', '**/*.spec.js'] }]);
-    return rule
   }
 
   // Grunt browserify target creator, instrumented for istanbul
@@ -250,16 +223,10 @@ export class Rule {
     return { files: allFilesForlibPaths.concat(copyInfo.files) };
   }
 
-  public buildAndRunTest(test :string, grunt :any, coverage?:boolean) :string[] {
+  public buildAndRunTest(test :string, grunt :any) :string[] {
     var name = test + 'Spec';
     var browserifyRule = this.browserifySpec(test);
     var jasmineRule = this.jasmineSingleSpec(test);
-
-    if (coverage) {
-      name += 'Cov';
-      browserifyRule = this.addCoverageToBrowserify(browserifyRule);
-      jasmineRule = this.addCoverageToSpec(jasmineRule);
-    }
 
     grunt.config.set('browserify.' + name, browserifyRule);
     grunt.config.set('jasmine.' + name, jasmineRule);
