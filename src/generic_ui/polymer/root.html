@@ -467,13 +467,13 @@
     </uproxy-action-dialog>
 
     <uproxy-action-dialog id="askForFeedback" backdrop layered="false" opened="false">
-      <div id="askForFeedbackTitle">
+      <div>
         <h1>{{ "ASK_FOR_FEEDBACK_TITLE" | $$ }}</h1>
       </div>
-      <div id="askForFeedbackBody">
+      <div>
         <p>{{ "ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED" | $$ }}</p>
-        <uproxy-button class="dialogButton" on-tap="{{ openFeedbackPanel }}"> Yes </uproxy-button>
-        <uproxy-button class="dialogButton" on-tap="{{ closeAskForFeedback }}"> No </uproxy-button>
+        <uproxy-button class="dialogButton" on-tap="{{ openFeedbackPanel }}"> {{ "YES" | $$ }} </uproxy-button>
+        <uproxy-button class="dialogButton" on-tap="{{ closeAskForFeedback }}"> {{ "NO" | $$ }} </uproxy-button>
       </div>
     </uproxy-action-dialog>
 
