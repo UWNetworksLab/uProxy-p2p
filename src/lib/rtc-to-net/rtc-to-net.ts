@@ -347,7 +347,7 @@ import ProxyConfig = require('./proxyconfig');
         }).then((webEndpoint :net.Endpoint) :Promise<tcp.Connection> => {
           this.webEndpoint_ = webEndpoint;
           // Returns socks reply and bound endpoint of connection
-          if (!this.isWebEndpointValid_(webEndpoint)) {
+          if (!this.isWebEndpointAllowed_(webEndpoint)) {
             this.replyToPeer_(socks.Reply.NOT_ALLOWED);
             return Promise.reject(new Error(
                 'tried to connect to disallowed address: ' +
@@ -357,8 +357,7 @@ import ProxyConfig = require('./proxyconfig');
                     [this.longId(), this.proxyConfig_.reproxy]);
 
           // Connect to web endpoint directly or through socks proxy
-          if (typeof this.proxyConfig_.reproxy !== 'undefined' &&
-              this.proxyConfig_.reproxy.enabled) {
+          if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled) {
             return Promise.resolve(this.getTcpConnection_(
                 this.proxyConfig_.reproxy.socksEndpoint, false));
           } else {
@@ -377,8 +376,7 @@ import ProxyConfig = require('./proxyconfig');
         }).then((info :tcp.ConnectionInfo)
             :Promise<[socks.Reply, net.Endpoint]> => {
           // Receive reply from web endpoint directly or through socks proxy
-          if (typeof this.proxyConfig_.reproxy !== 'undefined' &&
-              this.proxyConfig_.reproxy.enabled) {
+          if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled) {
             return this.connectWithSocksAuth_(this.webEndpoint_)
               .catch((e :Error) => {
                 log.debug('%1: Failed to complete reproxy socks auth',
@@ -512,7 +510,7 @@ import ProxyConfig = require('./proxyconfig');
           var auth = socks.interpretAuthResponse(buffer);
           log.debug('%1: Received auth handshake reply: %2',
                     [this.longId(), auth]);
-          if (auth != socks.Auth.NOAUTH) {
+          if (auth !== socks.Auth.NOAUTH) {
             throw new Error('Received wrong socks auth response. Expected ' +
                             socks.Auth.NOAUTH + ' but got ' + auth);
           }
@@ -543,7 +541,7 @@ import ProxyConfig = require('./proxyconfig');
         : Promise<void> => {
       var response :socks.Response = {
         reply: reply,
-        endpoint: bound ? bound : undefined
+        endpoint: bound || undefined
       };
       log.debug('%1: Sending response to Peer: %2', [this.longId(), response]);
       return this.dataChannel_.send({
@@ -659,7 +657,7 @@ import ProxyConfig = require('./proxyconfig');
     }
 
     // Checks validity of web endpoint of getter request
-    private isWebEndpointValid_ = (endpoint :net.Endpoint) :boolean => {
+    private isWebEndpointAllowed_ = (endpoint :net.Endpoint) :boolean => {
       if (ipaddr.isValid(endpoint.address) &&
           !this.isAllowedAddress_(endpoint.address)) {
         return false;
