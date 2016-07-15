@@ -344,25 +344,23 @@ import ProxyConfig = require('./proxyconfig');
           // TODO: Add a unit test for this case.
           this.replyToPeer_(socks.Reply.UNSUPPORTED_COMMAND);
           return Promise.reject(e);
-        }).then((webEndpoint :net.Endpoint) :Promise<tcp.Connection> => {
+        }).then((webEndpoint :net.Endpoint) :tcp.Connection => {
           this.webEndpoint_ = webEndpoint;
           // Returns socks reply and bound endpoint of connection
           if (!this.isWebEndpointAllowed_(webEndpoint)) {
             this.replyToPeer_(socks.Reply.NOT_ALLOWED);
-            return Promise.reject(new Error(
-                'tried to connect to disallowed address: ' +
-                webEndpoint.address));
+            throw new Error('tried to connect to disallowed address: ' +
+                webEndpoint.address);
           }
           log.debug('%1: Creating tcp connection with reproxy settings: %2',
                     [this.longId(), this.proxyConfig_.reproxy]);
 
           // Connect to web endpoint directly or through socks proxy
           if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled) {
-            return Promise.resolve(this.getTcpConnection_(
-                this.proxyConfig_.reproxy.socksEndpoint, false));
+            return this.getTcpConnection_(
+                this.proxyConfig_.reproxy.socksEndpoint, false);
           } else {
-            return Promise.resolve(this.getTcpConnection_(
-                webEndpoint, true)); // start paused
+            return this.getTcpConnection_(webEndpoint, true); // start paused
           }
         }).then((connection :tcp.Connection) :Promise<tcp.ConnectionInfo> => {
           this.tcpConnection_ = connection;
