@@ -1095,6 +1095,7 @@
     "message": "Create a cloud server"
   },
   "CREATING_A_CLOUD_SERVER": {
+    "description": "Title on screen while cloud installation is in progress",
     "message": "Creating a cloud server"
   },
   "CREATE_A_NEW_ACCOUNT": {
