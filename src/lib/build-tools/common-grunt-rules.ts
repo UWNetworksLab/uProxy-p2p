@@ -250,8 +250,7 @@ export class Rule {
     return { files: allFilesForlibPaths.concat(copyInfo.files) };
   }
 
-  public buildAndRunTest(test :string, gruntConfig :{[c :string] :{[t :string] :Object}},
-                         coverage?:boolean) :string[] {
+  public buildAndRunTest(test :string, grunt :any, coverage?:boolean) :string[] {
     var name = test + 'Spec';
     var browserifyRule = this.browserifySpec(test);
     var jasmineRule = this.jasmineSingleSpec(test);
@@ -262,8 +261,8 @@ export class Rule {
       jasmineRule = this.addCoverageToSpec(jasmineRule);
     }
 
-    gruntConfig['browserify'][name] = browserifyRule;
-    gruntConfig['jasmine'][name] = jasmineRule;
+    grunt.config.set('browserify.' + name, browserifyRule);
+    grunt.config.set('jasmine.' + name, jasmineRule);
 
     return [
       'browserify:' + name,
