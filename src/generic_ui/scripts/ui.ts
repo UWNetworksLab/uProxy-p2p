@@ -1152,7 +1152,8 @@ export class UserInterface implements ui_constants.UiApi {
     return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
-  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
+  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs)
+      :Promise<uproxy_core_api.CloudOperationResult> => {
     return this.core.cloudUpdate(args);
   }
 

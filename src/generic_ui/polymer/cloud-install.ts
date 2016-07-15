@@ -35,8 +35,8 @@ Polymer({
     ui.cloudUpdate({
       operation: uproxy_core_api.CloudOperationType.CLOUD_HAS_OAUTH,
       providerName: DEFAULT_PROVIDER
-    }).then((hasOAuth :boolean) => {
-      if (hasOAuth) {
+    }).then((result :uproxy_core_api.CloudOperationResult) => {
+      if (result.hasOAuth) {
         this.$.createServerOverlay.open();
       } else {
         this.$.signUpOrSignInOverlay.open();
