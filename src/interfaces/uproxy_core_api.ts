@@ -261,7 +261,8 @@ export enum PortControlSupport {PENDING, TRUE, FALSE};
 export enum CloudOperationType {
   CLOUD_INSTALL = 0,
   CLOUD_DESTROY = 1,
-  CLOUD_REBOOT = 2
+  CLOUD_REBOOT = 2,
+  CLOUD_HAS_OAUTH = 3
 }
 
 // Arguments to cloudUpdate
@@ -333,7 +334,7 @@ export interface CoreApi {
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudUpdate(args :CloudOperationArgs): Promise<void>;
+  cloudUpdate(args :CloudOperationArgs): Promise<any>;
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;

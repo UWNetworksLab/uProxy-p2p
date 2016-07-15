@@ -43,7 +43,7 @@
       padding: 0 30px 50px;
       text-align: center;
       position: absolute;
-      top: 0;
+      top: 30px;
       bottom: 0;
       right: 0;
       left: 0;
@@ -57,6 +57,7 @@
       bottom: 122px;
       right: 30px;
       left: 30px;
+      min-height: 218px; /* TODO: keep downArrow and add button anchored to bottom when min-height kicks in. Ideally we'll get this for free with https://github.com/uProxy/uproxy/issues/2547 */
     }
     #empty-roster-instructions h1 {
       color: #003C48;
@@ -68,9 +69,9 @@
     .downArrow {
       color: #fff;
       position: absolute;
-      right: 49px;
-      bottom: 95px;
-      font-size: 30px;
+      right: 54px;
+      bottom: 101px;
+      font-size: 20px;
       text-shadow: 0 7px 10px #ccc;
     }
     paper-progress {

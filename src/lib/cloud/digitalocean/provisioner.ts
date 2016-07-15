@@ -165,7 +165,8 @@ class Provisioner {
       // SSH on a new droplet to become responsive.
       console.debug('waiting for SSH port to become active');
       return new Pinger(this.network_['ipv4'], 22, 60).ping().then(() => {
-        return {ssh: this.sshKeyPair_, cloud: this.cloud_, network: this.network_};
+        // Keep in sync with the return type declaration in freedom-module.json:
+        return {ssh: this.sshKeyPair_, network: this.network_};
       });
     });
   }

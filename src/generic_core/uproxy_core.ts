@@ -691,7 +691,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public cloudUpdate = (args: uproxy_core_api.CloudOperationArgs): Promise<void> => {
+  public cloudUpdate = (args: uproxy_core_api.CloudOperationArgs): Promise<any> => {
     if (args.providerName !== CLOUD_PROVIDER_NAME) {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
@@ -706,9 +706,19 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         return this.destroyCloudServer_();
       case uproxy_core_api.CloudOperationType.CLOUD_REBOOT:
         return this.rebootCloudServer_();
+      case uproxy_core_api.CloudOperationType.CLOUD_HAS_OAUTH:
+        return this.cloudHasOAuth();
       default:
         return Promise.reject(new Error('cloud operation not supported'));
     }
+  }
+
+  public cloudHasOAuth = () :Promise<boolean> => {
+    return new Promise((F, R) => {
+      oneShotModule_(CLOUD_PROVIDER_MODULE_NAME, (provider :any) => {
+        return provider.hasOAuth().then(F, R);
+      });
+    });
   }
 
   private createCloudServer_ = (region: string) => {

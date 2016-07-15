@@ -25,14 +25,27 @@ Polymer({
         ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE')),
         this.$.createAccountMessage);
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
-        this.$.loginMessage);
+        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_CREATE_SERVER_MESSAGE')),
+        this.$.createServerMessage);
 
-    this.$.getStartedOverlay.open();
+    this.showFirstOverlay();
   },
-  showLoginOverlay: function() {
+  showFirstOverlay: function () {
     this.closeOverlays();
-    this.$.loginOverlay.open();
+    ui.cloudUpdate({
+      operation: uproxy_core_api.CloudOperationType.CLOUD_HAS_OAUTH,
+      providerName: DEFAULT_PROVIDER
+    }).then((hasOAuth :boolean) => {
+      if (hasOAuth) {
+        this.$.createServerOverlay.open();
+      } else {
+        this.$.signUpOrSignInOverlay.open();
+      }
+    });
+  },
+  showCreateServerOverlay: function() {
+    this.closeOverlays();
+    this.$.createServerOverlay.open();
   },
   launchDigitalOceanSignup: function() {
     // DigitalOcean referral codes trump promo codes,
@@ -46,23 +59,22 @@ Polymer({
     ui.openTab('https://cloud.digitalocean.com/droplets');
   },
   back: function() {
-    if (this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
-      this.closeOverlays();
-      this.$.getStartedOverlay.open();
+    if (this.$.failureOverlay.opened) {
+      this.showFirstOverlay();
     } else {
       this.closeOverlays();
     }
   },
   closeOverlays: function() {
-    this.$.getStartedOverlay.close();
-    this.$.loginOverlay.close();
+    this.$.signUpOrSignInOverlay.close();
+    this.$.createServerOverlay.close();
     this.$.installingOverlay.close();
     this.$.successOverlay.close();
     this.$.failureOverlay.close();
     this.$.serverExistsOverlay.close();
     this.$.cancelingOverlay.close();
   },
-  loginTapped: function() {
+  createServer: function() {
     const createId = Math.floor((Math.random() * 1000000)) + 1;
     this.mostRecentCreateId = createId;
 
@@ -119,7 +131,7 @@ Polymer({
         return Promise.resolve<void>();
       });
     }).then(() => {
-      return this.loginTapped();
+      return this.createServer();
     });
   },
   cancelCloudInstall: function() {
@@ -168,6 +180,7 @@ Polymer({
   },
   havePromoChanged: function () {
     ui.model.globalSettings.activePromoId = this.$.havePromoCode.checked;
+    ui.core.updateGlobalSettings(ui.model.globalSettings);
   },
   observe: {
     'ui.model.globalSettings.activePromoId': 'promoIdChanged'
