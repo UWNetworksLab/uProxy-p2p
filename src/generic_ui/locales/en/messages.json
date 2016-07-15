@@ -193,13 +193,11 @@
   },
   "FEEDBACK_SUBMITTED_4": {
     "description": "Trouble signing in feedback error.",
-    "message": "Login will fail if you try a social network that is banned. <uproxy-faq-link anchor='willUproxyWork'>Learn more.</uproxy-faq-link>
-    Thanks for your feedback!"
+    "message": "Login will fail if you try a social network that is banned. <uproxy-faq-link anchor='willUproxyWork'>Learn more.</uproxy-faq-link> Thanks for your feedback!"
   },
   "FEEDBACK_SUBMITTED_5": {
     "description": "No friends feedback error.",
-    "message": "Consider using uProxy cloud servers. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>
-    Thanks for your feedback!"
+    "message": "Consider using uProxy cloud servers. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link> Thanks for your feedback!"
   },
   "EMAIL_INSTEAD_TITLE": {
     "description": "Title for error that appears if feedback submission failed.",
