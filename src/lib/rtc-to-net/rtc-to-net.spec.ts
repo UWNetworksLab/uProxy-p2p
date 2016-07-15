@@ -29,7 +29,7 @@ var mockBoundEndpoint :net.Endpoint = {
 var voidPromise = Promise.resolve<void>();
 
 var mockProxyConfig :ProxyConfig = {
-  allowNonUnicast: false
+  allowNonUnicast: true
 };
 
 var mockRemoteEndpoint :net.Endpoint = {
@@ -149,7 +149,6 @@ describe('RtcToNet session', function() {
   it('onceReady fulfills with listening endpoint on successful negotiation', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -161,7 +160,6 @@ describe('RtcToNet session', function() {
   it('onceReady rejects and onceStopped fulfills on unsuccessful endpoint negotiation', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.reject(new Error('bad format')));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -173,7 +171,6 @@ describe('RtcToNet session', function() {
   it('onceStopped fulfills on datachannel termination', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -186,7 +183,6 @@ describe('RtcToNet session', function() {
   it('onceStopped fulfills on TCP connection termination', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -198,7 +194,6 @@ describe('RtcToNet session', function() {
   it('onceStopped fulfills on call to stop', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -210,7 +205,6 @@ describe('RtcToNet session', function() {
   it('bytes sent counter', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -229,7 +223,6 @@ describe('RtcToNet session', function() {
   it('bytes received counter', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -250,7 +243,6 @@ describe('RtcToNet session', function() {
   it('channel queue drains before termination', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -275,7 +267,6 @@ describe('RtcToNet session', function() {
   it('socket queue drains before termination', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     // The TCP connection is closed before the session starts.
@@ -297,7 +288,6 @@ describe('RtcToNet session', function() {
   it('backpressure', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
@@ -342,7 +332,6 @@ describe('RtcToNet session', function() {
   it('backpressure with early flood', (done) => {
     spyOn(session, 'receiveEndpointFromPeer_').and.returnValue(Promise.resolve(mockRemoteEndpoint));
     spyOn(session, 'replyToPeer_').and.returnValue(Promise.resolve());
-    spyOn(session, 'isWebEndpointAllowed_').and.returnValue(true);
     spyOn(session, 'getTcpConnection_').and.returnValue(Promise.resolve(mockTcpConnection));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
