@@ -9,6 +9,10 @@
       true,
       "spaces"
     ],
+    "ban": [
+      true,
+      ["Math", "random"]
+    ],
     "no-trailing-whitespace": true
   }
 }

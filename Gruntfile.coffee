@@ -1261,31 +1261,27 @@ taskManager.add 'test', [
   'integration_test'
 ]
 
-# Builds all code, including the "dist" build, but skips
-# linting and testing which can both be annoying and slow.
-# jshint is here because catches hard syntax errors, etc.
 taskManager.add 'build', [
   'exec:rmIosBuild'
   'exec:rmAndroidBuild'
+  'lint'
   'build_chrome'
   'build_firefox'
   'build_cca'
   'samples'
-  'jshint'
   'copy:dist'
   'jpm:xpi'
 ]
 
 taskManager.add 'lint', [
-  'copy:dev'
   'tslint'
+  'jshint'
 ]
 
 # This is run prior to releasing uProxy and, in addition to
 # building, tests and lints all code.
 taskManager.add 'dist', [
   'build'
-  'lint'
   'test'
 ]
 
