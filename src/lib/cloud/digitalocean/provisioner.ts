@@ -307,7 +307,7 @@ class Provisioner {
         console.debug('Launching OAuth flow...');
         oauth.launchAuthFlow(url, obj).then((responseUrl: string) => {
           console.debug('Got OAuth response:', responseUrl);
-          let query = responseUrl.substr(responseUrl.indexOf('#') + 1),
+          let query = responseUrl.substring(responseUrl.indexOf('#') + 1),
               keys = query.split('&'),
               params :any = {};
           for (let i = 0, keyi = keys[i]; keyi; keyi = keys[++i]) {
