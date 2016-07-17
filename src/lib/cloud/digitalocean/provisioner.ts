@@ -33,6 +33,9 @@ const REDIRECT_URIS: [string] = [
 
 const STORAGE_KEY_OAUTH = 'DigitalOcean-OAuth';
 
+let storageKeyForSSHKey = (name :string, pub :boolean) :string =>
+  'DigitalOcean-' + name + (pub && '-PublicKey' || '-PrivateKey');
+
 interface KeyPair {
   private: string;
   public: string;
@@ -308,19 +311,17 @@ class Provisioner {
         oauth.launchAuthFlow(url, obj).then((responseUrl: string) => {
           console.debug('Got OAuth response:', responseUrl);
           let query = responseUrl.substring(responseUrl.indexOf('#') + 1),
-              keys = query.split('&'),
+              paramA = query.split('&'),  // param array
               params :any = {};
-          for (let i = 0, keyi = keys[i]; keyi; keyi = keys[++i]) {
-            const idxeq = keyi.indexOf('=');
-            const param = keyi.substring(0, idxeq);
-            params[param] = keyi.substring(idxeq + 1);
+          for (let i = 0, parami = paramA[i]; parami; parami = paramA[++i]) {
+            const idxeq = parami.indexOf('=');
+            const param = parami.substring(0, idxeq);
+            params[param] = parami.substring(idxeq + 1);
           }
           if (params.expires_in) {
             // params.expires_in gives the number of seconds before the token
             // expires. Use this to calculate the absolute expiration time for
-            // later comparison (see getOAuthFromStorage_() above). Don't ask
-            // why DO doesn't just give an absolute time to begin with.¯\_(ツ)_/¯
-
+            // later comparison (see getOAuthFromStorage_() above).
             // First calculate the current time (in seconds since the epoch),
             // then add it to the expires_in delta to get the absolute expiration
             // time, and finally subtract some epsilon for wiggle room to be
@@ -356,13 +357,13 @@ class Provisioner {
    */
   private getSshKey_ = (name: string) : Promise<KeyPair> => {
     console.debug('getSshKey_', name);
-    const publicKeyIndex = 'DigitalOcean-' + name + '-PublicKey';
-    const privateKeyIndex = 'DigitalOcean-' + name + '-PrivateKey';
+    const storageKeyPub = storageKeyForSSHKey(name, true);
+    const storageKeyPri = storageKeyForSSHKey(name, false);
     return Promise.all([
-        this.storage_.get(publicKeyIndex),
-        this.storage_.get(privateKeyIndex)
+        this.storage_.get(storageKeyPub),
+        this.storage_.get(storageKeyPri)
     ]).then((results: string[]) => {
-      if (results[0] !== null && results[1] !== null) {
+      if (results[0] && results[1]) {
         console.debug('found SSH keys for', name, 'in storage');
         return {
           public: results[0],
@@ -374,8 +375,8 @@ class Provisioner {
         console.debug('generating SSH keys for', name);
         const result = Provisioner.generateKeyPair_();
         return Promise.all([
-          this.storage_.set(publicKeyIndex, result.public),
-          this.storage_.set(privateKeyIndex, result.private)
+          this.storage_.set(storageKeyPub, result.public),
+          this.storage_.set(storageKeyPri, result.private)
         ]).then((ignored: any) => {
           return result;
         }, (e: Error) => {

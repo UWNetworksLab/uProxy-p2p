@@ -130,9 +130,7 @@ Polymer({
         // so no need to remove contact
         return Promise.resolve<void>();
       });
-    }).then(() => {
-      return this.createServer();
-    });
+    }).then(() => this.createServer());
   },
   cancelCloudInstall: function() {
     this.mostRecentCreateId = 0;

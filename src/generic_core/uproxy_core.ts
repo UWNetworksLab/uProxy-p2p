@@ -697,9 +697,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
 
-    let newCloudOpResult = () :uproxy_core_api.CloudOperationResult => {
-      return {};
-    };
+    let newCloudOpResult = () :uproxy_core_api.CloudOperationResult => ({});
 
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
@@ -723,11 +721,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public cloudHasOAuth = () :Promise<boolean> => {
-    return new Promise((F, R) => {
-      oneShotModule_(CLOUD_PROVIDER_MODULE_NAME, (provider :any) => {
-        return provider.hasOAuth().then(F, R);
-      });
-    });
+    return oneShotModule_(CLOUD_PROVIDER_MODULE_NAME,
+                          (provider :any) => provider.hasOAuth());
   }
 
   private createCloudServer_ = (region: string) => {
