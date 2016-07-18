@@ -249,7 +249,7 @@ Polymer({
             feedbackType: uproxy_core_api.UserFeedbackType.DISCONNECTED_FROM_FRIEND
           }
         });
-      }, 
+      },
       () => { /* MT */ });
   },
   observe: {
