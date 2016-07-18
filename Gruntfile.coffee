@@ -1032,7 +1032,6 @@ module.exports = (grunt) ->
     'browserify:digitalOceanFreedomModule'
   ]
 
-  # uproxy-lib sample apps.
   grunt.registerTask 'echoServer', [
     'base'
     'browserify:echoServerFreedomModule'
@@ -1096,17 +1095,6 @@ module.exports = (grunt) ->
     'copy:libsForZorkChromeApp'
     'copy:libsForZorkFirefoxApp'
     'copy:libsForZorkNode'
-  ]
-
-  grunt.registerTask 'samples', [
-    'echoServer'
-    'copypasteChat'
-    'copypasteSocks'
-    'deployer'
-    'simpleChat'
-    'simpleSocks'
-    'uprobe'
-    'zork'
   ]
 
   grunt.registerTask 'version_file', [
@@ -1266,7 +1254,6 @@ module.exports = (grunt) ->
     'build_chrome'
     'build_firefox'
     'build_cca'
-    'samples'
     'jshint'
     'copy:dist'
     'jpm:xpi'
