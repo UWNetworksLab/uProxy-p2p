@@ -352,7 +352,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public showDialog(heading :string, message :string, buttonText ?:string,
       displayData ?:string) {
-    return this.backgroundUi.openDialog(dialogs.getConfirmationDialogDescription(
+    return this.backgroundUi.openDialog(dialogs.getMessageDialogDescription(
         heading, message, buttonText, displayData));
   }
 
