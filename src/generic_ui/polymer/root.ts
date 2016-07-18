@@ -9,6 +9,7 @@ import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 import user_module = require('../scripts/user');
 import dialogs = require('../scripts/dialogs');
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -168,6 +169,7 @@ Polymer({
   },
   revertProxySettings: function() {
     this.ui.stopUsingProxy(true);
+    this.openAskForFeedback();
   },
   restartProxying: function() {
     this.ui.restartProxying();
@@ -235,6 +237,20 @@ Polymer({
   },
   fireOpenInviteUserPanel: function() {
     this.fire('core-signal', { name: 'open-invite-user-dialog' });
+  },
+  openAskForFeedback: function() {
+    this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
+        translator.i18n_t('ASK_FOR_FEEDBACK_TITLE'),
+        translator.i18n_t('ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED'))).then(
+      () => {
+        this.fire('core-signal', {
+          name: 'open-feedback',
+          data: {
+            feedbackType: uproxy_core_api.UserFeedbackType.DISCONNECTED_FROM_FRIEND
+          }
+        });
+      },
+      () => { /* MT */ });
   },
   observe: {
     '$.mainPanel.selected': 'drawerToggled',

@@ -1347,6 +1347,14 @@
     "description": "Button label for starting an in-app browser connected to a uProxy peer.",
     "message": "Start browsing"
   }, 
+  "ASK_FOR_FEEDBACK_TITLE": {
+    "description": "Asks the user if they'd like to submit feedback",
+    "message": "Submit feedback?"
+  },
+  "ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED": {
+    "description": "Text shown when user is prompted to submit feedback after their connection is disrupted",
+    "message": "We noticed that you were disconnected from your friend. Would you like to submit some feedback?"
+  },
   "SHOW_LOGS": {
     "description": "Button label that opens logs",
     "message": "View logs"
