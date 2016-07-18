@@ -21,11 +21,11 @@ export enum UserFeedbackType {
   USER_INITIATED = 0,
   PROXYING_FAILURE = 1,
   CLOUD_CONNECTIONS_DISCONNECTED = 2,
-  CLOUD_SERVER_NO_CONNECT = 3, 
-  TROUBLE_SIGNING_IN = 4, 
-  NO_FRIENDS = 5, 
-  TROUBLE_STARTING_CONNECTION = 6, 
-  DISCONNECTED_FROM_FRIEND = 7, 
+  CLOUD_SERVER_NO_CONNECT = 3,
+  TROUBLE_SIGNING_IN = 4,
+  NO_FRIENDS = 5,
+  TROUBLE_STARTING_CONNECTION = 6,
+  DISCONNECTED_FROM_FRIEND = 7,
   OTHER_FEEDBACK = 8
 }
 
@@ -40,7 +40,6 @@ export interface GlobalSettings {
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
-  splashState : number;
   consoleFilter    :loggingTypes.Level;
   language         :string;
   force_message_version :number;
@@ -52,6 +51,7 @@ export interface GlobalSettings {
   activePromoId: string;
   shouldHijackDO: boolean;
   crypto: boolean;
+  reproxy: reproxySettings;
   // A list of strings, each represented as a constant below, with
   // prefix 'FEATURE_'.
   enabledExperiments :string[];
@@ -84,6 +84,13 @@ export interface ConnectionState {
   bytesSent :number;
   bytesReceived :number;
   activeEndpoint :net.Endpoint;
+}
+
+// Contains settings directing rtc-to-net server to go directly to net or
+// reproxy through a socks proxy server (such as local Tor proxy).
+export interface reproxySettings {
+  enabled       :boolean;      // Reproxy through socks is enabled
+  socksEndpoint :net.Endpoint; // Endpoint through which to reproxy
 }
 
 //TODO(jpevarnek) remove this interface
@@ -135,7 +142,8 @@ export enum Command {
   REMOVE_CONTACT = 1031,
   POST_REPORT = 1032,
   VERIFY_USER = 1033,
-  VERIFY_USER_SAS = 1034
+  VERIFY_USER_SAS = 1034,
+  GET_PORT_CONTROL_SUPPORT = 1035,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -348,4 +356,6 @@ export interface CoreApi {
   finishVerifyUser(args:FinishVerifyArgs) :void;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
+
+  getPortControlSupport(): Promise<PortControlSupport>;
 }

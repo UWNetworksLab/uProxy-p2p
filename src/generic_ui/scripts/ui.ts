@@ -118,7 +118,6 @@ export class UserInterface implements ui_constants.UiApi {
   public i18n_setLng :Function = translator_module.i18n_setLng;
 
   /* About this uProxy installation */
-  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
   public availableVersion :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
@@ -268,9 +267,6 @@ export class UserInterface implements ui_constants.UiApi {
     });
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
-
-    core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
-                  this.setPortControlSupport_);
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
       this.cloudInstallStatus = this.i18n_t(status);
@@ -1108,8 +1104,6 @@ export class UserInterface implements ui_constants.UiApi {
       this.addOnlineNetwork_(state.onlineNetworks[network]);
     }
 
-    this.portControlSupport = state.portControlSupport;
-
     // plenty of state may have changed, update it
     this.updateView_();
     this.updateSharingStatusBar_();
@@ -1150,10 +1144,6 @@ export class UserInterface implements ui_constants.UiApi {
     } else {
       this.browserApi.setBadgeNotification(numOfNotifications.toString());
     }
-  }
-
-  private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
-    this.portControlSupport = support;
   }
 
   public getNetworkDisplayName = (networkName :string) : string => {

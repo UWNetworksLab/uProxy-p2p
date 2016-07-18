@@ -376,7 +376,7 @@ export interface Network {
   isEncrypted : () => boolean;
 
   getKeyFromClientId : (clientId :string) => string;
-  
+
   /**
    * Removes user from the network's roster and storage
    */

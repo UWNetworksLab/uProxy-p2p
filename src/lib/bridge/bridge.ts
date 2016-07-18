@@ -23,7 +23,7 @@ export var preObfuscation = (
     config?:freedom.RTCPeerConnection.RTCConfiguration,
     portControl?:freedom.PortControl.PortControl)
     :BridgingPeerConnection => {
-  return new BridgingPeerConnection(ProviderType.PLAIN, name, config, 
+  return new BridgingPeerConnection(ProviderType.PLAIN, name, config,
                                     portControl);
 }
 
@@ -34,7 +34,7 @@ export var basicObfuscation = (
     portControl?:freedom.PortControl.PortControl,
     transformerConfig?:churn_types.TransformerConfig)
     :BridgingPeerConnection => {
-  return new BridgingPeerConnection(ProviderType.CHURN, name, config, 
+  return new BridgingPeerConnection(ProviderType.CHURN, name, config,
                                     portControl, transformerConfig);
 }
 

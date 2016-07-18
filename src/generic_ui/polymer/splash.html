@@ -114,11 +114,11 @@
     </style>
 
     <div horizontal layout>
-      <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
-          hidden?='{{SPLASH_STATES.INTRO==model.globalSettings.splashState}}'></core-icon>
+      <core-icon icon='arrow-back' on-tap='{{backToIntro}}' class='prevArrow'
+          hidden?='{{SPLASH_STATES.INTRO==state}}'></core-icon>
     </div>
 
-    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==model.globalSettings.splashState}}'>
+    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==state}}'>
       <div class='view' flex>
         <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
@@ -142,7 +142,7 @@
         </div> <!-- end of #languageLink -->
 
         <div id='nextWrapper'>
-          <uproxy-button raised on-tap='{{next}}'>{{ "NEXT" | $$ }}</uproxy-button>
+          <uproxy-button raised on-tap='{{goToStats}}'>{{ "NEXT" | $$ }}</uproxy-button>
         </div>
 
       </div> <!-- end of .view -->
@@ -155,7 +155,7 @@
 
     </div> <!-- end of #intro1 -->
 
-    <div vertical layout id="metricsOptIn" hidden?='{{SPLASH_STATES.METRICS_OPT_IN!==model.globalSettings.splashState}}'>
+    <div vertical layout id="metricsOptIn" hidden?='{{SPLASH_STATES.METRICS_OPT_IN!==state}}'>
       <div class="view" flex>
         <h1>{{ "WELCOME" | $$ }}</h1>
         <p>
