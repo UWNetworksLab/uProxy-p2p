@@ -101,16 +101,16 @@
         padding: 0px 16px;
         height: 60px;
       }
-      core-toolbar core-icon[icon="menu"] {
+      #menu-button {
         opacity: 0.6;
-        margin: 0px;
-        -webkit-transition: all 0.23s !important;
-        -moz-transition: all 0.23s !important;
-        transition: all 0.23s !important;
-      }
-      core-toolbar core-icon[icon="menu"]:hover {
-        opacity: 1;
         cursor: pointer;
+        -webkit-transition: all 0.23s;
+        -moz-transition: all 0.23s;
+        transition: all 0.23s;
+      }
+      #menu-button:hover {
+        opacity: 1;
+        box-shadow: none;
       }
       core-toolbar #title {
         font-size: 20px;
@@ -318,7 +318,7 @@
 
         <core-toolbar class="{{ {hasContacts: hasContacts} | tokenList }}">
 
-          <core-icon icon="menu" core-drawer-toggle></core-icon>
+          <core-icon-button id="menu-button" icon="menu" core-drawer-toggle></core-icon-button>
           <div id='title' flex>uProxy</div>
 
           <core-tooltip id='statsTooltip' label='{{ "STATS_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
