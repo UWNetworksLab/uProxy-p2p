@@ -63,10 +63,12 @@ EOF
 function get_firefox () {
   cat <<EOF
 RUN echo BROWSER=firefox >/etc/test.conf
-# jpm's installer requires node.
-RUN apt-get -qq install npm nodejs
-RUN ln -s /usr/bin/nodejs /usr/bin/node
-RUN npm install jpm -g
+
+# jpm requires Node.js.
+RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g jpm
+
 # Firefox dependencies (apt-get install -f handles this for Chrome).
 RUN apt-get -qq install libasound2 libdbus-glib-1-2 libgtk2.0.0 libgtk-3-0
 EOF
