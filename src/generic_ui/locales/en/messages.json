@@ -1319,6 +1319,10 @@
     "description": "One of the feedback options in the dropdown menu",
     "message": "My cloud server fails to connect."
   },
+  "CLOUD_SERVER_NO_START": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "I am not able to start a cloud server."
+  },
   "TROUBLE_SIGNING_IN": {
     "description": "One of the feedback options in the dropdown menu",
     "message": "I'm having trouble signing in."

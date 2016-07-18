@@ -45,6 +45,13 @@ Polymer({
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
   },
+  launchFeedback: function() {
+      this.fire('core-signal', {
+      name: 'open-feedback', data: {
+        feedbackType: uproxy_core_api.UserFeedbackType.CLOUD_SERVER_NO_START
+      }
+    });
+  },
   back: function() {
     if (this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
       this.closeOverlays();
