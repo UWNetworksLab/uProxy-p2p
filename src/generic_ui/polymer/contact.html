@@ -31,6 +31,9 @@
     .expandable {
       cursor: pointer;
     }
+    .notExpandable {
+      cursor: default;
+    }
     .nameRow core-icon {
       opacity: 0.6;
       margin: 0px 1px;
@@ -127,18 +130,15 @@
       line-height: 20px;
       color: #333;
     }
-    #contactDiv {
-      cursor: default;
-    }
     </style>
 
     <uproxy-state id="state"></uproxy-state>
 
     <div tabindex='-1'
-        class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "" : "expandable" }}'
+        class='nameRow frame {{ (isOnline || contact.status!=UserStatus.FRIEND) ? "online" : "offline" }} {{ contact.status==UserStatus.REMOTE_INVITED_BY_LOCAL ? "notExpandable" : "expandable" }}'
         top horizontal layout>
       <uproxy-avatar src='{{ contact.imageData }}' network='{{ contact.network.name }}' showIcon='{{ model.onlineNetworks.length > 1 }}' on-tap='{{ toggle }}'></uproxy-avatar>
-      <div id='contactDiv' flex>
+      <div flex>
         <div horizontal layout class='nameLine' on-tap='{{ toggle }}'>
           <div flex class='name'><bdi>{{ contact.name }}</bdi></div>
           <core-icon icon="open-in-new"

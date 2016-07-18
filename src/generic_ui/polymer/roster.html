@@ -110,13 +110,13 @@
     }
     </style>
 
-    <div id="empty-roster-instructions-container" hidden?="{{ loadingContacts || hasContacts }}">
+    <div id="empty-roster-instructions-container" hidden?="{{ hasContacts }}">
       <div id="empty-roster-instructions">
         <img src='../../icons/emptylist.svg'>
         <h1>{{ "EMPTY_ROSTER_INSTRUCTIONS" | $$ }}</h1>
       </div>
     </div>
-    <div class='downArrow' hidden?="{{ loadingContacts || hasContacts }}">▼</div>
+    <div class='downArrow' hidden?="{{ hasContacts }}">▼</div>
 
     <div hidden?='{{ !hasContacts }}'>
       <!-- Intentionally hiding search box. May decide to readd it later. -->
@@ -124,7 +124,7 @@
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$ }}'
+          groupTitle='{{ (mode == ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$ }}'
           contacts='{{ contacts.pending }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
@@ -135,7 +135,7 @@
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$ }}'
+          groupTitle='{{ (mode == ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$ }}'
           contacts='{{ contacts.trustedUproxy }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>

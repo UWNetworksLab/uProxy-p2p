@@ -134,7 +134,8 @@ export enum Command {
   REMOVE_CONTACT = 1031,
   POST_REPORT = 1032,
   VERIFY_USER = 1033,
-  VERIFY_USER_SAS = 1034
+  VERIFY_USER_SAS = 1034,
+  GET_PORT_CONTROL_SUPPORT = 1035,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -347,4 +348,6 @@ export interface CoreApi {
   finishVerifyUser(args:FinishVerifyArgs) :void;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
+
+  getPortControlSupport(): Promise<PortControlSupport>;
 }

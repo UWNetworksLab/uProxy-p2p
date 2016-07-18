@@ -531,6 +531,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
+  public getPortControlSupport = (): Promise<uproxy_core_api.PortControlSupport> => {
+    return portControl.probeProtocolSupport().then(
+        (probe:freedom.PortControl.ProtocolSupport) => {
+          return (probe.natPmp || probe.pcp || probe.upnp) ?
+                 uproxy_core_api.PortControlSupport.TRUE :
+                 uproxy_core_api.PortControlSupport.FALSE;
+    });
+  }
+
   // Probe for NAT-PMP, PCP, and UPnP support
   // Sets this.portControlSupport_ and sends update message to UI
   public refreshPortControlSupport = () :Promise<void> => {
@@ -538,13 +547,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
               uproxy_core_api.PortControlSupport.PENDING);
 
-    return portControl.probeProtocolSupport().then(
-      (probe:freedom.PortControl.ProtocolSupport) => {
-        this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
-                                   uproxy_core_api.PortControlSupport.TRUE :
-                                   uproxy_core_api.PortControlSupport.FALSE;
-        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
-                  this.portControlSupport_);
+    return this.getPortControlSupport().then((support) => {
+      this.portControlSupport_ = support;
+      ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
+                this.portControlSupport_);
     });
   }
 
