@@ -7,7 +7,6 @@ import key_verify = require('./key-verify');
 import logging = require('../lib/logging/logging');
 import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
 import net = require('../lib/net/net.types');
-import onetime = require('../lib/bridge/onetime');
 import nat_probe = require('../lib/nat/probe');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
@@ -25,11 +24,6 @@ import ui = ui_connector.connector;
 import storage = globals.storage;
 
 declare var freedom: freedom.FreedomInModuleEnv;
-
-// This is a global instance of RemoteConnection that is currently used for
-// either sharing or using a proxy through the copy+paste interface (i.e.
-// without an instance)
-export var copyPasteConnection :remote_connection.RemoteConnection = null;
 
 var log :logging.Log = new logging.Log('core');
 log.info('Loading core', version.UPROXY_VERSION);
@@ -109,8 +103,6 @@ function oneShotModule_<T>(moduleName: string, f: (provider: any) => Promise<T>)
  */
 export class uProxyCore implements uproxy_core_api.CoreApi {
 
-  private batcher_ : onetime.SignalBatcher<social.PeerMessage>;
-
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
 
@@ -118,14 +110,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   constructor() {
     log.debug('Preparing uProxy Core');
-    copyPasteConnection = new remote_connection.RemoteConnection(
-        (update:uproxy_core_api.Update, message?:social.PeerMessage) => {
-      if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
-        ui.update(update, message);
-      } else {
-        this.batcher_.addToBatch(message);
-      }
-    }, undefined, portControl);
 
     this.refreshPortControlSupport();
 
@@ -309,7 +293,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
     return globals.loadSettings.then(() => {
-      var copyPasteConnectionState = copyPasteConnection.getCurrentState();
 
       let moveToFront = (array :string[], element :string) :void => {
         let i = array.indexOf(element);
@@ -333,7 +316,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,
-        copyPasteConnection: copyPasteConnectionState,
         portControlSupport: this.portControlSupport_,
       };
     });
@@ -354,43 +336,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // Set the instance's new consent levels. It will take care of sending new
     // consent bits over the wire and re-syncing with the UI.
     user.modifyConsent(command.action);
-  }
-
-  // Resets the copy/paste signal batcher.
-  private resetBatcher_ = () : void => {
-    this.batcher_ = new onetime.SignalBatcher<social.PeerMessage>((signal:string) => {
-      ui.update(uproxy_core_api.Update.ONETIME_MESSAGE, signal);
-    }, (signal:social.PeerMessage) => {
-      // This is a terminating message iff signal.data is an instance
-      // bridge.SignallingMessage (which we can detect by the presence
-      // of a signals field) for which bridge.isTerminatingSignal
-      // returns true.
-      return signal.data && (<any>signal.data).signals &&
-        bridge.isTerminatingSignal(<bridge.SignallingMessage>signal.data);
-    }, true);
-  }
-
-  public startCopyPasteGet = () : Promise<net.Endpoint> => {
-    this.resetBatcher_();
-    return copyPasteConnection.startGet(globals.effectiveMessageVersion());
-  }
-
-  public stopCopyPasteGet = () :Promise<void> => {
-    return copyPasteConnection.stopGet();
-  }
-
-  public startCopyPasteShare = () => {
-    this.resetBatcher_();
-    copyPasteConnection.startShare(globals.effectiveMessageVersion());
-  }
-
-  public stopCopyPasteShare = () :Promise<void> => {
-    return copyPasteConnection.stopShare();
-  }
-
-  public sendCopyPasteSignal = (signal:string) => {
-    var decodedSignals = <social.PeerMessage[]>onetime.decode(signal);
-    decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
   public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
