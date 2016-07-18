@@ -6,7 +6,7 @@ before_install:
 install:
   - ./setup.sh install
 script:
-  - grunt build tslint unit_test
+  - grunt build tslint unit_test_nobuild
 sudo: false
 cache:
   directories:
