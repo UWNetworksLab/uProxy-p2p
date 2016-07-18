@@ -1002,17 +1002,18 @@ module.exports = (grunt) ->
     srcFile = path.join(realBasePath, srcFilename + '.html')
     intermediateFile = path.join(realBasePath, destFilename + '-inline.html')
     destFile = path.join(realBasePath, destFilename + '.html')
+    taskName = path.join(realBasePath, destFilename)
 
     # The basic vulcanize tasks, we do both steps in order to get all the
     # javascript into a separate file
-    addTask('vulcanize', destFile + 'Inline', doVulcanize(srcFile, intermediateFile, true, false))
-    addTask('vulcanize', destFile + 'Csp', doVulcanize(intermediateFile, destFile, false, true))
+    addTask('vulcanize', taskName + 'Inline', doVulcanize(srcFile, intermediateFile, true, false))
+    addTask('vulcanize', taskName + 'Csp', doVulcanize(intermediateFile, destFile, false, true))
 
     if browserify
       # If we need to brewserify the file, there also needs to be a step to replace
       # some of the strings in the vulcanized html file to refer to the static version
       browserifyPath = path.join(basePath, destFilename)
-      addTask('string-replace', destFile + 'Vulcanized', finishVulcanized(realBasePath, destFilename))
+      addTask('string-replace', taskName + 'Vulcanized', finishVulcanized(realBasePath, destFilename))
       addTask('browserify', browserifyPath, Rule.browserify(browserifyPath, {}))
 
     return tasks
