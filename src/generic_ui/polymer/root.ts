@@ -239,18 +239,18 @@ Polymer({
     this.fire('core-signal', { name: 'open-invite-user-dialog' });
   },
   openAskForFeedback: function() {
-    this.$.askForFeedback.open();
-  },
-  closeAskForFeedback: function() {
-    this.$.askForFeedback.close();
-  },
-  openFeedbackPanel: function() {
-    this.fire('core-signal', {
-      name: 'open-feedback', data: {
-        feedbackType: uproxy_core_api.UserFeedbackType.DISCONNECTED_FROM_FRIEND
-      }
-    });
-    this.$.askForFeedback.close();
+    this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
+        translator.i18n_t('ASK_FOR_FEEDBACK_TITLE'),
+        translator.i18n_t('ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED'))).then(
+      () => {
+        this.fire('core-signal', {
+          name: 'open-feedback',
+          data: {
+            feedbackType: uproxy_core_api.UserFeedbackType.DISCONNECTED_FROM_FRIEND
+          }
+        });
+      },
+      () => { /* MT */ });
   },
   observe: {
     '$.mainPanel.selected': 'drawerToggled',

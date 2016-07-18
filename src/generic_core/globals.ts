@@ -46,7 +46,6 @@ export var settings :uproxy_core_api.GlobalSettings = {
   allowNonUnicast: false,
   mode: user_interface.Mode.GET,
   version: STORAGE_VERSION,
-  splashState: 0,
   statsReportingEnabled: false,
   consoleFilter: loggingprovider.Level.warn,
   language: null,  // sentinel indicating lang should be calculated from browser settings
@@ -59,7 +58,11 @@ export var settings :uproxy_core_api.GlobalSettings = {
   activePromoId: null,  // set on promoIdDetected
   enabledExperiments: [],
   shouldHijackDO: true,
-  crypto: true
+  crypto: true,
+  reproxy: {
+    enabled: false,
+    socksEndpoint: {address: '127.0.0.1', port: 9050}
+  }
 };
 
 export var natType :string = '';
