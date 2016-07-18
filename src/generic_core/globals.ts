@@ -58,7 +58,11 @@ export var settings :uproxy_core_api.GlobalSettings = {
   activePromoId: null,  // set on promoIdDetected
   enabledExperiments: [],
   shouldHijackDO: true,
-  crypto: true
+  crypto: true,
+  reproxy: {
+    enabled: false,
+    socksEndpoint: {address: '127.0.0.1', port: 9050}
+  }
 };
 
 export var natType :string = '';

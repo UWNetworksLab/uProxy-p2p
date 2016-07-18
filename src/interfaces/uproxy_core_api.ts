@@ -51,6 +51,7 @@ export interface GlobalSettings {
   activePromoId: string;
   shouldHijackDO: boolean;
   crypto: boolean;
+  reproxy: reproxySettings;
   // A list of strings, each represented as a constant below, with
   // prefix 'FEATURE_'.
   enabledExperiments :string[];
@@ -83,6 +84,13 @@ export interface ConnectionState {
   bytesSent :number;
   bytesReceived :number;
   activeEndpoint :net.Endpoint;
+}
+
+// Contains settings directing rtc-to-net server to go directly to net or
+// reproxy through a socks proxy server (such as local Tor proxy).
+export interface reproxySettings {
+  enabled       :boolean;      // Reproxy through socks is enabled
+  socksEndpoint :net.Endpoint; // Endpoint through which to reproxy
 }
 
 //TODO(jpevarnek) remove this interface

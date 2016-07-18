@@ -72,7 +72,8 @@ export class Model {
     activePromoId: null,
     enabledExperiments: [],
     shouldHijackDO: true,
-    crypto: true
+    crypto: true,
+    reproxy: null
   };
 
   public reconnecting = false;

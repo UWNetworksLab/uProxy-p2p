@@ -2,6 +2,7 @@
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import bridge = require('../../bridge/bridge');
+import logging = require('../../logging/logging');
 import net = require('../../net/net.types');
 import peerconnection = require('../../webrtc/peerconnection');
 import proxyintegrationtesttypes = require('./proxy-integration-test.types');
@@ -13,6 +14,8 @@ import tcp = require('../../net/tcp');
 import ProxyConfig = require('../../rtc-to-net/proxyconfig');
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
+
+var log :logging.Log = new logging.Log('SocksClient');
 
 // This abstract class is converted into a real class by Freedom, which
 // fills in the unimplemented on(...) method in the process of
@@ -121,6 +124,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     });
 
     var authRequest = socks.composeAuthHandshakeBuffer([socks.Auth.NOAUTH]);
+    log.debug('Creating auth handshake: %1', [authRequest]);
     connection.send(authRequest);
     var connected = new Promise<tcp.ConnectionInfo>((F, R) => {
       connection.onceConnected.then(F);
@@ -131,19 +135,23 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       return firstBufferPromise;
     }).then((buffer:ArrayBuffer) : Promise<ArrayBuffer> => {
       var auth = socks.interpretAuthResponse(buffer);
+      log.debug('Received auth handshake reply: %1', [auth]);
       if (auth != socks.Auth.NOAUTH) {
         throw new Error('SOCKS server returned unexpected AUTH response.  ' +
                         'Expected NOAUTH (' + socks.Auth.NOAUTH + ') but got ' + auth);
       }
+      log.debug('Connecting through socks to: %1', [webEndpoint]);
 
       var request :socks.Request = {
         command: socks.Command.TCP_CONNECT,
         endpoint: webEndpoint,
       };
+      log.debug('Making socks request: %1', [request]);
       connection.send(socks.composeRequestBuffer(request));
       return connection.receiveNext();
     }).then((buffer:ArrayBuffer) : Promise<tcp.Connection> => {
       var response = socks.interpretResponseBuffer(buffer);
+      log.debug('Received request response: %1', [response]);
       if (response.reply != socks.Reply.SUCCEEDED) {
         // TODO: Fix bad style: reject should only and always be an error.
         // We should be resolving with result status.
