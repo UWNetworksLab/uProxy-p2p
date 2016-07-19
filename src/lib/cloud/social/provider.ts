@@ -235,7 +235,7 @@ export class CloudSocialProvider {
       }, (e: Error) => {
         log.warn('failed to fetch banner: %1', e);
         return '';
-      }).then((banner: string) => {        
+      }).then((banner: string) => {
         this.savedContacts_[invite.host] = {
           invite: invite,
           description: banner,
@@ -547,7 +547,7 @@ class Connection {
                   }
                   break;
                 case ConnectionState.WAITING_FOR_VERSION:
-                  const parsedVersion = parseInt(reply, 10);                  
+                  const parsedVersion = parseInt(reply, 10);
                   if (isNaN(parsedVersion)) {
                     log.debug('%1: server does not support message_version, assuming %2',
                       this.name_, this.version_);
