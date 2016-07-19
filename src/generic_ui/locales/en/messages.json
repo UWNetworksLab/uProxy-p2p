@@ -786,14 +786,6 @@
     "description": "Title of the FAQ window",
     "message": "Get Help"
   },
-  "CONFIRM_LOGOUT_FOR_COPYPASTE": {
-    "description": "If a user is signed in to social network(s) and attempt to start a one-time connection, this message informs them that they must first log out of all social networks.",
-    "message": "To start a one-time connection, you will be logged out of connected social networks. Would you like to log out now?"
-  },
-  "CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING": {
-    "description": "If a user is signed in to social network(s) and is getting or sharing, and attempt to start a one-time connection, this message informs them that they must first log out of all social networks.",
-    "message": "To start a one-time connection, you will be logged out of connected social networks and your connections will be stopped.  Would you like to log out now?"
-  },
   "CONFIRM_LOGOUT_GETTING_AND_SHARING": {
     "description": "Confirmation when user logs out from a social network while they are getting and sharing access with users on that network",
     "message": "Are you sure you want to log out? You will no longer be getting or sharing access with your friends."
