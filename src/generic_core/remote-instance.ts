@@ -240,7 +240,7 @@ import ui = ui_connector.connector;
         type:social.PeerMessageType,
         messageVersion:number,
         signalFromRemote:bridge.SignallingMessage) : Promise<void> => {
-      log.debug('handleDecryptedSignal_(%1, %2, %3)', type, messageVersion, 
+      log.debug('handleDecryptedSignal_(%1, %2, %3)', type, messageVersion,
                 signalFromRemote);
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.

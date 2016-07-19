@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "validProxyServers": {
+      "description": "An object mapping proxy server IP addresses to their corresponding public key in order to fingerprint before connecting.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "enforceProxyServerValidity": {
+      "description": "Control whether the app/extension checks the proxy server's public key fingerprint before connecting.",
+      "type": "boolean"
+    }
+  }
+}

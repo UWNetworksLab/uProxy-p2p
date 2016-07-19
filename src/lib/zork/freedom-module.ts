@@ -42,6 +42,9 @@ var socksEndpoint :net.Endpoint = {
 // run on the same machine.
 var PORTS = [9000, 9010, 9020];
 
+// Number of getters.
+let numOfGetters = 0;
+
 // Starts a TCP server on the first free port listed in PORTS.
 // Rejects if no port is free.
 function bind(i:number = 0) : Promise<tcp.Server> {
@@ -138,6 +141,10 @@ function serveConnection(connection: tcp.Connection): void {
       case 'quit':
         connection.close();
         break;
+      case 'getters':
+        sendReply(numOfGetters.toString(10), connection);
+        keepParsing = true;
+        break;
       default:
         if (verb.length > 0) {
           sendReply('I don\'t understand that command. (' + verb + ')', connection);
@@ -207,11 +214,16 @@ function give(
     allowNonUnicast: true
   }, bridge.best('rtctonet', pcConfig)).then(() => {
     log.info('%1: RtcToNet connected', connection.connectionId);
+    numOfGetters++;
     connection.close();
   }, (e: Error) => {
     log.error('%1: failed to start rtcToNet: %2',
         connection.connectionId, e.message);
     connection.close();
+  });
+
+  rtcToNet.onceStopped.then(() => {
+    numOfGetters--;
   });
 
   // Must do this after calling start.

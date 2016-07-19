@@ -30,7 +30,7 @@ provisioner.start('test').then((serverInfo: any) => {
 
   log.info('installing...');
   installer.install(serverInfo.network.ipv4, serverInfo.network.ssh_port,
-  	  'root', serverInfo.ssh.private).then((invitation: string) => {
+      'root', serverInfo.ssh.private).then((invitation: string) => {
     log.info('uproxy installed! invitation: %1', invitation);
     }, (e: Error) => {
     log.error('failed to install: %1', e.message);

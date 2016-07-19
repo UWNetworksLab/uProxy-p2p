@@ -58,12 +58,11 @@ export class Model {
     hasSeenSharingEnabledScreen: false,
     hasSeenWelcome: false,
     hasSeenMetrics: false,
-    splashState : 0,
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
     statsReportingEnabled: false,
     consoleFilter: 0,
-    language: 'en',
+    language: null,  // sentinel indicating lang should be calculated from browser settings
     force_message_version: 0,
     quiverUserName: '',
     showCloud: false,
@@ -73,7 +72,8 @@ export class Model {
     activePromoId: null,
     enabledExperiments: [],
     shouldHijackDO: true,
-    crypto: true
+    crypto: true,
+    reproxy: null
   };
 
   public reconnecting = false;

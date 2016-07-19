@@ -155,27 +155,6 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     this.sendCommand(uproxy_core_api.Command.MODIFY_CONSENT, command);
   }
 
-  startCopyPasteGet = () : Promise<net.Endpoint> => {
-    console.log('Starting to proxy for CopyPaste');
-    return this.promiseCommand(uproxy_core_api.Command.START_PROXYING_COPYPASTE_GET);
-  }
-
-  stopCopyPasteGet = () :Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_GET);
-  }
-
-  startCopyPasteShare = ()  => {
-    this.sendCommand(uproxy_core_api.Command.START_PROXYING_COPYPASTE_SHARE);
-  }
-
-  stopCopyPasteShare = () :Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE);
-  }
-
-  sendCopyPasteSignal = (signal:string) => {
-    this.sendCommand(uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE, signal);
-  }
-
   start = (path :social.InstancePath) : Promise<net.Endpoint> => {
     console.log('Starting to proxy through ' + path);
     return this.promiseCommand(uproxy_core_api.Command.START_PROXYING, path);
@@ -230,8 +209,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_NAT_TYPE);
   }
 
-  refreshPortControlSupport = () : Promise<void> => {
-    return this.promiseCommand(uproxy_core_api.Command.REFRESH_PORT_CONTROL);
+  getPortControlSupport = (): Promise<uproxy_core_api.PortControlSupport> => {
+    return this.promiseCommand(uproxy_core_api.Command.GET_PORT_CONTROL_SUPPORT);
   }
 
   pingUntilOnline = (pingUrl :string) : Promise<void> => {

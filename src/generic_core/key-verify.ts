@@ -973,7 +973,7 @@ export class KeyVerify {
     var b64Key = key.toString('base64');
     var zeroByte :Buffer= new Buffer(1);
     zeroByte.fill(0);
-    var completeValue = Buffer.concat([ oneBuf, new Buffer(label), zeroByte, 
+    var completeValue = Buffer.concat([ oneBuf, new Buffer(label), zeroByte,
                                         Buffer.concat([context]), lenBuf]);
     var full_hmac = this.fullHmac_(b64Key, completeValue.toString('base64'));
     log.debug('kdf: full_hmac: ', full_hmac);

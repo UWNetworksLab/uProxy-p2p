@@ -13,7 +13,7 @@ Polymer({
   email: '',
   feedback: '',
   logs: '',
-  feedbackType: '',
+  feedbackType: null,
   close: function() {
     this.$.feedbackPanel.close();
   },
@@ -24,18 +24,26 @@ Polymer({
     if (data && data.includeLogs) {
       this.$.logCheckbox.checked = true;
     }
-    this.feedbackType = (data && data.feedbackType) ? data.feedbackType :
-        uproxy_core_api.UserFeedbackType.USER_INITIATED;
+    if (data && data.feedbackType) {
+      this.feedbackType = data.feedbackType;
+    }
     this.$.feedbackPanel.open();
   },
   sendFeedback: function() {
     this.feedback = this.feedback.trim();
-    this.$.feedbackDecorator.isInvalid = !this.feedback.length;
-
-    if (this.$.feedbackDecorator.isInvalid) {
-      return;
+    //if user does not select something from dropdown
+    if (this.$.errorInput.selected == null) {
+        this.$.errorDecorator.isInvalid = true;
+        return;
     }
 
+    //if user selects 'other', make sure that additional feedback is required
+    if (this.feedbackType == uproxy_core_api.UserFeedbackType.OTHER_FEEDBACK && !this.feedback.length) {
+      this.$.errorDecorator.isInvalid = false;
+      this.$.feedbackDecorator.isInvalid = true;
+      this.$.collapse.opened = false;
+      return;
+    }
     this.$.sendingFeedbackDialog.open();
     ui_context.ui.sendFeedback({
       email: this.email,
@@ -48,9 +56,15 @@ Polymer({
       // user types input in the input fields.
       this.$.emailInput.placeholder = ui.i18n_t('EMAIL_PLACEHOLDER');
       this.$.feedbackInput.placeholder = ui.i18n_t('FEEDBACK_PLACEHOLDER');
+      this.$.errorInput.selected = 'null';
+      this.$.errorDecorator.isInvalid = false;
+      this.$.feedbackDecorator.isInvalid = false;
+      this.$.dropdownContainer.textContent = ui.i18n_t('CUSTOM_ERROR_PLACEHOLDER');
+      this.$.collapse.opened = false;
       // Clear the form.
       this.email = '';
       this.feedback = '';
+      this.feedbackType = null;
       this.$.logCheckbox.checked = false;
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
@@ -69,12 +83,23 @@ Polymer({
       this.$.sendingFeedbackDialog.close();
     });
   },
+  toggleDropdown: function() {
+    this.$.collapse.toggle();
+  },
+  changePlaceholder: function(event: Event, detail: any, sender: HTMLElement) {
+    if (detail.isSelected) {
+      this.$.dropdownContainer.textContent = detail.item.textContent;
+      this.$.collapse.opened = false;
+    }
+  },
   viewLogs: function() {
-    this.ui.openTab('generic_ui/view-logs.html?lang=' + model.globalSettings.language);
+    // calls to logs.html to view logs
+    this.fire('core-signal', { name: 'open-logs' });
   },
   ready: function() {
     this.ui = ui_context.ui;
     this.model = ui_context.model;
+    this.UserFeedbackType = uproxy_core_api.UserFeedbackType;
   },
   computed: {
     'opened': '$.feedbackPanel.opened'
