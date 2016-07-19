@@ -1362,5 +1362,9 @@
   "SHOW_LOGS": {
     "description": "Button label that opens logs",
     "message": "View logs"
+  },
+  "REPORT_ERROR": {
+    "description": "Prompt that asks user to report error",
+    "message": "Report this error"
   }
 }
