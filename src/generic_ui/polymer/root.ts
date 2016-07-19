@@ -33,6 +33,8 @@ Polymer({
   toastMessage: '',
   unableToGet: '',
   unableToShare: '',
+  gettingStatus: null,
+  sharingStatus: null,
   viewChanged: function(oldView :ui_types.View, newView :ui_types.View) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
@@ -251,6 +253,12 @@ Polymer({
         });
       },
       () => { /* MT */ });
+  },
+  updateGettingStatus: function(e: Event, gettingStatus?: string) {
+    this.gettingStatus = gettingStatus;
+  },
+  updateSharingStatus: function(e: Event, sharingStatus?: string) {
+    this.sharingStatus = sharingStatus;
   },
   observe: {
     '$.mainPanel.selected': 'drawerToggled',
