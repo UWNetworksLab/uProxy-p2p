@@ -114,17 +114,15 @@ export class UserInterface implements ui_constants.UiApi {
   private userCancelledGetAttempt_ :boolean = false;
 
   /* Translation */
-  public i18n_t :Function = translator_module.i18n_t;
-  public i18n_setLng :Function = translator_module.i18n_setLng;
+  public i18n_t = translator_module.i18n_t;
+  public i18n_setLng = translator_module.i18n_setLng;
+  public i18nSanitizeHtml = translator_module.i18nSanitizeHtml;
 
   /* About this uProxy installation */
   public availableVersion :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
-
-  public cloudInstallStatus :string = '';
-  public cloudInstallProgress = 0;
 
   // User-initiated proxy access mode.
   private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
@@ -269,11 +267,11 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.cloudInstallStatus = this.i18n_t(status);
+      this.fireSignal('cloud-install-status', status);
     });
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
-      this.cloudInstallProgress = progress;
+      this.fireSignal('cloud-install-progress', progress);
     });
 
     browserApi.on('inviteUrlData', this.handleInvite);
@@ -1170,11 +1168,6 @@ export class UserInterface implements ui_constants.UiApi {
     } else {
       this.view = ui_constants.View.SPLASH;
     }
-  }
-
-  public i18nSanitizeHtml = (i18nMessage :string) => {
-    // Remove all HTML other than supported tags like strong, a, p, etc.
-    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
   public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
