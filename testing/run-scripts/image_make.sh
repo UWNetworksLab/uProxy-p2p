@@ -34,7 +34,7 @@ TMP_DIR=`mktemp -d`
 cp -R ${BASH_SOURCE%/*}/../integration/test $TMP_DIR/test
 
 cat <<EOF > $TMP_DIR/Dockerfile
-FROM phusion/baseimage:0.9.18
+FROM phusion/baseimage:0.9.19
 
 RUN apt-get -qq update
 RUN apt-get -qq install wget unzip xvfb fvwm supervisor iptables x11vnc unattended-upgrades

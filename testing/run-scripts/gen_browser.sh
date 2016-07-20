@@ -99,6 +99,27 @@ RUN ln -s /usr/share/firefox/firefox /usr/bin/firefox
 EOF
 
 }
+
+function get_node () {
+  cat <<EOF
+RUN echo BROWSER=node >/etc/test.conf
+EOF
+  case $1 in
+    stable)
+      cat <<EOF
+RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
+EOF
+            ;;
+    *)
+      log "Unknown node version $1. Only option right now is stable."
+      ;;
+  esac
+  cat <<EOF
+RUN apt-get install -y nodejs
+EOF
+
+}
+
 case $1 in
   chrome)
     get_chrome $2
@@ -109,7 +130,10 @@ case $1 in
   localchrome)
     get_localchrome $2 $3
     ;;
+  node)
+    get_node $2
+    ;;
   *)
-    log "Unknown browser $1.  Options are chrome, localchrome, and firefox."
+    log "Unknown browser $1.  Options are chrome, localchrome, firefox, and node."
     exit 1
 esac
