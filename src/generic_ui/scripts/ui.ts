@@ -484,7 +484,7 @@ export class UserInterface implements ui_constants.UiApi {
       } else {
         // Old v1 invites are base64 encoded JSON
         var lastNonCodeCharacter = Math.max(invite.lastIndexOf('/'), invite.lastIndexOf('#'));
-        var token = invite.substr(lastNonCodeCharacter + 1);
+        var token = invite.substring(lastNonCodeCharacter + 1);
 
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match('[A-Za-z0-9+/=_]+')[0];

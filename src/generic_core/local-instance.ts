@@ -62,7 +62,7 @@ import storage = globals.storage;
         // 20 bytes for the instance ID.  This we can keep.
         // TODO: don't use Math.random; use uproxy crypto. (security higene)
         hex = Math.floor(Math.random() * 256).toString(16);
-        id += ('00'.substr(0, 2 - hex.length) + hex);
+        id += ('00'.substring(0, 2 - hex.length) + hex);
       }
       return id;
     }
