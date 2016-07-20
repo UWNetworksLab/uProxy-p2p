@@ -1,11 +1,14 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts' />
 
+import logging = require('../../logging/logging');
 import Pinger = require('../../net/pinger');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
 // TODO: https://github.com/uProxy/uproxy/issues/2051
 declare var forge: any;
+
+const log = new logging.Log('digitalocean');
 
 const POLL_TIMEOUT: number = 5000; //milliseconds
 
@@ -84,13 +87,13 @@ class Provisioner {
     return new Promise((F, R) => {
       let reject = (errcode :string, message :string, data? :any, exc? :any) => {
         let err = {errcode: errcode, message: message, data: data, exc: exc};
-        console.debug(message, data);
+        log.debug(message, data);
         this.storage_.remove(STORAGE_KEY_OAUTH).then(() => {
           this.promiseOAuth_ = null;  // Invalidate any cached promise
           R(err);
         });
       }
-      console.debug('Looking for oauthJson in storage...');
+      log.debug('Looking for oauthJson in storage...');
       this.storage_.get(STORAGE_KEY_OAUTH).then((oauthJson :string) => {
         if (!oauthJson) {
           return reject('OAUTH_ERR', 'Missing oauthJson', oauthJson);
@@ -101,7 +104,7 @@ class Provisioner {
         } catch (e) {
           return reject('OAUTH_ERR', 'Error parsing oauthJson', oauthJson, e);
         }
-        console.debug('Retrieved saved OAuth from storage:', oauthObj);
+        log.debug('Retrieved saved OAuth from storage:', oauthObj);
         if (!oauthObj.access_token) {
           return reject('OAUTH_ERR', 'Missing access_token field', oauthObj);
         }
@@ -111,12 +114,12 @@ class Provisioner {
           if (validFor <= 0) {
             return reject('OAUTH_ERR', 'Stored OAuth expired', validFor);
           } else {
-            console.debug('Stored OAuth valid for another ' + validFor + 's');
+            log.debug('Stored OAuth valid for another ' + validFor + 's');
           }
         } else {
-          console.debug('Missing expired_at field. Assuming unexpired.');
+          log.debug('Missing expired_at field. Assuming unexpired.');
         }
-        console.debug('Resolving: oauthObj:', oauthObj);
+        log.debug('Resolving: oauthObj:', oauthObj);
         F(oauthObj);
       });
     });
@@ -130,7 +133,7 @@ class Provisioner {
    * @return {Promise.<Object>}
    */
   public start = (name: string, region = DEFAULT_REGION, image = DEFAULT_IMAGE, size = DEFAULT_SIZE): Promise<Object> => {
-    console.debug('start', name);
+    log.debug('start', name);
 
     return this.getSshKey_(name).then((keypair: KeyPair) => {
       this.sshKeyPair_ = keypair;
@@ -170,7 +173,7 @@ class Provisioner {
 
       // It usually takes several seconds after the API reports success for
       // SSH on a new droplet to become responsive.
-      console.debug('waiting for SSH port to become active');
+      log.debug('waiting for SSH port to become active');
       return new Pinger(this.network_['ipv4'], 22, 60).ping().then(() => {
         // Keep in sync with the return type declaration in freedom-module.json:
         return {ssh: this.sshKeyPair_, network: this.network_};
@@ -184,7 +187,7 @@ class Provisioner {
    * @return {Promise.<void>}
    */
   public stop = (name: string): Promise<void> => {
-    console.debug('stop', name);
+    log.debug('stop', name);
     return this.destroyServer_(name);
   }
 
@@ -228,7 +231,7 @@ class Provisioner {
    * to complete or rejects if droplet doesn't exist
    */
   public reboot = (name: string) : Promise<void> => {
-    console.debug('reboot', name);
+    log.debug('reboot', name);
     return this.getDropletByName_(name).then((droplet: any) => {
       this.cloud_ = this.cloud_ || {};
       this.cloud_.vm = this.cloud_.vm || droplet;
@@ -292,14 +295,14 @@ class Provisioner {
    * }
    */
   private doOAuth_ = () : Promise<Object> => {
-    console.debug('In doOAuth_');
+    log.debug('In doOAuth_');
     if (this.promiseOAuth_) {
-      console.debug('Returning cached promiseOAuth_', this.promiseOAuth_);
+      log.debug('Returning cached promiseOAuth_', this.promiseOAuth_);
       return this.promiseOAuth_;
     }
     return this.promiseOAuth_ = new Promise((F, R) => {
       var oauth = freedom['core.oauth']();
-      console.debug('Initiating OAuth...');
+      log.debug('Initiating OAuth...');
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
         var url = 'https://cloud.digitalocean.com/v1/oauth/authorize?' +
             'client_id=41f77ea7aa94311a2337027eb238591db9e98c6e2c1067b3b2c7c3420901703f&' +
@@ -307,9 +310,9 @@ class Provisioner {
             'redirect_uri=' + encodeURIComponent(obj.redirect) + '&' +
             'state=' + encodeURIComponent(obj.state) + '&' +
             'scope=read%20write';
-        console.debug('Launching OAuth flow...');
+        log.debug('Launching OAuth flow...');
         oauth.launchAuthFlow(url, obj).then((responseUrl: string) => {
-          console.debug('Got OAuth response:', responseUrl);
+          log.debug('Got OAuth response:', responseUrl);
           let query = responseUrl.substring(responseUrl.indexOf('#') + 1),
               paramA = query.split('&'),  // param array
               params :any = {};
@@ -329,17 +332,17 @@ class Provisioner {
             const now = Date.now() / 1000 | 0;  // Unix timestamp in seconds.
             const delta = parseInt(params.expires_in);  // Convert from string.
             if (isNaN(delta)) {
-              console.debug('parseInt(expires_in) failed:', params.expires_in);
+              log.debug('parseInt(expires_in) failed:', params.expires_in);
             } else {
               params.expires_in = delta;
               const epsilon = -60;
               params.expires_at = now + delta + epsilon;
-              console.debug('Calculated expires_at:', params.expires_at);
+              log.debug('Calculated expires_at:', params.expires_at);
             }
           }
-          console.debug('Saving OAuth:', params);
+          log.debug('Saving OAuth:', params);
           this.storage_.set(STORAGE_KEY_OAUTH, JSON.stringify(params)).then(() => {
-            console.debug('OAuth saved in storage, resolving:', params);
+            log.debug('OAuth saved in storage, resolving:', params);
             F(params);
           });
         });
@@ -356,7 +359,7 @@ class Provisioner {
    * storage or if a keypair cannot be generated
    */
   private getSshKey_ = (name: string) : Promise<KeyPair> => {
-    console.debug('getSshKey_', name);
+    log.debug('getSshKey_', name);
     const storageKeyPub = storageKeyForSSHKey(name, true);
     const storageKeyPri = storageKeyForSSHKey(name, false);
     return Promise.all([
@@ -364,7 +367,7 @@ class Provisioner {
         this.storage_.get(storageKeyPri)
     ]).then((results: string[]) => {
       if (results[0] && results[1]) {
-        console.debug('found SSH keys for', name, 'in storage');
+        log.debug('found SSH keys for', name, 'in storage');
         return {
           public: results[0],
           private: results[1]
@@ -372,7 +375,7 @@ class Provisioner {
       }
 
       try {
-        console.debug('generating SSH keys for', name);
+        log.debug('generating SSH keys for', name);
         const result = Provisioner.generateKeyPair_();
         return Promise.all([
           this.storage_.set(storageKeyPub, result.public),
@@ -409,32 +412,32 @@ class Provisioner {
   private doRequest_ = (method: string, actionPath: string, body?: string, retry = true) :
       Promise<Object> => {
     const url = 'https://api.digitalocean.com/v2/' + actionPath;
-    console.debug('Request for:', url);
+    log.debug('Request for:', url);
     return new Promise((F, R) => {
       let maybeRetryAfterOAuth = () => {
         if (!retry) {
           R({errcode: 'CLOUD_ERR', message: 'Request failed', url: url});
           return;
         }
-        console.debug('Awaiting OAuth before retrying', url);
+        log.debug('Awaiting OAuth before retrying', url);
         this.doOAuth_().then(() => {
-          console.debug('Got OAuth, retrying', url);
+          log.debug('Got OAuth, retrying', url);
           this.doRequest_(method, actionPath, body, false).then((result :any) => {
-            console.debug('Request succeeded on retry', url);
+            log.debug('Request succeeded on retry', url);
             F(result);
           });
         }).catch((e) => {
-          console.debug('doOAuth_ failed:', e);
+          log.debug('doOAuth_ failed:', e);
           R(e);
         });
       };
       this.getOAuthFromStorage_().then((oauthObj :any) => {
         const xhr = freedom['core.xhr']();
-        console.debug('Making request:', url);
+        log.debug('Making request:', url);
         xhr.on('onload', (loadInfo: any) => {
           xhr.getStatus().then((statusCode :number) => {
             if (statusCode === 401) {
-              console.debug('401 response. Invalid access token?');
+              log.debug('401 response. Invalid access token?');
               // User could have gone to
               // https://cloud.digitalocean.com/settings/api/access
               // to revoke authorization.
@@ -485,14 +488,14 @@ class Provisioner {
     return this.doRequest_('GET', 'droplets/' + this.cloud_.vm.id + '/actions').then((resp: any) => {
       for (var i = 0; i < resp.actions.length; i++) {
         if (resp.actions[i].status === 'in-progress') {
-          console.debug('waiting for operations to complete...');
+          log.debug('waiting for operations to complete...');
           return new Promise<void>((F, R) => {
             setTimeout(() => {
               this.waitDigitalOceanActions_().then(F, R);
             }, POLL_TIMEOUT);
           });
         }
-        console.debug('all operations complete');
+        log.debug('all operations complete');
       }
     }).catch((e: Error) => {
       throw e;
@@ -509,7 +512,7 @@ class Provisioner {
    * @return {Promise.<void>} resolves on success, rejects on failure
    */
   private setupDigitalOcean_ = (name: string, region: string, image: string, size: string):  Promise<void> => {
-    console.info('creating', image, 'droplet in', region);
+    log.info('creating', image, 'droplet in', region);
     return new Promise<void>((F, R) => {
       this.cloud_ = {};
       // Get SSH keys in account
