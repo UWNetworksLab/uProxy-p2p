@@ -304,6 +304,9 @@ var generateProxyingSessionId_ = (): string => {
           break;
         case 4:
         case 5:
+          // Version 5 was used to indicate support for encrypted signalling messages.
+          // Since nothing changed at the peerconnection layer between 4 and 5, we can
+          // safely fall through.
           log.debug('using holographic ICE with caesar obfuscation');
           pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_);
           break;
