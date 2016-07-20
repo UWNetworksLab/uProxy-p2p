@@ -8,6 +8,7 @@
  */
 
 import bridge = require('../lib/bridge/bridge');
+import constants = require('./constants');
 import globals = require('./globals');
 import logging = require('../lib/logging/logging');
 import net = require('../lib/net/net.types');
@@ -288,25 +289,25 @@ var generateProxyingSessionId_ = (): string => {
           commonVersion, localVersion, remoteVersion);
       // See globals.ts for a description of each version.
       switch (commonVersion) {
-        case 1:
+        case constants.MESSAGE_VERSIONS.PRE_BRIDGE:
           log.debug('using old peerconnection');
           pc = new peerconnection.PeerConnectionClass(
             freedom['core.rtcpeerconnection'](config),
             'sockstortc');
           break;
-        case 2:
+        case constants.MESSAGE_VERSIONS.BRIDGE:
           log.debug('using bridge without obfuscation');
           pc = bridge.preObfuscation('sockstortc', config, this.portControl_);
           break;
-        case 3:
+        case constants.MESSAGE_VERSIONS.CAESAR:
           log.debug('using bridge with caesar obfuscation');
           pc = bridge.basicObfuscation('sockstortc', config, this.portControl_);
           break;
-        case 4:
-        case 5:
-          // Version 5 was used to indicate support for encrypted signalling messages.
-          // Since nothing changed at the peerconnection layer between 4 and 5, we can
-          // safely fall through.
+        case constants.MESSAGE_VERSIONS.HOLOGRAPHIC_ICE:
+        case constants.MESSAGE_VERSIONS.ENCRYPTED_SIGNALS:
+          // Since nothing changed at the peerconnection layer between
+          // HOLOGRAPHIC_ICE and ENCRYPTED_SIGNALS, we can safely
+          // fall through.
           log.debug('using holographic ICE with caesar obfuscation');
           pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_);
           break;

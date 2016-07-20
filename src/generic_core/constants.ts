@@ -2,13 +2,20 @@
 
 export const STORAGE_VERSION = 1;
 
-// 1: initial release
-// 2: introduce BridgingPeerConnection (no obfuscation)
-// 3: caesar obfuscation
-// 4: holographic ICE
-// 5: encrypted signalling messages (long since replaced by Network#isEncrypted)
-// 6: RC4 obfuscation (TODO: enable once FF48 is released)
-export const MESSAGE_VERSION = 5;
+export enum MESSAGE_VERSIONS {
+  PRE_BRIDGE = 1,
+  BRIDGE = 2,
+  CAESAR = 3,
+  HOLOGRAPHIC_ICE = 4,
+  // This has long since been replaced by Network#isEncrypted.
+  // At the peerconnection layer, there is no difference between this
+  // and HOLOGRAPHIC_ICE.
+  ENCRYPTED_SIGNALS = 5,
+  RC4 = 6
+};
+
+// TODO: make this RC4 once FF48 is released
+export const MESSAGE_VERSION = MESSAGE_VERSIONS.ENCRYPTED_SIGNALS;
 
 export const DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},
