@@ -286,6 +286,7 @@ var generateProxyingSessionId_ = (): string => {
       var commonVersion = Math.min(localVersion, remoteVersion);
       log.info('lowest shared client version is %1 (me: %2, peer: %3)',
           commonVersion, localVersion, remoteVersion);
+      // See globals.ts for a description of each version.
       switch (commonVersion) {
         case 1:
           log.debug('using old peerconnection');
