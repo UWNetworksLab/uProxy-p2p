@@ -75,6 +75,11 @@
     .warning {
       font-weight: bold;
     }
+    #cloudFailureFeedback {
+      text-align: center;
+      text-decoration: underline;
+      cursor: pointer;
+    }
     </style>
 
     <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
@@ -186,6 +191,9 @@
         <uproxy-button raised on-tap='{{ launchDigitalOceanSettings }}'>
           {{ 'LAUNCH_DIGITAL_OCEAN_SETTINGS' | $$ }}
         </uproxy-button>
+        <p id="cloudFailureFeedback" on-tap="{{ launchFeedback }}">
+          {{ 'REPORT_ERROR' | $$ }}
+        </p>
       </div>
     </core-overlay>
 
