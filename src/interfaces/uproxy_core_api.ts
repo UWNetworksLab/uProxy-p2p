@@ -22,11 +22,12 @@ export enum UserFeedbackType {
   PROXYING_FAILURE = 1,
   CLOUD_CONNECTIONS_DISCONNECTED = 2,
   CLOUD_SERVER_NO_CONNECT = 3,
-  TROUBLE_SIGNING_IN = 4,
-  NO_FRIENDS = 5,
-  TROUBLE_STARTING_CONNECTION = 6,
-  DISCONNECTED_FROM_FRIEND = 7,
-  OTHER_FEEDBACK = 8
+  CLOUD_SERVER_NO_START = 4,
+  TROUBLE_SIGNING_IN = 5,
+  NO_FRIENDS = 6,
+  TROUBLE_STARTING_CONNECTION = 7,
+  DISCONNECTED_FROM_FRIEND = 8,
+  OTHER_FEEDBACK = 9
 }
 
 // Object containing description so it can be saved to storage.
@@ -65,7 +66,6 @@ export interface InitialState {
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
-  copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
 }
 
@@ -117,11 +117,6 @@ export enum Command {
   START_PROXYING = 1005,
   STOP_PROXYING = 1006,
   MODIFY_CONSENT = 1007, // TODO: make this work with the consent piece.
-  START_PROXYING_COPYPASTE_GET = 1008,
-  STOP_PROXYING_COPYPASTE_GET = 1009,
-  START_PROXYING_COPYPASTE_SHARE = 1010,
-  STOP_PROXYING_COPYPASTE_SHARE = 1011,
-  COPYPASTE_SIGNALLING_MESSAGE = 1012,
 
   SEND_CREDENTIALS = 1014,
   UPDATE_GLOBAL_SETTINGS = 1015,
@@ -171,9 +166,6 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
-  // 2021 was POST_TO_CLOUDFRONT.  Replaced by Command.POST_REPORT.
-  // Legacy one-time connection string. Unused, do not send.
-  COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,

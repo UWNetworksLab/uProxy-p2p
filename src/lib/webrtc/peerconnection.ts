@@ -320,6 +320,10 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, {id: 0}).then(
         this.addRtcDataChannel_).then(
         this.registerControlChannel_).then(() => {
+          if (typeof module !== 'undefined' && module.exports) {
+            // node.js needs to manually trigger negotiation
+            this.onNegotiationNeeded_();
+          }
           return this.onceConnected;
         });
   }

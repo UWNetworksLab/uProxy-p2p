@@ -59,7 +59,13 @@ module i18nUtil {
   //
   // TODO (lucyhe): find a better way to do this.
   export function getBrowserLanguage() : string {
-    return navigator.language.substring(0, 2);
+    if (typeof navigator !== 'undefined') {
+      // firefox/chrome
+      return navigator.language.substring(0, 2);
+    } else {
+      // TODO in node, process.env.LANG may be usable
+      return 'xx';
+    }
   }
 
 }

@@ -107,24 +107,20 @@ export class UserInterface implements ui_constants.UiApi {
   private mapInstanceIdToUser_ :{[instanceId :string] :User} = {};
 
   /* Getting and sharing */
-  public gettingStatus :string = null;
-  public sharingStatus :string = null;
   public isSharingDisabled :boolean = false;
   public proxyingId: string; // ID of the most recent failed proxying attempt.
   private userCancelledGetAttempt_ :boolean = false;
 
   /* Translation */
-  public i18n_t :Function = translator_module.i18n_t;
-  public i18n_setLng :Function = translator_module.i18n_setLng;
+  public i18n_t = translator_module.i18n_t;
+  public i18n_setLng = translator_module.i18n_setLng;
+  public i18nSanitizeHtml = translator_module.i18nSanitizeHtml;
 
   /* About this uProxy installation */
   public availableVersion :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
-
-  public cloudInstallStatus :string = '';
-  public cloudInstallProgress = 0;
 
   // User-initiated proxy access mode.
   private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
@@ -269,11 +265,11 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.cloudInstallStatus = this.i18n_t(status);
+      this.fireSignal('cloud-install-status', status);
     });
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
-      this.cloudInstallProgress = progress;
+      this.fireSignal('cloud-install-progress', progress);
     });
 
     browserApi.on('inviteUrlData', this.handleInvite);
@@ -404,37 +400,36 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private updateGettingStatusBar_ = () => {
-    // TODO: localize this.
+    var gettingStatus: string = null;
     if (this.instanceGettingAccessFrom_) {
-      this.gettingStatus = this.i18n_t('GETTING_ACCESS_FROM', {
+      gettingStatus = this.i18n_t('GETTING_ACCESS_FROM', {
         name: this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].name
       });
-    } else {
-      this.gettingStatus = null;
     }
+    this.fireSignal('update-getting-status', gettingStatus);
   }
 
   private updateSharingStatusBar_ = () => {
     // TODO: localize this - may require simpler formatting to work
     // in all languages.
+    var sharingStatus: string = null;
     var instanceIds = Object.keys(this.instancesGivingAccessTo);
-    if (instanceIds.length === 0) {
-      this.sharingStatus = null;
-    } else if (instanceIds.length === 1) {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_ONE', {
+    if (instanceIds.length === 1) {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_ONE', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name
       });
     } else if (instanceIds.length === 2) {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_TWO', {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_TWO', {
         name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
         name2: this.mapInstanceIdToUser_[instanceIds[1]].name
       });
-    } else {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_MANY', {
+    } else if (instanceIds.length > 2) {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_MANY', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name,
         numOthers: (instanceIds.length - 1)
       });
     }
+    this.fireSignal('update-sharing-status', sharingStatus);
   }
 
   private addUser_ = (tokenObj :social.InviteTokenData, showConfirmation :boolean) : Promise<void> => {
@@ -1170,11 +1165,6 @@ export class UserInterface implements ui_constants.UiApi {
     } else {
       this.view = ui_constants.View.SPLASH;
     }
-  }
-
-  public i18nSanitizeHtml = (i18nMessage :string) => {
-    // Remove all HTML other than supported tags like strong, a, p, etc.
-    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
   public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {

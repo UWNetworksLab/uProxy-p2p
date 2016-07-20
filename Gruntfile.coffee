@@ -1176,25 +1176,6 @@ module.exports = (grunt) ->
     'exec:ccaPrepareIosDev'
   ]
 
-  # --- Testing tasks ---
-  grunt.registerTask 'test_lib', [
-    'base'
-  ].concat _.flatten(
-    Rule.buildAndRunTest(spec, grunt) for spec in Rule.getTests('src', 'lib', ['build-tools', 'integration-tests'])
-  )
-
-  grunt.registerTask 'test_core', [
-    'base'
-  ].concat _.flatten(
-    Rule.buildAndRunTest(spec, grunt) for spec in Rule.getTests('src', 'generic_core')
-  )
-
-  grunt.registerTask 'test_ui', [
-    'base'
-  ].concat _.flatten(
-    Rule.buildAndRunTest(spec, grunt) for spec in Rule.getTests('src', 'generic_ui/scripts')
-  )
-
   grunt.registerTask 'test_chrome', [
     'build_chrome'
     'browserify:chromeExtensionCoreConnectorSpec'
@@ -1227,11 +1208,15 @@ module.exports = (grunt) ->
     'jasmine_chromeapp:socksEcho'
   ]
 
+  grunt.registerTask 'unit_test_nobuild', _.flatten(
+    Rule.buildAndRunTest(spec, grunt) for spec in Rule.getTests('src', 'lib', ['build-tools', 'integration-tests']),
+    Rule.buildAndRunTest(spec, grunt) for spec in Rule.getTests('src', 'generic_core'),
+    Rule.buildAndRunTest(spec, grunt) for spec in Rule.getTests('src', 'generic_ui/scripts')
+  )
+
   grunt.registerTask 'unit_test', [
-    'test_lib'
-    'test_core'
-    'test_ui'
-    'test_chrome'
+    'base'
+    'unit_test_nobuild'
   ]
 
   # TODO: add test_chrome once it passes reliably
