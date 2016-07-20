@@ -12,20 +12,29 @@ var ui = ui_context.ui;
 const DEFAULT_PROVIDER = 'digitalocean';
 
 Polymer({
+  // ID of the latest attempt to create a server, used to distinguish
+  // between install failures that should be flagged to the user and
+  // failures owing to cancellation. We use a random number rather
+  // than a simple boolean because, in the event of cancellation, it
+  // can take *several* seconds for the installer to fail by which time
+  // the user could have initiated a whole new install.
+  mostRecentCreateId: 0,
+  installStatus: '',
+  installProgress: 0,
   open: function() {
     // Set translated HTML content - need to use injectBoundHTML
     // in order to enable <uproxy-faq-link>, etc tags in the text.
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_GET_STARTED_MESSAGE')),
+        translator.i18nSanitizeHtml(translator.i18n_t('CLOUD_INSTALL_GET_STARTED_MESSAGE')),
         this.$.getStartedMessage);
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_EXISTING_SERVER_MESSAGE')),
+        translator.i18nSanitizeHtml(translator.i18n_t('CLOUD_INSTALL_EXISTING_SERVER_MESSAGE')),
         this.$.existingServerMessage);
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE')),
+        translator.i18nSanitizeHtml(translator.i18n_t('CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE')),
         this.$.createAccountMessage);
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_CREATE_SERVER_MESSAGE')),
+        translator.i18nSanitizeHtml(translator.i18n_t('CLOUD_INSTALL_CREATE_SERVER_MESSAGE')),
         this.$.createServerMessage);
 
     this.showFirstOverlay();
@@ -58,6 +67,13 @@ Polymer({
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
   },
+  launchFeedback: function() {
+      this.fire('core-signal', {
+      name: 'open-feedback', data: {
+        feedbackType: uproxy_core_api.UserFeedbackType.CLOUD_SERVER_NO_START
+      }
+    });
+  },
   back: function() {
     if (this.$.failureOverlay.opened) {
       this.showFirstOverlay();
@@ -80,7 +96,7 @@ Polymer({
 
     if (!this.$.installingOverlay.opened) {
       this.closeOverlays();
-      ui.cloudInstallStatus = '';
+      this.installStatus = '';
       this.$.installingOverlay.open();
     }
     ui.cloudUpdate({
@@ -112,7 +128,7 @@ Polymer({
   removeServerAndInstallAgain: function() {
     this.mostRecentCreateId = 0;
     this.closeOverlays();
-    ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
+    this.installStatus = translator.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
     this.$.installingOverlay.open();
     // Destroy uProxy cloud server
     return ui.cloudUpdate({
@@ -160,16 +176,6 @@ Polymer({
     input.focus();
     input.select();
   },
-  ready: function() {
-    this.ui = ui;
-    // ID of the latest attempt to create a server, used to distinguish
-    // between install failures that should be flagged to the user and
-    // failures owing to cancellation. We use a random number rather
-    // than a simple boolean because, in the event of cancellation, it
-    // can take *several* seconds for the installer to fail by which time
-    // the user could have initiated a whole new install.
-    this.mostRecentCreateId = 0;
-  },
   promoIdChanged: function() {
     // do not uncheck the box if we no longer have the promo id set
     if (ui.model.globalSettings.activePromoId) {
@@ -179,6 +185,12 @@ Polymer({
   havePromoChanged: function () {
     ui.model.globalSettings.activePromoId = this.$.havePromoCode.checked;
     ui.core.updateGlobalSettings(ui.model.globalSettings);
+  },
+  updateCloudInstallStatus: function(e: Event, status: string) {
+    this.installStatus = translator.i18n_t(status);
+  },
+  updateCloudInstallProgress: function(e: Event, progress: number) {
+    this.installProgress = progress;
   },
   observe: {
     'ui.model.globalSettings.activePromoId': 'promoIdChanged'

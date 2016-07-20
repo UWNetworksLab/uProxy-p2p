@@ -81,9 +81,16 @@
     .warning {
       font-weight: bold;
     }
+    #cloudFailureFeedback {
+      text-align: center;
+      text-decoration: underline;
+      cursor: pointer;
+    }
     </style>
 
     <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
+    <core-signals on-core-signal-cloud-install-status="{{ updateCloudInstallStatus }}"></core-signals>
+    <core-signals on-core-signal-cloud-install-progress="{{ updateCloudInstallProgress }}"></core-signals>
 
     <core-overlay id='signUpOrSignInOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
@@ -149,9 +156,9 @@
         <p class="warning">{{ 'CLOUD_INSTALL_INSTALLING_WARNING' | $$ }}</p>
         <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$ }}</p>
         <div>
-          <paper-progress id='installProgress' value='{{ ui.cloudInstallProgress }}'></paper-progress>
+          <paper-progress id='installProgress' value='{{ installProgress }}'></paper-progress>
         </div>
-        <p>{{ ui.cloudInstallStatus }}</p>
+        <p>{{ installStatus }}</p>
         <uproxy-button on-tap='{{ cancelCloudInstall }}'>{{ 'CANCEL' | $$ }}</uproxy-button>
       </div>
     </core-overlay>
@@ -190,6 +197,9 @@
         <uproxy-button raised on-tap='{{ launchDigitalOceanSettings }}'>
           {{ 'LAUNCH_DIGITAL_OCEAN_SETTINGS' | $$ }}
         </uproxy-button>
+        <p id="cloudFailureFeedback" on-tap="{{ launchFeedback }}">
+          {{ 'REPORT_ERROR' | $$ }}
+        </p>
       </div>
     </core-overlay>
 

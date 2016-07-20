@@ -291,7 +291,8 @@ describe('UI.UserInterface', () => {
       // if the core.start promise fulfills. (see polymer/instance.ts)
       syncUserAndInstance('userId', 'userName', 'testInstanceId');
       ui.startGettingInUiAndConfig(
-          'testInstanceId', { address : 'testAddress' , port : 0 });
+          'testInstanceId', { address : 'testAddress' , port : 0 },
+          browser_api.ProxyAccessMode.IN_APP);
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
       ui.stoppedGetting({instanceId: null, error: false});
@@ -300,7 +301,8 @@ describe('UI.UserInterface', () => {
     it('Extension icon changes when you stop getting access', () => {
       syncUserAndInstance('userId', 'userName', 'testGiverId');
       ui.startGettingInUiAndConfig(
-          'testGiverId', { address : 'testAddress' , port : 0 });
+          'testGiverId', { address : 'testAddress' , port : 0 },
+          browser_api.ProxyAccessMode.IN_APP);
       ui['instanceGettingAccessFrom_'] = 'testGiverId';
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
@@ -314,11 +316,17 @@ describe('UI.UserInterface', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.sharingStatus).toEqual(ui.i18n_t('SHARING_ACCESS_WITH_ONE',
-          { name: 'Alice' }));
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-sharing-status',
+          ui.i18n_t('SHARING_ACCESS_WITH_ONE', { name: 'Alice' }));
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.sharingStatus).toEqual(null);
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-sharing-status',
+          null);
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-sharing-status',
+          null);
     });
 
     it('No notification when you stop sharing and are not already proxying', () => {
@@ -341,14 +349,16 @@ describe('UI.UserInterface', () => {
       // Note that setting and clearing instanceGettingAccessFrom_ is done in
       // polymer/instance.ts.
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
-      expect(ui.gettingStatus).toEqual(null);
       ui['instanceGettingAccessFrom_'] = 'testInstanceId';
       ui['updateGettingStatusBar_']();
-      expect(ui.gettingStatus).toEqual(ui.i18n_t('GETTING_ACCESS_FROM',
-          { name: 'Alice' }));
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-getting-status',
+          ui.i18n_t('GETTING_ACCESS_FROM', { name: 'Alice' }));
       ui['instanceGettingAccessFrom_'] = null;
       ui['updateGettingStatusBar_']();
-      expect(ui.gettingStatus).toEqual(null);
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-getting-status',
+          null);
     });
   });  // Update giving and/or getting state in UI
 });  // UI.UserInterface

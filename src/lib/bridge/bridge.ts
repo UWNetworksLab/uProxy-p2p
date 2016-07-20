@@ -23,7 +23,7 @@ export var preObfuscation = (
     config?:freedom.RTCPeerConnection.RTCConfiguration,
     portControl?:freedom.PortControl.PortControl)
     :BridgingPeerConnection => {
-  return new BridgingPeerConnection(ProviderType.PLAIN, name, config, 
+  return new BridgingPeerConnection(ProviderType.PLAIN, name, config,
                                     portControl);
 }
 
@@ -34,7 +34,7 @@ export var basicObfuscation = (
     portControl?:freedom.PortControl.PortControl,
     transformerConfig?:churn_types.TransformerConfig)
     :BridgingPeerConnection => {
-  return new BridgingPeerConnection(ProviderType.CHURN, name, config, 
+  return new BridgingPeerConnection(ProviderType.CHURN, name, config,
                                     portControl, transformerConfig);
 }
 
@@ -262,7 +262,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       pc:freedom.RTCPeerConnection.RTCPeerConnection)
       :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
     log.debug('%1: constructing holographic ICE peerconnection', this.name_);
-    if (navigator.userAgent.indexOf('Android') !== -1) {
+    if (typeof navigator !== 'undefined' &&
+        navigator.userAgent.indexOf('Android') !== -1) {
       return new xchurn.Connection(pc, this.name_, true,
           this.portControl_, this.transformerConfig_);
     }

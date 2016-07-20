@@ -34,7 +34,6 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     enableMonitoring: false,
     areAllContactsUproxy: false,
     supportsReconnect: false,
-    isExperimental: true
   },
   'GitHub': {
     metricsName: 'github',
@@ -43,7 +42,6 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     enableMonitoring: false,
     areAllContactsUproxy: true,
     supportsReconnect: false,
-    isExperimental: true
   },
   'Quiver': {
     displayName: 'uProxy',
@@ -53,7 +51,6 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     enableMonitoring: true,
     areAllContactsUproxy: true,
     supportsReconnect: true,
-    isExperimental: true,
     isEncrypted: true
   },
   'Cloud': {
@@ -63,6 +60,5 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     enableMonitoring: false,
     areAllContactsUproxy: true,
     supportsReconnect: false,
-    isExperimental: true
   }
 };

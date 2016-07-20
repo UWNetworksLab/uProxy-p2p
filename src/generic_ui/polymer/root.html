@@ -101,16 +101,16 @@
         padding: 0px 16px;
         height: 60px;
       }
-      core-toolbar core-icon[icon="menu"] {
+      #menu-button {
         opacity: 0.6;
-        margin: 0px;
-        -webkit-transition: all 0.23s !important;
-        -moz-transition: all 0.23s !important;
-        transition: all 0.23s !important;
-      }
-      core-toolbar core-icon[icon="menu"]:hover {
-        opacity: 1;
         cursor: pointer;
+        -webkit-transition: all 0.23s;
+        -moz-transition: all 0.23s;
+        transition: all 0.23s;
+      }
+      #menu-button:hover {
+        opacity: 1;
+        box-shadow: none;
       }
       core-toolbar #title {
         font-size: 20px;
@@ -287,11 +287,13 @@
     </style>
     <uproxy-state id="state"></uproxy-state>
 
-    <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
-
-    <core-signals on-core-signal-open-dialog="{{ openDialog }}"></core-signals>
-
-    <core-signals on-core-signal-show-toast="{{ showToast }}"></core-signal>
+    <core-signals
+        on-core-signal-close-settings="{{ closeSettings }}"
+        on-core-signal-open-dialog="{{ openDialog }}"
+        on-core-signal-show-toast="{{ showToast }}"
+        on-core-signal-update-getting-status="{{ updateGettingStatus }}"
+        on-core-signal-update-sharing-status="{{ updateSharingStatus }}">
+    </core-signal>
 
     <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
@@ -318,7 +320,7 @@
 
         <core-toolbar class="{{ {hasContacts: hasContacts} | tokenList }}">
 
-          <core-icon icon="menu" core-drawer-toggle></core-icon>
+          <core-icon-button id="menu-button" icon="menu" core-drawer-toggle></core-icon-button>
           <div id='title' flex>uProxy</div>
 
           <core-tooltip id='statsTooltip' label='{{ "STATS_ENABLED_TOOLTIP" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
@@ -383,16 +385,16 @@
                   <a href='#' on-tap='{{ openProxyError }}'>GET HELP</a>
                 </div>
               </div>
-              <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
+              <div class='statusRow' hidden?='{{!gettingStatus}}'>
                 <div class='statusText'>
                   <core-icon icon='uproxy-icons:receive'></core-icon>
-                  {{ui.gettingStatus}}
+                  {{gettingStatus}}
                 </div>
               </div>
-              <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
+              <div class='statusRow' hidden?='{{!sharingStatus}}'>
                 <div class='statusText'>
                   <core-icon icon='uproxy-icons:share'></core-icon>
-                  {{ui.sharingStatus}}
+                  {{sharingStatus}}
                 </div>
               </div>
               <div class='statusRow' hidden?='{{!ui.availableVersion}}'>

@@ -62,7 +62,7 @@
       margin: 0.5em 0em;
     }
     #logCheckboxLabel {
-      cursor: pointer;
+      color: grey;
       text-indent: 10px;
       display: inline-block;
     }
@@ -167,6 +167,11 @@
       height: 15px;
       width: 15px;
     }
+    #logsLink {
+      cursor: pointer;
+      padding-top: 10px;
+      padding-bottom: 16px;
+    }
     #sendingFeedback {
       text-align: center;
       font-size: 16px;
@@ -205,6 +210,7 @@
               <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{ changePlaceholder }}" valueattr="data-feedbackOption" id="errorInput">
                 <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}">{{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
                 <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}">{{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_START }}">{{ "CLOUD_SERVER_NO_START" | $$ }}</paper-item>
                 <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_SIGNING_IN }}">{{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
                 <paper-item data-feedbackOption="{{ UserFeedbackType.NO_FRIENDS }}">{{ "NO_FRIENDS" | $$ }}</paper-item>
                 <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}">{{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
@@ -235,13 +241,17 @@
 
           <div id="logCheckboxContainer">
             <paper-checkbox for id="logCheckbox"></paper-checkbox>
-            <span id="logCheckboxLabel" on-tap="{{ viewLogs }}">
-              {{ "NETWORK_AND_LOGS" | $$ }}
-            </span>
+            <span id="logCheckboxLabel"> {{ "NETWORK_AND_LOGS" | $$ }} </span>
             <uproxy-faq-link anchor="doesUproxyLogData">
               <core-icon icon="help" id="helpIcon"></core-icon>
             </uproxy-faq-link>
           </div>
+          <div id="logsLink">
+            <span id="logsLink" on-tap="{{ viewLogs }}">
+              {{ "SHOW_LOGS" | $$ }}
+            </span>
+          </div>
+
           <p id="moreInfo">
             {{ "P_I_I_MESSAGE" | $$ }}
           </p>

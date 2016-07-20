@@ -21,12 +21,13 @@ export enum UserFeedbackType {
   USER_INITIATED = 0,
   PROXYING_FAILURE = 1,
   CLOUD_CONNECTIONS_DISCONNECTED = 2,
-  CLOUD_SERVER_NO_CONNECT = 3, 
-  TROUBLE_SIGNING_IN = 4, 
-  NO_FRIENDS = 5, 
-  TROUBLE_STARTING_CONNECTION = 6, 
-  DISCONNECTED_FROM_FRIEND = 7, 
-  OTHER_FEEDBACK = 8
+  CLOUD_SERVER_NO_CONNECT = 3,
+  CLOUD_SERVER_NO_START = 4,
+  TROUBLE_SIGNING_IN = 5,
+  NO_FRIENDS = 6,
+  TROUBLE_STARTING_CONNECTION = 7,
+  DISCONNECTED_FROM_FRIEND = 8,
+  OTHER_FEEDBACK = 9
 }
 
 // Object containing description so it can be saved to storage.
@@ -40,7 +41,6 @@ export interface GlobalSettings {
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
-  splashState : number;
   consoleFilter    :loggingTypes.Level;
   language         :string;
   force_message_version :number;
@@ -52,6 +52,7 @@ export interface GlobalSettings {
   activePromoId: string;
   shouldHijackDO: boolean;
   crypto: boolean;
+  reproxy: reproxySettings;
   // A list of strings, each represented as a constant below, with
   // prefix 'FEATURE_'.
   enabledExperiments :string[];
@@ -65,7 +66,6 @@ export interface InitialState {
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
-  copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
 }
 
@@ -84,6 +84,13 @@ export interface ConnectionState {
   bytesSent :number;
   bytesReceived :number;
   activeEndpoint :net.Endpoint;
+}
+
+// Contains settings directing rtc-to-net server to go directly to net or
+// reproxy through a socks proxy server (such as local Tor proxy).
+export interface reproxySettings {
+  enabled       :boolean;      // Reproxy through socks is enabled
+  socksEndpoint :net.Endpoint; // Endpoint through which to reproxy
 }
 
 //TODO(jpevarnek) remove this interface
@@ -110,11 +117,6 @@ export enum Command {
   START_PROXYING = 1005,
   STOP_PROXYING = 1006,
   MODIFY_CONSENT = 1007, // TODO: make this work with the consent piece.
-  START_PROXYING_COPYPASTE_GET = 1008,
-  STOP_PROXYING_COPYPASTE_GET = 1009,
-  START_PROXYING_COPYPASTE_SHARE = 1010,
-  STOP_PROXYING_COPYPASTE_SHARE = 1011,
-  COPYPASTE_SIGNALLING_MESSAGE = 1012,
 
   SEND_CREDENTIALS = 1014,
   UPDATE_GLOBAL_SETTINGS = 1015,
@@ -135,7 +137,8 @@ export enum Command {
   REMOVE_CONTACT = 1031,
   POST_REPORT = 1032,
   VERIFY_USER = 1033,
-  VERIFY_USER_SAS = 1034
+  VERIFY_USER_SAS = 1034,
+  GET_PORT_CONTROL_SUPPORT = 1035,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -163,9 +166,6 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
-  // 2021 was POST_TO_CLOUDFRONT.  Replaced by Command.POST_REPORT.
-  // Legacy one-time connection string. Unused, do not send.
-  COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
@@ -356,4 +356,6 @@ export interface CoreApi {
   finishVerifyUser(args:FinishVerifyArgs) :void;
 
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
+
+  getPortControlSupport(): Promise<PortControlSupport>;
 }

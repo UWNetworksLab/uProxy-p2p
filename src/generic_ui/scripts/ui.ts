@@ -9,11 +9,13 @@
  * Common User Interface state holder and changer.
  */
 
+import _ = require('lodash');
 import ui_constants = require('../../interfaces/ui');
 import background_ui = require('./background_ui');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
+import ProxyAccessMode = browser_api.ProxyAccessMode;
 import BrowserAPI = browser_api.BrowserAPI;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import net = require('../../lib/net/net.types');
@@ -77,6 +79,12 @@ export function getImageData(userId: string, oldImageData: string,
       jdenticon.toSvg(userIdHash, 100).replace(/#/g, '%23') + '\'';
 }
 
+
+/* Suppress `error TS2339: Property 'languages' does not exist on type
+ * 'Navigator'` triggered by `navigator.languages` reference below.
+ */
+declare var navigator :any;
+
 /**
  * The User Interface class.
  *
@@ -99,25 +107,23 @@ export class UserInterface implements ui_constants.UiApi {
   private mapInstanceIdToUser_ :{[instanceId :string] :User} = {};
 
   /* Getting and sharing */
-  public gettingStatus :string = null;
-  public sharingStatus :string = null;
   public isSharingDisabled :boolean = false;
   public proxyingId: string; // ID of the most recent failed proxying attempt.
   private userCancelledGetAttempt_ :boolean = false;
 
   /* Translation */
-  public i18n_t :Function = translator_module.i18n_t;
-  public i18n_setLng :Function = translator_module.i18n_setLng;
+  public i18n_t = translator_module.i18n_t;
+  public i18n_setLng = translator_module.i18n_setLng;
+  public i18nSanitizeHtml = translator_module.i18nSanitizeHtml;
 
   /* About this uProxy installation */
-  public portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
   public availableVersion :string = null;
 
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
-  public cloudInstallStatus :string = '';
-  public cloudInstallProgress = 0;
+  // User-initiated proxy access mode.
+  private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -258,15 +264,12 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
-    core.onUpdate(uproxy_core_api.Update.PORT_CONTROL_STATUS,
-                  this.setPortControlSupport_);
-
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.cloudInstallStatus = this.i18n_t(status);
+      this.fireSignal('cloud-install-status', status);
     });
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
-      this.cloudInstallProgress = progress;
+      this.fireSignal('cloud-install-progress', progress);
     });
 
     browserApi.on('inviteUrlData', this.handleInvite);
@@ -345,7 +348,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public showDialog(heading :string, message :string, buttonText ?:string,
       displayData ?:string) {
-    return this.backgroundUi.openDialog(dialogs.getConfirmationDialogDescription(
+    return this.backgroundUi.openDialog(dialogs.getMessageDialogDescription(
         heading, message, buttonText, displayData));
   }
 
@@ -397,37 +400,36 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private updateGettingStatusBar_ = () => {
-    // TODO: localize this.
+    var gettingStatus: string = null;
     if (this.instanceGettingAccessFrom_) {
-      this.gettingStatus = this.i18n_t('GETTING_ACCESS_FROM', {
+      gettingStatus = this.i18n_t('GETTING_ACCESS_FROM', {
         name: this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].name
       });
-    } else {
-      this.gettingStatus = null;
     }
+    this.fireSignal('update-getting-status', gettingStatus);
   }
 
   private updateSharingStatusBar_ = () => {
     // TODO: localize this - may require simpler formatting to work
     // in all languages.
+    var sharingStatus: string = null;
     var instanceIds = Object.keys(this.instancesGivingAccessTo);
-    if (instanceIds.length === 0) {
-      this.sharingStatus = null;
-    } else if (instanceIds.length === 1) {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_ONE', {
+    if (instanceIds.length === 1) {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_ONE', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name
       });
     } else if (instanceIds.length === 2) {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_TWO', {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_TWO', {
         name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
         name2: this.mapInstanceIdToUser_[instanceIds[1]].name
       });
-    } else {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_MANY', {
+    } else if (instanceIds.length > 2) {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_MANY', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name,
         numOthers: (instanceIds.length - 1)
       });
     }
+    this.fireSignal('update-sharing-status', sharingStatus);
   }
 
   private addUser_ = (tokenObj :social.InviteTokenData, showConfirmation :boolean) : Promise<void> => {
@@ -482,7 +484,7 @@ export class UserInterface implements ui_constants.UiApi {
       } else {
         // Old v1 invites are base64 encoded JSON
         var lastNonCodeCharacter = Math.max(invite.lastIndexOf('/'), invite.lastIndexOf('#'));
-        var token = invite.substr(lastNonCodeCharacter + 1);
+        var token = invite.substring(lastNonCodeCharacter + 1);
 
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match('[A-Za-z0-9+/=_]+')[0];
@@ -655,6 +657,7 @@ export class UserInterface implements ui_constants.UiApi {
       // In the case where the user clicked stop, this will have no effect
       // (this function is idempotent).
       this.browserApi.stopUsingProxy();
+      this.proxyAccessMode_ = ProxyAccessMode.NONE;
     }
 
     this.updateGettingStatusBar_();
@@ -670,6 +673,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     this.browserApi.stopUsingProxy();
+    this.proxyAccessMode_ = ProxyAccessMode.NONE;
     this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
 
@@ -695,10 +699,12 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public restartProxying = () => {
-    this.startGettingFromInstance(this.core.disconnectedWhileProxying);
+    this.startGettingFromInstance(this.core.disconnectedWhileProxying,
+                                  this.proxyAccessMode_);
   }
 
-  public startGettingFromInstance = (instanceId :string) :Promise<void> => {
+  public startGettingFromInstance =
+      (instanceId :string, accessMode: ProxyAccessMode): Promise<void> => {
     this.instanceTryingToGetAccessFrom = instanceId;
 
     return this.core.start(this.getInstancePath_(instanceId))
@@ -710,7 +716,9 @@ export class UserInterface implements ui_constants.UiApi {
           this.instanceGettingAccessFrom_ != instanceId) {
         this.core.stop(this.getInstancePath_(this.instanceGettingAccessFrom_));
       }
-      this.startGettingInUiAndConfig(instanceId, endpoint);
+      // Remember access mode in case of reconnect.
+      this.proxyAccessMode_ = accessMode;
+      this.startGettingInUiAndConfig(instanceId, endpoint, accessMode);
     }, (err:Error) => {
       this.instanceTryingToGetAccessFrom = null;
       throw err;
@@ -739,10 +747,15 @@ export class UserInterface implements ui_constants.UiApi {
     * Sets extension icon to default and undoes proxy configuration.
     */
   public startGettingInUiAndConfig =
-      (instanceId :string, endpoint :net.Endpoint) => {
+      (instanceId :string, endpoint :net.Endpoint, accessMode: ProxyAccessMode) => {
     if (instanceId) {
       this.instanceGettingAccessFrom_ = instanceId;
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
+    }
+
+    if (!accessMode || accessMode === ProxyAccessMode.NONE) {
+      console.error('Cannot start using proxy: unknown proxy acccess mode.');
+      return;
     }
 
     this.core.disconnectedWhileProxying = null;
@@ -752,7 +765,7 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateGettingStatusBar_();
 
     this.browserApi.startUsingProxy(endpoint,
-        this.model.globalSettings.proxyBypass);
+        this.model.globalSettings.proxyBypass, {accessMode: accessMode});
   }
 
   /**
@@ -903,7 +916,9 @@ export class UserInterface implements ui_constants.UiApi {
       var gettingState = payload.offeringInstances[i].localGettingFromRemote;
       var instanceId = payload.offeringInstances[i].instanceId;
       if (gettingState === social.GettingState.GETTING_ACCESS) {
-        this.startGettingInUiAndConfig(instanceId, payload.offeringInstances[i].activeEndpoint);
+        this.startGettingInUiAndConfig(
+            instanceId, payload.offeringInstances[i].activeEndpoint,
+            this.proxyAccessMode_);
         break;
       } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
         this.instanceTryingToGetAccessFrom = instanceId;
@@ -932,7 +947,7 @@ export class UserInterface implements ui_constants.UiApi {
   };
 
   /**
-   * Remove a friend from the friend list by removing it from 
+   * Remove a friend from the friend list by removing it from
    * model.contacts
    */
   public removeFriend = (args:{ networkName: string, userId: string }) => {
@@ -1054,6 +1069,21 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.networkNames = state.networkNames;
     this.model.cloudProviderNames = state.cloudProviderNames;
     this.availableVersion = state.availableVersion;
+    if (!state.globalSettings.language) {
+      // Set state.globalSettings.language based on browser settings:
+      // Choose the first language in navigator.languages we have available.
+      let lang :string;
+      try {
+        lang = _(navigator.languages).map((langCode :string) => {
+          return langCode.substring(0, 2).toLowerCase();  // Normalize
+        }).find((langCode :string) => {  // Return first lang we have available.
+          return _.includes(translator_module.i18n_languagesAvailable, langCode);
+        });
+      } catch (e) {
+        lang = 'en';
+      }
+      state.globalSettings.language = lang || 'en';
+    }
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.updateLanguage(state.globalSettings.language);
     }
@@ -1068,8 +1098,6 @@ export class UserInterface implements ui_constants.UiApi {
     for (var network in state.onlineNetworks) {
       this.addOnlineNetwork_(state.onlineNetworks[network]);
     }
-
-    this.portControlSupport = state.portControlSupport;
 
     // plenty of state may have changed, update it
     this.updateView_();
@@ -1113,20 +1141,12 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  private setPortControlSupport_ = (support:uproxy_core_api.PortControlSupport) => {
-    this.portControlSupport = support;
-  }
-
   public getNetworkDisplayName = (networkName :string) : string => {
     return this.getProperty_<string>(networkName, 'displayName') || networkName;
   }
 
   private supportsReconnect_ = (networkName :string) : boolean => {
     return this.getProperty_<boolean>(networkName, 'supportsReconnect') || false;
-  }
-
-  public isExperimentalNetwork = (networkName :string) : boolean => {
-    return this.getProperty_<boolean>(networkName, 'isExperimental') || false;
   }
 
   private getProperty_ = <T>(networkName :string, propertyName :string) : T => {
@@ -1145,11 +1165,6 @@ export class UserInterface implements ui_constants.UiApi {
     } else {
       this.view = ui_constants.View.SPLASH;
     }
-  }
-
-  public i18nSanitizeHtml = (i18nMessage :string) => {
-    // Remove all HTML other than supported tags like strong, a, p, etc.
-    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
   }
 
   public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs)
