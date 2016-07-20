@@ -315,6 +315,11 @@ module.exports = (grunt) ->
       androidReplaceXwalkDist: {
         command: './replace_xwalk_in_apk.sh release'
       }
+      installFreedomForNodeForZork: {
+        # This allows our Docker containers, which do not have access to the
+        # git repo's "top-level" node_modules/ folder find freedom-for-node.
+        command: 'npm install --prefix build/dev/uproxy/lib/samples/zork-node freedom-for-node'
+      }
     }
 
     copy: {
@@ -620,7 +625,6 @@ module.exports = (grunt) ->
           localDestPath: 'lib/samples/zork-firefoxapp/data/'
       libsForZorkNode:
         Rule.copyLibs
-          npmLibNames: ['freedom-for-node']
           pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork']
           pathsFromThirdPartyBuild: ['freedom-port-control']
           localDestPath: 'lib/samples/zork-node/'
@@ -1095,6 +1099,7 @@ module.exports = (grunt) ->
     'copy:libsForZorkChromeApp'
     'copy:libsForZorkFirefoxApp'
     'copy:libsForZorkNode'
+    'exec:installFreedomForNodeForZork'
   ]
 
   grunt.registerTask 'version_file', [
