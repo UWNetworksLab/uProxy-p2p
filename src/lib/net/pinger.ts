@@ -20,7 +20,7 @@ class Pinger {
   // Resolves once a connection has been established, rejecting if
   // no connection can be made within the timeout.
   public ping = (): Promise<void> => {
-    log.debug('pinging ' + this.host_ + ':' + this.port_ + '...');
+    log.debug('pinging %1:%2...', this.host_ , this.port_);
 
     return promises.retry(() => {
       const socket = freedom['core.tcpsocket']();
