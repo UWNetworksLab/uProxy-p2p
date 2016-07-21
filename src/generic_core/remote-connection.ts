@@ -8,10 +8,12 @@
  */
 
 import bridge = require('../lib/bridge/bridge');
+import constants = require('./constants');
 import globals = require('./globals');
 import logging = require('../lib/logging/logging');
 import net = require('../lib/net/net.types');
 import peerconnection = require('../lib/webrtc/peerconnection');
+import rc4 = require('../lib/transformers/rc4');
 import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import social = require('../interfaces/social');
 import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
@@ -285,24 +287,36 @@ var generateProxyingSessionId_ = (): string => {
       var commonVersion = Math.min(localVersion, remoteVersion);
       log.info('lowest shared client version is %1 (me: %2, peer: %3)',
           commonVersion, localVersion, remoteVersion);
+      // See globals.ts for a description of each version.
       switch (commonVersion) {
-        case 1:
+        case constants.MESSAGE_VERSIONS.PRE_BRIDGE:
           log.debug('using old peerconnection');
           pc = new peerconnection.PeerConnectionClass(
             freedom['core.rtcpeerconnection'](config),
             'sockstortc');
           break;
-        case 2:
+        case constants.MESSAGE_VERSIONS.BRIDGE:
           log.debug('using bridge without obfuscation');
           pc = bridge.preObfuscation('sockstortc', config, this.portControl_);
           break;
-        case 3:
-          log.debug('using bridge with basicObfuscation');
+        case constants.MESSAGE_VERSIONS.CAESAR:
+          log.debug('using bridge with caesar obfuscation');
           pc = bridge.basicObfuscation('sockstortc', config, this.portControl_);
           break;
+        case constants.MESSAGE_VERSIONS.HOLOGRAPHIC_ICE:
+        case constants.MESSAGE_VERSIONS.ENCRYPTED_SIGNALS:
+          // Since nothing changed at the peerconnection layer between
+          // HOLOGRAPHIC_ICE and ENCRYPTED_SIGNALS, we can safely
+          // fall through.
+          log.debug('using holographic ICE with caesar obfuscation');
+          pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_);
+          break;
         default:
-          log.debug('using holographic ICE');
-          pc = bridge.best('sockstortc', config, this.portControl_);
+          log.debug('using holographic ICE with RC4 obfuscation');
+          pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_, {
+            name: 'rc4',
+            config: JSON.stringify(rc4.randomConfig())
+          });
         }
 
         globals.metrics.increment('attempt');

@@ -3,6 +3,7 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import bridge = require('../bridge/bridge');
 import churn_types = require('../churn/churn.types');
+import constants = require('../../generic_core/constants');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
@@ -131,6 +132,10 @@ function serveConnection(connection: tcp.Connection): void {
         break;
       case 'xyzzy':
         sendReply('Nothing happens.', connection);
+        keepParsing = true;
+        break;
+      case 'version':
+        sendReply(constants.MESSAGE_VERSION.toString(10), connection);
         keepParsing = true;
         break;
       case 'quit':
