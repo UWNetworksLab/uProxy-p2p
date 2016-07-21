@@ -1,5 +1,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-toggle-button/paper-toggle-button.html'>
 <link rel='import' href='../../bower/core-label/core-label.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
@@ -72,6 +73,54 @@
       text-align: center;
       background-color: #ffffff;
     }
+    #enableTor {
+      width: 100%;
+      border-bottom: 1px solid rgb(221, 221, 221);
+      padding: 20px 30px;
+      text-align: start;
+      overflow: auto;
+      color: #12A391;
+    }
+    #enableTor core-icon {
+      height: 15px !important;
+      color: grey;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      margin-right: 0px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    #enableTor core-icon:hover {
+      opacity: 1;
+    }
+    #enableTor paper-toggle-button {
+    }
+    #enableTor paper-input-decorator[id=torPortDecorator] {
+      font-size: 1.0em;
+      background-color: rgb(240,240,240);
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-bottom: 7px;
+      padding-top: 0;
+      margin-bottom: 0.75em;
+      margin-top: 0.75em;
+      margin-right: 3em;
+      width: 3em;
+      float: right;
+    }
+    textarea[fit] {
+      /* fit does not properly size textareas on Firefox */
+      height: 100%;
+    }
+    .advancedSettingsText {
+      font-size: 12px;
+      padding-top: 0px;
+      color: rgb(112, 112, 112);
+    }
+    .error {
+      color: rgb(200, 112, 112);
+    }
     core-tooltip::shadow #tooltip {
       /* Without this, the first time you view the
          tooltip, it appears off center. */
@@ -89,18 +138,6 @@
       padding-top: 0;
       margin-bottom: 0.75em;
       margin-top: 0.75em;
-    }
-    textarea[fit] {
-      /* fit does not properly size textareas on Firefox */
-      height: 100%;
-    }
-    .advancedSettingsText {
-      font-size: 12px;
-      padding-top: 0px;
-      color: rgb(112, 112, 112);
-    }
-    .error {
-      color: rgb(200, 112, 112);
     }
     #portControlBox {
       border-bottom: 1px solid rgb(221, 221, 221);
@@ -149,6 +186,20 @@
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>
+          </p>
+        </div>
+        <div id='enableTor'>
+          <p class='inputLabel'>
+            {{ "TOR_ENABLE" | $$ }}
+            <uproxy-faq-link anchor='doesUproxyLogData'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+            <paper-toggle-button>
+              <input is='core-input' value='{{ torEnabled }}' />
+            </paper-toggle-button>
+            <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}'>
+              <input is='core-input' maxlength="5" value='{{ torPort }}' disabled?='{{ torEnabled === false }}'/>
+            </paper-input-decorator>
           </p>
         </div>
         <div id='portControlBox'>

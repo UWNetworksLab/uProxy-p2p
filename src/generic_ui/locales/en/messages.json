@@ -171,6 +171,14 @@
     "description": "The text for a button in the settings pane the user can click to check their NAT settings and view the latest logs uProxy has collected",
     "message": "Analyze NAT"
   },
+  "TOR_ENABLE": {
+    "description": "Title of section in advanced settings for enabling Tor reproxy",
+    "message": "Enable Tor?"
+  },
+  "TOR_PORT_PLACEHOLDER": {
+    "description": "Default message in port field of advanced setting for enablign Tor reproxy",
+    "message": "Port"
+  },
   "P_I_I_MESSAGE": {
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
     "message": "Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information."
