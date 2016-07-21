@@ -644,24 +644,38 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public cloudUpdate = (args: uproxy_core_api.CloudOperationArgs): Promise<void> => {
+  public cloudUpdate = (args: uproxy_core_api.CloudOperationArgs)
+      :Promise<uproxy_core_api.CloudOperationResult> => {
     if (args.providerName !== CLOUD_PROVIDER_NAME) {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
+
+    let newCloudOpResult = () :uproxy_core_api.CloudOperationResult => ({});
 
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
-        return this.createCloudServer_(args.region);
+        return this.createCloudServer_(args.region).then(newCloudOpResult);
       case uproxy_core_api.CloudOperationType.CLOUD_DESTROY:
-        return this.destroyCloudServer_();
+        return this.destroyCloudServer_().then(newCloudOpResult);
       case uproxy_core_api.CloudOperationType.CLOUD_REBOOT:
-        return this.rebootCloudServer_();
+        return this.rebootCloudServer_().then(newCloudOpResult);
+      case uproxy_core_api.CloudOperationType.CLOUD_HAS_OAUTH:
+        return this.cloudHasOAuth().then(
+          (hasOAuth :boolean) :uproxy_core_api.CloudOperationResult => {
+            return {hasOAuth: hasOAuth};
+          }
+        );
       default:
         return Promise.reject(new Error('cloud operation not supported'));
     }
+  }
+
+  public cloudHasOAuth = () :Promise<boolean> => {
+    return oneShotModule_(CLOUD_PROVIDER_MODULE_NAME,
+                          (provider :any) => provider.hasOAuth());
   }
 
   private createCloudServer_ = (region: string) => {

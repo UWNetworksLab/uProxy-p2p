@@ -261,7 +261,8 @@ export enum PortControlSupport {PENDING, TRUE, FALSE};
 export enum CloudOperationType {
   CLOUD_INSTALL = 0,
   CLOUD_DESTROY = 1,
-  CLOUD_REBOOT = 2
+  CLOUD_REBOOT = 2,
+  CLOUD_HAS_OAUTH = 3
 }
 
 // Arguments to cloudUpdate
@@ -271,6 +272,11 @@ export interface CloudOperationArgs {
   providerName :string;
   // Provider-specific region in which to locate a new server.
   region ?:string;
+};
+
+// Result of cloudUpdate
+export interface CloudOperationResult {
+  hasOAuth? :boolean;
 };
 
 // Argument to removeContact
@@ -333,7 +339,9 @@ export interface CoreApi {
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudUpdate(args :CloudOperationArgs): Promise<void>;
+  // Update: This is also now used for CloudOperationType.CLOUD_HAS_OAUTH,
+  // which is neither long-running nor potentially triggers an OAuth flow.
+  cloudUpdate(args :CloudOperationArgs): Promise<CloudOperationResult>;
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;

@@ -1167,7 +1167,8 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
+  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs)
+      :Promise<uproxy_core_api.CloudOperationResult> => {
     return this.core.cloudUpdate(args);
   }
 
