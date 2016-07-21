@@ -197,7 +197,7 @@
   },
   "FEEDBACK_SUBMITTED_4": {
     "description": "Trouble signing in feedback error.",
-    "message": "Login will fail if you try a social network that is banned.  Thanks for your feedback! <uproxy-faq-link anchor='willUproxyWork'>Learn more.</uproxy-faq-link>"
+    "message": "Login will fail if you try a social network that is blocked.  Thanks for your feedback! <uproxy-faq-link anchor='willUproxyWork'>Learn more.</uproxy-faq-link>"
   },
   "FEEDBACK_SUBMITTED_5": {
     "description": "No friends feedback error.",
