@@ -95,17 +95,20 @@
       opacity: 1;
     }
     #enableTor paper-toggle-button {
+      float: right;
+      margin-right: 5em;
     }
     #enableTor paper-input-decorator[id=torPortDecorator] {
       font-size: 1.0em;
+      font-weight: normal;
       background-color: rgb(240,240,240);
       padding-left: 5px;
       padding-right: 5px;
-      padding-bottom: 7px;
+      padding-bottom: 6px;
       padding-top: 0;
-      margin-bottom: 0.75em;
-      margin-top: 0.75em;
-      margin-right: 3em;
+      margin-bottom: 0;
+      margin-top: 0;
+      margin-right: 5em;
       width: 3em;
       float: right;
     }
@@ -120,6 +123,12 @@
     }
     .error {
       color: rgb(200, 112, 112);
+    }
+    paper-toggle-button::shadow [checked] .toggle {
+      background-color: #12A391;
+    }
+    paper-toggle-button::shadow [checked] .toggle-ink {
+      color: #12A391;
     }
     core-tooltip::shadow #tooltip {
       /* Without this, the first time you view the
@@ -194,11 +203,12 @@
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>
-            <paper-toggle-button>
-              <input is='core-input' value='{{ torEnabled }}' />
-            </paper-toggle-button>
+            <paper-toggle-button id='torEnableButton'></paper-toggle-button>
+          </p>
+          <p class='advancedSettingsText' hidden?='{{ !$.torEnableButton.checked }}'>
+            <span id='torPortLabel'>{{ "TOR_PORT_PLACEHOLDER" | $$ }}:</span>
             <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}'>
-              <input is='core-input' maxlength="5" value='{{ torPort }}' disabled?='{{ torEnabled === false }}'/>
+              <input is='core-input' maxlength="5" value='{{ torPort }}'/>
             </paper-input-decorator>
           </p>
         </div>

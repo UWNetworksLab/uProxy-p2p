@@ -34,6 +34,10 @@ Polymer({
       this.refreshPortControl();
     }
 
+    // Set visuals in "Enable Tor" div based on current global settings
+    this.$.torEnableButton.checked = ui_context.model.globalSettings.reproxy.enabled;
+    this.torPort = ui_context.model.globalSettings.reproxy.socksEndpoint.port;
+
     this.$.advancedSettingsPanel.open();
   },
   // Perform rudimentary JSON check for the text settings.
@@ -58,6 +62,15 @@ Polymer({
       if (!this.checkSettings_(ui_context.model.globalSettings, newSettings)) {
         this.status = StatusState.KEY_VALUE_ERROR;
         return;
+      }
+      // User input values in "Enable Tor" div override JSON blob
+      if (this.$.torEnableButton.checked) {
+        newSettings.reproxy = {
+          enabled: true,
+          socksEndpoint: {address: '127.0.0.1', port: this.torPort}
+        }
+      } else {
+        newSettings.reproxy.enabled = false;
       }
 
       ui_context.model.globalSettings = newSettings;
