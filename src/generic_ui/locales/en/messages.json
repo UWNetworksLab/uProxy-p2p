@@ -175,13 +175,37 @@
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
     "message": "Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information."
   },
-  "THANK_YOU": {
+  "FEEDBACK_TITLE": {
     "description": "",
     "message": "Thank you!"
+  },
+  "FEEDBACK_TITLE_4": {
+    "description": "",
+    "message": "Trouble signing in"
+  },
+  "FEEDBACK_TITLE_5": {
+    "description": "",
+    "message": "No friends to proxy from"
+  },
+  "FEEDBACK_TITLE_6": {
+    "description": "",
+    "message": "Can't start connection"
   },
   "FEEDBACK_SUBMITTED": {
     "description": "User feedback was successfully submitted.",
     "message": "Your feedback has been submitted to the uProxy development team."
+  },
+  "FEEDBACK_SUBMITTED_4": {
+    "description": "Trouble signing in feedback error.",
+    "message": "Login will fail if you try a social network that is blocked.  Thanks for your feedback! <uproxy-faq-link anchor='willUproxyWork'>Learn more.</uproxy-faq-link>"
+  },
+  "FEEDBACK_SUBMITTED_5": {
+    "description": "No friends feedback error.",
+    "message": "Consider using uProxy cloud servers.  Thanks for your feedback! <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+  },
+  "FEEDBACK_SUBMITTED_6": {
+    "description": "Trouble connecting feedback error.",
+    "message": "Sometimes uProxy relies on port control to establish a connection, but that might not be available for your network.  Thanks for your feedback! <uproxy-faq-link anchor='whatIsPortControl'>Learn more.</uproxy-faq-link>"
   },
   "EMAIL_INSTEAD_TITLE": {
     "description": "Title for error that appears if feedback submission failed.",
