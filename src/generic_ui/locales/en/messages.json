@@ -179,6 +179,14 @@
     "description": "Default message in port field of advanced setting for enablign Tor reproxy",
     "message": "Port"
   },
+  "TOR_HOW_ENABLE_REPROXY": {
+    "description": "Title of FAQ question explaining Tor anonymity option of Sharers reproxying Getter requests",
+    "message": "How do I use Tor with uProxy to provide anonymity?"
+  },
+  "TOR_HOW_ENABLE_REPROXY_ANSWER": {
+    "description": "Title of FAQ question explaining Tor anonymity option of Sharers reproxying Getter requests",
+    "message": "<p><a href=\"https://www.torproject.org/\">Tor</a> is a free and open network that provides anonymity for its users by protecting against certain traffic analysis attacks. Though uProxy is not an anonymity tool by itself, it can be used with Tor to provide increased anonymity. Currently, our supported Tor option can only be enabled by the user sharing their access, not by users receving access.</p><p>If you are sharing your connection with others, you can use Tor to protect the anonmity of your connection. To use Tor with uProxy, you must first <a href=\"https://www.torproject.org/download/download\">download</a> Tor. When you have Tor running on your machine, navigate to the Advanced Settings panel in uProxy, click the Enable Tor button, and enter the port number for Tor (9050 is default for stand-alone Tor and 9150 is default for Tor Browser Bundle). All new users receiving access from you will now have their requests routed through Tor. To route old users through Tor, you must revoke and reapprove their access.</p>"
+  },
   "P_I_I_MESSAGE": {
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
     "message": "Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information."
