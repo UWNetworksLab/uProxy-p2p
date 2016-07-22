@@ -37,15 +37,23 @@ cat <<EOF > $TMP_DIR/Dockerfile
 FROM phusion/baseimage:0.9.19
 
 RUN apt-get -qq update
-RUN apt-get -qq install wget unzip xvfb fvwm supervisor iptables x11vnc unattended-upgrades
+RUN apt-get -qq install wget unzip supervisor iptables unattended-upgrades
 
 RUN mkdir /test
 COPY test /test
 
 EXPOSE 9000
 EXPOSE 9999
+EOF
+
+# Chrome and Firefox need X.
+if [ "$BROWSER" = "chrome" ] || [ "$BROWSER" = "firefox" ]
+then
+  cat <<EOF >> $TMP_DIR/Dockerfile
+RUN apt-get install -y xvfb fvwm x11vnc
 EXPOSE 5900
 EOF
+fi
 
 if [ -n "$PREBUILT" ]
 then
