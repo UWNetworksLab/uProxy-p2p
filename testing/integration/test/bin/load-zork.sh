@@ -26,14 +26,17 @@ while getopts vzh? opt; do
   esac
 done
 
-pkill Xvfb
-rm -f /tmp/.X10-lock
-export DISPLAY=:10
-Xvfb :10 -screen 0 1280x1024x24 &
-fvwm &
+if [ "$BROWSER" = "chrome" ] || [ "$BROWSER" = "firefox" ]
+then
+  pkill Xvfb
+  rm -f /tmp/.X10-lock
+  export DISPLAY=:10
+  Xvfb :10 -screen 0 1280x1024x24 &
+  fvwm &
 
-if [ "$RUNVNC" = true ]; then
-  x11vnc -display :10 -forever &
+  if [ "$RUNVNC" = true ]; then
+    x11vnc -display :10 -forever &
+  fi
 fi
 
 if [ "$IPTABLES" = true ]
