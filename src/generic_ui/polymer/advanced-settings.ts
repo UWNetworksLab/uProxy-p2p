@@ -65,11 +65,13 @@ Polymer({
       }
       // User input values in "Enable Tor" div override JSON blob
       if (this.$.torEnableButton.checked) {
+        this.torEnabled = true;
         newSettings.reproxy = {
           enabled: true,
           socksEndpoint: {address: '127.0.0.1', port: this.torPort}
-        }
+        };
       } else {
+        this.torEnabled = false;
         newSettings.reproxy.enabled = false;
       }
 

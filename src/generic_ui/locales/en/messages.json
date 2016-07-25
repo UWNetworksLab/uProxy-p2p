@@ -173,19 +173,31 @@
   },
   "TOR_ENABLE": {
     "description": "Title of section in advanced settings for enabling Tor reproxy",
-    "message": "Enable Tor?"
+    "message": "Share through Tor?"
   },
   "TOR_PORT_PLACEHOLDER": {
     "description": "Default message in port field of advanced setting for enablign Tor reproxy",
     "message": "Port"
   },
+  "TOR_ROUTING_INFO": {
+    "description": "Info message displayed if Tor is enabled",
+    "message": "Routing through Tor from port"
+  },
+  "TOR_NOT_ROUTING_INFO": {
+    "description": "Info message displayed if Tor is disabled",
+    "message": "Not routing through Tor"
+  },
+  "TOR_ENABLE_WARNING": {
+    "description": "Warning message that appears when a user attempts to enable Tor through advanced settings",
+    "message": "WARNING: This setting will break uProxy unless Tor is correctly configured to listen on the given local port. This setting is to be enabled only by users sharing their connection with others."
+  },
   "TOR_HOW_ENABLE_REPROXY": {
     "description": "Title of FAQ question explaining Tor anonymity option of Sharers reproxying Getter requests",
-    "message": "How do I use Tor with uProxy to provide anonymity?"
+    "message": "How can sharers safely offer access to people they may not completely trust?"
   },
   "TOR_HOW_ENABLE_REPROXY_ANSWER": {
     "description": "Title of FAQ question explaining Tor anonymity option of Sharers reproxying Getter requests",
-    "message": "<p><a href=\"https://www.torproject.org/\">Tor</a> is a free and open network that provides anonymity for its users by protecting against certain traffic analysis attacks. Though uProxy is not an anonymity tool by itself, it can be used with Tor to provide increased anonymity. Currently, our supported Tor option can only be enabled by the user sharing their access, not by users receiving access.</p><p>If you are sharing your connection with others, you can use Tor to protect the anonymity of your connection. To use Tor with uProxy, you must first <a href=\"https://www.torproject.org/download/download\">download</a> Tor. When you have Tor running on your machine, navigate to the Advanced Settings panel in uProxy, click the Enable Tor button, and enter the port number for Tor (9050 is default for stand-alone Tor and 9150 is default for Tor Browser Bundle). All new users receiving access from you will now have their requests routed through Tor. To route old users through Tor, you must revoke and reapprove their access.</p>"
+    "message": "<p>uProxy allows sharers to route the connections of people getting access through the Tor network, concealing the identity of the sharer from websites that are visited. This reduces risk for the sharer in the case that someone getting access does something abusive with the connection. However, the transit through the Tor network may slow network performance for the person getting access. The person getting access also does not have a strong expectation of anonymity, because they will not be using the restrictive security settings of the Tor browser bundle.</p><p>To send getter traffic through Tor, you must first <a href=\"https://www.torproject.org/download/download\">download</a> Tor. When you have Tor running on your machine, first navigate to the Advanced Settings panel in uProxy, and click the Enable Tor option. Then, enter the port number for Tor; 9050 is the default for stand-alone Tor and 9150 is the default for Tor Browser Bundle. Click Set for changes to save. All new users you grant access to will now have their requests routed through Tor. To send traffic from previously approved users through Tor, you must revoke and reapprove their access.</p>"
   },
   "P_I_I_MESSAGE": {
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
@@ -619,8 +631,8 @@
     "description": "Extra information displayed when port control is not supported",
     "message": "You may be able to enable port control to make uProxy more reliable."
   },
-  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
-    "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
+  "MORE_INFO": {
+    "description": "Generic label for more info link to FAQ.",
     "message": "More info."
   },
   "LEARN_MORE": {

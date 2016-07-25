@@ -25,7 +25,6 @@
       background-color: white;
     }
     #container {
-      height: 100%;
     }
     #formContainer {
       padding: 20px 30px 0px;
@@ -102,12 +101,10 @@
       padding-left: 5px;
       padding-right: 5px;
       padding-bottom: 6px;
-      padding-top: 0;
+      padding-top: 2px;
       margin-bottom: 0;
-      margin-top: 0;
+      margin-top: 5px;
       margin-right: 0;
-      width: 3em;
-      float: right;
     }
     textarea[fit] {
       /* fit does not properly size textareas on Firefox */
@@ -136,6 +133,9 @@
     paper-input-decorator[id=advancedSettingsDecorator] /deep/ .focused-underline {
       /* Remove the underline from the advanced settings textbox. */
       height: 0px;
+    }
+    paper-input-decorator[id=advancedSettingsDecorator] {
+      height: 10em;
     }
     paper-input-decorator {
       font-size: 1.4em;
@@ -202,11 +202,17 @@
             </uproxy-faq-link>
             <paper-toggle-button id='torEnableButton'></paper-toggle-button>
           </p>
-          <p class='advancedSettingsText' hidden?='{{ !$.torEnableButton.checked }}'>
-            <span id='torPortLabel'>{{ "TOR_PORT_PLACEHOLDER" | $$ }}:</span>
-            <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}'>
-              <input is='core-input' maxlength="5" value='{{ torPort }}'/>
-            </paper-input-decorator>
+          <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
+            <input is='core-input' maxlength="5" value='{{ torPort }}' />
+          </paper-input-decorator>
+          <p class='advancedSettingsText' style='color:red;' hidden?='{{ !$.torEnableButton.checked }}'>
+            {{ "TOR_ENABLE_WARNING" | $$ }}
+          </p>
+          <p class='advancedSettingsText' hidden?='{{ torEnabled }}'>
+            {{ "TOR_NOT_ROUTING_INFO" | $$ }}
+          </p>
+          <p class='advancedSettingsText' hidden?='{{ !torEnabled }}'>
+            {{ "TOR_ROUTING_INFO" | $$ }} {{ torPort  | $$ }}
           </p>
         </div>
         <div id='portControlBox'>
@@ -232,13 +238,13 @@
           <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
             {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>
-              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$ }}
+              {{ 'MORE_INFO' | $$ }}
             </uproxy-faq-link>
           </p>
         </div>
-        <div id='formContainer' flex vertical layout>
+        <div id='formContainer' vertical layout>
           <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}' flex>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}'>
             <textarea value='{{ settings }}' fit>
             </textarea>
           </paper-input-decorator>
