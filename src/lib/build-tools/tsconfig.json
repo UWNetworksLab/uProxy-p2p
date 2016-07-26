@@ -2,7 +2,6 @@
   "compilerOptions": {
     "module": "commonjs",
     "noImplicitAny": true
-  },
-  "files": ["common-grunt-rules.ts"]
+  }
 }
 
