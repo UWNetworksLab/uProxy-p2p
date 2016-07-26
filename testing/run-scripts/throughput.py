@@ -9,7 +9,6 @@ import time
 import urllib.parse
 
 FLOOD_SIZE_MB = 32
-FLOOD_MAX_SPEED_MB = 5
 
 # https://github.com/uProxy/uproxy-docker/pull/26
 LATENCY_MS = 150
@@ -19,10 +18,10 @@ parser = argparse.ArgumentParser(
 parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
 args = parser.parse_args()
 
-# Where is flood server?
-flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M',
-    str(FLOOD_MAX_SPEED_MB) + 'M'], universal_newlines=True).strip()
-print('** using flood server at ' + str(flood_ip))
+# Start a flood server.
+flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M'],
+    universal_newlines=True).strip()
+print('** flood server: ' + flood_ip)
 
 browsers = ['chrome', 'firefox']
 versions = ['stable', 'beta', 'canary']
@@ -45,8 +44,10 @@ for browser in browsers:
 
       # time.time is good for Unix-like systems.
       start = time.time()
-      if subprocess.call(['nc', '-X', '5', '-x', 'localhost:9999',
-          flood_ip, '1224']) != 0:
+      # Redirecting to /dev/null proves crucial to making nc consume
+      # bytes as fast as it possibly can, at least on Linux.
+      if subprocess.call('nc -X 5 -x localhost:9999 ' + flood_ip + ' 1224 > /dev/null',
+          shell=True) != 0:
         raise Exception('nc failed, proxy probably did not start')
       end = time.time()
 

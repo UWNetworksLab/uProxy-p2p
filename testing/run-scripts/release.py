@@ -32,12 +32,11 @@ known_small_md5sum = subprocess.check_output(
     universal_newlines=True).strip()
 print('** small download known md5sum: ' + known_small_md5sum)
 
-# Where is flood server?
+# Start a flood server.
 FLOOD_SIZE_MB = 1
-FLOOD_MAX_SPEED = '5M'
-flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M',
-    FLOOD_MAX_SPEED], universal_newlines=True).strip()
-print('** using flood server at ' + str(flood_ip))
+flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M'],
+    universal_newlines=True).strip()
+print('** flood server: ' + flood_ip)
 
 subprocess.call('nc ' + flood_ip + ' 1224 > /tmp/nc', shell=True)
 known_large_md5sum = subprocess.check_output(
