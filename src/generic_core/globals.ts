@@ -32,7 +32,6 @@ export var settings :uproxy_core_api.GlobalSettings = {
   language: null,  // sentinel indicating lang should be calculated from browser settings
   force_message_version: 0, // zero means "don't override"
   quiverUserName: '',
-  showCloud: false,
   proxyBypass: constants.DEFAULT_PROXY_BYPASS.slice(0),
   enforceProxyServerValidity: false,
   validProxyServers: [],
