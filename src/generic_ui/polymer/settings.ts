@@ -13,11 +13,11 @@ import ui_constants = require('../../interfaces/ui');
 
 
   // // ElleTest begin
-  // var languages :Language[] = <Language[]>require('../locales/all/languages.json');
-  // // ElleTest end
-  // // ElleTest begin
-  // var core = ui_context.core;
-  // var elleTest = ui_context.model;
+  var languages :Language[] = <Language[]>require('../locales/all/languages.json');
+  // ElleTest end
+  // ElleTest begin
+  var core = ui_context.core;
+  var elleTest = ui_context.model;
   // // ElleTest end
 interface Language {
   description :string;
@@ -68,9 +68,9 @@ Polymer({
     this.fire('core-signal', {name: 'open-advanced-settings'});
   },
   // ElleTest begin
-  openLanguageForm: function() {
-    this.fire('core-signal', {name: 'open-splash'});
-  },
+  // openLanguageForm: function() {
+  //   this.fire('core-signal', {name: 'open-splash'});
+  // },
   // ElleTest end
   networksChanged: function() {
     if (!ui_context.model.onlineNetworks) {
@@ -95,8 +95,8 @@ Polymer({
     this.ui = ui;
     this.model = ui_context.model;
     // // ElleTest begin
-    // this.model = elleTest;
-    // this.languages = languages;
+    this.model = elleTest;
+    this.languages = languages;
     // // ElleTest end
 
   },
@@ -104,42 +104,42 @@ Polymer({
     'model.onlineNetworks': 'networksChanged'
   },
   // // ElleTest begin
-  // setState: function(state :Number) {
-  //   if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
-  //     console.error('Invalid call to setState: ' + state);
-  //     return;
-  //   }
-  //   elleTest.globalSettings.splashState = state;
-  //   core.updateGlobalSettings(elleTest.globalSettings);
-  // },
-  // next: function() {
-  //   if (elleTest.globalSettings.splashState == this.SPLASH_STATES.METRICS_OPT_IN) {
-  //     ui.view = ui_constants.View.ROSTER;
-  //   } else {
-  //     this.setState(elleTest.globalSettings.splashState + 1);
-  //   }
-  // },
-  // prev: function() {
-  //   this.setState(elleTest.globalSettings.splashState - 1);
-  // },
-  // updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
-  //   if (detail.isSelected) {
-  //     var newLanguage = detail.item.getAttribute('languageCode');
-  //     ui.updateLanguage(newLanguage);
-  //     window.location.reload();
-  //   }
-  // },
-  // updateSeenMetrics: function(val :Boolean) {
-  //   elleTest.globalSettings.hasSeenMetrics = true;
-  //   elleTest.globalSettings.statsReportingEnabled = val;
-  //   core.updateGlobalSettings(elleTest.globalSettings);
-  //   this.next();
-  // },
-  // enableStats: function() {
-  //   return this.updateSeenMetrics(true);
-  // },
-  // disableStats: function() {
-  //   return this.updateSeenMetrics(false);
-  // }
+  setState: function(state :Number) {
+    if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
+      console.error('Invalid call to setState: ' + state);
+      return;
+    }
+    elleTest.globalSettings.splashState = state;
+    core.updateGlobalSettings(elleTest.globalSettings);
+  },
+  next: function() {
+    if (elleTest.globalSettings.splashState == this.SPLASH_STATES.METRICS_OPT_IN) {
+      ui.view = ui_constants.View.ROSTER;
+    } else {
+      this.setState(elleTest.globalSettings.splashState + 1);
+    }
+  },
+  prev: function() {
+    this.setState(elleTest.globalSettings.splashState - 1);
+  },
+  updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
+    if (detail.isSelected) {
+      var newLanguage = detail.item.getAttribute('languageCode');
+      ui.updateLanguage(newLanguage);
+      window.location.reload();
+    }
+  },
+  updateSeenMetrics: function(val :Boolean) {
+    elleTest.globalSettings.hasSeenMetrics = true;
+    elleTest.globalSettings.statsReportingEnabled = val;
+    core.updateGlobalSettings(elleTest.globalSettings);
+    this.next();
+  },
+  enableStats: function() {
+    return this.updateSeenMetrics(true);
+  },
+  disableStats: function() {
+    return this.updateSeenMetrics(false);
+  }
   // // ElleTest end
 });
