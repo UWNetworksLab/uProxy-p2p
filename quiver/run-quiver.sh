@@ -26,7 +26,7 @@ do_install() {
     curl -fsSL https://get.docker.com/ | sh
   fi
 
-  docker run --restart=always --name quiver -d -p 80:3000 dborkan/quiver
+  docker run --restart=always --name quiver -d -p 80:3000 uproxy/quiver
 }
 
 # Wrapped in a function for some protection against half-downloads.
