@@ -980,11 +980,6 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string, userName ?:string) : Promise<void> => {
-    if (network === 'Cloud') {
-      this.model.globalSettings.showCloud = true;
-      this.core.updateGlobalSettings(this.model.globalSettings);
-    }
-
     return this.core.login({
         network: network,
         loginType: uproxy_core_api.LoginType.INITIAL,

@@ -65,7 +65,6 @@ export class Model {
     language: null,  // sentinel indicating lang should be calculated from browser settings
     force_message_version: 0,
     quiverUserName: '',
-    showCloud: false,
     proxyBypass: [],
     enforceProxyServerValidity: false,
     validProxyServers: [],

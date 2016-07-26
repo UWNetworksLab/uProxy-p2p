@@ -45,7 +45,6 @@ export interface GlobalSettings {
   language         :string;
   force_message_version :number;
   quiverUserName :string;
-  showCloud :boolean;
   proxyBypass: string[];
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
