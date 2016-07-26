@@ -25,6 +25,10 @@
       background-color: white;
     }
     #container {
+      height: 100%;
+    }
+    #settingsContainer {
+      overflow: auto;
     }
     #formContainer {
       padding: 20px 30px 0px;
@@ -184,80 +188,82 @@
         <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
         </uproxy-app-bar>
-        <div id='analyzeNAT'>
-          <p class='inputLabel'>
-            <uproxy-link on-tap='{{ viewLogs }}'>
-              {{ "ANALYZE_NAT" | $$ }}
-            </uproxy-link>
-            <uproxy-faq-link anchor='doesUproxyLogData'>
-              <core-icon icon="help"></core-icon>
-            </uproxy-faq-link>
-          </p>
-        </div>
-        <div id='enableTor'>
-          <p class='inputLabel'>
-            {{ "TOR_ENABLE" | $$ }}
-            <uproxy-faq-link anchor='howToEnableTorReproxy'>
-              <core-icon icon="help"></core-icon>
-            </uproxy-faq-link>
-            <paper-toggle-button id='torEnableButton'></paper-toggle-button>
-          </p>
-          <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
-            <input is='core-input' maxlength="5" value='{{ torPort }}' />
-          </paper-input-decorator>
-          <p class='advancedSettingsText' style='color:red;' hidden?='{{ !$.torEnableButton.checked }}'>
-            {{ "TOR_ENABLE_WARNING" | $$ }}
-          </p>
-          <p class='advancedSettingsText' hidden?='{{ torEnabled }}'>
-            {{ "TOR_NOT_ROUTING_INFO" | $$ }}
-          </p>
-          <p class='advancedSettingsText' hidden?='{{ !torEnabled }}'>
-            {{ "TOR_ROUTING_INFO" | $$ }} {{ torPort  | $$ }}
-          </p>
-        </div>
-        <div id='portControlBox'>
+        <div id='settingsContainer' flex>
+          <div id='analyzeNAT'>
+            <p class='inputLabel'>
+              <uproxy-link on-tap='{{ viewLogs }}'>
+                {{ "ANALYZE_NAT" | $$ }}
+              </uproxy-link>
+              <uproxy-faq-link anchor='doesUproxyLogData'>
+                <core-icon icon="help"></core-icon>
+              </uproxy-faq-link>
+            </p>
+          </div>
+          <div id='enableTor'>
+            <p class='inputLabel'>
+              {{ "TOR_ENABLE" | $$ }}
+              <uproxy-faq-link anchor='howToEnableTorReproxy'>
+                <core-icon icon="help"></core-icon>
+              </uproxy-faq-link>
+              <paper-toggle-button id='torEnableButton'></paper-toggle-button>
+            </p>
+            <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
+              <input is='core-input' maxlength="5" value='{{ torPort }}' />
+            </paper-input-decorator>
+            <p class='advancedSettingsText' style='color:red;' hidden?='{{ !$.torEnableButton.checked }}'>
+              {{ "TOR_ENABLE_WARNING" | $$ }}
+            </p>
+            <p class='advancedSettingsText' hidden?='{{ torEnabled }}'>
+              {{ "TOR_NOT_ROUTING_INFO" | $$ }}
+            </p>
+            <p class='advancedSettingsText' hidden?='{{ !torEnabled }}'>
+              {{ "TOR_ROUTING_INFO" | $$ }} {{ torPort  | $$ }}
+            </p>
+          </div>
+          <div id='portControlBox'>
 
-          <p class='inputLabel'>
-            {{ 'PORT_CONTROL_TITLE' | $$ }}
-            <uproxy-faq-link anchor='whatIsPortControl'>
-              <core-icon icon='help'></core-icon>
-            </uproxy-faq-link>
-          </p>
-          <span class='label' hidden?='{{ !_supportsPortControl(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
-          </span>
-          <span class='label' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
-          </span>
-          <span class='label' hidden?='{{ !_portControlStatusPending(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_PENDING' | $$ }}
-          </span>
-          <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
-            <core-icon icon='refresh'></core-icon>
-          </uproxy-link>
-          <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
-            <uproxy-faq-link anchor='whatIsPortControl'>
-              {{ 'MORE_INFO' | $$ }}
-            </uproxy-faq-link>
-          </p>
+            <p class='inputLabel'>
+              {{ 'PORT_CONTROL_TITLE' | $$ }}
+              <uproxy-faq-link anchor='whatIsPortControl'>
+                <core-icon icon='help'></core-icon>
+              </uproxy-faq-link>
+            </p>
+            <span class='label' hidden?='{{ !_supportsPortControl(portControlSupport) }}'>
+              {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
+            </span>
+            <span class='label' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
+              {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
+            </span>
+            <span class='label' hidden?='{{ !_portControlStatusPending(portControlSupport) }}'>
+              {{ 'PORT_CONTROL_PENDING' | $$ }}
+            </span>
+            <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
+              <core-icon icon='refresh'></core-icon>
+            </uproxy-link>
+            <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
+              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
+              <uproxy-faq-link anchor='whatIsPortControl'>
+                {{ 'MORE_INFO' | $$ }}
+              </uproxy-faq-link>
+            </p>
+          </div>
+          <div id='formContainer' vertical layout>
+            <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
+            <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}'>
+              <textarea value='{{ settings }}' fit>
+              </textarea>
+            </paper-input-decorator>
+            <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
+              {{ "SETTINGS_SAVED" | $$ }}
+            </p>
+            <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
+              {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
+            </p>
+            <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
+              {{ "SETTINGS_JSON_ERROR" | $$ }}
+            </p>
+          </div> <!-- end of form container -->
         </div>
-        <div id='formContainer' vertical layout>
-          <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}'>
-            <textarea value='{{ settings }}' fit>
-            </textarea>
-          </paper-input-decorator>
-          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
-            {{ "SETTINGS_SAVED" | $$ }}
-          </p>
-          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
-            {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
-          </p>
-          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
-            {{ "SETTINGS_JSON_ERROR" | $$ }}
-          </p>
-        </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
           {{ "SET" | $$ }}
         </div>
