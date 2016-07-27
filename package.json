@@ -81,7 +81,7 @@
     "install": "npm run setup-third-party && npm run setup-tools",
     "setup-bower": "bower install --allow-root --config.interactive=false --config.directory=build/third_party/bower",
     "setup-third-party": "npm run setup-bower && mkdir -p build/third_party && npm run setup-typings && cp -r third_party/* build/third_party/ && npm run setup-freedom-port-control",
-    "setup-tools": "mkdir -p build/tools && cp src/lib/build-tools/{*.ts,tsconfig.json} build/tools/ && tsc -p ./build/tools",
+    "setup-tools": "mkdir -p build/tools && cp src/lib/build-tools/*.ts build/tools/ && tsc --module commonjs --noImplicitAny build/tools/*.ts",
     "setup-typings": "cd third_party && typings install",
     "setup-freedom-port-control": "mkdir -p build/third_party/freedom-port-control && cp -r node_modules/freedom-port-control/dist build/third_party/freedom-port-control/",
     "test": "grunt test"
