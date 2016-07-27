@@ -36,7 +36,7 @@ COPY third_party third_party/
 # TODO(fortuna): Move all build dependencies out of src/
 COPY src/lib/build-tools src/lib/build-tools/
 
-RUN ./setup.sh install && npm cache clean && rm -rf /tmp/*
+RUN npm install && npm cache clean && rm -rf /tmp/*
 
 # Remove files we don't need anymore.
 RUN rm -rf bower.json setup.sh src
