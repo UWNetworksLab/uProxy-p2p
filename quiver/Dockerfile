@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.9.19
+FROM ubuntu:xenial
 
 RUN apt-get update -qq
 RUN curl -sL https://deb.nodesource.com/setup_4.x | bash
@@ -9,4 +9,4 @@ COPY ${SERVER_FILES} /quiver/freedom-social-quiver-server/
 
 EXPOSE 3000
 
-ENTRYPOINT PORT=3000 DEBUG=stats node /quiver/freedom-social-quiver-server/app.js
+ENTRYPOINT PORT=3000 DEBUG=stats nodejs /quiver/freedom-social-quiver-server/app.js
