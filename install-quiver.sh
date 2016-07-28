@@ -26,7 +26,7 @@ do_install() {
     curl -fsSL https://get.docker.com/ | sh
   fi
 
-  docker run --restart=always --name uproxy-quiver -d -p 80:3000 uproxy/quiver
+  docker run --restart=always --log-driver=syslog --log-opt tag=quiver --name uproxy-quiver -d -p 80:3000 uproxy/quiver
 }
 
 # Wrapped in a function for some protection against half-downloads.
