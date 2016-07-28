@@ -329,6 +329,7 @@ import ProxyConfig = require('./proxyconfig');
     private socketReceivedBytes_ :number = 0;
     private channelSentBytes_ :number = 0;
     private channelReceivedBytes_ :number = 0;
+    private testingTimeCurrent_ :number = 0;
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -586,6 +587,7 @@ import ProxyConfig = require('./proxyconfig');
     // Invoked when a packet is received over the TCP socket.
     private sendOnChannel_ = (data:ArrayBuffer) : void => {
       this.socketReceivedBytes_ += data.byteLength;
+      log.debug('Bytes Received on this socket: ' + this.socketReceivedBytes_);
       this.dataChannel_.send({buffer: data});
     }
 
@@ -605,6 +607,8 @@ import ProxyConfig = require('./proxyconfig');
     // and vice versa. Should only be called once both socket and channel have
     // been successfully established.
     private linkSocketAndChannel_ = () : void => {
+      var d = new Date();
+      this.testingTimeCurrent_ = d.getTime();
       log.debug('%1: linking socket and channel', this.longId());
       var socketReader = (data:ArrayBuffer) => {
         this.sendOnChannel_(data);
@@ -628,6 +632,14 @@ import ProxyConfig = require('./proxyconfig');
       var channelReader = (data:peerconnection.Data) : void => {
         this.sendOnSocket_(data);
         this.socketSentBytes_ += data.buffer.byteLength;
+        log.debug('Bytes sent on this socket: ' + this.socketSentBytes_);
+        var d1 = new Date();
+        var testingTimeUpdated = d1.getTime();
+        var differenceTesting = testingTimeUpdated - this.testingTimeCurrent_;
+        differenceTesting = differenceTesting / 1000; //seconds
+        this.testingTimeCurrent_ = testingTimeUpdated;
+        var testingSentBandwidthOnSocket = data.buffer.byteLength / differenceTesting;
+        log.debug('Testing "bandwidth" for socket sent bytes: ' + testingSentBandwidthOnSocket);
       };
       this.dataChannel_.dataFromPeerQueue.setSyncHandler(channelReader);
 
