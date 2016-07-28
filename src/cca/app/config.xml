@@ -9,7 +9,7 @@
     </platform>
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <platform name="android">
-        <config-file target="AndroidManifest.xml" parent="./application/activity">
+        <config-file target="AndroidManifest.xml" parent="./application/activity/[@android:name='MainActivity']">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
