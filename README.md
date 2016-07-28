@@ -36,7 +36,7 @@ To manage dependencies we use:
 
 First, to install required NPMs and configure the `build/` directory for TypeScript compilation, execute:
 ```bash
-./setup.sh install
+npm install
 ```
 
 Then, to compile the TypeScript code and build uProxy and all of the demo apps, execute:
@@ -46,7 +46,7 @@ grunt
 
 Having problems? To clean up from a partial, broken, or extremely out-dated build, try executing this command before repeating the above steps:
 ```bash
-./setup.sh clean
+npm run clean
 ```
 
 ### IDE

@@ -4,7 +4,7 @@ node_js:
 before_install:
   - npm install -g grunt-cli bower
 install:
-  - ./setup.sh install
+  - npm install
 script:
   - grunt build
   - grunt tslint
