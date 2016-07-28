@@ -179,15 +179,15 @@
     "description": "",
     "message": "Thank you!"
   },
-  "FEEDBACK_TITLE_4": {
+  "TROUBLE_SIGNING_IN_TITLE": {
     "description": "",
     "message": "Trouble signing in"
   },
-  "FEEDBACK_TITLE_5": {
+  "NO_FRIENDS_TITLE": {
     "description": "",
     "message": "No friends to proxy from"
   },
-  "FEEDBACK_TITLE_6": {
+  "CANT_START_CONNECTION_TITLE": {
     "description": "",
     "message": "Can't start connection"
   },
@@ -195,15 +195,15 @@
     "description": "User feedback was successfully submitted.",
     "message": "Your feedback has been submitted to the uProxy development team."
   },
-  "FEEDBACK_SUBMITTED_4": {
+  "TROUBLE_SIGNING_IN_HELP": {
     "description": "Trouble signing in feedback error.",
     "message": "Login will fail if you try a social network that is blocked.  Thanks for your feedback! <uproxy-faq-link anchor='willUproxyWork'>Learn more.</uproxy-faq-link>"
   },
-  "FEEDBACK_SUBMITTED_5": {
+  "NO_FRIENDS_HELP": {
     "description": "No friends feedback error.",
     "message": "Consider using uProxy cloud servers.  Thanks for your feedback! <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
   },
-  "FEEDBACK_SUBMITTED_6": {
+  "CANT_START_CONNECTION_HELP": {
     "description": "Trouble connecting feedback error.",
     "message": "Sometimes uProxy relies on port control to establish a connection, but that might not be available for your network.  Thanks for your feedback! <uproxy-faq-link anchor='whatIsPortControl'>Learn more.</uproxy-faq-link>"
   },
@@ -1371,7 +1371,7 @@
   "START_BROWSING": {
     "description": "Button label for starting an in-app browser connected to a uProxy peer.",
     "message": "Start browsing"
-  }, 
+  },
   "ASK_FOR_FEEDBACK_TITLE": {
     "description": "Asks the user if they'd like to submit feedback",
     "message": "Submit feedback?"

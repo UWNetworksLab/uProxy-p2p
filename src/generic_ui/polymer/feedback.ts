@@ -52,16 +52,19 @@ Polymer({
       browserInfo: navigator.userAgent,
       feedbackType: this.feedbackType
     }).then(() => {
+    // The keys below correspond with UserFeedbackType enum values
+    // in uproxy_core_api.ts
     var messages : {[key: number]: [string, string]} = {
       0: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
       1: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
       2: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
       3: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
-      4: ['FEEDBACK_SUBMITTED_4', 'FEEDBACK_TITLE_4'],
-      5: ['FEEDBACK_SUBMITTED_5', 'FEEDBACK_TITLE_5'],
-      6: ['FEEDBACK_SUBMITTED_6', 'FEEDBACK_TITLE_6'],
-      7: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
-      8: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE']
+      4: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
+      5: ['TROUBLE_SIGNING_IN_TITLE', 'TROUBLE_SIGNING_IN_HELP'],
+      6: ['NO_FRIENDS_TITLE', 'NO_FRIENDS_HELP'],
+      7: ['CANT_START_CONNECTION_TITLE', 'CANT_START_CONNECTION_HELP'],
+      8: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE'],
+      9: ['FEEDBACK_SUBMITTED', 'FEEDBACK_TITLE']
     };
       // root.ts listens for open-dialog signals and shows a popup
       // when it receives these events.
