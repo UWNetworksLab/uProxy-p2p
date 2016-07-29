@@ -330,6 +330,7 @@ import ProxyConfig = require('./proxyconfig');
     private channelSentBytes_ :number = 0;
     private channelReceivedBytes_ :number = 0;
     private testingTimeCurrent_ :number = 0;
+    private shouldStopTesting_:number = 0;
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -392,7 +393,7 @@ import ProxyConfig = require('./proxyconfig');
         });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
-
+      this.testingTiming_();
       // Shutdown once the data channel terminates.
       this.dataChannel_.onceClosed.then(() => {
         if (this.dataChannel_.dataFromPeerQueue.getLength() > 0) {
@@ -425,6 +426,7 @@ import ProxyConfig = require('./proxyconfig');
       // effectively immediate.  However, we wrap it in a promise to ensure
       // that any exception is sent to the Promise.catch, rather than
       // propagating synchronously up the stack.
+      this.shouldStopTesting_ = 1;
       var shutdownPromises :Promise<any>[] = [
         new Promise((F, R) => { this.dataChannel_.close(); F(); })
       ];
@@ -587,7 +589,6 @@ import ProxyConfig = require('./proxyconfig');
     // Invoked when a packet is received over the TCP socket.
     private sendOnChannel_ = (data:ArrayBuffer) : void => {
       this.socketReceivedBytes_ += data.byteLength;
-      log.debug('Bytes Received on this socket: ' + this.socketReceivedBytes_);
       this.dataChannel_.send({buffer: data});
     }
 
@@ -597,9 +598,9 @@ import ProxyConfig = require('./proxyconfig');
       if (!data.buffer) {
         throw new Error('received non-buffer data from datachannel');
       }
+      log.debug('rn: ' + data.buffer.byteLength + ' session number = ' + this.channelLabel());
       this.bytesReceivedFromPeer_.handle(data.buffer.byteLength);
       this.channelReceivedBytes_ += data.buffer.byteLength;
-
       this.tcpConnection_.send(data.buffer);
     }
 
@@ -632,14 +633,6 @@ import ProxyConfig = require('./proxyconfig');
       var channelReader = (data:peerconnection.Data) : void => {
         this.sendOnSocket_(data);
         this.socketSentBytes_ += data.buffer.byteLength;
-        log.debug('Bytes sent on this socket: ' + this.socketSentBytes_);
-        var d1 = new Date();
-        var testingTimeUpdated = d1.getTime();
-        var differenceTesting = testingTimeUpdated - this.testingTimeCurrent_;
-        differenceTesting = differenceTesting / 1000; //seconds
-        this.testingTimeCurrent_ = testingTimeUpdated;
-        var testingSentBandwidthOnSocket = data.buffer.byteLength / differenceTesting;
-        log.debug('Testing "bandwidth" for socket sent bytes: ' + testingSentBandwidthOnSocket);
       };
       this.dataChannel_.dataFromPeerQueue.setSyncHandler(channelReader);
 
@@ -675,6 +668,12 @@ import ProxyConfig = require('./proxyconfig');
       return true;
     }
 
+    private testingTiming_ = () : void => {
+      if (!this.shouldStopTesting_) {
+        log.debug('It has been 5 sec ' + this.channelLabel());
+        setTimeout(this.testingTiming_, 5000);
+      }
+    }
     private isAllowedAddress_ = (addressString:string) : boolean => {
       // default is to disallow non-unicast addresses; i.e. only proxy for
       // public internet addresses.
