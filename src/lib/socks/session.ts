@@ -16,29 +16,38 @@ enum State {
 
 export class SocksSession implements piece.SocksPiece {
   private state_ = State.AWAITING_AUTHS;
-  private forwardingSocket_: any;
+
+  // Connection to the remote server. This is created once the SOCKS
+  // client has sent us the address with which it wishes to connect.
+  private forwardingSocket_: piece.SocksPiece;
 
   constructor(
     private serverId_: string,
     private id_: string) { }
 
-  private getForwardingSocket_: any;
-  public onForwardingSocketRequired = (callback: any) => {
+  private getForwardingSocket_: (host: string, port: number) => Promise<piece.SocksPiece>;
+  private sendToSocksClient_: (buffer: ArrayBuffer) => void;
+  private onForwardingSocketDisconnect_: () => void;
+
+  public onForwardingSocketRequired = (callback: (host: string, port: number) => Promise<piece.SocksPiece>) => {
     this.getForwardingSocket_ = callback;
   }
 
-  private sendToSocksClient_: (buffer: ArrayBuffer) => void;
+  // Sets a callback which is invoked when there is something to be sent
+  // to the SOCKS client.
   public onData = (callback: (buffer: ArrayBuffer) => void): SocksSession => {
     this.sendToSocksClient_ = callback;
     return this;
   }
 
-  private onForwardingSocketDisconnect_: () => void;
   public onDisconnect = (callback: () => void): SocksSession => {
     this.onForwardingSocketDisconnect_ = callback;
     return this;
   }
 
+  // This is called with data from the SOCKS client. We almost always want to send
+  // this to the forwarding socket except during SOCKS protocol negotiation, in which
+  // case we need to decode the SOCKS headers and reply back to the SOCKS client.
   public handleData = (buffer: ArrayBuffer) => {
     log.debug('%1/%2: received %3 bytes from SOCKS client', this.serverId_, this.id_, buffer.byteLength);
     switch (this.state_) {
@@ -65,7 +74,7 @@ export class SocksSession implements piece.SocksPiece {
           this.getForwardingSocket_(
             request.endpoint.address,
             request.endpoint.port).then((forwardingSocket: piece.SocksPiece) => {
-              log.debug('%1/%2: connected to remote endpoint', this.serverId_, this.id_);
+              log.info('%1/%2: connected to remote endpoint', this.serverId_, this.id_);
 
               this.forwardingSocket_ = forwardingSocket;
 

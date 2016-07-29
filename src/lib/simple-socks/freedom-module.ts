@@ -14,7 +14,7 @@ const loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
   loggingTypes.Level.debug);
 
-const log = new logging.Log('simple-socks');
+const log = new logging.Log('simple socks');
 
 const SERVER_ADDRESS = '0.0.0.0';
 const SERVER_PORT = 9999;
@@ -27,7 +27,7 @@ new freedom_server.FreedomSocksServer(SERVER_ADDRESS, SERVER_PORT, SERVER_NAME).
   const clientId = 'p' + (numSessions++) + 'p';
   log.info('new SOCKS session %1', clientId);
   const socksSession = new session.SocksSession(SERVER_NAME, clientId);
-  socksSession.onForwardingSocketRequired((host: string, port: number) => {
+  socksSession.onForwardingSocketRequired((host, port) => {
     const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
     // TODO: destroy the socket on disconnect
     return forwardingSocket.connect(host, port).then(() => {
@@ -35,8 +35,8 @@ new freedom_server.FreedomSocksServer(SERVER_ADDRESS, SERVER_PORT, SERVER_NAME).
     });
   });
   return socksSession;
-}).listen().catch((e: Error) => {
-  log.error('failed to start SOCKS server: %1', e.message);
-}).then(() => {
+}).listen().then(() => {
   log.info('curl -x socks5h://%1:%2 www.example.com', SERVER_ADDRESS, SERVER_PORT);
+}, (e) => {
+  log.error('failed to start SOCKS server: %1', e.message);
 });
