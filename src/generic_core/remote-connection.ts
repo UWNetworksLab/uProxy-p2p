@@ -350,7 +350,6 @@ var generateProxyingSessionId_ = (): string => {
 
     private handleBytesReceived_ = (bytes :number) => {
       this.bytesReceived_ += bytes;
-      log.debug('testing: new amount of bytes Received' + this.bytesReceived_);
       this.delayedUpdate_();
     }
 
