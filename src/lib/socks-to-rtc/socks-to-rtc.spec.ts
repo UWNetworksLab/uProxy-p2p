@@ -12,7 +12,7 @@ import handler = require('../handler/queue');
 import socks_to_rtc = require('./socks-to-rtc');
 import net = require('../net/net.types');
 import tcp = require('../net/tcp');
-import socks = require('../socks-common/socks-headers');
+import socks_headers = require('../socks/headers');
 
 import logging = require('../logging/logging');
 
@@ -200,7 +200,7 @@ describe('SOCKS session', function() {
   it('onceReady fulfills on successful negotiation', (done) => {
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     session.start(mockTcpConnection, mockDataChannel, mockBytesSent, mockBytesReceived).then(done);
   });
@@ -208,7 +208,7 @@ describe('SOCKS session', function() {
   it('onceReady rejects and onceStopped fulfills on unsuccessful negotiation', (done) => {
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.FAILURE}));
+        Promise.resolve({reply: socks_headers.Reply.FAILURE}));
 
     session.start(mockTcpConnection, mockDataChannel, mockBytesSent, mockBytesReceived)
       .catch((e:Error) => { return session.onceStopped; }).then(done);
@@ -219,7 +219,7 @@ describe('SOCKS session', function() {
 
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     session.start(mockTcpConnection, mockDataChannel, mockBytesSent, mockBytesReceived)
       .then(() => { return session.onceStopped; }).then(done);
@@ -231,7 +231,7 @@ describe('SOCKS session', function() {
 
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     session.start(mockTcpConnection, mockDataChannel, mockBytesSent, mockBytesReceived)
       .then(session.stop).then(() => { return session.onceStopped; }).then(done);
@@ -243,7 +243,7 @@ describe('SOCKS session', function() {
 
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     var buffer = new Uint8Array([1,2,3]).buffer;
     session.start(
@@ -265,7 +265,7 @@ describe('SOCKS session', function() {
 
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     var message :peerconnection.Data = {
       buffer: new Uint8Array([1,2,3]).buffer
@@ -291,7 +291,7 @@ describe('SOCKS session', function() {
 
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     var message :peerconnection.Data = {
       buffer: new Uint8Array([1,2,3]).buffer
@@ -320,7 +320,7 @@ describe('SOCKS session', function() {
 
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     var buffer = new Uint8Array([1,2,3]).buffer;
     var onceMessageHandled = mockTcpConnection.dataFromSocketQueue.handle(buffer);
@@ -341,7 +341,7 @@ describe('SOCKS session', function() {
   it('backpressure', (done) => {
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
     mockTcpConnection.onceClosed = new Promise<tcp.SocketCloseKind>((F, R) => {});
@@ -385,7 +385,7 @@ describe('SOCKS session', function() {
   it('backpressure with early flood', (done) => {
     spyOn(session, 'doAuthHandshake_').and.returnValue(Promise.resolve());
     spyOn(session, 'doRequestHandshake_').and.returnValue(
-        Promise.resolve({reply: socks.Reply.SUCCEEDED}));
+        Promise.resolve({reply: socks_headers.Reply.SUCCEEDED}));
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
     mockTcpConnection.onceClosed = new Promise<tcp.SocketCloseKind>((F, R) => {});

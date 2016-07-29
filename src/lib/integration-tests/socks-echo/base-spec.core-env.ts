@@ -1,7 +1,7 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
-import socks = require('../../socks-common/socks-headers');
+import socks_headers = require('../../socks/headers');
 
 import proxyintegrationtesttypes = require('./proxy-integration-test.types');
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
@@ -167,7 +167,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // reject with a NOT_ALLOWED error.
       expect(connectionId).toBeUndefined();
     }, (e:any) => {
-      expect(e.reply).toEqual(socks.Reply.NOT_ALLOWED);
+      expect(e.reply).toEqual(socks_headers.Reply.NOT_ALLOWED);
     }).then(done);
   });
 
@@ -220,7 +220,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // reject with a NOT_ALLOWED error.
       expect(connectionId).toBeUndefined();
     }, (e:any) => {
-      expect(e.reply).toEqual(socks.Reply.NOT_ALLOWED);
+      expect(e.reply).toEqual(socks_headers.Reply.NOT_ALLOWED);
     }).then(() => {
       runUproxyOrg404Test(testModule, done);
     });
@@ -243,7 +243,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // resolution succeeds.  However, to avoid portscanning leaks
       // (https://github.com/uProxy/uproxy/issues/809) NOT_ALLOWED will be reported
       // as FAILURE
-      expect([socks.Reply.HOST_UNREACHABLE, socks.Reply.FAILURE]).toContain(e.reply);
+      expect([socks_headers.Reply.HOST_UNREACHABLE, socks_headers.Reply.FAILURE]).toContain(e.reply);
     }).then(done);
   });
 
@@ -254,7 +254,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // This code should not run, because there is no server on this port.
       expect(connectionId).toBeUndefined();
     }).catch((e:any) => {
-      expect(e.reply).toEqual(socks.Reply.CONNECTION_REFUSED);
+      expect(e.reply).toEqual(socks_headers.Reply.CONNECTION_REFUSED);
     }).then(done);
   });
 
@@ -265,7 +265,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // This code should not run, because localhost is blocked.
       expect(connectionId).toBeUndefined();
     }).catch((e:any) => {
-      expect(e.reply).toEqual(socks.Reply.NOT_ALLOWED);
+      expect(e.reply).toEqual(socks_headers.Reply.NOT_ALLOWED);
     }).then(done);
   });
 
@@ -278,7 +278,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
     }).catch((e:any) => {
       // TODO: Make this just NOT_ALLOWED once this bug in ipadddr.js is fixed:
       // https://github.com/whitequark/ipaddr.js/issues/9
-      expect([socks.Reply.NOT_ALLOWED, socks.Reply.FAILURE]).toContain(e.reply);
+      expect([socks_headers.Reply.NOT_ALLOWED, socks_headers.Reply.FAILURE]).toContain(e.reply);
     }).then(done);
   });
 
@@ -289,7 +289,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // This code should not run, because localhost is blocked.
       expect(connectionId).toBeUndefined();
     }).catch((e:any) => {
-      expect(e.reply).toEqual(socks.Reply.NOT_ALLOWED);
+      expect(e.reply).toEqual(socks_headers.Reply.NOT_ALLOWED);
     }).then(done);
   });
 
@@ -300,7 +300,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // This code should not run, because local network access is blocked.
       expect(connectionId).toBeUndefined();
     }).catch((e:any) => {
-      expect(e.reply).toEqual(socks.Reply.NOT_ALLOWED);
+      expect(e.reply).toEqual(socks_headers.Reply.NOT_ALLOWED);
     }).then(done);
   });
 
@@ -313,7 +313,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // This code should not run, because there is no server on this port.
       expect(connectionId).toBeUndefined();
     }).catch((e:any) => {
-      expect(e.reply).toEqual(socks.Reply.CONNECTION_REFUSED);
+      expect(e.reply).toEqual(socks_headers.Reply.CONNECTION_REFUSED);
     }).then(done);
   });
 
@@ -330,7 +330,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // domain isn't on the local network, and we're concerned about port
       // scanning, we return the generic FAILURE code instead.
       // See https://github.com/uProxy/uproxy/issues/809.
-      expect(e.reply).toEqual(socks.Reply.FAILURE);
+      expect(e.reply).toEqual(socks_headers.Reply.FAILURE);
     }).then(done);
   });
 
@@ -340,7 +340,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
       // This code should not run, because there is no such DNS name.
       expect(connectionId).toBeUndefined();
     }).catch((e:any) => {
-      expect(e.reply).toEqual(socks.Reply.HOST_UNREACHABLE);
+      expect(e.reply).toEqual(socks_headers.Reply.HOST_UNREACHABLE);
     }).then(done);
   });
 

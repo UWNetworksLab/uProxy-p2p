@@ -1,6 +1,6 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts' />
 
-import socks = require('../../socks-common/socks-headers');
+import socks_headers = require('../../socks/headers');
 
 import proxyintegrationtesttypes = require('./proxy-integration-test.types');
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
@@ -122,9 +122,9 @@ function slowTestDescription(useChurn:boolean) {
     testModule.connect(80, '192.0.2.111').then((connectionId:string) => {
       // This code should not run, because this is a reserved IP address.
       expect(connectionId).toBeUndefined();
-    }).catch((e:{reply:socks.Reply}) => {
+    }).catch((e:{reply:socks_headers.Reply}) => {
       // The socket should time out after two minutes.
-      expect(e.reply).toEqual(socks.Reply.TTL_EXPIRED);
+      expect(e.reply).toEqual(socks_headers.Reply.TTL_EXPIRED);
     }).then(done);
   });
 }
