@@ -1,6 +1,7 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import headers = require('./headers');
+import piece = require('./piece');
 import logging = require('../logging/logging');
 
 const log: logging.Log = new logging.Log('socks session');
@@ -13,23 +14,7 @@ enum State {
   DISCONNECTED
 }
 
-export interface SocksSession {
-  onDataForSocksClient: (callback: (buffer: ArrayBuffer) => void) => SocksSession;
-  onForwardingSocketDisconnect: (callback: () => void) => SocksSession;
-
-  handleSocksClientData: (buffer: ArrayBuffer) => void;
-  handleDisconnect: () => void;
-}
-
-export interface ForwardingSocket {
-  onData: (callback: (buffer: ArrayBuffer) => void) => ForwardingSocket;
-  onDisconnect: (callback: () => void) => ForwardingSocket;
-
-  handleData: (buffer: ArrayBuffer) => void;
-  handleDisconnect: () => void;
-}
-
-export class SocksSessionImpl implements SocksSession {
+export class SocksSession implements piece.SocksPiece {
   private state_ = State.AWAITING_AUTHS;
   private forwardingSocket_: any;
 
@@ -37,24 +22,24 @@ export class SocksSessionImpl implements SocksSession {
     private serverId_: string,
     private id_: string) { }
 
-  private onForwardingSocketRequired_: any;
+  private getForwardingSocket_: any;
   public onForwardingSocketRequired = (callback: any) => {
-    this.onForwardingSocketRequired_ = callback;
+    this.getForwardingSocket_ = callback;
   }
 
   private sendToSocksClient_: (buffer: ArrayBuffer) => void;
-  public onDataForSocksClient = (callback: (buffer: ArrayBuffer) => void): SocksSessionImpl => {
+  public onData = (callback: (buffer: ArrayBuffer) => void): SocksSession => {
     this.sendToSocksClient_ = callback;
     return this;
   }
 
   private onForwardingSocketDisconnect_: () => void;
-  public onForwardingSocketDisconnect = (callback: () => void): SocksSessionImpl => {
+  public onDisconnect = (callback: () => void): SocksSession => {
     this.onForwardingSocketDisconnect_ = callback;
     return this;
   }
 
-  public handleSocksClientData = (buffer: ArrayBuffer) => {
+  public handleData = (buffer: ArrayBuffer) => {
     log.debug('%1/%2: received %3 bytes from SOCKS client', this.serverId_, this.id_, buffer.byteLength);
     switch (this.state_) {
       case State.AWAITING_AUTHS:
@@ -77,9 +62,9 @@ export class SocksSessionImpl implements SocksSession {
           log.debug('%1/%2: requested endpoint: %3', this.serverId_, this.id_, request.endpoint);
           this.state_ = State.AWAITING_CONNECTION;
 
-          this.onForwardingSocketRequired_(
+          this.getForwardingSocket_(
             request.endpoint.address,
-            request.endpoint.port).then((forwardingSocket: link.SocksLink) => {
+            request.endpoint.port).then((forwardingSocket: piece.SocksPiece) => {
               log.debug('%1/%2: connected to remote endpoint', this.serverId_, this.id_);
 
               this.forwardingSocket_ = forwardingSocket;

@@ -1,13 +1,13 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts' />
 
 import logging = require('../../logging/logging');
-import session = require('../session');
+import piece = require('../piece');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
 const log: logging.Log = new logging.Log('freedom socks server');
 
-class FreedomSocksServer {
+export class FreedomSocksServer {
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
@@ -23,9 +23,9 @@ class FreedomSocksServer {
     FreedomSocksServer.id_++;
   }
 
-  private onConnection_: () => session.SocksSession;
-  public onConnection = (callback: () => session.SocksSession): FreedomSocksServer => {
-    this.onConnection_ = callback;
+  private getSocksSession_: () => piece.SocksPiece;
+  public onConnection = (callback: () => piece.SocksPiece): FreedomSocksServer => {
+    this.getSocksSession_ = callback;
     return this;
   }
 
@@ -35,21 +35,22 @@ class FreedomSocksServer {
         const clientId = connectInfo.host + ':' + connectInfo.port;
         log.info('%1: new SOCKS client %2', this.name_, clientId);
 
-        const clientSocket: freedom.TcpSocket.Socket = freedom['core.tcpsocket'](connectInfo.socket);
+        const clientSocket = freedom['core.tcpsocket'](connectInfo.socket);
 
-        const socksSession = this.onConnection_();
+        const socksSession = this.getSocksSession_();
 
-        socksSession.onDataForSocksClient((buffer: ArrayBuffer) => {
+        // onDataForSocksClient
+        socksSession.onData((buffer: ArrayBuffer) => {
           clientSocket.write(buffer);
         });
 
-        // TODO: clearer name
-        socksSession.onForwardingSocketDisconnect(() => {
+        // onForwardingSocketDisconnect
+        socksSession.onDisconnect(() => {
           log.debug('%1: forwarding socket for SOCKS client %2 has disconnected', this.name_, clientId);
         });
 
         clientSocket.on('onData', (info: freedom.TcpSocket.ReadInfo) => {
-          socksSession.handleSocksClientData(info.data);
+          socksSession.handleData(info.data);
         });
 
         clientSocket.on('onDisconnect', (info: freedom.TcpSocket.DisconnectInfo) => {
@@ -62,5 +63,3 @@ class FreedomSocksServer {
     });
   }
 }
-
-export = FreedomSocksServer;

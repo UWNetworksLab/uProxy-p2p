@@ -2,7 +2,7 @@
 
 import session = require('../socks/session');
 
-import FreedomSocksServer = require('../socks/freedom/server');
+import freedom_server = require('../socks/freedom/server');
 import freedom_socket = require('../socks/freedom/socket');
 
 import logging = require('../logging/logging');
@@ -14,7 +14,7 @@ const loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
   loggingTypes.Level.debug);
 
-const log: logging.Log = new logging.Log('simple-socks');
+const log = new logging.Log('simple-socks');
 
 const SERVER_ADDRESS = '0.0.0.0';
 const SERVER_PORT = 9999;
@@ -23,12 +23,12 @@ const SERVER_NAME = 'sample';
 // 100% freedomjs SOCKS server:
 //   FreedomSocksServer -> SocksSession -> FreedomSocksSocket
 let numSessions = 0;
-new FreedomSocksServer(SERVER_ADDRESS, SERVER_PORT, SERVER_NAME).onConnection(() => {
+new freedom_server.FreedomSocksServer(SERVER_ADDRESS, SERVER_PORT, SERVER_NAME).onConnection(() => {
   const clientId = 'p' + (numSessions++) + 'p';
   log.info('new SOCKS session %1', clientId);
-  const socksSession = new session.SocksSessionImpl(SERVER_NAME, clientId);
+  const socksSession = new session.SocksSession(SERVER_NAME, clientId);
   socksSession.onForwardingSocketRequired((host: string, port: number) => {
-    const forwardingSocket = new freedom_socket.FreedomSocksSocket();
+    const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
     // TODO: destroy the socket on disconnect
     return forwardingSocket.connect(host, port).then(() => {
       return forwardingSocket;

@@ -1,13 +1,13 @@
 /// <reference path='../../../../../third_party/typings/browser.d.ts' />
 
 import logging = require('../../logging/logging');
-import session = require('../session');
+import piece = require('../piece');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
 const log: logging.Log = new logging.Log('freedom forwarding socket');
 
-export class FreedomSocksSocket implements session.ForwardingSocket {
+export class FreedomForwardingSocket implements piece.SocksPiece {
   private socket_ = freedom['core.tcpsocket']();
 
   constructor() {
@@ -20,13 +20,13 @@ export class FreedomSocksSocket implements session.ForwardingSocket {
   }
 
   private onData_: (buffer: ArrayBuffer) => void;
-  public onData = (callback: (buffer: ArrayBuffer) => void): FreedomSocksSocket => {
+  public onData = (callback: (buffer: ArrayBuffer) => void): FreedomForwardingSocket => {
     this.onData_ = callback;
     return this;
   }
 
   private onDisconnect_: () => void;
-  public onDisconnect = (callback: () => void): FreedomSocksSocket => {
+  public onDisconnect = (callback: () => void): FreedomForwardingSocket => {
     this.onDisconnect_ = callback;
     return this;
   }
