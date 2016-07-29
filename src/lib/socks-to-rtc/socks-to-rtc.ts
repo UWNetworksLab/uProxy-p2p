@@ -6,7 +6,7 @@ import net = require('../net/net.types');
 import logging = require('../logging/logging');
 import peerconnection = require('../webrtc/peerconnection');
 import Pool = require('../pool/pool');
-import socks = require('../socks-common/socks-headers');
+import socks_headers = require('../socks/headers');
 import tcp = require('../net/tcp');
 
 // SocksToRtc passes socks requests over WebRTC datachannels.
@@ -208,8 +208,8 @@ module SocksToRtc {
       }, (e:Error) => {
         log.error('failed to open channel for new SOCKS client: %1 ',
             e.message);
-        tcpConnection.send(socks.composeResponseBuffer({
-          reply: socks.Reply.FAILURE
+        tcpConnection.send(socks_headers.composeResponseBuffer({
+          reply: socks_headers.Reply.FAILURE
         }));
       });
     }
@@ -274,10 +274,10 @@ module SocksToRtc {
       // The session is ready once we've completed both
       // auth and request handshakes.
       this.onceReady = this.doAuthHandshake_().then(
-          this.doRequestHandshake_).then((response:socks.Response) => {
-        if (response.reply !== socks.Reply.SUCCEEDED) {
+          this.doRequestHandshake_).then((response:socks_headers.Response) => {
+        if (response.reply !== socks_headers.Reply.SUCCEEDED) {
           throw new Error('handshake failed with reply code ' +
-              socks.Reply[response.reply]);
+              socks_headers.Reply[response.reply]);
         }
         log.info('%1: connected to remote host', [this.longId()]);
         log.debug('%1: remote peer bound address: %2', [
@@ -358,10 +358,10 @@ module SocksToRtc {
     private doAuthHandshake_ = ()
         : Promise<void> => {
       return this.tcpConnection_.receiveNext()
-        .then(socks.interpretAuthHandshakeBuffer)
-        .then((auths:socks.Auth[]) => {
+        .then(socks_headers.interpretAuthHandshakeBuffer)
+        .then((auths:socks_headers.Auth[]) => {
           this.tcpConnection_.send(
-              socks.composeAuthResponse(socks.Auth.NOAUTH));
+              socks_headers.composeAuthResponse(socks_headers.Auth.NOAUTH));
         });
     }
 
@@ -378,10 +378,10 @@ module SocksToRtc {
     // occurs then we send a generic FAILURE response back to the SOCKS
     // client before rejecting.
     // TODO: Needs unit tests badly since it's mocked by several other tests.
-    private doRequestHandshake_ = () : Promise<socks.Response> => {
+    private doRequestHandshake_ = () : Promise<socks_headers.Response> => {
       return this.tcpConnection_.receiveNext()
-        .then(socks.interpretRequestBuffer)
-        .then((request:socks.Request) => {
+        .then(socks_headers.interpretRequestBuffer)
+        .then((request:socks_headers.Request) => {
           // The domain name is very sensitive, so we keep it out of the
           // info-level logs, which may be uploaded.
           log.debug('%1: received endpoint from SOCKS client: %2', [
@@ -401,8 +401,8 @@ module SocksToRtc {
               'during handshake: ' + JSON.stringify(data));
           }
           try {
-            var response :socks.Response = JSON.parse(data.str);
-            if (!socks.isValidResponse(response)) {
+            var response :socks_headers.Response = JSON.parse(data.str);
+            if (!socks_headers.isValidResponse(response)) {
               throw new Error('invalid response received from peer ' +
                   'during handshake: ' + data.str);
             }
@@ -417,11 +417,11 @@ module SocksToRtc {
               this.longId(),
               e.message]);
           return {
-            reply: socks.Reply.FAILURE
+            reply: socks_headers.Reply.FAILURE
           };
         })
-        .then((response:socks.Response) => {
-          return this.tcpConnection_.send(socks.composeResponseBuffer(
+        .then((response:socks_headers.Response) => {
+          return this.tcpConnection_.send(socks_headers.composeResponseBuffer(
               response)).then((discard:any) => { return response; });
         });
     }
