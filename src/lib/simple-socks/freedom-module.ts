@@ -1,59 +1,42 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
-import bridge = require('../bridge/bridge');
+import session = require('../socks/session');
+
+import FreedomSocksServer = require('../socks/freedom/server');
+import freedom_socket = require('../socks/freedom/socket');
+
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
-import net = require('../net/net.types');
-import rtc_to_net = require('../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
-import tcp = require('../net/tcp');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
 const loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(loggingTypes.Destination.console,
-                                   loggingTypes.Level.debug);
+  loggingTypes.Level.debug);
 
-const log :logging.Log = new logging.Log('simple-socks');
+const log: logging.Log = new logging.Log('simple-socks');
 
-const socksEndpoint:net.Endpoint = {
-  address: '0.0.0.0',
-  port: 9999
-};
+const SERVER_ADDRESS = '0.0.0.0';
+const SERVER_PORT = 9999;
+const SERVER_NAME = 'sample';
 
-const pcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
-  iceServers: [{urls: ['stun:stun.l.google.com:19302']},
-               {urls: ['stun:stun.services.mozilla.com']}]
-};
-
-export const socksToRtc = new socks_to_rtc.SocksToRtc();
-export const rtcToNet = new rtc_to_net.RtcToNet();
-
-rtcToNet.start({
-  allowNonUnicast: true
-}, bridge.best('rtctonet', pcConfig)).then(() => {
-  log.info('RtcToNet ready');
-}, (e:Error) => {
-  log.error('failed to start RtcToNet: %1', e.message);
-});
-
-// Must do this after calling start.
-rtcToNet.signalsForPeer.setSyncHandler(socksToRtc.handleSignalFromPeer);
-
-// Must do this before calling start.
-socksToRtc.on('signalForPeer', rtcToNet.handleSignalFromPeer);
-
-socksToRtc.start(
-  new tcp.Server(socksEndpoint),
-  // If you encounter issues w/obfuscation, replace bridge.best(...)
-  // with bridge.preObfuscation('sockstortc', pcConfig))
-  bridge.best('sockstortc', pcConfig, undefined, {
-    // See churn pipe source for the full list of transformer names.
-    name: 'rc4'
-  })).then((endpoint:net.Endpoint) => {
-    log.info('SocksToRtc listening on %1', endpoint);
-    log.info('curl -x socks5h://%1:%2 www.example.com',
-             endpoint.address, endpoint.port);
-  }, (e:Error) => {
-    log.error('failed to start SocksToRtc: %1', e.message);
+// 100% freedomjs SOCKS server:
+//   FreedomSocksServer -> SocksSession -> FreedomSocksSocket
+let numSessions = 0;
+new FreedomSocksServer(SERVER_ADDRESS, SERVER_PORT, SERVER_NAME).onConnection(() => {
+  const clientId = 'p' + (numSessions++) + 'p';
+  log.info('new SOCKS session %1', clientId);
+  const socksSession = new session.SocksSessionImpl(SERVER_NAME, clientId);
+  socksSession.onForwardingSocketRequired((host: string, port: number) => {
+    const forwardingSocket = new freedom_socket.FreedomSocksSocket();
+    // TODO: destroy the socket on disconnect
+    return forwardingSocket.connect(host, port).then(() => {
+      return forwardingSocket;
+    });
   });
+  return socksSession;
+}).listen().catch((e: Error) => {
+  log.error('failed to start SOCKS server: %1', e.message);
+}).then(() => {
+  log.info('curl -x socks5h://%1:%2 www.example.com', SERVER_ADDRESS, SERVER_PORT);
+});
