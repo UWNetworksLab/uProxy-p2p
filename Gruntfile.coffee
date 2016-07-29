@@ -246,7 +246,8 @@ module.exports = (grunt) ->
 
     exec: {
       ccaCreateDev: {
-        command: '<%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
+        # Pipe 'no' for the first time cca.js asks whether to send usage stats.
+        command: 'echo no | <%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
       }
       ccaCreateDist: {
         command: '<%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
