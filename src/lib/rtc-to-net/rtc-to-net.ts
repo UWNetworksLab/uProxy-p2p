@@ -337,7 +337,7 @@ import ProxyConfig = require('./proxyconfig');
     // Records the bytes sent to and from peer, for the previous time interval in this session. 
     private prevBytesSession_:number = 0;
     // The length of each interval used to calculate bandwidth.
-    public static BANDWIDTH_MONITOR_INTERVAL = 5000;  
+    public static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -401,7 +401,7 @@ import ProxyConfig = require('./proxyconfig');
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
       //Reset bandwidth loop check.
-      this.stopBandwidthCalc_ = false; 
+      this.stopBandwidthCalc_ = false;
       this.calculateBandwidth_();
       // Shutdown once the data channel terminates.
       this.dataChannel_.onceClosed.then(() => {
