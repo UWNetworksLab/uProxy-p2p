@@ -330,10 +330,14 @@ import ProxyConfig = require('./proxyconfig');
     private channelSentBytes_ :number = 0;
     private channelReceivedBytes_ :number = 0;
 
-    //used to caculate the total bandwidth of this session in 5 second intervals
-    private stopBandwidthCalc_:number = 0;
+    // Used to stop the calculation of bandwidth.
+    private stopBandwidthCalc_:boolean = false;
+    // Records the bytes sent to and from peer, for the current time interval in this session.
     private currBytesSession_:number = 0;
+    // Records the bytes sent to and from peer, for the previous time interval in this session. 
     private prevBytesSession_:number = 0;
+    // The length of each interval used to calculate bandwidth.
+    public static BANDWIDTH_MONITOR_INTERVAL = 5000;  
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -396,6 +400,8 @@ import ProxyConfig = require('./proxyconfig');
         });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
+      //Reset bandwidth loop check.
+      this.stopBandwidthCalc_ = false; 
       this.calculateBandwidth_();
       // Shutdown once the data channel terminates.
       this.dataChannel_.onceClosed.then(() => {
@@ -429,7 +435,7 @@ import ProxyConfig = require('./proxyconfig');
       // effectively immediate.  However, we wrap it in a promise to ensure
       // that any exception is sent to the Promise.catch, rather than
       // propagating synchronously up the stack.
-      this.stopBandwidthCalc_ = 1;
+      this.stopBandwidthCalc_ = true;
       var shutdownPromises :Promise<any>[] = [
         new Promise((F, R) => { this.dataChannel_.close(); F(); })
       ];
@@ -670,19 +676,23 @@ import ProxyConfig = require('./proxyconfig');
       return true;
     }
 
+    // Calculates bandwidth over "BANDWIDTH_MONITOR_INTERVAL" millisecond intervals based on 
+    // total bytes sent and received by this session. We want to calculate 
+    // bandwidth over a certain time interval; doing it continuously would
+    // not help us stop a random peak in bandwidth usage if the overall 
+    // average is still low.
     private calculateBandwidth_ = () : void => {
       if (!this.stopBandwidthCalc_) {
-        //calculate bandwidth over 5 second interval based on total bytes sent and received by this session
-        //we want to calculate bandwidth over a certain time interval; doing it continuously would not help us stop a random
-        //peak in badnwidth usage if the overall average is still low.
-        var bitsTransferred_ = (this.currBytesSession_ - this.prevBytesSession_) * 8; //8 bits in a byte, bandwidth measured in metric multiple of bits/sec 
-        var bandwidthSession_  = bitsTransferred_ / 5; //5 seconds have elapsed since last time this method was called
-
-        log.debug('It has been 5 sec in session' + this.channelLabel() + '; bandwidth: ' + bandwidthSession_ + ' bits/sec');
+        // There are 8 bits in a byte
+        var bitsTransferred_ = (this.currBytesSession_ - this.prevBytesSession_) * 8;
+        // Bandwidth is measured in bits/sec.
+        var bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), bandwidthSession_);
         this.prevBytesSession_ = this.currBytesSession_;
-        setTimeout(this.calculateBandwidth_, 5000);
+        setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
       }
     }
+
     private isAllowedAddress_ = (addressString:string) : boolean => {
       // default is to disallow non-unicast addresses; i.e. only proxy for
       // public internet addresses.
