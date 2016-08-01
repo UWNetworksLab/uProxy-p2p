@@ -57,6 +57,8 @@ import ProxyConfig = require('./proxyconfig');
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
 
+    private stopBandwidthCalcTotal:boolean = false;
+
     // Returns true if the addition was successful.
     private static addUserSession_ = (userId:string) : boolean => {
       if (!userId) {
@@ -159,6 +161,7 @@ import ProxyConfig = require('./proxyconfig');
       if (this.peerConnection_) {
         throw new Error('already configured');
       }
+      this.stopBandwidthCalcTotal = false;
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(peerconnection, 'RtcToNet');
       this.proxyConfig = proxyConfig;
@@ -171,6 +174,7 @@ import ProxyConfig = require('./proxyconfig');
       // fulfills first.  https://github.com/uProxy/uproxy/issues/760
       this.onceReady = this.peerConnection_.onceConnected.then(() => {});
       this.onceReady.catch(this.fulfillStopping_);
+      this.calculateBandwidthTotal();
       this.peerConnection_.onceClosed
         .then(() => {
           log.debug('peerconnection terminated');
@@ -266,6 +270,7 @@ import ProxyConfig = require('./proxyconfig');
       // TODO(ldixon): explore why not not just return
       // this.peerConnection_.close(); call the PeerConnection's close and
       // return synchronously.
+      this.stopBandwidthCalcTotal = true;
       return new Promise<void>((F, R) => {
         this.peerConnection_.close();
         F();
@@ -274,6 +279,23 @@ import ProxyConfig = require('./proxyconfig');
 
     public handleSignalFromPeer = (message:Object) :void => {
       return this.peerConnection_.handleSignalMessage(message);
+    }
+
+    private calculateBandwidthTotal = () : void => {
+      if (!this.stopBandwidthCalcTotal) {
+        // There are 8 bits in a byte
+        var currBytesTotal = 0;
+        var prevBytesTotal = 0;
+        for (var label in this.sessions_) {
+          currBytesTotal += this.sessions_[label].currBytesSession_;
+          prevBytesTotal += this.sessions_[label].prevBytesSession_; //TODO might be a better way to keep track
+        }
+        var bitsTransferredTotal = (currBytesTotal - prevBytesTotal) * 8;
+        // Bandwidth is measured in bits/sec.
+        var bandwidthSession_  = bitsTransferredTotal / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('testing!' + currBytesTotal);
+        setTimeout(this.calculateBandwidthTotal, Session.BANDWIDTH_MONITOR_INTERVAL);
+      }
     }
 
     public toString = () : string => {
@@ -332,11 +354,11 @@ import ProxyConfig = require('./proxyconfig');
 
     // Used to stop the calculation of bandwidth.
     private stopBandwidthCalc_:boolean = false;
-    // Records the bytes sent to and from peer, for the current time interval in this session.
-    private currBytesSession_:number = 0;
-    // Records the bytes sent to and from peer, for the previous time interval in this session. 
-    private prevBytesSession_:number = 0;
-    // The length of each interval used to calculate bandwidth.
+    // Records the bytes sent to and from peer, for the current time interval.
+    public currBytesSession_:number = 0;
+    // Records the bytes sent to and from peer, for the previous time interval. 
+    public prevBytesSession_:number = 0;
+    // The length of each interval used to calculate bandwidth, in milliseconds.
     public static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
     // The supplied datachannel must already be successfully established.
@@ -676,10 +698,10 @@ import ProxyConfig = require('./proxyconfig');
       return true;
     }
 
-    // Calculates bandwidth over "BANDWIDTH_MONITOR_INTERVAL" millisecond intervals based on 
-    // total bytes sent and received by this session. We want to calculate 
+    // Calculates bandwidth over BANDWIDTH_MONITOR_INTERVAL millisecond intervals based on
+    // total bytes sent and received by this session. We want to calculate
     // bandwidth over a certain time interval; doing it continuously would
-    // not help us stop a random peak in bandwidth usage if the overall 
+    // not help us stop a random peak in bandwidth usage if the overall
     // average is still low.
     private calculateBandwidth_ = () : void => {
       if (!this.stopBandwidthCalc_) {
