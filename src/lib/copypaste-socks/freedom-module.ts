@@ -67,21 +67,18 @@ var doStart = () => {
 
   socksRtc = new socks_to_rtc.SocksToRtc();
 
-  // Forward signalling channel messages to the UI.
-  socksRtc.on('signalForPeer', batcher.addToBatch);
-
   // SocksToRtc adds the number of bytes it sends/receives to its respective
   // queue as it proxies. When new numbers (of bytes) are added to these queues,
   // emit the number to the UI (look for corresponding freedom.on in main.html).
-  socksRtc.on('bytesReceivedFromPeer', (numBytes:number) => {
-      parentModule.emit('bytesReceived', numBytes);
+  socksRtc.bytesReceivedFromPeer.setSyncHandler((numBytes:number) => {
+    parentModule.emit('bytesReceived', numBytes);
   });
 
-  socksRtc.on('bytesSentToPeer', (numBytes:number) => {
-      parentModule.emit('bytesSent', numBytes);
+  socksRtc.bytesSentToPeer.setSyncHandler((numBytes:number) => {
+    parentModule.emit('bytesSent', numBytes);
   });
 
-  socksRtc.on('stopped', () => {
+  socksRtc.onceStopped.then(() => {
     parentModule.emit('proxyingStopped');
   });
 
@@ -94,6 +91,9 @@ var doStart = () => {
   }, (e:Error) => {
     log.error('failed to start SocksToRtc: %1', e.message);
   });
+
+  // Forward signalling channel messages to the UI.
+  socksRtc.signalsForPeer.setSyncHandler(batcher.addToBatch);
 }
 
 parentModule.on('start', doStart);

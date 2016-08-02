@@ -37,12 +37,6 @@ rtcToNet.start({
   log.error('failed to start RtcToNet: %1', e.message);
 });
 
-// Must do this after calling start.
-rtcToNet.signalsForPeer.setSyncHandler(socksToRtc.handleSignalFromPeer);
-
-// Must do this before calling start.
-socksToRtc.on('signalForPeer', rtcToNet.handleSignalFromPeer);
-
 socksToRtc.start(
   new tcp.Server(socksEndpoint),
   // If you encounter issues w/obfuscation, replace bridge.best(...)
@@ -57,3 +51,7 @@ socksToRtc.start(
   }, (e:Error) => {
     log.error('failed to start SocksToRtc: %1', e.message);
   });
+
+// Must do this after calling start.
+rtcToNet.signalsForPeer.setSyncHandler(socksToRtc.handleSignalFromPeer);
+socksToRtc.signalsForPeer.setSyncHandler(rtcToNet.handleSignalFromPeer);
