@@ -283,17 +283,16 @@ import ProxyConfig = require('./proxyconfig');
 
     private calculateBandwidthTotal = () : void => {
       if (!this.stopBandwidthCalcTotal) {
-        // There are 8 bits in a byte
         var currBytesTotal = 0;
         var prevBytesTotal = 0;
         for (var label in this.sessions_) {
-          currBytesTotal += this.sessions_[label].currBytesSession_;
-          prevBytesTotal += this.sessions_[label].prevBytesSession_; //TODO might be a better way to keep track
+          currBytesTotal += this.sessions_[label].currBytes_;
+          prevBytesTotal += this.sessions_[label].prevBytes_; //TODO there might be a better way to keep track
         }
         var bitsTransferredTotal = (currBytesTotal - prevBytesTotal) * 8;
         // Bandwidth is measured in bits/sec.
-        var bandwidthSession_  = bitsTransferredTotal / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
-        log.debug('testing!' + currBytesTotal);
+        var bandwidthTotal  = bitsTransferredTotal / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('Current bandwidth for whole connection: %1 bits/sec', bandwidthTotal);
         setTimeout(this.calculateBandwidthTotal, Session.BANDWIDTH_MONITOR_INTERVAL);
       }
     }
@@ -355,9 +354,9 @@ import ProxyConfig = require('./proxyconfig');
     // Used to stop the calculation of bandwidth.
     private stopBandwidthCalc_:boolean = false;
     // Records the bytes sent to and from peer, for the current time interval.
-    public currBytesSession_:number = 0;
+    public currBytes_:number = 0;
     // Records the bytes sent to and from peer, for the previous time interval. 
-    public prevBytesSession_:number = 0;
+    public prevBytes_:number = 0;
     // The length of each interval used to calculate bandwidth, in milliseconds.
     public static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
@@ -630,7 +629,7 @@ import ProxyConfig = require('./proxyconfig');
         throw new Error('received non-buffer data from datachannel');
       }
       this.bytesReceivedFromPeer_.handle(data.buffer.byteLength);
-      this.currBytesSession_ += data.buffer.byteLength;
+      this.currBytes_ += data.buffer.byteLength;
       this.channelReceivedBytes_ += data.buffer.byteLength;
       this.tcpConnection_.send(data.buffer);
     }
@@ -643,7 +642,7 @@ import ProxyConfig = require('./proxyconfig');
       var socketReader = (data:ArrayBuffer) => {
         this.sendOnChannel_(data);
         this.bytesSentToPeer_.handle(data.byteLength);
-        this.currBytesSession_ += data.byteLength;
+        this.currBytes_ += data.byteLength;
         this.channelSentBytes_ += data.byteLength;
       };
       this.tcpConnection_.dataFromSocketQueue.setSyncHandler(socketReader);
@@ -706,11 +705,11 @@ import ProxyConfig = require('./proxyconfig');
     private calculateBandwidth_ = () : void => {
       if (!this.stopBandwidthCalc_) {
         // There are 8 bits in a byte
-        var bitsTransferred_ = (this.currBytesSession_ - this.prevBytesSession_) * 8;
+        var bitsTransferred_ = (this.currBytes_ - this.prevBytes_) * 8;
         // Bandwidth is measured in bits/sec.
         var bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
         log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), bandwidthSession_);
-        this.prevBytesSession_ = this.currBytesSession_;
+        this.prevBytes_ = this.currBytes_;
         setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
       }
     }
