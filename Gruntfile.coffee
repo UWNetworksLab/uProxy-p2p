@@ -282,9 +282,6 @@ module.exports = (grunt) ->
         cwd: '<%= androidDevPath %>'
         command: '<%= ccaJsPath %> run android --emulator'
       }
-      rmAndroidBuild: {
-        command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
-      }
       ccaCreateIosDev: {
         command: '<%= ccaJsPath %> create <%= iosDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
       }
@@ -1145,7 +1142,6 @@ module.exports = (grunt) ->
 
   # Mobile OS build tasks
   grunt.registerTask 'build_android', [
-    'exec:rmAndroidBuild'
     'build_cca'
     'exec:ccaCreateDev'
     'exec:ccaPlatformAndroidDev'
@@ -1241,7 +1237,6 @@ module.exports = (grunt) ->
   # jshint is here because catches hard syntax errors, etc.
   grunt.registerTask 'build', [
     'exec:rmIosBuild'
-    'exec:rmAndroidBuild'
     'build_chrome'
     'build_firefox'
     'build_cca'
