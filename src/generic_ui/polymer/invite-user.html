@@ -1,12 +1,13 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel="import" href="../../bower/core-signals/core-signals.html">
-<link rel='import' href='../../bower/paper-dropdown-menu/paper-dropdown-menu.html'>
+
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
 <link rel='import' href='network-invite-user.html'>
 <link rel="import" href="i18n-filter.html">
+<link rel='import' href='cloud-install.html'>
 
 <polymer-element name='uproxy-invite-user'>
   <template>
@@ -16,34 +17,25 @@
         width: 100%;
         background-color: white;
       }
-      #inviteUserPanel uproxy-button {
-        width: 200px;
-        margin: 0;
-        padding-left: 1em;
-        padding-right: 1em;
-      }
       .view {
         overflow: auto;
       }
-      .section {
-        padding-left: 2em;
-        padding-right: 2em;
-        padding-top: 1em;
+      .acceptInvite {
+        text-align: left;
+        margin: 18px 24px 14px 24px;
         padding-bottom: 1em;
-        line-height: 20px;
+      }
+      .acceptInvite paper-input-decorator {
+        padding-top: 0;
+        padding-bottom: 18px;
+        font-size: 16px;
+      }
+      #inviteCodeDecorator {
+        padding-bottom: 0;
       }
       a {
         cursor: pointer;
       }
-      paper-dropdown-menu {
-        padding: 0;
-        margin: 0;
-      }
-      paper-input-decorator {
-        font-size: 16px;
-      }
-
-      /* CSS for roster-before-login flow. */
       #allInviteMethods {
         text-align: center;
       }
@@ -57,7 +49,7 @@
         margin-top: 0;
       }
       #loginToInviteFriendDialog p {
-        color: rgb(160, 160, 160);
+        color: #666;
         line-height: 18px;
         font-weight: lighter;
         font-size: 12px;
@@ -70,43 +62,39 @@
         color: rgb(180,180,180);
         cursor: pointer;
       }
-      #QuiverLoginButton {
-        width: 200px;
-        margin-top: 1em;
-        margin-bottom: 1em;
-      }
-      .QuiverTitle {
-        font-size: 1.4em;
-        color: #009688;
-        font-weight: normal;
-        margin: 1em 1em 0em 1em;
-      }
-      .orText {
-        font-size: 26px;
-        margin-top: 0.5em;
-        font-style: italic;
+      #acceptInviteButton {
+        width: 100%;
+        margin-top: 18px;
+        margin-left: 0;
+        margin-right: 0;
       }
       .networkLoginButton {
-        display: inline-block;
-        width: 120px;
-        margin-top: 0.5em;
-        margin-bottom: 1em;
         cursor: pointer;
         vertical-align: top;
+        padding: 1em 2em 1em 2em;
+      }
+      .networkLoginButton {
+        cursor: pointer;
+        vertical-align: top;
+        padding: 1em 2em 1em 2em;
+      }
+      .networkLoginButton:last-child {
+        border-bottom: none;
       }
       .networkLoginButton .networkName {
-        margin-top: 0.5em;
+        margin-top: 0.7em;
+        margin-left: 1em;
+        font-size: 16px;
+        color: rgba(0, 0, 0, .86);
+        display: inline-block;
+        font-weight: 700;
       }
       .networkLoginButton core-icon {
-        width: 75px;
-        height: 75px;
+        width: 50px;
+        height: 50px;
       }
       .networkLoginButton .experimental {
-        color: red;
         font-size: 12px;
-      }
-      .networkLoginButton.copypaste {
-        margin-top: 2em;
       }
       uproxy-button.login {
         margin: 15px 0px;
@@ -141,121 +129,107 @@
       uproxy-dialog {
         padding: 5px;
       }
+      /* uproxy-faq-link is used in the translation for weWontPostLearnMore */
+      uproxy-faq-link {
+        color: #12A391;
+      }
+      .paleText {
+        color: #9e9e9e;
+      }
+      #weWontPostLearnMore {
+        font-size: 14px;
+        padding: 26px;
+        color: #999;
+        border-top: 1px solid rgb(221, 221, 221);
+      }
+      #allNetworkButtons {
+        text-align: left;
+      }
+      .categoryHeader {
+        text-align: left;
+        padding: 1em 2em 1em 2em;
+        background-color: rgb(225,246,244);  /* light aqua green */
+        color: rgba(0,0,0,0.54);
+        line-height: 22px;
+      }
+      #cloudInstall {
+        color: white;
+        background-color: #34AFCE;  /* blue */;
+        margin: 14px 24px 14px 24px;
+        padding: 2em 1em 2em 2em;
+        cursor: pointer;
+        line-height: 30px;
+        border-radius: 3px;
+      }
+      #cloudInstall .content {
+        width: 85%;
+        vertical-align: middle;
+        display: inline-block;
+      }
+      #cloudInstall p {
+        line-height: 1.75em;
+      }
+      #cloudInstall h1 {
+        font-weight: 300;
+        margin-top: 0;
+        font-size: 20px;
+        line-height: 30px;
+      }
+      #cloudInstall img {
+        height: 50px;
+        margin-bottom: 1em;
+      }
+      .chevronWrapper {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: right;
+      }
+      #cloudInstall .chevronWrapper {
+        width: 13%;  /* TODO: why doesn't 15% work? */
+      }
+      core-icon[icon=chevron-right] {
+        width: 25px;
+        height: 25px;
+      }
+      .networkLoginButton .chevronWrapper {
+        position: absolute;
+        right: 2em;
+        margin-top: 12.5px; /* (network icon height - chevron height) / 2 */
+      }
     </style>
 
+    <uproxy-state id="state"></uproxy-state>
     <core-signals on-core-signal-open-invite-user-dialog='{{ openInviteUserPanel }}'></core-signals>
 
     <core-overlay id='inviteUserPanel'>
       <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-        {{ 'INVITE_A_FRIEND' | $$(model.globalSettings.language) }}
+        {{ 'CONNECT_WITH_A_FRIEND' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='view' flex>
-        <!-- TODO: translate before launch on webstore -->
-        <div id="allInviteMethods" hidden?='{{!ui.showRosterBeforeLogin}}'>
-          <div hidden?="{{!supportsQuiver}}">
-            <div hidden?='{{isQuiverLoggedIn}}' class='section'>
-              <h1 class='QuiverTitle'>Sign in to the uProxy network</h1>
-              <paper-input-decorator label='Choose a user name' layout vertical>
-                <input is='core-input' value='{{ userName }}' />
-              </paper-input-decorator>
-              <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
-            </div>
-            <div hidden?='{{!isQuiverLoggedIn}}' class='section'>
-              <!-- TODO: localization -->
-              <h1 class='QuiverTitle'>Send this link to your friends so they can find you on uProxy</h1>
-              <div hidden?='{{ quiverInviteUrl == "" }}'>
-                <paper-input-decorator layout vertical>
-                  <input readonly is='core-input' on-tap='{{ select }}' value='{{ quiverInviteUrl }}' />
-                </paper-input-decorator>
-              </div>
-            </div>
-            <div class='orText'>- - - OR - - -</div>
+        <div id="allInviteMethods">
+          <div class='acceptInvite'>
+            <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$(model.globalSettings.language) }}' layout vertical>
+              <input is='core-input' value='{{ inviteCode }}' />
+            </paper-input-decorator>
+            <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$(model.globalSettings.language) }}</uproxy-button>
           </div>
-          <div class='section'>
-          <p>{{ "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK" | $$(model.globalSettings.language) }}</p>
-            <template repeat='{{ n in networkButtonNames }}' vertical layout>
-              <div on-tap='{{ networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
+
+          <div id='allNetworkButtons'>
+            <template repeat='{{ n in model.networkNames }}' vertical layout>
+              <div on-tap='{{networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
                 <core-icon icon='uproxy-icons:{{n}}'></core-icon>
                 <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
-                <div class='experimental' hidden?='{{!isExperimentalNetwork(n)}}'>
-                  Experimental
+                <div class='chevronWrapper'>
+                  <core-icon icon="chevron-right"></core-icon>
                 </div>
               </div>
             </template>
 
-            <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}' class='section'>
-              <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
-              <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$(model.globalSettings.language) }}</div>
-            </div>
+          </div> <!-- end of #allNetworkButtons -->
 
-            <div class="section">
-              {{ "WE_WONT_POST" | $$(model.globalSettings.language) }}
-            </div>
-          </div>
-
-          <div class="section">
-            {{ "HAVE_AN_INVITE_CODE" | $$(model.globalSettings.language) }}<br>
-            <a on-tap="{{showAcceptUserInvite}}">{{ "ENTER_IT_HERE" | $$(model.globalSettings.language) }}</a>
-          </div>
-        </div> <!--End of roster-before-login view-->
-
-        <!-- TODO: remove this and uproxy-network template once Quiver
-        support is on the webstore -->
-        <div hidden?='{{ui.showRosterBeforeLogin}}'>
-          <div hidden?='{{ onlineInviteNetworks.length <= 1}}' class='section'>
-            <p>{{ 'HOW_TO_INVITE_FRIENDS' | $$(model.globalSettings.language) }}</p>
-            <paper-dropdown-menu>
-              <paper-dropdown class='dropdown'>
-                <core-menu class='menu' selected='0' on-core-select='{{ onNetworkSelect }}' id='networkSelectMenu'>
-                  <template repeat="{{ network in onlineInviteNetworks }}">
-                    <paper-item label='{{ network.name }}'>
-                      {{ network.displayName }}
-                    </paper-item>
-                  </template>
-                </core-menu>
-              </paper-dropdown>
-            </paper-dropdown-menu>
-          </div>
-          <div class='section'>
-            <div hidden?='{{ selectedNetworkName != "Facebook-Firebase-V2"}}'>
-              <p>{{ 'FACEBOOK_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
-              <uproxy-button affirmative on-tap='{{ sendToFacebookFriend }}'>
-                {{ 'SEND_INVITATION' | $$(model.globalSettings.language) }}
-              </uproxy-button>
-            </div>
-
-            <div hidden?='{{ selectedNetworkName != "GMail"}}'>
-              <p>{{ 'GMAIL_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
-              <paper-input-decorator label='{{ "EMAIL_PLACEHOLDER" | $$(model.globalSettings.language) }}' layout vertical>
-                <input is='core-input' value='{{ inviteUserEmail }}' />
-              </paper-input-decorator>
-
-              <uproxy-button affirmative on-tap='{{ sendToGMailFriend }}'>
-                {{ 'SEND_INVITATION' | $$(model.globalSettings.language) }}
-              </uproxy-button>
-            </div>
-
-            <div hidden?='{{ selectedNetworkName != "GitHub"}}'>
-              <p>{{ 'GITHUB_INVITE_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
-              <paper-input-decorator label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
-                <input is='core-input' value='{{ githubUserIdInput }}'>
-              </paper-input-decorator>
-              <uproxy-button affirmative on-tap='{{ inviteGithubFriend }}'>
-                {{ 'SEND_INVITATION' | $$(model.globalSettings.language) }}
-              </uproxy-button>
-            </div>
-
-            <div hidden?='{{ selectedNetworkName != "Cloud"}}'>
-              <p>{{ 'ADD_CLOUD_INSTRUCTIONS' | $$(model.globalSettings.language) }}</p>
-            </div>
-          </div>
-          <div class='section'>
-            <a on-tap='{{ showAcceptUserInvite }}'>
-              {{ 'ACCEPT_LINK_FROM_INVITE_PAGE' | $$(model.globalSettings.language) }}
-            </a>
-          </div>
-        </div> <!--End of login-before-roster view-->
+          <div id="weWontPostLearnMore"></div>
+        </div> <!--End of #allInviteMethods -->
       </div>
     </core-overlay>
 
@@ -272,6 +246,7 @@
     </uproxy-dialog>
 
     <uproxy-network-invite-user network="{{selectedNetworkName}}"></uproxy-network-invite-user>
+    <uproxy-cloud-install></uproxy-cloud-install>
 
   </template>
   <script src='invite-user.js'></script>

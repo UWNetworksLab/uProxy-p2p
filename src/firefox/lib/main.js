@@ -23,7 +23,7 @@ var panel;
 
 // Load freedom.
 var manifest = self.data.url('generic_core/freedom-module.json');
-var loggingProviderManifest = self.data.url("uproxy-lib/loggingprovider/freedom-module.json");
+var loggingProviderManifest = self.data.url("lib/loggingprovider/freedom-module.json");
 var init = freedom(manifest, {
   'logger': loggingProviderManifest,
   'debug': 'debug'
@@ -33,11 +33,11 @@ var init = freedom(manifest, {
     width: 371,
     height: 600,
     contentURL: self.data.url("generic_ui/index.html")
-  })
+  });
 
   // Set up connection between freedom and content script.
-  require('glue.js').setUpConnection(new uproxy(), panel, button);
-  require('url-handler.js').setup(panel, button);
+  require('lib/glue.js').setUpConnection(new uproxy(), panel, button);
+  require('lib/url-handler.js').setup(panel, button);
 });
 
 

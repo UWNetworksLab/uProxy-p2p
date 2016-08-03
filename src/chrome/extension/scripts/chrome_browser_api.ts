@@ -1,3 +1,5 @@
+/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+
 /**
  * chrome_browser_api.ts
  *
@@ -6,12 +8,8 @@
 
 import browser_api = require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
-import net = require('../../../../../third_party/uproxy-lib/net/net.types');
-import UI = require('../../../generic_ui/scripts/ui');
+import net = require('../../../lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
-
-/// <reference path='../../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../../networking-typings/communications.d.ts' />
 
 enum PopupState {
     NOT_LAUNCHED,
@@ -23,10 +21,11 @@ declare var Notification :any; //TODO remove this
 
 class ChromeBrowserApi implements BrowserAPI {
 
-  public browserSpecificElement = "uproxy-app-missing";
+  public browserSpecificElement = 'uproxy-app-missing';
 
   public canProxy = true;
   public hasInstalledThenLoggedIn = true;
+  public supportsVpn = false;
 
   // For browser action.
 
@@ -35,8 +34,8 @@ class ChromeBrowserApi implements BrowserAPI {
   public setIcon = (iconFile :string) : void => {
     chrome.browserAction.setIcon({
       path: {
-        "19" : this.ICON_DIR + "19_" + iconFile,
-        "38" : this.ICON_DIR + "38_" + iconFile,
+        '19' : this.ICON_DIR + '19_' + iconFile,
+        '38' : this.ICON_DIR + '38_' + iconFile,
       }
     });
   }
@@ -44,7 +43,6 @@ class ChromeBrowserApi implements BrowserAPI {
   // For proxy configuration.
 
   private preUproxyConfig_ :chrome.proxy.ProxyConfig = null;
-  private uproxyConfig_ :chrome.proxy.ProxyConfig = null;
   private running_ :boolean = false;
 
   // For managing popup.
@@ -52,7 +50,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private POPUP_URL = "generic_ui/index.html";
+  private POPUP_URL = 'generic_ui/index.html';
   // When we last called chrome.windows.create (for logging purposes).
   private popupCreationStartTime_ = Date.now();
 
@@ -63,17 +61,6 @@ class ChromeBrowserApi implements BrowserAPI {
 
   constructor() {
     // use localhost
-    this.uproxyConfig_ = {
-      mode: "fixed_servers",
-      rules: {
-        singleProxy: {
-          scheme: "socks5",
-          host: null,
-          port: null
-        }
-      }
-    };
-
     chrome.proxy.settings.clear({scope: 'regular'});
 
     chrome.proxy.settings.get({}, (details) => {
@@ -102,7 +89,7 @@ class ChromeBrowserApi implements BrowserAPI {
       }
     });
 
-    chrome.browserAction.setBadgeBackgroundColor({color: "#009968"});
+    chrome.browserAction.setBadgeBackgroundColor({color: '#009968'});
   }
 
   private canControlProxy_ = (level :string) :boolean => {
@@ -110,16 +97,28 @@ class ChromeBrowserApi implements BrowserAPI {
            level === 'controlled_by_this_extension';
   }
 
-  public startUsingProxy = (endpoint:net.Endpoint) => {
-    this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
-    this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
+  public startUsingProxy =
+      (endpoint: net.Endpoint, bypass: string[],
+       opts: browser_api.ProxyConnectOptions) => {
+    var config = {
+      mode: 'fixed_servers',
+      rules: {
+        singleProxy: {
+          scheme: 'socks5',
+          host: endpoint.address,
+          port: endpoint.port,
+        },
+        bypassList: bypass,
+      }
+    };
+
     console.log('Directing Chrome proxy settings to uProxy');
     this.running_ = true;
     chrome.proxy.settings.get({incognito:false},
       (details) => {
         this.preUproxyConfig_ = details.value;
         chrome.proxy.settings.set({
-            value: this.uproxyConfig_,
+            value: config,
             scope: 'regular'
           }, () => {console.log('Successfully set proxy');});
       });
@@ -154,11 +153,11 @@ class ChromeBrowserApi implements BrowserAPI {
     chrome.tabs.query({currentWindow: true}, function(tabs){
       for (var i = 0; i < tabs.length; i++) {
         if (tabs[i].url == chrome.extension.getURL(relativeUrl)) {
-          chrome.tabs.update(tabs[i].id, {url: "../" + relativeUrl, active: true});
+          chrome.tabs.update(tabs[i].id, {url: '../' + relativeUrl, active: true});
           return;
         }
       }
-      chrome.tabs.create({url: "../" + relativeUrl});
+      chrome.tabs.create({url: '../' + relativeUrl});
     });
   }
 
@@ -173,7 +172,7 @@ class ChromeBrowserApi implements BrowserAPI {
         this.handlePopupLaunch = F;
       });
       chrome.windows.create({url: this.POPUP_URL,
-                     type: "popup",
+                     type: 'popup',
                      width: 371,
                      height: 600}, this.newPopupCreated_);
       return this.onceLaunched_;
@@ -182,8 +181,8 @@ class ChromeBrowserApi implements BrowserAPI {
       chrome.windows.update(this.popupWindowId_, {focused: true});
       return Promise.resolve<void>();
     } else {
+      console.log('Waiting for popup to launch...');
       return this.onceLaunched_;
-      console.log("Waiting for popup to launch...");
     }
   }
 
@@ -191,7 +190,7 @@ class ChromeBrowserApi implements BrowserAPI {
     * Callback passed to chrome.windows.create.
     */
   private newPopupCreated_ = (popup :chrome.windows.Window) => {
-    console.log("Time between browser icon click and popup launch (ms): " +
+    console.log('Time between browser icon click and popup launch (ms): ' +
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
     this.popupState_ = PopupState.LAUNCHED;
@@ -212,6 +211,10 @@ class ChromeBrowserApi implements BrowserAPI {
     }, 5000);
   }
 
+  public isConnectedToCellular = (): Promise<boolean> => {
+    return Promise.resolve(false);
+  }
+
   private events_ :{[name :string] :Function} = {};
 
   public on = (name :string, callback :Function) => {
@@ -228,49 +231,12 @@ class ChromeBrowserApi implements BrowserAPI {
     });
   }
 
-  public frontedPost = (data :any,
-                        externalDomain :string,
-                        cloudfrontDomain :string,
-                        cloudfrontPath = "") : Promise<void> => {
-    // Set the Cloudfront destination as the Host in the request header,
-    // hiding the Cloudfront URL from observers but still informing
-    // the external domain (e.g. AWS) where the request should be forwarded.
-    var setHostInHeader = (details :chrome.webRequest.OnBeforeSendHeadersDetails) => {
-      details.requestHeaders.push({
-        name: 'Host',
-        value: cloudfrontDomain
-      });
-      return { requestHeaders: details.requestHeaders };
-    };
+  public respond = (data :any, callback ?:Function, msg ?:string) : void => {
+    callback && this.respond_(data, callback);
+  }
 
-    // Call setHostInHeader before sending POST requests by adding
-    // a listener to chrome's onBeforeSendHeaders.
-    chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
-      urls: [externalDomain + "*"] /* URLs this listener applies to. */
-    }, ['requestHeaders', 'blocking']);
-
-    var removeSendHeaderListener = () => {
-      // Remove the functionality of setHostInHeader after we're done with our
-      // POST so that we don't interfere with any other requests.
-      // This will be called after the POST has succeeded or failed.
-      chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
-    };
-
-    return new Promise<void>((fulfill, reject) => {
-      var xhr = new XMLHttpRequest();
-      xhr.onload = function(){
-        fulfill();
-      };
-      xhr.onerror = function(){
-        reject(new Error('POST failed with HTTP code ' + xhr.status));
-      };
-      var params = JSON.stringify(data);
-      // Only the front domain is exposed on the wire. The cloudfrontPath
-      // should be encrypted. The cloudfrontPath needs to be here and not
-      // in the Host header, which can only take a host name.
-      xhr.open('POST', externalDomain + cloudfrontPath, true);
-      xhr.send(params);
-    }).then(removeSendHeaderListener, removeSendHeaderListener);
+  private respond_ = (data :any, callback :Function) : void => {
+    callback(data);
   }
 
   public setBadgeNotification = (notification :string) => {

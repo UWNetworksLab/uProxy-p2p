@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * core.ts
  *
@@ -10,17 +12,15 @@
  *  - Instances, which is a list of active uProxy installs.
  */
 
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
-
 import browser_connector = require('../interfaces/browser_connector');
 import globals = require('./globals');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import loggingprovider = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import logging = require('../lib/logging/logging');
+import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
 import metrics_module = require('./metrics');
-import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
+import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import social_network = require('./social');
 import social = require('../interfaces/social');
-import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
+import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
 import ui = require('./ui_connector');
 import uproxy_core = require('./uproxy_core');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
@@ -52,15 +52,17 @@ var exported = {
 };
 export = exported;
 
+// Note: Our mechanism for dispatching commands requires that the
+// members of core are bound closures.  E.g.:
+//    public foo = (args) => {..}
+// And NOT:
+//    public foo (args) {..}
 var commands :{[command :number] :((data?:any) => (Promise<any>|void))} = {};
 commands[uproxy_core_api.Command.LOGIN] = core.login;
 commands[uproxy_core_api.Command.LOGOUT] = core.logout;
 commands[uproxy_core_api.Command.MODIFY_CONSENT] = core.modifyConsent;
-commands[uproxy_core_api.Command.START_PROXYING_COPYPASTE_GET] = core.startCopyPasteGet;
-commands[uproxy_core_api.Command.START_PROXYING_COPYPASTE_SHARE] = core.startCopyPasteShare;
-commands[uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE] = core.sendCopyPasteSignal;
 commands[uproxy_core_api.Command.START_PROXYING] = core.start;
-commands[uproxy_core_api.Command.SEND_INVITATION] = core.inviteUser;
+commands[uproxy_core_api.Command.INVITE_GITHUB_USER] = core.inviteGitHubUser;
 commands[uproxy_core_api.Command.GET_INVITE_URL] = core.getInviteUrl;
 commands[uproxy_core_api.Command.SEND_EMAIL] = core.sendEmail;
 commands[uproxy_core_api.Command.STOP_PROXYING] = core.stop;
@@ -73,17 +75,22 @@ commands[uproxy_core_api.Command.HANDLE_CORE_UPDATE] = core.handleUpdate;
 commands[uproxy_core_api.Command.GET_VERSION] = core.getVersion;
 commands[uproxy_core_api.Command.PING_UNTIL_ONLINE] = core.pingUntilOnline;
 commands[uproxy_core_api.Command.ACCEPT_INVITATION] = core.acceptInvitation;
+commands[uproxy_core_api.Command.CLOUD_UPDATE] = core.cloudUpdate;
+commands[uproxy_core_api.Command.UPDATE_ORG_POLICY] = core.updateOrgPolicy;
+commands[uproxy_core_api.Command.REMOVE_CONTACT] = core.removeContact;
+commands[uproxy_core_api.Command.POST_REPORT] = core.postReport;
+commands[uproxy_core_api.Command.VERIFY_USER] = core.verifyUser;
+commands[uproxy_core_api.Command.VERIFY_USER_SAS] = core.finishVerifyUser;
+commands[uproxy_core_api.Command.GET_PORT_CONTROL_SUPPORT] = core.getPortControlSupport;
 
 for (var command in commands) {
-  ui_connector.onCommand(command, commands[command]);
+  ui_connector.onCommand(parseInt(command, 10), commands[command]);
 }
 
 var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
     globals.metrics, globals.storage, core.getNetworkInfoObj,
     (payload :any) => {
       if (globals.settings.statsReportingEnabled) {
-        ui_connector.update(
-            uproxy_core_api.Update.POST_TO_CLOUDFRONT,
-            {payload: payload, cloudfrontPath: 'submit-rappor-stats'});
+        core.postReport({payload: payload, path: 'submit-rappor-stats'});
       }
     });

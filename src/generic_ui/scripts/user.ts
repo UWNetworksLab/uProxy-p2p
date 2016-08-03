@@ -1,10 +1,12 @@
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
+
 /**
  * user.ts
  *
  * This is the UI-specific representation of a User.
  */
-/// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
+import model = require('./model');
 import social = require('../../interfaces/social');
 import user_interface = require('./ui');
 import translator_module = require('./translator');
@@ -59,7 +61,7 @@ export class User implements social.BaseUser {
   /**
    * Initialize the user to an 'empty' default.
    */
-  constructor(public userId :string, public network :user_interface.Network,
+  constructor(public userId :string, public network :model.Network,
       private ui_ :user_interface.UserInterface) {
     console.log('new user: ' + this.userId);
     this.name = '';
@@ -75,124 +77,147 @@ export class User implements social.BaseUser {
       console.error('Unexpected userId: ' + profile.userId);
     }
 
-    // if we do not have stored state, no use in checking for changes
-    if (this.consent_ &&
-        // Don't show notifications for other instances of yourself
-        this.userId !== this.network.userId) {
-      // notifications for get mode
-      if (!payload.consent.ignoringRemoteUserOffer) {
-        if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {
-          if (payload.consent.localRequestsAccessFromRemote) {
-            this.ui_.showNotification(i18n_t("GRANTED_ACCESS_NOTIFICATION", {name: profile.name}),
-                { mode: 'get', network: this.network.name, user: this.userId });
-          } else {
-            this.ui_.showNotification(i18n_t("OFFERED_ACCESS_NOTIFICATION", {name: profile.name}),
-                { mode: 'get', network: this.network.name, user: this.userId });
-          }
-        }
-      }
+    // We want to make it obvious that cloud friends are sharable to others.
+    // Normally, friends will only have share expanded if they are requesting
+    // access, but that will never be the case for a cloud server.
+    if (!this.status && profile.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+      this.shareExpanded = true;
+    }
 
-      // notifications for share mode
-      if (!payload.consent.ignoringRemoteUserRequest) {
-        if (!this.consent_.remoteRequestsAccessFromLocal && payload.consent.remoteRequestsAccessFromLocal) {
-          if (payload.consent.localGrantsAccessToRemote) {
-            this.ui_.showNotification(i18n_t("ACCEPTED_OFFER_NOTIFICATION", {name: profile.name}),
-                { mode: 'share', network: this.network.name, user: this.userId });
-          } else {
-            this.ui_.showNotification(i18n_t("REQUESTING_ACCESS_NOTIFICATION", {name: profile.name}),
-                { mode: 'share', network: this.network.name, user: this.userId });
-          }
+    this.name = profile.name;
+    this.url = profile.url;
+    this.status = profile.status;
+
+    // check whether to show notifications if we have previous state and it's
+    // not another instance of us
+    if (this.consent_ && this.userId !== this.network.userId) {
+      this.showNotificationsFromUpdate_(payload);
+    }
+
+    this.imageData = user_interface.getImageData(this.userId, this.imageData,
+                                                 profile.imageData);
+
+    this.mergeOfferingInstaces_(payload.offeringInstances);
+
+    this.allInstanceIds = payload.allInstanceIds;
+    this.updateInstanceDescriptions_();
+    this.consent_ = payload.consent;
+    this.isOnline = payload.isOnline;
+
+    if (this.shouldGetBeExpanded_()) {
+      this.getExpanded = true;
+    }
+
+    if (this.shouldShareBeExpanded_()) {
+      this.shareExpanded = true;
+    }
+
+    this.gettingConsentState = this.calculateGettingConsentState_();
+    this.sharingConsentState = this.calculateSharingConsentState_();
+  }
+
+  private showNotificationsFromUpdate_ = (payload: social.UserData): void => {
+    // notifications for get mode
+    if (!payload.consent.ignoringRemoteUserOffer) {
+      if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {
+        if (payload.consent.localRequestsAccessFromRemote) {
+          this.ui_.showNotification(i18n_t('GRANTED_ACCESS_NOTIFICATION', {name: payload.user.name}),
+              { mode: 'get', network: this.network.name, user: this.userId });
+        } else {
+          this.ui_.showNotification(i18n_t('OFFERED_ACCESS_NOTIFICATION', {name: payload.user.name}),
+              { mode: 'get', network: this.network.name, user: this.userId });
         }
       }
     }
 
-    this.name = profile.name;
-    this.imageData = profile.imageData;
-    this.url = profile.url;
-    this.status = profile.status;
+    // notifications for share mode
+    if (!payload.consent.ignoringRemoteUserRequest) {
+      if (!this.consent_.remoteRequestsAccessFromLocal && payload.consent.remoteRequestsAccessFromLocal) {
+        if (payload.consent.localGrantsAccessToRemote) {
+          this.ui_.showNotification(i18n_t('ACCEPTED_OFFER_NOTIFICATION', {name: payload.user.name}),
+              { mode: 'share', network: this.network.name, user: this.userId });
+        } else {
+          this.ui_.showNotification(i18n_t('REQUESTING_ACCESS_NOTIFICATION', {name: payload.user.name}),
+              { mode: 'share', network: this.network.name, user: this.userId });
+        }
+      }
+    }
+  }
 
+  private mergeOfferingInstaces_ = (newOfferingIrstances: social.InstanceData[]): void => {
     // iterate backwards to allow removing elements
     var i = this.offeringInstances.length;
     while (i--) {
-      var found = _.findIndex(payload.offeringInstances, (obj) => {
+      var found = _.findIndex(newOfferingIrstances, (obj) => {
         return obj.instanceId === this.offeringInstances[i].instanceId;
       });
 
       if (found !== -1) {
-        _.merge(this.offeringInstances[i], payload.offeringInstances[found]);
-        payload.offeringInstances.splice(found, 1);
+        _.merge(this.offeringInstances[i], newOfferingIrstances[found]);
+        newOfferingIrstances.splice(found, 1);
       } else {
         this.offeringInstances.splice(i, 1);
       }
     }
 
-    for (var j in payload.offeringInstances) {
-      this.offeringInstances.push(payload.offeringInstances[j]);
+    for (var j in newOfferingIrstances) {
+      this.offeringInstances.push(newOfferingIrstances[j]);
     }
+  }
 
-    //this.offeringInstances = payload.offeringInstances;
-    this.allInstanceIds = payload.allInstanceIds;
-    this.updateInstanceDescriptions();
-    this.consent_ = payload.consent;
-    this.isOnline = payload.isOnline;
-
-    // Update gettingConsentState, used to display correct getting buttons.
-    if (this.offeringInstances.length > 0) {
-      // Expand the contact if there previously were no offers and we are not
-      // ignoring offers.
-      if ((this.gettingConsentState ==
+  private shouldGetBeExpanded_ = (): boolean => {
+    return this.offeringInstances.length > 0 &&
+        (this.gettingConsentState ==
           GettingConsentState.NO_OFFER_OR_REQUEST ||
           this.gettingConsentState ==
           GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION) &&
-          !this.consent_.ignoringRemoteUserOffer) {
-        this.getExpanded = true;
-      }
+          !this.consent_.ignoringRemoteUserOffer && this.isOnline;
+  }
+
+  private calculateGettingConsentState_ = (): GettingConsentState => {
+    if (this.offeringInstances.length > 0) {
+      // there is an instance offering access to us
       if (this.consent_.localRequestsAccessFromRemote) {
-        this.gettingConsentState =
-            GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED;
+        return GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED;
       } else if (this.consent_.ignoringRemoteUserOffer) {
-        this.gettingConsentState =
-            GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED;
+        return GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED;
       } else {
-        this.gettingConsentState =
-            GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION;
+        return GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION;
       }
     } else {
       if (this.consent_.localRequestsAccessFromRemote) {
-        this.gettingConsentState =
-            GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION;
+        return GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION;
       } else {
-        this.gettingConsentState = GettingConsentState.NO_OFFER_OR_REQUEST;
+        return GettingConsentState.NO_OFFER_OR_REQUEST;
       }
     }
+  }
 
-    // Update sharingConsentState, used to display correct sharing buttons.
-    if (this.consent_.remoteRequestsAccessFromLocal) {
-      // Expand the contact if there previously were no requests and we are not
-      // ignoring requests.
-      if ((this.sharingConsentState ==
+  private shouldShareBeExpanded_ = (): boolean => {
+    // Expand the contact if there previously were no requests, we are not
+    // ignoring requests, and the contact is online.
+    return this.consent_.remoteRequestsAccessFromLocal &&
+        (this.sharingConsentState ==
           SharingConsentState.NO_OFFER_OR_REQUEST ||
           this.sharingConsentState ==
           SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION) &&
-          !this.consent_.ignoringRemoteUserRequest) {
-        this.shareExpanded = true;
-      }
+          !this.consent_.ignoringRemoteUserRequest && this.isOnline;
+  }
+
+  private calculateSharingConsentState_ = (): SharingConsentState => {
+    if (this.consent_.remoteRequestsAccessFromLocal) {
       if (this.consent_.localGrantsAccessToRemote) {
-        this.sharingConsentState =
-            SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED;
+        return SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED;
       } else if (this.consent_.ignoringRemoteUserRequest) {
-        this.sharingConsentState =
-            SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED;
+        return SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED;
       } else {
-        this.sharingConsentState =
-            SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION;
+        return SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION;
       }
     } else {
       if (this.consent_.localGrantsAccessToRemote) {
-        this.sharingConsentState =
-            SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION;
+        return SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION;
       } else {
-        this.sharingConsentState = SharingConsentState.NO_OFFER_OR_REQUEST;
+        return SharingConsentState.NO_OFFER_OR_REQUEST;
       }
     }
   }
@@ -249,7 +274,7 @@ export class User implements social.BaseUser {
     };
   }
 
-  public updateInstanceDescriptions = () => {
+  private updateInstanceDescriptions_ = () => {
     if (this.offeringInstances.length <= 1) {
       // Leave descriptions unchanged if there are 0 or 1 instances.
       return;
@@ -258,7 +283,7 @@ export class User implements social.BaseUser {
       var instance = this.offeringInstances[i];
       if (!instance.description) {
         // Set description to "Computer 1", "Computer 2", etc.
-        instance.description = i18n_t("DESCRIPTION_DEFAULT", {number: i + 1});
+        instance.description = i18n_t('DESCRIPTION_DEFAULT', {number: i + 1});
       }
     }
   }

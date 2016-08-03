@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * firewall.ts
  *
@@ -14,9 +16,7 @@
  *    visual trickery.  See http://www.unicode.org/reports/tr36/#visual_spoofing
  */
 
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
-
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 
 var log :logging.Log = new logging.Log('firewall');
 
@@ -48,8 +48,8 @@ var DEFAULT_RESPONSE_POLICY = new DefaultResponsePolicy;
 // Whether |s| is some sort of keyword in JS.  We also include the
 // properties of Object.
 export function isReservedWord(s :string) : boolean {
-  var keywords = [ "__proto__", "__noSuchMethod__", "__defineGetter__",
-                   "__defineSetter__", "__lookupGetter__", "__lookupSetter__"];
+  var keywords = [ '__proto__', '__noSuchMethod__', '__defineGetter__',
+                   '__defineSetter__', '__lookupGetter__', '__lookupSetter__'];
   for (var k in keywords) {
     if (s == keywords[k]) {
       return true;
@@ -178,8 +178,7 @@ var CLIENT_STATE_SCHEMA :Schema = {
   'status' : 'string',
   'timestamp' : '?number',
   'lastUpdated' : '?number',
-  'lastSeen' : '?number',
-  'inviteResponse' : '?string'
+  'lastSeen' : '?number'
 };
 
 export function isValidClientState(state :freedom.Social.ClientState,
@@ -214,6 +213,11 @@ export function isValidClientState(state :freedom.Social.ClientState,
   }
 
   if (state.timestamp < 0) {
+    fail();
+    return false;
+  }
+
+  if (!(state.status === 'ONLINE' || state.status === 'OFFLINE')) {
     fail();
     return false;
   }

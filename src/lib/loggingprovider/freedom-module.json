@@ -1,0 +1,31 @@
+{
+  "name": "uProxy Logging Provider",
+  "description": "Logging Provider for aggregating uProxy logs, and filtering.",
+  "app": {
+    "script": "freedom-module.static.js"
+  },
+  "constraints": {
+    "isolation": "never"
+  },
+  "provides": ["console", "loggingcontroller", "logginglistener"],
+  "default": "console",
+  "permissions": [
+    "core.console"
+  ],
+  "api": {
+    "loggingcontroller": {
+      "getEncrypedLogBuffer": {"type": "method", "value": [["array", "string"]], "ret": "buffer"},
+      "getLogs": {"type": "method", "value": [["array", "string"]], "ret": ["array", "string"]},
+      "clearLogs": {"type": "method", "value": []},
+      "enable" : {"type": "method", "value": []},
+      "disable" : {"type": "method", "value": []},
+      "setDefaultFilter": {"type": "method", "value": ["number", "number"]},
+      "setFilters": {"type": "method", "value": ["number", "object"]},
+      "setFilter": {"type": "method", "value": ["number", "string", "number"]}
+    },
+    "logginglistener": {
+      "constructor": { "value": ["string"] },
+      "levelchange": { "type": "event", "value": "number" }
+    }
+  }
+}

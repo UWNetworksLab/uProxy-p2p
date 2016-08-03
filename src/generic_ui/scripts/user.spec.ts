@@ -1,5 +1,6 @@
-/// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
+import model = require('./model');
 import user_interface = require('./ui');
 import translator = require('./translator');
 import user = require('./user');
@@ -13,8 +14,8 @@ describe('UI.User', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     ui = jasmine.createSpyObj<user_interface.UserInterface>('UserInterface', ['showNotification']);
-    var testNetwork :user_interface.Network = {name: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
-    ui.model = new user_interface.Model();
+    var testNetwork :model.Network = {name: 'testNetwork', userId: 'localUserId', roster: {}, logoutExpected: false};
+    ui.model = new model.Model();
     ui.model.onlineNetworks = [testNetwork];
     ui.i18n_t = translator.i18n_t;
 
@@ -33,6 +34,8 @@ describe('UI.User', () => {
       bytesSent: 0,
       bytesReceived: 0,
       activeEndpoint: null,
+      verifyState: social.VerifyState.VERIFY_NONE,
+      verifySAS: null,
     };
   }
 
@@ -193,5 +196,32 @@ describe('UI.User', () => {
     expect(sampleUser.offeringInstances[0]).toBe(second);
   });
 
+  it('expands contact if online', () => {
+    sampleUser.update(makeUpdateMessage({
+      offeringInstances: [
+        getInstance('instance1', '')
+      ],
+      consent: {
+        remoteRequestsAccessFromLocal: true
+      },
+      isOnline: true,
+    }));
+    expect(sampleUser.getExpanded).toBe(true);
+    expect(sampleUser.shareExpanded).toBe(true);
+  });
+
+  it('collapses contact if offline', () => {
+    sampleUser.update(makeUpdateMessage({
+      offeringInstances: [
+        getInstance('instance1', '')
+      ],
+      consent: {
+        remoteRequestsAccessFromLocal: true
+      },
+      isOnline: false,
+    }));
+    expect(sampleUser.getExpanded).toBe(false);
+    expect(sampleUser.shareExpanded).toBe(false);
+  });
   // TODO: more specs
 });  // UI.User

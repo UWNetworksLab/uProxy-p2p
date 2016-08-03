@@ -2,7 +2,7 @@
 <link rel='import' href='contact.html'>
 
 <polymer-element name='uproxy-roster-group'
-    attributes='contacts, groupTitle, searchQuery, mode'>
+    attributes='contacts, groupTitle, mode'>
 
   <template>
     <style>
@@ -24,7 +24,6 @@
 
     <template repeat='{{ c in sortedContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'
           isOnline='{{ c.isOnline }}'
           on-contact-changed='{{ contactsChanged }}'
           mode='{{ mode }}'>

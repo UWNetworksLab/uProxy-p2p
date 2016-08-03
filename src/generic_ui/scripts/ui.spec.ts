@@ -1,8 +1,9 @@
-/// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
 import user_interface = require('./ui');
 import ui_constants = require('../../interfaces/ui');
 import browser_api = require('../../interfaces/browser_api');
+import background_ui = require('./background_ui');
 import BrowserAPI = browser_api.BrowserAPI;
 import browser_connector = require('../../interfaces/browser_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
@@ -18,6 +19,7 @@ describe('UI.UserInterface', () => {
   var mockBrowserApi :BrowserAPI;
   var updateToHandlerMap :{[name :string] :Function} = {};
   var mockCore :CoreConnector;
+  var mockBackgroundUi :background_ui.BackgroundUi;
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
@@ -62,9 +64,17 @@ describe('UI.UserInterface', () => {
          'on',
          'handlePopupLaunch',
          'bringUproxyToFront',
-         'setBadgeNotification'
+         'setBadgeNotification',
+         'isConnectedToCellular'
          ]);
-    ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
+
+    mockBackgroundUi = jasmine.createSpyObj('backgroundUi', [
+        'registerAsFakeBackground',
+        'fireSignal',
+        'openDialog'
+    ]);
+
+    ui = new user_interface.UserInterface(mockCore, mockBrowserApi, mockBackgroundUi);
     spyOn(console, 'log');
   });
 
@@ -76,7 +86,6 @@ describe('UI.UserInterface', () => {
         userId: userId,
         name: userName,
         imageData: 'testImageData',
-        isOnline: true
       },
       allInstanceIds: [instanceId],
       offeringInstances: [],
@@ -137,15 +146,6 @@ describe('UI.UserInterface', () => {
   function startProxyingForRemotePeer() {
     updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
         .call(ui, 'testInstance');
-  }
-
-  function activateConfirmationButton(shouldConfirm :boolean) {
-    var text = ui.i18n_t(shouldConfirm ? 'YES' : 'NO');
-    var buttons = (<any>ui.signalToFire).data.buttons;
-    var buttonInfo = <any>_.find(buttons, {text: text});
-    var index = buttonInfo.callbackIndex;
-
-    ui.invokeConfirmationCallback(index, shouldConfirm);
   }
 
   describe('synced users are correctly exposed', () => {
@@ -291,7 +291,8 @@ describe('UI.UserInterface', () => {
       // if the core.start promise fulfills. (see polymer/instance.ts)
       syncUserAndInstance('userId', 'userName', 'testInstanceId');
       ui.startGettingInUiAndConfig(
-          'testInstanceId', { address : 'testAddress' , port : 0 });
+          'testInstanceId', { address : 'testAddress' , port : 0 },
+          browser_api.ProxyAccessMode.IN_APP);
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
       ui.stoppedGetting({instanceId: null, error: false});
@@ -300,7 +301,8 @@ describe('UI.UserInterface', () => {
     it('Extension icon changes when you stop getting access', () => {
       syncUserAndInstance('userId', 'userName', 'testGiverId');
       ui.startGettingInUiAndConfig(
-          'testGiverId', { address : 'testAddress' , port : 0 });
+          'testGiverId', { address : 'testAddress' , port : 0 },
+          browser_api.ProxyAccessMode.IN_APP);
       ui['instanceGettingAccessFrom_'] = 'testGiverId';
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
@@ -314,11 +316,17 @@ describe('UI.UserInterface', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.sharingStatus).toEqual(ui.i18n_t('SHARING_ACCESS_WITH_ONE',
-          { name: 'Alice' }));
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-sharing-status',
+          ui.i18n_t('SHARING_ACCESS_WITH_ONE', { name: 'Alice' }));
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.sharingStatus).toEqual(null);
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-sharing-status',
+          null);
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-sharing-status',
+          null);
     });
 
     it('No notification when you stop sharing and are not already proxying', () => {
@@ -341,131 +349,16 @@ describe('UI.UserInterface', () => {
       // Note that setting and clearing instanceGettingAccessFrom_ is done in
       // polymer/instance.ts.
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
-      expect(ui.gettingStatus).toEqual(null);
       ui['instanceGettingAccessFrom_'] = 'testInstanceId';
       ui['updateGettingStatusBar_']();
-      expect(ui.gettingStatus).toEqual(ui.i18n_t('GETTING_ACCESS_FROM',
-          { name: 'Alice' }));
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-getting-status',
+          ui.i18n_t('GETTING_ACCESS_FROM', { name: 'Alice' }));
       ui['instanceGettingAccessFrom_'] = null;
       ui['updateGettingStatusBar_']();
-      expect(ui.gettingStatus).toEqual(null);
+      expect(mockBackgroundUi.fireSignal).toHaveBeenCalledWith(
+          'update-getting-status',
+          null);
     });
   });  // Update giving and/or getting state in UI
-
-  describe('logout', () => {
-    it('No networks', (done) => {
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
-        expect(mockCore.logout).not.toHaveBeenCalled();
-        done();
-      });
-    });
-
-    it('Single network', (done) => {
-      login();
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {;
-        expect(mockCore.logout).toHaveBeenCalled();
-        logout(); //cleanup
-        done();
-      }).catch(() => {
-        logout();
-        expect('Error: rejected promise').toEqual(false);
-      });
-    });
-
-    it('Waits for confirmation while sharing', (done) => {
-      login();
-      addRemotePeer();
-      startProxyingForRemotePeer();
-
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
-        expect(mockCore.logout).toHaveBeenCalled();
-        logout();
-        done();
-      });
-
-      expect(ui.signalToFire).toEqual(jasmine.objectContaining({name: 'open-dialog'}));
-      expect(mockCore.logout).not.toHaveBeenCalled();
-
-      // pretend the confirmaiton button was clicked
-      activateConfirmationButton(true);
-    });
-
-    it('Will not logout if user rejects', (done) => {
-      login();
-      addRemotePeer();
-      startProxyingForRemotePeer();
-
-      ui.logout({ name: 'testNetwork', userId: 'fakeUser' }).then(() => {
-        expect(mockCore.logout).not.toHaveBeenCalled();
-        logout();
-        done();
-      });
-
-      activateConfirmationButton(false);
-    });
-  });
 });  // UI.UserInterface
-
-describe('user_interface.model', () => {
-  var model :user_interface.Model;
-
-  beforeEach(() => {
-    model = new user_interface.Model();
-  });
-
-  it('Updating global settings correctly updates description', () => {
-    // description is chosen here as just some arbitrary simple value
-    var newDescription = 'Test description';
-
-    model.updateGlobalSettings({
-      description: newDescription
-    });
-
-    expect(model.globalSettings.description).toEqual(newDescription);
-  });
-
-  it('Updating one field of global settings does not change any other fields', () => {
-    var constantString = 'some arbitrary string';
-
-    model.updateGlobalSettings({
-      description: constantString
-    });
-
-    model.updateGlobalSettings({
-      mode: ui_constants.Mode.SHARE
-    });
-
-    expect(model.globalSettings.description).toEqual(constantString);
-  });
-
-  it('Syncing arrays in global settings works fine', () => {
-    var newStunServers = [
-      {
-        urls: ['something.net:5']
-      },
-      {
-        urls: ['else.net:7']
-      }
-    ];
-
-    model.updateGlobalSettings({
-      stunServers: newStunServers
-    });
-
-    expect(model.globalSettings.stunServers.length).toEqual(newStunServers.length);
-
-    for (var i in newStunServers) {
-      expect(newStunServers[i]).toEqual(model.globalSettings.stunServers[i]);
-    }
-  });
-
-  it('Updating global settings does not reassign', () => {
-    var a = model.globalSettings;
-
-    model.updateGlobalSettings({
-      mode: ui_constants.Mode.SHARE
-    });
-
-    expect(model.globalSettings).toEqual(a);
-  });
-});

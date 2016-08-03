@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * remote-instance.ts
  *
@@ -6,21 +8,19 @@
  * consent, proxying status, and any other signalling information.
  */
 
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
-/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
-
-import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import arraybuffers = require('../lib/arraybuffers/arraybuffers');
+import bridge = require('../lib/bridge/bridge');
 import consent = require('./consent');
 import crypto = require('./crypto');
 import globals = require('./globals');
+import key_verify = require('./key-verify');
 import _ = require('lodash');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import logging = require('../lib/logging/logging');
+import net = require('../lib/net/net.types');
 import Persistent = require('../interfaces/persistent');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import signals = require('../lib/webrtc/signals');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
 import user_interface = require('../interfaces/ui');
@@ -34,7 +34,7 @@ import ui = ui_connector.connector;
 
 // module Core {
   var log :logging.Log = new logging.Log('remote-instance');
-
+  const VERIFY_TIMEOUT = 120000;
   /**
    * RemoteInstance - represents a remote uProxy installation.
    *
@@ -67,6 +67,18 @@ import ui = ui_connector.connector;
     // from storage.
     private fulfillStorageLoad_ : () => void;
 
+    // Any key-verify session state.
+    // - In-progress protocol session.
+    private keyVerifySession_ :key_verify.KeyVerify = null;
+    // - The Short Authentication String (SAS) if we're in the middle of
+    //   verification.
+    private verifySAS_ :string = null;
+    // - The Verification-State-machine state.  See the type for
+    //   details -- mostly used for the UI.
+    private verifyState_ = social.VerifyState.VERIFY_NONE;
+    // - Promise resolution callback for user SAS verification.
+    private resolvedVerifySAS_ :(v:boolean) => void = null;
+
     public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
     });
@@ -89,6 +101,11 @@ import ui = ui_connector.connector;
     private startRtcToNetTimeout_ :NodeJS.Timer = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
+
+    // Permission token that we have received from this instance, but have not
+    // yet sent back to the remote user (e.g. because they were offline when
+    // we accepted their invite).
+    public unusedPermissionToken :string;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -117,19 +134,35 @@ import ui = ui_connector.connector;
           });
     }
 
-    private handleConnectionUpdate_ = (update :uproxy_core_api.Update, data?:any) => {
+    public handleKeyVerifyMessage = (msg:any) => {
+      if (this.keyVerifySession_ !== null) {
+        log.debug('handleKeyVerifyMessage(%1): going to existing session',
+                  msg);
+        this.keyVerifySession_.readMessage(msg);
+      } else {
+        log.debug('handleKeyVerifyMessage(%1): creating new session.', msg);
+        // Create a key verify session and give it this message.
+        this.verifyUser(msg);
+      }
+    };
+
+
+    private handleConnectionUpdate_ = (update :uproxy_core_api.Update,
+                                       data?:any) => {
       log.debug('connection update: %1', uproxy_core_api.Update[update]);
       switch (update) {
         case uproxy_core_api.Update.SIGNALLING_MESSAGE:
           var clientId = this.user.instanceToClient(this.instanceId);
           if (!clientId) {
-            log.error('Could not find clientId for instance', this);
+            log.error('Could not find clientId for instance', this.instanceId);
             return;
           }
           if (typeof this.publicKey !== 'undefined' &&
               typeof globals.publicKey !== 'undefined' &&
               // No need to encrypt again for networks like Quiver
-              !this.user.network.encryptsWithClientId()) {
+              !this.user.network.isEncrypted() &&
+              // Disable crypto for ios
+              globals.settings.crypto) {
             crypto.signEncrypt(JSON.stringify(data.data), this.publicKey)
             .then((cipherText :string) => {
               data.data = cipherText;
@@ -172,7 +205,8 @@ import ui = ui_connector.connector;
     }
 
     public isSharing = () => {
-      return this.connection_.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
+      return this.connection_.localSharingWithRemote ===
+        social.SharingState.SHARING_ACCESS;
     }
 
     /**
@@ -187,7 +221,9 @@ import ui = ui_connector.connector;
           typeof globals.publicKey !== 'undefined' &&
           // signal data is not encrypted for Quiver, because entire message
           // is encrypted over the network and already decrypted by this point
-          !this.user.network.encryptsWithClientId()) {
+          !this.user.network.isEncrypted() &&
+          // Disable crypto for ios
+          globals.settings.crypto) {
         return crypto.verifyDecrypt(<string>msg.data, this.publicKey)
         .then((plainText :string) => {
           return this.handleDecryptedSignal_(
@@ -204,6 +240,8 @@ import ui = ui_connector.connector;
         type:social.PeerMessageType,
         messageVersion:number,
         signalFromRemote:bridge.SignallingMessage) : Promise<void> => {
+      log.debug('handleDecryptedSignal_(%1, %2, %3)', type, messageVersion,
+                signalFromRemote);
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -250,12 +288,93 @@ import ui = ui_connector.connector;
       return Promise.resolve<void>();
     }
 
+    public verifyUser = (firstMsg ?:any) : void => {
+      log.debug('verifyUser(%1)', firstMsg);
+      // The only time you'd want to do a second key verification is
+      // if an attacker is trying to kill an existing trust
+      // relationship.
+      if (this.verifyState_ === social.VerifyState.VERIFY_COMPLETE) {
+        log.debug('verifyUser(%1): ALREADY VERIFIED.', firstMsg);
+        return;
+      }
+      let inst = this;
+      let clientId = this.user.instanceToClient(this.instanceId);
+      let delegate :key_verify.Delegate = {
+        sendMessage : (msg:any) :Promise<void> => {
+          let verifyMessage :social.PeerMessage = {
+            type: social.PeerMessageType.KEY_VERIFY_MESSAGE,
+            data: msg
+          };
+          return inst.user.network.send(inst.user, clientId, verifyMessage);
+        },
+        showSAS : (sas:string) :Promise<boolean> => {
+          log.debug('verifyUser: Got SAS ' + sas);
+          if (sas) {
+            inst.verifySAS_ = sas;
+          }
+          let result = new Promise<boolean>((resolve:any) => {
+            // Send UPDATE message with SAS.
+            this.resolvedVerifySAS_ = resolve;
+            // The UI's now showing the SAS with a YES/NO prompt.  The
+            // user will hit one of those buttons and we'll send a
+            // command back that'll cause a resolution of the Promise
+            // from start() below.
+            inst.user.notifyUI();
+          });
+          return result;
+        }
+      };
+      if (firstMsg !== undefined) {
+        this.keyVerifySession_ = key_verify.RespondToVerify(
+            this.publicKey, delegate, firstMsg);
+        if (this.keyVerifySession_ === null) {
+          // Immediately fail - bad initial message from peer.
+          log.error('verifyUser: peer-initiated session had bad message: ',
+                    firstMsg);
+          return;
+        }
+      } else {
+        this.keyVerifySession_ = key_verify.InitiateVerify(this.publicKey,
+                                                           delegate);
+      }
+
+      this.verifyState_ = social.VerifyState.VERIFY_BEGIN;
+      this.user.notifyUI();
+      this.keyVerifySession_.start(VERIFY_TIMEOUT).then(() => {
+        log.debug('verifyUser: succeeded.');
+        inst.keyVerified = true;
+        inst.keyVerifySession_ = null
+        inst.verifySAS_ = null;
+        inst.verifyState_ = social.VerifyState.VERIFY_COMPLETE;
+        inst.user.notifyUI();
+      }, () => {
+        log.debug('verifyUser: failed.');
+        inst.keyVerified = false;
+        inst.verifyState_ = social.VerifyState.VERIFY_FAILED;
+        inst.keyVerifySession_ = null
+        inst.verifySAS_ = null;
+        inst.user.notifyUI();
+      });
+    };
+
+    public finishVerifyUser = (result :boolean) => {
+      console.log('finishVerifyuser: ', result, ' promise resolution is ',
+                  this.resolvedVerifySAS_);
+      if (this.resolvedVerifySAS_ !== null) {
+        this.resolvedVerifySAS_(result);
+      } else {
+        log.error('Getting a completed verification result when no session ' +
+                  'is open.');
+      }
+    }
+
     /**
       * When our peer sends us a signal that they'd like to be a client,
       * we should try to start sharing.
       */
     private startShare_ = () : void => {
       var sharingStopped :Promise<void>;
+      log.debug('startShare_');
       if (this.connection_.localSharingWithRemote === social.SharingState.NONE) {
         // Stop any existing sharing attempts with this instance.
         sharingStopped = Promise.resolve<void>();
@@ -268,6 +387,7 @@ import ui = ui_connector.connector;
 
       // Start sharing only after an existing connection is stopped.
       sharingStopped.then(() => {
+        log.debug('sharingStopped.then()');
         // Set timeout to close rtcToNet_ if start() takes too long.
         // Calling stopShare() at the end of the timeout makes the
         // assumption that our peer failed to start getting access.
@@ -277,6 +397,7 @@ import ui = ui_connector.connector;
         }, this.RTC_TO_NET_TIMEOUT);
 
         this.connection_.startShare(this.messageVersion).then(() => {
+          log.debug('this.connection_.startShare().then()');
           clearTimeout(this.startRtcToNetTimeout_);
         }, () => {
           log.warn('Could not start sharing.');
@@ -293,6 +414,7 @@ import ui = ui_connector.connector;
     }
 
     public stopShare = () :Promise<void> => {
+      log.debug('stopShare()');
       if (this.connection_.localSharingWithRemote === social.SharingState.NONE) {
         log.warn('Cannot stop sharing while currently not sharing.');
         return Promise.resolve<void>();
@@ -309,6 +431,7 @@ import ui = ui_connector.connector;
      * currently granted.
      */
     public start = () :Promise<net.Endpoint> => {
+      log.debug('start()');
       if (!this.wireConsentFromRemote.isOffering) {
         log.warn('Lacking permission to proxy');
         return Promise.reject(Error('Lacking permission to proxy'));
@@ -340,6 +463,7 @@ import ui = ui_connector.connector;
      * Stop using this remote instance as a proxy server.
      */
     public stop = () :Promise<void> => {
+      log.debug('stop()');
       return this.connection_.stopGet();
     }
 
@@ -350,7 +474,9 @@ import ui = ui_connector.connector;
      */
     public update = (data:social.InstanceHandshake,
         messageVersion:number) :Promise<void> => {
+      log.debug('update(%1, %2)', data, messageVersion);
       return this.onceLoaded.then(() => {
+        log.debug('update(%1, %2).onceLoaded.then()', data, messageVersion);
         if (data.publicKey &&
             (typeof this.publicKey === 'undefined' || !this.keyVerified)) {
           this.publicKey = data.publicKey;
@@ -363,6 +489,7 @@ import ui = ui_connector.connector;
     }
 
     private updateConsentFromWire_ = (bits :social.ConsentWireState) => {
+      log.debug('updateConsentFromWire_(%1)', bits);
       var userConsent = this.user.consent;
 
       if (!bits.isOffering &&
@@ -377,8 +504,10 @@ import ui = ui_connector.connector;
       this.user.updateRemoteRequestsAccessFromLocal();
     }
 
-    private saveToStorage = () => {
+    public saveToStorage = () => {
+      log.debug('saveToStorage()');
       return this.onceLoaded.then(() => {
+      log.debug('saveToStorage() this.onceLoaded.then()');
         var state = this.currentState();
         return storage.save(this.getStorePath(), state)
         .then(() => {
@@ -398,7 +527,8 @@ import ui = ui_connector.connector;
         wireConsentFromRemote: this.wireConsentFromRemote,
         description:           this.description,
         publicKey:             this.publicKey,
-        keyVerified:           this.keyVerified
+        keyVerified:           this.keyVerified,
+        unusedPermissionToken: this.unusedPermissionToken
       });
     }
 
@@ -414,12 +544,22 @@ import ui = ui_connector.connector;
       }
       if (typeof state.keyVerified !== 'undefined') {
         this.keyVerified = state.keyVerified;
+        if (state.keyVerified) {
+          // There's an open question here on how to handle
+          // verification failures - do we remember them as explicit
+          // failures, or do we just treat them as not having
+          // succeeded? So far, treat as the latter.
+          this.verifyState_ = social.VerifyState.VERIFY_COMPLETE;
+        }
       }
       if (state.wireConsentFromRemote) {
         this.wireConsentFromRemote = state.wireConsentFromRemote
       } else {
         log.error('Failed to load wireConsentFromRemote for instance ' +
             this.instanceId);
+      }
+      if (typeof state.unusedPermissionToken !== 'undefined') {
+        this.unusedPermissionToken = state.unusedPermissionToken;
       }
     }
 
@@ -431,11 +571,12 @@ import ui = ui_connector.connector;
     // UI message data. Maybe rename to |getInstanceData|?
     public currentStateForUi = () :social.InstanceData => {
       var connectionState = this.connection_.getCurrentState();
-
       return {
         instanceId:             this.instanceId,
         description:            this.description,
         isOnline:               this.user.isInstanceOnline(this.instanceId),
+        verifyState:            this.verifyState_,
+        verifySAS:              this.verifySAS_,
         localGettingFromRemote: connectionState.localGettingFromRemote,
         localSharingWithRemote: connectionState.localSharingWithRemote,
         bytesSent:              connectionState.bytesSent,
@@ -445,6 +586,7 @@ import ui = ui_connector.connector;
     }
 
     public handleLogout = () => {
+      log.debug('handleLogout()');
       if (this.connection_.localSharingWithRemote !== social.SharingState.NONE) {
         log.info('Closing rtcToNet_ for logout');
         this.connection_.stopShare();
@@ -462,7 +604,8 @@ import ui = ui_connector.connector;
     wireConsentFromRemote :social.ConsentWireState;
     description           :string;
     publicKey             :string;
-    keyVerified           :boolean
+    keyVerified           :boolean;
+    unusedPermissionToken :string;
   }
 
   // TODO: Implement obfuscation.

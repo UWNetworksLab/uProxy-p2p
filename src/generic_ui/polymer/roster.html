@@ -32,13 +32,6 @@
     ::-webkit-input-placeholder {
       color: #ccc;
     }
-    #loadContacts {
-      text-align: center;
-      margin: 110px 80px;
-    }
-    #loadContacts div {
-      font-size: 17px;
-    }
     .no-friends {
       width: 150px !important;
       height: 150px !important;
@@ -47,20 +40,40 @@
     core-icon.no-friends {
       color: #e5efee;
     }
-    #loadingContacts {
-      margin-top: 0.5em;
-    }
-    #connectWithFriendsInstruction {
-      margin: 2em 100px 2em 2em;
-      bottom: 0;
+    #empty-roster-instructions-container {
+      padding: 0 30px 50px;
+      text-align: center;
       position: absolute;
-      font-size: 14px;
-      line-height: 20px;
+      top: 30px;
+      bottom: 0;
+      right: 0;
+      left: 0;
     }
-    #connectWithFriendsInstruction h1 {
-      font-size: 1.4em;
-      color: #009688;
-      font-weight: normal;
+    #empty-roster-instructions {
+      box-shadow: 0 4px 10px 0px #ccc;
+      border-radius: 3px;
+      padding: 60px 0 30px;
+      position: absolute;
+      top: 0;
+      bottom: 122px;
+      right: 30px;
+      left: 30px;
+      min-height: 218px; /* TODO: keep downArrow and add button anchored to bottom when min-height kicks in. Ideally we'll get this for free with https://github.com/uProxy/uproxy/issues/2547 */
+    }
+    #empty-roster-instructions h1 {
+      color: #003C48;
+      font-size: 16px;
+      font-weight: 500;
+      max-width: 240px;
+      margin: 30px auto;
+    }
+    .downArrow {
+      color: #fff;
+      position: absolute;
+      right: 54px;
+      bottom: 104px;
+      font-size: 20px;
+      text-shadow: 0 7px 10px #ccc;
     }
     paper-progress {
       margin-bottom: 1em;
@@ -71,34 +84,48 @@
       border-bottom: solid 1px;
       border-color: rgb(238, 238, 238);
     }
+    #orWrapper {
+      position: absolute;  /* take out of the flow */
+      top: 50%;
+      /* compensate for padding at the bottom and orCircle height */
+      transform: translateY(-77px);
+      width: 100%;
+      text-align: center;
+      left: 0;  /* needed for proper centering */
+    }
+    #orCircle {
+      display: inline-block;
+      height: 40px;
+      border-radius: 50%;
+      background-color: white;
+      width: 40px;
+    }
+    #orText {
+      font-size: 14px;
+      padding-top: 9px;
+      color: #12A391;
+    }
+    .centerVertical {
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
     </style>
 
-    <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
-    <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
-
-    <!-- Shown if there are no contacts found so far -->
-    <div id='loadContacts' hidden?='{{ hasContacts }}'>
-      <core-icon icon="social:person" class="no-friends"></core-icon>
-      <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
-        {{ "LOADING_FRIENDS" | $$(model.globalSettings.language) }}<br>
-        <paper-progress indeterminate='true'></paper-progress>
+    <div id="empty-roster-instructions-container" hidden?="{{ hasContacts }}">
+      <div id="empty-roster-instructions">
+        <img src='../../icons/emptylist.svg'>
+        <h1>{{ "EMPTY_ROSTER_INSTRUCTIONS" | $$(model.globalSettings.language) }}</h1>
       </div>
     </div>
-
-    <div id="connectWithFriendsInstruction" hidden?="{{ loadingContacts || hasContacts }}">
-      <h1>{{ 'CONNECT_TO_FRIEND' | $$ }}</h1>
-      {{ 'CONNECT_TO_FRIEND_MESSAGE' | $$ }}
-    </div>
+    <div class='downArrow' hidden?="{{ hasContacts }}">▼</div>
 
     <div hidden?='{{ !hasContacts }}'>
-      <!-- Intentionally hiding search box. May decide to readd it later. -->
-      <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}' hidden></input>
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$(model.globalSettings.language) }}'
+          groupTitle='{{ (mode == ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$(model.globalSettings.language) }}'
           contacts='{{ contacts.pending }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Trusted if there are no Trusted contacts, or if there are no Pending contacts -->
@@ -107,9 +134,8 @@
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$(model.globalSettings.language) }}'
+          groupTitle='{{ (mode == ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$(model.globalSettings.language) }}'
           contacts='{{ contacts.trustedUproxy }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Untrusted if there are no Untrusted contacts, or if there are no Trusted & Pending contacts -->
@@ -120,7 +146,6 @@
       <uproxy-roster-group
           groupTitle='{{ "UPROXY_FRIENDS" | $$(model.globalSettings.language) }}'
           contacts='{{ contacts.untrustedUproxy }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
     </div>
 

@@ -9,12 +9,19 @@
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='dialog.html'>
 
+<link rel="import" href="../../bower/paper-button/paper-button.html">
+<link rel='import' href='../../bower/paper-item/paper-item.html'>
+<link rel="import" href="../../bower/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../../bower/core-menu/core-menu.html">
+<link rel="import" href="../../bower/core-collapse/core-collapse.html">
+
 <polymer-element name='uproxy-feedback' attributes=''>
   <template>
     <style>
     :host {
       text-align: center;
-      font-color: #009688;  /* dark green */
+      font-color: #12A391;  /* dark green */
     }
     uproxy-app-bar {
       text-align: left;
@@ -31,21 +38,31 @@
     #formContainer {
       padding: 30px;
       text-align: start;
-      color: #009688;
+      color: #12A391;
       overflow: auto;
     }
     .inputLabel {
       margin: 0;
       font-weight: 600;
     }
+    #dropdownContainer {
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #dropdownArrow {
+      cursor: pointer;
+      height: 28px;
+      width: 28px;
+    }
     #emailInput {
       margin: 0;
+      padding-bottom: 4px;
     }
     #logCheckboxContainer {
       margin: 0.5em 0em;
     }
     #logCheckboxLabel {
-      cursor: pointer;
+      color: grey;
       text-indent: 10px;
       display: inline-block;
     }
@@ -63,15 +80,27 @@
       padding-top: 1.5em;
       padding-bottom: 1.5em;
       border-top: 1px solid rgb(221, 221, 221);
-      color: #009688;
+      color: #12A391;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
       background-color: #ffffff;
       text-transform: uppercase;
     }
+    #commonFeedbackOptions paper-dropdown-menu {
+      border-bottom: 0px;
+      font-size: 16px;
+      margin-top: 0em;
+      margin-bottom: 0em;
+    }
+    #commonFeedbackOptions core-icon {
+      height: 18px;
+      width: 18px;
+    }
+    #commonFeedbackOptions paper-item::shadow .button-content {
+      padding: 0;
+    }
     core-icon {
-      height: 15px !important;
       color: grey;
       opacity: 0.6;
       margin-bottom: 2px;
@@ -87,16 +116,28 @@
          tooltip, it appears off center. */
       left: -64px !important;
     }
-    paper-input-decorator[id=feedbackDecorator] /deep/ .unfocused-underline,
-    paper-input-decorator[id=feedbackDecorator] /deep/ .focused-underline {
-      /* Remove the underline from the Feedback textbox. */
+    #errorDecorator /deep/ .unfocused-underline,
+    #errorDecorator /deep/ .focused-underline {
+      /* 
+        Remove the underline from the errorDecorator textbox, which is there to throw the error for not selecting
+        an option from the dropdown menu 
+      */
       height: 0px;
+    }
+    #errorDecorator {
+      margin-top: 0em;
+      margin-bottom: 1.5em;
+      padding-top: 0em;
+      padding-bottom: 0em;
+    }
+    #errorInput {
+      font-size: 10px;
     }
     paper-input-decorator[id=emailDecorator] {
       padding: 13px 0px 32px 0px;
     }
     paper-input-decorator[id=feedbackDecorator] {
-      padding: 13px 0px 24px 0px;
+      padding: 13px 0px 32px 0px;
     }
 
     paper-input-decorator {
@@ -104,14 +145,13 @@
     }
     paper-input-decorator::shadow .input-body {
       color: #707070;
-      padding-bottom: 4px;
     }
     paper-checkbox::shadow #ink[checked] {
       color: white;
     }
     paper-checkbox::shadow #checkbox.checked {
-      background-color: #009688;
-      border-color: #009688;
+      background-color: #12A391;
+      border-color: #12A391;
     }
     paper-checkbox::shadow #checkbox {
       border-color: grey;
@@ -120,20 +160,24 @@
       top: 30%;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
     }
+    paper-item {
+      font-size: 14px;
+    }
+    #helpIcon {
+      height: 15px;
+      width: 15px;
+    }
+    #logsLink {
+      cursor: pointer;
+      padding-top: 10px;
+      padding-bottom: 16px;
+    }
     #sendingFeedback {
       text-align: center;
       font-size: 16px;
     }
-    #feedbackDecorator {
-      height: 190px;
-    }
-    #feedbackPaperTextarea {
-      height: 190px;
-      margin: 0em;
-    }
     paper-autogrow-textarea::shadow .textarea-container {
-      padding: 0.25em;
-      background-color: rgb(240,240,240);
+      background-color: white;
       border-radius: 2px;
       color: #707070;
     }
@@ -141,55 +185,86 @@
       white-space: pre-wrap; /* css-3 */
       white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
     }
+    .dropdown.colored::shadow #ripple,
+    .dropdown.colored::shadow #background {
+      border: 1px solid #0f9d58;
+      background-color: #b7e1cd;
+    }
     </style>
 
+    <uproxy-state id="state"></uproxy-state>
     <!-- Listen for the 'open-feedback' event, which is fired by the settings and splash pages. -->
     <core-signals on-core-signal-open-feedback="{{ open }}"></core-signals>
-
-    <core-overlay id='feedbackPanel'>
-      <div id='container' vertical layout>
-        <uproxy-app-bar on-go-back='{{ close }}'>
+    <core-overlay id="feedbackPanel">
+      <div id="container" vertical layout>
+        <uproxy-app-bar on-go-back="{{ close }}">
           {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
-        <div id='formContainer' flex>
-          <p class='inputLabel'>{{ "EMAIL_TITLE" | $$(model.globalSettings.language) }}</p>
-          <paper-input-decorator id='emailDecorator'
-              label='{{ "EMAIL_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
-            <input id="emailInput"
-                   is="core-input"
-                   value='{{ email }}'>
-          </paper-input-decorator>
-          <p class='inputLabel'>{{ "FEEDBACK_TITLE" | $$(model.globalSettings.language) }}</p>
-          <paper-input-decorator id='feedbackDecorator'
+
+        <div id="formContainer" flex>
+          <span id="dropdownContainer" on-click="{{ toggleDropdown }}"> {{"CUSTOM_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}</span>
+          <core-icon icon="expand-more" on-click="{{ toggleDropdown }}" hidden?="{{$.collapse.opened}}"></core-icon>
+          <core-icon icon="expand-less" on-click="{{ toggleDropdown }}" hidden?="{{!$.collapse.opened}}"></core-icon>
+          <core-collapse id="collapse">
+            <div class="content">
+              <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{ changePlaceholder }}" valueattr="data-feedbackOption" id="errorInput">
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}">{{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}">{{ "CLOUD_SERVER_NO_CONNECT" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_START }}">{{ "CLOUD_SERVER_NO_START" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_SIGNING_IN }}">{{ "TROUBLE_SIGNING_IN" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.NO_FRIENDS }}">{{ "NO_FRIENDS" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}">{{ "TROUBLE_STARTING_CONNECTION" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}">{{ "DISCONNECTED_FROM_FRIEND" | $$(model.globalSettings.language) }}</paper-item>
+                 <paper-item data-feedbackOption="{{ UserFeedbackType.OTHER_FEEDBACK }}">{{ "OTHER_FEEDBACK" | $$(model.globalSettings.language) }}</paper-item>
+              </core-menu>
+            </div>
+          </core-collapse>
+
+          <!-- because dropdown menus have no 'error' attribute, this is an invisible decorator that has an error if nothing is selected from the dropdown -->
+          <paper-input-decorator id="errorDecorator" label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}' error='{{ "NO_CUSTOM_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}'></paper-input-decorator>
+
+          <paper-input-decorator id="feedbackDecorator"
               label='{{ "FEEDBACK_PLACEHOLDER" | $$(model.globalSettings.language) }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
             <paper-autogrow-textarea id="feedbackPaperTextarea">
               <textarea id="feedbackInput"
-                     value='{{ feedback }}'>
+                     value="{{ feedback }}">
               </textarea>
             </paper-autogrow-textarea>
           </paper-input-decorator>
-          <div id='logCheckboxContainer'>
-            <paper-checkbox for id='logCheckbox'></paper-checkbox>
-            <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
-              {{ "NETWORK_AND_LOGS" | $$(model.globalSettings.language) }}
-            </span>
-            <uproxy-faq-link anchor='doesUproxyLogData'>
-              <core-icon icon="help"></core-icon>
+
+          <paper-input-decorator id="emailDecorator"
+              label='{{ "EMAIL_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
+            <input id="emailInput"
+                   is="core-input"
+                   value="{{ email }}">
+          </paper-input-decorator>
+
+          <div id="logCheckboxContainer">
+            <paper-checkbox for id="logCheckbox"></paper-checkbox>
+            <span id="logCheckboxLabel"> {{ "NETWORK_AND_LOGS" | $$(model.globalSettings.language) }} </span>
+            <uproxy-faq-link anchor="doesUproxyLogData">
+              <core-icon icon="help" id="helpIcon"></core-icon>
             </uproxy-faq-link>
           </div>
-          <p id='moreInfo'>
+          <div id="logsLink">
+            <span id="logsLink" on-tap="{{ viewLogs }}">
+              {{ "SHOW_LOGS" | $$(model.globalSettings.language) }}
+            </span>
+          </div>
+
+          <p id="moreInfo">
             {{ "P_I_I_MESSAGE" | $$(model.globalSettings.language) }}
           </p>
         </div> <!-- end of form container -->
-        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>{{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}</div>
+        <div id="sendFeedback" on-tap="{{ sendFeedback }}">{{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}</div>
       </div>
     </core-overlay>
-    <uproxy-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
+    <uproxy-action-dialog backdrop layered="false" id="sendingFeedbackDialog" autoCloseDisabled="true">
       <div id="SENDING_FEEDBACK">
         {{ "SENDING_FEEDBACK" | $$(model.globalSettings.language) }}<br>
-        <paper-progress indeterminate='true'></paper-progress>
+        <paper-progress indeterminate="true"></paper-progress>
       </div>
     </uproxy-action-dialog>
   </template>
-  <script src='feedback.js'></script>
+  <script src="feedback.js"></script>
 </polymer-element>

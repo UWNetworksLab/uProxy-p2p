@@ -11,20 +11,16 @@
       "url": "../freedom-social-quiver/socketio.quiver.json",
       "api": "social2"
     },
-    "SOCIAL-GMail": {
-      "url": "../freedom-social-firebase/social.firebase-google.json",
-      "api": "social2"
-    },
     "SOCIAL-Cloud": {
-      "url": "../uproxy-lib/cloud/social/freedom-module.json",
+      "url": "../lib/cloud/social/freedom-module.json",
       "api": "social2"
     },
     "loggingcontroller": {
-      "url": "../uproxy-lib/loggingprovider/freedom-module.json",
+      "url": "../lib/loggingprovider/freedom-module.json",
       "api": "loggingcontroller"
     },
     "logginglistener": {
-      "url": "../uproxy-lib/loggingprovider/freedom-module.json",
+      "url": "../lib/loggingprovider/freedom-module.json",
       "api": "logginglistener"
     },
     "metrics": {
@@ -32,7 +28,7 @@
       "api": "metrics"
     },
     "churnPipe": {
-      "url": "../uproxy-lib/churn-pipe/freedom-module.json",
+      "url": "../lib/churn-pipe/freedom-module.json",
       "api": "churnPipe"
     },
     "pgp": {
@@ -42,9 +38,18 @@
     "portControl": {
       "url": "../freedom-port-control/port-control.json",
       "api": "portControl"
+    },
+    "CLOUDPROVIDER-digitalocean": {
+      "url": "../lib/cloud/digitalocean/freedom-module.json",
+      "api": "digitalocean"
+    },
+    "cloudinstall": {
+      "url": "../lib/cloud/install/freedom-module.json",
+      "api": "cloudinstall"
     }
   },
   "permissions": [
+    "core.crypto",
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
     "core.storage",

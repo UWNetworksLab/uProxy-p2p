@@ -1,14 +1,17 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../../third_party/typings/xregexp/xregexp.d.ts' />
+/// <reference path='../../../../third_party/typings/browser.d.ts' />
 
+import _ = require('lodash');
 import social = require('../../interfaces/social');
+import translator = require('../scripts/translator');
 import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 import user_module = require('../scripts/user');
+import dialogs = require('../scripts/dialogs');
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 var ui = ui_context.ui;
-var core = ui_context.core;
 var model = ui_context.model;
 var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 
@@ -30,14 +33,23 @@ Polymer({
   toastMessage: '',
   unableToGet: '',
   unableToShare: '',
+  gettingStatus: null,
+  sharingStatus: null,
   viewChanged: function(oldView :ui_types.View, newView :ui_types.View) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
     if (newView == ui_types.View.ROSTER && oldView == ui_types.View.SPLASH) {
-      this.fire('core-signal', {name: "login-success"});
+      // TODO: can this be removed now that roster-before-login has launched?
+      this.fire('core-signal', {name: 'login-success'});
       this.closeSettings();
       this.$.modeTabs.updateBar();
+
+      // User has now seen the welcome messages - this used to be a
+      // uproxy-bubble, now the only welcome content is on the splash screen
+      // and the empty roster text.
+      model.globalSettings.hasSeenWelcome = true;
+      this.$.state.background.updateGlobalSettings(model.globalSettings);
     }
   },
   statsIconClicked: function() {
@@ -53,15 +65,13 @@ Polymer({
     ui.setMode(ui_types.Mode.SHARE);
   },
   closedWelcome: function() {
-    model.globalSettings.hasSeenWelcome = true;
-    core.updateGlobalSettings(model.globalSettings);
   },
   closedSharing: function() {
     model.globalSettings.hasSeenSharingEnabledScreen = true;
-    core.updateGlobalSettings(model.globalSettings);
+    this.$.state.background.updateGlobalSettings(model.globalSettings);
   },
-  dismissCopyPasteError: function() {
-    ui.copyPasteError = ui_types.CopyPasteError.NONE;
+  closeDialog: function() {
+    this.$.dialog.close();
   },
   openDialog: function(e :Event, detail :ui_types.DialogDescription) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
@@ -71,7 +81,6 @@ Polymer({
      *   message: 'main message for the dialog',
      *   buttons: [{
      *     text: 'button text, e.g. Done',
-     *     signal: 'core-signal to fire when button is clicked (optional)',
      *     dismissive: boolean, whether button is dismissive (optional)
      *   }]
      * }
@@ -79,6 +88,8 @@ Polymer({
 
     if (detail.userInputData && detail.userInputData.initInputValue) {
       this.$.dialogInput.value = detail.userInputData.initInputValue;
+    } else if (detail.displayData) {
+      this.$.dialogDisplay.value = detail.displayData;
     } else {
       this.$.dialogInput.value = '';
     }
@@ -105,12 +116,6 @@ Polymer({
       });
     });
   },
-  reusableDialogClosed: function() {
-    fulfillReusableDialogClosed();
-  },
-  openProxyError: function() {
-    this.$.proxyError.open();
-  },
   dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     // Get userInput, or set to undefined if it is '', null, etc
     var userInput = this.$.dialogInput.value || undefined;
@@ -122,21 +127,24 @@ Polymer({
 
     this.isUserInputInvalid = false;
 
-    var callbackIndex = parseInt(target.getAttribute('data-callbackIndex'), 10);
-    if (callbackIndex) {
-      var fulfill = (target.getAttribute('affirmative') != null);
-      ui.invokeConfirmationCallback(callbackIndex, fulfill, userInput);
-    }
-    var signal = target.getAttribute('data-signal');
-    if (signal) {
-      this.fire('core-signal', { name: signal });
-    }
+    var fulfill = (target.getAttribute('affirmative') !== null);
+    this.$.state.handleDialogClick(fulfill, userInput);
     this.$.dialog.close();
+  },
+  selectAll: function(e :Event, d :Object, input :HTMLInputElement) {
+    input.focus();
+    input.select();
+  },
+  reusableDialogClosed: function() {
+    fulfillReusableDialogClosed();
+  },
+  openProxyError: function() {
+    this.$.proxyError.open();
   },
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
-    this.core = core;
+    this.core = ui_context.core;
     this.ui_constants = ui_types;
     this.user_interface = user_interface;
     this.model = model;
@@ -144,50 +152,41 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
-    this.updateDirectionality();
+    this.setDirectionality();
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&
         this.model.globalSettings.mode == ui_types.Mode.SHARE) {
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
-      ui.showDialog(ui.i18n_t('SHARING_UNAVAILABLE_TITLE'),
-          ui.i18n_t('SHARING_UNAVAILABLE_MESSAGE'), ui.i18n_t('CLOSE'));
+      this.$.state.openDialog(dialogs.getMessageDialogDescription(
+          translator.i18n_t('SHARING_UNAVAILABLE_TITLE'),
+          translator.i18n_t('SHARING_UNAVAILABLE_MESSAGE'),
+          translator.i18n_t('CLOSE')));
     } else {
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core
-      core.updateGlobalSettings(model.globalSettings);
-    }
-  },
-  signalToFireChanged: function() {
-    if (ui.signalToFire) {
-      this.fire('core-signal', { name: ui.signalToFire.name, data: ui.signalToFire.data });
+      this.$.state.background.updateGlobalSettings(model.globalSettings);
     }
   },
   revertProxySettings: function() {
     this.ui.stopUsingProxy(true);
+    this.openAskForFeedback();
   },
   restartProxying: function() {
     this.ui.restartProxying();
   },
-  toastMessageChanged: function(oldVal :string, newVal :string) {
-    if (newVal) {
-      this.toastMessage = newVal;
-      this.unableToShare = ui.unableToShare;
-      this.unableToGet = ui.unableToGet;
-      this.$.toast.show();
-
-      // clear the message so we can pick up on other changes
-      ui.toastMessage = null;
-      ui.unableToShare = false;
-      ui.unableToGet = false;
-    }
+  showToast: function(e: Event, detail: { toastMessage: string, unableToGet?: boolean, unableToShare?: boolean }) {
+    this.toastMessage = detail.toastMessage;
+    this.unableToGet = detail.unableToGet || false;
+    this.unableToShare = detail.unableToShare || false;
+    this.$.toast.show();
   },
   openTroubleshoot: function() {
-    if (this.ui.unableToGet) {
-      this.troubleshootTitle = ui.i18n_t("UNABLE_TO_GET");
+    if (this.unableToGet) {
+      this.troubleshootTitle = ui.i18n_t('UNABLE_TO_GET');
     } else {
-      this.troubleshootTitle = ui.i18n_t("UNABLE_TO_SHARE");
+      this.troubleshootTitle = ui.i18n_t('UNABLE_TO_SHARE');
     }
     this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});
@@ -205,6 +204,8 @@ Polymer({
       this.$.settings.accountChooserOpen = false;
     } else {
       // Drawer was closed.
+      // Cancel the user's edits to the description, if they haven't saved
+      this.$.settings.$.description.cancelEditing();
       this.$.statsTooltip.disabled = false;
     }
   },
@@ -218,25 +219,49 @@ Polymer({
       this.isSharingEnabledWithOthers = trustedContacts.length > 0;
     }
   },
-  updateDirectionality: function() {
-    // Update the directionality of the UI.
-    for (var i = 0; i < RTL_LANGUAGES.length; i++) {
-      if (RTL_LANGUAGES[i] == model.globalSettings.language.substring(0,2)) {
-        this.dir = 'rtl';
-        return;
-      }
+  /*
+   * Set our `dir` value to 'ltr' or 'rtl' based on current language.
+   */
+  setDirectionality: function() {
+    if (_.includes(RTL_LANGUAGES, model.globalSettings.language)) {
+      this.dir = 'rtl';
+    } else {
+      this.dir = 'ltr';
     }
-    this.dir = 'ltr';
+  },
+  languageChanged: function(oldLanguage :string, newLanguage :string) {
+    if (oldLanguage && oldLanguage !== newLanguage) {
+      window.location.reload();
+    }
   },
   restart: function() {
-    core.restart();
+    this.$.state.background.restart();
   },
   fireOpenInviteUserPanel: function() {
     this.fire('core-signal', { name: 'open-invite-user-dialog' });
   },
+  openAskForFeedback: function() {
+    this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
+        translator.i18n_t('ASK_FOR_FEEDBACK_TITLE'),
+        translator.i18n_t('ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED'))).then(
+      () => {
+        this.fire('core-signal', {
+          name: 'open-feedback',
+          data: {
+            feedbackType: uproxy_core_api.UserFeedbackType.DISCONNECTED_FROM_FRIEND
+          }
+        });
+      },
+      () => { /* MT */ });
+  },
+  updateGettingStatus: function(e: Event, gettingStatus?: string) {
+    this.gettingStatus = gettingStatus;
+  },
+  updateSharingStatus: function(e: Event, sharingStatus?: string) {
+    this.sharingStatus = sharingStatus;
+  },
   observe: {
     '$.mainPanel.selected': 'drawerToggled',
-    'ui.toastMessage': 'toastMessageChanged',
     'ui.view': 'viewChanged',
     // Use an observer on model.contacts.shareAccessContacts.trustedUproxy
     // so that we can detect any time elements are added or removed from this
@@ -245,8 +270,7 @@ Polymer({
     // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
-    'ui.signalToFire': 'signalToFireChanged',
-    'model.globalSettings.language': 'updateDirectionality'
+    'model.globalSettings.language': 'languageChanged'
   },
   computed: {
     'hasContacts': '(model.contacts.getAccessContacts.pending.length + model.contacts.getAccessContacts.trustedUproxy.length + model.contacts.getAccessContacts.untrustedUproxy.length + model.contacts.shareAccessContacts.pending.length + model.contacts.shareAccessContacts.trustedUproxy.length + model.contacts.shareAccessContacts.untrustedUproxy.length) > 0',

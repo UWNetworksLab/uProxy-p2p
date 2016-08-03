@@ -1,0 +1,243 @@
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='../../bower/paper-progress/paper-progress.html'>
+<link rel='import' href='../../bower/paper-radio-button/paper-radio-button.html'>
+<link rel='import' href='../../bower/paper-radio-group/paper-radio-group.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='button.html'>
+
+<polymer-element name='uproxy-cloud-install'>
+  <template>
+    <style>
+    :host {
+      text-align: start;
+    }
+    core-overlay {
+      height: 100%;
+      width: 100%;
+      background-color: white;
+    }
+    paper-progress {
+      width: 100%;
+    }
+    paper-radio-button {
+      width: 100%;
+      padding: 6px 12px !important;
+    }
+    .content {
+      margin: 2em;
+    }
+    uproxy-button {
+      background-color: #34AFCE;  /* blue */
+      margin: 4px 0;
+      padding: 0.5em;
+      width: 100%;
+      font-size: 14px;
+    }
+    paper-checkbox {
+      margin: 10px 0 24px;
+      font-size: 12px;
+    }
+    hr {
+      margin: 20px 0;
+      color: #eee;
+      border-style: solid;
+    }
+    h1 {
+      color: #003C48;
+      font-weight: 400;
+      font-size: 20px;
+      line-height: 30px;
+    }
+    p {
+      line-height: 1.75em;
+      font-size: 12px;
+    }
+    #regionMenu {
+      font-size: 12px;
+    }
+    .header-image {
+      text-align: center;
+    }
+    .header-image img {
+      margin: 0.5em 0 0;
+      width: 120px;
+    }
+    .header-image img[src*="uproxy+digitalocean.svg"] {
+      width: 180px;
+    }
+    paper-progress::shadow #activeProgress {
+      background-color: #34AFCE !important;  /* blue */
+    }
+    paper-radio-button[checked]::shadow #onRadio {
+      background-color: #34AFCE;  /* blue */
+    }
+    paper-radio-button[checked]::shadow #offRadio {
+      border-color: #34AFCE;  /* blue */
+    }
+    uproxy-faq-link {
+      color: #12A391;
+    }
+    .warning {
+      font-weight: bold;
+    }
+    #cloudFailureFeedback {
+      text-align: center;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    </style>
+
+    <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
+    <core-signals on-core-signal-cloud-install-status="{{ updateCloudInstallStatus }}"></core-signals>
+    <core-signals on-core-signal-cloud-install-progress="{{ updateCloudInstallProgress }}"></core-signals>
+
+    <core-overlay id='signUpOrSignInOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/uproxy+digitalocean.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_GET_STARTED_TITLE' | $$ }}</h1>
+        <div id='getStartedMessage'></div>
+        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}" on-change="{{havePromoChanged}}"></paper-checkbox>
+        <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
+          {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ showCreateServerOverlay }}'>
+          {{ 'I_HAVE_AN_ACCOUNT' | $$ }}
+        </uproxy-button>
+        <hr>
+        <h1>{{ 'CLOUD_INSTALL_EXISTING_SERVER_TITLE' | $$ }}</h1>
+        <p id='existingServerMessage'></p>
+      </div>
+    </core-overlay>
+
+    <core-overlay id='createServerOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/uproxy+digitalocean.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_LOGIN_TITLE' | $$ }}</h1>
+        <div>
+          <paper-radio-group id='regionMenu' selected='sgp1'>
+            <!-- TODO: get available regions from DigitalOcean -->
+            <paper-radio-button name='sgp1' label='{{ "ASIA_SINGAPORE" | $$ }}'></paper-radio-button>
+            <paper-radio-button name='blr1' label='{{ "ASIA_BANGALORE" | $$ }}'></paper-radio-button>
+            <paper-radio-button name='ams2' label='{{ "EUROPE_AMSTERDAM" | $$ }}'></paper-radio-button>
+            <paper-radio-button name='nyc2' label='{{ "NORTH_AMERICA_NEW_YORK" | $$ }}'></paper-radio-button>
+          </paper-radio-group>
+        </div>
+        <div id='createServerMessage'></div>
+        <!-- TODO: add learn more links -->
+        <uproxy-button raised on-tap='{{ createServer }}'>
+          {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+        </uproxy-button>
+      </div>
+    </core-overlay>
+
+    <core-overlay id='installingOverlay'>
+      <uproxy-app-bar color='#34AFCE' disableback="true">
+        {{ 'CREATING_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/create.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_INSTALLING_TITLE' | $$ }}</h1>
+        <p class="warning">{{ 'CLOUD_INSTALL_INSTALLING_WARNING' | $$ }}</p>
+        <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$ }}</p>
+        <div>
+          <paper-progress id='installProgress' value='{{ installProgress }}'></paper-progress>
+        </div>
+        <p>{{ installStatus }}</p>
+        <uproxy-button on-tap='{{ cancelCloudInstall }}'>{{ 'CANCEL' | $$ }}</uproxy-button>
+      </div>
+    </core-overlay>
+
+    <core-overlay id='successOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/success.svg'>
+        </div>
+          <h1>{{ 'CLOUD_INSTALL_SUCCESS_TITLE' | $$ }}</h1>
+        <!-- TODO: show IP address -->
+        <p>{{ 'CLOUD_INSTALL_SUCCESS_MESSAGE' | $$ }}</p>
+        <!-- TODO: add start getting access button -->
+        <uproxy-button on-tap='{{ closeOverlays }}'>{{ 'CONTINUE' | $$ }}</uproxy-button>
+      </div>
+    </core-overlay>
+
+    <core-overlay id='failureOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/error-circle-ic.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_ERROR_TITLE' | $$ }}</h1>
+        <p>{{ 'DIGITAL_OCEAN_ERROR_MESSAGE' | $$ }}</p>
+        <uproxy-button raised on-tap='{{ createServer }}'>
+          {{ 'TRY_AGAIN' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ launchDigitalOceanSettings }}'>
+          {{ 'LAUNCH_DIGITAL_OCEAN_SETTINGS' | $$ }}
+        </uproxy-button>
+        <p id="cloudFailureFeedback" on-tap="{{ launchFeedback }}">
+          {{ 'REPORT_ERROR' | $$ }}
+        </p>
+      </div>
+    </core-overlay>
+
+    <core-overlay id='serverExistsOverlay'>
+      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/error-circle-ic.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE' | $$ }}</h1>
+        <p>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE' | $$ }}</p>
+        <uproxy-button raised on-tap='{{ removeServerAndInstallAgain }}'>
+          {{ 'REMOVE_SERVER_AND_TRY_AGAIN' | $$ }}
+        </uproxy-button>
+        <uproxy-button raised on-tap='{{ closeOverlays }}'>
+          {{ 'CANCEL' | $$ }}
+        </uproxy-button>
+      </div>
+    </core-overlay>
+
+
+    <core-overlay id='cancelingOverlay'>
+      <uproxy-app-bar color='#34AFCE' disableback="true">
+        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+      </uproxy-app-bar>
+
+      <div class='content'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/error-circle-ic.svg'>
+        </div>
+        <h1>{{ 'CLOUD_INSTALL_CANCEL_TITLE' | $$ }}</h1>
+        <p>{{ 'CLOUD_INSTALL_CANCEL_MESSAGE' | $$ }}</p>
+      </div>
+    </core-overlay>
+
+  </template>
+  <script src='cloud-install.js'></script>
+</polymer-element>

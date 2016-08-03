@@ -6,7 +6,7 @@
  */
 
 import globals = require('./globals');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import logging = require('../lib/logging/logging');
 import Persistent = require('../interfaces/persistent');
 import social = require('../interfaces/social');
 
@@ -15,17 +15,13 @@ import storage = globals.storage;
 // module Core {
   var log :logging.Log = new logging.Log('local-instance');
 
-  // Small convenience wrapper for random Uint8.
-  //
-  // TODO: gather up uses of random and put them into a common directory in
-  // uproxy-lib, or directly use end-to-end implementation.
   export class LocalInstance implements social.LocalInstanceState, Persistent {
-
     public instanceId :string;
     public clientId :string;
     public userName :string;
     public imageData :string;
-    public invitePermissionTokens :{ [token :string] :social.PermissionTokenInfo } = {};
+    public invitePermissionTokens
+      :{ [token :string] :social.PermissionTokenInfo } = {};
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -66,7 +62,7 @@ import storage = globals.storage;
         // 20 bytes for the instance ID.  This we can keep.
         // TODO: don't use Math.random; use uproxy crypto. (security higene)
         hex = Math.floor(Math.random() * 256).toString(16);
-        id += ('00'.substr(0, 2 - hex.length) + hex);
+        id += ('00'.substring(0, 2 - hex.length) + hex);
       }
       return id;
     }
@@ -86,9 +82,11 @@ import storage = globals.storage;
     }
 
     /**
-     * TODO: Come up with a better typing for this.
+     * This does not return a LocalInstanceState because we don't want
+     * to save the exchangeInviteToken method to storage.
+     * TODO: consider removing exchangeInviteToken from LocalInstanceState
      */
-    public currentState = () :social.LocalInstanceState => {
+    public currentState = () => {
       return {
         instanceId: this.instanceId,
         userId: this.userId,
@@ -116,18 +114,37 @@ import storage = globals.storage;
       });
     }
 
-    public generateInvitePermissionToken = () : string => {
+    public generateInvitePermissionToken = (isRequesting :boolean, isOffering :boolean) : string => {
+      if (!isRequesting && !isOffering) {
+        // sanity check
+        throw Error('Not generating permission token with !isRequesting && !isOffering');
+      }
       var permissionToken = String(Math.random());
       this.invitePermissionTokens[permissionToken] = {
-        access: social.PermissionTokenAccess.FRIEND_REQUEST,
-        createdAt: Date.now()
+        isRequesting: isRequesting,
+        isOffering: isOffering,
+        createdAt: Date.now(),
+        acceptedByUserIds: []
       };
       this.saveToStorage();
       return permissionToken;
     }
 
-    public isValidInvite = (permissionToken :string) : boolean => {
-      return permissionToken in this.invitePermissionTokens;
+    public exchangeInviteToken = (token :string, userId :string) : social.PermissionTokenInfo => {
+      var tokenData = this.invitePermissionTokens[token];
+      if (!tokenData) {
+        log.warn('Permission token ' + token + ' not found.');
+        return null;
+      } else if (tokenData.acceptedByUserIds.indexOf(userId) >= 0) {
+        // Tokens can only be used once per userId.  This is so that if someone
+        // gets a token that offers them access, I can later revoke their access
+        // and they can't re-use the same token again to re-gain permission.
+        log.warn('Permission token ' + token + ' already used by ' + userId);
+        return null;
+      }
+      tokenData.acceptedByUserIds.push(userId);
+      this.saveToStorage();
+      return tokenData;
     }
 
   }  // class local_instance.LocalInstance

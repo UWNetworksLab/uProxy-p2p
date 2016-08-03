@@ -3,7 +3,7 @@
  * interface to be extended as classes specific to particular components.
  */
 
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import net = require('../lib/net/net.types');
 import uproxy_core_api = require('./uproxy_core_api');
 
 export interface UserPath {
@@ -13,7 +13,7 @@ export interface UserPath {
 
 export interface SocialNetworkInfo {
   name :string;
-  userId :string; // ID for current user
+  userId ?:string; // ID for current user
 }
 
 export interface InstancePath extends UserPath {
@@ -31,16 +31,11 @@ export interface StopProxyInfo {
   error      :boolean;
 }
 
-export enum PermissionTokenAccess {
-  FRIEND_REQUEST = 0,   // only requesting that the user is a friend
-  REQUEST_ACCESS,
-  OFFER_ACCESS,
-  REQUEST_AND_OFFER_ACCESS
-}
-
 export interface PermissionTokenInfo {
-  access :PermissionTokenAccess;
+  isRequesting :boolean;
+  isOffering :boolean;
   createdAt :number;
+  acceptedByUserIds :string[];
 }
 
 export interface LocalInstanceState {
@@ -49,6 +44,7 @@ export interface LocalInstanceState {
   userName         :string;
   imageData        :string;
   invitePermissionTokens :{ [token :string] :PermissionTokenInfo };
+  exchangeInviteToken : (token :string, userId :string) => PermissionTokenInfo;
 }
 
 export interface NetworkMessage {
@@ -86,12 +82,21 @@ export interface ConsentState {
   remoteRequestsAccessFromLocal :boolean;
 }
 
+export enum VerifyState {
+  VERIFY_NONE = 0,
+  VERIFY_BEGIN = 1,
+  VERIFY_COMPLETE = 2,
+  VERIFY_FAILED = 3
+}
+
 export interface InstanceData {
   bytesReceived          :number;
   bytesSent              :number;
   description            :string;
   instanceId             :string;
   isOnline               :boolean;
+  verifyState            :VerifyState;
+  verifySAS              :string;
   localGettingFromRemote :GettingState;
   localSharingWithRemote :SharingState;
   activeEndpoint         :net.Endpoint;
@@ -110,7 +115,6 @@ export interface UserData {
 export interface NetworkState {
   name         :string;
   profile      :UserProfileMessage;
-  // TODO: bad smell: UI data should not be
   roster       :{[userId :string] :UserData };
 }
 
@@ -120,8 +124,9 @@ export interface NetworkOptions {
   areAllContactsUproxy :boolean;
   supportsReconnect :boolean;
   displayName ?:string;  // Network name to be displayed in the UI.
-  isExperimental ?:boolean;
-  encryptsWithClientId ?:boolean;
+  metricsName ?:string;  // Name to use for metrics
+  isEncrypted ?:boolean;
+  rosterFunction ?:(rosterNames:string[])=>number;
 }
 
 /**
@@ -140,7 +145,10 @@ export enum PeerMessageType {
   SIGNAL_FROM_CLIENT_PEER,
   SIGNAL_FROM_SERVER_PEER,
   // Request that an instance message be sent back from a peer.
-  INSTANCE_REQUEST
+  INSTANCE_REQUEST,
+  // Key Verification
+  KEY_VERIFY_MESSAGE,
+  PERMISSION_TOKEN
 }
 
 export interface PeerMessage {
@@ -172,12 +180,16 @@ export interface InstanceHandshake {
   instanceId  :string;
   consent     :ConsentWireState;
   description ?:string;
-  name        :string;
-  userId      :string;
   // publicKey is not set for networks which include the public key in their
   // clientId (Quiver).
   publicKey   ?:string;
 }
+
+// This is only used for sending the received permission token back to the
+// user who generated the token.
+export interface PermissionTokenMessage {
+  token :string;
+};
 
 // Describing whether or not a remote instance is currently accessing or not,
 // assuming consent is GRANTED for that particular pathway.
@@ -210,7 +222,9 @@ export enum ClientStatus {
 export enum UserStatus {
   FRIEND = 0,
   LOCAL_INVITED_BY_REMOTE = 1,
-  REMOTE_INVITED_BY_LOCAL = 2
+  REMOTE_INVITED_BY_LOCAL = 2,
+  CLOUD_INSTANCE_CREATED_BY_LOCAL = 3,
+  CLOUD_INSTANCE_SHARED_WITH_LOCAL = 4
 }
 
 // Status of a client connected to a social network.
@@ -219,7 +233,6 @@ export interface ClientState {
   clientId  :string;
   status    :ClientStatus;
   timestamp :number;
-  inviteResponse ?:string;
 }
 
 
@@ -232,13 +245,6 @@ export interface UserState {
   instanceIds :string[];
   consent     :ConsentState;
   status      :UserStatus;
-  knownPublicKeys :string[];
-}
-
-export interface inviteResponse {
-  userId :string;
-  publicKey :string;
-  permissionToken :string;
 }
 
 export interface RemoteUserInstance {
@@ -252,6 +258,23 @@ export interface SignallingMetadata {
   // Random ID associated with this proxying attempt.
   // Used for logging purposes and implicitly delimits proxying attempts.
   proxyingId ?:string;
+}
+
+export interface InviteTokenPermissions {
+  token :string;
+  isRequesting :boolean;
+  isOffering :boolean;
+}
+
+export interface InviteTokenData {
+  v :number;  // version
+  networkName :string;
+  // TODO: make this optional, it's not used by cloud social provider (and maybe others)
+  userName :string;
+  networkData :string|Object;
+  permission ?:InviteTokenPermissions;
+  userId ?:string;  // Only included if permissions also set
+  instanceId ?:string;  // Only included if permissions also set
 }
 
 /**
@@ -287,7 +310,7 @@ export interface Network {
    * appropriate, and sends an update to the UI upon success. Does nothing if
    * already logged in.
    */
-  login :(reconnect :boolean, userName ?:string) => Promise<void>;
+  login :(loginType :uproxy_core_api.LoginType, userName ?:string) => Promise<void>;
 
   getStorePath :() => string;
 
@@ -309,17 +332,17 @@ export interface Network {
   /**
    * Accept an invite to use uProxy with a friend
    */
-  acceptInvitation: (token ?:string, userId ?:string) => Promise<void>;
+  acceptInvitation: (token ?:InviteTokenData, userId ?:string) => Promise<void>;
 
   /**
-   * Send an invite to a friend to use uProxy
+   * Send an invite to a GitHub friend to use uProxy
    */
-  inviteUser: (optionalUserId :string) => Promise<void>;
+  inviteGitHubUser: (data :uproxy_core_api.CreateInviteArgs) => Promise<void>;
 
   /**
    * Generates an invite token
    */
-  getInviteUrl: () => Promise<string>;
+  getInviteUrl: (data :uproxy_core_api.CreateInviteArgs) => Promise<string>;
 
   /**
    * Generates an invite token
@@ -350,8 +373,12 @@ export interface Network {
 
   areAllContactsUproxy : () => boolean;
 
-  encryptsWithClientId : () => boolean;
+  isEncrypted : () => boolean;
 
   getKeyFromClientId : (clientId :string) => string;
-}
 
+  /**
+   * Removes user from the network's roster and storage
+   */
+  removeUserFromStorage : (userId :string) => Promise<void>;
+}

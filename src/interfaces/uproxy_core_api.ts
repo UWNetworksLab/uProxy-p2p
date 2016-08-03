@@ -1,7 +1,7 @@
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
+import net = require('../lib/net/net.types');
 import social = require('./social');
 import ui = require('./ui');
 
@@ -9,6 +9,7 @@ import ui = require('./ui');
 
 export interface UserFeedback {
   email        :string;
+  error        :string;
   feedback     :string;
   logs         :string;
   browserInfo  ?:string;
@@ -18,7 +19,15 @@ export interface UserFeedback {
 
 export enum UserFeedbackType {
   USER_INITIATED = 0,
-  PROXYING_FAILURE = 1
+  PROXYING_FAILURE = 1,
+  CLOUD_CONNECTIONS_DISCONNECTED = 2,
+  CLOUD_SERVER_NO_CONNECT = 3,
+  CLOUD_SERVER_NO_START = 4,
+  TROUBLE_SIGNING_IN = 5,
+  NO_FRIENDS = 6,
+  TROUBLE_STARTING_CONNECTION = 7,
+  DISCONNECTED_FROM_FRIEND = 8,
+  OTHER_FEEDBACK = 9
 }
 
 // Object containing description so it can be saved to storage.
@@ -28,24 +37,44 @@ export interface GlobalSettings {
   stunServers      :freedom.RTCPeerConnection.RTCIceServer[];
   hasSeenSharingEnabledScreen :boolean;
   hasSeenWelcome   :boolean;
+  hasSeenMetrics   :boolean;
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
-  splashState : number;
   consoleFilter    :loggingTypes.Level;
   language         :string;
   force_message_version :number;
   quiverUserName :string;
-  showCloud :boolean;
+  proxyBypass: string[];
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
+  activePromoId: string;
+  shouldHijackDO: boolean;
+  crypto: boolean;
+  reproxy: reproxySettings;
+  // A list of strings, each represented as a constant below, with
+  // prefix 'FEATURE_'.
+  enabledExperiments :string[];
 }
+
+export const FEATURE_VERIFY = 'verify';
+
 export interface InitialState {
   networkNames :string[];
+  cloudProviderNames :string[];
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
-  copyPasteState :CopyPasteState; //TODO(jpevarnek): remove this property
-  copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
+}
+
+export interface ValidProxyServerIdentity {
+  [key: string]: string;
+}
+
+export interface ManagedPolicyUpdate {
+  enforceProxyServerValidity :boolean;
+  validProxyServers :ValidProxyServerIdentity[];
 }
 
 export interface ConnectionState {
@@ -54,6 +83,13 @@ export interface ConnectionState {
   bytesSent :number;
   bytesReceived :number;
   activeEndpoint :net.Endpoint;
+}
+
+// Contains settings directing rtc-to-net server to go directly to net or
+// reproxy through a socks proxy server (such as local Tor proxy).
+export interface reproxySettings {
+  enabled       :boolean;      // Reproxy through socks is enabled
+  socksEndpoint :net.Endpoint; // Endpoint through which to reproxy
 }
 
 //TODO(jpevarnek) remove this interface
@@ -80,11 +116,6 @@ export enum Command {
   START_PROXYING = 1005,
   STOP_PROXYING = 1006,
   MODIFY_CONSENT = 1007, // TODO: make this work with the consent piece.
-  START_PROXYING_COPYPASTE_GET = 1008,
-  STOP_PROXYING_COPYPASTE_GET = 1009,
-  START_PROXYING_COPYPASTE_SHARE = 1010,
-  STOP_PROXYING_COPYPASTE_SHARE = 1011,
-  COPYPASTE_SIGNALLING_MESSAGE = 1012,
 
   SEND_CREDENTIALS = 1014,
   UPDATE_GLOBAL_SETTINGS = 1015,
@@ -99,7 +130,14 @@ export enum Command {
   GET_INVITE_URL = 1025,
   SEND_EMAIL = 1026,
   ACCEPT_INVITATION = 1027,
-  SEND_INVITATION = 1028
+  INVITE_GITHUB_USER = 1028,
+  CLOUD_UPDATE = 1029,
+  UPDATE_ORG_POLICY = 1030,
+  REMOVE_CONTACT = 1031,
+  POST_REPORT = 1032,
+  VERIFY_USER = 1033,
+  VERIFY_USER_SAS = 1034,
+  GET_PORT_CONTROL_SUPPORT = 1035,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -127,14 +165,15 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
-  POST_TO_CLOUDFRONT = 2021,
-  // Legacy one-time connection string. Unused, do not send.
-  COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
-  ONETIME_MESSAGE = 2026
+  ONETIME_MESSAGE = 2026,
+  CLOUD_INSTALL_STATUS = 2027,
+  REMOVE_FRIEND = 2028, // Removed friend from roster.
+  // Payload is an integer between 0 and 100.
+  CLOUD_INSTALL_PROGRESS = 2029
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -169,10 +208,21 @@ export interface CloudfrontPostData {
   cloudfrontPath :string;
 }
 
+export enum LoginType {
+  INITIAL = 0,
+  RECONNECT,
+  TEST
+}
+
 export interface LoginArgs {
   network :string;
-  reconnect :boolean;
+  loginType :LoginType;
   userName ?:string;
+}
+
+export interface LoginResult {
+  userId     :string;
+  instanceId :string;
 }
 
 export interface NetworkInfo {
@@ -190,13 +240,61 @@ export interface EmailData {
   body :string;
 };
 
+// Data needed to accept user invites.
 export interface AcceptInvitationData {
   network :social.SocialNetworkInfo;
-  token ?:string;
+  tokenObj ?:any;
   userId ?:string;
 };
 
+// Data needed to generate an invite URL.
+export interface CreateInviteArgs {
+  network :social.SocialNetworkInfo;
+  isRequesting :boolean;
+  isOffering :boolean;
+  userId ?:string;  // for GitHub only
+};
+
 export enum PortControlSupport {PENDING, TRUE, FALSE};
+
+export enum CloudOperationType {
+  CLOUD_INSTALL = 0,
+  CLOUD_DESTROY = 1,
+  CLOUD_REBOOT = 2,
+  CLOUD_HAS_OAUTH = 3
+}
+
+// Arguments to cloudUpdate
+export interface CloudOperationArgs {
+  operation: CloudOperationType;
+  // Use this cloud computing provider to access a server.
+  providerName :string;
+  // Provider-specific region in which to locate a new server.
+  region ?:string;
+};
+
+// Result of cloudUpdate
+export interface CloudOperationResult {
+  hasOAuth? :boolean;
+};
+
+// Argument to removeContact
+export interface RemoveContactArgs {
+  // Name of the network the contact is a part of
+  networkName :string,
+  // userId of the contact you want to remove
+  userId :string
+};
+
+export interface PostReportArgs {
+  payload: Object;
+  path: string;
+};
+
+export interface FinishVerifyArgs {
+  inst: social.InstancePath,
+  sameSAS: boolean
+};
 
 /**
  * The primary interface to the uProxy Core.
@@ -215,32 +313,6 @@ export interface CoreApi {
 
   getLogs() :Promise<string>;
 
-  // CopyPaste interactions
-
-  /*
-   * The promise fulfills with an endpoint that can be used to proxy through
-   * if sucessfully started or rejects otherwise
-   */
-  startCopyPasteGet() :Promise<net.Endpoint>;
-
-  /*
-   * The promise fulfills when the connection is fully closed and state has
-   * been cleaned up
-   */
-  stopCopyPasteGet() :Promise<void>;
-
-  startCopyPasteShare() :void;
-
-  /*
-   * The promise fulfills when the connection is fully closed and state has
-   * been cleaned up
-   */
-  stopCopyPasteShare() :Promise<void>;
-
-  // Decodes an encoded batch of signalling messages and forwards each signal
-  // to the RemoteConnection.
-  sendCopyPasteSignal(signal:string) :void;
-
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
   stop (path :social.InstancePath) : void;
@@ -250,7 +322,7 @@ export interface CoreApi {
   // TODO: Implement this or remove it.
   // changeOption(option :string) : void;
 
-  login(loginArgs :LoginArgs) : Promise<void>;
+  login(loginArgs :LoginArgs) : Promise<LoginResult>;
   logout(networkInfo :social.SocialNetworkInfo) : Promise<void>;
 
   // TODO: use Event instead of attaching manual handler. This allows event
@@ -260,5 +332,29 @@ export interface CoreApi {
   pingUntilOnline(pingUrl :string) : Promise<void>;
   getVersion() :Promise<{ version :string }>;
 
-}
+  getInviteUrl(data :CreateInviteArgs): Promise<string>;
 
+  // Installs or destroys uProxy on a server. Generally a long-running operation, so
+  // callers should expose CLOUD_INSTALL_STATUS updates to the user.
+  // This may also invoke an OAuth flow, in order to perform operations
+  // with the cloud computing provider on the user's behalf.
+  // Update: This is also now used for CloudOperationType.CLOUD_HAS_OAUTH,
+  // which is neither long-running nor potentially triggers an OAuth flow.
+  cloudUpdate(args :CloudOperationArgs): Promise<CloudOperationResult>;
+
+  // Removes contact from roster, storage, and friend list
+  removeContact(args :RemoveContactArgs) : Promise<void>;
+
+  // Make a domain-fronted POST request to the uProxy logs/stats server.
+  postReport(args:PostReportArgs) : Promise<void>;
+
+  // Start a ZRTP key-verification session.
+  verifyUser(inst :social.InstancePath) :void;
+
+  // Confirm or reject the SAS in a ZRTP key-verification session.
+  finishVerifyUser(args:FinishVerifyArgs) :void;
+
+  inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
+
+  getPortControlSupport(): Promise<PortControlSupport>;
+}

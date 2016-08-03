@@ -13,7 +13,12 @@ Polymer({
     // Since opening the FAQ panel is async, set the openingAnchor,
     // and then scrollAfterOpening will scroll to openingAnchor after
     // the panel has finished opening.
-    this.openingAnchor = detail.anchor;
+    if (detail.anchor === '') {
+      this.openingAnchor = 'header';
+    } else {
+      this.openingAnchor = detail.anchor;
+    }
+
     this.$.faqPanel.open();
   },
   scrollAfterOpening: function() {
@@ -44,7 +49,7 @@ Polymer({
       var regexToGetUrl =
           /href\s*=\s*(\"([^"]*\")|'[^']*'|([^'">\s]+))/g;
       var url = regexToGetUrl.exec(p1)[1];
-      return "<a on-tap='{{openTab}}' data-url=" + url + ">" + p2 + "</a>";
+      return '<a on-tap="{{openTab}}" data-url=' + url + '>' + p2 + '</a>';
     });
     return sanitizedMessage;
   },

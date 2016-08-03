@@ -29,7 +29,7 @@
       cursor: pointer;
     }
     .userInfo {
-      background-color: #009688;  /* dark green */
+      background-color: #12A391;  /* dark green */
       color: white;
       padding: 28px;
       line-height: 24px;
@@ -134,6 +134,7 @@
       margin-top: 30px;
     }
     </style>
+    <uproxy-state id="state"></uproxy-state>
 
     <div vertical layout>
       <div class='userInfo'>
@@ -148,12 +149,7 @@
 
         <div class='clickable currentAccountInfo' on-tap='{{ toggleAccountChooser }}'>
           <div horizontal center layout>
-            <span hidden?="{{ model.onlineNetworks.length != 0 }}"
-              class='subdued' flex>{{ "NOT_CONNECTED_LOGIN_TO_START" | $$(model.globalSettings.language) }}</span>
-            <span hidden?="{{ model.onlineNetworks.length != 1 }}"
-              class='subdued' flex>{{ "CONNECTED_WITH" | $$(model.globalSettings.language, {network: displayName}) }}</span>
-            <span hidden?="{{ model.onlineNetworks.length < 2}}"
-              class='subdued' flex>{{ "CONNECTED_WITH_NUMBER" | $$(model.globalSettings.language, {number: model.onlineNetworks.length}) }}</span>
+            <span class='subdued' flex>{{ connectedNetworks }}</span>
             <span hidden?='{{ model.onlineNetworks.length === 1 }}'>
               <core-icon icon='arrow-drop-down' hidden?='{{ accountChooserOpen }}'></core-icon>
               <core-icon icon='arrow-drop-up' hidden?='{{ !accountChooserOpen }}'></core-icon>
@@ -172,7 +168,7 @@
       <div id='mainSettings' class='settingsContent' hidden?='{{ accountChooserOpen }}'>
         <div class='smalltext'>
           {{ "DEVICE_DESCRIPTION" | $$(model.globalSettings.language) }}
-          <uproxy-description></uproxy-description>
+          <uproxy-description id='description'></uproxy-description>
         </div>
 
         <hr>
@@ -202,7 +198,7 @@
 
         <hr>
 
-        <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
+        <uproxy-link on-tap='{{ restart }}' hidden?='{{ !showRestartButton }}' role='button'>
           <core-icon icon='refresh'></core-icon>
           <span class='label'>{{ "RESTART" | $$(model.globalSettings.language) }}</span>
         </uproxy-link>
@@ -216,7 +212,7 @@
       <div id='accountChooser' class='settingsContent' hidden?='{{ !accountChooserOpen }}'>
         <span class='smalltext'>{{ "CONNECTED_ACCOUNTS" | $$(model.globalSettings.language) }}</span>
         <template repeat='{{ name in model.networkNames }}'>
-          <div hidden?="{{name=='Cloud' && !model.globalSettings.showCloud && !ui.showRosterBeforeLogin}}">
+          <div hidden?="{{name=='Cloud'}}">
             <uproxy-network-in-settings name='{{ name }}'></uproxy-network-in-settings>
           </div>
         </template>

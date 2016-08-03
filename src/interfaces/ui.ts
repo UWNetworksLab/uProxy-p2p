@@ -27,17 +27,10 @@ export enum Mode {
 export interface UiApi {
 
   syncUser(UserMessage:social.UserData) : void;
+  removeFriend(args:{ networkName :string, userId :string }) : void;
   // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
   // the below)...
   // updateAll(data:Object) : void;
-}
-
-export enum CopyPasteError {
-  NONE = 0,
-  BAD_URL, // url is somehow invalid
-  LOGGED_IN, // trying to copy+paste while logged in to a network
-  UNEXPECTED, // received a url at an invalid time
-  FAILED // something about the connection failed
 }
 
 export interface DialogButtonDescription {
@@ -56,4 +49,5 @@ export interface DialogDescription {
   message :string;
   buttons: DialogButtonDescription[];
   userInputData ?:DialogUserInputData;
+  displayData ?:string;
 }

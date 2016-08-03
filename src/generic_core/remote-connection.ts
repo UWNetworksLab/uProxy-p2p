@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/typings/browser.d.ts' />
+
 /**
  * remote-connection.ts
  *
@@ -5,18 +7,20 @@
  * It handles the signaling channel between two peers, regardless of permission.
  */
 
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-
-import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
+import bridge = require('../lib/bridge/bridge');
+import constants = require('./constants');
 import globals = require('./globals');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
-import peerconnection = require('../../../third_party/uproxy-lib/webrtc/peerconnection');
-import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
+import logging = require('../lib/logging/logging');
+import net = require('../lib/net/net.types');
+import peerconnection = require('../lib/webrtc/peerconnection');
+import rc4 = require('../lib/transformers/rc4');
+import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import social = require('../interfaces/social');
-import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
-import tcp = require('../../../third_party/uproxy-lib/net/tcp');
+import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
+import tcp = require('../lib/net/tcp');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+
+declare var freedom: freedom.FreedomInModuleEnv;
 
 var PROXYING_SESSION_ID_LENGTH = 16;
 
@@ -148,7 +152,8 @@ var generateProxyingSessionId_ = (): string => {
 
       this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
       this.rtcToNet_.start({
-        allowNonUnicast: globals.settings.allowNonUnicast
+        allowNonUnicast: globals.settings.allowNonUnicast,
+        reproxy: globals.settings.reproxy
       }, pc);
 
       this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
@@ -282,26 +287,39 @@ var generateProxyingSessionId_ = (): string => {
       var commonVersion = Math.min(localVersion, remoteVersion);
       log.info('lowest shared client version is %1 (me: %2, peer: %3)',
           commonVersion, localVersion, remoteVersion);
+      // See globals.ts for a description of each version.
       switch (commonVersion) {
-        case 1:
+        case constants.MESSAGE_VERSIONS.PRE_BRIDGE:
           log.debug('using old peerconnection');
           pc = new peerconnection.PeerConnectionClass(
             freedom['core.rtcpeerconnection'](config),
             'sockstortc');
           break;
-        case 2:
+        case constants.MESSAGE_VERSIONS.BRIDGE:
           log.debug('using bridge without obfuscation');
           pc = bridge.preObfuscation('sockstortc', config, this.portControl_);
           break;
-        case 3:
-          log.debug('using bridge with basicObfuscation');
+        case constants.MESSAGE_VERSIONS.CAESAR:
+          log.debug('using bridge with caesar obfuscation');
           pc = bridge.basicObfuscation('sockstortc', config, this.portControl_);
           break;
+        case constants.MESSAGE_VERSIONS.HOLOGRAPHIC_ICE:
+        case constants.MESSAGE_VERSIONS.ENCRYPTED_SIGNALS:
+          // Since nothing changed at the peerconnection layer between
+          // HOLOGRAPHIC_ICE and ENCRYPTED_SIGNALS, we can safely
+          // fall through.
+          log.debug('using holographic ICE with caesar obfuscation');
+          pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_);
+          break;
         default:
-          log.debug('using holographic ICE');
-          pc = bridge.best('sockstortc', config, this.portControl_);
+          log.debug('using holographic ICE with RC4 obfuscation');
+          pc = bridge.holographicIceOnly('sockstortc', config, this.portControl_, {
+            name: 'rc4',
+            config: JSON.stringify(rc4.randomConfig())
+          });
         }
 
+        globals.metrics.increment('attempt');
       return this.socksToRtc_.start(tcpServer, pc).then(
           (endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
@@ -312,7 +330,6 @@ var generateProxyingSessionId_ = (): string => {
         return endpoint;
       }).catch((e :Error) => {
         this.localGettingFromRemote = social.GettingState.NONE;
-        globals.metrics.increment('failure');
         this.stateRefresh_();
         return Promise.reject(Error('Could not start proxy'));
       });
@@ -323,7 +340,7 @@ var generateProxyingSessionId_ = (): string => {
         log.warn('Cannot stop proxying when neither proxying nor trying to proxy.');
         return;
       }
-
+      globals.metrics.increment('stop');
       this.localGettingFromRemote = social.GettingState.NONE;
       this.stateRefresh_();
       return this.socksToRtc_.stop();

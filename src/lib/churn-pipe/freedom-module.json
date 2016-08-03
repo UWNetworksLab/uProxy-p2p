@@ -1,0 +1,76 @@
+{
+  "name": "Churn pipe",
+  "description": "Obfuscating network pipe.",
+  "app": {
+    "script": [
+      "freedom-module.static.js"
+    ]
+  },
+  "provides": [
+    "churnPipe"
+  ],
+  "api": {
+    "churnPipe": {
+      "constructor": {
+        "value": [
+          "string"
+        ]
+      },
+      "setTransformer": {
+        "type": "method",
+        "value": [{
+          "name": "string",
+          "config": "string"
+        }]
+      },
+      "bindLocal": {
+        "type": "method",
+        "value": [{
+          "address": "string",
+          "port": "number"
+        }]
+      },
+      "addBrowserEndpoint": {
+        "type": "method",
+        "value": [{
+          "address": "string",
+          "port": "number"
+        }]
+      },
+      "bindRemote": {
+        "type": "method",
+        "value": [{
+          "address": "string",
+          "port": "number"
+        }]
+      },
+      "shutdown": {
+        "type": "method",
+        "value": []
+      },
+      "mappingAdded": {
+        "type": "event",
+        "value": {
+          "remote": {
+            "address": "string",
+            "port": "number"
+          },
+          "local": {
+            "address": "string",
+            "port": "number"
+          }
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "logginglistener": {
+      "url": "../loggingprovider/freedom-module.json",
+      "api": "logginglistener"
+    }
+  },
+  "permissions": [
+    "core.crypto",
+    "core.udpsocket"
+  ]
+}

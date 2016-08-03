@@ -15,7 +15,7 @@ self.port.on('message', function(message :any) {
 
 
 // Listen for messages from pages where the content script is injected
-// (e.g. disconnected.js and get_logs.js)
+// (e.g. disconnected.js)
 window.addEventListener('message', function(event) {
   if (event.data.update) {
     self.port.emit('update', event.data);
@@ -27,10 +27,6 @@ window.addEventListener('message', function(event) {
 
   if (event.data.showPanel) {
     self.port.emit('showPanel', event.data);
-  }
-
-  if (event.data.getLogs) {
-    self.port.emit('getLogs', event.data);
   }
 }, false);
 

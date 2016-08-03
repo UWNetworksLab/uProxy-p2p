@@ -1,50 +1,48 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
-/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
 import _ = require('lodash');
+import constants = require('./constants');
 import local_storage = require('./storage');
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import loggingprovider = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import logging = require('../lib/logging/logging');
+import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
 import metrics_module = require('./metrics');
 import user_interface = require('../interfaces/ui');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+
+declare const freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('globals');
 
 export var storage = new local_storage.Storage();
 
-export var STORAGE_VERSION = 1;
-
-// 1: initial release
-// 2: uproxy-lib v27, move to bridge but no obfuscation yet
-// 3: offer basicObfuscation
-// 4: holographic ICE
-export var MESSAGE_VERSION = 5;
-
-export var DEFAULT_STUN_SERVERS = [
-  {urls: ['stun:stun.l.google.com:19302']},
-  {urls: ['stun:stun.services.mozilla.com']},
-  {urls: ['stun:stun.stunprotocol.org']}
-];
-
-  // Initially, the STUN servers are a copy of the default.
-  // We need to use slice to copy the values, otherwise modifying this
-  // variable can modify DEFAULT_STUN_SERVERS as well.
+// Initially, the STUN servers are a copy of the default.
+// We need to use slice to copy the values, otherwise modifying this
+// variable can modify DEFAULT_STUN_SERVERS as well.
 export var settings :uproxy_core_api.GlobalSettings = {
   description: '',
-  stunServers: DEFAULT_STUN_SERVERS.slice(0),
+  stunServers: constants.DEFAULT_STUN_SERVERS.slice(0),
   hasSeenSharingEnabledScreen: false,
   hasSeenWelcome: false,
+  hasSeenMetrics: false,
   allowNonUnicast: false,
   mode: user_interface.Mode.GET,
-  version: STORAGE_VERSION,
-  splashState: 0,
+  version: constants.STORAGE_VERSION,
   statsReportingEnabled: false,
   consoleFilter: loggingprovider.Level.warn,
-  language: 'en',
+  language: null,  // sentinel indicating lang should be calculated from browser settings
   force_message_version: 0, // zero means "don't override"
   quiverUserName: '',
-  showCloud: false
+  proxyBypass: constants.DEFAULT_PROXY_BYPASS.slice(0),
+  enforceProxyServerValidity: false,
+  validProxyServers: [],
+  activePromoId: null,  // set on promoIdDetected
+  enabledExperiments: [],
+  shouldHijackDO: true,
+  crypto: true,
+  reproxy: {
+    enabled: false,
+    socksEndpoint: {address: '127.0.0.1', port: 9050}
+  }
 };
 
 export var natType :string = '';
@@ -55,8 +53,7 @@ export var loadSettings :Promise<void> =
       log.info('Loaded global settings', settingsFromStorage);
 
       // Use the setting values loaded from storage unless the value was not
-      // set in storage in which case we should use the default value (set
-      // above)
+      // set in storage in which case we should use the default value.
       _.merge(settings, settingsFromStorage, (a :Object, b :Object) => {
         if (_.isArray(a) && _.isArray(b)) {
           // arrays should be replaced instead of combined
@@ -78,7 +75,7 @@ export var loadSettings :Promise<void> =
 // Client version to run as, which is globals.MESSAGE_VERSION unless
 // overridden in advanced settings.
 export var effectiveMessageVersion = () : number => {
-  return settings.force_message_version || MESSAGE_VERSION;
+  return settings.force_message_version || constants.MESSAGE_VERSION;
 }
 
 export var metrics = new metrics_module.Metrics(storage);

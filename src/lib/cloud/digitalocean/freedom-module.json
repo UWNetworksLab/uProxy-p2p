@@ -1,0 +1,72 @@
+{
+  "name": "digitalocean",
+  "description": "Provisions VMs on Digital Ocean",
+  "app": {
+    "script": [
+      "../../../forge-min/forge.min.js",
+      "freedom-module.static.js"
+    ]
+  },
+  "provides": [ "digitalocean" ],
+  "default": "digitalocean",
+  "api": {
+    "digitalocean": {
+      "constructor": { "value": [ ] },
+      "start": {
+        "type": "method",
+        "value": [ "string", "string" ],
+        "ret": {
+          "ssh": {
+            "public": "string",
+            "private": "string"
+          },
+          "network": {
+            "ipv4": "string",
+            "ipv6": "string",
+            "ssh_port": "number"
+          }
+        },
+        "err": {
+          "errcode": "string",
+          "message": "string"
+        } 
+      },
+      "stop": {
+        "type": "method",
+        "value": [ "string" ],
+        "ret": [],
+        "err": {
+          "errcode": "string",
+          "message": "string"
+        }
+      },
+      "reboot": {
+        "type": "method",
+        "value": [ "string" ],
+        "ret": [],
+        "err": {
+          "errcode": "string",
+          "message": "string"
+        }
+      },
+      "hasOAuth": {
+        "type": "method",
+        "value": [],
+        "ret": "boolean"
+      },
+      "status": {
+        "type": "event",
+        "value": {
+          "code": "string",
+          "message": "string"
+        }
+      }
+    }
+  },
+  "permissions": [
+    "core.xhr",
+    "core.oauth",
+    "core.storage",
+    "core.tcpsocket"
+  ]
+}

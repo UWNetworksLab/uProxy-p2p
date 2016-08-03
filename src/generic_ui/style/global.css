@@ -10,13 +10,13 @@ body /deep/ paper-button.grey {
 
 /* all paper-progress places should be green */
 body /deep/ paper-progress::shadow #activeProgress {
-  background: #009688;
+  background: #12A391;
 }
 
 body /deep/ a {
   text-decoration: none;
   font-weight: 500;
-  color: #009688;
+  color: #12A391;
 }
 
 html /deep/ [dir='rtl'] /deep/ core-icon[icon='arrow-back'] {
@@ -24,7 +24,7 @@ html /deep/ [dir='rtl'] /deep/ core-icon[icon='arrow-back'] {
 }
 
 body /deep/ paper-input-decorator /deep/ .underline div {
-  background-color: #009688;
+  background-color: #12A391;
 }
 
 /* get around a bug in polymer styling */
@@ -32,4 +32,12 @@ body /deep/ paper-input-decorator input[is="core-input"] {
   padding: 0;
   margin: 0.5em 0 0.25em;
   width: 100%;
+}
+
+body /deep/ uproxy-action-dialog::shadow #actions {
+  padding: 24px;
+}
+
+body /deep/ uproxy-faq-link {
+  white-space: nowrap;
 }

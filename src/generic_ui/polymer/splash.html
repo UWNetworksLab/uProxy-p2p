@@ -6,7 +6,6 @@
 <link rel="import" href="../../bower/core-menu/core-menu.html">
 <link rel='import' href='button.html'>
 <link rel='import' href='faq-link.html'>
-<link rel='import' href='network.html'>
 
 <polymer-element name='uproxy-splash' attributes=''>
   <template>
@@ -24,7 +23,7 @@
     }
     h1 {
       font-size: 1.4em;
-      color: #009688;  /* dark green */
+      color: #12A391;  /* dark green */
       margin-bottom: 1.5em;
     }
     h1.uproxyTitle {
@@ -36,9 +35,6 @@
     }
     h1.uproxyTitle .first-u {
       color: #10c9b1;
-    }
-    h1.sub {
-      font-weight: normal;
     }
     #proxy-pic {
       opacity: 0.3;
@@ -63,21 +59,8 @@
     #nextWrapper uproxy-button {
       width: 150px;
     }
-    uproxy-network {
-      padding: 12px;
-    }
     #nextWrapper {
-      margin-top: 50px;
-    }
-    #oneTimeConnection {
-      margin-bottom: 1.5em;
-    }
-    #submitFeedback {
-      text-decoration: underline;
-      cursor: pointer;
-      display: inline-block;
       margin-top: 1em;
-      margin-bottom: 1em;
     }
     uproxy-faq-link paper-button {
       width: 100%;
@@ -99,7 +82,7 @@
       margin-left: 8px;
       margin-right: 8px;
     }
-    #intro1, #networks, #metricsOptIn {
+    #intro1, #metricsOptIn {
       height: 100%;
     }
     #metricsOptIn {
@@ -127,55 +110,15 @@
     #languageLink paper-item::shadow .button-content {
       padding: 0;
     }
-    paper-input-decorator {
-      font-size: 16px;
-    }
-    #QuiverLoginButton {
-      width: 200px;
-      margin-top: 1em;
-      margin-bottom: 1em;
-    }
-    #QuiverTitle {
-      font-weight: normal;
-      margin-top: 0;
-      margin-bottom: 0;
-    }
-    .networkLoginButton {
-      display: inline-block;
-      width: 120px;
-      margin-top: 0.5em;
-      margin-bottom: 1em;
-      cursor: pointer;
-      vertical-align: top;
-    }
-    .networkLoginButton .networkName {
-      margin-top: 0.5em;
-    }
-    .networkLoginButton core-icon {
-      width: 75px;
-      height: 75px;
-    }
-    .networkLoginButton .experimental {
-      color: red;
-      font-size: 12px;
-    }
-    .orText {
-      font-size: 26px;
-      margin-top: 0.5em;
-      font-style: italic;
-    }
-    .networkLoginButton.copypaste {
-      margin-top: 2em;
-    }
 
     </style>
 
     <div horizontal layout>
-      <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
-          hidden?='{{SPLASH_STATES.INTRO==model.globalSettings.splashState}}'></core-icon>
+      <core-icon icon='arrow-back' on-tap='{{backToIntro}}' class='prevArrow'
+          hidden?='{{SPLASH_STATES.INTRO==state}}'></core-icon>
     </div>
 
-    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==model.globalSettings.splashState}}'>
+    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==state}}'>
       <div class='view' flex>
         <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
@@ -183,14 +126,11 @@
           {{ "ABOUT_UPROXY" | $$(model.globalSettings.language) }}
         </p>
 
-        <div id='nextWrapper'>
-          <uproxy-button raised on-tap='{{next}}'>{{ "NEXT" | $$(model.globalSettings.language) }}</uproxy-button>
-        </div>
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>
           <paper-dropdown-menu label='{{ "LANGUAGE" | $$(model.globalSettings.language) }}'>
             <paper-dropdown class="dropdown" valign="bottom">
-                <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
+                <core-menu selected="{{ langIndex }}" class="menu" on-core-select='{{ updateLanguage }}'>
                     <template repeat='{{ l in languages }}'>
                       <paper-item languageCode='{{ l.languageCode }}'>
                         <bdi>{{ l.language }}</bdi>
@@ -199,18 +139,23 @@
                 </core-menu>
             </paper-dropdown>
           </paper-dropdown-menu>
+        </div> <!-- end of #languageLink -->
+
+        <div id='nextWrapper'>
+          <uproxy-button raised on-tap='{{goToStats}}'>{{ "NEXT" | $$ }}</uproxy-button>
         </div>
-      </div>
+
+      </div> <!-- end of .view -->
 
       <uproxy-faq-link anchor='whatIsUproxy'>
         <paper-button>
-          {{ "LEARN_MORE_UPROXY" | $$(model.globalSettings.language) }}
+          {{ "LEARN_MORE_UPROXY" | $$ }}
         </paper-button>
       </uproxy-faq-link>
 
-    </div>
+    </div> <!-- end of #intro1 -->
 
-    <div vertical layout id="metricsOptIn" hidden?='{{SPLASH_STATES.METRICS_OPT_IN!==model.globalSettings.splashState}}'>
+    <div vertical layout id="metricsOptIn" hidden?='{{SPLASH_STATES.METRICS_OPT_IN!==state}}'>
       <div class="view" flex>
         <h1>{{ "WELCOME" | $$(model.globalSettings.language) }}</h1>
         <p>
@@ -226,70 +171,6 @@
       <uproxy-faq-link anchor='doesUproxyLogData'>
         <paper-button>
           {{ "MORE_ABOUT_METRICS" | $$(model.globalSettings.language) }}
-        </paper-button>
-      </uproxy-faq-link>
-    </div>
-
-    <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==model.globalSettings.splashState}}'>
-      <div class='view' flex>
-        <!-- TODO: translate before launch on webstore -->
-        <div hidden?='{{!supportsQuiver}}'>
-          <h1 id='QuiverTitle'>Sign in to the uProxy network</h1>
-
-          <paper-input-decorator label='Choose a user name' layout vertical>
-            <input is='core-input' value='{{ userName }}' />
-          </paper-input-decorator>
-          <uproxy-button id='QuiverLoginButton' raised on-tap='{{ loginToQuiver }}'>Sign In</uproxy-button>
-
-          <div class='orText'>- - - OR - - -</div>
-          <p>Sign in with a social network.</p>
-          <template repeat='{{ n in networkButtonNames }}' vertical layout>
-            <div on-tap='{{ loginTapped }}' class='networkLoginButton' data-network='{{n}}'>
-              <core-icon icon='uproxy-icons:{{n}}'></core-icon>
-              <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
-              <div class='experimental' hidden?='{{!isExperimentalNetwork(n)}}'>
-                Experimental
-              </div>
-            </div>
-          </template>
-
-          <div class='orText'>- - - OR - - -</div>
-          <div class='networkLoginButton copypaste' on-tap='{{ copypaste }}'>
-            <core-icon icon='uproxy-icons:CopyAndPaste'></core-icon>
-            <div class='networkName'>{{ "SET_UP_ONE_TIME" | $$(model.globalSettings.language) }}</div>
-          </div>
-
-          <p>
-            {{ "WE_WONT_POST" | $$(model.globalSettings.language) }}
-          </p>
-
-          <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-            {{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}
-          </span>
-        </div>
-
-        <!-- TODO: remove this and uproxy-network template once Quiver
-        support is on the webstore -->
-        <div hidden?='{{supportsQuiver}}'>
-          <h1 class='sub'>{{ "WHICH_SOCIAL_NETWORK" | $$(model.globalSettings.language) }}</h1>
-          <p>{{ "WHY_SOCIAL_NETWORK" | $$(model.globalSettings.language) }}</p>
-          <template repeat='{{ n in networkButtonNames }}' vertical layout>
-            <uproxy-network networkName='{{n}}' hidden?="{{n=='Cloud' && !model.globalSettings.showCloud && !ui.showRosterBeforeLogin}}"></uproxy-network>
-          </template>
-          <p id='oneTimeConnection'>
-            <a href='#' on-tap='{{ copypaste }}'>{{ "SET_UP_ONE_TIME" | $$(model.globalSettings.language) }}</a>
-          </p>
-          <p>
-            {{ "WE_WONT_POST" | $$(model.globalSettings.language) }}
-          </p>
-          <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-            {{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}
-          </span>
-        </div>
-      </div>
-      <uproxy-faq-link anchor='whyDoesUproxyConnect'>
-        <paper-button>
-          {{ "LEARN_MORE_SOCIAL" | $$(model.globalSettings.language) }}
         </paper-button>
       </uproxy-faq-link>
     </div>

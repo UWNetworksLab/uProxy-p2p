@@ -1,8 +1,18 @@
 import social = require('../interfaces/social');
 
+function lenMinusOne(keys:string[]) :number {
+  return keys.length -1;
+}
+
+function length(keys:string[]) :number {
+  return keys.length;
+}
+
 export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
   'Facebook-Firebase-V2': {
     displayName: 'Facebook',
+    metricsName: 'facebook',
+    rosterFunction: lenMinusOne,
     isFirebase: true,
     enableMonitoring: true,
     areAllContactsUproxy: true,
@@ -10,6 +20,8 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
   },
   'GMail': {
     displayName: 'Gmail',  // fix incorrect capitalization "GMail"
+    metricsName: 'gmail',
+    rosterFunction: lenMinusOne,
     isFirebase: true,
     enableMonitoring: true,
     areAllContactsUproxy: true,
@@ -17,32 +29,36 @@ export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
   },
   'WeChat': {
     isFirebase: false,
+    metricsName: 'wechat',
+    rosterFunction: lenMinusOne,
     enableMonitoring: false,
     areAllContactsUproxy: false,
     supportsReconnect: false,
-    isExperimental: true
   },
   'GitHub': {
+    metricsName: 'github',
+    rosterFunction: lenMinusOne,
     isFirebase: false,
     enableMonitoring: false,
     areAllContactsUproxy: true,
     supportsReconnect: false,
-    isExperimental: true
   },
   'Quiver': {
     displayName: 'uProxy',
+    metricsName: 'quiver',
+    rosterFunction: lenMinusOne,
     isFirebase: false,
-    enableMonitoring: false,
+    enableMonitoring: true,
     areAllContactsUproxy: true,
     supportsReconnect: true,
-    isExperimental: true,
-    encryptsWithClientId: true
+    isEncrypted: true
   },
   'Cloud': {
+    metricsName: 'cloud',
+    rosterFunction: length,
     isFirebase: false,
     enableMonitoring: false,
     areAllContactsUproxy: true,
     supportsReconnect: false,
-    isExperimental: true
   }
 };

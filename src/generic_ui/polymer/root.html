@@ -9,28 +9,27 @@
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
 <link rel="import" href="../../bower/core-overlay/core-overlay.html">
-<link rel='import' href='invite-user.html'>
-<link rel='import' href='accept-user-invite.html'>
-<link rel="import" href="i18n-filter.html">
-<link rel="import" href='splash.html'>
+<link rel='import' href='advanced-settings.html'>
+<link rel='import' href='app-bar.html'>
+<link rel='import' href='browser-elements.html'>
+<link rel='import' href='bubble.html'>
+<link rel='import' href='button.html'>
+<link rel='import' href='dialog.html'>
 <link rel="import" href='faq.html'>
+<link rel='import' href='feedback.html'>
+<link rel="import" href="i18n-filter.html">
+<link rel='import' href='icons.html'>
+<link rel='import' href='invite-user.html'>
+<link rel="import" href='logs.html'>
+<link rel='import' href='proxy-error.html'>
+<link rel='import' href='reconnect.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
-<link rel="import" href='logs.html'>
-<link rel='import' href='copypaste.html'>
-<link rel='import' href='bubble.html'>
-<link rel='import' href='feedback.html'>
-<link rel='import' href='advanced-settings.html'>
-<link rel='import' href='reconnect.html'>
+<link rel="import" href='splash.html'>
+<link rel='import' href='state.html'>
 <link rel='import' href='troubleshoot.html'>
-<link rel='import' href='dialog.html'>
-<link rel='import' href='browser-elements.html'>
-<link rel='import' href='icons.html'>
-<link rel='import' href='proxy-error.html'>
-<link rel='import' href='button.html'>
 
-<polymer-element name='uproxy-root' attributes='model' on-open-dialog='{{ openDialog }}'>
-
+<polymer-element name='uproxy-root' attributes='model'>
   <template>
     <style>
       :host {
@@ -57,8 +56,10 @@
         opacity: .4;
       }
       /* Since notification number should always be opacity = 1, we force
-         the .tab-content to be opacity = 1 and instead add the .notSelected class to just tab text. There's no way to have .tab-content opacity
-         of 0.6 while its child element (the number) has opacity 1.  */
+         the .tab-content to be opacity = 1 and instead add the
+         .notSelected class to just tab text. There's no way to have
+         .tab-content opacity of 0.6 while its child element (the
+         number) has opacity 1.  */
       paper-tab::shadow .tab-content{
         font-size: 14px;
         text-transform: uppercase;
@@ -89,25 +90,27 @@
         box-shadow: inset 0px 5px 6px -3px rgba(0,0,0,0.13);
       }
       core-toolbar {
-        height: 105px;
         width: 100%;
-        background-color: #009688;
+        background-color: #12A391;
         color: white;
+      }
+      core-toolbar.hasContacts {
+        height: 105px;
       }
       core-toolbar::shadow #topBar {
         padding: 0px 16px;
         height: 60px;
       }
-      core-toolbar core-icon[icon="menu"] {
+      #menu-button {
         opacity: 0.6;
-        margin: 0px;
-        -webkit-transition: all 0.23s !important;
-        -moz-transition: all 0.23s !important;
-        transition: all 0.23s !important;
-      }
-      core-toolbar core-icon[icon="menu"]:hover {
-        opacity: 1;
         cursor: pointer;
+        -webkit-transition: all 0.23s;
+        -moz-transition: all 0.23s;
+        transition: all 0.23s;
+      }
+      #menu-button:hover {
+        opacity: 1;
+        box-shadow: none;
       }
       core-toolbar #title {
         font-size: 20px;
@@ -172,9 +175,6 @@
         overflow: visible;
         padding: 30px 30px 0px 30px;
       }
-      uproxy-action-dialog::shadow #actions {
-        padding: 24px;
-      }
       .core-overlay-backdrop {
         z-index: 1001;
       }
@@ -183,15 +183,18 @@
       }
       uproxy-action-dialog h1 {
         font-size: 1.4em;
-        color: #009688;
+        color: #12A391;
         font-weight: normal;
       }
-      #dialog p {
+      #dialogMessage {
         line-height: 20px;
         color: #666;
         font-weight: 300;
         letter-spacing: 0.4px;
         margin: 0;
+      }
+      #dialog uproxy-faq-link {
+        font-weight: bold;
       }
       #disconnectDialog {
         text-align: center;
@@ -226,7 +229,6 @@
         padding-top: 1em;
         padding-bottom: 1em;
         border-top: 1px solid rgb(221, 221, 221);
-        text-transform: uppercase;
         display: block;
         text-align: center;
         font-size: 1.1em;
@@ -255,36 +257,50 @@
         font-size: 12px;
       }
       paper-toast #toastHelpLink {
-        text-transform: uppercase;
         color: #47B5AA;
       }
       #inviteButton {
         color: white;
         background-color: #34ceb9;  /* teal */
         position: absolute;
-        right: 2em;
+        right: 35px;
         /* Needed to make button clickable on Firefox issue #1905 */
         z-index: 1;
         height: 56px;
         width: 56px;
         padding: 15px;
       }
+      #inviteButton /deep/ core-icon {
+        /* Override default styles which result in a 24x24 icon */
+        height: 18px;
+        width: 18px;
+        /* Necessary to position our smaller icon correctly */
+        margin: 4px auto 0;
+      }
+      core-icon[icon=clear] {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: rgb(180,180,180);
+        cursor: pointer;
+      }
     </style>
+    <uproxy-state id="state"></uproxy-state>
 
-    <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
-
-    <!-- Required for cases where an open-dialog signal is sent from the UI via ui.fireSignal -->
-    <core-signals on-core-signal-open-dialog="{{ openDialog }}"></core-signals>
+    <core-signals
+        on-core-signal-close-settings="{{ closeSettings }}"
+        on-core-signal-open-dialog="{{ openDialog }}"
+        on-core-signal-show-toast="{{ showToast }}"
+        on-core-signal-update-getting-status="{{ updateGettingStatus }}"
+        on-core-signal-update-sharing-status="{{ updateSharingStatus }}">
+    </core-signals>
 
     <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
-
-    <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
-    </uproxy-copypaste>
 
     <!-- core-overlays, launched using core-signals -->
     <uproxy-invite-user></uproxy-invite-user>
     <uproxy-google-invite></uproxy-google-invite>
-    <uproxy-accept-user-invite></uproxy-accept-user-invite>
+    <uproxy-logs></uproxy-logs>
     <uproxy-feedback id='feedback'></uproxy-feedback>
     <uproxy-faq id='faq'></uproxy-faq>
     <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
@@ -302,17 +318,10 @@
       <core-header-panel main
           hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
 
-        <core-toolbar>
+        <core-toolbar class="{{ {hasContacts: hasContacts} | tokenList }}">
 
-          <core-icon icon="menu" core-drawer-toggle></core-icon>
+          <core-icon-button id="menu-button" icon="menu" core-drawer-toggle></core-icon-button>
           <div id='title' flex>uProxy</div>
-
-          <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
-            <h3>{{ "CANNOT_OPEN_ONE_TIME_TITLE" | $$(model.globalSettings.language) }}</h3>
-            <p>
-              {{ "CANT_OPEN_ONE_TIME_MESSAGE" | $$(model.globalSettings.language) }}
-            </p>
-          </uproxy-bubble>
 
           <core-tooltip id='statsTooltip' label='{{ "STATS_ENABLED_TOOLTIP" | $$(model.globalSettings.language) }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
@@ -330,17 +339,17 @@
             <p>{{ "SHARING_ENABLED_MESSAGE" | $$(model.globalSettings.language) }}</p>
           </uproxy-bubble>
 
-          <div class='bottom fit' dir="ltr">
+          <div class='bottom fit' dir="ltr" hidden?='{{ !hasContacts }}'>
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$(model.globalSettings.language) }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$ }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.getAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.getAccessContacts.pending.length }}
                 </span>
-              </paper-tab>ro
+              </paper-tab>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ "SHARE_ACCESS" | $$(model.globalSettings.language) }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ "SHARE_ACCESS" | $$ }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.shareAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.shareAccessContacts.pending.length }}
@@ -349,17 +358,6 @@
             </paper-tabs>
           </div>
         </core-toolbar>
-
-        <!--
-          core-header class ensures this gets inserted in the header portion of
-          core-header-panel and it is positioned below the toolbar (see
-          https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
-        -->
-        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}' noclear="true">
-          <p>
-            {{ "WELCOME_MESSAGE" | $$(model.globalSettings.language) }}
-          </p>
-        </uproxy-bubble>
 
         <div class='content' fit>
 
@@ -387,16 +385,16 @@
                   <a href='#' on-tap='{{ openProxyError }}'>GET HELP</a>
                 </div>
               </div>
-              <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
+              <div class='statusRow' hidden?='{{!gettingStatus}}'>
                 <div class='statusText'>
                   <core-icon icon='uproxy-icons:receive'></core-icon>
-                  {{ui.gettingStatus}}
+                  {{gettingStatus}}
                 </div>
               </div>
-              <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
+              <div class='statusRow' hidden?='{{!sharingStatus}}'>
                 <div class='statusText'>
                   <core-icon icon='uproxy-icons:share'></core-icon>
-                  {{ui.sharingStatus}}
+                  {{sharingStatus}}
                 </div>
               </div>
               <div class='statusRow' hidden?='{{!ui.availableVersion}}'>
@@ -412,15 +410,16 @@
         </div>
         <!-- Elements (like the paper fab) that determine position based on proxying/error statuses, must come after the status elements above. Otherwise the positioning will be incorrect. -->
         <paper-fab id="inviteButton"
-          mini src='../icons/ic_person_add_white_24dp.svg'
+          mini src='../icons/plus_white.svg'
           on-tap='{{ fireOpenInviteUserPanel }}'
-          style='bottom: {{ $.status.offsetHeight + 26 }}px;'></paper-fab>
+          style='bottom: {{ $.status.offsetHeight + 35 }}px;'></paper-fab>
       </core-header-panel>
     </core-drawer-panel>
 
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
     <uproxy-action-dialog backdrop layered="false" id="dialog" on-core-overlay-close-completed="{{reusableDialogClosed}}" closeSelector=''>
+      <core-icon icon="clear" on-tap='{{ closeDialog }}'></core-icon>
       <h1 id='dialogHeading'></h1>
       <p id='dialogMessage'></p>
       <div hidden?='{{ !dialog.userInputData }}'>
@@ -428,11 +427,17 @@
           <input id='dialogInput' is='core-input'/>
         </paper-input-decorator>
       </div>
+      <div hidden?='{{ !dialog.displayData }}'>
+        <paper-input-decorator layout vertical>
+          <input id='dialogDisplay' readonly is='core-input' on-tap='{{ selectAll }}' />
+        </paper-input-decorator>
+      </div>
       <template repeat='{{ button in dialog.buttons }}'>
-        <uproxy-button affirmative?='{{ !button.dismissive }}'
-          dismissive?='{{ button.dismissive }}' class='dialogButton'
-          on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'
-          data-callbackIndex='{{ button.callbackIndex }}'>
+        <uproxy-button
+          affirmative?='{{ !button.dismissive }}'
+          dismissive?='{{ button.dismissive }}'
+          class='dialogButton'
+          on-tap='{{ dialogButtonClick }}'>
           {{button.text}}
         </uproxy-button>
       </template>

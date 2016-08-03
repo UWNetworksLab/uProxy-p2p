@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extName__",
-  "version": "0.8.29",
+  "version": "0.9.4",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
   "minimum_chrome_version": "41.0.2272.63",
@@ -21,6 +21,16 @@
     },
     "default_title": "__MSG_extTitle__"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://cloud.digitalocean.com/*"
+      ],
+      "js": [
+        "generic_ui/scripts/content_digitalocean.js"
+      ]
+    }
+  ],
   "permissions": [
     "background",
     "tabs",
@@ -28,13 +38,11 @@
     "notifications",
     "https://www.uproxy.org/oauth-redirect-uri*",
     "webRequest",
-    "https://uproxy.org/request/*",
-    "https://uproxy.org/offer/*",
     "https://a0.awsstatic.com/",
     "webRequestBlocking"
   ],
   "web_accessible_resources": [
-    "copypaste.html"
+    "icons/*"
   ],
   "externally_connectable": {
     "ids": [

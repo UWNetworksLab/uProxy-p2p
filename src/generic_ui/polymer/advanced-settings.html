@@ -5,6 +5,7 @@
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
+<link rel='import' href='logs.html'>
 <link rel='import' href='link.html'>
 
 <polymer-element name='uproxy-advanced-settings'>
@@ -12,7 +13,7 @@
     <style>
     :host {
       text-align: start;
-      font-color: #009688;  /* dark green */
+      font-color: #12A391;  /* dark green */
     }
     uproxy-app-bar {
       font-size: 18px;
@@ -28,7 +29,7 @@
     #formContainer {
       padding: 20px 30px 0px;
       text-align: start;
-      color: #009688;
+      color: #12A391;
       overflow: auto;
     }
     .inputLabel {
@@ -45,7 +46,7 @@
       padding: 20px 30px;
       text-align: start;
       overflow: auto;
-      color: #009688;
+      color: #12A391;
     }
     #analyzeNAT core-icon {
       height: 15px !important;
@@ -65,7 +66,7 @@
       padding-top: 1.5em;
       padding-bottom: 1.5em;
       border-top: 1px solid rgb(221, 221, 221);
-      color: #009688;
+      color: #12A391;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
@@ -105,7 +106,7 @@
       border-bottom: 1px solid rgb(221, 221, 221);
       padding: 20px 30px;
       text-align: start;
-      color: #009688;
+      color: #12A391;
       overflow: auto;
     }
     #portControlBox core-icon {
@@ -131,6 +132,7 @@
       margin-bottom: 0px;
     }
     </style>
+    <uproxy-state id="state"></uproxy-state>
 
     <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
     <core-signals on-core-signal-open-advanced-settings='{{ open }}'></core-signals>
@@ -158,20 +160,20 @@
               <core-icon icon='help'></core-icon>
             </uproxy-faq-link>
           </p>
-          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.TRUE }}'>
+          <span class='label' hidden?='{{ !_supportsPortControl(portControlSupport) }}'>
             {{ 'PORT_CONTROL_SUPPORTED' | $$(model.globalSettings.language) }}
           </span>
-          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
+          <span class='label' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
             {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$(model.globalSettings.language) }}
           </span>
-          <span class='label' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.PENDING }}'>
+          <span class='label' hidden?='{{ !_portControlStatusPending(portControlSupport) }}'>
             {{ 'PORT_CONTROL_PENDING' | $$(model.globalSettings.language) }}
           </span>
           <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
             <core-icon icon='refresh'></core-icon>
           </uproxy-link>
-          <p class='label info' hidden?='{{ ui.portControlSupport !== uproxy_core_api.PortControlSupport.FALSE }}'>
-            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$(model.globalSettings.language) }}
+          <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
+            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>
               {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$(model.globalSettings.language) }}
             </uproxy-faq-link>
@@ -183,13 +185,13 @@
             <textarea value='{{ settings }}' fit>
             </textarea>
           </paper-input-decorator>
-          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>
+          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
             {{ "SETTINGS_SAVED" | $$(model.globalSettings.language) }}
           </p>
-          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>
+          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
             {{ "SETTINGS_BAD_FORMAT_ERROR" | $$(model.globalSettings.language) }}
           </p>
-          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>
+          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
             {{ "SETTINGS_JSON_ERROR" | $$(model.globalSettings.language) }}
           </p>
         </div> <!-- end of form container -->

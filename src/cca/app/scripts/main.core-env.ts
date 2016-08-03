@@ -1,3 +1,6 @@
+/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/cordova/splashscreen.d.ts'/>
+
 /**
  * background.ts
  *
@@ -5,13 +8,11 @@
  * loaded.
  */
 
-/// <reference path='../../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
-/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
-/// <reference path='../../../../../third_party/typings/cordova/splashscreen.d.ts'/>
-
 import CordovaBrowserApi = require('./cordova_browser_api');
 
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+
+declare const freedom: freedom.FreedomInCoreEnv;
 
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
@@ -31,7 +32,6 @@ console.log('Instantiating UI');
 // This instantiation, before the core has even started, should reduce the
 // apparent startup time, but runs the risk of leaving the UI non-responsive
 // until the core catches up.
-// TODO: Add a loading screen, for slow systems.
 browserApi.bringUproxyToFront().then(() => {
   console.log('UI instantiation complete');
   if (navigator.splashscreen) {
@@ -40,8 +40,8 @@ browserApi.bringUproxyToFront().then(() => {
 });
 
 console.log('Loading core');
-freedom('generic_core/freedom-module.json', {
-  'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
+freedom('generic_core/freedom-module.json', <freedom.FreedomInCoreEnvOptions>{
+  'logger': 'lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
   'portType': 'worker'
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {

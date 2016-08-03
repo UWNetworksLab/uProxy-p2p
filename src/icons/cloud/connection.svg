@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="116px" height="86px" viewBox="0 0 116 86" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.6 (26304) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 6</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="012-invite-copy-12" transform="translate(-123.000000, -199.000000)">
+            <g id="Group-6" transform="translate(123.000000, 199.000000)">
+                <ellipse id="Oval-85" fill-opacity="0.5" fill="#34CEB9" cx="55.6470588" cy="38" rx="37.8823529" ry="38"></ellipse>
+                <path d="M91,59.7478146 C97.90625,59.7478146 103.5,54.032783 103.5,46.9767943 C103.5,39.9208057 97.90625,34.2057741 91,34.2057741 C84.09375,34.2057741 78.5,39.9208057 78.5,46.9767943 C78.5,54.032783 84.09375,59.7478146 91,59.7478146 L91,59.7478146 Z M91,66.1333247 C82.65625,66.1333247 66,70.4116165 66,78.904345 L66,85.2898551 L116,85.2898551 L116,78.904345 C116,70.4116165 99.34375,66.1333247 91,66.1333247 L91,66.1333247 Z" id="Shape" fill="#12A391" opacity="0.300000012"></path>
+                <g id="Group" transform="translate(45.000000, 27.000000)" fill="#FFFFFF">
+                    <ellipse id="Oval-10" cx="7.35294118" cy="10.173913" rx="2.47058824" ry="2.47826087"></ellipse>
+                    <ellipse id="Oval-10" cx="10.6470588" cy="2.73913043" rx="2.47058824" ry="2.47826087"></ellipse>
+                    <ellipse id="Oval-10" cx="10.6470588" cy="17.6086957" rx="2.47058824" ry="2.47826087"></ellipse>
+                    <ellipse id="Oval-10" cx="18.0588235" cy="10.173913" rx="2.47058824" ry="2.47826087"></ellipse>
+                    <ellipse id="Oval-10" cx="3.23529412" cy="10.173913" rx="2.47058824" ry="2.47826087"></ellipse>
+                    <rect id="Rectangle-62-Copy-2" transform="translate(10.647059, 10.173913) rotate(-270.000000) translate(-10.647059, -10.173913) " x="8.17647059" y="2.73913043" width="4.94117647" height="14.8695652"></rect>
+                    <rect id="Rectangle-62-Copy" x="8.17647059" y="2.73913043" width="4.94117647" height="14.8695652"></rect>
+                </g>
+                <path d="M45.95625,61.5613923 C44.34125,53.3421959 37.145,47.1718427 28.5,47.1718427 C21.63625,47.1718427 15.675,51.0789389 12.70625,56.7966408 C5.5575,57.559001 0,63.6340593 0,70.9956004 C0,78.8812642 6.38875,85.2898551 14.25,85.2898551 L45.125,85.2898551 C51.68,85.2898551 57,79.9533333 57,73.3779762 C57,67.0885041 52.13125,61.99022 45.95625,61.5613923 L45.95625,61.5613923 Z" id="Shape" fill="#34AFCE" opacity="0.300000012"></path>
+            </g>
+        </g>
+    </g>
+</svg>

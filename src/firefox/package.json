@@ -3,10 +3,11 @@
   "title": "uProxy Beta",
   "description": "This is the beta version of uProxy.",
   "author": "uProxy Team <info@uproxy.org>",
-  "id": "jid1-uTe1Bgrsb76jSA",
+  "id": "jid1-uTe1Bgrsb76jSA@jetpack",
   "license": "Apache 2.0",
-  "version": "0.8.29",
+  "version": "0.9.4",
   "permissions": {
     "private-browsing": true
-  }
+  },
+  "main": "lib/main.js"
 }

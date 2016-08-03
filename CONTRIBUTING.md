@@ -12,3 +12,7 @@ You can help develop uProxy in several ways:
     2. Fork the relevant repository
     3. Write the code to implement the change
     4. Submit a pull request and get it reviewed. 
+
+### Code of Conduct
+This project adheres to the [Open Code of Conduct][code-of-conduct]. By participating, you are expected to honor this code.
+[code-of-conduct]: http://todogroup.org/opencodeofconduct/#uProxy/info@uproxy.org

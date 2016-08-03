@@ -1,10 +1,10 @@
-/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/browser.d.ts' />
 
-import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
-import mockFreedomRtcPeerConnection = require('../../../third_party/uproxy-lib/freedom/mocks/mock-rtcpeerconnection');
+import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
+import mockFreedomRtcPeerConnection = require('../lib/freedom/mocks/mock-rtcpeerconnection');
 
 import freedom_mocks = require('../mocks/freedom-mocks');
+declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
 });
 

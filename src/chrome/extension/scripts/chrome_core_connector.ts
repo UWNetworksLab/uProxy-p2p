@@ -1,10 +1,10 @@
+/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+
 /**
  * chrome_core_connector.ts
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
-/// <reference path='../../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
 import browser_connector = require('../../../interfaces/browser_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import chrome_api = require('../../../interfaces/chrome');
@@ -137,8 +137,8 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         // Once connected, the extension popup should show its start page.
         chrome.browserAction.setIcon({
           path: {
-            "19": "icons/19_" + Constants.LOGGED_OUT_ICON,
-            "38": "icons/38_" + Constants.LOGGED_OUT_ICON
+            '19': 'icons/19_' + Constants.LOGGED_OUT_ICON,
+            '38': 'icons/38_' + Constants.LOGGED_OUT_ICON
           }
         });
         this.fulfillConnect_();
