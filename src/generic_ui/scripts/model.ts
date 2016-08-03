@@ -72,7 +72,11 @@ export class Model {
     enabledExperiments: [],
     shouldHijackDO: true,
     crypto: true,
-    reproxy: null
+    reproxy: {
+      enabled: false,
+      socksEndpoint: {address: '127.0.0.1', port: 9050},
+      auth: [0]
+    }
   };
 
   public reconnecting = false;

@@ -3,6 +3,7 @@
 import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
 import net = require('../lib/net/net.types');
 import social = require('./social');
+import socks = require('../lib/socks/headers');
 import ui = require('./ui');
 
 // --- Core <--> UI Interfaces ---
@@ -90,6 +91,7 @@ export interface ConnectionState {
 export interface reproxySettings {
   enabled       :boolean;      // Reproxy through socks is enabled
   socksEndpoint :net.Endpoint; // Endpoint through which to reproxy
+  auth          :socks.Auth[];   // Type of socks auth to attempt
 }
 
 //TODO(jpevarnek) remove this interface

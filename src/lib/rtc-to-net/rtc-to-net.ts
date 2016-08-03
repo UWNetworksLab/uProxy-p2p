@@ -498,9 +498,9 @@ import ProxyConfig = require('./proxyconfig');
                 [this.longId(), webEndpoint]);
       // Start socks auth handshake
       var authRequest = socks_headers.composeAuthHandshakeBuffer(
-          [socks_headers.Auth.USERPASS, socks_headers.Auth.NOAUTH]);
+          this.proxyConfig_.reproxy.auth);
       log.debug('%1: Creating auth negotiation handshake: %2',
-                [this.longId(), authRequest]);
+                [this.longId(), this.proxyConfig_.reproxy.auth]);
       this.tcpConnection_.send(authRequest);
 
       // Wait for auth handshake response
@@ -514,12 +514,13 @@ import ProxyConfig = require('./proxyconfig');
             return;
           } else if (auth === socks_headers.Auth.USERPASS) {
             // Create username password auth request
-            var userpassRequest = socks_headers.composeUserPassRequest({
-                username: 'user',
-                password: 'password'
-            });
+            var userpass :socks_headers.UserPass = {
+              username: this.proxyConfig_.userId || 'user',
+              password: ''
+            };
+            var userpassRequest = socks_headers.composeUserPassRequest(userpass);
             log.debug('%1: Making USERPASS request: %2',
-                      [this.longId(), userpassRequest]);
+                      [this.longId(), userpass]);
             this.tcpConnection_.send(userpassRequest);
             return this.tcpConnection_.receiveNext()
               .then((buffer:ArrayBuffer) :void => {
