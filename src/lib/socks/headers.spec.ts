@@ -12,7 +12,7 @@ describe('socks', function() {
 
   beforeEach(function() {
     ipv4RequestArray = new Uint8Array([
-      Socks.VERSION5,
+      Socks.Version.VERSION5,
       Socks.Command.TCP_CONNECT,
       0, // reserved
       Socks.AddressType.IP_V4,
