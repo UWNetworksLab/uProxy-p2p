@@ -61,7 +61,7 @@ Polymer({
       }
 
       if (ui_context.model.globalSettings.language != newSettings.language) {
-        ui.updateLanguage(newSettings.language);
+        ui_context.ui.updateLanguage(newSettings.language);
       }
 
       ui_context.model.globalSettings = newSettings;

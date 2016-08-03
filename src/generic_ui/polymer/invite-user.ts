@@ -115,8 +115,11 @@ var inviteUser = {
   },
   ready: function() {
     this.selectedNetworkName = '';
-    this.model = ui_context.model;
     this.inviteCode = '';
+  },
+  created: function () {
+    this.model = ui_context.model;
+    console.log(this.model.globalSettings.language);
   }
 };
 

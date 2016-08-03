@@ -1,8 +1,8 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-var ui = ui_context.ui;
+import translator = require('../scripts/translator');
 
 declare var PolymerExpressions: any;
 PolymerExpressions.prototype.$$ = (placeholder :string, language :string, params?: any) :string => {
-  return ui.i18n_t(placeholder, params);
+  return translator.i18n_t(placeholder, params);
 }

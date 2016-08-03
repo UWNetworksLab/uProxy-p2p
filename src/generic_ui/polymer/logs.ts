@@ -2,7 +2,6 @@
 import translator_module = require('../scripts/translator');
 
 declare var PolymerExpressions: any;
-PolymerExpressions.prototype.$$ = translator_module.i18n_t;
 
 Polymer({
   logs: '',
