@@ -236,8 +236,8 @@ export function interpretAuthResponse(buffer:ArrayBuffer) : Auth {
 //            | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
 //            +----+------+----------+------+----------+
 export function composeUserPassRequest(creds:UserPass) : ArrayBuffer {
-  var ulen :number = 2*creds.username.length; // 2 bytes per char
-  var plen :number = 2*creds.password.length;
+  var ulen :number = 2 * creds.username.length; // 2 bytes per char
+  var plen :number = 2 * creds.password.length;
   var requestBytes :Uint8Array = new Uint8Array(2 + ulen + 1 + plen);
 
   requestBytes[0] = Version.VERSION1;  // Only support version 1 of UserPass protocol.
@@ -274,7 +274,7 @@ export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPass {
 //                         +----+--------+
 export function composeUserPassResponse(success:boolean) : ArrayBuffer {
   var responseBytes :Uint8Array = new Uint8Array(2);
-  responseBytes[0] = Version.VERSION1; // Only support for version 1 of UserPass protocol.
+  responseBytes[0] = Version.VERSION1;  // Only support for version 1 of UserPass protocol.
   responseBytes[1] = success ? 0 : -1; // Send 0 if successful
   return responseBytes.buffer;
 }
