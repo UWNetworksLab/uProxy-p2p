@@ -360,7 +360,7 @@ import ProxyConfig = require('./proxyconfig');
             return this.getTcpConnection_(
                 this.proxyConfig_.reproxy.socksEndpoint, false);
           } else {
-            return this.getTcpConnection_(webEndpoint, true); // start paused
+            return this.getTcpConnection_(webEndpoint, true);  // start paused
           }
         }).then((connection :tcp.Connection) :Promise<tcp.ConnectionInfo> => {
           this.tcpConnection_ = connection;
@@ -514,7 +514,7 @@ import ProxyConfig = require('./proxyconfig');
             return;
           } else if (auth === socks_headers.Auth.USERPASS) {
             // Create username password auth request
-            var userpass :socks_headers.UserPass = {
+            var userpass :socks_headers.UserPassRequest = {
               username: this.proxyConfig_.userId || 'user',
               password: ''
             };

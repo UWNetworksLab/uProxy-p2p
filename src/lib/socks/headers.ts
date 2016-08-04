@@ -4,10 +4,11 @@
 */
 /// <reference path='../../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
+import arraybuffers = require('../arraybuffers/arraybuffers');
 import ipaddr = require('ipaddr.js');
 import net = require('../net/net.types');
 
-// VERSION - Protocol versions
+// VERSION - Socks protocol and subprotocol version headers
 export enum Version {
   VERSION1 = 0x01,
   VERSION5 = 0x05
@@ -70,7 +71,7 @@ export interface Request {
 
 // Represents a SOCKS username-password pair for USERPASS auth
 // @see interpretUserPassRequest
-export interface UserPass {
+export interface UserPassRequest {
   username       :string;
   password       :string;
 }
@@ -235,20 +236,20 @@ export function interpretAuthResponse(buffer:ArrayBuffer) : Auth {
 //            +----+------+----------+------+----------+
 //            | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
 //            +----+------+----------+------+----------+
-export function composeUserPassRequest(creds:UserPass) : ArrayBuffer {
-  var ulen :number = 2 * creds.username.length; // 2 bytes per char
-  var plen :number = 2 * creds.password.length;
+export function composeUserPassRequest(userPass:UserPassRequest) : ArrayBuffer {
+  const ulen = 2 * userPass.username.length;  // 2 bytes per char
+  const plen = 2 * userPass.password.length;
   var requestBytes :Uint8Array = new Uint8Array(2 + ulen + 1 + plen);
 
   requestBytes[0] = Version.VERSION1;  // Only support version 1 of UserPass protocol.
   requestBytes[1] = ulen;
-  requestBytes.set(new Uint8Array(str2ab(creds.username)), 2);
+  requestBytes.set(new Buffer(userPass.username, 'ascii'), 2);
   requestBytes[2 + ulen] = plen;
-  requestBytes.set(new Uint8Array(str2ab(creds.password)), 2 + ulen + 1);
+  requestBytes.set(new Buffer(userPass.password, 'ascii'), 2 + ulen + 1);
   return requestBytes.buffer;
 }
 
-export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPass {
+export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPassRequest {
   var requestBytes = new Uint8Array(buffer);
 
   // Only UserPass Version 1 is supported.
@@ -257,10 +258,10 @@ export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPass {
     throw new Error('unsupported USERPASS Auth version: ' + userpassVersion);
   }
 
-  var ulen :number = requestBytes[1];
-  var username :string = ab2str(requestBytes.slice(2, 2 + ulen));
-  var plen :number = requestBytes[2 + ulen];
-  var password :string = ab2str(requestBytes.slice(2 + ulen + 1));
+  const ulen = requestBytes[1];
+  const username = new Buffer(requestBytes.slice(2, 2 + ulen)).toString('ascii');
+  const plen = requestBytes[2 + ulen];
+  const password = new Buffer(requestBytes.slice(2 + ulen + 1)).toString('ascii');
   return {username: username, password: password};
 }
 
@@ -275,13 +276,16 @@ export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPass {
 export function composeUserPassResponse(success:boolean) : ArrayBuffer {
   var responseBytes :Uint8Array = new Uint8Array(2);
   responseBytes[0] = Version.VERSION1;  // Only support for version 1 of UserPass protocol.
-  responseBytes[1] = success ? 0 : -1; // Send 0 if successful
+  responseBytes[1] = success ? 0 : -1;  // Send 0 if successful
   return responseBytes.buffer;
 }
 
 export function interpretUserPassResponse(buffer:ArrayBuffer) : boolean {
   var responseBytes = new Uint8Array(buffer);
-  return responseBytes[1] == 0 ? true : false;
+  if (responseBytes.byteLength != 2) {
+    throw new Error('USERPASS auth response must be exactly 2 bytes long');
+  }
+  return responseBytes[1] === 0;
 }
 
 // Client to Server (Step 3-A)
@@ -559,21 +563,4 @@ export function interpretResponseBuffer(buffer:ArrayBuffer) : Response {
   }
 
   return response;
-}
-
-// Helper methods for encoding strings to/from ArrayBuffer
-
-// ArrayBuffer to string
-function ab2str(buf:ArrayBuffer) : string {
-  return String.fromCharCode.apply(null, new Uint16Array(buf));
-}
-
-// string to ArrayBuffer
-function str2ab(str:string) : ArrayBuffer {
-  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
-  var bufView = new Uint16Array(buf);
-  for (var i=0, strLen=str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
 }
