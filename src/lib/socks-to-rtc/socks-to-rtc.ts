@@ -31,7 +31,9 @@ export class SocksToRtc {
   // Should never reject.
   public onceStopped :Promise<void>;
 
-  // Message handler queues to/from the peer.
+  // Message handler queues to/from the peer. Accessing this before
+  // calling start() will result in an error.
+  // TODO: public fields bad!
   public signalsForPeer :handler.QueueHandler<Object, void>;
 
   // The two Queues below only count bytes transferred between the SOCKS
