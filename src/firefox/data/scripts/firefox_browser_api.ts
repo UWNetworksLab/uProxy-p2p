@@ -83,6 +83,10 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.on(name, callback);
   }
 
+  public exit = () => {
+    // Not necessary for in-browser versions
+  }
+
   public respond = (data :any, callback ?:Function, msg ?:string) : void => {
     msg && this.respond_(data, msg);
   }

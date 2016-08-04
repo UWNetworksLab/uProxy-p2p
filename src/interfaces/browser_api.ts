@@ -54,6 +54,9 @@ export interface BrowserAPI {
   // passed, a message will be supplied instead, which will be emitted with
   // the given response data.
   respond(data :any, callback ?:Function, msg ?:string) :void;
+
+  /* exit uProxy completely */
+  exit(): void;
 }
 
 // Describes the user-initiated mode to access a proxy.
