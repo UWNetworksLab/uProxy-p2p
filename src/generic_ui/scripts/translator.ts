@@ -55,7 +55,6 @@ export const i18n_t = (placeholder :string, params ?:any): string => {
       params[p] = '\u200E' + params[p] + '\u200E';
     }
   }
-  console.log(i18next.t(placeholder, params));
   return i18next.t(placeholder, params);
 };
 
