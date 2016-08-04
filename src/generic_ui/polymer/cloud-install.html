@@ -17,9 +17,6 @@
       width: 100%;
       background-color: white;
     }
-    uproxy-button {
-      margin: 15px 0px;
-    }
     paper-progress {
       width: 100%;
     }
@@ -32,31 +29,42 @@
     }
     uproxy-button {
       background-color: #34AFCE;  /* blue */
+      margin: 4px 0;
       padding: 0.5em;
       width: 100%;
       font-size: 14px;
     }
+    paper-checkbox {
+      margin: 10px 0 24px;
+      font-size: 12px;
+    }
+    hr {
+      margin: 20px 0;
+      color: #eee;
+      border-style: solid;
+    }
     h1 {
-      color: #34AFCE;  /* blue */
+      color: #003C48;
       font-weight: 400;
       font-size: 20px;
       line-height: 30px;
     }
-    h2 {
-      font-weight: 400;
-      font-size: 23px;
-    }
     p {
       line-height: 1.75em;
+      font-size: 12px;
     }
     #regionMenu {
-      font-size: 16px;
+      font-size: 12px;
     }
-    .imgWrapper {
+    .header-image {
       text-align: center;
     }
-    .imgWrapper img {
-      margin: 1em 0.5em 1em 0.5em;
+    .header-image img {
+      margin: 0.5em 0 0;
+      width: 120px;
+    }
+    .header-image img[src*="uproxy+digitalocean.svg"] {
+      width: 180px;
     }
     paper-progress::shadow #activeProgress {
       background-color: #34AFCE !important;  /* blue */
@@ -73,72 +81,49 @@
     .warning {
       font-weight: bold;
     }
-    #newAccount {
-      margin: 15px 0 8px;
-    }
-    #haveAccount {
-      margin: 0 0 15px;
+    #cloudFailureFeedback {
+      text-align: center;
+      text-decoration: underline;
+      cursor: pointer;
     }
     </style>
 
     <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
+    <core-signals on-core-signal-cloud-install-status="{{ updateCloudInstallStatus }}"></core-signals>
+    <core-signals on-core-signal-cloud-install-progress="{{ updateCloudInstallProgress }}"></core-signals>
 
-    <core-overlay id='getStartedOverlay'>
+    <core-overlay id='signUpOrSignInOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
         {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
       </uproxy-app-bar>
 
       <div class='content'>
-        <div class='imgWrapper'>
-          <img src='../../icons/cloud/create-circle-ic.svg'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/uproxy+digitalocean.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_GET_STARTED_TITLE' | $$ }}</h1>
-        <p id='getStartedMessage'></p>
-        <uproxy-button raised on-tap='{{ showDigitalOceanAccountHelpOverlay }}'
-          id="newAccount">
+        <div id='getStartedMessage'></div>
+        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}" on-change="{{havePromoChanged}}"></paper-checkbox>
+        <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
           {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
         </uproxy-button>
-        <uproxy-button raised on-tap='{{ showLoginOverlay }}' id="haveAccount">
+        <uproxy-button raised on-tap='{{ showCreateServerOverlay }}'>
           {{ 'I_HAVE_AN_ACCOUNT' | $$ }}
         </uproxy-button>
+        <hr>
+        <h1>{{ 'CLOUD_INSTALL_EXISTING_SERVER_TITLE' | $$ }}</h1>
         <p id='existingServerMessage'></p>
       </div>
     </core-overlay>
 
-    <core-overlay id='digitalOceanAccountHelpOverlay'>
+    <core-overlay id='createServerOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
         {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
       </uproxy-app-bar>
 
       <div class='content'>
-        <div class='imgWrapper'>
-          <img src='../../icons/cloud/getstarted-step1.svg'>
-          <img src='../../icons/cloud/getstarted-step2.svg'>
-          <img src='../../icons/cloud/getstarted-step3.svg'>
-        </div>
-        <h1>{{ 'CLOUD_INSTALL_CREATE_ACCOUNT_TITLE' | $$ }}</h1>
-        <!-- TODO: some of this text needs to be bold - need to set the HTML element rather than use $$ to translate -->
-        <p id='createAccountMessage'></p>
-
-        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}" on-change="{{havePromoChanged}}"></paper-checkbox>
-
-        <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
-          {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
-        </uproxy-button>
-        <uproxy-button raised on-tap='{{ showLoginOverlay }}'>
-          {{ 'SIGN_ME_IN' | $$}}
-        </uproxy-button>
-      </div>
-    </core-overlay>
-
-    <core-overlay id='loginOverlay'>
-      <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
-      </uproxy-app-bar>
-
-      <div class='content'>
-        <div class='imgWrapper'>
-          <img src='../../icons/cloud/location-circle.svg'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/uproxy+digitalocean.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_LOGIN_TITLE' | $$ }}</h1>
         <div>
@@ -150,30 +135,30 @@
             <paper-radio-button name='nyc2' label='{{ "NORTH_AMERICA_NEW_YORK" | $$ }}'></paper-radio-button>
           </paper-radio-group>
         </div>
-        <p id='loginMessage'></p>
+        <div id='createServerMessage'></div>
         <!-- TODO: add learn more links -->
-        <uproxy-button raised on-tap='{{ loginTapped }}'>
-          {{ 'SIGN_IN_AND_CONNECT' | $$ }}
+        <uproxy-button raised on-tap='{{ createServer }}'>
+          {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
         </uproxy-button>
       </div>
     </core-overlay>
 
     <core-overlay id='installingOverlay'>
       <uproxy-app-bar color='#34AFCE' disableback="true">
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+        {{ 'CREATING_A_CLOUD_SERVER' | $$ }}
       </uproxy-app-bar>
 
       <div class='content'>
-        <div class='imgWrapper'>
-          <img src='../../icons/cloud/loading-circle.svg'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/create.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_INSTALLING_TITLE' | $$ }}</h1>
         <p class="warning">{{ 'CLOUD_INSTALL_INSTALLING_WARNING' | $$ }}</p>
         <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$ }}</p>
         <div>
-          <paper-progress id='installProgress' value='{{ ui.cloudInstallProgress }}'></paper-progress>
+          <paper-progress id='installProgress' value='{{ installProgress }}'></paper-progress>
         </div>
-        <p>{{ ui.cloudInstallStatus }}</p>
+        <p>{{ installStatus }}</p>
         <uproxy-button on-tap='{{ cancelCloudInstall }}'>{{ 'CANCEL' | $$ }}</uproxy-button>
       </div>
     </core-overlay>
@@ -184,8 +169,8 @@
       </uproxy-app-bar>
 
       <div class='content'>
-        <div class='imgWrapper'>
-          <img src='../../icons/cloud/ready-circle.svg'>
+        <div class='header-image'>
+          <img src='../../icons/cloud/success.svg'>
         </div>
           <h1>{{ 'CLOUD_INSTALL_SUCCESS_TITLE' | $$ }}</h1>
         <!-- TODO: show IP address -->
@@ -201,17 +186,20 @@
       </uproxy-app-bar>
 
       <div class='content'>
-        <div class='imgWrapper'>
+        <div class='header-image'>
           <img src='../../icons/cloud/error-circle-ic.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_ERROR_TITLE' | $$ }}</h1>
         <p>{{ 'DIGITAL_OCEAN_ERROR_MESSAGE' | $$ }}</p>
-        <uproxy-button raised on-tap='{{ loginTapped }}'>
+        <uproxy-button raised on-tap='{{ createServer }}'>
           {{ 'TRY_AGAIN' | $$ }}
         </uproxy-button>
         <uproxy-button raised on-tap='{{ launchDigitalOceanSettings }}'>
           {{ 'LAUNCH_DIGITAL_OCEAN_SETTINGS' | $$ }}
         </uproxy-button>
+        <p id="cloudFailureFeedback" on-tap="{{ launchFeedback }}">
+          {{ 'REPORT_ERROR' | $$ }}
+        </p>
       </div>
     </core-overlay>
 
@@ -221,7 +209,7 @@
       </uproxy-app-bar>
 
       <div class='content'>
-        <div class='imgWrapper'>
+        <div class='header-image'>
           <img src='../../icons/cloud/error-circle-ic.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE' | $$ }}</h1>
@@ -242,7 +230,7 @@
       </uproxy-app-bar>
 
       <div class='content'>
-        <div class='imgWrapper'>
+        <div class='header-image'>
           <img src='../../icons/cloud/error-circle-ic.svg'>
         </div>
         <h1>{{ 'CLOUD_INSTALL_CANCEL_TITLE' | $$ }}</h1>

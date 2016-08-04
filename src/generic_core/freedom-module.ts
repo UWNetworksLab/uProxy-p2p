@@ -61,11 +61,6 @@ var commands :{[command :number] :((data?:any) => (Promise<any>|void))} = {};
 commands[uproxy_core_api.Command.LOGIN] = core.login;
 commands[uproxy_core_api.Command.LOGOUT] = core.logout;
 commands[uproxy_core_api.Command.MODIFY_CONSENT] = core.modifyConsent;
-commands[uproxy_core_api.Command.START_PROXYING_COPYPASTE_GET] = core.startCopyPasteGet;
-commands[uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_GET] = core.stopCopyPasteGet;
-commands[uproxy_core_api.Command.START_PROXYING_COPYPASTE_SHARE] = core.startCopyPasteShare;
-commands[uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE] = core.stopCopyPasteShare;
-commands[uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE] = core.sendCopyPasteSignal;
 commands[uproxy_core_api.Command.START_PROXYING] = core.start;
 commands[uproxy_core_api.Command.INVITE_GITHUB_USER] = core.inviteGitHubUser;
 commands[uproxy_core_api.Command.GET_INVITE_URL] = core.getInviteUrl;
@@ -86,6 +81,7 @@ commands[uproxy_core_api.Command.REMOVE_CONTACT] = core.removeContact;
 commands[uproxy_core_api.Command.POST_REPORT] = core.postReport;
 commands[uproxy_core_api.Command.VERIFY_USER] = core.verifyUser;
 commands[uproxy_core_api.Command.VERIFY_USER_SAS] = core.finishVerifyUser;
+commands[uproxy_core_api.Command.GET_PORT_CONTROL_SUPPORT] = core.getPortControlSupport;
 
 for (var command in commands) {
   ui_connector.onCommand(parseInt(command, 10), commands[command]);

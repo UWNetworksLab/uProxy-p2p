@@ -3,6 +3,7 @@
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import bridge = require('../bridge/bridge');
 import churn_types = require('../churn/churn.types');
+import constants = require('../../generic_core/constants');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
@@ -40,6 +41,9 @@ var socksEndpoint :net.Endpoint = {
 // Specifiying multiple ports allows multiple instances of this app to
 // run on the same machine.
 var PORTS = [9000, 9010, 9020];
+
+// Number of getters.
+let numOfGetters = 0;
 
 // Starts a TCP server on the first free port listed in PORTS.
 // Rejects if no port is free.
@@ -130,8 +134,16 @@ function serveConnection(connection: tcp.Connection): void {
         sendReply('Nothing happens.', connection);
         keepParsing = true;
         break;
+      case 'version':
+        sendReply(constants.MESSAGE_VERSION.toString(10), connection);
+        keepParsing = true;
+        break;
       case 'quit':
         connection.close();
+        break;
+      case 'getters':
+        sendReply(numOfGetters.toString(10), connection);
+        keepParsing = true;
         break;
       default:
         if (verb.length > 0) {
@@ -162,11 +174,6 @@ function get(
     :void {
   var socksToRtc = new socks_to_rtc.SocksToRtc();
 
-  // Must do this before calling start.
-  socksToRtc.on('signalForPeer', (signal:Object) => {
-    sendReply(JSON.stringify(signal), connection);
-  });
-
   socksToRtc.start(new tcp.Server(socksEndpoint), bridge.best('sockstortc',
       pcConfig, undefined, transformerConfig)).then((endpoint:net.Endpoint) => {
     log.info('%1: SOCKS server listening on %2 (curl -x socks5h://%3:%4 www.example.com)',
@@ -176,6 +183,11 @@ function get(
     log.error('%1: failed to start SOCKS server: %2',
         connection.connectionId, e.message);
     connection.close();
+  });
+
+  // Must do this after calling start.
+  socksToRtc.signalsForPeer.setSyncHandler((signal:Object) => {
+    sendReply(JSON.stringify(signal), connection);
   });
 
   lines.setSyncHandler((signal:string): void => {
@@ -202,11 +214,16 @@ function give(
     allowNonUnicast: true
   }, bridge.best('rtctonet', pcConfig)).then(() => {
     log.info('%1: RtcToNet connected', connection.connectionId);
+    numOfGetters++;
     connection.close();
   }, (e: Error) => {
     log.error('%1: failed to start rtcToNet: %2',
         connection.connectionId, e.message);
     connection.close();
+  });
+
+  rtcToNet.onceStopped.then(() => {
+    numOfGetters--;
   });
 
   // Must do this after calling start.

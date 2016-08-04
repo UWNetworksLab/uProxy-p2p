@@ -69,12 +69,23 @@ export class BackgroundUi {
   }
 
   /* actual BackgroundUi methods */
-  public fireSignal(signalName: string, data?: Object): void {
+  public fireSignal = (signalName: string, data?: Object): void => {
     this.doInPanel_('fire-signal', { name: signalName, data: data });
   }
 
-  public openDialog(data: ui.DialogDescription): Promise<any> {
+  public openDialog = (data: ui.DialogDescription): Promise<any> => {
     return this.doInPanel_('open-dialog', data, true);
+  }
+
+  public showToast = (
+      message: string,
+      unableToGet: boolean = false,
+      unableToShare: boolean = false): void => {
+    return this.fireSignal('show-toast', {
+      message: message,
+      unableToGet: unableToGet,
+      unableToShare: unableToShare
+    });
   }
 
   private wrapPromise_ = (promise: Promise<any>, promiseId: number) => {

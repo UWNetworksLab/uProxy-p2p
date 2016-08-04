@@ -10,12 +10,6 @@ var model = ui_context.model;
 
 Polymer({
   sortedContacts: [],
-  hideForSearch: function(name :string, query :string) {
-    if (query.length === 0) {
-      return false;
-    }
-    return name.toLowerCase().indexOf(query.toLowerCase()) === -1;
-  },
   created: function() {
     // this gets expensive, especially during initialization, if we are calling
     // it on every event, so throttle it

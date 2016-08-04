@@ -12,13 +12,9 @@ import dialogs = require('../scripts/dialogs');
 import ui_constants = require('../../interfaces/ui');
 
 
-  // // ElleTest begin
   var languages :Language[] = <Language[]>require('../locales/all/languages.json');
-  // ElleTest end
-  // ElleTest begin
   var core = ui_context.core;
-  var elleTest = ui_context.model;
-  // // ElleTest end
+  var languageSettings = ui_context.model;
 interface Language {
   description :string;
   language :string;
@@ -31,6 +27,7 @@ Polymer({
 
   accountChooserOpen: false,
   connectedNetworks: '',
+  showRestartButton: false,
   logOut: function() {
     // logout all networks asynchronously
 
@@ -67,11 +64,6 @@ Polymer({
   openAdvancedSettingsForm: function() {
     this.fire('core-signal', {name: 'open-advanced-settings'});
   },
-  // ElleTest begin
-  // openLanguageForm: function() {
-  //   this.fire('core-signal', {name: 'open-splash'});
-  // },
-  // ElleTest end
   networksChanged: function() {
     if (!ui_context.model.onlineNetworks) {
       return;
@@ -94,33 +86,33 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = ui_context.model;
-    // // ElleTest begin
-    this.model = elleTest;
+    this.model = language_settings;
     this.languages = languages;
-    // // ElleTest end
+
+
+    this.showRestartButton = (typeof window.chrome) !== 'undefined';
 
   },
   observe: {
     'model.onlineNetworks': 'networksChanged'
   },
-  // // ElleTest begin
   setState: function(state :Number) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
       console.error('Invalid call to setState: ' + state);
       return;
     }
-    elleTest.globalSettings.splashState = state;
-    core.updateGlobalSettings(elleTest.globalSettings);
+    languageSettings.globalSettings.splashState = state;
+    core.updateGlobalSettings(languageSettings.globalSettings);
   },
   next: function() {
-    if (elleTest.globalSettings.splashState == this.SPLASH_STATES.METRICS_OPT_IN) {
+    if (languageSettings.globalSettings.splashState == this.SPLASH_STATES.METRICS_OPT_IN) {
       ui.view = ui_constants.View.ROSTER;
     } else {
-      this.setState(elleTest.globalSettings.splashState + 1);
+      this.setState(languageSettings.globalSettings.splashState + 1);
     }
   },
   prev: function() {
-    this.setState(elleTest.globalSettings.splashState - 1);
+    this.setState(languageSettings.globalSettings.splashState - 1);
   },
   updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
     if (detail.isSelected) {
@@ -130,9 +122,9 @@ Polymer({
     }
   },
   updateSeenMetrics: function(val :Boolean) {
-    elleTest.globalSettings.hasSeenMetrics = true;
-    elleTest.globalSettings.statsReportingEnabled = val;
-    core.updateGlobalSettings(elleTest.globalSettings);
+    languageSettings.globalSettings.hasSeenMetrics = true;
+    languageSettings.globalSettings.statsReportingEnabled = val;
+    core.updateGlobalSettings(languageSettings.globalSettings);
     this.next();
   },
   enableStats: function() {
@@ -141,5 +133,4 @@ Polymer({
   disableStats: function() {
     return this.updateSeenMetrics(false);
   }
-  // // ElleTest end
 });

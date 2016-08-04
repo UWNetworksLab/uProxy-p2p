@@ -9,7 +9,7 @@ import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
-import socks = require('../socks-common/socks-headers');
+import socks_headers = require('../socks/headers');
 import tcp = require('../net/tcp');
 
 import Pool = require('../pool/pool');
@@ -91,7 +91,9 @@ import ProxyConfig = require('./proxyconfig');
     // (externally provided) proxyconfig.
     public proxyConfig :ProxyConfig;
 
-    // Message handler queues to/from the peer.
+    // Message handler queues to/from the peer. Accessing this before
+    // calling start() will result in an error.
+    // TODO: public fields bad!
     public signalsForPeer :handler.QueueHandler<Object, void>;
 
     // The two Queues below only count bytes transferred between the SOCKS
@@ -263,7 +265,6 @@ import ProxyConfig = require('./proxyconfig');
     // Since its close() method should never throw, this should never reject.
     // TODO: close all sessions before fulfilling
     private stopResources_ = () : Promise<void> => {
-      log.debug('freeing resources');
       // TODO(ldixon): explore why not not just return
       // this.peerConnection_.close(); call the PeerConnection's close and
       // return synchronously.
@@ -301,6 +302,7 @@ import ProxyConfig = require('./proxyconfig');
   // common parts into a super-class this inherits from?
   export class Session {
     private tcpConnection_ :tcp.Connection;
+    private webEndpoint_   :net.Endpoint;
 
     // Fulfills once a connection has been established with the remote peer.
     // Rejects if a connection cannot be made for any reason.
@@ -342,26 +344,52 @@ import ProxyConfig = require('./proxyconfig');
       this.onceReady = this.receiveEndpointFromPeer_()
         .catch((e:Error) => {
           // TODO: Add a unit test for this case.
-          this.replyToPeer_(socks.Reply.UNSUPPORTED_COMMAND);
+          this.replyToPeer_(socks_headers.Reply.UNSUPPORTED_COMMAND);
           return Promise.reject(e);
-        })
-        .then(this.getTcpConnection_)
-        .then((tcpConnection) => {
-          this.tcpConnection_ = tcpConnection;
+        }).then((webEndpoint :net.Endpoint) :tcp.Connection => {
+          this.webEndpoint_ = webEndpoint;
+          // Returns socks reply and bound endpoint of connection
+          if (!this.isWebEndpointAllowed_(webEndpoint)) {
+            this.replyToPeer_(socks_headers.Reply.NOT_ALLOWED);
+            throw new Error('tried to connect to disallowed address: ' +
+                webEndpoint.address);
+          }
+          log.debug('%1: Creating tcp connection with reproxy settings: %2',
+                    [this.longId(), this.proxyConfig_.reproxy]);
 
+          // Connect to web endpoint directly or through socks proxy
+          if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled) {
+            return this.getTcpConnection_(
+                this.proxyConfig_.reproxy.socksEndpoint, false);
+          } else {
+            return this.getTcpConnection_(webEndpoint, true); // start paused
+          }
+        }).then((connection :tcp.Connection) :Promise<tcp.ConnectionInfo> => {
+          this.tcpConnection_ = connection;
           return this.tcpConnection_.onceConnected
-            .catch((e:freedom.Error) => {
-              log.info('%1: failed to connect to remote endpoint', [this.longId()]);
+            .catch((e :freedom.Error) => {
+              log.info('%1: failed to connect to remote endpoint',
+                       [this.longId()]);
               this.replyToPeer_(this.getReplyFromError_(e));
               return Promise.reject(new Error(e.errcode));
             });
-        })
-        .then((info:tcp.ConnectionInfo) => {
-          log.info('%1: connected to remote endpoint', [this.longId()]);
-          log.debug('%1: bound address: %2', [this.longId(),
-              JSON.stringify(info.bound)]);
-          var reply = this.getReplyFromInfo_(info);
-          this.replyToPeer_(reply, info);
+        }).then((info :tcp.ConnectionInfo)
+            :Promise<[socks_headers.Reply, net.Endpoint]> => {
+          // Receive reply from web endpoint directly or through socks proxy
+          if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled) {
+            return this.connectWithSocksAuth_(this.webEndpoint_)
+              .catch((e :Error) => {
+                log.debug('%1: Failed to complete reproxy socks auth',
+                          [this.longId()]);
+                this.replyToPeer_(socks_headers.Reply.FAILURE);
+                return Promise.reject(e);
+              });
+          } else {
+            return Promise.resolve([this.getReplyFromInfo_(info), info.bound]);
+          }
+        }).then((reply :[socks_headers.Reply, net.Endpoint]) :Promise<void> => {
+          log.info('%1: connected to remote web endpoint', [this.longId()]);
+          return this.replyToPeer_(reply[0], reply[1]);
         });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
@@ -394,7 +422,6 @@ import ProxyConfig = require('./proxyconfig');
     // closed, fulfilling once both have closed. Since neither object's
     // close() methods should ever reject, this should never reject.
     private stopResources_ = () : Promise<void> => {
-      log.debug('%1: freeing resources', [this.longId()]);
       // DataChannel.close() returns void, implying that the shutdown is
       // effectively immediate.  However, we wrap it in a promise to ensure
       // that any exception is sent to the Promise.catch, rather than
@@ -422,7 +449,7 @@ import ProxyConfig = require('./proxyconfig');
             return;
           }
 
-          var request :socks.Request;
+          var request :socks_headers.Request;
           try { request = JSON.parse(data.str); }
           catch (e) {
             R(new Error('received malformed message during handshake: ' +
@@ -430,12 +457,12 @@ import ProxyConfig = require('./proxyconfig');
             return;
           }
 
-          if (!socks.isValidRequest(request)) {
+          if (!socks_headers.isValidRequest(request)) {
             R(new Error('received invalid request from peer: ' +
                 JSON.stringify(data.str)));
             return;
           }
-          if (request.command != socks.Command.TCP_CONNECT) {
+          if (request.command != socks_headers.Command.TCP_CONNECT) {
             R(new Error('unexpected type for endpoint message'));
             return;
           }
@@ -450,49 +477,98 @@ import ProxyConfig = require('./proxyconfig');
       });
     }
 
-    private getTcpConnection_ = (endpoint:net.Endpoint) : tcp.Connection => {
-      if (ipaddr.isValid(endpoint.address) &&
-          !this.isAllowedAddress_(endpoint.address)) {
-        this.replyToPeer_(socks.Reply.NOT_ALLOWED);
-        throw new Error('tried to connect to disallowed address: ' +
-                        endpoint.address);
-      }
-      return new tcp.Connection({endpoint: endpoint}, true /* startPaused */);
+    // Initiates tcp connection to endpoint
+    private getTcpConnection_ = (endpoint:net.Endpoint, paused:boolean)
+          :tcp.Connection => {
+      // Return TCP connection to endpoint
+      return new tcp.Connection({endpoint: endpoint}, paused);
+    }
+
+    // Waits for tcp connection to complete
+    private waitForTcpConnection_ = (connection :tcp.Connection)
+          :Promise<tcp.ConnectionInfo> => {
+      log.debug('%1: Connection instantiated: %2',
+               [this.longId(), this.tcpConnection_]);
+
+      return this.tcpConnection_.onceConnected
+    }
+
+    // Completes socks authentication protocol
+    private connectWithSocksAuth_ = (webEndpoint :net.Endpoint)
+          :Promise<[socks_headers.Reply, net.Endpoint]> => {
+      log.debug('%1: Connecting through socks to: %2',
+                [this.longId(), webEndpoint]);
+      // Complete socks auth handshake
+      var authRequest = socks_headers.composeAuthHandshakeBuffer([socks_headers.Auth.NOAUTH]);
+      log.debug('%1: Creating auth handshake: %2',
+                [this.longId(), authRequest]);
+      this.tcpConnection_.send(authRequest);
+
+      // Wait for auth handshake response
+      return this.tcpConnection_.receiveNext()
+        .then((buffer:ArrayBuffer) :Promise<ArrayBuffer> => {
+          var auth = socks_headers.interpretAuthResponse(buffer);
+          log.debug('%1: Received auth handshake reply: %2',
+                    [this.longId(), auth]);
+          if (auth !== socks_headers.Auth.NOAUTH) {
+            throw new Error('Received wrong socks auth response. Expected ' +
+                            socks_headers.Auth.NOAUTH + ' but got ' + auth);
+          }
+          // Send socks connection request
+          var request :socks_headers.Request = {
+            command: socks_headers.Command.TCP_CONNECT,
+            endpoint: webEndpoint
+          };
+          log.debug('%1: Making socks request: %2', [this.longId(), request]);
+          this.tcpConnection_.send(socks_headers.composeRequestBuffer(request));
+          return this.tcpConnection_.receiveNext();
+        }).then((buffer:ArrayBuffer) :[socks_headers.Reply, net.Endpoint] => {
+          // Wait for socks connection response
+          var response = socks_headers.interpretResponseBuffer(buffer);
+          log.debug('%1: Received request response: %2',
+                    [this.longId(), response]);
+          if (response.reply !== socks_headers.Reply.SUCCEEDED) {
+            throw new Error('Socks connection through reproxy failed');
+          }
+          var nullEndpoint :net.Endpoint = {'address': '0.0.0.0', 'port': 0};
+          return [response.reply, nullEndpoint];
+        });
     }
 
     // Fulfills once the connected endpoint has been returned to the SOCKS
     // client. Rejects if the endpoint cannot be sent to the SOCKS client.
-    private replyToPeer_ = (reply:socks.Reply, info?:tcp.ConnectionInfo)
+    private replyToPeer_ = (reply:socks_headers.Reply, bound?:net.Endpoint)
         : Promise<void> => {
-      var response :socks.Response = {
+      var response :socks_headers.Response = {
         reply: reply,
-        endpoint: info ? info.bound : undefined
+        endpoint: bound || undefined
       };
+      log.debug('%1: Sending response to Peer: %2', [this.longId(), response]);
       return this.dataChannel_.send({
         str: JSON.stringify(response)
       }).then(() => {
-        if (reply != socks.Reply.SUCCEEDED) {
+        if (reply != socks_headers.Reply.SUCCEEDED) {
           this.stop();
         }
       });
     }
 
-    private getReplyFromInfo_ = (info:tcp.ConnectionInfo) : socks.Reply => {
+    private getReplyFromInfo_ = (info:tcp.ConnectionInfo) : socks_headers.Reply => {
       // TODO: This code should really return socks.Reply.NOT_ALLOWED,
       // but due to port-scanning concerns we return a generic error instead.
       // See https://github.com/uProxy/uproxy/issues/809
       return this.isAllowedAddress_(info.remote.address) ?
-          socks.Reply.SUCCEEDED : socks.Reply.FAILURE;
+          socks_headers.Reply.SUCCEEDED : socks_headers.Reply.FAILURE;
     }
 
-    private getReplyFromError_ = (e:freedom.Error) : socks.Reply => {
-      var reply :socks.Reply = socks.Reply.FAILURE;
+    private getReplyFromError_ = (e:freedom.Error) : socks_headers.Reply => {
+      var reply :socks_headers.Reply = socks_headers.Reply.FAILURE;
       if (e.errcode == 'TIMED_OUT') {
-        reply = socks.Reply.TTL_EXPIRED;
+        reply = socks_headers.Reply.TTL_EXPIRED;
       } else if (e.errcode == 'NETWORK_CHANGED') {
-        reply = socks.Reply.NETWORK_UNREACHABLE;
+        reply = socks_headers.Reply.NETWORK_UNREACHABLE;
       } else if (e.errcode == 'NAME_NOT_RESOLVED') {
-        reply = socks.Reply.HOST_UNREACHABLE;
+        reply = socks_headers.Reply.HOST_UNREACHABLE;
       } else if (e.errcode == 'CONNECTION_RESET' ||
                  e.errcode == 'CONNECTION_REFUSED') {
         // Due to port-scanning concerns, we return a generic error if the user
@@ -500,7 +576,7 @@ import ProxyConfig = require('./proxyconfig');
         // address might be on the local network.
         // See https://github.com/uProxy/uproxy/issues/809
         if (this.proxyConfig_.allowNonUnicast) {
-          reply = socks.Reply.CONNECTION_REFUSED;
+          reply = socks_headers.Reply.CONNECTION_REFUSED;
         }
       }
       // TODO: report ConnectionInfo in cases where a port was bound.
@@ -531,7 +607,7 @@ import ProxyConfig = require('./proxyconfig');
     // and vice versa. Should only be called once both socket and channel have
     // been successfully established.
     private linkSocketAndChannel_ = () : void => {
-      log.info('%1: linking socket and channel', this.longId());
+      log.debug('%1: linking socket and channel', this.longId());
       var socketReader = (data:ArrayBuffer) => {
         this.sendOnChannel_(data);
         this.bytesSentToPeer_.handle(data.byteLength);
@@ -578,6 +654,15 @@ import ProxyConfig = require('./proxyconfig');
           log.debug('%1: Exited  overflow, resuming socket', this.longId());
         }
       });
+    }
+
+    // Checks validity of web endpoint of getter request
+    private isWebEndpointAllowed_ = (endpoint :net.Endpoint) :boolean => {
+      if (ipaddr.isValid(endpoint.address) &&
+          !this.isAllowedAddress_(endpoint.address)) {
+        return false;
+      }
+      return true;
     }
 
     private isAllowedAddress_ = (addressString:string) : boolean => {

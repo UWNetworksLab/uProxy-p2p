@@ -5,7 +5,9 @@ import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');
 import net = require('../../lib/net/net.types');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import translator = require('../scripts/translator');
 import user_interface = require('../scripts/ui');
+import browser_api = require('../../interfaces/browser_api');
 
 // generic_ui/scripts/ui.ts: UserInterface
 var ui = ui_context.ui;
@@ -24,7 +26,6 @@ Polymer({
     this.ui = ui;
     this.ui_constants = ui_constants;
     this.GettingState = social.GettingState;
-    this.model = model;
     this.sas = null;
     // Whether this is the side that started verification.  The sides
     // of the verification show different UIs.
@@ -35,17 +36,23 @@ Polymer({
       model.globalSettings.enabledExperiments.indexOf(
         uproxy_core_api.FEATURE_VERIFY) >= 0;
   },
-  start: function() {
+  start_: function(accessMode: browser_api.ProxyAccessMode) {
     if (!this.instance.isOnline) {
-      this.ui.toastMessage = ui.i18n_t('FRIEND_OFFLINE',
-                                       { name: this.user.name });
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('FRIEND_OFFLINE',
+                                          { name: this.user.name })
+        }
+      });
       return;
     }
 
     this.sas = null;
-    ui.startGettingFromInstance(this.instance.instanceId).catch((e: Error) => {
-      console.error('could not get access: ' + e.message);
-    });
+    ui.startGettingFromInstance(this.instance.instanceId, accessMode)
+      .catch((e: Error) => {
+        console.error('could not get access: ' + e.message);
+      });
   },
   stop: function() {
     if (this.instance.localGettingFromRemote ==
@@ -55,6 +62,12 @@ Polymer({
       ui.stopUsingProxy();
     }
     ui.stopGettingFromInstance(this.instance.instanceId);
+  },
+  startBrowsing: function() {
+    this.start_(browser_api.ProxyAccessMode.IN_APP);
+  },
+  startVpn: function() {
+    this.start_(browser_api.ProxyAccessMode.VPN);
   },
   fireChanged: function() {
     this.fire('instance-changed');

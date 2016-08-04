@@ -22,6 +22,7 @@ class FirefoxBrowserApi implements BrowserAPI {
   public browserSpecificElement :string;
   public canProxy = true;
   public hasInstalledThenLoggedIn = true;
+  public supportsVpn = false;
 
   // Global unique promise ID.
   private promiseId_ :number = 1;
@@ -55,7 +56,9 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('launchTabIfNotOpen', url);
   }
 
-  public startUsingProxy = (endpoint:net.Endpoint, bypass :string[]) => {
+  public startUsingProxy =
+      (endpoint: net.Endpoint, bypass: string[],
+       opts: browser_api.ProxyConnectOptions) => {
     //TODO actually use bypass list
     port.emit('startUsingProxy', endpoint);
   }

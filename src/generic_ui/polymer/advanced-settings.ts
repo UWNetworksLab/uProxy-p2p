@@ -7,10 +7,6 @@
 // a message from the core that overwrites while this window is open, and the
 // user clicks set, we will overwrite the core change.
 
-var ui = ui_context.ui;
-var core = ui_context.core;
-var model = ui_context.model;
-
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 export enum StatusState {
@@ -22,6 +18,7 @@ export enum StatusState {
 
 Polymer({
   settings: '',
+  portControlSupport: null,
   status: StatusState.EMPTY,
   jsonifySettings_: function(settingsObject :Object) {
     return JSON.stringify(settingsObject, null, ' ');
@@ -32,6 +29,11 @@ Polymer({
   open: function() {
     this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
     this.status = StatusState.EMPTY;
+
+    if (this.portControlSupport === null) {
+      this.refreshPortControl();
+    }
+
     this.$.advancedSettingsPanel.open();
   },
   // Perform rudimentary JSON check for the text settings.
@@ -60,7 +62,7 @@ Polymer({
 
       ui_context.model.globalSettings = newSettings;
       this.status = StatusState.SET;
-      ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+      this.$.state.core.updateGlobalSettings(ui_context.model.globalSettings);
 
       this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
     } catch (e) {
@@ -68,15 +70,14 @@ Polymer({
     }
   },
   viewLogs: function() {
-   // this.ui.openTab('generic_ui/view-logs.html?lang=' + this.model.globalSettings.language);
+   // calls logs.html to open the logs
     this.fire('core-signal', { name: 'open-logs' });
   },
-  ready: function() {
-    this.ui = ui;
-    this.model = model;
-  },
   refreshPortControl: function() {
-    core.refreshPortControlSupport();
+    this.portControlSupport = uproxy_core_api.PortControlSupport.PENDING;
+    this.$.state.core.getPortControlSupport().then((support: uproxy_core_api.PortControlSupport) => {
+      this.portControlSupport = support;
+    });
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'

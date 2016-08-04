@@ -2,12 +2,14 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
+import _ = require('lodash');
 import social = require('../../interfaces/social');
 import translator = require('../scripts/translator');
 import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 import user_module = require('../scripts/user');
 import dialogs = require('../scripts/dialogs');
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -31,6 +33,8 @@ Polymer({
   toastMessage: '',
   unableToGet: '',
   unableToShare: '',
+  gettingStatus: null,
+  sharingStatus: null,
   viewChanged: function(oldView :ui_types.View, newView :ui_types.View) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
@@ -68,9 +72,6 @@ Polymer({
   },
   closeDialog: function() {
     this.$.dialog.close();
-  },
-  dismissCopyPasteError: function() {
-    ui.copyPasteError = ui_types.CopyPasteError.NONE;
   },
   openDialog: function(e :Event, detail :ui_types.DialogDescription) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
@@ -151,7 +152,7 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
-    this.updateDirectionality();
+    this.setDirectionality();
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&
@@ -168,32 +169,21 @@ Polymer({
       this.$.state.background.updateGlobalSettings(model.globalSettings);
     }
   },
-  signalToFireChanged: function() {
-    if (ui.signalToFire) {
-      this.fire('core-signal', { name: ui.signalToFire.name, data: ui.signalToFire.data });
-    }
-  },
   revertProxySettings: function() {
     this.ui.stopUsingProxy(true);
+    this.openAskForFeedback();
   },
   restartProxying: function() {
     this.ui.restartProxying();
   },
-  toastMessageChanged: function(oldVal :string, newVal :string) {
-    if (newVal) {
-      this.toastMessage = newVal;
-      this.unableToShare = ui.unableToShare;
-      this.unableToGet = ui.unableToGet;
-      this.$.toast.show();
-
-      // clear the message so we can pick up on other changes
-      ui.toastMessage = null;
-      ui.unableToShare = false;
-      ui.unableToGet = false;
-    }
+  showToast: function(e: Event, detail: { toastMessage: string, unableToGet?: boolean, unableToShare?: boolean }) {
+    this.toastMessage = detail.toastMessage;
+    this.unableToGet = detail.unableToGet || false;
+    this.unableToShare = detail.unableToShare || false;
+    this.$.toast.show();
   },
   openTroubleshoot: function() {
-    if (this.ui.unableToGet) {
+    if (this.unableToGet) {
       this.troubleshootTitle = ui.i18n_t('UNABLE_TO_GET');
     } else {
       this.troubleshootTitle = ui.i18n_t('UNABLE_TO_SHARE');
@@ -214,6 +204,8 @@ Polymer({
       this.$.settings.accountChooserOpen = false;
     } else {
       // Drawer was closed.
+      // Cancel the user's edits to the description, if they haven't saved
+      this.$.settings.$.description.cancelEditing();
       this.$.statsTooltip.disabled = false;
     }
   },
@@ -227,18 +219,18 @@ Polymer({
       this.isSharingEnabledWithOthers = trustedContacts.length > 0;
     }
   },
-  updateDirectionality: function() {
-    // Update the directionality of the UI.
-    for (var i = 0; i < RTL_LANGUAGES.length; i++) {
-      if (RTL_LANGUAGES[i] == model.globalSettings.language.substring(0,2)) {
-        this.dir = 'rtl';
-        return;
-      }
+  /*
+   * Set our `dir` value to 'ltr' or 'rtl' based on current language.
+   */
+  setDirectionality: function() {
+    if (_.includes(RTL_LANGUAGES, model.globalSettings.language)) {
+      this.dir = 'rtl';
+    } else {
+      this.dir = 'ltr';
     }
-    this.dir = 'ltr';
   },
   languageChanged: function(oldLanguage :string, newLanguage :string) {
-    if (typeof oldLanguage != 'undefined') {
+    if (oldLanguage && oldLanguage !== newLanguage) {
       window.location.reload();
     }
   },
@@ -248,9 +240,28 @@ Polymer({
   fireOpenInviteUserPanel: function() {
     this.fire('core-signal', { name: 'open-invite-user-dialog' });
   },
+  openAskForFeedback: function() {
+    this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
+        translator.i18n_t('ASK_FOR_FEEDBACK_TITLE'),
+        translator.i18n_t('ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED'))).then(
+      () => {
+        this.fire('core-signal', {
+          name: 'open-feedback',
+          data: {
+            feedbackType: uproxy_core_api.UserFeedbackType.DISCONNECTED_FROM_FRIEND
+          }
+        });
+      },
+      () => { /* MT */ });
+  },
+  updateGettingStatus: function(e: Event, gettingStatus?: string) {
+    this.gettingStatus = gettingStatus;
+  },
+  updateSharingStatus: function(e: Event, sharingStatus?: string) {
+    this.sharingStatus = sharingStatus;
+  },
   observe: {
     '$.mainPanel.selected': 'drawerToggled',
-    'ui.toastMessage': 'toastMessageChanged',
     'ui.view': 'viewChanged',
     // Use an observer on model.contacts.shareAccessContacts.trustedUproxy
     // so that we can detect any time elements are added or removed from this
@@ -259,7 +270,6 @@ Polymer({
     // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
-    'ui.signalToFire': 'signalToFireChanged',
     'model.globalSettings.language': 'languageChanged'
   },
   computed: {

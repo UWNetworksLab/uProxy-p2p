@@ -31,13 +31,6 @@
     ::-webkit-input-placeholder {
       color: #ccc;
     }
-    #loadContacts {
-      text-align: center;
-      margin: 110px 80px;
-    }
-    #loadContacts div {
-      font-size: 17px;
-    }
     .no-friends {
       width: 150px !important;
       height: 150px !important;
@@ -46,52 +39,40 @@
     core-icon.no-friends {
       color: #e5efee;
     }
-    #loadingContacts {
-      margin-top: 0.5em;
-    }
-    /* TODO: this doesn't stretch quite right on large uProxy windows */
-    #connectWithFriendsInstruction {
-      top: 0;
-      position: absolute;
-      font-size: 16px;
-      line-height: 22px;
-      padding: 24px 24px 140px 24px;
-      box-sizing: border-box;
-      height: 100%;
-      width: 100%;
-    }
-    .instructions {
-      padding-right: 1em;  /* no left padding so img is properly centered */
-      height: 50%;
-    }
-    .instructions.cloud {
-      background-color: rgba(51,187,206,0.15);
-      color: #34AFCE;
-    }
-    .instructions.peerToPeer {
-      background-color: rgba(51,206,185,0.15);
-      color: #12A391;
-    }
-    .instructions .imageWrapper {
-      min-width: 60px;
+    #empty-roster-instructions-container {
+      padding: 0 30px 50px;
       text-align: center;
-      height: 100%;
+      position: absolute;
+      top: 30px;
+      bottom: 0;
+      right: 0;
+      left: 0;
     }
-    .instructions .textWrapper {
-      height: 100%;
-      flex-basis: 35%;
+    #empty-roster-instructions {
+      box-shadow: 0 4px 10px 0px #ccc;
+      border-radius: 3px;
+      padding: 60px 0 30px;
+      position: absolute;
+      top: 0;
+      bottom: 122px;
+      right: 30px;
+      left: 30px;
+      min-height: 218px; /* TODO: keep downArrow and add button anchored to bottom when min-height kicks in. Ideally we'll get this for free with https://github.com/uProxy/uproxy/issues/2547 */
     }
-    .instructions img {
-      height: 50px;
+    #empty-roster-instructions h1 {
+      color: #003C48;
+      font-size: 16px;
+      font-weight: 500;
+      max-width: 240px;
+      margin: 30px auto;
     }
     .downArrow {
+      color: #fff;
       position: absolute;
-      right: 44px;
-      width: 0px;
-      height: 0px;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-top: 20px solid rgb(225,246,244);  /* light aqua green */
+      right: 54px;
+      bottom: 104px;
+      font-size: 20px;
+      text-shadow: 0 7px 10px #ccc;
     }
     paper-progress {
       margin-bottom: 1em;
@@ -130,52 +111,20 @@
     }
     </style>
 
-    <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
-    <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
-
-    <!-- Shown if there are no contacts found so far -->
-    <div id='loadContacts' hidden?='{{ hasContacts }}'>
-      <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
-        <core-icon icon="social:person" class="no-friends"></core-icon>
-        {{ "LOADING_FRIENDS" | $$ }}<br>
-        <paper-progress indeterminate='true'></paper-progress>
+    <div id="empty-roster-instructions-container" hidden?="{{ hasContacts }}">
+      <div id="empty-roster-instructions">
+        <img src='../../icons/emptylist.svg'>
+        <h1>{{ "EMPTY_ROSTER_INSTRUCTIONS" | $$ }}</h1>
       </div>
     </div>
-
-    <div id="connectWithFriendsInstruction" hidden?="{{ loadingContacts || hasContacts }}">
-      <div class='instructions cloud' horizontal layout>
-        <div class='imageWrapper' flex>
-          <img src='../../icons/emptybuddylist-cloud.svg' class='centerVertical'>
-        </div>
-        <div class='textWrapper' flex>
-          <div class='centerVertical'>
-            {{ "EMPTY_ROSTER_CLOUD_INSTRUCTIONS" | $$ }}
-          </div>
-        </div>
-      </div>
-      <div id='orWrapper'><div id='orCircle'><div id='orText'>or</div></div></div>
-      <div class='instructions peerToPeer' style='margin-top:3px;' horizontal layout>
-        <div class='imageWrapper' flex>
-          <img src='../../icons/emptybuddylist-friend.svg' class='centerVertical'>
-        </div>
-        <div class='textWrapper' flex>
-          <div class='centerVertical'>
-            {{ "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS" | $$ }}
-          </div>
-        </div>
-      </div>
-      <div class='downArrow'></div>
-    </div>
+    <div class='downArrow' hidden?="{{ hasContacts }}">▼</div>
 
     <div hidden?='{{ !hasContacts }}'>
-      <!-- Intentionally hiding search box. May decide to readd it later. -->
-      <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}' hidden></input>
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$ }}'
+          groupTitle='{{ (mode == ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$ }}'
           contacts='{{ contacts.pending }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Trusted if there are no Trusted contacts, or if there are no Pending contacts -->
@@ -184,9 +133,8 @@
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{ (model.globalSettings.mode==ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$ }}'
+          groupTitle='{{ (mode == ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$ }}'
           contacts='{{ contacts.trustedUproxy }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Untrusted if there are no Untrusted contacts, or if there are no Trusted & Pending contacts -->
@@ -197,7 +145,6 @@
       <uproxy-roster-group
           groupTitle='{{ "UPROXY_FRIENDS" | $$ }}'
           contacts='{{ contacts.untrustedUproxy }}'
-          searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
     </div>
 

@@ -94,7 +94,8 @@
     var i18nKeyByUIKey = {
       // TODO: Check if user has already completed oauth, if so use different
       // test for this h1?
-      h1: 'AUTHORIZE_DIGITALOCEAN',
+      h1: 'PROCEED_TO_UPROXY_TITLE',
+      msg: 'PROCEED_TO_UPROXY_MSG',
       proceedLink: 'PROCEED_TO_UPROXY',
       promoInput: 'ENTER_PROMO',
       promoAccepted: 'PROMO_ACCEPTED',
@@ -152,6 +153,13 @@
       img.style.width = '218px';
       overlay.appendChild(img);
 
+      var textContainer = document.createElement('div');
+      textContainer.style.margin = '26px auto';
+      textContainer.style.maxWidth = '700px';
+      textContainer.style.minWidth = '360px';
+      textContainer.style.padding = '0 30px';
+      overlay.appendChild(textContainer);
+
       var h1 = document.createElement('h1');
       h1.textContent = translations[i18nKeyByUIKey.h1];
       h1.style.color = '#fff';
@@ -159,10 +167,15 @@
       h1.style.fontSize = '24px';
       h1.style.fontWeight = 'bold';
       h1.style.lineHeight = '36px';
-      h1.style.margin = '26px auto';
-      h1.style.maxWidth = '600px';
-      h1.style.minWidth = '360px';
-      overlay.appendChild(h1);
+      h1.style.wordBreak = 'normal';
+      textContainer.appendChild(h1);
+
+      var msgDiv = document.createElement('div');
+      msgDiv.textContent = translations[i18nKeyByUIKey.msg];
+      msgDiv.style.color = '#fff';
+      msgDiv.style.fontFamily = 'Roboto';
+      msgDiv.style.fontSize = '14px';
+      textContainer.appendChild(msgDiv);
 
       if (shouldPromptPromo()) {
         var DOtoken = document.querySelector('input[name="authenticity_token"]');
@@ -338,14 +351,12 @@
 
     (function modifyUI() {
       (function hideEls() {
-        // hide elements for the following selectors on all pages
-        ['a.create_droplet'   // 'Create Droplet' button in topnav
-        ].map(hideEl);
-
         if (pageId === 'welcome') {
           // hide the 'Create Droplet' box
           // (there's no more-specific selector for it than this, unfortunately)
           hideEl('div.small-4:last-child');
+          // hide the 'Create Droplet' button in the topnav
+          hideEl('a.create_droplet');
         }
 
         function hideEl(selector) {

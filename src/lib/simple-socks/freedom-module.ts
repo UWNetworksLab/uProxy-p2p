@@ -37,20 +37,21 @@ rtcToNet.start({
   log.error('failed to start RtcToNet: %1', e.message);
 });
 
+socksToRtc.start(
+  new tcp.Server(socksEndpoint),
+  // If you encounter issues w/obfuscation, replace bridge.best(...)
+  // with bridge.preObfuscation('sockstortc', pcConfig))
+  bridge.best('sockstortc', pcConfig, undefined, {
+    // See churn pipe source for the full list of transformer names.
+    name: 'rc4'
+  })).then((endpoint:net.Endpoint) => {
+    log.info('SocksToRtc listening on %1', endpoint);
+    log.info('curl -x socks5h://%1:%2 www.example.com',
+             endpoint.address, endpoint.port);
+  }, (e:Error) => {
+    log.error('failed to start SocksToRtc: %1', e.message);
+  });
+
 // Must do this after calling start.
 rtcToNet.signalsForPeer.setSyncHandler(socksToRtc.handleSignalFromPeer);
-
-// Must do this before calling start.
-socksToRtc.on('signalForPeer', rtcToNet.handleSignalFromPeer);
-
-socksToRtc.start(new tcp.Server(socksEndpoint),
-    bridge.best('sockstortc', pcConfig, undefined, {
-      // See churn pipe source for the full list of transformer names.
-      name: 'rc4'
-    })).then((endpoint:net.Endpoint) => {
-  log.info('SocksToRtc listening on %1', endpoint);
-  log.info('curl -x socks5h://%1:%2 www.example.com',
-      endpoint.address, endpoint.port);
-}, (e:Error) => {
-  log.error('failed to start SocksToRtc: %1', e.message);
-});
+socksToRtc.signalsForPeer.setSyncHandler(rtcToNet.handleSignalFromPeer);

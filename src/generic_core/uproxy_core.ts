@@ -2,12 +2,12 @@
 
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
+import constants = require('./constants');
 import _ = require('lodash');
 import key_verify = require('./key-verify');
 import logging = require('../lib/logging/logging');
 import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
 import net = require('../lib/net/net.types');
-import onetime = require('../lib/bridge/onetime');
 import nat_probe = require('../lib/nat/probe');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
@@ -25,11 +25,6 @@ import ui = ui_connector.connector;
 import storage = globals.storage;
 
 declare var freedom: freedom.FreedomInModuleEnv;
-
-// This is a global instance of RemoteConnection that is currently used for
-// either sharing or using a proxy through the copy+paste interface (i.e.
-// without an instance)
-export var copyPasteConnection :remote_connection.RemoteConnection = null;
 
 var log :logging.Log = new logging.Log('core');
 log.info('Loading core', version.UPROXY_VERSION);
@@ -109,8 +104,6 @@ function oneShotModule_<T>(moduleName: string, f: (provider: any) => Promise<T>)
  */
 export class uProxyCore implements uproxy_core_api.CoreApi {
 
-  private batcher_ : onetime.SignalBatcher<social.PeerMessage>;
-
   // this should be set iff an update to the core is available
   private availableVersion_ :string = null;
 
@@ -118,14 +111,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   constructor() {
     log.debug('Preparing uProxy Core');
-    copyPasteConnection = new remote_connection.RemoteConnection(
-        (update:uproxy_core_api.Update, message?:social.PeerMessage) => {
-      if (update !== uproxy_core_api.Update.SIGNALLING_MESSAGE) {
-        ui.update(update, message);
-      } else {
-        this.batcher_.addToBatch(message);
-      }
-    }, undefined, portControl);
 
     this.refreshPortControlSupport();
 
@@ -267,9 +252,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    * instances.
    */
   public updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
-    newSettings.version = globals.STORAGE_VERSION;
+    newSettings.version = constants.STORAGE_VERSION;
     if (newSettings.stunServers.length === 0) {
-      newSettings.stunServers = globals.DEFAULT_STUN_SERVERS;
+      newSettings.stunServers = constants.DEFAULT_STUN_SERVERS;
     }
     var oldDescription = globals.settings.description;
     globals.storage.save('globalSettings', newSettings)
@@ -309,15 +294,29 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {
     return globals.loadSettings.then(() => {
-      var copyPasteConnectionState = copyPasteConnection.getCurrentState();
+
+      let moveToFront = (array :string[], element :string) :void => {
+        let i = array.indexOf(element);
+        if (i < 1) {
+          return;
+        }
+        array.splice(0, 0, array.splice(i, 1)[0] );
+      };
+
+      let networkNames = Object.keys(social_network.networks);
+
+      for (let name of ['Quiver', 'Cloud']) {
+        if (name in social_network.networks) {
+          moveToFront(networkNames, name);
+        }
+      }
 
       return {
-        networkNames: Object.keys(social_network.networks),
+        networkNames: networkNames,
         cloudProviderNames: getCloudProviderNames(),
         globalSettings: globals.settings,
         onlineNetworks: social_network.getOnlineNetworks(),
         availableVersion: this.availableVersion_,
-        copyPasteConnection: copyPasteConnectionState,
         portControlSupport: this.portControlSupport_,
       };
     });
@@ -338,43 +337,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // Set the instance's new consent levels. It will take care of sending new
     // consent bits over the wire and re-syncing with the UI.
     user.modifyConsent(command.action);
-  }
-
-  // Resets the copy/paste signal batcher.
-  private resetBatcher_ = () : void => {
-    this.batcher_ = new onetime.SignalBatcher<social.PeerMessage>((signal:string) => {
-      ui.update(uproxy_core_api.Update.ONETIME_MESSAGE, signal);
-    }, (signal:social.PeerMessage) => {
-      // This is a terminating message iff signal.data is an instance
-      // bridge.SignallingMessage (which we can detect by the presence
-      // of a signals field) for which bridge.isTerminatingSignal
-      // returns true.
-      return signal.data && (<any>signal.data).signals &&
-        bridge.isTerminatingSignal(<bridge.SignallingMessage>signal.data);
-    }, true);
-  }
-
-  public startCopyPasteGet = () : Promise<net.Endpoint> => {
-    this.resetBatcher_();
-    return copyPasteConnection.startGet(globals.effectiveMessageVersion());
-  }
-
-  public stopCopyPasteGet = () :Promise<void> => {
-    return copyPasteConnection.stopGet();
-  }
-
-  public startCopyPasteShare = () => {
-    this.resetBatcher_();
-    copyPasteConnection.startShare(globals.effectiveMessageVersion());
-  }
-
-  public stopCopyPasteShare = () :Promise<void> => {
-    return copyPasteConnection.stopShare();
-  }
-
-  public sendCopyPasteSignal = (signal:string) => {
-    var decodedSignals = <social.PeerMessage[]>onetime.decode(signal);
-    decodedSignals.forEach(copyPasteConnection.handleSignal);
   }
 
   public inviteGitHubUser = (data :uproxy_core_api.CreateInviteArgs): Promise<void> => {
@@ -515,6 +477,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
   }
 
+  public getPortControlSupport = (): Promise<uproxy_core_api.PortControlSupport> => {
+    return portControl.probeProtocolSupport().then(
+        (probe:freedom.PortControl.ProtocolSupport) => {
+          return (probe.natPmp || probe.pcp || probe.upnp) ?
+                 uproxy_core_api.PortControlSupport.TRUE :
+                 uproxy_core_api.PortControlSupport.FALSE;
+    });
+  }
+
   // Probe for NAT-PMP, PCP, and UPnP support
   // Sets this.portControlSupport_ and sends update message to UI
   public refreshPortControlSupport = () :Promise<void> => {
@@ -522,13 +493,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
               uproxy_core_api.PortControlSupport.PENDING);
 
-    return portControl.probeProtocolSupport().then(
-      (probe:freedom.PortControl.ProtocolSupport) => {
-        this.portControlSupport_ = (probe.natPmp || probe.pcp || probe.upnp) ?
-                                   uproxy_core_api.PortControlSupport.TRUE :
-                                   uproxy_core_api.PortControlSupport.FALSE;
-        ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
-                  this.portControlSupport_);
+    return this.getPortControlSupport().then((support) => {
+      this.portControlSupport_ = support;
+      ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
+                this.portControlSupport_);
     });
   }
 
@@ -677,24 +645,38 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     ui.update(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, details);
   }
 
-  public cloudUpdate = (args: uproxy_core_api.CloudOperationArgs): Promise<void> => {
+  public cloudUpdate = (args: uproxy_core_api.CloudOperationArgs)
+      :Promise<uproxy_core_api.CloudOperationResult> => {
     if (args.providerName !== CLOUD_PROVIDER_NAME) {
       return Promise.reject(new Error('unsupported cloud provider'));
     }
+
+    let newCloudOpResult = () :uproxy_core_api.CloudOperationResult => ({});
 
     switch (args.operation) {
       case uproxy_core_api.CloudOperationType.CLOUD_INSTALL:
         if (!args.region) {
           return Promise.reject(new Error('no region specified for cloud provider'));
         }
-        return this.createCloudServer_(args.region);
+        return this.createCloudServer_(args.region).then(newCloudOpResult);
       case uproxy_core_api.CloudOperationType.CLOUD_DESTROY:
-        return this.destroyCloudServer_();
+        return this.destroyCloudServer_().then(newCloudOpResult);
       case uproxy_core_api.CloudOperationType.CLOUD_REBOOT:
-        return this.rebootCloudServer_();
+        return this.rebootCloudServer_().then(newCloudOpResult);
+      case uproxy_core_api.CloudOperationType.CLOUD_HAS_OAUTH:
+        return this.cloudHasOAuth().then(
+          (hasOAuth :boolean) :uproxy_core_api.CloudOperationResult => {
+            return {hasOAuth: hasOAuth};
+          }
+        );
       default:
         return Promise.reject(new Error('cloud operation not supported'));
     }
+  }
+
+  public cloudHasOAuth = () :Promise<boolean> => {
+    return oneShotModule_(CLOUD_PROVIDER_MODULE_NAME,
+                          (provider :any) => provider.hasOAuth());
   }
 
   private createCloudServer_ = (region: string) => {

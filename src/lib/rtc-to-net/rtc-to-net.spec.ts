@@ -2,7 +2,7 @@
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 declare var freedom: freedom.FreedomInModuleEnv;
-freedom = freedomMocker.makeMockFreedomInModuleEnv();
+(<any>window).freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import peerconnection = require('../webrtc/peerconnection');
@@ -12,7 +12,7 @@ import handler = require('../handler/queue');
 import rtc_to_net = require('./rtc-to-net');
 import net = require('../net/net.types');
 import tcp = require('../net/tcp');
-import socks = require('../socks-common/socks-headers');
+import socks_headers = require('../socks/headers');
 
 import logging = require('../logging/logging');
 
@@ -29,7 +29,7 @@ var mockBoundEndpoint :net.Endpoint = {
 var voidPromise = Promise.resolve<void>();
 
 var mockProxyConfig :ProxyConfig = {
-  allowNonUnicast: false
+  allowNonUnicast: true
 };
 
 var mockRemoteEndpoint :net.Endpoint = {

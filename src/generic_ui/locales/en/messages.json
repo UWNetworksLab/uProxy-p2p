@@ -147,157 +147,21 @@
     "description": "Label for button that will offer a friend access to the Internet through the user, even though the friend has not requested access.",
     "message": "Offer Access"
   },
-  "SHARE_ONE_TIME": {
-    "description": "Share access to the user's Internet using a link that will only work once.",
-    "message": "Share a one-time connection"
-  },
-  "REQUEST_ONE_TIME": {
-    "description": "Request access to the user's friend's Internet using a link that will only work once.",
-    "message": "Request a one-time connection"
-  },
-  "START_ONE_TIME": {
-    "description": "Start an Internet connection using a link that will only work once.",
-    "message": "Start a one-time connection"
-  },
-  "ERROR_PARSING_LINK": {
-    "description": "Error shown if a one-time connection link did not work.",
-    "message": "There was an error parsing the uproxy connection link, please try navigating to the link again or asking your friend for a new link."
-  },
-  "NO_LONGER_GETTING": {
-    "description": "Message shown when a one-time connection ends.",
-    "message": "You are no longer getting access. To request a connection, click the button below."
-  },
-  "NO_LONGER_SHARING": {
-    "description": "Message shown when a one-time connection ends and the user was sharing.",
-    "message": "You are no longer sharing access.  Click the button below to request a connection or paste a request link from a friend to share access again."
-  },
-  "START_NEW_CONNECTION": {
-    "description": "Label for button that takes user back to the 'Start a one-time connection' page.",
-    "message": "Start getting a new connection"
-  },
-  "ERROR_STARTING_CONNECTION": {
-    "description": "Error shown if a one-time connection failed to start.",
-    "message": "There was an error starting the connection and it had to be terminated. Please try starting another connection."
-  },
-  "SEND_CONNECTION_LINK": {
-    "description": "Instructions for the user to share their connection with a one-time link.",
-    "message": "To share your connection, please ask your friend to send you their link."
-  },
-  "COPY_CONNECTION_LINK": {
-    "description": "Instructions for the user to request access from a friend with a one-time link.",
-    "message": "To request access from a friend, copy and paste this link to them over a channel you trust."
-  },
-  "LOADING": {
-    "description": "Message show when something is taking time to load.",
-    "message": "Loading..."
-  },
-  "FRIEND_NEEDS_TO_CLICK": {
-    "description": "Instructions telling the user their friend needs to take an action to finish setting up the one-time connection and then their friend will send back a link.",
-    "message": "After your friend has opened the link, they'll send a link to you in return. Click on the link or paste it below."
-  },
-  "ONE_TIME_SHARING_SUCCESS": {
-    "description": "Inform the user that they are now successfully sharing access through a one-time connection",
-    "message": "You are now sharing access with your friend."
-  },
-  "ONE_TIME_SHARING_STOP_DIRECTIONS": {
-    "description": "Directions for how to stop sharing access; should refer to the act of clicking the button below which should also have a fairly obvious label.",
-    "message": "To stop sharing access, click the button below."
-  },
-  "ONE_TIME_GETTING_SUCCESS": {
-    "description": "Inform the user that they have now successfully set up a connection through which they can get access.  This message should in no way imply that they are actually getting access (there will be another message prompting them to start using the connection).",
-    "message": "Success! A one time connection has been set up successfully."
-  },
-  "START_ONE_TIME_INSTRUCTION": {
-    "description": "",
-    "message": "To start getting access from your friend, click the button below."
-  },
-  "STOP_ONE_TIME_INSTRUCTION": {
-    "description": "",
-    "message": "To stop getting access from your friend, click the button below."
-  },
-  "ONE_TIME_GETTING": {
-    "description": "The user is connected to the Internet through their friend.",
-    "message": "You are currently getting access."
-  },
-  "STOP_ONE_TIME_GETTING_BEFORE_NEW": {
-    "description": "Instruction for the user to stop a current one-time connection if they want to start a new one.",
-    "message": "If you would like to start a new one-time connection, press \"Stop Getting Access\" first."
-  },
-  "FRIEND_REQUESTED_ONE_TIME": {
-    "description": "A friend has requested to access the Internet through the user.",
-    "message": "Your friend has requested to use your Internet connection."
-  },
-  "HOW_TO_OFFER_ONE_TIME": {
-    "description": "Instructions for user if they'd like to share their Internet connection with a one-time link.",
-    "message": "If you'd like to give them access, copy and paste this URL back to them."
-  },
-  "GET_ONE_TIME_INSTEAD": {
-    "description": "Label for a link to the 'Start a one-time connection' page.",
-    "message": "Get access instead"
-  },
-  "TRYING_TO_SHARE_ONE_TIME": {
-    "description": "Instructions for user if they want to get access instead, while attempting to share access.",
-    "message": "You are currently in the process of trying to share access. If you would like to get access instead, click the link above."
-  },
-  "GET_ONE_TIME_INSTEAD_INSTRUCTION": {
-    "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection.",
-    "message": "If you would like to start a one-time connection with someone else, press the \"Back\" button and then \"Start a one-time connection\" to start a new session."
-  },
-  "ONE_TIME_SHARING": {
-    "description": "The user is sharing their Internet access with a friend.",
-    "message": "You are currently sharing access."
-  },
-  "STOP_ONE_TIME_SHARING": {
-    "description": "Label for button to terminate your connection to a friend who is accessing the Internet through you.",
-    "message": "Stop sharing access"
-  },
-  "STOP_ONE_TIME_SHARING_BEFORE_NEW": {
-    "description": "Instruction for the user to stop a current one-time connection if they want to start a new one.",
-    "message": "If you would like to start a new one-time connection, press \"Stop Sharing Access\" first."
-  },
-  "ONE_TIME_LINK_INPUT_DESCRIPTION": {
-    "description": "Text (appearing within the input box) informing the user that they can paste the one-time connection link they get back from their friend here.  It should be clear that it is the link from the friend and not the link they just copied above.",
-    "message": "Link from your friend"
-  },
-  "ONE_TIME_LINK_INPUT_ERROR": {
-    "description": "Error message to show the user if they paste a poorly-formatted link into a texbox.  Should prompt them to try pasting the link again.",
-    "message": "Unable to recognize this link. Please check for accuracy and try again."
-  },
-  "SUBMIT_ONE_TIME_LINK": {
-    "description": "Text for a button the user may click after pasting in a (probably valid) one-time connection link into a textbox above the button.",
-    "message": "Submit"
-  },
-  "GO_BACK": {
-    "description": "Go back to the main page from the one-time connection page.",
-    "message": "Go back?"
-  },
-  "ARE_YOU_SURE": {
-    "description": "Question confirming if the user wants to end an active connection to a friend.",
-    "message": "Are you sure you want to end this one-time connection?"
-  },
   "SUBMIT_FEEDBACK_SENTENCE_CASE": {
     "description": "Submit feedback to the uProxy team.",
     "message": "Submit feedback"
   },
-  "EMAIL_TITLE": {
-    "description": "",
-    "message": "Email (optional)"
-  },
   "EMAIL_PLACEHOLDER": {
     "description": "",
-    "message": "Email address"
-  },
-  "FEEDBACK_TITLE": {
-    "description": "Label for textbox for user's to submit feedback and comments to uProxy.",
-    "message": "Enter your feedback below"
+    "message": "Email address (optional)"
   },
   "FEEDBACK_PLACEHOLDER": {
     "description": "The default text that appears in the user feedback textbox.",
-    "message": "Write your feedback"
+    "message": "Your feedback"
   },
   "FEEDBACK_ERROR_PLACEHOLDER": {
     "description": "Error that apears if you try to submit an empty feedback.",
-    "message": "Please enter some feedback"
+    "message": "Please specify your feedback"
   },
   "NETWORK_AND_LOGS": {
     "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team.",
@@ -311,13 +175,37 @@
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
     "message": "Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information."
   },
-  "THANK_YOU": {
+  "FEEDBACK_TITLE": {
     "description": "",
     "message": "Thank you!"
+  },
+  "TROUBLE_SIGNING_IN_TITLE": {
+    "description": "",
+    "message": "Trouble signing in"
+  },
+  "NO_FRIENDS_TITLE": {
+    "description": "",
+    "message": "No friends to proxy from"
+  },
+  "CANT_START_CONNECTION_TITLE": {
+    "description": "",
+    "message": "Can't start connection"
   },
   "FEEDBACK_SUBMITTED": {
     "description": "User feedback was successfully submitted.",
     "message": "Your feedback has been submitted to the uProxy development team."
+  },
+  "TROUBLE_SIGNING_IN_HELP": {
+    "description": "Trouble signing in feedback error.",
+    "message": "Login will fail if you try a social network that is blocked.  Thanks for your feedback! <uproxy-faq-link anchor='willUproxyWork'>Learn more.</uproxy-faq-link>"
+  },
+  "NO_FRIENDS_HELP": {
+    "description": "No friends feedback error.",
+    "message": "Consider using uProxy cloud servers.  Thanks for your feedback! <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+  },
+  "CANT_START_CONNECTION_HELP": {
+    "description": "Trouble connecting feedback error.",
+    "message": "Sometimes uProxy relies on port control to establish a connection, but that might not be available for your network.  Thanks for your feedback! <uproxy-faq-link anchor='whatIsPortControl'>Learn more.</uproxy-faq-link>"
   },
   "EMAIL_INSTEAD_TITLE": {
     "description": "Title for error that appears if feedback submission failed.",
@@ -346,14 +234,6 @@
   "ATTEMPTING_RECONNECT": {
     "description": "uProxy was disconnected from the social network and is trying to reconnect.",
     "message": "Attempting to re-connect."
-  },
-  "CANNOT_OPEN_ONE_TIME_TITLE": {
-    "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network.",
-    "message": "Cannot open one-time connection"
-  },
-  "CANT_OPEN_ONE_TIME_MESSAGE": {
-    "description": "Text for an error popup that appears if the user tries to open a one-time link while signed in to a social network.",
-    "message": "It is not currently possible to open a manual connection at the same time as being signed in to a social network.  To launch a manual connection, please log out through the settings menu and re-paste the link."
   },
   "STATS_ENABLED_TITLE": {
     "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team.",
@@ -550,10 +430,6 @@
   "WHY_SOCIAL_NETWORK": {
     "description": "Explains why uProxy needs social networks. (Friends need to login with the same social network on uProxy for friends to see each other.)",
     "message": "uProxy uses social networks to help you set up connections with your friends"
-  },
-  "SET_UP_ONE_TIME": {
-    "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link.",
-    "message": "Set up a 1-time connection"
   },
   "WE_WONT_POST": {
     "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user.",
@@ -819,6 +695,9 @@
     "description": "Invite instructions for the uProxy Network (aka Quiver)",
     "message": "Generate a link and send it to your friends so they can find you on uProxy.  You can request access, offer access or both."
   },
+  "NETWORK_LIST_CLOUD_LABEL": {
+    "message": "Create a cloud server"
+  },
   "ADD_A_CLOUD_FRIEND": {
     "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with",
     "message": "Add a Cloud friend"
@@ -930,14 +809,6 @@
   "FAQ_SENTENCE_CASE": {
     "description": "Title of the FAQ window",
     "message": "Get Help"
-  },
-  "CONFIRM_LOGOUT_FOR_COPYPASTE": {
-    "description": "If a user is signed in to social network(s) and attempt to start a one-time connection, this message informs them that they must first log out of all social networks.",
-    "message": "To start a one-time connection, you will be logged out of connected social networks. Would you like to log out now?"
-  },
-  "CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING": {
-    "description": "If a user is signed in to social network(s) and is getting or sharing, and attempt to start a one-time connection, this message informs them that they must first log out of all social networks.",
-    "message": "To start a one-time connection, you will be logged out of connected social networks and your connections will be stopped.  Would you like to log out now?"
   },
   "CONFIRM_LOGOUT_GETTING_AND_SHARING": {
     "description": "Confirmation when user logs out from a social network while they are getting and sharing access with users on that network",
@@ -1143,7 +1014,7 @@
   },
   "WHAT_IS_DIGITAL_OCEAN_ANSWER": {
     "description": "",
-    "message": "<p>DigitalOcean is a cloud hosting provider. Once you create an account and set up a payment method, uProxy will be able to create a server under your account. By default, uProxy will set up a server that costs $10 per month. (DigitalOcean offers servers starting at $5/month, and we plan to support these in the future, but for usable performance, the next level up is currently required.) In addition to credit cards, DigitalOcean accepts PayPal, which integrates with a number of payment systems, including UnionPay. You can pause your server or terminate your DigitalOcean account at any time.</p>"
+    "message": "<p>DigitalOcean is a cloud hosting provider. Once you create an account and set up a payment method, uProxy will be able to create a server under your account. By default, uProxy will set up a server that costs $10/month. (DigitalOcean offers servers starting at $5/month, and we plan to support these in the future, but for usable performance, the next level up is currently required.) In addition to credit cards, DigitalOcean accepts PayPal, which integrates with a number of payment systems, including UnionPay. You can pause your server or terminate your DigitalOcean account at any time.</p>"
   },
   "HOW_DO_I_INSTALL_UPROXY_ON_SERVER": {
     "description": "",
@@ -1239,13 +1110,13 @@
     "description": "Title on cloud deployment screens, where the user can set up a new server that allows them proxy access.",
     "message": "Create a cloud server"
   },
+  "CREATING_A_CLOUD_SERVER": {
+    "description": "Title on screen while cloud installation is in progress",
+    "message": "Creating a cloud server"
+  },
   "CREATE_A_NEW_ACCOUNT": {
     "description": "Button text for creating a new account (e.g. for DigitalOcean)",
-    "message": "Create a new account"
-  },
-  "SIGN_IN_AND_CONNECT": {
-    "description": "Button text for signing into DigitalOcean",
-    "message": "Sign in and connect"
+    "message": "Create a DigitalOcean account"
   },
   "TRY_AGAIN": {
     "description": "Button text for trying again (e.g. connecting to DigitalOcean)",
@@ -1285,11 +1156,11 @@
   },
   "CLOUD_INSTALL_LOGIN_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "Choose a location near you to create a cloud server."
+    "message": "Choose where you’d like your cloud server to be located."
   },
-  "CLOUD_INSTALL_LOGIN_MESSAGE": {
-    "description": "Message shown during DigitalOcean server deployment, references text for SIGN_IN_AND_CONNECT button",
-    "message": "Once you click \"sign in and connect\", you will be charged $10 a month by DigitalOcean.  You can terminate your server at any time.  <uproxy-faq-link anchor='whatIsDigitalOcean'>Learn more.</uproxy-faq-link>"
+  "CLOUD_INSTALL_CREATE_SERVER_MESSAGE": {
+    "description": "Message shown during DigitalOcean server creation",
+    "message": "<p>Before your cloud server is created, you will be taken to the DigitalOcean site and asked to let uProxy access your DigitalOcean account if you have not done so already (and you may have to log into DigitalOcean first).</p><p>Once you create a cloud server, you will be charged $10/month by DigitalOcean. You can delete your server to stop being charged at any time.</p>"
   },
   "CLOUD_INSTALL_CREATE_ACCOUNT_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
@@ -1301,15 +1172,19 @@
   },
   "CLOUD_INSTALL_GET_STARTED_TITLE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "uProxy now allows you to create a private cloud server through DigitalOcean."
+    "message": "Create a private cloud server on DigitalOcean through uProxy."
   },
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "description": "Message shown during DigitalOcean server deployment",
-    "message": "For $10 per month you can get and share access with your friends and family. If you sign up with uProxy, your first month is free! Create a new account or sign in to connect and share access. <uproxy-faq-link anchor='whatAreCloudServers'>Learn more.</uproxy-faq-link>"
+    "message": "<p>For $10/month you can have your very own uProxy Cloud Server, so you can get access 24x7 (and share it with friends, too). <uproxy-faq-link anchor='whatAreCloudServers'>Learn more about cloud servers</uproxy-faq-link></p><p>Cloud servers run on top of DigitalOcean. If you do not yet have a DigitalOcean account, create one through the button below. You will be prompted to add a payment method, but if you sign up through uProxy, your first month is free! <uproxy-faq-link anchor='whatIsDigitalOcean'>Learn more about DigitalOcean</uproxy-faq-link></p>"
+  },
+  "CLOUD_INSTALL_EXISTING_SERVER_TITLE": {
+    "description": "Title for 'already have a cloud server' section",
+    "message": "Already have a cloud server?"
   },
   "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
     "description": "Instructions link for users who already have an existing cloud server.",
-    "message": "Already have a cloud server? <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link> to use it with uProxy."
+    "message": "You can manually set up your own uProxy server. <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>Learn how</uproxy-faq-link>"
   },
   "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
     "description": "Message shown on invite screen for DigitalOcean server deployment",
@@ -1321,19 +1196,15 @@
   },
   "I_HAVE_AN_ACCOUNT": {
     "description": "Button text shown during DigitalOcean server deployment",
-    "message": "I have an account"
+    "message": "I have a DigitalOcean account"
   },
   "SIGN_ME_IN": {
     "description": "Button text shown during DigitalOcean server deployment",
     "message": "Sign me in!"
   },
-  "EMPTY_ROSTER_CLOUD_INSTRUCTIONS": {
-    "description": "Instructions shown for cloud when the user has an empty roster",
-    "message": "Create a private cloud server and share access with friends & family"
-  },
-  "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS": {
-    "description": "Instructions shown for peer-to-peer when the user has an empty roster",
-    "message": "Get or share access with family & friends."
+  "EMPTY_ROSTER_INSTRUCTIONS": {
+    "description": "Instructions shown when the user has an empty roster",
+    "message": "Get and share access from a friend or a private cloud server."
   },
   "ASIA_SINGAPORE": {
     "description": "Region option for deploying a DigitalOcean server",
@@ -1427,8 +1298,13 @@
     "description": "Label for a checkbox indicating that you have a promo code",
     "message": "I have a promo code"
   },
-  "AUTHORIZE_DIGITALOCEAN": {
-    "message": "Authorize uProxy to connect with DigitalOcean"
+  "PROCEED_TO_UPROXY_TITLE": {
+    "description": "Title of the content script overlay that takes over cloud.digitalocean.com to direct users back to uProxy",
+    "message": "Your DigitalOcean account is all set up!"
+  },
+  "PROCEED_TO_UPROXY_MSG": {
+    "description": "Message under the title of the content script overlay that takes over cloud.digitalocean.com to direct users back to uProxy, references I_HAVE_AN_ACCOUNT text",
+    "message": "You can now go back to uProxy and choose the “I have a DigitalOcean account” option if prompted."
   },
   "PROCEED_TO_UPROXY": {
     "message": "Proceed to uProxy"
@@ -1447,5 +1323,69 @@
   },
   "APPLY": {
     "message": "Apply"
+  },
+  "CUSTOM_ERROR_PLACEHOLDER": {
+    "description": "The default text that appears in the dropdown menu in feedback. ",
+    "message": "Choose a topic for feedback"
+  },
+  "NO_CUSTOM_ERROR_PLACEHOLDER": {
+    "description": "Error that apears if you do not select any feedback in the dropdown menu.",
+    "message": "Please choose feedback most similar to yours"
+  },
+  "CLOUD_CONNECTIONS_DISCONNECTED": {
+    "descripton": "One of the feedback options in the dropdown menu",
+    "message": "My cloud connections get disconnected."
+  },
+  "CLOUD_SERVER_NO_CONNECT": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "My cloud server fails to connect."
+  },
+  "CLOUD_SERVER_NO_START": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "I am not able to start a cloud server."
+  },
+  "TROUBLE_SIGNING_IN": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "I'm having trouble signing in."
+  },
+  "NO_FRIENDS": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "I don't have any friends to proxy from."
+  },
+  "TROUBLE_STARTING_CONNECTION": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "I can't start a connection."
+  },
+  "DISCONNECTED_FROM_FRIEND": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "I get disconnected from my friend."
+  },
+  "OTHER_FEEDBACK": {
+    "description": "One of the feedback options in the dropdown menu",
+    "message": "Other (please specify below)"
+  },
+  "START_VPN": {
+    "description": "Button label for starting a connection in VPN mode, where all device traffic is routed through uProxy.",
+    "message": "Start VPN"
+  },
+  "START_BROWSING": {
+    "description": "Button label for starting an in-app browser connected to a uProxy peer.",
+    "message": "Start browsing"
+  },
+  "ASK_FOR_FEEDBACK_TITLE": {
+    "description": "Asks the user if they'd like to submit feedback",
+    "message": "Submit feedback?"
+  },
+  "ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED": {
+    "description": "Text shown when user is prompted to submit feedback after their connection is disrupted",
+    "message": "We noticed that you were disconnected from your friend. Would you like to submit some feedback?"
+  },
+  "SHOW_LOGS": {
+    "description": "Button label that opens logs",
+    "message": "View logs"
+  },
+  "REPORT_ERROR": {
+    "description": "Prompt that asks user to report error",
+    "message": "Report this error"
   }
 }

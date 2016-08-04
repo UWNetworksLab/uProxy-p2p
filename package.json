@@ -1,7 +1,8 @@
 {
   "name": "uProxy",
   "description": "Internet without borders",
-  "version": "0.9.1",
+  "version": "0.9.4",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -10,6 +11,7 @@
     "url": "http://github.com/uproxy/uproxy/issues",
     "email": "info@uproxy.org"
   },
+  "engines" : { "node" : ">=4" },
   "licenses": [
     {
       "type": "Apache-2.0",
@@ -26,10 +28,10 @@
     "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
     "forge-min": "^0.6.20",
-    "freedom": "^0.6.27",
-    "freedom-for-chrome": "^0.4.23",
-    "freedom-for-firefox": "^0.6.22",
-    "freedom-for-node": "^0.2.18",
+    "freedom": "^0.6.31",
+    "freedom-for-chrome": "^0.4.25",
+    "freedom-for-firefox": "^0.6.24",
+    "freedom-for-node": "^0.2.20",
     "freedom-pgp-e2e": "^0.6.2",
     "freedom-port-control": "^0.9.0",
     "freedom-social-firebase": "^2.0.0",
@@ -72,5 +74,16 @@
     "typings": "^0.7.12",
     "uparams": "^1.2.0",
     "xregexp": "^2.0.0"
+  },
+  "scripts": {
+    "build": "grunt",
+    "clean": "rm -rf node_modules/ build/ .tscache/",
+    "install": "npm run setup-third-party && npm run setup-tools",
+    "setup-bower": "bower install --allow-root --config.interactive=false --config.directory=build/third_party/bower",
+    "setup-third-party": "npm run setup-bower && mkdir -p build/third_party && npm run setup-typings && cp -r third_party/* build/third_party/ && npm run setup-freedom-port-control",
+    "setup-tools": "mkdir -p build/tools && cp src/lib/build-tools/*.ts build/tools/ && tsc --module commonjs --noImplicitAny build/tools/*.ts",
+    "setup-typings": "cd third_party && typings install",
+    "setup-freedom-port-control": "mkdir -p build/third_party/freedom-port-control && cp -r node_modules/freedom-port-control/dist build/third_party/freedom-port-control/",
+    "test": "grunt test"
   }
 }

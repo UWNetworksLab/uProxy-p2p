@@ -1,7 +1,7 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-var ui = ui_context.ui;
-var i18n_t = ui.i18n_t;
+import translator = require('../scripts/translator');
+var i18n_t = translator.i18n_t;
 
 declare var PolymerExpressions: any;
 PolymerExpressions.prototype.$$ = i18n_t;

@@ -13,24 +13,18 @@
       }
       #container {
         text-align: center;
-        /*margin: 50px;*/
          height: 100%;
          width: 100%;
          background-color: white;
       }
       #logsPanel {
-      height: 100%;
-      width: 100%;
-      background-color: white;
-    }
+        height: 100%;
+        width: 100%;
+        background-color: white;
+      }
       uproxy-app-bar {
-      text-align: left;
-      font-size: 18px;
-    }
-      #openUproxy {
-        color: #12A391;
-        cursor: pointer;
-        text-decoration: underline;
+        text-align: left;
+        font-size: 18px;
       }
       paper-progress::shadow #progressContainer {
         background-color: #ffffff;
@@ -65,22 +59,21 @@
       }
     </style>
     <core-signals on-core-signal-open-logs="{{ openLogs }}"></core-signals>
-
     <core-overlay id='logsPanel'>
-    <div id='container' vertical layout>
-    <uproxy-app-bar on-go-back='{{ close }}'>
+      <div id='container' vertical layout>
+        <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "LOGS_TITLE" | $$ }}
         </uproxy-app-bar>
-      <h1><bdi>{{ "LOGS_TITLE" | $$ }}</bdi></h1>
-      <p><bdi>{{ "TO_SEND_LOGS" | $$ }}</bdi></p>
-      <div id='logs'>
-        <div id="loadingLogs" hidden?="{{ !loadingLogs }}">
-          <p>{{ "RETRIEVING_LOGS" | $$ }}</p>
-          <paper-progress indeterminate='true'></paper-progress>
-        </div>
-        <pre>{{ logs }}</pre>
-      </div> <!-- end of errorText -->
-    </div>
+        <h1><bdi>{{ "LOGS_TITLE" | $$ }}</bdi></h1>
+        <p><bdi>{{ "TO_SEND_LOGS" | $$ }}</bdi></p>
+        <div id='logs'>
+          <div id="loadingLogs" hidden?="{{ !loadingLogs }}">
+            <p>{{ "RETRIEVING_LOGS" | $$ }}</p>
+            <paper-progress indeterminate='true'></paper-progress>
+          </div>
+          <pre>{{ logs }}</pre>
+        </div> <!-- end of errorText -->
+      </div>
     </core-overlay>
   </template>
   <script src='logs.js'></script>

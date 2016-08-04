@@ -59,14 +59,14 @@ export function probe() : Promise<string> {
       } else {
         return;
       }
-      
+
       if (timerId !== undefined) {
         clearTimeout(timerId);
         if (rejectShortcut) {
           rejectShortcut(new Error('shortCircuit'));
         }
       }
-    }   
+    }
 
     socket.on('onData', onUdpData);
 

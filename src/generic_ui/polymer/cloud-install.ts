@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
+import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import ui_constants = require('../../interfaces/ui');
 import user = require('../scripts/user');
@@ -11,31 +12,49 @@ var ui = ui_context.ui;
 const DEFAULT_PROVIDER = 'digitalocean';
 
 Polymer({
+  // ID of the latest attempt to create a server, used to distinguish
+  // between install failures that should be flagged to the user and
+  // failures owing to cancellation. We use a random number rather
+  // than a simple boolean because, in the event of cancellation, it
+  // can take *several* seconds for the installer to fail by which time
+  // the user could have initiated a whole new install.
+  mostRecentCreateId: 0,
+  installStatus: '',
+  installProgress: 0,
   open: function() {
     // Set translated HTML content - need to use injectBoundHTML
     // in order to enable <uproxy-faq-link>, etc tags in the text.
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_GET_STARTED_MESSAGE')),
+        translator.i18nSanitizeHtml(translator.i18n_t('CLOUD_INSTALL_GET_STARTED_MESSAGE')),
         this.$.getStartedMessage);
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_EXISTING_SERVER_MESSAGE')),
+        translator.i18nSanitizeHtml(translator.i18n_t('CLOUD_INSTALL_EXISTING_SERVER_MESSAGE')),
         this.$.existingServerMessage);
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE')),
+        translator.i18nSanitizeHtml(translator.i18n_t('CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE')),
         this.$.createAccountMessage);
     this.injectBoundHTML(
-        ui.i18nSanitizeHtml(ui.i18n_t('CLOUD_INSTALL_LOGIN_MESSAGE')),
-        this.$.loginMessage);
+        translator.i18nSanitizeHtml(translator.i18n_t('CLOUD_INSTALL_CREATE_SERVER_MESSAGE')),
+        this.$.createServerMessage);
 
-    this.$.getStartedOverlay.open();
+    this.showFirstOverlay();
   },
-  showDigitalOceanAccountHelpOverlay: function() {
+  showFirstOverlay: function () {
     this.closeOverlays();
-    this.$.digitalOceanAccountHelpOverlay.open();
+    ui.cloudUpdate({
+      operation: uproxy_core_api.CloudOperationType.CLOUD_HAS_OAUTH,
+      providerName: DEFAULT_PROVIDER
+    }).then((result :uproxy_core_api.CloudOperationResult) => {
+      if (result.hasOAuth) {
+        this.$.createServerOverlay.open();
+      } else {
+        this.$.signUpOrSignInOverlay.open();
+      }
+    });
   },
-  showLoginOverlay: function() {
+  showCreateServerOverlay: function() {
     this.closeOverlays();
-    this.$.loginOverlay.open();
+    this.$.createServerOverlay.open();
   },
   launchDigitalOceanSignup: function() {
     // DigitalOcean referral codes trump promo codes,
@@ -48,32 +67,36 @@ Polymer({
   launchDigitalOceanSettings: function() {
     ui.openTab('https://cloud.digitalocean.com/droplets');
   },
+  launchFeedback: function() {
+      this.fire('core-signal', {
+      name: 'open-feedback', data: {
+        feedbackType: uproxy_core_api.UserFeedbackType.CLOUD_SERVER_NO_START
+      }
+    });
+  },
   back: function() {
-    if (this.$.digitalOceanAccountHelpOverlay.opened ||
-        this.$.loginOverlay.opened || this.$.failureOverlay.opened) {
-      this.closeOverlays();
-      this.$.getStartedOverlay.open();
+    if (this.$.failureOverlay.opened) {
+      this.showFirstOverlay();
     } else {
       this.closeOverlays();
     }
   },
   closeOverlays: function() {
-    this.$.getStartedOverlay.close();
-    this.$.digitalOceanAccountHelpOverlay.close();
-    this.$.loginOverlay.close();
+    this.$.signUpOrSignInOverlay.close();
+    this.$.createServerOverlay.close();
     this.$.installingOverlay.close();
     this.$.successOverlay.close();
     this.$.failureOverlay.close();
     this.$.serverExistsOverlay.close();
     this.$.cancelingOverlay.close();
   },
-  loginTapped: function() {
+  createServer: function() {
     const createId = Math.floor((Math.random() * 1000000)) + 1;
     this.mostRecentCreateId = createId;
 
     if (!this.$.installingOverlay.opened) {
       this.closeOverlays();
-      ui.cloudInstallStatus = '';
+      this.installStatus = '';
       this.$.installingOverlay.open();
     }
     ui.cloudUpdate({
@@ -84,6 +107,7 @@ Polymer({
       this.closeOverlays();
       this.$.successOverlay.open();
       ui.model.globalSettings.shouldHijackDO = false;
+      ui.core.updateGlobalSettings(ui.model.globalSettings);
     }).catch((e :any) => {
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
@@ -104,7 +128,7 @@ Polymer({
   removeServerAndInstallAgain: function() {
     this.mostRecentCreateId = 0;
     this.closeOverlays();
-    ui.cloudInstallStatus = ui.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
+    this.installStatus = translator.i18n_t('REMOVING_UPROXY_CLOUD_STATUS');
     this.$.installingOverlay.open();
     // Destroy uProxy cloud server
     return ui.cloudUpdate({
@@ -122,9 +146,7 @@ Polymer({
         // so no need to remove contact
         return Promise.resolve<void>();
       });
-    }).then(() => {
-      return this.loginTapped();
-    });
+    }).then(() => this.createServer());
   },
   cancelCloudInstall: function() {
     this.mostRecentCreateId = 0;
@@ -134,25 +156,25 @@ Polymer({
       providerName: DEFAULT_PROVIDER
     }).then(() => {
       this.closeOverlays();
-      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_SUCCESS');
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('CLOUD_INSTALL_CANCEL_SUCCESS')
+        }
+      });
     }).catch((e: Error) => {
       this.$.cancelingOverlay.close();
-      ui.toastMessage = ui.i18n_t('CLOUD_INSTALL_CANCEL_FAILURE');
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('CLOUD_INSTALL_CANCEL_FAILURE')
+        }
+      });
     });
   },
   select: function(e: Event, d: Object, input: HTMLInputElement) {
     input.focus();
     input.select();
-  },
-  ready: function() {
-    this.ui = ui;
-    // ID of the latest attempt to create a server, used to distinguish
-    // between install failures that should be flagged to the user and
-    // failures owing to cancellation. We use a random number rather
-    // than a simple boolean because, in the event of cancellation, it
-    // can take *several* seconds for the installer to fail by which time
-    // the user could have initiated a whole new install.
-    this.mostRecentCreateId = 0;
   },
   promoIdChanged: function() {
     // do not uncheck the box if we no longer have the promo id set
@@ -162,6 +184,13 @@ Polymer({
   },
   havePromoChanged: function () {
     ui.model.globalSettings.activePromoId = this.$.havePromoCode.checked;
+    ui.core.updateGlobalSettings(ui.model.globalSettings);
+  },
+  updateCloudInstallStatus: function(e: Event, status: string) {
+    this.installStatus = translator.i18n_t(status);
+  },
+  updateCloudInstallProgress: function(e: Event, progress: number) {
+    this.installProgress = progress;
   },
   observe: {
     'ui.model.globalSettings.activePromoId': 'promoIdChanged'

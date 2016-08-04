@@ -129,12 +129,9 @@
       border-bottom: solid 1px;
       border-color: rgb(238, 238, 238);
     }
-
     #accountChooser div {
       margin-top: 30px;
     }
-
-    /*ElleTest begin*/
     #languageLink paper-dropdown-menu {
       border-bottom: 0px;
       font-size: 13px;
@@ -150,7 +147,6 @@
     #languageLink paper-item::shadow .button-content {
       padding: 0;
     }
-    /*ElleTest end*/
     </style>
     <uproxy-state id="state"></uproxy-state>
 
@@ -186,7 +182,7 @@
       <div id='mainSettings' class='settingsContent' hidden?='{{ accountChooserOpen }}'>
         <div class='smalltext'>
           {{ "DEVICE_DESCRIPTION" | $$ }}
-          <uproxy-description></uproxy-description>
+          <uproxy-description id='description'></uproxy-description>
         </div>
 
         <hr>
@@ -207,7 +203,6 @@
           <span class='label'>{{ "ADVANCED_SETTINGS" | $$ }}</span>
         </uproxy-link>
 
-        <!-- Elletest begin -->
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>
           <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
@@ -222,15 +217,6 @@
             </paper-dropdown>
           </paper-dropdown-menu>
         </div> <!-- end of #languageLink -->
-        <!-- ElleTest end -->
-
-        <!-- ElleTest begin -->
-<!--         <uproxy-link on-tap='{{ openLanguageForm }}' role='button'>
-          <core-icon icon="language"></core-icon>
-          <span class='label'>{{ "Change Language" | $$ }}</span>
-        </uproxy-link> -->
-        <!-- ElleTest end -->
-
         <div id='metricsCheckbox'>
           <paper-checkbox label='{{ "STATS_ENABLED_TITLE" | $$ }}' checked='{{ model.globalSettings.statsReportingEnabled }}' on-change='{{updateStatsReportingEnabled}}'></paper-checkbox>
           <uproxy-faq-link class='faq-icon' anchor='doesUproxyLogData'>
@@ -240,7 +226,7 @@
 
         <hr>
 
-        <uproxy-link on-tap='{{ restart }}' hidden?='{{ ui.browser !== "chrome" }}' role='button'>
+        <uproxy-link on-tap='{{ restart }}' hidden?='{{ !showRestartButton }}' role='button'>
           <core-icon icon='refresh'></core-icon>
           <span class='label'>{{ "RESTART" | $$ }}</span>
         </uproxy-link>
@@ -254,7 +240,7 @@
       <div id='accountChooser' class='settingsContent' hidden?='{{ !accountChooserOpen }}'>
         <span class='smalltext'>{{ "CONNECTED_ACCOUNTS" | $$ }}</span>
         <template repeat='{{ name in model.networkNames }}'>
-          <div hidden?="{{name=='Cloud' && !model.globalSettings.showCloud}}">
+          <div hidden?="{{name=='Cloud'}}">
             <uproxy-network-in-settings name='{{ name }}'></uproxy-network-in-settings>
           </div>
         </template>
