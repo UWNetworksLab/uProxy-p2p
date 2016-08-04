@@ -280,6 +280,9 @@ export class UserInterface implements ui_constants.UiApi {
     browserApi.on('promoIdDetected', this.setActivePromoId);
     browserApi.on('translationsRequest', this.handleTranslationsRequest);
     browserApi.on('globalSettingsRequest', this.handleGlobalSettingsRequest);
+    browserApi.on('backbutton', () => {
+      this.fireSignal('backbutton');
+    });
     backgroundUi.registerAsFakeBackground(this.panelMessageHandler);
 
     core.getFullState()

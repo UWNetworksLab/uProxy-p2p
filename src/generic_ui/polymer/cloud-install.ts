@@ -194,5 +194,8 @@ Polymer({
   },
   observe: {
     'ui.model.globalSettings.activePromoId': 'promoIdChanged'
+  },
+  computed: {
+    'opened': '$.signUpOrSignInOverlay.opened || $.createServerOverlay.opened || $.installingOverlay.opened || $.successOverlay.opened || $.failureOverlay.opened || $.serverExistsOverlay.opened || $.cancelingOverlay.opened'
   }
 });

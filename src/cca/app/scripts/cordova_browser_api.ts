@@ -92,6 +92,10 @@ class CordovaBrowserApi implements BrowserAPI {
       // fires.
       window.top.webintent.getUri(this.onUrl_);  // Handle URL already received.
       window.top.webintent.onNewIntent(this.onUrl_);  // Handle future URLs.
+
+      window.top.document.addEventListener('backbutton', () => {
+        this.emit_('backbutton');
+      }, false);
     }, false);
   }
 
@@ -341,6 +345,10 @@ class CordovaBrowserApi implements BrowserAPI {
       });
       delete this.pendingEvents_[name];
     }
+  }
+
+  public exit = () => {
+    (<any>navigator).app.exitApp();
   }
 
   private emit_ = (name :string, ...args :Object[]) => {
