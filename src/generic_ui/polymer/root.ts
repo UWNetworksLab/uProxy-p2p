@@ -229,11 +229,6 @@ Polymer({
       this.dir = 'ltr';
     }
   },
-  languageChanged: function(oldLanguage :string, newLanguage :string) {
-    if (oldLanguage && oldLanguage !== newLanguage) {
-      window.location.reload();
-    }
-  },
   restart: function() {
     this.$.state.background.restart();
   },

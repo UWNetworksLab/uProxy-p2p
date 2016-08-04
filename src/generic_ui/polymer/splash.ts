@@ -39,7 +39,6 @@ Polymer({
       var newLanguage = detail.item.getAttribute('languageCode');
       if (newLanguage !== curLanguage) {
         ui.updateLanguage(newLanguage);
-        window.location.reload();
       }
     }
   },
