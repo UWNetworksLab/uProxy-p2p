@@ -237,9 +237,9 @@ export function interpretAuthResponse(buffer:ArrayBuffer) : Auth {
 //            | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
 //            +----+------+----------+------+----------+
 export function composeUserPassRequest(userPass:UserPassRequest) : ArrayBuffer {
-  const ulen = userPass.username.length;  // 2 bytes per char
+  const ulen = userPass.username.length;
   const plen = userPass.password.length;
-  var requestBytes :Uint8Array = new Uint8Array(2 + ulen + 1 + plen);
+  var requestBytes = new Uint8Array(2 + ulen + 1 + plen);
 
   requestBytes[0] = Version.VERSION1;  // Only support version 1 of UserPass protocol.
   requestBytes[1] = ulen;
@@ -251,17 +251,32 @@ export function composeUserPassRequest(userPass:UserPassRequest) : ArrayBuffer {
 
 export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPassRequest {
   var requestBytes = new Uint8Array(buffer);
-
+  if (requestBytes.byteLength < 3) {
+    throw new Error('USERPASS auth request must be at least 3 bytes long');
+  }
   // Only UserPass Version 1 is supported.
   var userpassVersion = requestBytes[0];
   if (userpassVersion != Version.VERSION1) {
     throw new Error('unsupported USERPASS Auth version: ' + userpassVersion);
   }
   const ulen = requestBytes[1];
+  if (requestBytes.byteLength < 2 + ulen + 1) {
+    throw new Error('USERPASS auth request does not contain proper bytes.' +
+                   ' ulen: ' + ulen + ', request size: ' +
+                   requestBytes.byteLength);
+  }
   const username = (new Buffer(requestBytes)).slice(2, 2 + ulen).toString('ascii');
   const plen = requestBytes[2 + ulen];
+  if (requestBytes.byteLength != 2 + ulen + 1 + plen) {
+    throw new Error('USERPASS auth request does not contain proper bytes.' +
+                   ' ulen: ' + ulen + ', plen: ' + plen +
+                   ' request size: ' + requestBytes.byteLength);
+  }
   const password = (new Buffer(requestBytes)).slice(2 + ulen + 1).toString('ascii');
-  return {username: username, password: password};
+  return {
+    username: username,
+    password: password
+  };
 }
 
 // Server to Client (USERPASS Subnegotiation)
@@ -273,7 +288,7 @@ export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPassRequest {
 //                         | 1  |   1    |
 //                         +----+--------+
 export function composeUserPassResponse(success:boolean) : ArrayBuffer {
-  var responseBytes :Uint8Array = new Uint8Array(2);
+  var responseBytes = new Uint8Array(2);
   responseBytes[0] = Version.VERSION1;  // Only support for version 1 of UserPass protocol.
   responseBytes[1] = success ? 0 : -1;  // Send 0 if successful
   return responseBytes.buffer;

@@ -51,7 +51,10 @@ describe('socks', function() {
   });
 
   it('roundtrip userpass auth request', () => {
-    var userpass = {username: 'user', password: 'pass'}
+    var userpass = {
+      username: 'user',
+      password: 'pass'
+    };
     var buffer = Socks.composeUserPassRequest(userpass);
     var userpassAgain = Socks.interpretUserPassRequest(buffer);
     expect(userpassAgain.username).toEqual(userpass.username);
@@ -59,7 +62,10 @@ describe('socks', function() {
   });
 
   it('reject userpass auth request wrong version', () => {
-    var userpass = {username: 'user', password: 'pass'}
+    var userpass = {
+      username: 'user',
+      password: 'pass'
+    };
     var buffer = new Uint8Array(Socks.composeUserPassRequest(userpass));
     buffer[0] = 2;
     expect(() => {
@@ -68,7 +74,10 @@ describe('socks', function() {
   });
 
   it('roundtrip userpass auth request empty username/password', () => {
-    var userpass = {username: '', password: ''}
+    var userpass = {
+      username: '',
+      password: ''
+    };
     var buffer = Socks.composeUserPassRequest(userpass);
     var userpassAgain = Socks.interpretUserPassRequest(buffer);
     expect(userpassAgain.username).toEqual(userpass.username);
