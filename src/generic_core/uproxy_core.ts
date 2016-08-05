@@ -795,6 +795,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       enforceProxyServerValidity;
     globals.settings.validProxyServers = policy.validProxyServers;
     this.updateGlobalSettings(globals.settings);
+
+    ui.update(uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS, globals.settings);
   }
 
   public verifyUser = (inst:social.InstancePath) :void => {
