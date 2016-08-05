@@ -30,6 +30,12 @@ export enum UserFeedbackType {
   OTHER_FEEDBACK = 9
 }
 
+// Object containing an update to apply to another object
+export interface UpdateGlobalSettingArgs {
+  name: string; // field being updated
+  value: Object; // anything that's getting updated
+}
+
 // Object containing description so it can be saved to storage.
 export interface GlobalSettings {
   version          :number;
@@ -118,7 +124,7 @@ export enum Command {
   MODIFY_CONSENT = 1007, // TODO: make this work with the consent piece.
 
   SEND_CREDENTIALS = 1014,
-  UPDATE_GLOBAL_SETTINGS = 1015,
+  UPDATE_GLOBAL_SETTINGS = 1015, // Fully replaces the uProxy global settings
   GET_LOGS = 1016,
   GET_NAT_TYPE = 1017,
   PING_UNTIL_ONLINE = 1018,
@@ -138,6 +144,7 @@ export enum Command {
   VERIFY_USER = 1033,
   VERIFY_USER_SAS = 1034,
   GET_PORT_CONTROL_SUPPORT = 1035,
+  UPDATE_GLOBAL_SETTING = 1036, // Updates a single global setting
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -318,9 +325,7 @@ export interface CoreApi {
   stop (path :social.InstancePath) : void;
 
   updateGlobalSettings(newSettings :GlobalSettings) :void;
-  // TODO: rename toggle-option and/or replace with real configuration system.
-  // TODO: Implement this or remove it.
-  // changeOption(option :string) : void;
+  updateGlobalSetting(change: UpdateGlobalSettingArgs): void;
 
   login(loginArgs :LoginArgs) : Promise<LoginResult>;
   logout(networkInfo :social.SocialNetworkInfo) : Promise<void>;
