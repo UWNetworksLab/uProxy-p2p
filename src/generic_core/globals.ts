@@ -6,7 +6,6 @@ import local_storage = require('./storage');
 import logging = require('../lib/logging/logging');
 import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
 import metrics_module = require('./metrics');
-import socks = require('../lib/socks/headers');
 import user_interface = require('../interfaces/ui');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
@@ -43,7 +42,6 @@ export var settings :uproxy_core_api.GlobalSettings = {
   reproxy: {
     enabled: false,
     socksEndpoint: {address: '127.0.0.1', port: 9050},
-    auth: [socks.Auth.NOAUTH]
   }
 };
 

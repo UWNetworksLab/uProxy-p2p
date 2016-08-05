@@ -498,9 +498,8 @@ import ProxyConfig = require('./proxyconfig');
                 [this.longId(), webEndpoint]);
       // Start socks auth handshake
       var authRequest = socks_headers.composeAuthHandshakeBuffer(
-          this.proxyConfig_.reproxy.auth);
-      log.debug('%1: Creating auth negotiation handshake: %2',
-                [this.longId(), this.proxyConfig_.reproxy.auth]);
+          [socks_headers.Auth.USERPASS, socks_headers.Auth.NOAUTH]);
+      log.debug('%1: Creating auth negotiation handshake', [this.longId()]);
       this.tcpConnection_.send(authRequest);
 
       // Wait for auth handshake response
