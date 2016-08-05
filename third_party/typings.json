@@ -2,7 +2,7 @@
   "dependencies": {
     "lodash": "registry:npm/lodash#4.0.0+20160416211519"
   },
-  "ambientDependencies": {
+  "globalDependencies": {
     "chrome": "registry:dt/chrome#0.0.0+20160317120654",
     "chrome-app": "registry:dt/chrome-app#0.0.0+20160317120654",
     "circular-json": "registry:dt/circular-json#0.1.6+20160316155526",
