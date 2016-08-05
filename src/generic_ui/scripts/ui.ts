@@ -274,6 +274,12 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('cloud-install-progress', progress);
     });
 
+    core.onUpdate(
+        uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS,
+        (globalSettings: uproxy_core_api.GlobalSettings) => {
+          this.model.updateGlobalSettings(globalSettings);
+        });
+
     browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
