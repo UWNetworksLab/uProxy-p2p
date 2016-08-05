@@ -171,11 +171,9 @@ class CoreConnector implements uproxy_core_api.CoreApi {
                      newSettings);
   }
 
-  // TODO: Implement this or remove it.
-  // changeOption = (option) => {
-  //   console.log('Changing option ' + option);
-  //   this.sendCommand(uproxy_core_api.Command.CHANGE_OPTION, option);
-  // }
+  updateGlobalSetting = (change: uproxy_core_api.ObjectUpdate) => {
+    this.sendCommand(uproxy_core_api.Command.UPDATE_GLOBAL_SETTING, change);
+  }
 
   login = (loginArgs :uproxy_core_api.LoginArgs) : Promise<uproxy_core_api.LoginResult> => {
     return this.promiseCommand(uproxy_core_api.Command.LOGIN, loginArgs);

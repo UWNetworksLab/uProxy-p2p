@@ -245,6 +245,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     throw 'uproxy_core onUpdate not implemented.';
   }
 
+  public updateGlobalSetting = (change: uproxy_core_api.ObjectUpdate) => {
+    (<any>globals.settings)[change.name] = change.value;
+
+    // We could try to speed things up slightly by just manually calling the
+    // save here, but that seems like an unnecessary optimization for something
+    // that should not be called that often
+    this.updateGlobalSettings(globals.settings);
+  }
+
   /**
    * Updates user's description of their current device. This applies to all
    * local instances for every network the user is currently logged onto. Those
