@@ -135,7 +135,7 @@
     #languageLink paper-dropdown-menu {
       border-bottom: 0px;
       font-size: 13px;
-      margin-top: 1.5em;
+      margin: 0;
     }
     #languageLink core-icon {
       height: 18px !important;
@@ -198,12 +198,7 @@
           <span class='label'>{{ "GET_HELP" | $$ }}</span>
         </uproxy-faq-link>
 
-        <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
-          <core-icon icon="settings"></core-icon>
-          <span class='label'>{{ "ADVANCED_SETTINGS" | $$ }}</span>
-        </uproxy-link>
-
-        <div id='languageLink'>
+                <div id='languageLink'>
           <core-icon icon='language'></core-icon>
           <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
             <paper-dropdown class="dropdown" valign="bottom">
@@ -217,6 +212,12 @@
             </paper-dropdown>
           </paper-dropdown-menu>
         </div> <!-- end of #languageLink -->
+
+        <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
+          <core-icon icon="settings"></core-icon>
+          <span class='label'>{{ "ADVANCED_SETTINGS" | $$ }}</span>
+        </uproxy-link>
+
         <div id='metricsCheckbox'>
           <paper-checkbox label='{{ "STATS_ENABLED_TITLE" | $$ }}' checked='{{ model.globalSettings.statsReportingEnabled }}' on-change='{{updateStatsReportingEnabled}}'></paper-checkbox>
           <uproxy-faq-link class='faq-icon' anchor='doesUproxyLogData'>

@@ -86,7 +86,7 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = ui_context.model;
-    this.model = language_settings;
+    this.model = languageSettings;
     this.languages = languages;
 
 
