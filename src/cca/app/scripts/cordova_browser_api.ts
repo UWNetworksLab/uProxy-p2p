@@ -208,7 +208,6 @@ class CordovaBrowserApi implements BrowserAPI {
     } else {
       console.error('Unexpected proxy acccess mode ', this.proxyAccessMode_);
     }
-    this.proxyAccessMode_ = ProxyAccessMode.NONE;
   };
 
   public openTab = (url :string) => {
