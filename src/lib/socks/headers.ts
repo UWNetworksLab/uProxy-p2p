@@ -237,8 +237,8 @@ export function interpretAuthResponse(buffer:ArrayBuffer) : Auth {
 //            | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
 //            +----+------+----------+------+----------+
 export function composeUserPassRequest(userPass:UserPassRequest) : ArrayBuffer {
-  const ulen = 2 * userPass.username.length;  // 2 bytes per char
-  const plen = 2 * userPass.password.length;
+  const ulen = userPass.username.length;  // 2 bytes per char
+  const plen = userPass.password.length;
   var requestBytes :Uint8Array = new Uint8Array(2 + ulen + 1 + plen);
 
   requestBytes[0] = Version.VERSION1;  // Only support version 1 of UserPass protocol.
@@ -257,11 +257,10 @@ export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPassRequest {
   if (userpassVersion != Version.VERSION1) {
     throw new Error('unsupported USERPASS Auth version: ' + userpassVersion);
   }
-
   const ulen = requestBytes[1];
-  const username = new Buffer(requestBytes.slice(2, 2 + ulen)).toString('ascii');
+  const username = (new Buffer(requestBytes)).slice(2, 2 + ulen).toString('ascii');
   const plen = requestBytes[2 + ulen];
-  const password = new Buffer(requestBytes.slice(2 + ulen + 1)).toString('ascii');
+  const password = (new Buffer(requestBytes)).slice(2 + ulen + 1).toString('ascii');
   return {username: username, password: password};
 }
 

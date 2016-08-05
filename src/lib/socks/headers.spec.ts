@@ -50,6 +50,38 @@ describe('socks', function() {
     expect(authAgain).toEqual(auth);
   });
 
+  it('roundtrip userpass auth request', () => {
+    var userpass = {username: 'user', password: 'pass'}
+    var buffer = Socks.composeUserPassRequest(userpass);
+    var userpassAgain = Socks.interpretUserPassRequest(buffer);
+    expect(userpassAgain.username).toEqual(userpass.username);
+    expect(userpassAgain.password).toEqual(userpass.password);
+  });
+
+  it('reject userpass auth request wrong version', () => {
+    var userpass = {username: 'user', password: 'pass'}
+    var buffer = new Uint8Array(Socks.composeUserPassRequest(userpass));
+    buffer[0] = 2;
+    expect(() => {
+      Socks.interpretUserPassRequest(buffer);
+    }).toThrow();
+  });
+
+  it('roundtrip userpass auth request empty username/password', () => {
+    var userpass = {username: '', password: ''}
+    var buffer = Socks.composeUserPassRequest(userpass);
+    var userpassAgain = Socks.interpretUserPassRequest(buffer);
+    expect(userpassAgain.username).toEqual(userpass.username);
+    expect(userpassAgain.password).toEqual(userpass.password);
+  });
+
+  it('roundtrip userpass auth response', () => {
+    var bufferTrue = Socks.composeUserPassResponse(true);
+    var bufferFalse = Socks.composeUserPassResponse(false);
+    expect(Socks.interpretUserPassResponse(bufferTrue)).toEqual(true);
+    expect(Socks.interpretUserPassResponse(bufferFalse)).toEqual(false);
+  });
+
   it('reject wrongly sized requests', () => {
     expect(() => {
       Socks.interpretRequestBuffer(new ArrayBuffer(8));
