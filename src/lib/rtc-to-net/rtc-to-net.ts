@@ -57,8 +57,8 @@ import ProxyConfig = require('./proxyconfig');
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
 
-    private stopBandwidthCalcTotal:boolean = false;
-    private prevBytesTotal:number = 0;
+    private stopBandwidthCalcTotal :boolean = false;
+    private prevBytesTotal :number = 0;
 
     // Returns true if the addition was successful.
     private static addUserSession_ = (userId:string) : boolean => {
@@ -287,7 +287,6 @@ import ProxyConfig = require('./proxyconfig');
         var currBytesTotal = 0;
         for (var label in this.sessions_) {
           currBytesTotal += this.sessions_[label].currBytes_;
-          // prevBytesTotal += this.sessions_[label].prevBytes_; //TODO there might be a better way to keep track
         }
         var bitsTransferredTotal = (currBytesTotal - this.prevBytesTotal) * 8;
         // Bandwidth is measured in bits/sec.
