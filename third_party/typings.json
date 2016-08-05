@@ -12,7 +12,7 @@
     "filewriter": "registry:dt/filewriter#0.0.0+20160316155526",
     "freedom": "registry:dt/freedom#0.6.29+20160505190140",
     "jasmine": "registry:dt/jasmine#2.2.0+20160317120654",
-    "node": "registry:dt/node#4.0.0+20160412142033",
+    "node": "registry:dt/node#4.0.0+20160510211532",
     "ssh2": "registry:dt/ssh2#0.0.0+20160316155526",
     "webrtc/mediastream": "registry:dt/webrtc/mediastream#0.0.0+20160317120654",
     "xregexp": "registry:dt/xregexp#3.0.0+20160317120654"
