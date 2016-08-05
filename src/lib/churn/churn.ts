@@ -1,6 +1,6 @@
 /// <reference path='../../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 /// <reference path='../../../../third_party/random-lib/random-lib.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import caesar = require('../transformers/caesar');

@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
 /// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />

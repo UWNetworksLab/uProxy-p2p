@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../generic_ui/polymer/context.d.ts' />
 
 import background_ui = require('../../../generic_ui/scripts/background_ui');

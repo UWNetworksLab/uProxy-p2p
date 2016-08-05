@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/webintents.d.ts'/>
 /// <reference path='../../../../../third_party/typings/cordova/tun2socks.d.ts'/>

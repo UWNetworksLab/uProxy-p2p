@@ -1,5 +1,5 @@
 /// <reference path='../../../../third_party/browserify-zlib/browserify-zlib.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import bridge = require('./bridge');
 import churn_types = require('../churn/churn.types');

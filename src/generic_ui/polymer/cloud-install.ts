@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 import translator = require('../scripts/translator');
