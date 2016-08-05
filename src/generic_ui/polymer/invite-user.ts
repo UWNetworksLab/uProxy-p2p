@@ -105,12 +105,15 @@ var inviteUser = {
   acceptInvite: function() {
     ui.handleInvite(this.inviteCode).then(() => {
       this.closeInviteUserPanel();
-
-      this.$.state.openDialog(dialogs.getMessageDialogDescription(
-          '', translator.i18n_t('FRIEND_ADDED')));
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('FRIEND_ADDED')
+        }
+      });
     }).catch(() => {
       this.$.state.openDialog(dialogs.getMessageDialogDescription(
-          '', translator.i18n_t('FRIEND_ADD_ERROR')));
+        '', translator.i18n_t('FRIEND_ADD_ERROR')));
     });
   },
   ready: function() {
