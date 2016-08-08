@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 

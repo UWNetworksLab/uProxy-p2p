@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');
