@@ -23,8 +23,9 @@ export function socksEchoTestDescription(useChurn:boolean) {
   var testerFactoryManager
         :freedom.FreedomModuleFactoryManager<ProxyIntegrationTester>;
   var testModule :ProxyIntegrationTester;
-  var createTestModule = function(denyLocalhost?:boolean,
-      sessionLimit?:number, ipv6Only?:boolean) : ProxyIntegrationTester {
+  var createTestModule = function(denyLocalhost?:boolean, sessionLimit?:number,
+                                  ipv6Only?:boolean, reproxy?:boolean)
+                                  : ProxyIntegrationTester {
         return testerFactoryManager(denyLocalhost, useChurn, sessionLimit, ipv6Only);
   };
 
@@ -379,6 +380,30 @@ export function socksEchoTestDescription(useChurn:boolean) {
       expect(arraybuffers.byteEquality(input, output)).toBe(true);
     }).catch((e:any) => {
       expect(e).toBeUndefined();
+    }).then(done);
+  });
+
+  it('run a simple echo test with reproxy', (done) => {
+    var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
+    var testModule = createTestModule(undefined, undefined, undefined, true);
+    testModule.startEchoServer().then((port:number) => {
+      return testModule.connect(port);
+    }).then((connectionId:string) => {
+      return testModule.echo(connectionId, input);
+    }).then((output:ArrayBuffer) => {
+      expect(arraybuffers.byteEquality(input, output)).toBe(true);
+    }).catch((e:any) => {
+      expect(e).toBeUndefined();
+    }).then(done);
+  });
+
+  it('attempt to connect to a nonexistent DNS name with reproxy', (done) => {
+    var testModule = createTestModule(true, undefined, undefined, true);
+    testModule.connect(80, 'www.nonexistentdomain.gov').then((connectionId:string) => {
+      // This code should not run, because there is no such DNS name.
+      expect(connectionId).toBeUndefined();
+    }).catch((e:any) => {
+      expect(e.reply).toEqual(socks_headers.Reply.HOST_UNREACHABLE);
     }).then(done);
   });
 };
