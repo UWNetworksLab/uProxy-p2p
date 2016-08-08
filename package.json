@@ -79,7 +79,7 @@
   },
   "scripts": {
     "build": "grunt",
-    "clean": "rm -rf node_modules/ build/ .tscache/",
+    "clean": "rm -rf node_modules/ build/ .tscache/ third_party/typings/",
     "install": "npm run setup-third-party && npm run setup-tools",
     "setup-bower": "bower install --allow-root --config.interactive=false --config.directory=build/third_party/bower",
     "setup-third-party": "npm run setup-bower && mkdir -p build/third_party && npm run setup-typings && cp -r third_party/* build/third_party/ && npm run setup-freedom-port-control",
