@@ -24,6 +24,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   private socksToRtc_ :socks_to_rtc.SocksToRtc;
   private rtcToNet_ :rtc_to_net.RtcToNet;
   private socksEndpoint_ : Promise<net.Endpoint>;
+  private reproxyEndpoint_ : Promise<net.Endpoint>;
   private echoServers_ :tcp.Server[] = [];
   private connections_ :{ [index:string]: tcp.Connection; } = {};
   private localhost_ :string = '127.0.0.1';
@@ -33,9 +34,16 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
               denyLocalhost?:boolean,
               obfuscate?:boolean,
               sessionLimit?:number,
-              ipv6Only?:boolean) {
-    this.socksEndpoint_ = this.startSocksPair_(denyLocalhost, obfuscate,
-        sessionLimit, ipv6Only);
+              ipv6Only?:boolean,
+              reproxy?:boolean) {
+    if (reproxy) {
+      this.reproxyEndpoint_ = this.startSocksPair_();
+      this.socksEndpoint_ = this.startReproxySocksPair_(denyLocalhost, obfuscate,
+          sessionLimit, ipv6Only);
+    } else {
+      this.socksEndpoint_ = this.startSocksPair_(denyLocalhost, obfuscate,
+          sessionLimit, ipv6Only);
+    }
   }
 
   public startEchoServer = () : Promise<number> => {
@@ -77,8 +85,21 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     }
   }
 
+  // Start a socksToRtc and rtcToNet pair that reproxies through reproxyEndpoint
+  private startReproxySocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean,
+      sessionLimit?:number, ipv6Only?:boolean)
+      : Promise<net.Endpoint> => {
+    return this.reproxyEndpoint_
+      .then((reproxyEndpoint :net.Endpoint) : Promise<net.Endpoint> => {
+        return this.startSocksPair_(denyLocalhost, obfuscate, sessionLimit,
+                                    ipv6Only, reproxyEndpoint);
+      });
+  }
+
+  // Start a socksToRtc and rtcToNet pair
   private startSocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean,
-      sessionLimit?:number, ipv6Only?:boolean) : Promise<net.Endpoint> => {
+      sessionLimit?:number, ipv6Only?:boolean, reproxyEndpoint?:net.Endpoint)
+      : Promise<net.Endpoint> => {
     var socksToRtcEndpoint :net.Endpoint = {
       address: this.localhost_,
       port: 0
@@ -89,6 +110,12 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     var rtcToNetProxyConfig :ProxyConfig = {
       allowNonUnicast: !denyLocalhost  // Allow RtcToNet to contact the localhost server.
     };
+    if (reproxyEndpoint) {  // Add reproxy settings to proxy config
+      rtcToNetProxyConfig.reproxy = {
+        enabled: true,
+        socksEndpoint: reproxyEndpoint
+      };
+    }
 
     if (typeof sessionLimit === 'number') {
       rtc_to_net.RtcToNet.SESSION_LIMIT = sessionLimit;
