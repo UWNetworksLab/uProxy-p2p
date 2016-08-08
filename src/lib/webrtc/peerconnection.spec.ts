@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import MockFreedomRtcDataChannel =
   require('../freedom/mocks/mock-rtcdatachannel');

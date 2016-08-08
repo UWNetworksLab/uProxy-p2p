@@ -79,9 +79,9 @@
   },
   "scripts": {
     "build": "grunt",
-    "clean": "rm -rf node_modules/ build/ .tscache/ third_party/typings/",
+    "clean": "rm -rf node_modules/ build/ third_party/{typings,bower}/",
     "install": "npm run install-bower && npm run install-typings && npm run setup-third-party && npm run build-grunt-deps",
-    "install-bower": "bower install --allow-root --config.interactive=false --config.directory=build/third_party/bower",
+    "install-bower": "bower install --allow-root --config.interactive=false --config.directory=third_party/bower",
     "install-typings": "cd third_party && typings install",
     "setup-third-party": "mkdir -p build/third_party && cp -r third_party/* build/third_party/ && npm run setup-freedom-port-control",
     "build-grunt-deps": "mkdir -p build/tools && cp src/lib/build-tools/*.ts build/tools/ && tsc --module commonjs --noImplicitAny build/tools/*.ts",

@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 var startButton = document.getElementById('startButton');
 var copyTextarea = <HTMLInputElement>document.getElementById('copy');
