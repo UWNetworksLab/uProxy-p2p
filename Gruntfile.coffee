@@ -304,7 +304,10 @@ module.exports = (grunt) ->
         cwd: '<%= iosDistPath %>'
         command: '<%= ccaJsPath %> prepare'
       }
-      rmIosBuild: {
+      cleanAndroid: {
+        command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
+      }
+      cleanIos: {
         command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
       }
       androidReplaceXwalkDev: {
@@ -1142,6 +1145,7 @@ module.exports = (grunt) ->
 
   # Mobile OS build tasks
   grunt.registerTask 'build_android', [
+    'exec:cleanAndroid'
     'build_cca'
     'exec:ccaCreateDev'
     'exec:ccaPlatformAndroidDev'
@@ -1170,7 +1174,7 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'build_ios', [
-    'exec:rmIosBuild'
+    'exec:cleanIos'
     'build_cca'
     'exec:ccaCreateIosDev'
     'exec:ccaAddPluginsIosBuild'
@@ -1233,10 +1237,10 @@ module.exports = (grunt) ->
   ]
 
   # Builds all code, including the "dist" build, but skips
-  # linting and testing which can both be annoying and slow.
+  # iOS and Android as well as
+  # ts-linting and testing which can be annoying and slow.
   # jshint is here because catches hard syntax errors, etc.
   grunt.registerTask 'build', [
-    'exec:rmIosBuild'
     'build_chrome'
     'build_firefox'
     'build_cca'
