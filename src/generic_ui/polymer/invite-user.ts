@@ -120,6 +120,8 @@ var inviteUser = {
     this.selectedNetworkName = '';
     this.model = ui_context.model;
     this.inviteCode = '';
+    // Disable creating a cloud server on Android for now (see #2633).
+    this.hideCreateCloud = ui.isAndroid;
   }
 };
 
