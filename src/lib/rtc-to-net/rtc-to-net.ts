@@ -1,7 +1,7 @@
 // Server which handles SOCKS connections over WebRTC datachannels and send them
 // out to the internet and sending back over WebRTC the responses.
 
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import handler = require('../handler/queue');

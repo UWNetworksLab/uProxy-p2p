@@ -1,4 +1,4 @@
-/// <reference path='../typings/browser.d.ts' />
+/// <reference path='../typings/index.d.ts' />
 
 // TypeScript definitions for random-lib:
 //   https://github.com/fardog/node-random-lib

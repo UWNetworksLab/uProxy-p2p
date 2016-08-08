@@ -1,7 +1,7 @@
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../third_party/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts' />
+/// <reference path='../../../third_party/chrome/chrome.d.ts' />
 
 
 import _ = require('lodash');

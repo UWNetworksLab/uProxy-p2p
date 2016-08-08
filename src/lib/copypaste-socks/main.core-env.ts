@@ -1,5 +1,5 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import signals = require('../webrtc/signals');

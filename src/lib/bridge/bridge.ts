@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import churn = require('../churn/churn');
 import churn_types = require('../churn/churn.types');

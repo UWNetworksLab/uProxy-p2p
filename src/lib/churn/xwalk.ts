@@ -1,5 +1,5 @@
 /// <reference path='../../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import caesar = require('../transformers/caesar');
 import candidate = require('../churn/candidate');

@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 // The |Aggregator| interface aggregates objects of type |T| to form a
 // compound object of type |T2|. It may have internal data, including time
