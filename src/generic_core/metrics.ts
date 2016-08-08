@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/random-lib/random-lib.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts' />
-/// <reference path='../../../third_party/typings/freedomjs-anonymized-metrics/index.d.ts' />
+/// <reference path='../../../third_party/freedomjs-anonymized-metrics/index.d.ts' />
 
 import _ = require('lodash');
 import logging = require('../lib/logging/logging');

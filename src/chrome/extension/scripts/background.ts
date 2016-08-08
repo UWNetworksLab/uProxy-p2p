@@ -22,7 +22,7 @@ import compareVersion = require('compare-version');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../third_party/chrome/chrome.d.ts'/>
 
 // --------------------- Communicating with the App ----------------------------
 export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi

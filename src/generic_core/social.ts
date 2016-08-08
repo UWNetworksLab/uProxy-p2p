@@ -1,5 +1,5 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
-/// <reference path='../../../third_party/typings/generic/jsurl.d.ts' />
+/// <reference path='../../../third_party/generic/jsurl.d.ts' />
 
 /**
  * social.ts
