@@ -94,131 +94,131 @@
 
     <core-overlay id='signUpOrSignInOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+        {{ 'CREATE_A_CLOUD_SERVER' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='content'>
         <div class='header-image'>
           <img src='../../icons/cloud/uproxy+digitalocean.svg'>
         </div>
-        <h1>{{ 'CLOUD_INSTALL_GET_STARTED_TITLE' | $$ }}</h1>
+        <h1>{{ 'CLOUD_INSTALL_GET_STARTED_TITLE' | $$(model.globalSettings.language) }}</h1>
         <div id='getStartedMessage'></div>
-        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$ }}" on-change="{{havePromoChanged}}"></paper-checkbox>
+        <paper-checkbox id='havePromoCode' label="{{ 'HAVE_PROMO_CODE' | $$(model.globalSettings.language) }}" on-change="{{havePromoChanged}}"></paper-checkbox>
         <uproxy-button raised on-tap='{{ launchDigitalOceanSignup }}'>
-          {{ 'CREATE_A_NEW_ACCOUNT' | $$ }}
+          {{ 'CREATE_A_NEW_ACCOUNT' | $$(model.globalSettings.language) }}
         </uproxy-button>
         <uproxy-button raised on-tap='{{ showCreateServerOverlay }}'>
-          {{ 'I_HAVE_AN_ACCOUNT' | $$ }}
+          {{ 'I_HAVE_AN_ACCOUNT' | $$(model.globalSettings.language) }}
         </uproxy-button>
         <hr>
-        <h1>{{ 'CLOUD_INSTALL_EXISTING_SERVER_TITLE' | $$ }}</h1>
+        <h1>{{ 'CLOUD_INSTALL_EXISTING_SERVER_TITLE' | $$(model.globalSettings.language) }}</h1>
         <p id='existingServerMessage'></p>
       </div>
     </core-overlay>
 
     <core-overlay id='createServerOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+        {{ 'CREATE_A_CLOUD_SERVER' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='content'>
         <div class='header-image'>
           <img src='../../icons/cloud/uproxy+digitalocean.svg'>
         </div>
-        <h1>{{ 'CLOUD_INSTALL_LOGIN_TITLE' | $$ }}</h1>
+        <h1>{{ 'CLOUD_INSTALL_LOGIN_TITLE' | $$(model.globalSettings.language) }}</h1>
         <div>
           <paper-radio-group id='regionMenu' selected='sgp1'>
             <!-- TODO: get available regions from DigitalOcean -->
-            <paper-radio-button name='sgp1' label='{{ "ASIA_SINGAPORE" | $$ }}'></paper-radio-button>
-            <paper-radio-button name='blr1' label='{{ "ASIA_BANGALORE" | $$ }}'></paper-radio-button>
-            <paper-radio-button name='ams2' label='{{ "EUROPE_AMSTERDAM" | $$ }}'></paper-radio-button>
-            <paper-radio-button name='nyc2' label='{{ "NORTH_AMERICA_NEW_YORK" | $$ }}'></paper-radio-button>
+            <paper-radio-button name='sgp1' label='{{ "ASIA_SINGAPORE" | $$(model.globalSettings.language) }}'></paper-radio-button>
+            <paper-radio-button name='blr1' label='{{ "ASIA_BANGALORE" | $$(model.globalSettings.language) }}'></paper-radio-button>
+            <paper-radio-button name='ams2' label='{{ "EUROPE_AMSTERDAM" | $$(model.globalSettings.language) }}'></paper-radio-button>
+            <paper-radio-button name='nyc2' label='{{ "NORTH_AMERICA_NEW_YORK" | $$(model.globalSettings.language) }}'></paper-radio-button>
           </paper-radio-group>
         </div>
         <div id='createServerMessage'></div>
         <!-- TODO: add learn more links -->
         <uproxy-button raised on-tap='{{ createServer }}'>
-          {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+          {{ 'CREATE_A_CLOUD_SERVER' | $$(model.globalSettings.language) }}
         </uproxy-button>
       </div>
     </core-overlay>
 
     <core-overlay id='installingOverlay'>
       <uproxy-app-bar color='#34AFCE' disableback="true">
-        {{ 'CREATING_A_CLOUD_SERVER' | $$ }}
+        {{ 'CREATING_A_CLOUD_SERVER' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='content'>
         <div class='header-image'>
           <img src='../../icons/cloud/create.svg'>
         </div>
-        <h1>{{ 'CLOUD_INSTALL_INSTALLING_TITLE' | $$ }}</h1>
-        <p class="warning">{{ 'CLOUD_INSTALL_INSTALLING_WARNING' | $$ }}</p>
-        <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$ }}</p>
+        <h1>{{ 'CLOUD_INSTALL_INSTALLING_TITLE' | $$(model.globalSettings.language) }}</h1>
+        <p class="warning">{{ 'CLOUD_INSTALL_INSTALLING_WARNING' | $$(model.globalSettings.language) }}</p>
+        <p>{{ 'CLOUD_INSTALL_INSTALLING_MESSAGE' | $$(model.globalSettings.language) }}</p>
         <div>
           <paper-progress id='installProgress' value='{{ installProgress }}'></paper-progress>
         </div>
         <p>{{ installStatus }}</p>
-        <uproxy-button on-tap='{{ cancelCloudInstall }}'>{{ 'CANCEL' | $$ }}</uproxy-button>
+        <uproxy-button on-tap='{{ cancelCloudInstall }}'>{{ 'CANCEL' | $$(model.globalSettings.language) }}</uproxy-button>
       </div>
     </core-overlay>
 
     <core-overlay id='successOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+        {{ 'CREATE_A_CLOUD_SERVER' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='content'>
         <div class='header-image'>
           <img src='../../icons/cloud/success.svg'>
         </div>
-          <h1>{{ 'CLOUD_INSTALL_SUCCESS_TITLE' | $$ }}</h1>
+          <h1>{{ 'CLOUD_INSTALL_SUCCESS_TITLE' | $$(model.globalSettings.language) }}</h1>
         <!-- TODO: show IP address -->
-        <p>{{ 'CLOUD_INSTALL_SUCCESS_MESSAGE' | $$ }}</p>
+        <p>{{ 'CLOUD_INSTALL_SUCCESS_MESSAGE' | $$(model.globalSettings.language) }}</p>
         <!-- TODO: add start getting access button -->
-        <uproxy-button on-tap='{{ closeOverlays }}'>{{ 'CONTINUE' | $$ }}</uproxy-button>
+        <uproxy-button on-tap='{{ closeOverlays }}'>{{ 'CONTINUE' | $$(model.globalSettings.language) }}</uproxy-button>
       </div>
     </core-overlay>
 
     <core-overlay id='failureOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+        {{ 'CREATE_A_CLOUD_SERVER' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='content'>
         <div class='header-image'>
           <img src='../../icons/cloud/error-circle-ic.svg'>
         </div>
-        <h1>{{ 'CLOUD_INSTALL_ERROR_TITLE' | $$ }}</h1>
-        <p>{{ 'DIGITAL_OCEAN_ERROR_MESSAGE' | $$ }}</p>
+        <h1>{{ 'CLOUD_INSTALL_ERROR_TITLE' | $$(model.globalSettings.language) }}</h1>
+        <p>{{ 'DIGITAL_OCEAN_ERROR_MESSAGE' | $$(model.globalSettings.language) }}</p>
         <uproxy-button raised on-tap='{{ createServer }}'>
-          {{ 'TRY_AGAIN' | $$ }}
+          {{ 'TRY_AGAIN' | $$(model.globalSettings.language) }}
         </uproxy-button>
         <uproxy-button raised on-tap='{{ launchDigitalOceanSettings }}'>
-          {{ 'LAUNCH_DIGITAL_OCEAN_SETTINGS' | $$ }}
+          {{ 'LAUNCH_DIGITAL_OCEAN_SETTINGS' | $$(model.globalSettings.language) }}
         </uproxy-button>
         <p id="cloudFailureFeedback" on-tap="{{ launchFeedback }}">
-          {{ 'REPORT_ERROR' | $$ }}
+          {{ 'REPORT_ERROR' | $$(model.globalSettings.language) }}
         </p>
       </div>
     </core-overlay>
 
     <core-overlay id='serverExistsOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+        {{ 'CREATE_A_CLOUD_SERVER' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='content'>
         <div class='header-image'>
           <img src='../../icons/cloud/error-circle-ic.svg'>
         </div>
-        <h1>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE' | $$ }}</h1>
-        <p>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE' | $$ }}</p>
+        <h1>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE' | $$(model.globalSettings.language) }}</h1>
+        <p>{{ 'CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE' | $$(model.globalSettings.language) }}</p>
         <uproxy-button raised on-tap='{{ removeServerAndInstallAgain }}'>
-          {{ 'REMOVE_SERVER_AND_TRY_AGAIN' | $$ }}
+          {{ 'REMOVE_SERVER_AND_TRY_AGAIN' | $$(model.globalSettings.language) }}
         </uproxy-button>
         <uproxy-button raised on-tap='{{ closeOverlays }}'>
-          {{ 'CANCEL' | $$ }}
+          {{ 'CANCEL' | $$(model.globalSettings.language) }}
         </uproxy-button>
       </div>
     </core-overlay>
@@ -226,15 +226,15 @@
 
     <core-overlay id='cancelingOverlay'>
       <uproxy-app-bar color='#34AFCE' disableback="true">
-        {{ 'CREATE_A_CLOUD_SERVER' | $$ }}
+        {{ 'CREATE_A_CLOUD_SERVER' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='content'>
         <div class='header-image'>
           <img src='../../icons/cloud/error-circle-ic.svg'>
         </div>
-        <h1>{{ 'CLOUD_INSTALL_CANCEL_TITLE' | $$ }}</h1>
-        <p>{{ 'CLOUD_INSTALL_CANCEL_MESSAGE' | $$ }}</p>
+        <h1>{{ 'CLOUD_INSTALL_CANCEL_TITLE' | $$(model.globalSettings.language) }}</h1>
+        <p>{{ 'CLOUD_INSTALL_CANCEL_MESSAGE' | $$(model.globalSettings.language) }}</p>
       </div>
     </core-overlay>
 

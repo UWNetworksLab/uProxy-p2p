@@ -342,14 +342,14 @@
           <div class='bottom fit' dir="ltr" hidden?='{{ !hasContacts }}'>
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$ }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ "GET_ACCESS" | $$(model.globalSettings.language) }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.getAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.getAccessContacts.pending.length }}
                 </span>
               </paper-tab>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ "SHARE_ACCESS" | $$ }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ "SHARE_ACCESS" | $$(model.globalSettings.language) }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.shareAccessContacts.pending.length === 0 }}'>
                   {{ model.contacts.shareAccessContacts.pending.length }}

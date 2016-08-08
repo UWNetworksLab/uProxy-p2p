@@ -173,7 +173,7 @@
             <core-icon icon='refresh'></core-icon>
           </uproxy-link>
           <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
+            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$(model.globalSettings.language) }}
             <uproxy-faq-link anchor='whatIsPortControl'>
               {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$(model.globalSettings.language) }}
             </uproxy-faq-link>

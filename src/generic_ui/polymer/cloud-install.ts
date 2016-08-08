@@ -192,7 +192,10 @@ Polymer({
   updateCloudInstallProgress: function(e: Event, progress: number) {
     this.installProgress = progress;
   },
+  created: function() {
+    this.model = ui.model;
+  },
   observe: {
     'ui.model.globalSettings.activePromoId': 'promoIdChanged'
-  }
+  },
 });

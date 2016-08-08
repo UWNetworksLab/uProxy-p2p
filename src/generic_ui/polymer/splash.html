@@ -142,14 +142,14 @@
         </div> <!-- end of #languageLink -->
 
         <div id='nextWrapper'>
-          <uproxy-button raised on-tap='{{goToStats}}'>{{ "NEXT" | $$ }}</uproxy-button>
+          <uproxy-button raised on-tap='{{goToStats}}'>{{ "NEXT" | $$(model.globalSettings.language) }}</uproxy-button>
         </div>
 
       </div> <!-- end of .view -->
 
       <uproxy-faq-link anchor='whatIsUproxy'>
         <paper-button>
-          {{ "LEARN_MORE_UPROXY" | $$ }}
+          {{ "LEARN_MORE_UPROXY" | $$(model.globalSettings.language) }}
         </paper-button>
       </uproxy-faq-link>
 

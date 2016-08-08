@@ -200,7 +200,7 @@
                 </p>
               </div>
               <p class='preButtonDetailedText'>{{ "WAITING_FOR_ACCESS" | $$({ name: contact.name }) }}</p>
-              <uproxy-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$ }}</uproxy-button>
+              <uproxy-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ "CANCEL_REQUEST" | $$(model.globalSettings.language) }}</uproxy-button>
             </div>
 
             <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
@@ -270,7 +270,7 @@
           <div hidden?="{{contact.network.name!='Cloud'}}">
             <!-- Instances and descriptions are usually hidden from the Share tab because we have user-level sharing permissions. For Cloud, we should show the description as it also describes the user (since there is one instance per user). -->
             <p class='description'>{{ sortedInstances[0].description }}</p>
-            <uproxy-button raised on-tap='{{ shareCloudFriend }}'>{{ "SHARE_WITH_A_FRIEND" | $$ }}</uproxy-button>
+            <uproxy-button raised on-tap='{{ shareCloudFriend }}'>{{ "SHARE_WITH_A_FRIEND" | $$(model.globalSettings.language) }}</uproxy-button>
           </div>
 
           <div class='friendControls' hidden?='{{contact.status!=UserStatus.LOCAL_INVITED_BY_REMOTE}}'>

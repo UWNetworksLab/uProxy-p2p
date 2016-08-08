@@ -8,6 +8,7 @@
 // user clicks set, we will overwrite the core change.
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import translator = require('../scripts/translator');
 
 export enum StatusState {
   EMPTY,
@@ -61,6 +62,7 @@ Polymer({
       }
 
       if (ui_context.model.globalSettings.language != newSettings.language) {
+        translator.i18n_setLng(newSettings.language);
         ui_context.ui.updateLanguage(newSettings.language);
       }
 
@@ -82,6 +84,9 @@ Polymer({
     this.$.state.core.getPortControlSupport().then((support: uproxy_core_api.PortControlSupport) => {
       this.portControlSupport = support;
     });
+  },
+  created: function() {
+    this.model = ui_context.model;
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
