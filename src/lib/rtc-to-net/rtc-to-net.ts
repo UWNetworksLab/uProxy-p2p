@@ -54,6 +54,8 @@ import ProxyConfig = require('./proxyconfig');
     // Public for tests.
     public static SESSION_LIMIT = 10000;
 
+    public static BANDWIDTH_MONITOR_INTERVAL = 5000;
+
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
 
@@ -290,7 +292,7 @@ import ProxyConfig = require('./proxyconfig');
         }
         var bitsTransferredTotal = (currBytesTotal - this.prevBytesTotal) * 8;
         // Bandwidth is measured in bits/sec.
-        var bandwidthTotal  = bitsTransferredTotal / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        var bandwidthTotal  = bitsTransferredTotal / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
         log.debug('Current bandwidth for whole connection: %1 bits/sec', bandwidthTotal);
         this.prevBytesTotal = currBytesTotal;
         setTimeout(this.calculateBandwidthTotal, Session.BANDWIDTH_MONITOR_INTERVAL);
@@ -358,7 +360,7 @@ import ProxyConfig = require('./proxyconfig');
     // Records the bytes sent to and from peer, for the previous time interval. 
     public prevBytes_:number = 0;
     // The length of each interval used to calculate bandwidth, in milliseconds.
-    public static BANDWIDTH_MONITOR_INTERVAL = 5000;
+    private static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
     // The supplied datachannel must already be successfully established.
     constructor(
