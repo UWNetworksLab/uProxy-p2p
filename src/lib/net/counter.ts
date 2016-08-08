@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 // Wraps asycnronous function calls, tracking the number of calls still
 // resolving and invoking a function once that number reaches zero *and* a

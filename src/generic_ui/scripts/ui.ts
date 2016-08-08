@@ -1,7 +1,7 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/generic/jdenticon.d.ts' />
+/// <reference path='../../../third_party/generic/jsurl.d.ts' />
+/// <reference path='../../../third_party/generic/uparams.d.ts' />
 
 /**
  * ui.ts
@@ -122,7 +122,9 @@ export class UserInterface implements ui_constants.UiApi {
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
-  // User-initiated proxy access mode.
+  // User-initiated proxy access mode. Set when starting the proxy in order to
+  // stop it accordingly, and to automatically restart proxying in case of a
+  // disconnect.
   private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
 
   /**
@@ -657,7 +659,6 @@ export class UserInterface implements ui_constants.UiApi {
       // In the case where the user clicked stop, this will have no effect
       // (this function is idempotent).
       this.browserApi.stopUsingProxy();
-      this.proxyAccessMode_ = ProxyAccessMode.NONE;
     }
 
     this.updateGettingStatusBar_();
@@ -673,7 +674,6 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     this.browserApi.stopUsingProxy();
-    this.proxyAccessMode_ = ProxyAccessMode.NONE;
     this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
 

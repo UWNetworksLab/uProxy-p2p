@@ -2,7 +2,7 @@
   For the RFC for socks, see:
     http://tools.ietf.org/html/rfc1928
 */
-/// <reference path='../../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
+/// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 import ipaddr = require('ipaddr.js');
 import net = require('../net/net.types');
