@@ -122,7 +122,9 @@ export class UserInterface implements ui_constants.UiApi {
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
-  // User-initiated proxy access mode.
+  // User-initiated proxy access mode. Set when starting the proxy in order to
+  // stop it accordingly, and to automatically restart proxying in case of a
+  // disconnect.
   private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
 
   /**

@@ -52,7 +52,9 @@ class CordovaBrowserApi implements BrowserAPI {
 
   public supportsVpn = deviceSupportsVpn();
 
-  // Mode to start/stop proxying.
+  // Mode to start/stop proxying. Set when starting the proxy in order to stop
+  // it accordingly, and to automatically restart proxying in case of a
+  // disconnect.
   private proxyAccessMode_ = ProxyAccessMode.NONE;
 
   public setIcon = (iconFile :string) : void => {
