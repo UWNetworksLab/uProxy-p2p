@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/index.d.ts'/>
+/// <reference path='../../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../generic_ui/polymer/context.d.ts' />
 
 import ui_model = require('../../../generic_ui/scripts/model');

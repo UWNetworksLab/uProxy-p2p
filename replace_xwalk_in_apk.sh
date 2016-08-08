@@ -15,7 +15,7 @@
 ROOT_DIR="$(cd "$(dirname $0)"; pwd)";
 
 if [ "$1" = "debug" ]; then
-  APK_PATH="$ROOT_DIR/build/dev/uproxy/android/platforms/android/build/outputs/apk"
+  APK_PATH="$ROOT_DIR/build/src/android/platforms/android/build/outputs/apk"
 elif [ "$1" = "release" ]; then
   APK_PATH="$ROOT_DIR/build/dist/android/platforms/android/build/outputs/apk"
 else
