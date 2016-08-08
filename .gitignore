@@ -29,6 +29,4 @@ out
 test_output
 tmp
 keys
-third_party/typings/globals*
-third_party/typings/modules*
-third_party/typings/index.d.ts
+third_party/typings
