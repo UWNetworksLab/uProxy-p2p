@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 export class MockModuleSelfConstructor implements freedom.ModuleSelfConstructor {
   public provideSynchronous(classFn:Function) : void {}

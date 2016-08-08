@@ -1,5 +1,5 @@
-/// <reference path='../../../../../third_party/typings/index.d.ts' />
-/// <reference path='../../../../../third_party/firefox/firefox.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../../third_party/firefox/firefox.d.ts' />
 
 /**
  * firefox_connector.ts

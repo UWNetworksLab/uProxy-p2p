@@ -10,7 +10,7 @@ path = require 'path'
 #-------------------------------------------------------------------------
 
 # Location of where src is copied into and compiled.
-devBuildPath = 'build/dev/uproxy'
+devBuildPath = 'build/src'
 distBuildPath = 'build/dist'
 # Location of where to copy/build third_party source/libs.
 thirdPartyBuildPath = 'build/third_party'
@@ -316,7 +316,7 @@ module.exports = (grunt) ->
       installFreedomForNodeForZork: {
         # This allows our Docker containers, which do not have access to the
         # git repo's "top-level" node_modules/ folder find freedom-for-node.
-        command: 'npm install --prefix build/dev/uproxy/lib/samples/zork-node freedom-for-node'
+        command: 'npm install --prefix build/src/lib/samples/zork-node freedom-for-node'
       }
     }
 
@@ -898,7 +898,7 @@ module.exports = (grunt) ->
     #-------------------------------------------------------------------------
     jasmine:
       chrome_extension: Rule.jasmineSpec('chrome/extension/scripts/',
-          [path.join('build/dev/uproxy/mocks/chrome_mocks.js')])
+          [path.join('build/src/mocks/chrome_mocks.js')])
 
     jasmine_chromeapp: {
       all: {
@@ -914,7 +914,7 @@ module.exports = (grunt) ->
                   'core.spec.static.js'
         ],
         options: {
-          outdir: 'build/dev/uproxy/integration/'
+          outdir: 'build/src/integration/'
           # Uncomment this for debugging
           # keepRunner: true,
         }

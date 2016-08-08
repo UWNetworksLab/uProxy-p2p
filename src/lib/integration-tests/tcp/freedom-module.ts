@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import tcp = require('../../net/tcp');
