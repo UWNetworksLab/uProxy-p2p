@@ -383,6 +383,8 @@ export function socksEchoTestDescription(useChurn:boolean) {
     }).then(done);
   });
 
+  // TODO: The reproxy tests do not check explicitly if the request travelled
+  // through the reproxy - perhaps by echoing back port number
   it('run a simple echo test with reproxy', (done) => {
     var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
     var testModule = createTestModule(undefined, undefined, undefined, true);
