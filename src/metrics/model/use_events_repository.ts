@@ -24,7 +24,7 @@ export class UseEvent {
   }
 
   public isFirstUse(): boolean {
-    return this._previous_date === null; 
+    return this._previous_date === null;
   }
 
   public toString(): string {
@@ -32,7 +32,7 @@ export class UseEvent {
     let country_str = this.country();
     let previous_str = '(first use)';
     if (!this.isFirstUse()) {
-      previous_str = `previous_date: ${this.previousDate().toString()} (${this.previousCountry()})`; 
+      previous_str = `previous_date: ${this.previousDate().toString()} (${this.previousCountry()})`;
     }
     return `date: ${date_str} (${country_str}) ${previous_str}`;
   }
