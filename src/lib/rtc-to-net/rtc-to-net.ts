@@ -295,7 +295,7 @@ import ProxyConfig = require('./proxyconfig');
         var bandwidthTotal  = bitsTransferredTotal / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
         log.debug('Current bandwidth for whole connection: %1 bits/sec', bandwidthTotal);
         this.prevBytesTotal = currBytesTotal;
-        setTimeout(this.calculateBandwidthTotal, Session.BANDWIDTH_MONITOR_INTERVAL);
+        setTimeout(this.calculateBandwidthTotal, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
       }
     }
 
