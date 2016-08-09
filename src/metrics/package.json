@@ -2,7 +2,7 @@
   "name": "uproxy-metrics",
   "version": "1.0.0",
   "description": "Metrics server for uProxy",
-  "main": "index.js",
+  "main": "metrics_server/index.js",
   "dependencies": {
     "csv-parse": "^1.1.7",
     "es6-promise": "^3.2.1",
@@ -17,7 +17,7 @@
   "scripts": {
     "build": "mkdir -p ./out && npm run record-use-build",
     "test": "npm run use-repository-test",
-    "clean": "rm -rf ./out",
+    "clean": "rm -rf ./out ./typings",
     "ts-compile": "tsc",
     "package-json-copy": "cp package.json out",
     "record-use-build": "npm run ts-compile && npm run package-json-copy",

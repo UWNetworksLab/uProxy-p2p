@@ -1,7 +1,7 @@
 import gcloud = require('gcloud');
 
 import sd = require('../model/simple_date');
-import umr = require('../model/use_events_repository');
+import uer = require('../model/use_events_repository');
 
 function toDatastoreDate(date: sd.SimpleDate): Date {
   if (date === null) {
@@ -12,13 +12,13 @@ function toDatastoreDate(date: sd.SimpleDate): Date {
 }
 
 // UseEventsRepository implemented using the Google Cloud Datastore.
-export default class DatastoreUseEventsRepository implements umr.UseEventsRepository {
+export default class DatastoreUseEventsRepository implements uer.UseEventsRepository {
   // Pass the gcloud.Datastore object to use.
   public constructor(datastore: gcloud.datastore.Datastore) {
     this.datastore = datastore;
   }
 
-  public recordUseEvent(event: umr.UseEvent): Promise<void> {
+  public recordUseEvent(event: uer.UseEvent): Promise<void> {
     let entry = {
       key: this.datastore.key('LatestUse'),
       data: {
@@ -36,18 +36,18 @@ export default class DatastoreUseEventsRepository implements umr.UseEventsReposi
     });
   }
 
-  getUseEventsInRange(start_date: sd.SimpleDate, end_date: sd.SimpleDate): Promise<umr.UseEvent[]> {
+  getUseEventsInRange(start_date: sd.SimpleDate, end_date: sd.SimpleDate): Promise<uer.UseEvent[]> {
     const query = this.datastore.createQuery('LatestUse')
       .filter('date', '>=', toDatastoreDate(start_date))
       .filter('date', '<=', toDatastoreDate(end_date));
-    return new Promise<umr.UseEvent[]>((resolve, reject) => {
+    return new Promise<uer.UseEvent[]>((resolve, reject) => {
       this.datastore.runQuery(query, (error: any, db_entries: any[]) => {
         if (error) {
           return reject(error);
         }
-        let events = [] as umr.UseEvent[];
+        let events = [] as uer.UseEvent[];
         for (let entry of db_entries) {
-          events.push(new umr.UseEvent(sd.datefromJsDate(entry.data.date),
+          events.push(new uer.UseEvent(sd.datefromJsDate(entry.data.date),
                                        entry.data.country,
                                        sd.datefromJsDate(entry.data.previous_date),
                                        entry.data.previous_country));

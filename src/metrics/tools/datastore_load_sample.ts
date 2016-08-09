@@ -40,7 +40,7 @@ let repo = new DatastoreUseEventsRepository(datastore);
 
 let load_future = repo.countEntries().then((count) => {
   console.log('Datastore has %d entries before load', count);
-  return LoadSample('./tools/sample_usage.csv', repo);
+  return LoadSample('./tools/sample_events.csv', repo);
 });
 
 load_future.then((values) => {
