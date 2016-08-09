@@ -786,13 +786,16 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return null;
   }
 
-  public updateOrgPolicy(policy :uproxy_core_api.ManagedPolicyUpdate) :void {
-    globals.settings.enforceProxyServerValidity = policy.
-      enforceProxyServerValidity;
-    globals.settings.validProxyServers = policy.validProxyServers;
-    this.updateGlobalSettings(globals.settings);
+  public updateOrgPolicy = (policy :uproxy_core_api.ManagedPolicyUpdate): void => {
+    // have to load settings first to make sure we don't overwrite anything
+    globals.loadSettings.then(() => {
+      globals.settings.enforceProxyServerValidity = policy.
+        enforceProxyServerValidity;
+      globals.settings.validProxyServers = policy.validProxyServers;
+      this.updateGlobalSettings(globals.settings);
 
-    ui.update(uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS, globals.settings);
+      ui.update(uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS, globals.settings);
+    });
   }
 
   public verifyUser = (inst:social.InstancePath) :void => {
