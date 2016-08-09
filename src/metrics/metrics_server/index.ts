@@ -2,7 +2,8 @@
 
 import gcloud = require('gcloud');
 
-import umr = require('../model/use_events_repository');
+import sd = require('../model/simple_date');
+import uer = require('../model/use_events_repository');
 import DatastoreUseEventsRepository from '../adaptors/datastore_use_events_repository';
 
 let datastore = gcloud().datastore({
@@ -22,24 +23,24 @@ export function recordUse(req: any, res: any): void {
       return res.status(500);
     }
 
-    let date = umr.eventDatefromString(query.date);
+    let date = sd.datefromString(query.date);
     if (!date) {
       return res.status(400).send('date is missing\n');
     }
-    let country_code: umr.CountryCode = query.country;
+    let country_code: uer.CountryCode = query.country;
     if (!country_code) { country_code = 'ZZ'; }
 
-    let previous_date = null as umr.EventDate;
-    let previous_country_code = null as umr.CountryCode;
+    let previous_date = null as sd.SimpleDate;
+    let previous_country_code = null as uer.CountryCode;
     if (query.previous_date) {
-      previous_date = umr.eventDatefromString(query.previous_date);
+      previous_date = sd.datefromString(query.previous_date);
       if (!previous_date) {
         return res.status(400).send(`Could not parse previous_date: ${query.previous_date}\n`);
       }
       previous_country_code = query.previous_country;
       if (!previous_country_code) { previous_country_code = 'ZZ' }
     }
-    let event = new umr.UseEvent(date, country_code, previous_date, previous_country_code);
+    let event = new uer.UseEvent(date, country_code, previous_date, previous_country_code);
     repository.recordUseEvent(event).then(() => {
       res.status(200).send('Use recorded\n');
     }, (error) => {

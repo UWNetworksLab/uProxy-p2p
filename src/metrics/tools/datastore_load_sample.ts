@@ -1,7 +1,10 @@
+/// <reference path="../typings/globals/csv-parse/index.d.ts" />
+
 import fs = require('fs');
 import gcloud = require('gcloud');
 import csv_parse = require('csv-parse/lib/sync');
 
+import sd = require('../model/simple_date');
 import * as umr from '../model/use_events_repository';
 import DatastoreUseEventsRepository from '../adaptors/datastore_use_events_repository';
 
@@ -17,9 +20,9 @@ function LoadSample(inputFilename: string, repo: umr.UseEventsRepository): Promi
   let entries = csv_parse(content.toString(), { columns: true }) as CsvEntry[];
   console.log('Read %d items from %s', entries.length, inputFilename);
   let insertions = entries.map((entry) => {
-    let date = umr.eventDatefromString(entry.latest_date);
+    let date = sd.datefromString(entry.latest_date);
     let country = entry.latest_country;
-    let previous_date = umr.eventDatefromString(entry.previous_date);
+    let previous_date = sd.datefromString(entry.previous_date);
     if (!previous_date) { previous_date = null; }
     let previous_country = entry.previous_country;
     if (!previous_country) { previous_country = null }

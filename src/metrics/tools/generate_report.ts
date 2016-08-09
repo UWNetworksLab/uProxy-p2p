@@ -1,6 +1,9 @@
+/// <reference path="../typings/globals/es6-collections/index.d.ts" />
+
 import gcloud = require('gcloud');
 import fs = require('fs');
 
+import sd = require('../model/simple_date');
 import umr = require('../model/use_events_repository');
 import DatastoreUseEventsRepository from '../adaptors/datastore_use_events_repository';
 
@@ -14,8 +17,8 @@ class DateRangeMetrics {
   public re_activations = 0;
 };
 
-function MetricsForDateRange(events: umr.UseEvent[], start_date: umr.EventDate,
-  end_date: umr.EventDate, country_matcher: CountryMatcher) {
+function MetricsForDateRange(events: umr.UseEvent[], start_date: sd.SimpleDate,
+  end_date: sd.SimpleDate, country_matcher: CountryMatcher) {
   let metrics = new DateRangeMetrics;
   for (let event of events) {
     let date = event.date();
@@ -41,7 +44,7 @@ function MetricsForDateRange(events: umr.UseEvent[], start_date: umr.EventDate,
   return metrics;
 }
 
-function LastUse(events: umr.UseEvent[], query_date: umr.EventDate, query_country: CountryMatcher): number {
+function LastUse(events: umr.UseEvent[], query_date: sd.SimpleDate, query_country: CountryMatcher): number {
   let last_use = 0;
   for (let event of events) {
     if (query_country.matches(event.country()) && query_date.equals(event.date())) {
@@ -63,7 +66,7 @@ class CsvRangeReport {
     this.output = fs.createWriteStream(filename);
   }
 
-  public addLine(date: umr.EventDate, country_matcher: CountryMatcher, range: number, metrics: DateRangeMetrics): void {
+  public addLine(date: sd.SimpleDate, country_matcher: CountryMatcher, range: number, metrics: DateRangeMetrics): void {
     let range_str = `${range}d`;
     if (range % 7 == 0) {
       range_str = `${range / 7}w`;
@@ -85,7 +88,7 @@ class CsvDateHistogram {
     this.output = fs.createWriteStream(filename);
   }
 
-  public addDateValue(date: umr.EventDate, country_matcher: CountryMatcher, value: number): void {
+  public addDateValue(date: sd.SimpleDate, country_matcher: CountryMatcher, value: number): void {
     this.output.write(`${date},${country_matcher},${value}\n`);
   }
 
@@ -131,7 +134,7 @@ repo.countEntries().then((count) => {
   console.log('Datastore has %d entries', count);
 })
 
-let end_date = umr.eventDatefromString('2016-08-06');
+let end_date = sd.datefromString('2016-08-06');
 let start_date = end_date.minusDays(180);
 
 // Complexity: date_range * events

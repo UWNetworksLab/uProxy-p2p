@@ -1,8 +1,9 @@
 import gcloud = require('gcloud');
 
+import sd = require('../model/simple_date');
 import umr = require('../model/use_events_repository');
 
-function toDatastoreDate(date: umr.EventDate): Date {
+function toDatastoreDate(date: sd.SimpleDate): Date {
   if (date === null) {
     return null;
   }
@@ -35,7 +36,7 @@ export default class DatastoreUseEventsRepository implements umr.UseEventsReposi
     });
   }
 
-  getUseEventsInRange(start_date: umr.EventDate, end_date: umr.EventDate): Promise<umr.UseEvent[]> {
+  getUseEventsInRange(start_date: sd.SimpleDate, end_date: sd.SimpleDate): Promise<umr.UseEvent[]> {
     const query = this.datastore.createQuery('LatestUse')
       .filter('date', '>=', toDatastoreDate(start_date))
       .filter('date', '<=', toDatastoreDate(end_date));
@@ -46,9 +47,9 @@ export default class DatastoreUseEventsRepository implements umr.UseEventsReposi
         }
         let events = [] as umr.UseEvent[];
         for (let entry of db_entries) {
-          events.push(new umr.UseEvent(umr.eventDatefromJsDate(entry.data.date),
+          events.push(new umr.UseEvent(sd.datefromJsDate(entry.data.date),
                                        entry.data.country,
-                                       umr.eventDatefromJsDate(entry.data.previous_date),
+                                       sd.datefromJsDate(entry.data.previous_date),
                                        entry.data.previous_country));
         }
         resolve(events);
@@ -56,7 +57,7 @@ export default class DatastoreUseEventsRepository implements umr.UseEventsReposi
     });
   }
 
-  getUniqueClients(start_date: umr.EventDate, end_date: umr.EventDate): Promise<number> {
+  getUniqueClients(start_date: sd.SimpleDate, end_date: sd.SimpleDate): Promise<number> {
     debugger;
     return new Promise<number>((resolve, reject) => {
       this.getUseEventsInRange(start_date, end_date).then((entries) => {
