@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express = require('express');
 
 import sd = require('../model/simple_date');
 import uer = require('../model/use_events_repository');
