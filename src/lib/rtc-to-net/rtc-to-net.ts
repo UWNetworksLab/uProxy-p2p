@@ -231,7 +231,9 @@ import ProxyConfig = require('./proxyconfig');
           channel,
           this.proxyConfig,
           this.bytesReceivedFromPeer,
-          this.bytesSentToPeer);
+          this.bytesSentToPeer,
+          this.userId_
+      );
       this.sessions_[channelLabel] = session;
       session.start().catch((e:Error) => {
         log.warn('session %1 failed to connect to remote endpoint: %2', [
@@ -335,7 +337,9 @@ import ProxyConfig = require('./proxyconfig');
         private dataChannel_:peerconnection.DataChannel,
         private proxyConfig_:ProxyConfig,
         private bytesReceivedFromPeer_:handler.QueueFeeder<number,void>,
-        private bytesSentToPeer_:handler.QueueFeeder<number,void>) {}
+        private bytesSentToPeer_:handler.QueueFeeder<number,void>,
+        private userId_?:string
+    ) {}
 
     // Returns onceReady.
     public start = () : Promise<void> => {
@@ -514,7 +518,7 @@ import ProxyConfig = require('./proxyconfig');
           } else if (auth === socks_headers.Auth.USERPASS) {
             // Create username password auth request
             var userpass :socks_headers.UserPassRequest = {
-              username: this.proxyConfig_.userId || 'user',
+              username: this.userId_ || 'user',
               password: ''
             };
             var userpassRequest = socks_headers.composeUserPassRequest(userpass);
