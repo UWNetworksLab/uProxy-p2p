@@ -54,6 +54,9 @@ import ProxyConfig = require('./proxyconfig');
     // Public for tests.
     public static SESSION_LIMIT = 10000;
 
+    private static BANDWIDTH_LIMIT = 1000000;
+    private static BANDWIDTH_MONITOR_INTERVAL = 5000;
+
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
 
@@ -290,10 +293,10 @@ import ProxyConfig = require('./proxyconfig');
         }
         var bitsTransferred = (currBytes - this.prevBytes) * 8;
         // Bandwidth is measured in bits/sec.
-        var bandwidth  = bitsTransferred / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        var bandwidth  = bitsTransferred / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
         log.debug('Current bandwidth for whole connection: %1 bits/sec', bandwidth);
         this.prevBytes = currBytes;
-        setTimeout(this.calculateBandwidth, Session.BANDWIDTH_MONITOR_INTERVAL);
+        setTimeout(this.calculateBandwidth, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
       }
     }
 
@@ -352,7 +355,7 @@ import ProxyConfig = require('./proxyconfig');
     private channelReceivedBytes_ :number = 0;
 
     private bandwidthOverLimit :boolean = false;
-    private limitBandwidth: boolean = false;
+    private limitBandwidth: boolean = true;
 
     // Used to stop the calculation of bandwidth.
     private stopBandwidthCalc_ :boolean = false;
@@ -363,7 +366,7 @@ import ProxyConfig = require('./proxyconfig');
     // The length of each interval used to calculate bandwidth, in milliseconds.
     public static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
-    public static BANDWIDTH_LIMIT = 1000000; // 1 Mbps
+    public static BANDWIDTH_LIMIT = 1000; // 1 Mbps
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -731,19 +734,19 @@ import ProxyConfig = require('./proxyconfig');
             // Figures out the time needed to pause to correct bandwidth back to limit-- measured in milliseconds.
             var timeDifference_ = (bandwidthDifference_ / Session.BANDWIDTH_LIMIT) * 1000; 
             // Pauses to account for timeDifference.
-            this.tcpConnection_.pause();
-            log.debug('%1: pausing for %2 ms; current bytes sent/received: %3', this.channelLabel(), timeDifference_, this.currBytes_);
-            setTimeout(this.resumeAfterBandwidthOverflow, timeDifference_);
-            this.prevBytes_ = this.currBytes_;
-
-            // If the TCP connection is paused when calculateBandwidth is called again, the bandwidth should be 0.
-            setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
-          } else {
-            this.prevBytes_ = this.currBytes_;
-            setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
+            this.pauseForBandwidthOverflow(timeDifference_);
           }
+            // If the TCP connection is paused when calculateBandwidth is called again, the bandwidth should be 0.
+            this.prevBytes_ = this.currBytes_;
+            setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
         }
       }
+    }
+
+    private pauseForBandwidthOverflow = (pauseTime:number) : void => {
+      this.tcpConnection_.pause();
+      log.debug('%1: pausing for %2 ms; current bytes sent/received: %3', this.channelLabel(), pauseTime, this.currBytes_);
+      setTimeout(this.resumeAfterBandwidthOverflow, pauseTime);
     }
 
     private resumeAfterBandwidthOverflow = () : void => {
