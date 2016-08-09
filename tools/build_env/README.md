@@ -11,19 +11,19 @@ easier to set up the development environment for new uProxy developers.
 First, install Docker:
 https://docs.docker.com/engine/installation/
 
-Thereafter, you just need to add this prefix to your commands:
-`docker run --rm -v "$PWD":/worker -w /worker uproxy/build`
+Thereafter, you just need to add this prefix to your commands: `./tools/build_env/build_env.sh`
 
 So, to install dependencies and build uProxy for Chrome:
 ```bash
-docker run --rm -v "$PWD":/worker -w /worker uproxy/build npm install
-docker run --rm -v "$PWD":/worker -w /worker uproxy/build grunt build_chrome
+./tools/build_env/build_env.sh npm install
+./tools/build_env/build_env.sh grunt build_chrome
 ```
 
-You may wish to create an `alias` for the Docker prefix. What's happening when you use this prefix? Roughly:
+What's happening when you use this "script prefix"? Roughly:
 
  1. Starts a new Docker container, fetching the `uproxy/build` image from Docker Hub if necessary.
- 1. Runs the specified command.
+ 1. Runs the specified command in the container.
+ 1. Makes you the owner of all files in the repository (because commands in the container run as `root`, any new files created in the previous step will be owned by `root`).
  1. Deletes the container.
 
 ## Updating the Image
@@ -31,10 +31,12 @@ You may wish to create an `alias` for the Docker prefix. What's happening when y
 Build the image locally:
 
 ```bash
-docker build -t uproxy/build tools/build_env
+./tools/build_env/build_env.sh -b
 ```
 
-Test, then upload to Docker Hub:
+Upload to Docker Hub:
 ```bash
-docker push uproxy/build
+./tools/build_env/build_env.sh -p
 ```
+
+The `-b` and `-p` switches may be used together but please test before uploading to Docker Hub.
