@@ -357,7 +357,7 @@ import ProxyConfig = require('./proxyconfig');
     private channelReceivedBytes_ :number = 0;
 
     private bandwidthOverLimit :boolean = false;
-    private limitBandwidth: boolean = true;
+    private limitBandwidth: boolean = false;
 
     // Used to stop the calculation of bandwidth.
     private stopBandwidthCalc_ :boolean = false;
@@ -368,7 +368,8 @@ import ProxyConfig = require('./proxyconfig');
     // The length of each interval used to calculate bandwidth, in milliseconds.
     private static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
-    public static BANDWIDTH_LIMIT = 1000; // 1 Mbps
+    public static BANDWIDTH_LIMIT = 1000000;
+    // 1 Mbps
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -734,7 +735,7 @@ import ProxyConfig = require('./proxyconfig');
             log.debug('%1: went over the limit', this.channelLabel());
             var bandwidthDifference_ = bandwidthSession_ - Session.BANDWIDTH_LIMIT;
             // Figures out the time needed to pause to correct bandwidth back to limit-- measured in milliseconds.
-            var timeDifference_ = (bandwidthDifference_ / Session.BANDWIDTH_LIMIT) * 1000; 
+            var timeDifference_ = (bandwidthDifference_ / Session.BANDWIDTH_LIMIT) * 1000;
             // Pauses to account for timeDifference.
             this.pauseForBandwidthOverflow(timeDifference_);
           }
