@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import bridge = require('../../bridge/bridge');
@@ -7,7 +7,7 @@ import net = require('../../net/net.types');
 import peerconnection = require('../../webrtc/peerconnection');
 import proxyintegrationtesttypes = require('./proxy-integration-test.types');
 import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
-import socks = require('../../socks-common/socks-headers');
+import socks_headers = require('../../socks/headers');
 import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
 import tcp = require('../../net/tcp');
 
@@ -106,14 +106,15 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       }
       this.socksToRtc_.handleSignalFromPeer(msg);
     });
-    this.socksToRtc_.on('signalForPeer', (msg:Object) => {
+    const start = this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint),
+        bridger('sockstortc', rtcPcConfig));
+    this.socksToRtc_.signalsForPeer.setSyncHandler((msg:Object) => {
       if (ipv6Only) {
         AbstractProxyIntegrationTest.stripIPv4_(msg);
       }
       this.rtcToNet_.handleSignalFromPeer(msg);
     });
-    return this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint),
-        bridger('sockstortc', rtcPcConfig));
+    return start;
   }
 
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
@@ -123,7 +124,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       this.dispatchEvent_('sockClosed', connection.connectionId);
     });
 
-    var authRequest = socks.composeAuthHandshakeBuffer([socks.Auth.NOAUTH]);
+    var authRequest = socks_headers.composeAuthHandshakeBuffer([socks_headers.Auth.NOAUTH]);
     log.debug('Creating auth handshake: %1', [authRequest]);
     connection.send(authRequest);
     var connected = new Promise<tcp.ConnectionInfo>((F, R) => {
@@ -134,25 +135,25 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     return connected.then((i:tcp.ConnectionInfo) => {
       return firstBufferPromise;
     }).then((buffer:ArrayBuffer) : Promise<ArrayBuffer> => {
-      var auth = socks.interpretAuthResponse(buffer);
+      var auth = socks_headers.interpretAuthResponse(buffer);
       log.debug('Received auth handshake reply: %1', [auth]);
-      if (auth != socks.Auth.NOAUTH) {
+      if (auth != socks_headers.Auth.NOAUTH) {
         throw new Error('SOCKS server returned unexpected AUTH response.  ' +
-                        'Expected NOAUTH (' + socks.Auth.NOAUTH + ') but got ' + auth);
+                        'Expected NOAUTH (' + socks_headers.Auth.NOAUTH + ') but got ' + auth);
       }
       log.debug('Connecting through socks to: %1', [webEndpoint]);
 
-      var request :socks.Request = {
-        command: socks.Command.TCP_CONNECT,
+      var request :socks_headers.Request = {
+        command: socks_headers.Command.TCP_CONNECT,
         endpoint: webEndpoint,
       };
       log.debug('Making socks request: %1', [request]);
-      connection.send(socks.composeRequestBuffer(request));
+      connection.send(socks_headers.composeRequestBuffer(request));
       return connection.receiveNext();
     }).then((buffer:ArrayBuffer) : Promise<tcp.Connection> => {
-      var response = socks.interpretResponseBuffer(buffer);
+      var response = socks_headers.interpretResponseBuffer(buffer);
       log.debug('Received request response: %1', [response]);
-      if (response.reply != socks.Reply.SUCCEEDED) {
+      if (response.reply != socks_headers.Reply.SUCCEEDED) {
         // TODO: Fix bad style: reject should only and always be an error.
         // We should be resolving with result status.
         return Promise.reject(response);

@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
 import net = require('../lib/net/net.types');
@@ -45,7 +45,6 @@ export interface GlobalSettings {
   language         :string;
   force_message_version :number;
   quiverUserName :string;
-  showCloud :boolean;
   proxyBypass: string[];
   enforceProxyServerValidity :boolean;
   validProxyServers :ValidProxyServerIdentity[];
@@ -66,7 +65,6 @@ export interface InitialState {
   globalSettings :GlobalSettings;
   onlineNetworks :social.NetworkState[];
   availableVersion :string;
-  copyPasteConnection :ConnectionState;
   portControlSupport :PortControlSupport;
 }
 
@@ -118,11 +116,6 @@ export enum Command {
   START_PROXYING = 1005,
   STOP_PROXYING = 1006,
   MODIFY_CONSENT = 1007, // TODO: make this work with the consent piece.
-  START_PROXYING_COPYPASTE_GET = 1008,
-  STOP_PROXYING_COPYPASTE_GET = 1009,
-  START_PROXYING_COPYPASTE_SHARE = 1010,
-  STOP_PROXYING_COPYPASTE_SHARE = 1011,
-  COPYPASTE_SIGNALLING_MESSAGE = 1012,
 
   SEND_CREDENTIALS = 1014,
   UPDATE_GLOBAL_SETTINGS = 1015,
@@ -172,9 +165,6 @@ export enum Update {
   STOP_GIVING = 2018,
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
-  // 2021 was POST_TO_CLOUDFRONT.  Replaced by Command.POST_REPORT.
-  // Legacy one-time connection string. Unused, do not send.
-  COPYPASTE_MESSAGE = 2022,
   FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
@@ -270,7 +260,8 @@ export enum PortControlSupport {PENDING, TRUE, FALSE};
 export enum CloudOperationType {
   CLOUD_INSTALL = 0,
   CLOUD_DESTROY = 1,
-  CLOUD_REBOOT = 2
+  CLOUD_REBOOT = 2,
+  CLOUD_HAS_OAUTH = 3
 }
 
 // Arguments to cloudUpdate
@@ -280,6 +271,11 @@ export interface CloudOperationArgs {
   providerName :string;
   // Provider-specific region in which to locate a new server.
   region ?:string;
+};
+
+// Result of cloudUpdate
+export interface CloudOperationResult {
+  hasOAuth? :boolean;
 };
 
 // Argument to removeContact
@@ -342,7 +338,9 @@ export interface CoreApi {
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  cloudUpdate(args :CloudOperationArgs): Promise<void>;
+  // Update: This is also now used for CloudOperationType.CLOUD_HAS_OAUTH,
+  // which is neither long-running nor potentially triggers an OAuth flow.
+  cloudUpdate(args :CloudOperationArgs): Promise<CloudOperationResult>;
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;

@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 /**
  * Script for the introductory splash screen.

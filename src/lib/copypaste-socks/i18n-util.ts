@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/i18n/i18n.d.ts' />
+/// <reference path='../../../third_party/i18n/i18n.d.ts' />
 
 // A little utility library for managing translation strings.
 
@@ -59,7 +59,13 @@ module i18nUtil {
   //
   // TODO (lucyhe): find a better way to do this.
   export function getBrowserLanguage() : string {
-    return navigator.language.substring(0, 2);
+    if (typeof navigator !== 'undefined') {
+      // firefox/chrome
+      return navigator.language.substring(0, 2);
+    } else {
+      // TODO in node, process.env.LANG may be usable
+      return 'xx';
+    }
   }
 
 }

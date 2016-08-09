@@ -4,9 +4,11 @@ node_js:
 before_install:
   - npm install -g grunt-cli bower
 install:
-  - ./setup.sh install
+  - npm install
 script:
-  - grunt build tslint unit_test
+  - grunt build
+  - grunt tslint
+  - grunt unit_test_nobuild
 sudo: false
 cache:
   directories:

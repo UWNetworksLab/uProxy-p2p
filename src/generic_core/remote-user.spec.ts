@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
 
@@ -18,6 +18,7 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import local_storage = require('./storage');
 import consent = require('./consent');
 
+import constants = require('./constants');
 import globals = require('./globals');
 import storage = globals.storage;
 import local_instance = require('./local-instance');
@@ -163,7 +164,7 @@ describe('remote_user.User', () => {
           instanceId: 'instanceId', description: '', publicKey: '',
           consent: {isOffering: false, isRequesting: false}
         },
-        version: globals.MESSAGE_VERSION
+        version: constants.MESSAGE_VERSION
       });
       expect(user.syncInstance_).toHaveBeenCalled();
     });
@@ -175,7 +176,7 @@ describe('remote_user.User', () => {
       user.handleMessage('fakeclient', {
         type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
         data: {},
-        version: globals.MESSAGE_VERSION
+        version: constants.MESSAGE_VERSION
       });
       expect(instance.handleSignal).toHaveBeenCalled();
     });
@@ -199,7 +200,7 @@ describe('remote_user.User', () => {
       expect(user.instanceToClient('fakeinstance')).toBeUndefined();
       expect(user.clientToInstance('fakeclient')).toBeUndefined();
       user.syncInstance_('fakeclient', instanceHandshake,
-          globals.MESSAGE_VERSION).then(() => {
+          constants.MESSAGE_VERSION).then(() => {
         expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
         expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
         instance = user.getInstance('fakeinstance');
@@ -221,14 +222,14 @@ describe('remote_user.User', () => {
       user.handleClient(clientState);
       // Pretend a valid instance message has been sent from the new client.
       user.syncInstance_('fakeclient2', instanceHandshake,
-          globals.MESSAGE_VERSION);
+          constants.MESSAGE_VERSION);
       expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient2');
       expect(user.clientToInstance('fakeclient')).toEqual(null);
       expect(user.clientToInstance('fakeclient2')).toEqual('fakeinstance');
     });
 
     it('syncs UI after updating instance', () => {
-      user.syncInstance_('fakeclient', instanceHandshake, globals.MESSAGE_VERSION);
+      user.syncInstance_('fakeclient', instanceHandshake, constants.MESSAGE_VERSION);
     });
 
   });  // describe client <---> instance

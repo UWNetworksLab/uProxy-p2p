@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 /**
  * core.ts
@@ -61,11 +61,6 @@ var commands :{[command :number] :((data?:any) => (Promise<any>|void))} = {};
 commands[uproxy_core_api.Command.LOGIN] = core.login;
 commands[uproxy_core_api.Command.LOGOUT] = core.logout;
 commands[uproxy_core_api.Command.MODIFY_CONSENT] = core.modifyConsent;
-commands[uproxy_core_api.Command.START_PROXYING_COPYPASTE_GET] = core.startCopyPasteGet;
-commands[uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_GET] = core.stopCopyPasteGet;
-commands[uproxy_core_api.Command.START_PROXYING_COPYPASTE_SHARE] = core.startCopyPasteShare;
-commands[uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE] = core.stopCopyPasteShare;
-commands[uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE] = core.sendCopyPasteSignal;
 commands[uproxy_core_api.Command.START_PROXYING] = core.start;
 commands[uproxy_core_api.Command.INVITE_GITHUB_USER] = core.inviteGitHubUser;
 commands[uproxy_core_api.Command.GET_INVITE_URL] = core.getInviteUrl;

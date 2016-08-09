@@ -16,12 +16,6 @@
         "type": "method",
         "value": [ "string", "string" ],
         "ret": {
-          "oauth": {
-            "access_token": "string",
-            "expires_in": "string",
-            "state": "string",
-            "token_type": "string"
-          },
           "ssh": {
             "public": "string",
             "private": "string"
@@ -29,7 +23,7 @@
           "network": {
             "ipv4": "string",
             "ipv6": "string",
-            "ssh_port": "string"
+            "ssh_port": "number"
           }
         },
         "err": {
@@ -54,6 +48,11 @@
           "errcode": "string",
           "message": "string"
         }
+      },
+      "hasOAuth": {
+        "type": "method",
+        "value": [],
+        "ret": "boolean"
       },
       "status": {
         "type": "event",

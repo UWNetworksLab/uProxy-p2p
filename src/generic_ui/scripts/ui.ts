@@ -1,7 +1,7 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/generic/jdenticon.d.ts' />
+/// <reference path='../../../third_party/generic/jsurl.d.ts' />
+/// <reference path='../../../third_party/generic/uparams.d.ts' />
 
 /**
  * ui.ts
@@ -107,15 +107,14 @@ export class UserInterface implements ui_constants.UiApi {
   private mapInstanceIdToUser_ :{[instanceId :string] :User} = {};
 
   /* Getting and sharing */
-  public gettingStatus :string = null;
-  public sharingStatus :string = null;
   public isSharingDisabled :boolean = false;
   public proxyingId: string; // ID of the most recent failed proxying attempt.
   private userCancelledGetAttempt_ :boolean = false;
 
   /* Translation */
-  public i18n_t :Function = translator_module.i18n_t;
-  public i18n_setLng :Function = translator_module.i18n_setLng;
+  public i18n_t = translator_module.i18n_t;
+  public i18n_setLng = translator_module.i18n_setLng;
+  public i18nSanitizeHtml = translator_module.i18nSanitizeHtml;
 
   /* About this uProxy installation */
   public availableVersion :string = null;
@@ -123,10 +122,9 @@ export class UserInterface implements ui_constants.UiApi {
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
-  public cloudInstallStatus :string = '';
-  public cloudInstallProgress = 0;
-
-  // User-initiated proxy access mode.
+  // User-initiated proxy access mode. Set when starting the proxy in order to
+  // stop it accordingly, and to automatically restart proxying in case of a
+  // disconnect.
   private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
 
   /**
@@ -269,11 +267,11 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.cloudInstallStatus = this.i18n_t(status);
+      this.fireSignal('cloud-install-status', status);
     });
 
     core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
-      this.cloudInstallProgress = progress;
+      this.fireSignal('cloud-install-progress', progress);
     });
 
     browserApi.on('inviteUrlData', this.handleInvite);
@@ -352,7 +350,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   public showDialog(heading :string, message :string, buttonText ?:string,
       displayData ?:string) {
-    return this.backgroundUi.openDialog(dialogs.getConfirmationDialogDescription(
+    return this.backgroundUi.openDialog(dialogs.getMessageDialogDescription(
         heading, message, buttonText, displayData));
   }
 
@@ -404,37 +402,36 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   private updateGettingStatusBar_ = () => {
-    // TODO: localize this.
+    var gettingStatus: string = null;
     if (this.instanceGettingAccessFrom_) {
-      this.gettingStatus = this.i18n_t('GETTING_ACCESS_FROM', {
+      gettingStatus = this.i18n_t('GETTING_ACCESS_FROM', {
         name: this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].name
       });
-    } else {
-      this.gettingStatus = null;
     }
+    this.fireSignal('update-getting-status', gettingStatus);
   }
 
   private updateSharingStatusBar_ = () => {
     // TODO: localize this - may require simpler formatting to work
     // in all languages.
+    var sharingStatus: string = null;
     var instanceIds = Object.keys(this.instancesGivingAccessTo);
-    if (instanceIds.length === 0) {
-      this.sharingStatus = null;
-    } else if (instanceIds.length === 1) {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_ONE', {
+    if (instanceIds.length === 1) {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_ONE', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name
       });
     } else if (instanceIds.length === 2) {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_TWO', {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_TWO', {
         name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
         name2: this.mapInstanceIdToUser_[instanceIds[1]].name
       });
-    } else {
-      this.sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_MANY', {
+    } else if (instanceIds.length > 2) {
+      sharingStatus = this.i18n_t('SHARING_ACCESS_WITH_MANY', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name,
         numOthers: (instanceIds.length - 1)
       });
     }
+    this.fireSignal('update-sharing-status', sharingStatus);
   }
 
   private addUser_ = (tokenObj :social.InviteTokenData, showConfirmation :boolean) : Promise<void> => {
@@ -489,7 +486,7 @@ export class UserInterface implements ui_constants.UiApi {
       } else {
         // Old v1 invites are base64 encoded JSON
         var lastNonCodeCharacter = Math.max(invite.lastIndexOf('/'), invite.lastIndexOf('#'));
-        var token = invite.substr(lastNonCodeCharacter + 1);
+        var token = invite.substring(lastNonCodeCharacter + 1);
 
         // Removes any non base64 characters that may appear, e.g. "%E2%80%8E"
         token = token.match('[A-Za-z0-9+/=_]+')[0];
@@ -662,7 +659,6 @@ export class UserInterface implements ui_constants.UiApi {
       // In the case where the user clicked stop, this will have no effect
       // (this function is idempotent).
       this.browserApi.stopUsingProxy();
-      this.proxyAccessMode_ = ProxyAccessMode.NONE;
     }
 
     this.updateGettingStatusBar_();
@@ -678,7 +674,6 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     this.browserApi.stopUsingProxy();
-    this.proxyAccessMode_ = ProxyAccessMode.NONE;
     this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
 
@@ -985,11 +980,6 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string, userName ?:string) : Promise<void> => {
-    if (network === 'Cloud') {
-      this.model.globalSettings.showCloud = true;
-      this.core.updateGlobalSettings(this.model.globalSettings);
-    }
-
     return this.core.login({
         network: network,
         loginType: uproxy_core_api.LoginType.INITIAL,
@@ -1172,12 +1162,8 @@ export class UserInterface implements ui_constants.UiApi {
     }
   }
 
-  public i18nSanitizeHtml = (i18nMessage :string) => {
-    // Remove all HTML other than supported tags like strong, a, p, etc.
-    return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
-  }
-
-  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs): Promise<void> => {
+  public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs)
+      :Promise<uproxy_core_api.CloudOperationResult> => {
     return this.core.cloudUpdate(args);
   }
 

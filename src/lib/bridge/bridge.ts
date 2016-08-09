@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import churn = require('../churn/churn');
 import churn_types = require('../churn/churn.types');
@@ -262,7 +262,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       pc:freedom.RTCPeerConnection.RTCPeerConnection)
       :peerconnection.PeerConnection<churn_types.ChurnSignallingMessage> => {
     log.debug('%1: constructing holographic ICE peerconnection', this.name_);
-    if (navigator.userAgent.indexOf('Android') !== -1) {
+    if (typeof navigator !== 'undefined' &&
+        navigator.userAgent.indexOf('Android') !== -1) {
       return new xchurn.Connection(pc, this.name_, true,
           this.portControl_, this.transformerConfig_);
     }

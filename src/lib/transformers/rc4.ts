@@ -1,5 +1,5 @@
-/// <reference path='../../../../third_party/simple-rc4/simple-rc4.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/simple-rc4/simple-rc4.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import crypto = require('crypto');
 import logging = require('../logging/logging');
@@ -21,6 +21,13 @@ const TRUNCATED_IV_LENGTH_BYTES = 8;
 export function sampleConfig(): Config {
   return {
     key: new Buffer(KEY_LENGTH_BYTES).fill(0).toString('hex')
+  };
+}
+
+// Creates a cryptographically secure random config, suitable for real-world use.
+export function randomConfig(): Config {
+  return {
+    key: crypto.randomBytes(KEY_LENGTH_BYTES).toString('hex')
   };
 }
 

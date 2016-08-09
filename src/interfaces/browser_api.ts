@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import net = require('../lib/net/net.types');
 
@@ -36,7 +36,6 @@ export interface BrowserAPI {
 
   on(name: string, callback: Function): void;
   on(name: 'inviteUrlData', callback: (url: string) => void): void;
-  on(name: 'copyPasteUrlData', callback: (url: string) => void): void;
   on(name :'notificationClicked', callback :(tag :string) => void) :void;
   on(name :'proxyDisconnected', callback :(info?:ProxyDisconnectInfo) => void) :void;
 

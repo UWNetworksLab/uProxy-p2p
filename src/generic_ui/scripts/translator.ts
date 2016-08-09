@@ -1,5 +1,5 @@
-/// <reference path='../../../../../node_modules/i18next-client/typescript/i18next.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../node_modules/i18next-client/typescript/i18next.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import i18next = require('i18next-client');
 import xregexp = require('xregexp');
@@ -59,5 +59,10 @@ export const i18n_t = (placeholder :string, params ?:any): string => {
 };
 
 export const i18n_setLng = i18next.setLng;
+
+export const i18nSanitizeHtml = (i18nMessage: string) => {
+  // Remove all HTML other than supported tags like strong, a, p, etc.
+  return i18nMessage.replace(/<((?!(\/?(strong|a|p|br|uproxy-faq-link)))[^>]+)>/g, '');
+}
 
 export const i18n_languagesAvailable :string[] = Object.keys(window.i18nResources);

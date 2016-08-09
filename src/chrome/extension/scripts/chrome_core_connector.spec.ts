@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../third_party/typings/index.d.ts'/>
 
 import background_ui = require('../../../generic_ui/scripts/background_ui');
 import ChromeCoreConnector = require('./chrome_core_connector');

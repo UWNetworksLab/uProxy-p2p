@@ -1,5 +1,5 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../third_party/typings/generic/jsurl.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
+/// <reference path='../../third_party/generic/jsurl.d.ts' />
 
 /**
  * social.ts
@@ -72,7 +72,7 @@ export function initializeNetworks() :void {
         continue;
       }
 
-      var name = dependency.substr(PREFIX.length);
+      var name = dependency.substring(PREFIX.length);
       networks[name] = {};
     }
   }
@@ -499,7 +499,7 @@ export function notifyUI(networkName :string, userId :string) {
         var myKey = this.getStorePath();
         for (var i in keys) {
           if (keys[i].indexOf(myKey) === 0) {
-            var userId = keys[i].substr(myKey.length);
+            var userId = keys[i].substring(myKey.length);
             if (this.isNewFriend_(userId)) {
               this.addUser(userId);
             }
@@ -542,7 +542,7 @@ export function notifyUI(networkName :string, userId :string) {
         // If we change agent to use instanceId, we also should modify
         // Firebase code to change disconnected clients to OFFLINE, rather
         // than removing them.
-        var agent = 'uproxy' + Math.random().toString().substr(2,10);
+        var agent = 'uproxy' + Math.random().toString().substring(2, 12);
         request = {
           agent: agent,
           version: '0.1',
@@ -556,7 +556,7 @@ export function notifyUI(networkName :string, userId :string) {
           userName = globals.settings.quiverUserName;
         }
         request = {
-          agent: Math.random().toString().substr(2,10),
+          agent: Math.random().toString().substring(2, 12),
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
           interactive: interactive,

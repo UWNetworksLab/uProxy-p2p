@@ -15,13 +15,16 @@
 ROOT_DIR="$(cd "$(dirname $0)"; pwd)";
 
 if [ "$1" = "debug" ]; then
-  APK_FILE="$ROOT_DIR/build/dev/uproxy/android/platforms/android/build/outputs/apk/android-armv7-debug.apk"
+  APK_PATH="$ROOT_DIR/build/src/android/platforms/android/build/outputs/apk"
 elif [ "$1" = "release" ]; then
-  APK_FILE="$ROOT_DIR/build/dist/android/platforms/android/build/outputs/apk/android-armv7-release.apk"
+  APK_PATH="$ROOT_DIR/build/dist/android/platforms/android/build/outputs/apk"
 else
   echo "Unknown build type $1"
   exit 1
 fi
+
+APK_UNALIGNED="$APK_PATH/android-armv7-$1-unaligned.apk"
+APK_FINAL="$APK_PATH/android-armv7-$1.apk"
 
 LIB_URL="https://github.com/uProxy/webrtc-mod/releases/download/20-1/libxwalkcore.so"
 if [ -z "$TMPDIR" ]; then TMPDIR="/tmp"; fi
@@ -34,10 +37,10 @@ mkdir -p "$TMPDIR/$LIB_PATH"
 curl $LIB_URL -o "$TMPDIR/$LIB_PATH/$LIB_NAME" -L
 
 # Replace the Crosswalk library inside the apk
-jar -ufv $APK_FILE -C $TMPDIR "$LIB_PATH/$LIB_NAME"
+jar -ufv $APK_UNALIGNED -C $TMPDIR "$LIB_PATH/$LIB_NAME"
 
 # Delete the META-INF directory to allow re-signing
-zip -d $APK_FILE "META-INF/*"
+zip -d $APK_UNALIGNED "META-INF/*"
 
 # Re-sign
 if [ "$1" = "debug" ]; then
@@ -56,4 +59,11 @@ else
   exit 1
 fi
 
-jarsigner -keystore "$KEY_DIR/$storeFile" -storepass $storePassword -keypass $keyPassword $APK_FILE $keyAlias
+jarsigner -keystore "$KEY_DIR/$storeFile" -storepass $storePassword -keypass $keyPassword $APK_UNALIGNED $keyAlias
+
+# Overwrite the aligned apk with a new one.  zipalign isn't on the path, and
+# more than one might be installed, so first we have to pick one.
+ZIPALIGN_TOOLS=( $ANDROID_HOME/build-tools/*/zipalign )
+ZIPALIGN="${ZIPALIGN_TOOLS[${#ZIPALIGN_TOOLS[@]}-1]}"
+$ZIPALIGN -f 4 $APK_UNALIGNED $APK_FINAL
+

@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import logging = require('../logging/logging');
 import promises = require('../promises/promises');
@@ -20,7 +20,7 @@ class Pinger {
   // Resolves once a connection has been established, rejecting if
   // no connection can be made within the timeout.
   public ping = (): Promise<void> => {
-    log.debug('pinging %1:%2...', this.host_, this.port_);
+    log.debug('pinging %1:%2...', this.host_ , this.port_);
 
     return promises.retry(() => {
       const socket = freedom['core.tcpsocket']();
@@ -29,7 +29,7 @@ class Pinger {
         try {
           freedom['core.tcpsocket'].close(socket);
         } catch (e) {
-          console.warn('error destroying socket: ' + e.message);
+          log.warn('error destroying socket: ' + e.message);
         }
       };
 
@@ -37,10 +37,10 @@ class Pinger {
       //       out almost immediately if nothing is listening on the port,
       //       it works well for our purposes.
       return socket.connect(this.host_, this.port_).then((unused: any) => {
-        log.debug('connected to %1:%2', this.host_, this.port_);
+        log.debug('connected to ' + this.host_ + ':' + this.port_ + '...');
         destructor();
       }, (e: Error) => {
-        log.debug('connection failed to %1:%2', this.host_, this.port_);
+        log.debug('connection failed to ' + this.host_ + ':' + this.port_ + '...');
         destructor();
         throw e;
       });

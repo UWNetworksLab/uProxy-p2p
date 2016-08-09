@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');
@@ -65,7 +65,6 @@ export class Model {
     language: null,  // sentinel indicating lang should be calculated from browser settings
     force_message_version: 0,
     quiverUserName: '',
-    showCloud: false,
     proxyBypass: [],
     enforceProxyServerValidity: false,
     validProxyServers: [],

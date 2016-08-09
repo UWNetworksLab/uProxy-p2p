@@ -1,10 +1,9 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 import ui_constants = require('../../interfaces/ui');
 
 Polymer({
-  searchQuery: '',
   ready: function() {
     this.ui_constants = ui_constants;
   },
