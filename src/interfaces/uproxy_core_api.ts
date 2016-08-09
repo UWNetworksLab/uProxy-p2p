@@ -53,7 +53,7 @@ export interface GlobalSettings {
   quiverUserName :string;
   proxyBypass: string[];
   enforceProxyServerValidity :boolean;
-  validProxyServers :ValidProxyServerIdentity[];
+  validProxyServers :ValidProxyServerIdentities;
   activePromoId: string;
   shouldHijackDO: boolean;
   crypto: boolean;
@@ -74,13 +74,13 @@ export interface InitialState {
   portControlSupport :PortControlSupport;
 }
 
-export interface ValidProxyServerIdentity {
+export interface ValidProxyServerIdentities {
   [key: string]: string;
 }
 
 export interface ManagedPolicyUpdate {
   enforceProxyServerValidity :boolean;
-  validProxyServers :ValidProxyServerIdentity[];
+  validProxyServers :ValidProxyServerIdentities;
 }
 
 export interface ConnectionState {

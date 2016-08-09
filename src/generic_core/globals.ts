@@ -34,7 +34,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   quiverUserName: '',
   proxyBypass: constants.DEFAULT_PROXY_BYPASS.slice(0),
   enforceProxyServerValidity: false,
-  validProxyServers: [],
+  validProxyServers: {},
   activePromoId: null,  // set on promoIdDetected
   enabledExperiments: [],
   shouldHijackDO: true,
