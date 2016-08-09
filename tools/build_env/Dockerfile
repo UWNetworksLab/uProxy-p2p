@@ -14,10 +14,10 @@ ADD https://dl-ssl.google.com/linux/linux_signing_key.pub /tmp/google_key.pub
 RUN bash /tmp/add_nodejs_repository.sh && \
     apt-key add /tmp/google_key.pub && \
     echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list && \
-    apt-get -qq update && \
+    apt-get -q update && \
     apt-get install -qq git google-chrome-stable nodejs python xvfb && \
-    apt-get -qq autoremove && \
-    apt-get -qq clean && \
+    apt-get -q autoremove && \
+    apt-get -q clean && \
     npm install -g grunt-cli && \
     npm cache clean && \
     rm -rf /tmp/*
