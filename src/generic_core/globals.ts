@@ -41,7 +41,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   crypto: true,
   reproxy: {
     enabled: false,
-    socksEndpoint: {address: '127.0.0.1', port: 9050}
+    socksEndpoint: {address: '127.0.0.1', port: 9050},
   }
 };
 
