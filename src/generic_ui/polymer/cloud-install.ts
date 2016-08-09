@@ -1,6 +1,6 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');

@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/firefox/firefox.d.ts' />
+/// <reference path='../../../../third_party/firefox/firefox.d.ts' />
 
 /**
  * firefox_browser_api.ts

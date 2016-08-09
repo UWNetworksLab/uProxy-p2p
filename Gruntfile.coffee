@@ -10,7 +10,7 @@ path = require 'path'
 #-------------------------------------------------------------------------
 
 # Location of where src is copied into and compiled.
-devBuildPath = 'build/dev/uproxy'
+devBuildPath = 'build/src'
 distBuildPath = 'build/dist'
 # Location of where to copy/build third_party source/libs.
 thirdPartyBuildPath = 'build/third_party'
@@ -304,7 +304,10 @@ module.exports = (grunt) ->
         cwd: '<%= iosDistPath %>'
         command: '<%= ccaJsPath %> prepare'
       }
-      rmIosBuild: {
+      cleanAndroid: {
+        command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
+      }
+      cleanIos: {
         command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
       }
       androidReplaceXwalkDev: {
@@ -316,7 +319,7 @@ module.exports = (grunt) ->
       installFreedomForNodeForZork: {
         # This allows our Docker containers, which do not have access to the
         # git repo's "top-level" node_modules/ folder find freedom-for-node.
-        command: 'npm install --prefix build/dev/uproxy/lib/samples/zork-node freedom-for-node'
+        command: 'npm install --prefix build/src/lib/samples/zork-node freedom-for-node'
       }
     }
 
@@ -898,7 +901,7 @@ module.exports = (grunt) ->
     #-------------------------------------------------------------------------
     jasmine:
       chrome_extension: Rule.jasmineSpec('chrome/extension/scripts/',
-          [path.join('build/dev/uproxy/mocks/chrome_mocks.js')])
+          [path.join('build/src/mocks/chrome_mocks.js')])
 
     jasmine_chromeapp: {
       all: {
@@ -914,7 +917,7 @@ module.exports = (grunt) ->
                   'core.spec.static.js'
         ],
         options: {
-          outdir: 'build/dev/uproxy/integration/'
+          outdir: 'build/src/integration/'
           # Uncomment this for debugging
           # keepRunner: true,
         }
@@ -1142,6 +1145,7 @@ module.exports = (grunt) ->
 
   # Mobile OS build tasks
   grunt.registerTask 'build_android', [
+    'exec:cleanAndroid'
     'build_cca'
     'exec:ccaCreateDev'
     'exec:ccaPlatformAndroidDev'
@@ -1170,7 +1174,7 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'build_ios', [
-    'exec:rmIosBuild'
+    'exec:cleanIos'
     'build_cca'
     'exec:ccaCreateIosDev'
     'exec:ccaAddPluginsIosBuild'
@@ -1233,10 +1237,10 @@ module.exports = (grunt) ->
   ]
 
   # Builds all code, including the "dist" build, but skips
-  # linting and testing which can both be annoying and slow.
+  # iOS and Android as well as
+  # ts-linting and testing which can be annoying and slow.
   # jshint is here because catches hard syntax errors, etc.
   grunt.registerTask 'build', [
-    'exec:rmIosBuild'
     'build_chrome'
     'build_firefox'
     'build_cca'

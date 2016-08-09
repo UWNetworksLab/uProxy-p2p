@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import bridge = require('../bridge/bridge');
@@ -174,11 +174,6 @@ function get(
     :void {
   var socksToRtc = new socks_to_rtc.SocksToRtc();
 
-  // Must do this before calling start.
-  socksToRtc.on('signalForPeer', (signal:Object) => {
-    sendReply(JSON.stringify(signal), connection);
-  });
-
   socksToRtc.start(new tcp.Server(socksEndpoint), bridge.best('sockstortc',
       pcConfig, undefined, transformerConfig)).then((endpoint:net.Endpoint) => {
     log.info('%1: SOCKS server listening on %2 (curl -x socks5h://%3:%4 www.example.com)',
@@ -188,6 +183,11 @@ function get(
     log.error('%1: failed to start SOCKS server: %2',
         connection.connectionId, e.message);
     connection.close();
+  });
+
+  // Must do this after calling start.
+  socksToRtc.signalsForPeer.setSyncHandler((signal:Object) => {
+    sendReply(JSON.stringify(signal), connection);
   });
 
   lines.setSyncHandler((signal:string): void => {

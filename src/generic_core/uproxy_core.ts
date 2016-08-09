@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');

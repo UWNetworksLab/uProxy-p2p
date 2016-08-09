@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 var ui = ui_context.ui;
 

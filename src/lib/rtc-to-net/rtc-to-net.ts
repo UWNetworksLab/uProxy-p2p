@@ -1,7 +1,7 @@
 // Server which handles SOCKS connections over WebRTC datachannels and send them
 // out to the internet and sending back over WebRTC the responses.
 
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import handler = require('../handler/queue');
@@ -54,8 +54,13 @@ import ProxyConfig = require('./proxyconfig');
     // Public for tests.
     public static SESSION_LIMIT = 10000;
 
+    public static BANDWIDTH_MONITOR_INTERVAL = 5000;
+
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
+
+    private stopBandwidthCalcTotal :boolean = false;
+    private prevBytesTotal :number = 0;
 
     // Returns true if the addition was successful.
     private static addUserSession_ = (userId:string) : boolean => {
@@ -91,7 +96,9 @@ import ProxyConfig = require('./proxyconfig');
     // (externally provided) proxyconfig.
     public proxyConfig :ProxyConfig;
 
-    // Message handler queues to/from the peer.
+    // Message handler queues to/from the peer. Accessing this before
+    // calling start() will result in an error.
+    // TODO: public fields bad!
     public signalsForPeer :handler.QueueHandler<Object, void>;
 
     // The two Queues below only count bytes transferred between the SOCKS
@@ -159,6 +166,7 @@ import ProxyConfig = require('./proxyconfig');
       if (this.peerConnection_) {
         throw new Error('already configured');
       }
+      this.stopBandwidthCalcTotal = false;
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(peerconnection, 'RtcToNet');
       this.proxyConfig = proxyConfig;
@@ -171,6 +179,7 @@ import ProxyConfig = require('./proxyconfig');
       // fulfills first.  https://github.com/uProxy/uproxy/issues/760
       this.onceReady = this.peerConnection_.onceConnected.then(() => {});
       this.onceReady.catch(this.fulfillStopping_);
+      this.calculateBandwidthTotal();
       this.peerConnection_.onceClosed
         .then(() => {
           log.debug('peerconnection terminated');
@@ -266,6 +275,7 @@ import ProxyConfig = require('./proxyconfig');
       // TODO(ldixon): explore why not not just return
       // this.peerConnection_.close(); call the PeerConnection's close and
       // return synchronously.
+      this.stopBandwidthCalcTotal = true;
       return new Promise<void>((F, R) => {
         this.peerConnection_.close();
         F();
@@ -274,6 +284,21 @@ import ProxyConfig = require('./proxyconfig');
 
     public handleSignalFromPeer = (message:Object) :void => {
       return this.peerConnection_.handleSignalMessage(message);
+    }
+
+    private calculateBandwidthTotal = () : void => {
+      if (!this.stopBandwidthCalcTotal) {
+        var currBytesTotal = 0;
+        for (var label in this.sessions_) {
+          currBytesTotal += this.sessions_[label].currBytes_;
+        }
+        var bitsTransferredTotal = (currBytesTotal - this.prevBytesTotal) * 8;
+        // Bandwidth is measured in bits/sec.
+        var bandwidthTotal  = bitsTransferredTotal / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('Current bandwidth for whole connection: %1 bits/sec', bandwidthTotal);
+        this.prevBytesTotal = currBytesTotal;
+        setTimeout(this.calculateBandwidthTotal, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
+      }
     }
 
     public toString = () : string => {
@@ -329,6 +354,15 @@ import ProxyConfig = require('./proxyconfig');
     private socketReceivedBytes_ :number = 0;
     private channelSentBytes_ :number = 0;
     private channelReceivedBytes_ :number = 0;
+
+    // Used to stop the calculation of bandwidth.
+    private stopBandwidthCalc_:boolean = false;
+    // Records the bytes sent to and from peer, for the current time interval.
+    public currBytes_:number = 0;
+    // Records the bytes sent to and from peer, for the previous time interval. 
+    public prevBytes_:number = 0;
+    // The length of each interval used to calculate bandwidth, in milliseconds.
+    private static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -391,7 +425,9 @@ import ProxyConfig = require('./proxyconfig');
         });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
-
+      //Reset bandwidth loop check.
+      this.stopBandwidthCalc_ = false;
+      this.calculateBandwidth_();
       // Shutdown once the data channel terminates.
       this.dataChannel_.onceClosed.then(() => {
         if (this.dataChannel_.dataFromPeerQueue.getLength() > 0) {
@@ -424,6 +460,7 @@ import ProxyConfig = require('./proxyconfig');
       // effectively immediate.  However, we wrap it in a promise to ensure
       // that any exception is sent to the Promise.catch, rather than
       // propagating synchronously up the stack.
+      this.stopBandwidthCalc_ = true;
       var shutdownPromises :Promise<any>[] = [
         new Promise((F, R) => { this.dataChannel_.close(); F(); })
       ];
@@ -596,8 +633,8 @@ import ProxyConfig = require('./proxyconfig');
         throw new Error('received non-buffer data from datachannel');
       }
       this.bytesReceivedFromPeer_.handle(data.buffer.byteLength);
+      this.currBytes_ += data.buffer.byteLength;
       this.channelReceivedBytes_ += data.buffer.byteLength;
-
       this.tcpConnection_.send(data.buffer);
     }
 
@@ -609,6 +646,7 @@ import ProxyConfig = require('./proxyconfig');
       var socketReader = (data:ArrayBuffer) => {
         this.sendOnChannel_(data);
         this.bytesSentToPeer_.handle(data.byteLength);
+        this.currBytes_ += data.byteLength;
         this.channelSentBytes_ += data.byteLength;
       };
       this.tcpConnection_.dataFromSocketQueue.setSyncHandler(socketReader);
@@ -661,6 +699,23 @@ import ProxyConfig = require('./proxyconfig');
         return false;
       }
       return true;
+    }
+
+    // Calculates bandwidth over BANDWIDTH_MONITOR_INTERVAL millisecond intervals based on
+    // total bytes sent and received by this session. We want to calculate
+    // bandwidth over a certain time interval; doing it continuously would
+    // not help us stop a random peak in bandwidth usage if the overall
+    // average is still low.
+    private calculateBandwidth_ = () : void => {
+      if (!this.stopBandwidthCalc_) {
+        // There are 8 bits in a byte
+        var bitsTransferred_ = (this.currBytes_ - this.prevBytes_) * 8;
+        // Bandwidth is measured in bits/sec.
+        var bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), bandwidthSession_);
+        this.prevBytes_ = this.currBytes_;
+        setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
+      }
     }
 
     private isAllowedAddress_ = (addressString:string) : boolean => {

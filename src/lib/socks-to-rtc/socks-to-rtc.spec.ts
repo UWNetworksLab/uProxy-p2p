@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 declare var freedom: freedom.FreedomInModuleEnv;
@@ -50,11 +50,7 @@ describe('SOCKS server', function() {
 
   beforeEach(function() {
     server = new socks_to_rtc.SocksToRtc();
-
-    var serverStopped = new Promise<void>((F, R) => {
-      server.on('stopped', F);
-    });
-    onceServerStopped = () => { return serverStopped; };
+    onceServerStopped = () => { return server.onceStopped; };
 
     // TODO: create named more fleshed out TcpServer and PeerConnection mock
     // classes for testing. e.g. failing to listen mock, listen & gets

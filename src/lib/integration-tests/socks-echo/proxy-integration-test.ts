@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 import bridge = require('../../bridge/bridge');
@@ -106,14 +106,15 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       }
       this.socksToRtc_.handleSignalFromPeer(msg);
     });
-    this.socksToRtc_.on('signalForPeer', (msg:Object) => {
+    const start = this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint),
+        bridger('sockstortc', rtcPcConfig));
+    this.socksToRtc_.signalsForPeer.setSyncHandler((msg:Object) => {
       if (ipv6Only) {
         AbstractProxyIntegrationTest.stripIPv4_(msg);
       }
       this.rtcToNet_.handleSignalFromPeer(msg);
     });
-    return this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint),
-        bridger('sockstortc', rtcPcConfig));
+    return start;
   }
 
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
