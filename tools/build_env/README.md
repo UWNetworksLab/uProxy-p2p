@@ -6,6 +6,8 @@ build environment for uProxy development. No other tools are needed.
 This allows us to reproduce the build the same way in any machine and makes it
 easier to set up the development environment for new uProxy developers.
 
+This approach is based on [Microcontainers](https://www.iron.io/microcontainers-tiny-portable-containers/), using [mhart's Node.js images](https://github.com/mhart/alpine-node).
+
 ## Usage
 
 First, install Docker:
