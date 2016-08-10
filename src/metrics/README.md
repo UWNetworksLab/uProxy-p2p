@@ -7,13 +7,19 @@
 
 ## Using a local Cloud Datastore
 
+Install `gcloud` tool: https://cloud.google.com/sdk/docs/quickstarts
+
+Make sure you have gcloud beta version 2016.01.12 or more recent:
+
+    gcloud --version
+
 Start a local datastore on port 8080:
 
     npm run datastore-start
 
 Load the sample events from `metrics/sample_events.csv`:
 
-    npm run datastore-load
+    npm run build && npm run datastore-load
 
 Generate metrics:
 
