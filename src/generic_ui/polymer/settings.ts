@@ -11,10 +11,9 @@ import user_interface = require('../scripts/ui');
 import dialogs = require('../scripts/dialogs');
 import ui_constants = require('../../interfaces/ui');
 
-
-  var languages :Language[] = <Language[]>require('../locales/all/languages.json');
-  var core = ui_context.core;
-  var languageSettings = ui_context.model;
+var languages :Language[] = <Language[]>require('../locales/all/languages.json');
+var core = ui_context.core;
+var languageSettings = ui_context.model;
 interface Language {
   description :string;
   language :string;
@@ -22,9 +21,6 @@ interface Language {
 }
 
 Polymer({
-
-
-
   accountChooserOpen: false,
   connectedNetworks: '',
   showRestartButton: false,
@@ -35,9 +31,6 @@ Polymer({
     var isSharing = ui.isGivingAccess();
     var confirmationMessage: string = null;
     var confirmLogout = Promise.resolve<void>();
-
-
-    
 
     if (isGetting || isSharing) {
       var confirmationMessage = dialogs.getLogoutConfirmationMessage(ui.isGettingAccess(), ui.isGivingAccess());
@@ -88,8 +81,6 @@ Polymer({
     this.model = ui_context.model;
     this.model = languageSettings;
     this.languages = languages;
-
-
     this.showRestartButton = (typeof window.chrome) !== 'undefined';
 
   },

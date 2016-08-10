@@ -10,9 +10,8 @@
 <link rel='import' href='network-in-settings.html'>
 
 <polymer-element name='uproxy-settings'>
-
   <template>
-    <style>
+    <style is='custom-style'>
     :host {
       position: absolute;
       display: inline-block;
@@ -134,9 +133,10 @@
     }
     #languageLink paper-dropdown-menu {
       border-bottom: 0px;
-      font-size: 13px;
+      font-size: 14px;
       margin: 0;
-      padding-left: 5px;
+      padding-left: 7px;
+      padding-bottom: 0px;
     }
     #languageLink core-icon {
       height: 18px !important;
@@ -198,8 +198,7 @@
           <core-icon icon="help"></core-icon>
           <span class='label'>{{ "GET_HELP" | $$ }}</span>
         </uproxy-faq-link>
-
-                <div id='languageLink'>
+        <div id='languageLink'>
           <core-icon icon='language'></core-icon>
           <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
             <paper-dropdown class="dropdown" valign="bottom">
