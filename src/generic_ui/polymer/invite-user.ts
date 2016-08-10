@@ -22,13 +22,21 @@ var inviteUser = {
         ui.i18nSanitizeHtml(ui.i18n_t('WE_WONT_POST_LEARN_MORE')),
         this.$.weWontPostLearnMore);
 
-    this.$.inviteUserPanel.open();
+    if (this.model.networkNames.length === 1) {
+      // Special case: there is only one supported network.  Skip the chooser.
+      this.loginWithNetwork(this.model.networkNames[0]);
+    } else {
+      this.$.inviteUserPanel.open();
+    }
   },
   closeInviteUserPanel: function() {
     this.$.inviteUserPanel.close();
   },
   networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
+    this.loginWithNetwork(networkName);
+  },
+  loginWithNetwork: function(networkName: string) {
     if (networkName === 'Cloud') {
       return this.cloudInstall();
     }

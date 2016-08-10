@@ -1064,6 +1064,14 @@ export class UserInterface implements ui_constants.UiApi {
     this.model.networkNames = state.networkNames;
     this.model.cloudProviderNames = state.cloudProviderNames;
     this.availableVersion = state.availableVersion;
+
+    if (this.model.cloudProviderNames.length === 0) {
+      // No deployment provider, so remove cloud from the UI's network list.
+      this.model.networkNames = this.model.networkNames.filter((name) => {
+        return name !== 'Cloud';
+      });
+    }
+
     if (!state.globalSettings.language) {
       // Set state.globalSettings.language based on browser settings:
       // Choose the first language in navigator.languages we have available.
