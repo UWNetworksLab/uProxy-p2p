@@ -356,16 +356,24 @@ import ProxyConfig = require('./proxyconfig');
     private channelReceivedBytes_ :number = 0;
 
     private bandwidthOverLimit_: boolean = false;
-    private limitBandwidth: boolean = false;
+    private limitBandwidth_: boolean = true;
+
+    private notPausedFraction_ :number = 1;
 
     // Used to stop the calculation of bandwidth.
     private stopBandwidthCalc_: boolean = false;
     // Records the bytes sent to and from peer, for the current time interval.
     public currBytes_ :number = 0;
-    // Records the bytes sent to and from peer, for the previous time interval. 
+    // Records the bytes sent to and from peer, for the previous time interval.
     public prevBytes_ :number = 0;
+
     // The length of each interval used to calculate bandwidth, in milliseconds.
-    private static BANDWIDTH_MONITOR_INTERVAL = 5000;
+    // This value should not be too small, because pausing/resuming is a fraction
+    // of this value; if the connection is paused and resumed too quickly, the bandwidth
+    // is not accurately limited. In other words, even though the connection is paused,
+    // the consequence of a very short pause is that many bits are transferred in the 
+    //time it takes to call the method again, which ncreases the bandwidth.
+    private static BANDWIDTH_MONITOR_INTERVAL = 3000;
     //1 Mbps
     public static BANDWIDTH_LIMIT = 1000000;
 
@@ -715,30 +723,34 @@ import ProxyConfig = require('./proxyconfig');
     // average is still low.
     private calculateBandwidth_ = () : void => {
       if (!this.stopBandwidthCalc_) {
-        // There are 8 bits in a byte
-        var bitsTransferred_ = (this.currBytes_ - this.prevBytes_) * 8;
-        // Bandwidth is measured in bits/sec.
-        var bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
-        log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), bandwidthSession_);
+        // There are 8 bits in a byte.
+        var bitsTransferred = (this.currBytes_ - this.prevBytes_) * 8;
+        // Calculated in milliseconds.
+        var notPausedTime = Session.BANDWIDTH_MONITOR_INTERVAL * this.notPausedFraction_;
+        // Bandwidth is how many bytes were sent/received over time that WASN'T paused, since a fraction of every interval is paused.
+        var bandwidthSession = bitsTransferred / (notPausedTime / 1000);
+        log.debug('%1: Bandwidth over non-paused time = %2', this.channelLabel(), bandwidthSession);
+        var bandwidthWholeInterval = bitsTransferred / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('%1: Bandwidth over whole interval (should be close to limit, or under) = %2', this.channelLabel(), bandwidthWholeInterval);
         /*
-          Bandwidth limiter starts here. If the current bandwidth for this time interval is over
-          the limit, the time 'left over' is calculated based on how long it should have taken
-          for this amount of data to be sent/received. Based on that, the session is paused
-          for a certain amount of time.
+          Bandwidth limiting starts here. If the current bandwidth is over the limit, the fraction of the next interval to pause 
+          to normalize the bandwidth is calculated, and the session is paused for that long.
         */
-        if (this.limitBandwidth) {
-          if (bandwidthSession_ > Session.BANDWIDTH_LIMIT) {
+        if (this.limitBandwidth_) {
+          if (bandwidthSession > Session.BANDWIDTH_LIMIT) {
             this.bandwidthOverLimit_ = true;
-            log.debug('%1: went over the limit', this.channelLabel());
-            var bandwidthDifference_ = bandwidthSession_ - Session.BANDWIDTH_LIMIT;
-            // Figures out the time needed to pause to correct bandwidth back to limit-- measured in milliseconds.
-            var timeDifference_ = (bandwidthDifference_ / Session.BANDWIDTH_LIMIT) * 1000;
-            // Pauses to account for timeDifference.
-            this.pauseForBandwidthOverflow(timeDifference_);
+            // Calculate correct fraction of time interval to not pause the session during.
+            this.notPausedFraction_ = Session.BANDWIDTH_LIMIT / bandwidthSession; 
+            // Pause for the correct amount of the interval, in ms.
+            var timeToPause = Session.BANDWIDTH_MONITOR_INTERVAL * (1 - this.notPausedFraction_);
+            log.debug(this.channelLabel() + ' Fraction of interval to not pause during: ' + this.notPausedFraction_);
+            this.pauseForBandwidthOverflow(timeToPause);
+          } else {
+            // Reset the fraction to not pause during to 1; do not pause during the next interval.
+            this.notPausedFraction_ = 1;
           }
-            // If the TCP connection is paused when calculateBandwidth is called again, the bandwidth should be 0.
-            this.prevBytes_ = this.currBytes_;
-            setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
+          this.prevBytes_ = this.currBytes_;
+          setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
         }
       }
     }
