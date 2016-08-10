@@ -78,6 +78,10 @@ class Background {
     this.state_ = state;
   }
 
+  public updateGlobalSetting = (name: string, value: Object): void => {
+    this.doInBackground_('update-global-setting', { name: name, value: value });
+  }
+
   public updateGlobalSettings = (settings: uproxy_core_api.GlobalSettings): void => {
     this.doInBackground_('update-global-settings', settings);
   }

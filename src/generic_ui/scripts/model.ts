@@ -67,12 +67,15 @@ export class Model {
     quiverUserName: '',
     proxyBypass: [],
     enforceProxyServerValidity: false,
-    validProxyServers: [],
+    validProxyServers: {},
     activePromoId: null,
     enabledExperiments: [],
     shouldHijackDO: true,
     crypto: true,
-    reproxy: null
+    reproxy: {
+      enabled: false,
+      socksEndpoint: {address: '127.0.0.1', port: 9050},
+    }
   };
 
   public reconnecting = false;
