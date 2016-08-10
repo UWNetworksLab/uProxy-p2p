@@ -119,6 +119,10 @@ export class UserInterface implements ui_constants.UiApi {
   /* About this uProxy installation */
   public availableVersion :string = null;
 
+  /* Platform */
+  private isFirefox :boolean;
+  private isAndroid :boolean;
+
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
@@ -137,12 +141,14 @@ export class UserInterface implements ui_constants.UiApi {
       public backgroundUi: background_ui.BackgroundUi) {
     this.updateView_();
 
-    var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
+    const firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
     if (firefoxMatches) {
+      this.isFirefox = true;
       if (parseInt(firefoxMatches[1], 10) === 37) {
         this.isSharingDisabled = true;
       }
     }
+    this.isAndroid = navigator.userAgent.indexOf('Android') !== -1;
 
     core.on('core_connect', () => {
       this.updateView_();
