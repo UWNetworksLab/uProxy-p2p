@@ -56,7 +56,7 @@ This will geenrate two files:
 
 Run a local metrics server:
 
-    npm run build && DATASTORE_EMULATOR_HOST=127.0.0.1:8080 npm run start-dev
+    npm run build && npm run start-dev
 
 You can make POST requests with `curl`. Example:
 
@@ -70,4 +70,4 @@ To deploy the metrics server:
 
 To query the service:
 
-    curl --retry 0 -i -X POST 'https://us-central1-uproxy-metrics.cloudfunctions.net/recordUse?date=2016-02-10&country=AU&previous_date=2016-02-09&previous_country=CN'
+    curl --retry 0 -i -X POST -H 'Content-length: 0' 'https://uproxy-metrics.appspot.com/recordUse?date=2016-02-10&country=AU&previous_date=2016-02-09&previous_country=CN'

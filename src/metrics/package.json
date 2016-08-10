@@ -24,19 +24,20 @@
     "record-use-build": "npm run ts-compile && npm run package-json-copy",
     "record-use-deploy": "gcloud alpha functions deploy --bucket uproxy-metrics-users-dev --trigger-http --source out recordUse",
 
-    "datastore-start": "gcloud beta emulators datastore start --project=uproxy-metrics --no-legacy --no-store-on-disk --host-port=localhost:8080",
-    "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 node out/tools/datastore_load_sample.js",
-    "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 node out/tools/generate_report.js",
-    "use-repository-test": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 node out/adaptors/datastore_use_events_repository_test.js",
+    "env": "env",
 
-    "start-dev": "node out/metrics_server/app.js",
-    "start": "node metrics_server/app.js",
-    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 nodemon out/metrics_server/app.js",
-    "deploy": "gcloud app deploy out/metrics_server/app.yaml"
+    "datastore-start": "gcloud beta emulators datastore start --project=uproxy-metrics --no-legacy --no-store-on-disk --host-port=localhost:8081",
+    "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/datastore_load_sample.js",
+    "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/generate_report.js",
+    "use-repository-test": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/adaptors/datastore_use_events_repository_test.js",
+
+    "start-dev": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 node out/metrics_server/server.js",
+    "start": "node metrics_server/server.js",
+    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 nodemon out/metrics_server/server.js",
+    "deploy": "cd out && cp metrics_server/app.yaml . && gcloud --project=uproxy-metrics app deploy"
   },
   "engines": {
     "node": ">=4"
   },
-  "author": "Vinicius Fortuna",
-  "license": "ISC"
+  "author": "uProxy"
 }
