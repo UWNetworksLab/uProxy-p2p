@@ -3,6 +3,8 @@
 /// <reference path='../../../../third_party/cordova/webintents.d.ts'/>
 /// <reference path='../../../../third_party/cordova/tun2socks.d.ts'/>
 /// <reference path='../../../../third_party/cordova/device.d.ts'/>
+/// <reference path='../../../../third_party/cordova/backbutton.d.ts'/>
+/// <reference path='../../../../third_party/cordova/app.d.ts'/>
 
 /**
  * cordova_browser_api.ts
@@ -348,11 +350,13 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public exit = () => {
-    (<any>navigator).Backbutton.goBack(() => { /* MT (success) */ }, () => {
-      /* We don't expect an error here, but it should be handled */
-      console.error('Could not go back, exiting app completely');
-      (<any>navigator).app.exitApp();
-    });
+    if (navigator.Backbutton) {
+      navigator.Backbutton.goBack(() => { /* MT (success) */ }, () => {
+        /* We don't expect an error here, but it should be handled */
+        console.error('Could not go back, exiting app completely');
+        navigator.app.exitApp();
+      });
+    }
   }
 
   private emit_ = (name :string, ...args :Object[]) => {
