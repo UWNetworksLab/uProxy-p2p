@@ -82,6 +82,7 @@ commands[uproxy_core_api.Command.POST_REPORT] = core.postReport;
 commands[uproxy_core_api.Command.VERIFY_USER] = core.verifyUser;
 commands[uproxy_core_api.Command.VERIFY_USER_SAS] = core.finishVerifyUser;
 commands[uproxy_core_api.Command.GET_PORT_CONTROL_SUPPORT] = core.getPortControlSupport;
+commands[uproxy_core_api.Command.CHECK_REPROXY] = core.checkReproxy;
 
 for (var command in commands) {
   ui_connector.onCommand(parseInt(command, 10), commands[command]);

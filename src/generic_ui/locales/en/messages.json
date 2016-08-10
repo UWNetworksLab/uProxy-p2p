@@ -179,17 +179,25 @@
     "description": "Default message in port field of advanced setting for enablign Tor reproxy",
     "message": "Port"
   },
-  "TOR_ROUTING_INFO": {
-    "description": "Info message displayed if Tor is enabled",
-    "message": "Routing through Tor from port"
-  },
-  "TOR_NOT_ROUTING_INFO": {
-    "description": "Info message displayed if Tor is disabled",
-    "message": "Not routing through Tor"
-  },
   "TOR_ENABLE_WARNING": {
     "description": "Warning message that appears when a user attempts to enable Tor through advanced settings",
     "message": "WARNING: This setting will break uProxy unless Tor is correctly configured to listen on the given local port. This setting is to be enabled only by users sharing their connection with others."
+  },
+  "TOR_PORT_TRUE": {
+    "description": "Info message displayed when there exists a reproxy listening at input port",
+    "message": "Found server listening at port"
+  },
+  "TOR_PORT_FALSE": {
+    "description": "Info message displayed when we cannot find a reproxy listening at input port",
+    "message": "Could not find server listening at port"
+  },
+  "TOR_PORT_PENDING": {
+    "description": "Info message displayed when searching for a reproxy listening at input port",
+    "message": "Searching for server listening at port"
+  },
+  "TOR_PORT_UNCHECKED": {
+    "description": "Info message displayed when we haven't checked for a reproxy listening at input port",
+    "message": "Check if server is listening on given port"
   },
   "TOR_HOW_ENABLE_REPROXY": {
     "description": "Title of FAQ question explaining Tor anonymity option of Sharers reproxying Getter requests",

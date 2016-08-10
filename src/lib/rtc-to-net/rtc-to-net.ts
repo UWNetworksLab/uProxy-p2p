@@ -482,15 +482,6 @@ import ProxyConfig = require('./proxyconfig');
       return new tcp.Connection({endpoint: endpoint}, paused);
     }
 
-    // Waits for tcp connection to complete
-    private waitForTcpConnection_ = (connection :tcp.Connection)
-          :Promise<tcp.ConnectionInfo> => {
-      log.debug('%1: Connection instantiated: %2',
-               [this.longId(), this.tcpConnection_]);
-
-      return this.tcpConnection_.onceConnected
-    }
-
     // Completes socks authentication protocol
     private connectWithSocksAuth_ = (webEndpoint :net.Endpoint)
           :Promise<[socks.Reply, net.Endpoint]> => {

@@ -139,6 +139,7 @@ export enum Command {
   VERIFY_USER = 1033,
   VERIFY_USER_SAS = 1034,
   GET_PORT_CONTROL_SUPPORT = 1035,
+  CHECK_REPROXY = 1036
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -258,6 +259,8 @@ export interface CreateInviteArgs {
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
 
+export enum ReproxyCheck {PENDING, TRUE, FALSE, UNCHECKED};
+
 export enum CloudOperationType {
   CLOUD_INSTALL = 0,
   CLOUD_DESTROY = 1,
@@ -358,4 +361,7 @@ export interface CoreApi {
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 
   getPortControlSupport(): Promise<PortControlSupport>;
+
+  // Check if socks reproxy exists at input port
+  checkReproxy(port :number): Promise<ReproxyCheck>;
 }

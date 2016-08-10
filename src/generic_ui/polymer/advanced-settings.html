@@ -210,15 +210,26 @@
             <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
               <input is='core-input' maxlength="5" value='{{ torPort }}' />
             </paper-input-decorator>
-            <p class='advancedSettingsText' style='color:red;' hidden?='{{ !$.torEnableButton.checked }}'>
-              {{ "TOR_ENABLE_WARNING" | $$ }}
-            </p>
-            <p class='advancedSettingsText' hidden?='{{ torEnabled }}'>
-              {{ "TOR_NOT_ROUTING_INFO" | $$ }}
-            </p>
-            <p class='advancedSettingsText' hidden?='{{ !torEnabled }}'>
-              {{ "TOR_ROUTING_INFO" | $$ }} {{ torPort  | $$ }}
-            </p>
+            <div id='torEnableToggledOn' hidden?='{{ !$.torEnableButton.checked }}'>
+              <p class='advancedSettingsText' style='color:red;'>
+                {{ "TOR_ENABLE_WARNING" | $$ }}
+              </p>
+              <span class='advancedSettingsText' hidden?='{{ !_reproxyCheckUnchecked(reproxyCheck) }}'>
+                {{ 'TOR_PORT_UNCHECKED' | $$ }}
+              </span>
+              <span class='advancedSettingsText' hidden?='{{ !_reproxyCheckTrue(reproxyCheck) }}'>
+                {{ 'TOR_PORT_TRUE' | $$ }} {{ testedTorPort  | $$ }}
+              </span>
+              <span class='advancedSettingsText' style='color:red;' hidden?='{{ !_reproxyCheckFalse(reproxyCheck) }}'>
+                {{ 'TOR_PORT_FALSE' | $$ }} {{ testedTorPort  | $$ }}
+              </span>
+              <span class='advancedSettingsText' hidden?='{{ !_reproxyCheckPending(reproxyCheck) }}'>
+                {{ 'TOR_PORT_PENDING' | $$ }} {{ testedTorPort  | $$ }}
+              </span>
+              <uproxy-link on-tap='{{ refreshReproxyCheck }}' role='button'>
+                <core-icon icon='refresh'></core-icon>
+              </uproxy-link>
+            </div>
           </div>
           <div id='portControlBox'>
 

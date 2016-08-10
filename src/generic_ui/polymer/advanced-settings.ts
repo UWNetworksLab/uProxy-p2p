@@ -19,6 +19,7 @@ export enum StatusState {
 Polymer({
   settings: '',
   portControlSupport: null,
+  reproxyCheck: uproxy_core_api.ReproxyCheck.UNCHECKED,
   status: StatusState.EMPTY,
   jsonifySettings_: function(settingsObject :Object) {
     return JSON.stringify(settingsObject, null, ' ');
@@ -70,9 +71,12 @@ Polymer({
           enabled: true,
           socksEndpoint: {address: '127.0.0.1', port: this.torPort}
         };
+        // Refresh warning check for server listening on input port
+        this.refreshReproxyCheck();
       } else {
         this.torEnabled = false;
         newSettings.reproxy.enabled = false;
+        this.reproxyCheck = uproxy_core_api.ReproxyCheck.UNCHECKED;
       }
 
       ui_context.model.globalSettings = newSettings;
@@ -94,8 +98,28 @@ Polymer({
       this.portControlSupport = support;
     });
   },
+  refreshReproxyCheck: function() {
+    this.reproxyCheck = uproxy_core_api.ReproxyCheck.PENDING;
+    this.testedTorPort = this.torPort;
+    this.$.state.core.checkReproxy(this.testedTorPort)
+      .then((check: uproxy_core_api.ReproxyCheck) => {
+        this.reproxyCheck = check;
+      });
+  },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
+  },
+  _reproxyCheckTrue: function(check: uproxy_core_api.ReproxyCheck) {
+    return check === uproxy_core_api.ReproxyCheck.TRUE;
+  },
+  _reproxyCheckFalse: function(check: uproxy_core_api.ReproxyCheck) {
+    return check === uproxy_core_api.ReproxyCheck.FALSE;
+  },
+  _reproxyCheckPending: function(check: uproxy_core_api.ReproxyCheck) {
+    return check === uproxy_core_api.ReproxyCheck.PENDING;
+  },
+  _reproxyCheckUnchecked: function(check: uproxy_core_api.ReproxyCheck) {
+    return check === uproxy_core_api.ReproxyCheck.UNCHECKED;
   },
   _supportsPortControl: function(supportStatus: uproxy_core_api.PortControlSupport) {
     return supportStatus === uproxy_core_api.PortControlSupport.TRUE;
