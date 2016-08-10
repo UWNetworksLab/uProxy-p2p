@@ -2,7 +2,7 @@
 
 set -eu
 
-IMAGE_NAME="uproxy/build"
+readonly IMAGE_NAME="uproxy/build"
 BUILD=false
 PUBLISH=false
 
@@ -41,7 +41,7 @@ fi
 
 if [ "$BUILD" = true ]
 then
-  DOCKER_ROOT="$(dirname $0)"
+  readonly DOCKER_ROOT="$(dirname $0)"
   docker build --rm -t $IMAGE_NAME $DOCKER_ROOT
 fi
 
@@ -53,7 +53,7 @@ fi
 
 if (( $# > 0 ))
 then
-  GIT_ROOT=`git rev-parse --show-toplevel`
+  readonly GIT_ROOT=`git rev-parse --show-toplevel`
   docker run --rm -ti -v "$GIT_ROOT":/worker -w /worker $IMAGE_NAME "$@"
   # TODO: Don't spin up a second container just to chown.
   docker run --rm -ti -v "$GIT_ROOT":/worker -w /worker $IMAGE_NAME chown -R $(stat -c "%u:%g" .git) /worker
