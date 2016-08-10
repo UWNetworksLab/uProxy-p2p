@@ -740,7 +740,7 @@ import ProxyConfig = require('./proxyconfig');
           if (bandwidthSession > Session.BANDWIDTH_LIMIT) {
             this.bandwidthOverLimit_ = true;
             // Calculate correct fraction of time interval to not pause the session during.
-            this.notPausedFraction_ = Session.BANDWIDTH_LIMIT / bandwidthSession; 
+            this.notPausedFraction_ = Session.BANDWIDTH_LIMIT / bandwidthSession;
             // Pause for the correct amount of the interval, in ms.
             var timeToPause = Session.BANDWIDTH_MONITOR_INTERVAL * (1 - this.notPausedFraction_);
             log.debug(this.channelLabel() + ' Fraction of interval to not pause during: ' + this.notPausedFraction_);
