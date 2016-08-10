@@ -1,3 +1,16 @@
+# uProxy Metrics
+
+## Set up development environment
+
+All development is done from the `src/metrics` root:
+
+    cd src/metrics
+
+Install the external dependencies:
+
+    npm install
+    ./node_modules/.bin/typings install
+
 ## Directories
 
 * `model/`: The core business logic of the metrics system.
