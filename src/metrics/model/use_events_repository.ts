@@ -3,6 +3,7 @@ import sd = require('./simple_date');
 // Represents the operations we can perform on the use metrics repository.
 export interface UseEventsRepository {
   recordUseEvent(event: UseEvent): Promise<void>
+  getUseEventsInRange(start_date: sd.SimpleDate, end_date: sd.SimpleDate): Promise<UseEvent[]>
 }
 
 export class UseEvent {
