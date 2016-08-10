@@ -722,7 +722,6 @@ import ProxyConfig = require('./proxyconfig');
         // Bandwidth is measured in bits/sec.
         var bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
         log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), bandwidthSession_);
-        
         /*
           Bandwidth limiter starts here. If the current bandwidth for this time interval is over
           the limit, the time 'left over' is calculated based on how long it should have taken
@@ -757,7 +756,7 @@ import ProxyConfig = require('./proxyconfig');
       this.bandwidthOverLimit = false;
       this.tcpConnection_.resume();
     }
-   
+
     private isAllowedAddress_ = (addressString:string) : boolean => {
       // default is to disallow non-unicast addresses; i.e. only proxy for
       // public internet addresses.
