@@ -67,7 +67,7 @@ export class Model {
     quiverUserName: '',
     proxyBypass: [],
     enforceProxyServerValidity: false,
-    validProxyServers: [],
+    validProxyServers: {},
     activePromoId: null,
     enabledExperiments: [],
     shouldHijackDO: true,

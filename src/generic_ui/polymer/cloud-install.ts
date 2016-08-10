@@ -107,7 +107,7 @@ Polymer({
       this.closeOverlays();
       this.$.successOverlay.open();
       ui.model.globalSettings.shouldHijackDO = false;
-      ui.core.updateGlobalSettings(ui.model.globalSettings);
+      this.$.state.background.updateGlobalSetting('shouldHijackDO', false);
     }).catch((e :any) => {
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
@@ -184,7 +184,7 @@ Polymer({
   },
   havePromoChanged: function () {
     ui.model.globalSettings.activePromoId = this.$.havePromoCode.checked;
-    ui.core.updateGlobalSettings(ui.model.globalSettings);
+    this.$.state.background.updateGlobalSetting('activePromoId', this.$.havePromoCode.checked);
   },
   updateCloudInstallStatus: function(e: Event, status: string) {
     this.installStatus = translator.i18n_t(status);

@@ -49,7 +49,7 @@ Polymer({
       // uproxy-bubble, now the only welcome content is on the splash screen
       // and the empty roster text.
       model.globalSettings.hasSeenWelcome = true;
-      this.$.state.background.updateGlobalSettings(model.globalSettings);
+      this.$.state.background.updateGlobalSetting('hasSeenWelcome', true);
     }
   },
   statsIconClicked: function() {
@@ -68,7 +68,7 @@ Polymer({
   },
   closedSharing: function() {
     model.globalSettings.hasSeenSharingEnabledScreen = true;
-    this.$.state.background.updateGlobalSettings(model.globalSettings);
+    this.$.state.background.updateGlobalSetting('hasSeenSharingEnabledScreen', true);
   },
   closeDialog: function() {
     this.$.dialog.close();
@@ -166,7 +166,7 @@ Polymer({
     } else {
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core
-      this.$.state.background.updateGlobalSettings(model.globalSettings);
+      this.$.state.background.updateGlobalSetting('mode', model.globalSettings.mode);
     }
   },
   revertProxySettings: function() {
