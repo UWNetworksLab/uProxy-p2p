@@ -13,10 +13,21 @@ Install the external dependencies:
 
 ## Directories
 
+Library directories:
+
 * `model/`: The core business logic of the metrics system.
 * `adaptors/`: Implementation of model concepts that interfaces with external systems.
+
+Application directories:
+
 * `metrics_server/`: The code for the metrics server application.
 * `tools/`: Applications for development and maintenance of the system.
+
+There ae a few restrictions on dependencies between the modules:
+
+* `model` cannot depend on anything other than the `model` itself and basic external libraries.
+* `adaptors` can depend on `model` and external libraries, but not on applications.
+* Application modules can depend on `model` and `adaptors` but not on other applications.
 
 ## Local Development
 
