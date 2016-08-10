@@ -1,4 +1,3 @@
-/// <reference path="../typings/globals/express/index.d.ts" />
 import express = require('express');
 import gcloud = require('gcloud');
 

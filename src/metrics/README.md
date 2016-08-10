@@ -18,7 +18,7 @@ Install the external dependencies:
 * `metrics_server/`: The code for the metrics server application.
 * `tools/`: Applications for development and maintenance of the system.
 
-## Using a local Cloud Datastore
+## Local Development
 
 Install `gcloud` tool: https://cloud.google.com/sdk/docs/quickstarts
 
@@ -43,11 +43,19 @@ This will geenrate two files:
 * `out/range_metrics`: unique users and activations per date range for each date and country.
 * `out/last_use_metrics.csv`: date and country last use histogram
 
+Run a local metrics server:
+
+    npm run build && DATASTORE_EMULATOR_HOST=127.0.0.1:8080 npm run start-dev
+
+You can make POST requests with `curl`. Example:
+
+    curl --retry 0 -i -X POST 'localhost:8080/recordUse?date=2016-02-10&country=AU&previous_date=2016-02-09&previous_country=CN'
+
 ## Deployment
 
 To deploy the metrics server:
 
-    npm run record-use-build && npm run record-use-deploy
+    npm run build && npm run deploy
 
 To query the service:
 

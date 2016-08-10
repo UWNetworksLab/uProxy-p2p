@@ -2,11 +2,12 @@
   "name": "uproxy-metrics",
   "version": "1.0.0",
   "description": "Metrics server for uProxy",
-  "main": "metrics_server/index.js",
+  "main": "metrics_server/server.js",
   "dependencies": {
     "csv-parse": "^1.1.7",
     "es6-promise": "^3.2.1",
     "es6-set": "^0.1.4",
+    "express": "^4.14.0",
     "gcloud": "^0.37.0"
   },
   "devDependencies": {
@@ -15,17 +16,23 @@
   },
   "//": "For start-datastore, see https://cloud.google.com/datastore/docs/tools/datastore-emulator",
   "scripts": {
-    "build": "mkdir -p ./out && npm run record-use-build",
+    "build": "mkdir -p ./out && npm run ts-compile && cp metrics_server/app.yaml out/metrics_server/ && cp package.json out/",
     "test": "npm run use-repository-test",
     "clean": "rm -rf ./out ./typings",
     "ts-compile": "tsc",
     "package-json-copy": "cp package.json out",
     "record-use-build": "npm run ts-compile && npm run package-json-copy",
     "record-use-deploy": "gcloud alpha functions deploy --bucket uproxy-metrics-users-dev --trigger-http --source out recordUse",
+
     "datastore-start": "gcloud beta emulators datastore start --project=uproxy-metrics --no-legacy --no-store-on-disk --host-port=localhost:8080",
     "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 node out/tools/datastore_load_sample.js",
     "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 node out/tools/generate_report.js",
-    "use-repository-test": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 node out/adaptors/datastore_use_events_repository_test.js"
+    "use-repository-test": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 node out/adaptors/datastore_use_events_repository_test.js",
+
+    "start-dev": "node out/metrics_server/app.js",
+    "start": "node metrics_server/app.js",
+    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8080 nodemon out/metrics_server/app.js",
+    "deploy": "gcloud app deploy out/metrics_server/app.yaml"
   },
   "engines": {
     "node": ">=4"
