@@ -39,20 +39,17 @@ if ! which docker > /dev/null; then
   exit 1
 fi
 
-if [[ $BUILD = true ]]
-then
+if [[ $BUILD = true ]]; then
   readonly DOCKER_ROOT="$(dirname $0)"
   docker build --rm -t $IMAGE_NAME $DOCKER_ROOT
 fi
 
-if [[ $PUBLISH = true ]]
-then
+if [[ $PUBLISH = true ]]; then
   docker push $IMAGE_NAME
   echo "Find the new image at https://hub.docker.com/r/$IMAGE_NAME/tags/"
 fi
 
-if [[ $# -gt 0 ]]
-then
+if [[ $# -gt 0 ]]; then
   readonly GIT_ROOT=`git rev-parse --show-toplevel`
   docker run --rm -ti -v "$GIT_ROOT":/worker -w /worker $IMAGE_NAME "$@"
   # TODO: Don't spin up a second container just to chown.
