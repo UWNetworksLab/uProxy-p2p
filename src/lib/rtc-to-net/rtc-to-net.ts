@@ -54,7 +54,6 @@ import ProxyConfig = require('./proxyconfig');
     // Public for tests.
     public static SESSION_LIMIT = 10000;
 
-    private static BANDWIDTH_LIMIT = 1000000;
     private static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
     // Number of live sessions by user, if greater than zero.
@@ -290,7 +289,7 @@ import ProxyConfig = require('./proxyconfig');
       return this.peerConnection_.handleSignalMessage(message);
     }
 
-    private calculateBandwidth = () : void => {
+    private calculateBandwidth = (): void => {
       if (!this.stopBandwidthCalc) {
         var currBytes = 0;
         var currNumSessions = 0; // TODO: is there a diff variable to use for this?
@@ -377,21 +376,21 @@ import ProxyConfig = require('./proxyconfig');
     private channelSentBytes_ :number = 0;
     private channelReceivedBytes_ :number = 0;
 
-    private bandwidthOverLimit :boolean = false;
+    private bandwidthOverLimit_: boolean = false;
     private limitBandwidth: boolean = false;
 
     // The current bandwidth for this session.
     public bandwidthSession_ :number = 0;
     // Used to stop the calculation of bandwidth.
-    private stopBandwidthCalc_ :boolean = false;
+    private stopBandwidthCalc_: boolean = false;
     // Records the bytes sent to and from peer, for the current time interval.
     public currBytes_ :number = 0;
     // Records the bytes sent to and from peer, for the previous time interval. 
     public prevBytes_ :number = 0;
     // The length of each interval used to calculate bandwidth, in milliseconds.
     private static BANDWIDTH_MONITOR_INTERVAL = 5000;
-
-    public static BANDWIDTH_LIMIT = 1000000; // 1 Mbps
+    //1 Mbps
+    public static BANDWIDTH_LIMIT = 1000000;
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -734,7 +733,7 @@ import ProxyConfig = require('./proxyconfig');
         if (this.tcpConnection_.isClosed()) {
           return;
         }
-        if (!this.bandwidthOverLimit) {
+        if (!this.bandwidthOverLimit_) {
           if (overflow) {
             this.tcpConnection_.pause();
             log.debug('%1: Hit overflow, pausing socket', this.longId());
@@ -766,9 +765,9 @@ import ProxyConfig = require('./proxyconfig');
         // There are 8 bits in a byte
         var bitsTransferred_ = (this.currBytes_ - this.prevBytes_) * 8;
         // Bandwidth is measured in bits/sec.
-        this.bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
-        log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), this.bandwidthSession_);
-        
+
+        var bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), bandwidthSession_);
         /*
           Bandwidth limiter starts here. If the current bandwidth for this time interval is over
           the limit, the time 'left over' is calculated based on how long it should have taken
@@ -776,12 +775,12 @@ import ProxyConfig = require('./proxyconfig');
           for a certain amount of time.
         */
         if (this.limitBandwidth) {
-          if (this.bandwidthSession_ > Session.BANDWIDTH_LIMIT) {
-            this.bandwidthOverLimit = true;
+          if (bandwidthSession_ > Session.BANDWIDTH_LIMIT) {
+            this.bandwidthOverLimit_ = true;
             log.debug('%1: went over the limit', this.channelLabel());
             var bandwidthDifference_ = this.bandwidthSession_ - Session.BANDWIDTH_LIMIT;
             // Figures out the time needed to pause to correct bandwidth back to limit-- measured in milliseconds.
-            var timeDifference_ = (bandwidthDifference_ / Session.BANDWIDTH_LIMIT) * 1000; 
+            var timeDifference_ = (bandwidthDifference_ / Session.BANDWIDTH_LIMIT) * 1000;
             // Pauses to account for timeDifference.
             this.pauseForBandwidthOverflow(timeDifference_);
           }
@@ -792,7 +791,7 @@ import ProxyConfig = require('./proxyconfig');
       }
     }
 
-    public pauseForBandwidthOverflow = (pauseTime:number) : void => {
+    private pauseForBandwidthOverflow = (pauseTime: number) : void => {
       this.tcpConnection_.pause();
       log.debug('%1: pausing for %2 ms; current bytes sent/received: %3', this.channelLabel(), pauseTime, this.currBytes_);
       setTimeout(this.resumeAfterBandwidthOverflow, pauseTime);
@@ -800,10 +799,10 @@ import ProxyConfig = require('./proxyconfig');
 
     private resumeAfterBandwidthOverflow = () : void => {
       log.debug('%1: resuming; current bytes sent/received: %2', this.channelLabel(), this.currBytes_);
-      this.bandwidthOverLimit = false;
+      this.bandwidthOverLimit_ = false;
       this.tcpConnection_.resume();
     }
-   
+
     private isAllowedAddress_ = (addressString:string) : boolean => {
       // default is to disallow non-unicast addresses; i.e. only proxy for
       // public internet addresses.
