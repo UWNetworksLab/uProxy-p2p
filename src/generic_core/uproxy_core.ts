@@ -793,8 +793,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public updateOrgPolicy = (policy :uproxy_core_api.ManagedPolicyUpdate): void => {
     // have to load settings first to make sure we don't overwrite anything
     globals.loadSettings.then(() => {
-      globals.settings.enforceProxyServerValidity = policy.
-        enforceProxyServerValidity;
+      globals.settings.enforceProxyServerValidity =
+          policy.enforceProxyServerValidity;
       globals.settings.validProxyServers = policy.validProxyServers;
       this.updateGlobalSettings(globals.settings);
 
