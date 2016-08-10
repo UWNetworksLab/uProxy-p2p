@@ -222,7 +222,7 @@ module.exports = (grunt) ->
       freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
       freedomquiver: readJSONFile('node_modules/freedom-social-quiver/package.json')
 
-    clean: ['build/dev', 'build/dist', '.tscache']
+    clean: [devBuildPath, distBuildPath, '.tscache']
 
     #-------------------------------------------------------------------------
     # Import global names into config name space
