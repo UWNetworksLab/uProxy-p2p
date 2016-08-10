@@ -348,7 +348,11 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public exit = () => {
-    (<any>navigator).app.exitApp();
+    (<any>navigator).Backbutton.goBack(() => { /* MT (success) */ }, () => {
+      /* We don't expect an error here, but it should be handled */
+      console.error('Could not go back, exiting app completely');
+      (<any>navigator).app.exitApp();
+    });
   }
 
   private emit_ = (name :string, ...args :Object[]) => {
