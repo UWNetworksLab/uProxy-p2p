@@ -1,4 +1,5 @@
 /// <reference path='./context.d.ts' />
+/// <reference path='../../../third_party/cordova/app.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 var ui = ui_context.ui;
@@ -69,7 +70,8 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = ui_context.model;
-    this.showRestartButton = (typeof window.chrome) !== 'undefined';
+    this.showRestartButton = (typeof window.chrome) !== 'undefined' &&
+        !(navigator.app && navigator.app.exitApp);
   },
   observe: {
     'model.onlineNetworks': 'networksChanged'
