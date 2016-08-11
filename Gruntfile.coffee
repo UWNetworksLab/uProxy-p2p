@@ -222,7 +222,7 @@ module.exports = (grunt) ->
       freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
       freedomquiver: readJSONFile('node_modules/freedom-social-quiver/package.json')
 
-    clean: ['build/dev', 'build/dist', '.tscache']
+    clean: [devBuildPath, distBuildPath, '.tscache']
 
     #-------------------------------------------------------------------------
     # Import global names into config name space
@@ -810,12 +810,14 @@ module.exports = (grunt) ->
         '!' + devBuildPath + '/integration/**/*.ts'
         '!' + devBuildPath + '/**/*.core-env.ts'
         '!' + devBuildPath + '/**/*.core-env.spec.ts'
+        '!' + androidDevPath + '/**/*.ts'
       ]
       coreEnv: compileTypescript [
         devBuildPath + '/**/*.core-env.ts'
         devBuildPath + '/**/*.core-env.spec.ts'
         '!' + devBuildPath + '/lib/build-tools/**/*.ts'
         '!' + devBuildPath + '/integration/**/*.ts'
+        '!' + androidDevPath + '/**/*.ts'
       ]
 
     browserify:

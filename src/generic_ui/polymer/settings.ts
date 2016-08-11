@@ -61,7 +61,7 @@ Polymer({
     }
   },
   updateStatsReportingEnabled: function() {
-    this.$.state.background.updateGlobalSettings(ui_context.model.globalSettings);
+    this.$.state.background.updateGlobalSetting('statsReportingEnabled', ui_context.model.globalSettings.statsReportingEnabled);
   },
   toggleAccountChooser: function() {
     this.accountChooserOpen = !this.accountChooserOpen;
