@@ -221,6 +221,10 @@ class ChromeBrowserApi implements BrowserAPI {
     this.events_[name] = callback;
   }
 
+  public exit = () => {
+    // Not necessary for in-browser versions
+  }
+
   public emit = (name :string, ...args :Object[]) => {
     this.bringUproxyToFront().then(() => {
       if (name in this.events_) {
