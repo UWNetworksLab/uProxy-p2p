@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
 import mockFreedomRtcPeerConnection = require('../lib/freedom/mocks/mock-rtcpeerconnection');

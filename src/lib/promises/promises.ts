@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 // Invokes f up to maxAttempts number of times, resolving with its result
 // on the first success and rejecting on the maxAttempts-th failure, waiting,

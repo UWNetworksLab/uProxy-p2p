@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='./context.d.ts' />
 
 Polymer({
