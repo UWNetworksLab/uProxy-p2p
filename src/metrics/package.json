@@ -5,8 +5,6 @@
   "main": "metrics_server/server.js",
   "dependencies": {
     "csv-parse": "^1.1.7",
-    "es6-promise": "^3.2.1",
-    "es6-set": "^0.1.4",
     "express": "^4.14.0",
     "gcloud": "^0.37.0"
   },

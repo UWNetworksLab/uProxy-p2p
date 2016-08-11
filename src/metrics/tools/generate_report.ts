@@ -1,5 +1,3 @@
-/// <reference path="../typings/globals/es6-collections/index.d.ts" />
-
 import gcloud = require('gcloud');
 import fs = require('fs');
 
