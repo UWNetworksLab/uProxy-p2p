@@ -252,6 +252,9 @@ module.exports = (grunt) ->
       ccaCreateDist: {
         command: '<%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
       }
+      ccaCreateMonkeyProof: {
+        command: '<%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxyForAutomatedTesting "uProxy" --link-to=<%= ccaDistPath %>'
+      }
       ccaPlatformAndroidDev: {
         cwd: '<%= androidDevPath %>'
         command: '<%= ccaPlatformAndroidCmd %>'
@@ -346,6 +349,18 @@ module.exports = (grunt) ->
               src: ['*'],
               dest: devBuildPath + '/generic_core',
               onlyIf: 'modified'
+          }
+        ]
+
+      # A monkey-proof build can be given to automated test systems
+      # without contaminating our usage metrics.
+      monkey_proof:
+        files: [
+          { # Copies monkey-proof mod.ts into the build
+            expand: true
+            cwd: 'src/generic_core/monkey_proof/'
+            src: ['*']
+            dest: path.join(devBuildPath, 'generic_core')
           }
         ]
 
@@ -810,6 +825,7 @@ module.exports = (grunt) ->
         '!' + devBuildPath + '/integration/**/*.ts'
         '!' + devBuildPath + '/**/*.core-env.ts'
         '!' + devBuildPath + '/**/*.core-env.spec.ts'
+        '!' + devBuildPath + '/generic_core/monkey_proof/*.ts'
         '!' + androidDevPath + '/**/*.ts'
       ]
       coreEnv: compileTypescript [
@@ -1027,6 +1043,10 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'base', [
     'copy:dev'
+    'compile_base'
+  ]
+
+  grunt.registerTask 'compile_base', [
     'ts'
     'version_file'
     'browserify:chromeAppMain'
@@ -1145,6 +1165,16 @@ module.exports = (grunt) ->
     'browserify:ccaContext'
   ].concat fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)
 
+  grunt.registerTask 'build_cca_monkey_proof', [
+    'copy:dev'
+    'copy:monkey_proof'
+    'compile_base'
+    'copy:cca'
+    'copy:cca_additional'
+    'browserify:ccaMain'
+    'browserify:ccaContext'
+  ].concat fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)
+
   # Mobile OS build tasks
   grunt.registerTask 'build_android', [
     'exec:cleanAndroid'
@@ -1153,7 +1183,6 @@ module.exports = (grunt) ->
     'exec:ccaPlatformAndroidDev'
     'exec:ccaAddPluginsAndroidDev'
     'copy:cca_splash_dev'
-    'exec:ccaBuildAndroid'
     'exec:androidReplaceXwalkDev'
   ]
 
@@ -1161,6 +1190,20 @@ module.exports = (grunt) ->
     'build_cca'
     'copy:dist'
     'exec:ccaCreateDist'
+    'exec:ccaPlatformAndroidDist'
+    'exec:ccaAddPluginsAndroidDist'
+    'copy:cca_splash_dist'
+    'symlink:cca_keys'
+    'exec:ccaReleaseAndroid'
+    'exec:androidReplaceXwalkDist'
+  ]
+
+  # Identical to the release build but with monkey-proofing, for use by
+  # automated test systems without contaminating usage metrics.
+  grunt.registerTask 'monkey_proof_android', [
+    'build_cca_monkey_proof'
+    'copy:dist'
+    'exec:ccaCreateMonkeyProof'
     'exec:ccaPlatformAndroidDist'
     'exec:ccaAddPluginsAndroidDist'
     'copy:cca_splash_dist'
