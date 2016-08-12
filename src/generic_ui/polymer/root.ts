@@ -260,6 +260,55 @@ Polymer({
   updateSharingStatus: function(e: Event, sharingStatus?: string) {
     this.sharingStatus = sharingStatus;
   },
+  handleBackButton: function() {
+    // If the generic dialog is open, it's the highest-level thing in the UI
+    if (this.$.dialog.opened) {
+      this.closeDialog();
+      return;
+    }
+
+    // Handle non-roster cases (browser error or splash screen)
+    if (ui.view === ui_types.View.SPLASH) {
+      if (this.$.splash.state > 0) {
+        this.$.splash.state--;
+        return;
+      }
+
+      ui.browserApi.exit();
+      return;
+    }
+
+    if (ui.view === ui_types.View.BROWSER_ERROR) {
+      ui.browserApi.exit();
+      return;
+    }
+
+    // Definitely on the roster at this point, go through views
+    const panelIds = ['faq', 'feedback', 'advancedSettings'];
+    for (let i in panelIds) {
+      const el = this.$[panelIds[i]];
+      if (el.opened) {
+        el.close();
+        return;
+      }
+    }
+
+    // InviteUser is more complicated, just calling exit would be deceptive,
+    // this seems cleaner than having a check for if back exists on each
+    // element in the above list
+    if (this.$.inviteUser.opened) {
+      this.$.inviteUser.back();
+      return;
+    }
+
+    // If we're simply on the roster, close settings if open, otherwise exit
+    if (this.$.mainPanel.selected === 'drawer') {
+      this.$.mainPanel.closeDrawer();
+      return;
+    }
+
+    ui.browserApi.exit();
+  },
   observe: {
     '$.mainPanel.selected': 'drawerToggled',
     'ui.view': 'viewChanged',
