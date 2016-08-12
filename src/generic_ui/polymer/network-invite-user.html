@@ -5,7 +5,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
 <link rel='import' href='dialog.html'>
-<link rel="import" href="i18n-filter.html">
 
 <polymer-element name='uproxy-network-invite-user' attributes="network">
   <template>
@@ -71,10 +70,9 @@
     </style>
 
     <uproxy-state id="state"></uproxy-state>
-    <core-signals on-core-signal-open-network-invite-dialog='{{openInviteUserPanel}}'></core-signals>
 
     <core-overlay id='networkInviteUserPanel' class='{{ network }}'>
-      <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
+      <uproxy-app-bar on-go-back='{{ close }}'>
         {{ 'INVITE_A_FRIEND' | $$ }}
       </uproxy-app-bar>
 

@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 /**
  * remote-connection.ts
@@ -153,7 +153,7 @@ var generateProxyingSessionId_ = (): string => {
       this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
       this.rtcToNet_.start({
         allowNonUnicast: globals.settings.allowNonUnicast,
-        reproxy: globals.settings.reproxy
+        reproxy: globals.settings.reproxy,
       }, pc);
 
       this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
@@ -236,10 +236,8 @@ var generateProxyingSessionId_ = (): string => {
 
       this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
 
-      // set up basic handlers
-      this.socksToRtc_.on('signalForPeer', this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
-      this.socksToRtc_.on('bytesReceivedFromPeer', this.handleBytesReceived_);
-      this.socksToRtc_.on('bytesSentToPeer', this.handleBytesSent_);
+      this.socksToRtc_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
+      this.socksToRtc_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);
 
       // TODO: Change this back to listening to the 'stopped' callback
       // once https://github.com/uProxy/uproxy/issues/1264 is resolved.
@@ -320,8 +318,8 @@ var generateProxyingSessionId_ = (): string => {
         }
 
         globals.metrics.increment('attempt');
-      return this.socksToRtc_.start(tcpServer, pc).then(
-          (endpoint :net.Endpoint) => {
+
+      const start = this.socksToRtc_.start(tcpServer, pc).then((endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
         this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
         globals.metrics.increment('success');
@@ -333,6 +331,12 @@ var generateProxyingSessionId_ = (): string => {
         this.stateRefresh_();
         return Promise.reject(Error('Could not start proxy'));
       });
+
+      // Ugh, this needs to be called after start.
+      this.socksToRtc_.signalsForPeer.setSyncHandler(
+          this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
+
+      return start;
     }
 
     public stopGet = () :Promise<void> => {

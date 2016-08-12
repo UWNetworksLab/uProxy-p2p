@@ -2,13 +2,17 @@
   For the RFC for socks, see:
     http://tools.ietf.org/html/rfc1928
 */
-/// <reference path='../../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
+/// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
+import arraybuffers = require('../arraybuffers/arraybuffers');
 import ipaddr = require('ipaddr.js');
 import net = require('../net/net.types');
 
-// version 5 of socks
-export var VERSION5 = 0x05;
+// VERSION - Socks protocol and subprotocol version headers
+export enum Version {
+  VERSION1 = 0x01,
+  VERSION5 = 0x05
+}
 
 // AUTH - Authentication methods
 export enum Auth {
@@ -63,6 +67,13 @@ export interface Destination {
 export interface Request {
   command        :Command;
   endpoint       :net.Endpoint;
+}
+
+// Represents a SOCKS username-password pair for USERPASS auth
+// @see interpretUserPassRequest
+export interface UserPassRequest {
+  username       :string;
+  password       :string;
 }
 
 function isValidEndpoint(e:any) : boolean {
@@ -135,9 +146,11 @@ export interface UdpMessage {
 
 
 // Client to Server (Step 1)
+// Authentication method negotiation
 //
 // Examines the supplied session establishment bytes, throwing an
 // error if the requested SOCKS version or METHOD is unsupported.
+// https://tools.ietf.org/html/rfc1928
 //
 //   +----+----------+----------+
 //   |VER | NMETHODS | METHODS  |
@@ -151,7 +164,7 @@ export function interpretAuthHandshakeBuffer(buffer:ArrayBuffer) : Auth[] {
 
   // Only SOCKS Version 5 is supported.
   var socksVersion = handshakeBytes[0];
-  if (socksVersion != VERSION5) {
+  if (socksVersion != Version.VERSION5) {
     throw new Error('unsupported SOCKS version: ' + socksVersion);
   }
 
@@ -174,7 +187,7 @@ export function composeAuthHandshakeBuffer(auths:Auth[]) : ArrayBuffer {
     throw new Error('At least one authentication method must be specified.');
   }
   var handshakeBytes = new Uint8Array(auths.length + 2);
-  handshakeBytes[0] = VERSION5;
+  handshakeBytes[0] = Version.VERSION5;
   handshakeBytes[1] = auths.length;
   // https://github.com/Microsoft/TypeScript/issues/3979
   (<any>handshakeBytes).set(auths, 2);
@@ -182,6 +195,7 @@ export function composeAuthHandshakeBuffer(auths:Auth[]) : ArrayBuffer {
 }
 
 // Server to Client (Step 2)
+// Authentication method negotiation response
 //
 // Given an initial authentication query, compose a response with the support
 // authentication types (none needed).
@@ -189,7 +203,7 @@ export function composeAuthResponse(authType:Auth)
     : ArrayBuffer {
   var buffer:ArrayBuffer = new ArrayBuffer(2);
   var bytes:Uint8Array = new Uint8Array(buffer);
-  bytes[0] = VERSION5;
+  bytes[0] = Version.VERSION5;
   bytes[1] = authType;
   return buffer;
 }
@@ -202,10 +216,90 @@ export function interpretAuthResponse(buffer:ArrayBuffer) : Auth {
 
   // Only SOCKS Version 5 is supported.
   var socksVersion = byteArray[0];
-  if (socksVersion != VERSION5) {
+  if (socksVersion != Version.VERSION5) {
     throw new Error('unsupported SOCKS version: ' + socksVersion);
   }
   return byteArray[1];
+}
+
+// In between Steps 2 and 3, additional subnegotiation messages may need to
+// be exchanged depending on which authentication method was negotiated.
+//
+// Client to Server (USERPASS Subnegotiation)
+// https://tools.ietf.org/html/rfc1929
+//
+// Given a username and password combination for userpass auth, compose and
+// interpret the auth request.
+//
+//            +----+------+----------+------+----------+
+//            |VER | ULEN |  UNAME   | PLEN |  PASSWD  |
+//            +----+------+----------+------+----------+
+//            | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
+//            +----+------+----------+------+----------+
+export function composeUserPassRequest(userPass:UserPassRequest) : ArrayBuffer {
+  const ulen = userPass.username.length;
+  const plen = userPass.password.length;
+  var requestBytes = new Uint8Array(2 + ulen + 1 + plen);
+
+  requestBytes[0] = Version.VERSION1;  // Only support version 1 of UserPass protocol.
+  requestBytes[1] = ulen;
+  requestBytes.set(new Buffer(userPass.username, 'ascii'), 2);
+  requestBytes[2 + ulen] = plen;
+  requestBytes.set(new Buffer(userPass.password, 'ascii'), 2 + ulen + 1);
+  return requestBytes.buffer;
+}
+
+export function interpretUserPassRequest(buffer:ArrayBuffer) : UserPassRequest {
+  var requestBytes = new Uint8Array(buffer);
+  if (requestBytes.byteLength < 3) {
+    throw new Error('USERPASS auth request must be at least 3 bytes long');
+  }
+  // Only UserPass Version 1 is supported.
+  var userpassVersion = requestBytes[0];
+  if (userpassVersion != Version.VERSION1) {
+    throw new Error('unsupported USERPASS Auth version: ' + userpassVersion);
+  }
+  const ulen = requestBytes[1];
+  if (requestBytes.byteLength < 2 + ulen + 1) {
+    throw new Error('USERPASS auth request does not contain proper bytes.' +
+                   ' ulen: ' + ulen + ', request size: ' +
+                   requestBytes.byteLength);
+  }
+  const username = (new Buffer(requestBytes)).slice(2, 2 + ulen).toString('ascii');
+  const plen = requestBytes[2 + ulen];
+  if (requestBytes.byteLength != 2 + ulen + 1 + plen) {
+    throw new Error('USERPASS auth request does not contain proper bytes.' +
+                   ' ulen: ' + ulen + ', plen: ' + plen +
+                   ' request size: ' + requestBytes.byteLength);
+  }
+  const password = (new Buffer(requestBytes)).slice(2 + ulen + 1).toString('ascii');
+  return {
+    username: username,
+    password: password
+  };
+}
+
+// Server to Client (USERPASS Subnegotiation)
+// Given a boolean of userpass auth success, compose and interpret response.
+//
+//                         +----+--------+
+//                         |VER | STATUS |
+//                         +----+--------+
+//                         | 1  |   1    |
+//                         +----+--------+
+export function composeUserPassResponse(success:boolean) : ArrayBuffer {
+  var responseBytes = new Uint8Array(2);
+  responseBytes[0] = Version.VERSION1;  // Only support for version 1 of UserPass protocol.
+  responseBytes[1] = success ? 0 : -1;  // Send 0 if successful
+  return responseBytes.buffer;
+}
+
+export function interpretUserPassResponse(buffer:ArrayBuffer) : boolean {
+  var responseBytes = new Uint8Array(buffer);
+  if (responseBytes.byteLength != 2) {
+    throw new Error('USERPASS auth response must be exactly 2 bytes long');
+  }
+  return responseBytes[1] === 0;
 }
 
 // Client to Server (Step 3-A)
@@ -233,7 +327,7 @@ export function interpretRequest(byteArray:Uint8Array) : Request {
 
   // Fail if client is not talking Socks version 5.
   var version = byteArray[0];
-  if (version !== VERSION5) {
+  if (version !== Version.VERSION5) {
     throw new Error('must be SOCKS5');
   }
 
@@ -263,7 +357,7 @@ export function composeRequestBuffer(request:Request) : ArrayBuffer {
   var destination = makeDestinationFromEndpoint(request.endpoint);
   // The header is 3 bytes
   var byteArray = new Uint8Array(3 + destination.addressByteLength);
-  byteArray[0] = VERSION5;
+  byteArray[0] = Version.VERSION5;
   byteArray[1] = request.command;
   byteArray[2] = 0;  // reserved
   byteArray.set(composeDestination(destination), 3);
@@ -453,7 +547,7 @@ export function composeResponseBuffer(response:Response) : ArrayBuffer {
   var destinationArray = composeDestination(destination);
 
   var bytes :Uint8Array = new Uint8Array(destinationArray.length + 3);
-  bytes[0] = VERSION5;
+  bytes[0] = Version.VERSION5;
   bytes[1] = response.reply;
   bytes[2] = 0x00;
   bytes.set(destinationArray, 3);
@@ -466,7 +560,7 @@ export function interpretResponseBuffer(buffer:ArrayBuffer) : Response {
 
   // Only SOCKS Version 5 is supported.
   var socksVersion = bytes[0];
-  if (socksVersion != VERSION5) {
+  if (socksVersion != Version.VERSION5) {
     throw new Error('unsupported SOCKS version: ' + socksVersion);
   }
 

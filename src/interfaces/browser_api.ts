@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import net = require('../lib/net/net.types');
 
@@ -54,6 +54,9 @@ export interface BrowserAPI {
   // passed, a message will be supplied instead, which will be emitted with
   // the given response data.
   respond(data :any, callback ?:Function, msg ?:string) :void;
+
+  // This should close any uProxy UI window
+  exit(): void;
 }
 
 // Describes the user-initiated mode to access a proxy.

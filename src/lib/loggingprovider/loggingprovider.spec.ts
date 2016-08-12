@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 // Setup freedom mock environment.
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');

@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 import social = require('../../interfaces/social');
 import translator = require('../scripts/translator');
@@ -46,7 +46,7 @@ Polymer({
       var facebookUrl = navigator.userAgent.indexOf('Mobile Safari') === -1 ?
           facebookSendUrl : facebookShareUrl;
       ui.openTab(facebookUrl);
-      this.closeInviteUserPanel();
+      this.close();
     });
   },
   sendToGMailFriend: function() {
@@ -63,7 +63,7 @@ Polymer({
           subject: ui.i18n_t('INVITE_EMAIL_SUBJECT', { name: name }),
           body: ui.i18n_t('INVITE_EMAIL_BODY', { url: this.inviteUrl, name: name })
       });
-      this.closeInviteUserPanel();
+      this.close();
       this.$.state.openDialog(dialogs.getMessageDialogDescription('', translator.i18n_t('INVITE_EMAIL_SENT')));
     });
   },
@@ -78,7 +78,7 @@ Polymer({
       isOffering: this.offerAccess,
       userId: this.gitHubUserIdInput
     }).then(() => {
-      this.closeInviteUserPanel();
+      this.close();
       this.$.state.openDialog(dialogs.getMessageDialogDescription('',
             translator.i18n_t('INVITE_SENT_CONFIRMATION', { name: this.gitHubUserIdInput })));
     }).catch(() => {
@@ -88,11 +88,11 @@ Polymer({
             translator.i18n_t('GITHUB_INVITE_SEND_FAILED')));
     });
   },
-  openInviteUserPanel: function() {
+  open: function() {
     this.initFields();
     this.$.networkInviteUserPanel.open();
   },
-  closeInviteUserPanel: function() {
+  close: function() {
     this.$.networkInviteUserPanel.close();
   },
   select: function(e :Event, d :Object, input :HTMLInputElement) {
@@ -136,6 +136,9 @@ Polymer({
   },
   ready: function() {
     this.initFields();
+  },
+  computed: {
+    'opened': '$.networkInviteUserPanel.opened'
   }
 });
 

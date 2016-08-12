@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
@@ -69,5 +69,8 @@ Polymer({
       }
       this.injectBoundHTML(i18nMessage, element);
     }
+  },
+  computed: {
+    'opened': '$.faqPanel.opened'
   }
 });

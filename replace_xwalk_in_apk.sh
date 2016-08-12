@@ -15,7 +15,7 @@
 ROOT_DIR="$(cd "$(dirname $0)"; pwd)";
 
 if [ "$1" = "debug" ]; then
-  APK_PATH="$ROOT_DIR/build/dev/uproxy/android/platforms/android/build/outputs/apk"
+  APK_PATH="$ROOT_DIR/build/src/android/platforms/android/build/outputs/apk"
 elif [ "$1" = "release" ]; then
   APK_PATH="$ROOT_DIR/build/dist/android/platforms/android/build/outputs/apk"
 else
@@ -64,6 +64,6 @@ jarsigner -keystore "$KEY_DIR/$storeFile" -storepass $storePassword -keypass $ke
 # Overwrite the aligned apk with a new one.  zipalign isn't on the path, and
 # more than one might be installed, so first we have to pick one.
 ZIPALIGN_TOOLS=( $ANDROID_HOME/build-tools/*/zipalign )
-ZIPALIGN="${ZIPALIGN_TOOLS[-1]}"
+ZIPALIGN="${ZIPALIGN_TOOLS[${#ZIPALIGN_TOOLS[@]}-1]}"
 $ZIPALIGN -f 4 $APK_UNALIGNED $APK_FINAL
 

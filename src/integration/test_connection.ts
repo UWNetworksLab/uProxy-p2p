@@ -1,6 +1,6 @@
-import tcp = require('../../../third_party/uproxy-lib/net/tcp');
-import socks_common = require('../../../third_party/uproxy-lib/socks-common/socks-headers');
-import net = require('../../../third_party/uproxy-lib/net/net.types');
+import tcp = require('../../third_party/uproxy-lib/net/tcp');
+import socks_common = require('../../third_party/uproxy-lib/socks-common/socks-headers');
+import net = require('../../third_party/uproxy-lib/net/net.types');
 
 class ProxyTester {
   private echoServer_ :tcp.Server;

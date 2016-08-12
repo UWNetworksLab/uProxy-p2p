@@ -5,7 +5,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
 <link rel='import' href='network-invite-user.html'>
-<link rel="import" href="i18n-filter.html">
 <link rel='import' href='cloud-install.html'>
 
 <polymer-element name='uproxy-invite-user'>
@@ -244,8 +243,8 @@
       </div>
     </uproxy-dialog>
 
-    <uproxy-network-invite-user network="{{selectedNetworkName}}"></uproxy-network-invite-user>
-    <uproxy-cloud-install></uproxy-cloud-install>
+    <uproxy-network-invite-user id="networkInviteUser" network="{{selectedNetworkName}}"></uproxy-network-invite-user>
+    <uproxy-cloud-install id="installCloud"></uproxy-cloud-install>
 
   </template>
   <script src='invite-user.js'></script>
