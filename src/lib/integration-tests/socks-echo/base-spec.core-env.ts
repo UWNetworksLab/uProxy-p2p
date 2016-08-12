@@ -26,7 +26,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   var createTestModule = function(denyLocalhost?:boolean, sessionLimit?:number,
                                   ipv6Only?:boolean, reproxy?:boolean)
                                   : ProxyIntegrationTester {
-        return testerFactoryManager(denyLocalhost, useChurn, sessionLimit, ipv6Only);
+        return testerFactoryManager(denyLocalhost, useChurn, sessionLimit, ipv6Only, reproxy);
   };
 
   beforeEach((done) => {
@@ -383,8 +383,6 @@ export function socksEchoTestDescription(useChurn:boolean) {
     }).then(done);
   });
 
-  // TODO: The reproxy tests do not check explicitly if the request travelled
-  // through the reproxy - perhaps by echoing back port number
   it('run a simple echo test with reproxy', (done) => {
     var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
     var testModule = createTestModule(undefined, undefined, undefined, true);
@@ -394,6 +392,9 @@ export function socksEchoTestDescription(useChurn:boolean) {
       return testModule.echo(connectionId, input);
     }).then((output:ArrayBuffer) => {
       expect(arraybuffers.byteEquality(input, output)).toBe(true);
+      return testModule.getReproxyBytesReceived();
+    }).then((bytes:number) => {
+      expect(bytes > 0).toBe(true);
     }).catch((e:any) => {
       expect(e).toBeUndefined();
     }).then(done);
@@ -406,6 +407,9 @@ export function socksEchoTestDescription(useChurn:boolean) {
       expect(connectionId).toBeUndefined();
     }).catch((e:any) => {
       expect(e.reply).toEqual(socks_headers.Reply.HOST_UNREACHABLE);
+      return testModule.getReproxyBytesReceived();
+    }).then((bytes:number) => {
+      expect(bytes > 0).toBe(true);
     }).then(done);
   });
 };
