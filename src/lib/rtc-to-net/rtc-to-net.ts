@@ -55,7 +55,7 @@ import ProxyConfig = require('./proxyconfig');
     public static SESSION_LIMIT = 10000;
 
     private static BANDWIDTH_MONITOR_INTERVAL = 5000;
-
+    public static LIMIT_BANDWIDTH = true;
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
 
@@ -356,7 +356,7 @@ import ProxyConfig = require('./proxyconfig');
     private channelReceivedBytes_ :number = 0;
 
     private pausedForBandwidthOverflow_: boolean = false;
-    private limitBandwidth_: boolean = true;
+    //private limitBandwidth_: boolean = true;
     private pausedForChannelOverflow_: boolean = false;
 
     // Don't pause this session for the entire interval.
@@ -374,7 +374,7 @@ import ProxyConfig = require('./proxyconfig');
     // of this value; if the connection is paused and resumed too quickly, the bandwidth
     // is not accurately limited. In other words, even though the connection is paused,
     // the consequence of a very short pause is that many bits are transferred in the
-    // time it takes to call the method again, which increases the bandwidth.da
+    // time it takes to call the method again, which increases the bandwidth.
     private static BANDWIDTH_MONITOR_INTERVAL = 3000;
     //1 Mbps
     public static BANDWIDTH_LIMIT = 1000000;
@@ -696,9 +696,8 @@ import ProxyConfig = require('./proxyconfig');
         if (this.tcpConnection_.isClosed()) {
           return;
         }
-        this.pausedForChannelOverflow_ = overflow;
         // Need to pause for overflow.
-        if (this.pausedForChannelOverflow_) {
+        if (overflow) {
           // Check if connection is not already paused for bandwidth overflow.
           if (!this.pausedForBandwidthOverflow_) {
             this.tcpConnection_.pause();
@@ -715,6 +714,7 @@ import ProxyConfig = require('./proxyconfig');
             log.debug('%1: Exited overflow, but connection is still paused for bandwidth', this.longId());
           }
         }
+        this.pausedForChannelOverflow_ = overflow;
       });
     }
 
@@ -747,10 +747,10 @@ import ProxyConfig = require('./proxyconfig');
       var bandwidthWholeInterval = bitsTransferred / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
       log.debug('%1: Bandwidth over whole interval (should be close to limit, or under) = %2', this.channelLabel(), bandwidthWholeInterval);
       /*
-      * Bandwidth limiting starts here. If the current bandwidth is over the limit, the fraction of the next interval to pause 
-      * to normalize the bandwidth is calculated, and the session is paused for that long.
-      */
-      if (this.limitBandwidth_) {
+       * Bandwidth limiting starts here. If the current bandwidth is over the limit, the fraction of the next interval to pause 
+       * to normalize the bandwidth is calculated, and the session is paused for that long.
+       */
+      if (RtcToNet.LIMIT_BANDWIDTH) {
         if (bandwidthSession > Session.BANDWIDTH_LIMIT) {
           // Calculate correct fraction of time interval to not pause the session during.
           this.notPausedFraction_ = Session.BANDWIDTH_LIMIT / bandwidthSession;
