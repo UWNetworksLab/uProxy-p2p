@@ -11,6 +11,10 @@ Install the external dependencies:
     npm install
     ./node_modules/.bin/typings install
 
+You can run unit tests with:
+
+    npm test
+
 ## Directories
 
 Library directories:
@@ -49,7 +53,7 @@ Generate metrics:
 
   npm run build && npm run datastore-report
 
-This will geenrate two files:
+This will generate two files:
 
 * `out/range_metrics`: unique users and activations per date range for each date and country.
 * `out/last_use_metrics.csv`: date and country last use histogram
