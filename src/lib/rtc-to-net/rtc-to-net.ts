@@ -776,7 +776,6 @@ import ProxyConfig = require('./proxyconfig');
       } else {
         log.debug('%1: pausing for %2 ms (connection is already paused); current bytes sent/received: %3', this.channelLabel(), pauseTime, this.currBytes_);
       }
-      
       setTimeout(this.resumeAfterBandwidthOverflow, pauseTime);
     }
 
@@ -792,7 +791,7 @@ import ProxyConfig = require('./proxyconfig');
     }
 
     private isAllowedAddress_ = (addressString:string) : boolean => {
-      // default is to disallow non-unicast addresses; i.e. only proxy for
+      // default is to disallow non-unicast addresses; i.e. only proxy forc
       // public internet addresses.
       if (this.proxyConfig_.allowNonUnicast) {
         return true
