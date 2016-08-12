@@ -48,7 +48,7 @@ describe('SimpleDate', () => {
     });
   });
 
-  describe('The equal method', () => {
+  describe('The comparison methods', () => {
     it('Equivalent dates are equal', function() {
       let date1 = new sd.SimpleDate(2010, 1, 1);
       let date2 = new sd.SimpleDate(2010, 1, 1);
@@ -62,6 +62,14 @@ describe('SimpleDate', () => {
       expect(date1 !== date2).toBeTruthy();
       expect(date1.equals(date2)).toBeFalsy();
       expect(date2.equals(date1)).toBeFalsy();
+    });
+    it('Comparison respects order', function() {
+      let date1 = new sd.SimpleDate(2010, 1, 1);
+      let date2 = new sd.SimpleDate(2012, 1, 1);
+      expect(date1.isEarlierThan(date2)).toBeTruthy();
+      expect(date2.isEarlierThan(date1)).toBeFalsy();
+      expect(date1.isLaterThan(date2)).toBeFalsy();
+      expect(date2.isLaterThan(date1)).toBeTruthy();
     });
   });
 
