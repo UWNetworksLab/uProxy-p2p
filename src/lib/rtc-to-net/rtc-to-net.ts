@@ -307,11 +307,19 @@ import ProxyConfig = require('./proxyconfig');
         for (var label in this.sessions_) {
           var bitsInterval = (this.sessions_[label].currBytes_ - this.sessions_[label].prevBytes_) * 8;
           // Bandwidth is measured in bps.
-          // TODO: fix if this is the session's first time
-          var bandwidthSession = bitsInterval / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
+          if (this.sessions_[label].testingFirstTimeSession) {
+            log.debug('It is ' + this.sessions_[label].channelLabel() + 's first time!');
+            var currTime = new Date().getTime();
+            var timeDifference = currTime - this.sessions_[label].testingFirstDate;
+            log.debug('It has been ' + timeDifference + ' milliseconds since the session was started');
+            var bandwidthSession = bitsInterval / (timeDifference / 1000);
+            this.sessions_[label].testingFirstTimeSession = false;
+          } else {
+            var bandwidthSession = bitsInterval / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
+          }
           log.debug(this.sessions_[label].channelLabel() + ': This session current bw: ' + bandwidthSession);
           totalBandwidth += bandwidthSession;
-          this.sessions_[label].testingBandwidthForTotal = bandwidthSession;
+          this.sessions_[label].currBandwidth = bandwidthSession;
           // If the bandwidth of this session is less than the allowed limit per session, add leftover bw to extra bw pool.
           if (bandwidthSession < perSessionBandwidthLimit) {
             bufferBandwidth += (perSessionBandwidthLimit - bandwidthSession);
@@ -335,8 +343,8 @@ import ProxyConfig = require('./proxyconfig');
           // Go through all the sessions that went over the limit, and pause each one.
           for (var label in this.sessions_) {
             // After redistributing buffer bandwidth, the session may no longer need to be paused.
-            if (this.sessions_[label].testingBandwidthForTotal > perSessionBandwidthLimit) {
-              var notPausedFracSession = perSessionBandwidthLimit / this.sessions_[label].testingBandwidthForTotal;
+            if (this.sessions_[label].currBandwidth > perSessionBandwidthLimit) {
+              var notPausedFracSession = perSessionBandwidthLimit / this.sessions_[label].currBandwidth;
               var timeToPause = RtcToNet.BANDWIDTH_MONITOR_INTERVAL * (1 - notPausedFracSession);
               log.debug(this.sessions_[label].channelLabel() + ' is pausing (total experimenting) for ' + timeToPause + '; total bytes sent/rec: ' + this.sessions_[label].currBytes_);
               this.sessions_[label].pauseForBandwidthOverflow(timeToPause);
@@ -408,13 +416,15 @@ import ProxyConfig = require('./proxyconfig');
     // Don't pause this session for the entire interval.
     private notPausedFraction_: number = 1;
 
-    // The current bandwidth for this session.
-    public bandwidthSession_ :number = 0;
+    public testingFirstTimeSession: boolean = true;
+    public testingFirstDate: number = 0;
+
     // Records the bytes sent to and from peer, for the current time interval.
     public currBytes_: number = 0;
     // Records the bytes sent to and from peer, for the previous time interval.
     public prevBytes_: number = 0;
-    public testingBandwidthForTotal: number = 0;
+    // The current bandwidth for this session.
+    public currBandwidth: number = 0;
 
     // The length of each interval used to calculate bandwidth, in milliseconds.
     // This value should not be too small, because pausing/resuming is a fraction
@@ -489,7 +499,7 @@ import ProxyConfig = require('./proxyconfig');
         });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
-      //this.calculateBandwidth_();
+      this.testingFirstDate = new Date().getTime();
       // Shutdown once the data channel terminates.
       this.dataChannel_.onceClosed.then(() => {
         if (this.dataChannel_.dataFromPeerQueue.getLength() > 0) {
