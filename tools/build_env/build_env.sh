@@ -49,7 +49,7 @@ if [[ $PUBLISH = true ]]; then
   echo "Find the new image at https://hub.docker.com/r/$IMAGE_NAME/tags/"
 fi
 
-if [[ $# -gt 0 ]]; then
+if (( $# > 0 )); then
   readonly GIT_ROOT=`git rev-parse --show-toplevel`
   docker run --rm -ti -v "$GIT_ROOT":/worker -w /worker $IMAGE_NAME "$@"
   # TODO: Don't spin up a second container just to chown.
