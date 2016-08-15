@@ -240,7 +240,9 @@ import ProxyConfig = require('./proxyconfig');
           channel,
           this.proxyConfig,
           this.bytesReceivedFromPeer,
-          this.bytesSentToPeer);
+          this.bytesSentToPeer,
+          this.userId_
+      );
       this.sessions_[channelLabel] = session;
       session.start().catch((e:Error) => {
         log.warn('session %1 failed to connect to remote endpoint: %2', [
@@ -383,7 +385,9 @@ import ProxyConfig = require('./proxyconfig');
         private dataChannel_:peerconnection.DataChannel,
         private proxyConfig_:ProxyConfig,
         private bytesReceivedFromPeer_:handler.QueueFeeder<number,void>,
-        private bytesSentToPeer_:handler.QueueFeeder<number,void>) {}
+        private bytesSentToPeer_:handler.QueueFeeder<number,void>,
+        private userId_?:string
+    ) {}
 
     // Returns onceReady.
     public start = () : Promise<void> => {
@@ -408,7 +412,7 @@ import ProxyConfig = require('./proxyconfig');
             return this.getTcpConnection_(
                 this.proxyConfig_.reproxy.socksEndpoint, false);
           } else {
-            return this.getTcpConnection_(webEndpoint, true); // start paused
+            return this.getTcpConnection_(webEndpoint, true);  // start paused
           }
         }).then((connection :tcp.Connection) :Promise<tcp.ConnectionInfo> => {
           this.tcpConnection_ = connection;
@@ -547,22 +551,44 @@ import ProxyConfig = require('./proxyconfig');
           :Promise<[socks_headers.Reply, net.Endpoint]> => {
       log.debug('%1: Connecting through socks to: %2',
                 [this.longId(), webEndpoint]);
-      // Complete socks auth handshake
-      var authRequest = socks_headers.composeAuthHandshakeBuffer([socks_headers.Auth.NOAUTH]);
-      log.debug('%1: Creating auth handshake: %2',
-                [this.longId(), authRequest]);
+      // Start socks auth handshake
+      var authRequest = socks_headers.composeAuthHandshakeBuffer(
+          [socks_headers.Auth.USERPASS, socks_headers.Auth.NOAUTH]);
+      log.debug('%1: Creating auth negotiation handshake', [this.longId()]);
       this.tcpConnection_.send(authRequest);
 
       // Wait for auth handshake response
       return this.tcpConnection_.receiveNext()
-        .then((buffer:ArrayBuffer) :Promise<ArrayBuffer> => {
-          var auth = socks_headers.interpretAuthResponse(buffer);
-          log.debug('%1: Received auth handshake reply: %2',
+        .then((buffer:ArrayBuffer) :Promise<void> => {
+          var auth:socks_headers.Auth = socks_headers.interpretAuthResponse(buffer);
+          log.debug('%1: Received auth handshake negotiation reply: %2',
                     [this.longId(), auth]);
-          if (auth !== socks_headers.Auth.NOAUTH) {
-            throw new Error('Received wrong socks auth response. Expected ' +
-                            socks_headers.Auth.NOAUTH + ' but got ' + auth);
+          // Complete socks auth based on auth method negotiated
+          if (auth === socks_headers.Auth.NOAUTH) {
+            return;
+          } else if (auth === socks_headers.Auth.USERPASS) {
+            // Create username password auth request
+            var userpass :socks_headers.UserPassRequest = {
+              username: this.userId_ || 'user',
+              password: ''
+            };
+            var userpassRequest = socks_headers.composeUserPassRequest(userpass);
+            log.debug('%1: Making USERPASS request: %2',
+                      [this.longId(), userpass]);
+            this.tcpConnection_.send(userpassRequest);
+            return this.tcpConnection_.receiveNext()
+              .then((buffer:ArrayBuffer) :void => {
+                var success :boolean = socks_headers.interpretUserPassResponse(buffer);
+                log.debug('%1: Received userpass subnegotiation reply: %2',
+                          [this.longId(), success]);
+                if (!success) {
+                  throw new Error('Socks USERPASS auth subnegotiation failed');
+                }
+              });
+          } else {
+            throw new Error('Received unsupported socks auth method: ' + auth);
           }
+        }).then(() :Promise<ArrayBuffer> => {
           // Send socks connection request
           var request :socks_headers.Request = {
             command: socks_headers.Command.TCP_CONNECT,

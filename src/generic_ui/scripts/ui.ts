@@ -274,12 +274,21 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('cloud-install-progress', progress);
     });
 
+    core.onUpdate(
+        uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS,
+        (globalSettings: uproxy_core_api.GlobalSettings) => {
+          this.model.updateGlobalSettings(globalSettings);
+        });
+
     browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
     browserApi.on('promoIdDetected', this.setActivePromoId);
     browserApi.on('translationsRequest', this.handleTranslationsRequest);
     browserApi.on('globalSettingsRequest', this.handleGlobalSettingsRequest);
+    browserApi.on('backbutton', () => {
+      this.fireSignal('backbutton');
+    });
     backgroundUi.registerAsFakeBackground(this.panelMessageHandler);
 
     core.getFullState()
@@ -384,14 +393,12 @@ export class UserInterface implements ui_constants.UiApi {
       }
 
       if (data.mode === 'get') {
-        this.model.globalSettings.mode = ui_constants.Mode.GET;
-        this.core.updateGlobalSettings(this.model.globalSettings);
+        this.updateGlobalSetting('mode', ui_constants.Mode.GET);
         if (contact) {
           contact.getExpanded = true;
         }
       } else if (data.mode === 'share' && !this.isSharingDisabled) {
-        this.model.globalSettings.mode = ui_constants.Mode.SHARE;
-        this.core.updateGlobalSettings(this.model.globalSettings);
+        this.updateGlobalSetting('mode', ui_constants.Mode.SHARE);
         if (contact) {
           contact.shareExpanded = true;
         }
@@ -590,8 +597,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.globalSettings.quiverUserName,
         this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
     .then((quiverUserName :string) => {
-      this.model.globalSettings.quiverUserName = quiverUserName;
-      this.core.updateGlobalSettings(this.model.globalSettings);
+      this.updateGlobalSetting('quiverUserName', quiverUserName);
       return this.login('Quiver', quiverUserName);
     });
   }
@@ -620,8 +626,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public setActivePromoId = (promoId :string) => {
-    this.model.globalSettings.activePromoId = promoId;
-    this.core.updateGlobalSettings(this.model.globalSettings);
+    this.updateGlobalSetting('activePromoId', promoId);
   }
 
   /**
@@ -1049,13 +1054,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public setMode = (mode :ui_constants.Mode) => {
-    this.model.globalSettings.mode = mode;
-    this.core.updateGlobalSettings(this.model.globalSettings);
+    this.updateGlobalSetting('mode', mode);
   }
 
   public updateLanguage = (newLanguage :string) => {
-    this.model.globalSettings.language = newLanguage;
-    this.core.updateGlobalSettings(this.model.globalSettings);
+    this.updateGlobalSetting('language', newLanguage);
     this.i18n_setLng(newLanguage);
   }
 
@@ -1205,4 +1208,9 @@ export class UserInterface implements ui_constants.UiApi {
     console.log('VERIFYING SAS AS ' + sameSAS);
     return this.core.finishVerifyUser(args);
   };
+
+  private updateGlobalSetting = (setting: string, value: Object) => {
+    (<any>this.model.globalSettings)[setting] = value;
+    this.core.updateGlobalSetting({ name: setting, value: value });
+  }
 } // class UserInterface
