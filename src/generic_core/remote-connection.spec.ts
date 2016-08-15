@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 /*
  * remote-connection.spec.ts
@@ -20,7 +20,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'portControl': () => { return new Object },
 });
 
-import globals = require('./globals');
+import constants = require('./constants');
 import remote_connection = require('./remote-connection');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
@@ -60,19 +60,19 @@ describe('remote_connection.RemoteConnection', () => {
     it('basic setup', () => {
       spyOn(socksToRtc, 'start').and.callThrough();
 
-      connection.startGet(globals.MESSAGE_VERSION);
+      connection.startGet(constants.MESSAGE_VERSION);
 
       expect(socksToRtc.start).toHaveBeenCalled();
       expect(connection.localGettingFromRemote).toEqual(social.GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('starting get twice fails', () => {
-      connection.startGet(globals.MESSAGE_VERSION);
+      connection.startGet(constants.MESSAGE_VERSION);
       expect(connection.startGet).toThrow();
     });
 
     it('getting access after success', (done) => {
-      var start = connection.startGet(globals.MESSAGE_VERSION);
+      var start = connection.startGet(constants.MESSAGE_VERSION);
       socksToRtc.resolveStart(null);
 
       start.then(() => {
@@ -82,7 +82,7 @@ describe('remote_connection.RemoteConnection', () => {
     });
 
     it('cleanup after failure to start', (done) => {
-      var start = connection.startGet(globals.MESSAGE_VERSION);
+      var start = connection.startGet(constants.MESSAGE_VERSION);
 
       socksToRtc.rejectStart(Error('fake rejection'));
 
@@ -92,14 +92,14 @@ describe('remote_connection.RemoteConnection', () => {
 
   describe('server setup', () => {
     it('basic setup', () => {
-      connection.startShare(globals.MESSAGE_VERSION);
+      connection.startShare(constants.MESSAGE_VERSION);
 
       expect(rtc_to_net.RtcToNet).toHaveBeenCalled();
       expect(connection.localSharingWithRemote).toEqual(social.SharingState.TRYING_TO_SHARE_ACCESS);
     });
 
     it('sharing access after success', (done) => {
-      connection.startShare(globals.MESSAGE_VERSION);
+      connection.startShare(constants.MESSAGE_VERSION);
 
       rtcToNet.resolveReady();
 
@@ -110,7 +110,7 @@ describe('remote_connection.RemoteConnection', () => {
     });
 
     it('cleanup after failure to start', (done) => {
-      var onceReady = connection.startShare(globals.MESSAGE_VERSION);
+      var onceReady = connection.startShare(constants.MESSAGE_VERSION);
 
       onceReady.then(failTest)
       .catch(() => {
@@ -122,7 +122,7 @@ describe('remote_connection.RemoteConnection', () => {
     });
 
     it('close after successful start', (done) => {
-      connection.startShare(globals.MESSAGE_VERSION);
+      connection.startShare(constants.MESSAGE_VERSION);
 
       rtcToNet.onceReady.then(() => {
         expect(connection.localSharingWithRemote).toEqual(social.SharingState.SHARING_ACCESS);
@@ -141,7 +141,7 @@ describe('remote_connection.RemoteConnection', () => {
   describe('bytes sent/received', () => {
     it('getting connection', (done) => {
       jasmine.clock().install();
-      var start = connection.startGet(globals.MESSAGE_VERSION);
+      var start = connection.startGet(constants.MESSAGE_VERSION);
       socksToRtc.resolveStart(null);
 
       start.then(() => {

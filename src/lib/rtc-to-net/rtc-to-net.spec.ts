@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 declare var freedom: freedom.FreedomInModuleEnv;
@@ -12,7 +12,7 @@ import handler = require('../handler/queue');
 import rtc_to_net = require('./rtc-to-net');
 import net = require('../net/net.types');
 import tcp = require('../net/tcp');
-import socks = require('../socks-common/socks-headers');
+import socks_headers = require('../socks/headers');
 
 import logging = require('../logging/logging');
 

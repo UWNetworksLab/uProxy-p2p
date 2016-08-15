@@ -1,7 +1,8 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
+import constants = require('./constants');
 import _ = require('lodash');
 import key_verify = require('./key-verify');
 import logging = require('../lib/logging/logging');
@@ -246,6 +247,19 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     throw 'uproxy_core onUpdate not implemented.';
   }
 
+  public updateGlobalSetting = (change: uproxy_core_api.UpdateGlobalSettingArgs) => {
+    // Make sure we have the correct settings object loaded and aren't
+    // going to write over something we should not
+    globals.loadSettings.then(() => {
+      (<any>globals.settings)[change.name] = change.value;
+
+      // We could try to speed things up slightly by just manually calling the
+      // save here, but that seems like an unnecessary optimization for something
+      // that should not be called that often
+      this.updateGlobalSettings(globals.settings);
+    });
+  }
+
   /**
    * Updates user's description of their current device. This applies to all
    * local instances for every network the user is currently logged onto. Those
@@ -253,9 +267,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    * instances.
    */
   public updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
-    newSettings.version = globals.STORAGE_VERSION;
+    newSettings.version = constants.STORAGE_VERSION;
     if (newSettings.stunServers.length === 0) {
-      newSettings.stunServers = globals.DEFAULT_STUN_SERVERS;
+      newSettings.stunServers = constants.DEFAULT_STUN_SERVERS;
     }
     var oldDescription = globals.settings.description;
     globals.storage.save('globalSettings', newSettings)
@@ -798,11 +812,16 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return null;
   }
 
-  public updateOrgPolicy(policy :uproxy_core_api.ManagedPolicyUpdate) :void {
-    globals.settings.enforceProxyServerValidity = policy.
-      enforceProxyServerValidity;
-    globals.settings.validProxyServers = policy.validProxyServers;
-    this.updateGlobalSettings(globals.settings);
+  public updateOrgPolicy = (policy :uproxy_core_api.ManagedPolicyUpdate): void => {
+    // have to load settings first to make sure we don't overwrite anything
+    globals.loadSettings.then(() => {
+      globals.settings.enforceProxyServerValidity =
+          policy.enforceProxyServerValidity;
+      globals.settings.validProxyServers = policy.validProxyServers;
+      this.updateGlobalSettings(globals.settings);
+
+      ui.update(uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS, globals.settings);
+    });
   }
 
   public verifyUser = (inst:social.InstancePath) :void => {

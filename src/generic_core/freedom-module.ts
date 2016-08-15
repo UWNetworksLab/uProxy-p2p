@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 /**
  * core.ts
@@ -82,6 +82,7 @@ commands[uproxy_core_api.Command.POST_REPORT] = core.postReport;
 commands[uproxy_core_api.Command.VERIFY_USER] = core.verifyUser;
 commands[uproxy_core_api.Command.VERIFY_USER_SAS] = core.finishVerifyUser;
 commands[uproxy_core_api.Command.GET_PORT_CONTROL_SUPPORT] = core.getPortControlSupport;
+commands[uproxy_core_api.Command.UPDATE_GLOBAL_SETTING] = core.updateGlobalSetting;
 commands[uproxy_core_api.Command.CHECK_REPROXY] = core.checkReproxy;
 
 for (var command in commands) {

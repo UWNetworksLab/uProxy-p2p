@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/typings/index.d.ts' />
 
 import AbstractProxyIntegrationTest = require('./proxy-integration-test');
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');

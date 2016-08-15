@@ -1,7 +1,7 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/jdenticon.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/jsurl.d.ts' />
-/// <reference path='../../../../third_party/typings/generic/uparams.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/generic/jdenticon.d.ts' />
+/// <reference path='../../../third_party/generic/jsurl.d.ts' />
+/// <reference path='../../../third_party/generic/uparams.d.ts' />
 
 /**
  * ui.ts
@@ -122,7 +122,9 @@ export class UserInterface implements ui_constants.UiApi {
   // Please note that this value is updated periodically so may not reflect current reality.
   private isConnectedToCellular_ :boolean = false;
 
-  // User-initiated proxy access mode.
+  // User-initiated proxy access mode. Set when starting the proxy in order to
+  // stop it accordingly, and to automatically restart proxying in case of a
+  // disconnect.
   private proxyAccessMode_: ProxyAccessMode = ProxyAccessMode.NONE;
 
   /**
@@ -272,12 +274,21 @@ export class UserInterface implements ui_constants.UiApi {
       this.fireSignal('cloud-install-progress', progress);
     });
 
+    core.onUpdate(
+        uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS,
+        (globalSettings: uproxy_core_api.GlobalSettings) => {
+          this.model.updateGlobalSettings(globalSettings);
+        });
+
     browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
     browserApi.on('proxyDisconnected', this.proxyDisconnected);
     browserApi.on('promoIdDetected', this.setActivePromoId);
     browserApi.on('translationsRequest', this.handleTranslationsRequest);
     browserApi.on('globalSettingsRequest', this.handleGlobalSettingsRequest);
+    browserApi.on('backbutton', () => {
+      this.fireSignal('backbutton');
+    });
     backgroundUi.registerAsFakeBackground(this.panelMessageHandler);
 
     core.getFullState()
@@ -382,14 +393,12 @@ export class UserInterface implements ui_constants.UiApi {
       }
 
       if (data.mode === 'get') {
-        this.model.globalSettings.mode = ui_constants.Mode.GET;
-        this.core.updateGlobalSettings(this.model.globalSettings);
+        this.updateGlobalSetting('mode', ui_constants.Mode.GET);
         if (contact) {
           contact.getExpanded = true;
         }
       } else if (data.mode === 'share' && !this.isSharingDisabled) {
-        this.model.globalSettings.mode = ui_constants.Mode.SHARE;
-        this.core.updateGlobalSettings(this.model.globalSettings);
+        this.updateGlobalSetting('mode', ui_constants.Mode.SHARE);
         if (contact) {
           contact.shareExpanded = true;
         }
@@ -588,8 +597,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.globalSettings.quiverUserName,
         this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
     .then((quiverUserName :string) => {
-      this.model.globalSettings.quiverUserName = quiverUserName;
-      this.core.updateGlobalSettings(this.model.globalSettings);
+      this.updateGlobalSetting('quiverUserName', quiverUserName);
       return this.login('Quiver', quiverUserName);
     });
   }
@@ -618,8 +626,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public setActivePromoId = (promoId :string) => {
-    this.model.globalSettings.activePromoId = promoId;
-    this.core.updateGlobalSettings(this.model.globalSettings);
+    this.updateGlobalSetting('activePromoId', promoId);
   }
 
   /**
@@ -657,7 +664,6 @@ export class UserInterface implements ui_constants.UiApi {
       // In the case where the user clicked stop, this will have no effect
       // (this function is idempotent).
       this.browserApi.stopUsingProxy();
-      this.proxyAccessMode_ = ProxyAccessMode.NONE;
     }
 
     this.updateGettingStatusBar_();
@@ -673,7 +679,6 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     this.browserApi.stopUsingProxy();
-    this.proxyAccessMode_ = ProxyAccessMode.NONE;
     this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
 
@@ -980,11 +985,6 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public login = (network :string, userName ?:string) : Promise<void> => {
-    if (network === 'Cloud') {
-      this.model.globalSettings.showCloud = true;
-      this.core.updateGlobalSettings(this.model.globalSettings);
-    }
-
     return this.core.login({
         network: network,
         loginType: uproxy_core_api.LoginType.INITIAL,
@@ -1054,13 +1054,11 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public setMode = (mode :ui_constants.Mode) => {
-    this.model.globalSettings.mode = mode;
-    this.core.updateGlobalSettings(this.model.globalSettings);
+    this.updateGlobalSetting('mode', mode);
   }
 
   public updateLanguage = (newLanguage :string) => {
-    this.model.globalSettings.language = newLanguage;
-    this.core.updateGlobalSettings(this.model.globalSettings);
+    this.updateGlobalSetting('language', newLanguage);
     this.i18n_setLng(newLanguage);
   }
 
@@ -1210,4 +1208,9 @@ export class UserInterface implements ui_constants.UiApi {
     console.log('VERIFYING SAS AS ' + sameSAS);
     return this.core.finishVerifyUser(args);
   };
+
+  private updateGlobalSetting = (setting: string, value: Object) => {
+    (<any>this.model.globalSettings)[setting] = value;
+    this.core.updateGlobalSetting({ name: setting, value: value });
+  }
 } // class UserInterface

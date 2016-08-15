@@ -292,13 +292,14 @@
         on-core-signal-open-dialog="{{ openDialog }}"
         on-core-signal-show-toast="{{ showToast }}"
         on-core-signal-update-getting-status="{{ updateGettingStatus }}"
-        on-core-signal-update-sharing-status="{{ updateSharingStatus }}">
-    </core-signal>
+        on-core-signal-update-sharing-status="{{ updateSharingStatus }}"
+        on-core-signal-backbutton="{{ handleBackButton }}">
+    </core-signals>
 
     <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
     <!-- core-overlays, launched using core-signals -->
-    <uproxy-invite-user></uproxy-invite-user>
+    <uproxy-invite-user id='inviteUser'></uproxy-invite-user>
     <uproxy-google-invite></uproxy-google-invite>
     <uproxy-logs></uproxy-logs>
     <uproxy-feedback id='feedback'></uproxy-feedback>

@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 /*
  * remote-instance.spec.ts
@@ -28,6 +28,7 @@ import social = require('../interfaces/social');
 import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
 import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import globals = require('./globals');
+import constants = require('./constants');
 import local_storage = require('./storage');
 import net = require('../lib/net/net.types');
 import local_instance = require('./local-instance');
@@ -91,7 +92,7 @@ describe('remote_instance.RemoteInstance', () => {
       instance0.update({
         instanceId : 'newInstanceId', publicKey : 'key', description: 'desc',
         consent: {isRequesting: true, isOffering: true}
-      }, globals.MESSAGE_VERSION).then(() => {
+      }, constants.MESSAGE_VERSION).then(() => {
         expect(instance0.publicKey).toEqual('key');
         expect(instance0.description).toEqual('desc');
         expect(instance0.wireConsentFromRemote.isOffering).toEqual(true);
@@ -134,7 +135,7 @@ describe('remote_instance.RemoteInstance', () => {
       instance.update({
         instanceId: INSTANCE_ID, description: '', publicKey: '',
         consent: {isOffering: true, isRequesting: true}
-      }, globals.MESSAGE_VERSION).then(() => {
+      }, constants.MESSAGE_VERSION).then(() => {
         expect(instance.wireConsentFromRemote.isOffering).toEqual(true);
         expect(instance.wireConsentFromRemote.isRequesting).toEqual(true);
         expect(userConsent.remoteRequestsAccessFromLocal).toEqual(true);
@@ -275,7 +276,8 @@ describe('remote_instance.RemoteInstance', () => {
       alice.handleSignal({
           type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
           data: fakeSignallingMessage,
-          version: globals.MESSAGE_VERSION}).then(() => {
+          version: constants.MESSAGE_VERSION
+      }).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(
             fakeSignallingMessage);
@@ -289,7 +291,8 @@ describe('remote_instance.RemoteInstance', () => {
         alice.handleSignal({
             type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
             data: fakeSignallingMessage,
-            version: globals.MESSAGE_VERSION}).then(() => {
+            version: constants.MESSAGE_VERSION
+        }).then(() => {
           expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(
               fakeSignallingMessage);
           expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
@@ -302,7 +305,8 @@ describe('remote_instance.RemoteInstance', () => {
       alice.handleSignal({
           type: social.PeerMessageType.INSTANCE,
           data: fakeSignallingMessage,
-          version: globals.MESSAGE_VERSION}).then(() => {
+          version: constants.MESSAGE_VERSION
+      }).then(() => {
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         done();
@@ -314,7 +318,8 @@ describe('remote_instance.RemoteInstance', () => {
       alice.handleSignal({
           type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
           data: fakeSignallingMessage,
-          version: globals.MESSAGE_VERSION}).then(() => {
+          version: constants.MESSAGE_VERSION
+      }).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         done();

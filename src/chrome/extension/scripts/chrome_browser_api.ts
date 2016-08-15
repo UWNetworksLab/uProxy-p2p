@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
+/// <reference path='../../../../third_party/typings/index.d.ts'/>
 
 /**
  * chrome_browser_api.ts
@@ -219,6 +219,10 @@ class ChromeBrowserApi implements BrowserAPI {
 
   public on = (name :string, callback :Function) => {
     this.events_[name] = callback;
+  }
+
+  public exit = () => {
+    // Not necessary for in-browser versions
   }
 
   public emit = (name :string, ...args :Object[]) => {

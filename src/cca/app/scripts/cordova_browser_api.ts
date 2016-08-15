@@ -1,8 +1,10 @@
-/// <reference path='../../../../../third_party/typings/browser.d.ts'/>
-/// <reference path='../../../../../third_party/typings/cordova/themeablebrowser.d.ts'/>
-/// <reference path='../../../../../third_party/typings/cordova/webintents.d.ts'/>
-/// <reference path='../../../../../third_party/typings/cordova/tun2socks.d.ts'/>
-/// <reference path='../../../../../third_party/typings/cordova/device.d.ts'/>
+/// <reference path='../../../../third_party/typings/index.d.ts'/>
+/// <reference path='../../../../third_party/cordova/themeablebrowser.d.ts'/>
+/// <reference path='../../../../third_party/cordova/webintents.d.ts'/>
+/// <reference path='../../../../third_party/cordova/tun2socks.d.ts'/>
+/// <reference path='../../../../third_party/cordova/device.d.ts'/>
+/// <reference path='../../../../third_party/cordova/backbutton.d.ts'/>
+/// <reference path='../../../../third_party/cordova/app.d.ts'/>
 
 /**
  * cordova_browser_api.ts
@@ -52,7 +54,9 @@ class CordovaBrowserApi implements BrowserAPI {
 
   public supportsVpn = deviceSupportsVpn();
 
-  // Mode to start/stop proxying.
+  // Mode to start/stop proxying. Set when starting the proxy in order to stop
+  // it accordingly, and to automatically restart proxying in case of a
+  // disconnect.
   private proxyAccessMode_ = ProxyAccessMode.NONE;
 
   public setIcon = (iconFile :string) : void => {
@@ -90,6 +94,10 @@ class CordovaBrowserApi implements BrowserAPI {
       // fires.
       window.top.webintent.getUri(this.onUrl_);  // Handle URL already received.
       window.top.webintent.onNewIntent(this.onUrl_);  // Handle future URLs.
+
+      window.top.document.addEventListener('backbutton', () => {
+        this.emit_('backbutton');
+      }, false);
     }, false);
   }
 
@@ -208,7 +216,6 @@ class CordovaBrowserApi implements BrowserAPI {
     } else {
       console.error('Unexpected proxy acccess mode ', this.proxyAccessMode_);
     }
-    this.proxyAccessMode_ = ProxyAccessMode.NONE;
   };
 
   public openTab = (url :string) => {
@@ -339,6 +346,16 @@ class CordovaBrowserApi implements BrowserAPI {
         callback.apply(null, args);
       });
       delete this.pendingEvents_[name];
+    }
+  }
+
+  public exit = () => {
+    if (navigator.Backbutton) {
+      navigator.Backbutton.goBack(() => { /* MT (success) */ }, () => {
+        /* We don't expect an error here, but it should be handled */
+        console.error('Could not go back, exiting app completely');
+        navigator.app.exitApp();
+      });
     }
   }
 

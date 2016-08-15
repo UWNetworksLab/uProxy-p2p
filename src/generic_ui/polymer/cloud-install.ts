@@ -1,6 +1,6 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
@@ -107,7 +107,7 @@ Polymer({
       this.closeOverlays();
       this.$.successOverlay.open();
       ui.model.globalSettings.shouldHijackDO = false;
-      ui.core.updateGlobalSettings(ui.model.globalSettings);
+      this.$.state.background.updateGlobalSetting('shouldHijackDO', false);
     }).catch((e :any) => {
       // TODO: Figure out why e.message is not set
       if (e === 'Error: server already exists') {
@@ -184,7 +184,7 @@ Polymer({
   },
   havePromoChanged: function () {
     ui.model.globalSettings.activePromoId = this.$.havePromoCode.checked;
-    ui.core.updateGlobalSettings(ui.model.globalSettings);
+    this.$.state.background.updateGlobalSetting('activePromoId', this.$.havePromoCode.checked);
   },
   updateCloudInstallStatus: function(e: Event, status: string) {
     this.installStatus = translator.i18n_t(status);
@@ -194,5 +194,8 @@ Polymer({
   },
   observe: {
     'ui.model.globalSettings.activePromoId': 'promoIdChanged'
+  },
+  computed: {
+    'opened': '$.signUpOrSignInOverlay.opened || $.createServerOverlay.opened || $.installingOverlay.opened || $.successOverlay.opened || $.failureOverlay.opened || $.serverExistsOverlay.opened || $.cancelingOverlay.opened'
   }
 });

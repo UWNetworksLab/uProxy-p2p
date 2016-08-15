@@ -1,7 +1,7 @@
 // Server which handles SOCKS connections over WebRTC datachannels and send them
 // out to the internet and sending back over WebRTC the responses.
 
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import handler = require('../handler/queue');
@@ -9,7 +9,7 @@ import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
-import socks = require('../socks-common/socks-headers');
+import socks_headers = require('../socks/headers');
 import tcp = require('../net/tcp');
 
 import Pool = require('../pool/pool');
@@ -54,8 +54,13 @@ import ProxyConfig = require('./proxyconfig');
     // Public for tests.
     public static SESSION_LIMIT = 10000;
 
+    public static BANDWIDTH_MONITOR_INTERVAL = 5000;
+
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
+
+    private stopBandwidthCalcTotal :boolean = false;
+    private prevBytesTotal :number = 0;
 
     // Returns true if the addition was successful.
     private static addUserSession_ = (userId:string) : boolean => {
@@ -91,7 +96,9 @@ import ProxyConfig = require('./proxyconfig');
     // (externally provided) proxyconfig.
     public proxyConfig :ProxyConfig;
 
-    // Message handler queues to/from the peer.
+    // Message handler queues to/from the peer. Accessing this before
+    // calling start() will result in an error.
+    // TODO: public fields bad!
     public signalsForPeer :handler.QueueHandler<Object, void>;
 
     // The two Queues below only count bytes transferred between the SOCKS
@@ -159,6 +166,7 @@ import ProxyConfig = require('./proxyconfig');
       if (this.peerConnection_) {
         throw new Error('already configured');
       }
+      this.stopBandwidthCalcTotal = false;
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(peerconnection, 'RtcToNet');
       this.proxyConfig = proxyConfig;
@@ -171,6 +179,7 @@ import ProxyConfig = require('./proxyconfig');
       // fulfills first.  https://github.com/uProxy/uproxy/issues/760
       this.onceReady = this.peerConnection_.onceConnected.then(() => {});
       this.onceReady.catch(this.fulfillStopping_);
+      this.calculateBandwidthTotal();
       this.peerConnection_.onceClosed
         .then(() => {
           log.debug('peerconnection terminated');
@@ -231,7 +240,9 @@ import ProxyConfig = require('./proxyconfig');
           channel,
           this.proxyConfig,
           this.bytesReceivedFromPeer,
-          this.bytesSentToPeer);
+          this.bytesSentToPeer,
+          this.userId_
+      );
       this.sessions_[channelLabel] = session;
       session.start().catch((e:Error) => {
         log.warn('session %1 failed to connect to remote endpoint: %2', [
@@ -266,6 +277,7 @@ import ProxyConfig = require('./proxyconfig');
       // TODO(ldixon): explore why not not just return
       // this.peerConnection_.close(); call the PeerConnection's close and
       // return synchronously.
+      this.stopBandwidthCalcTotal = true;
       return new Promise<void>((F, R) => {
         this.peerConnection_.close();
         F();
@@ -274,6 +286,21 @@ import ProxyConfig = require('./proxyconfig');
 
     public handleSignalFromPeer = (message:Object) :void => {
       return this.peerConnection_.handleSignalMessage(message);
+    }
+
+    private calculateBandwidthTotal = () : void => {
+      if (!this.stopBandwidthCalcTotal) {
+        var currBytesTotal = 0;
+        for (var label in this.sessions_) {
+          currBytesTotal += this.sessions_[label].currBytes_;
+        }
+        var bitsTransferredTotal = (currBytesTotal - this.prevBytesTotal) * 8;
+        // Bandwidth is measured in bits/sec.
+        var bandwidthTotal  = bitsTransferredTotal / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('Current bandwidth for whole connection: %1 bits/sec', bandwidthTotal);
+        this.prevBytesTotal = currBytesTotal;
+        setTimeout(this.calculateBandwidthTotal, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
+      }
     }
 
     public toString = () : string => {
@@ -330,25 +357,36 @@ import ProxyConfig = require('./proxyconfig');
     private channelSentBytes_ :number = 0;
     private channelReceivedBytes_ :number = 0;
 
+    // Used to stop the calculation of bandwidth.
+    private stopBandwidthCalc_:boolean = false;
+    // Records the bytes sent to and from peer, for the current time interval.
+    public currBytes_:number = 0;
+    // Records the bytes sent to and from peer, for the previous time interval. 
+    public prevBytes_:number = 0;
+    // The length of each interval used to calculate bandwidth, in milliseconds.
+    private static BANDWIDTH_MONITOR_INTERVAL = 5000;
+
     // The supplied datachannel must already be successfully established.
     constructor(
         private dataChannel_:peerconnection.DataChannel,
         private proxyConfig_:ProxyConfig,
         private bytesReceivedFromPeer_:handler.QueueFeeder<number,void>,
-        private bytesSentToPeer_:handler.QueueFeeder<number,void>) {}
+        private bytesSentToPeer_:handler.QueueFeeder<number,void>,
+        private userId_?:string
+    ) {}
 
     // Returns onceReady.
     public start = () : Promise<void> => {
       this.onceReady = this.receiveEndpointFromPeer_()
         .catch((e:Error) => {
           // TODO: Add a unit test for this case.
-          this.replyToPeer_(socks.Reply.UNSUPPORTED_COMMAND);
+          this.replyToPeer_(socks_headers.Reply.UNSUPPORTED_COMMAND);
           return Promise.reject(e);
         }).then((webEndpoint :net.Endpoint) :tcp.Connection => {
           this.webEndpoint_ = webEndpoint;
           // Returns socks reply and bound endpoint of connection
           if (!this.isWebEndpointAllowed_(webEndpoint)) {
-            this.replyToPeer_(socks.Reply.NOT_ALLOWED);
+            this.replyToPeer_(socks_headers.Reply.NOT_ALLOWED);
             throw new Error('tried to connect to disallowed address: ' +
                 webEndpoint.address);
           }
@@ -360,7 +398,7 @@ import ProxyConfig = require('./proxyconfig');
             return this.getTcpConnection_(
                 this.proxyConfig_.reproxy.socksEndpoint, false);
           } else {
-            return this.getTcpConnection_(webEndpoint, true); // start paused
+            return this.getTcpConnection_(webEndpoint, true);  // start paused
           }
         }).then((connection :tcp.Connection) :Promise<tcp.ConnectionInfo> => {
           this.tcpConnection_ = connection;
@@ -372,26 +410,28 @@ import ProxyConfig = require('./proxyconfig');
               return Promise.reject(new Error(e.errcode));
             });
         }).then((info :tcp.ConnectionInfo)
-            :Promise<[socks.Reply, net.Endpoint]> => {
+            :Promise<[socks_headers.Reply, net.Endpoint]> => {
           // Receive reply from web endpoint directly or through socks proxy
           if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled) {
             return this.connectWithSocksAuth_(this.webEndpoint_)
               .catch((e :Error) => {
                 log.debug('%1: Failed to complete reproxy socks auth',
                           [this.longId()]);
-                this.replyToPeer_(socks.Reply.FAILURE);
+                this.replyToPeer_(socks_headers.Reply.FAILURE);
                 return Promise.reject(e);
               });
           } else {
             return Promise.resolve([this.getReplyFromInfo_(info), info.bound]);
           }
-        }).then((reply :[socks.Reply, net.Endpoint]) :Promise<void> => {
+        }).then((reply :[socks_headers.Reply, net.Endpoint]) :Promise<void> => {
           log.info('%1: connected to remote web endpoint', [this.longId()]);
           return this.replyToPeer_(reply[0], reply[1]);
         });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
-
+      //Reset bandwidth loop check.
+      this.stopBandwidthCalc_ = false;
+      this.calculateBandwidth_();
       // Shutdown once the data channel terminates.
       this.dataChannel_.onceClosed.then(() => {
         if (this.dataChannel_.dataFromPeerQueue.getLength() > 0) {
@@ -424,6 +464,7 @@ import ProxyConfig = require('./proxyconfig');
       // effectively immediate.  However, we wrap it in a promise to ensure
       // that any exception is sent to the Promise.catch, rather than
       // propagating synchronously up the stack.
+      this.stopBandwidthCalc_ = true;
       var shutdownPromises :Promise<any>[] = [
         new Promise((F, R) => { this.dataChannel_.close(); F(); })
       ];
@@ -447,7 +488,7 @@ import ProxyConfig = require('./proxyconfig');
             return;
           }
 
-          var request :socks.Request;
+          var request :socks_headers.Request;
           try { request = JSON.parse(data.str); }
           catch (e) {
             R(new Error('received malformed message during handshake: ' +
@@ -455,12 +496,12 @@ import ProxyConfig = require('./proxyconfig');
             return;
           }
 
-          if (!socks.isValidRequest(request)) {
+          if (!socks_headers.isValidRequest(request)) {
             R(new Error('received invalid request from peer: ' +
                 JSON.stringify(data.str)));
             return;
           }
-          if (request.command != socks.Command.TCP_CONNECT) {
+          if (request.command != socks_headers.Command.TCP_CONNECT) {
             R(new Error('unexpected type for endpoint message'));
             return;
           }
@@ -484,39 +525,61 @@ import ProxyConfig = require('./proxyconfig');
 
     // Completes socks authentication protocol
     private connectWithSocksAuth_ = (webEndpoint :net.Endpoint)
-          :Promise<[socks.Reply, net.Endpoint]> => {
+          :Promise<[socks_headers.Reply, net.Endpoint]> => {
       log.debug('%1: Connecting through socks to: %2',
                 [this.longId(), webEndpoint]);
-      // Complete socks auth handshake
-      var authRequest = socks.composeAuthHandshakeBuffer([socks.Auth.NOAUTH]);
-      log.debug('%1: Creating auth handshake: %2',
-                [this.longId(), authRequest]);
+      // Start socks auth handshake
+      var authRequest = socks_headers.composeAuthHandshakeBuffer(
+          [socks_headers.Auth.USERPASS, socks_headers.Auth.NOAUTH]);
+      log.debug('%1: Creating auth negotiation handshake', [this.longId()]);
       this.tcpConnection_.send(authRequest);
 
       // Wait for auth handshake response
       return this.tcpConnection_.receiveNext()
-        .then((buffer:ArrayBuffer) :Promise<ArrayBuffer> => {
-          var auth = socks.interpretAuthResponse(buffer);
-          log.debug('%1: Received auth handshake reply: %2',
+        .then((buffer:ArrayBuffer) :Promise<void> => {
+          var auth:socks_headers.Auth = socks_headers.interpretAuthResponse(buffer);
+          log.debug('%1: Received auth handshake negotiation reply: %2',
                     [this.longId(), auth]);
-          if (auth !== socks.Auth.NOAUTH) {
-            throw new Error('Received wrong socks auth response. Expected ' +
-                            socks.Auth.NOAUTH + ' but got ' + auth);
+          // Complete socks auth based on auth method negotiated
+          if (auth === socks_headers.Auth.NOAUTH) {
+            return;
+          } else if (auth === socks_headers.Auth.USERPASS) {
+            // Create username password auth request
+            var userpass :socks_headers.UserPassRequest = {
+              username: this.userId_ || 'user',
+              password: ''
+            };
+            var userpassRequest = socks_headers.composeUserPassRequest(userpass);
+            log.debug('%1: Making USERPASS request: %2',
+                      [this.longId(), userpass]);
+            this.tcpConnection_.send(userpassRequest);
+            return this.tcpConnection_.receiveNext()
+              .then((buffer:ArrayBuffer) :void => {
+                var success :boolean = socks_headers.interpretUserPassResponse(buffer);
+                log.debug('%1: Received userpass subnegotiation reply: %2',
+                          [this.longId(), success]);
+                if (!success) {
+                  throw new Error('Socks USERPASS auth subnegotiation failed');
+                }
+              });
+          } else {
+            throw new Error('Received unsupported socks auth method: ' + auth);
           }
+        }).then(() :Promise<ArrayBuffer> => {
           // Send socks connection request
-          var request :socks.Request = {
-            command: socks.Command.TCP_CONNECT,
+          var request :socks_headers.Request = {
+            command: socks_headers.Command.TCP_CONNECT,
             endpoint: webEndpoint
           };
           log.debug('%1: Making socks request: %2', [this.longId(), request]);
-          this.tcpConnection_.send(socks.composeRequestBuffer(request));
+          this.tcpConnection_.send(socks_headers.composeRequestBuffer(request));
           return this.tcpConnection_.receiveNext();
-        }).then((buffer:ArrayBuffer) :[socks.Reply, net.Endpoint] => {
+        }).then((buffer:ArrayBuffer) :[socks_headers.Reply, net.Endpoint] => {
           // Wait for socks connection response
-          var response = socks.interpretResponseBuffer(buffer);
+          var response = socks_headers.interpretResponseBuffer(buffer);
           log.debug('%1: Received request response: %2',
                     [this.longId(), response]);
-          if (response.reply !== socks.Reply.SUCCEEDED) {
+          if (response.reply !== socks_headers.Reply.SUCCEEDED) {
             throw new Error('Socks connection through reproxy failed');
           }
           var nullEndpoint :net.Endpoint = {'address': '0.0.0.0', 'port': 0};
@@ -526,9 +589,9 @@ import ProxyConfig = require('./proxyconfig');
 
     // Fulfills once the connected endpoint has been returned to the SOCKS
     // client. Rejects if the endpoint cannot be sent to the SOCKS client.
-    private replyToPeer_ = (reply:socks.Reply, bound?:net.Endpoint)
+    private replyToPeer_ = (reply:socks_headers.Reply, bound?:net.Endpoint)
         : Promise<void> => {
-      var response :socks.Response = {
+      var response :socks_headers.Response = {
         reply: reply,
         endpoint: bound || undefined
       };
@@ -536,28 +599,28 @@ import ProxyConfig = require('./proxyconfig');
       return this.dataChannel_.send({
         str: JSON.stringify(response)
       }).then(() => {
-        if (reply != socks.Reply.SUCCEEDED) {
+        if (reply != socks_headers.Reply.SUCCEEDED) {
           this.stop();
         }
       });
     }
 
-    private getReplyFromInfo_ = (info:tcp.ConnectionInfo) : socks.Reply => {
+    private getReplyFromInfo_ = (info:tcp.ConnectionInfo) : socks_headers.Reply => {
       // TODO: This code should really return socks.Reply.NOT_ALLOWED,
       // but due to port-scanning concerns we return a generic error instead.
       // See https://github.com/uProxy/uproxy/issues/809
       return this.isAllowedAddress_(info.remote.address) ?
-          socks.Reply.SUCCEEDED : socks.Reply.FAILURE;
+          socks_headers.Reply.SUCCEEDED : socks_headers.Reply.FAILURE;
     }
 
-    private getReplyFromError_ = (e:freedom.Error) : socks.Reply => {
-      var reply :socks.Reply = socks.Reply.FAILURE;
+    private getReplyFromError_ = (e:freedom.Error) : socks_headers.Reply => {
+      var reply :socks_headers.Reply = socks_headers.Reply.FAILURE;
       if (e.errcode == 'TIMED_OUT') {
-        reply = socks.Reply.TTL_EXPIRED;
+        reply = socks_headers.Reply.TTL_EXPIRED;
       } else if (e.errcode == 'NETWORK_CHANGED') {
-        reply = socks.Reply.NETWORK_UNREACHABLE;
+        reply = socks_headers.Reply.NETWORK_UNREACHABLE;
       } else if (e.errcode == 'NAME_NOT_RESOLVED') {
-        reply = socks.Reply.HOST_UNREACHABLE;
+        reply = socks_headers.Reply.HOST_UNREACHABLE;
       } else if (e.errcode == 'CONNECTION_RESET' ||
                  e.errcode == 'CONNECTION_REFUSED') {
         // Due to port-scanning concerns, we return a generic error if the user
@@ -565,7 +628,7 @@ import ProxyConfig = require('./proxyconfig');
         // address might be on the local network.
         // See https://github.com/uProxy/uproxy/issues/809
         if (this.proxyConfig_.allowNonUnicast) {
-          reply = socks.Reply.CONNECTION_REFUSED;
+          reply = socks_headers.Reply.CONNECTION_REFUSED;
         }
       }
       // TODO: report ConnectionInfo in cases where a port was bound.
@@ -587,8 +650,8 @@ import ProxyConfig = require('./proxyconfig');
         throw new Error('received non-buffer data from datachannel');
       }
       this.bytesReceivedFromPeer_.handle(data.buffer.byteLength);
+      this.currBytes_ += data.buffer.byteLength;
       this.channelReceivedBytes_ += data.buffer.byteLength;
-
       this.tcpConnection_.send(data.buffer);
     }
 
@@ -600,6 +663,7 @@ import ProxyConfig = require('./proxyconfig');
       var socketReader = (data:ArrayBuffer) => {
         this.sendOnChannel_(data);
         this.bytesSentToPeer_.handle(data.byteLength);
+        this.currBytes_ += data.byteLength;
         this.channelSentBytes_ += data.byteLength;
       };
       this.tcpConnection_.dataFromSocketQueue.setSyncHandler(socketReader);
@@ -652,6 +716,23 @@ import ProxyConfig = require('./proxyconfig');
         return false;
       }
       return true;
+    }
+
+    // Calculates bandwidth over BANDWIDTH_MONITOR_INTERVAL millisecond intervals based on
+    // total bytes sent and received by this session. We want to calculate
+    // bandwidth over a certain time interval; doing it continuously would
+    // not help us stop a random peak in bandwidth usage if the overall
+    // average is still low.
+    private calculateBandwidth_ = () : void => {
+      if (!this.stopBandwidthCalc_) {
+        // There are 8 bits in a byte
+        var bitsTransferred_ = (this.currBytes_ - this.prevBytes_) * 8;
+        // Bandwidth is measured in bits/sec.
+        var bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
+        log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), bandwidthSession_);
+        this.prevBytes_ = this.currBytes_;
+        setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
+      }
     }
 
     private isAllowedAddress_ = (addressString:string) : boolean => {

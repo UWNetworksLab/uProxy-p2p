@@ -1,4 +1,4 @@
-/// <reference path='../../../../../third_party/typings/firefox/firefox.d.ts' />
+/// <reference path='../../../../third_party/firefox/firefox.d.ts' />
 
 /**
  * firefox_browser_api.ts
@@ -81,6 +81,10 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public on = (name :string, callback :Function) => {
     port.on(name, callback);
+  }
+
+  public exit = () => {
+    // Not necessary for in-browser versions
   }
 
   public respond = (data :any, callback ?:Function, msg ?:string) : void => {
