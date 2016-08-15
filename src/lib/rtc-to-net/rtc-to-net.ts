@@ -410,7 +410,6 @@ import ProxyConfig = require('./proxyconfig');
     private channelReceivedBytes_ :number = 0;
 
     private pausedForBandwidthOverflow_: boolean = false;
-    //private limitBandwidth_: boolean = true;
     private pausedForChannelOverflow_: boolean = false;
 
     // Don't pause this session for the entire interval.
@@ -829,7 +828,7 @@ import ProxyConfig = require('./proxyconfig');
     }
 
     private isAllowedAddress_ = (addressString:string) : boolean => {
-      // default is to disallow non-unicast addresses; i.e. only proxy forc
+      // default is to disallow non-unicast addresses; i.e. only proxy for
       // public internet addresses.
       if (this.proxyConfig_.allowNonUnicast) {
         return true
