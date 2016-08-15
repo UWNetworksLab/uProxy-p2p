@@ -157,7 +157,23 @@ function sumMetrics(mets :NetMetrics) :number{
   }
 }
 
-export class Metrics {
+export interface Metrics {
+  increment(name :string) : void;
+  userCount(network: string, userName :string, friendCount:number) : void;
+  getReport(natInfo:uproxy_core_api.NetworkInfo) : Promise<Object>;
+  reset() : void;
+}
+
+export class NoOpMetrics implements Metrics {
+  public increment(name :string) {}
+  public userCount(network: string, userName :string, friendCount:number) {}
+  public getReport(natInfo:uproxy_core_api.NetworkInfo) {
+    return new Promise((F, R) => {});  // Never provide a report.
+  }
+  public reset() {}
+}
+
+export class FreedomMetrics implements Metrics {
   public onceLoaded_ :Promise<void>;  // Only public for tests
   private add_ :Updater<number>;
   private metricsProvider_ :freedom_AnonymizedMetrics;

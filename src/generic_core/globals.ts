@@ -78,7 +78,9 @@ export var effectiveMessageVersion = () : number => {
   return settings.force_message_version || constants.MESSAGE_VERSION;
 }
 
-export var metrics = new metrics_module.Metrics(storage);
+export var metrics = freedom['metrics'] ?
+    new metrics_module.FreedomMetrics(storage) :
+    new metrics_module.NoOpMetrics();
 
 export var publicKey :string;
 export var pgp :freedom.PgpProvider.PgpProvider = freedom['pgp']();
