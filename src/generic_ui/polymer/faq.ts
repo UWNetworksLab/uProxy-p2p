@@ -75,5 +75,8 @@ Polymer({
   },
   observe: {
     'model.globalSettings.language': 'translateElements'
+  },
+  computed: {
+    'opened': '$.faqPanel.opened'
   }
 });
