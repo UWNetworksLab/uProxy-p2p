@@ -165,10 +165,18 @@ export interface Metrics {
 }
 
 export class NoOpMetrics implements Metrics {
-  public increment(name :string) {}
-  public userCount(network: string, userName :string, friendCount:number) {}
+  public increment(name :string) {
+    log.debug('No-op metrics ignoring increment for %1', name);
+  }
+  public userCount(network: string, userName :string, friendCount:number) {
+    log.debug('No-op metrics ignoring user count: %1, %2, %3',
+        network, userName, friendCount);
+  }
   public getReport(natInfo:uproxy_core_api.NetworkInfo) {
-    return new Promise((F, R) => {});  // Never provide a report.
+    log.debug('No-op metrics ignoring report request');
+    // To avoid contaminating the production metrics with empty reports, we
+    // return a promise that never resolves at all.
+    return new Promise((F, R) => {});
   }
   public reset() {}
 }

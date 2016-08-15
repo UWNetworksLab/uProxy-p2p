@@ -78,7 +78,7 @@ export var effectiveMessageVersion = () : number => {
   return settings.force_message_version || constants.MESSAGE_VERSION;
 }
 
-export var metrics = freedom['metrics'] ?
+export const metrics = freedom['metrics'] ?
     new metrics_module.FreedomMetrics(storage) :
     new metrics_module.NoOpMetrics();
 
