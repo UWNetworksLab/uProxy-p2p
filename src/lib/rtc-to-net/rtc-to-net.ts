@@ -351,7 +351,7 @@ import ProxyConfig = require('./proxyconfig');
             }
           }
         }
-        setTimeout(this.calculateBandwidth, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);      
+        setTimeout(this.calculateBandwidth, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
       }
     }
 
