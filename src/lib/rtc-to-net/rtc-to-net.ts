@@ -307,13 +307,13 @@ import ProxyConfig = require('./proxyconfig');
         for (var label in this.sessions_) {
           var bitsInterval = (this.sessions_[label].currBytes_ - this.sessions_[label].prevBytes_) * 8;
           // Bandwidth is measured in bps.
-          if (this.sessions_[label].testingFirstTimeSession) {
+          if (this.sessions_[label].firstTimeSession) {
             log.debug('It is ' + this.sessions_[label].channelLabel() + 's first time!');
             var currTime = new Date().getTime();
-            var timeDifference = currTime - this.sessions_[label].testingFirstDate;
+            var timeDifference = currTime - this.sessions_[label].firstDate;
             log.debug('It has been ' + timeDifference + ' milliseconds since the session was started');
             var bandwidthSession = bitsInterval / (timeDifference / 1000);
-            this.sessions_[label].testingFirstTimeSession = false;
+            this.sessions_[label].firstTimeSession = false;
           } else {
             var bandwidthSession = bitsInterval / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
           }
@@ -415,8 +415,8 @@ import ProxyConfig = require('./proxyconfig');
     // Don't pause this session for the entire interval.
     private notPausedFraction_: number = 1;
 
-    public testingFirstTimeSession: boolean = true;
-    public testingFirstDate: number = 0;
+    public firstTimeSession: boolean = true;
+    public firstDate: number = 0;
 
     // Records the bytes sent to and from peer, for the current time interval.
     public currBytes_: number = 0;
@@ -498,7 +498,7 @@ import ProxyConfig = require('./proxyconfig');
         });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
-      this.testingFirstDate = new Date().getTime();
+      this.firstDate = new Date().getTime();
       // Shutdown once the data channel terminates.
       this.dataChannel_.onceClosed.then(() => {
         if (this.dataChannel_.dataFromPeerQueue.getLength() > 0) {
