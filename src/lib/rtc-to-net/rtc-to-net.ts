@@ -55,8 +55,8 @@ import ProxyConfig = require('./proxyconfig');
     public static SESSION_LIMIT = 10000;
 
     private static BANDWIDTH_MONITOR_INTERVAL = 5000;
-    private static BANDWIDTH_LIMIT = 1000000;
 
+    private static BANDWIDTH_LIMIT = 1000000;
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
 
@@ -410,7 +410,7 @@ import ProxyConfig = require('./proxyconfig');
     private channelReceivedBytes_ :number = 0;
 
     private pausedForBandwidthOverflow_: boolean = false;
-    private limitBandwidth_: boolean = true;
+    //private limitBandwidth_: boolean = true;
     private pausedForChannelOverflow_: boolean = false;
 
     // Don't pause this session for the entire interval.
@@ -431,7 +431,7 @@ import ProxyConfig = require('./proxyconfig');
     // of this value; if the connection is paused and resumed too quickly, the bandwidth
     // is not accurately limited. In other words, even though the connection is paused,
     // the consequence of a very short pause is that many bits are transferred in the
-    // time it takes to call the method again, which increases the bandwidth.da
+    // time it takes to call the method again, which increases the bandwidth.
     private static BANDWIDTH_MONITOR_INTERVAL = 3000;
     //1 Mbps
     public static BANDWIDTH_LIMIT = 1000000;
@@ -774,9 +774,8 @@ import ProxyConfig = require('./proxyconfig');
         if (this.tcpConnection_.isClosed()) {
           return;
         }
-        this.pausedForChannelOverflow_ = overflow;
         // Need to pause for overflow.
-        if (this.pausedForChannelOverflow_) {
+        if (overflow) {
           // Check if connection is not already paused for bandwidth overflow.
           if (!this.pausedForBandwidthOverflow_) {
             this.tcpConnection_.pause();
@@ -793,6 +792,7 @@ import ProxyConfig = require('./proxyconfig');
             log.debug('%1: Exited overflow, but connection is still paused for bandwidth', this.longId());
           }
         }
+        this.pausedForChannelOverflow_ = overflow;
       });
     }
 
