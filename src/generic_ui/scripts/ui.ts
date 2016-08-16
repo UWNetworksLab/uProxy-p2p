@@ -597,8 +597,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.globalSettings.quiverUserName,
         this.i18n_t('UPROXY_NETWORK_SIGN_IN'))
     .then((quiverUserName :string) => {
-      this.model.globalSettings.quiverUserName = quiverUserName;
-      this.core.updateGlobalSettings(this.model.globalSettings);
+      this.updateGlobalSetting('quiverUserName', quiverUserName);
       return this.login('Quiver', quiverUserName);
     });
   }
@@ -627,8 +626,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public setActivePromoId = (promoId :string) => {
-    this.model.globalSettings.activePromoId = promoId;
-    this.core.updateGlobalSettings(this.model.globalSettings);
+    this.updateGlobalSetting('activePromoId', promoId);
   }
 
   /**
