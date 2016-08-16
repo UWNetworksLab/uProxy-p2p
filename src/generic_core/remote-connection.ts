@@ -156,7 +156,7 @@ var generateProxyingSessionId_ = (): string => {
         reproxy: globals.settings.reproxy,
       }, pc);
       this.rtcToNet_.updateBandwidthSettings({
-        testing: globals.settings.bandwidthSettings,
+        settings: globals.settings.bandwidthSettings,
       });
       this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);

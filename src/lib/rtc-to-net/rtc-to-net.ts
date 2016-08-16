@@ -98,7 +98,7 @@ import BandwidthConfig = require('./bandwidth-config');
     // (externally provided) proxyconfig.
     public proxyConfig :ProxyConfig;
 
-    public bandwidthConfigTesting :BandwidthConfig;
+    public bandwidthConfig :BandwidthConfig;
     // Message handler queues to/from the peer. Accessing this before
     // calling start() will result in an error.
     // TODO: public fields bad!
@@ -199,10 +199,10 @@ import BandwidthConfig = require('./bandwidth-config');
     }
 
     public updateBandwidthSettings = (
-      bandwidthConfigTesting: BandwidthConfig) => {
-      this.bandwidthConfigTesting = bandwidthConfigTesting;
-      this.limitBandwidth = this.bandwidthConfigTesting.testing.enabled;
-      this.bandwidthLimit = this.bandwidthConfigTesting.testing.limit;
+      bandwidthConfig: BandwidthConfig) => {
+      this.bandwidthConfig = bandwidthConfig;
+      this.limitBandwidth = this.bandwidthConfig.settings.enabled;
+      this.bandwidthLimit = this.bandwidthConfig.settings.limit;
     }
     // Loops until onceStopped fulfills.
     public initiateSnapshotting = () => {
