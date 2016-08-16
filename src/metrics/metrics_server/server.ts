@@ -1,3 +1,4 @@
+import bodyParser = require('body-parser')
 import express = require('express');
 import gcloud = require('gcloud');
 
@@ -11,6 +12,7 @@ let datastore = gcloud().datastore({
 let use_service = new  us.RecordUseService(new DatastoreUseEventsRepository(datastore));
 
 let app = express();
+app.use(bodyParser.json({type: 'application/json'}));
 
 app.get('/', (request: express.Request, response: express.Response) => {
   response.status(200).send('Hello, world!');
