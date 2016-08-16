@@ -134,7 +134,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   HOSTARGS=
   if [ -n "$PREBUILT" ]
   then
-    HOSTARGS="$HOSTARGS -v $PREBUILT/build/dev/uproxy/lib/samples:/test/zork"
+    HOSTARGS="$HOSTARGS -v $PREBUILT/build/src/lib/samples:/test/zork"
   fi
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
