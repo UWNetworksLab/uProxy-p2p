@@ -39,10 +39,6 @@
       "url": "../lib/loggingprovider/freedom-module.json",
       "api": "logginglistener"
     },
-    "metrics": {
-      "url": "../freedomjs-anonymized-metrics/anonmetrics.json",
-      "api": "metrics"
-    },
     "churnPipe": {
       "url": "../lib/churn-pipe/freedom-module.json",
       "api": "churnPipe"
