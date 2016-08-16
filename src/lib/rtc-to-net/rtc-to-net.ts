@@ -54,6 +54,12 @@ import ProxyConfig = require('./proxyconfig');
     // Public for tests.
     public static SESSION_LIMIT = 10000;
 
+    // The length of each interval used to calculate bandwidth, in milliseconds.
+    // This value should not be too small, because pausing/resuming is a fraction
+    // of this value; if the connection is paused and resumed too quickly, the bandwidth
+    // is not accurately limited. In other words, even though the connection is paused,
+    // the consequence of a very short pause is that many bits are transferred in the
+    // time it takes to call the method again, which increases the bandwidth.
     private static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
     private static BANDWIDTH_LIMIT = 1000000;
@@ -424,16 +430,6 @@ import ProxyConfig = require('./proxyconfig');
     public prevBytes_: number = 0;
     // The current bandwidth for this session.
     public currBandwidth: number = 0;
-
-    // The length of each interval used to calculate bandwidth, in milliseconds.
-    // This value should not be too small, because pausing/resuming is a fraction
-    // of this value; if the connection is paused and resumed too quickly, the bandwidth
-    // is not accurately limited. In other words, even though the connection is paused,
-    // the consequence of a very short pause is that many bits are transferred in the
-    // time it takes to call the method again, which increases the bandwidth.
-    private static BANDWIDTH_MONITOR_INTERVAL = 3000;
-    //1 Mbps
-    public static BANDWIDTH_LIMIT = 1000000;
 
     // The supplied datachannel must already be successfully established.
     constructor(
