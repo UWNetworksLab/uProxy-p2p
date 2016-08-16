@@ -35,8 +35,8 @@ Polymer({
       this.refreshPortControl();
     }
 
-    this.bandwidthLimit = ui_context.model.globalSettings.bandwidthSettings.limit;    
-
+    this.bandwidthLimit = ui_context.model.globalSettings.bandwidthSettings.limit;
+    this.$.bandwidthLimitEnabled.checked = ui_context.model.globalSettings.bandwidthSettings.enabled;
     this.$.advancedSettingsPanel.open();
   },
   // Perform rudimentary JSON check for the text settings.

@@ -91,6 +91,9 @@
       margin-bottom: 0.75em;
       margin-top: 0.75em;
     }
+    paper-input-decorator[id=bandwidthLimitDecorator] {
+      height: 10px;
+    }
     textarea[fit] {
       /* fit does not properly size textareas on Firefox */
       height: 100%;
@@ -155,6 +158,9 @@
 
         <div id = 'bandwidthLimitingPanel'>
           <paper-toggle-button id = 'bandwidthLimitEnabled'></paper-toggle-button>
+          <paper-input-decorator id='bandwidthLimitDecorator' label='replace with real label' floatingLabel='{{ true }}' hidden?='{{ !$.bandwidthLimitEnabled.checked }}'>
+            <input is='core-input' type='number' min="10000" value='{{ bandwidthLimit }}' />
+          </paper-input-decorator>
         </div>
 
         <div id='portControlBox'>
