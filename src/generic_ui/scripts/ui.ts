@@ -1088,6 +1088,7 @@ export class UserInterface implements ui_constants.UiApi {
     if (state.globalSettings.language !== this.model.globalSettings.language) {
       this.updateLanguage(state.globalSettings.language);
     }
+    this.model.updateGlobalSettings(state.globalSettings);
 
     while (this.model.onlineNetworks.length > 0) {
       var toRemove = this.model.onlineNetworks[0];
