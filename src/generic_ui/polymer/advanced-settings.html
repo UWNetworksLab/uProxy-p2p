@@ -1,6 +1,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
-<link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
+<link rel='import' href='../../bower/paper-toggle-button/paper-toggle-button.html'>
 <link rel='import' href='../../bower/core-label/core-label.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
@@ -152,9 +152,12 @@
             </uproxy-faq-link>
           </p>
         </div>
-        <paper-checkbox id = 'testingCheckbox'></paper-checkbox>
-        <div id='portControlBox'>
 
+        <div id = 'bandwidthLimitingPanel'>
+          <paper-toggle-button id = 'bandwidthLimitEnabled'></paper-toggle-button>
+        </div>
+
+        <div id='portControlBox'>
           <p class='inputLabel'>
             {{ 'PORT_CONTROL_TITLE' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>

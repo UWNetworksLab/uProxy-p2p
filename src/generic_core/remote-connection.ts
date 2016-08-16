@@ -154,10 +154,10 @@ var generateProxyingSessionId_ = (): string => {
       this.rtcToNet_.start({
         allowNonUnicast: globals.settings.allowNonUnicast,
         reproxy: globals.settings.reproxy,
-      }, {
-        testing: globals.settings.bandwidthSettings,
       }, pc);
-
+      this.rtcToNet_.updateBandwidthSettings({
+        testing: globals.settings.bandwidthSettings,
+      });
       this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
       this.rtcToNet_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);

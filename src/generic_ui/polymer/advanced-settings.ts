@@ -17,6 +17,7 @@ export enum StatusState {
 };
 
 Polymer({
+  bandwidthLimit: 0,
   settings: '',
   portControlSupport: null,
   status: StatusState.EMPTY,
@@ -33,6 +34,8 @@ Polymer({
     if (this.portControlSupport === null) {
       this.refreshPortControl();
     }
+
+    this.bandwidthLimit = ui_context.model.globalSettings.bandwidthSettings.limit;    
 
     this.$.advancedSettingsPanel.open();
   },
@@ -59,8 +62,10 @@ Polymer({
         this.status = StatusState.KEY_VALUE_ERROR;
         return;
       }
-      if (this.$.testingCheckbox.checked) {
-        newSettings.bandwidthSettings.limit = 50000;
+      if (this.$.bandwidthLimitEnabled.checked) {
+        newSettings.bandwidthSettings.enabled = true;
+      } else {
+        newSettings.bandwidthSettings.enabled = false;
       }
       ui_context.model.globalSettings = newSettings;
       this.status = StatusState.SET;

@@ -57,14 +57,13 @@ import BandwidthConfig = require('./bandwidth-config');
 
     private static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
-    private static BANDWIDTH_LIMIT = 1000000;
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
 
     private stopBandwidthCalc :boolean = false;
     private prevBytes :number = 0;
-    private limitBandwidth :boolean = true;
-
+    private limitBandwidth :boolean = false;
+    private bandwidthLimit: number = 1000000;
     // Returns true if the addition was successful.
     private static addUserSession_ = (userId:string) : boolean => {
       if (!userId) {
@@ -165,7 +164,6 @@ import BandwidthConfig = require('./bandwidth-config');
     // Returns this.onceReady.
     public start = (
         proxyConfig:ProxyConfig,
-        bandwidthConfigTesting:BandwidthConfig,
         peerconnection:peerconnection.PeerConnection<Object>)
         : Promise<void> => {
       if (this.peerConnection_) {
@@ -175,7 +173,6 @@ import BandwidthConfig = require('./bandwidth-config');
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(peerconnection, 'RtcToNet');
       this.proxyConfig = proxyConfig;
-      this.bandwidthConfigTesting = bandwidthConfigTesting;
 
       this.signalsForPeer = this.peerConnection_.signalForPeerQueue;
       this.pool_.peerOpenedChannelQueue.setSyncHandler(
@@ -201,6 +198,12 @@ import BandwidthConfig = require('./bandwidth-config');
       return this.onceReady;
     }
 
+    public updateBandwidthSettings = (
+      bandwidthConfigTesting: BandwidthConfig) => {
+      this.bandwidthConfigTesting = bandwidthConfigTesting;
+      this.limitBandwidth = this.bandwidthConfigTesting.testing.enabled;
+      this.bandwidthLimit = this.bandwidthConfigTesting.testing.limit;
+    }
     // Loops until onceStopped fulfills.
     public initiateSnapshotting = () => {
       var loop = true;
@@ -295,7 +298,11 @@ import BandwidthConfig = require('./bandwidth-config');
     }
 
     private calculateBandwidth = (): void => {
-      log.debug('Testing: does this work?' + this.bandwidthConfigTesting.testing.limit);
+      if (this.bandwidthConfigTesting.testing.enabled) {
+        log.debug('limit should be set on');
+      } else {
+        log.debug('limit should be set off');
+      }
       if (!this.stopBandwidthCalc) {
         var totalBandwidth = 0;
         var bufferBandwidth = 0;
@@ -303,9 +310,9 @@ import BandwidthConfig = require('./bandwidth-config');
         var numSessions = Object.keys(this.sessions_).length;
 
         if (numSessions == 0) {
-          var perSessionBandwidthLimit = RtcToNet.BANDWIDTH_LIMIT;
+          var perSessionBandwidthLimit = this.bandwidthLimit;
         } else {
-          var perSessionBandwidthLimit = RtcToNet.BANDWIDTH_LIMIT / numSessions;
+          var perSessionBandwidthLimit = this.bandwidthLimit / numSessions;
         }
         log.debug('Number of sessions: ' + numSessions + '; bandwidth limit for each: ' + perSessionBandwidthLimit);
 
@@ -340,7 +347,7 @@ import BandwidthConfig = require('./bandwidth-config');
         log.debug('Buffer bandwidth for this interval: ' + bufferBandwidth);
         // We only need to pause sessions if the total bandwidth is over the limit, even if some individual sessions
         // went over their alloted limit.
-        if (totalBandwidth > RtcToNet.BANDWIDTH_LIMIT) {
+        if (totalBandwidth > this.bandwidthLimit) {
           // If there is any buffer bandwidth, split that evenly among sessions that went over the limit.
           // If the total went over the limit, sessionsOverLimit has to have at least 1 session in it.
           perSessionBandwidthLimit += bufferBandwidth / (sessionsOverLimit);
@@ -437,8 +444,6 @@ import BandwidthConfig = require('./bandwidth-config');
     // the consequence of a very short pause is that many bits are transferred in the
     // time it takes to call the method again, which increases the bandwidth.
     private static BANDWIDTH_MONITOR_INTERVAL = 3000;
-    //1 Mbps
-    public static BANDWIDTH_LIMIT = 1000000;
 
     // The supplied datachannel must already be successfully established.
     constructor(
