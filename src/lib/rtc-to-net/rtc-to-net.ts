@@ -14,6 +14,7 @@ import tcp = require('../net/tcp');
 
 import Pool = require('../pool/pool');
 import ProxyConfig = require('./proxyconfig');
+import BandwidthConfig = require('./bandwidth-config');
 
 // module RtcToNet {
 
@@ -98,6 +99,7 @@ import ProxyConfig = require('./proxyconfig');
     // (externally provided) proxyconfig.
     public proxyConfig :ProxyConfig;
 
+    public bandwidthConfigTesting :BandwidthConfig;
     // Message handler queues to/from the peer. Accessing this before
     // calling start() will result in an error.
     // TODO: public fields bad!
@@ -163,6 +165,7 @@ import ProxyConfig = require('./proxyconfig');
     // Returns this.onceReady.
     public start = (
         proxyConfig:ProxyConfig,
+        bandwidthConfigTesting:BandwidthConfig,
         peerconnection:peerconnection.PeerConnection<Object>)
         : Promise<void> => {
       if (this.peerConnection_) {
@@ -172,6 +175,7 @@ import ProxyConfig = require('./proxyconfig');
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(peerconnection, 'RtcToNet');
       this.proxyConfig = proxyConfig;
+      this.bandwidthConfigTesting = bandwidthConfigTesting;
 
       this.signalsForPeer = this.peerConnection_.signalForPeerQueue;
       this.pool_.peerOpenedChannelQueue.setSyncHandler(
@@ -291,7 +295,7 @@ import ProxyConfig = require('./proxyconfig');
     }
 
     private calculateBandwidth = (): void => {
-      log.debug('Testing: does this work?' + this.proxyConfig.testing.limit);
+      log.debug('Testing: does this work?' + this.bandwidthConfigTesting.testing.limit);
       if (!this.stopBandwidthCalc) {
         var totalBandwidth = 0;
         var bufferBandwidth = 0;

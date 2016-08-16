@@ -59,7 +59,9 @@ Polymer({
         this.status = StatusState.KEY_VALUE_ERROR;
         return;
       }
-
+      if (this.$.testingCheckbox.checked) {
+        newSettings.bandwidthSettings.limit = 50000;
+      }
       ui_context.model.globalSettings = newSettings;
       this.status = StatusState.SET;
       this.$.state.core.updateGlobalSettings(ui_context.model.globalSettings);
