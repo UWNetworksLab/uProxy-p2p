@@ -76,6 +76,7 @@ Polymer({
       } else {
         this.torEnabled = false;
         newSettings.reproxy.enabled = false;
+        ui_context.model.reproxyError = false;  // Reset error and check
         this.reproxyCheck = uproxy_core_api.ReproxyCheck.UNCHECKED;
       }
 

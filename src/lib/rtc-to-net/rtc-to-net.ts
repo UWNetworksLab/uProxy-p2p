@@ -42,6 +42,13 @@ import ProxyConfig = require('./proxyconfig');
     sessions :SessionSnapshot[];
   }
 
+  // TODO Decide if this should be encoded as an enum with many updates, or an
+  // object with updates stored as fields.
+  export enum Status {
+    REPROXY_ERROR,
+    REPROXY_WORKING
+  }
+
   // The |RtcToNet| class holds a peer-connection and all its associated
   // proxied connections.
   // TODO: Extract common code for this and SocksToRtc:
@@ -117,6 +124,13 @@ import ProxyConfig = require('./proxyconfig');
     // defined in the class that creates an instance of RtcToNet.
     public bytesSentToPeer :handler.Queue<number, void> =
         new handler.Queue<number, void>();
+
+    // Queue of status updates of type Status used to signal different status
+    // updates to generic core. All Sessions created in RtcToNet share a single
+    // status queue. Handler is typically defined in the class that creates an
+    // instance of RtcToNet.
+    public statusUpdates :handler.Queue<Status, void> =
+        new handler.Queue<Status, void>();
 
     // Fulfills once the module is ready to allocate sockets.
     // Rejects if a peerconnection could not be made for any reason.
@@ -241,6 +255,7 @@ import ProxyConfig = require('./proxyconfig');
           this.proxyConfig,
           this.bytesReceivedFromPeer,
           this.bytesSentToPeer,
+          this.statusUpdates,
           this.userId_
       );
       this.sessions_[channelLabel] = session;
@@ -361,7 +376,7 @@ import ProxyConfig = require('./proxyconfig');
     private stopBandwidthCalc_:boolean = false;
     // Records the bytes sent to and from peer, for the current time interval.
     public currBytes_:number = 0;
-    // Records the bytes sent to and from peer, for the previous time interval. 
+    // Records the bytes sent to and from peer, for the previous time interval.
     public prevBytes_:number = 0;
     // The length of each interval used to calculate bandwidth, in milliseconds.
     private static BANDWIDTH_MONITOR_INTERVAL = 5000;
@@ -372,6 +387,7 @@ import ProxyConfig = require('./proxyconfig');
         private proxyConfig_:ProxyConfig,
         private bytesReceivedFromPeer_:handler.QueueFeeder<number,void>,
         private bytesSentToPeer_:handler.QueueFeeder<number,void>,
+        private statusUpdates_:handler.QueueFeeder<Status, void>,
         private userId_?:string
     ) {}
 
@@ -407,6 +423,9 @@ import ProxyConfig = require('./proxyconfig');
               log.info('%1: failed to connect to remote endpoint',
                        [this.longId()]);
               this.replyToPeer_(this.getReplyFromError_(e));
+              if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled) {
+                this.statusUpdates_.handle(Status.REPROXY_ERROR);
+              }
               return Promise.reject(new Error(e.errcode));
             });
         }).then((info :tcp.ConnectionInfo)
@@ -418,6 +437,7 @@ import ProxyConfig = require('./proxyconfig');
                 log.debug('%1: Failed to complete reproxy socks auth',
                           [this.longId()]);
                 this.replyToPeer_(socks_headers.Reply.FAILURE);
+                this.statusUpdates_.handle(Status.REPROXY_ERROR);
                 return Promise.reject(e);
               });
           } else {
@@ -566,6 +586,8 @@ import ProxyConfig = require('./proxyconfig');
             throw new Error('Received unsupported socks auth method: ' + auth);
           }
         }).then(() :Promise<ArrayBuffer> => {
+          // Socks auth succeeded
+          this.statusUpdates_.handle(Status.REPROXY_WORKING);
           // Send socks connection request
           var request :socks_headers.Request = {
             command: socks_headers.Command.TCP_CONNECT,

@@ -183,6 +183,8 @@ export enum Update {
   // Payload is an integer between 0 and 100.
   CLOUD_INSTALL_PROGRESS = 2029,
   REFRESH_GLOBAL_SETTINGS = 2030, // Sends UI new canonical version of global settings
+  REPROXY_ERROR = 2031,  // Controls reproxy error bar notification to sharer
+  REPROXY_WORKING = 2032
 }
 
 // Action taken by the user. These values are not on the wire. They are passed

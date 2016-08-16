@@ -381,9 +381,17 @@
                 <div class='statusText' horizontal layout>
                   <core-icon icon='warning'></core-icon>
                   <span flex>
-                    Other proxy settings in use
+                    {{ "OTHER_PROXY_IN_USE_ERR" | $$ }}
                   </span>
-                  <a href='#' on-tap='{{ openProxyError }}'>GET HELP</a>
+                  <a href='#' on-tap='{{ openProxyError }}'>{{ "GET_HELP" | $$ }}</a>
+                </div>
+              </div>
+              <div class='statusRow error' hidden?='{{ !(model.globalSettings.reproxy.enabled && model.reproxyError) }}'>
+                <div class='statusText' horizontal layout>
+                  <core-icon icon='warning'></core-icon>
+                  <span flex>
+                    {{ "REPROXY_ERR" | $$ }}
+                  </span>
                 </div>
               </div>
               <div class='statusRow' hidden?='{{!gettingStatus}}'>

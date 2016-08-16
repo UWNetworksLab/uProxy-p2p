@@ -1423,5 +1423,13 @@
   "REPORT_ERROR": {
     "description": "Prompt that asks user to report error",
     "message": "Report this error"
+  },
+  "OTHER_PROXY_IN_USE_ERR": {
+    "description": "Error message displayed when other proxy settings are in use",
+    "message": "Other proxy settings in use"
+  },
+  "REPROXY_ERR": {
+    "description": "Error message displayed when unable to route through reproxy",
+    "message": "Unable to route through reproxy"
   }
 }

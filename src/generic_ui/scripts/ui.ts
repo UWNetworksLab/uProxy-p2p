@@ -278,7 +278,15 @@ export class UserInterface implements ui_constants.UiApi {
         uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS,
         (globalSettings: uproxy_core_api.GlobalSettings) => {
           this.model.updateGlobalSettings(globalSettings);
-        });
+    });
+
+    core.onUpdate(uproxy_core_api.Update.REPROXY_ERROR, () => {
+        this.model.reproxyError = true;
+    });
+
+    core.onUpdate(uproxy_core_api.Update.REPROXY_WORKING, () => {
+        this.model.reproxyError = false;
+    });
 
     browserApi.on('inviteUrlData', this.handleInvite);
     browserApi.on('notificationClicked', this.handleNotificationClick);
@@ -1213,4 +1221,5 @@ export class UserInterface implements ui_constants.UiApi {
     (<any>this.model.globalSettings)[setting] = value;
     this.core.updateGlobalSetting({ name: setting, value: value });
   }
+
 } // class UserInterface
