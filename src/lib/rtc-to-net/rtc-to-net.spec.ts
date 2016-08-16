@@ -110,6 +110,7 @@ describe('RtcToNet session', function() {
   var mockDataFromPeerQueue :handler.Queue<peerconnection.Data,void>;
   var mockBytesReceived :handler.Queue<number,void>;
   var mockBytesSent :handler.Queue<number,void>;
+  var mockUpdates :handler.Queue<rtc_to_net.Status,void>;
 
   beforeEach(function() {
     mockTcpConnection = jasmine.createSpyObj('tcp connection', [
