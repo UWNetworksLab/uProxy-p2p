@@ -7,7 +7,7 @@ interface ProxyConfig {
   // in a non-unicast (e.g. local network) address will fail.
   allowNonUnicast :boolean;
   reproxy        ?:uproxy_core_api.reproxySettings;
-  testing ?: string;
+  testing ?: uproxy_core_api.bandwidthSettingsTesting;
 }
 
 export = ProxyConfig;

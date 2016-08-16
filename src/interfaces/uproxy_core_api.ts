@@ -58,6 +58,7 @@ export interface GlobalSettings {
   shouldHijackDO: boolean;
   crypto: boolean;
   reproxy: reproxySettings;
+  bandwidthSettings: bandwidthSettingsTesting;
   // A list of strings, each represented as a constant below, with
   // prefix 'FEATURE_'.
   enabledExperiments :string[];
@@ -96,6 +97,11 @@ export interface ConnectionState {
 export interface reproxySettings {
   enabled       :boolean;      // Reproxy through socks is enabled
   socksEndpoint :net.Endpoint; // Endpoint through which to reproxy
+}
+
+export interface bandwidthSettingsTesting {
+  enabled :boolean;
+  limit :number;
 }
 
 //TODO(jpevarnek) remove this interface

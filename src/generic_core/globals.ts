@@ -42,6 +42,10 @@ export var settings :uproxy_core_api.GlobalSettings = {
   reproxy: {
     enabled: false,
     socksEndpoint: {address: '127.0.0.1', port: 9050},
+  },
+  bandwidthSettings: {
+    enabled: true,
+    limit: 100,
   }
 };
 

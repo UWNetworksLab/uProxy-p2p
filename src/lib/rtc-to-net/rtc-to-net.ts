@@ -291,7 +291,7 @@ import ProxyConfig = require('./proxyconfig');
     }
 
     private calculateBandwidth = (): void => {
-      log.debug('Testing: does this work?' + this.proxyConfig.testing);
+      log.debug('Testing: does this work?' + this.proxyConfig.testing.limit);
       if (!this.stopBandwidthCalc) {
         var totalBandwidth = 0;
         var bufferBandwidth = 0;
