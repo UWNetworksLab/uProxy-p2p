@@ -298,8 +298,9 @@ import BandwidthConfig = require('./bandwidth-config');
     }
 
     private calculateBandwidth = (): void => {
-      if (this.bandwidthConfigTesting.testing.enabled) {
+      if (this.limitBandwidth) {
         log.debug('limit should be set on');
+        log.debug('limit: ' + this.bandwidthLimit);
       } else {
         log.debug('limit should be set off');
       }
