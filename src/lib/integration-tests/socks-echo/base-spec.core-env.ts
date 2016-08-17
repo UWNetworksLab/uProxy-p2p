@@ -384,7 +384,6 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('run a simple echo test with reproxy', (done) => {
-    console.error('Starting echo test');
     var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
     var testModule = createTestModule(undefined, undefined, undefined, true);
     testModule.startEchoServer().then((port:number) => {
@@ -395,12 +394,9 @@ export function socksEchoTestDescription(useChurn:boolean) {
       expect(arraybuffers.byteEquality(input, output)).toBe(true);
       return testModule.getReproxyBytesReceived();
     }).then((bytes:number) => {
-      console.error('Bytes received in echo: ' + bytes);
       expect(bytes === input.byteLength).toBe(true);
       return testModule.getReproxyBytesSent();
     }).then((bytes:number) => {
-      console.error('Bytes sent in echo: ' + bytes);
-      console.error('Bytes in input/output: ' + input.byteLength);
       expect(bytes === input.byteLength).toBe(true);
     }).catch((e:any) => {
       expect(e).toBeUndefined();
@@ -408,20 +404,12 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('attempt to connect to a nonexistent DNS name with reproxy', (done) => {
-    console.error('Starting error test');
     var testModule = createTestModule(true, undefined, undefined, true);
     testModule.connect(80, 'www.nonexistentdomain.gov').then((connectionId:string) => {
       // This code should not run, because there is no such DNS name.
       expect(connectionId).toBeUndefined();
     }).catch((e:any) => {
       expect(e.reply).toEqual(socks_headers.Reply.HOST_UNREACHABLE);
-      return testModule.getReproxyBytesReceived();
-    }).then((bytes:number) => {
-      console.error('Bytes received in error: ' + bytes);
-      return testModule.getReproxyBytesSent();
-    }).then((bytes:number) => {
-      console.error('Bytes sent in error: ' + bytes);
-      expect(bytes > 0).toBe(true);
     }).then(done);
   });
 };
