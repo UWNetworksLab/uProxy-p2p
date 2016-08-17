@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
 
@@ -48,10 +48,10 @@ var storageValues = {metrics: {
   on_cloud: {}
 }};
 
-describe('metrics_module.Metrics', () => {
+describe('metrics_module.FreedomMetrics', () => {
   it('Loads data from storage', (done) => {
     var storage = new MockStorage(storageValues);
-    var metrics = new metrics_module.Metrics(storage);
+    var metrics = new metrics_module.FreedomMetrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(1);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(2);
@@ -61,7 +61,7 @@ describe('metrics_module.Metrics', () => {
 
   it('Sets values to 0 if no data is in storage', (done) => {
     var storage = new MockStorage({});
-    var metrics = new metrics_module.Metrics(storage);
+    var metrics = new metrics_module.FreedomMetrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(0);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(0);
@@ -72,7 +72,7 @@ describe('metrics_module.Metrics', () => {
   it('Increment adds to the values in storage and saves', (done) => {
     var storage = new MockStorage(storageValues);
     spyOn(storage, 'save').and.callThrough();
-    var metrics = new metrics_module.Metrics(storage);
+    var metrics = new metrics_module.FreedomMetrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(1);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(2);
@@ -87,7 +87,7 @@ describe('metrics_module.Metrics', () => {
 
   it('getReport reports obfuscated metric values', (done) => {
     var storage = new MockStorage(storageValues);
-    var metrics = new metrics_module.Metrics(storage);
+    var metrics = new metrics_module.FreedomMetrics(storage);
     metrics.getReport(networkInfo).then((payload :any) => {
       expect(payload['success-v3']).toBeDefined();
       expect(payload['success-v3']).not.toEqual(1);
@@ -114,7 +114,7 @@ describe('metrics_module.DailyMetricsReporter', () => {
 
   beforeEach(() => {
     jasmine.clock().install();
-    mockedMetrics = new metrics_module.Metrics(emptyStorage);
+    mockedMetrics = new metrics_module.FreedomMetrics(emptyStorage);
   });
 
   afterEach(() => {

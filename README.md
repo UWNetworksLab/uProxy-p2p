@@ -59,13 +59,6 @@ Sublime Text 3 provides a good development experience:
 
 Now, TypeScript files will have syntax highlighting and include support for "jump to definition" and refactoring (renaming).
 
-Several compile errors will remain, namely imports from `../../../third_party`. To workaround, Unix (and OSX) users can create a symlink:
-
- * `cd` to the directory containing the repo
- * `ln -s uproxy-lib/build/third_party ../third_party`
-
-Re-compile, with F7 (and perhaps restart Sublime, just to be sure) to resolve these errors.
-
 ## Run
 
 ### uProxy
@@ -75,8 +68,8 @@ Re-compile, with F7 (and perhaps restart Sublime, just to be sure) to resolve th
 These are the steps to try uProxy in the Chrome browser.
 
 - In Chrome, go to `chrome://extensions`, make sure 'Developer mode' is enabled
-- Click 'Load unpacked extension...' and select `build/dev/uproxy/chrome/app`
-- Click 'Load unpacked extension...' and select `build/dev/uproxy/chrome/extension`
+- Click 'Load unpacked extension...' and select `build/src/chrome/app`
+- Click 'Load unpacked extension...' and select `build/src/chrome/extension`
 
 You need both the uProxy Chrome App and the uProxy Extension.
 
@@ -90,7 +83,7 @@ These are the steps to try uProxy in the Firefox browser.
 Instructions can be found here: https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation
     - A quick way to get started is to download/extract the zip mentioned in "Prerequisites"
 
-- Run `cd build/dev/uproxy/firefox`
+- Run `cd build/src/firefox`
 
 - Run `cfx run` and Firefox should launch with the uProxy add-on installed
 
@@ -98,20 +91,20 @@ You can use `grunt build_firefox` from the root directory of the repository to c
 
 ### Demo apps
 
-These can be found at `build/dev/uproxy-lib/samples/`. They are a mix of web sites, browser extensions (Chrome and Firefox), and Node.js apps.
+These can be found at `build/src/samples/`. They are a mix of web sites, browser extensions (Chrome and Firefox), and Node.js apps.
 
 To run web apps:
  * start a webserver, e.g. `python -m SimpleHTTPServer`
- * open the relevant HTML file in your browser, e.g. http://localhost:8000/build/dev/uproxy-lib/samples/simple-freedom-chat/main.html.
+ * open the relevant HTML file in your browser, e.g. http://localhost:8000/build/src/samples/simple-freedom-chat/main.html.
 
 To run Chrome apps:
- - open `chrome://extensions`, enable check Developer Mode, and load the unpacked extension from the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-chromeapp/`.
+ - open `chrome://extensions`, enable check Developer Mode, and load the unpacked extension from the relevant directory, e.g. `build/src/samples/simple-socks-chromeapp/`.
 
 To run Firefox add-ons:
-- install [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) via NPM, e.g. `npm install jpm -g`, `cd` to the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-firefoxapp/`, and execute ``jpm run -b `which firefox` ``.
+- install [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) via NPM, e.g. `npm install jpm -g`, `cd` to the relevant directory, e.g. `build/src/samples/simple-socks-firefoxapp/`, and execute ``jpm run -b `which firefox` ``.
 
 To run Node.js apps:
- - Directly run `node` with the entry point, e.g. `node build/dev/uproxy-lib/samples/zork-node/index.js`
+ - Directly run `node` with the entry point, e.g. `node build/src/samples/zork-node/index.js`
 
 **Note: until freedom-for-node supports core.rtcpeerconnection, this sample will not work**
 

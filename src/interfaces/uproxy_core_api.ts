@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
 import net = require('../lib/net/net.types');
@@ -30,6 +30,12 @@ export enum UserFeedbackType {
   OTHER_FEEDBACK = 9
 }
 
+// Object containing an update to apply to another object
+export interface UpdateGlobalSettingArgs {
+  name: string; // field being updated
+  value: Object; // anything that's getting updated
+}
+
 // Object containing description so it can be saved to storage.
 export interface GlobalSettings {
   version          :number;
@@ -47,7 +53,7 @@ export interface GlobalSettings {
   quiverUserName :string;
   proxyBypass: string[];
   enforceProxyServerValidity :boolean;
-  validProxyServers :ValidProxyServerIdentity[];
+  validProxyServers :ValidProxyServerIdentities;
   activePromoId: string;
   shouldHijackDO: boolean;
   crypto: boolean;
@@ -68,13 +74,13 @@ export interface InitialState {
   portControlSupport :PortControlSupport;
 }
 
-export interface ValidProxyServerIdentity {
+export interface ValidProxyServerIdentities {
   [key: string]: string;
 }
 
 export interface ManagedPolicyUpdate {
   enforceProxyServerValidity :boolean;
-  validProxyServers :ValidProxyServerIdentity[];
+  validProxyServers :ValidProxyServerIdentities;
 }
 
 export interface ConnectionState {
@@ -118,7 +124,7 @@ export enum Command {
   MODIFY_CONSENT = 1007, // TODO: make this work with the consent piece.
 
   SEND_CREDENTIALS = 1014,
-  UPDATE_GLOBAL_SETTINGS = 1015,
+  UPDATE_GLOBAL_SETTINGS = 1015, // Fully replaces the uProxy global settings
   GET_LOGS = 1016,
   GET_NAT_TYPE = 1017,
   PING_UNTIL_ONLINE = 1018,
@@ -138,6 +144,7 @@ export enum Command {
   VERIFY_USER = 1033,
   VERIFY_USER_SAS = 1034,
   GET_PORT_CONTROL_SUPPORT = 1035,
+  UPDATE_GLOBAL_SETTING = 1036, // Updates a single global setting
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -173,7 +180,8 @@ export enum Update {
   CLOUD_INSTALL_STATUS = 2027,
   REMOVE_FRIEND = 2028, // Removed friend from roster.
   // Payload is an integer between 0 and 100.
-  CLOUD_INSTALL_PROGRESS = 2029
+  CLOUD_INSTALL_PROGRESS = 2029,
+  REFRESH_GLOBAL_SETTINGS = 2030, // Sends UI new canonical version of global settings
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -318,9 +326,7 @@ export interface CoreApi {
   stop (path :social.InstancePath) : void;
 
   updateGlobalSettings(newSettings :GlobalSettings) :void;
-  // TODO: rename toggle-option and/or replace with real configuration system.
-  // TODO: Implement this or remove it.
-  // changeOption(option :string) : void;
+  updateGlobalSetting(change: UpdateGlobalSettingArgs): void;
 
   login(loginArgs :LoginArgs) : Promise<LoginResult>;
   logout(networkInfo :social.SocialNetworkInfo) : Promise<void>;
