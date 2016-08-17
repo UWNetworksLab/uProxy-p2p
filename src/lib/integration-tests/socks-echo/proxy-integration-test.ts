@@ -334,6 +334,12 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   public shutdown = () : Promise<void> => {
     var closeSocksToRtc = this.socksToRtc_.stop();
     var closeRtcToNet = this.rtcToNet_.stop();
+    var closeReproxySocksToRtc :Promise<void>;
+    var closeReproxyRtcToNet :Promise<void>;
+    if (this.reproxyEndpoint_) {
+      closeReproxySocksToRtc = this.reproxySocksToRtc_.stop();
+      closeReproxyRtcToNet = this.reproxyRtcToNet_.stop();
+    }
     var stopEchoServers = this.echoServers_.map((server) => {
       return server.shutdown();
     });
@@ -345,6 +351,10 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
 
     var shutdownPromises = closeConnections.concat(stopEchoServers,
         [closeRtcToNet, closeSocksToRtc]);
+    if (this.reproxyEndpoint_) {
+      shutdownPromises = shutdownPromises.concat(closeReproxySocksToRtc,
+                                                 closeReproxyRtcToNet);
+    }
     return Promise.all(shutdownPromises).then((voids:void[]) => {});
   }
 
