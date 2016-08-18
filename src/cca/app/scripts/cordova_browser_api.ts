@@ -87,7 +87,7 @@ class CordovaBrowserApi implements BrowserAPI {
       }, false);
     }, false);
 
-    this.deviceSupportsVpn_();
+    this.checkVpnSupport_();
   }
 
   private onUrl_ = (url:string) => {
@@ -369,7 +369,7 @@ class CordovaBrowserApi implements BrowserAPI {
 
   // Sets the supportsVpn member variable depending on whether the device
   // supports VPN mode.
-  private deviceSupportsVpn_ = () : void => {
+  private checkVpnSupport_ = () : void => {
     if (window.tun2socks === undefined) {
       // We only add the tun2socks plugins to Android.
       // Other platforms should fail here.
