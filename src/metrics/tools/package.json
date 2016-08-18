@@ -1,0 +1,14 @@
+{
+  "name": "@uproxy-metrics/tools",
+  "version": "1.0.0-beta",
+  "author": "uProxy",
+  "private": true,
+  "description": "Metrics tools for uProxy",
+  "dependencies": {
+    "csv-parse": "^1.1.7",
+    "gcloud": "^0.37.0"
+  },
+  "engines": {
+    "node": ">=4"
+  }
+}

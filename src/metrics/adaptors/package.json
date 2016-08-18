@@ -1,0 +1,13 @@
+{
+  "name": "@uproxy-metrics/adaptors",
+  "version": "1.0.0-beta",
+  "author": "uProxy",
+  "private": true,
+  "description": "Adaptors for uProxy metrics system",
+  "dependencies": {
+    "gcloud": "^0.37.0"
+  },
+  "engines": {
+    "node": ">=4"
+  }
+}
