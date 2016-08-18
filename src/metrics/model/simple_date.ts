@@ -60,6 +60,8 @@ export class SimpleDate {
   }
 }
 
+// Creates a SimpleDate from an ISO string.
+// Any time information will be ignored.
 export function datefromString(date_str: string): SimpleDate {
   if (!date_str) {
     return null;
@@ -69,10 +71,11 @@ export function datefromString(date_str: string): SimpleDate {
     // Parsing error.
     return null;
   }
-  return datefromJsDate(js_date);
+  return datefromUtcJsDate(js_date);
 }
 
-export function datefromJsDate(js_date: Date): SimpleDate {
+// Creates a SimpleDate using the year, month and day from the given date, as observed at UTC.
+export function datefromUtcJsDate(js_date: Date): SimpleDate {
   if (js_date === null) {
     return null;
   }
@@ -80,6 +83,17 @@ export function datefromJsDate(js_date: Date): SimpleDate {
   return new SimpleDate(js_date.getUTCFullYear(), js_date.getUTCMonth() + 1, js_date.getUTCDate());
 }
 
+// Creates a SimpleDate using the year, month and day from the given date, as observed at the timezone of the host system.
+// Use this method if you'd like to bucketize a date in the client code.
+export function datefromLocalJsDate(js_date: Date): SimpleDate {
+  if (js_date === null) {
+    return null;
+  }
+  // Add 1 to month because it is 0-based in JS Date.
+  return new SimpleDate(js_date.getFullYear(), js_date.getMonth() + 1, js_date.getDate());
+}
+
+// Returns a string representation of number, with padding zeroes to fit 'length' characters.
 function padLeft(number:number, length: number) {
   let number_str = number.toString();
   if (number_str.length >= length) {
