@@ -394,10 +394,10 @@ export function socksEchoTestDescription(useChurn:boolean) {
       expect(arraybuffers.byteEquality(input, output)).toBe(true);
       return testModule.getReproxyBytesReceived();
     }).then((bytes:number) => {
-      expect(bytes === input.byteLength).toBe(true);
+      expect(bytes).toEqual(input.byteLength);
       return testModule.getReproxyBytesSent();
     }).then((bytes:number) => {
-      expect(bytes === input.byteLength).toBe(true);
+      expect(bytes).toEqual(input.byteLength);
     }).catch((e:any) => {
       expect(e).toBeUndefined();
     }).then(done);
