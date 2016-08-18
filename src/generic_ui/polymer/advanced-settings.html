@@ -89,7 +89,7 @@
       float: right;
     }
     #bandwidthLimitLabel {
-      margin-top: 15px;
+      width: 100px;
     }
     #bandwidthSet {
       margin-top: 5px;
@@ -201,6 +201,9 @@
           <div id = 'bandwidthLimitingPanel'>
             <p class='inputLabel' id='bandwidthLimitPrompt'>
               {{ "LIMIT_BANDWIDTH_PROMPT" | $$}}
+              <uproxy-faq-link anchor='whatIsBandwidthLimiting'>
+                <core-icon icon='help'></core-icon>
+              </uproxy-faq-link>
               <paper-toggle-button id='bandwidthLimitEnabled' on-tap='{{ setLimit }}'></paper-toggle-button>
             </p>
             <div hidden?='{{ !$.bandwidthLimitEnabled.checked }}'>
