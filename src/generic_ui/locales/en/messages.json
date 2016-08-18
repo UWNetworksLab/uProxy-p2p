@@ -1387,5 +1387,21 @@
   "REPORT_ERROR": {
     "description": "Prompt that asks user to report error",
     "message": "Report this error"
+  },
+  "LIMIT_BANDWIDTH_PROMPT": {
+    "description": "Prompt that asks user if they would like to limit the bandwidth",
+    "message": "Limit bandwidth?"
+  },
+  "LIMIT_BANDWIDTH_LABEL": {
+    "description": "Label for user input for bandwidth limit",
+    "message": "Bandwidth limit:"
+  },
+  "INVALID_BANDWIDTH_ERROR": {
+    "description": "Error that appears if user sets an invalid bandwidth limit",
+    "message": "Please enter a bandwidth limit that is at least 10,000 bps."
+  },
+  "LIMIT_BANDWIDTH": {
+    "description": "Placeholder for user input for bandwidth limit",
+    "message": "Limit"
   }
 }

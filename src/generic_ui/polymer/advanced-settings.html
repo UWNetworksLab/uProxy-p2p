@@ -79,6 +79,10 @@
       overflow: auto;
       color: #12A391;
     }
+    #bandwidthLimitPrompt {
+      margin-top: 2px;
+      margin-bottom: 9px;
+    }
     #bandwidthLimitEnabled {
       margin-left: 3px;
       margin-top: 3px;
@@ -117,7 +121,7 @@
     paper-input-decorator[id=bandwidthLimitDecorator] {
       font-size: 1.0em;
       font-weight: normal;
-      width: 100px;
+      width: 75px;
       padding-left: 5px;
       padding-right: 5px;
       padding-bottom: 6px;
@@ -167,9 +171,6 @@
     #portControlBox .info {
       margin-bottom: 0px;
     }
-    .bandwidthInfo{
-      width:100%;
-    }
     .align-left{
       float: left;
     }
@@ -198,20 +199,20 @@
         </div>
         <div id='portControlBox'>
           <div id = 'bandwidthLimitingPanel'>
-            <p class='inputLabel' id='bandwidthLimit'>
-              Limit bandwidth?
+            <p class='inputLabel' id='bandwidthLimitPrompt'>
+              {{ "LIMIT_BANDWIDTH_PROMPT" | $$}}
               <paper-toggle-button id='bandwidthLimitEnabled' on-tap='{{ setLimit }}'></paper-toggle-button>
             </p>
-            <div class='bandwidthInput' hidden?='{{ !$.bandwidthLimitEnabled.checked }}'>
+            <div hidden?='{{ !$.bandwidthLimitEnabled.checked }}'>
               <div class='align-left' id='bandwidthLimitLabel'>
-                Bandwidth Limit:
+                {{ "LIMIT_BANDWIDTH_LABEL" | $$}}
               </div>
               <div class='align-right'>
-                <paper-input-decorator id='bandwidthLimitDecorator' label='replace with real label' class='align-left'>
+                <paper-input-decorator id='bandwidthLimitDecorator' label='{{ "LIMIT_BANDWIDTH" | $$ }}' class='align-left' error='{{ "INVALID_BANDWIDTH_ERROR" | $$ }}'>
                   <input is='core-input' type='number' min="10000" value='{{ bandwidthLimit }}' />
                 </paper-input-decorator>
                 <uproxy-button on-tap='{{ setLimit }}' class='align-right' id='bandwidthSet'>
-                  Hi
+                  {{ "SAVE" | $$}}
                 </uproxy-button>
               </div>
             </div>
