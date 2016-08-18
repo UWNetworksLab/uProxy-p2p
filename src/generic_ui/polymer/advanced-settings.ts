@@ -85,7 +85,7 @@ Polymer({
       this.portControlSupport = support;
     });
   },
-  created: function() {
+  ready: function() {
     this.model = ui_context.model;
   },
   computed: {
