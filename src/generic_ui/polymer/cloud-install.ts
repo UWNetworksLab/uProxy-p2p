@@ -192,7 +192,7 @@ Polymer({
   updateCloudInstallProgress: function(e: Event, progress: number) {
     this.installProgress = progress;
   },
-  created: function() {
+  ready: function() {
     this.model = ui.model;
   },
   observe: {

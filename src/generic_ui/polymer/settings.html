@@ -149,7 +149,9 @@
 
         <div class='clickable currentAccountInfo' on-tap='{{ toggleAccountChooser }}'>
           <div horizontal center layout>
-            <span class='subdued' flex>{{ connectedNetworks }}</span>
+            <span class='subdued' hidden?='{{model.onlineNetworks.length !== 0}}' flex>{{ "NOT_CONNECTED_LOGIN_TO_START" | $$(model.globalSettings.language) }}</span>
+            <span class='subdued' hidden?='{{model.onlineNetworks.length !== 1}}' flex>{{ "CONNECTED_WITH" | $$(model.globalSettings.language, {network: connectedNetwork}) }}</span>
+            <span class='subdued' hidden?='{{model.onlineNetworks.length < 2}}' flex>{{ "CONNECTED_WITH_NUMBER" | $$(model.globalSettings.language, {number: model.onlineNetworks.length}) }}</span>
             <span hidden?='{{ model.onlineNetworks.length === 1 }}'>
               <core-icon icon='arrow-drop-down' hidden?='{{ accountChooserOpen }}'></core-icon>
               <core-icon icon='arrow-drop-up' hidden?='{{ !accountChooserOpen }}'></core-icon>
