@@ -110,17 +110,19 @@ Polymer({
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
   },
-  _reproxyCheckTrue: function(check: uproxy_core_api.ReproxyCheck) {
-    return check === uproxy_core_api.ReproxyCheck.TRUE;
-  },
-  _reproxyCheckFalse: function(check: uproxy_core_api.ReproxyCheck) {
-    return check === uproxy_core_api.ReproxyCheck.FALSE;
-  },
-  _reproxyCheckPending: function(check: uproxy_core_api.ReproxyCheck) {
-    return check === uproxy_core_api.ReproxyCheck.PENDING;
-  },
-  _reproxyCheckUnchecked: function(check: uproxy_core_api.ReproxyCheck) {
-    return check === uproxy_core_api.ReproxyCheck.UNCHECKED;
+  _reproxyCheckToString: function(check: uproxy_core_api.ReproxyCheck) :string {
+    switch (check) {
+      case uproxy_core_api.ReproxyCheck.UNCHECKED:
+        return 'UNCHECKED';
+      case uproxy_core_api.ReproxyCheck.PENDING:
+        return 'PENDING';
+      case uproxy_core_api.ReproxyCheck.TRUE:
+        return 'TRUE';
+      case uproxy_core_api.ReproxyCheck.FALSE:
+        return 'FALSE';
+      default:
+        return '';
+    }
   },
   _supportsPortControl: function(supportStatus: uproxy_core_api.PortControlSupport) {
     return supportStatus === uproxy_core_api.PortControlSupport.TRUE;

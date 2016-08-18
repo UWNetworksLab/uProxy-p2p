@@ -392,6 +392,7 @@
                   <span flex>
                     {{ "REPROXY_ERR" | $$ }}
                   </span>
+                  <a href='#' on-tap='{{ openReproxyError }}'>{{ "GET_HELP" | $$ }}</a>
                 </div>
               </div>
               <div class='statusRow' hidden?='{{!gettingStatus}}'>
@@ -477,6 +478,12 @@
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
 
     <uproxy-proxy-error id='proxyError'></uproxy-proxy-error>
+
+    <uproxy-dialog id='reproxyError' backdrop layered='false'>
+      <core-icon class="close button" icon="clear" on-tap='{{ closeReproxyError }}'></core-icon>
+      <h2>{{ "REPROXY_ERROR_HEADING" | $$ }}</h2>
+      <p>{{ "REPROXY_ERROR_DETAILS" | $$ }}</p>
+    </uproxy-dialog>
 
     <paper-toast id='toast'
         text='{{ toastMessage }}' responsiveWidth='320px'

@@ -214,16 +214,16 @@
               <p class='advancedSettingsText' style='color:red;'>
                 {{ "TOR_ENABLE_WARNING" | $$ }}
               </p>
-              <span class='advancedSettingsText' hidden?='{{ !_reproxyCheckUnchecked(reproxyCheck) }}'>
+              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "UNCHECKED" }}'>
                 {{ 'TOR_PORT_UNCHECKED' | $$ }}
               </span>
-              <span class='advancedSettingsText' hidden?='{{ !_reproxyCheckTrue(reproxyCheck) }}'>
+              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "TRUE" }}'>
                 {{ 'TOR_PORT_TRUE' | $$ }} {{ testedTorPort  | $$ }}
               </span>
-              <span class='advancedSettingsText' style='color:red;' hidden?='{{ !_reproxyCheckFalse(reproxyCheck) }}'>
+              <span class='advancedSettingsText' style='color:red;' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "FALSE" }}'>
                 {{ 'TOR_PORT_FALSE' | $$ }} {{ testedTorPort  | $$ }}
               </span>
-              <span class='advancedSettingsText' hidden?='{{ !_reproxyCheckPending(reproxyCheck) }}'>
+              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "PENDING" }}'>
                 {{ 'TOR_PORT_PENDING' | $$ }} {{ testedTorPort  | $$ }}
               </span>
               <uproxy-link on-tap='{{ refreshReproxyCheck }}' role='button'>

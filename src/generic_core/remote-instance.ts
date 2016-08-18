@@ -189,8 +189,6 @@ import ui = ui_connector.connector;
           this.user.notifyUI();
           break;
         case uproxy_core_api.Update.REPROXY_ERROR:
-          ui.update(update, data);
-          break;
         case uproxy_core_api.Update.REPROXY_WORKING:
           ui.update(update, data);
           break;

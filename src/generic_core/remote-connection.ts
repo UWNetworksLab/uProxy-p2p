@@ -386,7 +386,7 @@ var generateProxyingSessionId_ = (): string => {
           this.sendUpdate_(uproxy_core_api.Update.REPROXY_WORKING, null);
           break;
         default:
-          throw new Error('Cannot handle status update');
+          log.warn('Received unrecognized status update from RtcToNet: %1', status);
       }
     }
 

@@ -205,7 +205,7 @@
   },
   "TOR_HOW_ENABLE_REPROXY_ANSWER": {
     "description": "Title of FAQ question explaining Tor anonymity option of Sharers reproxying Getter requests",
-    "message": "<p>uProxy allows sharers to route the connections of people getting access through the Tor network, concealing the identity of the sharer from websites that are visited. This reduces risk for the sharer in the case that someone getting access does something abusive with the connection. However, the transit through the Tor network may slow network performance for the person getting access. The person getting access also does not have a strong expectation of anonymity, because they will not be using the restrictive security settings of the Tor browser bundle.</p><p>To send getter traffic through Tor, you must first <a href=\"https://www.torproject.org/download/download\">download</a> Tor. When you have Tor running on your machine, first navigate to the Advanced Settings panel in uProxy, and click the Enable Tor option. Then, enter the port number for Tor; 9050 is the default for stand-alone Tor and 9150 is the default for Tor Browser Bundle. Click Set for changes to save. All new users you grant access to will now have their requests routed through Tor. To send traffic from previously approved users through Tor, you must revoke and reapprove their access.</p>"
+    "message": "<p>uProxy allows sharers to route the connections of people getting access through the Tor network, concealing the identity of the sharer from websites that are visited. This reduces risk for the sharer in the case that someone getting access does something abusive with the connection. However, the transit through the Tor network may slow network performance for the person getting access. The person getting access also does not have a strong expectation of anonymity, because they will not be using the restrictive security settings of the Tor browser bundle.</p><p>To send getter traffic through Tor, you must first <a href=\"https://www.torproject.org/download/download\">download</a> Tor. When you have Tor running on your machine, first navigate to the Advanced Settings panel in uProxy, and click the Enable Tor option. Then, enter the port number for Tor; 9050 is the default for stand-alone Tor and 9150 is the default for Tor Browser Bundle. Click Set for changes to save. All new connections you grant access to will now have their requests routed through Tor. To send traffic from previously approved connections through Tor, you must revoke and reapprove their access.</p>"
   },
   "P_I_I_MESSAGE": {
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
@@ -1430,6 +1430,14 @@
   },
   "REPROXY_ERR": {
     "description": "Error message displayed when unable to route through reproxy",
-    "message": "Unable to route through reproxy"
+    "message": "Unable to share through Tor"
+  },
+  "REPROXY_ERROR_HEADING": {
+    "description": "Heading of expanded reproxy error dialog box",
+    "message": "Unable to share through Tor"
+  },
+  "REPROXY_ERROR_DETAILS": {
+    "description": "Body of expanded reproxy error dialog box",
+    "message": "Sharing is broken because uProxy couldn't connect to Tor on input port. Please start Tor or disable \"Share through Tor\" in Advanced Settings."
   }
 }

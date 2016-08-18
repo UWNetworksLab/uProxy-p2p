@@ -372,6 +372,9 @@ import ProxyConfig = require('./proxyconfig');
     private channelSentBytes_ :number = 0;
     private channelReceivedBytes_ :number = 0;
 
+    // Flag to keep track of reproxy status and send status updates accordingly
+    private reproxyError_ :boolean = false;
+
     // Used to stop the calculation of bandwidth.
     private stopBandwidthCalc_:boolean = false;
     // Records the bytes sent to and from peer, for the current time interval.
@@ -423,7 +426,9 @@ import ProxyConfig = require('./proxyconfig');
               log.info('%1: failed to connect to remote endpoint',
                        [this.longId()]);
               this.replyToPeer_(this.getReplyFromError_(e));
-              if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled) {
+              if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled
+                  && !this.reproxyError_) {
+                this.reproxyError_ = true;
                 this.statusUpdates_.handle(Status.REPROXY_ERROR);
               }
               return Promise.reject(new Error(e.errcode));
@@ -437,13 +442,22 @@ import ProxyConfig = require('./proxyconfig');
                 log.debug('%1: Failed to complete reproxy socks auth',
                           [this.longId()]);
                 this.replyToPeer_(socks_headers.Reply.FAILURE);
-                this.statusUpdates_.handle(Status.REPROXY_ERROR);
+                if (!this.reproxyError_) {
+                  this.reproxyError_ = true;
+                  this.statusUpdates_.handle(Status.REPROXY_ERROR);
+                }
                 return Promise.reject(e);
               });
           } else {
             return Promise.resolve([this.getReplyFromInfo_(info), info.bound]);
           }
         }).then((reply :[socks_headers.Reply, net.Endpoint]) :Promise<void> => {
+          if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled
+              && this.reproxyError_) {
+            // Reproxy working
+            this.reproxyError_ = false;
+            this.statusUpdates_.handle(Status.REPROXY_WORKING);
+          }
           log.info('%1: connected to remote web endpoint', [this.longId()]);
           return this.replyToPeer_(reply[0], reply[1]);
         });
@@ -586,8 +600,6 @@ import ProxyConfig = require('./proxyconfig');
             throw new Error('Received unsupported socks auth method: ' + auth);
           }
         }).then(() :Promise<ArrayBuffer> => {
-          // Socks auth succeeded
-          this.statusUpdates_.handle(Status.REPROXY_WORKING);
           // Send socks connection request
           var request :socks_headers.Request = {
             command: socks_headers.Command.TCP_CONNECT,

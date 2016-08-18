@@ -141,6 +141,12 @@ Polymer({
   openProxyError: function() {
     this.$.proxyError.open();
   },
+  openReproxyError: function() {
+    this.$.reproxyError.open();
+  },
+  closeReproxyError: function() {
+    this.$.reproxyError.close();
+  },
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;

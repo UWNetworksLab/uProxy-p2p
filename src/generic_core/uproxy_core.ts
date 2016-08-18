@@ -532,6 +532,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         return uproxy_core_api.ReproxyCheck.TRUE;
       }).catch((e :Error) :uproxy_core_api.ReproxyCheck => {
         return uproxy_core_api.ReproxyCheck.FALSE;
+      }).then((result :uproxy_core_api.ReproxyCheck) :uproxy_core_api.ReproxyCheck => {
+        socksConnection.close();
+        return result;
       });
   }
 
