@@ -40,7 +40,7 @@ Make sure you have gcloud beta version 2016.01.12 or more recent:
 
     gcloud --version
 
-Start a local datastore on port 8080:
+Start a local datastore on port 8080 using the [Datastore emulator](https://cloud.google.com/datastore/docs/tools/datastore-emulator):
 
     npm build-tools && npm run datastore-start
 
@@ -69,7 +69,9 @@ You can make POST requests with `curl`. Example:
 
 To deploy a **pre-built** metrics server:
 
-    npm run deploy
+    npm run build-server && npm run deploy
+
+> NOTE: This will deploy to production. Make sure to test it first!
 
 To query the service:
 

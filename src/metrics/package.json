@@ -8,11 +8,13 @@
     "typescript": "^1.8.10",
     "typings": "^1.3.2"
   },
-  "//": "For start-datastore, see https://cloud.google.com/datastore/docs/tools/datastore-emulator",
+  "__comments": [
+    "TODO: Remove node_modules_hack once AppEngine stops stripping node_modules/"
+  ],
   "scripts": {
     "install": "npm install adaptors/ metrics_server/ model/ tools/ && typings install",
 
-    "build-server": "npm run clean-out && npm run ts-compile && cp -R node_modules/@uproxy-metrics/metrics_server/node_modules/ metrics_server/app.yaml out && echo \"require('./metrics_server/server')\" > out/server.js",
+    "build-server": "npm run clean-out && npm run ts-compile && cp -R node_modules/@uproxy-metrics/metrics_server/node_modules/ metrics_server/production/* out",
     "build-tools": "npm run clean-out && npm run ts-compile && cp -R node_modules/@uproxy-metrics/tools/node_modules/ out",
     "ts-compile": "tsc",
 
@@ -29,8 +31,8 @@
     "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/datastore_load_sample.js",
     "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/generate_report.js",
 
-    "start": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 node out/server.js",
-    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 nodemon out/server.js",
-    "deploy": "gcloud --project=uproxy-metrics app deploy out/app.yaml"
+    "start": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 node out/metrics_server/server.js",
+    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 nodemon out/metrics_server/server.js",
+    "deploy": "cd out && cp -R node_modules node_modules_hack && gcloud --project=uproxy-metrics app deploy"
   }
 }
