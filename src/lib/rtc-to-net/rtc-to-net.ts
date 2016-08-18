@@ -324,7 +324,6 @@ import ProxyConfig = require('./proxyconfig');
           }
           log.debug('%1: This session current bw: %2', this.sessions_[label].channelLabel(), bandwidthSession);
           totalBandwidth += bandwidthSession;
-          this.sessions_[label].currBandwidth = bandwidthSession;
           // If the bandwidth of this session is less than the allowed limit per session, add leftover bw to extra bw pool.
           if (bandwidthSession < perSessionBandwidthLimit) {
             bufferBandwidth += (perSessionBandwidthLimit - bandwidthSession);
@@ -335,6 +334,7 @@ import ProxyConfig = require('./proxyconfig');
           }
           // Update prevBytes_ of this session.
           this.sessions_[label].prevBytes_ = this.sessions_[label].currBytes_;
+          this.sessions_[label].currBandwidth = bandwidthSession;
         }
         log.debug('Total bandwidth for this interval: %1', totalBandwidth);
         log.debug('Buffer bandwidth for this interval: %1', bufferBandwidth);
