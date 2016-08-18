@@ -62,8 +62,8 @@ import BandwidthConfig = require('./bandwidth-config');
 
     private stopBandwidthCalc :boolean = false;
     private prevBytes :number = 0;
-    private limitBandwidth :boolean = false;
-    private bandwidthLimit: number = 1000000;
+    private static limitBandwidth :boolean = false;
+    private static bandwidthLimit: number = 1000000;
     // Returns true if the addition was successful.
     private static addUserSession_ = (userId:string) : boolean => {
       if (!userId) {
@@ -98,7 +98,6 @@ import BandwidthConfig = require('./bandwidth-config');
     // (externally provided) proxyconfig.
     public proxyConfig :ProxyConfig;
 
-    public bandwidthConfig :BandwidthConfig;
     // Message handler queues to/from the peer. Accessing this before
     // calling start() will result in an error.
     // TODO: public fields bad!
@@ -198,11 +197,10 @@ import BandwidthConfig = require('./bandwidth-config');
       return this.onceReady;
     }
 
-    public updateBandwidthSettings = (
+    public static updateBandwidthSettings = (
       bandwidthConfig: BandwidthConfig) => {
-      this.bandwidthConfig = bandwidthConfig;
-      this.limitBandwidth = this.bandwidthConfig.settings.enabled;
-      this.bandwidthLimit = this.bandwidthConfig.settings.limit;
+      RtcToNet.limitBandwidth = bandwidthConfig.settings.enabled;
+      RtcToNet.bandwidthLimit = bandwidthConfig.settings.limit;
     }
     // Loops until onceStopped fulfills.
     public initiateSnapshotting = () => {
@@ -298,9 +296,9 @@ import BandwidthConfig = require('./bandwidth-config');
     }
 
     private calculateBandwidth = (): void => {
-      if (this.limitBandwidth) {
+      if (RtcToNet.limitBandwidth) {
         log.debug('limit should be set on');
-        log.debug('limit: ' + this.bandwidthLimit);
+        log.debug('limit: ' + RtcToNet.bandwidthLimit);
       } else {
         log.debug('limit should be set off');
       }
@@ -311,9 +309,9 @@ import BandwidthConfig = require('./bandwidth-config');
         var numSessions = Object.keys(this.sessions_).length;
 
         if (numSessions == 0) {
-          var perSessionBandwidthLimit = this.bandwidthLimit;
+          var perSessionBandwidthLimit = RtcToNet.bandwidthLimit;
         } else {
-          var perSessionBandwidthLimit = this.bandwidthLimit / numSessions;
+          var perSessionBandwidthLimit = RtcToNet.bandwidthLimit / numSessions;
         }
         log.debug('Number of sessions: ' + numSessions + '; bandwidth limit for each: ' + perSessionBandwidthLimit);
 
@@ -348,7 +346,7 @@ import BandwidthConfig = require('./bandwidth-config');
         log.debug('Buffer bandwidth for this interval: ' + bufferBandwidth);
         // We only need to pause sessions if the total bandwidth is over the limit, even if some individual sessions
         // went over their alloted limit.
-        if (totalBandwidth > this.bandwidthLimit) {
+        if (totalBandwidth > RtcToNet.bandwidthLimit) {
           // If there is any buffer bandwidth, split that evenly among sessions that went over the limit.
           // If the total went over the limit, sessionsOverLimit has to have at least 1 session in it.
           perSessionBandwidthLimit += bufferBandwidth / (sessionsOverLimit);
