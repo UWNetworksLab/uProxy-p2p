@@ -16,7 +16,7 @@ import browser_connector = require('../interfaces/browser_connector');
 import globals = require('./globals');
 import logging = require('../lib/logging/logging');
 import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
-import metrics_module = require('./metrics');
+import rappor_metrics = require('./rappor-metrics');
 import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import social_network = require('./social');
 import social = require('../interfaces/social');
@@ -87,8 +87,8 @@ for (var command in commands) {
   ui_connector.onCommand(parseInt(command, 10), commands[command]);
 }
 
-var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
-    globals.metrics, globals.storage, core.getNetworkInfoObj,
+var dailyMetricsReporter = new rappor_metrics.DailyMetricsReporter(
+    globals.rapporMetrics, globals.storage, core.getNetworkInfoObj,
     (payload :any) => {
       if (globals.settings.statsReportingEnabled) {
         core.postReport({payload: payload, path: 'submit-rappor-stats'});

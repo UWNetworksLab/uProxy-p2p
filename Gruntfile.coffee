@@ -803,6 +803,7 @@ module.exports = (grunt) ->
     ts:
       moduleEnv: compileTypescript [
         devBuildPath + '/**/*.ts'
+        '!' + devBuildPath + '/metrics/**/*.ts'
         '!' + devBuildPath + '/lib/build-tools/**/*.ts'
         '!' + devBuildPath + '/integration/**/*.ts'
         '!' + devBuildPath + '/**/*.core-env.ts'

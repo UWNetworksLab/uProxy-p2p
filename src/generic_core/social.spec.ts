@@ -12,7 +12,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 });
 
 import social = require('../interfaces/social');
-import rappor_metrics = require('./metrics');
+import rappor_metrics = require('./rappor-metrics');
 import social_network = require('./social');
 import local_storage = require('./storage');
 import local_instance = require('./local-instance');

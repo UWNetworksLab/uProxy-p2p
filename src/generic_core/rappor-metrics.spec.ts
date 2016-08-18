@@ -8,7 +8,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'metrics': () => { return new freedom_mocks.MockMetrics(); },
 });
 
-import metrics_module = require('./metrics');
+import rappor_metrics = require('./rappor-metrics');
 import mock_storage = require('../mocks/mock-storage');
 var MockStorage = mock_storage.MockStorage;
 
@@ -29,8 +29,8 @@ var add = function(a:number,b:number) :number {
   return a+b;
 }
 
-var newBuffer = function(a:number) :metrics_module.WeekBuffer<number> {
-  var buf = new metrics_module.WeekBuffer<number>();
+var newBuffer = function(a:number) :rappor_metrics.WeekBuffer<number> {
+  var buf = new rappor_metrics.WeekBuffer<number>();
   buf.update(a, add);
   return buf;
 }
@@ -48,10 +48,10 @@ var storageValues = {metrics: {
   on_cloud: {}
 }};
 
-describe('metrics_module.Metrics', () => {
+describe('rappor_metrics.Metrics', () => {
   it('Loads data from storage', (done) => {
     var storage = new MockStorage(storageValues);
-    var metrics = new metrics_module.Metrics(storage);
+    var metrics = new rappor_metrics.Metrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(1);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(2);
@@ -61,7 +61,7 @@ describe('metrics_module.Metrics', () => {
 
   it('Sets values to 0 if no data is in storage', (done) => {
     var storage = new MockStorage({});
-    var metrics = new metrics_module.Metrics(storage);
+    var metrics = new rappor_metrics.Metrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(0);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(0);
@@ -72,7 +72,7 @@ describe('metrics_module.Metrics', () => {
   it('Increment adds to the values in storage and saves', (done) => {
     var storage = new MockStorage(storageValues);
     spyOn(storage, 'save').and.callThrough();
-    var metrics = new metrics_module.Metrics(storage);
+    var metrics = new rappor_metrics.Metrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(1);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(2);
@@ -87,7 +87,7 @@ describe('metrics_module.Metrics', () => {
 
   it('getReport reports obfuscated metric values', (done) => {
     var storage = new MockStorage(storageValues);
-    var metrics = new metrics_module.Metrics(storage);
+    var metrics = new rappor_metrics.Metrics(storage);
     metrics.getReport(networkInfo).then((payload :any) => {
       expect(payload['success-v3']).toBeDefined();
       expect(payload['success-v3']).not.toEqual(1);
@@ -108,13 +108,13 @@ describe('metrics_module.Metrics', () => {
   });
 });
 
-describe('metrics_module.DailyMetricsReporter', () => {
+describe('rappor_metrics.DailyMetricsReporter', () => {
   var emptyStorage = new MockStorage({});
-  var mockedMetrics :metrics_module.Metrics;
+  var mockedMetrics :rappor_metrics.Metrics;
 
   beforeEach(() => {
     jasmine.clock().install();
-    mockedMetrics = new metrics_module.Metrics(emptyStorage);
+    mockedMetrics = new rappor_metrics.Metrics(emptyStorage);
   });
 
   afterEach(() => {
@@ -136,7 +136,7 @@ describe('metrics_module.DailyMetricsReporter', () => {
     var storage = new MockStorage(
         {'metrics-report-timestamp': {nextSendTimestamp: Date.now() - 1000}});
     var onReportCallback = jasmine.createSpy('onReportCallback');
-    var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
+    var dailyMetricsReport = new rappor_metrics.DailyMetricsReporter(
         mockedMetrics, storage, getNetworkInfoObj, onReportCallback);
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('metrics_module.DailyMetricsReporter', () => {
     var storage = new MockStorage(
         {'metrics-report-timestamp': {nextSendTimestamp: timestamp}});
     var onReportCallback = jasmine.createSpy('onReportCallback');
-    var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
+    var dailyMetricsReport = new rappor_metrics.DailyMetricsReporter(
         mockedMetrics, storage, getNetworkInfoObj, onReportCallback);
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).not.toHaveBeenCalled();
@@ -166,12 +166,12 @@ describe('metrics_module.DailyMetricsReporter', () => {
     spyOn(mockedMetrics, 'getReport').and.callFake(() => { done(); });
 
     var onReportCallback = jasmine.createSpy('onReportCallback');
-    var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
+    var dailyMetricsReport = new rappor_metrics.DailyMetricsReporter(
         mockedMetrics, emptyStorage, getNetworkInfoObj, onReportCallback);
     expect(mockedMetrics.getReport).not.toHaveBeenCalled();
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).not.toHaveBeenCalled();
-      jasmine.clock().tick(metrics_module.DailyMetricsReporter.MAX_TIMEOUT);
+      jasmine.clock().tick(rappor_metrics.DailyMetricsReporter.MAX_TIMEOUT);
     });
     jasmine.clock().tick(1);  // Needed to make onceLoaded_ fulfill
   });

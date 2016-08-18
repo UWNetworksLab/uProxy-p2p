@@ -317,12 +317,12 @@ var generateProxyingSessionId_ = (): string => {
           });
         }
 
-        globals.metrics.increment('attempt');
+        globals.rapporMetrics.increment('attempt');
 
       const start = this.socksToRtc_.start(tcpServer, pc).then((endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
         this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
-        globals.metrics.increment('success');
+        globals.rapporMetrics.increment('success');
         this.stateRefresh_();
         this.activeEndpoint = endpoint;
         return endpoint;
@@ -344,7 +344,7 @@ var generateProxyingSessionId_ = (): string => {
         log.warn('Cannot stop proxying when neither proxying nor trying to proxy.');
         return;
       }
-      globals.metrics.increment('stop');
+      globals.rapporMetrics.increment('stop');
       this.localGettingFromRemote = social.GettingState.NONE;
       this.stateRefresh_();
       return this.socksToRtc_.stop();

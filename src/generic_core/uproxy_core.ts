@@ -176,7 +176,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     var network = this.pendingNetworks_[networkName];
     if (typeof network === 'undefined') {
-      network = new social_network.FreedomNetwork(networkName, globals.metrics);
+      network = new social_network.FreedomNetwork(networkName, globals.rapporMetrics);
       this.pendingNetworks_[networkName] = network;
     }
 
@@ -395,9 +395,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.error('Instance does not exist for proxying', path.instanceId);
       return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-    // Remember this instance as our proxy.  Set this before start fulfills
-    // in case the user decides to cancel the proxy before it begins.
-    return remote.start();
+    return remote.start().then((endpoint :net.Endpoint) => {
+      if (globals.settings.statsReportingEnabled) {
+        globals.activeUserMetrics.updateActivityReport();
+      }
+      return endpoint;
+    });
   }
 
   /**

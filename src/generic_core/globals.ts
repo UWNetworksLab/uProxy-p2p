@@ -1,11 +1,12 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
 import _ = require('lodash');
+import active_user_metrics = require('./active-user-metrics')
 import constants = require('./constants');
 import local_storage = require('./storage');
 import logging = require('../lib/logging/logging');
 import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
-import metrics_module = require('./metrics');
+import rappor_metrics = require('./rappor-metrics');
 import user_interface = require('../interfaces/ui');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
@@ -78,7 +79,8 @@ export var effectiveMessageVersion = () : number => {
   return settings.force_message_version || constants.MESSAGE_VERSION;
 }
 
-export var metrics = new metrics_module.Metrics(storage);
+export var rapporMetrics = new rappor_metrics.Metrics(storage);
+export var activeUserMetrics = new active_user_metrics.Metrics(storage);
 
 export var publicKey :string;
 export var pgp :freedom.PgpProvider.PgpProvider = freedom['pgp']();
