@@ -613,9 +613,7 @@ import ProxyConfig = require('./proxyconfig');
           var response = socks_headers.interpretResponseBuffer(buffer);
           log.debug('%1: Received request response: %2',
                     [this.longId(), response]);
-          if (response.reply !== socks_headers.Reply.SUCCEEDED) {
-            throw new Error('Socks connection through reproxy failed');
-          }
+          // Return response regardless if response is success or failure
           var nullEndpoint :net.Endpoint = {'address': '0.0.0.0', 'port': 0};
           return [response.reply, nullEndpoint];
         });
