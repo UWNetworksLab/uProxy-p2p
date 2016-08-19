@@ -21,7 +21,7 @@
     "message": "获取上网权限"
   }, 
   "WHAT_IS_BETA_ANSWER": {
-    "message": "<p>uProxy 的 Beta 版仍处于开发阶段，不过我们相信，对于能够访问该扩展程序支持的至少一个社交网络的用户来说，该版本应该能够很好地发挥作用。欢迎试用该版本并提供任何反馈，以协助我们改进。您可以点击<a href=\"https://groups.google.com/forum/#!forum/uproxy- discuss\">此处</a>，将反馈发布到我们的公开讨论列表；也可以私下向我们发送电子邮件，电子邮件地址是 <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>。如果您对以下进展感兴趣或愿意为这个开放源代码项目贡献自己的力量，请参阅 <a href=\"https://github.com/uProxy/uproxy/issues\">GitHub 上的问题跟踪记录</a>。</p>"
+    "message": "<p>uProxy 的 Beta 版仍处于开发阶段，不过我们相信，对于能够访问该扩展程序支持的至少一个社交网络的用户来说，该版本应该能够很好地发挥作用。欢迎试用该版本并提供任何反馈，以协助我们改进。您可以点击<a href=\"https://groups.google.com/forum/#!forum/uproxy- discuss\">此处</a>，将反馈发布到我们的公开讨论列表；也可以私下向我们发送电子邮件，电子邮件地址是 <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>。如果您对后续进展感兴趣或愿意为这个开放源代码项目贡献自己的力量，请参阅 <a href=\"https://github.com/uProxy/uproxy/issues\">GitHub 上的问题跟踪记录</a>。</p>"
   }, 
   "ACCEPTED_OFFER_NOTIFICATION": {
     "message": "__name__ 已接受您的上网邀请"
@@ -243,7 +243,7 @@
     "message": "取消"
   }, 
   "HOW_DOES_UPROXY_COMPARE_ANSWER": {
-    "message": "<p>uProxy 是一款值得信赖且能够防止流量被屏蔽的扩展程序。</p><p>VPN 用户通常连接到能被轻易识别出的服务器，VPN 流量则可以被轻易地识别出来并被屏蔽。而 uProxy 用户是彼此之间建立连接（而不是连接到常用的服务器），uProxy 则能够使其流量难以被识别出来，并因此而难以被屏蔽。</p><p>此外，VPN 服务可以监控您访问的网站，并且很多 VPN 服务不会对此类数据保密。uProxy 用户信任的是他们通过好友建立的连接，而不是他们可能不甚了解的 VPN 服务。</p><p>除了不了解 VPN 会如何处理用户的浏览数据外，用户也很难了解并信任 VPN 客户端和服务器软件，尤其当它们是封闭源代码客户端/软件的情况下。而 uProxy 是开放源代码扩展程序，持续接受公众监督。uProxy 会尽可能避免让用户盲目信任可信度无法验证的软件。</p>"
+    "message": "<p>uProxy 是一款值得信赖且能够防止流量被屏蔽的扩展程序。</p><p>VPN 用户通常连接到能被轻易识别出的服务器，VPN 流量则可以被轻易地识别出来并被屏蔽。而 uProxy 用户是彼此之间建立连接（而不是连接到常用的服务器），uProxy 则能够使其流量难以被识别出来，并因此而难以被屏蔽。</p><p>此外，VPN 服务可以监控您访问的网站，并且很多 VPN 服务不会对此类数据保密。uProxy 用户信任的是他们通过好友建立的连接，而不是他们可能不甚了解的 VPN 服务。</p><p>除了不了解 VPN 会如何处理用户的浏览数据外，用户也很难了解并信任 VPN 客户端和服务器软件，尤其当它们是封闭源代码客户端/软件的情况下。而 uProxy 是开放源代码扩展程序，持续接受公众监督。uProxy 会尽可能避免让用户盲目信任可信度无法得到验证的软件。</p>"
   }, 
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "message": "<p>每月只需 10 美元，您就可以拥有自己的 uProxy 云服务器，畅享全天候无阻上网的便利，还可以与好友分享上网权限。<uproxy-faq- link anchor='whatAreCloudServers'>详细了解云服务器</uproxy-faq-link></p><p>云服务器运行在 DigitalOcean 之上。如果您还没有 DigitalOcean 帐户，请点击以下按钮创建一个。系统将提示您添加付款方式，不过如果您通过 uProxy 登录，第一个月将免费！<uproxy-faq-link anchor='whatIsDigitalOcean'>详细了解 DigitalOcean</uproxy- faq-link></p>"
@@ -327,7 +327,7 @@
     "message": "离线"
   }, 
   "CONTINUE_BROWSING": {
-    "message": "不使用 uProxy 并继续浏览"
+    "message": "继续浏览，而不使用 uProxy"
   }, 
   "CONFIRM_LOGOUT_GETTING_AND_SHARING": {
     "message": "确定要退出吗？退出之后，您将无法再通过好友获取或与好友分享上网权限。"
@@ -387,7 +387,7 @@
     "message": "抱歉，连接失败。请检查邀请代码是否正确。"
   }, 
   "CHANGE_STATS_CHOICE": {
-    "message": "您可以分享匿名指标，协助我们改进 uProxy。所有数据都会由客户端进行匿名化处理，并会以安全方式传输。"
+    "message": "您可以分享匿名指标，协助我们改进 uProxy。所有数据都会由客户端进行匿名化处理并以安全方式传输。"
   }, 
   "CLOUD_CONNECTIONS_DISCONNECTED": {
     "message": "我的云连接被断开了。"
@@ -501,7 +501,7 @@
     "message": "请先检查您的 DigitalOcean 设置，然后重试。如果您不想重试，请确认您没有名为“uproxy- cloud-server”的 Droplet。这将确保您不会被收取任何月费。"
   }, 
   "DOES_UPROXY_GIVE_ME_ANSWER": {
-    "message": "<p>uProxy 不是匿名化处理工具；它可用于向 ISP 隐藏您的浏览活动，但不能用于向您访问的网站隐藏您的身份。如果用户通过 uProxy 获取上网权限，那么他访问的网站将能够看到向其授予上网权限的人员的 IP 地址，并且可能会看到获取上网权限的 uProxy 用户的 IP 地址。如果您需要向访问的网站隐藏自己的身份，最好是使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor 浏览器</a>。</p>"
+    "message": "<p>uProxy 不是匿名化处理工具；它可用于向 ISP 隐藏您的浏览活动，但不能用于向您访问的网站隐藏您的身份。如果用户通过 uProxy 获取上网权限，那么该用户访问的网站将能够看到向其分享上网权限的人员的 IP 地址，并且可能会看到获取上网权限的 uProxy 用户的 IP 地址。如果您需要向您访问的网站隐藏自己的身份，最好是使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor 浏览器</a>。</p>"
   }, 
   "REQUESTS": {
     "message": "请求者"
@@ -612,7 +612,7 @@
     "message": "重启以更新"
   }, 
   "WHAT_ISNT_PROXIED_ANSWER": {
-    "message": "<p>uProxy 仅代理所在网络浏览器的流量，不代理其他应用的流量。在一些不常见的情况下，浏览器可能会发出不经由代理的请求，并且某些网络技术（尤其是 Flash 和 WebRTC）能够发出不经由代理的请求。VPN 也经常会出现同样的情况。建议隐私需求较高的用户考虑使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor 浏览器</a>，该浏览器经过专门设计，能够最大限度地防范流量监测工具获取与您的活动相关的信息。</p>"
+    "message": "<p>uProxy 仅代理自己所在网络浏览器的流量，不代理其他应用的流量。在一些不常见的情况下，浏览器可能会发出不经由代理的请求，并且某些网络技术（尤其是 Flash 和 WebRTC）能够发出不经由代理的请求。VPN 也经常会出现同样的情况。建议隐私需求较高的用户考虑使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor 浏览器</a>，该浏览器经过专门设计，能够最大限度地防范流量监测工具获取与您的活动相关的信息。</p>"
   }, 
   "TROUBLE_STARTING_CONNECTION": {
     "message": "我无法建立连接。"
@@ -711,7 +711,7 @@
     "message": "通过 uProxy 在 DigitalOcean 上创建私有云服务器。"
   }, 
   "WHY_IS_IT_IMPORTANT_ANSWER": {
-    "message": "<p>uProxy 旨在帮助互相信任的好友分享互联网连接。连接到您不信任的人员是有风险的，我们建议您不要这样做。</p><p>如果您通过恶意人员获取上网权限，他们可能能够窥探您的网络浏览活动，甚至干扰您的流量。除了向您授予上网权限的人员之外，您还要信任他们的互联网连接是安全的。因此，如果他们通过可能不安全的未知公共 Wi-Fi 热点连接，那么您最好是等到他们回到家中通过安全的网络连接。</p><p>如果您与不认识且不信任的人分享上网权限，他们可能能够利用您的连接从事非法活动，而根据当地法律，您可能会因促成该活动而承担法律责任。<p>无论您将互联网连接分享给任何人，都务必要确保您信任他们，无论是使用家用 Wi-Fi 网络的客人，还是远在世界另一端的 uProxy 好友，都是如此。</p>"
+    "message": "<p>uProxy 旨在帮助互相信任的好友分享互联网连接。连接到您不信任的人员是有风险的，我们建议您不要这样做。</p><p>如果您通过恶意人员获取上网权限，他们可能能够窥探您的网络浏览活动，甚至干扰您的流量。除了向您授予上网权限的人员之外，您还要信任他们的互联网连接是安全的。因此，如果他们通过可能不安全的未知公共 Wi-Fi 热点连接，那么您最好是等到他们回到家中通过安全的网络进行连接。</p><p>如果您与不认识且不信任的人分享上网权限，他们可能能够利用您的连接从事非法活动，而根据当地法律，您可能会因促成该活动而承担法律责任。<p>无论您将互联网连接分享给任何人，都务必要确保您信任他们，无论是使用家用 Wi-Fi 网络的客人，还是远在世界另一端的 uProxy 好友，都是如此。</p>"
   }, 
   "LEARN_MORE": {
     "message": "了解详情"
@@ -741,7 +741,7 @@
     "message": "选择您希望自己的云服务器位于什么位置。"
   }, 
   "SHARING_UNAVAILABLE_MESSAGE": {
-    "message": "抱歉！您使用的是 Firefox 37，其中存在导致分享无法进行的错误（请参阅 git.io/vf5x1）。Firefox 38 中已更正此错误，因此您可以升级 Firefox 或改用 Chrome 来进行分享。"
+    "message": "抱歉！您使用的是 Firefox 37，其中存在导致无法分享的错误（请参阅 git.io/vf5x1）。Firefox 38 中已更正此错误，因此您可以升级 Firefox 或改用 Chrome 来进行分享。"
   }, 
   "RETRIEVING_LOGS": {
     "message": "正在检索日志并分析您的网络…"
@@ -864,7 +864,7 @@
     "message": "您的反馈已提交至 uProxy 开发团队。"
   }, 
   "WHAT_IS_GITHUB_ANSWER": {
-    "message": "<p>GitHub 是帮助开发者分享代码的网站，不过 uProxy 可以使用 GitHub 分享在好友之间建立直接连接所需的信息，就像使用社交网络时一样。对于一些用户而言，GitHub 比许多社交网络都更易于访问。此外，用户可以免费<a href=\"https://github.com/join\">注册</a> GitHub。</p><p>请注意，其他人可能会知晓 GitHub 帐户是否在使用 uProxy。如果您已有 GitHub 帐户，并且不希望将该帐户与 uProxy 相关联，则可以创建使用化名的 GitHub 帐户，并通过该帐户使用 uProxy。</p>"
+    "message": "<p>GitHub 是帮助开发者分享代码的网站，不过 uProxy 可以使用 GitHub 分享在好友之间建立直接连接所需的信息，就像使用社交网络时一样。对于一些用户而言，GitHub 比许多社交网络都更易于访问。此外，用户可以免费<a href=\"https://github.com/join\">注册</a> GitHub。</p><p>请注意，其他人可能会知晓 GitHub 帐户是否在使用 uProxy。如果您已有 GitHub 帐户，但不希望将该帐户与 uProxy 相关联，则可以创建使用化名的 GitHub 帐户，并通过该帐户使用 uProxy。</p>"
   }, 
   "WHAT_IS_DIGITAL_OCEAN_ANSWER": {
     "message": "<p>DigitalOcean 是一家云托管服务提供商。在您创建帐户并设置付款方式之后，uProxy 将能够在您帐户名下创建服务器。默认情况下，uProxy 将设置每月费用为 10 美元的服务器（DigitalOcean 提供的服务器起价为每月 5 美元，我们计划在未来支持这些服务器；但为了保证使用性能，目前要求使用高一档的服务器）。除了信用卡之外，DigitalOcean 还接受 PayPal（集成了多种付款系统，包括银联）。您可以随时暂停自己的服务器或终止自己的 DigitalOcean 帐户。</p>"

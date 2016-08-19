@@ -19,6 +19,7 @@ export enum StatusState {
 Polymer({
   settings: '',
   portControlSupport: null,
+  reproxyCheck: uproxy_core_api.ReproxyCheck.UNCHECKED,
   status: StatusState.EMPTY,
   jsonifySettings_: function(settingsObject :Object) {
     return JSON.stringify(settingsObject, null, ' ');
@@ -33,6 +34,10 @@ Polymer({
     if (this.portControlSupport === null) {
       this.refreshPortControl();
     }
+
+    // Set visuals in "Enable Tor" div based on current global settings
+    this.$.torEnableButton.checked = ui_context.model.globalSettings.reproxy.enabled;
+    this.torPort = ui_context.model.globalSettings.reproxy.socksEndpoint.port;
 
     this.$.advancedSettingsPanel.open();
   },
@@ -59,6 +64,21 @@ Polymer({
         this.status = StatusState.KEY_VALUE_ERROR;
         return;
       }
+      // User input values in "Enable Tor" div override JSON blob
+      if (this.$.torEnableButton.checked) {
+        this.torEnabled = true;
+        newSettings.reproxy = {
+          enabled: true,
+          socksEndpoint: {address: '127.0.0.1', port: this.torPort}
+        };
+        // Refresh warning check for server listening on input port
+        this.refreshReproxyCheck();
+      } else {
+        this.torEnabled = false;
+        newSettings.reproxy.enabled = false;
+        ui_context.model.reproxyError = false;  // Reset error and check
+        this.reproxyCheck = uproxy_core_api.ReproxyCheck.UNCHECKED;
+      }
 
       ui_context.model.globalSettings = newSettings;
       this.status = StatusState.SET;
@@ -79,8 +99,30 @@ Polymer({
       this.portControlSupport = support;
     });
   },
+  refreshReproxyCheck: function() {
+    this.reproxyCheck = uproxy_core_api.ReproxyCheck.PENDING;
+    this.testedTorPort = this.torPort;
+    this.$.state.core.checkReproxy(this.testedTorPort)
+      .then((check: uproxy_core_api.ReproxyCheck) => {
+        this.reproxyCheck = check;
+      });
+  },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
+  },
+  _reproxyCheckToString: function(check: uproxy_core_api.ReproxyCheck) :string {
+    switch (check) {
+      case uproxy_core_api.ReproxyCheck.UNCHECKED:
+        return 'UNCHECKED';
+      case uproxy_core_api.ReproxyCheck.PENDING:
+        return 'PENDING';
+      case uproxy_core_api.ReproxyCheck.TRUE:
+        return 'TRUE';
+      case uproxy_core_api.ReproxyCheck.FALSE:
+        return 'FALSE';
+      default:
+        return '';
+    }
   },
   _supportsPortControl: function(supportStatus: uproxy_core_api.PortControlSupport) {
     return supportStatus === uproxy_core_api.PortControlSupport.TRUE;
