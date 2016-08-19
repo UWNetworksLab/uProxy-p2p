@@ -15,12 +15,12 @@
   "scripts": {
     "install": "npm install --production adaptors/ metrics_server/ model/ tools/ && typings install",
 
-    "build-server": "npm run build-clean && npm run ts-compile && cp -R node_modules/@uproxy-metrics/metrics_server/node_modules/ metrics_server/production/* build",
-    "build-tools": "npm run build-clean && npm run ts-compile && cp -R node_modules/@uproxy-metrics/tools/node_modules/ build",
-    "ts-compile": "tsc",
+    "build-server": "npm run build-clean && npm run tsc -- metrics_server/server.ts && ln -s ../node_modules/@uproxy-metrics/metrics_server/node_modules/ build/ && cp metrics_server/production/* build/",
+    "build-tools":  "npm run build-clean && npm run tsc -- tools/*.ts && ln -s ../node_modules/@uproxy-metrics/tools/node_modules/ build/",
+    "tsc": "tsc --module commonjs --target es6 --noImplicitAny --rootDir . --outDir build/ typings/index.d.ts",
     "build-clean": "rm -rf ./build",
 
-    "test": "npm run ts-compile && JASMINE_CONFIG_PATH=jasmine.json jasmine",
+    "test": "npm run tsc -- **/*.spec.ts && JASMINE_CONFIG_PATH=jasmine.json jasmine",
     "test-use-repository": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node build/adaptors/datastore_use_events_repository_test.js",
 
     "clean": "npm run build-clean && npm run clean-install",
