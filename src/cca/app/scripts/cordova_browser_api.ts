@@ -2,7 +2,6 @@
 /// <reference path='../../../../third_party/cordova/themeablebrowser.d.ts'/>
 /// <reference path='../../../../third_party/cordova/webintents.d.ts'/>
 /// <reference path='../../../../third_party/cordova/tun2socks.d.ts'/>
-/// <reference path='../../../../third_party/cordova/device.d.ts'/>
 /// <reference path='../../../../third_party/cordova/backbutton.d.ts'/>
 /// <reference path='../../../../third_party/cordova/app.d.ts'/>
 
@@ -19,7 +18,6 @@ import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../lib/net/net.types');
 import Constants = require('../../../generic_ui/scripts/constants');
-import compareVersion = require('compare-version');
 
 enum PopupState {
     NOT_LAUNCHED,
@@ -28,19 +26,6 @@ enum PopupState {
 }
 
 declare var Notification :any; //TODO remove this
-
-// Returns whether the device supports VPN mode.
-function deviceSupportsVpn() : boolean {
-  if (window.tun2socks === undefined || window.device === undefined) {
-    // We only add the device and tun2socks plugins to Android.
-    // Other platforms should fail here.
-    return false;
-  }
-  // tun2socks calls bindProcessToNetwork so that the application traffic
-  // bypasses the VPN in order to avoid a loop-back.
-  // This API requires Android version >= Marshmallow (6.0, API 23).
-  return compareVersion(window.device.version, '6.0.0') >= 0;
-};
 
 class CordovaBrowserApi implements BrowserAPI {
 
@@ -52,7 +37,9 @@ class CordovaBrowserApi implements BrowserAPI {
   // https://github.com/uProxy/uproxy/issues/1832
   public hasInstalledThenLoggedIn = true;
 
-  public supportsVpn = deviceSupportsVpn();
+  // The constructor will call into the tun2socks plugin to determine if the
+  // device supports VPN.
+  public supportsVpn = false;
 
   // Mode to start/stop proxying. Set when starting the proxy in order to stop
   // it accordingly, and to automatically restart proxying in case of a
@@ -99,6 +86,8 @@ class CordovaBrowserApi implements BrowserAPI {
         this.emit_('backbutton');
       }, false);
     }, false);
+
+    this.checkVpnSupport_();
   }
 
   private onUrl_ = (url:string) => {
@@ -376,6 +365,23 @@ class CordovaBrowserApi implements BrowserAPI {
 
   private respond_ = (data :any, callback :Function) : void => {
     callback(data);
+  }
+
+  // Sets the supportsVpn member variable depending on whether the device
+  // supports VPN mode.
+  private checkVpnSupport_ = () : void => {
+    if (window.tun2socks === undefined) {
+      // We only add the tun2socks plugins to Android.
+      // Other platforms should fail here.
+      this.supportsVpn = false;
+      return;
+    }
+    // tun2socks calls bindProcessToNetwork so that the application traffic
+    // bypasses the VPN in order to avoid a loop-back.
+    // This API requires Android version >= Marshmallow (6.0, API 23).
+    window.tun2socks.deviceSupportsPlugin().then((supportsVpn: boolean) => {
+      this.supportsVpn = supportsVpn;
+    });
   }
 }
 
