@@ -363,7 +363,7 @@ import BandwidthConfig = require('./bandwidth-config');
                 this.sessions_[label].pauseForBandwidthOverflow(timeToPause);
               }
             }
-          } 
+          }
         }
         setTimeout(this.calculateBandwidth, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
       }
