@@ -4,6 +4,7 @@
   "author": "uProxy",
   "devDependencies": {
     "jasmine": "^2.4.1",
+    "nodemon": "^1.10.2",
     "typescript": "^1.8.10",
     "typings": "^1.3.2"
   },

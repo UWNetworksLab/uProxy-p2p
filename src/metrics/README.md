@@ -65,6 +65,18 @@ You can make POST requests with `curl`. Example:
 
     curl --retry 0 -i -X POST 'localhost:8080/recordUse' -d '{"date": "2016-02-10", "country": "AU", "previous_date": "2016-02-09", "previous_country": "CN"}' -H "Content-Type:application/json"
 
+## Incremental build
+
+To compile the Typescript code as they change, run:
+
+    npm run ts-compile -- --watch
+
+To restart the server on changes, run:
+
+    npm run monitor
+
+Those commands are blocking, so they need to run on different shells.
+
 ## Deployment
 
 To deploy a **pre-built** metrics server:
