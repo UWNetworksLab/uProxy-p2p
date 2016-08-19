@@ -19,9 +19,13 @@
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
+      /* Without this padding, the hit area on mobile is too small. */
       padding: 8px 16px;
       margin: 0;
     }
+    /* Without this, the svg element the icon is drawn inside will expand
+       beyond the 24px height that it should have to take up the larger hit
+       area afforded by the padding above. */
     core-icon.back /deep/ svg {
       height: 24px;
       margin-top: 8px;
