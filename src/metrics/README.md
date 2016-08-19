@@ -54,8 +54,8 @@ Generate metrics:
 
 This will generate two files:
 
-* `out/range_metrics`: unique users and activations per date range for each date and country.
-* `out/last_use_metrics.csv`: date and country last use histogram
+* `build/range_metrics`: unique users and activations per date range for each date and country.
+* `build/last_use_metrics.csv`: date and country last use histogram
 
 Run a local metrics server:
 

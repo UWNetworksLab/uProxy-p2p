@@ -1,7 +1,10 @@
 {
-  "spec_dir": "out",
+  "spec_dir": "build",
   "spec_files": [
-    "**/*.spec.js"
+    "adaptors/*.spec.js",
+    "metrics_server/*.spec.js",
+    "model/*.spec.js",
+    "tools/*.spec.js"
   ],
   "stopSpecOnExpectationFailure": false,
   "random": false

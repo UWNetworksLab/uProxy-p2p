@@ -14,25 +14,25 @@
   "scripts": {
     "install": "npm install adaptors/ metrics_server/ model/ tools/ && typings install",
 
-    "build-server": "npm run clean-out && npm run ts-compile && cp -R node_modules/@uproxy-metrics/metrics_server/node_modules/ metrics_server/production/* out",
-    "build-tools": "npm run clean-out && npm run ts-compile && cp -R node_modules/@uproxy-metrics/tools/node_modules/ out",
+    "build-server": "npm run build-clean && npm run ts-compile && cp -R node_modules/@uproxy-metrics/metrics_server/node_modules/ metrics_server/production/* build",
+    "build-tools": "npm run build-clean && npm run ts-compile && cp -R node_modules/@uproxy-metrics/tools/node_modules/ build",
     "ts-compile": "tsc",
+    "build-clean": "rm -rf ./build",
 
     "test": "npm run ts-compile && JASMINE_CONFIG_PATH=jasmine.json jasmine",
-    "test-use-repository": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/adaptors/datastore_use_events_repository_test.js",
+    "test-use-repository": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node build/adaptors/datastore_use_events_repository_test.js",
 
-    "clean": "npm run clean-out && npm run clean-install",
+    "clean": "npm run build-clean && npm run clean-install",
     "clean-install": "rm -rf ./node_modules ./typings",
-    "clean-out": "rm -rf ./out",
 
     "env": "env",
 
     "datastore-start": "gcloud beta emulators datastore start --project=uproxy-metrics --no-legacy --no-store-on-disk --host-port=localhost:8081",
-    "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/datastore_load_sample.js",
-    "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/generate_report.js",
+    "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node build/tools/datastore_load_sample.js",
+    "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node build/tools/generate_report.js",
 
-    "start": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 node out/metrics_server/server.js",
-    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 nodemon out/metrics_server/server.js",
-    "deploy": "cd out && cp -R node_modules node_modules_hack && gcloud --project=uproxy-metrics app deploy"
+    "start": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 node build/metrics_server/server.js",
+    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 nodemon build/metrics_server/server.js",
+    "deploy": "cd build && cp -R node_modules node_modules_hack && gcloud --project=uproxy-metrics app deploy"
   }
 }
