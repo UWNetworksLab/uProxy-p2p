@@ -81,7 +81,7 @@ declare namespace gcloud {
   }
 }
 
-declare module '"gcloud' {
+declare module 'gcloud' {
   const gcloud: (config?: gcloud.Config) => gcloud.Api;
   export = gcloud;
 }
