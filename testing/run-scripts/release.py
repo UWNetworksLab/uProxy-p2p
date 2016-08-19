@@ -3,7 +3,7 @@
 # Part of the uProxy release process:
 #   https://github.com/uProxy/uproxy
 # Currently, this performs two important tests on every
-# getter/giver combination of the stable, beta, and canary
+# getter/giver combination of the stable and beta
 # releases of Chrome and Firefox:
 #  1. download http://www.example.com/, via curl
 #  2. transfer a 16MB file, via ncat
@@ -18,9 +18,9 @@ import subprocess
 
 parser = argparse.ArgumentParser(
     description='Cross-browser tests for uproxy release process.')
-parser.add_argument('clone_path', help='path to pre-built uproxy-lib repo')
+parser.add_argument('clone_path', help='path to uproxy repo')
 parser.add_argument('--browsers', help='browsers to test', nargs='+', default=['chrome', 'firefox'])
-parser.add_argument('--versions', help='browser versions to test', nargs='+', default=['stable', 'beta', 'canary'])
+parser.add_argument('--versions', help='browser versions to test', nargs='+', default=['stable', 'beta'])
 args = parser.parse_args()
 
 test_url = 'http://www.example.com/'
