@@ -1,40 +1,39 @@
 {
   "name": "uproxy-metrics",
-  "version": "1.0.0",
-  "description": "Metrics server for uProxy",
-  "main": "metrics_server/server.js",
-  "dependencies": {
-    "body-parser": "^1.15.2",
-    "csv-parse": "^1.1.7",
-    "express": "^4.14.0",
-    "gcloud": "^0.37.0"
-  },
+  "version": "1.0.0-beta",
+  "author": "uProxy",
   "devDependencies": {
     "jasmine": "^2.4.1",
+    "nodemon": "^1.10.2",
     "typescript": "^1.8.10",
     "typings": "^1.3.2"
   },
-  "//": "For start-datastore, see https://cloud.google.com/datastore/docs/tools/datastore-emulator",
+  "__comments": [
+    "TODO: Remove node_modules_hack once AppEngine stops stripping node_modules/",
+    "See https://stackoverflow.com/questions/37310253/how-to-force-app-engine-upload-node-modules/39028187"
+  ],
   "scripts": {
-    "build": "mkdir -p ./out && npm run ts-compile && cp metrics_server/app.yaml out/metrics_server/ && cp package.json out/",
-    "test": "JASMINE_CONFIG_PATH=jasmine.json jasmine",
-    "clean": "rm -rf ./node_modules ./out ./typings",
+    "install": "npm install --production adaptors/ metrics_server/ model/ tools/ && typings install",
+
+    "build-server": "npm run build-clean && npm run ts-compile && cp -R node_modules/@uproxy-metrics/metrics_server/node_modules/ metrics_server/production/* build",
+    "build-tools": "npm run build-clean && npm run ts-compile && cp -R node_modules/@uproxy-metrics/tools/node_modules/ build",
     "ts-compile": "tsc",
-    "package-json-copy": "cp package.json out",
-    "record-use-build": "npm run ts-compile && npm run package-json-copy",
-    "record-use-deploy": "gcloud alpha functions deploy --bucket uproxy-metrics-users-dev --trigger-http --source out recordUse",
+    "build-clean": "rm -rf ./build",
+
+    "test": "npm run ts-compile && JASMINE_CONFIG_PATH=jasmine.json jasmine",
+    "test-use-repository": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node build/adaptors/datastore_use_events_repository_test.js",
+
+    "clean": "npm run build-clean && npm run clean-install",
+    "clean-install": "rm -rf ./node_modules ./typings",
+
     "env": "env",
+
     "datastore-start": "gcloud beta emulators datastore start --project=uproxy-metrics --no-legacy --no-store-on-disk --host-port=localhost:8081",
-    "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/datastore_load_sample.js",
-    "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/generate_report.js",
-    "use-repository-test": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/adaptors/datastore_use_events_repository_test.js",
-    "start-dev": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 node out/metrics_server/server.js",
-    "start": "node metrics_server/server.js",
-    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 nodemon out/metrics_server/server.js",
-    "deploy": "cd out && cp metrics_server/app.yaml . && gcloud --project=uproxy-metrics app deploy"
-  },
-  "engines": {
-    "node": ">=4"
-  },
-  "author": "uProxy"
+    "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node build/tools/datastore_load_sample.js",
+    "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node build/tools/generate_report.js",
+
+    "start": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 node build/metrics_server/server.js",
+    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 nodemon build/metrics_server/server.js",
+    "deploy": "cd build && cp -R node_modules node_modules_hack && gcloud --project=uproxy-metrics app deploy"
+  }
 }

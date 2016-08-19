@@ -46,7 +46,7 @@ events_repo.countEntries().then((count) => {
 
 let end_date = sd.datefromString('2016-08-06');
 let start_date = end_date.minusDays(180);
-let report = new CsvMetricsReport('./out/range_metrics.csv', './out/last_use_metrics.csv');
+let report = new CsvMetricsReport('./build/range_metrics.csv', './build/last_use_metrics.csv');
 
 mr.generateReport(events_repo, start_date, end_date, report).catch((error) => {
   console.error('Failed to generate report: %s', error);

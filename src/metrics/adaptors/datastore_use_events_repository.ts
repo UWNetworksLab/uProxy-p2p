@@ -47,9 +47,9 @@ export default class DatastoreUseEventsRepository implements uer.UseEventsReposi
         }
         let events = [] as uer.UseEvent[];
         for (let entry of db_entries) {
-          events.push(new uer.UseEvent(sd.datefromJsDate(entry.data.date),
+          events.push(new uer.UseEvent(sd.datefromUtcJsDate(entry.data.date),
                                        entry.data.country,
-                                       sd.datefromJsDate(entry.data.previous_date),
+                                       sd.datefromUtcJsDate(entry.data.previous_date),
                                        entry.data.previous_country));
         }
         resolve(events);

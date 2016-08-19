@@ -26,7 +26,7 @@ declare namespace gcloud {
       namespace?: string;
     }
 
-    interface Datastore {     
+    interface Datastore {
       allocateIds(incompleteKey: Key, n: number, callback: (err: Object, keys: Key[], apiResponse: any) => void): void;
       createQuery(kind: string): Query;
       createQuery(namespace: string,
@@ -81,7 +81,7 @@ declare namespace gcloud {
   }
 }
 
-declare module "gcloud" {
+declare module '"gcloud' {
   const gcloud: (config?: gcloud.Config) => gcloud.Api;
   export = gcloud;
 }

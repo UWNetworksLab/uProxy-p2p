@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Internet without borders",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "private": true,
   "repository": {
     "type": "git",
