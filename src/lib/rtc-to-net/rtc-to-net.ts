@@ -296,12 +296,6 @@ import BandwidthConfig = require('./bandwidth-config');
     }
 
     private calculateBandwidth = (): void => {
-      if (RtcToNet.limitBandwidth) {
-        log.debug('limit should be set on');
-        log.debug('limit: ' + RtcToNet.bandwidthLimit);
-      } else {
-        log.debug('limit should be set off');
-      }
       if (!this.stopBandwidthCalc) {
         var totalBandwidth = 0;
         var bufferBandwidth = 0;
@@ -346,19 +340,21 @@ import BandwidthConfig = require('./bandwidth-config');
         log.debug('Buffer bandwidth for this interval: ' + bufferBandwidth);
         // We only need to pause sessions if the total bandwidth is over the limit, even if some individual sessions
         // went over their alloted limit.
-        if (totalBandwidth > RtcToNet.bandwidthLimit) {
-          // If there is any buffer bandwidth, split that evenly among sessions that went over the limit.
-          // If the total went over the limit, sessionsOverLimit has to have at least 1 session in it.
-          perSessionBandwidthLimit += bufferBandwidth / (sessionsOverLimit);
-          log.debug('Updated perSessionBandwidthLimit: ' + perSessionBandwidthLimit);
-          // Go through all the sessions that went over the limit, and pause each one.
-          for (var label in this.sessions_) {
-            // After redistributing buffer bandwidth, the session may no longer need to be paused.
-            if (this.sessions_[label].currBandwidth > perSessionBandwidthLimit) {
-              var notPausedFracSession = perSessionBandwidthLimit / this.sessions_[label].currBandwidth;
-              var timeToPause = RtcToNet.BANDWIDTH_MONITOR_INTERVAL * (1 - notPausedFracSession);
-              log.debug(this.sessions_[label].channelLabel() + ' is pausing (total experimenting) for ' + timeToPause + '; total bytes sent/rec: ' + this.sessions_[label].currBytes_);
-              this.sessions_[label].pauseForBandwidthOverflow(timeToPause);
+        if (RtcToNet.limitBandwidth) {
+          if (totalBandwidth > RtcToNet.bandwidthLimit) {
+            // If there is any buffer bandwidth, split that evenly among sessions that went over the limit.
+            // If the total went over the limit, sessionsOverLimit has to have at least 1 session in it.
+            perSessionBandwidthLimit += bufferBandwidth / (sessionsOverLimit);
+            log.debug('Updated perSessionBandwidthLimit: ' + perSessionBandwidthLimit);
+            // Go through all the sessions that went over the limit, and pause each one.
+            for (var label in this.sessions_) {
+              // After redistributing buffer bandwidth, the session may no longer need to be paused.
+              if (this.sessions_[label].currBandwidth > perSessionBandwidthLimit) {
+                var notPausedFracSession = perSessionBandwidthLimit / this.sessions_[label].currBandwidth;
+                var timeToPause = RtcToNet.BANDWIDTH_MONITOR_INTERVAL * (1 - notPausedFracSession);
+                log.debug(this.sessions_[label].channelLabel() + ' is pausing (total experimenting) for ' + timeToPause + '; total bytes sent/rec: ' + this.sessions_[label].currBytes_);
+                this.sessions_[label].pauseForBandwidthOverflow(timeToPause);
+              }
             }
           }
         }
