@@ -83,6 +83,8 @@ export class Model {
   };
 
   public reconnecting = false;
+  // Flag for error connecting to reproxy
+  public reproxyError = false;
 
   // userId is included as an optional parameter because we will eventually
   // want to use it to get an accurate network.  For now, it is ignored and

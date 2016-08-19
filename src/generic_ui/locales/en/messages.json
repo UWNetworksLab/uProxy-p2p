@@ -171,6 +171,42 @@
     "description": "The text for a button in the settings pane the user can click to check their NAT settings and view the latest logs uProxy has collected",
     "message": "Analyze NAT"
   },
+  "TOR_ENABLE": {
+    "description": "Title of section in advanced settings for enabling Tor reproxy",
+    "message": "Share through Tor?"
+  },
+  "TOR_PORT_PLACEHOLDER": {
+    "description": "Default message in port field of advanced setting for enablign Tor reproxy",
+    "message": "Port"
+  },
+  "TOR_ENABLE_WARNING": {
+    "description": "Warning message that appears when a user attempts to enable Tor through advanced settings",
+    "message": "WARNING: This setting will break uProxy unless Tor is correctly configured to listen on the given local port. This setting is to be enabled only by users sharing their connection with others."
+  },
+  "TOR_PORT_TRUE": {
+    "description": "Info message displayed when there exists a reproxy listening at input port",
+    "message": "Found server listening at port"
+  },
+  "TOR_PORT_FALSE": {
+    "description": "Info message displayed when we cannot find a reproxy listening at input port",
+    "message": "Could not find server listening at port"
+  },
+  "TOR_PORT_PENDING": {
+    "description": "Info message displayed when searching for a reproxy listening at input port",
+    "message": "Searching for server listening at port"
+  },
+  "TOR_PORT_UNCHECKED": {
+    "description": "Info message displayed when we haven't checked for a reproxy listening at input port",
+    "message": "Check if server is listening on given port"
+  },
+  "TOR_HOW_ENABLE_REPROXY": {
+    "description": "Title of FAQ question explaining Tor anonymity option of Sharers reproxying Getter requests",
+    "message": "How can sharers safely offer access to people they may not completely trust?"
+  },
+  "TOR_HOW_ENABLE_REPROXY_ANSWER": {
+    "description": "Title of FAQ question explaining Tor anonymity option of Sharers reproxying Getter requests",
+    "message": "<p>uProxy allows sharers to route the connections of people getting access through the Tor network, concealing the identity of the sharer from websites that are visited. This reduces risk for the sharer in the case that someone getting access does something abusive with the connection. However, the transit through the Tor network may slow network performance for the person getting access. The person getting access also does not have a strong expectation of anonymity, because they will not be using the restrictive security settings of the Tor browser bundle.</p><p>To send getter traffic through Tor, you must first <a href=\"https://www.torproject.org/download/download\">download</a> Tor. When you have Tor running on your machine, first navigate to the Advanced Settings panel in uProxy, and click the Enable Tor option. Then, enter the port number for Tor; 9050 is the default for stand-alone Tor and 9150 is the default for Tor Browser Bundle. Click Set for changes to save. All new connections will now have their requests routed through Tor.</p>"
+  },
   "P_I_I_MESSAGE": {
     "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy.",
     "message": "Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information."
@@ -627,8 +663,8 @@
     "description": "Extra information displayed when port control is not supported",
     "message": "You may be able to enable port control to make uProxy more reliable."
   },
-  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
-    "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text",
+  "MORE_INFO": {
+    "description": "Generic label for more info link to FAQ.",
     "message": "More info."
   },
   "LEARN_MORE": {
@@ -1411,5 +1447,17 @@
   "WHAT_IS_BANDWIDTH_LIMITING_ANSWER": {
     "description": "Answer for section of FAQ that explains bandwidth limiting",
     "message": "<p>uProxy allows sharers to limit the amount of bandwidth used up by users proxying through the sharer. After setting a limit, each person proxying through the sharer will never use more than the limit on the bandwidth set by the sharer. </p> <p>Bandwidth is commonly measured in bits per second (bps). For conversion, 1,000,000 bps = 1 Mbps. </p>"
+  },
+  "OTHER_PROXY_IN_USE_ERR": {
+    "description": "Error message displayed when other proxy settings are in use",
+    "message": "Other proxy settings in use"
+  },
+  "REPROXY_ERR": {
+    "description": "Error message displayed when unable to route through reproxy",
+    "message": "Unable to share through Tor"
+  },
+  "REPROXY_ERROR_DETAILS": {
+    "description": "Body of expanded reproxy error dialog box",
+    "message": "Sharing is broken because uProxy couldn't connect to Tor's input port. Please start Tor or disable \"Share through Tor\" in Advanced Settings."
   }
 }

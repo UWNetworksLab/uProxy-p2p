@@ -1,5 +1,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-toggle-button/paper-toggle-button.html'>
 <link rel='import' href='../../bower/core-label/core-label.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
@@ -28,6 +29,9 @@
     #container {
       height: 100%;
     }
+    #settingsContainer {
+      overflow: auto;
+    }
     #formContainer {
       padding: 20px 30px 0px;
       text-align: start;
@@ -43,7 +47,6 @@
       margin-top: 1em;
     }
     #analyzeNAT {
-      width: 100%;
       border-bottom: 1px solid rgb(221, 221, 221);
       padding: 20px 30px;
       text-align: start;
@@ -74,6 +77,13 @@
       text-align: center;
       background-color: #ffffff;
     }
+    #enableTor {
+      border-bottom: 1px solid rgb(221, 221, 221);
+      padding: 20px 30px;
+      text-align: start;
+      overflow: auto;
+      color: #12A391;
+    }
     #bandwidthLimitingPanel {
       text-align: start;
       overflow: auto;
@@ -94,6 +104,46 @@
     #bandwidthSet {
       margin-top: 5px;
     }
+    #enableTor core-icon {
+      height: 15px !important;
+      color: grey;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      margin-right: 0px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    #enableTor core-icon:hover {
+      opacity: 1;
+    }
+    #enableTor paper-toggle-button {
+      float: right;
+    }
+    #enableTor paper-input-decorator[id=torPortDecorator] {
+      font-size: 1.0em;
+      font-weight: normal;
+      background-color: rgb(240,240,240);
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-bottom: 6px;
+      padding-top: 2px;
+      margin-bottom: 0;
+      margin-top: 5px;
+      margin-right: 0;
+    }
+    textarea[fit] {
+      /* fit does not properly size textareas on Firefox */
+      height: 100%;
+    }
+    .advancedSettingsText {
+      font-size: 12px;
+      padding-top: 0px;
+      color: rgb(112, 112, 112);
+    }
+    .error {
+      color: rgb(200, 112, 112);
+    }
     paper-toggle-button::shadow [checked] .toggle {
       background-color: #12A391;
     }
@@ -109,6 +159,9 @@
     paper-input-decorator[id=advancedSettingsDecorator] /deep/ .focused-underline {
       /* Remove the underline from the advanced settings textbox. */
       height: 0px;
+    }
+    paper-input-decorator[id=advancedSettingsDecorator] {
+      height: 10em;
     }
     paper-input-decorator {
       font-size: 1.4em;
@@ -221,6 +274,38 @@
             </div>
           </div>
         </div>
+        <div id='enableTor'>
+          <p class='inputLabel'>
+            {{ "TOR_ENABLE" | $$ }}
+            <uproxy-faq-link anchor='howToEnableTorReproxy'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+            <paper-toggle-button id='torEnableButton'></paper-toggle-button>
+          </p>
+          <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
+            <input is='core-input' maxlength="5" value='{{ torPort }}' />
+          </paper-input-decorator>
+          <div id='torEnableToggledOn' hidden?='{{ !$.torEnableButton.checked }}'>
+            <p class='advancedSettingsText' style='color:red;'>
+              {{ "TOR_ENABLE_WARNING" | $$ }}
+            </p>
+            <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "UNCHECKED" }}'>
+              {{ 'TOR_PORT_UNCHECKED' | $$ }}
+            </span>
+            <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "TRUE" }}'>
+              {{ 'TOR_PORT_TRUE' | $$ }} {{ testedTorPort  | $$ }}
+            </span>
+            <span class='advancedSettingsText' style='color:red;' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "FALSE" }}'>
+              {{ 'TOR_PORT_FALSE' | $$ }} {{ testedTorPort  | $$ }}
+            </span>
+            <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "PENDING" }}'>
+              {{ 'TOR_PORT_PENDING' | $$ }} {{ testedTorPort  | $$ }}
+            </span>
+            <uproxy-link on-tap='{{ refreshReproxyCheck }}' role='button'>
+              <core-icon icon='refresh'></core-icon>
+            </uproxy-link>
+          </div>
+        </div>
         <div id='portControlBox'>
           <p class='inputLabel'>
             {{ 'PORT_CONTROL_TITLE' | $$ }}
@@ -247,9 +332,9 @@
             </uproxy-faq-link>
           </p>
         </div>
-        <div id='formContainer' flex vertical layout>
+        <div id='formContainer' vertical layout>
           <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}' flex>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}'>
             <textarea value='{{ settings }}' fit>
             </textarea>
           </paper-input-decorator>

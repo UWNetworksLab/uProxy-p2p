@@ -43,6 +43,13 @@ import BandwidthConfig = require('./bandwidth-config');
     sessions :SessionSnapshot[];
   }
 
+  // TODO Decide if this should be encoded as an enum with many updates, or an
+  // object with updates stored as fields.
+  export enum Status {
+    REPROXY_ERROR,
+    REPROXY_WORKING
+  }
+
   // The |RtcToNet| class holds a peer-connection and all its associated
   // proxied connections.
   // TODO: Extract common code for this and SocksToRtc:
@@ -126,6 +133,13 @@ import BandwidthConfig = require('./bandwidth-config');
     // defined in the class that creates an instance of RtcToNet.
     public bytesSentToPeer :handler.Queue<number, void> =
         new handler.Queue<number, void>();
+
+    // Queue of status updates of type Status used to signal different status
+    // updates to generic core. All Sessions created in RtcToNet share a single
+    // status queue. Handler is typically defined in the class that creates an
+    // instance of RtcToNet.
+    public statusUpdates :handler.Queue<Status, void> =
+        new handler.Queue<Status, void>();
 
     // Fulfills once the module is ready to allocate sockets.
     // Rejects if a peerconnection could not be made for any reason.
@@ -256,6 +270,7 @@ import BandwidthConfig = require('./bandwidth-config');
           this.proxyConfig,
           this.bytesReceivedFromPeer,
           this.bytesSentToPeer,
+          this.statusUpdates,
           this.userId_
       );
       this.sessions_[channelLabel] = session;
@@ -437,6 +452,8 @@ import BandwidthConfig = require('./bandwidth-config');
     public prevBytes_: number = null;
     // The current bandwidth for this session.
     public currBandwidth: number = 0;
+    // Flag to keep track of reproxy status and send status updates accordingly
+    private reproxyError_ :boolean = false;
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -444,6 +461,7 @@ import BandwidthConfig = require('./bandwidth-config');
         private proxyConfig_:ProxyConfig,
         private bytesReceivedFromPeer_:handler.QueueFeeder<number,void>,
         private bytesSentToPeer_:handler.QueueFeeder<number,void>,
+        private statusUpdates_:handler.QueueFeeder<Status, void>,
         private userId_?:string
     ) {}
 
@@ -479,6 +497,11 @@ import BandwidthConfig = require('./bandwidth-config');
               log.info('%1: failed to connect to remote endpoint',
                        [this.longId()]);
               this.replyToPeer_(this.getReplyFromError_(e));
+              if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled
+                  && !this.reproxyError_) {
+                this.reproxyError_ = true;
+                this.statusUpdates_.handle(Status.REPROXY_ERROR);
+              }
               return Promise.reject(new Error(e.errcode));
             });
         }).then((info :tcp.ConnectionInfo)
@@ -490,12 +513,22 @@ import BandwidthConfig = require('./bandwidth-config');
                 log.debug('%1: Failed to complete reproxy socks auth',
                           [this.longId()]);
                 this.replyToPeer_(socks_headers.Reply.FAILURE);
+                if (!this.reproxyError_) {
+                  this.reproxyError_ = true;
+                  this.statusUpdates_.handle(Status.REPROXY_ERROR);
+                }
                 return Promise.reject(e);
               });
           } else {
             return Promise.resolve([this.getReplyFromInfo_(info), info.bound]);
           }
         }).then((reply :[socks_headers.Reply, net.Endpoint]) :Promise<void> => {
+          if (this.proxyConfig_.reproxy && this.proxyConfig_.reproxy.enabled
+              && this.reproxyError_) {
+            // Reproxy working
+            this.reproxyError_ = false;
+            this.statusUpdates_.handle(Status.REPROXY_WORKING);
+          }
           log.info('%1: connected to remote web endpoint', [this.longId()]);
           return this.replyToPeer_(reply[0], reply[1]);
         });
@@ -592,15 +625,6 @@ import BandwidthConfig = require('./bandwidth-config');
       return new tcp.Connection({endpoint: endpoint}, paused);
     }
 
-    // Waits for tcp connection to complete
-    private waitForTcpConnection_ = (connection :tcp.Connection)
-          :Promise<tcp.ConnectionInfo> => {
-      log.debug('%1: Connection instantiated: %2',
-               [this.longId(), this.tcpConnection_]);
-
-      return this.tcpConnection_.onceConnected
-    }
-
     // Completes socks authentication protocol
     private connectWithSocksAuth_ = (webEndpoint :net.Endpoint)
           :Promise<[socks_headers.Reply, net.Endpoint]> => {
@@ -657,9 +681,7 @@ import BandwidthConfig = require('./bandwidth-config');
           var response = socks_headers.interpretResponseBuffer(buffer);
           log.debug('%1: Received request response: %2',
                     [this.longId(), response]);
-          if (response.reply !== socks_headers.Reply.SUCCEEDED) {
-            throw new Error('Socks connection through reproxy failed');
-          }
+          // Return response regardless if response is success or failure
           var nullEndpoint :net.Endpoint = {'address': '0.0.0.0', 'port': 0};
           return [response.reply, nullEndpoint];
         });
