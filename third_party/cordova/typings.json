@@ -1,0 +1,12 @@
+{
+  "files": [
+    "app.d.ts",
+    "backbutton.d.ts",
+    "cordova.d.ts",
+    "inappbrowser.d.ts",
+    "splashscreen.d.ts",
+    "themeablebrowser.d.ts",
+    "tun2socks.d.ts",
+    "webintents.d.ts"
+  ]
+}
