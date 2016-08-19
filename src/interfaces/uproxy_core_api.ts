@@ -151,6 +151,7 @@ export enum Command {
   VERIFY_USER_SAS = 1034,
   GET_PORT_CONTROL_SUPPORT = 1035,
   UPDATE_GLOBAL_SETTING = 1036, // Updates a single global setting
+  CHECK_REPROXY = 1037
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -188,6 +189,8 @@ export enum Update {
   // Payload is an integer between 0 and 100.
   CLOUD_INSTALL_PROGRESS = 2029,
   REFRESH_GLOBAL_SETTINGS = 2030, // Sends UI new canonical version of global settings
+  REPROXY_ERROR = 2031,  // Controls reproxy error bar notification to sharer
+  REPROXY_WORKING = 2032
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -270,6 +273,8 @@ export interface CreateInviteArgs {
 };
 
 export enum PortControlSupport {PENDING, TRUE, FALSE};
+
+export enum ReproxyCheck {PENDING, TRUE, FALSE, UNCHECKED};
 
 export enum CloudOperationType {
   CLOUD_INSTALL = 0,
@@ -369,4 +374,7 @@ export interface CoreApi {
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 
   getPortControlSupport(): Promise<PortControlSupport>;
+
+  // Check if socks reproxy exists at input port
+  checkReproxy(port :number): Promise<ReproxyCheck>;
 }
