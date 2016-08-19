@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-require('polymer');
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 var ui = ui_context.ui;
 

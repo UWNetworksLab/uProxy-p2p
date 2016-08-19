@@ -1,5 +1,5 @@
+/// <reference path='../../../third_party/typings/index.d.ts'/>
 /// <reference path='./context.d.ts' />
-require('polymer');
 
 import social = require('../../interfaces/social');
 import ui_constants = require('../../interfaces/ui');

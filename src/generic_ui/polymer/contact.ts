@@ -1,5 +1,4 @@
 /// <reference path='./context.d.ts' />
-require('polymer');
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
 import ui_constants = require('../../interfaces/ui');

@@ -1,4 +1,4 @@
-require('polymer');
+/// <reference path='../../../third_party/typings/index.d.ts'/>
 
 // this class covers two different cases: trying to set the dialog to be
 // offscreen and not having correct information on where the dialog should be

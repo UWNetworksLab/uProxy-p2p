@@ -1,5 +1,5 @@
+/// <reference path='../../../third_party/typings/index.d.ts'/>
 /// <reference path='./context.d.ts' />
-require('polymer');
 
 Polymer({
   editDescription: function() {

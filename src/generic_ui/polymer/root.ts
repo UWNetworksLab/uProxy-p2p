@@ -1,6 +1,5 @@
-/// <reference path='./context.d.ts' />
-require('polymer');
 /// <reference path='../../../third_party/typings/index.d.ts' />
+/// <reference path='./context.d.ts' />
 
 import _ = require('lodash');
 import social = require('../../interfaces/social');

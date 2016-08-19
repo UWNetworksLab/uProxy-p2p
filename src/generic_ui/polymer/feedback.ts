@@ -1,5 +1,5 @@
+/// <reference path='../../../third_party/typings/index.d.ts'/>
 /// <reference path='./context.d.ts' />
-require('polymer');
 
 import translator = require('../scripts/translator');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');

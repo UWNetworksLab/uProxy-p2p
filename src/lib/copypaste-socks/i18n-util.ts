@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/i18n/i18n.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts'/>
 
 // A little utility library for managing translation strings.
 

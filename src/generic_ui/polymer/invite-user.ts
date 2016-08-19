@@ -1,6 +1,5 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts' />
-require('polymer');
 
 import _ = require('lodash');
 import model = require('../scripts/model');

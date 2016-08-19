@@ -1,3 +1,4 @@
+/// <reference path='../../../third_party/typings/index.d.ts'/>
 /// <reference path='./context.d.ts' />
 
 // This class will set our global settings object as a JSON blob. It will
@@ -6,7 +7,6 @@
 // a message from the core that overwrites while this window is open, and the
 // user clicks set, we will overwrite the core change.
 
-require('polymer');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 export enum StatusState {

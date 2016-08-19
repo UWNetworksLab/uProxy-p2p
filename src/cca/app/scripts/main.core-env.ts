@@ -1,5 +1,4 @@
 /// <reference path='../../../../third_party/typings/index.d.ts'/>
-/// <reference path='../../../../third_party/cordova/splashscreen.d.ts'/>
 
 /**
  * background.ts
