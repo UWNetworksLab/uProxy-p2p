@@ -11,7 +11,7 @@
     "TODO: Remove node_modules_hack once AppEngine stops stripping node_modules/"
   ],
   "scripts": {
-    "install": "npm install adaptors/ metrics_server/ model/ tools/ && typings install",
+    "install": "npm install --production adaptors/ metrics_server/ model/ tools/ && typings install",
 
     "build-server": "npm run build-clean && npm run ts-compile && cp -R node_modules/@uproxy-metrics/metrics_server/node_modules/ metrics_server/production/* build",
     "build-tools": "npm run build-clean && npm run ts-compile && cp -R node_modules/@uproxy-metrics/tools/node_modules/ build",
