@@ -4,6 +4,8 @@
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='../../bower/paper-toggle-button/paper-toggle-button.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='logs.html'>
 <link rel='import' href='link.html'>
@@ -72,6 +74,32 @@
       text-align: center;
       background-color: #ffffff;
     }
+    #bandwidthLimitingPanel {
+      text-align: start;
+      overflow: auto;
+      color: #12A391;
+    }
+    #bandwidthLimitPrompt {
+      margin-top: 2px;
+      margin-bottom: 9px;
+    }
+    #bandwidthLimitEnabled {
+      margin-left: 3px;
+      margin-top: 3px;
+      float: right;
+    }
+    #bandwidthLimitLabel {
+      width: 100px;
+    }
+    #bandwidthSet {
+      margin-top: 5px;
+    }
+    paper-toggle-button::shadow [checked] .toggle {
+      background-color: #12A391;
+    }
+    paper-toggle-button::shadow [checked] .toggle-ink {
+      color: #12A391;
+    }
     core-tooltip::shadow #tooltip {
       /* Without this, the first time you view the
          tooltip, it appears off center. */
@@ -89,6 +117,18 @@
       padding-top: 0;
       margin-bottom: 0.75em;
       margin-top: 0.75em;
+    }
+    paper-input-decorator[id=bandwidthLimitDecorator] {
+      font-size: 1.0em;
+      font-weight: normal;
+      width: 75px;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-bottom: 6px;
+      padding-top: 2px;
+      margin-bottom: 0;
+      margin-top: 5px;
+      margin-right: 0;
     }
     textarea[fit] {
       /* fit does not properly size textareas on Firefox */
@@ -131,6 +171,12 @@
     #portControlBox .info {
       margin-bottom: 0px;
     }
+    .align-left{
+      float: left;
+    }
+    .align-right{
+      float: right;
+    }
     </style>
     <uproxy-state id="state"></uproxy-state>
 
@@ -152,7 +198,30 @@
           </p>
         </div>
         <div id='portControlBox'>
-
+          <div id = 'bandwidthLimitingPanel'>
+            <p class='inputLabel' id='bandwidthLimitPrompt'>
+              {{ "LIMIT_BANDWIDTH_PROMPT" | $$}}
+              <uproxy-faq-link anchor='whatIsBandwidthLimiting'>
+                <core-icon icon='help'></core-icon>
+              </uproxy-faq-link>
+              <paper-toggle-button id='bandwidthLimitEnabled' on-tap='{{ setLimit }}'></paper-toggle-button>
+            </p>
+            <div hidden?='{{ !$.bandwidthLimitEnabled.checked }}'>
+              <div class='align-left' id='bandwidthLimitLabel'>
+                {{ "LIMIT_BANDWIDTH_LABEL" | $$}}
+              </div>
+              <div class='align-right'>
+                <paper-input-decorator id='bandwidthLimitDecorator' label='{{ "LIMIT_BANDWIDTH" | $$ }}' class='align-left' error='{{ "INVALID_BANDWIDTH_ERROR" | $$ }}'>
+                  <input is='core-input' type='number' min="10000" value='{{ bandwidthLimit }}' />
+                </paper-input-decorator>
+                <uproxy-button on-tap='{{ setLimit }}' class='align-right' id='bandwidthSet'>
+                  {{ "SAVE" | $$}}
+                </uproxy-button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id='portControlBox'>
           <p class='inputLabel'>
             {{ 'PORT_CONTROL_TITLE' | $$ }}
             <uproxy-faq-link anchor='whatIsPortControl'>

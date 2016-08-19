@@ -15,6 +15,7 @@ import net = require('../lib/net/net.types');
 import peerconnection = require('../lib/webrtc/peerconnection');
 import rc4 = require('../lib/transformers/rc4');
 import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
+import RtcToNet = rtc_to_net.RtcToNet;
 import social = require('../interfaces/social');
 import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
 import tcp = require('../lib/net/tcp');
@@ -155,7 +156,9 @@ var generateProxyingSessionId_ = (): string => {
         allowNonUnicast: globals.settings.allowNonUnicast,
         reproxy: globals.settings.reproxy,
       }, pc);
-
+      RtcToNet.updateBandwidthSettings({
+        settings: globals.settings.bandwidthSettings,
+      });
       this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
       this.rtcToNet_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);

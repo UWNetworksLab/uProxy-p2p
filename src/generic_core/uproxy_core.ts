@@ -20,7 +20,8 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import version = require('../generic/version');
 import freedomXhr = require('freedom-xhr');
-
+import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
+import RtcToNet = rtc_to_net.RtcToNet;
 import ui = ui_connector.connector;
 import storage = globals.storage;
 
@@ -270,6 +271,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       newSettings.stunServers = constants.DEFAULT_STUN_SERVERS;
     }
     var oldDescription = globals.settings.description;
+    var oldBandwidthEnabled = globals.settings.bandwidthSettings.enabled;
+    var oldBandwidthLimit = globals.settings.bandwidthSettings.limit;
     globals.storage.save('globalSettings', newSettings)
       .catch((e) => {
         log.error('Could not save globalSettings to storage', e.stack);
@@ -299,7 +302,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         }
       }
     }
-
+    // Update RtcToNet's bandwidth settings, so that even existing connections have bandwidth settings changed.
+    if (globals.settings.bandwidthSettings.enabled !== oldBandwidthEnabled || globals.settings.bandwidthSettings.limit !== oldBandwidthLimit) {
+      RtcToNet.updateBandwidthSettings({
+        settings: globals.settings.bandwidthSettings,
+      });
+    }
     loggingController.setDefaultFilter(
       loggingTypes.Destination.console,
       globals.settings.consoleFilter);

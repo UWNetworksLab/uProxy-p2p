@@ -17,6 +17,8 @@ export enum StatusState {
 };
 
 Polymer({
+  bandwidthLimit: 0,
+  minimumBandwidth: 10000,
   settings: '',
   portControlSupport: null,
   status: StatusState.EMPTY,
@@ -34,6 +36,8 @@ Polymer({
       this.refreshPortControl();
     }
 
+    this.bandwidthLimit = ui_context.model.globalSettings.bandwidthSettings.limit;
+    this.$.bandwidthLimitEnabled.checked = ui_context.model.globalSettings.bandwidthSettings.enabled;
     this.$.advancedSettingsPanel.open();
   },
   // Perform rudimentary JSON check for the text settings.
@@ -59,11 +63,20 @@ Polymer({
         this.status = StatusState.KEY_VALUE_ERROR;
         return;
       }
-
       ui_context.model.globalSettings = newSettings;
+      // If changed in the text box, update bandwidth limit input accordingly.
+      var currLimit = ui_context.model.globalSettings.bandwidthSettings.limit;
+      if ((!currLimit) || (currLimit < this.minimumBandwidth)) {
+        this.$.bandwidthLimitDecorator.isInvalid = true;
+        this.bandwidthLimit = ui_context.model.globalSettings.bandwidthSettings.limit;
+        return;
+      } else {
+        this.$.bandwidthLimitDecorator.isInvalid = false;
+      }
       this.status = StatusState.SET;
+      this.bandwidthLimit = currLimit;
+      this.$.bandwidthLimitEnabled.checked = ui_context.model.globalSettings.bandwidthSettings.enabled;
       this.$.state.core.updateGlobalSettings(ui_context.model.globalSettings);
-
       this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
     } catch (e) {
       this.status = StatusState.PARSE_ERROR;
@@ -81,6 +94,23 @@ Polymer({
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
+  },
+  setLimit: function() {
+    if (this.$.bandwidthLimitEnabled.checked) {
+      var enabledCurr = true;
+    } else {
+      var enabledCurr = false;
+    }
+    if ((!this.bandwidthLimit) || (this.bandwidthLimit < this.minimumBandwidth)) {
+      this.$.bandwidthLimitDecorator.isInvalid = true;
+      return;
+    } else {
+      this.$.bandwidthLimitDecorator.isInvalid = false;
+    }
+    ui_context.model.globalSettings.bandwidthSettings.enabled = enabledCurr;
+    ui_context.model.globalSettings.bandwidthSettings.limit = this.bandwidthLimit;
+    this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
+    this.$.state.core.updateGlobalSettings(ui_context.model.globalSettings);
   },
   _supportsPortControl: function(supportStatus: uproxy_core_api.PortControlSupport) {
     return supportStatus === uproxy_core_api.PortControlSupport.TRUE;
