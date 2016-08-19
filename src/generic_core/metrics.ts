@@ -1,4 +1,4 @@
-/// <reference path='../../third_party/random-lib/random-lib.d.ts' />
+require('random-lib');
 /// <reference path='../../third_party/typings/index.d.ts' />
 /// <reference path='../../third_party/freedomjs-anonymized-metrics/index.d.ts' />
 

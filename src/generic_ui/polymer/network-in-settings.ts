@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../third_party/polymer/polymer.d.ts' />
+require('polymer');
 
 import translator = require('../scripts/translator');
 import dialogs = require('../scripts/dialogs');

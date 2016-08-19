@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/browserify-zlib/browserify-zlib.d.ts' />
+require('browserify-zlib');
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
 import bridge = require('./bridge');

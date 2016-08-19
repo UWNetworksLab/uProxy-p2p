@@ -2,7 +2,7 @@
   For the RFC for socks, see:
     http://tools.ietf.org/html/rfc1928
 */
-/// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
+require('ipaddrjs');
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import ipaddr = require('ipaddr.js');

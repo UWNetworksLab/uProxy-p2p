@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+require('polymer');
 
 import copypaste_api = require('../copypaste-api');
 declare module browserified_exports {

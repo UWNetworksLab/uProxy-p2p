@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/simple-rc4/simple-rc4.d.ts' />
+require('simple-rc4');
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
 import crypto = require('crypto');

@@ -1,6 +1,7 @@
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../generic_ui/polymer/context.d.ts' />
+
+require('polymer');
 
 // Launch the Chrome webstore page for the uProxy app,
 // or activate the user's tab open to uproxy.org/install

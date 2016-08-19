@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
+require('ipaddrjs');
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
 import caesar = require('../transformers/caesar');

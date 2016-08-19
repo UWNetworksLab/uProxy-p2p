@@ -16,15 +16,15 @@
     "ssh2": "registry:dt/ssh2#0.0.0+20160514170459",
     "webrtc/mediastream": "registry:dt/webrtc/mediastream#0.0.0+20160317120654",
     "xregexp": "registry:dt/xregexp#3.0.0+20160317120654",
-    "browserify-zlib": "file:browserify-zlib/browserify-zlib.d.ts",
-    "cordova": "file:cordova/typings.json",    
-    "firefox": "file:firefox/firefox.d.ts",
-    "freedomjs-anonymized-metrics": "file:freedomjs-anonymized-metrics/index.d.ts",
+    "browserify-zlib": "file:browserify-zlib.d.ts",
+    "cordova": "file:cordova/typings.json",
+    "firefox": "file:firefox.d.ts",
+    "freedomjs-anonymized-metrics": "file:freedomjs-anonymized-metrics.d.ts",
     "generic": "file:generic/typings.json",
     "i18n": "file:i18n/i18n.d.ts",
-    "ipaddrjs": "file:ipaddrjs/ipaddrjs.d.ts",
-    "polymer": "file:polymer/polymer.d.ts",
-    "random-lib": "file:random-lib/random-lib.d.ts",
-    "simple-rc4": "file:simple-rc4/simple-rc4.d.ts"
+    "ipaddrjs": "file:ipaddrjs.d.ts",
+    "polymer": "file:polymer.d.ts",
+    "random-lib": "file:random-lib.d.ts",
+    "simple-rc4": "file:simple-rc4.d.ts"
   }
 }

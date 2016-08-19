@@ -1,6 +1,6 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts'/>
-/// <reference path='../../../third_party/polymer/polymer.d.ts' />
+require('polymer');
 
 import panel_connector = require('../../interfaces/panel_connector');
 import social = require('../../interfaces/social');

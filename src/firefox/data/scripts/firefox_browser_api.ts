@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/firefox/firefox.d.ts' />
-
 /**
  * firefox_browser_api.ts
  *
