@@ -5,6 +5,7 @@
   "private": true,
   "description": "Metrics server for uProxy",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "gcloud": "^0.37.0"
   },

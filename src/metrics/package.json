@@ -2,7 +2,6 @@
   "name": "uproxy-metrics",
   "version": "1.0.0-beta",
   "author": "uProxy",
-  "description": "Metrics systems for uProxy",
   "devDependencies": {
     "jasmine": "^2.4.1",
     "typescript": "^1.8.10",
