@@ -21,6 +21,7 @@ export interface BrowserAPI {
   // TODO: write comment to explain what browserSpecificElement is.
   browserSpecificElement :string;
 
+  // Whether proxy settings are able to be set by uProxy
   canProxy :boolean;
   // Whether user has installed and logged into uProxy.
   hasInstalledThenLoggedIn :boolean;

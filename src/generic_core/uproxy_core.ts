@@ -15,7 +15,9 @@ import remote_user = require('./remote-user');
 import user = require('./remote-user');
 import social_network = require('./social');
 import social = require('../interfaces/social');
+import socks = require('../lib/socks/headers');
 import StoredValue = require('./stored_value');
+import tcp = require('../lib/net/tcp');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import version = require('../generic/version');
@@ -511,6 +513,29 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       ui.update(uproxy_core_api.Update.PORT_CONTROL_STATUS,
                 this.portControlSupport_);
     });
+  }
+
+  // Checks to see if socks reproxy server is listening on input port by
+  // issuing auth request and checking for successful response.
+  public checkReproxy = (port :number) :Promise<uproxy_core_api.ReproxyCheck> => {
+    var socksEndpoint = {
+      address: '127.0.0.1',
+      port: port
+    };
+    var socksConnection = new tcp.Connection({endpoint: socksEndpoint}, false);
+    return socksConnection.onceConnected
+      .then((info :tcp.ConnectionInfo) :Promise<ArrayBuffer> => {
+        socksConnection.send(socks.composeAuthHandshakeBuffer([socks.Auth.NOAUTH]));
+        return socksConnection.receiveNext();
+      }).then((buffer :ArrayBuffer) :uproxy_core_api.ReproxyCheck => {
+        socks.interpretAuthResponse(buffer);
+        return uproxy_core_api.ReproxyCheck.TRUE;
+      }).catch((e :Error) :uproxy_core_api.ReproxyCheck => {
+        return uproxy_core_api.ReproxyCheck.FALSE;
+      }).then((result :uproxy_core_api.ReproxyCheck) :uproxy_core_api.ReproxyCheck => {
+        socksConnection.close();
+        return result;
+      });
   }
 
   // Probe the NAT type and support for port control protocols
