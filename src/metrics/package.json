@@ -9,7 +9,8 @@
     "typings": "^1.3.2"
   },
   "__comments": [
-    "TODO: Remove node_modules_hack once AppEngine stops stripping node_modules/"
+    "TODO: Remove node_modules_hack once AppEngine stops stripping node_modules/",
+    "See https://stackoverflow.com/questions/37310253/how-to-force-app-engine-upload-node-modules/39028187"
   ],
   "scripts": {
     "install": "npm install --production adaptors/ metrics_server/ model/ tools/ && typings install",
