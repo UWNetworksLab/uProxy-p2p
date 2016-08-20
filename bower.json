@@ -18,11 +18,11 @@
     "paper-toast": "Polymer/paper-toast#^0.5.6",
     "paper-dropdown": "Polymer/paper-dropdown#~0.5.6",
     "paper-fab": "Polymer/paper-fab#~0.5.6",
-    "web-animations-js": "^1.0.8"
+    "web-animations-js": "^2.2.2"
   },
   "resolutions": {
     "webcomponentsjs": "^0.6.0",
     "core-overlay": "0.1.1",
-    "web-animations-js": "^1.0.8"
+    "web-animations-js": "^2.2.2"
   }
 }
