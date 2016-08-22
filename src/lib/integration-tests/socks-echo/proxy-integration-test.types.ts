@@ -16,4 +16,6 @@ export interface ProxyIntegrationTester {
   on(name:string, listener:(event:Object) => void) :void;
   closeEchoConnections() : Promise<void>;
   shutdown() : Promise<void>;
+  getReproxyBytesReceived() :Promise<number>;
+  getReproxyBytesSent() :Promise<number>;
 }

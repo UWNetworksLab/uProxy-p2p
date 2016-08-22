@@ -30,7 +30,7 @@
   "api": {
     "ProxyIntegrationTest": {
       "constructor": {
-        "value": ["boolean", "boolean", "number", "boolean"]
+        "value": ["boolean", "boolean", "number", "boolean", "boolean"]
       },
       "startEchoServer": {
         "type": "method",
@@ -76,6 +76,14 @@
       "sockClosed": {
           "type": "event",
           "value": "string"
+      },
+      "getReproxyBytesReceived": {
+        "type": "method",
+        "ret": "number"
+      },
+      "getReproxyBytesSent": {
+        "type": "method",
+        "ret": "number"
       }
     }
   },
