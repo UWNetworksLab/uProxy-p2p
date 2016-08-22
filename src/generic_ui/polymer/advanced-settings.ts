@@ -124,11 +124,7 @@ Polymer({
     'opened': '$.advancedSettingsPanel.opened'
   },
   setLimit: function() {
-    if (this.$.bandwidthLimitEnabled.checked) {
-      var enabledCurr = true;
-    } else {
-      var enabledCurr = false;
-    }
+    var enabledCurr = this.$.bandwidthLimitEnabled.checked;
     if ((!this.bandwidthLimit) || (this.bandwidthLimit < this.minimumBandwidth)) {
       this.$.bandwidthLimitDecorator.isInvalid = true;
       return;

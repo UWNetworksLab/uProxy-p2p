@@ -1426,7 +1426,7 @@
   },
   "LIMIT_BANDWIDTH_PROMPT": {
     "description": "Prompt that asks user if they would like to limit the bandwidth",
-    "message": "Limit bandwidth?"
+    "message": "Limit bandwidth"
   },
   "LIMIT_BANDWIDTH_LABEL": {
     "description": "Label for user input for bandwidth limit",
@@ -1446,7 +1446,7 @@
   },
   "WHAT_IS_BANDWIDTH_LIMITING_ANSWER": {
     "description": "Answer for section of FAQ that explains bandwidth limiting",
-    "message": "<p>uProxy allows sharers to limit the amount of bandwidth used up by users proxying through the sharer. After setting a limit, each person proxying through the sharer will never use more than the limit on the bandwidth set by the sharer. </p> <p>Bandwidth is commonly measured in bits per second (bps). For conversion, 1,000,000 bps = 1 Mbps. </p>"
+    "message": "<p>uProxy allows sharers to limit the amount of bandwidth used up by users proxying through the sharer. After setting a limit, each person proxying through the sharer will never use more than the limit on the bandwidth set by the sharer.</p>"
   },
   "OTHER_PROXY_IN_USE_ERR": {
     "description": "Error message displayed when other proxy settings are in use",

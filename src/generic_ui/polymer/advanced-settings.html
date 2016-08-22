@@ -171,14 +171,11 @@
       margin-bottom: 0.75em;
       margin-top: 0.75em;
     }
-    paper-input-decorator[id=bandwidthLimitDecorator] {
+    #bandwidthLimitDecorator {
       font-size: 1.0em;
       font-weight: normal;
       width: 75px;
-      padding-left: 5px;
-      padding-right: 5px;
-      padding-bottom: 6px;
-      padding-top: 2px;
+      padding: 2px 5px 6px 5px;
       margin-bottom: 0;
       margin-top: 5px;
       margin-right: 0;
@@ -224,10 +221,10 @@
     #portControlBox .info {
       margin-bottom: 0px;
     }
-    .align-left{
+    .align-left {
       float: left;
     }
-    .align-right{
+    .align-right {
       float: right;
     }
     </style>
@@ -251,7 +248,7 @@
           </p>
         </div>
         <div id='portControlBox'>
-          <div id = 'bandwidthLimitingPanel'>
+          <div id='bandwidthLimitingPanel'>
             <p class='inputLabel' id='bandwidthLimitPrompt'>
               {{ "LIMIT_BANDWIDTH_PROMPT" | $$}}
               <uproxy-faq-link anchor='whatIsBandwidthLimiting'>
