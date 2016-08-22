@@ -12,8 +12,6 @@ source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
 # $1 is the version
 function get_chrome () {
-  DRIVERURL=https://chromedriver.storage.googleapis.com/$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
-  
   case $1 in
     stable)
       URL=https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -31,8 +29,6 @@ function get_chrome () {
   esac
   cat <<EOF
 RUN echo BROWSER=chrome >/etc/test.conf
-ADD $DRIVERURL /tmp/driver.zip
-RUN unzip -qq /tmp/driver.zip -d /usr/bin
 RUN wget $URL -O /tmp/chrome.deb
 RUN dpkg -i /tmp/chrome.deb || apt-get -f install -y
 EOF
