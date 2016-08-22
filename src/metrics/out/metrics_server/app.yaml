@@ -1,0 +1,3 @@
+# This file must be placed at the root directory of the app to be deployed.
+runtime: nodejs
+vm: true

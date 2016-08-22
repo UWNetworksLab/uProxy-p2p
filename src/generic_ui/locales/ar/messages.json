@@ -1,1350 +1,1049 @@
 {
-    "OFFERED_YOU_ACCESS": {
-        "message": "قد قاموا بعرضك للوصول.",
-        "description": "A friend has offered their Internet access to the user."
-    },
-    "CLOUD_INSTALL_STATUS_CONFIGURING_SSH": {
-        "message": "تكوين خدمة SSH...",
-        "description": "Progress bar label shown during cloud install indicating that we are configuring SSH."
-    },
-    "NO": {
-        "message": "لا",
-        "description": "Button label."
-    },
-    "ONE_TIME_SHARING_SUCCESS": {
-        "message": "أنت الآن تشارك الوصول مع صديقك.",
-        "description": "Inform the user that they are now successfully sharing access through a one-time connection"
-    },
-    "SET_UP_ONE_TIME": {
-        "message": "قُم بإعداد اتصال المرة الواحدة",
-        "description": "Clickable link on the login page. As an alternative to logging in to a social network, user's can attempt a connection with a one-time link."
-    },
-    "ERROR_PARSING_LINK": {
-        "message": "كان هناك خطأ في تحليل رابط اتصال uproxy، يرجى محاولة الانتقال إلى الرابط مرة أخرى أو طلب رابط جديد من صديقك.",
-        "description": "Error shown if a one-time connection link did not work."
-    },
-    "CLOUD_INVITE_FAILED": {
-        "message": "للأسف، فشل الاتصال. يرجى التحقق من رمز الدعوة.",
-        "description": "Dialog text informing user that a connection could not be made to their cloud instance"
-    },
-    "WHAT_DO_GET_ACCESS_ANSWER": {
-        "message": "<p>عندما تقوم <strong> بالحصول على إذن بالوصول </strong> من صديق، فإن كل حركة مرور على الشبكة من متصفحك تنتقل مشفرة أولاً إلى جهاز الكمبيوتر الخاص بصديقك ومن هناك، إلى الإنترنت. هذا يعني أن، في معظم المواقع، سيظهر طلبك ليكون قادم من كمبيوتر صديقك، والشخص الذي يراقب اتصالك سيرى فقط أن لديك اتصال آمن لصديقك. </p> <p> عندما تكون <strong> بمشاركة الوصول </strong>، فإن الأصدقاء المأذون لهم يكونوا قادرون على إرسال حركة المرور على شبكة الإنترنت إلى جهاز الكمبيوتر الخاص بك، ومن هناك إلى الإنترنت. يمكن لصديقك فقط الاتصال  من خلال جهاز الكمبيوتر إذا كنت تأذن له على ذلك الكمبيوتر، ويمكنك إلغاء الإذن في أي وقت. </p>",
-        "description": ""
-    },
-    "UPROXY_NETWORK_LOGIN_TITLE": {
-        "message": "تسجيل الدخول إلى شبكة uProxy",
-        "description": "Title for when the user is logging into the uProxy network (via settings or a link)"
-    },
-    "ANALYZE_NAT": {
-        "message": "قُم بتحليل ترجمة عنوان الشبكة",
-        "description": "The text for a button in the settings pane the user can click to check their NAT settings and view the latest logs uProxy has collected"
-    },
-    "SAVE": {
-        "message": "حفظ",
-        "description": "Label for button that saves the user's text input."
-    },
-    "STOP_ONE_TIME_INSTRUCTION": {
-        "message": "لإيقاف الحصول على إمكانية الوصول من صديقك، انقر على الزر أدناه.",
-        "description": ""
-    },
-    "ATTEMPTING_RECONNECT": {
-        "message": "محاولة إعادة الاتصال.",
-        "description": "uProxy was disconnected from the social network and is trying to reconnect."
-    },
-    "DISCONNECT": {
-        "message": "قطع الاتصال",
-        "description": "User clicks this to disconnect from a network"
-    },
-    "EXT_MISSING_TITLE": {
-        "message": "أنت مستعد تقريباً لاستخدام  uProxy!",
-        "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
-    },
-    "ADD_CLOUD_INSTRUCTIONS": {
-        "message": "إذا كان لديك رمز دعوة مظلمة،  الرجاء الضغط على الرابط أدناه وأدخل دعوتك على صفحة الواجهة.",
-        "description": "If the user is trying to add a Cloud friend, instruct them to click on the link to enter an invitation."
-    },
-    "I_HAVE_AN_ACCOUNT": {
-        "message": "لدي حساب",
-        "description": "Button text shown during DigitalOcean server deployment"
-    },
-    "THANK_YOU": {
-        "message": "شكراً لك!",
-        "description": ""
-    },
-    "WHO_KNOWS_THAT": {
-        "message": "من الذي يعلم أنني أقوم باستخدام uProxy؟",
-        "description": ""
-    },
-    "SUBMIT_ONE_TIME_LINK": {
-        "message": "إرسال",
-        "description": "Text for a button the user may click after pasting in a (probably valid) one-time connection link into a textbox above the button."
-    },
-    "TRY_AGAIN": {
-        "message": "حاول مرة أخرى",
-        "description": "Button text for trying again (e.g. connecting to DigitalOcean)"
-    },
-    "RESPOND_TO_FRIEND_REQUEST": {
-        "message": "قُم بالرد على طلب الصداقة",
-        "description": "Shown in roster under contacts who have requested to be the user's uProxy friend."
-    },
-    "LOGS_TITLE": {
-        "message": "السجلات وتحليل الشبكة",
-        "description": "Title for the page that displays a user's network information and uProxy logs."
-    },
-    "WHY_IS_UPROXY_ASKING_ANSWER": {
-        "message": "  <p>عندما تقوم بتثبيت uProxy من أجل الكروم، فإنه يطلب منك إذن من أجل (1) قراءة وتغيير كل بياناتك على مواقع الويب التي تزورها، و (2) التواصل مع المواقع المتعاونة. هذه الأذون ضرورية من أجل uProxy لتوجيه حركة المرور الخاصة بك خلال اتصال صديقك. لم يتم إرسال إي بيانات عن مواقع الويب التي تزورها مطلقاً إلى فريق  uProxy أو الشبكات الاجتماعية التي تتصل بها. </p>",
-        "description": ""
-    },
-    "FRIEND_NEEDS_TO_CLICK": {
-        "message": "بعدما قام صديقك بفتح الرابط، سوف يقومون بإرسال رابط إليك عوضاً عن ذلك. انقر على الرابط أو قُم بلصقه أدناه.",
-        "description": "Instructions telling the user their friend needs to take an action to finish setting up the one-time connection and then their friend will send back a link."
-    },
-    "WHAT_ISNT_PROXIED_ANSWER": {
-        "message": "<p> uProxy يقوم بالخدمة النائبة فقط عن حركة المرور لمتصفح الويب قيد التشغيل، وليس للتطبيقات الأخرى. هناك بعض الحالات شائعة حيث يمكن للمتصفح إنشاء طلبات  لم تعمل بالخدمة النائبة، وبعض تقنيات الويب، وخصوصاً فلاش وWebRTC، قادرة على إنشاء طلبات التي لا تعمل من خلال البروكسي. غالبا ما تطبق نفس المحاذير على الشبكات الخاصة الافتراضية. ويتم تشجيع المستخدمين أصحاب احتياجات الخصوصية القوية لتداول <a href=\"https://www.torproject.org/projects/torbrowser.html\"> متصفح تور </a>، الذي صُمم خصيصاً لتقليل ما يمكن أن يعرفه مراقب حركة المرور الخاصة بك عن نشاطك. </p>",
-        "description": ""
-    },
-    "SHARING_ACCESS_WITH_ONE": {
-        "message": "مشاركة الوصول مع __المدعو__",
-        "description": "Message in a status bar that is visible when one friend is getting access through the user."
-    },
-    "FACEBOOK_INVITE_INSTRUCTIONS": {
-        "message": "انقر أدناه لإرسال دعوة uProxy إلى أصدقائك على الفيسبوك. عندما يقومون بفتح هذا الرابط بuProxy، فسوف يظهرون في قائمة اتصال uProxy الخاصة بك.",
-        "description": "Invite instructions for Facebook"
-    },
-    "LOGGED_OUT": {
-        "message": "لقد قمت بتسجيل الخروج من __الشبكة__",
-        "description": "Notification for when the user has been logged out of the social network."
-    },
-    "UNLIKELY": {
-        "message": "ربما لا",
-        "description": "Meaning very low probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
-    },
-    "EMPTY_ROSTER_CLOUD_INSTRUCTIONS": {
-        "message": "قُم بإنشاء خادم سحابي خاص وقُم بمشاركة الوصول مع الأصدقاء والأسرة",
-        "description": "Instructions shown for cloud when the user has an empty roster"
-    },
-    "CHOOSE_A_SOCIAL_NETWORK": {
-        "message": "اختر شبكة اجتماعية",
-        "description": "Text prompting user to log into social networks and invite their friends."
-    },
-    "CLOUD_INSTALL_SUCCESS_TITLE": {
-        "message": "عمل ناجح! إن الخادم السحابي الجديد الخاص بك جاهز.",
-        "description": "Message shown after successful DigitalOcean server deployment"
-    },
-    "CLOUD_INVITE_PLACEHOLDER": {
-        "message": "كود الدعوة",
-        "description": "Placeholder in input box for the invite code."
-    },
-    "LANGUAGE": {
-        "message": "اللغة",
-        "description": "Language used by the application."
-    },
-    "DOES_UPROXY_LOG_DATA_SHORT": {
-        "message": "هل يقوم uProxy بجمع بيانات حولي؟",
-        "description": ""
-    },
-    "SENDING_FEEDBACK": {
-        "message": "إرسال تعليق",
-        "description": "Message in dialog indicating feedback is being sent to the uProxy team."
-    },
-    "ACCEPTED_OFFER_NOTIFICATION": {
-        "message": "__المدعو__ قد قبل عرضك للوصول",
-        "description": "Notification for when a friend has accepted the user's offer to share their Internet with that friend."
-    },
-    "GETTING_ACCESS_FROM": {
-        "message": "الحصول على إمكانية الوصول من  __ الاسم__",
-        "description": "Message in a status bar that is visible when the user is getting access from a friend."
-    },
-    "DESTROY_CLOUD_SERVER_FAILURE": {
-        "message": "نحن آسفون. نحن لا نستطيع أن تدمر الخادم السحابي الخاص بك في هذا الوقت. قد تكون بحاجة  لتسجيل الدخول إلى مزود السحابية لتدميره بنفسك.",
-        "description": "Message that tells users we failed to destroy their cloud server"
-    },
-    "TRYING_TO_CONNECT": {
-        "message": "محاولة الاتصال ب __الاسم__",
-        "description": "The user is trying to connect to the Internet through their friend."
-    },
-    "WHAT_IS_DIGITAL_OCEAN": {
-        "message": "ما هو DigitalOcean؟",
-        "description": ""
-    },
-    "WHEN_I_AM_SHARING_ACCESS": {
-        "message": "عندما أقوم بمشاركة الوصول مع شخص، ما الذي يكون لديهم من إمكانية الوصول إليه؟",
-        "description": ""
-    },
-    "LEARN_MORE_SOCIAL": {
-        "message": "اطلع على المزيد حول الشبكات الاجتماعية",
-        "description": "Label for button that brings user to more information about why social networks are used for uProxy."
-    },
-    "WHO_KNOWS_THAT_ANSWER": {
-        "message": "<p> أي شخص تتواصل معه و يعلم أنك تستخدم uProxy. وبالإضافة إلى ذلك، إذا اخترت اتصال uProxy بشبكة اجتماعية مثل الفيسبوك، فيمكن لمسئولي الشبكة الاجتماعية أن يقولون أنك تستخدم uProxy، وقد يكون أصدقائك على تلك الشبكة الذين يستخدمون uProxy قادرون أيضاً على القول. </p> <p> بالنسبة للمستخدمين الذين يقومون بالتواصل بحساب Gmail أو الفيسبوك، فإن uProxy يستخدم Firebase، وهي خدمة تُدار من قِبل جوجل. فريق Firebase، وفريق uProxy المسئولون عن حساب uProxy Firebase، وبالتالي، يمكن الحصول على المعلومات حول أي حسابات تستخدم uProxy. </p> <p> إذا كنت تشعر بالقلق إزاء استخدام uProxy بحسابك الشخصي، فقم بإنشاء حساب باسم مستعار مخصص واستخدام ذلك مع uProxy بدلاً منه. </p> <p> لاحظ أن لا شيء من هذه الخدمات يطّلع مطلقاً على أي المواقع أو الصفحات التي تقوم بزيارتها أثناء استخدام uProxy. المستخدم فقط الذي تحصل على الوصل من خلاله يكون في وضع يمكنه مراقبة حركة المرور الخاصة بك. لذلك مرة أخرى، احصل على إذن الوصول فقط من خلال أصدقاء تثق بهم لمشاركة الاتصال بالإنترنت. </p>",
-        "description": ""
-    },
-    "GO_BACK": {
-        "message": "الرجوع؟",
-        "description": "Go back to the main page from the one-time connection page."
-    },
-    "WHAT_IS_DIGITAL_OCEAN_ANSWER": {
-        "message": "<p> DigitalOcean هو مزود استضافة سحابية. بمجرد أن تقوم بإنشاء حساب وإعداد طريقة الدفع، فسيكون uProxy قادراً على إنشاء خادم بموجب حسابك. افتراضياً، سيقوم uProxy بإنشاء خادم والذي يتكلف 10$ في الشهر. (DigitalOcean يوفر خوادم بدءاً من 5$/ شهر، ونحن نخطط لدعم تلك في المستقبل، ولكن للحصول على أداء صالح للاستعمال، مطلوب حالياً المستوى الأعلى التالي.) بالإضافة إلى بطاقات الائتمان، DigitalOcean يقبل باي بال، والذي يتكامل مع عدد من أنظمة الدفع، بما في ذلك يونيون باي. يمكنك إيقاف الخادم الخاص بك مؤقتاً أو إنهاء حساب DigitalOcean الخاص بك في أي وقتٍ. </p>",
-        "description": ""
-    },
-    "GITHUB_INVITE_SEND_FAILED": {
-        "message": "للأسف، يمكنك فقط دعوة الأصدقاء الذين قاموا بتسجيل الدخول إلى uProxy بGitHub من قبل.",
-        "description": "Dialog text informing user that a GitHub friend request failed."
-    },
-    "CLOUD_INSTALL_INSTALLING_TITLE": {
-        "message": "ترقب عن كثب، نحن نقوم بإنشاء خادم سحابي جديد.",
-        "description": "Message shown during DigitalOcean server deployment"
-    },
-    "WHICH_SOCIAL_NETWORK": {
-        "message": "أين يمكننك العثور على جهات الاتصال الخاصة بك بسرعة؟",
-        "description": "Question seen at the top of uProxy's login page. Asks which social network should be used to find the user's friends."
-    },
-    "REMOVE_CLOUD_SERVER": {
-        "message": "حذف الخادم المظلم",
-        "description": "Title for the dialogs that instruct users on deleting a cloud server"
-    },
-    "FEEDBACK_SUBMITTED": {
-        "message": "لقد تم إرسال تعليقاتك إلى فريق تطوير uProxy.",
-        "description": "User feedback was successfully submitted."
-    },
-    "OFFERS": {
-        "message": "العروض",
-        "description": "Title for the group of friends who have sent offers of access to their Internet, which the user have not yet accepted."
-    },
-    "WHAT_IS_UPROXY": {
-        "message": "ما هو uProxy؟",
-        "description": "FAQ"
-    },
-    "STOPPED_PROXYING": {
-        "message": "__المدعو__ توقف عن التوكيل من خلالكم",
-        "description": "Notification for when a friend has stopped accessing the Internet through the user."
-    },
-    "CONFIRM_LOGOUT_FOR_COPYPASTE": {
-        "message": "لبدء الاتصال مرة واحدة، سيتم تسجيل خروجك من الشبكات الاجتماعية المتصلة. هل تود تسجيل الخروج الآن؟",
-        "description": "If a user is signed in to social network(s) and attempt to start a one-time connection, this message informs them that they must first log out of all social networks."
-    },
-    "WAITING_FOR_ACCESS": {
-        "message": "سوف تكون قادراً على الحصول على إذن الوصول عندما يوافق __اسم__.",
-        "description": "User will be able to access the Internet through their friend, once that friend gives the user permission."
-    },
-    "FRIENDS_WHO_SHARE": {
-        "message": "الأصدقاء الذين يمكنك الحصول على إمكانية الوصول منهم",
-        "description": "Title for the group of friends who the user can get Internet access from."
-    },
-    "SIGN_IN_TO_NETWORK": {
-        "message": "تسجيل الدخول إلى __الشبكة__",
-        "description": "Title for dialog that appears after users choose a social network for finding friends."
-    },
-    "LOGIN_REQUIRED_TITLE": {
-        "message": "تسجيل الدخول مطلوب",
-        "description": "Title for confirmation that the user must login to a network to accept an invitation"
-    },
-    "WHAT_IS_GITHUB_ANSWER": {
-        "message": " <p> GitHub هو موقع لمساعدة المطورين لمشاركة الكود، ولكن uProxy يمكنه استخدام GitHub لتبادل المعلومات اللازمة لإعداد اتصالات مباشرة بين الأصدقاء، تماماً كما يستخدم الشبكات الاجتماعية. GitHub أكثر سهولة للوصول إلى بعض المستخدمين عن العديد من الشبكات الاجتماعية، ومجاني <a href=\"https://github.com/join\"> للتسجيل </a>. </p> <p> يرجى ملاحظة أنه من الممكن معرفة ما إذا كان حساب GitHub يستخدم uProxy. إذا كان لديك بالفعل حساب GitHub و لا تريد ربطه مع uProxy، يمكنك إنشاء حساب GitHub باسم مستعار واستخدامه مع uProxy بدلاً من ذلك. </p>",
-        "description": ""
-    },
-    "CONNECTED_ACCOUNTS": {
-        "message": "الحسابات المتصلة",
-        "description": "In settings, title for the social networks you can connect to."
-    },
-    "DESCRIPTION_DEFAULT": {
-        "message": " __رقم__ جهاز الكمبيوتر",
-        "description": "If a friend has more than one computer, the computers are given this default name (with increasing numbers) to differentiate them."
-    },
-    "OFFER_ACCESS": {
-        "message": "قُم بعرض إمكانية الوصول",
-        "description": "Label for button that will offer a friend access to the Internet through the user, even though the friend has not requested access."
-    },
-    "OFFLINE": {
-        "message": "بدون اتصال بالإنترنت",
-        "description": "Shown under your contact's who are offline"
-    },
-    "DESCRIPTION": {
-        "message": "الوصف",
-        "description": "Placeholder for the input field for the name of the user's device."
-    },
-    "RESTART": {
-        "message": "إعادة التشغيل",
-        "description": "Restart uProxy completely."
-    },
-    "SIGN_ME_IN": {
-        "message": "سجل دخولي في!",
-        "description": "Button text shown during DigitalOcean server deployment"
-    },
-    "BACK_TO_TOP": {
-        "message": "العودة إلى الأعلى",
-        "description": ""
-    },
-    "RESTART_UPROXY_UPDATE": {
-        "message": "إعادة التشغيل للتحديث ",
-        "description": "A link the user can click on to restart uProxy and permorm an update"
-    },
-    "FEEDBACK_ERROR_PLACEHOLDER": {
-        "message": "يرجى إدخال بعض التعليقات",
-        "description": "Error that apears if you try to submit an empty feedback."
-    },
-    "DOES_UPROXY_PROTECT_ANSWER": {
-        "message": " <p> يمكن أن يقوم uProxy بالمساعدة في حمايتك من العدو الذي يحاول توجيهك إلى موقع إلكتروني مؤذي أو العبث بحركة المرور الخاصة بك. ومع ذلك، فإن التركيز الأساسي في uProxy هو تمكين المستخدمين من مشاركة الوصول إلى الإنترنت المفتوح. </p>",
-        "description": ""
-    },
-    "WHAT_ARE_CLOUD_SERVERS": {
-        "message": "ما هي خوادم uProxy السحابية؟",
-        "description": ""
-    },
-    "OFFERED_ACCESS_NOTIFICATION": {
-        "message": "__اسم__ عرض عليك إمكانية الوصول",
-        "description": "Notification for when the user receives an offer from a friend to access the Internet through them."
-    },
-    "FACEBOOK_INVITE_IN_BROWSER": {
-        "message": "يرجى إكمال الدعوة في الفيسبوك",
-        "description": "Dialog message instructing user to complete Facebook invitation in their browser"
-    },
-    "TRYING_TO_SHARE_ONE_TIME": {
-        "message": "أنت حالياً في عملية محاولة مشاركة إذن الوصول. إذا كنت ترغب في الحصول على إذن الوصول بدلاً من ذلك، انقر على الرابط أعلاه.",
-        "description": "Instructions for user if they want to get access instead, while attempting to share access."
-    },
-    "ERROR_SIGNING_IN": {
-        "message": "كانت هناك مشكلة في تسجيل الدخول إلى  __الشبكة __. يرجى المحاولة مرة أخرى.",
-        "description": "Notification for when the user could not be signed in to a social network."
-    },
-    "EDIT_ADVANCED_SETTINGS": {
-        "message": "قُم بتعديل إعداداتك أدناه",
-        "description": "Instruction for the user to edit their advanced settings (by typing JSON in a textbox)."
-    },
-    "MORE_INFO": {
-        "message": "المزيد من المعلومات",
-        "description": "Link to 'Does uProxy log data about me?' question in the FAQ."
-    },
-    "SHARING_ENABLED_MESSAGE": {
-        "message": "هذا الرمز يعني أنك جاهز لمشاركة إذن الوصول مع الأصدقاء الذين عرضت الوصول إليهم.",
-        "description": "Text in a popup that explains what the sharing icon (on the toolbar) is."
-    },
-    "WHERE_TO_GET": {
-        "message": "أين ينبغي أن أحصل على  uProxy؟",
-        "description": "FAQ"
-    },
-    "CLOUD_INSTALL_CREATE_ACCOUNT_TITLE": {
-        "message": "كل ما تحتاجه للبدء هو عنوان البريد الإلكتروني الخاص بك وبطاقة الائتمان أوحساب باي بال.",
-        "description": "Message shown during DigitalOcean server deployment"
-    },
-    "LEARN_MORE": {
-        "message": "تعلم المزيد",
-        "description": "Generic label for links to FAQ."
-    },
-    "REMOVE_CLOUD_SERVER_CONFIRMATION": {
-        "message": "هل أنت متأكد من أنك تريد حذف هذا الخادم السحابي؟",
-        "description": "Message that warns users their cloud server will be destroyed"
-    },
-    "UPROXY_FRIENDS": {
-        "message": "الأصدقاء الذين لديهم uProxy",
-        "description": "Title for the group of friends who have uProxy but who don't fit into any of the other contact groups."
-    },
-    "RECONNECTING": {
-        "message": "إعادة الاتصال...",
-        "description": "Indicate that uProxy is attempting to reconnect automatically after a failure.  A progress indicator is also visible."
-    },
-    "WHAT_IS_UPROXY_NETWORK_ANSWER": {
-        "message": " <p>تم تصميم شبكة uProxy لتكون واحدة من أبسط الطرق للاتصال على نحو موثوق مع أصدقائك، في حين لا يزال من الصعب المنع. لاستخدام شبكة uProxy، فأنت تحتاج فقط إلى إدخال اسم (والتي لا يلزم \nأن يكون فريد) ثم قم بتسجيل الدخول وكن على استعداد لمشاركة الدعوات مع الأصدقاء. حالياً، ترتبط الهوية بجهاز واحد؛ إذا كنت ترغب في إعداد uProxy على جهاز كمبيوتر جديد، فسوف تحتاج إلى إعادة دعوة أصدقائك، وذلك للتواصل معهم من هذا الجهاز. </p> <p> يقوم فريق uProxy بإدارة شبكة uProxy، ومع ذلك في سيكون في المستقبل من الممكن للأطراف الثالثة زيادة الشبكة عن طريق تشغيل خادم إضافي. يتم تشفير كافة المعلومات التي يتم إرسالها عبر شبكة uProxy بين نقطتين، وبين الأقران، لذلك يمكن لأحد أن يتدخل في ذلك. ومع ذلك، لا يزال يمكن لمشغلي الشبكات معرفة أي عناوين IP تتصل مع بعضها البعض. </p>",
-        "description": ""
-    },
-    "WILL_UPROXY_WORK": {
-        "message": "أين يعمل uProxy؟",
-        "description": ""
-    },
-    "SHARING_ENABLED_TITLE": {
-        "message": "تم تمكين المشاركة ",
-        "description": "Title for popup that points to the sharing icon in uProxy's top toolbar. The popup appears when the user first grants access to one of their friends. The sharing icon is visible as long as there are friends who can get access to the user's Internet."
-    },
-    "CONTINUE_BROWSING": {
-        "message": "متابعة التصفح بدون uProxy",
-        "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."
-    },
-    "CONNECTED_WITH_NUMBER": {
-        "message": "التواصل مع __رقم__ الشبكات",
-        "description": "Text in settings informing the user of how many networks they're connected to."
-    },
-    "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER": {
-        "message": "تثبيت  \"دوكر\"....",
-        "description": "Progress bar label shown during cloud install indicating that we are installing Docker, a pre-requisite."
-    },
-    "UPROXY_NETWORK_CHOOSE_A_USER_NAME": {
-        "message": "اختر اسم مستخدم",
-        "description": "Placeholder text for user name on uProxy network"
-    },
-    "WHERE_TO_GET_ANSWER": {
-        "message": "<p> أسهل طريقة للحصول على uProxy هي الذهاب إلى <a href=\"install\"> صفحة </a>  التثبيت. ويمكنك العثور على uProxy في <a href=\"https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj\"> سوق chrome الإلكتروني</a> و<a href=\"https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/\"> موقع إضافات فايرفوكس </a>. هذه هي الأماكن الوحيدة التي ينبغي عليك الذهاب إليها للحصول على uProxy. لا تحمل uProxy من أي مكان آخر إطلاقاً، لأنه يمكن أن تكون نسخة زائفة التي قد تضعك في دائرة الخطر. </p>",
-        "description": ""
-    },
-    "DEVICE_DESCRIPTION": {
-        "message": "وصف الجهاز",
-        "description": "Title for the section in Settings where the user can edit the name of their device."
-    },
-    "NORTH_AMERICA_NEW_YORK": {
-        "message": "شمال أمريكا (نيويورك)",
-        "description": "Region option for deploying a DigitalOcean server"
-    },
-    "COPY_CONNECTION_LINK": {
-        "message": "لطلب إذن بالدخول من صديق، قُم بنسخ ولصق هذا الرابط إليهم عبر القناة التي تثق بها.",
-        "description": "Instructions for the user to request access from a friend with a one-time link."
-    },
-    "SIGN_IN_AND_CONNECT": {
-        "message": "قُم بالتسجيل الدخول والاتصال",
-        "description": "Button text for signing into DigitalOcean"
-    },
-    "START_ONE_TIME": {
-        "message": "ابدأ الاتصال المرة الواحدة",
-        "description": "Start an Internet connection using a link that will only work once."
-    },
-    "WHO_MADE_UPROXY": {
-        "message": "من الذي يقوم بتطوير uProxy؟",
-        "description": ""
-    },
-    "CANNOT_OPEN_ONE_TIME_TITLE": {
-        "message": "لا يمكن فتح اتصال المرة الواحدة",
-        "description": "Title for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
-    },
-    "CREATE_A_CLOUD_SERVER": {
-        "message": "إنشاء خادم مظلم",
-        "description": "Title on cloud deployment screens, where the user can set up a new server that allows them proxy access."
-    },
-    "SET": {
-        "message": "قُم بالضبط",
-        "description": "Label for button that saves the user's advanced settings."
-    },
-    "ASK_TO_SUBMIT_ANALYSIS": {
-        "message": "هل تود إرسال نوع ترجمة عنوان الشبكة الخاصة بك إلى فريق uProxy ، لمساعدتنا في فهم أفضل للشبكات التي عليها مستخدمينا؟",
-        "description": "Asks the user if they are willing to share their network analysis results with uProxy, to help the development of uProxy."
-    },
-    "FRIEND_OFFLINE": {
-        "message": "__اسم__ غير متصل بالإنترنت",
-        "description": "Message shown when trying to get access from a friend who is offline."
-    },
-    "UNABLE_TO_GET": {
-        "message": "غير قادر على الحصول على إذن بالوصول",
-        "description": "Title for popup that appears when an attempt to access the Internet through a friend fails."
-    },
-    "ADD_A_CLOUD_FRIEND": {
-        "message": "قُم بإضافة صديق يستخدم الحوسبة السحابية",
-        "description": "Title for screen where user adds a Cloud instance (virtual machine) to use uProxy with"
-    },
-    "HOW_DO_I_FIND": {
-        "message": "كيف أقوم بالعثور على أصدقائي على uProxy؟",
-        "description": ""
-    },
-    "ONE_TIME_SHARING_STOP_DIRECTIONS": {
-        "message": "لإيقاف مشاركة الوصول، انقر على الزر أدناه.",
-        "description": "Directions for how to stop sharing access; should refer to the act of clicking the button below which should also have a fairly obvious label."
-    },
-    "WHAT_DO_GET_ACCESS": {
-        "message": "ماذا يعني \"الحصول على إذن الوصول\" و\"مشاركة إذن الوصول\"؟",
-        "description": ""
-    },
-    "FRIEND_ADDED": {
-        "message": "تمت إضافة صديق",
-        "description": "Confirmation message after adding a friend to the roster."
-    },
-    "HAVE_AN_INVITE_CODE": {
-        "message": "هل لديك رمز دعوة؟",
-        "description": "Text above a button that asks the user if they already have a uProxy invite code"
-    },
-    "WHY_DOES_UPROXY_CONNECT_ANSWER": {
-        "message": "<p> uProxy يحتاج إلى وسيلة لمعرفة متى يكون أصدقائك متصلون على الإنترنت، ويحتاج إلى تبادل المعلومات (عنوان IP، والمنفذ، ومفاتيح التشفير) بين الأقران لإنشاء اتصالات مباشرة. بدلا من تشغيل الخدمة المركزية التي يمكن أن تُحجب بسهولة، uProxy يتصل بالشبكات الاجتماعية التي تقوم أنت وأصدقائك باستخدامها بالفعل. ويُستخدم فقط للمساعدة في إنشاء اتصال مباشر بين المستخدمين؛ لا يتم إرسال حركة المرور على الإنترنت الوكيلة من خلال الشبكة الاجتماعية. <strong> لن يقوم uProxy بالنشر علناً أبداً بالنيابة عنك. </strong> فهو يقوم  فقط بتبادل الرسائل الخاصة مع الأصدقاء الذين تختارهم والذين يقومون بتشغيل uProxy أيضاً. يمكنك قراءة المزيد حول الشبكات الاجتماعية الآمنة <a href=\"https://github.com/uProxy/uproxy/wiki/Trust\"> هنا </a>. </p>",
-        "description": ""
-    },
-    "EMAIL_PLACEHOLDER": {
-        "message": "عنوان البريد الإلكتروني",
-        "description": ""
-    },
-    "CONNECTED_WITH": {
-        "message": "متصل ب__ الشبكة__",
-        "description": "Text in settings that informs the user which social network they're connected to."
-    },
-    "FRIEND_REQUESTS_ACCESS": {
-        "message": "__اسم__ يطلب منك إذن بالوصول.",
-        "description": "A friend has requested to access the Internet through the user."
-    },
-    "CLOUD_SHARE_INSTRUCTIONS": {
-        "message": "مشاركة إذن الوصول إلى النموذج السحابي الخاص بك عن طريق إرسال هذا الرابط إلى صديق.",
-        "description": "Message shown in a dialog, with a Cloud invite code, to let users know how they can allow their friends to proxy through their Cloud instance."
-    },
-    "UNABLE_TO_SHARE_WITH": {
-        "message": "غير قادر على مشاركة إذن الوصول مع__اسم__",
-        "description": "Error message seen in uProxy when a friend failed to get access to the Internet through the user."
-    },
-    "YES": {
-        "message": "نعم",
-        "description": "Button label."
-    },
-    "ASK_FOR_ACCESS": {
-        "message": "قُم بطلب إذن الوصول",
-        "description": "Button label that sends a request to the user's friend, asking if the user can access the Internet through them."
-    },
-    "WHAT_IS_PORT_CONTROL": {
-        "message": "ما هي مراقبة المنافذ؟",
-        "description": ""
-    },
-    "REMOVE_CLOUD_SERVER_SUCCESS": {
-        "message": "نجاح! تم حذف الخادم المظلم الخاص بك.",
-        "description": "Message that tells users a cloud server was sucessfully deleted from their friend list"
-    },
-    "VERY_LIKELY": {
-        "message": "في الغالب",
-        "description": "Meaning high probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
-    },
-    "ACCEPT_INVITE_CONFIRMATION": {
-        "message": "هل ترغب في إضافة __المدعو__ إلى جهات الاتصال الخاصة بك في uProxy؟",
-        "description": "Confirmation message when accepting an invite."
-    },
-    "ASK_TO_ANALYZE": {
-        "message": "يمكن أن يكون نوع ترجمة عنوان الشبكة الخاصة بشبكتك غير متوافق مع uProxy. هل ترغب أن يقوم uProxy بتحليل شبكتك؟",
-        "description": "Text in a popup that appears when an attempt to access the Internet through a friend fails."
-    },
-    "FRIEND_REQUEST_SENT": {
-        "message": "تم إرسال طلب الصداقة",
-        "description": "Shown in roster under contacts who the user has requested to be a uProxy friend."
-    },
-    "STOP_GETTING": {
-        "message": "إيقاف الحصول على إمكانية الوصول",
-        "description": "Stop accessing the Internet through a friend's connection."
-    },
-    "ANALYSIS_RESULTS": {
-        "message": "يبدو أنك على __نوع ترجمة عنوان الشبكة__، والذي __ له تأثير على ترجمة عنوان الشبكة__ التداخل مع قدرتك على الاتصال بالأصدقاء.",
-        "description": "A summary of the user's network analysis."
-    },
-    "GITHUB_LOGIN_CONFIRMATION": {
-        "message": "uProxy يمكنه استخدام GitHub، أداة المطور، لتساعدك على الاتصال بأصدقائك. <br> <br> لأنه قد يكون من الممكن للآخرين معرفة أي حسابات GitHub تستخدم uProxy،  <strong> ننصحك بإنشاء حساب GitHub مجهول جديد </strong>، حتى إذا كنت بالفعل تستخدم GitHub <strong> سوف تحتاج إلى التحقق من البريد الإلكتروني الخاص بك مع GitHub قبل أن تقوم بالاتصال. </strong> ",
-        "description": "Confirmation message the user sees prior to logging into GitHub"
-    },
-    "SUBMIT_FEEDBACK": {
-        "message": "قُم بإرسال تعليقات",
-        "description": "Submit feedback to the uProxy team."
-    },
-    "BETA_MESSAGE": {
-        "message": "هذا هو إصدار بيتا من uProxy، وقد يكون غير جدير بالثقة في بعض الأحيان.",
-        "description": "Text in a popup that appears wen the user first uses uProxy. Explains that the current version of uProxy is an early, unfinished release, and anonymous statistics (from the user, if they choose) can help with uProxy's development."
-    },
-    "CANCEL": {
-        "message": "إلغاء",
-        "description": "Button label that rejects a proposed action."
-    },
-    "CLOUD_INVITE_INSTRUCTIONS": {
-        "message": "قُم بإدخال كود الدعوة الخاصة بك. عندما يتم إجراء اتصال، فسوف يظهر في قائمة الاتصال الخاصة بك.",
-        "description": "Invite instructions for Cloud"
-    },
-    "ANALYZING_NETWORK": {
-        "message": "تحليل الشبكة",
-        "description": "Message shown when the user's network is being analyzed."
-    },
-    "EMAIL_INSTEAD_MESSAGE": {
-        "message": "للأسف! نحن غير قادرين على إرسال ملاحظاتك إلى uproxy.org. يرجى نسخ ولصق ملاحظاتك في رسالة بالبريد الإلكتروني إلى info@uproxy.org.",
-        "description": "Seen if feedback submission through uProxy fails. Message asks users to email their feedback instead."
-    },
-    "LEARN_MORE_UPROXY": {
-        "message": "تعرّف على المزيد حول uProxy؟",
-        "description": "Label for button that brings user to more information about uProxy."
-    },
-    "ADVANCED_SETTINGS_SENTENCE_CASE": {
-        "message": "الإعدادات المتقدمة",
-        "description": "Title for the advanced settings screen."
-    },
-    "START_NEW_CONNECTION": {
-        "message": "ابدأ الحصول على اتصال جديد",
-        "description": "Label for button that takes user back to the 'Start a one-time connection' page."
-    },
-    "ACCEPT_OFFER": {
-        "message": "اقبل العرض",
-        "description": "Accept a friend's offer that would allow the user to access the Internet through their friend."
-    },
-    "WHAT_ARE_CLOUD_SERVERS_ANSWER": {
-        "message": " <p> يمكن لمستخدمي uProxy الحصول على الوصول بطريقتين: عن طريق إنشاء وكلاء لحركة المرور من خلال صديق ومن خلال الاتصال بالخادم الذي يقوم بتشغيل uProxy.\nيمكن أن يقوم uProxy بجعل عملية إنشاء الخادم الخاص أوتوماتيكية على منصة الاستضافة السحابية. نحن ندعم حالياً DigitalOcean، ومع ذلك فإن الإعداد اليدوي على خوادم أخرى ممكناً. وبمجرد الإنشاء، فنحن نجعل من السهل مشاركة الوصول إلى خادمك مع أصدقائك وعائلتك، فقط انتقل إلى علامة التبويب \"مشاركة\". </p>",
-        "description": ""
-    },
-    "SUBMIT_FEEDBACK_SENTENCE_CASE": {
-        "message": "إرسال تعليق",
-        "description": "Submit feedback to the uProxy team."
-    },
-    "P_I_I_MESSAGE": {
-        "message": "سيتم إرسال ملاحظتك وعنوان البريد الإلكتروني الخاص بك لuProxy.org. قد تتضمن سجلاتك، معلومات الشبكة وبريدك الإلكتروني المعلومات الشخصية التعريفية.",
-        "description": "Message helping make sure the user understands that personally identifiable information may be included in their feedback to uProxy."
-    },
-    "ACCESS_NOT_GRANTED": {
-        "message": "لم تمنحهم إمكانية الوصول.",
-        "description": "The user has not permissioned a friend to access the Internet through the user."
-    },
-    "NEXT": {
-        "message": "التالي",
-        "description": "Label for button that proceeds from the introduction page to the login page."
-    },
-    "FRIEND_ADD_ERROR": {
-        "message": "كان هناك خطأ في إضافة صديقك.",
-        "description": "Error message when a friend cannot be added to the roster."
-    },
-    "STOP_ONE_TIME_GETTING_BEFORE_NEW": {
-        "message": "إذا كنت ترغب في بدء الاتصال لمرة واحدة الجديد، اضغط على\"إيقاف الوصول\" أولاً.",
-        "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
-    },
-    "WHAT_IS_UPROXY_ANSWER": {
-        "message": "<p> uProxy هو ملحق مفتوح المصدر للمتصفح للكروم وفايرفوكس يتيح للمستخدمين توجيه الاتصال بالإنترنت الخاص بهم من خلال واحد آخر أو من خلال الخوادم السحابية الخاصة. uProxy يمكنه أن يجعل من الصعب على الطرف الثالث (مثل الحكومة أو مزود خدمة الإنترنت) المراقبة أو التدخل في حركة المرور المستخدم الذي يحصل على إذن بالوصول. إنه مثل خدمة الشبكات الخاصة الافتراضية الشخصية التي يمكنك استخدامها لتوفير الوصول الآمن إلى الأصدقاء والعائلة، ولنفسك عند السفر. </p>",
-        "description": ""
-    },
-    "ENABLE_METRICS": {
-        "message": "هل ترغب في تمكين جمع المقاييس المجهولة؟",
-        "description": "Asks the user if they want to send anonymous metrics about their uProxy usage."
-    },
-    "WHO_MADE_UPROXY_ANSWER": {
-        "message": "<p> يجري تطوير uProxy بواسطة جامعة واشنطن. وتم بدء المشروع بواسطة أفكار جوجل وتم الحصول على إسهامات من جوجل، و Brave New Software، والمجموعة مفتوحة المصدر. </p>",
-        "description": ""
-    },
-    "DISCONNECTED_TITLE": {
-        "message": "للأسف! تم قطع اتصالك من صديقك.",
-        "description": "Title for error that appears when the user was getting access to the Internet through their friend, but that connection was terminated."
-    },
-    "SHARE_ONE_TIME": {
-        "message": "قُم بمشاركة اتصال المرة الواحدة",
-        "description": "Share access to the user's Internet using a link that will only work once."
-    },
-    "FRIENDS_WHO_CAN_GET": {
-        "message": "الأصدقاء الذين يمكنهم الحصول على إذن بالدخول منك",
-        "description": "Title for the group of friends who can access the Internet through the user."
-    },
-    "FEEDBACK_PLACEHOLDER": {
-        "message": "قُم بكتابة تعليقاتك",
-        "description": "The default text that appears in the user feedback textbox."
-    },
-    "NO_LONGER_GETTING": {
-        "message": "لم يعد يمكنك الحصول على إذن الوصول. لطلب اتصال، انقر على الزر أدناه.",
-        "description": "Message shown when a one-time connection ends."
-    },
-    "INVITE_SENT_CONFIRMATION": {
-        "message": "تم إرسال الدعوة إلى __المدعو__!",
-        "description": "Dialog text to confirm that an invite was sent to the user's friend"
-    },
-    "GET_ACCESS": {
-        "message": "الحصول على إذن بالوصول",
-        "description": "Text for the tab on the toolbar. When the user is on the 'Get Access' tab, they are looking to get access to the Internet through a friend."
-    },
-    "REVOKE_ACCESS": {
-        "message": "إلغاء الوصول",
-        "description": "Label for button that takes back an offer to a friend who has already accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
-    },
-    "RETRIEVING_LOGS": {
-        "message": "استرجاع السجلات وتحليل الشبكة الخاصة بك...",
-        "description": "Message shown while uProxy is analyzing the user's network settings."
-    },
-    "DISCONNECTED_MESSAGE": {
-        "message": "إذا قمت بتعطيل الخادم الوكيل، لن يتم توجيه حركة المرور الخاصة بك على الشبكة إلى صديقك. قد ترغب في إغلاق أي صفحة الحساسة قُمت بفتحها، قبل المتابعة.",
-        "description": "Instruction informing the user that if they want to browse the Internet and stop waiting for reconnection, the user will need to use their local (potentially unsafe and/or censored) connection."
-    },
-    "WHAT_IS_UPROXY_NETWORK": {
-        "message": "ما هي شبكة uProxy؟",
-        "description": ""
-    },
-    "ENTER_INVITATION_DESCRIPTION": {
-        "message": "إذا تلقيت دعوة من صديق ترغب في استخدام uProxy معه، قُم بلصقه هنا: ",
-        "description": "Instructions for user to enter an invitation"
-    },
-    "HOW_DO_I_FIND_ANSWER": {
-        "message": "<p> يمكنك استخدام زر \"الاتصال بصديق\" في أسفل اليمين في قائمة جهات الاتصال لدعوة الأصدقاء إلى التوكيل معك باستخدام واحدة من الشبكات الاجتماعية المدعومة لدينا. </p><p> لكي تشاهد متى يكون صديق متصل بالإنترنت، كل منكم عليه أن يسجل الدخول إلى uProxy من خلال نفس الشبكة الاجتماعية في نفس الوقت.  يمكنك تسجيل الدخول إلى شبكات اجتماعية متعددة في وقت واحد عن طريق الذهاب إلى القائمة (الرمز ≡ في أعلى اليسار) وتوسيع نطاق العنوان (▾). </p>",
-        "description": ""
-    },
-    "CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE": {
-        "message": "لا تقلق بشأن عمل قطرة جديدة على DigitalOcean، ونحن نفعل ذلك لك. <uproxy-faq-link anchor='whatIsDigitalOcean'> تعلم المزيد. </uproxy-faq-link> <br> عند الانتهاء من إنشاء حساب وتحديث الفواتير، انقر على \"سجل دخولي في\".",
-        "description": "Message shown during DigitalOcean server deployment, references text for SIGN_ME_IN button"
-    },
-    "CONNECT": {
-        "message": "اتصل",
-        "description": "User clicks this to connect to a network"
-    },
-    "EMAIL_TITLE": {
-        "message": "بريد إلكتروني (اختياري)",
-        "description": ""
-    },
-    "PORT_CONTROL_TITLE": {
-        "message": "وضع مراقبة المنافذ",
-        "description": "Title for the port control section in advanced settings"
-    },
-    "FRIEND_REQUEST": {
-        "message": "صديقك __المدعو__ يرغب في أن يستخدم uproxy معك!",
-        "description": "Message above button for user to accept a uProxy friend request"
-    },
-    "INVITE_A_FRIEND": {
-        "message": "ُقُم بدعوة صديق",
-        "description": "Title for screen where user invites a friend to uProxy"
-    },
-    "CONNECT_WITH_A_FRIEND": {
-        "message": "قُم بالتواصل مع صديق",
-        "description": "Title of screen for user to send invites or enter received invites."
-    },
-    "CONFIRM_LOGOUT_SHARING": {
-        "message": "هل أنت متأكد أنك تريد تسجيل الخروج؟ لن تتمكن بعد من مشاركة الوصول مع أصدقائك.",
-        "description": "Confirmation when user logs out from a social network while they are sharing access with users on that network"
-    },
-    "ADVANCED_SETTINGS": {
-        "message": "الإعدادات المتقدمة\n",
-        "description": "Clickable text from the Settings menu. Clicking this opens the advanced settings screen."
-    },
-    "SHARING_ACCESS_WITH_TWO": {
-        "message": "مشاركة الوصول مع __المدعو1 __و__المدعو2__",
-        "description": "Message in a status bar that is visible when two friends are getting access through the user."
-    },
-    "SIGN_IN_TO_INVITE_FRIENDS": {
-        "message": "لكي تدعو __الشبكة__ صديق إلى uproxyً، الرجاء تسجيل الدخول إلى __الشبكة__ حسابك.",
-        "description": "Text for dialog that appears if users choose an invite-only social network to find uProxy friends. Text explains that users must sign in before inviting friends."
-    },
-    "FAQ_SENTENCE_CASE": {
-        "message": "الحصول على المساعدة",
-        "description": "Title of the FAQ window"
-    },
-    "NETWORK_AND_LOGS": {
-        "message": "حلل الشبكة وقُم بإدراج السجلات",
-        "description": "Label for a checkbox that indicates if the user wants uProxy to analyze their network settings and include their uProxy logs with their feedback to the uProxy team."
-    },
-    "INVITE_LINK_FROM_ACCEPT_PAGE": {
-        "message": "كنت أود أن أرسل دعوة في محلها.",
-        "description": "Link to send an invite if the user is already on the accept-invite page."
-    },
-    "UPROXY_NETWORK_SIGN_IN": {
-        "message": "تسجيل الدخول",
-        "description": "Sign in button for the uProxy network"
-    },
-    "HOW_DOES_UPROXY_COMPARE": {
-        "message": "كيف يناظر uProxy الشبكات الخاصة الافتراضية؟",
-        "description": ""
-    },
-    "CLOUD_INSTALL_INVITE_SCREEN_MESSAGE": {
-        "message": "مقابل 10$ في الشهر يمكنك الحصول على ومشاركة إذن الوصول مع الأصدقاء والعائلة من خادمك الخاص.",
-        "description": "Message shown on invite screen for DigitalOcean server deployment"
-    },
-    "SHARE_ACCESS": {
-        "message": "مشاركة إذن الوصول",
-        "description": "Text for the tab on the toolbar. When the user is on the 'Share Access' tab, they are looking to share access to their Internet with a friend."
-    },
-    "REQUESTS": {
-        "message": "الطلبات",
-        "description": "Title for the group of friends who have sent requests to access the user's Internet, which the user have not yet granted."
-    },
-    "PORT_CONTROL_NOT_SUPPORTED_INFO": {
-        "message": "قد تكون قادراً على تمكين مراقبة المنافذ لجعل uProxy أكثر ثقة.",
-        "description": "Extra information displayed when port control is not supported"
-    },
-    "SHARING_ENABLED_TOOLTIP": {
-        "message": "أنت متاح للمشاركة.",
-        "description": "Text that appears in a tooltip when the user hovers over the sharing icon."
-    },
-    "ARE_YOU_SURE": {
-        "message": "هل أنت متأكد من أنك تريد إنهاء اتصال المرة الواحدة؟",
-        "description": "Question confirming if the user wants to end an active connection to a friend."
-    },
-    "MORE_ABOUT_METRICS": {
-        "message": "تعلم المزيد عن المقاييس مجهولة المصدر",
-        "description": ""
-    },
-    "START_GETTING": {
-        "message": "ابدأ الحصول على إذن بالوصول",
-        "description": "Start accessing the Internet through a friend's connection."
-    },
-    "CLOUD_INSTALL_INSTALLING_MESSAGE": {
-        "message": "هذه العملية قد تستغرق ما يصل إلى 15 دقيقة. من فضلك اترك المتصفح مفتوح أثناء التثبيت. بمجرد توصيلك، يمكنك مشاركة الوصول مع أصدقائك وعائلتك من متصفحك الخاص.",
-        "description": "Message shown during DigitalOcean server deployment"
-    },
-    "CLOUD_INSTALL_LOGIN_MESSAGE": {
-        "message": "بمجرد أن تقوم بالنفر على\" تسجيل الدخول والاتصال\"، سيتم تحصيل 10$ منك شهرياً بواسطة DigitalOcean. يمكنك إنهاء خادمك في أي وقت. <uproxy-faq-link anchor='whatIsDigitalOcean'> تعرّف على المزيد. </uproxy-faq-link>\n",
-        "description": "Message shown during DigitalOcean server deployment, references text for SIGN_IN_AND_CONNECT button"
-    },
-    "QUIVER_LINK_INSTRUCTIONS": {
-        "message": "قُم بإرسال هذا الرابط إلى أصدقائك حتى يتمكنوا من العثور عليك على uProxy",
-        "description": "Instructions telling user how to use link for the uProxy network (aka Quiver)."
-    },
-    "PORT_CONTROL_PENDING": {
-        "message": "موجه التحقق لدعم مراقبة المنفذ...",
-        "description": "uProxy is currently probing router for port control support"
-    },
-    "IM_IN": {
-        "message": "أنا في",
-        "description": "Agree to submitting anonymous metrics to uProxy."
-    },
-    "DOES_UPROXY_GIVE_ME_ANSWER": {
-        "message": "<p> إن uProxy ليس أداة لعدم الكشف عن الهوية. إنه مفيد لإخفاء التصفح من مزود خدمة الإنترنتISP الخاص بك، ولكن ليس لإخفاء هويتك عن المواقع التي تزورها. الموقع على الانترنت الذي يتم زيارته  من قِبل شخص الذي يقوم بالحصول على إذن الوصول عن طريق uProxy سيرى عنوان IP للشخص الذي يقوم بمشاركة الوصول، وقد يكون موقع الويب قادراً على اكتشاف عنوان IP لمستخدم uProxy الذي يقوم بالحصول على الوصول. إذا كنت بحاجة إلى إخفاء هويتك عن المواقع التي تزورها، ننصحك باستخدام <a href=\"https://www.torproject.org/projects/torbrowser.html\"> متصفح تور</a>. </p>",
-        "description": ""
-    },
-    "SHARING_ACCESS_WITH_MANY": {
-        "message": "مشاركة الوصول مع__اسم__و__numOthers__الآخرون",
-        "description": "Message in a status bar that is visible when three or more friends are getting access through the user."
-    },
-    "LOGOUT": {
-        "message": "تسجيل الخروج من uProxy\n",
-        "description": "Log-out of uProxy."
-    },
-    "ONE_TIME_GETTING_SUCCESS": {
-        "message": "عمل ناجح! تم إعداد اتصال المرة الواحدة بنجاح.",
-        "description": "Inform the user that they have now successfully set up a connection through which they can get access.  This message should in no way imply that they are actually getting access (there will be another message prompting them to start using the connection)."
-    },
-    "CLOUD_INSTALL_ERROR_TITLE": {
-        "message": "للأسف! كان لدينا صعوبة في أنشاء خادم سحابي.",
-        "description": "Message shown after failed DigitalOcean server deployment"
-    },
-    "ACCEPT_LINK_FROM_INVITE_PAGE": {
-        "message": "كنت أود أن أدخل دعوة في محلها.",
-        "description": "Link to accept an invite if the user is already on the send an invite page"
-    },
-    "ABOUT_UPROXY": {
-        "message": "uProxy يساعدك في الحصول على ومشاركة إذن الوصول إلى الإنترنت مع الأصدقاء أو من خلال اتصال سحابي آمن. ",
-        "description": "Description on uProxy's introduction screen explaining what uProxy is."
-    },
-    "ONLINE": {
-        "message": "على الإنترنت",
-        "description": "Shown under your contact's who are online"
-    },
-    "INVITE_EMAIL_SUBJECT": {
-        "message": "دعو للتواصل مع__ اسم__ على uProxy",
-        "description": "Default email subject for sending an uProxy invite"
-    },
-    "HOW_TO_OFFER_ONE_TIME": {
-        "message": "إذا كنت ترغب في منحهم إذن بالوصول، قُم بنسخ ولصق هذا URL مرة أخرى لهم.",
-        "description": "Instructions for user if they'd like to share their Internet connection with a one-time link."
-    },
-    "WELCOME": {
-        "message": "أهلاً وسهلاً بك في uProxy",
-        "description": ""
-    },
-    "ONE_TIME_LINK_INPUT_DESCRIPTION": {
-        "message": "رابط من صديقك",
-        "description": "Text (appearing within the input box) informing the user that they can paste the one-time connection link they get back from their friend here.  It should be clear that it is the link from the friend and not the link they just copied above."
-    },
-    "EMAIL_INSTEAD_TITLE": {
-        "message": "ملاحظات البريد الإلكتروني في محلها؟",
-        "description": "Title for error that appears if feedback submission failed."
-    },
-    "HOW_DOES_UPROXY_COMPARE_ANSWER": {
-        "message": "<p> تم تصميم uProxy لكي يكون جدير بالثقة ومقاوم للحظر.</p> <p> عادة يتصل مستخدمون الشبكة الخاصة الافتراضية بخوادم سهل التعرف عليها، ويمكن تحديد حركة المرور في الشبكة الخاصة الافتراضية وحظرها. على العكس، فإن مستخدمون uProxy يتصلون مع بعضهم البعض بدلاً من الخوادم الشائعة، وuProxy يجعل من الصعب تحديد حركة المرور وبالتالي يصعب حظرها.</p> <p> بالإضافة، فإن خدمات الشبكة الخاصة الافتراضية يمكنها مراقبة المواقع الإلكترونية التي تزورها، والكثير لا يبقون هذه البيانات خاصة. ومستخدمون uProxy يضعون ثقتهم في اتصالاتهم بالأصدقاء، بدلاً من خدمات الشبكة الخاصة الافتراضية التي قد لا تعرف عنها الكثير.</p> <p> بالإضافة إلى عدم معرفة الشبكات الخاصة الافتراضية في ما تفعله مع بيانات تصفح مستخدميها، كما يمكن أن يكون من الصعب معرفة والثقة في زبون الشبكة الخاصة الاجتماعية وبرنامج الخادم، خاصة عندما يكون المصدر مغلق. على العكس، فإن uProxy مصدر مفتوح، وتواجه المراقبة العامة المستمرة. كلما أمكن، فإن uProxy يتجنب أن يطلب من المستخدمين   وضع ثقة عمياء في البرامج التي لا يمكن التحقق من مصداقيتها.</p> ",
-        "description": ""
-    },
-    "UNABLE_TO_GET_FROM": {
-        "message": "غير قادر على الوصول من __المدعو__",
-        "description": "Error message seen in uProxy when the user failed to get access to the Internet through a friend."
-    },
-    "SHARING_UNAVAILABLE_TITLE": {
-        "message": "إن المشاركة غير متاحة",
-        "description": "Title for error that appears when the user can not share their Internet access with friends."
-    },
-    "EMPTY_ROSTER_PEER_TO_PEER_INSTRUCTIONS": {
-        "message": "قُم بالحصول على أو مشاركة إذن الوصول مع الأسرة والأصدقاء.",
-        "description": "Instructions shown for peer-to-peer when the user has an empty roster"
-    },
-    "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY": {
-        "message": "انتظار uProxy للبدء...",
-        "description": "Progress bar label shown during cloud install indicating that we are waiting for uProxy to start."
-    },
-    "SEND_INVITATION": {
-        "message": "قُم بإرسال دعوة",
-        "description": "Button text to initiate sending an invitation"
-    },
-    "STATS_ENABLED_TITLE": {
-        "message": "تم تمكين الإحصائيات المجهولة",
-        "description": "The user has elected to submit anonymous statistics about their uProxy usage to the uProxy team."
-    },
-    "REQUIRED_FIELD": {
-        "message": "حقل مطلوب.",
-        "description": "Error message indicating that a field is required (e.g. user name)"
-    },
-    "CLOSE": {
-        "message": "اغلق",
-        "description": "Button label to close a popup."
-    },
-    "CONFIRM_LOGOUT_FOR_COPYPASTE_WHILE_PROXYING": {
-        "message": "لبدء الاتصال لمرة واحدة، سيتم تسجيل دخولك من الشبكات الاجتماعية المتصلة وسيتم إيقاف اتصالاتك. هل ترغب في تسجيل الخروج الآن؟",
-        "description": "If a user is signed in to social network(s) and is getting or sharing, and attempt to start a one-time connection, this message informs them that they must first log out of all social networks."
-    },
-    "LOADING": {
-        "message": "تحميل...",
-        "description": "Message show when something is taking time to load."
-    },
-    "WE_WONT_POST_LEARN_MORE": {
-        "message": "لن نشارك بياناتك أو نشرها علناً دون موافقك. <uproxy-faq-link anchor='whyDoesUproxyConnect'> تعرّف على المزيد </uproxy-faq-link>",
-        "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user."
-    },
-    "EDIT_ADVANCED_SETTINGS_PLACEHOLDER": {
-        "message": "تعديل إعداداتك",
-        "description": "Default text in the advanced settings textbox."
-    },
-    "INVITE_EMAIL_BODY": {
-        "message": "__اسم__ قام بدعوتك للتواصل معه على uProxy. للقيام بذلك، انقر على رابط الدعوة أدناه أو لصقه في uProxy.\n<br> <br> __url__ <br> <br> إذا لم يكن لديك uProxy مُثبت، يمكنك الحصول عليه من <a href='uproxy.org'> uproxy.org </a> أو مباشرةً من متجر كروم الإلكتروني <a href='https://chrome.google.com/webstore/detail/uproxy-part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'> الجزء 1 </a> و <a href='https://chrome.google.com/webstore/detail/uproxy-part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'> الجزء 2  </a> وسوق فايرفوكس(<a href='https://addons.mozilla.org/en-US/firefox/addon/uproxy-firefox/'> هنا </a>).",
-        "description": "Default email body for sending an uProxy invite"
-    },
-    "LAUNCH_DIGITAL_OCEAN_SETTINGS": {
-        "message": "قُم بفتح إعدادات DigitalOcean",
-        "description": "Button text for launching user's DigitalOcean settings page."
-    },
-    "GITHUB_INVITE_PLACEHOLDER": {
-        "message": "اسم المستخدم الخاص بالصديق في GitHub",
-        "description": "Placeholder in input box for the GitHub username of the friend the user is inviting"
-    },
-    "INVITE_EMAIL_SENT": {
-        "message": "تم إرسال البريد الإلكتروني الخاص بالدعوة.",
-        "description": "Confirmation message after an invite email has been sent"
-    },
-    "APP_MISSING_MESSAGE": {
-        "message": "قُم بتحميل وتمكين الجزء 2 من uProxy للبدء.",
-        "description": "Shown in Chrome to instruct the user to install part 2 of uProxy."
-    },
-    "ONE_TIME_SHARING": {
-        "message": "أنت تقوم حالياً بمشاركة إذن الوصول.",
-        "description": "The user is sharing their Internet access with a friend."
-    },
-    "REMOVE_CLOUD_SERVER_FAILURE": {
-        "message": "نحن آسفون. لا نستطيع حذف الخادم السحابي الخاص بك من أجلك في هذا الوقت.",
-        "description": "Message that tells users we failed to destroy their cloud server"
-    },
-    "NAME_THIS_DEVICE": {
-        "message": "قُم بتسمية هذا الجهاز",
-        "description": "If the user has not named their device (e.g. 'laptop' or 'home computer'), they will see this message in the Settings panel."
-    },
-    "CLOUD_INSTALL_GET_STARTED_TITLE": {
-        "message": "uProxy يسمح لك الآن بإنشاء خادم سحابي خلال DigitalOcean.",
-        "description": "Message shown during DigitalOcean server deployment"
-    },
-    "DOES_UPROXY_LOG_DATA_ANSWER": {
-        "message": "<p> إذا لم تختر الإعلان عن بيانات uProxy، لم يتم إعلان أي بيانات حول استخدامك أياً كان. إذا قمت بالاختيار، يتم طمس هوية أي بيانات الاستخدام قبل أن يغادر جهاز الكمبيوتر الخاص بك دائماً، وباستخدام نفس التكنولوجيا العالية، و<a href=\"http://googleresearch.blogspot.com/2014/10/learning-statistics-with-privacy-aided.html\"> خوارزميات </a> الحفاظ على الخصوصية التي تُستخدم في جوجل كروم. </p> <p> إذا قمت يدوياً باستخدام أداة إرسال التعليقات في قائمة الإعدادات، لديك الخيار لتضمين السجلات من استخدام uProxy الخاص بك الحديث. قد تحتوي  السجلات على معلومات التعريف الشخصي (PII). لم يتم مشاركة معلومات التعريف الشخصي  PII خارج فريق uProxy، ويتم الاحتفاظ بأي سجلات تحتوي على معلومات التعريف الشخصي PII  لمدة ثلاثة أشهر على أكثر تقدير قبل أن تُحذف. </p> <p> ويتم إرسال جميع التقارير بطريقة تجعل من الصعب على مراقب حركة المرور أن يكتشف أنك تستخدم uProxy.\n </p> <p> يمكنك قراءة المزيد حول جمع بيانات uProxy <a href=\"https://github.com/uProxy/uproxy/wiki/Data-Collection\"> هنا </a>. <p>",
-        "description": ""
-    },
-    "HOW_DO_I_INSTALL_UPROXY_ON_SERVER": {
-        "message": "كيف يمكنني تثبيت uProxy على الخادم الموجود الخاص بي؟",
-        "description": ""
-    },
-    "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY": {
-        "message": "تحميل وتثبيت صورة uProxy...",
-        "description": "Progress bar label shown during cloud install indicating that we are downloading a Docker image for uProxy."
-    },
-    "ACCEPT_INVITE": {
-        "message": "اقبل الدعوة",
-        "description": "Text for button for user to accept a uProxy friend request"
-    },
-    "UPROXY_NETWORK_INVITE_LOGIN_MESSAGE": {
-        "message": "لإضافة__ اسم__كصديق، يرجى تسجيل الدخول في شبكة uProxy",
-        "description": "Message instructing user to login to the uProxy network to accept an invitation."
-    },
-    "SHARING_ACCESS_WITH_FRIEND": {
-        "message": "مشاركة إذن الوصول مع صديق حالياً",
-        "description": "Message in a status bar that is visible when the user is sharing access with a nameless friend"
-    },
-    "SEND_CONNECTION_LINK": {
-        "message": "لمشاركة اتصالك، يرجى الطلب من صديقك أن يرسل لك الرابط الخاص به.",
-        "description": "Instructions for the user to share their connection with a one-time link."
-    },
-    "GMAIL_INVITE_INSTRUCTIONS": {
-        "message": "قُم بإدخال عنوان البريد لإرسال الإلكتروني الخاص بصديقك لإرسال طلب صداقة إليهم عن طريق البريد الإلكتروني. عندما يقبلون الدعوة، فسوف يظهروا على قائمة الاتصال الخاصة بك.",
-        "description": "Invite instructions for GMail"
-    },
-    "WHAT_ISNT_PROXIED": {
-        "message": "ماهي حركة المرور التي لا تتوسط، وهل يمكن ل uProxy أن يسرب معلومات عن المواقع التي أزورها؟",
-        "description": ""
-    },
-    "DOES_UPROXY_LOG_DATA": {
-        "message": "هل يقوم uProxy بتسجيل بيانات حولي، وما هي سياسة الخصوصية الخاصة ب uProxy ؟",
-        "description": ""
-    },
-    "APP_MISSING_TITLE": {
-        "message": "أنت تقريباً مستعد لاستخدام uProxy!",
-        "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
-    },
-    "WHAT_IS_PORT_CONTROL_ANSWER": {
-        "message": " <p> يتم تنفيذ ترجمة عنوان الشبكة (NAT) عادةً من قبل الموجهات للسماح بمشاركة عنوان IP العام الواحد من قِبل العديد من الأجهزة على الشبكة. ومع ذلك، فإن هذا يمكن أن يجعله تحدياً للمستخدمين لإنشاء اتصالات مباشرة مع بعضهم البعض، وبعض أنواع ترجمة عناوين الشبكة (خاصةً ترجمة عناوين الشبكة المتماثلة) يمكن أن تمنع uProxy من إنشاء اتصالات بنجاح. </p> <p> إذا كان الموجه الخاص بك قام بتمكين مراقبة المنافذ  (UPnP, NAT-PMP, or PCP)، يمكن إلى uProxy أن يعطي أمر للموجه الخاص بك للسماح تحديداً بالاتصالات الواردة من المستخدمين uProxy الآخرين. إذا كان كل من جانبي اتصال uProxy قادراً على استخدام مراقبة المنافذ، فإن الاتصالات تكاد أن تكون دائماً ناجحة، بغض النظر عن تكوين ترجمة عنوان الشبكة. للحصول على معلومات حول تمكين مراقبة المنافذ على الموجه الخاص بك، اطلع على دليل الموجه الخاص بك أو البحث في الإنترنت عن \"تمكين(اسم الموجه) UPnP\". </p>",
-        "description": ""
-    },
-    "WHAT_IS_ALPHA": {
-        "message": "ما هو إصدار ألفا؟",
-        "description": ""
-    },
-    "ERROR_STARTING_CONNECTION": {
-        "message": "كان هناك خطأ في بدء الاتصال وكان لا بد من الإنهاء. يرجى محاولة بدء اتصال آخر.",
-        "description": "Error shown if a one-time connection failed to start."
-    },
-    "TO_SEND_LOGS": {
-        "message": "لإرسال سجلاتك إلى فريق uProxy للمساعدة، افتح uProxy وانقر على 'إرسال تعليقات'",
-        "description": "Instructions guiding the user through how to submit their logs to uProxy."
-    },
-    "ONE_TIME_LINK_INPUT_ERROR": {
-        "message": "غير قادر على التعرف على هذا الرابط. يرجى التحقق للدقة والمحاولة مرة أخرى.",
-        "description": "Error message to show the user if they paste a poorly-formatted link into a texbox.  Should prompt them to try pasting the link again."
-    },
-    "WHEN_I_AM_SHARING_ACCESS_ANSWER": {
-        "message": "<p>المستخدمين الذين يحصلون على إذن الوصول منك هم فقط القادرون على استخدام اتصال الإنترنت الخاص بك فقط. لا يمكنهم الاطلاع على الملفات الموجودة على جهاز الكمبيوتر الخاص بك، والاطلاع على ما تقوم به على شبكة الإنترنت، أو تسجيل الدخول إلى مواقع الويب باستخدام هويتك. لا يمكنهم أيضاً الوصول إلى الأجهزة التي على شبكة بيتك على أو شبكة العمل مثل طابعة مشتركة أو خادم ملفات. </p>",
-        "description": ""
-    },
-    "SETTINGS_SAVED": {
-        "message": "تم حفظ الإعدادات",
-        "description": "Message that confirms to the user that their advanced settings were saved."
-    },
-    "WHY_IS_IT_IMPORTANT": {
-        "message": "لماذا هو مهم علي أن أثق بالناس الذين اتصل بهم؟",
-        "description": ""
-    },
-    "CONFIRM_LOGOUT_GETTING": {
-        "message": "هل أنت متأكد من أنك تريد تسجيل الخروج؟ سوف لن تتمكن من الحصول على إذن بالوصول من صديقك.",
-        "description": "Confirmation when user logs out from a social network while they are getting access from users on that network"
-    },
-    "NOT_CONNECTED_LOGIN_TO_START": {
-        "message": "سجل الدخول لكي تبدأ",
-        "description": "Text in settings that informs the user they should sign in to a social network to get started."
-    },
-    "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
-        "message": "هل لديك بالفعل خادم سحابي؟ <uproxy-faq-link anchor='howDoInstallUproxyOnServer'> تعرّف على كيفية </uproxy-faq-link> استخدامه مع uProxy.",
-        "description": "Instructions link for users who already have an existing cloud server."
-    },
-    "INVITE_ERROR": {
-        "message": "حدث خطأ في دعوتك.",
-        "description": "Error message shown for invalid invite URLs or tokens"
-    },
-    "STOP_IGNORING_REQUESTS": {
-        "message": "إيقاف تجاهل الطلبات",
-        "description": "Button label for if the user wants to stop ignoring requests."
-    },
-    "GET_ONE_TIME_INSTEAD": {
-        "message": "الحصول على إمكانية الوصول في محله",
-        "description": "Label for a link to the 'Start a one-time connection' page."
-    },
-    "REQUESTING_ACCESS_NOTIFICATION": {
-        "message": "__اسم__ يطلب إذن بالوصول",
-        "description": "Notification for when a friend sends a request to access the Internet through the user."
-    },
-    "WHAT_IS_BETA_ANSWER": {
-        "message": "<p> إصدار بيتا هذا ل uProxy لا يزال قيد التطوير، ولكننا نعتقد أنه ينبغي أن يعمل بشكل جيد للمستخدمين القادرين على الوصول إلى واحد على الأقل من الشبكات الاجتماعية التي يدعمها. كنا نحب لك أن تجربه، وتساعدنا على تقديم تعديلات من خلال إعطاء أي ملاحظات ترغب في مشاركتها. يمكنك النشر على قائمة المناقشة العامة الخاصة بنا<a href=\"https://groups.google.com/forum/#!forum/uproxy-discuss\"> هنا </a>، أو مراسلتنا عبر البريد الإلكتروني بشكل خاص على <a href=\"mailto:info@uproxy.org\"> info@uproxy.org \n</a>.  إذا كنت مهتم بمتابعة التقدم أو المساهمة في مشروع المصدر المفتوح، يرجى مشاهدة <a href=\"https://github.com/uProxy/uproxy/issues\"> مشكلة التتبع على GitHub الخاص بنا </a>. </p> ",
-        "description": ""
-    },
-    "STOP_IGNORING_OFFERS": {
-        "message": "توقف عن تجاهل العروض",
-        "description": "Button label for if the user wants to stop ignoring offers."
-    },
-    "HOW_TO_INVITE_FRIENDS": {
-        "message": "كيف تود أن تقوم بالدعوة إلى أصدقائك؟",
-        "description": "Question above network select dropdown on invite screen"
-    },
-    "SELECT_LANGUAGE": {
-        "message": "قُم باختيار اللغة",
-        "description": "Instruction to select language used by the application."
-    },
-    "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
-        "message": "المزيد من المعلومات",
-        "description": "Link text right after the PORT_CONTROL_NOT_SUPPORTED_INFO text"
-    },
-    "FEEDBACK_TITLE": {
-        "message": "ادخل ملاحظاتك أدناه",
-        "description": "Label for textbox for user's to submit feedback and comments to uProxy."
-    },
-    "CANCEL_OFFER": {
-        "message": "إلغاء العرض",
-        "description": "Label for button that takes back an offer to a friend who has not yet accepted that offer. If the button is clicked, the friend will no longer be able to connect to the Internet through the user."
-    },
-    "UNABLE_TO_SHARE": {
-        "message": "غير قادر على مشاركة الوصول",
-        "description": "Title for popup that appears when an attempt to share the Internet with a friend fails."
-    },
-    "EXPERIMENTAL": {
-        "message": "تجريبي",
-        "description": "Label below social networks (on the login page) indicating that a social network is experimental."
-    },
-    "WHAT_IS_GITHUB": {
-        "message": "ماهو GitHub وكيف يمكنني استخدامه؟",
-        "description": ""
-    },
-    "HOW_DO_I_INSTALL_UPROXY_ON_SERVER_ANSWER": {
-        "message": "<p> يعمل خادم uProxy في حاوية دوكر. يمكن للمستخدمين المتقدمين تهيئة التعليمات في <a href=\"https://blog.uproxy.org/2016/02/get-access-24x7-through-your-own-uproxy.html\"> هذا المكان </a> لتثبيت uProxy على خوادمهم الخاصة. </p>",
-        "description": ""
-    },
-    "SETTINGS_BAD_FORMAT_ERROR": {
-        "message": "يتعذر التعيين: تهيئة سيئة",
-        "description": "Error shown to the user if their input for advanced settings is badly formed JSON."
-    },
-    "CHANGE_STATS_CHOICE": {
-        "message": "هل يمكنك مساعدتنا في جعل uProxy أفضل من خلال مشاركة مقاييس مجهولة المصدر. يتم أخفاء هوية كافة البيانات من قبل الزبون وتنتقل بشكل آمن.",
-        "description": "Informs the user that they can opt in and out of sending anonymous statistics at any time they choose, from the Settings menu."
-    },
-    "HOW_DO_I_SUBMIT_ANSWER": {
-        "message": "<p> لإرسال ملاحظة من ضمن uProxy، اذهب إلى القائمة (رمز≡) واختر\"إرسال ملاحظة\". ويمكنك أيضاً مراسلتنا عبر البريد الإلكتروني على <a href=\"mailto:info@uproxy.org\"> info@uproxy.org\n</a>.</p> ",
-        "description": ""
-    },
-    "ENTER_IT_HERE": {
-        "message": "قُم بإدخاله هنا",
-        "description": "Text for button that opens a view for the user to enter their uProxy invite code"
-    },
-    "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK": {
-        "message": "قُم بالعثور على أصدقائك على الشبكة الاجتماعية.",
-        "description": "Title above social network icons on the page to find and/or invite friends."
-    },
-    "STARTED_PROXYING": {
-        "message": "__اسم__ بدأ استخدام الخادم الوكيل من خلالك",
-        "description": "Notification for when a friend has started accessing the Internet through the user."
-    },
-    "STOP_ONE_TIME_SHARING": {
-        "message": "إيقاف مشاركة الوصول",
-        "description": "Label for button to terminate your connection to a friend who is accessing the Internet through you."
-    },
-    "LOGIN_REQUIRED_MESSAGE": {
-        "message": "لقبول هذه الدعوة للتواصل مع __الاسم__، ستكون بحاجة لتسجيل الدخول إلى uProxy ب__ الشبكة__. انقر على نعم للمتابعة.",
-        "description": "Message for confirmation that the user must login to a network to accept an invitation"
-    },
-    "ASIA_SINGAPORE": {
-        "message": "آسيا(سنغافورة)",
-        "description": "Region option for deploying a DigitalOcean server"
-    },
-    "HOW_DO_I_SUBMIT": {
-        "message": "كيف أقوم بإرسال تعليق؟",
-        "description": ""
-    },
-    "GET_ONE_TIME_INSTEAD_INSTRUCTION": {
-        "message": "إذا كنت ترغب في بدء اتصال لمرة واحدة مع شخص آخر، اضغط على زر\"العودة\" ثم\" ابدأ اتصال لمرة واحدة\" لبدء جلسة جديدة.",
-        "description": "Instructions for the user if they want to abort an existing attempt and start a new one-time connection."
-    },
-    "PORT_CONTROL_SUPPORTED": {
-        "message": "إن مراقبة المنافذ ممكنة لدى الموجه الخاص بك.",
-        "description": "NAT-PMP, PCP, or UPnP is supported in the router"
-    },
-    "HOW_DOES_UPROXY_HELP": {
-        "message": "كيف يساعد uProxy في حماية اتصالي بالإنترنت؟",
-        "description": ""
-    },
-    "FRIEND_REQUESTED_ACCESS": {
-        "message": "لقد طلبوا الوصول من خلالكم.",
-        "description": "A friend has requested to access the Internet through the user."
-    },
-    "PRIVACY_POLICY": {
-        "message": "سياسة الخصوصية",
-        "description": "Link to uProxy's privacy policy."
-    },
-    "CLOUD_INSTALL_STATUS_CREATING_SERVER": {
-        "message": "إنشاء خادم...",
-        "description": "Progress bar label shown during cloud install indicating that a new server is being provisioned."
-    },
-    "GITHUB_INVITE_INSTRUCTIONS": {
-        "message": "قُم بإدخال اسم المستخدم الخاص بصديقك في GitHub. سوف تراهم في قائمة الاتصال الخاصة بك عندما يوافقون على طلبك.",
-        "description": "Invite instructions for GitHub"
-    },
-    "HOW_DOES_UPROXY_HELP_ANSWER": {
-        "message": " <p> عند استخدام الإنترنت بشكل طبيعي، فإن مزود خدمة الإنترنت (ISP)  الخاص بك  يكون قادراً على الاطلاع على المواقع التي تزورها، وربما محاولة التدخل في اتصالك عن طريق منع الوصول إلى بعض المواقع، أو حتى العبث بمحتوياتها. على شبكات الواي فاي التي لا تتطلب كلمة مرور، فإنه من الممكن أيضاً لمستخدم آخر على الشبكة معرفة أي المواقع التي تزورها، والمواقع التي هي HTTP (وليس HTTPS)، فقد  يتمكنوا من رؤية محتوى حركة المرور، أيضاً. </p> <p> عندما تقوم  بالحصول على إذن الوصول من خلال uProxy، يتم تشفير الاتصال بينك وبين صديقك. يتم إرسال حركة مرور المتصفح الخاص بك من خلال هذا الاتصال، ثم إلى الإنترنت من كمبيوتر صديقك. حين الحصول على إذن الوصول من خلال uProxy، لا يجب أن يكون ISP الخاص بك قادراً على الاطلاع على المواقع التي تزورها، وuProxy يجعل عن عمد من الصعب على مزود خدمة الإنترنت الخاص بك التعرف على  وعرقلة حركة مرور uProxy الخاص بك. </p>",
-        "description": ""
-    },
-    "GETTING_ACCESS_FROM_FRIEND": {
-        "message": "الحصول على إمكانية الوصول من صديق حالياً",
-        "description": "Message in a status bar that is visible when the user is getting access from a nameless friend"
-    },
-    "ASKING_FOR_ACCESS": {
-        "message": "اسأل عن الوصول",
-        "description": "The user is asking for permission to access the Internet through their friend; user is waiting for the friend's reply."
-    },
-    "GET_HELP": {
-        "message": "احصل على مساعدة",
-        "description": "Get help from the frequently asked questions page."
-    },
-    "SHARE_WITH_A_FRIEND": {
-        "message": "شارك مع صديق",
-        "description": "Button text shown below each Cloud friend in the Share tab to open a dialog with a Cloud invite code."
-    },
-    "INVITATION_PLACEHOLDER_TEXT": {
-        "message": "هل لديك رمز دعوة؟ ادخله هنا",
-        "description": "Invitation placeholder text, instructing users to enter an invite in this field"
-    },
-    "ENTER_INVITATION": {
-        "message": "قُم بإدخال دعوة",
-        "description": "Title for screen where user enters an invitation"
-    },
-    "CANCEL_REQUEST": {
-        "message": "إلغاء الطلب",
-        "description": "Label for button which will take back a request to get Internet access through a friend."
-    },
-    "WHY_DOES_UPROXY_CONNECT": {
-        "message": "لماذا يتصل uProxy بالشبكات الاجتماعية؟",
-        "description": ""
-    },
-    "CLOUD_VIRTUAL_MACHINE": {
-        "message": "جهاز افتراضي",
-        "description": "Refers to a remote server users can proxy from"
-    },
-    "IGNORE": {
-        "message": "تجاهل",
-        "description": "Button label that ignores an offer or request."
-    },
-    "STOP_ONE_TIME_SHARING_BEFORE_NEW": {
-        "message": "إذا كنت ترغب في بدء اتصال المرة الواحدة الجديد، اضغط على \"إيقاف مشاركة الوصول\" أولاً.",
-        "description": "Instruction for the user to stop a current one-time connection if they want to start a new one."
-    },
-    "QUIVER_LOGIN_TEXT": {
-        "message": "شبكة uProxy هي طريقة بسيطة للعثور على أصدقائك والتواصل معهم على نحو موثوق. <uproxy-faq-link anchor='whatIsUproxyNetwork'> تعرّف على المزيد. </uproxy-faq-link>",
-        "description": "Text shown to the user when they are about to login to the uProxy Network (aka Quiver)"
-    },
-    "REQUEST_ONE_TIME": {
-        "message": "قُم بطلب اتصال لمرة واحدة",
-        "description": "Request access to the user's friend's Internet using a link that will only work once."
-    },
-    "DONE": {
-        "message": "تم",
-        "description": "Button label that suggests acknowledgement and that closes a popup."
-    },
-    "SETTINGS_JSON_ERROR": {
-        "message": "تعذر تعيين: عدم تطابق قيمة JSON",
-        "description": "Error shown to the user if their input for advanced settings is incomplete or incompatible with expected settings configurations."
-    },
-    "WHAT_IS_ALPHA_ANSWER": {
-        "message": "إصدار ألفا هذا ل uProxy لا يزال قيد التطوير وربما يكون غير مستقر في بعض الأحيان؛  بعض الميزات غير كاملة، وهناك <a href=\"https://github.com/uProxy/uproxy/issues\"> قائمة للمشاكل المفتوحة </a> على GitHub. كنا نحب لك أن تجرب ذلك وتساعدنا على إجراء التحسينات، من خلال إعطائك لنا ملاحظاتك.",
-        "description": ""
-    },
-    "LOADING_FRIENDS": {
-        "message": "تحميل أصدقاء uProxy",
-        "description": "User's friends are being loaded from a social network."
-    },
-    "OK": {
-        "message": "حسناً",
-        "description": "Button label."
-    },
-    "GRANT": {
-        "message": "منحة",
-        "description": "Label for button that accepts a friend's request to access the Internet through the user."
-    },
-    "NO_LONGER_SHARING": {
-        "message": "إنك لم تعد قادراً على مشاركة الوصول. انقر على الزر أدناه لطلب اتصال أو قُم بلصق رابط الطلب من صديق لمشاركة الوصول مرة أخرى.",
-        "description": "Message shown when a one-time connection ends and the user was sharing."
-    },
-    "START_ONE_TIME_INSTRUCTION": {
-        "message": "لبدء الحصول على إمكانية الوصول من صديقك، انقر على الزر أدناه. ",
-        "description": ""
-    },
-    "CONFIRM_LOGOUT_GETTING_AND_SHARING": {
-        "message": "هل أنت متأكد من أنك تريد تسجيل الخروج؟ لن تكون قادراً على الحصول  على أو مشاركة الوصول مع أصدقائك.",
-        "description": "Confirmation when user logs out from a social network while they are getting and sharing access with users on that network"
-    },
-    "DIGITAL_OCEAN_ERROR_MESSAGE": {
-        "message": "يرجى الاطلاع على إعدادات DigitalOcean قبل المحاولة مرة أخرى. إذا لم تكن ترغب في المحاولة مرة أخرى، قُم بالتحقق من أنك ليس لديك القطرات المسماة\"خادم uproxy السحابي\". وهذا سيضمن لك تجنب أي رسومٍ شهرية.",
-        "description": "Following a failed DigitalOcean install, instruct the user to consult DigitalOcean's website where they can check their settings or remove a half-installed server."
-    },
-    "CLOUD_INSTALL_LOGIN_TITLE": {
-        "message": "قُم بتحديد مكان قريب مكان لإنشاء خادم سحابي.",
-        "description": "Message shown during DigitalOcean server deployment"
-    },
-    "RESTART_PROXYING": {
-        "message": "حاول مرة أخرى",
-        "description": "Displayed on a button next to the RECONNECT_FAILED message"
-    },
-    "WILL_UPROXY_WORK_ANSWER": {
-        "message": "<p> إذا تم حظر الوصول إلى جميع الشبكات الاجتماعية التي يقوم uProxy بدعمها، فإنك لن تكون قادراً على استخدام شبكة اجتماعية لمساعدتك على إنشاء اتصال مع أصدقائك. لا يزال بإمكانك إنشاء اتصال لمرة واحدة يدوياً، من خلال تبادل الروابط التي تم إنشاؤها من قِبل uProxy عبر قناة آمنة، ولكن سيكون عليك تكرار هذا التبادل في كل مرة تريد الاتصال بصديقك. إن ميزة استخدام الشبكات الاجتماعية هي أن إقامة الاتصال تلقائية، بمجرد منح الترخيص. </p>",
-        "description": ""
-    },
-    "CLOUD_INSTALL_SUCCESS_MESSAGE": {
-        "message": "يمكنك الآن مشاركة إذن الوصول مع الأصدقاء والأسرة من خادمك الخاص.",
-        "description": "Message shown after successful DigitalOcean server deployment"
-    },
-    "CLOUD_INSTALL_STATUS_LOGGING_IN": {
-        "message": "تسجيل الدخول إلى الخادم الجديد...",
-        "description": "Progress bar label shown during cloud install indicating that we are logging into the newly created server."
-    },
-    "WHY_IS_IT_IMPORTANT_ANSWER": {
-        "message": " <p> تم تصميم uProxy لمساعدة الأصدقاء الذين يثقون ببعضهم البعض لمشاركة الاتصال بالإنترنت. إن الاتصال بالأشخاص الذين لا تثق بهم خطر وغير مستحسن. </p> <p> إذا كنت تحصل على إذن بالوصول من شخص ماكر، فقد يكون قادراً على التجسس على تصفح الويب الخاص بك وحتى التدخل بحركة المرور الخاصة بك. إلى جانب الثقة في الشخص الذي تحصل منه على إذن بالوصول، يجب عليك أن تثق أن اتصال الإنترنت الخاص به آمن أيضاً. إذا كانوا يتصلون من نقطة ساخنة عامة للواي فاي غير معروفة والتي قد تكون غير آمنة، فقد يكون من الأفضل الانتظار حتى يكونوا متصلين من شبكة آمنة مرة أخرى في المنزل. </p> <p> إذا كنت تشارك إذن الوصول مع شخص لا تعرفه وتثق به، فقد يكون قادراً على استخدام اتصالك للمشاركة في نشاط غير مشروع، وبالاعتماد على القوانين المحلية، قد تُعتبر مسؤولاً من الناحية القانونية لتسهيل هذا النشاط. <p> من المهم أن تثق بأي شخص تشاركه في الاتصال بالإنترنت، سواء كان ضيفاً على شبكة الواي فاي في بيتك، أو صديق uProxy في جهة أخرى من العالم. </p>",
-        "description": ""
-    },
-    "DOES_UPROXY_PROTECT": {
-        "message": "هل يقوم uProxy بحمايتي من الفيروسات، والتصيد أو القرصنة؟",
-        "description": ""
-    },
-    "WHY_IS_UPROXY_ASKING": {
-        "message": "لماذا يسأل uProxy عن أذون كروم هذه؟",
-        "description": ""
-    },
-    "RECONNECT_FAILED": {
-        "message": "لقد فشلت إعادة الاتصال",
-        "description": "Indicate that uProxy attempted to reconnect automatically but it failed."
-    },
-    "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
-        "message": "قُم بإنشاء حساب جديد أو تسجيل الدخول للاتصال ومشاركة إذن الوصول.\n<uproxy-faq-link anchor='whatAreCloudServers'> تعرّف على المزيد. </uproxy-faq-link>",
-        "description": "Message shown during DigitalOcean server deployment"
-    },
-    "DESTROY_CLOUD_SERVER_CONFIRMATION": {
-        "message": "هذا سوف يدمر خادم uProxy السحابي الخاص بك. يرجى الوضع في الاعتبار أن الأصدقاء والأسرة لن يتمكنوا من استخدام هذا الخادم السحابي بمجرد تدميره.",
-        "description": "Message that warns users their cloud server will be destroyed"
-    },
-    "EUROPE_AMSTERDAM": {
-        "message": "أوروبا(أمستردام)",
-        "description": "Region option for deploying a DigitalOcean server"
-    },
-    "CONTINUE": {
-        "message": "المتابعة",
-        "description": "Button label."
-    },
-    "EXT_MISSING_MESSAGE": {
-        "message": "قُم بتحميل وتمكين الجزء 1 من uProxy للبدء.",
-        "description": "Shown in Chrome to instruct the user to install part 1 of uProxy."
-    },
-    "WHAT_IS_BETA": {
-        "message": "ما هو إصدار بيتا؟",
-        "description": ""
-    },
-    "GRANTED_ACCESS_NOTIFICATION": {
-        "message": "__اسم__ منحك إذن بالوصول",
-        "description": "Notification for when a user's request to access the Internet through a friend has been accepted by that friend."
-    },
-    "CREATE_A_NEW_ACCOUNT": {
-        "message": "قُم بإنشاء حساب جديد",
-        "description": "Button text for creating a new account (e.g. for DigitalOcean)"
-    },
-    "WE_WONT_POST": {
-        "message": "لن نشارك بياناتك أو ننشرها علناً دون موافقتك",
-        "description": "Inform the user that uProxy does not share data or post to their social network accounts without agreement from the user."
-    },
-    "PORT_CONTROL_NOT_SUPPORTED": {
-        "message": "جهاز التوجيه الخاص بك ليس لديه منفذ للتحكم متمكن.",
-        "description": "NAT-PMP, PCP, and UPnP are not supported in the router"
-    },
-    "ONE_TIME_GETTING": {
-        "message": "أنت حالياً تحصل على إذن الوصول.",
-        "description": "The user is connected to the Internet through their friend."
-    },
-    "WHY_SOCIAL_NETWORK": {
-        "message": "يستخدم uProxy الشبكات الاجتماعية لمساعدتك على إعداد الاتصالات مع أصدقائك",
-        "description": "Explains why uProxy needs social networks. (Friends need to login with the same social network on uProxy for friends to see each other.)"
-    },
-    "CANT_OPEN_ONE_TIME_MESSAGE": {
-        "message": "غير ممكن حالياً فتح الاتصال اليدوي في نفس الوقت الذي يتم فيه تسجيل الدخول إلى الشبكة الاجتماعية. لبدء الاتصال اليدوي، يرجى تسجيل الخروج من خلال قائمة الإعدادات وإعادة لصق الرابط.",
-        "description": "Text for an error popup that appears if the user tries to open a one-time link while signed in to a social network."
-    },
-    "CLOUD_INSTALL_STATUS_INSTALLING_SSH": {
-        "message": "تحميل وتثبيت صورة خادم SSH...",
-        "description": "Progress bar label shown during cloud install indicating that we are downloading a Docker image for an SSH server."
-    },
-    "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS": {
-        "message": "تحميل تثبيت البرامج النصية...",
-        "description": "Progress bar label shown during cloud install indicating that we are downloading scripts which will install uProxy."
-    },
-    "SHARING_UNAVAILABLE_MESSAGE": {
-        "message": "للأسف، أنت تستخدم فايرفوكس 37، والذي لديه عيب يقوم بمنع المشاركة من العمل(اطلع على git.io/vf5x1). يتم إصلاح هذا الخلل في فايرفوكس 38، لذلك يمكنك تمكين المشاركة بترقية فايرفوكس أو التبديل إلى كروم.",
-        "description": "Text for error that appears when the user can not share their Internet access with friends."
-    },
-    "UPDATE_AVAILABLE": {
-        "message": "هناك تحديث متاح",
-        "description": "What to show the user (on the bottom bar) when an update is available.  The actual update will not be done until they restart uProxy which we will prompt them to do with a link."
-    },
-    "DOES_UPROXY_GIVE_ME": {
-        "message": "هل يقدم uProxy تصفح مجهول؟",
-        "description": ""
-    },
-    "POSSIBLY": {
-        "message": "ربما",
-        "description": "Meaning medium probability. Used in context of the probability that network settings are preventing a uProxy connection from being established. Used in analysisResults string."
-    },
-    "NO_THANKS": {
-        "message": "لا شكراً",
-        "description": "Do not agree to submitting anonymous metrics to uProxy."
-    },
-    "SUBMIT_BUTTON_TEXT": {
-        "message": "إرسال",
-        "description": "Button that submits some data entered by the user, e.g. entering a friend invite"
-    },
-    "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
-        "message": "إنشاء خادم مظلم من خلال DigitalOcean",
-        "description": "Message shown on invite screen for DigitalOcean server deployment"
-    },
-    "STATS_ENABLED_TOOLTIP": {
-        "message": "أنت تقوم بمشاركة الإحصائيات المجهولة.",
-        "description": "Text that appears in a tooltip when the user hovers over the 'anonymous stats enabled' icon."
-    },
-    "FRIEND_REQUESTED_ONE_TIME": {
-        "message": "لقد طلب صديقك أن يستخدم الاتصال بالإنترنت الخاص بك.",
-        "description": "A friend has requested to access the Internet through the user."
+  "INVITE_SENT_CONFIRMATION": {
+    "message": "تم إرسال الدعوة إلى __name__."
+  }, 
+  "WILL_UPROXY_WORK": {
+    "message": "أين يعمل uProxy؟"
+  }, 
+  "WHAT_IS_UPROXY": {
+    "message": "ما المقصود بعبارة uProxy؟"
+  }, 
+  "FACEBOOK_INVITE_INSTRUCTIONS": {
+    "message": "يمكنك النقر أدناه لإرسال دعوة uProxy إلى أحد أصدقائك على Facebook. وعندما يفتح صديقك هذا الرابط باستخدام uProxy، فإنه يظهر ضمن قائمة جهات اتصالك في uProxy."
+  }, 
+  "CHOOSE_A_SOCIAL_NETWORK": {
+    "message": "اختيار شبكة اجتماعية"
+  }, 
+  "WAITING_FOR_ACCESS": {
+    "message": "ستحصل على إمكانية الوصول عند موافقة __name__."
+  }, 
+  "GET_ACCESS": {
+    "message": "الحصول على إمكانية الوصول"
+  }, 
+  "WHAT_IS_BETA_ANSWER": {
+    "message": "<p>لا يزال الإصدار التجريبي من uProxy قيد التطوير، ولكننا نعتقد أنه من المفترض أن يعمل جيدًا لدى المستخدمين الذين لديهم إمكانية وصول إلى شبكة اجتماعية واحدة على الأقل من الشبكات المتوافقة. يسعدنا أن تجرِّب هذا الإصدار لمساعدتنا في إدخال تحسينات بناءً على التعليقات التي تريد مشاركتها معنا. يمكنك نشر تعليقاتك على قائمة النقاش العام التي نوفرها <a href=\"https://groups.google.com/forum/#!forum/uproxy- discuss\">هنا</a>، أو مراسلتنا عبر البريد الإلكتروني بشكل خاص على العنوان <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>. وإذا كنت مهتمًا بمتابعة مستوى التقدم أو الإسهام في مشروع المصدر المفتوح، فيُرجى الاطلاع على <a href=\"https://github.com/uProxy/uproxy/issues\">أداة تتبع المشكلات على GitHub</a>.</p>"
+  }, 
+  "ACCEPTED_OFFER_NOTIFICATION": {
+    "message": "هناك موافقة من __name__ على عرض إمكانية الوصول الذي قدَّمته"
+  }, 
+  "LEARN_MORE_UPROXY": {
+    "message": "مزيد من المعلومات حول uProxy"
+  }, 
+  "WILL_UPROXY_WORK_ANSWER": {
+    "message": "<p>عندما يتم حظر الوصول إلى جميع الشبكات الاجتماعية المعتمدة من uProxy، لن تتمكن من استخدام شبكة اجتماعية لمساعدتك في إعداد اتصال مع أصدقائك. وسيظل بإمكانك إعداد اتصال من مرة واحدة بشكل يدوي، من خلال تبادل الروابط التي يتم إنشاؤها في uProxy عبر قناة آمنة، ولكن سيتعين عليك تكرار هذا التبادل في كل مرة تريد الاتصال بصديقك. ومن ميزات استخدام الشبكات الاجتماعية أنه يتم إنشاء الاتصال تلقائيًا بعد منح التفويض.</p>"
+  }, 
+  "WHAT_ARE_CLOUD_SERVERS_ANSWER": {
+    "message": "<p>يمكن لمستخدمي uProxy الحصول على إمكانية الوصول بطريقتين: من خلال استخدام خادم وكيل مع حركة بياناتهم إلى صديق والاتصال بخادم يعمل باستخدام uProxy. بإمكان uProxy توفير عملية آلية لإنشاء خادم خاص على سحابة تستضيف المنصة. إننا ندعم DigitalOcean في الوقت الحالي، إلا أنه يمكن الإعداد اليدوي على الخوادم الأخرى. وبعد إنشاء ذلك، فإننا نسهِّل مشاركة إمكانية الوصول إلى خادمك مع أصدقائك وأفراد عائلتك من خلال الانتقال إلى علامة تبويب \"المشاركة\".</p>"
+  }, 
+  "ANALYZING_NETWORK": {
+    "message": "جارٍ تحليل الشبكة"
+  }, 
+  "CLOUD_INSTALL_STATUS_INSTALLING_SSH": {
+    "message": "جارٍ تنزيل وتثبيت صورة خادم SSH..."
+  }, 
+  "ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED": {
+    "message": "لقد لاحظنا أنه تم قطع اتصالك بصديقك. هل لديك مانع من إرسال بعض التعليقات؟"
+  }, 
+  "GMAIL_INVITE_INSTRUCTIONS": {
+    "message": "أدخل عنوان البريد الإلكتروني لصديقك لإرسال طلب صداقة إليه عبر البريد الإلكتروني. وعندما يقبل الدعوة، سيظهر ضمن قائمة جهات اتصالك."
+  }, 
+  "RESTART_FAILURE_TITLE": {
+    "message": "عذرًا، لم نتمكن من إعادة تشغيل خادمك."
+  }, 
+  "CONNECTED_WITH_NUMBER": {
+    "message": "تم الاتصال بـ __number__ شبكة"
+  }, 
+  "PORT_CONTROL_SUPPORTED": {
+    "message": "تم تمكين التحكم في المنفذ على جهاز التوجيه."
+  }, 
+  "SHARING_ACCESS_WITH_ONE": {
+    "message": "جارٍ مشاركة إمكانية الوصول مع __name__"
+  }, 
+  "CREATE_A_CLOUD_SERVER": {
+    "message": "إنشاء خادم سحابي"
+  }, 
+  "ADVANCED_SETTINGS": {
+    "message": "الإعدادات المتقدمة"
+  }, 
+  "REMOVE_SERVER_AND_TRY_AGAIN": {
+    "message": "إزالة الخادم وإعادة المحاولة"
+  }, 
+  "CREATING_A_CLOUD_SERVER": {
+    "message": "جارٍ إنشاء خادم سحابي"
+  }, 
+  "SELECT_LANGUAGE": {
+    "message": "اختيار لغة"
+  }, 
+  "GETTING_ACCESS_FROM": {
+    "message": "جارٍ الحصول على إمكانية الوصول من __name__"
+  }, 
+  "HOW_DO_I_FIND": {
+    "message": "كيف يمكنني الوصول إلى أصدقائي على uProxy؟"
+  }, 
+  "REQUIRED_FIELD": {
+    "message": "حقل مطلوب."
+  }, 
+  "SETTINGS_JSON_ERROR": {
+    "message": "تعذر التعيين: قيمة JSON غير متطابقة"
+  }, 
+  "STOP_IGNORING_REQUESTS": {
+    "message": "إيقاف تجاهل الطلبات"
+  }, 
+  "HOW_TO_INVITE_FRIENDS": {
+    "message": "كيف تريد توجيه الدعوة إلى أصدقائك؟"
+  }, 
+  "CREATE_A_NEW_ACCOUNT": {
+    "message": "إنشاء حساب في DigitalOcean"
+  }, 
+  "ENTER_INVITATION": {
+    "message": "إدخال دعوة"
+  }, 
+  "FRIEND_REQUESTS_ACCESS": {
+    "message": "هناك طلب من __name__ للحصول على إمكانية الوصول من خلالك."
+  }, 
+  "DOES_UPROXY_LOG_DATA_ANSWER": {
+    "message": "<p>عند عدم تمكين تقارير البيانات في uProxy، لن يتم رفع تقارير ببيانات عن استخدامك إطلاقًا. ولكن في حال تمكين تقارير البيانات، سيتم إخفاء هويتك من بيانات الاستخدام قبل مغادرتها جهاز الكمبيوتر، باستخدام أحدث تكنولوجيا <a href=\"http://googleresearch.blogspot.com/2014/10/learning-statistics- with-privacy-aided.html\">الخوارزميات</a> المستخدمة للحفاظ على الخصوصية في Google Chrome.</p><p>وإذا كنت تستخدم أداة \"إرسال التعليقات\" في قائمة الإعدادات يدويًا، فسيكون لديك خيار تضمين سجلات من استخدامك الأخير على uProxy. قد تحتوي السجلات على معلومات يمكن من خلالها تحديد الهوية الشخصية (PII). ولكن لا يتم مطلقًا مشاركة معلومات PII خارج نطاق فريق عمل uProxy، ويتم الاحتفاظ بأي سجلات تحتوي على معلومات PII لمدة ثلاثة أشهر كحد أقصى قبل التخلص منها.</p><p>يتم إرسال جميع التقارير على نحو يجعل من الصعب على أي مراقب لحركة البيانات اكتشاف استخدامك uProxy.</p><p>يمكنك الاطلاع على مزيد من المعلومات حول جمع البيانات في uProxy <a href=\"https://github.com/uProxy/uproxy/wiki/Data- Collection\">هنا</a>.<p>"
+  }, 
+  "LOGOUT": {
+    "message": "تسجيل الخروج من uProxy"
+  }, 
+  "SIGN_ME_IN": {
+    "message": "تسجيل دخولي"
+  }, 
+  "WHAT_IS_PORT_CONTROL_ANSWER": {
+    "message": "<p>يتم تطبيق ترجمة عناوين الشبكة (NAT) عادة بواسطة أجهزة التوجيه للسماح بمشاركة عنوان IP عام واحد بواسطة عدة أجهزة على الشبكة. إلا أن ذلك قد يشكل تحديًا بالنسبة إلى المستخدمين من حيث إنشاء اتصالات مباشرة مع الآخرين، ويمكن أن تمنع بعض أنواع NAT (خاصة NAT المتماثلة) uProxy من إنشاء اتصالات ناجحة.</p><p>إذا تم تمكين التحكم في المنفذ على جهاز التوجيه (UPnP أو NAT-PMP أو PCP)، فيمكن أن يطلب uProxy من جهاز التوجيه السماح بالاتصالات الواردة من مستخدمي uProxy الآخرين. إذا كان هناك طرف من طرفي اتصال uProxy يمكنه استخدام التحكم في المنفذ، فستكون الاتصالات ناجحة في الغالب، بغض النظر عن تهيئة NAT. للحصول على معلومات حول تمكين التحكم في المنفذ على جهاز التوجيه، راجع دليل جهاز التوجيه أو ابحث في الويب عن \"تمكين UPnP في (اسم جهاز التوجيه)\".</p>"
+  }, 
+  "INVITATION_PLACEHOLDER_TEXT": {
+    "message": "هل لديك رمز دعوة؟ أدخله هنا"
+  }, 
+  "WHO_KNOWS_THAT_ANSWER": {
+    "message": "<p>سيكون بإمكان أي شخص تتواصل معه أن يعرف أنك تستخدم uProxy. علاوة على ذلك، إذا اخترت ربط uProxy بإحدى الشبكات الاجتماعية مثل Facebook، سيتمكن مشرفو هذه الشبكة من معرفة أنك تستخدم uProxy، وقد يكون بإمكان أصدقائك على هذه الشبكة من مستخدمي uProxy أن يعرفوا ذلك أيضًا.</p><p>بالنسبة إلى المستخدمين الذين يتواصلون باستخدام حساب في Gmail أو Facebook، يستخدم uProxy خدمة Firebase، وهي خدمة تديرها Google. إلا أنه يمكن لفريق Firebase وفريق uProxy اللذين يشرفان على حساب uProxy Firebase، الوصول إلى معلومات حول الحسابات التي تستخدم uProxy.</p><p>إذا كانت لديك مخاوف من استخدام uProxy مع حسابك الشخصي، فيمكنك إنشاء حساب مخصص باسم مستعار واستخدامه مع uProxy بدلاً من ذلك.</p><p>تجدر الإشارة إلى أنه لا يمكن لأي من هذه الخدمات معرفة المواقع أو الصفحات التي تنتقل إليها أثناء استخدام uProxy. ولن يتمكن أحد من مراقبة حركة بياناتك سوى المستخدم الذي تحصل على إمكانية الوصول من خلاله. ولذلك فإننا نؤكد على أهمية الحصول على إمكانية الوصول من خلال الأصدقاء الذين تثق في مشاركة اتصال الإنترنت معهم.</p>"
+  }, 
+  "POSSIBLY": {
+    "message": "ربما"
+  }, 
+  "UPROXY_NETWORK_CHOOSE_A_USER_NAME": {
+    "message": "اختيار اسم مستخدم"
+  }, 
+  "EDIT_ADVANCED_SETTINGS": {
+    "message": "تعديل الإعدادات أدناه"
+  }, 
+  "EXT_MISSING_TITLE": {
+    "message": "أنت على استعداد تقريبًا لاستخدام uProxy."
+  }, 
+  "PROCEED_TO_UPROXY": {
+    "message": "المتابعة إلى uProxy"
+  }, 
+  "THANK_YOU": {
+    "message": "شكرًا لك"
+  }, 
+  "ASKING_FOR_ACCESS": {
+    "message": "جارٍ طلب الحصول على إمكانية الوصول"
+  }, 
+  "FRIEND_ADDED": {
+    "message": "تمت إضافة الصديق"
+  }, 
+  "LOGIN_REQUIRED_TITLE": {
+    "message": "يلزم تسجيل الدخول"
+  }, 
+  "REQUEST_ACCESS": {
+    "message": "طلب إمكانية الوصول"
+  }, 
+  "OFFERED_YOU_ACCESS": {
+    "message": "لديك من هذا الشخص عرض إمكانية وصول."
+  }, 
+  "SHARING_ACCESS_WITH_TWO": {
+    "message": "جارٍ مشاركة إمكانية الوصول مع __name1__ و__name2__"
+  }, 
+  "NOT_CONNECTED_LOGIN_TO_START": {
+    "message": "يمكنك تسجيل الدخول للبدء"
+  }, 
+  "FRIENDS_WHO_SHARE": {
+    "message": "الأصدقاء الذين يمكنك الحصول على إمكانية الوصول منهم"
+  }, 
+  "RESTART_SERVER_TEXT": {
+    "message": "إذا تكرر ظهور هذا الخطأ، فيمكنك تجربة إعادة تشغيل الخادم."
+  }, 
+  "ASIA_SINGAPORE": {
+    "message": "آسيا (سنغافورة)"
+  }, 
+  "SHARING_ACCESS_WITH_MANY": {
+    "message": "جارٍ مشاركة إمكانية الوصول مع __name__ و__numOthers__ من الأشخاص الآخرين"
+  }, 
+  "P_I_I_MESSAGE": {
+    "message": "سيتم إرسال تعليقاتك وعنوان بريدك الإلكتروني إلى uProxy.org. ربما تحتوي سجلاتك ومعلومات الشبكة والبريد الإلكتروني على معلومات يمكن من خلالها تحديد الهوية الشخصية."
+  }, 
+  "DISCONNECT": {
+    "message": "قطع الاتصال"
+  }, 
+  "STARTED_PROXYING": {
+    "message": "تم بدء عمل __name__ على خادم وكيل من خلالك"
+  }, 
+  "TROUBLE_SIGNING_IN": {
+    "message": "أواجه مشكلات في تسجيل الدخول."
+  }, 
+  "ASK_TO_ANALYZE": {
+    "message": "ربما كان نوع NAT في الشبكة غير متوافق مع uProxy. هل تريد من uProxy تحليل شبكتك؟"
+  }, 
+  "CLOUD_INSTALL_INSTALLING_MESSAGE": {
+    "message": "بعد اتصالك، يمكنك مشاركة إمكانية الوصول مع أصدقائك وأفراد العائلة من خادمك الشخصي."
+  }, 
+  "EMPTY_ROSTER_INSTRUCTIONS": {
+    "message": "يمكنك الحصول على إمكانية الوصول ومشاركتها مع أحد أصدقائك أو خادم سحابي خاص."
+  }, 
+  "REMOVE_CLOUD_SERVER_SUCCESS": {
+    "message": "تم بنجاح إزالة خادمك السحابي."
+  }, 
+  "SHARING_ENABLED_MESSAGE": {
+    "message": "يعني ظهور الرمز أنك متاح لمشاركة إمكانية الوصول مع الأصدقاء الذين عرضت عليهم إمكانية الوصول."
+  }, 
+  "OFFER_ACCESS": {
+    "message": "عرض إمكانية الوصول"
+  }, 
+  "DOES_UPROXY_LOG_DATA_SHORT": {
+    "message": "هل يتم في uProxy جمع بيانات عني؟"
+  }, 
+  "SIGN_IN_TO_NETWORK": {
+    "message": "تسجيل الدخول إلى __network__"
+  }, 
+  "PROMO_ACCEPTED": {
+    "message": "تم قبول الرمز الترويجي."
+  }, 
+  "ENTER_IT_HERE": {
+    "message": "أدخله هنا"
+  }, 
+  "RECONNECT_FAILED": {
+    "message": "أخفقت إعادة الاتصال"
+  }, 
+  "STATS_ENABLED_TOOLTIP": {
+    "message": "أنت بصدد مشاركة إحصاءات بهوية مجهولة."
+  }, 
+  "CUSTOM_ERROR_PLACEHOLDER": {
+    "message": "اختيار موضوع التعليق"
+  }, 
+  "NORTH_AMERICA_NEW_YORK": {
+    "message": "أمريكا الشمالية (نيويورك)"
+  }, 
+  "SEND_INVITATION_FACEBOOK": {
+    "message": "توجيه دعوة على Facebook"
+  }, 
+  "FEEDBACK_ERROR_PLACEHOLDER": {
+    "message": "الرجاء تحديد تعليقاتك"
+  }, 
+  "SHARING_ENABLED_TITLE": {
+    "message": "تم تمكين المشاركة"
+  }, 
+  "WHAT_IS_GITHUB": {
+    "message": "ما المقصود من GitHub وكيف يمكنني استخدامها؟"
+  }, 
+  "UPROXY_FRIENDS": {
+    "message": "الأصدقاء الذين لديهم uProxy"
+  }, 
+  "CANCEL": {
+    "message": "إلغاء"
+  }, 
+  "HOW_DOES_UPROXY_COMPARE_ANSWER": {
+    "message": "<p>تم تصميم uProxy بحيث يمكن الوثوق به والاعتماد عليه في مواجهة الحظر.</p><p>عادة ما يتصل مستخدمو الشبكات الظاهرية الخاصة بخوادم يسهل تحديد هويتها، ومن ثم يمكن بسهولة الوقوف على حركة بيانات الشبكة الظاهرية الخاصة وحظرها. على النقيض، يتصل مستخدمو uProxy ببعضهم وليس بخوادم مشتركة، كما يصعب في uProxy التعرف على حركة البيانات ومن ثم يصعب حظرها.</p><p>علاوة على ذلك، يمكن لخدمات الشبكة الظاهرية الخاصة مراقبة مواقع الويب التي تنتقل إليها، والعديد منها لا يحتفظ بخصوصية هذه البيانات. يمكن لمستخدمي uProxy الوثوق في اتصالاتهم مع الأصدقاء، على العكس من خدمات الشبكة الظاهرية الخاصة التي ربما لا يعرفون سوى القليل عنها.</p><p>وإلى جانب الغموض بشأن تصرفات الشبكات الظاهرية الخاصة في بيانات التصفح التابعة للمستخدمين، قد يصعب معرفة عميل الشبكة الظاهرية الخاصة وبرنامج الخادم وقد يصعب كذلك الوثوق بهما، خاصة عندما يكون مصدرًا مغلقًا. على العكس من ذلك، فإن uProxy يوفر مصدرًا مفتوحًا ويتعرض لفحص عام ودقيق بشكل مستمر. ومتى أمكن يتجنب uProxy مطالبة المستخدمين بالوثوق ثقة عمياء في برامجه التي لا يمكن التحقق من موثوقيتها.</p>"
+  }, 
+  "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
+    "message": "<p>مقابل $10 شهريًا، يمكنك الحصول على خادم uProxy السحابي الخاص بك، حتى تتمكن من استخدامه على مدار اليوم وطوال أيام الأسبوع (ومشاركته مع الأصدقاء كذلك). <uproxy-faq- link anchor='whatAreCloudServers'>تعرَّف على مزيد من المعلومات حول الخوادم السحابية </uproxy-faq-link></p><p>تعمل الخوادم السحابية في الصدارة على DigitalOcean. وإذا لم يكن لديك حساب بعد في DigitalOcean، فيمكنك إنشاء حساب من خلال الزر التالي. سيُطلب منك إضافة طريقة دفع، ولكن إذا اشتركت من خلال uProxy، فستحصل على أول شهر مجانًا. <uproxy-faq-link anchor='whatIsDigitalOcean'>مزيد من المعلومات حول DigitalOcean</uproxy- faq-link></p>", 
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
     }
+  }, 
+  "CLOUD_SERVER_NO_CONNECT": {
+    "message": "أخفق الاتصال بخادمي السحابي."
+  }, 
+  "ASK_FOR_FEEDBACK_TITLE": {
+    "message": "هل لديك رغبة في إرسال تعليقات؟"
+  }, 
+  "WHY_SOCIAL_NETWORK": {
+    "message": "يتم في uProxy استخدام الشبكات الاجتماعية لمساعدتك في إعداد اتصالات مع أصدقائك"
+  }, 
+  "I_HAVE_AN_ACCOUNT": {
+    "message": "لديَّ حساب على DigitalOcean"
+  }, 
+  "LOGGED_OUT": {
+    "message": "تم تسجيل خروجك من __network__"
+  }, 
+  "RESTART_PROXYING": {
+    "message": "إعادة المحاولة"
+  }, 
+  "WHAT_IS_PORT_CONTROL": {
+    "message": "ما المقصود بالتحكم في المنفذ؟"
+  }, 
+  "WHAT_IS_ALPHA": {
+    "message": "ما المقصود بالإصدار ألفا؟"
+  }, 
+  "STOP_GETTING": {
+    "message": "إيقاف الحصول على إمكانية وصول"
+  }, 
+  "SENDING_FEEDBACK": {
+    "message": "جارٍ إرسال التعليقات"
+  }, 
+  "DEVICE_DESCRIPTION": {
+    "message": "وصف الجهاز"
+  }, 
+  "STOPPED_PROXYING": {
+    "message": "تم إيقاف عمل __name__ على خادم وكيل من خلالك"
+  }, 
+  "DOES_UPROXY_LOG_DATA": {
+    "message": "هل يعمل uProxy على تسجيل بيانات عني؟ وما سياسة الخصوصية المتبعة في uProxy؟"
+  }, 
+  "CLOUD_INSTALL_CREATE_SERVER_MESSAGE": {
+    "message": "<p>قبل إنشاء خادمك السحابي، سيتم نقلك إلى موقع DigitalOcean وسيُطلب منك السماح إتاحة إمكانية وصول uProxy إلى حسابك في DigitalOcean إذا لم يسبق لك إجراء ذلك (وقد تحتاج إلى تسجيل دخولك إلى DigitalOcean أولاً).</p><p>وبعد  إنشاء خادم سحابي، سيتم تحصيل $10 منك شهريًا من قِبل DigitalOcean. ويمكنك متى شئت حذف الخادم حتى لا يتم تحصيل رسوم منك.</p>", 
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  }, 
+  "SIGN_IN_TO_INVITE_FRIENDS": {
+    "message": "لتوجيه الدعوة إلى صديق في __network__ للوصول إلى uProxy، يُرجى تسجيل الدخول إلى حساب __network__."
+  }, 
+  "OTHER_FEEDBACK": {
+    "message": "غير ذلك (يُرجى التحديد أدناه)"
+  }, 
+  "SAVE": {
+    "message": "حفظ"
+  }, 
+  "GITHUB_INVITE_SEND_FAILED": {
+    "message": "عفوًا، يمكنك توجيه الدعوة فقط إلى الأصدقاء الذين سجَّلوا دخولهم إلى uProxy باستخدام GitHub من قبل."
+  }, 
+  "REMOVE_CLOUD_SERVER": {
+    "message": "إزالة الخادم السحابي"
+  }, 
+  "WHAT_DO_GET_ACCESS": {
+    "message": "ما معنى \"الحصول على إمكانية الوصول\" و\"مشاركة إمكانية الوصول\"؟"
+  }, 
+  "ENABLE_METRICS": {
+    "message": "هل تريد تمكين جمع مقاييس بهوية مجهولة؟"
+  }, 
+  "CONFIRM_LOGOUT_SHARING": {
+    "message": "هل تريد تسجيل الخروج بالتأكيد؟ لن تتمكن مرة أخرى من مشاركة إمكانية الوصول من صديقك."
+  }, 
+  "INVITE_ERROR": {
+    "message": "حدث خطأ في الدعوة."
+  }, 
+  "DONE": {
+    "message": "اكتمل"
+  }, 
+  "UNLIKELY": {
+    "message": "ربما لا"
+  }, 
+  "OFFLINE": {
+    "message": "غير متصل"
+  }, 
+  "CONTINUE_BROWSING": {
+    "message": "متابعة التصفح بدون uProxy"
+  }, 
+  "CONFIRM_LOGOUT_GETTING_AND_SHARING": {
+    "message": "هل تريد تسجيل الخروج بالتأكيد؟ لن تتمكن مرة أخرى من الحصول على إمكانية الوصول أو مشاركتها مع صديقك."
+  }, 
+  "CLOUD_INSTALL_EXISTING_SERVER_TITLE": {
+    "message": "هل لديك خادم سحابي من قبل؟"
+  }, 
+  "OFFERS": {
+    "message": "العروض"
+  }, 
+  "EXT_MISSING_MESSAGE": {
+    "message": "يمكنك تنزيل الجزء 1 من uProxy وتمكينه للبدء."
+  }, 
+  "HAVE_AN_INVITE_CODE": {
+    "message": "هل لديك رمز دعوة؟"
+  }, 
+  "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK": {
+    "message": "يمكنك البحث عن أصدقائك على إحدى الشبكات الاجتماعية."
+  }, 
+  "FRIEND_ADD_ERROR": {
+    "message": "حدث خطأ أثناء إضافة صديقك."
+  }, 
+  "HOW_DOES_UPROXY_COMPARE": {
+    "message": "ما الفرق بين uProxy والشبكات الظاهرية الخاصة؟"
+  }, 
+  "UPDATE_AVAILABLE": {
+    "message": "يتوفر تحديث"
+  }, 
+  "YES": {
+    "message": "نعم"
+  }, 
+  "CLOUD_INSTALL_CANCEL_TITLE": {
+    "message": "يُرجى الانتظار. نحن بصدد إلغاء إنشاء خادم سحابة."
+  }, 
+  "INVITE_A_FRIEND": {
+    "message": "دعوة صديق"
+  }, 
+  "WHO_KNOWS_THAT": {
+    "message": "من الذي قد يعرف أنني أستخدم uProxy؟"
+  }, 
+  "PORT_CONTROL_NOT_SUPPORTED_INFO": {
+    "message": "قد تستطيع تمكين التحكم في المنفذ ليصبح uProxy أكثر موثوقية."
+  }, 
+  "CONTINUE": {
+    "message": "متابعة"
+  }, 
+  "EXPERIMENTAL": {
+    "message": "تجريبية"
+  }, 
+  "HOW_DO_I_SUBMIT": {
+    "message": "كيف يمكنني إرسال تعليقات؟"
+  }, 
+  "CLOUD_INSTALL_STATUS_CONFIGURING_SSH": {
+    "message": "جارٍ تهيئة SSH..."
+  }, 
+  "CLOUD_INVITE_FAILED": {
+    "message": "عفوًا، أخفق الاتصال. يُرجى التحقق من رمز الدعوة."
+  }, 
+  "CHANGE_STATS_CHOICE": {
+    "message": "يمكنك مساعدتنا في تحسين أداء uProxy من خلال مشاركة مقاييس بهوية مجهولة؛ ذلك أنه يتم إخفاء الهوية من خلال العميل وإرسالها بشكل آمن."
+  }, 
+  "CLOUD_CONNECTIONS_DISCONNECTED": {
+    "message": "تم إلغاء اتصالي بالسحاب."
+  }, 
+  "EDIT_ADVANCED_SETTINGS_PLACEHOLDER": {
+    "message": "تعديل إعداداتك"
+  }, 
+  "RESTARTING_SERVER": {
+    "message": "جارٍ إعادة تشغيل الخادم..."
+  }, 
+  "WHAT_DO_GET_ACCESS_ANSWER": {
+    "message": "<p>عند <strong>الحصول على إمكانية الوصول</strong> من أحد الأصدقاء، يتم نقل جميع بيانات الويب من متصفحك أولاً في حالة مشفَّرة إلى كمبيوتر الصديق، ومن كمبيوتر الصديق إلى الإنترنت. وهذا يعني أنه بالنسبة إلى معظم مواقع الويب، سيبدو أن الطلب وارد من كمبيوتر الصديق، ولن يظهر للشخص الذي يراقب اتصالك سوى وجود اتصال آمن بصديقك.</p><p>وعند <strong>مشاركة إمكانية الوصول</strong>، سيكون بإمكان الأصدقاء المعتمدين إرسال بيانات الويب إلى الكمبيوتر التابع لك ومن الكمبيوتر التابع لك إلى الإنترنت. ولن يتمكن صديقك من الاتصال عبر جهاز الكمبيوتر إلا إذا فوَّضته على هذا الكمبيوتر، ويمكنك إبطال تفويضه متى شئت.</p>"
+  }, 
+  "SHARE_WITH_A_FRIEND": {
+    "message": "المشاركة مع صديق"
+  }, 
+  "SHARING_ENABLED_TOOLTIP": {
+    "message": "أنت متاح للمشاركة."
+  }, 
+  "ACCEPT_INVITE_CONFIRMATION": {
+    "message": "هل لديك رغبة في إضافة __name__ إلى جهات اتصال uProxy؟"
+  }, 
+  "SET": {
+    "message": "تعيين"
+  }, 
+  "STATS_ENABLED_TITLE": {
+    "message": "تم تمكين الإحصاءات بهوية مجهولة"
+  }, 
+  "DISCONNECTED_TITLE": {
+    "message": "عفوًا، تم قطع اتصالك بصديقك."
+  }, 
+  "GITHUB_INVITE_INSTRUCTIONS": {
+    "message": "أدخل اسم مستخدم GitHub التابع لصديقك. وسيظهر في قائمة جهات اتصالك عندما يقبل طلبك."
+  }, 
+  "WHAT_ARE_CLOUD_SERVERS": {
+    "message": "ما المقصود بخوادم uProxy السحابية؟"
+  }, 
+  "START_GETTING": {
+    "message": "بدء الحصول على إمكانية وصول"
+  }, 
+  "HOW_DO_I_INSTALL_UPROXY_ON_SERVER": {
+    "message": "كيف يمكنني تثبيت uProxy على خادمي الحالي؟"
+  }, 
+  "ASIA_BANGALORE": {
+    "message": "آسيا (بنغالور)"
+  }, 
+  "HOW_DOES_UPROXY_HELP": {
+    "message": "كيف يمكن الاستفادة من uProxy في حماية اتصالي بالإنترنت؟"
+  }, 
+  "DOES_UPROXY_PROTECT": {
+    "message": "هل تتوفر لي حماية في uProxy من الفيروسات والتصيُّد والاختراق؟"
+  }, 
+  "INVITE_LINK_FROM_ACCEPT_PAGE": {
+    "message": "أريد إرسال دعوة بدلاً من ذلك."
+  }, 
+  "WHAT_IS_UPROXY_ANSWER": {
+    "message": "<p>uProxy هو عبارة عن إضافة على متصفح مفتوح المصدر يمكن استخدامها على Chrome وFirefox وتتيح للمستخدمين إمكانية توجيه اتصال الإنترنت التابع لهم من خلال بعضهم أو من خلال خوادم سحابية خاصة. يساعد uProxy في الحيلولة دون أن تتمكن جهة خارجية (كجهة حكومية أو موفر خدمة الإنترنت) من مراقبة حركة بيانات المستخدم الذي يحصل على إمكانية الوصول أو التدخل في حركة البيانات هذه. وبذلك فإنه يشبه خدمة الشبكة الظاهرية الخاصة التي يتم تخصيصها ويمكن استخدامها لتوفير إمكانية وصول آمن للأصدقاء وأفراد العائلة، وكذلك لنفسك عند السفر.</p>"
+  }, 
+  "CLOUD_INSTALL_CREATE_ACCOUNT_TITLE": {
+    "message": "للبدء، لن يلزمك سوى عنوان بريدك الإلكتروني وبطاقة ائتمان أو حساب في PayPal."
+  }, 
+  "PORT_CONTROL_TITLE": {
+    "message": "حالة التحكم في المنفذ"
+  }, 
+  "EMAIL_INSTEAD_TITLE": {
+    "message": "هل تريد إرسال التعليقات عبر البريد الإلكتروني بدلاً من ذلك؟"
+  }, 
+  "UPROXY_NETWORK_SIGN_IN": {
+    "message": "تسجيل الدخول"
+  }, 
+  "RESPOND_TO_FRIEND_REQUEST": {
+    "message": "الرد على طلب صديق"
+  }, 
+  "DESCRIPTION_DEFAULT": {
+    "message": "الكمبيوتر رقم __number__"
+  }, 
+  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
+    "message": "مزيد من المعلومات"
+  }, 
+  "UPROXY_NETWORK_INVITE_LOGIN_MESSAGE": {
+    "message": "لإضافة __name__ كصديق، يُرجى تسجيل الدخول إلى شبكة uProxy"
+  }, 
+  "ONLINE": {
+    "message": "متصل"
+  }, 
+  "INVITE_EMAIL_SENT": {
+    "message": "تم إرسال رسالة الدعوة عبر البريد الإلكتروني."
+  }, 
+  "MORE_ABOUT_METRICS": {
+    "message": "مزيد من المعلومات حول المقاييس بهوية مجهولة"
+  }, 
+  "CONNECTED_ACCOUNTS": {
+    "message": "الحسابات المتصلة"
+  }, 
+  "REPORT_ERROR": {
+    "message": "يمكنك الإبلاغ عن هذا الخطأ"
+  }, 
+  "SHARING_ACCESS_WITH_FRIEND": {
+    "message": "جارٍ مشاركة إمكانية الوصول مع صديق الآن"
+  }, 
+  "ATTEMPTING_RECONNECT": {
+    "message": "جارٍ محاولة إعادة الاتصال."
+  }, 
+  "ASK_TO_SUBMIT_ANALYSIS": {
+    "message": "هل تريد إرسال نوع NAT إلى فريق uProxy لمساعدتنا في استيعاب الشبكات التي يستخدمها المستخدمون على نحو أفضل؟"
+  }, 
+  "GETTING_ACCESS_FROM_FRIEND": {
+    "message": "جارٍ الحصول على إمكانية الوصول من أحد الأصدقاء"
+  }, 
+  "DIGITAL_OCEAN_ERROR_MESSAGE": {
+    "message": "يُرجى التحقق من إعداداتك في DigitalOcean قبل إعادة التجربة. إذا لم تكن ترغب في إعادة المحاولة، فتأكد من عدم وجود أي droplets لديك باسم \"uproxy- cloud-server\". وسيضمن هذا لك عدم تحمل أي رسوم شهرية."
+  }, 
+  "DOES_UPROXY_GIVE_ME_ANSWER": {
+    "message": "<p>لا يُعد uProxy أداة لإخفاء الهوية؛ ذلك أنه يُستخدم في إخفاء نشاط تصفحك عن موفر خدمة الإنترنت، ولكنه لا يُستخدم لإخفاء هويتك عن المواقع التي تزورها. وبذلك عندما يزور شخص ما موقعًا على الويب بعد حصوله على إمكانية الوصول عبر uProxy سيظهر لهذا الموقع عنوان IP للشخص الذي يشارك إمكانية الوصول، وقد يتمكن موقع الويب من اكتشاف عنوان IP لمستخدم uProxy الذي يريد الحصول على إمكانية الوصول. وإذا كنت تريد إخفاء هويتك عن مواقع الويب التي تزورها، فنحن نوصيك باستخدام <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor Browser</a>.</p>"
+  }, 
+  "REQUESTS": {
+    "message": "الطلبات"
+  }, 
+  "WHEN_I_AM_SHARING_ACCESS_ANSWER": {
+    "message": "<p>لن يتمكن المستخدمون الذين تمنحهم إمكانية الوصول إلا من استخدام اتصال الإنترنت التابع لك. ذلك أنه لن يكون بإمكانهم إلقاء نظرة على الملفات في جهاز الكمبيوتر التابع لك، أو الاطلاع على نشاطك على الإنترنت، أو تسجيل الدخول إلى موقعك باستخدام هويتك. كما يتعذر عليهم الوصول إلى الأجهزة على شبكتك المنزلية أو شبكة العمل المحلية مثل الطابعة المشتركة أو خادم الملفات.</p>"
+  }, 
+  "ASK_FOR_ACCESS": {
+    "message": "طلب الحصول على إمكانية الوصول"
+  }, 
+  "WHAT_IS_UPROXY_NETWORK_ANSWER": {
+    "message": "<p>تم تصميم شبكة uProxy بحيث تكون واحدة من أبسط طرق التواصل مع الأصدقاء بشكل موثوق فيه، مع الحفاظ على صعوبة الحظر. لاستخدام شبكة uProxy، لن تحتاج إلا إلى إدخال اسم (لا يجب أن يكون فريدًا) وسيتم بعد ذلك تسجيل دخولك لتكون على استعداد لمشاركة الدعوات مع الأصدقاء. تقتصر الهوية في الوقت الحالي على جهاز واحد، وبذلك عندما تريد إعداد uProxy على كمبيوتر جديد، سيلزمك إعادة توجيه الدعوة للأصدقاء، حتى تتمكن من التواصل معهم من هذا الجهاز.</p><p>يعمل فريق uProxy على تشغيل شبكة uProxy، إلا أنه قد تتمكن الجهات الخارجية في المستقبل من توسيع الشبكة من خلال تشغيل خادم إضافي. يتم تشفير جميع المعلومات التي تنتقل عبر شبكة uProxy بين طرفين، أو بين نظيرين، ومن ثم لن يتمكن أحد من التدخل فيها. إلا أنه سيظل بإمكان مشغِّلي الشبكة معرفة عناوين IP المتصلة ببعضها.</p>"
+  }, 
+  "CONNECTED_WITH": {
+    "message": "تم الاتصال بـ __network__"
+  }, 
+  "EMAIL_PLACEHOLDER": {
+    "message": "عنوان البريد الإلكتروني (اختياري)"
+  }, 
+  "GET_HELP": {
+    "message": "الحصول على مساعدة"
+  }, 
+  "SUBMIT_BUTTON_TEXT": {
+    "message": "إرسال"
+  }, 
+  "NEXT": {
+    "message": "التالي"
+  }, 
+  "REMOVE_CLOUD_SERVER_CONFIRMATION": {
+    "message": "هل تريد بالتأكيد حذف هذا الخادم السحابي؟"
+  }, 
+  "UNABLE_TO_GET": {
+    "message": "يتعذر الحصول على إمكانية وصول"
+  }, 
+  "SEND_INVITATION": {
+    "message": "إرسال دعوة"
+  }, 
+  "CLOUD_INSTALL_INVITE_SCREEN_MESSAGE": {
+    "message": "يمكنك الحصول على إمكانية الوصول ومشاركتها مع أصدقائك وأفراد عائلتك من خادمك الشخصي."
+  }, 
+  "PROCESSING": {
+    "message": "جارٍ المعالجة…"
+  }, 
+  "WE_WONT_POST": {
+    "message": "لن تتم مشاركة بياناتك أو مشاركتك على نطاق عام بدون موافقتك"
+  }, 
+  "SHARING_UNAVAILABLE_TITLE": {
+    "message": "المشاركة غير متاحة"
+  }, 
+  "WE_WONT_POST_LEARN_MORE": {
+    "message": "لن نشارك بياناتك أو مشاركتك على نطاق عام بدون موافقتك. <uproxy-faq-link anchor='whyDoesUproxyConnect'>مزيد من المعلومات</uproxy- faq-link>"
+  }, 
+  "WELCOME": {
+    "message": "مرحبًا بك في uProxy"
+  }, 
+  "DESTROY_CLOUD_SERVER_FAILURE": {
+    "message": "عذرًا، فلم نتمكن من تدمير خادمك السحابي الآن. قد تحتاج إلى تسجيل دخولك إلى مقدِّم خدمة السحاب لتدميره بنفسك."
+  }, 
+  "EUROPE_AMSTERDAM": {
+    "message": "أوروبا (أمستردام)"
+  }, 
+  "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
+    "message": "إنشاء خادم سحابي من خلال DigitalOcean"
+  }, 
+  "WHY_DOES_UPROXY_CONNECT_ANSWER": {
+    "message": "<p>يحتاج uProxy إلى وسيلة ليعرف بها متى يتصل أصدقاؤك بالإنترنت، كما يحتاج إلى تبادل المعلومات (عنوان IP والمنفذ ومفاتيح التشفير) بين النظراء لإعداد اتصالات مباشرة. وبدلاً من تشغيل خدمة مركزية يمكن حظرها بسهولة، يتصل uProxy بالشبكات الاجتماعية التي تستخدمها أنت وأصدقاؤك بالفعل. ولا يتم استخدامها إلا لمساعدتك في إنشاء اتصال مباشر بين المستخدمين؛ ولا يتم إرسال بيانات الإنترنت المنتقلة عبر الخادم الوكيل إلى الشبكة الاجتماعية. <strong>لن يتم النشر في uProxy على نطاق عام نيابة عنك أبدًا.</strong> بل يتم فقط تبادل الرسائل الخاصة مع الأصدقاء الذين تختارهم ويستخدمون أيضًا uProxy. يمكنك الاطلاع على مزيد من المعلومات حول الوثوق في الشبكات الاجتماعية <a href=\"https://github.com/uProxy/uproxy/wiki/Trust\">هنا</a>.</p>"
+  }, 
+  "GENERATE_LINK": {
+    "message": "إنشاء رابط"
+  }, 
+  "RESTART": {
+    "message": "إعادة التشغيل"
+  }, 
+  "NO_THANKS": {
+    "message": "لا، شكرًا"
+  }, 
+  "SETTINGS_BAD_FORMAT_ERROR": {
+    "message": "تعذر التعيين: تنسيق غير صالح"
+  }, 
+  "IM_IN": {
+    "message": "أوافق"
+  }, 
+  "HOW_DOES_UPROXY_HELP_ANSWER": {
+    "message": "<p>عند استخدامك لشبكة الإنترنت بشكل طبيعي، يصبح بإمكان موفر خدمة الإنترنت الاطلاع على المواقع التي تزورها، ويمكنه محاولة التدخل في اتصالك من خلال حظر الوصول إلى بعض المواقع، وربما تلاعب بالمحتوى. على شبكات Wi-Fi التي لا تتطلب كلمة مرور، ربما يتمكن مستخدم آخر على الشبكة من الاطلاع على مواقع الويب التي تزورها، وبالنسبة إلى المواقع التي تعمل ببروتوكول HTTP (وليس HTTPS)، يمكن الاطلاع على محتوى حركة الزيارات كذلك.</p><p>ولكن عند الحصول على إمكانية الوصول من خلال uProxy، يصبح اتصالك بصديقك مشفَّرًا. تمر حركة بيانات متصفحك عبر هذا الاتصال، ثم يصل إلى الإنترنت من كمبيوتر صديقك. وعند الحصول على إمكانية الوصول من خلال uProxy، من المفترض ألا يتمكن موفر خدمة الإنترنت من معرفة المواقع التي تزورها، كما يتعمد uProxy عرقلة وقوف موفر خدمة الإنترنت على حركة بيانات uProxy وحظرها.</p>"
+  }, 
+  "REMOVE_CLOUD_SERVER_FAILURE": {
+    "message": "عذرًا، لا يمكننا إزالة الخادم السحابي في الوقت الحالي."
+  }, 
+  "ADD_A_CLOUD_FRIEND": {
+    "message": "إضافة صديق في السحاب"
+  }, 
+  "PRIVACY_POLICY": {
+    "message": "سياسة الخصوصية"
+  }, 
+  "WHY_DOES_UPROXY_CONNECT": {
+    "message": "لماذا يتم الربط بين uProxy والشبكات الاجتماعية؟"
+  }, 
+  "CLOUD_INSTALL_STATUS_CREATING_SERVER": {
+    "message": "جارٍ إنشاء الخادم..."
+  }, 
+  "TRYING_TO_CONNECT": {
+    "message": "جارٍ محاولة الاتصال بـ __name__"
+  }, 
+  "FRIEND_REQUEST": {
+    "message": "يريد صديقك friend __name__ استخدام uProxy معك."
+  }, 
+  "RESTART_UPROXY_UPDATE": {
+    "message": "إعادة التشغيل للتحديث"
+  }, 
+  "WHAT_ISNT_PROXIED_ANSWER": {
+    "message": "<p>لا يتم نقل الملفات في uProxy إلا لمتصفح الويب الذي يعمل على uProxy، وليس لأي تطبيقات أخرى. وهناك بعض المواقف النادرة التي قد يقدِّم المتصفح فيها طلبات بدون الخادم الوكيل، كما أن هناك بعض تقنيات الويب، أهمها Flash وWebRTC، يمكنها تقديم طلبات لا تتم عبر الخادم الوكيل. تسري التحذيرات نفسها غالبًا على الشبكات الظاهرية الخاصة. ويُوصى المستخدمون الذين لديهم متطلبات خصوصية قوية بتجربة استخدام <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor Browser</a>، الذي تم تصميمه خصيصًا للحد من المعلومات التي يمكن أن يحصل عليها مراقب حركة البيانات حول أنشطتك.</p>"
+  }, 
+  "TROUBLE_STARTING_CONNECTION": {
+    "message": "لا يمكنني بدء اتصال."
+  }, 
+  "DESTROY_CLOUD_SERVER_CONFIRMATION": {
+    "message": "سيؤدي هذا إلى تدمير خادم uProxy السحابي التابع لك. وتجدر الإشارة إلى أنه لن يكون بإمكان أصدقائك وأفراد عائلتك استخدام هذا الخادم السحابي مرة أخرى بعد تدميره."
+  }, 
+  "BETA_MESSAGE": {
+    "message": "هذا إصدار تجريبي من uProxy، وقد لا يتم الاعتماد عليه في بعض الأحيان."
+  }, 
+  "STOP_IGNORING_OFFERS": {
+    "message": "إيقاف تجاهل العروض"
+  }, 
+  "CLOUD_INSTALL_CANCEL_MESSAGE": {
+    "message": "يمكن أن يستغرق إلغاء إنشاء الخادم السحابي مدة تصل إلى دقيقتين. نأسف على اضطرارك للانتظار."
+  }, 
+  "CONNECT_WITH_A_FRIEND": {
+    "message": "الاتصال بأحد الأصدقاء"
+  }, 
+  "UPROXY_NETWORK_LOGIN_TITLE": {
+    "message": "تسجيل الدخول إلى شبكة uProxy"
+  }, 
+  "RESTART_SERVER": {
+    "message": "إعادة التشغيل الآن"
+  }, 
+  "APPLY": {
+    "message": "تطبيق"
+  }, 
+  "NETWORK_LIST_CLOUD_LABEL": {
+    "message": "إنشاء خادم سحابي"
+  }, 
+  "LEARN_MORE_SOCIAL": {
+    "message": "تعرَّف على مزيد من المعلومات حول الشبكات الاجتماعية"
+  }, 
+  "HAVE_PROMO_CODE": {
+    "message": "لديّ رمز ترويجي"
+  }, 
+  "WHY_IS_UPROXY_ASKING": {
+    "message": "لماذا يطلب uProxy الحصول على أذونات Chrome؟"
+  }, 
+  "DOES_UPROXY_GIVE_ME": {
+    "message": "هل تتوفر في uProxy إمكانية التصفح بهوية مجهولة؟"
+  }, 
+  "WHICH_SOCIAL_NETWORK": {
+    "message": "أين يمكن الحصول على جهات الاتصال بأسرع طريقة؟"
+  }, 
+  "APP_MISSING_TITLE": {
+    "message": "أنت على استعداد تقريبًا لاستخدام uProxy."
+  }, 
+  "IGNORE": {
+    "message": "تجاهل"
+  }, 
+  "CLOUD_INSTALL_STATUS_LOGGING_IN": {
+    "message": "جارٍ تسجيل الدخول إلى خادم جديد..."
+  }, 
+  "WHERE_TO_GET_ANSWER": {
+    "message": "<p>أسهل طريقة للحصول على uProxy هي الانتقال إلى صفحة <a href=\"install\">التثبيت</a>. كما يمكنك الحصول على uProxy من خلال <a href=\"https://chrome.google.com/webstore/detail/uproxy- part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj\">سوق Chrome الإلكتروني</a> و<a href=\"https://addons.mozilla.org/en-US/firefox/addon/uproxy- firefox/\">موقع إضافات Firefox</a>. وهذه فقط الأماكن التي من المفترض أن تحصل على uProxy منها. تجنَّب تنزيل uProxy من أي مكان آخر، نظرًا لأنك قد تحصل على إصدار زائف يمكن أن تتعرض لخطر بسببه.</p>"
+  }, 
+  "NO_FRIENDS": {
+    "message": "ليس لديَّ أي أصدقاء للوصول إلى خادم وكيل لديهم."
+  }, 
+  "HOW_DO_I_INSTALL_UPROXY_ON_SERVER_ANSWER": {
+    "message": "<p>يتم تشغيل خادم uProxy في حاوية Docker. ويمكن للمستخدمين المتقدمين اتباع التعليمات الواردة في <a href=\"https://blog.uproxy.org/2016/02 /get-access-24x7-through-your-own-uproxy.html\">هذه المشاركة</a> لتثبيت uProxy على خوادمهم الخاصة.</p>"
+  }, 
+  "DOES_UPROXY_PROTECT_ANSWER": {
+    "message": "<p>يمكن الاستفادة من uProxy في حمايتك من أي خصم يسعى إلى إعادة توجيهك إلى موقع مريب أو يريد التلاعب بحركة بياناتك على أي نحو آخر. إلا أن الأولوية في uProxy لتمكين المستخدمين من مشاركة إمكانية الوصول لفتح الإنترنت.</p>"
+  }, 
+  "SHARE_ACCESS": {
+    "message": "مشاركة إمكانية الوصول"
+  }, 
+  "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY": {
+    "message": "جارٍ تنزيل وتثبيت صورة uProxy..."
+  }, 
+  "CANCEL_REQUEST": {
+    "message": "إلغاء الطلب"
+  }, 
+  "CLOUD_SERVER_NO_START": {
+    "message": "لا يمكنني تشغيل خادم سحابي."
+  }, 
+  "VERY_LIKELY": {
+    "message": "غالبًا"
+  }, 
+  "RESTART_SERVER_TITLE": {
+    "message": "عفوًا، لدينا مشكلة في الحصول على إمكانية الوصول."
+  }, 
+  "WHO_MADE_UPROXY_ANSWER": {
+    "message": "<p>تتولى جامعة واشنطن تطوير uProxy. كانت نواة المشروع في Google Ideas، إلا أنها تلقت إسهامات من Google وBrave New Software ومنتدى المصدر المفتوح.</p>"
+  }, 
+  "FRIEND_REQUESTED_ACCESS": {
+    "message": "طلب الحصول على إمكانية الوصول عن طريقك."
+  }, 
+  "WHAT_IS_UPROXY_NETWORK": {
+    "message": "ما المقصود بشبكة Network؟"
+  }, 
+  "CLOUD_INSTALL_GET_STARTED_TITLE": {
+    "message": "يمكنك إنشاء خادم سحابي خاص بك على DigitalOcean من خلال uProxy."
+  }, 
+  "WHY_IS_IT_IMPORTANT_ANSWER": {
+    "message": "<p>يتم تصميم uProxy لمساعدة الأصدقاء الذين يثقون في بعضهم لمشاركة اتصال بالإنترنت. ولذلك فإن الاتصال بأشخاص لا تثق فيهم قد يتسبب في مخاطر ومن ثم يجب تجنبه.</p><p>إذا حصلت على إمكانية الوصول من شخص ما قد يتسبب في ضرر لك، فربما يتمكن من التجسس على تصفحك للويب وقد يتلاعب في حركة بياناتك. وبالإضافة إلى الوثوق في الشخص الذي تحصل على إمكانية الوصول منه، يجب أن تثق أيضًا في توفر اتصال آمن بالإنترنت لديه. ولذلك إذا كان يريد الاتصال من نقطة اتصال Wi-Fi عامة وغير معروفة وقد تكون غير آمنة، من الأفضل الانتظار حتى يتم الاتصال من شبكة آمنة في المنزل.</p><p>عند مشاركة إمكانية الوصول مع شخص ما لا تعرفه ولا تثق فيه، قد يتمكن من استخدام اتصالك للقيام بنشاط غير مشروع، وبموجب القوانين المحلية، قد تتحمل مسؤولية قانونية لتسهيل القيام بهذا النشاط.<p>ولذلك من الضروري أن تثق في أي شخص تشارك اتصال الإنترنت معه، سواء أكان ضيفًا على شبكة Wi-Fi في منزلك أو صديقًا على uProxy في قارة أخرى من قارات العالم.</p>"
+  }, 
+  "LEARN_MORE": {
+    "message": "مزيد من المعلومات"
+  }, 
+  "CLOUD_INSTALL_INSTALLING_TITLE": {
+    "message": "يُرجى الانتظار حتى يكتمل إنشاء خادم سحابي جديد."
+  }, 
+  "CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE": {
+    "message": "اكتشفنا أن لديك خادمًا بالفعل يحمل الاسم \"uproxy-cloud- server\". يمكننا إزالته وإنشاء خادم جديد لك، كما يمكنك الرجوع إلى قائمة الأصدقاء."
+  }, 
+  "ACCEPT_INVITE": {
+    "message": "قبول الدعوة"
+  }, 
+  "INVITE_EMAIL_BODY": {
+    "message": "لديك دعوة من __name__ للتواصل عبر uProxy. للقيام بذلك، انقر على رابط الدعوة أدناه أو الصقه في uProxy.<br><br>__url__<br><br>إذا لم تكن تثبِّت uProxy، فيمكنك الحصول عليه من <a href='uproxy.org'>uproxy.org</a> أو من سوق Chrome الإلكتروني مباشرة (<a href='https://chrome.google.com/webstore/detail/uproxy- part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>الجزء 1</a> و<a href='https://chrome.google.com/webstore/detail/uproxy- part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>الجزء 2</a>) وFirefox Marketplace (<a href='https://addons.mozilla.org/en-US/firefox/addon /uproxy-firefox/'>هنا</a>)."
+  }, 
+  "PORT_CONTROL_PENDING": {
+    "message": "جارٍ فحص جهاز التوجيه لدعم التحكم في المنفذ..."
+  }, 
+  "APP_MISSING_MESSAGE": {
+    "message": "يمكنك تنزيل الجزء 2 من uProxy وتمكينه للبدء."
+  }, 
+  "ADVANCED_SETTINGS_SENTENCE_CASE": {
+    "message": "الإعدادات المتقدمة"
+  }, 
+  "CLOUD_INSTALL_LOGIN_TITLE": {
+    "message": "يمكنك اختيار المكان المطلوب لخادمك السحابي."
+  }, 
+  "SHARING_UNAVAILABLE_MESSAGE": {
+    "message": "عفوًا أنت تستخدم الإصدار Firefox 37، وهو إصدار يحتوي على خطأ يحول دون المشاركة (راجع git.io/vf5x1). تم إصلاح هذا الخطأ في الإصدار Firefox 38، لذلك يُرجى تمكين المشاركة من خلال ترقية Firefox أو استخدام Chrome بدلاً منه."
+  }, 
+  "RETRIEVING_LOGS": {
+    "message": "جارٍ استرداد السجلات وتحليل شبكتك..."
+  }, 
+  "MORE_INFO": {
+    "message": "مزيد من المعلومات"
+  }, 
+  "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY": {
+    "message": "في انتظار بدء تشغيل uProxy..."
+  }, 
+  "GRANT": {
+    "message": "منح إمكانية الوصول"
+  }, 
+  "NAME_THIS_DEVICE": {
+    "message": "اختيار اسم لهذا الجهاز"
+  }, 
+  "FEEDBACK_PLACEHOLDER": {
+    "message": "تعليقاتك"
+  }, 
+  "DISCONNECTED_MESSAGE": {
+    "message": "عند تعطيل الخادم الوكيل، لن تكون هناك إمكانية لتوجيه زيارات الويب التابعة لك عبر صديقك. وقد تحتاج إلى إغلاق أي صفحات تحمل معلومات حساسة سبق لك فتحها، قبل المتابعة."
+  }, 
+  "START_BROWSING": {
+    "message": "بدء التصفح"
+  }, 
+  "CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE": {
+    "message": "عفوًا، لديك خادم uProxy سحابي من قبل."
+  }, 
+  "CLOUD_INSTALL_SUCCESS_MESSAGE": {
+    "message": "يمكنك مشاركة إمكانية الوصول مع أصدقائك وأفراد عائلتك من خادمك الشخصي."
+  }, 
+  "PROMO_FAILED": {
+    "message": "تعذر تطبيق الرمز الترويجي."
+  }, 
+  "OK": {
+    "message": "موافق"
+  }, 
+  "EMAIL_INSTEAD_MESSAGE": {
+    "message": "عفوًا، لم نتمكن من إرسال تعليقاتك إلى uproxy.org. الرجاء نسخ تعليقاتك ولصقها في رسالة إلكترونية إلى info@uproxy.org."
+  }, 
+  "ANALYSIS_RESULTS": {
+    "message": "يبدو أنك على __natType__، حيث هناك __natImpact__ في تعارض مع إمكانية اتصالك بالأصدقاء."
+  }, 
+  "HOW_DO_I_FIND_ANSWER": {
+    "message": "<p>يمكنك استخدام زر \"الاتصال بصديق\" أسفل يسار قائمة جهات الاتصال لتوجيه دعوة إلى الأصدقاء للاستفادة من الخادم الوكيل معك باستخدام إحدى الشبكات الاجتماعية المعتمدة لدينا.</p><p>وحتى تعرف أن الصديق لديه اتصال بالإنترنت، يتعين عليكما تسجيل الدخول إلى uProxy باستخدام الشبكة الاجتماعية نفسها في آن واحد. يمكنك تسجيل دخولك إلى عدة شبكات اجتماعية في آن واحد من خلال الانتقال إلى القائمة (رمز ≡ أعلى اليمين) وتوسيع العنوان (▾).</p>"
+  }, 
+  "FRIEND_REQUEST_SENT": {
+    "message": "تم إرسال طلب الصداقة"
+  }, 
+  "CLOUD_INSTALL_CANCEL_SUCCESS": {
+    "message": "تم بنجاح إلغاء إنشاء الخادم السحابي."
+  }, 
+  "TRY_AGAIN": {
+    "message": "إعادة المحاولة"
+  }, 
+  "RESTART_FAILURE_TEXT": {
+    "message": "قد يلزمك حذف خادمك السحابي وإنشاء خادم جديد."
+  }, 
+  "RESTART_SUCCESS": {
+    "message": "تم بنجاح إعادة تشغيل الخادم."
+  }, 
+  "LAUNCH_DIGITAL_OCEAN_SETTINGS": {
+    "message": "فتح إعدادات DigitalOcean"
+  }, 
+  "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER": {
+    "message": "جارٍ تثبيت Docker..."
+  }, 
+  "FRIEND_OFFLINE": {
+    "message": "__name__ في وضع عدم اتصال"
+  }, 
+  "DISCONNECTED_FROM_FRIEND": {
+    "message": "تم قطع اتصالي مع صديقي."
+  }, 
+  "LANGUAGE": {
+    "message": "اللغة"
+  }, 
+  "SUBMIT_FEEDBACK_SENTENCE_CASE": {
+    "message": "إرسال التعليقات"
+  }, 
+  "CONNECT": {
+    "message": "اتصال"
+  }, 
+  "FRIENDS_WHO_CAN_GET": {
+    "message": "الأصدقاء الذين يمكنهم الحصول على إمكانية الوصول منك"
+  }, 
+  "START_VPN": {
+    "message": "تشغيل شبكة ظاهرية خاصة"
+  }, 
+  "ACCEPT_OFFER": {
+    "message": "قبول العرض"
+  }, 
+  "REMOVING_UPROXY_CLOUD_STATUS": {
+    "message": "جارٍ إزالة خادم uProxy السحابي..."
+  }, 
+  "NO_CUSTOM_ERROR_PLACEHOLDER": {
+    "message": "الرجاء اختيار تعليق أشبه ما يكون برأيك"
+  }, 
+  "QUIVER_LOGIN_TEXT": {
+    "message": "توفر شبكة uProxy وسيلة سهلة للبحث عن الأصدقاء والتواصل معهم بشكل موثوق فيه. <uproxy-faq-link anchor='whatIsUproxyNetwork'>مزيد من المعلومات.</uproxy-faq-link>"
+  }, 
+  "HOW_DO_I_SUBMIT_ANSWER": {
+    "message": "<p>لإرسال تعليقات من داخل uProxy، يمكنك الانتقال إلى القائمة (رمز ≡) واختيار \"إرسال تعليقات\". كما يمكنك مراسلتنا عبر البريد الإلكتروني على العنوان <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>.</p>"
+  }, 
+  "PROCEED_TO_UPROXY_TITLE": {
+    "message": "اكتمل إعداد حسابك في DigitalOcean"
+  }, 
+  "PORT_CONTROL_NOT_SUPPORTED": {
+    "message": "لم يتم تمكين التحكم في المنفذ على جهاز التوجيه."
+  }, 
+  "CLOUD_SHARE_INSTRUCTIONS": {
+    "message": "يمكنك مشاركة إمكانية الوصول إلى خادمك السحابي من خلال إرسال هذا الرابط إلى أحد الأصدقاء."
+  }, 
+  "ACCESS_NOT_GRANTED": {
+    "message": "لم يتم منح الصديق إمكانية الوصول."
+  }, 
+  "GRANTED_ACCESS_NOTIFICATION": {
+    "message": "تم بواسطة __name__ منحك إمكانية الوصول"
+  }, 
+  "FEEDBACK_SUBMITTED": {
+    "message": "تم إرسال تعليقاتك إلى فريق تطوير uProxy."
+  }, 
+  "WHAT_IS_GITHUB_ANSWER": {
+    "message": "<p>موقع GitHub هو موقع على الويب يساعد مطوِّري البرامج في مشاركة الرموز، إلا أن بإمكان uProxy الاستفادة من GitHub في مشاركة المعلومات اللازمة لإعداد الاتصالات المباشرة بين الأصدقاء، على النحو الذي يتم في الشبكات الاجتماعية تمامًا. يمكن لبعض المستخدمين الوصول إلى GitHub بسهولة أكبر من عدد كبير من الشبكات الاجتماعية، كما يمكن <a href=\"https://github.com/join\">الاشتراك</a> فيه مجانًا.</p><p>تجدر الإشارة إلى أنه يمكن تحديد ما إذا كان حساب GitHub يستخدم uProxy أم لا. إذا كان لديك حساب GitHub لا تريد إقرانه مع uProxy، فيمكنك إنشاء حساب GitHub باسم مستعار واستخدام هذا الحساب مع uProxy بدلاً من ذلك.</p>"
+  }, 
+  "WHAT_IS_DIGITAL_OCEAN_ANSWER": {
+    "message": "<p>يُعد DigitalOcean مقدم خدمة استضافة سحابية. وبعد إنشاء حساب وإعداد طريقة دفع، سيصبح بإمكان uProxy إنشاء خادم في حسابك. يتم في uProxy افتراضيًا إعداد خادم بتكلفة $10 شهريًا. (ويوفِّر DigitalOcean خوادم بسعر يبدأ من $5 شهريًا، كما أننا نسعى لتوفير دعم لذلك في المستقبل، ولكن كي تحصل على مستوى أداء جيد، يجب أن نبدأ بهذا المستوى في الوقت الحالي.) بالإضافة إلى بطاقات الائتمان، يقبل DigitalOcean الدفع من خلال PayPal، الذي يتم دمجه في عدد أنظمة الدفع، بما في ذلك UnionPay. يمكنك إيقاف الخادم مؤقتًا أو إنهاء حسابك في DigitalOcean متى شئت.</p>", 
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }, 
+      "2": {
+        "content": "$2"
+      }
+    }
+  }, 
+  "GITHUB_INVITE_PLACEHOLDER": {
+    "message": "اسم مستخدم الصديق على GitHub"
+  }, 
+  "NETWORK_AND_LOGS": {
+    "message": "تحليل الشبكة وتضمين السجلات"
+  }, 
+  "CLOUD_INVITE_PLACEHOLDER": {
+    "message": "رمز الدعوة"
+  }, 
+  "NO": {
+    "message": "لا"
+  }, 
+  "LOADING_FRIENDS": {
+    "message": "جارٍ تحميل أصدقاء uProxy"
+  }, 
+  "CANCEL_OFFER": {
+    "message": "إلغاء العرض"
+  }, 
+  "REVOKE_ACCESS": {
+    "message": "إبطال إمكانية الوصول"
+  }, 
+  "ENTER_PROMO": {
+    "message": "هل لديك رمز ترويجي؟ يمكنك إدخاله هنا."
+  }, 
+  "CLOSE": {
+    "message": "إغلاق"
+  }, 
+  "INVITE_EMAIL_SUBJECT": {
+    "message": "دعوة للتواصل مع __name__ عبر uProxy"
+  }, 
+  "OFFERED_ACCESS_NOTIFICATION": {
+    "message": "لديك عرض إمكانية وصول من __name__"
+  }, 
+  "WHAT_ISNT_PROXIED": {
+    "message": "ما البيانات التي لا يتم نقلها عبر الخادم الوكيل، وهل يمكن أن يتم تسريب معلومات في uProxy حول المواقع التي أنتقل إليها؟"
+  }, 
+  "WHEN_I_AM_SHARING_ACCESS": {
+    "message": "ما الذي تكون هناك إمكانية للوصول إليه عندما أشارك إمكانية الوصول مع شخص ما؟"
+  }, 
+  "PROCEED_TO_UPROXY_MSG": {
+    "message": "يمكنك الآن الرجوع إلى uProxy وتحديد خيار \"لديّ حساب في DigitalOcean\" عندما يُطلب منك ذلك."
+  }, 
+  "CONFIRM_LOGOUT_GETTING": {
+    "message": "هل تريد تسجيل الخروج بالتأكيد؟ لن تتمكن مرة أخرى من الحصول على إمكانية الوصول من صديقك."
+  }, 
+  "WHAT_IS_BETA": {
+    "message": "ما المقصود بالإصدار التجريبي؟"
+  }, 
+  "SHOW_LOGS": {
+    "message": "عرض السجلات"
+  }, 
+  "REQUESTING_ACCESS_NOTIFICATION": {
+    "message": "هناك طلب من __name__ للحصول على إمكانية الوصول"
+  }, 
+  "BACK_TO_TOP": {
+    "message": "من الخلف لأعلى"
+  }, 
+  "WHAT_IS_ALPHA_ANSWER": {
+    "message": "لا يزال الإصدار ألفا من uProxy قيد التطوير وربما لا يتمتع بالاستقرار أحيانًا، نظرًا لأن هناك بعض الميزات التي لم تكتمل، كما أن هناك <a href=\"https://github.com/uProxy/uproxy/issues\">قائمة بالمشكلات المفتوحة</a> على GitHub. يسعدنا أن تجرِّب هذا الإصدار لمساعدتنا في إدخال تحسينات بناءً على تعليقاتك."
+  }, 
+  "UNABLE_TO_SHARE_WITH": {
+    "message": "تتعذر مشاركة إمكانية الوصول مع __name__"
+  }, 
+  "SETTINGS_SAVED": {
+    "message": "تم حفظ الإعدادات"
+  }, 
+  "LOGIN_REQUIRED_MESSAGE": {
+    "message": "لقبول هذه الدعوة والتواصل مع __name__، يلزمك تسجيل الدخول إلى uProxy باستخدام __network__.  انقر على \"نعم\" للمتابعة."
+  }, 
+  "CLOUD_INVITE_INSTRUCTIONS": {
+    "message": "أدخل رمز الدعوة. وعند حدوث اتصال، سيظهر الرمز في قائمة جهات الاتصال."
+  }, 
+  "CLOUD_INSTALL_SUCCESS_TITLE": {
+    "message": "تم بنجاح إعداد خادمك السحابي الجديد."
+  }, 
+  "UNABLE_TO_GET_FROM": {
+    "message": "يتعذر الحصول على إمكانية وصول من __name__"
+  }, 
+  "ACCEPT_LINK_FROM_INVITE_PAGE": {
+    "message": "أريد إدخال دعوة بدلاً من ذلك."
+  }, 
+  "CLOUD_INSTALL_CANCEL_FAILURE": {
+    "message": "لا يمكننا إلغاء إنشاء الخادم السحابي الآن. يمكنك حذف الخادم بعد أن يصبح جاهزًا."
+  }, 
+  "WHY_IS_IT_IMPORTANT": {
+    "message": "ما سبب أهمية الوثوق في الأشخاص الذين أتصل بهم؟"
+  }, 
+  "UNABLE_TO_SHARE": {
+    "message": "تتعذر مشاركة إمكانية الوصول"
+  }, 
+  "CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE": {
+    "message": "لا داعي للقلق بشأن إنشاء Droplet جديد على DigitalOcean. يمكنك الاعتماد علينا.  <uproxy-faq-link anchor='whatIsDigitalOcean'>مزيد من المعلومات .</uproxy-faq-link><br>عند الانتهاء من إنشاء حساب وتحديث الفوترة، انقر على \"تسجيل دخولي\"."
+  }, 
+  "WHERE_TO_GET": {
+    "message": "من أين يمكنني الحصول على uProxy؟"
+  }, 
+  "CLOUD_VIRTUAL_MACHINE": {
+    "message": "جهاز ظاهري"
+  }, 
+  "ERROR_SIGNING_IN": {
+    "message": "حدثت مشكلة أثناء تسجيل الدخول إلى __network__.  الرجاء إعادة المحاولة."
+  }, 
+  "ADD_CLOUD_INSTRUCTIONS": {
+    "message": "إذا كان لديك رمز دعوة في السحاب، فيُرجى النقر على الرابط أدناه وإدخال دعوتك على صفحة الوجهة."
+  }, 
+  "CLOUD_INSTALL_INSTALLING_WARNING": {
+    "message": "قد تستغرق هذه العملية مدة تصل إلى 10 دقائق. الرجاء ترك المتصفح مفتوحًا مع استمرار الاتصال بالإنترنت."
+  }, 
+  "QUIVER_INVITE_INSTRUCTIONS": {
+    "message": "يمكنك إنشاء رابط وإرساله إلى أصدقائك حتى يصبح بإمكانهم الوصول إليك على uProxy. يمكنك طلب إمكانية الوصول أو عرض إمكانية الوصول أو كلاهما."
+  }, 
+  "ANALYZE_NAT": {
+    "message": "تحليل NAT"
+  }, 
+  "RECONNECTING": {
+    "message": "جارٍ إعادة الاتصال..."
+  }, 
+  "GITHUB_LOGIN_CONFIRMATION": {
+    "message": "بإمكان uProxy استخدام أداة GitHub، وهي أداة لمطوِّر التطبيقات تساعدك في التواصل مع أصدقائك.<br><br>ونظرًا لأنه قد يتمكن الآخرون من تحديد حسابات GitHub التي تستخدم uProxy، <strong>we فإننا نوصي بإنشاء حساب جديد بهوية مجهولة على GitHub</strong>، حتى إذا كنت تستخدم GitHub من قبل. <strong>ستحتاج إلى إثبات ملكية بريدك الإلكتروني باستخدام GitHub قبل الاتصال.</strong>"
+  }, 
+  "TO_SEND_LOGS": {
+    "message": "لإرسال سجلاتك إلى فريق uProxy وطلب المساعدة، يمكنك فتح uProxy والنقر على \"إرسال تعليقات\""
+  }, 
+  "CLOUD_INSTALL_ERROR_TITLE": {
+    "message": "عفوًا، لدينا مشكلة في إنشاء خادم سحابي."
+  }, 
+  "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS": {
+    "message": "جارٍ تنزيل النصوص البرمجية للتثبيت..."
+  }, 
+  "WHO_MADE_UPROXY": {
+    "message": "من يعمل على تطوير uProxy؟"
+  }, 
+  "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
+    "message": "يمكنك إعداد خادم uProxy الخاص بك يدويًا. <uproxy-faq-link anchor='howDoInstallUproxyOnServer'>معرفة كيفية ذلك</uproxy-faq-link>"
+  }, 
+  "SUBMIT_FEEDBACK": {
+    "message": "إرسال التعليقات"
+  }, 
+  "WHY_IS_UPROXY_ASKING_ANSWER": {
+    "message": "<p>عند تثبيت uProxy على Chrome، فإنه يطلب الحصول على إذن لتنفيذ ما يلي (1) قراءة جميع بياناتك وتغييرها على مواقع الويب التي تنتقل إليها و(2) التواصل مع مواقع الويب المشاركة. ويرجع سبب أهمية هذه الأذونات بالنسبة إلى uProxy إلى أنها لازمة لتوجيه حركة البيانات من خلال اتصال صديقك. وتجدر الإشارة إلى أنه لا يتم أبدًا إرسال أية بيانات حول مواقع الويب التي تنتقل إليها لفريق uProxy أو للشبكات الاجتماعية التي تتصل بها.</p>"
+  }, 
+  "ABOUT_UPROXY": {
+    "message": "يمكنك الاستفادة من uProxy في الحصول على إمكانية الوصول إلى الإنترنت ومشاركة ذلك مع الأصدقاء أو عبر اتصال آمن في السحاب."
+  }, 
+  "DESCRIPTION": {
+    "message": "الوصف"
+  }, 
+  "WHAT_IS_DIGITAL_OCEAN": {
+    "message": "ما المقصود بـ DigitalOcean؟"
+  }, 
+  "LOGS_TITLE": {
+    "message": "السجلات وتحليل الشبكة"
+  }, 
+  "ENTER_INVITATION_DESCRIPTION": {
+    "message": "إذا تلقيت دعوة من صديق تريد مشاركتك في استخدام uProxy، فيمكنك لصق الدعوة هنا."
+  }, 
+  "FAQ_SENTENCE_CASE": {
+    "message": "الحصول على مساعدة"
+  }
 }

@@ -1,0 +1,10 @@
+{
+  "name": "@uproxy-metrics/model",
+  "version": "1.0.0-beta",
+  "author": "uProxy",
+  "private": true,
+  "description": "Model for uProxy metrics system",
+  "engines": {
+    "node": ">=4"
+  }
+}

@@ -48,10 +48,10 @@ var storageValues = {metrics: {
   on_cloud: {}
 }};
 
-describe('rappor_metrics.Metrics', () => {
+describe('rappor_metrics.FreedomMetrics', () => {
   it('Loads data from storage', (done) => {
     var storage = new MockStorage(storageValues);
-    var metrics = new rappor_metrics.Metrics(storage);
+    var metrics = new rappor_metrics.FreedomMetrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(1);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(2);
@@ -61,7 +61,7 @@ describe('rappor_metrics.Metrics', () => {
 
   it('Sets values to 0 if no data is in storage', (done) => {
     var storage = new MockStorage({});
-    var metrics = new rappor_metrics.Metrics(storage);
+    var metrics = new rappor_metrics.FreedomMetrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(0);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(0);
@@ -72,7 +72,7 @@ describe('rappor_metrics.Metrics', () => {
   it('Increment adds to the values in storage and saves', (done) => {
     var storage = new MockStorage(storageValues);
     spyOn(storage, 'save').and.callThrough();
-    var metrics = new rappor_metrics.Metrics(storage);
+    var metrics = new rappor_metrics.FreedomMetrics(storage);
     metrics.onceLoaded_.then(() => {
       expect(metrics.data_.successes.reduce(0,add)).toEqual(1);
       expect(metrics.data_.attempts.reduce(0,add)).toEqual(2);
@@ -87,7 +87,7 @@ describe('rappor_metrics.Metrics', () => {
 
   it('getReport reports obfuscated metric values', (done) => {
     var storage = new MockStorage(storageValues);
-    var metrics = new rappor_metrics.Metrics(storage);
+    var metrics = new rappor_metrics.FreedomMetrics(storage);
     metrics.getReport(networkInfo).then((payload :any) => {
       expect(payload['success-v3']).toBeDefined();
       expect(payload['success-v3']).not.toEqual(1);
@@ -114,7 +114,7 @@ describe('rappor_metrics.DailyMetricsReporter', () => {
 
   beforeEach(() => {
     jasmine.clock().install();
-    mockedMetrics = new rappor_metrics.Metrics(emptyStorage);
+    mockedMetrics = new rappor_metrics.FreedomMetrics(emptyStorage);
   });
 
   afterEach(() => {

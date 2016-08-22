@@ -87,10 +87,12 @@
       cursor: pointer;
     }
     </style>
+    <uproxy-state id="state"></uproxy-state>
 
-    <core-signals on-core-signal-open-cloud-install='{{ open }}'></core-signals>
-    <core-signals on-core-signal-cloud-install-status="{{ updateCloudInstallStatus }}"></core-signals>
-    <core-signals on-core-signal-cloud-install-progress="{{ updateCloudInstallProgress }}"></core-signals>
+    <core-signals
+        on-core-signal-cloud-install-status="{{ updateCloudInstallStatus }}"
+        on-core-signal-cloud-install-progress="{{ updateCloudInstallProgress }}">
+    </core-signals>
 
     <core-overlay id='signUpOrSignInOverlay'>
       <uproxy-app-bar on-go-back='{{ back }}' color='#34AFCE'>

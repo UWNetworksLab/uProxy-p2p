@@ -35,14 +35,14 @@ export var settings :uproxy_core_api.GlobalSettings = {
   quiverUserName: '',
   proxyBypass: constants.DEFAULT_PROXY_BYPASS.slice(0),
   enforceProxyServerValidity: false,
-  validProxyServers: [],
+  validProxyServers: {},
   activePromoId: null,  // set on promoIdDetected
   enabledExperiments: [],
   shouldHijackDO: true,
   crypto: true,
   reproxy: {
     enabled: false,
-    socksEndpoint: {address: '127.0.0.1', port: 9050}
+    socksEndpoint: {address: '127.0.0.1', port: 9050},
   }
 };
 
@@ -79,8 +79,10 @@ export var effectiveMessageVersion = () : number => {
   return settings.force_message_version || constants.MESSAGE_VERSION;
 }
 
-export var rapporMetrics = new rappor_metrics.Metrics(storage);
-export var activeUserMetrics = new active_user_metrics.Metrics(storage);
+export const metrics = freedom['metrics'] ?
+    new rappor_metrics.FreedomMetrics(storage) :
+    new rappor_metrics.NoOpMetrics();
+export const activeUserMetrics = new active_user_metrics.Metrics(storage);
 
 export var publicKey :string;
 export var pgp :freedom.PgpProvider.PgpProvider = freedom['pgp']();

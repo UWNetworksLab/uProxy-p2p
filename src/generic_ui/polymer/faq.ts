@@ -69,5 +69,8 @@ Polymer({
       }
       this.injectBoundHTML(i18nMessage, element);
     }
+  },
+  computed: {
+    'opened': '$.faqPanel.opened'
   }
 });

@@ -222,7 +222,7 @@ module.exports = (grunt) ->
       freedomwechat: readJSONFile('node_modules/freedom-social-wechat/package.json')
       freedomquiver: readJSONFile('node_modules/freedom-social-quiver/package.json')
 
-    clean: ['build/dev', 'build/dist', '.tscache']
+    clean: [devBuildPath, distBuildPath, '.tscache']
 
     #-------------------------------------------------------------------------
     # Import global names into config name space
@@ -236,7 +236,7 @@ module.exports = (grunt) ->
 
     # Create commands to run in different directories
     ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android'
-    ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git cordova-plugin-device https://github.com/albertolalama/cordova-plugin-tun2socks.git#alalama-tun2socks'
+    ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git cordova-plugin-device https://github.com/uProxy/cordova-plugin-tun2socks.git cordova-plugin-backbutton'
 
     # Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released
     ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git'
@@ -304,7 +304,10 @@ module.exports = (grunt) ->
         cwd: '<%= iosDistPath %>'
         command: '<%= ccaJsPath %> prepare'
       }
-      rmIosBuild: {
+      cleanAndroid: {
+        command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
+      }
+      cleanIos: {
         command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
       }
       androidReplaceXwalkDev: {
@@ -808,12 +811,14 @@ module.exports = (grunt) ->
         '!' + devBuildPath + '/integration/**/*.ts'
         '!' + devBuildPath + '/**/*.core-env.ts'
         '!' + devBuildPath + '/**/*.core-env.spec.ts'
+        '!' + androidDevPath + '/**/*.ts'
       ]
       coreEnv: compileTypescript [
         devBuildPath + '/**/*.core-env.ts'
         devBuildPath + '/**/*.core-env.spec.ts'
         '!' + devBuildPath + '/lib/build-tools/**/*.ts'
         '!' + devBuildPath + '/integration/**/*.ts'
+        '!' + androidDevPath + '/**/*.ts'
       ]
 
     browserify:
@@ -1143,6 +1148,7 @@ module.exports = (grunt) ->
 
   # Mobile OS build tasks
   grunt.registerTask 'build_android', [
+    'exec:cleanAndroid'
     'build_cca'
     'exec:ccaCreateDev'
     'exec:ccaPlatformAndroidDev'
@@ -1171,7 +1177,7 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'build_ios', [
-    'exec:rmIosBuild'
+    'exec:cleanIos'
     'build_cca'
     'exec:ccaCreateIosDev'
     'exec:ccaAddPluginsIosBuild'
@@ -1234,10 +1240,10 @@ module.exports = (grunt) ->
   ]
 
   # Builds all code, including the "dist" build, but skips
-  # linting and testing which can both be annoying and slow.
+  # iOS and Android as well as
+  # ts-linting and testing which can be annoying and slow.
   # jshint is here because catches hard syntax errors, etc.
   grunt.registerTask 'build', [
-    'exec:rmIosBuild'
     'build_chrome'
     'build_firefox'
     'build_cca'

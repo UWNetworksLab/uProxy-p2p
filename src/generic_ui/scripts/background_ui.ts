@@ -48,6 +48,9 @@ export class BackgroundUi {
 
   private handleMessage_ = (name: string, data: panel_connector.CommandPayload) => {
     switch (name) {
+      case 'update-global-setting':
+        this.core_.updateGlobalSetting(<uproxy_core_api.UpdateGlobalSettingArgs>data.data);
+        break;
       case 'update-global-settings':
         this.core_.updateGlobalSettings(<uproxy_core_api.GlobalSettings>data.data);
         break;

@@ -45,8 +45,9 @@ Polymer({
   },
   updateMetricsCollection: function(val :Boolean) {
     model.globalSettings.hasSeenMetrics = true;
+    this.$.state.background.updateGlobalSetting('hasSeenMetrics', true);
     model.globalSettings.statsReportingEnabled = val;
-    core.updateGlobalSettings(model.globalSettings);
+    this.$.state.background.updateGlobalSetting('statsReportingEnabled', val);
     ui.view = ui_constants.View.ROSTER;
   },
   enableStats: function() {

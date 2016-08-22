@@ -70,10 +70,9 @@
     </style>
 
     <uproxy-state id="state"></uproxy-state>
-    <core-signals on-core-signal-open-network-invite-dialog='{{openInviteUserPanel}}'></core-signals>
 
     <core-overlay id='networkInviteUserPanel' class='{{ network }}'>
-      <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
+      <uproxy-app-bar on-go-back='{{ close }}'>
         {{ 'INVITE_A_FRIEND' | $$ }}
       </uproxy-app-bar>
 

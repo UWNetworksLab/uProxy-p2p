@@ -36,6 +36,11 @@ export class RecordUseService {
         }
         previous_country_code = req.body.previous_country;
         if (!previous_country_code) { previous_country_code = 'ZZ' }
+
+        if (date.equals(previous_date) && country_code === previous_country_code) {
+          res.status(200).send('Ignored: source and target buckets are the same\n');
+          return;
+        }
       }
       let event = new uer.UseEvent(date, country_code, previous_date, previous_country_code);
       this._repository.recordUseEvent(event).then(() => {

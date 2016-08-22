@@ -1,0 +1,17 @@
+{
+  "name": "@uproxy-metrics/metrics_server",
+  "version": "1.0.0-beta",
+  "author": "uProxy",
+  "private": true,
+  "description": "Metrics server for uProxy",
+  "__comments": [
+    "TODO: Remove node_modules_hack once AppEngine stops stripping node_modeles"
+  ],
+  "scripts": {
+    "install": "mv -fn node_modules_hack node_modules",
+    "start": "node ./metrics_server/server.js"
+  },
+  "engines": {
+    "node": ">=4"
+  }
+}

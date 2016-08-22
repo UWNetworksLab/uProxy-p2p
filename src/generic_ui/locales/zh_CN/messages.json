@@ -1,0 +1,1031 @@
+{
+  "INVITE_SENT_CONFIRMATION": {
+    "message": "邀请已发送给 __name__！"
+  }, 
+  "WILL_UPROXY_WORK": {
+    "message": "uProxy 适用于哪些情况？"
+  }, 
+  "WHAT_IS_UPROXY": {
+    "message": "什么是 uProxy？"
+  }, 
+  "FACEBOOK_INVITE_INSTRUCTIONS": {
+    "message": "点击下方即可向您的 Facebook 好友发送 uProxy 邀请。他们通过 uProxy 打开此链接后，将会出现在您的 uProxy 联系人列表中。"
+  }, 
+  "CHOOSE_A_SOCIAL_NETWORK": {
+    "message": "请选择社交网络"
+  }, 
+  "WAITING_FOR_ACCESS": {
+    "message": "__name__ 接受之后，您将能够获取上网权限。"
+  }, 
+  "GET_ACCESS": {
+    "message": "获取上网权限"
+  }, 
+  "WHAT_IS_BETA_ANSWER": {
+    "message": "<p>uProxy 的 Beta 版仍处于开发阶段，不过我们相信，对于能够访问该扩展程序支持的至少一个社交网络的用户来说，该版本应该能够很好地发挥作用。欢迎试用该版本并提供任何反馈，以协助我们改进。您可以点击<a href=\"https://groups.google.com/forum/#!forum/uproxy- discuss\">此处</a>，将反馈发布到我们的公开讨论列表；也可以私下向我们发送电子邮件，电子邮件地址是 <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>。如果您对后续进展感兴趣或愿意为这个开放源代码项目贡献自己的力量，请参阅 <a href=\"https://github.com/uProxy/uproxy/issues\">GitHub 上的问题跟踪记录</a>。</p>"
+  }, 
+  "ACCEPTED_OFFER_NOTIFICATION": {
+    "message": "__name__ 已接受您的上网邀请"
+  }, 
+  "LEARN_MORE_UPROXY": {
+    "message": "详细了解 uProxy"
+  }, 
+  "WILL_UPROXY_WORK_ANSWER": {
+    "message": "<p>如果 uProxy 支持的所有社交网络的访问均遭到屏蔽，那么您将无法借助社交网络来与好友建立连接。您仍可以通过安全渠道交换 uProxy 生成的链接，从而手动建立一次性连接；不过，每次要与好友建立连接时，都要重复此交换操作。使用社交网络的优势在于，获得授权后，即会自动建立连接。</p>"
+  }, 
+  "WHAT_ARE_CLOUD_SERVERS_ANSWER": {
+    "message": "<p>uProxy 用户可以通过两种方式获取上网权限：通过好友代理流量，以及连接到运行 uProxy 的服务器。uProxy 可以自动完成在云托管平台上创建私有服务器的流程。目前，我们支持 DigitalOcean，但您也可以在其他服务器上手动设置。创建服务器之后，您只需转到“分享”标签，即可轻松地与亲朋好友分享对服务器的访问权限。</p>"
+  }, 
+  "ANALYZING_NETWORK": {
+    "message": "正在分析网络"
+  }, 
+  "CLOUD_INSTALL_STATUS_INSTALLING_SSH": {
+    "message": "正在下载并安装 SSH 服务器映像…"
+  }, 
+  "ASK_FOR_FEEDBACK_CONNECTION_DISCONNECTED": {
+    "message": "我们注意到，您与好友之间的连接已断开。要提交反馈吗？"
+  }, 
+  "GMAIL_INVITE_INSTRUCTIONS": {
+    "message": "输入好友的电子邮件地址，以便通过电子邮件向其发送加好友请求。他们接受邀请后，将会出现在您的联系人列表中。"
+  }, 
+  "RESTART_FAILURE_TITLE": {
+    "message": "抱歉！无法重启您的服务器。"
+  }, 
+  "CONNECTED_WITH_NUMBER": {
+    "message": "已与 __number__ 个网络建立连接"
+  }, 
+  "PORT_CONTROL_SUPPORTED": {
+    "message": "您的路由器已启用端口控制。"
+  }, 
+  "SHARING_ACCESS_WITH_ONE": {
+    "message": "正在与 __name__ 分享上网权限"
+  }, 
+  "CREATE_A_CLOUD_SERVER": {
+    "message": "创建云服务器"
+  }, 
+  "ADVANCED_SETTINGS": {
+    "message": "高级设置"
+  }, 
+  "REMOVE_SERVER_AND_TRY_AGAIN": {
+    "message": "移除服务器并重试"
+  }, 
+  "CREATING_A_CLOUD_SERVER": {
+    "message": "正在创建云服务器"
+  }, 
+  "SELECT_LANGUAGE": {
+    "message": "请选择语言…"
+  }, 
+  "GETTING_ACCESS_FROM": {
+    "message": "正在通过 __name__ 获取上网权限"
+  }, 
+  "HOW_DO_I_FIND": {
+    "message": "如何在 uProxy 上找到我的好友？"
+  }, 
+  "REQUIRED_FIELD": {
+    "message": "必填字段。"
+  }, 
+  "SETTINGS_JSON_ERROR": {
+    "message": "无法设置：JSON 值不匹配"
+  }, 
+  "STOP_IGNORING_REQUESTS": {
+    "message": "停止忽略请求"
+  }, 
+  "HOW_TO_INVITE_FRIENDS": {
+    "message": "您想以哪种方式邀请好友？"
+  }, 
+  "CREATE_A_NEW_ACCOUNT": {
+    "message": "创建 DigitalOcean 帐户"
+  }, 
+  "ENTER_INVITATION": {
+    "message": "请输入邀请"
+  }, 
+  "FRIEND_REQUESTS_ACCESS": {
+    "message": "__name__ 请求通过您访问互联网。"
+  }, 
+  "DOES_UPROXY_LOG_DATA_ANSWER": {
+    "message": "<p>如果您没有启用 uProxy 的数据报告功能，系统将不会报告与您的使用情况有关的任何数据。如果您启用了该功能，系统在将任何使用情况数据从您的计算机发送到其他地方之前，都会使用 Google Chrome 中所用的先进的隐私保护<a href=\"http://googleresearch.blogspot.com/2014/10/learning-statistics- with-privacy-aided.html\">算法</a>对其进行匿名化处理。</p><p>如果您手动使用设置菜单中的“提交反馈”工具，则可以选择包含近期的 uProxy 使用情况日志。日志中可能包含个人身份信息 (PII)。我们绝不会将您的个人身份信息提供给 uProxy 团队以外的第三方，并且包含个人身份信息的所有日志最多保留 3 个月即会被清除。</p><p>所有报告的提交方式均可以确保流量监测工具很难检测到您在使用 uProxy。</p><p>要了解与 uProxy 的数据收集有关的更多信息，请点击<a href=\"https://github.com/uProxy/uproxy/wiki/Data- Collection\">此处</a>。<p>"
+  }, 
+  "LOGOUT": {
+    "message": "退出 uProxy"
+  }, 
+  "SIGN_ME_IN": {
+    "message": "登录！"
+  }, 
+  "WHAT_IS_PORT_CONTROL_ANSWER": {
+    "message": "<p>网络地址转换 (NAT) 通常由路由器实施，旨在使网络中的多台设备能够共用一个公共 IP 地址。不过，这使得用户很难在彼此之间建立直接连接，并且某些类型的 NAT（尤其是对称 NAT）会导致 uProxy 无法成功建立连接。</p><p>如果您的路由器启用了端口控制（UPnP、NAT-PMP 或 PCP），uProxy 将能够指示路由器特许其他 uProxy 用户接入。如果 uProxy 连接的任一方能够使用端口控制，那么无论 NAT 配置是怎样的，大多数情况下都能成功建立连接。如需关于在路由器上启用端口控制的信息，请查看路由器手册或在网上搜索“（路由器名称）启用 UPnP”。</p>"
+  }, 
+  "INVITATION_PLACEHOLDER_TEXT": {
+    "message": "有邀请代码？请在此处输入"
+  }, 
+  "WHO_KNOWS_THAT_ANSWER": {
+    "message": "<p>和您建立了连接的所有人均会知晓您在使用 uProxy。此外，如果您选择将 uProxy 连接到社交网络（例如 Facebook），那么该社交网络的管理员可以知晓您在使用 uProxy，您在该社交网络上的使用 uProxy 的好友也有可能知晓。</p><p>对于通过 Gmail 或 Facebook 帐户建立连接的用户，uProxy 会使用 Firebase（Google 运营的一项服务）。因此，Firebase 团队以及负责管理 uProxy Firebase 帐户的 uProxy 团队均可获取关于哪些帐户在使用 uProxy 的信息。</p><p>如果您对通过个人帐户使用 uProxy 存有顾虑，请创建使用化名的专用帐户，并通过该帐户使用 uProxy。</p><p>请注意，在您使用 uProxy 时，上述服务均不会看到您访问的网站或网页。只有向您授予上网权限的用户能够监控您的流量。因此，再强调一次，请只通过您能够放心地分享互联网连接的好友获取上网权限。</p>"
+  }, 
+  "POSSIBLY": {
+    "message": "有可能"
+  }, 
+  "UPROXY_NETWORK_CHOOSE_A_USER_NAME": {
+    "message": "请选择用户名"
+  }, 
+  "EDIT_ADVANCED_SETTINGS": {
+    "message": "在下方修改您的设置"
+  }, 
+  "EXT_MISSING_TITLE": {
+    "message": "使用 uProxy 的准备工作已基本就绪！"
+  }, 
+  "PROCEED_TO_UPROXY": {
+    "message": "转到 uProxy"
+  }, 
+  "THANK_YOU": {
+    "message": "谢谢！"
+  }, 
+  "ASKING_FOR_ACCESS": {
+    "message": "正在请求上网权限"
+  }, 
+  "FRIEND_ADDED": {
+    "message": "已添加好友"
+  }, 
+  "LOGIN_REQUIRED_TITLE": {
+    "message": "需要登录"
+  }, 
+  "REQUEST_ACCESS": {
+    "message": "请求上网权限"
+  }, 
+  "OFFERED_YOU_ACCESS": {
+    "message": "他们向您提供了上网权限。"
+  }, 
+  "SHARING_ACCESS_WITH_TWO": {
+    "message": "正在与 __name1__ 和 __name2__ 分享上网权限"
+  }, 
+  "NOT_CONNECTED_LOGIN_TO_START": {
+    "message": "登录后方可开始使用"
+  }, 
+  "FRIENDS_WHO_SHARE": {
+    "message": "可向您授予上网权限的好友"
+  }, 
+  "RESTART_SERVER_TEXT": {
+    "message": "如果您重复遇到此错误，请试试重启服务器。"
+  }, 
+  "ASIA_SINGAPORE": {
+    "message": "亚洲（新加坡）"
+  }, 
+  "SHARING_ACCESS_WITH_MANY": {
+    "message": "正在与 __name__ 以及另外 __numOthers__ 位好友分享上网权限"
+  }, 
+  "P_I_I_MESSAGE": {
+    "message": "您的反馈和电子邮件地址将发送到 uProxy.org。您的日志、网络信息和电子邮件可能包含个人身份信息。"
+  }, 
+  "DISCONNECT": {
+    "message": "断开连接"
+  }, 
+  "STARTED_PROXYING": {
+    "message": "__name__ 已开始通过您访问互联网"
+  }, 
+  "TROUBLE_SIGNING_IN": {
+    "message": "我无法登录。"
+  }, 
+  "ASK_TO_ANALYZE": {
+    "message": "可能是您网络的 NAT 类型与 uProxy 不兼容。需要 uProxy 分析您的网络吗？"
+  }, 
+  "CLOUD_INSTALL_INSTALLING_MESSAGE": {
+    "message": "连接之后，您就可以通过私有服务器与亲朋好友分享上网权限了。"
+  }, 
+  "EMPTY_ROSTER_INSTRUCTIONS": {
+    "message": "通过好友或私有云服务器获取和分享上网权限。"
+  }, 
+  "REMOVE_CLOUD_SERVER_SUCCESS": {
+    "message": "成功！您的云服务器已移除。"
+  }, 
+  "SHARING_ENABLED_MESSAGE": {
+    "message": "此图标表示您可以向已授予上网权限的好友分享上网权限了。"
+  }, 
+  "OFFER_ACCESS": {
+    "message": "提供上网权限"
+  }, 
+  "DOES_UPROXY_LOG_DATA_SHORT": {
+    "message": "uProxy 是否会收集与我有关的数据？"
+  }, 
+  "SIGN_IN_TO_NETWORK": {
+    "message": "登录 __network__"
+  }, 
+  "PROMO_ACCEPTED": {
+    "message": "促销代码已被接受！"
+  }, 
+  "ENTER_IT_HERE": {
+    "message": "请在此处输入"
+  }, 
+  "RECONNECT_FAILED": {
+    "message": "重新连接失败"
+  }, 
+  "STATS_ENABLED_TOOLTIP": {
+    "message": "您当前选择的是分享匿名统计信息。"
+  }, 
+  "CUSTOM_ERROR_PLACEHOLDER": {
+    "message": "选择反馈主题"
+  }, 
+  "NORTH_AMERICA_NEW_YORK": {
+    "message": "北美（纽约）"
+  }, 
+  "SEND_INVITATION_FACEBOOK": {
+    "message": "在 Facebook 上邀请"
+  }, 
+  "FEEDBACK_ERROR_PLACEHOLDER": {
+    "message": "请输入您的反馈"
+  }, 
+  "SHARING_ENABLED_TITLE": {
+    "message": "可以分享了"
+  }, 
+  "WHAT_IS_GITHUB": {
+    "message": "什么是 GitHub？如何使用？"
+  }, 
+  "UPROXY_FRIENDS": {
+    "message": "有 uProxy 的好友"
+  }, 
+  "CANCEL": {
+    "message": "取消"
+  }, 
+  "HOW_DOES_UPROXY_COMPARE_ANSWER": {
+    "message": "<p>uProxy 是一款值得信赖且能够防止流量被屏蔽的扩展程序。</p><p>VPN 用户通常连接到能被轻易识别出的服务器，VPN 流量则可以被轻易地识别出来并被屏蔽。而 uProxy 用户是彼此之间建立连接（而不是连接到常用的服务器），uProxy 则能够使其流量难以被识别出来，并因此而难以被屏蔽。</p><p>此外，VPN 服务可以监控您访问的网站，并且很多 VPN 服务不会对此类数据保密。uProxy 用户信任的是他们通过好友建立的连接，而不是他们可能不甚了解的 VPN 服务。</p><p>除了不了解 VPN 会如何处理用户的浏览数据外，用户也很难了解并信任 VPN 客户端和服务器软件，尤其当它们是封闭源代码客户端/软件的情况下。而 uProxy 是开放源代码扩展程序，持续接受公众监督。uProxy 会尽可能避免让用户盲目信任可信度无法得到验证的软件。</p>"
+  }, 
+  "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
+    "message": "<p>每月只需 10 美元，您就可以拥有自己的 uProxy 云服务器，畅享全天候无阻上网的便利，还可以与好友分享上网权限。<uproxy-faq- link anchor='whatAreCloudServers'>详细了解云服务器</uproxy-faq-link></p><p>云服务器运行在 DigitalOcean 之上。如果您还没有 DigitalOcean 帐户，请点击以下按钮创建一个。系统将提示您添加付款方式，不过如果您通过 uProxy 登录，第一个月将免费！<uproxy-faq-link anchor='whatIsDigitalOcean'>详细了解 DigitalOcean</uproxy- faq-link></p>"
+  }, 
+  "CLOUD_SERVER_NO_CONNECT": {
+    "message": "我的云服务器无法连接。"
+  }, 
+  "ASK_FOR_FEEDBACK_TITLE": {
+    "message": "要提交反馈吗？"
+  }, 
+  "WHY_SOCIAL_NETWORK": {
+    "message": "uProxy 利用社交网络来帮助您与好友建立连接"
+  }, 
+  "I_HAVE_AN_ACCOUNT": {
+    "message": "我有 DigitalOcean 帐户"
+  }, 
+  "LOGGED_OUT": {
+    "message": "您已退出 __network__"
+  }, 
+  "RESTART_PROXYING": {
+    "message": "重试"
+  }, 
+  "WHAT_IS_PORT_CONTROL": {
+    "message": "什么是端口控制？"
+  }, 
+  "WHAT_IS_ALPHA": {
+    "message": "什么是 Alpha 版？"
+  }, 
+  "STOP_GETTING": {
+    "message": "停止获取上网权限"
+  }, 
+  "SENDING_FEEDBACK": {
+    "message": "正在发送反馈"
+  }, 
+  "DEVICE_DESCRIPTION": {
+    "message": "设备说明"
+  }, 
+  "STOPPED_PROXYING": {
+    "message": "__name__ 已停止通过您访问互联网"
+  }, 
+  "DOES_UPROXY_LOG_DATA": {
+    "message": "uProxy 是否会记录与我有关的数据？uProxy 的隐私权政策是什么？"
+  }, 
+  "CLOUD_INSTALL_CREATE_SERVER_MESSAGE": {
+    "message": "<p>在创建云服务器之前，系统会先将您转到 DigitalOcean 网站，并提示您允许 uProxy 访问您的 DigitalOcean 帐户（如果您尚未这么做），您可能需要先登录 DigitalOcean。</p><p>在您创建云服务器之后，DigitalOcean 将每月向您收取 10 美元的费用。您可以随时删除服务器，之后 DigitalOcean 将不再向您收取费用。</p>"
+  }, 
+  "SIGN_IN_TO_INVITE_FRIENDS": {
+    "message": "要邀请 __network__ 好友使用 uProxy，请登录您的 __network__ 帐户。"
+  }, 
+  "OTHER_FEEDBACK": {
+    "message": "其他（请在下方注明）"
+  }, 
+  "SAVE": {
+    "message": "保存"
+  }, 
+  "GITHUB_INVITE_SEND_FAILED": {
+    "message": "抱歉，您只能邀请在此之前已通过 GitHub 登录 uProxy 的好友。"
+  }, 
+  "REMOVE_CLOUD_SERVER": {
+    "message": "移除云服务器"
+  }, 
+  "WHAT_DO_GET_ACCESS": {
+    "message": "“获取上网权限”和“分享上网权限”是什么意思？"
+  }, 
+  "ENABLE_METRICS": {
+    "message": "要启用匿名指标收集功能吗？"
+  }, 
+  "CONFIRM_LOGOUT_SHARING": {
+    "message": "确定要退出吗？退出之后，您将无法再与好友分享上网权限。"
+  }, 
+  "INVITE_ERROR": {
+    "message": "您的邀请存在错误。"
+  }, 
+  "DONE": {
+    "message": "完成"
+  }, 
+  "UNLIKELY": {
+    "message": "不太可能"
+  }, 
+  "OFFLINE": {
+    "message": "离线"
+  }, 
+  "CONTINUE_BROWSING": {
+    "message": "继续浏览，而不使用 uProxy"
+  }, 
+  "CONFIRM_LOGOUT_GETTING_AND_SHARING": {
+    "message": "确定要退出吗？退出之后，您将无法再通过好友获取或与好友分享上网权限。"
+  }, 
+  "CLOUD_INSTALL_EXISTING_SERVER_TITLE": {
+    "message": "已经有云服务器？"
+  }, 
+  "OFFERS": {
+    "message": "邀请者"
+  }, 
+  "EXT_MISSING_MESSAGE": {
+    "message": "下载并启用 uProxy 的第 1 部分，即可开始使用。"
+  }, 
+  "HAVE_AN_INVITE_CODE": {
+    "message": "有邀请代码？"
+  }, 
+  "FIND_YOUR_FRIENDS_ON_A_SOCIAL_NETWORK": {
+    "message": "寻找您在社交网络上的好友。"
+  }, 
+  "FRIEND_ADD_ERROR": {
+    "message": "添加好友时出错。"
+  }, 
+  "HOW_DOES_UPROXY_COMPARE": {
+    "message": "与 VPN 相比，uProxy 怎么样？"
+  }, 
+  "UPDATE_AVAILABLE": {
+    "message": "有更新"
+  }, 
+  "YES": {
+    "message": "是"
+  }, 
+  "CLOUD_INSTALL_CANCEL_TITLE": {
+    "message": "请稍候！正在取消创建云服务器。"
+  }, 
+  "INVITE_A_FRIEND": {
+    "message": "邀请好友"
+  }, 
+  "WHO_KNOWS_THAT": {
+    "message": "谁会知晓我在使用 uProxy？"
+  }, 
+  "PORT_CONTROL_NOT_SUPPORTED_INFO": {
+    "message": "您或许能够启用端口控制，以提高 uProxy 的可靠性。"
+  }, 
+  "CONTINUE": {
+    "message": "继续"
+  }, 
+  "EXPERIMENTAL": {
+    "message": "实验性"
+  }, 
+  "HOW_DO_I_SUBMIT": {
+    "message": "如何提交反馈？"
+  }, 
+  "CLOUD_INSTALL_STATUS_CONFIGURING_SSH": {
+    "message": "正在配置 SSH…"
+  }, 
+  "CLOUD_INVITE_FAILED": {
+    "message": "抱歉，连接失败。请检查邀请代码是否正确。"
+  }, 
+  "CHANGE_STATS_CHOICE": {
+    "message": "您可以分享匿名指标，协助我们改进 uProxy。所有数据都会由客户端进行匿名化处理并以安全方式传输。"
+  }, 
+  "CLOUD_CONNECTIONS_DISCONNECTED": {
+    "message": "我的云连接被断开了。"
+  }, 
+  "EDIT_ADVANCED_SETTINGS_PLACEHOLDER": {
+    "message": "修改您的设置"
+  }, 
+  "RESTARTING_SERVER": {
+    "message": "正在重启服务器…"
+  }, 
+  "WHAT_DO_GET_ACCESS_ANSWER": {
+    "message": "<p>当您通过好友<strong>获取上网权限</strong>时，来自您浏览器的所有网络流量都会先以加密形式传送到您好友的计算机，然后再从您好友的计算机传送到互联网。也就是说，对于大多数网站，相应请求将看起来像来自您好友的计算机，而监控您的连接的人员将只能看到您与好友之间建立了安全连接。</p><p>当您<strong>分享上网权限</strong>时，获得授权的好友能够将其网络流量发送到您的计算机，然后这些网络流量再从您的计算机传送到互联网。您的好友只能通过您授权他们时所在的计算机连接互联网，并且您可以随时撤消对他们的授权。</p>"
+  }, 
+  "SHARE_WITH_A_FRIEND": {
+    "message": "与好友分享"
+  }, 
+  "SHARING_ENABLED_TOOLTIP": {
+    "message": "您可以分享上网权限了。"
+  }, 
+  "ACCEPT_INVITE_CONFIRMATION": {
+    "message": "要将 __name__ 添加到您的 uProxy 通讯录吗？"
+  }, 
+  "SET": {
+    "message": "设置"
+  }, 
+  "STATS_ENABLED_TITLE": {
+    "message": "已选择提交匿名统计信息"
+  }, 
+  "DISCONNECTED_TITLE": {
+    "message": "抱歉！您与好友之间的连接已断开。"
+  }, 
+  "GITHUB_INVITE_INSTRUCTIONS": {
+    "message": "输入好友的 GitHub 用户名。他们接受您的请求后，将会出现在您的联系人列表中。"
+  }, 
+  "WHAT_ARE_CLOUD_SERVERS": {
+    "message": "什么是 uProxy 云服务器？"
+  }, 
+  "START_GETTING": {
+    "message": "开始获取上网权限"
+  }, 
+  "HOW_DO_I_INSTALL_UPROXY_ON_SERVER": {
+    "message": "如何在我现有的服务器上安装 uProxy？"
+  }, 
+  "ASIA_BANGALORE": {
+    "message": "亚洲（班加罗尔）"
+  }, 
+  "HOW_DOES_UPROXY_HELP": {
+    "message": "uProxy 如何帮助保护我的互联网连接？"
+  }, 
+  "DOES_UPROXY_PROTECT": {
+    "message": "uProxy 是否会保护我免遭病毒、网上诱骗或黑客攻击的侵扰？"
+  }, 
+  "INVITE_LINK_FROM_ACCEPT_PAGE": {
+    "message": "我想改为发送邀请。"
+  }, 
+  "WHAT_IS_UPROXY_ANSWER": {
+    "message": "<p>uProxy 是一款适用于 Chrome 和 Firefox 的开放源代码浏览器扩展程序，可让用户通过其他用户或私有云服务器路由自己的互联网连接。uProxy 可让第三方（例如政府或 ISP）更难以监控或干扰获取上网权限的用户的流量。它就像一项个性化的 VPN 服务，您可以通过它让亲朋好友安全上网，并让自己在旅途中安全上网。</p>"
+  }, 
+  "CLOUD_INSTALL_CREATE_ACCOUNT_TITLE": {
+    "message": "您只需要有电子邮件地址以及信用卡或 PayPal 帐户，即可开始使用。"
+  }, 
+  "PORT_CONTROL_TITLE": {
+    "message": "端口控制状态"
+  }, 
+  "EMAIL_INSTEAD_TITLE": {
+    "message": "要改为使用电子邮件发送反馈吗？"
+  }, 
+  "UPROXY_NETWORK_SIGN_IN": {
+    "message": "登录"
+  }, 
+  "RESPOND_TO_FRIEND_REQUEST": {
+    "message": "回应加好友请求"
+  }, 
+  "DESCRIPTION_DEFAULT": {
+    "message": "计算机 __number__"
+  }, 
+  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
+    "message": "更多信息。"
+  }, 
+  "UPROXY_NETWORK_INVITE_LOGIN_MESSAGE": {
+    "message": "要将 __name__ 添加为好友，请登录 uProxy 网络"
+  }, 
+  "ONLINE": {
+    "message": "在线"
+  }, 
+  "INVITE_EMAIL_SENT": {
+    "message": "已发送邀请电子邮件。"
+  }, 
+  "MORE_ABOUT_METRICS": {
+    "message": "详细了解匿名指标"
+  }, 
+  "CONNECTED_ACCOUNTS": {
+    "message": "连接的帐户"
+  }, 
+  "REPORT_ERROR": {
+    "message": "报告此错误"
+  }, 
+  "SHARING_ACCESS_WITH_FRIEND": {
+    "message": "当前正在与一位好友分享上网权限"
+  }, 
+  "ATTEMPTING_RECONNECT": {
+    "message": "正在尝试重新连接。"
+  }, 
+  "ASK_TO_SUBMIT_ANALYSIS": {
+    "message": "要将 NAT 类型提交至 uProxy 团队，以便我们更好地了解用户所使用的网络吗？"
+  }, 
+  "GETTING_ACCESS_FROM_FRIEND": {
+    "message": "当前正在通过好友获取上网权限"
+  }, 
+  "DIGITAL_OCEAN_ERROR_MESSAGE": {
+    "message": "请先检查您的 DigitalOcean 设置，然后重试。如果您不想重试，请确认您没有名为“uproxy- cloud-server”的 Droplet。这将确保您不会被收取任何月费。"
+  }, 
+  "DOES_UPROXY_GIVE_ME_ANSWER": {
+    "message": "<p>uProxy 不是匿名化处理工具；它可用于向 ISP 隐藏您的浏览活动，但不能用于向您访问的网站隐藏您的身份。如果用户通过 uProxy 获取上网权限，那么该用户访问的网站将能够看到向其分享上网权限的人员的 IP 地址，并且可能会看到获取上网权限的 uProxy 用户的 IP 地址。如果您需要向您访问的网站隐藏自己的身份，最好是使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor 浏览器</a>。</p>"
+  }, 
+  "REQUESTS": {
+    "message": "请求者"
+  }, 
+  "WHEN_I_AM_SHARING_ACCESS_ANSWER": {
+    "message": "<p>通过您获取上网权限的用户只是能够使用您的互联网连接。他们不能查看您计算机上的文件，看不到您在互联网上执行的操作，也无法使用您的身份信息登录网站。此外，他们也无法访问连接到您本地家庭网络或办公网络的设备，例如共享的打印机或文件服务器。</p>"
+  }, 
+  "ASK_FOR_ACCESS": {
+    "message": "请求上网权限"
+  }, 
+  "WHAT_IS_UPROXY_NETWORK_ANSWER": {
+    "message": "<p>uProxy 网络旨在以最简单的方式让您与好友建立可靠连接，同时保证流量难以被屏蔽。要使用 uProxy 网络，您只需输入名称（不必具有唯一性），然后登录，即可开始与好友分享邀请。目前，一份身份信息与一台计算机绑定；如果您希望在新的计算机上设置 uProxy，则需要重新邀请好友，才能通过该计算机与他们建立连接。</p><p>uProxy 网络由 uProxy 团队运营，不过未来有可能支持第三方通过运行其他服务器来增强该网络。所有通过 uProxy 网络在对等端之间传送的信息均经过端到端加密，因此没有人能够进行干扰。不过，网络运营商仍能够知晓互相连接的 IP 地址。</p>"
+  }, 
+  "CONNECTED_WITH": {
+    "message": "已与 __network__ 建立连接"
+  }, 
+  "EMAIL_PLACEHOLDER": {
+    "message": "电子邮件地址（选填）"
+  }, 
+  "GET_HELP": {
+    "message": "获取帮助"
+  }, 
+  "SUBMIT_BUTTON_TEXT": {
+    "message": "提交"
+  }, 
+  "NEXT": {
+    "message": "继续"
+  }, 
+  "REMOVE_CLOUD_SERVER_CONFIRMATION": {
+    "message": "确定要删除这个云服务器吗？"
+  }, 
+  "UNABLE_TO_GET": {
+    "message": "无法获取上网权限"
+  }, 
+  "SEND_INVITATION": {
+    "message": "发送邀请"
+  }, 
+  "CLOUD_INSTALL_INVITE_SCREEN_MESSAGE": {
+    "message": "通过您自己的私有服务器获取上网权限并与亲朋好友分享。"
+  }, 
+  "PROCESSING": {
+    "message": "正在处理…"
+  }, 
+  "WE_WONT_POST": {
+    "message": "未经您的同意，我们不会分享或公开发布您的数据"
+  }, 
+  "SHARING_UNAVAILABLE_TITLE": {
+    "message": "无法分享"
+  }, 
+  "WE_WONT_POST_LEARN_MORE": {
+    "message": "未经您的同意，我们不会分享或公开发布您的数据。<uproxy-faq-link anchor='whyDoesUproxyConnect'>了解详情</uproxy- faq-link>"
+  }, 
+  "WELCOME": {
+    "message": "欢迎使用 uProxy"
+  }, 
+  "DESTROY_CLOUD_SERVER_FAILURE": {
+    "message": "抱歉，暂时无法销毁您的云服务器。您可能需要登录云服务提供商网站自行销毁。"
+  }, 
+  "EUROPE_AMSTERDAM": {
+    "message": "欧洲（阿姆斯特丹）"
+  }, 
+  "CLOUD_INSTALL_INVITE_SCREEN_TITLE": {
+    "message": "在 DigitalOcean 上创建云服务器"
+  }, 
+  "WHY_DOES_UPROXY_CONNECT_ANSWER": {
+    "message": "<p>uProxy 需要通过一种方式知晓您的好友何时在线，并且需要在对等端之间交换信息（IP 地址、端口和加密密钥）以建立直接连接。因此，uProxy 连接到您与好友已在使用的社交网络，而不是运营可被轻松屏蔽的中心服务。这些社交网络仅用于帮助在用户之间建立直接连接；代理的互联网流量不会通过社交网络传送。<strong>uProxy 绝不会以您的名义公开发布信息</strong>，而只是与您选择的同样运行 uProxy 的好友交换私人讯息。要详细了解信任社交网络方面的信息，请点击<a href=\"https://github.com/uProxy/uproxy/wiki/Trust\">此处</a>。</p>"
+  }, 
+  "GENERATE_LINK": {
+    "message": "生成链接"
+  }, 
+  "RESTART": {
+    "message": "重启"
+  }, 
+  "NO_THANKS": {
+    "message": "不用了"
+  }, 
+  "SETTINGS_BAD_FORMAT_ERROR": {
+    "message": "无法设置：格式错误"
+  }, 
+  "IM_IN": {
+    "message": "我同意"
+  }, 
+  "HOW_DOES_UPROXY_HELP_ANSWER": {
+    "message": "<p>当您按通常的方式使用互联网时，互联网服务提供商 (ISP) 能够看到您访问的网站，并可能会尝试屏蔽对某些网站的访问权限，甚至篡改网站内容，借此干扰您的连接。在不需要密码的 Wi-Fi 网络中，甚至是连接到同一网络的其他用户都可能会看到您访问的网站；对于 HTTP（而非 HTTPS）网站，这些用户可能还会看到您浏览的内容。</p><p>当您通过 uProxy 获取上网权限时，您与好友之间的连接是经过加密的。您浏览器的流量通过该连接发送，然后从好友的计算机发送至互联网。当通过 uProxy 获取上网权限时，您的 ISP 将无法看到您访问的网站，并且 uProxy 会采取专门的措施，使您的 ISP 难以识别和屏蔽您的 uProxy 流量。</p>"
+  }, 
+  "REMOVE_CLOUD_SERVER_FAILURE": {
+    "message": "抱歉，暂时无法移除您的云服务器。"
+  }, 
+  "ADD_A_CLOUD_FRIEND": {
+    "message": "添加云好友"
+  }, 
+  "PRIVACY_POLICY": {
+    "message": "隐私权政策"
+  }, 
+  "WHY_DOES_UPROXY_CONNECT": {
+    "message": "uProxy 为什么连接到社交网络？"
+  }, 
+  "CLOUD_INSTALL_STATUS_CREATING_SERVER": {
+    "message": "正在创建服务器…"
+  }, 
+  "TRYING_TO_CONNECT": {
+    "message": "正在尝试与 __name__ 建立连接"
+  }, 
+  "FRIEND_REQUEST": {
+    "message": "您的好友 __name__ 想和您一起使用 uProxy！"
+  }, 
+  "RESTART_UPROXY_UPDATE": {
+    "message": "重启以更新"
+  }, 
+  "WHAT_ISNT_PROXIED_ANSWER": {
+    "message": "<p>uProxy 仅代理自己所在网络浏览器的流量，不代理其他应用的流量。在一些不常见的情况下，浏览器可能会发出不经由代理的请求，并且某些网络技术（尤其是 Flash 和 WebRTC）能够发出不经由代理的请求。VPN 也经常会出现同样的情况。建议隐私需求较高的用户考虑使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor 浏览器</a>，该浏览器经过专门设计，能够最大限度地防范流量监测工具获取与您的活动相关的信息。</p>"
+  }, 
+  "TROUBLE_STARTING_CONNECTION": {
+    "message": "我无法建立连接。"
+  }, 
+  "DESTROY_CLOUD_SERVER_CONFIRMATION": {
+    "message": "这将销毁您的 uProxy 云服务器。请注意，这个云服务器销毁之后，您的亲朋好友将无法再使用它。"
+  }, 
+  "BETA_MESSAGE": {
+    "message": "这是 Beta 版 uProxy，偶尔可能不稳定。"
+  }, 
+  "STOP_IGNORING_OFFERS": {
+    "message": "停止忽略邀请"
+  }, 
+  "CLOUD_INSTALL_CANCEL_MESSAGE": {
+    "message": "取消创建云服务器最长可能需要 2 分钟的时间。抱歉，请耐心等候。"
+  }, 
+  "CONNECT_WITH_A_FRIEND": {
+    "message": "与好友建立连接"
+  }, 
+  "UPROXY_NETWORK_LOGIN_TITLE": {
+    "message": "登录 uProxy 网络"
+  }, 
+  "RESTART_SERVER": {
+    "message": "立即重启"
+  }, 
+  "APPLY": {
+    "message": "应用"
+  }, 
+  "NETWORK_LIST_CLOUD_LABEL": {
+    "message": "创建云服务器"
+  }, 
+  "LEARN_MORE_SOCIAL": {
+    "message": "详细了解社交网络"
+  }, 
+  "HAVE_PROMO_CODE": {
+    "message": "我有促销代码"
+  }, 
+  "WHY_IS_UPROXY_ASKING": {
+    "message": "uProxy 为什么要请求这些 Chrome 权限？"
+  }, 
+  "DOES_UPROXY_GIVE_ME": {
+    "message": "uProxy 是否提供匿名浏览选项？"
+  }, 
+  "WHICH_SOCIAL_NETWORK": {
+    "message": "从哪里可以最快速地找到联系人？"
+  }, 
+  "APP_MISSING_TITLE": {
+    "message": "使用 uProxy 的准备工作已基本就绪！"
+  }, 
+  "IGNORE": {
+    "message": "忽略"
+  }, 
+  "CLOUD_INSTALL_STATUS_LOGGING_IN": {
+    "message": "正在登录新服务器…"
+  }, 
+  "WHERE_TO_GET_ANSWER": {
+    "message": "<p>要下载 uProxy，最简单的方法是前往<a href=\"install\">安装</a>页面。您也可以在 <a href=\"https://chrome.google.com/webstore/detail/uproxy- part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj\">Chrome 网上应用店</a>和 <a href=\"https://addons.mozilla.org/zh-CN/firefox/addon/uproxy- firefox/\">Firefox 插件网站</a>上找到 uProxy。只有上述位置是下载 uProxy 的正规渠道。请不要从任何其他位置下载 uProxy，因为您下载的可能是会给您带来风险的假冒版本。</p>"
+  }, 
+  "NO_FRIENDS": {
+    "message": "我没有可作为流量代理的好友。"
+  }, 
+  "HOW_DO_I_INSTALL_UPROXY_ON_SERVER_ANSWER": {
+    "message": "<p>uProxy 服务器在 Docker 容器中运行。高级用户可以参考<a href=\"https://blog.uproxy.org/2016/02 /get-access-24x7-through-your-own-uproxy.html\">此博文</a>中的说明在自己的服务器上安装 uProxy。</p>"
+  }, 
+  "DOES_UPROXY_PROTECT_ANSWER": {
+    "message": "<p>uProxy 有助于防范攻击者将您重定向到恶意网站或以其他方式干扰您的流量。不过，uProxy 的主要用途是让用户能够分享对开放互联网的访问权限。</p>"
+  }, 
+  "SHARE_ACCESS": {
+    "message": "分享上网权限"
+  }, 
+  "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY": {
+    "message": "正在下载并安装 uProxy 映像…"
+  }, 
+  "CANCEL_REQUEST": {
+    "message": "取消请求"
+  }, 
+  "CLOUD_SERVER_NO_START": {
+    "message": "我无法启动云服务器。"
+  }, 
+  "VERY_LIKELY": {
+    "message": "很有可能"
+  }, 
+  "RESTART_SERVER_TITLE": {
+    "message": "抱歉！无法获取上网权限。"
+  }, 
+  "WHO_MADE_UPROXY_ANSWER": {
+    "message": "<p>uProxy 正在由华盛顿大学开发。该项目的想法源自 Google 创意，并获得了 Google、Brave New Software 和开放源代码社区的大力支持。</p>"
+  }, 
+  "FRIEND_REQUESTED_ACCESS": {
+    "message": "他们已请求通过您访问互联网。"
+  }, 
+  "WHAT_IS_UPROXY_NETWORK": {
+    "message": "什么是 uProxy 网络？"
+  }, 
+  "CLOUD_INSTALL_GET_STARTED_TITLE": {
+    "message": "通过 uProxy 在 DigitalOcean 上创建私有云服务器。"
+  }, 
+  "WHY_IS_IT_IMPORTANT_ANSWER": {
+    "message": "<p>uProxy 旨在帮助互相信任的好友分享互联网连接。连接到您不信任的人员是有风险的，我们建议您不要这样做。</p><p>如果您通过恶意人员获取上网权限，他们可能能够窥探您的网络浏览活动，甚至干扰您的流量。除了向您授予上网权限的人员之外，您还要信任他们的互联网连接是安全的。因此，如果他们通过可能不安全的未知公共 Wi-Fi 热点连接，那么您最好是等到他们回到家中通过安全的网络进行连接。</p><p>如果您与不认识且不信任的人分享上网权限，他们可能能够利用您的连接从事非法活动，而根据当地法律，您可能会因促成该活动而承担法律责任。<p>无论您将互联网连接分享给任何人，都务必要确保您信任他们，无论是使用家用 Wi-Fi 网络的客人，还是远在世界另一端的 uProxy 好友，都是如此。</p>"
+  }, 
+  "LEARN_MORE": {
+    "message": "了解详情"
+  }, 
+  "CLOUD_INSTALL_INSTALLING_TITLE": {
+    "message": "请稍候，正在创建新的云服务器。"
+  }, 
+  "CLOUD_INSTALL_ERROR_EXISTING_SERVER_MESSAGE": {
+    "message": "我们发现您已经有一个名为“uproxy-cloud- server”的服务器。我们可以将其移除并为您创建一个新服务器；或者，您可以返回到好友列表。"
+  }, 
+  "ACCEPT_INVITE": {
+    "message": "接受邀请"
+  }, 
+  "INVITE_EMAIL_BODY": {
+    "message": "__name__ 已邀请您通过 uProxy 与其建立连接。要与其建立连接，请点击以下邀请链接或将其粘贴到 uProxy 中。<br><br>__url__<br><br>如果您尚未安装 uProxy，可以从 <a href='uproxy.org'>uproxy.org</a> 或直接从 Chrome 网上应用店（<a href='https://chrome.google.com/webstore/detail/uproxy- part-1-of-2/pjpcdnccaekokkkeheolmpkfifcbibnj'>第 1 部分</a>和<a href='https://chrome.google.com/webstore/detail/uproxy- part-2-of-2/fmdppkkepalnkeommjadgbhiohihdhii'>第 2 部分</a>）和 Firefox Marketplace（点击<a href='https://addons.mozilla.org/zh-CN/firefox/addon /uproxy-firefox/'>此处</a>）下载。"
+  }, 
+  "PORT_CONTROL_PENDING": {
+    "message": "正在探查路由器是否支持端口控制…"
+  }, 
+  "APP_MISSING_MESSAGE": {
+    "message": "下载并启用 uProxy 的第 2 部分，即可开始使用。"
+  }, 
+  "ADVANCED_SETTINGS_SENTENCE_CASE": {
+    "message": "高级设置"
+  }, 
+  "CLOUD_INSTALL_LOGIN_TITLE": {
+    "message": "选择您希望自己的云服务器位于什么位置。"
+  }, 
+  "SHARING_UNAVAILABLE_MESSAGE": {
+    "message": "抱歉！您使用的是 Firefox 37，其中存在导致无法分享的错误（请参阅 git.io/vf5x1）。Firefox 38 中已更正此错误，因此您可以升级 Firefox 或改用 Chrome 来进行分享。"
+  }, 
+  "RETRIEVING_LOGS": {
+    "message": "正在检索日志并分析您的网络…"
+  }, 
+  "MORE_INFO": {
+    "message": "更多信息"
+  }, 
+  "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY": {
+    "message": "正在等待 uProxy 启动…"
+  }, 
+  "GRANT": {
+    "message": "授权"
+  }, 
+  "NAME_THIS_DEVICE": {
+    "message": "请为此设备命名"
+  }, 
+  "FEEDBACK_PLACEHOLDER": {
+    "message": "您的反馈"
+  }, 
+  "DISCONNECTED_MESSAGE": {
+    "message": "如果您停用代理，您的网络流量将不再经由您好友的计算机。您可能需要先关闭已打开的所有敏感页面，然后再继续。"
+  }, 
+  "START_BROWSING": {
+    "message": "开始浏览"
+  }, 
+  "CLOUD_INSTALL_ERROR_EXISTING_SERVER_TITLE": {
+    "message": "抱歉！您已经有一个 uProxy 云服务器。"
+  }, 
+  "CLOUD_INSTALL_SUCCESS_MESSAGE": {
+    "message": "现在，您可以通过自己的私有服务器与亲朋好友分享上网权限了。"
+  }, 
+  "PROMO_FAILED": {
+    "message": "无法应用促销代码。"
+  }, 
+  "OK": {
+    "message": "确定"
+  }, 
+  "EMAIL_INSTEAD_MESSAGE": {
+    "message": "抱歉！无法将您的反馈提交至 uproxy.org。请将您的反馈复制并粘贴到电子邮件中，然后发送至 info@uproxy.org。"
+  }, 
+  "ANALYSIS_RESULTS": {
+    "message": "您使用的好像是 __natType__，它__natImpact__会导致您无法与好友建立连接。"
+  }, 
+  "HOW_DO_I_FIND_ANSWER": {
+    "message": "<p>您可以使用联系人列表右下角的“与好友建立连接”按钮，邀请好友通过我们支持的某个社交网络与您一起使用代理。</p><p>要看到好友何时在线，您和好友需要同时使用同一个社交网络登录 uProxy。要同时登录多个社交网络，请转到菜单（左上角的 ≡ 图标）并展开标题 (▾)。</p>"
+  }, 
+  "FRIEND_REQUEST_SENT": {
+    "message": "已发送加好友请求"
+  }, 
+  "CLOUD_INSTALL_CANCEL_SUCCESS": {
+    "message": "已成功取消创建云服务器。"
+  }, 
+  "TRY_AGAIN": {
+    "message": "重试"
+  }, 
+  "RESTART_FAILURE_TEXT": {
+    "message": "您可能需要删除自己的云服务器并创建一个新的云服务器。"
+  }, 
+  "RESTART_SUCCESS": {
+    "message": "已成功重启服务器！"
+  }, 
+  "LAUNCH_DIGITAL_OCEAN_SETTINGS": {
+    "message": "打开 DigitalOcean 设置"
+  }, 
+  "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER": {
+    "message": "正在安装 Docker…"
+  }, 
+  "FRIEND_OFFLINE": {
+    "message": "__name__ 处于离线状态"
+  }, 
+  "DISCONNECTED_FROM_FRIEND": {
+    "message": "我与好友之间的连接被断开了。"
+  }, 
+  "LANGUAGE": {
+    "message": "语言"
+  }, 
+  "SUBMIT_FEEDBACK_SENTENCE_CASE": {
+    "message": "提交反馈"
+  }, 
+  "CONNECT": {
+    "message": "连接"
+  }, 
+  "FRIENDS_WHO_CAN_GET": {
+    "message": "可通过您获取上网权限的好友"
+  }, 
+  "START_VPN": {
+    "message": "启动 VPN"
+  }, 
+  "ACCEPT_OFFER": {
+    "message": "接受邀请"
+  }, 
+  "REMOVING_UPROXY_CLOUD_STATUS": {
+    "message": "正在移除 uProxy 云服务器…"
+  }, 
+  "NO_CUSTOM_ERROR_PLACEHOLDER": {
+    "message": "请选择与您的反馈最相似的反馈"
+  }, 
+  "QUIVER_LOGIN_TEXT": {
+    "message": "通过 uProxy 网络，您可以轻松可靠地找到好友并与好友建立连接。<uproxy-faq-link anchor='whatIsUproxyNetwork'>了解详情</uproxy-faq-link>。"
+  }, 
+  "HOW_DO_I_SUBMIT_ANSWER": {
+    "message": "<p>要在 uProxy 中提交反馈，请转到菜单（≡ 图标）并选择“提交反馈”。您也可以向我们发送电子邮件，电子邮件地址是 <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>。</p>"
+  }, 
+  "PROCEED_TO_UPROXY_TITLE": {
+    "message": "您的 DigitalOcean 帐户已设置完毕！"
+  }, 
+  "PORT_CONTROL_NOT_SUPPORTED": {
+    "message": "您的路由器未启用端口控制。"
+  }, 
+  "CLOUD_SHARE_INSTRUCTIONS": {
+    "message": "将此链接发送给好友，即可分享对您的云实例的访问权限。"
+  }, 
+  "ACCESS_NOT_GRANTED": {
+    "message": "您还没有向他们授予上网权限。"
+  }, 
+  "GRANTED_ACCESS_NOTIFICATION": {
+    "message": "__name__ 已向您授予上网权限"
+  }, 
+  "FEEDBACK_SUBMITTED": {
+    "message": "您的反馈已提交至 uProxy 开发团队。"
+  }, 
+  "WHAT_IS_GITHUB_ANSWER": {
+    "message": "<p>GitHub 是帮助开发者分享代码的网站，不过 uProxy 可以使用 GitHub 分享在好友之间建立直接连接所需的信息，就像使用社交网络时一样。对于一些用户而言，GitHub 比许多社交网络都更易于访问。此外，用户可以免费<a href=\"https://github.com/join\">注册</a> GitHub。</p><p>请注意，其他人可能会知晓 GitHub 帐户是否在使用 uProxy。如果您已有 GitHub 帐户，但不希望将该帐户与 uProxy 相关联，则可以创建使用化名的 GitHub 帐户，并通过该帐户使用 uProxy。</p>"
+  }, 
+  "WHAT_IS_DIGITAL_OCEAN_ANSWER": {
+    "message": "<p>DigitalOcean 是一家云托管服务提供商。在您创建帐户并设置付款方式之后，uProxy 将能够在您帐户名下创建服务器。默认情况下，uProxy 将设置每月费用为 10 美元的服务器（DigitalOcean 提供的服务器起价为每月 5 美元，我们计划在未来支持这些服务器；但为了保证使用性能，目前要求使用高一档的服务器）。除了信用卡之外，DigitalOcean 还接受 PayPal（集成了多种付款系统，包括银联）。您可以随时暂停自己的服务器或终止自己的 DigitalOcean 帐户。</p>"
+  }, 
+  "GITHUB_INVITE_PLACEHOLDER": {
+    "message": "好友的 GitHub 用户名"
+  }, 
+  "NETWORK_AND_LOGS": {
+    "message": "分析网络并包含日志"
+  }, 
+  "CLOUD_INVITE_PLACEHOLDER": {
+    "message": "邀请代码"
+  }, 
+  "NO": {
+    "message": "否"
+  }, 
+  "LOADING_FRIENDS": {
+    "message": "正在加载 uProxy 好友"
+  }, 
+  "CANCEL_OFFER": {
+    "message": "取消邀请"
+  }, 
+  "REVOKE_ACCESS": {
+    "message": "撤消上网权限"
+  }, 
+  "ENTER_PROMO": {
+    "message": "有促销代码？请在此处输入。"
+  }, 
+  "CLOSE": {
+    "message": "关闭"
+  }, 
+  "INVITE_EMAIL_SUBJECT": {
+    "message": "通过 uProxy 与 __name__ 建立连接的邀请"
+  }, 
+  "OFFERED_ACCESS_NOTIFICATION": {
+    "message": "__name__ 向您提供了上网权限"
+  }, 
+  "WHAT_ISNT_PROXIED": {
+    "message": "不能代理哪些流量？uProxy 会不会泄露与我访问的网站有关的信息？"
+  }, 
+  "WHEN_I_AM_SHARING_ACCESS": {
+    "message": "当我和其他人分享上网权限时，他们可以访问哪些内容？"
+  }, 
+  "PROCEED_TO_UPROXY_MSG": {
+    "message": "现在，您可以返回到 uProxy，并在系统提示时选择“我有 DigitalOcean 帐户”选项。"
+  }, 
+  "CONFIRM_LOGOUT_GETTING": {
+    "message": "确定要退出吗？退出之后，您将无法再通过好友获取上网权限。"
+  }, 
+  "WHAT_IS_BETA": {
+    "message": "什么是 Beta 版？"
+  }, 
+  "SHOW_LOGS": {
+    "message": "查看日志"
+  }, 
+  "REQUESTING_ACCESS_NOTIFICATION": {
+    "message": "__name__ 正在请求上网权限"
+  }, 
+  "BACK_TO_TOP": {
+    "message": "返回页首"
+  }, 
+  "WHAT_IS_ALPHA_ANSWER": {
+    "message": "uProxy 的 Alpha 版仍处于开发阶段，有时可能不稳定，并且有些功能还不太完善，具体请参阅 GitHub 上的<a href=\"https://github.com/uProxy/uproxy/issues\">已知问题列表</a>。欢迎试用该版本并提供反馈，以协助我们改进。"
+  }, 
+  "UNABLE_TO_SHARE_WITH": {
+    "message": "无法与 __name__ 分享上网权限"
+  }, 
+  "SETTINGS_SAVED": {
+    "message": "设置已保存"
+  }, 
+  "LOGIN_REQUIRED_MESSAGE": {
+    "message": "要接受此邀请以便与 __name__ 建立连接，您需要通过 __network__ 登录 uProxy。要继续，请点击“是”。"
+  }, 
+  "CLOUD_INVITE_INSTRUCTIONS": {
+    "message": "请输入邀请代码。连接建立之后，相应好友将会出现在您的联系人列表中。"
+  }, 
+  "CLOUD_INSTALL_SUCCESS_TITLE": {
+    "message": "成功！新的云服务器已就绪。"
+  }, 
+  "UNABLE_TO_GET_FROM": {
+    "message": "无法通过 __name__ 获取上网权限"
+  }, 
+  "ACCEPT_LINK_FROM_INVITE_PAGE": {
+    "message": "我想改为输入邀请。"
+  }, 
+  "CLOUD_INSTALL_CANCEL_FAILURE": {
+    "message": "暂时无法取消创建您的云服务器。您可以在服务器就绪后将其删除。"
+  }, 
+  "WHY_IS_IT_IMPORTANT": {
+    "message": "为什么信任连接到的人员至关重要？"
+  }, 
+  "UNABLE_TO_SHARE": {
+    "message": "无法分享上网权限"
+  }, 
+  "CLOUD_INSTALL_CREATE_ACCOUNT_MESSAGE": {
+    "message": "不必担心有关在 DigitalOcean 上创建新 Droplet 的事宜，我们会帮您搞定。<uproxy-faq-link anchor='whatIsDigitalOcean'>了解详情</uproxy-faq-link>。<br>创建帐户并更新结算信息之后，请点击“登录”。"
+  }, 
+  "WHERE_TO_GET": {
+    "message": "从哪里下载 uProxy？"
+  }, 
+  "CLOUD_VIRTUAL_MACHINE": {
+    "message": "一台虚拟机"
+  }, 
+  "ERROR_SIGNING_IN": {
+    "message": "登录 __network__ 时出现问题，请重试。"
+  }, 
+  "ADD_CLOUD_INSTRUCTIONS": {
+    "message": "如果您有云邀请代码，请点击以下链接，然后在目标网页上输入您的邀请。"
+  }, 
+  "CLOUD_INSTALL_INSTALLING_WARNING": {
+    "message": "此过程最长可能需要 10 分钟的时间，请不要关闭浏览器并保持在线状态。"
+  }, 
+  "QUIVER_INVITE_INSTRUCTIONS": {
+    "message": "生成链接并将其发送给好友，以便他们在 uProxy 上找到您。您可以请求和/或提供上网权限。"
+  }, 
+  "ANALYZE_NAT": {
+    "message": "分析 NAT"
+  }, 
+  "RECONNECTING": {
+    "message": "正在重新连接…"
+  }, 
+  "GITHUB_LOGIN_CONFIRMATION": {
+    "message": "uProxy 可以利用 GitHub（一款供开发者使用的工具）帮助您与好友建立连接。<br><br>由于其他人可能会知晓哪些 GitHub 帐户在使用 uProxy，因此<strong>我们建议您创建一个新的匿名 GitHub 帐户</strong>，即使您已在使用 GitHub 也是如此。<strong>连接之前，您需要先通过 GitHub 验证您的电子邮件地址。</strong>"
+  }, 
+  "TO_SEND_LOGS": {
+    "message": "要将您的日志发送给 uProxy 团队以协助我们改进，请打开 uProxy 并点击“提交反馈”"
+  }, 
+  "CLOUD_INSTALL_ERROR_TITLE": {
+    "message": "抱歉！无法创建云服务器。"
+  }, 
+  "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS": {
+    "message": "正在下载安装脚本…"
+  }, 
+  "WHO_MADE_UPROXY": {
+    "message": "谁在开发 uProxy？"
+  }, 
+  "CLOUD_INSTALL_EXISTING_SERVER_MESSAGE": {
+    "message": "您可以手动设置自己的 uProxy 服务器。<uproxy-faq-link anchor='howDoInstallUproxyOnServer'>了解具体方法</uproxy-faq-link>"
+  }, 
+  "SUBMIT_FEEDBACK": {
+    "message": "提交反馈"
+  }, 
+  "WHY_IS_UPROXY_ASKING_ANSWER": {
+    "message": "<p>当您安装适用于 Chrome 的 uProxy 时，它会请求以下权限：(1) 读取和更改您访问的网站上的所有数据；(2) 与合作网站通信。uProxy 必须获取这些权限，才能通过您好友的连接路由您的流量。系统不会将您访问的网站的相关数据发送给 uProxy 团队或您连接的社交网络。</p>"
+  }, 
+  "ABOUT_UPROXY": {
+    "message": "借助 uProxy，您可以通过好友或安全的云连接获取上网权限，并可以通过安全的云连接与好友分享上网权限。"
+  }, 
+  "DESCRIPTION": {
+    "message": "说明"
+  }, 
+  "WHAT_IS_DIGITAL_OCEAN": {
+    "message": "什么是 DigitalOcean？"
+  }, 
+  "LOGS_TITLE": {
+    "message": "日志和网络分析"
+  }, 
+  "ENTER_INVITATION_DESCRIPTION": {
+    "message": "如果您收到了好友的邀请并想与其一起使用 uProxy，请将邀请粘贴在此处："
+  }, 
+  "FAQ_SENTENCE_CASE": {
+    "message": "获取帮助"
+  }
+}

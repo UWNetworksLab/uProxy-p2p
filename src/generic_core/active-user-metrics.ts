@@ -5,9 +5,17 @@ import storage = require('../interfaces/storage');
 
 var log :logging.Log = new logging.Log('metrics');
 
+interface ActivityReport {
+  newDate :string;  // Date in "YYYY-MM-DD" form, user timezone.
+  newCountry :string;
+  previousDate ?:string;  // Date in "YYYY-MM-DD" form, user timezone.
+  previousCountry ?:string;
+}
+
 class StoredActivityMetrics {
   public version = 1;
-  public lastGettingDate :string;  // Date in "YYYY-MM-DD" form, user timezone.
+  public unreportedActivities :ActivityReport[] = [];
+  public lastActivityReport :ActivityReport;
 };
 
 export class Metrics {
@@ -30,8 +38,25 @@ export class Metrics {
 
   public updateActivityReport = () => {
     this.onceLoaded_.then(() => {
+      // ZZ indicates unknown until we implement country lookup.
+      var country = 'ZZ';
       var today = getTodaysDateString();
-      if (today != this.data_.lastGettingDate) {
+      var lastActivityReport = this.data_.lastActivityReport;
+      if (!lastActivityReport ||
+          lastActivityReport.newDate != today ||
+          lastActivityReport.newCountry != country) {
+        // The user is either reporting getting for the first time, or the
+        // date or country has changed since the last report.
+        // Generate a new activity report.
+        var newActivityReport = {newDate: today, newCountry: country};
+        if (lastActivityReport) {
+          newActivityReport.previousDate = lastActivityReport.newDate;
+          newActivityReport.previousCountry = lastActivityReport.newCountry;
+        }
+        this.data_.unreportedActivities.push(newActivityReport);
+
+        // TODO: report all unreportedActivities.  after each success remove it from unreportedActivities
+
         // TODO: make XHR, test that this goes through the proxy, check for errors
         // TODO: if the XHR fails, we should try it again... but when?  should we save to storage the new values?
         this.postActivity_({
