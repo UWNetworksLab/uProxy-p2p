@@ -110,6 +110,7 @@ describe('RtcToNet session', function() {
   var mockDataFromPeerQueue :handler.Queue<peerconnection.Data,void>;
   var mockBytesReceived :handler.Queue<number,void>;
   var mockBytesSent :handler.Queue<number,void>;
+  var mockUpdates :handler.Queue<rtc_to_net.Status,void>;
 
   beforeEach(function() {
     mockTcpConnection = jasmine.createSpyObj('tcp connection', [
@@ -139,11 +140,14 @@ describe('RtcToNet session', function() {
 
     mockBytesReceived = new handler.Queue<number, void>();
     mockBytesSent = new handler.Queue<number, void>();
+    mockUpdates = new handler.Queue<rtc_to_net.Status, void>();
     session = new rtc_to_net.Session(
         mockDataChannel,
         mockProxyConfig,
         mockBytesReceived,
-        mockBytesSent);
+        mockBytesSent,
+        mockUpdates
+    );
   });
 
   it('onceReady fulfills with listening endpoint on successful negotiation', (done) => {

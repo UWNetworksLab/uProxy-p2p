@@ -13,17 +13,17 @@
       white-space: nowrap;
       overflow: hidden;
     }
-    core-icon.back {
+    core-icon-button.back {
       cursor: pointer;
       opacity: 0.6;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
-      margin-left: 16px;
-      margin-right: 16px;
+      margin: 0;
     }
-    core-icon.back:hover {
+    core-icon-button.back:hover {
       opacity: 1;
+      box-shadow: none;
     }
     core-toolbar {
       color: white;
@@ -31,7 +31,7 @@
     </style>
 
     <core-toolbar id='app-bar-toolbar' style="background-color: {{color}};">
-      <core-icon hidden?='{{ disableback }}' class='back' icon="arrow-back" on-tap='{{ back }}'></core-icon>
+      <core-icon-button hidden?='{{ disableback }}' class='back' icon="arrow-back" on-tap='{{ back }}'></core-icon-button>
       <div id='app-bar-title' flex>
         <content></content>
       </div>

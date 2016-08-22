@@ -1,5 +1,6 @@
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-toggle-button/paper-toggle-button.html'>
 <link rel='import' href='../../bower/core-label/core-label.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
@@ -26,6 +27,9 @@
     #container {
       height: 100%;
     }
+    #settingsContainer {
+      overflow: auto;
+    }
     #formContainer {
       padding: 20px 30px 0px;
       text-align: start;
@@ -41,7 +45,6 @@
       margin-top: 1em;
     }
     #analyzeNAT {
-      width: 100%;
       border-bottom: 1px solid rgb(221, 221, 221);
       padding: 20px 30px;
       text-align: start;
@@ -72,23 +75,40 @@
       text-align: center;
       background-color: #ffffff;
     }
-    core-tooltip::shadow #tooltip {
-      /* Without this, the first time you view the
-         tooltip, it appears off center. */
-      left: -64px !important;
+    #enableTor {
+      border-bottom: 1px solid rgb(221, 221, 221);
+      padding: 20px 30px;
+      text-align: start;
+      overflow: auto;
+      color: #12A391;
     }
-    paper-input-decorator[id=advancedSettingsDecorator] /deep/ .unfocused-underline,
-    paper-input-decorator[id=advancedSettingsDecorator] /deep/ .focused-underline {
-      /* Remove the underline from the advanced settings textbox. */
-      height: 0px;
+    #enableTor core-icon {
+      height: 15px !important;
+      color: grey;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      margin-right: 0px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
     }
-    paper-input-decorator {
-      font-size: 1.4em;
+    #enableTor core-icon:hover {
+      opacity: 1;
+    }
+    #enableTor paper-toggle-button {
+      float: right;
+    }
+    #enableTor paper-input-decorator[id=torPortDecorator] {
+      font-size: 1.0em;
+      font-weight: normal;
       background-color: rgb(240,240,240);
-      padding-left: 10px;
-      padding-top: 0;
-      margin-bottom: 0.75em;
-      margin-top: 0.75em;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-bottom: 6px;
+      padding-top: 2px;
+      margin-bottom: 0;
+      margin-top: 5px;
+      margin-right: 0;
     }
     textarea[fit] {
       /* fit does not properly size textareas on Firefox */
@@ -101,6 +121,33 @@
     }
     .error {
       color: rgb(200, 112, 112);
+    }
+    paper-toggle-button::shadow [checked] .toggle {
+      background-color: #12A391;
+    }
+    paper-toggle-button::shadow [checked] .toggle-ink {
+      color: #12A391;
+    }
+    core-tooltip::shadow #tooltip {
+      /* Without this, the first time you view the
+         tooltip, it appears off center. */
+      left: -64px !important;
+    }
+    paper-input-decorator[id=advancedSettingsDecorator] /deep/ .unfocused-underline,
+    paper-input-decorator[id=advancedSettingsDecorator] /deep/ .focused-underline {
+      /* Remove the underline from the advanced settings textbox. */
+      height: 0px;
+    }
+    paper-input-decorator[id=advancedSettingsDecorator] {
+      height: 10em;
+    }
+    paper-input-decorator {
+      font-size: 1.4em;
+      background-color: rgb(240,240,240);
+      padding-left: 10px;
+      padding-top: 0;
+      margin-bottom: 0.75em;
+      margin-top: 0.75em;
     }
     #portControlBox {
       border-bottom: 1px solid rgb(221, 221, 221);
@@ -142,59 +189,93 @@
         <uproxy-app-bar on-go-back='{{ close }}'>
           {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
-        <div id='analyzeNAT'>
-          <p class='inputLabel'>
-            <uproxy-link on-tap='{{ viewLogs }}'>
-              {{ "ANALYZE_NAT" | $$(model.globalSettings.language) }}
-            </uproxy-link>
-            <uproxy-faq-link anchor='doesUproxyLogData'>
-              <core-icon icon="help"></core-icon>
-            </uproxy-faq-link>
-          </p>
-        </div>
-        <div id='portControlBox'>
+        <div id='settingsContainer' flex>
+          <div id='analyzeNAT'>
+            <p class='inputLabel'>
+              <uproxy-link on-tap='{{ viewLogs }}'>
+                {{ "ANALYZE_NAT" | $$(model.globalSettings.language) }}
+              </uproxy-link>
+              <uproxy-faq-link anchor='doesUproxyLogData'>
+                <core-icon icon="help"></core-icon>
+              </uproxy-faq-link>
+            </p>
+          </div>
+          <div id='enableTor'>
+            <p class='inputLabel'>
+              {{ "TOR_ENABLE" | $$(model.globalSettings.language) }}
+              <uproxy-faq-link anchor='howToEnableTorReproxy'>
+                <core-icon icon="help"></core-icon>
+              </uproxy-faq-link>
+              <paper-toggle-button id='torEnableButton'></paper-toggle-button>
+            </p>
+            <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$(model.globalSettings.language) }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
+              <input is='core-input' maxlength="5" value='{{ torPort }}' />
+            </paper-input-decorator>
+            <div id='torEnableToggledOn' hidden?='{{ !$.torEnableButton.checked }}'>
+              <p class='advancedSettingsText' style='color:red;'>
+                {{ "TOR_ENABLE_WARNING" | $$(model.globalSettings.language) }}
+              </p>
+              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "UNCHECKED" }}'>
+                {{ 'TOR_PORT_UNCHECKED' | $$(model.globalSettings.language) }}
+              </span>
+              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "TRUE" }}'>
+                {{ 'TOR_PORT_TRUE' | $$(model.globalSettings.language) }} {{ testedTorPort  | $$(model.globalSettings.language) }}
+              </span>
+              <span class='advancedSettingsText' style='color:red;' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "FALSE" }}'>
+                {{ 'TOR_PORT_FALSE' | $$(model.globalSettings.language) }} {{ testedTorPort  | $$(model.globalSettings.language) }}
+              </span>
+              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "PENDING" }}'>
+                {{ 'TOR_PORT_PENDING' | $$(model.globalSettings.language) }} {{ testedTorPort  | $$(model.globalSettings.language) }}
+              </span>
+              <uproxy-link on-tap='{{ refreshReproxyCheck }}' role='button'>
+                <core-icon icon='refresh'></core-icon>
+              </uproxy-link>
+            </div>
+          </div>
+          <div id='portControlBox'>
 
-          <p class='inputLabel'>
-            {{ 'PORT_CONTROL_TITLE' | $$(model.globalSettings.language) }}
-            <uproxy-faq-link anchor='whatIsPortControl'>
-              <core-icon icon='help'></core-icon>
-            </uproxy-faq-link>
-          </p>
-          <span class='label' hidden?='{{ !_supportsPortControl(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_SUPPORTED' | $$(model.globalSettings.language) }}
-          </span>
-          <span class='label' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$(model.globalSettings.language) }}
-          </span>
-          <span class='label' hidden?='{{ !_portControlStatusPending(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_PENDING' | $$(model.globalSettings.language) }}
-          </span>
-          <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
-            <core-icon icon='refresh'></core-icon>
-          </uproxy-link>
-          <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$(model.globalSettings.language) }}
-            <uproxy-faq-link anchor='whatIsPortControl'>
-              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO_LINK' | $$(model.globalSettings.language) }}
-            </uproxy-faq-link>
-          </p>
+            <p class='inputLabel'>
+              {{ 'PORT_CONTROL_TITLE' | $$(model.globalSettings.language) }}
+              <uproxy-faq-link anchor='whatIsPortControl'>
+                <core-icon icon='help'></core-icon>
+              </uproxy-faq-link>
+            </p>
+            <span class='label' hidden?='{{ !_supportsPortControl(portControlSupport) }}'>
+              {{ 'PORT_CONTROL_SUPPORTED' | $$(model.globalSettings.language) }}
+            </span>
+            <span class='label' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
+              {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$(model.globalSettings.language) }}
+            </span>
+            <span class='label' hidden?='{{ !_portControlStatusPending(portControlSupport) }}'>
+              {{ 'PORT_CONTROL_PENDING' | $$(model.globalSettings.language) }}
+            </span>
+            <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
+              <core-icon icon='refresh'></core-icon>
+            </uproxy-link>
+            <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
+              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$(model.globalSettings.language) }}
+              <uproxy-faq-link anchor='whatIsPortControl'>
+                {{ 'MORE_INFO' | $$(model.globalSettings.language) }}
+              </uproxy-faq-link>
+            </p>
+          </div>
+          <div id='formContainer' vertical layout>
+            <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$(model.globalSettings.language) }}</p>
+            <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
+              <textarea value='{{ settings }}' fit>
+              </textarea>
+            </paper-input-decorator>
+            <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
+              {{ "SETTINGS_SAVED" | $$(model.globalSettings.language) }}
+            </p>
+            <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
+              {{ "SETTINGS_BAD_FORMAT_ERROR" | $$(model.globalSettings.language) }}
+            </p>
+            <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
+              {{ "SETTINGS_JSON_ERROR" | $$(model.globalSettings.language) }}
+            </p>
+          </div> <!-- end of form container -->
         </div>
-        <div id='formContainer' flex vertical layout>
-          <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$(model.globalSettings.language) }}</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$(model.globalSettings.language) }}' flex>
-            <textarea value='{{ settings }}' fit>
-            </textarea>
-          </paper-input-decorator>
-          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
-            {{ "SETTINGS_SAVED" | $$(model.globalSettings.language) }}
-          </p>
-          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
-            {{ "SETTINGS_BAD_FORMAT_ERROR" | $$(model.globalSettings.language) }}
-          </p>
-          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
-            {{ "SETTINGS_JSON_ERROR" | $$(model.globalSettings.language) }}
-          </p>
-        </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
           {{ "SET" | $$(model.globalSettings.language) }}
         </div>

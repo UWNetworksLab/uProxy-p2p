@@ -1,7 +1,6 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel="import" href="../../bower/core-signals/core-signals.html">
-
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='button.html'>
@@ -16,6 +15,9 @@
         width: 100%;
         background-color: white;
       }
+    #container {
+      height: 100%;
+    }
       .view {
         overflow: auto;
       }
@@ -201,34 +203,36 @@
     <core-signals on-core-signal-open-invite-user-dialog='{{ openInviteUserPanel }}'></core-signals>
 
     <core-overlay id='inviteUserPanel'>
-      <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-        {{ 'CONNECT_WITH_A_FRIEND' | $$(model.globalSettings.language) }}
-      </uproxy-app-bar>
+      <div id='container' vertical layout>
+        <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
+          {{ "CONNECT_WITH_A_FRIEND" | $$(model.globalSettings.language) }}
+        </uproxy-app-bar>
 
-      <div class='view' flex>
-        <div id="allInviteMethods">
-          <div class='acceptInvite'>
-            <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$(model.globalSettings.language) }}' layout vertical>
-              <input is='core-input' value='{{ inviteCode }}' />
-            </paper-input-decorator>
-            <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$(model.globalSettings.language) }}</uproxy-button>
-          </div>
+        <div class='view' flex>
+          <div id="allInviteMethods">
+            <div class='acceptInvite'>
+              <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$(model.globalSettings.language) }}' layout vertical>
+                <input is='core-input' value='{{ inviteCode }}' />
+              </paper-input-decorator>
+              <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$(model.globalSettings.language) }}</uproxy-button>
+            </div>
 
-          <div id='allNetworkButtons'>
-            <template repeat='{{ n in model.networkNames }}' vertical layout>
-              <div on-tap='{{networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
-                <core-icon icon='uproxy-icons:{{n}}'></core-icon>
-                <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
-                <div class='chevronWrapper'>
-                  <core-icon icon="chevron-right"></core-icon>
+            <div id='allNetworkButtons'>
+              <template repeat='{{ n in model.networkNames }}' vertical layout>
+                <div on-tap='{{networkTapped }}' class='networkLoginButton' data-network='{{n}}'>
+                  <core-icon icon='uproxy-icons:{{n}}'></core-icon>
+                  <div class='networkName'>{{getNetworkDisplayName(n)}}</div>
+                  <div class='chevronWrapper'>
+                    <core-icon icon="chevron-right"></core-icon>
+                  </div>
                 </div>
-              </div>
-            </template>
+              </template>
 
-          </div> <!-- end of #allNetworkButtons -->
+            </div> <!-- end of #allNetworkButtons -->
 
-          <div id="weWontPostLearnMore"></div>
-        </div> <!--End of #allInviteMethods -->
+            <div id="weWontPostLearnMore"></div>
+          </div> <!--End of #allInviteMethods -->
+        </div>
       </div>
     </core-overlay>
 

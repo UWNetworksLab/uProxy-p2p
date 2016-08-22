@@ -4,6 +4,7 @@ interface Tun2Socks {
   start(socksServerAddress:string) : Promise<string>;
   stop(): Promise<string>;
   onDisconnect(): Promise<string>;
+  deviceSupportsPlugin(): Promise<boolean>;
 }
 
 interface Window {

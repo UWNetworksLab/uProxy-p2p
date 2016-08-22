@@ -381,9 +381,18 @@
                 <div class='statusText' horizontal layout>
                   <core-icon icon='warning'></core-icon>
                   <span flex>
-                    Other proxy settings in use
+                    {{ "OTHER_PROXY_IN_USE_ERR" | $$ }}
                   </span>
-                  <a href='#' on-tap='{{ openProxyError }}'>GET HELP</a>
+                  <a href='#' on-tap='{{ openProxyError }}'>{{ "GET_HELP" | $$ }}</a>
+                </div>
+              </div>
+              <div class='statusRow error' hidden?='{{ !(model.globalSettings.reproxy.enabled && model.reproxyError) }}'>
+                <div class='statusText' horizontal layout>
+                  <core-icon icon='warning'></core-icon>
+                  <span flex>
+                    {{ "REPROXY_ERR" | $$ }}
+                  </span>
+                  <a href='#' on-tap='{{ openReproxyError }}'>{{ "GET_HELP" | $$ }}</a>
                 </div>
               </div>
               <div class='statusRow' hidden?='{{!gettingStatus}}'>
@@ -469,6 +478,12 @@
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
 
     <uproxy-proxy-error id='proxyError'></uproxy-proxy-error>
+
+    <uproxy-dialog id='reproxyError' backdrop layered='false'>
+      <core-icon class="close button" icon="clear" on-tap='{{ closeReproxyError }}'></core-icon>
+      <h2>{{ "REPROXY_ERR" | $$ }}</h2>
+      <p>{{ "REPROXY_ERROR_DETAILS" | $$ }}</p>
+    </uproxy-dialog>
 
     <paper-toast id='toast'
         text='{{ toastMessage }}' responsiveWidth='320px'
