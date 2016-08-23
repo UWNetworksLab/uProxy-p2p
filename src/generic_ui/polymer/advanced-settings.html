@@ -99,10 +99,18 @@
       float: right;
     }
     #bandwidthLimitLabel {
-      width: 100px;
+      width: 150px;
+      margin-top: 5px;
+    }
+    #bandwidthLimitEntry {
+      display: inline-flex;
+    }
+    #bandwidthLimitAnswer {
+      display: inline-flex;
     }
     #bandwidthSet {
       margin-top: 5px;
+      height: 40px;
     }
     #enableTor core-icon {
       height: 15px !important;
@@ -197,7 +205,6 @@
       padding: 20px 30px;
       text-align: start;
       color: #12A391;
-      overflow: auto;
     }
     #portControlBox core-icon {
       height: 15px !important;
@@ -221,12 +228,12 @@
     #portControlBox .info {
       margin-bottom: 0px;
     }
-    .align-left {
+/*    .align-left {
       float: left;
     }
     .align-right {
       float: right;
-    }
+    }*/
     </style>
     <uproxy-state id="state"></uproxy-state>
 
@@ -256,15 +263,15 @@
               </uproxy-faq-link>
               <paper-toggle-button id='bandwidthLimitEnabled' on-tap='{{ setLimit }}'></paper-toggle-button>
             </p>
-            <div hidden?='{{ !$.bandwidthLimitEnabled.checked }}'>
-              <div class='align-left' id='bandwidthLimitLabel'>
+            <div id='bandwidthLimitEntry' hidden?='{{ !$.bandwidthLimitEnabled.checked }}'>
+              <div id='bandwidthLimitLabel'>
                 {{ "LIMIT_BANDWIDTH_LABEL" | $$}}
               </div>
-              <div class='align-right'>
-                <paper-input-decorator id='bandwidthLimitDecorator' label='{{ "LIMIT_BANDWIDTH" | $$ }}' class='align-left' error='{{ "INVALID_BANDWIDTH_ERROR" | $$ }}'>
+              <div id='bandwidthLimitAnswer'>
+                <paper-input-decorator id='bandwidthLimitDecorator' label='{{ "LIMIT_BANDWIDTH" | $$ }}' error='{{ "INVALID_BANDWIDTH_ERROR" | $$ }}'>
                   <input is='core-input' type='number' min="10000" value='{{ bandwidthLimit }}' />
                 </paper-input-decorator>
-                <uproxy-button on-tap='{{ setLimit }}' class='align-right' id='bandwidthSet'>
+                <uproxy-button on-tap='{{ setLimit }}' id='bandwidthSet'>
                   {{ "SAVE" | $$}}
                 </uproxy-button>
               </div>
