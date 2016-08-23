@@ -798,7 +798,7 @@ module.exports = (grunt) ->
         noImplicitAny: true
         sourceMap: false
         module: 'commonjs'
-        fast: 'watch'
+        fast: 'always'
         rootDir: '.'
         allowJs: true
       
