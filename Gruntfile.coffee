@@ -106,17 +106,6 @@ doVulcanize = (src, dest, inline, csp) ->
     dest: dest
   }]
 
-compileTypescript = (files) ->
-  src: files.concat('!**/*.d.ts')
-  options:
-    target: 'es5'
-    comments: true
-    noImplicitAny: true
-    sourceMap: false
-    declaration: true
-    module: 'commonjs'
-    fast: 'always'
-
 readJSONFile = (file) -> JSON.parse(fs.readFileSync(file, 'utf8'))
 
 getWithBasePath = (files, base = '') ->
@@ -325,29 +314,29 @@ module.exports = (grunt) ->
 
     copy: {
       # Copy releveant non-typescript src files to dev build.
-      dev:
-        files: [
-          {
-              nonull: true,
-              expand: true,
-              cwd: 'src/',
-              src: [
-                '**/*',
-                '!generic_core/dist_build/*',
-                '!generic_core/dev_build/*'
-              ],
-              dest: devBuildPath,
-              onlyIf: 'modified'
-          }
-          {
-              nonull: true,
-              expand: true,
-              cwd: 'src/generic_core/dev_build/',
-              src: ['*'],
-              dest: devBuildPath + '/generic_core',
-              onlyIf: 'modified'
-          }
-        ]
+      resources:
+        files: [{
+          nonull: true,
+          expand: true,
+          cwd: 'src/',
+          src: [
+            '**/*',
+            '!**/*.ts'
+            '!generic_core/dist_build/*',
+            '!generic_core/dev_build/*'
+          ],
+          dest: devBuildPath,
+          onlyIf: 'modified'
+        }]
+      devGenericCore:
+        files: [{
+          nonull: true,
+          expand: true,
+          cwd: 'src/generic_core/dev_build/',
+          src: ['*'],
+          dest: devBuildPath + '/generic_core',
+          onlyIf: 'modified'
+        }]
 
       # Copy releveant files for distribution.
       dist:
@@ -804,21 +793,35 @@ module.exports = (grunt) ->
     # for code running outside, due to the differences in the meaning
     # of the (global) freedom object between the two environments.
     ts:
-      moduleEnv: compileTypescript [
-        devBuildPath + '/**/*.ts'
-        '!' + devBuildPath + '/lib/build-tools/**/*.ts'
-        '!' + devBuildPath + '/integration/**/*.ts'
-        '!' + devBuildPath + '/**/*.core-env.ts'
-        '!' + devBuildPath + '/**/*.core-env.spec.ts'
-        '!' + androidDevPath + '/**/*.ts'
-      ]
-      coreEnv: compileTypescript [
-        devBuildPath + '/**/*.core-env.ts'
-        devBuildPath + '/**/*.core-env.spec.ts'
-        '!' + devBuildPath + '/lib/build-tools/**/*.ts'
-        '!' + devBuildPath + '/integration/**/*.ts'
-        '!' + androidDevPath + '/**/*.ts'
-      ]
+      options:
+        target: 'es5'
+        comments: true
+        noImplicitAny: true
+        sourceMap: false
+        module: 'commonjs'
+        fast: 'watch'
+        rootDir: '.'
+        allowJs: true
+      
+      moduleEnv:
+        src: [
+          'src/**/*.ts',
+          '!src/**/*.d.ts',
+          '!src/lib/build-tools/**/*.ts',
+          '!src/integration/**/*.ts',
+          '!src/**/*.core-env.ts',
+          '!src/**/*.core-env.spec.ts'
+        ]
+        outDir: 'build'
+
+      coreEnv:
+        src: [
+          'src/**/*.core-env.ts',
+          'src/**/*.core-env.spec.ts',
+          '!src/lib/build-tools/**/*.ts',
+          '!src/integration/**/*.ts'
+        ]
+        outDir: 'build'
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
@@ -1026,7 +1029,8 @@ module.exports = (grunt) ->
     return tasks
 
   grunt.registerTask 'base', [
-    'copy:dev'
+    'copy:resources'
+    'copy:devGenericCore'
     'ts'
     'version_file'
     'browserify:chromeAppMain'
@@ -1252,7 +1256,6 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'lint', [
-    'copy:dev'
     'tslint'
   ]
 
