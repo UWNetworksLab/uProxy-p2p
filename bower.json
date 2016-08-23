@@ -21,7 +21,7 @@
     "web-animations-js": "^2.2.2"
   },
   "resolutions": {
-    "webcomponentsjs": "^0.6.0",
+    "webcomponentsjs": "^0.7.22",
     "core-overlay": "0.1.1",
     "web-animations-js": "^2.2.2"
   }
