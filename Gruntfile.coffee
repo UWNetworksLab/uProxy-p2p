@@ -904,7 +904,7 @@ module.exports = (grunt) ->
     watch:
       resources:
         files: ['src/**/*', '!src/**/*.ts']
-        tasks: ['sync:resources']
+        tasks: ['copy:resources']
       typescript:
         files: ['src/**/*.ts'],
         tasks: ['ts'],
