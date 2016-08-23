@@ -82,6 +82,11 @@ export class Model {
   // Flag for error connecting to reproxy
   public reproxyError = false;
 
+  // Each entry is a Promise if reconnection is in progress for that network.
+  // The promise resolves if reconnection succeeds, and rejects if it fails or
+  // is canceled.
+  public reconnectPending : {[socialNetwork:string] : Promise<uproxy_core_api.LoginResult>} = {};
+
   // userId is included as an optional parameter because we will eventually
   // want to use it to get an accurate network.  For now, it is ignored and
   // serves to remind us of where we still need to add the info

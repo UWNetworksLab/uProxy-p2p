@@ -69,9 +69,10 @@ export class User implements social.BaseUser {
   }
 
   /**
-   * Update user details.
+   * Update user details.  Returns a list of instances that are online and
+   * were not previously known to be online.
    */
-  public update = (payload :social.UserData) => {
+  public update = (payload :social.UserData) : social.InstanceData[] => {
     var profile :social.UserProfileMessage = payload.user;
     if (this.userId !== profile.userId) {
       console.error('Unexpected userId: ' + profile.userId);
@@ -97,7 +98,7 @@ export class User implements social.BaseUser {
     this.imageData = user_interface.getImageData(this.userId, this.imageData,
                                                  profile.imageData);
 
-    this.mergeOfferingInstaces_(payload.offeringInstances);
+    let change = this.mergeOfferingInstances_(payload.offeringInstances);
 
     this.allInstanceIds = payload.allInstanceIds;
     this.updateInstanceDescriptions_();
@@ -114,6 +115,8 @@ export class User implements social.BaseUser {
 
     this.gettingConsentState = this.calculateGettingConsentState_();
     this.sharingConsentState = this.calculateSharingConsentState_();
+
+    return change;
   }
 
   private showNotificationsFromUpdate_ = (payload: social.UserData): void => {
@@ -144,25 +147,44 @@ export class User implements social.BaseUser {
     }
   }
 
-  private mergeOfferingInstaces_ = (newOfferingIrstances: social.InstanceData[]): void => {
-    // iterate backwards to allow removing elements
-    var i = this.offeringInstances.length;
-    while (i--) {
-      var found = _.findIndex(newOfferingIrstances, (obj) => {
-        return obj.instanceId === this.offeringInstances[i].instanceId;
-      });
+  // TODO: Replace with _.keyBy once we upgrade to lodash v4.
+  private static key_(instances:social.InstanceData[])
+      : {[instanceId:string]: social.InstanceData} {
+    let obj :{[instanceId:string]: social.InstanceData} = {};
+    instances.forEach((instance) => {
+      obj[instance.instanceId] = instance;
+    });
+    return obj;
+  }
 
-      if (found !== -1) {
-        _.merge(this.offeringInstances[i], newOfferingIrstances[found]);
-        newOfferingIrstances.splice(found, 1);
+  private mergeOfferingInstances_ =
+      (newOfferingInstances: social.InstanceData[]): social.InstanceData[] => {
+    let oldMap = User.key_(this.offeringInstances);
+    let newMap = User.key_(newOfferingInstances);
+    // Remove obsolete elements of this.offeringInstances.
+    // this.offeringInstances can't be replaced, because it's being observed by
+    // Polymer, so we have to mutate it (i.e. use _.remove, not filter).
+    _.remove(this.offeringInstances, (instance) => {
+      return !(instance.instanceId in newMap);
+    });
+    let newOnlineInstances : social.InstanceData[] = [];
+    for (let instanceId in newMap) {
+      let newInstance = newMap[instanceId];
+      let alreadyOnline = false;
+      if (instanceId in oldMap) {
+        let oldInstance = oldMap[instanceId];
+        alreadyOnline = oldInstance.isOnline;
+        // The instance objects in this.offeringInstances are also being
+        // observed by Polymer, so we have to mutate them, not replace them.
+        _.merge(oldInstance, newInstance);
       } else {
-        this.offeringInstances.splice(i, 1);
+        this.offeringInstances.push(newInstance);
+      }
+      if (newInstance.isOnline && !alreadyOnline) {
+        newOnlineInstances.push(newInstance);
       }
     }
-
-    for (var j in newOfferingIrstances) {
-      this.offeringInstances.push(newOfferingIrstances[j]);
-    }
+    return newOnlineInstances;
   }
 
   private shouldGetBeExpanded_ = (): boolean => {

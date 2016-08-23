@@ -76,19 +76,20 @@ describe('UI.User', () => {
   });
 
   it('does not change description if only 1 instance', () => {
-    sampleUser.update(makeUpdateMessage({
+    let newInstance = getInstance('instance1', '')
+    expect(sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         'instance1'
       ],
       offeringInstances: [
-        getInstance('instance1', '')
+        newInstance
       ]
-    }));
+    }))).toContain(newInstance);
     expect(sampleUser.offeringInstances[0].description).toEqual('');
   });
 
   it('updates empty descriptions when multiple instances', () => {
-    sampleUser.update(makeUpdateMessage({
+    expect(sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         'instance1',
         'instance2',
@@ -99,7 +100,7 @@ describe('UI.User', () => {
         getInstance('instance2', 'laptop'),
         getInstance('instance3', '')
       ]
-    }));
+    })).length).toEqual(3);
     expect(sampleUser.offeringInstances[0].description).toEqual(
         ui.i18n_t('DESCRIPTION_DEFAULT', { number: 1 }));
     expect(sampleUser.offeringInstances[1].description).toEqual('laptop');
@@ -108,14 +109,14 @@ describe('UI.User', () => {
   });
 
   it('show notification if isOffering changes when not ignoring', () => {
-    sampleUser.update(makeUpdateMessage({
+    expect(sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         'instance1'
       ],
       offeringInstances: [
         getInstance('instance1', '')
       ]
-    }));
+    })).length).toEqual(1);
 
     expect(ui.showNotification).toHaveBeenCalledWith(
         ui.i18n_t('OFFERED_ACCESS_NOTIFICATION', { name: sampleUser.name }),
@@ -142,7 +143,7 @@ describe('UI.User', () => {
   });
 
   it('shows notificaion if isRequesting changes when not ignoring', () => {
-    sampleUser.update(makeUpdateMessage({
+    expect(sampleUser.update(makeUpdateMessage({
       consent: {
         localGrantsAccessToRemote: false,
         localRequestsAccessFromRemote: false,
@@ -150,7 +151,7 @@ describe('UI.User', () => {
         ignoringRemoteUserRequest: false,
         ignoringRemoteUserOffer: false
       }
-    }));
+    })).length).toEqual(0);
     expect(ui.showNotification).toHaveBeenCalledWith(
         ui.i18n_t('REQUESTING_ACCESS_NOTIFICATION', { name: sampleUser.name }),
         { mode: 'share', user: 'fakeuser', network: 'testNetwork' });
@@ -170,7 +171,7 @@ describe('UI.User', () => {
   });
 
   it('does not replace instances', () => {
-    sampleUser.update(makeUpdateMessage({
+    expect(sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         '1',
         '2'
@@ -179,19 +180,19 @@ describe('UI.User', () => {
         getInstance('1', ''),
         getInstance('2', '')
       ]
-    }));
+    })).length).toEqual(2);
 
     var second = sampleUser.offeringInstances[1];
     expect(second.instanceId).toEqual('2');
 
-    sampleUser.update(makeUpdateMessage({
+    expect(sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         '2'
       ],
       offeringInstances: [
         getInstance('2', '')
       ]
-    }));
+    })).length).toEqual(0);
 
     expect(sampleUser.offeringInstances[0]).toBe(second);
   });

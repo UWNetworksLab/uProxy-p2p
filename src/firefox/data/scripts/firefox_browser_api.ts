@@ -58,13 +58,13 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public startUsingProxy =
       (endpoint: net.Endpoint, bypass: string[],
-       opts: browser_api.ProxyConnectOptions) => {
+       opts: browser_api.ProxyConnectOptions) : Promise<void> => {
     //TODO actually use bypass list
-    port.emit('startUsingProxy', endpoint);
+    return this.promiseEmit('startUsingProxy', endpoint);
   }
 
-  public stopUsingProxy = () => {
-    port.emit('stopUsingProxy');
+  public stopUsingProxy = () : Promise<void> => {
+    return this.promiseEmit('stopUsingProxy');
   }
 
   public bringUproxyToFront = () => {

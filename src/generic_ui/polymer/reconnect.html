@@ -24,7 +24,9 @@
     }
     </style>
 
-    <uproxy-dialog backdrop opened='{{ model.reconnecting }}'
+    <!-- Open this dialog when reconnecting to the social network but not the peer.
+         If we are reconnecting to the peer, that dialog will show progress instead. -->
+    <uproxy-dialog backdrop opened='{{ model.reconnecting && !core.disconnectedWhileProxying}}'
         layered='false' id='reconnectDialog' autoCloseDisabled='true'>
       <div>
         <p>{{ "ATTEMPTING_RECONNECT" | $$(model.globalSettings.language) }}</p>

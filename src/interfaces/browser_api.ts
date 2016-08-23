@@ -8,8 +8,8 @@ import net = require('../lib/net/net.types');
 export interface BrowserAPI {
   // Configuration and control of the browsers proxy settings.
   startUsingProxy(
-    endpoint: net.Endpoint, bypass: string[], opts: ProxyConnectOptions): void;
-  stopUsingProxy() :void;
+    endpoint: net.Endpoint, bypass: string[], opts: ProxyConnectOptions): Promise<void>;
+  stopUsingProxy() :Promise<void>;
   // Set the browser icon for the extension/add-on.
   setIcon(iconFile :string) :void;
   // Open a new tab if it is not already open

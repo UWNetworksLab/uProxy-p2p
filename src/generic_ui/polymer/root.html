@@ -459,11 +459,12 @@
       <div id="disconnectDialogText">
         <h1>{{ "DISCONNECTED_TITLE" | $$(model.globalSettings.language) }}</h1>
         <div id='progressWrapper' hidden?='{{ !ui.mapInstanceIdToUser_[core.disconnectedWhileProxying] }}'>
-          <div hidden?='{{ !ui.instanceTryingToGetAccessFrom }}'>
+          <!-- Show the progress element when reconnecting to the peer or social network -->
+          <div hidden?='{{ !ui.instanceTryingToGetAccessFrom && !model.reconnecting }}'>
             <strong>{{ 'RECONNECTING' | $$(model.globalSettings.language) }}</strong>
             <paper-progress indeterminate='true'></paper-progress>
           </div>
-          <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom }}'>
+          <div hidden?='{{ !!ui.instanceTryingToGetAccessFrom || model.reconnecting }}'>
             <strong>{{ 'RECONNECT_FAILED' | $$(model.globalSettings.language) }}</strong>
             <uproxy-button class='dialogButton' on-tap='{{ restartProxying }}'>{{ 'RESTART_PROXYING' | $$(model.globalSettings.language) }}</uproxy-button>
           </div>
