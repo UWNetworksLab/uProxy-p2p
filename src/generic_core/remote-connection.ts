@@ -21,6 +21,7 @@ import tcp = require('../lib/net/tcp');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 declare var freedom: freedom.FreedomInModuleEnv;
+const onlineMonitor = freedom['core.online']();
 
 var PROXYING_SESSION_ID_LENGTH = 16;
 
@@ -44,7 +45,21 @@ var generateProxyingSessionId_ = (): string => {
 // module Core {
   var log :logging.Log = new logging.Log('remote-connection');
 
+  // Connections to remember, either because they're currently
+  // connected or because they'll retry given the opportunity.
+  let rememberedConnections : {[instanceId:string]: RemoteConnection} = {};
+
   export class RemoteConnection {
+
+    // Number of milliseconds before timing out socksToRtc_.start
+    private SOCKS_TO_RTC_TIMEOUT_ :number = 30000;
+    // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
+    // trying to connect) by timing out rtcToNet_.start 15 seconds later than
+    // socksToRtc_.start
+    private RTC_TO_NET_TIMEOUT_ :number = this.SOCKS_TO_RTC_TIMEOUT_ + 15000;
+    // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
+    private startSocksToRtcTimeout_ :NodeJS.Timer = null;
+    private startRtcToNetTimeout_ :NodeJS.Timer = null;
 
     public localGettingFromRemote = social.GettingState.NONE;
     public localSharingWithRemote = social.SharingState.NONE;
@@ -74,13 +89,33 @@ var generateProxyingSessionId_ = (): string => {
     // Unique ID of the most recent proxying attempt.
     private proxyingId_: string;
 
+    // The remote version of the sharer that we're currently trying to get
+    // access from.
+    private currentGetRemoteVersion_: number;
+
     constructor(
       sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void,
+      private instanceId_:string,
       private userId_?:string,
       private portControl_?:freedom.PortControl.PortControl
     ) {
       this.sendUpdate_ = sendUpdate;
       this.resetSharerCreated();
+      onlineMonitor.on('online', this.onOnline_);
+    }
+
+    private onOnline_ = () => {
+      setTimeout(() => {
+        if (this.localGettingFromRemote === social.GettingState.FAILED) {
+          log.info('Back online in the failed state; restarting');
+          this.startGet(this.currentGetRemoteVersion_);
+        }
+      }, 5000);  // 5 second delay for DHCP, etc.  TODO: Tune or remove.
+    }
+
+    public setSendUpdate =
+        (sender:(x :uproxy_core_api.Update, data?:Object) => void) => {
+      this.sendUpdate_ = sender;
     }
 
     private createSender_ = (type :social.PeerMessageType) => {
@@ -150,6 +185,14 @@ var generateProxyingSessionId_ = (): string => {
         pc = bridge.best('rtctonet', config, this.portControl_);
       }
 
+      // Set timeout to close rtcToNet_ if start() takes too long.
+      // Calling stopShare() at the end of the timeout makes the
+      // assumption that our peer failed to start getting access.
+      this.startRtcToNetTimeout_ = setTimeout(() => {
+        log.warn('Timing out rtcToNet_ connection');
+        this.stopShare();
+      }, this.RTC_TO_NET_TIMEOUT_);
+
       this.rtcToNet_ = new rtc_to_net.RtcToNet(this.userId_);
       this.rtcToNet_.start({
         allowNonUnicast: globals.settings.allowNonUnicast,
@@ -209,7 +252,8 @@ var generateProxyingSessionId_ = (): string => {
     }
 
     public startGet = (remoteVersion:number) :Promise<net.Endpoint> => {
-      if (this.localGettingFromRemote !== social.GettingState.NONE) {
+      if (this.localGettingFromRemote !== social.GettingState.NONE &&
+          this.localGettingFromRemote !== social.GettingState.FAILED) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         log.error('Currently have a connection open');
@@ -240,35 +284,11 @@ var generateProxyingSessionId_ = (): string => {
       this.socksToRtc_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
       this.socksToRtc_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);
 
-      // TODO: Change this back to listening to the 'stopped' callback
-      // once https://github.com/uProxy/uproxy/issues/1264 is resolved.
-      // Currently socksToRtc's 'stopped' callback does not get called on
-      // Firefox, possibly due to issues cleaning up sockets.
-      // onceStopping_, unlike 'stopped', gets fired as soon as stopping begins
-      // and doesn't wait for all cleanup to finish
-      this.socksToRtc_['onceStopping_'].then(() => {
-        // Stopped event is only considered an error if the user had been
-        // getting access and we hadn't called this.socksToRtc_.stop
-        // If there is an error when trying to start proxying, and a stopped
-        // event is fired, an error will be displayed as a result of the start
-        // promise rejecting.
-        // TODO: consider removing error field from STOP_GETTING_FROM_FRIEND
-        // The UI should know whether it was a user-initiated stopped event
-        // or not (based on whether they clicked stop/logout, or based on
-        // whether the browser's proxy was set).
-
-        var isError = social.GettingState.GETTING_ACCESS === this.localGettingFromRemote;
-        this.sendUpdate_(uproxy_core_api.Update.STOP_GETTING, isError);
-
-        this.localGettingFromRemote = social.GettingState.NONE;
-        this.bytesSent_ = 0;
-        this.bytesReceived_ = 0;
-        this.stateRefresh_();
-        this.socksToRtc_ = null;
-        this.activeEndpoint = null;
-      });
-
-      this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
+      if (this.localGettingFromRemote === social.GettingState.NONE) {
+        this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
+      } else {
+        this.localGettingFromRemote = social.GettingState.RETRYING;
+      }
       this.stateRefresh_();
 
       var tcpServer = new tcp.Server({
@@ -282,6 +302,7 @@ var generateProxyingSessionId_ = (): string => {
 
       var pc: peerconnection.PeerConnection<Object>;
 
+      this.currentGetRemoteVersion_ = remoteVersion;
       var localVersion = globals.effectiveMessageVersion();
       var commonVersion = Math.min(localVersion, remoteVersion);
       log.info('lowest shared client version is %1 (me: %2, peer: %3)',
@@ -320,6 +341,13 @@ var generateProxyingSessionId_ = (): string => {
 
         globals.metrics.increment('attempt');
 
+      // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
+      this.startSocksToRtcTimeout_ = setTimeout(() => {
+        log.warn('Timing out socksToRtc_ connection');
+        this.socksToRtc_.stop();
+        this.onConnectFailed_();
+      }, this.SOCKS_TO_RTC_TIMEOUT_);
+
       const start = this.socksToRtc_.start(tcpServer, pc).then((endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
         this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
@@ -328,8 +356,7 @@ var generateProxyingSessionId_ = (): string => {
         this.activeEndpoint = endpoint;
         return endpoint;
       }).catch((e :Error) => {
-        this.localGettingFromRemote = social.GettingState.NONE;
-        this.stateRefresh_();
+        this.onConnectFailed_();
         return Promise.reject(Error('Could not start proxy'));
       });
 
@@ -337,7 +364,50 @@ var generateProxyingSessionId_ = (): string => {
       this.socksToRtc_.signalsForPeer.setSyncHandler(
           this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
 
+      // onceStopped isn't defined until after calling start().
+      this.socksToRtc_.onceStopped.then(() => {
+        // Stopped event is only considered an error if the user had been
+        // getting access and we hadn't called this.socksToRtc_.stop
+        // If there is an error when trying to start proxying, and a stopped
+        // event is fired, an error will be displayed as a result of the start
+        // promise rejecting.
+
+        let isError = social.GettingState.NONE !== this.localGettingFromRemote &&
+            social.GettingState.TRYING_TO_GET_ACCESS !== this.localGettingFromRemote;
+
+        this.localGettingFromRemote = isError ? social.GettingState.FAILED :
+            social.GettingState.NONE;
+        this.bytesSent_ = 0;
+        this.bytesReceived_ = 0;
+        this.stateRefresh_();
+        this.socksToRtc_ = null;
+        this.activeEndpoint = null;
+
+        if (isError) {
+          // Check if we're online.  If we are, the error-stop may have been
+          // due to a transient condition that has already resolved, so
+          // trigger a retry (if we're still in the FAILED state).  This means
+          // that while online, broken connections will retry forever.
+          onlineMonitor.isOnline().then((online:boolean) => {
+            if (online) {
+              this.onOnline_();
+            }
+          })
+        }
+      });
+
       return start;
+    }
+
+    private onConnectFailed_ = () : void => {
+      if (this.localGettingFromRemote === social.GettingState.TRYING_TO_GET_ACCESS ||
+          this.localGettingFromRemote === social.GettingState.NONE) {
+        this.localGettingFromRemote = social.GettingState.NONE;
+      } else {
+        this.localGettingFromRemote = social.GettingState.FAILED;
+      }
+      this.socksToRtc_ = null;
+      this.stateRefresh_();
     }
 
     public stopGet = () :Promise<void> => {
@@ -348,7 +418,10 @@ var generateProxyingSessionId_ = (): string => {
       globals.metrics.increment('stop');
       this.localGettingFromRemote = social.GettingState.NONE;
       this.stateRefresh_();
-      return this.socksToRtc_.stop();
+      if (this.socksToRtc_) {
+        return this.socksToRtc_.stop();
+      }
+      return Promise.resolve<void>();
     }
 
     /*
@@ -391,6 +464,19 @@ var generateProxyingSessionId_ = (): string => {
     }
 
     private stateRefresh_ = () => {
+      if (this.localGettingFromRemote !== social.GettingState.NONE ||
+          this.localSharingWithRemote !== social.SharingState.NONE) {
+        rememberedConnections[this.instanceId_] = this;
+      } else {
+        delete rememberedConnections[this.instanceId_];
+      }
+      if (this.localGettingFromRemote !== social.GettingState.TRYING_TO_GET_ACCESS &&
+          this.localGettingFromRemote !== social.GettingState.RETRYING) {
+        clearTimeout(this.startSocksToRtcTimeout_);
+      }
+      if (this.localSharingWithRemote !== social.SharingState.TRYING_TO_SHARE_ACCESS) {
+        clearTimeout(this.startRtcToNetTimeout_);
+      }
       this.sendUpdate_(uproxy_core_api.Update.STATE, this.getCurrentState());
     }
 
@@ -401,6 +487,7 @@ var generateProxyingSessionId_ = (): string => {
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote,
         activeEndpoint: this.activeEndpoint,
+        proxyingId: this.proxyingId_,
       };
     }
 
@@ -408,4 +495,17 @@ var generateProxyingSessionId_ = (): string => {
       return this.proxyingId_;
     }
   }
+
+export function getRemoteConnection (
+    sendUpdate :(x:uproxy_core_api.Update, data?:Object) => void,
+    instanceId:string,
+    userId?:string,
+    portControl?:freedom.PortControl.PortControl) :RemoteConnection {
+  if (instanceId in rememberedConnections) {
+    let connection = rememberedConnections[instanceId];
+    connection.setSendUpdate(sendUpdate);
+    return connection;
+  }
+  return new RemoteConnection(sendUpdate, instanceId, userId, portControl);
+}
 // }
