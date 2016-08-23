@@ -800,7 +800,6 @@ module.exports = (grunt) ->
         module: 'commonjs'
         fast: 'always'
         rootDir: '.'
-        allowJs: true
       
       moduleEnv:
         src: [
@@ -901,6 +900,17 @@ module.exports = (grunt) ->
         src: [
           'src/firefox/lib/*.js'
         ]
+    
+    watch:
+      resources:
+        files: ['src/**/*', '!src/**/*.ts']
+        tasks: ['sync:resources']
+      typescript:
+        files: ['src/**/*.ts'],
+        tasks: ['ts'],
+      browserify:
+        files: ['build/**/*.js', '!build/**/*.static.js']
+        tasks: ['browserify:chromeAppMain', 'browserify:chromeExtMain']
 
     #-------------------------------------------------------------------------
     jasmine:
@@ -1277,6 +1287,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-jshint'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
+  grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-exec'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
