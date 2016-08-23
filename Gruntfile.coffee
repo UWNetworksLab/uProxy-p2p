@@ -328,13 +328,12 @@ module.exports = (grunt) ->
           dest: devBuildPath,
           onlyIf: 'modified'
         }]
+
       devGenericCore:
         files: [{
           nonull: true,
-          expand: true,
-          cwd: 'src/generic_core/dev_build/',
-          src: ['*'],
-          dest: devBuildPath + '/generic_core',
+          src: 'src/generic_core/dev_build/freedom-module.json',
+          dest: devBuildPath + '/generic_core/freedom-module.json',
           onlyIf: 'modified'
         }]
 
@@ -807,8 +806,8 @@ module.exports = (grunt) ->
         src: [
           'src/**/*.ts',
           '!src/**/*.d.ts',
-          '!src/lib/build-tools/**/*.ts',
-          '!src/integration/**/*.ts',
+          '!src/lib/build-tools/**/*',
+          '!src/integration/**/*',
           '!src/**/*.core-env.ts',
           '!src/**/*.core-env.spec.ts'
         ]
