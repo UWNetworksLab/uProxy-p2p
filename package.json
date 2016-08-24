@@ -51,6 +51,7 @@
     "grunt-contrib-jasmine": "^0.9.0",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-symlink": "^0.3.0",
+    "grunt-contrib-watch": "^1.0.0",
     "grunt-exec": "^1.0.0",
     "grunt-gitinfo": "^0.1.7",
     "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",

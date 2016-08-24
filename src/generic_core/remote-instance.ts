@@ -188,6 +188,10 @@ import ui = ui_connector.connector;
         case uproxy_core_api.Update.STATE:
           this.user.notifyUI();
           break;
+        case uproxy_core_api.Update.REPROXY_ERROR:
+        case uproxy_core_api.Update.REPROXY_WORKING:
+          ui.update(update, data);
+          break;
         default:
           log.warn('Received unexpected update from remote connection', {
             update: update,

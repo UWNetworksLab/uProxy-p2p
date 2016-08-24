@@ -24,6 +24,11 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   private socksToRtc_ :socks_to_rtc.SocksToRtc;
   private rtcToNet_ :rtc_to_net.RtcToNet;
   private socksEndpoint_ : Promise<net.Endpoint>;
+  private reproxySocksToRtc_ :socks_to_rtc.SocksToRtc;
+  private reproxyRtcToNet_ :rtc_to_net.RtcToNet;
+  private reproxyEndpoint_ : Promise<net.Endpoint>;
+  private reproxyBytesReceived_ :number = 0;
+  private reproxyBytesSent_ :number = 0;
   private echoServers_ :tcp.Server[] = [];
   private connections_ :{ [index:string]: tcp.Connection; } = {};
   private localhost_ :string = '127.0.0.1';
@@ -33,9 +38,16 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
               denyLocalhost?:boolean,
               obfuscate?:boolean,
               sessionLimit?:number,
-              ipv6Only?:boolean) {
-    this.socksEndpoint_ = this.startSocksPair_(denyLocalhost, obfuscate,
-        sessionLimit, ipv6Only);
+              ipv6Only?:boolean,
+              reproxy?:boolean) {
+    if (reproxy) {
+      this.reproxyEndpoint_ = this.startReproxySocksPair_();
+      this.socksEndpoint_ = this.startSocksPairWithReproxy_(denyLocalhost,
+          obfuscate, sessionLimit, ipv6Only);
+    } else {
+      this.socksEndpoint_ = this.startSocksPair_(denyLocalhost, obfuscate,
+          sessionLimit, ipv6Only);
+    }
   }
 
   public startEchoServer = () : Promise<number> => {
@@ -77,7 +89,8 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     }
   }
 
-  private startSocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean,
+  // Start a socksToRtc and rtcToNet pair to be used as a reproxy
+  private startReproxySocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean,
       sessionLimit?:number, ipv6Only?:boolean) : Promise<net.Endpoint> => {
     var socksToRtcEndpoint :net.Endpoint = {
       address: this.localhost_,
@@ -89,6 +102,68 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     var rtcToNetProxyConfig :ProxyConfig = {
       allowNonUnicast: !denyLocalhost  // Allow RtcToNet to contact the localhost server.
     };
+
+    if (typeof sessionLimit === 'number') {
+      rtc_to_net.RtcToNet.SESSION_LIMIT = sessionLimit;
+    }
+
+    var bridger = obfuscate ? bridge.best : bridge.preObfuscation;
+
+    this.reproxySocksToRtc_ = new socks_to_rtc.SocksToRtc();
+    this.reproxyRtcToNet_ = new rtc_to_net.RtcToNet('the user id');
+    this.reproxyRtcToNet_.start(rtcToNetProxyConfig,
+        bridger('rtctonet', rtcPcConfig));
+    this.reproxyRtcToNet_.signalsForPeer.setSyncHandler((msg:Object) => {
+      if (ipv6Only) {
+        AbstractProxyIntegrationTest.stripIPv4_(msg);
+      }
+      this.reproxySocksToRtc_.handleSignalFromPeer(msg);
+    });
+    const start = this.reproxySocksToRtc_.start(new tcp.Server(socksToRtcEndpoint),
+        bridger('sockstortc', rtcPcConfig));
+    this.reproxySocksToRtc_.signalsForPeer.setSyncHandler((msg:Object) => {
+      if (ipv6Only) {
+        AbstractProxyIntegrationTest.stripIPv4_(msg);
+      }
+      this.reproxyRtcToNet_.handleSignalFromPeer(msg);
+    });
+    // Create handlers for tracking number of bytes sent on reproxy
+    this.reproxyRtcToNet_.bytesReceivedFromPeer.setSyncHandler((bytes:number) => {
+      this.reproxyBytesReceived_ += bytes;
+    });
+    this.reproxyRtcToNet_.bytesSentToPeer.setSyncHandler((bytes:number) => {
+      this.reproxyBytesSent_ += bytes;
+    });
+    return start;
+  }
+
+  public getReproxyBytesReceived = () :Promise<number> => {
+    return Promise.resolve(this.reproxyBytesReceived_);
+  }
+  public getReproxyBytesSent = () :Promise<number> => {
+    return Promise.resolve(this.reproxyBytesSent_);
+  }
+
+  // Start a socksToRtc and rtcToNet pair
+  private startSocksPair_ = (denyLocalhost?:boolean, obfuscate?:boolean,
+      sessionLimit?:number, ipv6Only?:boolean, reproxyEndpoint?:net.Endpoint)
+      : Promise<net.Endpoint> => {
+    var socksToRtcEndpoint :net.Endpoint = {
+      address: this.localhost_,
+      port: 0
+    };
+    var rtcPcConfig :freedom.RTCPeerConnection.RTCConfiguration = {
+      iceServers: [],
+    };
+    var rtcToNetProxyConfig :ProxyConfig = {
+      allowNonUnicast: !denyLocalhost  // Allow RtcToNet to contact the localhost server.
+    };
+    if (reproxyEndpoint) {  // Add reproxy settings to proxy config
+      rtcToNetProxyConfig.reproxy = {
+        enabled: true,
+        socksEndpoint: reproxyEndpoint
+      };
+    }
 
     if (typeof sessionLimit === 'number') {
       rtc_to_net.RtcToNet.SESSION_LIMIT = sessionLimit;
@@ -115,6 +190,17 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       this.rtcToNet_.handleSignalFromPeer(msg);
     });
     return start;
+  }
+
+  // Start a socksToRtc and rtcToNet pair that reproxies through reproxyEndpoint
+  private startSocksPairWithReproxy_ = (denyLocalhost?:boolean,
+      obfuscate?:boolean, sessionLimit?:number, ipv6Only?:boolean)
+      : Promise<net.Endpoint> => {
+    return this.reproxyEndpoint_
+      .then((reproxyEndpoint :net.Endpoint) : Promise<net.Endpoint> => {
+        return this.startSocksPair_(denyLocalhost, obfuscate, sessionLimit,
+                                    ipv6Only, reproxyEndpoint);
+      });
   }
 
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
@@ -248,6 +334,12 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   public shutdown = () : Promise<void> => {
     var closeSocksToRtc = this.socksToRtc_.stop();
     var closeRtcToNet = this.rtcToNet_.stop();
+    var closeReproxySocksToRtc :Promise<void>;
+    var closeReproxyRtcToNet :Promise<void>;
+    if (this.reproxyEndpoint_) {
+      closeReproxySocksToRtc = this.reproxySocksToRtc_.stop();
+      closeReproxyRtcToNet = this.reproxyRtcToNet_.stop();
+    }
     var stopEchoServers = this.echoServers_.map((server) => {
       return server.shutdown();
     });
@@ -259,6 +351,10 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
 
     var shutdownPromises = closeConnections.concat(stopEchoServers,
         [closeRtcToNet, closeSocksToRtc]);
+    if (this.reproxyEndpoint_) {
+      shutdownPromises = shutdownPromises.concat(closeReproxySocksToRtc,
+                                                 closeReproxyRtcToNet);
+    }
     return Promise.all(shutdownPromises).then((voids:void[]) => {});
   }
 
