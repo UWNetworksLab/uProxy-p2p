@@ -1,4 +1,4 @@
-/// <reference path='../../../../node_modules/i18next-client/typescript/i18next.d.ts' />
+/// <reference path='../../../node_modules/i18next-client/typescript/i18next.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
 import i18next = require('i18next-client');
