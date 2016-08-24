@@ -72,7 +72,7 @@ import BandwidthConfig = require('./bandwidth-config');
 
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
-    private static limitBandwidth: boolean = false;
+    private static limitBandwidth: boolean = true;
     // The maximum amount of bandwidth the sharer allows each user proxying through them to use.
     private static bandwidthLimit: number = 1000000;
 
@@ -342,10 +342,24 @@ import BandwidthConfig = require('./bandwidth-config');
           var currTime = new Date().getTime();
           var timeDifference = currTime - session.startTime;
           log.debug('It has been %1 milliseconds since the session %2 was started', timeDifference, session.channelLabel());
-          var bandwidthSession = bitsInterval / (timeDifference / 1000);
+          // If session has been paused for socket overflow but has not yet resumed
+          if (session.pauseR < session.pauseStart) {
+            var diffAtEnd = new Date().getTime() - session.pauseStart;
+            session.additionalTime += diffAtEnd;
+          }
+          log.debug('Additional time paused: ' + session.additionalTime);
+          // Make sure bandwidth is calculated not including the time paused for socket overflow.
+          var bandwidthSession = bitsInterval / ((timeDifference-session.additionalTime) / 1000);
         } else {
           var bitsInterval = (session.currBytes - session.prevBytes) * 8;
-          var bandwidthSession = bitsInterval / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
+          // If session has been paused for socket overflow but has not yet resumed
+          if (session.pauseR < session.pauseStart) {
+            var diffAtEnd = new Date().getTime() - session.pauseStart;
+            session.additionalTime += diffAtEnd;
+          }
+          log.debug('Additional time paused: ' + session.additionalTime);
+          // Make sure bandwidth is calculated based on the time in last interval NOT paused, for either bandwidth or socket overflow.
+          var bandwidthSession = bitsInterval / (((RtcToNet.BANDWIDTH_MONITOR_INTERVAL * session.notPausedFrac)-session.additionalTime)/ 1000);
         }
         log.debug('%1: This session current bw: %2', session.channelLabel(), bandwidthSession);
         totalBandwidth += bandwidthSession;
@@ -376,10 +390,19 @@ import BandwidthConfig = require('./bandwidth-config');
             // After redistributing buffer bandwidth, the session may no longer need to be paused.
             if (session.currBandwidth > perSessionBandwidthLimit) {
               var notPausedFracSession = perSessionBandwidthLimit / session.currBandwidth;
+              session.notPausedFrac = notPausedFracSession;
               var timeToPause = RtcToNet.BANDWIDTH_MONITOR_INTERVAL * (1 - notPausedFracSession);
               log.debug('%1 is pausing (total experimenting) for %2; total bytes sent/rec: %3', session.channelLabel(), timeToPause, session.currBytes);
               session.pauseForBandwidthOverflow(timeToPause);
+            } else {
+              session.notPausedFrac = 1;
             }
+          }
+        } else {
+          // reset all "not paused fractions" because no sessions are pausing.
+          for (var label in this.sessions_) {
+            let session = this.sessions_[label];
+            session.notPausedFrac = 1;
           }
         }
       }
@@ -454,6 +477,14 @@ import BandwidthConfig = require('./bandwidth-config');
     public prevBytes: number = null;
     // The current bandwidth for this session.
     public currBandwidth: number = 0;
+    // The fraction of the last interval not paused.
+    public notPausedFrac: number = 1;
+    // The last time the session was paused for socket overflow.
+    public pauseStart: number = 0;
+    // The last time the session was resumed after socket overflow.
+    public pauseR: number = 0;
+    // The additional amount of time paused during the interval due to socket overflow.
+    public additionalTime: number = 0;
     // Flag to keep track of reproxy status and send status updates accordingly
     private reproxyError_ :boolean = false;
 
@@ -806,16 +837,33 @@ import BandwidthConfig = require('./bandwidth-config');
           if (!this.pausedForBandwidthOverflow_) {
             this.tcpConnection_.pause();
             log.debug('%1: Hit overflow, pausing socket', this.longId());
+            this.pauseStart = new Date().getTime();
+            log.debug('pause f: ' + this.pauseStart);
           } else {
             log.debug('%1: Hit overflow, but connection is already paused', this.longId());
+            this.pauseStart = 0;
+            log.debug('pause f: ' + this.pauseStart);
           }
         } else {
           // Check if the connection is still paused for bandwidth overflow; do not resume if it is.
           if (!this.pausedForBandwidthOverflow_) {
             this.tcpConnection_.resume();
             log.debug('%1: Exited  overflow, resuming socket', this.longId());
+            if (this.pauseStart > 0) {
+              this.pauseR = new Date().getTime();
+              this.additionalTime += (this.pauseR - this.pauseStart);
+              log.debug('pause f: ' + this.pauseStart + ' ; pause r: ' + this.pauseR);
+            } else {
+              // was paused in the middle of being paused; don't do anything
+              this.pauseR = 0;
+              log.debug('pause R: ' + this.pauseR);
+
+            }
           } else {
             log.debug('%1: Exited overflow, but connection is still paused for bandwidth', this.longId());
+            this.pauseR = 0;
+            log.debug('pause r: ' + this.pauseR);
+
           }
         }
         this.pausedForChannelOverflow_ = overflow;
@@ -832,6 +880,10 @@ import BandwidthConfig = require('./bandwidth-config');
     }
 
     public pauseForBandwidthOverflow = (pauseTime: number): void => {
+      // reset additional shit
+      this.additionalTime = 0;
+      this.pauseStart = 0;
+      this.pauseR = 0;
       this.pausedForBandwidthOverflow_ = true;
       // Check if connection is already paused for channel overflow; don't pause again if it is.
       if (!this.pausedForChannelOverflow_){
