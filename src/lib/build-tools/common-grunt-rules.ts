@@ -17,7 +17,7 @@ export interface RuleConfig {
 }
 
 export interface JasmineRule {
-  src :string[];
+  src ?:string[];
   options ?:{
     vendor ?:string|string[];
     specs :string[];
@@ -84,11 +84,15 @@ export class Rule {
   public jasmineSpec(name:string, morefiles?:string[]) :JasmineRule {
     if (!morefiles) { morefiles = []; }
     return {
-      src: [
-        require.resolve('es6-promise')
-      ].concat(morefiles),
       options: {
-        vendor: './src/lib/build-tools/testing/globals.js',
+        vendor: [
+          // phantomjs does not yet understand Promises natively:
+          //   https://github.com/ariya/phantomjs/issues/14166
+          require.resolve('es6-promise'),
+          // Declares globals, notably freedom, without which test
+          // environments implementing strict mode will fail.
+          './src/lib/build-tools/testing/globals.js'
+        ].concat(morefiles),
         specs: [ path.join(this.config.devBuildPath, name + '.spec.static.js') ],
         outfile: path.join(this.config.devBuildPath, name, '/SpecRunner.html'),
         keepRunner: true
