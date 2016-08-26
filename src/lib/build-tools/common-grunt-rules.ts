@@ -85,7 +85,6 @@ export class Rule {
     if (!morefiles) { morefiles = []; }
     return {
       src: [
-        require.resolve('arraybuffer-slice'),
         require.resolve('es6-promise')
       ].concat(morefiles),
       options: {

@@ -21,7 +21,6 @@
     }
   ],
   "devDependencies": {
-    "arraybuffer-slice": "^0.1.2",
     "bower": "^1.4.1",
     "browserify-zlib": "^0.1.4",
     "cca": "^0.8.0",
