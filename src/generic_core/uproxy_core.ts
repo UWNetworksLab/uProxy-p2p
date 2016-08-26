@@ -306,9 +306,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
     // Update RtcToNet's bandwidth settings, so that even existing connections have bandwidth settings changed.
     if (globals.settings.bandwidthSettings.enabled !== oldBandwidthEnabled || globals.settings.bandwidthSettings.limit !== oldBandwidthLimit) {
-      RtcToNet.updateBandwidthSettings({
-        settings: globals.settings.bandwidthSettings,
-      });
+      RtcToNet.updateBandwidthSettings(globals.settings.bandwidthSettings.enabled, globals.settings.bandwidthSettings.limit);
     }
     loggingController.setDefaultFilter(
       loggingTypes.Destination.console,
