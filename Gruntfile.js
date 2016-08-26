@@ -1192,13 +1192,17 @@
       'socksEchoIntegrationTestModule', 
       'jasmine_chromeapp:socksEcho'
     ]);
-    grunt.registerTask('unit_test_nobuild', _.flattenDeep(
-      [
-        Rule.getTests('src', 'lib', ['build-tools', 'integration-tests']),
-        Rule.getTests('src', 'generic_core'),
-        Rule.getTests('src', 'generic_ui/scripts')
-      ].map((tests) => {
-        return tests.map((spec) => Rule.buildAndRunTest(spec, grunt));
+    grunt.registerTask('unit_test_nobuild', _.flatten([].concat(
+      Rule.getTests('src', 'lib', ['build-tools', 'integration-tests']),
+      Rule.getTests('src', 'generic_core'),
+      Rule.getTests('src', 'generic_ui/scripts')
+    ).map((test) => {
+        // TODO: Fix and re-enable these tests (Issue #2727).
+        if (test === 'generic_core/remote-connection' ||
+            test === 'generic_core/remote-instance') {
+          return [];
+        }
+        return Rule.buildAndRunTest(test, grunt);
       })
     ));
 
