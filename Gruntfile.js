@@ -328,6 +328,22 @@
           command: 'npm install --prefix build/src/lib/samples/zork-node freedom-for-node'
         }
       },
+      concurrent: {
+        base: [
+          'browserify:chromeAppMain', 
+          'browserify:genericCoreFreedomModule', 
+          'browserify:ccaMain', 
+          'browserify:loggingProvider', 
+          'browserify:churnPipeFreedomModule', 
+          'browserify:cloudInstallerFreedomModule', 
+          'browserify:cloudSocialProviderFreedomModule', 
+          'browserify:digitalOceanFreedomModule'
+        ],
+        build_chrome: [
+          'build_chrome_app',
+          'build_chrome_ext'
+        ]
+      },
       copy: {
         // Copy releveant non-typescript src files to dev build.
         resources: {
@@ -1023,14 +1039,7 @@
       'copy:devGenericCore', 
       'ts', 
       'version_file', 
-      'browserify:chromeAppMain', 
-      'browserify:genericCoreFreedomModule', 
-      'browserify:ccaMain', 
-      'browserify:loggingProvider', 
-      'browserify:churnPipeFreedomModule', 
-      'browserify:cloudInstallerFreedomModule', 
-      'browserify:cloudSocialProviderFreedomModule', 
-      'browserify:digitalOceanFreedomModule'
+      'concurrent:base'
     ]);
     grunt.registerTask('echoServer', [
       'base', 
@@ -1243,6 +1252,7 @@
 
     //-------------------------------------------------------------------------
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
