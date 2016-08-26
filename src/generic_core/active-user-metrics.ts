@@ -90,7 +90,7 @@ export class Metrics {
     }
     return new Promise(function(F, R) {
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', 'http://localhost:8080/recordUse');  // TODO: use appengine with https
+      xhr.open('POST', 'https://uproxy-metrics.appspot.com/recordUse');
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onload = function() {
         log.debug('Got response from recordUse: ' + this.response);

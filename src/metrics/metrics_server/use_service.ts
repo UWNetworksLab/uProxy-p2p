@@ -7,7 +7,6 @@ export class RecordUseService {
   public constructor(private _repository:uer.UseEventsRepository) {}
 
   public recordUse(req: express.Request, res: express.Response): void {
-    console.log('req.body', req.body);
     try {
       if (req.method !== 'POST') {
         res.status(405).send(`Unsupported HTTP method ${req.method}\n`);
