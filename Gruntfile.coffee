@@ -914,8 +914,9 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     jasmine:
-      chrome_extension: Rule.jasmineSpec('chrome/extension/scripts/',
-          [path.join('build/src/mocks/chrome_mocks.js')])
+      chrome_core_connector: Rule.jasmineSpec('chrome/extension/scripts/chrome_core_connector', [
+        path.join('build/src/mocks/chrome_mocks.js')
+      ])
 
     jasmine_chromeapp: {
       all: {
@@ -1200,7 +1201,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'test_chrome', [
     'build_chrome'
     'browserify:chromeExtensionCoreConnectorSpec'
-    'jasmine:chrome_extension'
+    'jasmine:chrome_core_connector'
   ]
 
   grunt.registerTask 'tcpIntegrationTestModule', [
