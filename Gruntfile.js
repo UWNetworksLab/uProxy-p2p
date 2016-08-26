@@ -5,25 +5,23 @@
 (function() {
   'use strict';
 
-  var _, backendFreedomModulePaths, backendThirdPartyBuildPaths, basePath, ccaPath, coreDistFiles, extraFilesForCoreBuilds, freedomForChromePath, fs, path, rules, uiDistFiles, universalDistFiles;
-
-  _ = require('lodash');
-  fs = require('fs');
-  rules = require('./build/tools/common-grunt-rules');
-  path = require('path');
+  const _ = require('lodash');
+  const fs = require('fs');
+  const rules = require('./build/tools/common-grunt-rules');
+  const path = require('path');
 
 //-------------------------------------------------------------------------
 
   // Location of where src is copied into and compiled
-  let devBuildPath = 'build/src';
-  let distBuildPath = 'build/dist';
+  const devBuildPath = 'build/src';
+  const distBuildPath = 'build/dist';
   // Location of where to copy/build third_party source/libs.
-  let thirdPartyBuildPath = 'build/third_party';
+  const thirdPartyBuildPath = 'build/third_party';
   // This is used for the copying of uproxy libraries into the target directory.
-  let localLibsDestPath = '';
+  const localLibsDestPath = '';
 
   // Setup our build rules/tools
-  let Rule = new rules.Rule({
+  const Rule = new rules.Rule({
     // The path where code in this repository should be built in.
     devBuildPath: devBuildPath,
     // The path from where third party libraries should be copied. e.g. as used by
@@ -35,17 +33,17 @@
   });
 
 //------------------------------------------------------------------------- 
-  let chromeExtDevPath = path.join(devBuildPath, 'chrome/extension/');
-  let chromeAppDevPath = path.join(devBuildPath, 'chrome/app/');
-  let firefoxDevPath = path.join(devBuildPath, 'firefox/');
-  let ccaDevPath = path.join(devBuildPath, 'cca/app/');
-  let androidDevPath = path.join(devBuildPath, 'android/');
-  let iosDevPath = path.join(devBuildPath, 'ios/');
-  let genericPath = path.join(devBuildPath, 'generic/');
+  const chromeExtDevPath = path.join(devBuildPath, 'chrome/extension/');
+  const chromeAppDevPath = path.join(devBuildPath, 'chrome/app/');
+  const firefoxDevPath = path.join(devBuildPath, 'firefox/');
+  const ccaDevPath = path.join(devBuildPath, 'cca/app/');
+  const androidDevPath = path.join(devBuildPath, 'android/');
+  const iosDevPath = path.join(devBuildPath, 'ios/');
+  const genericPath = path.join(devBuildPath, 'generic/');
 
-  let ccaDistPath = path.join(distBuildPath, 'cca/app/');
-  let androidDistPath = path.join(distBuildPath, 'android/');
-  let iosDistPath = path.join(distBuildPath, 'ios/');
+  const ccaDistPath = path.join(distBuildPath, 'cca/app/');
+  const androidDistPath = path.join(distBuildPath, 'android/');
+  const iosDistPath = path.join(distBuildPath, 'ios/');
 
 //-------------------------------------------------------------------------
   function browserifyIntegrationTest(path) {
@@ -57,13 +55,13 @@
   }
 
 //-------------------------------------------------------------------------
-  basePath = process.cwd();
-  ccaPath = path.join(basePath, 'node_modules/cca/');
-  freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'));
+  const basePath = process.cwd();
+  const ccaPath = path.join(basePath, 'node_modules/cca/');
+  const freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'));
 
 //-------------------------------------------------------------------------
 // TODO: Move more file lists here.
-  let FILES = {
+  const FILES = {
     jasmine_helpers: [
       // Help Jasmine's PhantomJS understand promises.
       'node_modules/es6-promise/dist/promise-*.js',
@@ -130,9 +128,9 @@
     });
   }
 
-  backendThirdPartyBuildPaths = ['bower', 'sha1'];
+  const backendThirdPartyBuildPaths = ['bower', 'sha1'];
 
-  backendFreedomModulePaths = [
+  const backendFreedomModulePaths = [
     'lib/loggingprovider',
     'lib/churn-pipe',
     'lib/cloud/digitalocean',
@@ -140,7 +138,7 @@
     'lib/cloud/social'
   ];
 
-  uiDistFiles = [
+  const uiDistFiles = [
     'generic_ui/*.html',
     'generic_ui/style/*.css',
     'generic_ui/polymer/vulcanized*.{html,js}',
@@ -150,7 +148,7 @@
     'generic_ui/scripts/content_digitalocean.js'
   ];
 
-  coreDistFiles = [
+  const coreDistFiles = [
     'fonts/*',
     '*.html',  // technically does not exist in Firefox
 
@@ -183,7 +181,7 @@
   ];
 
   // This should always be added to arrays of files to copy last
-  universalDistFiles = [
+  const universalDistFiles = [
     'icons/**/*',
     'bower/webcomponentsjs/webcomponents.min.js',
     'bower/polymer/polymer.js',
@@ -193,7 +191,7 @@
     '!**/*spec*'
   ];
 
-  extraFilesForCoreBuilds = [
+  const extraFilesForCoreBuilds = [
     'freedomjs-anonymized-metrics',
     'freedom-social-firebase',
     'freedom-social-github',
@@ -215,7 +213,8 @@
   }
 
   module.exports = function(grunt) {
-    var spec;
+    require('time-grunt')(grunt);
+
     grunt.initConfig({
       pkg: readJSONFile('package.json'),
       pkgs: {
@@ -998,11 +997,11 @@
         return tasks.push(component + ':' + task);
       }
 
-      let realBasePath = path.join(devBuildPath, basePath);
-      let srcFile = path.join(realBasePath, srcFilename + '.html');
-      let intermediateFile = path.join(realBasePath, destFilename + '-inline.html');
-      let destFile = path.join(realBasePath, destFilename + '.html');
-      let taskName = path.join(realBasePath, destFilename);
+      const realBasePath = path.join(devBuildPath, basePath);
+      const srcFile = path.join(realBasePath, srcFilename + '.html');
+      const intermediateFile = path.join(realBasePath, destFilename + '-inline.html');
+      const destFile = path.join(realBasePath, destFilename + '.html');
+      const taskName = path.join(realBasePath, destFilename);
 
       // The basic vulcanize tasks, we do both steps in order to get all the
       // javascript into a separate file
@@ -1012,7 +1011,7 @@
       if (browserify) {
         // If we need to brewserify the file, there also needs to be a step to replace
         // some of the strings in the vulcanized html file to refer to the static version
-        let browserifyPath = path.join(basePath, destFilename);
+        const browserifyPath = path.join(basePath, destFilename);
         addTask('string-replace', taskName + 'Vulcanized', finishVulcanized(realBasePath, destFilename));
         addTask('browserify', browserifyPath, Rule.browserify(browserifyPath, {}));
       }
@@ -1193,7 +1192,7 @@
       'socksEchoIntegrationTestModule', 
       'jasmine_chromeapp:socksEcho'
     ]);
-    grunt.registerTask('unit_test_nobuild', _.flatten(
+    grunt.registerTask('unit_test_nobuild', _.flattenDeep(
       [
         Rule.getTests('src', 'lib', ['build-tools', 'integration-tests']),
         Rule.getTests('src', 'generic_core'),
