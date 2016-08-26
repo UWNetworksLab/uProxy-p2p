@@ -86,8 +86,7 @@ export class Rule {
     return {
       src: [
         require.resolve('arraybuffer-slice'),
-        require.resolve('es6-promise'),
-        path.join(this.config.thirdPartyBuildPath, 'promise-polyfill.js'),
+        require.resolve('es6-promise')
       ].concat(morefiles),
       options: {
         vendor: './src/lib/build-tools/testing/globals.js',
