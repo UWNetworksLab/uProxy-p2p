@@ -19,6 +19,7 @@ export interface RuleConfig {
 export interface JasmineRule {
   src :string[];
   options ?:{
+    vendor ?:string|string[];
     specs :string[];
     outfile ?:string;
     keepRunner ?:boolean;
@@ -104,6 +105,7 @@ export class Rule {
         path.join(this.config.thirdPartyBuildPath, 'promise-polyfill.js'),
       ],
       options: {
+        vendor: './src/lib/build-tools/testing/globals.js',
         specs: [ path.join(this.config.devBuildPath, file + '.spec.static.js') ],
         outfile: path.join(this.config.devBuildPath, file, '/SpecRunner.html'),
         keepRunner: true
