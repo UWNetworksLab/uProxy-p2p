@@ -14,7 +14,6 @@ import tcp = require('../net/tcp');
 
 import Pool = require('../pool/pool');
 import ProxyConfig = require('./proxyconfig');
-import BandwidthConfig = require('./bandwidth-config');
 
 // module RtcToNet {
 
@@ -218,9 +217,9 @@ import BandwidthConfig = require('./bandwidth-config');
       return this.onceReady;
     }
 
-    public static updateBandwidthSettings = (bandwidthConfig: BandwidthConfig) => {
-      RtcToNet.limitBandwidth = bandwidthConfig.settings.enabled;
-      RtcToNet.bandwidthLimit = bandwidthConfig.settings.limit;
+    public static updateBandwidthSettings = (enabled:boolean, limit:number) => {
+      RtcToNet.limitBandwidth = enabled;
+      RtcToNet.bandwidthLimit = limit;
     }
 
     // Loops until onceStopped fulfills.
@@ -358,7 +357,7 @@ import BandwidthConfig = require('./bandwidth-config');
         log.debug('%1: This session current bw: %2', session.channelLabel(), bandwidthSession);
         totalBandwidth += bandwidthSession;
         // If the bandwidth of this session is less than the allowed limit per session, add leftover bw to extra bw pool.
-        if (bandwidthSession <== perSessionBandwidthLimit) {
+        if (bandwidthSession <= perSessionBandwidthLimit) {
           bufferBandwidth += (perSessionBandwidthLimit - bandwidthSession);
         } else { // If the bandwidth of this session is more than the allowed limit per session, add to sessionsOverLimit.
           sessionsOverLimit++;
