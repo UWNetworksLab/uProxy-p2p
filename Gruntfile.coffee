@@ -413,9 +413,9 @@ module.exports = (grunt) ->
             ].concat(uiDistFiles, coreDistFiles, universalDistFiles)
             dest: ccaDistPath
           }
-          { # CCA dist freedom-module.json
+          { # CCA freedom-module.json
             expand: true
-            cwd: 'src/generic_core/cca_dist_build/'
+            cwd: 'src/generic_core/cca_build/'
             src: ['*']
             dest: path.join(ccaDistPath, 'generic_core')
           }
@@ -577,6 +577,12 @@ module.exports = (grunt) ->
             expand: true, cwd: genericPath
             src: ['*.js']
             dest: ccaDevPath + '/generic'
+          }
+          { # CCA freedom-module.json
+            expand: true
+            cwd: 'src/generic_core/cca_build/'
+            src: ['*']
+            dest: path.join(ccaDevPath, 'generic_core')
           }
         ]
 
