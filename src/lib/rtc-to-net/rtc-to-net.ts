@@ -343,7 +343,7 @@ import ProxyConfig = require('./proxyconfig');
           var timeDifference = currTime - session.startTime;
           log.debug('It has been %1 milliseconds since the session %2 was started', timeDifference, session.channelLabel());
         } else {
-          var bitsInterval = (session.currBytes - session.prevBytes) * 8; 
+          var bitsInterval = (session.currBytes - session.prevBytes) * 8;
           var timeDifference = RtcToNet.BANDWIDTH_MONITOR_INTERVAL * session.notPausedFrac;
         }
         // If session has been paused for socket overflow but has not yet resumed
