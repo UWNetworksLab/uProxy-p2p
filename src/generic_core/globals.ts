@@ -1,7 +1,6 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
 import _ = require('lodash');
-import active_user_metrics = require('./active-user-metrics')
 import constants = require('./constants');
 import local_storage = require('./storage');
 import logging = require('../lib/logging/logging');
@@ -79,10 +78,9 @@ export var effectiveMessageVersion = () : number => {
   return settings.force_message_version || constants.MESSAGE_VERSION;
 }
 
-export const metrics = freedom['metrics'] ?
+export const rapporMetrics = freedom['metrics'] ?
     new rappor_metrics.FreedomMetrics(storage) :
     new rappor_metrics.NoOpMetrics();
-export const activeUserMetrics = new active_user_metrics.Metrics(storage);
 
 export var publicKey :string;
 export var pgp :freedom.PgpProvider.PgpProvider = freedom['pgp']();

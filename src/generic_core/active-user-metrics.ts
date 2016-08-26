@@ -15,14 +15,16 @@ interface ActivityReport {
 class StoredActivityMetrics {
   public version = 1;
   public unreportedActivities :ActivityReport[] = [];
-  public lastActivityReport :ActivityReport;
+  public lastDate :string;    // Date in "YYYY-MM-DD" form, user timezone.
+  public lastCountry :string;
 };
 
 export class Metrics {
   public onceLoaded_ :Promise<void>;
   private data_ :StoredActivityMetrics;
 
-  constructor(private storage_ :storage.Storage) {
+  constructor(private storage_ :storage.Storage,
+              private checkIfProxying_ :(() => boolean)) {
     this.onceLoaded_ =
     this.storage_.load('activity-metrics').then(
         (storedData :StoredActivityMetrics) => {
@@ -41,52 +43,81 @@ export class Metrics {
       // ZZ indicates unknown until we implement country lookup.
       var country = 'ZZ';
       var today = getTodaysDateString();
-      var lastActivityReport = this.data_.lastActivityReport;
-      if (!lastActivityReport ||
-          lastActivityReport.newDate != today ||
-          lastActivityReport.newCountry != country) {
+      if (this.data_.lastDate != today ||
+          this.data_.lastCountry != country) {
         // The user is either reporting getting for the first time, or the
         // date or country has changed since the last report.
         // Generate a new activity report.
-        var newActivityReport = {newDate: today, newCountry: country};
-        if (lastActivityReport) {
-          newActivityReport.previousDate = lastActivityReport.newDate;
-          newActivityReport.previousCountry = lastActivityReport.newCountry;
-        }
+        var newActivityReport :ActivityReport = {
+          newDate: today,
+          newCountry: country,
+          previousDate: this.data_.lastDate,
+          previousCountry: this.data_.lastCountry
+        };
         this.data_.unreportedActivities.push(newActivityReport);
 
-        // TODO: report all unreportedActivities.  after each success remove it from unreportedActivities
-
-        // TODO: make XHR, test that this goes through the proxy, check for errors
-        // TODO: if the XHR fails, we should try it again... but when?  should we save to storage the new values?
-        this.postActivity_({
-              date: today,
-              previous_date: this.data_.lastGettingDate
-            });
-        this.data_.lastGettingDate = today;
-        this.storage_.save('activity-metrics', this.data_);
+        // Store new date and country for use in the next report.
+        this.data_.lastDate = today;
+        this.data_.lastCountry = country;
+        this.saveToStorage_();
       }
+
+      // Post any activity reports that may be on the queue.
+      this.postActivityQueue_();
     });
   }
 
-  // TODO: type data
-  private postActivity_ = (data :any) => {
+  private postActivityQueue_ = () => {
+    if (this.data_.unreportedActivities.length === 0) {
+      return;
+    }
+    this.postSingleActivity_(this.data_.unreportedActivities[0]).then(() => {
+      this.data_.unreportedActivities.shift();
+      this.saveToStorage_().then(() => {
+        this.postActivityQueue_();
+      });
+    }).catch((e :Error) => {
+      log.error('Error posting activity', e);
+    })
+  }
+
+  private postSingleActivity_ = (data :ActivityReport) => {
+    log.debug('postSingleActivity_: ', data);
+    if (!this.checkIfProxying_()) {
+      // Not proxying right now, don't post activity.  This may occur if
+      // proxying stops between multiple attempts to post metrics.
+      return Promise.reject('Unable to post activity metrics, not proxying');
+    }
     return new Promise(function(F, R) {
       var xhr = new XMLHttpRequest();
       xhr.open('POST', 'http://localhost:8080/recordUse');  // TODO: use appengine with https
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onload = function() {
-        // TODO: error handling!
-        console.log('got response: ' + this.response)
-        F();
+        log.debug('Got response from recordUse: ' + this.response);
+        if (this.status === 200) {
+          F();
+        } else {
+          R(new Error('Error posting activity: ' + this.status));
+        }
       };
-      xhr.send(JSON.stringify(data));
+      xhr.onerror = function(e) {
+        R(new Error('Failed to post activity: ' + e));
+      };
+      xhr.send(JSON.stringify({
+        date: data.newDate,
+        country: data.newCountry,
+        previous_date: data.previousDate,
+        previous_country: data.previousCountry
+      }));
     });
+  }
+
+  private saveToStorage_ = () : Promise<StoredActivityMetrics> => {
+    return this.storage_.save('activity-metrics', this.data_);
   }
 }
 
 // Returns today's date in user's timezone as a "YYYY-MM-DD" string.
-// TODO: double check time zones
 function getTodaysDateString() {
   var d = new Date();
   var monthNum = d.getMonth() + 1;

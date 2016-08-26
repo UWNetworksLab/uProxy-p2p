@@ -140,11 +140,12 @@ export enum Command {
   CLOUD_UPDATE = 1029,
   UPDATE_ORG_POLICY = 1030,
   REMOVE_CONTACT = 1031,
-  POST_REPORT = 1032,
+  POST_RAPPOR_REPORT = 1032,
   VERIFY_USER = 1033,
   VERIFY_USER_SAS = 1034,
   GET_PORT_CONTROL_SUPPORT = 1035,
   UPDATE_GLOBAL_SETTING = 1036, // Updates a single global setting
+  POST_ACTIVITY_REPORT = 1037
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -294,7 +295,7 @@ export interface RemoveContactArgs {
   userId :string
 };
 
-export interface PostReportArgs {
+export interface postRapporReportArgs {
   payload: Object;
   path: string;
 };
@@ -352,7 +353,7 @@ export interface CoreApi {
   removeContact(args :RemoveContactArgs) : Promise<void>;
 
   // Make a domain-fronted POST request to the uProxy logs/stats server.
-  postReport(args:PostReportArgs) : Promise<void>;
+  postRapporReport(args:postRapporReportArgs) : Promise<void>;
 
   // Start a ZRTP key-verification session.
   verifyUser(inst :social.InstancePath) :void;
@@ -363,4 +364,6 @@ export interface CoreApi {
   inviteGitHubUser(data :CreateInviteArgs) : Promise<void>;
 
   getPortControlSupport(): Promise<PortControlSupport>;
+
+  postActivityReport() :void;
 }

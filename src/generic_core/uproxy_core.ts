@@ -1,5 +1,6 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
+import active_user_metrics = require('./active-user-metrics');
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
 import constants = require('./constants');
@@ -109,10 +110,18 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
+  private lastInstanceGettingFrom_ :social.RemoteUserInstance;
+
+  private activeUserMetrics_ :active_user_metrics.Metrics;
+
   constructor() {
     log.debug('Preparing uProxy Core');
 
     this.refreshPortControlSupport();
+
+    this.activeUserMetrics_ = new active_user_metrics.Metrics(
+        globals.storage,
+        this.isGettingAccess.bind(this));
 
     globals.loadSettings.then(() => {
       return this.connectedNetworks_.get();
@@ -380,7 +389,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     network.sendEmail(data.to, data.subject, data.body);
   }
 
-  public postReport = (args :uproxy_core_api.PostReportArgs) : Promise<void> => {
+  public postRapporReport = (args :uproxy_core_api.postRapporReportArgs) : Promise<void> => {
     let host = 'd1wtwocg4wx1ih.cloudfront.net';
     let front = 'https://a0.awsstatic.com/';
     let request:XMLHttpRequest = new freedomXhr.auto();
@@ -409,9 +418,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
     return remote.start().then((endpoint :net.Endpoint) => {
-      if (globals.settings.statsReportingEnabled) {
-        globals.activeUserMetrics.updateActivityReport();
-      }
+      this.lastInstanceGettingFrom_ = remote;
       return endpoint;
     });
   }
@@ -427,6 +434,17 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
     remote.stop();
     // TODO: Handle revoked permissions notifications.
+  }
+
+  public isGettingAccess = () : boolean => {
+    return this.lastInstanceGettingFrom_ &&
+        this.lastInstanceGettingFrom_.isLocalGettingFromRemote();
+  }
+
+  public postActivityReport = () => {
+    if (globals.settings.statsReportingEnabled) {
+      this.activeUserMetrics_.updateActivityReport();
+    }
   }
 
   /**

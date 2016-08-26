@@ -724,6 +724,7 @@ export class UserInterface implements ui_constants.UiApi {
       // Remember access mode in case of reconnect.
       this.proxyAccessMode_ = accessMode;
       this.startGettingInUiAndConfig(instanceId, endpoint, accessMode);
+      this.core.postActivityReport();
     }, (err:Error) => {
       this.instanceTryingToGetAccessFrom = null;
       throw err;
@@ -1049,7 +1050,7 @@ export class UserInterface implements ui_constants.UiApi {
         proxyingId: this.proxyingId
       };
 
-      return this.core.postReport({payload: payload, path: 'submit-feedback'});
+      return this.core.postRapporReport({payload: payload, path: 'submit-feedback'});
     });
   }
 
