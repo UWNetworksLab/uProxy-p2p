@@ -219,13 +219,13 @@
                 {{ 'TOR_PORT_UNCHECKED' | $$(model.globalSettings.language) }}
               </span>
               <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "TRUE" }}'>
-                {{ 'TOR_PORT_TRUE' | $$(model.globalSettings.language) }} {{ testedTorPort  | $$(model.globalSettings.language) }}
+                {{ 'TOR_PORT_TRUE' | $$(model.globalSettings.language, {number: testedTorPort}) }}
               </span>
               <span class='advancedSettingsText' style='color:red;' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "FALSE" }}'>
-                {{ 'TOR_PORT_FALSE' | $$(model.globalSettings.language) }} {{ testedTorPort  | $$(model.globalSettings.language) }}
+                {{ 'TOR_PORT_FALSE' | $$(model.globalSettings.language, {number: testedTorPort}) }}
               </span>
               <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "PENDING" }}'>
-                {{ 'TOR_PORT_PENDING' | $$(model.globalSettings.language) }} {{ testedTorPort  | $$(model.globalSettings.language) }}
+                {{ 'TOR_PORT_PENDING' | $$(model.globalSettings.language, {number: testedTorPort}) }}
               </span>
               <uproxy-link on-tap='{{ refreshReproxyCheck }}' role='button'>
                 <core-icon icon='refresh'></core-icon>
