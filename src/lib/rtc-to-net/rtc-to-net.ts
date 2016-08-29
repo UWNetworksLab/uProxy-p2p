@@ -872,7 +872,7 @@ import ProxyConfig = require('./proxyconfig');
     }
 
     public pauseForBandwidthOverflow = (pauseTime: number): void => {
-      // reset additional shit
+      // Reset counters keeping track of additional time paused.
       this.additionalTime = 0;
       this.pauseStart = 0;
       this.pauseResume = 0;
