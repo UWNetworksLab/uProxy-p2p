@@ -1034,21 +1034,26 @@
       return tasks;
     }
 
-    grunt.registerTask('base', [
+    function registerTask(grunt, taskName, subTasks) {
+      let dedupedSubTasks = subTasks.map((task) => 'run-once:' + task);
+      return grunt.registerTask(taskName, dedupedSubTasks);
+    }
+
+    registerTask(grunt, 'base', [
       'copy:resources', 
       'copy:devGenericCore', 
       'ts', 
       'version_file', 
       'concurrent:base'
     ]);
-    grunt.registerTask('echoServer', [
+    registerTask(grunt, 'echoServer', [
       'base', 
       'browserify:echoServerFreedomModule', 
       'copy:libsForEchoServerChromeApp', 
       'copy:libsForEchoServerFirefoxApp', 
       'copy:libsForEchoServerNode'
     ]);
-    grunt.registerTask('copypasteChat', [
+    registerTask(grunt, 'copypasteChat', [
       'base', 
       'browserify:copypasteChatFreedomModule', 
       'browserify:copypasteChatMain', 
@@ -1056,7 +1061,7 @@
       'copy:libsForCopypasteChatFirefoxApp', 
       'copy:libsForCopypasteChatWebApp'
     ]);
-    grunt.registerTask('copypasteSocks', [
+    registerTask(grunt, 'copypasteSocks', [
       'base', 
       'browserify:copypasteSocksFreedomModule', 
       'browserify:copypasteSocksMain', 
@@ -1064,13 +1069,13 @@
       'copy:libsForCopyPasteSocksChromeApp', 
       'copy:libsForCopyPasteSocksFirefoxApp'
     ]);
-    grunt.registerTask('deployer', [
+    registerTask(grunt, 'deployer', [
       'base', 
       'browserify:deployerFreedomModule', 
       'copy:libsForDeployerChromeApp', 
       'copy:libsForDeployerFirefoxApp'
     ]);
-    grunt.registerTask('simpleChat', [
+    registerTask(grunt, 'simpleChat', [
       'base',
       'browserify:simpleChatFreedomModule',
       'browserify:simpleChatMain',
@@ -1078,20 +1083,20 @@
       'copy:libsForSimpleChatFirefoxApp',
       'copy:libsForSimpleChatWebApp'
     ]);
-    grunt.registerTask('simpleSocks', [
+    registerTask(grunt, 'simpleSocks', [
       'base',
       'browserify:simpleSocksFreedomModule',
       'copy:libsForSimpleSocksChromeApp',
       'copy:libsForSimpleSocksFirefoxApp',
       'copy:libsForSimpleSocksNode'
     ]);
-    grunt.registerTask('uprobe', [
+    registerTask(grunt, 'uprobe', [
       'base', 
       'browserify:uprobeFreedomModule', 
       'copy:libsForUprobeChromeApp', 
       'copy:libsForUprobeFirefoxApp'
     ]);
-    grunt.registerTask('zork', [
+    registerTask(grunt, 'zork', [
       'base', 
       'browserify:zorkFreedomModule', 
       'copy:libsForZorkChromeApp', 
@@ -1099,15 +1104,15 @@
       'copy:libsForZorkNode', 
       'exec:installFreedomForNodeForZork'
     ]);
-    grunt.registerTask('version_file', [
+    registerTask(grunt, 'version_file', [
       'gitinfo',
       'string-replace:version'
     ]);
-    grunt.registerTask('build_chrome_app', [
+    registerTask(grunt, 'build_chrome_app', [
       'base',
       'copy:chrome_app'
     ].concat(fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')));
-    grunt.registerTask('build_chrome_ext', [
+    registerTask(grunt, 'build_chrome_ext', [
       'base',
       'copy:chrome_extension',
       'copy:chrome_extension_additional',
@@ -1115,13 +1120,13 @@
       'browserify:chromeContext'
     ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
   
-    grunt.registerTask('build_chrome', [
+    registerTask(grunt, 'build_chrome', [
       'build_chrome_app',
       'build_chrome_ext'
     ]);
 
     // Firefox build tasks.
-    grunt.registerTask('build_firefox', [
+    registerTask(grunt, 'build_firefox', [
       'base',
       'copy:firefox', 
       'copy:firefox_additional', 
@@ -1129,7 +1134,7 @@
     ].concat(fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)));
     
     // CCA build tasks
-    grunt.registerTask('build_cca', [
+    registerTask(grunt, 'build_cca', [
       'base', 
       'copy:cca', 
       'copy:cca_additional', 
@@ -1138,7 +1143,7 @@
     ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
     
     // Mobile OS build tasks
-    grunt.registerTask('build_android', [
+    registerTask(grunt, 'build_android', [
       'exec:cleanAndroid',
       'build_cca', 
       'exec:ccaCreateDev', 
@@ -1148,7 +1153,7 @@
       'exec:ccaBuildAndroid', 
       'exec:androidReplaceXwalkDev'
     ]);
-    grunt.registerTask('release_android', [
+    registerTask(grunt, 'release_android', [
       'build_cca', 
       'copy:dist', 
       'exec:ccaCreateDist', 
@@ -1161,12 +1166,12 @@
     ]);
 
     // Emulate the mobile client for android
-    grunt.registerTask('emulate_android', [
+    registerTask(grunt, 'emulate_android', [
       'build_android', 
       'exec:ccaEmulateAndroid'
     ]);
 
-    grunt.registerTask('build_ios', [
+    registerTask(grunt, 'build_ios', [
       'exec:cleanIos', 
       'build_cca', 
       'exec:ccaCreateIosDev', 
@@ -1174,22 +1179,22 @@
       'exec:addIosrtcHook',
       'exec:ccaPrepareIosDev'
     ]);
-    grunt.registerTask('test_chrome', [
+    registerTask(grunt, 'test_chrome', [
       'build_chrome',
       'browserify:chromeExtensionCoreConnectorSpec',
       'jasmine:chrome_extension'
     ]);
-    grunt.registerTask('tcpIntegrationTestModule', [
+    registerTask(grunt, 'tcpIntegrationTestModule', [
       'base',
       'copy:libsForIntegrationTcp',
       'browserify:integrationTcpFreedomModule',
       'browserify:integrationTcpSpec'
     ]);
-    grunt.registerTask('tcpIntegrationTest', [
+    registerTask(grunt, 'tcpIntegrationTest', [
       'tcpIntegrationTestModule',
       'jasmine_chromeapp:tcp'
     ]);
-    grunt.registerTask('socksEchoIntegrationTestModule', [
+    registerTask(grunt, 'socksEchoIntegrationTestModule', [
       'base',
       'copy:libsForIntegrationSocksEcho',
       'browserify:integrationSocksEchoFreedomModule', 
@@ -1197,11 +1202,11 @@
       'browserify:integrationSocksEchoNochurnSpec', 
       'browserify:integrationSocksEchoSlowSpec'
     ]);
-    grunt.registerTask('socksEchoIntegrationTest', [
+    registerTask(grunt, 'socksEchoIntegrationTest', [
       'socksEchoIntegrationTestModule', 
       'jasmine_chromeapp:socksEcho'
     ]);
-    grunt.registerTask('unit_test_nobuild', _.flatten([].concat(
+    registerTask(grunt, 'unit_test_nobuild', _.flatten([].concat(
       Rule.getTests('src', 'lib', ['build-tools', 'integration-tests']),
       Rule.getTests('src', 'generic_core'),
       Rule.getTests('src', 'generic_ui/scripts')
@@ -1215,16 +1220,16 @@
       })
     ));
 
-    grunt.registerTask('unit_test', [
+    registerTask(grunt, 'unit_test', [
       'base',
       'unit_test_nobuild'
     ]);
     // TODO: add test_chrome once it passes reliably
-    grunt.registerTask('integration_test', [
+    registerTask(grunt, 'integration_test', [
       'tcpIntegrationTest',
       'socksEchoIntegrationTest'
     ]);
-    grunt.registerTask('test', [
+    registerTask(grunt, 'test', [
       'unit_test',
       'integration_test'
     ]);
@@ -1232,7 +1237,7 @@
     // iOS and Android as well as
     // ts-linting and testing which can be annoying and slow.
     // We added jshint here because catches hard syntax errors, etc.
-    grunt.registerTask('build', [
+    registerTask(grunt, 'build', [
       'build_chrome', 
       'build_firefox', 
       'build_cca', 
@@ -1240,15 +1245,15 @@
       'copy:dist', 
       'jpm:xpi'
     ]);
-    grunt.registerTask('lint', ['tslint']);
+    registerTask(grunt, 'lint', ['tslint']);
     // This is run prior to releasing uProxy and, in addition to
     // building, tests and lints all code.
-    grunt.registerTask('dist', [
+    registerTask(grunt, 'dist', [
       'build',
       'lint',
       'test'
     ]);
-    grunt.registerTask('default', ['build']);
+    registerTask(grunt, 'default', ['build']);
 
     //-------------------------------------------------------------------------
     grunt.loadNpmTasks('grunt-browserify');
@@ -1263,6 +1268,7 @@
     grunt.loadNpmTasks('grunt-gitinfo');
     grunt.loadNpmTasks('grunt-jasmine-chromeapp');
     grunt.loadNpmTasks('grunt-jpm');
+    grunt.loadNpmTasks('grunt-run-once');
     grunt.loadNpmTasks('grunt-string-replace');
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-tslint');
