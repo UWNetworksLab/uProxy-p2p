@@ -30,4 +30,3 @@ tmp
 keys
 third_party/bower
 third_party/typings
-src/.baseDir.ts
