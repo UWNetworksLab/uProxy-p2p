@@ -27,7 +27,6 @@
     "cca": "^0.8.0",
     "circular-json": "^0.3.0",
     "compare-version": "^0.1.2",
-    "crypto": "^0.0.3",
     "es6-promise": "^3.2.1",
     "forge-min": "^0.6.20",
     "freedom": "^0.6.31",
