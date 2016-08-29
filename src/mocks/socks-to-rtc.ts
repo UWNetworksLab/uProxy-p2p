@@ -1,3 +1,4 @@
+import handler = require('../lib/handler/queue');
 import net = require('../lib/net/net.types');
 
 export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
@@ -5,6 +6,11 @@ export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
 
   public resolveStart :(v :Object) => void;
   public rejectStart :(v :Object) => void;
+
+  public signalsForPeer = new handler.Queue<Object, void>();
+
+  public bytesReceivedFromPeer = new handler.Queue<number, void>();
+  public bytesSentToPeer = new handler.Queue<number, void>();
 
   public start = () => {
     return new Promise<net.Endpoint>((resolve, reject) => {
