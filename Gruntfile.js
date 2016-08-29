@@ -1,4 +1,3 @@
-// Gruntfile for uProxy
 /* jshint node: true */
 /* jshint esversion: 6 */
 
@@ -323,7 +322,6 @@ module.exports = function(grunt) {
       installFreedomForNodeForZork: {
         // This allows our Docker containers, which do not have access to the
         // git repo's "top-level" node_modules/ folder find freedom-for-node.
-
         command: 'npm install --prefix build/src/lib/samples/zork-node freedom-for-node'
       }
     },
@@ -357,13 +355,25 @@ module.exports = function(grunt) {
           {  // Chrome extension
             expand: true,
             cwd: chromeExtDevPath,
-            src: ['manifest.json', '_locales/**', 'generic_ui/scripts/copypaste.js', 'scripts/context.static.js', 'scripts/background.static.js'].concat(uiDistFiles, universalDistFiles),
+            src: [
+              'manifest.json',
+              '_locales/**',
+              'generic_ui/scripts/copypaste.js',
+              'scripts/context.static.js',
+              'scripts/background.static.js'
+            ].concat(uiDistFiles, universalDistFiles),
             dest: 'build/dist/chrome/extension'
           },
           {  // Chrome app
             expand: true,
             cwd: chromeAppDevPath,
-            src: ['manifest.json', 'managed_policy_schema.json', '_locales/**', 'polymer/vulcanized.{html,js}', 'freedom-for-chrome/freedom-for-chrome.js'].concat(coreDistFiles, universalDistFiles),
+            src: [
+              'manifest.json',
+              'managed_policy_schema.json',
+              '_locales/**',
+              'polymer/vulcanized.{html,js}',
+              'freedom-for-chrome/freedom-for-chrome.js'
+            ].concat(coreDistFiles, universalDistFiles),
             dest: 'build/dist/chrome/app'
           },
           {  // Chrome app freedom-module

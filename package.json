@@ -80,7 +80,6 @@
     "xregexp": "^2.0.0"
   },
   "scripts": {
-    "build": "grunt",
     "grunt": "grunt",
     "clean": "rm -rf node_modules/ build/ third_party/{typings,bower}/ .tscache/",
     "install": "npm run install-bower && npm run install-typings && npm run build-grunt-deps && npm run setup-third-party",
