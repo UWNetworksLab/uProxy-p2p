@@ -91,7 +91,7 @@ uproxy-bubble::shadow #done {
           <content></content>
 
           <div id='actions'>
-            <uproxy-button id='done' on-tap='{{ close }}'>{{ "DONE" | $$ }}</uproxy-button>
+            <uproxy-button id='done' on-tap='{{ close }}'>{{ "DONE" | $$(model.globalSettings.language) }}</uproxy-button>
           </div>
         </div>
       </div>

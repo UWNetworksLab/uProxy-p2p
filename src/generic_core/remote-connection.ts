@@ -159,6 +159,7 @@ var generateProxyingSessionId_ = (): string => {
       this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
       this.rtcToNet_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);
+      this.rtcToNet_.statusUpdates.setSyncHandler(this.handleStatusUpdate_);
 
       this.sharingReset_ = this.rtcToNet_.onceStopped.then(() => {
         this.localSharingWithRemote = social.SharingState.NONE;
@@ -374,6 +375,19 @@ var generateProxyingSessionId_ = (): string => {
     private handleBytesSent_ = (bytes :number) => {
       this.bytesSent_ += bytes;
       this.delayedUpdate_();
+    }
+
+    private handleStatusUpdate_ = (status :rtc_to_net.Status) => {
+      switch(status) {
+        case rtc_to_net.Status.REPROXY_ERROR:
+          this.sendUpdate_(uproxy_core_api.Update.REPROXY_ERROR, null);
+          break;
+        case rtc_to_net.Status.REPROXY_WORKING:
+          this.sendUpdate_(uproxy_core_api.Update.REPROXY_WORKING, null);
+          break;
+        default:
+          log.warn('Received unrecognized status update from RtcToNet: %1', status);
+      }
     }
 
     private stateRefresh_ = () => {

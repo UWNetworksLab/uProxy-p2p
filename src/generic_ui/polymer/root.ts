@@ -141,6 +141,12 @@ Polymer({
   openProxyError: function() {
     this.$.proxyError.open();
   },
+  openReproxyError: function() {
+    this.$.reproxyError.open();
+  },
+  closeReproxyError: function() {
+    this.$.reproxyError.close();
+  },
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
@@ -229,11 +235,6 @@ Polymer({
       this.dir = 'ltr';
     }
   },
-  languageChanged: function(oldLanguage :string, newLanguage :string) {
-    if (oldLanguage && oldLanguage !== newLanguage) {
-      window.location.reload();
-    }
-  },
   restart: function() {
     this.$.state.background.restart();
   },
@@ -319,7 +320,7 @@ Polymer({
     // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
-    'model.globalSettings.language': 'languageChanged'
+    'model.globalSettings.language': 'setDirectionality'
   },
   computed: {
     'hasContacts': '(model.contacts.getAccessContacts.pending.length + model.contacts.getAccessContacts.trustedUproxy.length + model.contacts.getAccessContacts.untrustedUproxy.length + model.contacts.shareAccessContacts.pending.length + model.contacts.shareAccessContacts.trustedUproxy.length + model.contacts.shareAccessContacts.untrustedUproxy.length) > 0',

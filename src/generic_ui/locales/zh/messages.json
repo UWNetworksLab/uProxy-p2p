@@ -360,7 +360,7 @@
         "description": "Label for button that will change the users Internet settings back to using the user's local connection (i.e. not their friend's Internet)."
     },
     "CONNECTED_WITH_NUMBER": {
-        "message": "连接到 __数字 __网络",
+        "message": "连接到 __number__ 网络",
         "description": "Text in settings informing the user of how many networks they're connected to."
     },
     "CLOUD_INSTALL_STATUS_INSTALLING_DOCKER": {
