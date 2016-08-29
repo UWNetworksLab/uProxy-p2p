@@ -2,8 +2,6 @@ import handler = require('../lib/handler/queue');
 import net = require('../lib/net/net.types');
 
 export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
-  public events :{ [event :string] :(...args :Object[]) => void } = {};
-
   public resolveStart :(v :Object) => void;
   public rejectStart :(v :Object) => void;
 
@@ -23,10 +21,6 @@ export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   }
 
   public handleSignalFromPeer = () => {
-  }
-
-  public on = (name :string, fn :(...args :Object[]) => void) => {
-    this.events[name] = fn;
   }
 
   // TODO: remove onceStopping_ when
