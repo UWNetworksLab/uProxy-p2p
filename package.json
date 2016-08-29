@@ -21,7 +21,6 @@
     }
   ],
   "devDependencies": {
-    "arraybuffer-slice": "^0.1.2",
     "bower": "^1.4.1",
     "browserify-zlib": "^0.1.4",
     "cca": "^0.8.0",
@@ -47,7 +46,7 @@
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-jasmine": "^0.9.0",
+    "grunt-contrib-jasmine": "^1.0.3",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-symlink": "^0.3.0",
     "grunt-contrib-watch": "^1.0.0",
