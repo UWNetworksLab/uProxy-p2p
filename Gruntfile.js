@@ -1208,11 +1208,6 @@ module.exports = function(grunt) {
     Rule.getTests('src', 'generic_core'),
     Rule.getTests('src', 'generic_ui/scripts')
   ).map((test) => {
-      // TODO: Fix and re-enable these tests (Issue #2727).
-      if (test === 'generic_core/remote-connection' ||
-          test === 'generic_core/remote-instance') {
-        return [];
-      }
       return Rule.buildAndRunTest(test, grunt);
     })
   ));
