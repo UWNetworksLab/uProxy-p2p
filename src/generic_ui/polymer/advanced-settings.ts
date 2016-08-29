@@ -8,6 +8,7 @@
 // user clicks set, we will overwrite the core change.
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import translator = require('../scripts/translator');
 
 export enum StatusState {
   EMPTY,
@@ -64,6 +65,12 @@ Polymer({
         this.status = StatusState.KEY_VALUE_ERROR;
         return;
       }
+
+      if (ui_context.model.globalSettings.language != newSettings.language) {
+        translator.i18n_setLng(newSettings.language);
+        ui_context.ui.updateLanguage(newSettings.language);
+      }
+
       // User input values in "Enable Tor" div override JSON blob
       if (this.$.torEnableButton.checked) {
         this.torEnabled = true;
@@ -106,6 +113,9 @@ Polymer({
       .then((check: uproxy_core_api.ReproxyCheck) => {
         this.reproxyCheck = check;
       });
+  },
+  ready: function() {
+    this.model = ui_context.model;
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
