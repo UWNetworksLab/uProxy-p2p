@@ -198,33 +198,33 @@
     <core-overlay id="feedbackPanel">
       <div id="container" vertical layout>
         <uproxy-app-bar on-go-back="{{ close }}">
-          {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$ }}
+          {{ "SUBMIT_FEEDBACK_SENTENCE_CASE" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
 
         <div id="formContainer" flex>
-          <span id="dropdownContainer" on-click="{{ toggleDropdown }}"> {{"CUSTOM_ERROR_PLACEHOLDER" | $$ }}</span>
+          <span id="dropdownContainer" on-click="{{ toggleDropdown }}"> {{"CUSTOM_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}</span>
           <core-icon icon="expand-more" on-click="{{ toggleDropdown }}" hidden?="{{$.collapse.opened}}"></core-icon>
           <core-icon icon="expand-less" on-click="{{ toggleDropdown }}" hidden?="{{!$.collapse.opened}}"></core-icon>
           <core-collapse id="collapse">
             <div class="content">
               <core-menu class="menu" selected="{{ feedbackType }}" on-core-select="{{ changePlaceholder }}" valueattr="data-feedbackOption" id="errorInput">
-                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}">{{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}">{{ "CLOUD_SERVER_NO_CONNECT" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_START }}">{{ "CLOUD_SERVER_NO_START" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_SIGNING_IN }}">{{ "TROUBLE_SIGNING_IN" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.NO_FRIENDS }}">{{ "NO_FRIENDS" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}">{{ "TROUBLE_STARTING_CONNECTION" | $$ }}</paper-item>
-                <paper-item data-feedbackOption="{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}">{{ "DISCONNECTED_FROM_FRIEND" | $$ }}</paper-item>
-                 <paper-item data-feedbackOption="{{ UserFeedbackType.OTHER_FEEDBACK }}">{{ "OTHER_FEEDBACK" | $$ }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_CONNECTIONS_DISCONNECTED }}">{{ "CLOUD_CONNECTIONS_DISCONNECTED" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_CONNECT }}">{{ "CLOUD_SERVER_NO_CONNECT" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.CLOUD_SERVER_NO_START }}">{{ "CLOUD_SERVER_NO_START" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_SIGNING_IN }}">{{ "TROUBLE_SIGNING_IN" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.NO_FRIENDS }}">{{ "NO_FRIENDS" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.TROUBLE_STARTING_CONNECTION }}">{{ "TROUBLE_STARTING_CONNECTION" | $$(model.globalSettings.language) }}</paper-item>
+                <paper-item data-feedbackOption="{{ UserFeedbackType.DISCONNECTED_FROM_FRIEND }}">{{ "DISCONNECTED_FROM_FRIEND" | $$(model.globalSettings.language) }}</paper-item>
+                 <paper-item data-feedbackOption="{{ UserFeedbackType.OTHER_FEEDBACK }}">{{ "OTHER_FEEDBACK" | $$(model.globalSettings.language) }}</paper-item>
               </core-menu>
             </div>
           </core-collapse>
 
           <!-- because dropdown menus have no 'error' attribute, this is an invisible decorator that has an error if nothing is selected from the dropdown -->
-          <paper-input-decorator id="errorDecorator" label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$ }}' error='{{ "NO_CUSTOM_ERROR_PLACEHOLDER" | $$ }}'></paper-input-decorator>
+          <paper-input-decorator id="errorDecorator" label='{{ "CUSTOM_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}' error='{{ "NO_CUSTOM_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}'></paper-input-decorator>
 
           <paper-input-decorator id="feedbackDecorator"
-              label='{{ "FEEDBACK_PLACEHOLDER" | $$ }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$ }}'>
+              label='{{ "FEEDBACK_PLACEHOLDER" | $$(model.globalSettings.language) }}' error='{{ "FEEDBACK_ERROR_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
             <paper-autogrow-textarea id="feedbackPaperTextarea">
               <textarea id="feedbackInput"
                      value="{{ feedback }}">
@@ -233,7 +233,7 @@
           </paper-input-decorator>
 
           <paper-input-decorator id="emailDecorator"
-              label='{{ "EMAIL_PLACEHOLDER" | $$ }}'>
+              label='{{ "EMAIL_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
             <input id="emailInput"
                    is="core-input"
                    value="{{ email }}">
@@ -241,27 +241,27 @@
 
           <div id="logCheckboxContainer">
             <paper-checkbox for id="logCheckbox"></paper-checkbox>
-            <span id="logCheckboxLabel"> {{ "NETWORK_AND_LOGS" | $$ }} </span>
+            <span id="logCheckboxLabel"> {{ "NETWORK_AND_LOGS" | $$(model.globalSettings.language) }} </span>
             <uproxy-faq-link anchor="doesUproxyLogData">
               <core-icon icon="help" id="helpIcon"></core-icon>
             </uproxy-faq-link>
           </div>
           <div id="logsLink">
             <span id="logsLink" on-tap="{{ viewLogs }}">
-              {{ "SHOW_LOGS" | $$ }}
+              {{ "SHOW_LOGS" | $$(model.globalSettings.language) }}
             </span>
           </div>
 
           <p id="moreInfo">
-            {{ "P_I_I_MESSAGE" | $$ }}
+            {{ "P_I_I_MESSAGE" | $$(model.globalSettings.language) }}
           </p>
         </div> <!-- end of form container -->
-        <div id="sendFeedback" on-tap="{{ sendFeedback }}">{{ "SUBMIT_FEEDBACK" | $$ }}</div>
+        <div id="sendFeedback" on-tap="{{ sendFeedback }}">{{ "SUBMIT_FEEDBACK" | $$(model.globalSettings.language) }}</div>
       </div>
     </core-overlay>
     <uproxy-action-dialog backdrop layered="false" id="sendingFeedbackDialog" autoCloseDisabled="true">
       <div id="SENDING_FEEDBACK">
-        {{ "SENDING_FEEDBACK" | $$ }}<br>
+        {{ "SENDING_FEEDBACK" | $$(model.globalSettings.language) }}<br>
         <paper-progress indeterminate="true"></paper-progress>
       </div>
     </uproxy-action-dialog>

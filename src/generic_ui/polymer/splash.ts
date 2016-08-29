@@ -8,6 +8,7 @@
 declare var require :(path :string) => Object;
 
 import ui_constants = require('../../interfaces/ui');
+import translator = require('../scripts/translator');
 import _ = require('lodash');
 
 interface Language {
@@ -38,8 +39,8 @@ Polymer({
       var curLanguage = this.model.globalSettings.language;
       var newLanguage = detail.item.getAttribute('languageCode');
       if (newLanguage !== curLanguage) {
+        translator.i18n_setLng(newLanguage);
         ui.updateLanguage(newLanguage);
-        window.location.reload();
       }
     }
   },
