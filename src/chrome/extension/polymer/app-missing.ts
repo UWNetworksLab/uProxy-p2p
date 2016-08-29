@@ -35,5 +35,8 @@ function openDownloadAppPage() : void {
 Polymer({
   downloadApp: function() {
     openDownloadAppPage();
+  },
+  ready: function() {
+    this.model = ui_context.model;
   }
 });

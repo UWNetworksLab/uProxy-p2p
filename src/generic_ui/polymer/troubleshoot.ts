@@ -37,4 +37,7 @@ Polymer({
       this.analyzedNetwork = true;
     });
   },
+  ready: function() {
+    this.model = ui_context.model;
+  }
 });

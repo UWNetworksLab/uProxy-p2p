@@ -185,15 +185,15 @@
   },
   "TOR_PORT_TRUE": {
     "description": "Info message displayed when there exists a reproxy listening at input port",
-    "message": "Found server listening at port"
+    "message": "Found server listening at port __number__"
   },
   "TOR_PORT_FALSE": {
     "description": "Info message displayed when we cannot find a reproxy listening at input port",
-    "message": "Could not find server listening at port"
+    "message": "Could not find server listening at port __number__"
   },
   "TOR_PORT_PENDING": {
     "description": "Info message displayed when searching for a reproxy listening at input port",
-    "message": "Searching for server listening at port"
+    "message": "Searching for server listening at port __number__"
   },
   "TOR_PORT_UNCHECKED": {
     "description": "Info message displayed when we haven't checked for a reproxy listening at input port",

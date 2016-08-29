@@ -81,42 +81,42 @@
       <!-- First screen in the dialog asks user if they want to diagnose their network. -->
       <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
-          {{ "ASK_TO_ANALYZE" | $$ }}
+          {{ "ASK_TO_ANALYZE" | $$(model.globalSettings.language) }}
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link><br>
         </p>
         <uproxy-button on-tap='{{ getNatType }}'>
-          {{ "YES" | $$ }}
+          {{ "YES" | $$(model.globalSettings.language) }}
         </uproxy-button>
         <uproxy-button on-tap='{{ close }}'>
-          {{ "NO" | $$ }}
+          {{ "NO" | $$(model.globalSettings.language) }}
         </uproxy-button>
       </div>
 
       <!-- Second screen in dialog shows a loading bar as we get NAT type. -->
       <div id='analyzeNetwork' hidden?='{{ !analyzingNetwork }}'>
-        {{ "ANALYZING_NETWORK" | $$ }}<br>
+        {{ "ANALYZING_NETWORK" | $$(model.globalSettings.language) }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
 
       <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
-        {{ "ANALYSIS_RESULTS" | $$({ natType: natType, natImpact: natImpact }) }}
+        {{ "ANALYSIS_RESULTS" | $$(model.globalSettings.language, { natType: natType, natImpact: natImpact }) }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>{{ "MORE_INFO" | $$ }}</span>
+          <span class='linkText'>{{ "MORE_INFO" | $$(model.globalSettings.language) }}</span>
         </uproxy-faq-link><br><br>
-        {{ "ASK_TO_SUBMIT_ANALYSIS" | $$ }}
+        {{ "ASK_TO_SUBMIT_ANALYSIS" | $$(model.globalSettings.language) }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>{{ "PRIVACY_POLICY" | $$ }}</span>
+          <span class='linkText'>{{ "PRIVACY_POLICY" | $$(model.globalSettings.language) }}</span>
         </uproxy-faq-link>
         <br>
         <div id='analyzedNetworkButtons'>
           <uproxy-button on-tap='{{ submitFeedback }}'>
-            {{ "YES" | $$ }}
+            {{ "YES" | $$(model.globalSettings.language) }}
           </uproxy-button>
           <uproxy-button on-tap='{{ close }}'>
-            {{ "NO" | $$ }}
+            {{ "NO" | $$(model.globalSettings.language) }}
           </uproxy-button>
         </div>
       </div>
