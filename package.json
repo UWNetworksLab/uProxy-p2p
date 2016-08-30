@@ -54,6 +54,7 @@
     "grunt-gitinfo": "^0.1.7",
     "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",
     "grunt-jpm": "^0.1.3",
+    "grunt-run-once": "^0.2.0",
     "grunt-string-replace": "^1.0.0",
     "grunt-subgrunt": "^1.2.0",
     "grunt-template-jasmine-istanbul": "^0.3.0",
