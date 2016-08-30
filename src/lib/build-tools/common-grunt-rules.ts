@@ -17,8 +17,9 @@ export interface RuleConfig {
 }
 
 export interface JasmineRule {
-  src :string[];
+  src ?:string[];
   options ?:{
+    vendor ?:string|string[];
     specs :string[];
     outfile ?:string;
     keepRunner ?:boolean;
@@ -78,34 +79,22 @@ export class Rule {
     return spec;
   }
 
-  // Grunt Jasmine target creator
-  // Assumes that the each spec file is a fully browserified js file.
+  // grunt-contrib-jasmine target creator. Assumes that the spec
+  // is browserified, i.e. has a .spec.static.js suffix.
   public jasmineSpec(name:string, morefiles?:string[]) :JasmineRule {
     if (!morefiles) { morefiles = []; }
     return {
-      src: [
-        require.resolve('arraybuffer-slice'),
-        require.resolve('es6-promise'),
-        path.join(this.config.thirdPartyBuildPath, 'promise-polyfill.js'),
-      ].concat(morefiles),
       options: {
-        specs: [ path.join(this.config.devBuildPath, name, '/**/*.spec.static.js') ],
+        vendor: [
+          // phantomjs does not yet understand Promises natively:
+          //   https://github.com/ariya/phantomjs/issues/14166
+          require.resolve('es6-promise'),
+          // Declares globals, notably freedom, without which test
+          // environments implementing strict mode will fail.
+          './src/lib/build-tools/testing/globals.js'
+        ].concat(morefiles),
+        specs: [ path.join(this.config.devBuildPath, name + '.spec.static.js') ],
         outfile: path.join(this.config.devBuildPath, name, '/SpecRunner.html'),
-        keepRunner: true
-      }
-    }
-  }
-
-  public jasmineSingleSpec(file :string) :JasmineRule {
-    return {
-      src: [
-        require.resolve('arraybuffer-slice'),
-        require.resolve('es6-promise'),
-        path.join(this.config.thirdPartyBuildPath, 'promise-polyfill.js'),
-      ],
-      options: {
-        specs: [ path.join(this.config.devBuildPath, file + '.spec.static.js') ],
-        outfile: path.join(this.config.devBuildPath, file, '/SpecRunner.html'),
         keepRunner: true
       }
     }
@@ -253,7 +242,7 @@ export class Rule {
   public buildAndRunTest(test :string, grunt :any, coverage?:boolean) :string[] {
     var name = test + 'Spec';
     var browserifyRule = this.browserifySpec(test);
-    var jasmineRule = this.jasmineSingleSpec(test);
+    var jasmineRule = this.jasmineSpec(test);
 
     if (coverage) {
       name += 'Cov';

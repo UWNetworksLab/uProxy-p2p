@@ -29,11 +29,11 @@
 
         <span class='action'>
           <a hidden?='{{ !signedIn }}' href='#' on-tap='{{ logout }}'>
-            {{ "DISCONNECT" | $$ }}
+            {{ "DISCONNECT" | $$(model.globalSettings.language) }}
           </a>
 
           <a hidden?='{{ signedIn }}' href='#' on-tap='{{ connect }}'>
-            {{ "CONNECT" | $$ }}
+            {{ "CONNECT" | $$(model.globalSettings.language) }}
           </a>
         </span>
       </div>

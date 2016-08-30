@@ -1,6 +1,7 @@
 <link rel="import" href="../../bower/core-icons/core-icons.html">
 <link rel="import" href="../../bower/core-icons/social-icons.html">
 <link rel="import" href="../../bower/core-signals/core-signals.html">
+<link rel="import" href="../../bower/paper-fab/paper-fab.html">
 <link rel="import" href="../../bower/polymer/polymer.html">
 <link rel='import' href='../../bower/paper-progress/paper-progress.html'>
 <link rel='import' href='roster-group.html'>
@@ -114,7 +115,7 @@
     <div id="empty-roster-instructions-container" hidden?="{{ hasContacts }}">
       <div id="empty-roster-instructions">
         <img src='../../icons/emptylist.svg'>
-        <h1>{{ "EMPTY_ROSTER_INSTRUCTIONS" | $$ }}</h1>
+        <h1>{{ "EMPTY_ROSTER_INSTRUCTIONS" | $$(model.globalSettings.language) }}</h1>
       </div>
     </div>
     <div class='downArrow' hidden?="{{ hasContacts }}">▼</div>
@@ -123,7 +124,7 @@
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{ (mode == ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$ }}'
+          groupTitle='{{ (mode == ui_constants.Mode.GET ? "OFFERS" : "REQUESTS") | $$(model.globalSettings.language) }}'
           contacts='{{ contacts.pending }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
@@ -133,7 +134,7 @@
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{ (mode == ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$ }}'
+          groupTitle='{{ (mode == ui_constants.Mode.GET ? "FRIENDS_WHO_SHARE" : "FRIENDS_WHO_CAN_GET") | $$(model.globalSettings.language) }}'
           contacts='{{ contacts.trustedUproxy }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
@@ -143,7 +144,7 @@
 
       <!-- untrusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{ "UPROXY_FRIENDS" | $$ }}'
+          groupTitle='{{ "UPROXY_FRIENDS" | $$(model.globalSettings.language) }}'
           contacts='{{ contacts.untrustedUproxy }}'
           mode='{{ mode }}'></uproxy-roster-group>
     </div>

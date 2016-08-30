@@ -233,10 +233,11 @@
 
     <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
     <core-signals on-core-signal-open-advanced-settings='{{ open }}'></core-signals>
+
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
+          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
         <div id='analyzeNAT'>
           <p class='inputLabel'>
@@ -347,7 +348,7 @@
           </p>
         </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
-          {{ "SET" | $$ }}
+          {{ "SET" | $$(model.globalSettings.language) }}
         </div>
       </div>
     </core-overlay>
