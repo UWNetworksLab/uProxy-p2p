@@ -386,10 +386,20 @@ import ProxyConfig = require('./proxyconfig');
               session.notPausedFrac = notPausedFracSession;
               var timeToPause = RtcToNet.BANDWIDTH_MONITOR_INTERVAL * (1 - notPausedFracSession);
               log.debug('%1 is pausing (total experimenting) for %2; total bytes sent/rec: %3', session.channelLabel(), timeToPause, session.currBytes);
+              session.pauseStart = 0;
               session.pauseForBandwidthOverflow(timeToPause);
             } else {
               session.notPausedFrac = 1;
+              // If session has been paused but not yet resumed, and session will not pause for bandwidth overflow, update pauseStart.
+              if (session.pauseStart > session.pauseResume) {
+                session.pauseStart = new Date().getTime();
+              } else {
+                session.pauseStart = 0;
+              }
             }
+            // Reset counters keeping track of additional time paused.
+            session.additionalTime = 0;
+            session.pauseResume = 0;
           }
         } else {
           // reset all "not paused fractions" because no sessions are pausing.
@@ -872,10 +882,6 @@ import ProxyConfig = require('./proxyconfig');
     }
 
     public pauseForBandwidthOverflow = (pauseTime: number): void => {
-      // Reset counters keeping track of additional time paused.
-      this.additionalTime = 0;
-      this.pauseStart = 0;
-      this.pauseResume = 0;
       this.pausedForBandwidthOverflow_ = true;
       // Check if connection is already paused for channel overflow; don't pause again if it is.
       if (!this.pausedForChannelOverflow_){
@@ -894,7 +900,9 @@ import ProxyConfig = require('./proxyconfig');
         this.tcpConnection_.resume();
         log.debug('%1: resuming; current bytes sent/received: %2', this.channelLabel(), this.currBytes);
       } else {
-        log.debug('%1: Done pausing for bandwidth overflow, but connection is still paused for channel overflow; current bytes sent/received: %2', this.channelLabel(), this.currBytes)
+        log.debug('%1: Done pausing for bandwidth overflow, but connection is still paused for channel overflow; current bytes sent/received: %2', this.channelLabel(), this.currBytes);
+        // If the connection is still paused for socket overflow, update new pauseStart time.
+        this.pauseStart = new Date().getTime();
       }
     }
 
