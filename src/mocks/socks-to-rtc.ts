@@ -1,10 +1,14 @@
+import handler = require('../lib/handler/queue');
 import net = require('../lib/net/net.types');
 
 export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
-  public events :{ [event :string] :(...args :Object[]) => void } = {};
-
   public resolveStart :(v :Object) => void;
   public rejectStart :(v :Object) => void;
+
+  public signalsForPeer = new handler.Queue<Object, void>();
+
+  public bytesReceivedFromPeer = new handler.Queue<number, void>();
+  public bytesSentToPeer = new handler.Queue<number, void>();
 
   public start = () => {
     return new Promise<net.Endpoint>((resolve, reject) => {
@@ -17,10 +21,6 @@ export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   }
 
   public handleSignalFromPeer = () => {
-  }
-
-  public on = (name :string, fn :(...args :Object[]) => void) => {
-    this.events[name] = fn;
   }
 
   // TODO: remove onceStopping_ when

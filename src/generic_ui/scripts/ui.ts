@@ -1082,6 +1082,7 @@ export class UserInterface implements ui_constants.UiApi {
   public updateLanguage = (newLanguage :string) => {
     this.updateGlobalSetting('language', newLanguage);
     this.i18n_setLng(newLanguage);
+    this.model.globalSettings.language = newLanguage;
   }
 
   public updateInitialState = (state :uproxy_core_api.InitialState) => {

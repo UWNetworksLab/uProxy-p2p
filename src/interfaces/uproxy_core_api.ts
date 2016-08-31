@@ -110,6 +110,7 @@ export interface CopyPasteState {
   endpoint :net.Endpoint;
 }
 
+
 // --- Communications ---
 
 // Commands are sent from the UI to the Core due to a user interaction.

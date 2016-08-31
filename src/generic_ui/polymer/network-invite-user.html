@@ -70,10 +70,11 @@
     </style>
 
     <uproxy-state id="state"></uproxy-state>
+    <core-signals on-core-signal-open-network-invite-dialog='{{openInviteUserPanel}}'></core-signals>
 
     <core-overlay id='networkInviteUserPanel' class='{{ network }}'>
       <uproxy-app-bar on-go-back='{{ close }}'>
-        {{ 'INVITE_A_FRIEND' | $$ }}
+        {{ 'INVITE_A_FRIEND' | $$(model.globalSettings.language) }}
       </uproxy-app-bar>
 
       <div class='section'>
@@ -81,21 +82,21 @@
 
         <!-- GitHub specific controls -->
         <div hidden?="{{network !== 'GitHub'}}">
-          <paper-input-decorator id='GitHubPlaceholder' label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$ }}'>
+          <paper-input-decorator id='GitHubPlaceholder' label='{{ "GITHUB_INVITE_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
             <input is='core-input' value='{{ gitHubUserIdInput }}'>
           </paper-input-decorator>
         </div>
 
         <!-- GMail specific controls -->
         <div hidden?="{{network !== 'GMail'}}">
-          <paper-input-decorator id='GMailPlaceholder' label='{{ "EMAIL_PLACEHOLDER" | $$ }}' layout vertical>
+          <paper-input-decorator id='GMailPlaceholder' label='{{ "EMAIL_PLACEHOLDER" | $$(model.globalSettings.language) }}' layout vertical>
             <input is='core-input' value='{{ inviteUserEmail }}' />
           </paper-input-decorator>
         </div>
 
         <div class='checkboxes'>
-          <p><paper-checkbox id='requestAccessCheckbox' label='{{ "REQUEST_ACCESS" | $$ }}' checked='{{ requestAccess }}'></paper-checkbox></p>
-          <p><paper-checkbox id='offerAccessCheckbox' label='{{ "OFFER_ACCESS" | $$ }}' checked='{{ offerAccess }}'></paper-checkbox></p>
+          <p><paper-checkbox id='requestAccessCheckbox' label='{{ "REQUEST_ACCESS" | $$(model.globalSettings.language) }}' checked='{{ requestAccess }}'></paper-checkbox></p>
+          <p><paper-checkbox id='offerAccessCheckbox' label='{{ "OFFER_ACCESS" | $$(model.globalSettings.language) }}' checked='{{ offerAccess }}'></paper-checkbox></p>
         </div>
 
         <uproxy-button id='confirmButton' affirmative on-tap='{{ confirmClicked }}'>{{ confirmText }}</uproxy-button>

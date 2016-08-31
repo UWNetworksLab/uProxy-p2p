@@ -183,16 +183,17 @@
 
     <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
     <core-signals on-core-signal-open-advanced-settings='{{ open }}'></core-signals>
+
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
+          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
         <div id='settingsContainer' flex>
           <div id='analyzeNAT'>
             <p class='inputLabel'>
               <uproxy-link on-tap='{{ viewLogs }}'>
-                {{ "ANALYZE_NAT" | $$ }}
+                {{ "ANALYZE_NAT" | $$(model.globalSettings.language) }}
               </uproxy-link>
               <uproxy-faq-link anchor='doesUproxyLogData'>
                 <core-icon icon="help"></core-icon>
@@ -201,30 +202,30 @@
           </div>
           <div id='enableTor'>
             <p class='inputLabel'>
-              {{ "TOR_ENABLE" | $$ }}
+              {{ "TOR_ENABLE" | $$(model.globalSettings.language) }}
               <uproxy-faq-link anchor='howToEnableTorReproxy'>
                 <core-icon icon="help"></core-icon>
               </uproxy-faq-link>
               <paper-toggle-button id='torEnableButton'></paper-toggle-button>
             </p>
-            <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
+            <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$(model.globalSettings.language) }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
               <input is='core-input' maxlength="5" value='{{ torPort }}' />
             </paper-input-decorator>
             <div id='torEnableToggledOn' hidden?='{{ !$.torEnableButton.checked }}'>
               <p class='advancedSettingsText' style='color:red;'>
-                {{ "TOR_ENABLE_WARNING" | $$ }}
+                {{ "TOR_ENABLE_WARNING" | $$(model.globalSettings.language) }}
               </p>
               <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "UNCHECKED" }}'>
-                {{ 'TOR_PORT_UNCHECKED' | $$ }}
+                {{ 'TOR_PORT_UNCHECKED' | $$(model.globalSettings.language) }}
               </span>
               <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "TRUE" }}'>
-                {{ 'TOR_PORT_TRUE' | $$ }} {{ testedTorPort  | $$ }}
+                {{ 'TOR_PORT_TRUE' | $$(model.globalSettings.language, {number: testedTorPort}) }}
               </span>
               <span class='advancedSettingsText' style='color:red;' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "FALSE" }}'>
-                {{ 'TOR_PORT_FALSE' | $$ }} {{ testedTorPort  | $$ }}
+                {{ 'TOR_PORT_FALSE' | $$(model.globalSettings.language, {number: testedTorPort}) }}
               </span>
               <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "PENDING" }}'>
-                {{ 'TOR_PORT_PENDING' | $$ }} {{ testedTorPort  | $$ }}
+                {{ 'TOR_PORT_PENDING' | $$(model.globalSettings.language, {number: testedTorPort}) }}
               </span>
               <uproxy-link on-tap='{{ refreshReproxyCheck }}' role='button'>
                 <core-icon icon='refresh'></core-icon>
@@ -234,49 +235,49 @@
           <div id='portControlBox'>
 
             <p class='inputLabel'>
-              {{ 'PORT_CONTROL_TITLE' | $$ }}
+              {{ 'PORT_CONTROL_TITLE' | $$(model.globalSettings.language) }}
               <uproxy-faq-link anchor='whatIsPortControl'>
                 <core-icon icon='help'></core-icon>
               </uproxy-faq-link>
             </p>
             <span class='label' hidden?='{{ !_supportsPortControl(portControlSupport) }}'>
-              {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
+              {{ 'PORT_CONTROL_SUPPORTED' | $$(model.globalSettings.language) }}
             </span>
             <span class='label' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-              {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
+              {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$(model.globalSettings.language) }}
             </span>
             <span class='label' hidden?='{{ !_portControlStatusPending(portControlSupport) }}'>
-              {{ 'PORT_CONTROL_PENDING' | $$ }}
+              {{ 'PORT_CONTROL_PENDING' | $$(model.globalSettings.language) }}
             </span>
             <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
               <core-icon icon='refresh'></core-icon>
             </uproxy-link>
             <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
+              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$(model.globalSettings.language) }}
               <uproxy-faq-link anchor='whatIsPortControl'>
-                {{ 'MORE_INFO' | $$ }}
+                {{ 'MORE_INFO' | $$(model.globalSettings.language) }}
               </uproxy-faq-link>
             </p>
           </div>
           <div id='formContainer' vertical layout>
-            <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
-            <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}'>
+            <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$(model.globalSettings.language) }}</p>
+            <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$(model.globalSettings.language) }}'>
               <textarea value='{{ settings }}' fit>
               </textarea>
             </paper-input-decorator>
             <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
-              {{ "SETTINGS_SAVED" | $$ }}
+              {{ "SETTINGS_SAVED" | $$(model.globalSettings.language) }}
             </p>
             <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
-              {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
+              {{ "SETTINGS_BAD_FORMAT_ERROR" | $$(model.globalSettings.language) }}
             </p>
             <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
-              {{ "SETTINGS_JSON_ERROR" | $$ }}
+              {{ "SETTINGS_JSON_ERROR" | $$(model.globalSettings.language) }}
             </p>
           </div> <!-- end of form container -->
         </div>
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
-          {{ "SET" | $$ }}
+          {{ "SET" | $$(model.globalSettings.language) }}
         </div>
       </div>
     </core-overlay>

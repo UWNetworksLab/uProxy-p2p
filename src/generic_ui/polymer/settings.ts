@@ -12,7 +12,7 @@ import dialogs = require('../scripts/dialogs');
 
 Polymer({
   accountChooserOpen: false,
-  connectedNetworks: '',
+  connectedNetwork: '',
   showRestartButton: false,
   logOut: function() {
     // logout all networks asynchronously
@@ -51,13 +51,11 @@ Polymer({
     if (!ui_context.model.onlineNetworks) {
       return;
     }
-    if (ui_context.model.onlineNetworks.length === 0) {
-      this.connectedNetworks = translator.i18n_t('NOT_CONNECTED_LOGIN_TO_START');
-    } else if (ui_context.model.onlineNetworks.length === 1) {
-      var displayName = ui.getNetworkDisplayName(ui_context.model.onlineNetworks[0].name);
-      this.connectedNetworks = translator.i18n_t('CONNECTED_WITH', {network: displayName});
+    if (ui_context.model.onlineNetworks.length === 1) {
+      // Only show a network name if we're connected to one network.
+      this.connectedNetwork = ui.getNetworkDisplayName(ui_context.model.onlineNetworks[0].name);
     } else {
-      this.connectedNetworks = translator.i18n_t('CONNECTED_WITH_NUMBER', {number: ui_context.model.onlineNetworks.length});
+      this.connectedNetwork = '';
     }
   },
   updateStatsReportingEnabled: function() {

@@ -33,7 +33,8 @@ import local_storage = require('./storage');
 import net = require('../lib/net/net.types');
 import local_instance = require('./local-instance');
 import bridge = require('../lib/bridge/bridge');
-
+import rtc_to_net_mock = require('../mocks/rtc-to-net');
+import socks_to_rtc_mock = require('../mocks/socks-to-rtc');
 
 describe('remote_instance.RemoteInstance', () => {
 
@@ -145,40 +146,22 @@ describe('remote_instance.RemoteInstance', () => {
   });
 
   describe('proxying', () => {
-
     var alice = new remote_instance.RemoteInstance(user, 'instance-alice');
 
-    // Bare-minimum functions to fake the current version methods of SocksToRtc.
-    // TODO once using uproxy-lib v20+, move to real mocks (examples:
-    // https://github.com/uProxy/uproxy-lib/blob/dev/src/freedom/mocks/mock-eventhandler.ts
-    // https://github.com/uProxy/uproxy-lib/blob/dev/src/webrtc/peerconnection.spec.ts
-    // )
-    var fakeSocksToRtc = {
-      handlers: <{[key :string] :Function}>{},
-      'start':
-          (endpoint:net.Endpoint, pcConfig: freedom.RTCPeerConnection.RTCConfiguration) => {
-         return Promise.resolve(endpoint);
-      },
-      'on': (t:string, f:Function) => { fakeSocksToRtc.handlers[t] = f; },
-      'stop': () => {
-        if (typeof fakeSocksToRtc.handlers['stopped'] === 'function') {
-          fakeSocksToRtc.handlers['stopped']();
-        }
-        return Promise.resolve();
-      },
-      // TODO: remove onceStopping_ when
-      // https://github.com/uProxy/uproxy/issues/1264 is resolved.
-      'onceStopping_': new Promise((F, R) => {}),
-      'handleSignalFromPeer': () => {}
-    };
+    var socksToRtc :socks_to_rtc_mock.SocksToRtcMock
+
+    beforeEach(() => {
+      socksToRtc = new socks_to_rtc_mock.SocksToRtcMock();
+      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(socksToRtc);
+    });
 
     it('can start proxying', (done) => {
       var aliceState = alice.currentStateForUi();
       expect(aliceState.localGettingFromRemote).toEqual(social.GettingState.NONE);
       alice.user.consent.localRequestsAccessFromRemote = true;
       alice.wireConsentFromRemote.isOffering = true;
-      // The module & constructor of SocksToRtc may change in the near future.
-      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
+      spyOn(socksToRtc, 'start').and.returnValue(Promise.resolve<void>());
+
       alice.start().then(() => {
         aliceState = alice.currentStateForUi();
         expect(aliceState.localGettingFromRemote)
@@ -198,7 +181,6 @@ describe('remote_instance.RemoteInstance', () => {
     });
 
     it('refuses to start proxy without permission', () => {
-      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.wireConsentFromRemote.isOffering = false;
       alice.start();
       var aliceState = alice.currentStateForUi();
@@ -234,27 +216,11 @@ describe('remote_instance.RemoteInstance', () => {
   });  // describe proxying
 
   describe('signalling', () => {
+    var alice :remote_instance.RemoteInstance;
 
-    // Build a mock Alice with fake signals and networking hooks.
-    var alice :remote_instance.RemoteInstance;  // Reset before each test in beforeEach
-    var fakeSocksToRtc = {
-      'handleSignalFromPeer': () => {},
-      'on': () => {},
-      'start': () => { return Promise.resolve(); },
-      'stop': () => { return Promise.resolve(); },
-      // TODO: remove onceStopping_ when
-      // https://github.com/uProxy/uproxy/issues/1264 is resolved.
-      'onceStopping_': new Promise((F, R) => {}),
-    };
-    var fakeRtcToNet = {
-      'handleSignalFromPeer': () => {},
-      'onceStopped': new Promise((F, R) => {}),  // return unresolved promise
-      'signalsForPeer': {setSyncHandler: () => {}},
-      'bytesReceivedFromPeer': {setSyncHandler: () => {}},
-      'bytesSentToPeer': {setSyncHandler: () => {}},
-      'onceReady': new Promise((F, R) => {}),  // return unresolved promise
-      'start': () => {}
-    };
+    var socksToRtc :socks_to_rtc_mock.SocksToRtcMock
+    var rtcToNet :rtc_to_net_mock.RtcToNetMock;
+
     var fakeSignallingMessage :bridge.SignallingMessage = {
       signals: {
         'FAKE': []
@@ -264,12 +230,18 @@ describe('remote_instance.RemoteInstance', () => {
 
     beforeEach(() => {
       alice = new remote_instance.RemoteInstance(user, 'instance-alice');
-      user.consent.localGrantsAccessToRemote = true;
-      spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
-      spyOn(fakeRtcToNet, 'handleSignalFromPeer');
-      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
-      spyOn(rtc_to_net, 'RtcToNet').and.returnValue(fakeRtcToNet);
       alice['connection_'].onceSharerCreated = Promise.resolve<void>();
+
+      user.consent.localGrantsAccessToRemote = true;
+
+      socksToRtc = new socks_to_rtc_mock.SocksToRtcMock();
+      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(socksToRtc);
+
+      rtcToNet = new rtc_to_net_mock.RtcToNetMock();
+      spyOn(rtc_to_net, 'RtcToNet').and.returnValue(rtcToNet);
+
+      spyOn(socksToRtc, 'handleSignalFromPeer').and.callThrough();
+      spyOn(rtcToNet, 'handleSignalFromPeer').and.callThrough();
     });
 
     it('handles OFFER signal from client peer as server', (done) => {
@@ -278,8 +250,8 @@ describe('remote_instance.RemoteInstance', () => {
           data: fakeSignallingMessage,
           version: constants.MESSAGE_VERSION
       }).then(() => {
-        expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
-        expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(
+        expect(socksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
+        expect(rtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(
             fakeSignallingMessage);
         done();
       });
@@ -287,15 +259,17 @@ describe('remote_instance.RemoteInstance', () => {
 
     it('handles signal from server peer as client', (done) => {
       alice.wireConsentFromRemote.isOffering = true;
+      spyOn(socksToRtc, 'start').and.returnValue(Promise.resolve<void>());
+
       alice.start().then(() => {
         alice.handleSignal({
             type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
             data: fakeSignallingMessage,
             version: constants.MESSAGE_VERSION
         }).then(() => {
-          expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(
+          expect(socksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(
               fakeSignallingMessage);
-          expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
+          expect(rtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
           done();
         });
       }).catch((e) => console.error('error calling start: ' + e));
@@ -307,8 +281,8 @@ describe('remote_instance.RemoteInstance', () => {
           data: fakeSignallingMessage,
           version: constants.MESSAGE_VERSION
       }).then(() => {
-        expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
-        expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
+        expect(rtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
+        expect(socksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         done();
       });
     });
@@ -320,8 +294,8 @@ describe('remote_instance.RemoteInstance', () => {
           data: fakeSignallingMessage,
           version: constants.MESSAGE_VERSION
       }).then(() => {
-        expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
-        expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
+        expect(socksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
+        expect(rtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         done();
       });
     });
