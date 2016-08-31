@@ -1,0 +1,176 @@
+<html>
+
+<head>
+</head>
+
+<body>
+  <div id='root-panel'></div>
+  <script>
+    'use strict';
+
+    class RootPanel {
+      // Takes the element that will be the root for this panel.
+      constructor(root_node) {
+        this.root_node_ = root_node;
+        this.content_node_ = null;
+      }
+      setContent(content_node){
+        if (this.content_node_ !== null) {
+          this.root_node_.removeChild(this.content_node_);
+        }
+        this.content_node_ = content_node;
+        this.root_node_.appendChild(content_node);
+      }
+    }
+
+    let root_panel = new RootPanel(document.getElementById('root-panel'));
+    // Clear current state.
+    window.history.replaceState(null, null);
+
+    let views = {};
+
+    class Settings {
+      constructor() {
+        this.language = null;
+      }
+      setLanguage(language) {
+        this.language = language;
+      }
+      enableMetrics(enable) {
+        this.enableMetrics = enable;
+      }
+    }
+    let settings = new Settings();
+
+    function pushView(key, view) {
+      console.log('Push View: ', key);
+      history.pushState({ view: key }, null, '#' + key);
+      root_panel.setContent(view.content());
+      views[key] = view;
+    }
+
+    window.onpopstate = function(event) {
+      console.log("Pop state: " + JSON.stringify(event.state));
+      if (event.state === null) {
+        pushView('home', new HomeView());
+      } else {
+        root_panel.setContent(views[event.state.view].content());
+      }
+    };
+
+    class WelcomeView {
+      constructor() {
+        this.language_handlers_ = [];
+        this.done_handlers_ = [];
+        this.content_ = document.createElement('div');
+        // TODO: Don't use a global setLanguage
+        this.content_.innerHTML = '<h1>Welcome</h1><div>' +
+          '<select>' +
+            '<option value="en">English</option>' +
+            '<option value="ar">Arabic</option>' +
+            '<option value="zh">Chinese</option>' +
+          '</select>' +
+          '<button class="next-button">Next</button>' +
+          '</div>';
+        let select_el = this.content_.getElementsByTagName('select')[0];
+        select_el.onchange = (event) => { this.emitLanguageChoice(select_el.value); };
+        this.content_.getElementsByClassName('next-button')[0].onclick = (event) => {
+          this.emitLanguageChoice(select_el.value);
+          this.emitDone();
+        };
+      }
+      content() {
+        return this.content_
+      }
+      emitLanguageChoice(language) {
+        for (let handler of this.language_handlers_) {
+          handler(language);
+        }
+      }
+      onLanguageChoice(handler) {
+        this.language_handlers_.push(handler);
+      }
+      emitDone() {
+        for (let handler of this.done_handlers_) {
+          handler();
+        }
+      }
+      onDone(handler) {
+        this.done_handlers_.push(handler);
+      }
+    }
+
+    class MetricsChoiceView {
+      constructor() {
+        this.choice_handlers_ = [];
+        this.done_handlers_ = [];
+        this.content_ = document.createElement('div');
+        this.content_.innerHTML = '<h1>Metrics Choice</h1><div>' +
+          '<button onclick="history.back();">Back</button>' +
+          '<button class="button-yes">Yes</button>' +
+          '<button class="button-no">No</button>'
+          '</div>';
+        this.content_.getElementsByClassName('button-yes')[0].onclick = (event) => {
+          this.done_(true);
+        };
+        this.content_.getElementsByClassName('button-no')[0].onclick = (event) => {
+          this.done_(false);
+        };
+      }
+      content() {
+        return this.content_
+      }
+      done_(choice) {
+        this.emitMetricsChoice(choice);
+        this.emitDone();
+      }
+      emitMetricsChoice(choice) {
+        for (let handler of this.choice_handlers_) {
+          handler(choice);
+        }
+      }
+      onMetricsChoice(handler) {
+        this.choice_handlers_.push(handler);
+      }
+      emitDone() {
+        for (let handler of this.done_handlers_) {
+          handler();
+        }
+      }
+      onDone(handler) {
+        this.done_handlers_.push(handler);
+      }
+    }
+
+    class HomeView {
+      constructor() {
+        this.content_ = document.createElement('div');
+        this.content_.innerHTML = '<h1>Home</h1>' +
+          `<p>Settings: ${JSON.stringify(settings)}</p>` +
+          '<p><button>Get Access from Peer</button></p>' +
+          '<p><button>Get Access from Cloud Proxy</button></p>' +
+          '<p><button>Share Access</button></p>';
+      }
+      content() {
+        return this.content_
+      }
+    }
+   
+    let welcome_view = new WelcomeView();
+    welcome_view.onLanguageChoice((language) => {
+      settings.setLanguage(language);
+    });
+    welcome_view.onDone(() => {
+      let metrics_view = new MetricsChoiceView();
+      metrics_view.onMetricsChoice((choice) => {
+        settings.enableMetrics(choice);
+      });
+      metrics_view.onDone(() => {
+        window.history.go(-2);
+      })
+      pushView('metrics', metrics_view);
+    });
+    pushView('welcome', welcome_view);
+  </script>
+</body>
+</html>
