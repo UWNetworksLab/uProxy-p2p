@@ -145,8 +145,8 @@ export enum Command {
   VERIFY_USER_SAS = 1034,
   GET_PORT_CONTROL_SUPPORT = 1035,
   UPDATE_GLOBAL_SETTING = 1036, // Updates a single global setting
-  POST_ACTIVITY_REPORT = 1037,
-  CHECK_REPROXY = 1038
+  CHECK_REPROXY = 1037,
+  UPDATE_BROWSER_PROXY_STATE = 1038,
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -370,7 +370,7 @@ export interface CoreApi {
 
   getPortControlSupport(): Promise<PortControlSupport>;
 
-  postActivityReport() :void;
+  updateBrowserProxyState(isActive :boolean) :void;
 
   // Check if socks reproxy exists at input port
   checkReproxy(port :number): Promise<ReproxyCheck>;

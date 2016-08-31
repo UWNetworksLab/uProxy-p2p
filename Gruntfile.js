@@ -774,7 +774,7 @@ module.exports = function(grunt) {
         src: [
           'src/**/*.ts',
           '!src/**/*.d.ts',
-          '!src/metrics/**/*.ts'
+          '!src/metrics/**/*.ts',
           '!src/lib/build-tools/**/*',
           '!src/integration/**/*',
           '!src/**/*.core-env.ts',

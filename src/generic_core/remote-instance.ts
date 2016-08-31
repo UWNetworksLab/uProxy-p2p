@@ -589,11 +589,6 @@ import ui = ui_connector.connector;
       };
     }
 
-    public isLocalGettingFromRemote = () : boolean => {
-      var connectionState = this.connection_.getCurrentState();
-      return connectionState.localGettingFromRemote == social.GettingState.GETTING_ACCESS;
-    }
-
     public handleLogout = () => {
       log.debug('handleLogout()');
       if (this.connection_.localSharingWithRemote !== social.SharingState.NONE) {

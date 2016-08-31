@@ -112,7 +112,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
-  private lastInstanceGettingFrom_ :social.RemoteUserInstance;
+  private isBrowserProxyActive_ :boolean = false;
 
   private activeUserMetrics_ :active_user_metrics.Metrics;
 
@@ -419,10 +419,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.error('Instance does not exist for proxying', path.instanceId);
       return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-    return remote.start().then((endpoint :net.Endpoint) => {
-      this.lastInstanceGettingFrom_ = remote;
-      return endpoint;
-    });
+    return remote.start();
   }
 
   /**
@@ -438,14 +435,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // TODO: Handle revoked permissions notifications.
   }
 
-  public isGettingAccess = () : boolean => {
-    return this.lastInstanceGettingFrom_ &&
-        this.lastInstanceGettingFrom_.isLocalGettingFromRemote();
-  }
-
-  public postActivityReport = () => {
-    if (globals.settings.statsReportingEnabled) {
-      this.activeUserMetrics_.updateActivityReport();
+  public updateBrowserProxyState = (isActive :boolean) => {
+    this.isBrowserProxyActive_ = isActive;
+    if (isActive && globals.settings.statsReportingEnabled) {
+      this.activeUserMetrics_.reportGetterUse();
     }
   }
 
@@ -899,5 +892,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       });
     }
     return Promise.resolve<void>();
+  }
+
+  public isGettingAccess = () : boolean => {
+    return this.isBrowserProxyActive_;
   }
 }  // class uProxyCore

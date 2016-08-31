@@ -83,7 +83,7 @@ commands[uproxy_core_api.Command.VERIFY_USER] = core.verifyUser;
 commands[uproxy_core_api.Command.VERIFY_USER_SAS] = core.finishVerifyUser;
 commands[uproxy_core_api.Command.GET_PORT_CONTROL_SUPPORT] = core.getPortControlSupport;
 commands[uproxy_core_api.Command.UPDATE_GLOBAL_SETTING] = core.updateGlobalSetting;
-commands[uproxy_core_api.Command.POST_ACTIVITY_REPORT] = core.postActivityReport;
+commands[uproxy_core_api.Command.UPDATE_BROWSER_PROXY_STATE] = core.updateBrowserProxyState;
 commands[uproxy_core_api.Command.CHECK_REPROXY] = core.checkReproxy;
 
 for (var command in commands) {

@@ -250,7 +250,6 @@ export interface UserState {
 export interface RemoteUserInstance {
   start() :Promise<net.Endpoint>;
   stop() :Promise<void>;
-  isLocalGettingFromRemote() :boolean;
 }
 
 // Payload for SIGNAL_FROM_CLIENT_PEER and SIGNAL_FROM_SERVER_PEER messages.

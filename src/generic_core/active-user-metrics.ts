@@ -38,7 +38,7 @@ export class Metrics {
     });
   }
 
-  public updateActivityReport = () => {
+  public reportGetterUse = () => {
     this.onceLoaded_.then(() => {
       // ZZ indicates unknown until we implement country lookup.
       var country = 'ZZ';

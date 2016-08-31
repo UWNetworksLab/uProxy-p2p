@@ -240,8 +240,8 @@ class CoreConnector implements uproxy_core_api.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.POST_RAPPOR_REPORT, args);
   }
 
-  postActivityReport = () : void => {
-    this.sendCommand(uproxy_core_api.Command.POST_ACTIVITY_REPORT);
+  updateBrowserProxyState = (isActive :boolean) : void => {
+    this.sendCommand(uproxy_core_api.Command.UPDATE_BROWSER_PROXY_STATE, isActive);
   }
 
   verifyUser = (inst :social.InstancePath) :Promise<void> => {

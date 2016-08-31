@@ -55,14 +55,6 @@ function setUpConnection(freedom, panel, button) {
     }
   }
 
-  panel.port.on('startUsingProxy', function(endpoint) {
-    proxyConfig.startUsingProxy(endpoint);
-  });
-
-  panel.port.on('stopUsingProxy', function() {
-    proxyConfig.stopUsingProxy();
-  });
-
   panel.port.on('setIcon', function(iconFiles) {
     button.icon = iconFiles;
   });
@@ -135,6 +127,16 @@ function setUpConnection(freedom, panel, button) {
       promiseEmitHandler(args);
     }.bind(this));
   }
+
+  onPromiseEmit('startUsingProxy', function(endpoint) {
+    proxyConfig.startUsingProxy(endpoint);
+    return Promise.resolve();
+  });
+
+  onPromiseEmit('stopUsingProxy', function() {
+    proxyConfig.stopUsingProxy();
+    return Promise.resolve();
+  });
 
   /* Allow pages in the addon and uproxy.org to send messages to the UI or the core */
   var contentProxyFile = self.data.url('scripts/content-proxy.js');

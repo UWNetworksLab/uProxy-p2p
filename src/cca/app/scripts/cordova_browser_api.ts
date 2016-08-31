@@ -127,7 +127,7 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public startUsingProxy = (endpoint: net.Endpoint, bypass: string[],
-                            opts: browser_api.ProxyConnectOptions) => {
+                            opts: browser_api.ProxyConnectOptions) : Promise<void> => {
     if (!chrome.proxy) {
       console.log('No proxy setting support; ignoring start command');
       return;
@@ -186,7 +186,7 @@ class CordovaBrowserApi implements BrowserAPI {
     });
   }
 
-  public stopUsingProxy = () => {
+  public stopUsingProxy = () : Promise<void> => {
     if (!chrome.proxy) {
       console.error('No proxy setting support; ignoring stop command');
       return;
