@@ -205,16 +205,16 @@
     <core-overlay id='inviteUserPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
-          {{ "CONNECT_WITH_A_FRIEND" | $$ }}
+          {{ "CONNECT_WITH_A_FRIEND" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
 
         <div class='view' flex>
           <div id="allInviteMethods">
             <div class='acceptInvite'>
-              <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$ }}' layout vertical>
+              <paper-input-decorator id='inviteCodeDecorator' label='{{ "INVITATION_PLACEHOLDER_TEXT" | $$(model.globalSettings.language) }}' layout vertical>
                 <input is='core-input' value='{{ inviteCode }}' />
               </paper-input-decorator>
-              <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$ }}</uproxy-button>
+              <uproxy-button id='acceptInviteButton' hidden?='{{ inviteCode.length === 0 }}' raised on-tap='{{ acceptInvite }}'>{{ "SUBMIT_BUTTON_TEXT" | $$(model.globalSettings.language) }}</uproxy-button>
             </div>
 
             <div id='allNetworkButtons'>
@@ -237,13 +237,13 @@
     </core-overlay>
 
     <uproxy-dialog layered="false" backdrop="true" id='loginToInviteFriendDialog' on-core-overlay-open-completed="{{loginToInviteFriendDialogOpened}}">
-      <h1>{{ "SIGN_IN_TO_NETWORK" | $$({network: getNetworkDisplayName(selectedNetworkName)})}}</h1>
+      <h1>{{ "SIGN_IN_TO_NETWORK" | $$(model.globalSettings.language, {network: getNetworkDisplayName(selectedNetworkName)})}}</h1>
       <core-icon icon="clear" on-tap='{{ closeLoginDialog }}'></core-icon>
       <p id="networkLoginConfirmation"></p>
       <div style="text-align:center;">
         <uproxy-button raised on-tap='{{loginTapped}}' class='login {{selectedNetworkName}}'>
           <span id="buttonLogoContainer"><core-icon icon='uproxy-icons:{{selectedNetworkName}}'></core-icon></span>
-          <span id="buttonTextContainer">{{ "SIGN_IN_TO_NETWORK" | $$({network: getNetworkDisplayName(selectedNetworkName)})}}</span>
+          <span id="buttonTextContainer">{{ "SIGN_IN_TO_NETWORK" | $$(model.globalSettings.language, {network: getNetworkDisplayName(selectedNetworkName)})}}</span>
         </uproxy-button>
       </div>
     </uproxy-dialog>

@@ -22,4 +22,7 @@ Polymer({
     // closes the logsPanel
     this.$.logsPanel.close();
   },
+  ready: function() {
+    this.model = ui_context.model;
+  }
 });

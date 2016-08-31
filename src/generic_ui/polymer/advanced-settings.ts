@@ -8,6 +8,7 @@
 // user clicks set, we will overwrite the core change.
 
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import translator = require('../scripts/translator');
 
 export enum StatusState {
   EMPTY,
@@ -17,6 +18,8 @@ export enum StatusState {
 };
 
 Polymer({
+  bandwidthLimit: 0,
+  minimumBandwidth: 10000,
   settings: '',
   portControlSupport: null,
   reproxyCheck: uproxy_core_api.ReproxyCheck.UNCHECKED,
@@ -35,10 +38,11 @@ Polymer({
       this.refreshPortControl();
     }
 
+    this.bandwidthLimit = ui_context.model.globalSettings.bandwidthSettings.limit;
+    this.$.bandwidthLimitEnabled.checked = ui_context.model.globalSettings.bandwidthSettings.enabled;
     // Set visuals in "Enable Tor" div based on current global settings
     this.$.torEnableButton.checked = ui_context.model.globalSettings.reproxy.enabled;
     this.torPort = ui_context.model.globalSettings.reproxy.socksEndpoint.port;
-
     this.$.advancedSettingsPanel.open();
   },
   // Perform rudimentary JSON check for the text settings.
@@ -64,6 +68,12 @@ Polymer({
         this.status = StatusState.KEY_VALUE_ERROR;
         return;
       }
+
+      if (ui_context.model.globalSettings.language != newSettings.language) {
+        translator.i18n_setLng(newSettings.language);
+        ui_context.ui.updateLanguage(newSettings.language);
+      }
+
       // User input values in "Enable Tor" div override JSON blob
       if (this.$.torEnableButton.checked) {
         this.torEnabled = true;
@@ -81,9 +91,19 @@ Polymer({
       }
 
       ui_context.model.globalSettings = newSettings;
+      // If changed in the text box, update bandwidth limit input accordingly.
+      var currLimit = ui_context.model.globalSettings.bandwidthSettings.limit;
+      if ((!currLimit) || (currLimit < this.minimumBandwidth)) {
+        this.$.bandwidthLimitDecorator.isInvalid = true;
+        this.bandwidthLimit = ui_context.model.globalSettings.bandwidthSettings.limit;
+        return;
+      } else {
+        this.$.bandwidthLimitDecorator.isInvalid = false;
+      }
       this.status = StatusState.SET;
+      this.bandwidthLimit = currLimit;
+      this.$.bandwidthLimitEnabled.checked = ui_context.model.globalSettings.bandwidthSettings.enabled;
       this.$.state.core.updateGlobalSettings(ui_context.model.globalSettings);
-
       this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
     } catch (e) {
       this.status = StatusState.PARSE_ERROR;
@@ -107,8 +127,24 @@ Polymer({
         this.reproxyCheck = check;
       });
   },
+  ready: function() {
+    this.model = ui_context.model;
+  },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
+  },
+  setLimit: function() {
+    var enabledCurr = this.$.bandwidthLimitEnabled.checked;
+    if ((!this.bandwidthLimit) || (this.bandwidthLimit < this.minimumBandwidth)) {
+      this.$.bandwidthLimitDecorator.isInvalid = true;
+      return;
+    } else {
+      this.$.bandwidthLimitDecorator.isInvalid = false;
+    }
+    ui_context.model.globalSettings.bandwidthSettings.enabled = enabledCurr;
+    ui_context.model.globalSettings.bandwidthSettings.limit = this.bandwidthLimit;
+    this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
+    this.$.state.core.updateGlobalSettings(ui_context.model.globalSettings);
   },
   _reproxyCheckToString: function(check: uproxy_core_api.ReproxyCheck) :string {
     switch (check) {

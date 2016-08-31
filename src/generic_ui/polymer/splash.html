@@ -124,12 +124,12 @@
         <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
         <p>
-          {{ "ABOUT_UPROXY" | $$ }}
+          {{ "ABOUT_UPROXY" | $$(model.globalSettings.language) }}
         </p>
 
         <div id='languageLink'>
           <core-icon icon='language'></core-icon>
-          <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
+          <paper-dropdown-menu label='{{ "LANGUAGE" | $$(model.globalSettings.language) }}'>
             <paper-dropdown class="dropdown" valign="bottom">
                 <core-menu selected="{{ langIndex }}" class="menu" on-core-select='{{ updateLanguage }}'>
                     <template repeat='{{ l in languages }}'>
@@ -143,14 +143,14 @@
         </div> <!-- end of #languageLink -->
 
         <div id='nextWrapper'>
-          <uproxy-button raised on-tap='{{goToStats}}'>{{ "NEXT" | $$ }}</uproxy-button>
+          <uproxy-button raised on-tap='{{goToStats}}'>{{ "NEXT" | $$(model.globalSettings.language) }}</uproxy-button>
         </div>
 
       </div> <!-- end of .view -->
 
       <uproxy-faq-link anchor='whatIsUproxy'>
         <paper-button>
-          {{ "LEARN_MORE_UPROXY" | $$ }}
+          {{ "LEARN_MORE_UPROXY" | $$(model.globalSettings.language) }}
         </paper-button>
       </uproxy-faq-link>
 
@@ -158,20 +158,20 @@
 
     <div vertical layout id="metricsOptIn" hidden?='{{SPLASH_STATES.METRICS_OPT_IN!==state}}'>
       <div class="view" flex>
-        <h1>{{ "WELCOME" | $$ }}</h1>
+        <h1>{{ "WELCOME" | $$(model.globalSettings.language) }}</h1>
         <p>
-          {{ "BETA_MESSAGE" | $$ }}<br><br>
-          {{ "CHANGE_STATS_CHOICE" | $$ }}
+          {{ "BETA_MESSAGE" | $$(model.globalSettings.language) }}<br><br>
+          {{ "CHANGE_STATS_CHOICE" | $$(model.globalSettings.language) }}
         </p>
-        <p><b>{{ "ENABLE_METRICS" | $$ }}</b></p>
+        <p><b>{{ "ENABLE_METRICS" | $$(model.globalSettings.language) }}</b></p>
         <div id="metricsButtons">
-          <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$ }}</uproxy-button>
-          <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$ }}</uproxy-button>
+          <uproxy-button id='enableStatsButton' on-tap='{{ enableStats }}'>{{ "IM_IN" | $$(model.globalSettings.language) }}</uproxy-button>
+          <uproxy-button id='disableStatsButton' on-tap='{{ disableStats }}'>{{ "NO_THANKS" | $$(model.globalSettings.language) }}</uproxy-button>
         </div>
       </div>
       <uproxy-faq-link anchor='doesUproxyLogData'>
         <paper-button>
-          {{ "MORE_ABOUT_METRICS" | $$ }}
+          {{ "MORE_ABOUT_METRICS" | $$(model.globalSettings.language) }}
         </paper-button>
       </uproxy-faq-link>
     </div>

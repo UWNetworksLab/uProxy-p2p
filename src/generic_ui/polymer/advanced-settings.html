@@ -5,6 +5,8 @@
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='../../bower/paper-toggle-button/paper-toggle-button.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='logs.html'>
 <link rel='import' href='link.html'>
@@ -82,6 +84,34 @@
       overflow: auto;
       color: #12A391;
     }
+    #bandwidthLimitingPanel {
+      text-align: start;
+      overflow: auto;
+      color: #12A391;
+    }
+    #bandwidthLimitPrompt {
+      margin-top: 2px;
+      margin-bottom: 9px;
+    }
+    #bandwidthLimitEnabled {
+      margin-left: 3px;
+      margin-top: 3px;
+      float: right;
+    }
+    #bandwidthLimitLabel {
+      width: 150px;
+      margin-top: 5px;
+    }
+    #bandwidthLimitEntry {
+      display: inline-flex;
+    }
+    #bandwidthLimitAnswer {
+      display: inline-flex;
+    }
+    #bandwidthSet {
+      margin-top: 5px;
+      height: 40px;
+    }
     #enableTor core-icon {
       height: 15px !important;
       color: grey;
@@ -149,12 +179,32 @@
       margin-bottom: 0.75em;
       margin-top: 0.75em;
     }
+    #bandwidthLimitDecorator {
+      font-size: 1.0em;
+      font-weight: normal;
+      width: 75px;
+      padding: 2px 5px 6px 5px;
+      margin-bottom: 0;
+      margin-top: 5px;
+      margin-right: 0;
+    }
+    textarea[fit] {
+      /* fit does not properly size textareas on Firefox */
+      height: 100%;
+    }
+    .advancedSettingsText {
+      font-size: 12px;
+      padding-top: 0px;
+      color: rgb(112, 112, 112);
+    }
+    .error {
+      color: rgb(200, 112, 112);
+    }
     #portControlBox {
       border-bottom: 1px solid rgb(221, 221, 221);
       padding: 20px 30px;
       text-align: start;
       color: #12A391;
-      overflow: auto;
     }
     #portControlBox core-icon {
       height: 15px !important;
@@ -183,100 +233,122 @@
 
     <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
     <core-signals on-core-signal-open-advanced-settings='{{ open }}'></core-signals>
+
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$ }}
+          {{ "ADVANCED_SETTINGS_SENTENCE_CASE" | $$(model.globalSettings.language) }}
         </uproxy-app-bar>
-        <div id='settingsContainer' flex>
-          <div id='analyzeNAT'>
-            <p class='inputLabel'>
-              <uproxy-link on-tap='{{ viewLogs }}'>
-                {{ "ANALYZE_NAT" | $$ }}
-              </uproxy-link>
-              <uproxy-faq-link anchor='doesUproxyLogData'>
-                <core-icon icon="help"></core-icon>
-              </uproxy-faq-link>
-            </p>
-          </div>
-          <div id='enableTor'>
-            <p class='inputLabel'>
-              {{ "TOR_ENABLE" | $$ }}
-              <uproxy-faq-link anchor='howToEnableTorReproxy'>
-                <core-icon icon="help"></core-icon>
-              </uproxy-faq-link>
-              <paper-toggle-button id='torEnableButton'></paper-toggle-button>
-            </p>
-            <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
-              <input is='core-input' maxlength="5" value='{{ torPort }}' />
-            </paper-input-decorator>
-            <div id='torEnableToggledOn' hidden?='{{ !$.torEnableButton.checked }}'>
-              <p class='advancedSettingsText' style='color:red;'>
-                {{ "TOR_ENABLE_WARNING" | $$ }}
-              </p>
-              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "UNCHECKED" }}'>
-                {{ 'TOR_PORT_UNCHECKED' | $$ }}
-              </span>
-              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "TRUE" }}'>
-                {{ 'TOR_PORT_TRUE' | $$ }} {{ testedTorPort  | $$ }}
-              </span>
-              <span class='advancedSettingsText' style='color:red;' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "FALSE" }}'>
-                {{ 'TOR_PORT_FALSE' | $$ }} {{ testedTorPort  | $$ }}
-              </span>
-              <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "PENDING" }}'>
-                {{ 'TOR_PORT_PENDING' | $$ }} {{ testedTorPort  | $$ }}
-              </span>
-              <uproxy-link on-tap='{{ refreshReproxyCheck }}' role='button'>
-                <core-icon icon='refresh'></core-icon>
-              </uproxy-link>
-            </div>
-          </div>
-          <div id='portControlBox'>
-
-            <p class='inputLabel'>
-              {{ 'PORT_CONTROL_TITLE' | $$ }}
-              <uproxy-faq-link anchor='whatIsPortControl'>
+        <div id='analyzeNAT'>
+          <p class='inputLabel'>
+            <uproxy-link on-tap='{{ viewLogs }}'>
+              {{ "ANALYZE_NAT" | $$ }}
+            </uproxy-link>
+            <uproxy-faq-link anchor='doesUproxyLogData'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+          </p>
+        </div>
+        <div id='portControlBox'>
+          <div id='bandwidthLimitingPanel'>
+            <p class='inputLabel' id='bandwidthLimitPrompt'>
+              {{ "LIMIT_BANDWIDTH_PROMPT" | $$}}
+              <uproxy-faq-link anchor='whatIsBandwidthLimiting'>
                 <core-icon icon='help'></core-icon>
               </uproxy-faq-link>
+              <paper-toggle-button id='bandwidthLimitEnabled' on-tap='{{ setLimit }}'></paper-toggle-button>
             </p>
-            <span class='label' hidden?='{{ !_supportsPortControl(portControlSupport) }}'>
-              {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
+            <div id='bandwidthLimitEntry' hidden?='{{ !$.bandwidthLimitEnabled.checked }}'>
+              <div id='bandwidthLimitLabel'>
+                {{ "LIMIT_BANDWIDTH_LABEL" | $$}}
+              </div>
+              <div id='bandwidthLimitAnswer'>
+                <paper-input-decorator id='bandwidthLimitDecorator' label='{{ "LIMIT_BANDWIDTH" | $$ }}' error='{{ "INVALID_BANDWIDTH_ERROR" | $$ }}'>
+                  <input is='core-input' type='number' min="10000" value='{{ bandwidthLimit }}' />
+                </paper-input-decorator>
+                <uproxy-button on-tap='{{ setLimit }}' id='bandwidthSet'>
+                  {{ "SAVE" | $$}}
+                </uproxy-button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id='enableTor'>
+          <p class='inputLabel'>
+            {{ "TOR_ENABLE" | $$ }}
+            <uproxy-faq-link anchor='howToEnableTorReproxy'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+            <paper-toggle-button id='torEnableButton'></paper-toggle-button>
+          </p>
+          <paper-input-decorator id='torPortDecorator' label='{{ "TOR_PORT_PLACEHOLDER" | $$ }}' floatingLabel='{{ true }}' hidden?='{{ !$.torEnableButton.checked }}'>
+            <input is='core-input' maxlength="5" value='{{ torPort }}' />
+          </paper-input-decorator>
+          <div id='torEnableToggledOn' hidden?='{{ !$.torEnableButton.checked }}'>
+            <p class='advancedSettingsText' style='color:red;'>
+              {{ "TOR_ENABLE_WARNING" | $$ }}
+            </p>
+            <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "UNCHECKED" }}'>
+              {{ 'TOR_PORT_UNCHECKED' | $$ }}
             </span>
-            <span class='label' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-              {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
+            <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "TRUE" }}'>
+              {{ 'TOR_PORT_TRUE' | $$ }} {{ testedTorPort  | $$ }}
             </span>
-            <span class='label' hidden?='{{ !_portControlStatusPending(portControlSupport) }}'>
-              {{ 'PORT_CONTROL_PENDING' | $$ }}
+            <span class='advancedSettingsText' style='color:red;' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "FALSE" }}'>
+              {{ 'TOR_PORT_FALSE' | $$ }} {{ testedTorPort  | $$ }}
             </span>
-            <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
+            <span class='advancedSettingsText' hidden?='{{ _reproxyCheckToString(reproxyCheck) !== "PENDING" }}'>
+              {{ 'TOR_PORT_PENDING' | $$ }} {{ testedTorPort  | $$ }}
+            </span>
+            <uproxy-link on-tap='{{ refreshReproxyCheck }}' role='button'>
               <core-icon icon='refresh'></core-icon>
             </uproxy-link>
-            <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
-              {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
-              <uproxy-faq-link anchor='whatIsPortControl'>
-                {{ 'MORE_INFO' | $$ }}
-              </uproxy-faq-link>
-            </p>
           </div>
-          <div id='formContainer' vertical layout>
-            <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
-            <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}'>
-              <textarea value='{{ settings }}' fit>
-              </textarea>
-            </paper-input-decorator>
-            <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
-              {{ "SETTINGS_SAVED" | $$ }}
-            </p>
-            <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
-              {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
-            </p>
-            <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
-              {{ "SETTINGS_JSON_ERROR" | $$ }}
-            </p>
-          </div> <!-- end of form container -->
         </div>
+        <div id='portControlBox'>
+          <p class='inputLabel'>
+            {{ 'PORT_CONTROL_TITLE' | $$ }}
+            <uproxy-faq-link anchor='whatIsPortControl'>
+              <core-icon icon='help'></core-icon>
+            </uproxy-faq-link>
+          </p>
+          <span class='label' hidden?='{{ !_supportsPortControl(portControlSupport) }}'>
+            {{ 'PORT_CONTROL_SUPPORTED' | $$ }}
+          </span>
+          <span class='label' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
+            {{ 'PORT_CONTROL_NOT_SUPPORTED' | $$ }}
+          </span>
+          <span class='label' hidden?='{{ !_portControlStatusPending(portControlSupport) }}'>
+            {{ 'PORT_CONTROL_PENDING' | $$ }}
+          </span>
+          <uproxy-link on-tap='{{ refreshPortControl }}' role='button'>
+            <core-icon icon='refresh'></core-icon>
+          </uproxy-link>
+          <p class='label info' hidden?='{{ !_doesNotSupportPortControl(portControlSupport) }}'>
+            {{ 'PORT_CONTROL_NOT_SUPPORTED_INFO' | $$ }}
+            <uproxy-faq-link anchor='whatIsPortControl'>
+              {{ 'MORE_INFO' | $$ }}
+            </uproxy-faq-link>
+          </p>
+        </div>
+        <div id='formContainer' vertical layout>
+          <p class='inputLabel'>{{ 'EDIT_ADVANCED_SETTINGS' | $$ }}</p>
+          <paper-input-decorator id='advancedSettingsDecorator' label='{{ "EDIT_ADVANCED_SETTINGS_PLACEHOLDER" | $$ }}'>
+            <textarea value='{{ settings }}' fit>
+            </textarea>
+          </paper-input-decorator>
+          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ !_statusStateIsSet(status) }}'>
+            {{ "SETTINGS_SAVED" | $$ }}
+          </p>
+          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsParseErorr(status) }}'>
+            {{ "SETTINGS_BAD_FORMAT_ERROR" | $$ }}
+          </p>
+          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ !_statusStateIsKeyValueError(status) }}'>
+            {{ "SETTINGS_JSON_ERROR" | $$ }}
+          </p>
+        </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>
-          {{ "SET" | $$ }}
+          {{ "SET" | $$(model.globalSettings.language) }}
         </div>
       </div>
     </core-overlay>
