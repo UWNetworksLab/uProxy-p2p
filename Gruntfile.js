@@ -1161,6 +1161,13 @@ module.exports = function(grunt) {
     'exec:ccaBuildAndroid', 
     'exec:androidReplaceXwalkDev'
   ]);
+  registerTask(grunt, 'build_android_cca', [
+    // Android build task that does not recreate the Cordova environment.
+    // Should only be used for building CCA modules and after running
+    // build_android, without cleaning, initially at least once.
+    'build_cca',
+    'exec:ccaBuildAndroid',
+  ]);
   registerTask(grunt, 'release_android', [
     'build_cca', 
     'copy:dist', 

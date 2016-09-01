@@ -4,9 +4,10 @@
     <preference name="SplashScreenDelay" value="20000" />
     <preference name="SplashMaintainAspectRatio" value="true" />
     <platform name="ios">
-        <preference name="deployment-target" value="7.0"/> 
+        <preference name="deployment-target" value="7.0"/>
         <hook type="before_run" src="hooks/iosrtc-swift-support.js"/>
     </platform>
+    <plugin name="cordova-build-architecture" spec="https://github.com/MBuchalik/cordova-build-architecture.git#v1.0.1" source="git" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <platform name="android">
         <config-file target="AndroidManifest.xml" parent="./application/activity/[@android:name='MainActivity']">
