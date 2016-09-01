@@ -19,6 +19,7 @@ import social = require('../interfaces/social');
 import socks = require('../lib/socks/headers');
 import StoredValue = require('./stored_value');
 import tcp = require('../lib/net/tcp');
+import xhr = require('../lib/xhr/xhr');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import version = require('../generic/version');
@@ -122,8 +123,14 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     this.refreshPortControlSupport();
 
     this.activeUserMetrics_ = new active_user_metrics.Metrics(
-        globals.storage,
-        this.isGettingAccess.bind(this));
+        globals.storage, (data :string) => {
+          // Post metrics only if the user is currently getting access.
+          if (!this.isGettingAccess_()) {
+            return Promise.reject('Cannot post activity metrics, not proxying');
+          }
+          return xhr.makeXhrPromise(
+              'https://uproxy-metrics.appspot.com/recordUse', 'POST', data);
+        });
 
     globals.loadSettings.then(() => {
       return this.connectedNetworks_.get();
@@ -894,7 +901,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return Promise.resolve<void>();
   }
 
-  public isGettingAccess = () : boolean => {
+  private isGettingAccess_ = () : boolean => {
     return this.isBrowserProxyActive_;
   }
 }  // class uProxyCore

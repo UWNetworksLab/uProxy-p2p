@@ -1,21 +1,22 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
 import logging = require('../lib/logging/logging');
+import simple_date = require('../metrics/model/simple_date');
 import storage = require('../interfaces/storage');
 
-var log :logging.Log = new logging.Log('metrics');
+let log :logging.Log = new logging.Log('metrics');
 
 interface ActivityReport {
-  newDate :string;  // Date in "YYYY-MM-DD" form, user timezone.
+  newDate :simple_date.SimpleDate;
   newCountry :string;
-  previousDate ?:string;  // Date in "YYYY-MM-DD" form, user timezone.
+  previousDate ?:simple_date.SimpleDate;
   previousCountry ?:string;
 }
 
 class StoredActivityMetrics {
   public version = 1;
   public unreportedActivities :ActivityReport[] = [];
-  public lastDate :string;    // Date in "YYYY-MM-DD" form, user timezone.
+  public lastDate :simple_date.SimpleDate;
   public lastCountry :string;
 };
 
@@ -24,7 +25,7 @@ export class Metrics {
   private data_ :StoredActivityMetrics;
 
   constructor(private storage_ :storage.Storage,
-              private checkIfProxying_ :(() => boolean)) {
+              private postCallback_ :((data :string) => Promise<void>)) {
     this.onceLoaded_ =
     this.storage_.load('activity-metrics').then(
         (storedData :StoredActivityMetrics) => {
@@ -41,14 +42,14 @@ export class Metrics {
   public reportGetterUse = () => {
     this.onceLoaded_.then(() => {
       // ZZ indicates unknown until we implement country lookup.
-      var country = 'ZZ';
-      var today = getTodaysDateString();
-      if (this.data_.lastDate != today ||
+      let country = 'ZZ';
+      let today = simple_date.datefromLocalJsDate(new Date());
+      if (!this.data_.lastDate.equals(today) ||
           this.data_.lastCountry != country) {
         // The user is either reporting getting for the first time, or the
         // date or country has changed since the last report.
         // Generate a new activity report.
-        var newActivityReport :ActivityReport = {
+        let newActivityReport :ActivityReport = {
           newDate: today,
           newCountry: country,
           previousDate: this.data_.lastDate,
@@ -71,9 +72,19 @@ export class Metrics {
     if (this.data_.unreportedActivities.length === 0) {
       return;
     }
-    this.postSingleActivity_(this.data_.unreportedActivities[0]).then(() => {
+    var activityReport = this.data_.unreportedActivities[0];
+    var postData = JSON.stringify({
+      date: activityReport.newDate.toString(),
+      country: activityReport.newCountry,
+      previous_date: activityReport.previousDate ?
+          activityReport.previousDate.toString() : undefined,
+      previous_country: activityReport.previousCountry
+    });
+    this.postCallback_(postData).then(() => {
       this.data_.unreportedActivities.shift();
       this.saveToStorage_().then(() => {
+        // Call postActivityQueue_ recursively, stopping once the queue
+        // is empty or the postCallback rejects.
         this.postActivityQueue_();
       });
     }).catch((e :Error) => {
@@ -81,46 +92,7 @@ export class Metrics {
     })
   }
 
-  private postSingleActivity_ = (data :ActivityReport) => {
-    log.debug('postSingleActivity_: ', data);
-    if (!this.checkIfProxying_()) {
-      // Not proxying right now, don't post activity.  This may occur if
-      // proxying stops between multiple attempts to post metrics.
-      return Promise.reject('Unable to post activity metrics, not proxying');
-    }
-    return new Promise(function(F, R) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', 'https://uproxy-metrics.appspot.com/recordUse');
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.onload = function() {
-        log.debug('Got response from recordUse: ' + this.response);
-        if (this.status === 200) {
-          F();
-        } else {
-          R(new Error('Error posting activity: ' + this.status));
-        }
-      };
-      xhr.onerror = function(e) {
-        R(new Error('Failed to post activity: ' + e));
-      };
-      xhr.send(JSON.stringify({
-        date: data.newDate,
-        country: data.newCountry,
-        previous_date: data.previousDate,
-        previous_country: data.previousCountry
-      }));
-    });
-  }
-
   private saveToStorage_ = () : Promise<StoredActivityMetrics> => {
     return this.storage_.save('activity-metrics', this.data_);
   }
-}
-
-// Returns today's date in user's timezone as a "YYYY-MM-DD" string.
-function getTodaysDateString() {
-  var d = new Date();
-  var monthNum = d.getMonth() + 1;
-  var monthString = monthNum < 10 ? '0' + monthNum : monthNum.toString();
-  return d.getFullYear() + '-' + monthString + '-' + d.getDate();
 }

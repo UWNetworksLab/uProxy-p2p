@@ -1,0 +1,1 @@
+"/Users/dborkan/github/uproxy-metrics/src/generic_core/uproxy_core.ts" "/Users/dborkan/github/uproxy-metrics/src/.baseDir.ts" --noImplicitAny --rootDir . --target ES5 --module commonjs --outDir build
