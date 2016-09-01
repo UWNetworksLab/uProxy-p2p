@@ -42,11 +42,11 @@
     }
     let settings = new Settings();
 
-    function pushView(key, view) {
+    function pushView(key, view_element) {
       console.log('Push View: ', key);
       history.pushState({ view: key }, null, '#' + key);
-      root_panel.setContent(view.content());
-      views[key] = view;
+      root_panel.setContent(view_element);
+      views[key] = view_element;
     }
 
     window.onpopstate = function(event) {
@@ -54,17 +54,16 @@
       if (event.state === null) {
         pushView('home', new HomeView());
       } else {
-        root_panel.setContent(views[event.state.view].content());
+        root_panel.setContent(views[event.state.view]);
       }
     };
 
-    class WelcomeView {
-      constructor() {
+    class WelcomeViewUnwrapped extends HTMLElement {
+      createdCallback() {
         this.language_handlers_ = [];
         this.done_handlers_ = [];
-        this.content_ = document.createElement('div');
         // TODO: Don't use a global setLanguage
-        this.content_.innerHTML = '<h1>Welcome</h1><div>' +
+        this.innerHTML = '<h1>Welcome</h1><div>' +
           '<select>' +
             '<option value="en">English</option>' +
             '<option value="ar">Arabic</option>' +
@@ -72,15 +71,12 @@
           '</select>' +
           '<button class="next-button">Next</button>' +
           '</div>';
-        let select_el = this.content_.getElementsByTagName('select')[0];
+        let select_el = this.getElementsByTagName('select')[0];
         select_el.onchange = (event) => { this.emitLanguageChoice(select_el.value); };
-        this.content_.getElementsByClassName('next-button')[0].onclick = (event) => {
+        this.getElementsByClassName('next-button')[0].onclick = (event) => {
           this.emitLanguageChoice(select_el.value);
           this.emitDone();
         };
-      }
-      content() {
-        return this.content_
       }
       emitLanguageChoice(language) {
         for (let handler of this.language_handlers_) {
@@ -99,26 +95,23 @@
         this.done_handlers_.push(handler);
       }
     }
+    const WelcomeView = document.registerElement('welcome-view', WelcomeViewUnwrapped);
 
-    class MetricsChoiceView {
-      constructor() {
+    class MetricsChoiceViewUnwrapped extends HTMLElement {
+      createdCallback() {
         this.choice_handlers_ = [];
         this.done_handlers_ = [];
-        this.content_ = document.createElement('div');
-        this.content_.innerHTML = '<h1>Metrics Choice</h1><div>' +
+        this.innerHTML = '<h1>Metrics Choice</h1><div>' +
           '<button onclick="history.back();">Back</button>' +
           '<button class="button-yes">Yes</button>' +
           '<button class="button-no">No</button>'
           '</div>';
-        this.content_.getElementsByClassName('button-yes')[0].onclick = (event) => {
+        this.getElementsByClassName('button-yes')[0].onclick = (event) => {
           this.done_(true);
         };
-        this.content_.getElementsByClassName('button-no')[0].onclick = (event) => {
+        this.getElementsByClassName('button-no')[0].onclick = (event) => {
           this.done_(false);
         };
-      }
-      content() {
-        return this.content_
       }
       done_(choice) {
         this.emitMetricsChoice(choice);
@@ -141,20 +134,19 @@
         this.done_handlers_.push(handler);
       }
     }
+    const MetricsChoiceView = document.registerElement('metrics-choice-view', MetricsChoiceViewUnwrapped);
 
-    class HomeView {
-      constructor() {
-        this.content_ = document.createElement('div');
-        this.content_.innerHTML = '<h1>Home</h1>' +
+
+    class HomeViewUnwrapped extends HTMLElement {
+      createdCallback() {
+        this.innerHTML = '<h1>Home</h1>' +
           `<p>Settings: ${JSON.stringify(settings)}</p>` +
           '<p><button>Get Access from Peer</button></p>' +
           '<p><button>Get Access from Cloud Proxy</button></p>' +
           '<p><button>Share Access</button></p>';
       }
-      content() {
-        return this.content_
-      }
     }
+    const HomeView = document.registerElement('home-view', HomeViewUnwrapped);
    
     let welcome_view = new WelcomeView();
     welcome_view.onLanguageChoice((language) => {
