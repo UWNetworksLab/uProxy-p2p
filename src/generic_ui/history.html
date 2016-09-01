@@ -62,7 +62,6 @@
       createdCallback() {
         this.language_handlers_ = [];
         this.done_handlers_ = [];
-        // TODO: Don't use a global setLanguage
         this.innerHTML = '<h1>Welcome</h1><div>' +
           '<select>' +
             '<option value="en">English</option>' +
@@ -71,9 +70,9 @@
           '</select>' +
           '<button class="next-button">Next</button>' +
           '</div>';
-        let select_el = this.getElementsByTagName('select')[0];
+        let select_el = this.querySelector('select');
         select_el.onchange = (event) => { this.emitLanguageChoice(select_el.value); };
-        this.getElementsByClassName('next-button')[0].onclick = (event) => {
+        this.querySelector('.next-button').onclick = (event) => {
           this.emitLanguageChoice(select_el.value);
           this.emitDone();
         };
@@ -106,10 +105,10 @@
           '<button class="button-yes">Yes</button>' +
           '<button class="button-no">No</button>'
           '</div>';
-        this.getElementsByClassName('button-yes')[0].onclick = (event) => {
+        this.querySelector('.button-yes').onclick = (event) => {
           this.done_(true);
         };
-        this.getElementsByClassName('button-no')[0].onclick = (event) => {
+        this.querySelector('.button-no').onclick = (event) => {
           this.done_(false);
         };
       }
