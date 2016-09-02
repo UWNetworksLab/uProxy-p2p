@@ -9,6 +9,16 @@ import model = require('../scripts/model');
 import translator = require('../scripts/translator');
 import user_interface = require('../scripts/ui');
 import dialogs = require('../scripts/dialogs');
+import ui_constants = require('../../interfaces/ui');
+
+var languages :Language[] = <Language[]>require('../locales/all/languages.json');
+var core = ui_context.core;
+var languageSettings = ui_context.model;
+interface Language {
+  description :string;
+  language :string;
+  languageCode :string;
+}
 
 Polymer({
   accountChooserOpen: false,
@@ -67,9 +77,18 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = ui_context.model;
+    this.model = languageSettings;
+    this.languages = languages;
     this.showRestartButton = (typeof window.chrome) !== 'undefined';
   },
   observe: {
     'model.onlineNetworks': 'networksChanged'
+  },
+  updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
+    if (detail.isSelected) {
+      var newLanguage = detail.item.getAttribute('languageCode');
+      ui.updateLanguage(newLanguage);
+      window.location.reload();
+    }
   }
 });

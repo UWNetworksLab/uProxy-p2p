@@ -10,9 +10,8 @@
 <link rel='import' href='network-in-settings.html'>
 
 <polymer-element name='uproxy-settings'>
-
   <template>
-    <style>
+    <style is='custom-style'>
     :host {
       position: absolute;
       display: inline-block;
@@ -129,9 +128,25 @@
       border-bottom: solid 1px;
       border-color: rgb(238, 238, 238);
     }
-
     #accountChooser div {
       margin-top: 30px;
+    }
+    #languageLink paper-dropdown-menu {
+      border-bottom: 0px;
+      font-size: 14px;
+      margin: 0;
+      padding-left: 7px;
+      padding-bottom: 0px;
+    }
+    #languageLink core-icon {
+      height: 18px !important;
+      width: 18px !important;
+    }
+    #languageLink paper-item {
+      font-size: 15px;
+    }
+    #languageLink paper-item::shadow .button-content {
+      padding: 0;
     }
     </style>
     <uproxy-state id="state"></uproxy-state>
@@ -185,6 +200,20 @@
           <core-icon icon="help"></core-icon>
           <span class='label'>{{ "GET_HELP" | $$(model.globalSettings.language) }}</span>
         </uproxy-faq-link>
+        <div id='languageLink'>
+          <core-icon icon='language'></core-icon>
+          <paper-dropdown-menu label='{{ "LANGUAGE" | $$ }}'>
+            <paper-dropdown class="dropdown" valign="bottom">
+                <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
+                    <template repeat='{{ l in languages }}'>
+                      <paper-item languageCode='{{ l.languageCode }}'>
+                        <bdi>{{ l.language }}</bdi>
+                      </paper-item>
+                    </template>
+                </core-menu>
+            </paper-dropdown>
+          </paper-dropdown-menu>
+        </div> <!-- end of #languageLink -->
 
         <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
           <core-icon icon="settings"></core-icon>
