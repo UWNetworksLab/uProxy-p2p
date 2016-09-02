@@ -1,3 +1,6 @@
+// Makes an XMLHttpRequest to the given URL, and returns a promise which
+// fulfills with the response string if the server returns 200, otherwise
+// rejects.
 export function makeXhrPromise(url :string, method :string, data :string)
     : Promise<string> {
   return new Promise(function(F, R) {

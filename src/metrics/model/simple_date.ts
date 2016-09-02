@@ -28,12 +28,12 @@ export class SimpleDate {
     return (+date._date - +this._date) / (24 * 60 * 60 * 1000);
   }
 
-  // Returns whether the input is before this date. 
+  // Returns whether the input is before this date.
   public equals(date: SimpleDate) {
     return this._date.getTime() == date._date.getTime();
   }
 
-  // Returns whether the input is before this date. 
+  // Returns whether the input is before this date.
   public isEarlierThan(date: SimpleDate) {
     return this._date < date._date;
   }

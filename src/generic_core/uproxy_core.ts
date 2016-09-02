@@ -113,8 +113,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
+  // Set to true iff the browser proxy is set to get access .
   private isBrowserProxyActive_ :boolean = false;
 
+  // Activity metrics for this user, to report getting access.
   private activeUserMetrics_ :active_user_metrics.Metrics;
 
   constructor() {

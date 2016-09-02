@@ -6,22 +6,28 @@ import storage = require('../interfaces/storage');
 
 let log :logging.Log = new logging.Log('metrics');
 
+// Type definition for data sent in each activity report.
 interface ActivityReport {
-  newDate :simple_date.SimpleDate;
+  newDate :string;          // Date in "YYYY-MM-DD" form, user timezone.
   newCountry :string;
-  previousDate ?:simple_date.SimpleDate;
+  previousDate ?:string;    // Date in "YYYY-MM-DD" form, user timezone.
   previousCountry ?:string;
-}
+};
 
+// Type definition for activity metrics data written to storage.
 class StoredActivityMetrics {
-  public version = 1;
+  public version :number = 1;
   public unreportedActivities :ActivityReport[] = [];
-  public lastDate :simple_date.SimpleDate;
+  public lastDate :string;    // Date in "YYYY-MM-DD" form, user timezone.
   public lastCountry :string;
 };
 
+// Metrics maintains activity metrics for a user, and can report getter usage
+// using the supplied postCallback_ function.
 export class Metrics {
+  // Promise fulfills once data has been loaded from storage.
   public onceLoaded_ :Promise<void>;
+  // Metrics data, saved to storage.
   private data_ :StoredActivityMetrics;
 
   constructor(private storage_ :storage.Storage,
@@ -41,10 +47,9 @@ export class Metrics {
 
   public reportGetterUse = () => {
     this.onceLoaded_.then(() => {
-      // ZZ indicates unknown until we implement country lookup.
-      let country = 'ZZ';
-      let today = simple_date.datefromLocalJsDate(new Date());
-      if (!this.data_.lastDate.equals(today) ||
+      let country = 'ZZ';  // ZZ means unknown until we have country lookup.
+      let today = simple_date.datefromLocalJsDate(new Date()).toString();
+      if (this.data_.lastDate != today ||
           this.data_.lastCountry != country) {
         // The user is either reporting getting for the first time, or the
         // date or country has changed since the last report.
@@ -68,6 +73,8 @@ export class Metrics {
     });
   }
 
+  // Post each element on unreportedActivities using the postCallback_.
+  // Stops when the queue is empty or if there is an error posting.
   private postActivityQueue_ = () => {
     if (this.data_.unreportedActivities.length === 0) {
       return;
