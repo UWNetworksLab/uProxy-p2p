@@ -87,41 +87,11 @@ Polymer({
   observe: {
     'model.onlineNetworks': 'networksChanged'
   },
-  setState: function(state :Number) {
-    if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
-      console.error('Invalid call to setState: ' + state);
-      return;
-    }
-    languageSettings.globalSettings.splashState = state;
-    core.updateGlobalSettings(languageSettings.globalSettings);
-  },
-  next: function() {
-    if (languageSettings.globalSettings.splashState == this.SPLASH_STATES.METRICS_OPT_IN) {
-      ui.view = ui_constants.View.ROSTER;
-    } else {
-      this.setState(languageSettings.globalSettings.splashState + 1);
-    }
-  },
-  prev: function() {
-    this.setState(languageSettings.globalSettings.splashState - 1);
-  },
   updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
     if (detail.isSelected) {
       var newLanguage = detail.item.getAttribute('languageCode');
       ui.updateLanguage(newLanguage);
       window.location.reload();
     }
-  },
-  updateSeenMetrics: function(val :Boolean) {
-    languageSettings.globalSettings.hasSeenMetrics = true;
-    languageSettings.globalSettings.statsReportingEnabled = val;
-    core.updateGlobalSettings(languageSettings.globalSettings);
-    this.next();
-  },
-  enableStats: function() {
-    return this.updateSeenMetrics(true);
-  },
-  disableStats: function() {
-    return this.updateSeenMetrics(false);
   }
 });
