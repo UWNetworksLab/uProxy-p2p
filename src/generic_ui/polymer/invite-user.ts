@@ -69,7 +69,6 @@ var inviteUser = {
     }
   },
   cloudInstall: function() {
-    this.closeInviteUserPanel();
     this.$.installCloud.open();
   },
   loginTapped: function() {
