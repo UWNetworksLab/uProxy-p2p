@@ -1152,21 +1152,22 @@ module.exports = function(grunt) {
   
   // Mobile OS build tasks
   registerTask(grunt, 'build_android', [
+    // Builds Android from scratch by recreating the Cordova environment.
     'exec:cleanAndroid',
-    'build_cca', 
-    'exec:ccaCreateDev', 
+    'build_cca',
+    'exec:ccaCreateDev',
     'exec:ccaPlatformAndroidDev',
-    'exec:ccaAddPluginsAndroidDev', 
-    'copy:cca_splash_dev', 
-    'exec:ccaBuildAndroid', 
-    'exec:androidReplaceXwalkDev'
+    'exec:ccaAddPluginsAndroidDev',
+    'copy:cca_splash_dev',
+    'build_android_cca'
   ]);
-  registerTask(grunt, 'build_android_cca', [
+  registerTask(grunt, 'build_android_ui', [
     // Android build task that does not recreate the Cordova environment.
     // Should only be used for building CCA modules and after running
     // build_android, without cleaning, initially at least once.
     'build_cca',
     'exec:ccaBuildAndroid',
+    'exec:androidReplaceXwalkDev'
   ]);
   registerTask(grunt, 'release_android', [
     'build_cca', 
