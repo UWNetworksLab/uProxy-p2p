@@ -9,11 +9,22 @@ import model = require('../scripts/model');
 import translator = require('../scripts/translator');
 import user_interface = require('../scripts/ui');
 import dialogs = require('../scripts/dialogs');
+import ui_constants = require('../../interfaces/ui');
+
+var languages :Language[] = <Language[]>require('../locales/all/languages.json');
+var core = ui_context.core;
+var languageSettings = ui_context.model;
+interface Language {
+  description :string;
+  language :string;
+  languageCode :string;
+}
 
 Polymer({
   accountChooserOpen: false,
   connectedNetwork: '',
   showRestartButton: false,
+  showLogoutButton: false,
   logOut: function() {
     // logout all networks asynchronously
 
@@ -29,6 +40,9 @@ Polymer({
 
     confirmLogout.then(() => {
       return Promise.all(ui_context.model.onlineNetworks.map((network: model.Network) => {
+        if (network.name === 'Cloud') {
+          return Promise.resolve();  // Don't log out of Cloud.
+        }
         return this.$.state.background.logout({
           name: network.name,
           userId: network.userId
@@ -48,6 +62,7 @@ Polymer({
     this.fire('core-signal', {name: 'open-advanced-settings'});
   },
   networksChanged: function() {
+    this.showLogoutButton = this.isUserLoggedIntoNonCloudNetwork();
     if (!ui_context.model.onlineNetworks) {
       return;
     }
@@ -58,6 +73,17 @@ Polymer({
       this.connectedNetwork = '';
     }
   },
+  isUserLoggedIntoNonCloudNetwork: function() {
+    if (!ui_context.model.onlineNetworks) {
+      return false;
+    }
+    for (let i = 0; i < ui_context.model.onlineNetworks.length; ++i) {
+      if (ui_context.model.onlineNetworks[i].name !== 'Cloud') {
+        return true;
+      }
+    }
+    return false;
+  },
   updateStatsReportingEnabled: function() {
     this.$.state.background.updateGlobalSetting('statsReportingEnabled', ui_context.model.globalSettings.statsReportingEnabled);
   },
@@ -67,9 +93,19 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = ui_context.model;
+    this.model = languageSettings;
+    this.languages = languages;
     this.showRestartButton = (typeof window.chrome) !== 'undefined';
+    this.showLogoutButton = this.isUserLoggedIntoNonCloudNetwork();
   },
   observe: {
     'model.onlineNetworks': 'networksChanged'
+  },
+  updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
+    if (detail.isSelected) {
+      var newLanguage = detail.item.getAttribute('languageCode');
+      ui.updateLanguage(newLanguage);
+      window.location.reload();
+    }
   }
 });

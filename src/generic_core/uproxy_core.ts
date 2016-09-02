@@ -227,6 +227,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     if (null === network) {
       log.warn('Could not logout of network', networkName);
       return;
+    } else if (network.name === 'Cloud') {
+      log.error('Cannot logout from Cloud');
+      return Promise.reject(new Error('Cannot logout from Cloud'));
     }
 
     return network.logout().then(() => {
