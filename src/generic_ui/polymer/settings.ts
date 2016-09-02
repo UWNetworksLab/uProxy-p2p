@@ -24,6 +24,7 @@ Polymer({
   accountChooserOpen: false,
   connectedNetwork: '',
   showRestartButton: false,
+  showLogoutButton: false,
   logOut: function() {
     // logout all networks asynchronously
 
@@ -39,6 +40,9 @@ Polymer({
 
     confirmLogout.then(() => {
       return Promise.all(ui_context.model.onlineNetworks.map((network: model.Network) => {
+        if (network.name === 'Cloud') {
+          return Promise.resolve();  // Don't log out of Cloud.
+        }
         return this.$.state.background.logout({
           name: network.name,
           userId: network.userId
@@ -58,6 +62,7 @@ Polymer({
     this.fire('core-signal', {name: 'open-advanced-settings'});
   },
   networksChanged: function() {
+    this.showLogoutButton = this.isUserLoggedIntoNonCloudNetwork();
     if (!ui_context.model.onlineNetworks) {
       return;
     }
@@ -67,6 +72,17 @@ Polymer({
     } else {
       this.connectedNetwork = '';
     }
+  },
+  isUserLoggedIntoNonCloudNetwork: function() {
+    if (!ui_context.model.onlineNetworks) {
+      return false;
+    }
+    for (let i = 0; i < ui_context.model.onlineNetworks.length; ++i) {
+      if (ui_context.model.onlineNetworks[i].name !== 'Cloud') {
+        return true;
+      }
+    }
+    return false;
   },
   updateStatsReportingEnabled: function() {
     this.$.state.background.updateGlobalSetting('statsReportingEnabled', ui_context.model.globalSettings.statsReportingEnabled);
@@ -80,6 +96,7 @@ Polymer({
     this.model = languageSettings;
     this.languages = languages;
     this.showRestartButton = (typeof window.chrome) !== 'undefined';
+    this.showLogoutButton = this.isUserLoggedIntoNonCloudNetwork();
   },
   observe: {
     'model.onlineNetworks': 'networksChanged'

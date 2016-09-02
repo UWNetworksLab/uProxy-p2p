@@ -234,7 +234,7 @@
           <span class='label'>{{ "RESTART" | $$(model.globalSettings.language) }}</span>
         </uproxy-link>
 
-        <uproxy-link on-tap='{{ logOut }}' hidden?="{{model.onlineNetworks.length==0}}" role='button'>
+        <uproxy-link on-tap='{{ logOut }}' hidden?="{{ !showLogoutButton }}" role='button'>
           <core-icon icon="uproxy-icons:logout"></core-icon>
           <span class='label'>{{ "LOGOUT" | $$(model.globalSettings.language) }}</span>
         </uproxy-link>
