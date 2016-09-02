@@ -1159,9 +1159,9 @@ module.exports = function(grunt) {
     'exec:ccaPlatformAndroidDev',
     'exec:ccaAddPluginsAndroidDev',
     'copy:cca_splash_dev',
-    'build_android_cca'
+    'build_android_lite'
   ]);
-  registerTask(grunt, 'build_android_ui', [
+  registerTask(grunt, 'build_android_lite', [
     // Android build task that does not recreate the Cordova environment.
     // Should only be used for building CCA modules and after running
     // build_android, without cleaning, initially at least once.
