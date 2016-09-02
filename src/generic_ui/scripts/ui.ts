@@ -680,11 +680,13 @@ export class UserInterface implements ui_constants.UiApi {
 
       // regardless, let the user know
       this.bringUproxyToFront();
-    } else {
-      // Clear the browser proxy settings.  This is necessary in case the
-      // proxy was stopped when the user was signed out of the social network.
-      // In the case where the user clicked stop, this will have no effect
-      // (this function is idempotent).
+    } else if (this.instanceGettingAccessFrom_ === null) {
+      // Clear the browser proxy settings only if there is no active connection.
+      // Otherwise, this is a connection handover and clearing the proxy
+      // settings will interrupt the active session.
+      // This is necessary in case the proxy was stopped when the user was
+      // signed out of the social network. In the case where the user clicked
+      // stop, this will have no effect (this function is idempotent).
       this.browserApi.stopUsingProxy();
     }
 
