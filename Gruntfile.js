@@ -1030,7 +1030,18 @@ module.exports = function(grunt) {
     return tasks;
   }
 
-  grunt.registerTask('base', [
+  // Returns a task name that will run the input task only once if
+  // called multiple times.
+  function makeRunOnce(taskName) {
+    return 'run-once:' + taskName;
+  }
+
+  // Register a task, making sure subtasks only run once.
+  function registerTask(grunt, taskName, subTasks) {
+    return grunt.registerTask(taskName, subTasks.map(makeRunOnce));
+  }
+
+  registerTask(grunt, 'base', [
     'copy:resources',
     'copy:devGenericCore',
     'ts',
@@ -1044,14 +1055,14 @@ module.exports = function(grunt) {
     'browserify:cloudSocialProviderFreedomModule',
     'browserify:digitalOceanFreedomModule'
   ]);
-  grunt.registerTask('echoServer', [
+  registerTask(grunt, 'echoServer', [
     'base',
     'browserify:echoServerFreedomModule',
     'copy:libsForEchoServerChromeApp',
     'copy:libsForEchoServerFirefoxApp',
     'copy:libsForEchoServerNode'
   ]);
-  grunt.registerTask('copypasteChat', [
+  registerTask(grunt, 'copypasteChat', [
     'base',
     'browserify:copypasteChatFreedomModule',
     'browserify:copypasteChatMain',
@@ -1059,7 +1070,7 @@ module.exports = function(grunt) {
     'copy:libsForCopypasteChatFirefoxApp',
     'copy:libsForCopypasteChatWebApp'
   ]);
-  grunt.registerTask('copypasteSocks', [
+  registerTask(grunt, 'copypasteSocks', [
     'base',
     'browserify:copypasteSocksFreedomModule',
     'browserify:copypasteSocksMain',
@@ -1067,13 +1078,13 @@ module.exports = function(grunt) {
     'copy:libsForCopyPasteSocksChromeApp',
     'copy:libsForCopyPasteSocksFirefoxApp'
   ]);
-  grunt.registerTask('deployer', [
+  registerTask(grunt, 'deployer', [
     'base',
     'browserify:deployerFreedomModule',
     'copy:libsForDeployerChromeApp',
     'copy:libsForDeployerFirefoxApp'
   ]);
-  grunt.registerTask('simpleChat', [
+  registerTask(grunt, 'simpleChat', [
     'base',
     'browserify:simpleChatFreedomModule',
     'browserify:simpleChatMain',
@@ -1081,20 +1092,20 @@ module.exports = function(grunt) {
     'copy:libsForSimpleChatFirefoxApp',
     'copy:libsForSimpleChatWebApp'
   ]);
-  grunt.registerTask('simpleSocks', [
+  registerTask(grunt, 'simpleSocks', [
     'base',
     'browserify:simpleSocksFreedomModule',
     'copy:libsForSimpleSocksChromeApp',
     'copy:libsForSimpleSocksFirefoxApp',
     'copy:libsForSimpleSocksNode'
   ]);
-  grunt.registerTask('uprobe', [
+  registerTask(grunt, 'uprobe', [
     'base',
     'browserify:uprobeFreedomModule',
     'copy:libsForUprobeChromeApp',
     'copy:libsForUprobeFirefoxApp'
   ]);
-  grunt.registerTask('zork', [
+  registerTask(grunt, 'zork', [
     'base',
     'browserify:zorkFreedomModule',
     'copy:libsForZorkChromeApp',
@@ -1102,15 +1113,15 @@ module.exports = function(grunt) {
     'copy:libsForZorkNode',
     'exec:installFreedomForNodeForZork'
   ]);
-  grunt.registerTask('version_file', [
+  registerTask(grunt, 'version_file', [
     'gitinfo',
     'string-replace:version'
   ]);
-  grunt.registerTask('build_chrome_app', [
+  registerTask(grunt, 'build_chrome_app', [
     'base',
     'copy:chrome_app'
   ].concat(fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')));
-  grunt.registerTask('build_chrome_ext', [
+  registerTask(grunt, 'build_chrome_ext', [
     'base',
     'copy:chrome_extension',
     'copy:chrome_extension_additional',
@@ -1118,13 +1129,13 @@ module.exports = function(grunt) {
     'browserify:chromeContext'
   ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
 
-  grunt.registerTask('build_chrome', [
+  registerTask(grunt, 'build_chrome', [
     'build_chrome_app',
     'build_chrome_ext'
   ]);
 
   // Firefox build tasks.
-  grunt.registerTask('build_firefox', [
+  registerTask(grunt, 'build_firefox', [
     'base',
     'copy:firefox',
     'copy:firefox_additional',
@@ -1132,7 +1143,7 @@ module.exports = function(grunt) {
   ].concat(fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)));
 
   // CCA build tasks
-  grunt.registerTask('build_cca', [
+  registerTask(grunt, 'build_cca', [
     'base',
     'copy:cca',
     'copy:cca_additional',
@@ -1141,17 +1152,25 @@ module.exports = function(grunt) {
   ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
 
   // Mobile OS build tasks
-  grunt.registerTask('build_android', [
+  registerTask(grunt, 'build_android', [
+    // Builds Android from scratch by recreating the Cordova environment.
     'exec:cleanAndroid',
     'build_cca',
     'exec:ccaCreateDev',
     'exec:ccaPlatformAndroidDev',
     'exec:ccaAddPluginsAndroidDev',
     'copy:cca_splash_dev',
+    'build_android_lite'
+  ]);
+  registerTask(grunt, 'build_android_lite', [
+    // Android build task that does not recreate the Cordova environment.
+    // Should only be used for building CCA modules and after running
+    // build_android, without cleaning, initially at least once.
+    'build_cca',
     'exec:ccaBuildAndroid',
     'exec:androidReplaceXwalkDev'
   ]);
-  grunt.registerTask('release_android', [
+  registerTask(grunt, 'release_android', [
     'build_cca',
     'copy:dist',
     'exec:ccaCreateDist',
@@ -1164,12 +1183,12 @@ module.exports = function(grunt) {
   ]);
 
   // Emulate the mobile client for android
-  grunt.registerTask('emulate_android', [
+  registerTask(grunt, 'emulate_android', [
     'build_android',
     'exec:ccaEmulateAndroid'
   ]);
 
-  grunt.registerTask('build_ios', [
+  registerTask(grunt, 'build_ios', [
     'exec:cleanIos',
     'build_cca',
     'exec:ccaCreateIosDev',
@@ -1177,22 +1196,22 @@ module.exports = function(grunt) {
     'exec:addIosrtcHook',
     'exec:ccaPrepareIosDev'
   ]);
-  grunt.registerTask('test_chrome', [
+  registerTask(grunt, 'test_chrome', [
     'build_chrome',
     'browserify:chromeExtensionCoreConnectorSpec',
     'jasmine:chrome_core_connector'
   ]);
-  grunt.registerTask('tcpIntegrationTestModule', [
+  registerTask(grunt, 'tcpIntegrationTestModule', [
     'base',
     'copy:libsForIntegrationTcp',
     'browserify:integrationTcpFreedomModule',
     'browserify:integrationTcpSpec'
   ]);
-  grunt.registerTask('tcpIntegrationTest', [
+  registerTask(grunt, 'tcpIntegrationTest', [
     'tcpIntegrationTestModule',
     'jasmine_chromeapp:tcp'
   ]);
-  grunt.registerTask('socksEchoIntegrationTestModule', [
+  registerTask(grunt, 'socksEchoIntegrationTestModule', [
     'base',
     'copy:libsForIntegrationSocksEcho',
     'browserify:integrationSocksEchoFreedomModule',
@@ -1200,34 +1219,29 @@ module.exports = function(grunt) {
     'browserify:integrationSocksEchoNochurnSpec',
     'browserify:integrationSocksEchoSlowSpec'
   ]);
-  grunt.registerTask('socksEchoIntegrationTest', [
+  registerTask(grunt, 'socksEchoIntegrationTest', [
     'socksEchoIntegrationTestModule',
     'jasmine_chromeapp:socksEcho'
   ]);
-  grunt.registerTask('unit_test_nobuild', _.flatten([].concat(
+  registerTask(grunt, 'unit_test_nobuild', _.flatten([].concat(
     Rule.getTests('src', 'lib', ['build-tools', 'integration-tests']),
     Rule.getTests('src', 'generic_core'),
     Rule.getTests('src', 'generic_ui/scripts')
   ).map((test) => {
-      // TODO: Fix and re-enable these tests (Issue #2727).
-      if (test === 'generic_core/remote-connection' ||
-          test === 'generic_core/remote-instance') {
-        return [];
-      }
       return Rule.buildAndRunTest(test, grunt);
     })
   ));
 
-  grunt.registerTask('unit_test', [
+  registerTask(grunt, 'unit_test', [
     'base',
     'unit_test_nobuild'
   ]);
   // TODO: add test_chrome once it passes reliably
-  grunt.registerTask('integration_test', [
+  registerTask(grunt, 'integration_test', [
     'tcpIntegrationTest',
     'socksEchoIntegrationTest'
   ]);
-  grunt.registerTask('test', [
+  registerTask(grunt, 'test', [
     'unit_test',
     'integration_test'
   ]);
@@ -1235,7 +1249,7 @@ module.exports = function(grunt) {
   // iOS and Android as well as
   // ts-linting and testing which can be annoying and slow.
   // We added jshint here because catches hard syntax errors, etc.
-  grunt.registerTask('build', [
+  registerTask(grunt, 'build', [
     'build_chrome',
     'build_firefox',
     'build_cca',
@@ -1243,15 +1257,15 @@ module.exports = function(grunt) {
     'copy:dist',
     'jpm:xpi'
   ]);
-  grunt.registerTask('lint', ['tslint']);
+  registerTask(grunt, 'lint', ['tslint']);
   // This is run prior to releasing uProxy and, in addition to
   // building, tests and lints all code.
-  grunt.registerTask('dist', [
+  registerTask(grunt, 'dist', [
     'build',
     'lint',
     'test'
   ]);
-  grunt.registerTask('default', ['build']);
+  registerTask(grunt, 'default', ['build']);
 
   //-------------------------------------------------------------------------
   grunt.loadNpmTasks('grunt-browserify');
@@ -1265,6 +1279,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-gitinfo');
   grunt.loadNpmTasks('grunt-jasmine-chromeapp');
   grunt.loadNpmTasks('grunt-jpm');
+  grunt.loadNpmTasks('grunt-run-once');
   grunt.loadNpmTasks('grunt-string-replace');
   grunt.loadNpmTasks('grunt-ts');
   grunt.loadNpmTasks('grunt-tslint');

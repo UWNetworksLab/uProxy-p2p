@@ -98,12 +98,6 @@ export interface reproxySettings {
   socksEndpoint :net.Endpoint; // Endpoint through which to reproxy
 }
 
-//TODO(jpevarnek) remove this interface
-export interface CopyPasteState {
-  connectionState :ConnectionState;
-  endpoint :net.Endpoint;
-}
-
 // --- Communications ---
 
 // Commands are sent from the UI to the Core due to a user interaction.

@@ -146,8 +146,8 @@ describe('remote_connection.RemoteConnection', () => {
 
       start.then(() => {
         // trigger the events
-        socksToRtc.events['bytesReceivedFromPeer'](1234);
-        socksToRtc.events['bytesSentToPeer'](4321);
+        socksToRtc.bytesReceivedFromPeer.handle(1234);
+        socksToRtc.bytesSentToPeer.handle(4321);
 
         // updateSpy should not get called immediately for byte updates
         jasmine.clock().tick(1);
