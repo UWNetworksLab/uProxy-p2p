@@ -82,7 +82,6 @@ Polymer({
     this.model = languageSettings;
     this.languages = languages;
     this.showRestartButton = (typeof window.chrome) !== 'undefined';
-
   },
   observe: {
     'model.onlineNetworks': 'networksChanged'
