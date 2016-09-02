@@ -1,12 +1,32 @@
 <html>
 
 <head>
+  <script src="/third_party/bower/webcomponentsjs/webcomponents.js"></script>
+  <link rel="import" href="/third_party/bower/core-menu/core-menu.html">
+  <link rel="import" href="/third_party/bower/paper-button/paper-button.html">
+  <link rel="import" href="/third_party/bower/paper-dropdown/paper-dropdown.html">
+  <link rel="import" href="/third_party/bower/paper-dropdown-menu/paper-dropdown-menu.html">
+  <link rel='import' href='/third_party/bower/paper-item/paper-item.html'>
+  <style>
+  </style>
 </head>
 
 <body>
   <div id='root-panel'></div>
   <script>
     'use strict';
+
+    class Settings {
+      constructor() {
+        this.language = null;
+      }
+      setLanguage(language) {
+        this.language = language;
+      }
+      enableMetrics(enable) {
+        this.enableMetrics = enable;
+      }
+    }
 
     class RootPanel {
       // Takes the element that will be the root for this panel.
@@ -23,61 +43,39 @@
       }
     }
 
-    let root_panel = new RootPanel(document.getElementById('root-panel'));
-    // Clear current state.
-    window.history.replaceState(null, null);
-
-    let views = {};
-
-    class Settings {
-      constructor() {
-        this.language = null;
-      }
-      setLanguage(language) {
-        this.language = language;
-      }
-      enableMetrics(enable) {
-        this.enableMetrics = enable;
-      }
-    }
-    let settings = new Settings();
-
-    function pushView(key, view_element) {
-      console.log('Push View: ', key);
-      history.pushState({ view: key }, null, '#' + key);
-      root_panel.setContent(view_element);
-      views[key] = view_element;
-    }
-
-    window.onpopstate = function(event) {
-      console.log("Pop state: " + JSON.stringify(event.state));
-      if (event.state === null) {
-        pushView('home', new HomeView());
-      } else {
-        root_panel.setContent(views[event.state.view]);
-      }
-    };
-
     class WelcomeViewUnwrapped extends HTMLElement {
       createdCallback() {
         this.language_handlers_ = [];
         this.done_handlers_ = [];
         this.innerHTML = '<h1>Welcome</h1><div>' +
-          '<select>' +
-            '<option value="en">English</option>' +
-            '<option value="ar">Arabic</option>' +
-            '<option value="zh">Chinese</option>' +
-          '</select>' +
-          '<button class="next-button">Next</button>' +
+          '<core-icon icon="language"></core-icon>' +
+          '<paper-dropdown-menu>' +
+            '<paper-dropdown class="dropdown">' +
+              '<core-menu class="menu" selected="0" on-core-select="{{handleLanguageSelected}}">' +
+                '<paper-item value="en">English</paper-item>' +
+                '<paper-item value="ar">Arabic</paper-item>' +
+                '<paper-item value="zh">Chinese</paper-item>' +
+              '</core-menu>' +
+            '</paper-dropdown>' +
+          '</paper-dropdown-menu>' +
+          '<paper-button class="next-button">Next</paper-button>' +
           '</div>';
-        let select_el = this.querySelector('select');
-        select_el.onchange = (event) => { this.emitLanguageChoice(select_el.value); };
+        let menu = this.querySelector('.menu');
+        menu.onchange = (event) => { this.emitLanguageChoice(select_el.value); };
         this.querySelector('.next-button').onclick = (event) => {
-          this.emitLanguageChoice(select_el.value);
+          console.log('selected item: ', menu.selectedItem);
+          this.emitLanguageChoice(menu.selectedItem.getAttribute('value'));
           this.emitDone();
         };
       }
+      handleLanguageSelected(e, detail) {
+        console.log('handleLanguageSelected: ', detail);
+        if (detail.isSelected) {
+          emitLanguageChoice(detail.item.value);
+        }
+      }
       emitLanguageChoice(language) {
+        console.log('Chosen language ', language);
         for (let handler of this.language_handlers_) {
           handler(language);
         }
@@ -139,29 +137,58 @@
     class HomeViewUnwrapped extends HTMLElement {
       createdCallback() {
         this.innerHTML = '<h1>Home</h1>' +
-          `<p>Settings: ${JSON.stringify(settings)}</p>` +
           '<p><button>Get Access from Peer</button></p>' +
           '<p><button>Get Access from Cloud Proxy</button></p>' +
           '<p><button>Share Access</button></p>';
       }
     }
     const HomeView = document.registerElement('home-view', HomeViewUnwrapped);
-   
-    let welcome_view = new WelcomeView();
-    welcome_view.onLanguageChoice((language) => {
-      settings.setLanguage(language);
-    });
-    welcome_view.onDone(() => {
-      let metrics_view = new MetricsChoiceView();
-      metrics_view.onMetricsChoice((choice) => {
-        settings.enableMetrics(choice);
+
+    function main() {
+      let settings = new Settings();
+
+      let root_panel = new RootPanel(document.getElementById('root-panel'));
+
+      // Clear current state.
+      window.history.replaceState(null, null);
+
+      let views = {};
+
+      function pushView(key, view_element) {
+        console.log('Push View: ', key);
+        history.pushState({ view: key }, null, '#' + key);
+        root_panel.setContent(view_element);
+        views[key] = view_element;
+      }
+
+      window.addEventListener('popstate', function(event) {
+        console.log("Pop state: " + JSON.stringify(event.state));
+        if (event.state === null) {
+          console.log('Settings: ', settings);
+          pushView('home', new HomeView());
+        } else {
+          root_panel.setContent(views[event.state.view]);
+        }
       });
-      metrics_view.onDone(() => {
-        window.history.go(-2);
-      })
-      pushView('metrics', metrics_view);
-    });
-    pushView('welcome', welcome_view);
+
+      let welcome_view = new WelcomeView();
+      welcome_view.onLanguageChoice((language) => {
+        settings.setLanguage(language);
+      });
+      welcome_view.onDone(() => {
+        let metrics_view = new MetricsChoiceView();
+        metrics_view.onMetricsChoice((choice) => {
+          settings.enableMetrics(choice);
+        });
+        metrics_view.onDone(() => {
+          window.history.go(-2);
+        })
+        pushView('metrics', metrics_view);
+      });
+      pushView('welcome', welcome_view);
+    }
+
+    main();
   </script>
 </body>
 </html>
