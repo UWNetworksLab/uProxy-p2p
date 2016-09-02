@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
 
@@ -84,7 +84,7 @@ describe('social_network.FreedomNetwork', () => {
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
     spyOn(console, 'log');
-    metrics = new rappor_metrics.Metrics(null);
+    metrics = new rappor_metrics.FreedomMetrics(null);
   });
 
   it('initialize networks', () => {

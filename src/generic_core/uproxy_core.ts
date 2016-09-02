@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
@@ -243,6 +243,19 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   // onUpdate not needed in the real core.
   onUpdate = (update:uproxy_core_api.Update, handler:Function) => {
     throw 'uproxy_core onUpdate not implemented.';
+  }
+
+  public updateGlobalSetting = (change: uproxy_core_api.UpdateGlobalSettingArgs) => {
+    // Make sure we have the correct settings object loaded and aren't
+    // going to write over something we should not
+    globals.loadSettings.then(() => {
+      (<any>globals.settings)[change.name] = change.value;
+
+      // We could try to speed things up slightly by just manually calling the
+      // save here, but that seems like an unnecessary optimization for something
+      // that should not be called that often
+      this.updateGlobalSettings(globals.settings);
+    });
   }
 
   /**
@@ -777,11 +790,16 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     return null;
   }
 
-  public updateOrgPolicy(policy :uproxy_core_api.ManagedPolicyUpdate) :void {
-    globals.settings.enforceProxyServerValidity = policy.
-      enforceProxyServerValidity;
-    globals.settings.validProxyServers = policy.validProxyServers;
-    this.updateGlobalSettings(globals.settings);
+  public updateOrgPolicy = (policy :uproxy_core_api.ManagedPolicyUpdate): void => {
+    // have to load settings first to make sure we don't overwrite anything
+    globals.loadSettings.then(() => {
+      globals.settings.enforceProxyServerValidity =
+          policy.enforceProxyServerValidity;
+      globals.settings.validProxyServers = policy.validProxyServers;
+      this.updateGlobalSettings(globals.settings);
+
+      ui.update(uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS, globals.settings);
+    });
   }
 
   public verifyUser = (inst:social.InstancePath) :void => {

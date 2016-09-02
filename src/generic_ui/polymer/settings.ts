@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 var ui = ui_context.ui;
 
@@ -71,7 +71,7 @@ Polymer({
     }
   },
   updateStatsReportingEnabled: function() {
-    this.$.state.background.updateGlobalSettings(ui_context.model.globalSettings);
+    this.$.state.background.updateGlobalSetting('statsReportingEnabled', ui_context.model.globalSettings.statsReportingEnabled);
   },
   toggleAccountChooser: function() {
     this.accountChooserOpen = !this.accountChooserOpen;

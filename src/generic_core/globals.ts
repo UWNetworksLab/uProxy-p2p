@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../third_party/typings/index.d.ts' />
 
 import _ = require('lodash');
 import constants = require('./constants');
@@ -34,14 +34,14 @@ export var settings :uproxy_core_api.GlobalSettings = {
   quiverUserName: '',
   proxyBypass: constants.DEFAULT_PROXY_BYPASS.slice(0),
   enforceProxyServerValidity: false,
-  validProxyServers: [],
+  validProxyServers: {},
   activePromoId: null,  // set on promoIdDetected
   enabledExperiments: [],
   shouldHijackDO: true,
   crypto: true,
   reproxy: {
     enabled: false,
-    socksEndpoint: {address: '127.0.0.1', port: 9050}
+    socksEndpoint: {address: '127.0.0.1', port: 9050},
   }
 };
 
@@ -78,7 +78,9 @@ export var effectiveMessageVersion = () : number => {
   return settings.force_message_version || constants.MESSAGE_VERSION;
 }
 
-export var metrics = new metrics_module.Metrics(storage);
+export const metrics = freedom['metrics'] ?
+    new metrics_module.FreedomMetrics(storage) :
+    new metrics_module.NoOpMetrics();
 
 export var publicKey :string;
 export var pgp :freedom.PgpProvider.PgpProvider = freedom['pgp']();

@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
 
 // 'model' object contains variables about the state of the application.
 // Polymer elements will bind to model so that the elements' style and

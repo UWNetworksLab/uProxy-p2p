@@ -1,6 +1,6 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts' />
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts' />
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 import _ = require('lodash');
 import model = require('../scripts/model');
@@ -27,6 +27,24 @@ var inviteUser = {
   closeInviteUserPanel: function() {
     this.$.inviteUserPanel.close();
   },
+  back: function() {
+    if (this.$.loginToInviteFriendDialog.opened) {
+      this.$.loginToInviteFriendDialog.close();
+      return;
+    }
+
+    if (this.$.installCloud.opened) {
+      this.$.installCloud.back();
+      return;
+    }
+
+    if (this.$.networkInviteUser.opened) {
+      this.$.networkInviteUser.close();
+      return;
+    }
+
+    this.closeInviteUserPanel();
+  },
   networkTapped: function(event: Event, detail: Object, target: HTMLElement) {
     var networkName = target.getAttribute('data-network');
     if (networkName === 'Cloud') {
@@ -52,7 +70,7 @@ var inviteUser = {
   },
   cloudInstall: function() {
     this.closeInviteUserPanel();
-    this.fire('core-signal', { name: 'open-cloud-install' });
+    this.$.installCloud.open();
   },
   loginTapped: function() {
     // loginTapped should only be called by the loginToInviteFriendDialog, which
@@ -72,7 +90,7 @@ var inviteUser = {
     this.selectedNetworkName = networkName;
     // After login for these networks, open another view which allows users
     // to invite their friends.
-    this.fire('core-signal', { name: 'open-network-invite-dialog' });
+    this.$.networkInviteUser.open();
   },
   loginToInviteFriendDialogOpened: function() {
     // Set confirmation message, which may include some HTML (e.g. strong, br).
@@ -105,18 +123,24 @@ var inviteUser = {
   acceptInvite: function() {
     ui.handleInvite(this.inviteCode).then(() => {
       this.closeInviteUserPanel();
-
-      this.$.state.openDialog(dialogs.getMessageDialogDescription(
-          '', translator.i18n_t('FRIEND_ADDED')));
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          toastMessage: translator.i18n_t('FRIEND_ADDED')
+        }
+      });
     }).catch(() => {
       this.$.state.openDialog(dialogs.getMessageDialogDescription(
-          '', translator.i18n_t('FRIEND_ADD_ERROR')));
+        '', translator.i18n_t('FRIEND_ADD_ERROR')));
     });
   },
   ready: function() {
     this.selectedNetworkName = '';
     this.model = ui_context.model;
     this.inviteCode = '';
+  },
+  computed: {
+    'opened': '$.inviteUserPanel.opened || $.loginToInviteFriendDialog.opened || $.installCloud.opened || $.networkInviteUser.opened'
   }
 };
 

@@ -1,6 +1,6 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../../third_party/typings/browser.d.ts'/>
-/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../third_party/typings/index.d.ts'/>
+/// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
 import panel_connector = require('../../interfaces/panel_connector');
 import social = require('../../interfaces/social');
@@ -76,6 +76,10 @@ class Background {
     }
 
     this.state_ = state;
+  }
+
+  public updateGlobalSetting = (name: string, value: Object): void => {
+    this.doInBackground_('update-global-setting', { name: name, value: value });
   }
 
   public updateGlobalSettings = (settings: uproxy_core_api.GlobalSettings): void => {

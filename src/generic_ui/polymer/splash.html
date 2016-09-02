@@ -113,6 +113,8 @@
 
     </style>
     <core-signals on-core-signal-open-splash='{{ open }}'></core-signals>
+    <uproxy-state id="state"></uproxy-state>
+
     <div horizontal layout>
       <core-icon icon='arrow-back' on-tap='{{backToIntro}}' class='prevArrow'
           hidden?='{{SPLASH_STATES.INTRO==state}}'></core-icon>
