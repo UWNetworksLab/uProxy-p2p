@@ -1,12 +1,12 @@
 // Makes an XMLHttpRequest to the given URL, and returns a promise which
 // fulfills with the response string if the server returns 200, otherwise
 // rejects.
-export function makeXhrPromise(url :string, method :string, data :string)
+export function makeXhrPromise(url :string, method :string, data :string, contentType :string)
     : Promise<string> {
   return new Promise(function(F, R) {
     let xhr = new XMLHttpRequest();
     xhr.open(method, url);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Content-Type', contentType);
     xhr.onload = function() {
       if (this.status === 200) {
         F(this.response);

@@ -26,7 +26,7 @@ class StoredActivityMetrics {
 // using the supplied postCallback_ function.
 export class Metrics {
   // Promise fulfills once data has been loaded from storage.
-  public onceLoaded_ :Promise<void>;
+  private onceLoaded_ :Promise<void>;
   // Metrics data, saved to storage.
   private data_ :StoredActivityMetrics;
 
@@ -45,7 +45,7 @@ export class Metrics {
     });
   }
 
-  public reportGetterUse = () => {
+  public reportGetterUse() {
     this.onceLoaded_.then(() => {
       let country = 'ZZ';  // ZZ means unknown until we have country lookup.
       let today = simple_date.datefromLocalJsDate(new Date()).toString();
@@ -75,7 +75,7 @@ export class Metrics {
 
   // Post each element on unreportedActivities using the postCallback_.
   // Stops when the queue is empty or if there is an error posting.
-  private postActivityQueue_ = () => {
+  private postActivityQueue_() {
     if (this.data_.unreportedActivities.length === 0) {
       return;
     }
@@ -99,7 +99,7 @@ export class Metrics {
     })
   }
 
-  private saveToStorage_ = () : Promise<StoredActivityMetrics> => {
+  private saveToStorage_() : Promise<StoredActivityMetrics> {
     return this.storage_.save('activity-metrics', this.data_);
   }
 }

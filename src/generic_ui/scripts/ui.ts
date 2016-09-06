@@ -715,7 +715,6 @@ export class UserInterface implements ui_constants.UiApi {
   // Unsets the browser proxy setting, then notifies the core of the update
   private stopBrowserProxy_ = () => {
     this.browserApi.stopUsingProxy().then(() => {
-      console.log('browserApi.stopUsingProxy completed');  // TODO: remove
       this.core.updateBrowserProxyState(false);
     });
   }
@@ -755,7 +754,6 @@ export class UserInterface implements ui_constants.UiApi {
       this.proxyAccessMode_ = accessMode;
       this.startGettingInUiAndConfig(
           instanceId, endpoint, accessMode).then(() => {
-        console.log('startGettingInUiAndConfig fulfilled');  // TODO: remove
         this.core.updateBrowserProxyState(true);
       });
     }, (err:Error) => {

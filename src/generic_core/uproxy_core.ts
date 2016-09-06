@@ -131,7 +131,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
             return Promise.reject('Cannot post activity metrics, not proxying');
           }
           return xhr.makeXhrPromise(
-              'https://uproxy-metrics.appspot.com/recordUse', 'POST', data);
+              'https://uproxy-metrics.appspot.com/recordUse', 'POST', data,
+              'application/json');
         });
 
     globals.loadSettings.then(() => {
