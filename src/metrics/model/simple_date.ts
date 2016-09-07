@@ -58,6 +58,11 @@ export class SimpleDate {
   public toString(): string {
     return `${this.getYear()}-${padLeft(this.getMonth(), 2)}-${padLeft(this.getDay(), 2)}`;
   }
+
+  // Returns an ISO string representation ("YYYY-MM-DD" format).
+  public toIsoString(): string {
+    return `${this.getYear()}-${padLeft(this.getMonth(), 2)}-${padLeft(this.getDay(), 2)}`;
+  }
 }
 
 // Creates a SimpleDate from an ISO string.

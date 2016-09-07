@@ -23,11 +23,12 @@
 build
 .build
 editor_support/*/*.sublime-workspace
+keys
 node_modules
 npm-debug.log
 test_output
 tmp
-keys
+tscommand-*.tmp.txt
+src/.baseDir.ts
 third_party/bower
 third_party/typings
-src/.baseDir.ts

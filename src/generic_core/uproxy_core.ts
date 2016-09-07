@@ -117,23 +117,32 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   private isBrowserProxyActive_ :boolean = false;
 
   // Activity metrics for this user, to report getting access.
-  private activeUserMetrics_ :active_user_metrics.Metrics;
+  private loadActiveUserMetrics_ :Promise<active_user_metrics.Metrics>;
 
   constructor() {
     log.debug('Preparing uProxy Core');
 
     this.refreshPortControlSupport();
 
-    this.activeUserMetrics_ = new active_user_metrics.Metrics(
-        globals.storage, (data :string) => {
-          // Post metrics only if the user is currently getting access.
-          if (!this.isGettingAccess_()) {
-            return Promise.reject('Cannot post activity metrics, not proxying');
-          }
-          return xhr.makeXhrPromise(
-              'https://uproxy-metrics.appspot.com/recordUse', 'POST', data,
-              'application/json');
-        });
+    this.loadActiveUserMetrics_ = storage.load('active-user-metrics').catch((e :Error) => {
+      // Not an error if no metrics are found storage, this happens the first
+      // time the user loads uProxy.  Use freshly initialized data.
+      return new active_user_metrics.StoredActivityMetrics();
+    }).then((data: active_user_metrics.StoredActivityMetrics) => {
+      let saveCallback = (saveData :active_user_metrics.StoredActivityMetrics) => {
+        return storage.save('active-user-metrics', saveData);
+      };
+      let postCallback = (postData :string) => {
+        // Post metrics only if the user is currently getting access.
+        if (!this.isGettingAccess_()) {
+          return Promise.reject('Cannot post activity metrics, not proxying');
+        }
+        return xhr.makeXhrPromise(
+            'https://uproxy-metrics.appspot.com/recordUse', 'POST',
+            postData, 'application/json');
+      };
+      return new active_user_metrics.Metrics(data, saveCallback, postCallback);
+    });
 
     globals.loadSettings.then(() => {
       return this.connectedNetworks_.get();
@@ -448,7 +457,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   public updateBrowserProxyState = (isActive :boolean) => {
     this.isBrowserProxyActive_ = isActive;
     if (isActive && globals.settings.statsReportingEnabled) {
-      this.activeUserMetrics_.reportGetterUse();
+      this.loadActiveUserMetrics_.then((metrics :active_user_metrics.Metrics) => {
+        metrics.reportGetterActivity();
+      });
     }
   }
 
