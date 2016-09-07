@@ -627,6 +627,7 @@ export class UserInterface implements ui_constants.UiApi {
   public proxyDisconnected = (info?:ProxyDisconnectInfo) => {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
+      this.core.updateBrowserProxyState(false);
       if (info && info.deliberate) {
         return;
       }
