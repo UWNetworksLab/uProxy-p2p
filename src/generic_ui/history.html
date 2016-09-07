@@ -7,6 +7,7 @@
   <link rel="import" href="/third_party/bower/paper-dropdown/paper-dropdown.html">
   <link rel="import" href="/third_party/bower/paper-dropdown-menu/paper-dropdown-menu.html">
   <link rel='import' href='/third_party/bower/paper-item/paper-item.html'>
+  <link rel='import' href='polymer/welcome-view.html'>
   <style>
   </style>
 </head>
@@ -42,57 +43,6 @@
         this.root_node_.appendChild(content_node);
       }
     }
-
-    class WelcomeViewUnwrapped extends HTMLElement {
-      createdCallback() {
-        this.language_handlers_ = [];
-        this.done_handlers_ = [];
-        this.innerHTML = '<h1>Welcome</h1><div>' +
-          '<core-icon icon="language"></core-icon>' +
-          '<paper-dropdown-menu>' +
-            '<paper-dropdown class="dropdown">' +
-              '<core-menu class="menu" selected="0" on-core-select="{{handleLanguageSelected}}">' +
-                '<paper-item value="en">English</paper-item>' +
-                '<paper-item value="ar">Arabic</paper-item>' +
-                '<paper-item value="zh">Chinese</paper-item>' +
-              '</core-menu>' +
-            '</paper-dropdown>' +
-          '</paper-dropdown-menu>' +
-          '<paper-button class="next-button">Next</paper-button>' +
-          '</div>';
-        let menu = this.querySelector('.menu');
-        menu.onchange = (event) => { this.emitLanguageChoice(select_el.value); };
-        this.querySelector('.next-button').onclick = (event) => {
-          console.log('selected item: ', menu.selectedItem);
-          this.emitLanguageChoice(menu.selectedItem.getAttribute('value'));
-          this.emitDone();
-        };
-      }
-      handleLanguageSelected(e, detail) {
-        console.log('handleLanguageSelected: ', detail);
-        if (detail.isSelected) {
-          emitLanguageChoice(detail.item.value);
-        }
-      }
-      emitLanguageChoice(language) {
-        console.log('Chosen language ', language);
-        for (let handler of this.language_handlers_) {
-          handler(language);
-        }
-      }
-      onLanguageChoice(handler) {
-        this.language_handlers_.push(handler);
-      }
-      emitDone() {
-        for (let handler of this.done_handlers_) {
-          handler();
-        }
-      }
-      onDone(handler) {
-        this.done_handlers_.push(handler);
-      }
-    }
-    const WelcomeView = document.registerElement('welcome-view', WelcomeViewUnwrapped);
 
     class MetricsChoiceViewUnwrapped extends HTMLElement {
       createdCallback() {
@@ -133,7 +83,6 @@
     }
     const MetricsChoiceView = document.registerElement('metrics-choice-view', MetricsChoiceViewUnwrapped);
 
-
     class HomeViewUnwrapped extends HTMLElement {
       createdCallback() {
         this.innerHTML = '<h1>Home</h1>' +
@@ -172,23 +121,16 @@
       });
 
       let welcome_view = new WelcomeView();
-      welcome_view.onLanguageChoice((language) => {
-        settings.setLanguage(language);
+      welcome_view.onLanguageChoice((event) => {
+        settings.setLanguage(event.detail);
       });
       welcome_view.onDone(() => {
-        let metrics_view = new MetricsChoiceView();
-        metrics_view.onMetricsChoice((choice) => {
-          settings.enableMetrics(choice);
-        });
-        metrics_view.onDone(() => {
-          window.history.go(-2);
-        })
-        pushView('metrics', metrics_view);
+        console.log('Settings: ', settings);
       });
       pushView('welcome', welcome_view);
     }
 
-    main();
+    window.addEventListener('polymer-ready', main);
   </script>
 </body>
 </html>

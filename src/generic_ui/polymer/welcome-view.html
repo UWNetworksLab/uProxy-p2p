@@ -1,0 +1,48 @@
+<polymer-element name='uproxy-welcome-view' constructor='WelcomeView'>
+  <template>
+    <h1>Welcome</h1>
+    <core-icon icon="language"></core-icon>
+    <paper-dropdown-menu>
+      <paper-dropdown class="dropdown">
+        <core-menu id="menu" valueattr='value' selected='{{language}}' on-core-select="{{handleLanguageSelected_}}">
+          <paper-item value="en">English</paper-item>
+          <paper-item value="ar">Arabic</paper-item>
+          <paper-item value="zh">Chinese</paper-item>
+        </core-menu>
+      </paper-dropdown>
+    </paper-dropdown-menu>
+    <paper-button on-click='{{handleNext_}}'>Next</paper-button>
+  </template>
+
+  <script>
+    Polymer({
+      publish: {
+        language: 'ar',
+      },
+      // Public methods
+      onDone: function(handler) {
+        this.addEventListener('done', handler);
+      },
+      onLanguageChoice: function(handler) {
+        this.addEventListener('language-chosen', handler);
+      },
+      // Private methods
+      handleLanguageSelected_: function(event, detail) {
+        if (detail.isSelected) {
+          this.emitLanguageChoice_(this.language);
+        }
+      },
+      handleNext_: function(event) {
+        this.emitLanguageChoice_(this.language);
+        this.emitDone_();
+      },
+      emitLanguageChoice_: function(language) {
+        console.log('Chosen language ', language);
+        this.fire('language-chosen', this.language);
+      },
+      emitDone_: function() {
+        this.fire('done');
+      }
+    });
+  </script>
+</polymer-element>
