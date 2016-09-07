@@ -51,7 +51,7 @@ export class Metrics {
           country: this.data_.lastActivity.country,
         };
       }
-      this.data_.unreportedActivities.push(newActivityReport);
+      this.enqueueReport_(newActivityReport);
 
       // Store new date and country for use in the next report.
       this.data_.lastActivity = {date: today, country: country};
@@ -87,5 +87,9 @@ export class Metrics {
     }).catch((e :Error) => {
       log.error('Error posting activity', e);
     })
+  }
+
+  private enqueueReport_(report :ActivityReport) {
+    this.data_.unreportedActivities.push(report);
   }
 }
