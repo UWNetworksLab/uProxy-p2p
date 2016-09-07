@@ -11,7 +11,6 @@
   <script src='../bower/webcomponentsjs/webcomponents.min.js'></script>
 
   <script src='scripts/context.static.js'></script>
-  <script src='scripts/workarounds.js'></script>
 
   <!-- The vulcanized code will be loaded asynchronously by context.static.js -->
   <!-- <link rel='import' href='polymer/vulcanized.html'> -->
@@ -45,8 +44,9 @@
 </head>
 
 <body unresolved touch-action='auto'>
-  <!-- uproxy-root will be loaded after polymer is loaded -->
+  <!-- uproxy-root and uproxy-workarounds will be loaded after polymer is loaded (see src/cca/app/scripts/context.ts) -->
   <!-- <uproxy-root></uproxy-root> -->
+  <!-- <uproxy-workarounds></uproxy-workarounds> -->
 </body>
 
 </html>

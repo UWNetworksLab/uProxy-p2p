@@ -160,6 +160,7 @@ Polymer({
     }
     this.setDirectionality();
     // Logic that depends on the uproxy-root element being loaded
+    // (as in src/cca/app/polymer/workarounds.ts)
     // can be scheduled appropriately by listening for this event:
     document.dispatchEvent(new Event('uproxy-root-ready'));
   },

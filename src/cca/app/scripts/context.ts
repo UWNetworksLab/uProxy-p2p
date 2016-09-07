@@ -32,6 +32,10 @@ chrome.runtime.getBackgroundPage((bgPage) => {
     // an <iframe> in this page to represent the background page.
     var root = document.createElement('uproxy-root');
     document.body.appendChild(root);
+    // Also add our <uproxy-workarounds> Polymer element defined in
+    // ../polymer/workarounds.{html,js}
+    var workarounds = document.createElement('uproxy-workarounds');
+    document.body.appendChild(workarounds);
   };
   link.onerror = function(e) {
     console.log('Error while loading polymer/vulcanized.html:', e);
