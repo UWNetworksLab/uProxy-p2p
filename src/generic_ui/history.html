@@ -121,7 +121,7 @@
       });
 
       let welcome_view = new WelcomeView();
-      welcome_view.onLanguageChoice((event) => {
+      welcome_view.onLanguageChosen((event) => {
         settings.setLanguage(event.detail);
       });
       welcome_view.onDone(() => {

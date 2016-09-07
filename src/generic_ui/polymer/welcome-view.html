@@ -23,20 +23,20 @@
       onDone: function(handler) {
         this.addEventListener('done', handler);
       },
-      onLanguageChoice: function(handler) {
+      onLanguageChosen: function(handler) {
         this.addEventListener('language-chosen', handler);
       },
       // Private methods
       handleLanguageSelected_: function(event, detail) {
         if (detail.isSelected) {
-          this.emitLanguageChoice_(this.language);
+          this.emitLanguageChosen_(this.language);
         }
       },
       handleNext_: function(event) {
-        this.emitLanguageChoice_(this.language);
+        this.emitLanguageChosen_(this.language);
         this.emitDone_();
       },
-      emitLanguageChoice_: function(language) {
+      emitLanguageChosen_: function(language) {
         console.log('Chosen language ', language);
         this.fire('language-chosen', this.language);
       },
