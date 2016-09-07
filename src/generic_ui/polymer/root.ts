@@ -159,6 +159,10 @@ Polymer({
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
     this.setDirectionality();
+    // Logic that depends on the uproxy-root element being ready
+    // (as in src/cca/app/polymer/workarounds.ts)
+    // can be scheduled appropriately by listening for this event:
+    document.dispatchEvent(new Event('uproxy-root-ready'));
   },
   tabSelected: function(e :Event) {
     if (this.ui.isSharingDisabled &&
