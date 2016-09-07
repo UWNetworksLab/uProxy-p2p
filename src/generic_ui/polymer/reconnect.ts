@@ -8,5 +8,6 @@ Polymer({
   },
   ready: function() {
     this.model = ui_context.model;
+    this.core = ui_context.core;
   }
 });

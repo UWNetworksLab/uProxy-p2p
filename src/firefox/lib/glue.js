@@ -55,11 +55,11 @@ function setUpConnection(freedom, panel, button) {
     }
   }
 
-  panel.port.on('startUsingProxy', function(endpoint) {
+  onPromiseEmit('startUsingProxy', function(endpoint) {
     proxyConfig.startUsingProxy(endpoint);
   });
 
-  panel.port.on('stopUsingProxy', function() {
+  onPromiseEmit('stopUsingProxy', function() {
     proxyConfig.stopUsingProxy();
   });
 

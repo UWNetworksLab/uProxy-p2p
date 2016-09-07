@@ -727,17 +727,70 @@ export class UserInterface implements ui_constants.UiApi {
     };
   }
 
-  public restartProxying = () => {
-    this.startGettingFromInstance(this.core.disconnectedWhileProxying,
-                                  this.proxyAccessMode_);
+  // If null, there is no pending restart.
+  // Resolves (after resetting itself to null) in a successful condition.
+  // Rejects (after resetting to null) if it fails.
+  private restartPending_ : Promise<void> = null;
+
+  public restartProxying = () : Promise<void> => {
+    if (!this.core.disconnectedWhileProxying) {
+      // Restart is no longer required.
+      this.restartPending_ = null;
+      return Promise.resolve<void>();
+    }
+    let instancePath =
+        this.getInstancePath_(this.core.disconnectedWhileProxying);
+    let network = instancePath.network.name;
+    if (this.restartPending_) {
+      // Delay the call until after all pending calls have failed.
+      // This makes this function safe to call while pending.
+      this.restartPending_ = this.restartPending_.catch(this.restartProxying);
+    } else if (this.model.reconnectPending[network] || !navigator.onLine) {
+      // Wait for the social network and network interfaces to come up before
+      // restarting the proxy connection.  If the network doesn't come back up,
+      // don't attempt to reconnect.
+      // TODO: Should we get rid of the social network case?  The social network
+      // will also call restartProxying once our sharer comes back online, so it's
+      // arguably redundant and unlikely to work (too early).
+      let networkUp :Promise<any> =
+          this.model.reconnectPending[network] || this.onceOnline_();
+      this.restartPending_ = networkUp.then(() => {
+            this.restartPending_ = null;
+            this.restartProxying();
+          }, (e) => {
+            this.restartPending_ = null;
+            throw e;
+          });
+    } else {
+      this.restartPending_ =
+          this.startGettingFromInstance(this.core.disconnectedWhileProxying,
+              this.proxyAccessMode_).then(() => {
+                this.restartPending_ = null;
+              }, (e) => {
+                this.restartPending_ = null;
+                throw e;
+              });
+    }
+    return this.restartPending_;
   }
 
   public startGettingFromInstance =
       (instanceId :string, accessMode: ProxyAccessMode): Promise<void> => {
     this.instanceTryingToGetAccessFrom = instanceId;
 
-    return this.core.start(this.getInstancePath_(instanceId))
-        .then((endpoint :net.Endpoint) => {
+    // In VPN mode, despite using Android's' VpnBuilder::addDisallowedApplications
+    // API, it seems like we can't start new connections while the VPN is active.
+    // Therefore, we have to disable the VPN before attempting a new connection.
+    // This creates a brief period where traffic can leak ... oh well.
+    // TODO: Investigate this misbehavior.  Is it real?  Is it a bug in Android or
+    // WebRTC?
+    let prepared = this.proxyAccessMode_ === ProxyAccessMode.VPN ?
+        this.browserApi.stopUsingProxy().catch((e) => {}) :
+        Promise.resolve<void>();
+
+    return prepared.then(() => {
+      return this.core.start(this.getInstancePath_(instanceId));
+    }).then((endpoint :net.Endpoint) => {
       this.instanceTryingToGetAccessFrom = null;
       // If we were getting access from some other instance
       // turn down the connection.
@@ -873,8 +926,7 @@ export class UserInterface implements ui_constants.UiApi {
         this.model.removeNetwork(networkMsg.name, networkMsg.userId);
 
         if (!existingNetwork.logoutExpected &&
-            this.supportsReconnect_(networkMsg.name) &&
-            !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
+            this.supportsReconnect_(networkMsg.name)) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect_(networkMsg.name);
         } else {
@@ -935,26 +987,35 @@ export class UserInterface implements ui_constants.UiApi {
       oldUserCategories = user.getCategories();
     }
 
-    user.update(payload);
+    // Update the state of this user to reflect the latest update.  Returns
+    // the IDs of online instances that were not previously known to be online.
+    let newOnlineInstances = user.update(payload);
 
     for (var i = 0; i < payload.allInstanceIds.length; ++i) {
       this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
     }
 
-    for (var i = 0; i < payload.offeringInstances.length; i++) {
-      var gettingState = payload.offeringInstances[i].localGettingFromRemote;
-      var instanceId = payload.offeringInstances[i].instanceId;
-      if (gettingState === social.GettingState.GETTING_ACCESS) {
+    newOnlineInstances.forEach((instance) => {
+      let gettingState = instance.localGettingFromRemote;
+      let instanceId = instance.instanceId;
+      if (instanceId === this.core.disconnectedWhileProxying) {
+        // We were proxying, but got disconnected from our sharer.  Now the
+        // sharer is back online, so start proxying with them again.
+        // TODO: Move this out of the UI.  Having this in the UI creates two
+        // bugs on desktop: (1) restarts won't occur while the UI is closed;
+        // (2) we'll trigger a fresh restart every time the UI is reopened.
+        this.restartProxying();
+      } else if (gettingState === social.GettingState.GETTING_ACCESS) {
+        // If the UI is closed and reopened, this code serves to figure out
+        // if it should be in the connected state or the connecting state. 
         this.startGettingInUiAndConfig(
             instanceId, payload.offeringInstances[i].activeEndpoint,
             this.proxyAccessMode_);
-        break;
       } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
         this.instanceTryingToGetAccessFrom = instanceId;
         this.updateGettingStatusBar_();
-        break;
       }
-    }
+    });
 
     for (var i = 0; i < payload.instancesSharingWithLocal.length; i++) {
       this.instancesGivingAccessTo[payload.instancesSharingWithLocal[i]] = true;
@@ -1022,35 +1083,66 @@ export class UserInterface implements ui_constants.UiApi {
     });
   }
 
-  private reconnect_ = (network :string) => {
-    this.model.reconnecting = true;
-    // TODO: add wechat, quiver, github URLs
-    var pingUrl = network == 'Facebook-Firebase-V2'
-        ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
-    this.core.pingUntilOnline(pingUrl).then(() => {
-      // Ensure that the user is still attempting to reconnect (i.e. they
-      // haven't clicked to stop reconnecting while we were waiting for the
-      // ping response).
-      // TODO: this doesn't work quite right if the user is signed into multiple social networks
-      if (this.model.reconnecting) {
-        this.core.login({network: network, loginType: uproxy_core_api.LoginType.RECONNECT}).then(() => {
-          // TODO: we don't necessarily want to hide the reconnect screen, as we might only be reconnecting to 1 of multiple disconnected networks
-          this.stopReconnect();
-        }).catch((e) => {
-          // Reconnect failed, give up.
-          // TODO: this may have only failed for 1 of multiple networks
-          this.stopReconnect();
-          this.showNotification(
-              this.i18n_t('LOGGED_OUT', { network: network }));
+  private onceOnline_ = () : Promise<void> => {
+    if (navigator.onLine) {
+      return Promise.resolve<void>();
+    }
 
-          this.updateView_();
-        });
-      }
+    return new Promise<void>((F, R) => {
+      let onlineListener = () => {
+        // Only listen once.
+        window.removeEventListener('online', onlineListener);
+        // Wait 5 more seconds for DHCP, etc.  Empirically necessary for
+        // reliable reconnect to cloud.
+        // TODO: Find a better solution!
+        setTimeout(F, 5000);
+      };
+      window.addEventListener('online', onlineListener);
     });
   }
 
-  public stopReconnect = () => {
-    this.model.reconnecting = false;
+  private cancelReconnect_: {[network:string]: () => void} = {};
+
+  private reconnect_ = (network :string) => {
+    let cancelable = new Promise<void>((F, R) => {
+      this.cancelReconnect_[network] = R;
+    });
+    let startReconnect = Promise.race<void>([cancelable, this.onceOnline_()]);
+    this.model.reconnecting = true;
+    this.model.reconnectPending[network] = startReconnect.then(() => {
+      return this.core.login({
+        network: network,
+        loginType: uproxy_core_api.LoginType.RECONNECT
+      });
+    });
+    this.model.reconnectPending[network].then(() => {
+      this.stopReconnect(network);
+      if (this.core.disconnectedWhileProxying) {
+        // Retry proxying now that we're connected to the social network again
+        // TODO: Should we get rid of this case?  It's arguably redundant with
+        // the check in syncUser, and also too early (peer might not be online
+        // yet).
+        this.restartProxying();
+      }
+    }, (e) => {
+      // Reconnect failed, give up.
+      this.stopReconnect(network);
+      this.showNotification(this.i18n_t('LOGGED_OUT', { network: network }));
+
+      this.updateView_();
+      throw e;
+    });
+  }
+
+  public stopReconnect = (network:string) => {
+    if (this.cancelReconnect_[network]) {
+      this.cancelReconnect_[network]();
+      delete this.cancelReconnect_[network];
+    }
+    delete this.model.reconnectPending[network];
+    this.model.reconnecting =
+        Object.keys(this.model.reconnectPending).length > 0;
+
   }
 
   public sendFeedback =
