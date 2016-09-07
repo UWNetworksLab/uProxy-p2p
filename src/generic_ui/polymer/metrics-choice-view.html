@@ -1,0 +1,38 @@
+<polymer-element name='uproxy-metrics-choice-view' constructor='MetricsChoiceView'>
+  <template>
+    <h1>Metrics Choice</h1>
+    <button on-click="{{handleBack_}}">Back</button>
+    <button on-click="{{handleOptIn_}}">Yes</button>
+    <button on-click="{{handleOptOut_}}">No</button>
+  </template>
+
+  <script>
+    Polymer({
+      // Public methods
+      onDone: function(handler) {
+        this.addEventListener('done', handler);
+      },
+      onMetricsChoiceMade: function(handler) {
+        this.addEventListener('metrics-choice-made', (event) => { handler(event.detail); });
+      },
+      // Private methods
+      handleBack_: function() {
+        history.back();
+      },
+      handleOptIn_: function() {
+        this.fireMetricsChoiceMade_(true);
+        this.fireDone_();
+      },
+      handleOptOut_: function() {
+        this.fireMetricsChoiceMade_(false);
+        this.fireDone_();
+      },
+      fireMetricsChoiceMade_: function(optIn) {
+        this.fire('metrics-choice-made', optIn);
+      },
+      fireDone_: function() {
+        this.fire('done');
+      }
+    });
+  </script>
+</polymer-element>

@@ -7,6 +7,7 @@
   <link rel="import" href="/third_party/bower/paper-dropdown/paper-dropdown.html">
   <link rel="import" href="/third_party/bower/paper-dropdown-menu/paper-dropdown-menu.html">
   <link rel='import' href='/third_party/bower/paper-item/paper-item.html'>
+  <link rel='import' href='polymer/metrics-choice-view.html'>
   <link rel='import' href='polymer/welcome-view.html'>
   <style>
   </style>
@@ -43,45 +44,6 @@
         this.root_node_.appendChild(content_node);
       }
     }
-
-    class MetricsChoiceViewUnwrapped extends HTMLElement {
-      createdCallback() {
-        this.choice_handlers_ = [];
-        this.done_handlers_ = [];
-        this.innerHTML = '<h1>Metrics Choice</h1><div>' +
-          '<button onclick="history.back();">Back</button>' +
-          '<button class="button-yes">Yes</button>' +
-          '<button class="button-no">No</button>'
-          '</div>';
-        this.querySelector('.button-yes').onclick = (event) => {
-          this.done_(true);
-        };
-        this.querySelector('.button-no').onclick = (event) => {
-          this.done_(false);
-        };
-      }
-      done_(choice) {
-        this.emitMetricsChoice(choice);
-        this.emitDone();
-      }
-      emitMetricsChoice(choice) {
-        for (let handler of this.choice_handlers_) {
-          handler(choice);
-        }
-      }
-      onMetricsChoice(handler) {
-        this.choice_handlers_.push(handler);
-      }
-      emitDone() {
-        for (let handler of this.done_handlers_) {
-          handler();
-        }
-      }
-      onDone(handler) {
-        this.done_handlers_.push(handler);
-      }
-    }
-    const MetricsChoiceView = document.registerElement('metrics-choice-view', MetricsChoiceViewUnwrapped);
 
     class HomeViewUnwrapped extends HTMLElement {
       createdCallback() {
@@ -125,7 +87,14 @@
         settings.setLanguage(event.detail);
       });
       welcome_view.onDone(() => {
-        console.log('Settings: ', settings);
+        let choice_view = new MetricsChoiceView();
+        choice_view.onMetricsChoiceMade((optIn) => {
+          settings.enableMetrics(optIn);
+        });
+        choice_view.onDone(() => {
+          history.go(-2);
+        });
+        pushView('metrics', choice_view)
       });
       pushView('welcome', welcome_view);
     }
