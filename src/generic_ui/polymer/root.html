@@ -419,6 +419,9 @@
           </div>
         </div>
         <!-- Elements (like the paper fab) that determine position based on proxying/error statuses, must come after the status elements above. Otherwise the positioning will be incorrect. -->
+        <!-- src/cca/app/polymer/workarounds.ts attaches an on-tap handler to
+             this #inviteButton element to work around #2659 (see PR #2751).
+             Make sure to keep the id etc. synced up if changing. -->
         <paper-fab id="inviteButton"
           mini src='../icons/plus_white.svg'
           on-tap='{{ fireOpenInviteUserPanel }}'
