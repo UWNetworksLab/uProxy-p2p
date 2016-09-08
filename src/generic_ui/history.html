@@ -1,6 +1,7 @@
 <html>
 
 <head>
+  <meta charset="UTF-8">
   <script src="/third_party/bower/webcomponentsjs/webcomponents.js"></script>
   <link rel='import' href='views/metrics-choice-view.html'>
   <link rel='import' href='views/welcome-view.html'>
@@ -77,7 +78,33 @@
         }
       });
 
+      function getMessage(msg_id) {
+        let messages = {
+          ar: {
+            NEXT: 'التالى',
+            WELCOME: 'أهلا بك'
+          },
+          en: {
+            NEXT: 'Next',
+            WELCOME: 'Welcome'
+          },
+          es: {
+            NEXT: 'Proximo',
+            WELCOME: 'Bienvenido'
+          },
+          zh: {
+            NEXT: '下一个',
+            WELCOME: '欢迎'
+          }
+        };
+        if (!messages[settings.language]) {
+          return msg_id;
+        }
+        return messages[settings.language][msg_id] || messages['en'][msg_id] || msg_id;
+      }
+
       let welcome_view = new WelcomeView();
+      welcome_view.setTranslator(getMessage);
       welcome_view.languageList = [
         {code: 'en', name: 'English'},
         {code: 'ar', name: 'Arabic'},
