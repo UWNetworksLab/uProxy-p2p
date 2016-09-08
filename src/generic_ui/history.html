@@ -37,7 +37,7 @@
     }
     const HomeView = document.registerElement('home-view', HomeViewUnwrapped);
 
-    function getMessage(language, msgId) {
+    function makeTranslator(language) {
       let messages = {
         ar: {
           BACK: 'عودة',
@@ -63,14 +63,10 @@
           WELCOME: '欢迎'
         }
       };
-      if (!messages[language]) {
-        return msgId;
-      }
-      return messages[language][msgId] || messages['en'][msgId] || msgId;
-    }
-
-    function makeTranslator(language) {
-      return function(msgId) { return getMessage(language, msgId); };
+      return function(msgId) {
+        if (!messages[language]) { return msgId; }
+        return messages[language][msgId] || messages['en'][msgId] || msgId;
+      };
     }
 
     function main() {
