@@ -57,6 +57,9 @@ Polymer({
   disableStats: function() {
     return this.updateMetricsCollection(false);
   },
+  open: function() {
+    this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
+  },
   ready: function() {
     this.model = model;
     this.languages = languages;
