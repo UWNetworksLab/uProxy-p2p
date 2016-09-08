@@ -171,7 +171,7 @@ class CordovaBrowserApi implements BrowserAPI {
     window.tun2socks.onDisconnect().then((msg: string) => {
       // UI will call stopUsingProxy, on proxyDisconnected event.
       this.emit_('proxyDisconnected', { deliberate: false });
-    }).catch(function(err: string) {
+    }).catch((err: string) => {
       // Event callbacks are never rejected in the plugin.
       // We should never reach this.
       console.error('Tun2Socks onDisconnect, unexpected callback error: ', err);
@@ -181,8 +181,9 @@ class CordovaBrowserApi implements BrowserAPI {
     var socksServerAddress = '127.0.0.1:' + endpoint.port;
     window.tun2socks.start(socksServerAddress).then(function(msg: string) {
       console.log('Tun2Socks start: ', msg);
-    }).catch(function(err: string) {
+    }).catch((err: string) => {
       console.error('Tun2Socks start error: ', err);
+      this.emit_('proxyDisconnected', { deliberate: false });
     });
   }
 
@@ -199,7 +200,7 @@ class CordovaBrowserApi implements BrowserAPI {
     } else if (this.proxyAccessMode_ === ProxyAccessMode.VPN) {
       window.tun2socks.stop().then(function(msg: string) {
         console.log('Tun2Socks stop: ', msg);
-      }).catch(function(err: string) {
+      }).catch((err: string) => {
         console.error('Tun2Socks stop error: ', err);
       });
     } else {
