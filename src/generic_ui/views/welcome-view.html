@@ -10,10 +10,10 @@
     <core-icon icon="language"></core-icon>
     <paper-dropdown-menu>
       <paper-dropdown class="dropdown">
-        <core-menu id="menu" valueattr='value' selected='{{language}}' on-core-select="{{handleLanguageSelected_}}">
-          <paper-item value="en">English</paper-item>
-          <paper-item value="ar">Arabic</paper-item>
-          <paper-item value="zh">Chinese</paper-item>
+        <core-menu id="menu" valueattr='value' selected='{{selectedLanguage}}' on-core-select="{{handleLanguageSelected_}}">
+          <template repeat='{{ language in languageList }}'>
+            <paper-item value='{{language.code}}'>{{language.name}}</paper-item>
+          </template>
         </core-menu>
       </paper-dropdown>
     </paper-dropdown-menu>
@@ -23,7 +23,8 @@
   <script>
     Polymer({
       publish: {
-        language: 'ar',
+        selectedLanguage: null,
+        languageList: []
       },
       // Public methods
       onDone: function(handler) {
@@ -35,18 +36,18 @@
       // Private methods
       handleLanguageSelected_: function(event, detail) {
         if (detail.isSelected) {
-          this.emitLanguageChosen_(this.language);
+          this.fireLanguageChosen_(this.selectedLanguage);
         }
       },
       handleNext_: function(event) {
-        this.emitLanguageChosen_(this.language);
-        this.emitDone_();
+        this.fireLanguageChosen_(this.selectedLanguage);
+        this.fireDone_();
       },
-      emitLanguageChosen_: function(language) {
+      fireLanguageChosen_: function(language) {
         console.log('Chosen language ', language);
-        this.fire('language-chosen', this.language);
+        this.fire('language-chosen', language);
       },
-      emitDone_: function() {
+      fireDone_: function() {
         this.fire('done');
       }
     });

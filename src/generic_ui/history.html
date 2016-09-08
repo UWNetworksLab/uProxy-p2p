@@ -78,6 +78,13 @@
       });
 
       let welcome_view = new WelcomeView();
+      welcome_view.languageList = [
+        {code: 'en', name: 'English'},
+        {code: 'ar', name: 'Arabic'},
+        {code: 'zh', name: 'Chinese'},
+        {code: 'es', name: 'Spanish'}
+      ];
+      welcome_view.selectedLanguage = 'zh';
       welcome_view.onLanguageChosen((event) => {
         settings.setLanguage(event.detail);
       });
