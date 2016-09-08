@@ -2,10 +2,10 @@
 
 <polymer-element name='uproxy-metrics-choice-view' constructor='MetricsChoiceView'>
   <template>
-    <h1>Metrics Choice</h1>
+    <h1>{{msg && msg('METRICS_CHOICE_TITLE')}}</h1>
     <paper-button on-click='{{handleBack_}}'>{{msg && msg('BACK')}}</paper-button>
-    <paper-button on-click='{{handleOptIn_}}'>Share</paper-button>
-    <paper-button on-click='{{handleOptOut_}}'>Opt-out</paper-button>
+    <paper-button on-click='{{handleOptIn_}}'>{{msg && msg('METRICS_OPT_IN')}}</paper-button>
+    <paper-button on-click='{{handleOptOut_}}'>{{msg && msg('METRICS_OPT_OUT')}}</paper-button>
   </template>
 
   <script>
