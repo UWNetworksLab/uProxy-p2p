@@ -35,7 +35,9 @@
         this.addEventListener('done', handler);
       },
       onLanguageSelected: function(handler) {
-        this.addEventListener('language-selected', handler);
+        this.addEventListener('language-selected', function(event) {
+          handler(event.detail);
+        });
       },
       // Private methods
       selectedLanguageChanged(oldValue, newValue) {

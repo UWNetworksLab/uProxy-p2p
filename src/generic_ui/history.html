@@ -2,6 +2,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <script src='scripts/stack_panel.js'></script>
   <script src="/third_party/bower/webcomponentsjs/webcomponents.js"></script>
   <link rel='import' href='views/metrics-choice-view.html'>
   <link rel='import' href='views/welcome-view.html'>
@@ -26,21 +27,6 @@
       }
     }
 
-    class RootPanel {
-      // Takes the element that will be the root for this panel.
-      constructor(root_node) {
-        this.root_node_ = root_node;
-        this.content_node_ = null;
-      }
-      setContent(content_node){
-        if (this.content_node_ !== null) {
-          this.root_node_.removeChild(this.content_node_);
-        }
-        this.content_node_ = content_node;
-        this.root_node_.appendChild(content_node);
-      }
-    }
-
     class HomeViewUnwrapped extends HTMLElement {
       createdCallback() {
         this.innerHTML = '<h1>Home</h1>' +
@@ -51,68 +37,45 @@
     }
     const HomeView = document.registerElement('home-view', HomeViewUnwrapped);
 
+    function getMessage(language, msgId) {
+      let messages = {
+        ar: {
+          BACK: 'عودة',
+          NEXT: 'التالى',
+          WELCOME: 'أهلا بك'
+        },
+        en: {
+          BACK: 'Back',
+          NEXT: 'Next',
+          METRICS_CHOICE_TITLE: 'Metrics Choice',
+          METRICS_OPT_IN: 'Opt-In',
+          METRICS_OPT_OUT: 'Opt-Out',
+          WELCOME: 'Welcome'
+        },
+        es: {
+          BACK: 'Volver',
+          NEXT: 'Proximo',
+          WELCOME: 'Bienvenido'
+        },
+        zh: {
+          BACK: '返回',
+          NEXT: '下一个',
+          WELCOME: '欢迎'
+        }
+      };
+      if (!messages[language]) {
+        return msgId;
+      }
+      return messages[language][msgId] || messages['en'][msgId] || msgId;
+    }
+
+    function makeTranslator(language) {
+      return function(msgId) { return getMessage(language, msgId); };
+    }
+
     function main() {
       let settings = new Settings();
-
-      let root_panel = new RootPanel(document.getElementById('root-panel'));
-
-      // Clear current state.
-      window.history.replaceState(null, null);
-
-      let views = {};
-
-      function pushView(key, view_element) {
-        console.log('Push View: ', key);
-        history.pushState({ view: key }, null, '#' + key);
-        root_panel.setContent(view_element);
-        views[key] = view_element;
-      }
-
-      window.addEventListener('popstate', function(event) {
-        console.log("Pop state: " + JSON.stringify(event.state));
-        if (event.state === null) {
-          console.log('Settings: ', settings);
-          pushView('home', new HomeView());
-        } else {
-          root_panel.setContent(views[event.state.view]);
-        }
-      });
-
-      function getMessage(language, msgId) {
-        let messages = {
-          ar: {
-            BACK: 'عودة',
-            NEXT: 'التالى',
-            WELCOME: 'أهلا بك'
-          },
-          en: {
-            BACK: 'Back',
-            NEXT: 'Next',
-            METRICS_CHOICE_TITLE: 'Metrics Choice',
-            METRICS_OPT_IN: 'Opt-In',
-            METRICS_OPT_OUT: 'Opt-Out',
-            WELCOME: 'Welcome'
-          },
-          es: {
-            BACK: 'Volver',
-            NEXT: 'Proximo',
-            WELCOME: 'Bienvenido'
-          },
-          zh: {
-            BACK: '返回',
-            NEXT: '下一个',
-            WELCOME: '欢迎'
-          }
-        };
-        if (!messages[language]) {
-          return msgId;
-        }
-        return messages[language][msgId] || messages['en'][msgId] || msgId;
-      }
-      function makeTranslator(language) {
-        return function(msgId) { return getMessage(language, msgId); };
-      }
-
+      let stack_panel = new StackPanel(document.getElementById('root-panel'));
       let welcome_view = new WelcomeView();
       welcome_view.languageList = [
         {code: 'en', name: 'English'},
@@ -121,23 +84,25 @@
         {code: 'es', name: 'Spanish'}
       ];
       welcome_view.selectedLanguage = 'zh';
-      welcome_view.onLanguageSelected((event) => {
-        let language = event.detail;
+      welcome_view.onLanguageSelected((language) => {
         settings.setLanguage(language);
         welcome_view.msg = makeTranslator(language);
       });
       welcome_view.onDone(() => {
         let choice_view = new MetricsChoiceView();
         choice_view.msg = makeTranslator(settings.language);
+        choice_view.onBack(() => { stack_panel.popView(); })
         choice_view.onMetricsChoiceMade((optIn) => {
           settings.enableMetrics(optIn);
         });
         choice_view.onDone(() => {
-          history.go(-2);
+          stack_panel.popViews(2);
+          stack_panel.pushView(new HomeView());
+          console.log('Settings: ', settings);
         });
-        pushView('metrics', choice_view)
+        stack_panel.pushView(choice_view);
       });
-      pushView('welcome', welcome_view);
+      stack_panel.pushView(welcome_view);
     }
 
     window.addEventListener('polymer-ready', main);
