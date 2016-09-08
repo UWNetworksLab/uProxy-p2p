@@ -1,9 +1,11 @@
+<link rel="import" href="/third_party/bower/paper-button/paper-button.html">
+
 <polymer-element name='uproxy-metrics-choice-view' constructor='MetricsChoiceView'>
   <template>
     <h1>Metrics Choice</h1>
-    <button on-click="{{handleBack_}}">Back</button>
-    <button on-click="{{handleOptIn_}}">Yes</button>
-    <button on-click="{{handleOptOut_}}">No</button>
+    <paper-button on-click='{{handleBack_}}'>Back</paper-button>
+    <paper-button on-click='{{handleOptIn_}}'>Share</paper-button>
+    <paper-button on-click='{{handleOptOut_}}'>Opt-out</paper-button>
   </template>
 
   <script>
