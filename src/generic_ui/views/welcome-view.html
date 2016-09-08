@@ -7,6 +7,7 @@
 <polymer-element name='uproxy-welcome-view' constructor='WelcomeView'>
   <template>
     <h1>{{'WELCOME' | msg(selectedLanguage)}}</h1>
+    <h1>{{ msg('WELCOME', selectedLanguage)}}</h1>
     <core-icon icon="language"></core-icon>
     <paper-dropdown-menu>
       <paper-dropdown class="dropdown">
@@ -36,7 +37,7 @@
       setTranslator: function(translator) {
         this.msg = translator;
       },
-      msg: function(msg_id, language) { return 'Foo' + msg_id + language; },
+      msg: function(msg_id, language) { return msg_id; },
       // Private methods
       selectedLanguageChanged(oldValue, newValue) {
         this.fireLanguageChosen_(this.selectedLanguage);

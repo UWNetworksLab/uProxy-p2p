@@ -3,7 +3,7 @@
 <polymer-element name='uproxy-metrics-choice-view' constructor='MetricsChoiceView'>
   <template>
     <h1>Metrics Choice</h1>
-    <paper-button on-click='{{handleBack_}}'>Back</paper-button>
+    <paper-button on-click='{{handleBack_}}'>{{'BACK' | msg}}</paper-button>
     <paper-button on-click='{{handleOptIn_}}'>Share</paper-button>
     <paper-button on-click='{{handleOptOut_}}'>Opt-out</paper-button>
   </template>
@@ -11,6 +11,7 @@
   <script>
     Polymer({
       // Public methods
+      msg: function(msg_id) { return msg_id; },
       onDone: function(handler) {
         this.addEventListener('done', handler);
       },
