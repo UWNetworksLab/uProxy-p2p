@@ -121,7 +121,7 @@
         {code: 'es', name: 'Spanish'}
       ];
       welcome_view.selectedLanguage = 'zh';
-      welcome_view.onLanguageChosen((event) => {
+      welcome_view.onLanguageSelected((event) => {
         let language = event.detail;
         settings.setLanguage(language);
         welcome_view.msg = makeTranslator(language);

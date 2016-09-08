@@ -24,29 +24,30 @@
 
   <script>
     Polymer({
+      // Injected configuration
       publish: {
         selectedLanguage: null,
         languageList: []
       },
+      msg: null,
       // Public methods
       onDone: function(handler) {
         this.addEventListener('done', handler);
       },
-      onLanguageChosen: function(handler) {
-        this.addEventListener('language-chosen', handler);
+      onLanguageSelected: function(handler) {
+        this.addEventListener('language-selected', handler);
       },
-      msg: null,
       // Private methods
       selectedLanguageChanged(oldValue, newValue) {
-        this.fireLanguageChosen_(this.selectedLanguage);
+        this.fireLanguageSelected_(this.selectedLanguage);
       },
       handleNext_: function(event) {
-        this.fireLanguageChosen_(this.selectedLanguage);
+        this.fireLanguageSelected_(this.selectedLanguage);
         this.fireDone_();
       },
-      fireLanguageChosen_: function(language) {
-        console.log('Chosen language ', language);
-        this.fire('language-chosen', language);
+      fireLanguageSelected_: function(language) {
+        console.log('Selected language ', language);
+        this.fire('language-selected', language);
       },
       fireDone_: function() {
         this.fire('done');
