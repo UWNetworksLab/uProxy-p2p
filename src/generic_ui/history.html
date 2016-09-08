@@ -78,7 +78,7 @@
         }
       });
 
-      function getMessage(msg_id) {
+      function getMessage(language, msgId) {
         let messages = {
           ar: {
             BACK: 'عودة',
@@ -101,14 +101,16 @@
             WELCOME: '欢迎'
           }
         };
-        if (!messages[settings.language]) {
-          return msg_id;
+        if (!messages[language]) {
+          return msgId;
         }
-        return messages[settings.language][msg_id] || messages['en'][msg_id] || msg_id;
+        return messages[language][msgId] || messages['en'][msgId] || msgId;
+      }
+      function makeTranslator(language) {
+        return function(msgId) { return getMessage(language, msgId); };
       }
 
       let welcome_view = new WelcomeView();
-      welcome_view.setTranslator(getMessage);
       welcome_view.languageList = [
         {code: 'en', name: 'English'},
         {code: 'ar', name: 'Arabic'},
@@ -117,11 +119,13 @@
       ];
       welcome_view.selectedLanguage = 'zh';
       welcome_view.onLanguageChosen((event) => {
-        settings.setLanguage(event.detail);
+        let language = event.detail;
+        settings.setLanguage(language);
+        welcome_view.msg = makeTranslator(language);
       });
       welcome_view.onDone(() => {
         let choice_view = new MetricsChoiceView();
-        choice_view.msg = getMessage;
+        choice_view.msg = makeTranslator(settings.language);
         choice_view.onMetricsChoiceMade((optIn) => {
           settings.enableMetrics(optIn);
         });

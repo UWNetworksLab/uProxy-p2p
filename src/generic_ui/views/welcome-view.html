@@ -6,19 +6,20 @@
 
 <polymer-element name='uproxy-welcome-view' constructor='WelcomeView'>
   <template>
-    <h1>{{'WELCOME' | msg(selectedLanguage)}}</h1>
-    <h1>{{ msg('WELCOME', selectedLanguage)}}</h1>
+    <!--<h1>{{'WELCOME' | msg(selectedLanguage)}}</h1>
+    <h1>{{ msg('WELCOME', selectedLanguage )}}</h1>-->
+    <h1>{{ msg && msg('WELCOME') }}</h1>
     <core-icon icon="language"></core-icon>
     <paper-dropdown-menu>
       <paper-dropdown class="dropdown">
         <core-menu id="menu" valueattr='value' selected='{{selectedLanguage}}'>
           <template repeat='{{ language in languageList }}'>
-            <paper-item value='{{language.code}}'>{{language.name | msg(selectedLanguage)}}</paper-item>
+            <paper-item value='{{language.code}}'>{{msg && msg(language.name)}}</paper-item>
           </template>
         </core-menu>
       </paper-dropdown>
     </paper-dropdown-menu>
-    <paper-button on-click='{{handleNext_}}'>{{'NEXT' | msg(selectedLanguage)}}</paper-button>
+    <paper-button on-click='{{handleNext_}}'>{{msg && msg('NEXT')}}</paper-button>
   </template>
 
   <script>
@@ -34,10 +35,7 @@
       onLanguageChosen: function(handler) {
         this.addEventListener('language-chosen', handler);
       },
-      setTranslator: function(translator) {
-        this.msg = translator;
-      },
-      msg: function(msg_id, language) { return msg_id; },
+      msg: null,
       // Private methods
       selectedLanguageChanged(oldValue, newValue) {
         this.fireLanguageChosen_(this.selectedLanguage);
