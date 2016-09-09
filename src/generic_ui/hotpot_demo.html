@@ -80,11 +80,11 @@
         {code: 'es', name: 'Spanish'}
       ];
       welcome_view.selectedLanguage = 'zh';
-      welcome_view.selectedLanguageStream.subscribe((language) => {
+      welcome_view.onLanguageSelected((language) => {
         settings.setLanguage(language);
         welcome_view.msg = makeTranslator(language);
       });
-      welcome_view.done.then(() => {
+      welcome_view.onDone(() => {
         let choice_view = new MetricsChoiceView();
         choice_view.msg = makeTranslator(settings.language);
         choice_view.onBack(() => { stack_panel.popView(); })

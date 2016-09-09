@@ -32,15 +32,22 @@
       msg: null,
       created: function() {
         let view = this;
-        this.selectedLanguageStream = Rx.Observable.create(function(observer) {
+        this.selectedLanguageStream_ = Rx.Observable.create(function(observer) {
           view.selectedLanguageObserver_ = observer;
         }).do((language) => {
           console.log('Selected language ', language);
         }).publish();
-        this.done = new Promise((finish) => {
+        this.donePromise_ = new Promise((finish) => {
           view.doneFulfill_ = finish;
         });
       }
+      // Public methods
+      onDone: function(handler) {
+        this.donePromise_.then(handler);
+      },
+      onLanguageSelected: function(handler) {
+        this.selectedLanguageStream_.subscribe(handler);
+      },
       // Private methods
       selectedLanguageChanged(oldLanguage, newLanguage) {
         this.selectedLanguageObserver_.OnNext(newLanguage);
