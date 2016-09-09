@@ -23,10 +23,10 @@ export class FreedomSocksServer {
     FreedomSocksServer.id_++;
   }
 
-  private getSocksSession_: () => piece.SocksPiece;
+  private getSocksSession_: () => Promise<piece.SocksPiece>;
 
   // Configures a callback which is invoked when a new SOCKS client has connected.
-  public onConnection = (callback: () => piece.SocksPiece): FreedomSocksServer => {
+  public onConnection = (callback: () => Promise<piece.SocksPiece>): FreedomSocksServer => {
     this.getSocksSession_ = callback;
     return this;
   }
@@ -36,38 +36,37 @@ export class FreedomSocksServer {
       this.serverSocket.on('onConnection', (connectInfo) => {
         const clientId = connectInfo.host + ':' + connectInfo.port;
         log.info('%1: new SOCKS client %2', this.name_, clientId);
+        this.getSocksSession_().then((socksSession) => {
+          const clientSocket = freedom['core.tcpsocket'](connectInfo.socket);
 
-        const clientSocket = freedom['core.tcpsocket'](connectInfo.socket);
+          // The SOCKS session has something it wants to send to the SOCKS client.
+          // This is always data from the forwarding socket *except* while we're
+          // establishing the SOCKS session, in which case it's some type of
+          // SOCKS headers.
+          socksSession.onData((buffer) => {
+            clientSocket.write(buffer);
+          });
 
-        const socksSession = this.getSocksSession_();
+          // The SOCKS session is *done*. This is either because the forwarding
+          // socket has disconnected or SOCKS protocol negotiation failed.
+          socksSession.onDisconnect(() => {
+            log.debug('%1: forwarding socket for SOCKS client %2 has disconnected', this.name_, clientId);
+          });
 
-        // The SOCKS session has something it wants to send to the SOCKS client.
-        // This is always data from the forwarding socket *except* while we're
-        // establishing the SOCKS session, in which case it's some type of
-        // SOCKS headers.
-        socksSession.onData((buffer) => {
-          clientSocket.write(buffer);
-        });
+          // We received some data from the SOCKS client.
+          // Whatever it is, we need to forward it to the SOCKS session.
+          clientSocket.on('onData', (info) => {
+            socksSession.handleData(info.data);
+          });
 
-        // The SOCKS session is *done*. This is either because the forwarding
-        // socket has disconnected or SOCKS protocol negotiation failed.
-        socksSession.onDisconnect(() => {
-          log.debug('%1: forwarding socket for SOCKS client %2 has disconnected', this.name_, clientId);
-        });
-
-        // We received some data from the SOCKS client.
-        // Whatever it is, we need to forward it to the SOCKS session.
-        clientSocket.on('onData', (info) => {
-          socksSession.handleData(info.data);
-        });
-
-        // The SOCKS client has disconnected. Notify the SOCKS session
-        // so it perform cleanup, such as disconnecting the forwarding socket.
-        clientSocket.on('onDisconnect', (info) => {
-          log.info('%1: disconnected from SOCKS client %2 (%3)', this.name_, clientId, info);
-          // TODO: use counter to guard against early onDisconnect notifications
-          freedom['core.tcpsocket'].close(clientSocket);
-          socksSession.handleDisconnect();
+          // The SOCKS client has disconnected. Notify the SOCKS session
+          // so it perform cleanup, such as disconnecting the forwarding socket.
+          clientSocket.on('onDisconnect', (info) => {
+            log.info('%1: disconnected from SOCKS client %2 (%3)', this.name_, clientId, info);
+            // TODO: use counter to guard against early onDisconnect notifications
+            freedom['core.tcpsocket'].close(clientSocket);
+            socksSession.handleDisconnect();
+          });
         });
       });
     });

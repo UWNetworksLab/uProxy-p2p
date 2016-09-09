@@ -1044,15 +1044,8 @@ module.exports = function(grunt) {
     'copy:resources', 
     'copy:devGenericCore', 
     'ts', 
-    'version_file', 
-    'browserify:chromeAppMain', 
-    'browserify:genericCoreFreedomModule', 
-    'browserify:ccaMain', 
+    'version_file',
     'browserify:loggingProvider', 
-    'browserify:churnPipeFreedomModule', 
-    'browserify:cloudInstallerFreedomModule', 
-    'browserify:cloudSocialProviderFreedomModule', 
-    'browserify:digitalOceanFreedomModule'
   ]);
   registerTask(grunt, 'echoServer', [
     'base', 
