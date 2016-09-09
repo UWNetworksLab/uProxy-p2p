@@ -30,30 +30,25 @@
         languageList: []
       },
       msg: null,
-      // Public methods
-      onDone: function(handler) {
-        this.addEventListener('done', handler);
-      },
-      onLanguageSelected: function(handler) {
-        this.addEventListener('language-selected', function(event) {
-          handler(event.detail);
+      created: function() {
+        let view = this;
+        this.selectedLanguageStream = Rx.Observable.create(function(observer) {
+          view.selectedLanguageObserver_ = observer;
+        }).do((language) => {
+          console.log('Selected language ', language);
+        }).publish();
+        this.done = new Promise((finish) => {
+          view.doneFulfill_ = finish;
         });
-      },
+      }
       // Private methods
-      selectedLanguageChanged(oldValue, newValue) {
-        this.fireLanguageSelected_(this.selectedLanguage);
+      selectedLanguageChanged(oldLanguage, newLanguage) {
+        this.selectedLanguageObserver_.OnNext(newLanguage);
       },
       handleNext_: function(event) {
-        this.fireLanguageSelected_(this.selectedLanguage);
-        this.fireDone_();
+        this.selectedLanguageObserver_.OnNext(this.selectedLanguage)
+        this.doneFulfill_();
       },
-      fireLanguageSelected_: function(language) {
-        console.log('Selected language ', language);
-        this.fire('language-selected', language);
-      },
-      fireDone_: function() {
-        this.fire('done');
-      }
     });
   </script>
 </polymer-element>
