@@ -18,7 +18,6 @@
     class Settings {
       constructor() {
         this.language = null;
-        this.enableMetrics = false;
       }
       setLanguage(language) {
         this.language = language;
@@ -81,11 +80,11 @@
         {code: 'es', name: 'Spanish'}
       ];
       welcome_view.selectedLanguage = 'zh';
-      welcome_view.onLanguageSelected((language) => {
+      welcome_view.selectedLanguageStream.subscribe((language) => {
         settings.setLanguage(language);
         welcome_view.msg = makeTranslator(language);
       });
-      welcome_view.onDone(() => {
+      welcome_view.done.then(() => {
         let choice_view = new MetricsChoiceView();
         choice_view.msg = makeTranslator(settings.language);
         choice_view.onBack(() => { stack_panel.popView(); })
