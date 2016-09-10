@@ -792,6 +792,7 @@ module.exports = function(grunt) {
       }
     },
     browserify: {
+      // sharedApp: Rule.browserify('generic_ui/app'),
       chromeAppMain: Rule.browserify('chrome/app/scripts/main.core-env'),
       chromeExtMain: Rule.browserify('chrome/extension/scripts/background', {
         browserifyOptions: {
@@ -1040,11 +1041,52 @@ module.exports = function(grunt) {
     return grunt.registerTask(taskName, subTasks.map(makeRunOnce));
   }
 
+  grunt.config.merge({
+    vulcanize: {
+      sharedAppInline: {
+        options: {
+          inline: true,
+          excludes: { scripts: ['polymer.js'] }
+        },
+        files: [{
+          src: path.join(devBuildPath, 'chrome/extension/generic_ui/app.html'),
+          dest: path.join(devBuildPath, 'chrome/extension/generic_ui/app-inline.html')
+        }]
+      },
+      sharedAppCsp: {
+        options: {
+          csp: true,
+          excludes: { scripts: ['polymer.js'] }
+        },
+        files: [{
+          src: path.join(devBuildPath, 'chrome/extension/generic_ui/app-inline.html'),
+          dest: path.join(devBuildPath, 'chrome/extension/generic_ui/app-vulcanized.html')
+        }]
+      },
+    },
+    browserify: {
+      sharedApp: Rule.browserify('chrome/extension/generic_ui/app')
+    },
+    'string-replace': {
+      sharedApp: finishVulcanized('chrome/extension/generic_ui', 'app')
+    }
+  });
+  registerTask(grunt, 'sharedApp', [
+    'copy:resources', 
+    'copy:devGenericCore', 
+    'ts', 
+    'version_file',
+    'vulcanize:sharedAppInline',
+    'vulcanize:sharedAppCsp',
+    'browserify:sharedApp',
+    'string-replace:sharedApp'
+  ]);
   registerTask(grunt, 'base', [
     'copy:resources', 
     'copy:devGenericCore', 
     'ts', 
-    'version_file', 
+    'version_file',
+    // 'browserify:sharedApp',
     'browserify:chromeAppMain', 
     'browserify:genericCoreFreedomModule', 
     'browserify:ccaMain', 
@@ -1125,8 +1167,9 @@ module.exports = function(grunt) {
     'copy:chrome_extension',
     'copy:chrome_extension_additional',
     'browserify:chromeExtMain',
-    'browserify:chromeContext'
-  ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
+    'browserify:chromeContext',
+    'sharedApp'
+  ]);
 
   registerTask(grunt, 'build_chrome', [
     'build_chrome_app',

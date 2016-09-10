@@ -3,16 +3,20 @@
 
 <head>
   <meta charset="UTF-8">
+  <base href="../">
+
   <title>uProxy</title>
   <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
-  <script src='../bower/webcomponentsjs/webcomponents.min.js'></script>
+  <script src='/bower/webcomponentsjs/webcomponents.min.js'></script>
 
-  <script src='../scripts/context.static.js'></script>
+  <script src='/scripts/context.static.js'></script>
 
-  <link rel='import' href='polymer/vulcanized.html'>
-  <link href='fonts/Roboto.css' rel='stylesheet' type='text/css'>
-  <link href='style/global.css' rel='stylesheet' shim-shadowdom>
+  <link rel='import' href='/generic_ui/app-vulcanized.html'>
 
+  <link href='/generic_ui/fonts/Roboto.css' rel='stylesheet' type='text/css'>
+  <link href='/generic_ui/style/global.css' rel='stylesheet' shim-shadowdom>
+
+  <!-- TODO: Consider including an application.html here -->
   <style>
     @font-face {
       font-family: Quicksand;
@@ -40,7 +44,6 @@
 </head>
 
 <body unresolved touch-action='auto'>
-  <uproxy-root></uproxy-root>
+  <div id='root-panel'></div>
 </body>
-
 </html>
