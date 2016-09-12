@@ -43,7 +43,7 @@ export class FreedomSocksServer {
           // This is always data from the forwarding socket *except* while we're
           // establishing the SOCKS session, in which case it's some type of
           // SOCKS headers.
-          socksSession.onData((buffer) => {
+          socksSession.onDataForSocksClient((buffer) => {
             clientSocket.write(buffer);
           });
 
@@ -56,7 +56,7 @@ export class FreedomSocksServer {
           // We received some data from the SOCKS client.
           // Whatever it is, we need to forward it to the SOCKS session.
           clientSocket.on('onData', (info) => {
-            socksSession.handleData(info.data);
+            socksSession.handleDataFromSocksClient(info.data);
           });
 
           // The SOCKS client has disconnected. Notify the SOCKS session

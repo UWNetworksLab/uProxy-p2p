@@ -51,22 +51,23 @@ giver.onceConnected.then(() => {
     socksSession.onForwardingSocketRequired((host, port) => {
       const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
 
+      // datachannel -> SOCKS session
+      channel.dataFromPeerQueue.setSyncHandler((data) => {
+        socksSession.handleDataFromSocksClient(data.buffer);
+      });
       // datachannel <- SOCKS session
-      socksSession.onData((bytes) => {
+      socksSession.onDataForSocksClient((bytes) => {
         channel.send({
           buffer: bytes
         });
       });
+
       socksSession.onDisconnect(() => {
         log.info('%1: forwarding socket terminated, closing datachannel', sessionId);
         // TODO: destroy the socket
         channel.close().catch((e) => {
           log.error('%1: failed to close datachannel: %1', sessionId, e);
         })
-      });
-      // datachannel -> SOCKS session
-      channel.dataFromPeerQueue.setSyncHandler((data) => {
-        socksSession.handleData(data.buffer);
       });
       channel.onceClosed.then(() => {
         log.info('%1: channel closed, discarding session', sessionId);
@@ -92,10 +93,17 @@ getter.negotiateConnection().then(() => {
       log.info('opened datachannel for SOCKS client %1', sessionId);
       return {
         // forward data from the socks client across the datachannel to the remote peer.
-        handleData: (bytes: ArrayBuffer) => {
+        handleDataFromSocksClient: (bytes: ArrayBuffer) => {
           channel.send({
             buffer: bytes
           });
+        },
+        // forward data from the channel to the socks client.
+        onDataForSocksClient: (callback: (buffer: ArrayBuffer) => void) => {
+          channel.dataFromPeerQueue.setSyncHandler((data) => {
+            callback(data.buffer);
+          });
+          return this;
         },
         // the socks client has disconnected - close the datachannel.
         handleDisconnect: () => {
@@ -103,12 +111,6 @@ getter.negotiateConnection().then(() => {
           channel.close().catch((e) => {
             log.error('%1: failed to close datachannel: %1', sessionId, e);
           })
-        },
-        onData: (callback: (buffer: ArrayBuffer) => void) => {
-          channel.dataFromPeerQueue.setSyncHandler((data) => {
-            callback(data.buffer);
-          });
-          return this;
         },
         onDisconnect: (callback: () => void) => {
           log.info('%1: forwarding socket disconnected, notifying socks client', sessionId);

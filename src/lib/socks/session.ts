@@ -35,7 +35,7 @@ export class SocksSession implements piece.SocksPiece {
 
   // Sets a callback which is invoked when there is something to be sent
   // to the SOCKS client.
-  public onData = (callback: (buffer: ArrayBuffer) => void): SocksSession => {
+  public onDataForSocksClient = (callback: (buffer: ArrayBuffer) => void): SocksSession => {
     this.sendToSocksClient_ = callback;
     return this;
   }
@@ -48,7 +48,7 @@ export class SocksSession implements piece.SocksPiece {
   // This is called with data from the SOCKS client. We almost always want to send
   // this to the forwarding socket except during SOCKS protocol negotiation, in which
   // case we need to decode the SOCKS headers and reply back to the SOCKS client.
-  public handleData = (buffer: ArrayBuffer) => {
+  public handleDataFromSocksClient = (buffer: ArrayBuffer) => {
     log.debug('%1/%2: received %3 bytes from SOCKS client', this.serverId_, this.id_, buffer.byteLength);
     switch (this.state_) {
       case State.AWAITING_AUTHS:
@@ -78,7 +78,7 @@ export class SocksSession implements piece.SocksPiece {
 
               this.forwardingSocket_ = forwardingSocket;
 
-              this.forwardingSocket_.onData((buffer: ArrayBuffer) => {
+              this.forwardingSocket_.onDataForSocksClient((buffer: ArrayBuffer) => {
                 log.debug('%1/%2: received %3 bytes from forwarding socket', this.serverId_, this.id_, buffer.byteLength);
                 this.sendToSocksClient_(buffer);
               });
@@ -111,7 +111,7 @@ export class SocksSession implements piece.SocksPiece {
         }
         break;
       case State.CONNECTED:
-        this.forwardingSocket_.handleData(buffer);
+        this.forwardingSocket_.handleDataFromSocksClient(buffer);
         break;
       default:
         // TODO: should we disconnect at this point?

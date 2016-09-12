@@ -20,7 +20,7 @@ export class FreedomForwardingSocket implements piece.SocksPiece {
   }
 
   private onData_: (buffer: ArrayBuffer) => void;
-  public onData = (callback: (buffer: ArrayBuffer) => void): FreedomForwardingSocket => {
+  public onDataForSocksClient = (callback: (buffer: ArrayBuffer) => void): FreedomForwardingSocket => {
     this.onData_ = callback;
     return this;
   }
@@ -31,7 +31,7 @@ export class FreedomForwardingSocket implements piece.SocksPiece {
     return this;
   }
 
-  public handleData = (buffer: ArrayBuffer) => {
+  public handleDataFromSocksClient = (buffer: ArrayBuffer) => {
     this.socket_.write(buffer);
   };
 
