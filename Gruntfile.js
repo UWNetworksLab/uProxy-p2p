@@ -102,17 +102,6 @@ module.exports = function(grunt) {
     };
   }
 
-  function doVulcanize(src, dest, inline, csp) {
-    return {
-      options: {
-        inline: inline,
-        csp: csp,
-        excludes: { scripts: ['polymer.js'] }
-      },
-      files: [{ src: src, dest: dest }]
-    };
-  }
-
   function readJSONFile(file) {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
   }
@@ -865,14 +854,19 @@ module.exports = function(grunt) {
 
     const realBasePath = path.join(devBuildPath, basePath);
     const srcFile = path.join(realBasePath, srcFilename + '.html');
-    const intermediateFile = path.join(realBasePath, destFilename + '-inline.html');
     const destFile = path.join(realBasePath, destFilename + '.html');
     const taskName = path.join(realBasePath, destFilename);
 
     // The basic vulcanize tasks, we do both steps in order to get all the
     // javascript into a separate file
-    addTask('vulcanize', taskName + 'Inline', doVulcanize(srcFile, intermediateFile, true, false));
-    addTask('vulcanize', taskName + 'Csp', doVulcanize(intermediateFile, destFile, false, true));
+    addTask('vulcanize', taskName, {
+      options: {
+        inline: true,
+        csp: destFilename + '.js',
+        excludes: { scripts: ['polymer.js'] }
+      },
+      files: [{ src: srcFile, dest: destFile }]
+    });
 
     if (browserify) {
       // If we need to brewserify the file, there also needs to be a step to replace
@@ -1129,7 +1123,7 @@ module.exports = function(grunt) {
           }
         ]
       }
-    }
+    },
   });
 
   // =========================================================================
@@ -1156,7 +1150,7 @@ module.exports = function(grunt) {
     'copy:firefox', 
     'copy:firefox_additional', 
   ].concat(fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)));
-  
+
   grunt.config.merge({
     browserify: {
       firefoxContext: {
@@ -1289,7 +1283,7 @@ module.exports = function(grunt) {
           }
         ]
       },
-    }
+    },
   });
 
   // =========================================================================
@@ -1335,6 +1329,7 @@ module.exports = function(grunt) {
   // =========================================================================
   // iOS
   // =========================================================================
+  
   registerTask(grunt, 'build_ios', [
     'exec:cleanIos', 
     'build_cca', 
