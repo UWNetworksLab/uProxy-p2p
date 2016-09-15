@@ -328,6 +328,14 @@ module.exports = function(grunt) {
           }
         ]
       },
+      i18nMessages: {
+        files: [{
+          nonull: false, expand: true,
+          cwd: 'src',
+          src: ['generic_ui/locales/**/*.json'],
+          dest: devBuildPath
+        }]
+      },
       devGenericCore: {
         files: [
           {
@@ -729,7 +737,7 @@ module.exports = function(grunt) {
       },
       chromeExt: {
         files: ['src/**/*'],
-        tasks: ['build_chrome_ext']
+        tasks: ['chromeExtRoot']
       }
     },
     //-------------------------------------------------------------------------
@@ -917,7 +925,7 @@ module.exports = function(grunt) {
   ]);
 
   registerTask(grunt, 'compileTypescript', 'Compiles all the Typescript code', [
-    'ts', 'version_file'
+    'copy:i18nMessages', 'ts', 'version_file'
   ]);
   registerTask(grunt, 'version_file', [
     'gitinfo',
@@ -1024,7 +1032,7 @@ module.exports = function(grunt) {
   
   grunt.config.merge({
     browserify: {
-     chromeAppMainCoreEnv: Rule.browserify('chrome/app/scripts/main.core-env'),
+      chromeAppMainCoreEnv: Rule.browserify('chrome/app/scripts/main.core-env'),
     },
     copy: {
       chromeApp: Rule.copyLibs({
@@ -1067,7 +1075,6 @@ module.exports = function(grunt) {
   registerTask(grunt, 'chromeExtContext', 
       'Builds build/src/chrome/extension/scripts/context.static.js', [
     'compileTypescript',
-    'copy:resources',
     'browserify:chromeExtContext'    
   ]);
   registerTask(grunt, 'chromeExtRoot',
@@ -1140,7 +1147,6 @@ module.exports = function(grunt) {
   registerTask(grunt, 'firefoxContext',
       'Builds build/src/firefox/data/scripts/context.static.js', [
     'compileTypescript',
-    'copy:resources',
     'browserify:firefoxContext'    
   ])
   registerTask(grunt, 'firefoxRoot',
@@ -1224,7 +1230,6 @@ module.exports = function(grunt) {
   registerTask(grunt, 'ccaContext',
       'Builds build/src/cca/app/scripts/context.static.js', [
     'compileTypescript',
-    'copy:resources',
     'browserify:ccaContext'    
   ]);
   registerTask(grunt, 'ccaRoot',
