@@ -443,40 +443,6 @@ module.exports = function(grunt) {
           }
         ]
       },     
-      cca: Rule.copyLibs({
-        npmLibNames: ['freedom-for-chrome', 'forge-min'],
-        pathsFromDevBuild: [
-          'generic_core',
-          'generic_ui',
-          'interfaces',
-          'icons',
-          'fonts'
-        ].concat(backendFreedomModulePaths),
-        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths,
-        files: getExtraFilesForCoreBuild(ccaDevPath).concat({
-          expand: true,
-          cwd: 'src/',
-          src: ['icons/128_online.png', 'fonts/*'],
-          dest: ccaDevPath
-        }),
-        localDestPath: 'cca/app/'
-      }),
-      cca_additional: {
-        files: [
-          {  // Copy chrome extension panel components from the background
-            expand: true,
-            cwd: ccaDevPath,
-            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*', '*.html'],
-            dest: ccaDevPath + '/generic_ui'
-          },
-          {  // Copy generic files used by core and UI.
-            expand: true,
-            cwd: genericPath,
-            src: ['*.js'],
-            dest: ccaDevPath + '/generic'
-          }
-        ]
-      },
       integration: {
         files: [{
           // Copy compiled Chrome App code, required for integration tests.
@@ -708,17 +674,6 @@ module.exports = function(grunt) {
       }
     },
     browserify: {
-      ccaMainCoreEnv: Rule.browserify('cca/app/scripts/main.core-env', {
-        browserifyOptions: {
-          standalone: 'ui_context'
-        }
-      }),
-      ccaContext: Rule.browserify('cca/app/scripts/context', {
-        browserifyOptions: {
-          standalone: 'ui_context'
-        }
-      }),
-
       chromeExtensionCoreConnector: Rule.browserify('chrome/extension/scripts/chrome_core_connector'),
       chromeExtensionCoreConnectorSpec: Rule.browserifySpec('chrome/extension/scripts/chrome_core_connector'),
       genericCoreFirewall: Rule.browserify('generic_core/firewall'),
@@ -944,6 +899,28 @@ module.exports = function(grunt) {
     }
     return grunt.registerTask(taskName, description, subTasks.map(makeRunOnce));
   }
+
+  registerTask(grunt, 'default', ['build']);
+
+  // Builds all code, including the "dist" build, but skips
+  // iOS and Android as well as
+  // ts-linting and testing which can be annoying and slow.
+  // We added jshint here because catches hard syntax errors, etc.
+  registerTask(grunt, 'build', [
+    'build_chrome', 
+    'build_firefox', 
+    'build_cca', 
+    'jshint', 
+    'copy:dist', 
+    'jpm:xpi'
+  ]);
+
+  // This is run prior to releasing uProxy and, in addition to
+  // building, tests and lints all code.
+  registerTask(grunt, 'dist', [
+    'build',
+    'test'
+  ]);
 
   registerTask(grunt, 'compileTypescript', 'Compiles all the Typescript code', [
     'ts', 'version_file'
@@ -1243,7 +1220,7 @@ module.exports = function(grunt) {
     'ccaContext',
     'ccaRoot',
     'copy:cca',
-    'copy:cca_additional',
+    'copy:ccaAdditional',
   ]);
   registerTask(grunt, 'ccaMainCoreEnv',
       'Builds build/src/cca/app/scripts/main.core-env.static.js', [
@@ -1261,11 +1238,64 @@ module.exports = function(grunt) {
     'compileTypescript',
     'copy:resources',
     'copy:cca',
-    'copy:cca_additional',
+    'copy:ccaAdditional',
   ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
 
+  grunt.config.merge({
+    browserify: {
+     ccaMainCoreEnv: Rule.browserify('cca/app/scripts/main.core-env', {
+        browserifyOptions: {
+          standalone: 'ui_context'
+        }
+      }),
+      ccaContext: Rule.browserify('cca/app/scripts/context', {
+        browserifyOptions: {
+          standalone: 'ui_context'
+        }
+      }),
+    },
+    copy: {
+      cca: Rule.copyLibs({
+        npmLibNames: ['freedom-for-chrome', 'forge-min'],
+        pathsFromDevBuild: [
+          'generic_core',
+          'generic_ui',
+          'interfaces',
+          'icons',
+          'fonts'
+        ].concat(backendFreedomModulePaths),
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths,
+        files: getExtraFilesForCoreBuild(ccaDevPath).concat({
+          expand: true,
+          cwd: 'src/',
+          src: ['icons/128_online.png', 'fonts/*'],
+          dest: ccaDevPath
+        }),
+        localDestPath: 'cca/app/'
+      }),
+      ccaAdditional: {
+        files: [
+          {  // Copy chrome extension panel components from the background
+            expand: true,
+            cwd: ccaDevPath,
+            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*', '*.html'],
+            dest: ccaDevPath + '/generic_ui'
+          },
+          {  // Copy generic files used by core and UI.
+            expand: true,
+            cwd: genericPath,
+            src: ['*.js'],
+            dest: ccaDevPath + '/generic'
+          }
+        ]
+      },
+    }
+  });
 
-  // Mobile OS build tasks
+  // =======================================================================================
+  // Android
+  // =======================================================================================
+
   registerTask(grunt, 'build_android', [
     // Builds Android from scratch by recreating the Cordova environment.
     'exec:cleanAndroid',
@@ -1302,6 +1332,10 @@ module.exports = function(grunt) {
     'exec:ccaEmulateAndroid'
   ]);
 
+  // =======================================================================================
+  // iOS
+  // =======================================================================================
+
   registerTask(grunt, 'build_ios', [
     'exec:cleanIos', 
     'build_cca', 
@@ -1310,6 +1344,11 @@ module.exports = function(grunt) {
     'exec:addIosrtcHook',
     'exec:ccaPrepareIosDev'
   ]);
+
+  // =======================================================================================
+  // Tests
+  // =======================================================================================
+
   registerTask(grunt, 'test_chrome', [
     'build_chrome',
     'browserify:chromeExtensionCoreConnectorSpec',
@@ -1360,26 +1399,7 @@ module.exports = function(grunt) {
     'unit_test',
     'integration_test'
   ]);
-  // Builds all code, including the "dist" build, but skips
-  // iOS and Android as well as
-  // ts-linting and testing which can be annoying and slow.
-  // We added jshint here because catches hard syntax errors, etc.
-  registerTask(grunt, 'build', [
-    'build_chrome', 
-    'build_firefox', 
-    'build_cca', 
-    'jshint', 
-    'copy:dist', 
-    'jpm:xpi'
-  ]);
   registerTask(grunt, 'lint', ['jshint', 'tslint']);
-  // This is run prior to releasing uProxy and, in addition to
-  // building, tests and lints all code.
-  registerTask(grunt, 'dist', [
-    'build',
-    'test'
-  ]);
-  registerTask(grunt, 'default', ['build']);
 
   //-------------------------------------------------------------------------
   grunt.loadNpmTasks('grunt-browserify');
