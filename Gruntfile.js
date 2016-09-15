@@ -792,13 +792,13 @@ module.exports = function(grunt) {
       }
     },
     browserify: {
-      chromeAppMain: Rule.browserify('chrome/app/scripts/main.core-env'),
-      chromeExtMain: Rule.browserify('chrome/extension/scripts/background', {
+      chromeAppMainCoreEnv: Rule.browserify('chrome/app/scripts/main.core-env'),
+      chromeExtBackground: Rule.browserify('chrome/extension/scripts/background', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
       }),
-      chromeContext: Rule.browserify('chrome/extension/scripts/context', {
+      chromeExtContext: Rule.browserify('chrome/extension/scripts/context', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
@@ -812,7 +812,7 @@ module.exports = function(grunt) {
           }
         }
       },
-      ccaMain: Rule.browserify('cca/app/scripts/main.core-env', {
+      ccaMainCoreEnv: Rule.browserify('cca/app/scripts/main.core-env', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
@@ -885,7 +885,7 @@ module.exports = function(grunt) {
       },
       browserify: {
         files: ['build/**/*.js', '!build/**/*.static.js'],
-        tasks: ['browserify:chromeAppMain', 'browserify:chromeExtMain']
+        tasks: ['browserify:chromeAppMainCoreEnv', 'browserify:chromeExtBackground']
       }
     },
     //-------------------------------------------------------------------------
@@ -1036,18 +1036,28 @@ module.exports = function(grunt) {
   }
 
   // Register a task, making sure subtasks only run once.
-  function registerTask(grunt, taskName, subTasks) {
-    return grunt.registerTask(taskName, subTasks.map(makeRunOnce));
+  // Description is optional.
+  function registerTask(grunt, taskName, description, subTasks) {
+    if (!subTasks) {
+      subTasks = description;
+      return grunt.registerTask(taskName, subTasks.map(makeRunOnce));
+    }
+    return grunt.registerTask(taskName, description, subTasks.map(makeRunOnce));
   }
+
+  registerTask(grunt, 'compileTypescript', 'Compiles all the Typescript code', [
+    'ts', 'version_file'
+  ]);
+  registerTask(grunt, 'version_file', [
+    'gitinfo',
+    'string-replace:version'
+  ]);
 
   registerTask(grunt, 'base', [
     'copy:resources', 
     'copy:devGenericCore', 
-    'ts', 
-    'version_file', 
-    'browserify:chromeAppMain', 
+    'compileTypescript', 
     'browserify:genericCoreFreedomModule', 
-    'browserify:ccaMain', 
     'browserify:loggingProvider', 
     'browserify:churnPipeFreedomModule', 
     'browserify:cloudInstallerFreedomModule', 
@@ -1099,57 +1109,97 @@ module.exports = function(grunt) {
     'copy:libsForSimpleSocksNode'
   ]);
   registerTask(grunt, 'uprobe', [
-    'base', 
-    'browserify:uprobeFreedomModule', 
-    'copy:libsForUprobeChromeApp', 
+    'base',
+    'browserify:uprobeFreedomModule',
+    'copy:libsForUprobeChromeApp',
     'copy:libsForUprobeFirefoxApp'
   ]);
   registerTask(grunt, 'zork', [
     'base', 
-    'browserify:zorkFreedomModule', 
-    'copy:libsForZorkChromeApp', 
-    'copy:libsForZorkFirefoxApp', 
-    'copy:libsForZorkNode', 
+    'browserify:zorkFreedomModule',
+    'copy:libsForZorkChromeApp',
+    'copy:libsForZorkFirefoxApp',
+    'copy:libsForZorkNode',
     'exec:installFreedomForNodeForZork'
   ]);
-  registerTask(grunt, 'version_file', [
-    'gitinfo',
-    'string-replace:version'
-  ]);
-  registerTask(grunt, 'build_chrome_app', [
-    'base',
-    'copy:chrome_app'
-  ].concat(fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')));
-  registerTask(grunt, 'build_chrome_ext', [
-    'base',
-    'copy:chrome_extension',
-    'copy:chrome_extension_additional',
-    'browserify:chromeExtMain',
-    'browserify:chromeContext'
-  ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
 
+  // Chrome
   registerTask(grunt, 'build_chrome', [
     'build_chrome_app',
     'build_chrome_ext'
   ]);
 
-  // Firefox build tasks.
+  // Chrome App
+  registerTask(grunt, 'build_chrome_app', [
+    'base',
+    'chromeAppMainCoreEnv',
+    'copy:chrome_app'
+  ].concat(fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')));
+
+  registerTask(grunt, 'chromeAppMainCoreEnv',
+      'Builds build/dist/chrome/app/scripts/main.core-env.static.js', [
+    'compileTypescript',
+    'browserify:chromeAppMainCoreEnv'
+  ]);
+
+  // Chrome Extension
+  registerTask(grunt, 'build_chrome_ext', [
+    'base',
+    'copy:chrome_extension',
+    'copy:chrome_extension_additional',
+    'chromeExtBackground',
+    'chromeExtContext'
+  ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
+
+  registerTask(grunt, 'chromeExtBackground', [
+    'compileTypescript',
+    'browserify:chromeExtBackground'
+  ]);
+
+  registerTask(grunt, 'chromeExtContext', 
+      'Builds build/src/chrome/extension/scripts/context.static.js', [
+    'compileTypescript',
+    'copy:resources',
+    'browserify:chromeExtContext'    
+  ]);
+
+  // Firefox
   registerTask(grunt, 'build_firefox', [
     'base',
     'copy:firefox', 
     'copy:firefox_additional', 
-    'browserify:firefoxContext'
+    'firefoxContext'
   ].concat(fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)));
+
+  registerTask(grunt, 'firefoxContext',
+      'Builds build/src/firefox/data/scripts/context.static.js', [
+    'compileTypescript',
+    'copy:resources',
+    'browserify:firefoxContext'    
+  ])
   
   // CCA build tasks
   registerTask(grunt, 'build_cca', [
-    'base', 
-    'copy:cca', 
-    'copy:cca_additional', 
-    'browserify:ccaMain', 
-    'browserify:ccaContext'
+    'base',
+    'copy:cca',
+    'copy:cca_additional',
+    'ccaMainCoreEnv',
+    'ccaContext'
   ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
   
+  registerTask(grunt, 'ccaContext',
+      'Builds build/src/cca/app/scripts/context.static.js', [
+    'compileTypescript',
+    'copy:resources',
+    'browserify:ccaContext'    
+  ])
+
+  registerTask(grunt, 'ccaMainCoreEnv',
+      'Builds build/src/cca/app/scripts/main.core-env.static.js', [
+    'compileTypescript',
+    'browserify:ccaMainCoreEnv'
+  ]);
+
   // Mobile OS build tasks
   registerTask(grunt, 'build_android', [
     // Builds Android from scratch by recreating the Cordova environment.
