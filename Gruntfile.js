@@ -881,7 +881,7 @@ module.exports = function(grunt) {
       },
       typescript: {
         files: ['src/**/*.ts'],
-        tasks: ['ts']
+        tasks: ['compileTypescript']
       },
       browserify: {
         files: ['build/**/*.js', '!build/**/*.static.js'],
@@ -1133,42 +1133,54 @@ module.exports = function(grunt) {
   registerTask(grunt, 'build_chrome_app', [
     'base',
     'chromeAppMainCoreEnv',
-    'copy:chrome_app'
-  ].concat(fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')));
-
+    'chromeAppExtMissing',
+    'copy:chrome_app',
+  ]);
   registerTask(grunt, 'chromeAppMainCoreEnv',
       'Builds build/dist/chrome/app/scripts/main.core-env.static.js', [
     'compileTypescript',
     'browserify:chromeAppMainCoreEnv'
   ]);
+  registerTask(grunt, 'chromeAppExtMissing',
+      'Builds build/src/chrome/app/polymer/vulcanized.{html,js}', [
+    'compileTypescript',
+    'copy:resources',
+    'copy:chrome_app',  // TODO: We may only need to copy bower/
+  ].concat(fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')));
 
   // Chrome Extension
   registerTask(grunt, 'build_chrome_ext', [
     'base',
+    'chromeExtBackground',
+    'chromeExtContext',
+    'chromeExtRoot',
     'copy:chrome_extension',
     'copy:chrome_extension_additional',
-    'chromeExtBackground',
-    'chromeExtContext'
-  ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
-
+  ]);
   registerTask(grunt, 'chromeExtBackground', [
     'compileTypescript',
     'browserify:chromeExtBackground'
   ]);
-
   registerTask(grunt, 'chromeExtContext', 
       'Builds build/src/chrome/extension/scripts/context.static.js', [
     'compileTypescript',
     'copy:resources',
     'browserify:chromeExtContext'    
   ]);
+  registerTask(grunt, 'chromeExtRoot',
+      'Builds build/src/chrome/extension/generic_ui/polymer/vulcanized.{html,static.js}', [
+    'compileTypescript',
+    'copy:resources',
+    'copy:chrome_extension',
+    'copy:chrome_extension_additional',  // TODO: We may only need to copy bower/
+  ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
 
   // Firefox
   registerTask(grunt, 'build_firefox', [
     'base',
+    'firefoxContext',
     'copy:firefox', 
     'copy:firefox_additional', 
-    'firefoxContext'
   ].concat(fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)));
 
   registerTask(grunt, 'firefoxContext',
@@ -1181,10 +1193,10 @@ module.exports = function(grunt) {
   // CCA build tasks
   registerTask(grunt, 'build_cca', [
     'base',
+    'ccaMainCoreEnv',
+    'ccaContext',
     'copy:cca',
     'copy:cca_additional',
-    'ccaMainCoreEnv',
-    'ccaContext'
   ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
   
   registerTask(grunt, 'ccaContext',
