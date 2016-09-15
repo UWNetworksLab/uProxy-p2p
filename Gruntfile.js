@@ -1068,7 +1068,8 @@ module.exports = function(grunt) {
     'copy:chromeExt',
     'copy:chromeExtAdditional',
   ]);
-  registerTask(grunt, 'chromeExtBackground', [
+  registerTask(grunt, 'chromeExtBackground', 
+      'Builds build/src/chrome/extension/scripts/background.static.js', [
     'compileTypescript',
     'browserify:chromeExtBackground'
   ]);
