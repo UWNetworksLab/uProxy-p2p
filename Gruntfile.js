@@ -1233,27 +1233,37 @@ module.exports = function(grunt) {
     },
   });
 
-  // CCA build tasks
+  // =======================================================================================
+  // CCA
+  // =======================================================================================
+
   registerTask(grunt, 'build_cca', [
     'base',
     'ccaMainCoreEnv',
     'ccaContext',
+    'ccaRoot',
     'copy:cca',
     'copy:cca_additional',
-  ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
-  
-  registerTask(grunt, 'ccaContext',
-      'Builds build/src/cca/app/scripts/context.static.js', [
-    'compileTypescript',
-    'copy:resources',
-    'browserify:ccaContext'    
-  ])
-
+  ]);
   registerTask(grunt, 'ccaMainCoreEnv',
       'Builds build/src/cca/app/scripts/main.core-env.static.js', [
     'compileTypescript',
     'browserify:ccaMainCoreEnv'
   ]);
+  registerTask(grunt, 'ccaContext',
+      'Builds build/src/cca/app/scripts/context.static.js', [
+    'compileTypescript',
+    'copy:resources',
+    'browserify:ccaContext'    
+  ]);
+  registerTask(grunt, 'ccaRoot',
+      'Builds build/src/cca/app/generic_ui/polymer/vulcanized.{html,static.js}', [
+    'compileTypescript',
+    'copy:resources',
+    'copy:cca',
+    'copy:cca_additional',
+  ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
+
 
   // Mobile OS build tasks
   registerTask(grunt, 'build_android', [
