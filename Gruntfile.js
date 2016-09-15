@@ -1113,8 +1113,7 @@ module.exports = function(grunt) {
     'exec:installFreedomForNodeForZork'
   ]);
   registerTask(grunt, 'version_file', [
-    'gitinfo',
-    'string-replace:version'
+    'gitinfo'
   ]);
   registerTask(grunt, 'build_chrome_app', [
     'base',
