@@ -443,45 +443,6 @@ module.exports = function(grunt) {
           }
         ]
       },     
-      // Firefox. Assumes the top-level tasks generic_core and generic_ui
-      // completed.
-      firefox: Rule.copyLibs({
-        npmLibNames: [
-          'freedom-for-firefox',
-          'forge-min'
-        ],
-        pathsFromDevBuild: [
-          'generic_core',
-          'generic_ui',
-          'interfaces',
-          'icons',
-          'fonts'
-        ].concat(backendFreedomModulePaths),
-        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths,
-        files: getExtraFilesForCoreBuild(path.join(firefoxDevPath, 'data')).concat({
-          expand: true,
-          cwd: devBuildPath,
-          src: ['interfaces/*.js'],
-          dest: firefoxDevPath + '/lib'
-        }),
-        localDestPath: 'firefox/data'
-      }),
-      firefox_additional: {
-        files: [
-          {  // Copy chrome extension panel components from the background.
-            expand: true,
-            cwd: firefoxDevPath + '/data',
-            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*'],
-            dest: firefoxDevPath + '/data/generic_ui'
-          },
-          {  // Copy generic files used by core and UI.
-            expand: true,
-            cwd: genericPath,
-            src: ['*.js'],
-            dest: firefoxDevPath + '/data/generic'
-          }
-        ]
-      },
       cca: Rule.copyLibs({
         npmLibNames: ['freedom-for-chrome', 'forge-min'],
         pathsFromDevBuild: [
@@ -747,25 +708,6 @@ module.exports = function(grunt) {
       }
     },
     browserify: {
-      chromeExtBackground: Rule.browserify('chrome/extension/scripts/background', {
-        browserifyOptions: {
-          standalone: 'ui_context'
-        }
-      }),
-      chromeExtContext: Rule.browserify('chrome/extension/scripts/context', {
-        browserifyOptions: {
-          standalone: 'ui_context'
-        }
-      }),
-      firefoxContext: {
-        src: [firefoxDevPath + '/data/scripts/background.js'],
-        dest: firefoxDevPath + '/data/scripts/context.static.js',
-        options: {
-          browserifyOptions: {
-            standalone: 'ui_context'
-          }
-        }
-      },
       ccaMainCoreEnv: Rule.browserify('cca/app/scripts/main.core-env', {
         browserifyOptions: {
           standalone: 'ui_context'
@@ -1087,7 +1029,10 @@ module.exports = function(grunt) {
     'build_chrome_ext'
   ]);
 
+  // =======================================================================================
   // Chrome App
+  // =======================================================================================
+
   registerTask(grunt, 'build_chrome_app', [
     'base',
     'chromeAppMainCoreEnv',
@@ -1105,6 +1050,7 @@ module.exports = function(grunt) {
     'copy:resources',
     'copy:chromeAppBower',
   ].concat(fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')));
+  
   grunt.config.merge({
     browserify: {
      chromeAppMainCoreEnv: Rule.browserify('chrome/app/scripts/main.core-env'),
@@ -1124,15 +1070,17 @@ module.exports = function(grunt) {
         localDestPath: 'chrome/app/'
       }),
       chromeAppBower: {
-        expand: true,
-        cwd: 'third_party',
+        expand: true, cwd: 'third_party',
         src: ['bower/**/*'],
-        dest: path.join(devBuildPath, 'chrome/app')
+        dest: chromeAppDevPath
       },
     }
   });
 
+  // =======================================================================================
   // Chrome Extension
+  // =======================================================================================
+
   registerTask(grunt, 'build_chrome_ext', [
     'base',
     'chromeExtBackground',
@@ -1158,7 +1106,20 @@ module.exports = function(grunt) {
     'copy:chromeExt',
     'copy:chromeExtAdditional',
   ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
+  
   grunt.config.merge({
+    browserify: {
+      chromeExtBackground: Rule.browserify('chrome/extension/scripts/background', {
+        browserifyOptions: {
+          standalone: 'ui_context'
+        }
+      }),
+      chromeExtContext: Rule.browserify('chrome/extension/scripts/context', {
+        browserifyOptions: {
+          standalone: 'ui_context'
+        }
+      }),
+    },
     copy: {
       chromeExt: Rule.copyLibs({
         npmLibNames: [],
@@ -1194,7 +1155,10 @@ module.exports = function(grunt) {
     }
   });
 
+  // =======================================================================================
   // Firefox
+  // =======================================================================================
+  
   registerTask(grunt, 'build_firefox', [
     'base',
     'firefoxContext',
@@ -1216,6 +1180,59 @@ module.exports = function(grunt) {
     'copy:firefox_additional', 
   ].concat(fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)));
   
+  grunt.config.merge({
+    browserify: {
+      firefoxContext: {
+        src: [firefoxDevPath + '/data/scripts/background.js'],
+        dest: firefoxDevPath + '/data/scripts/context.static.js',
+        options: {
+          browserifyOptions: {
+            standalone: 'ui_context'
+          }
+        }
+      },
+    },
+    copy: {
+      firefox: Rule.copyLibs({
+        npmLibNames: [
+          'freedom-for-firefox',
+          'forge-min'
+        ],
+        pathsFromDevBuild: [
+          'generic_core',
+          'generic_ui',
+          'interfaces',
+          'icons',
+          'fonts'
+        ].concat(backendFreedomModulePaths),
+        pathsFromThirdPartyBuild: backendThirdPartyBuildPaths,
+        files: getExtraFilesForCoreBuild(path.join(firefoxDevPath, 'data')).concat({
+          expand: true,
+          cwd: devBuildPath,
+          src: ['interfaces/*.js'],
+          dest: firefoxDevPath + '/lib'
+        }),
+        localDestPath: 'firefox/data'
+      }),
+      firefox_additional: {
+        files: [
+          {  // Copy chrome extension panel components from the background.
+            expand: true,
+            cwd: firefoxDevPath + '/data',
+            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*'],
+            dest: firefoxDevPath + '/data/generic_ui'
+          },
+          {  // Copy generic files used by core and UI.
+            expand: true,
+            cwd: genericPath,
+            src: ['*.js'],
+            dest: firefoxDevPath + '/data/generic'
+          }
+        ]
+      },
+    },
+  });
+
   // CCA build tasks
   registerTask(grunt, 'build_cca', [
     'base',
@@ -1329,6 +1346,7 @@ module.exports = function(grunt) {
     'socksEchoIntegrationTest'
   ]);
   registerTask(grunt, 'test', [
+    'lint',
     'unit_test',
     'integration_test'
   ]);
@@ -1344,12 +1362,11 @@ module.exports = function(grunt) {
     'copy:dist', 
     'jpm:xpi'
   ]);
-  registerTask(grunt, 'lint', ['tslint']);
+  registerTask(grunt, 'lint', ['jshint', 'tslint']);
   // This is run prior to releasing uProxy and, in addition to
   // building, tests and lints all code.
   registerTask(grunt, 'dist', [
     'build',
-    'lint',
     'test'
   ]);
   registerTask(grunt, 'default', ['build']);
