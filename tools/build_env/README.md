@@ -28,6 +28,15 @@ What's happening when you use this "script prefix"? Roughly:
  1. Makes you the owner of all files in the repository (because commands in the container run as `root`, any new files created in the previous step will be owned by `root`).
  1. Deletes the container.
 
+### Android
+
+**This image won't work for `build_android`.** The Android tools are **huge**: we maintain a separate image for Android development.
+
+It's tagged `android` and can be used via the `-t` switch, e.g.:
+```bash
+./tools/build_env/build_env.sh -t android npm run grunt build_chrome
+```
+
 ## Updating the Image
 
 Build the image locally:
@@ -42,3 +51,5 @@ Upload to Docker Hub:
 ```
 
 The `-b` and `-p` switches may be used together but please test before uploading to Docker Hub.
+
+**Note: Add `-t android` for Android builds.**
