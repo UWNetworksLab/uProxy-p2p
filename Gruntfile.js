@@ -1029,7 +1029,7 @@ module.exports = function(grunt) {
     'copy:resources',
     'copy:chromeAppBower',
   ].concat(fullyVulcanize('chrome/app/polymer', 'ext-missing', 'vulcanized')));
-  
+
   grunt.config.merge({
     browserify: {
       chromeAppMainCoreEnv: Rule.browserify('chrome/app/scripts/main.core-env'),
@@ -1061,7 +1061,6 @@ module.exports = function(grunt) {
   // =========================================================================
 
   registerTask(grunt, 'build_chrome_ext', [
-    'base',
     'chromeExtBackground',
     'chromeExtContext',
     'chromeExtRoot',
