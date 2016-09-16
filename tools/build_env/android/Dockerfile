@@ -6,6 +6,8 @@ LABEL description="Docker container for building uProxy for Android"
 
 RUN apt-get update
 RUN apt-get install -y curl unzip \
+# For installing phantomjs via NPM.
+bzip2 \
 # Android SDK.
 openjdk-8-jdk \
 # CCA.
