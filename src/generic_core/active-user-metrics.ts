@@ -35,7 +35,8 @@ export class Metrics {
 
   public reportGetterActivity() {
     let country = 'ZZ';  // ZZ means unknown until we have country lookup.
-    let today = simple_date.datefromLocalJsDate(new Date()).toIsoString();
+    let today = simple_date.simpleDateToIsoString(
+        simple_date.datefromLocalJsDate(new Date()));
     if (!this.data_.lastActivity ||
         this.data_.lastActivity.date !== today ||
         this.data_.lastActivity.country !== country) {

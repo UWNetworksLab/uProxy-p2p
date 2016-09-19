@@ -56,18 +56,13 @@ export class SimpleDate {
 
   // Returns a string representation for logging or debugging.
   public toString(): string {
-    return `${this.getYear()}-${padLeft(this.getMonth(), 2)}-${padLeft(this.getDay(), 2)}`;
-  }
-
-  // Returns an ISO string representation ("YYYY-MM-DD" format).
-  public toIsoString(): string {
-    return `${this.getYear()}-${padLeft(this.getMonth(), 2)}-${padLeft(this.getDay(), 2)}`;
+    return simpleDateToIsoString(this);
   }
 }
 
 // Creates a SimpleDate from an ISO string.
 // Any time information will be ignored.
-export function datefromString(date_str: string): SimpleDate {
+export function datefromIsoString(date_str: string): SimpleDate {
   if (!date_str) {
     return null;
   }
@@ -96,6 +91,11 @@ export function datefromLocalJsDate(js_date: Date): SimpleDate {
   }
   // Add 1 to month because it is 0-based in JS Date.
   return new SimpleDate(js_date.getFullYear(), js_date.getMonth() + 1, js_date.getDate());
+}
+
+// Returns an ISO string representation ("YYYY-MM-DD" format).
+export function simpleDateToIsoString(sd: SimpleDate): string {
+  return `${sd.getYear()}-${padLeft(sd.getMonth(), 2)}-${padLeft(sd.getDay(), 2)}`;
 }
 
 // Returns a string representation of number, with padding zeroes to fit 'length' characters.
