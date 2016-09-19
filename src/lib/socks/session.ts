@@ -2,9 +2,6 @@
 
 import headers = require('./headers');
 import piece = require('./piece');
-import logging = require('../logging/logging');
-
-const log: logging.Log = new logging.Log('socks session');
 
 enum State {
   AWAITING_AUTHS,
@@ -49,7 +46,7 @@ export class SocksSession implements piece.SocksPiece {
   // this to the forwarding socket except during SOCKS protocol negotiation, in which
   // case we need to decode the SOCKS headers and reply back to the SOCKS client.
   public handleDataFromSocksClient = (buffer: ArrayBuffer) => {
-    log.debug('%1/%2: received %3 bytes from SOCKS client', this.serverId_, this.id_, buffer.byteLength);
+    console.info('%1/%2: received %3 bytes from SOCKS client', this.serverId_, this.id_, buffer.byteLength);
     switch (this.state_) {
       case State.AWAITING_AUTHS:
         try {
@@ -58,7 +55,7 @@ export class SocksSession implements piece.SocksPiece {
           this.sendToSocksClient_(headers.composeAuthResponse(headers.Auth.NOAUTH));
         } catch (e) {
           // TODO: send error to the SOCKS client and disconnect
-          log.warn('%1/%2: could not parse auths: %3', this.serverId_, this.id_, e.message);
+          console.warn('%1/%2: could not parse auths: %3', this.serverId_, this.id_, e.message);
           this.state_ = State.DISCONNECTED;
         }
         break;
@@ -68,23 +65,23 @@ export class SocksSession implements piece.SocksPiece {
 
           // TODO: check for Command.TCP_CONNECT
           // TODO: check is valid and allowed address
-          log.debug('%1/%2: requested endpoint: %3', this.serverId_, this.id_, request.endpoint);
+          console.info('%1/%2: requested endpoint: %3', this.serverId_, this.id_, request.endpoint);
           this.state_ = State.AWAITING_CONNECTION;
 
           this.getForwardingSocket_(
             request.endpoint.address,
             request.endpoint.port).then((forwardingSocket: piece.SocksPiece) => {
-              log.info('%1/%2: connected to remote endpoint', this.serverId_, this.id_);
+              console.info('%1/%2: connected to remote endpoint', this.serverId_, this.id_);
 
               this.forwardingSocket_ = forwardingSocket;
 
               this.forwardingSocket_.onDataForSocksClient((buffer: ArrayBuffer) => {
-                log.debug('%1/%2: received %3 bytes from forwarding socket', this.serverId_, this.id_, buffer.byteLength);
+                // console.info('%1/%2: received %3 bytes from forwarding socket', this.serverId_, this.id_, buffer.byteLength);
                 this.sendToSocksClient_(buffer);
               });
 
               this.forwardingSocket_.onDisconnect(() => {
-                log.debug('%1/%2: forwarding socket has disconnected', this.serverId_, this.id_);
+                console.info('%1/%2: forwarding socket has disconnected', this.serverId_, this.id_);
                 this.onForwardingSocketDisconnect_();
               });
 
@@ -97,7 +94,7 @@ export class SocksSession implements piece.SocksPiece {
                 }
               }));
             }, (e: freedom.Error) => {
-              log.warn('%1/%2: failed to connect to remote endpoint: %3', this.serverId_, this.id_, e);
+              console.warn('%1/%2: failed to connect to remote endpoint: %3', this.serverId_, this.id_, e);
               this.sendToSocksClient_(headers.composeResponseBuffer({
                 // TODO: full range of error codes
                 reply: headers.Reply.FAILURE
@@ -105,7 +102,7 @@ export class SocksSession implements piece.SocksPiece {
             });
         } catch (e) {
           // TODO: send error to the SOCKS client
-          log.warn('%1/%2: could not parse request: %3', this.serverId_, this.id_, e.message);
+          console.warn('%1/%2: could not parse request: %3', this.serverId_, this.id_, e.message);
           this.state_ = State.DISCONNECTED;
           // this.socksClientLink_.handleDisconnect();
         }
@@ -115,14 +112,14 @@ export class SocksSession implements piece.SocksPiece {
         break;
       default:
         // TODO: should we disconnect at this point?
-        log.warn('%1/%2: ignoring bytes unexpectedly received in state %3',
+        console.warn('%1/%2: ignoring bytes unexpectedly received in state %3',
           this.serverId_, this.id_, State[this.state_]);
     }
   }
 
   // Invoked when there is no longer a connection to the SOCKS client.
   public handleDisconnect = () => {
-    log.debug('%1/%2: SOCKS client has disconnected', this.serverId_, this.id_);
+    console.info('%1/%2: SOCKS client has disconnected', this.serverId_, this.id_);
     this.forwardingSocket_.handleDisconnect();
   }
 }
