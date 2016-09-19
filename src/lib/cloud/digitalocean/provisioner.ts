@@ -305,7 +305,7 @@ class Provisioner {
       log.debug('Initiating OAuth...');
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
         var url = 'https://cloud.digitalocean.com/v1/oauth/authorize?' +
-            'client_id=41f77ea7aa94311a2337027eb238591db9e98c6e2c1067b3b2c7c3420901703f&' +
+            'client_id=7d16974f756b4843669d0b04a13dabe89413df90e9de05b9410a829191acf076&' +
             'response_type=token&' +
             'redirect_uri=' + encodeURIComponent(obj.redirect) + '&' +
             'state=' + encodeURIComponent(obj.state) + '&' +
