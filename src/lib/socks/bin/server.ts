@@ -6,14 +6,9 @@ import session = require('../session');
 
 const SERVER_ADDRESS = '0.0.0.0';
 const SERVER_PORT = 9999;
-const SERVER_NAME = 'sample';
 
-let numSessions = 0;
-
-new node_server.NodeSocksServer(SERVER_ADDRESS, SERVER_PORT).onConnection(() => {
-  const clientId = 'p' + (numSessions++) + 'p';
-  console.log('new SOCKS session %1', clientId);
-  const socksSession = new session.SocksSession(SERVER_NAME, clientId);
+new node_server.NodeSocksServer(SERVER_ADDRESS, SERVER_PORT).onConnection((clientId) => {
+  const socksSession = new session.SocksSession(clientId);
   socksSession.onForwardingSocketRequired((host, port) => {
     const forwardingSocket = new node_socket.NodeForwardingSocket();
     return forwardingSocket.connect(host, port).then(() => {
@@ -26,4 +21,3 @@ new node_server.NodeSocksServer(SERVER_ADDRESS, SERVER_PORT).onConnection(() => 
 }, (e) => {
   console.error('failed to start SOCKS server', e);
 });
-
