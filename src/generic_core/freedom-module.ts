@@ -16,7 +16,7 @@ import browser_connector = require('../interfaces/browser_connector');
 import globals = require('./globals');
 import logging = require('../lib/logging/logging');
 import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
-import metrics_module = require('./metrics');
+import rappor_metrics = require('./rappor-metrics');
 import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
 import social_network = require('./social');
 import social = require('../interfaces/social');
@@ -78,21 +78,22 @@ commands[uproxy_core_api.Command.ACCEPT_INVITATION] = core.acceptInvitation;
 commands[uproxy_core_api.Command.CLOUD_UPDATE] = core.cloudUpdate;
 commands[uproxy_core_api.Command.UPDATE_ORG_POLICY] = core.updateOrgPolicy;
 commands[uproxy_core_api.Command.REMOVE_CONTACT] = core.removeContact;
-commands[uproxy_core_api.Command.POST_REPORT] = core.postReport;
+commands[uproxy_core_api.Command.POST_RAPPOR_REPORT] = core.postRapporReport;
 commands[uproxy_core_api.Command.VERIFY_USER] = core.verifyUser;
 commands[uproxy_core_api.Command.VERIFY_USER_SAS] = core.finishVerifyUser;
 commands[uproxy_core_api.Command.GET_PORT_CONTROL_SUPPORT] = core.getPortControlSupport;
 commands[uproxy_core_api.Command.UPDATE_GLOBAL_SETTING] = core.updateGlobalSetting;
+commands[uproxy_core_api.Command.UPDATE_BROWSER_PROXY_STATE] = core.updateBrowserProxyState;
 commands[uproxy_core_api.Command.CHECK_REPROXY] = core.checkReproxy;
 
 for (var command in commands) {
   ui_connector.onCommand(parseInt(command, 10), commands[command]);
 }
 
-var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
-    globals.metrics, globals.storage, core.getNetworkInfoObj,
+var dailyMetricsReporter = new rappor_metrics.DailyMetricsReporter(
+    globals.rapporMetrics, globals.storage, core.getNetworkInfoObj,
     (payload :any) => {
       if (globals.settings.statsReportingEnabled) {
-        core.postReport({payload: payload, path: 'submit-rappor-stats'});
+        core.postRapporReport({payload: payload, path: 'submit-rappor-stats'});
       }
     });

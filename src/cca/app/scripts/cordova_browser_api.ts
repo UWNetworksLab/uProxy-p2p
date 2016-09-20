@@ -127,46 +127,49 @@ class CordovaBrowserApi implements BrowserAPI {
   }
 
   public startUsingProxy = (endpoint: net.Endpoint, bypass: string[],
-                            opts: browser_api.ProxyConnectOptions) => {
+                            opts: browser_api.ProxyConnectOptions) : Promise<void> => {
     if (!chrome.proxy) {
-      console.log('No proxy setting support; ignoring start command');
-      return;
+      return Promise.reject(
+          new Error('No proxy setting support; ignoring start command'));
     }
 
     if (!opts.accessMode || opts.accessMode === ProxyAccessMode.NONE) {
-      console.log('Cannot start proxying with unknown access mode.');
-      return;
+      return Promise.reject(
+          new Error('Cannot start proxying with unknown access mode.'));
     }
     // Remember access mode so we can stop proxying appropriately.
     this.proxyAccessMode_ = opts.accessMode;
     if (this.proxyAccessMode_ === ProxyAccessMode.IN_APP) {
-      this.startInAppProxy_(endpoint);
+      return this.startInAppProxy_(endpoint);
     } else if (this.proxyAccessMode_ === ProxyAccessMode.VPN) {
-      this.startVpnProxy_(endpoint);
+      return this.startVpnProxy_(endpoint);
     }
   };
 
-  private startInAppProxy_ = (endpoint: net.Endpoint) => {
-    chrome.proxy.settings.set({
-      scope: 'regular',
-      value: {
-        mode: 'fixed_servers',
-        rules: {
-          singleProxy: {
-            scheme: 'socks5',
-            host: endpoint.address,
-            port: endpoint.port
+  private startInAppProxy_ = (endpoint: net.Endpoint) : Promise<void>  => {
+    return new Promise<void>((F, R) => {
+      chrome.proxy.settings.set({
+        scope: 'regular',
+        value: {
+          mode: 'fixed_servers',
+          rules: {
+            singleProxy: {
+              scheme: 'socks5',
+              host: endpoint.address,
+              port: endpoint.port
+            }
           }
         }
-      }
-    }, (response:Object) => {
-      console.log('Set proxy response:', response);
-      // Open the in-app browser through the proxy.
-      this.openTab('https://news.google.com/');
+      }, (response:Object) => {
+        console.log('Set proxy response:', response);
+        // Open the in-app browser through the proxy.
+        this.openTab('https://news.google.com/');
+        F();
+      });
     });
   }
 
-  private startVpnProxy_ = (endpoint: net.Endpoint) => {
+  private startVpnProxy_ = (endpoint: net.Endpoint) : Promise<void>  => {
     // Set a callback for disconnect event before starting proxying.
     window.tun2socks.onDisconnect().then((msg: string) => {
       // UI will call stopUsingProxy, on proxyDisconnected event.
@@ -177,34 +180,41 @@ class CordovaBrowserApi implements BrowserAPI {
       console.error('Tun2Socks onDisconnect, unexpected callback error: ', err);
     });
 
-    // Convert local endpoint ipv6 address ("::") to ipv4 for tun2socks.
-    var socksServerAddress = '127.0.0.1:' + endpoint.port;
-    window.tun2socks.start(socksServerAddress).then(function(msg: string) {
-      console.log('Tun2Socks start: ', msg);
-    }).catch(function(err: string) {
-      console.error('Tun2Socks start error: ', err);
+    return new Promise<void>((F, R) => {
+      // Convert local endpoint ipv6 address ("::") to ipv4 for tun2socks.
+      var socksServerAddress = '127.0.0.1:' + endpoint.port;
+      window.tun2socks.start(socksServerAddress).then(function(msg: string) {
+        console.log('Tun2Socks start: ', msg);
+        F();
+      }).catch(function(err: string) {
+        R(new Error('Tun2Socks start error: ' + err));
+      });
     });
   }
 
-  public stopUsingProxy = () => {
+  public stopUsingProxy = () : Promise<void> => {
     if (!chrome.proxy) {
       console.error('No proxy setting support; ignoring stop command');
-      return;
+      return Promise.resolve<void>();
     }
 
-    if (this.proxyAccessMode_ === ProxyAccessMode.IN_APP) {
-      chrome.proxy.settings.clear({scope: 'regular'}, () => {
-        console.log('Cleared proxy settings');
-      });
-    } else if (this.proxyAccessMode_ === ProxyAccessMode.VPN) {
-      window.tun2socks.stop().then(function(msg: string) {
-        console.log('Tun2Socks stop: ', msg);
-      }).catch(function(err: string) {
-        console.error('Tun2Socks stop error: ', err);
-      });
-    } else {
-      console.error('Unexpected proxy acccess mode ', this.proxyAccessMode_);
-    }
+    return new Promise<void>((F, R) => {
+      if (this.proxyAccessMode_ === ProxyAccessMode.IN_APP) {
+        chrome.proxy.settings.clear({scope: 'regular'}, () => {
+          console.log('Cleared proxy settings');
+          F();
+        });
+      } else if (this.proxyAccessMode_ === ProxyAccessMode.VPN) {
+        window.tun2socks.stop().then(function(msg: string) {
+          console.log('Tun2Socks stop: ', msg);
+          F();
+        }).catch(function(err: string) {
+          R(new Error('Tun2Socks stop error: ' + err));
+        });
+      } else {
+        R(new Error('Unexpected proxy acccess mode ' + this.proxyAccessMode_));
+      }
+    });
   };
 
   public openTab = (url :string) => {

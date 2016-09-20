@@ -627,6 +627,7 @@ export class UserInterface implements ui_constants.UiApi {
   public proxyDisconnected = (info?:ProxyDisconnectInfo) => {
     if (this.isGettingAccess()) {
       this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
+      this.core.updateBrowserProxyState(false);
       if (info && info.deliberate) {
         return;
       }
@@ -685,7 +686,7 @@ export class UserInterface implements ui_constants.UiApi {
       // proxy was stopped when the user was signed out of the social network.
       // In the case where the user clicked stop, this will have no effect
       // (this function is idempotent).
-      this.browserApi.stopUsingProxy();
+      this.stopBrowserProxy_();
     }
 
     this.updateGettingStatusBar_();
@@ -693,14 +694,14 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   /**
-   * Undoes proxy configuration (e.g. chrome.proxy settings).
+   * Undoes proxy configuration, including UI updates (e.g. icon)
    */
   public stopUsingProxy = (userCancelled ?:boolean) => {
     if (userCancelled) {
       this.userCancelledGetAttempt_ = true;
     }
 
-    this.browserApi.stopUsingProxy();
+    this.stopBrowserProxy_();
     this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
 
@@ -710,6 +711,13 @@ export class UserInterface implements ui_constants.UiApi {
     if (this.instanceTryingToGetAccessFrom) {
       this.stopGettingFromInstance(this.instanceTryingToGetAccessFrom);
     }
+  }
+
+  // Unsets the browser proxy setting, then notifies the core of the update
+  private stopBrowserProxy_ = () => {
+    this.browserApi.stopUsingProxy().then(() => {
+      this.core.updateBrowserProxyState(false);
+    });
   }
 
   private getInstancePath_ = (instanceId :string) => {
@@ -745,7 +753,10 @@ export class UserInterface implements ui_constants.UiApi {
       }
       // Remember access mode in case of reconnect.
       this.proxyAccessMode_ = accessMode;
-      this.startGettingInUiAndConfig(instanceId, endpoint, accessMode);
+      this.startGettingInUiAndConfig(
+          instanceId, endpoint, accessMode).then(() => {
+        this.core.updateBrowserProxyState(true);
+      });
     }, (err:Error) => {
       this.instanceTryingToGetAccessFrom = null;
       throw err;
@@ -774,15 +785,15 @@ export class UserInterface implements ui_constants.UiApi {
     * Sets extension icon to default and undoes proxy configuration.
     */
   public startGettingInUiAndConfig =
-      (instanceId :string, endpoint :net.Endpoint, accessMode: ProxyAccessMode) => {
+      (instanceId :string, endpoint :net.Endpoint, accessMode: ProxyAccessMode)
+      : Promise<void> => {
     if (instanceId) {
       this.instanceGettingAccessFrom_ = instanceId;
       this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
     }
 
     if (!accessMode || accessMode === ProxyAccessMode.NONE) {
-      console.error('Cannot start using proxy: unknown proxy acccess mode.');
-      return;
+      return Promise.reject('Cannot start using proxy: unknown proxy acccess mode.');
     }
 
     this.core.disconnectedWhileProxying = null;
@@ -791,7 +802,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     this.updateGettingStatusBar_();
 
-    this.browserApi.startUsingProxy(endpoint,
+    return this.browserApi.startUsingProxy(endpoint,
         this.model.globalSettings.proxyBypass, {accessMode: accessMode});
   }
 
@@ -1071,7 +1082,7 @@ export class UserInterface implements ui_constants.UiApi {
         proxyingId: this.proxyingId
       };
 
-      return this.core.postReport({payload: payload, path: 'submit-feedback'});
+      return this.core.postRapporReport({payload: payload, path: 'submit-feedback'});
     });
   }
 

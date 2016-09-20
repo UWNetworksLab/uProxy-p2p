@@ -1,5 +1,6 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
+import active_user_metrics = require('./active-user-metrics');
 import bridge = require('../lib/bridge/bridge');
 import globals = require('./globals');
 import constants = require('./constants');
@@ -18,6 +19,7 @@ import social = require('../interfaces/social');
 import socks = require('../lib/socks/headers');
 import StoredValue = require('./stored_value');
 import tcp = require('../lib/net/tcp');
+import xhr = require('../lib/xhr/xhr');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import version = require('../generic/version');
@@ -111,10 +113,36 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
   private connectedNetworks_ = new StoredValue<string[]>('connectedNetworks', []);
 
+  // Set to true iff the browser proxy is set to get access .
+  private isBrowserProxyActive_ :boolean = false;
+
+  // Activity metrics for this user, to report getting access.
+  private loadActiveUserMetrics_ :Promise<active_user_metrics.Metrics>;
+
   constructor() {
     log.debug('Preparing uProxy Core');
 
     this.refreshPortControlSupport();
+
+    this.loadActiveUserMetrics_ = storage.load('active-user-metrics').catch((e :Error) => {
+      // Not an error if no metrics are found storage, this happens the first
+      // time the user loads uProxy.  Use freshly initialized data.
+      return new active_user_metrics.StoredActivityMetrics();
+    }).then((data: active_user_metrics.StoredActivityMetrics) => {
+      let saveCallback = (saveData :active_user_metrics.StoredActivityMetrics) => {
+        return storage.save('active-user-metrics', saveData);
+      };
+      let postCallback = (postData :string) => {
+        // Post metrics only if the user is currently getting access.
+        if (!this.isGettingAccess_()) {
+          return Promise.reject('Cannot post activity metrics, not proxying');
+        }
+        return xhr.makeXhrPromise(
+            'https://uproxy-metrics.appspot.com/recordUse', 'POST',
+            postData, 'application/json');
+      };
+      return new active_user_metrics.Metrics(data, saveCallback, postCallback);
+    });
 
     globals.loadSettings.then(() => {
       return this.connectedNetworks_.get();
@@ -178,7 +206,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     var network = this.pendingNetworks_[networkName];
     if (typeof network === 'undefined') {
-      network = new social_network.FreedomNetwork(networkName, globals.metrics);
+      network = new social_network.FreedomNetwork(networkName, globals.rapporMetrics);
       this.pendingNetworks_[networkName] = network;
     }
 
@@ -382,7 +410,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     network.sendEmail(data.to, data.subject, data.body);
   }
 
-  public postReport = (args :uproxy_core_api.PostReportArgs) : Promise<void> => {
+  public postRapporReport = (args :uproxy_core_api.postRapporReportArgs) : Promise<void> => {
     let host = 'd1wtwocg4wx1ih.cloudfront.net';
     let front = 'https://a0.awsstatic.com/';
     let request:XMLHttpRequest = new freedomXhr.auto();
@@ -410,8 +438,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.error('Instance does not exist for proxying', path.instanceId);
       return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-    // Remember this instance as our proxy.  Set this before start fulfills
-    // in case the user decides to cancel the proxy before it begins.
     return remote.start();
   }
 
@@ -426,6 +452,15 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
     remote.stop();
     // TODO: Handle revoked permissions notifications.
+  }
+
+  public updateBrowserProxyState = (isActive :boolean) => {
+    this.isBrowserProxyActive_ = isActive;
+    if (isActive && globals.settings.statsReportingEnabled) {
+      this.loadActiveUserMetrics_.then((metrics :active_user_metrics.Metrics) => {
+        metrics.reportGetterActivity();
+      });
+    }
   }
 
   /**
@@ -878,5 +913,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       });
     }
     return Promise.resolve<void>();
+  }
+
+  private isGettingAccess_ = () : boolean => {
+    return this.isBrowserProxyActive_;
   }
 }  // class uProxyCore

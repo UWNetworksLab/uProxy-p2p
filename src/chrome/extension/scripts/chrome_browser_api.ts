@@ -99,7 +99,7 @@ class ChromeBrowserApi implements BrowserAPI {
 
   public startUsingProxy =
       (endpoint: net.Endpoint, bypass: string[],
-       opts: browser_api.ProxyConnectOptions) => {
+       opts: browser_api.ProxyConnectOptions) : Promise<void> => {
     var config = {
       mode: 'fixed_servers',
       rules: {
@@ -114,22 +114,31 @@ class ChromeBrowserApi implements BrowserAPI {
 
     console.log('Directing Chrome proxy settings to uProxy');
     this.running_ = true;
-    chrome.proxy.settings.get({incognito:false},
-      (details) => {
-        this.preUproxyConfig_ = details.value;
-        chrome.proxy.settings.set({
-            value: config,
-            scope: 'regular'
-          }, () => {console.log('Successfully set proxy');});
-      });
+    return new Promise<void>((F, R) => {
+      var callback = () => {
+        console.log('Successfully set proxy');
+        F();
+      };
+      chrome.proxy.settings.get({incognito:false},
+        (details) => {
+          this.preUproxyConfig_ = details.value;
+          chrome.proxy.settings.set({
+              value: config,
+              scope: 'regular'
+            }, callback);
+        });
+    });
   };
 
-  public stopUsingProxy = () => {
-    if (this.running_) {
-      console.log('Reverting Chrome proxy settings');
-      this.running_ = false;
-      chrome.proxy.settings.clear({ scope: 'regular' });
+  public stopUsingProxy = () : Promise<void> => {
+    if (!this.running_) {
+      return Promise.resolve<void>();
     }
+    console.log('Reverting Chrome proxy settings');
+    this.running_ = false;
+    return new Promise<void>((F, R) => {
+      chrome.proxy.settings.clear({ scope: 'regular' }, F);
+    });
   };
 
   // Other.

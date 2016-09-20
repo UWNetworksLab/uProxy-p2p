@@ -32,7 +32,7 @@ module.exports = function(grunt) {
     localLibsDestPath: localLibsDestPath
   });
 
-//------------------------------------------------------------------------- 
+//-------------------------------------------------------------------------
   const chromeExtDevPath = path.join(devBuildPath, 'chrome/extension/');
   const chromeAppDevPath = path.join(devBuildPath, 'chrome/app/');
   const firefoxDevPath = path.join(devBuildPath, 'firefox/');
@@ -240,7 +240,7 @@ module.exports = function(grunt) {
     // Create commands to run in different directories.
     ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android',
     ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git cordova-plugin-backbutton',
-    
+
     // Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released.
     ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git',
 
@@ -774,6 +774,7 @@ module.exports = function(grunt) {
         src: [
           'src/**/*.ts',
           '!src/**/*.d.ts',
+          '!src/metrics/**/*.ts',
           '!src/lib/build-tools/**/*',
           '!src/integration/**/*',
           '!src/**/*.core-env.ts',
@@ -829,14 +830,14 @@ module.exports = function(grunt) {
       genericCoreFreedomModule: Rule.browserify('generic_core/freedom-module'),
       integrationSpec: Rule.browserifySpec('integration/core'),
       integrationFreedomModule: Rule.browserify('integration/test_connection'),
-      
+
       // uproxy-lib
       loggingProvider: Rule.browserify('lib/loggingprovider/freedom-module'),
       churnPipeFreedomModule: Rule.browserify('lib/churn-pipe/freedom-module'),
       cloudInstallerFreedomModule: Rule.browserify('lib/cloud/install/freedom-module'),
       cloudSocialProviderFreedomModule: Rule.browserify('lib/cloud/social/freedom-module'),
       digitalOceanFreedomModule: Rule.browserify('lib/cloud/digitalocean/freedom-module'),
-      
+
       // uproxy-lib sample apps.
       copypasteChatFreedomModule: Rule.browserify('lib/copypaste-chat/freedom-module'),
       copypasteSocksFreedomModule: Rule.browserify('lib/copypaste-socks/freedom-module'),
@@ -850,7 +851,7 @@ module.exports = function(grunt) {
       copypasteChatMain: Rule.browserify('lib/copypaste-chat/main.core-env'),
       copypasteSocksMain: Rule.browserify('lib/copypaste-socks/main.core-env'),
       simpleChatMain: Rule.browserify('lib/simple-chat/main.core-env'),
-      
+
       integrationTcpFreedomModule: Rule.browserify('lib/integration-tests/tcp/freedom-module'),
       integrationTcpSpec: browserifyIntegrationTest('lib/integration-tests/tcp/tcp.core-env'),
       integrationSocksEchoFreedomModule: Rule.browserify('lib/integration-tests/socks-echo/freedom-module'),
@@ -942,8 +943,8 @@ module.exports = function(grunt) {
           }
         ],
         scripts: [
-          'freedom-for-chrome/freedom-for-chrome.js', 
-          'churn.core-env.spec.static.js', 
+          'freedom-for-chrome/freedom-for-chrome.js',
+          'churn.core-env.spec.static.js',
           'nochurn.core-env.spec.static.js'
         ],
         options: {
@@ -961,7 +962,7 @@ module.exports = function(grunt) {
           }
         ],
         scripts: [
-          'freedom-for-chrome/freedom-for-chrome.js', 
+          'freedom-for-chrome/freedom-for-chrome.js',
           'slow.core-env.spec.static.js'
         ],
         options: {
@@ -1030,7 +1031,7 @@ module.exports = function(grunt) {
   }
 
   // Returns a task name that will run the input task only once if
-  // called multiple times. 
+  // called multiple times.
   function makeRunOnce(taskName) {
     return 'run-once:' + taskName;
   }
@@ -1041,46 +1042,46 @@ module.exports = function(grunt) {
   }
 
   registerTask(grunt, 'base', [
-    'copy:resources', 
-    'copy:devGenericCore', 
-    'ts', 
-    'version_file', 
-    'browserify:chromeAppMain', 
-    'browserify:genericCoreFreedomModule', 
-    'browserify:ccaMain', 
-    'browserify:loggingProvider', 
-    'browserify:churnPipeFreedomModule', 
-    'browserify:cloudInstallerFreedomModule', 
-    'browserify:cloudSocialProviderFreedomModule', 
+    'copy:resources',
+    'copy:devGenericCore',
+    'ts',
+    'version_file',
+    'browserify:chromeAppMain',
+    'browserify:genericCoreFreedomModule',
+    'browserify:ccaMain',
+    'browserify:loggingProvider',
+    'browserify:churnPipeFreedomModule',
+    'browserify:cloudInstallerFreedomModule',
+    'browserify:cloudSocialProviderFreedomModule',
     'browserify:digitalOceanFreedomModule'
   ]);
   registerTask(grunt, 'echoServer', [
-    'base', 
-    'browserify:echoServerFreedomModule', 
-    'copy:libsForEchoServerChromeApp', 
-    'copy:libsForEchoServerFirefoxApp', 
+    'base',
+    'browserify:echoServerFreedomModule',
+    'copy:libsForEchoServerChromeApp',
+    'copy:libsForEchoServerFirefoxApp',
     'copy:libsForEchoServerNode'
   ]);
   registerTask(grunt, 'copypasteChat', [
-    'base', 
-    'browserify:copypasteChatFreedomModule', 
-    'browserify:copypasteChatMain', 
-    'copy:libsForCopypasteChatChromeApp', 
-    'copy:libsForCopypasteChatFirefoxApp', 
+    'base',
+    'browserify:copypasteChatFreedomModule',
+    'browserify:copypasteChatMain',
+    'copy:libsForCopypasteChatChromeApp',
+    'copy:libsForCopypasteChatFirefoxApp',
     'copy:libsForCopypasteChatWebApp'
   ]);
   registerTask(grunt, 'copypasteSocks', [
-    'base', 
-    'browserify:copypasteSocksFreedomModule', 
-    'browserify:copypasteSocksMain', 
-    'vulcanize:copypasteSocks', 
-    'copy:libsForCopyPasteSocksChromeApp', 
+    'base',
+    'browserify:copypasteSocksFreedomModule',
+    'browserify:copypasteSocksMain',
+    'vulcanize:copypasteSocks',
+    'copy:libsForCopyPasteSocksChromeApp',
     'copy:libsForCopyPasteSocksFirefoxApp'
   ]);
   registerTask(grunt, 'deployer', [
-    'base', 
-    'browserify:deployerFreedomModule', 
-    'copy:libsForDeployerChromeApp', 
+    'base',
+    'browserify:deployerFreedomModule',
+    'copy:libsForDeployerChromeApp',
     'copy:libsForDeployerFirefoxApp'
   ]);
   registerTask(grunt, 'simpleChat', [
@@ -1099,17 +1100,17 @@ module.exports = function(grunt) {
     'copy:libsForSimpleSocksNode'
   ]);
   registerTask(grunt, 'uprobe', [
-    'base', 
-    'browserify:uprobeFreedomModule', 
-    'copy:libsForUprobeChromeApp', 
+    'base',
+    'browserify:uprobeFreedomModule',
+    'copy:libsForUprobeChromeApp',
     'copy:libsForUprobeFirefoxApp'
   ]);
   registerTask(grunt, 'zork', [
-    'base', 
-    'browserify:zorkFreedomModule', 
-    'copy:libsForZorkChromeApp', 
-    'copy:libsForZorkFirefoxApp', 
-    'copy:libsForZorkNode', 
+    'base',
+    'browserify:zorkFreedomModule',
+    'copy:libsForZorkChromeApp',
+    'copy:libsForZorkFirefoxApp',
+    'copy:libsForZorkNode',
     'exec:installFreedomForNodeForZork'
   ]);
   registerTask(grunt, 'version_file', [
@@ -1136,53 +1137,61 @@ module.exports = function(grunt) {
   // Firefox build tasks.
   registerTask(grunt, 'build_firefox', [
     'base',
-    'copy:firefox', 
-    'copy:firefox_additional', 
+    'copy:firefox',
+    'copy:firefox_additional',
     'browserify:firefoxContext'
   ].concat(fullyVulcanize('firefox/data/generic_ui/polymer', 'root', 'vulcanized', true)));
-  
+
   // CCA build tasks
   registerTask(grunt, 'build_cca', [
-    'base', 
-    'copy:cca', 
-    'copy:cca_additional', 
-    'browserify:ccaMain', 
+    'base',
+    'copy:cca',
+    'copy:cca_additional',
+    'browserify:ccaMain',
     'browserify:ccaContext'
   ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
-  
+
   // Mobile OS build tasks
   registerTask(grunt, 'build_android', [
+    // Builds Android from scratch by recreating the Cordova environment.
     'exec:cleanAndroid',
-    'build_cca', 
-    'exec:ccaCreateDev', 
+    'build_cca',
+    'exec:ccaCreateDev',
     'exec:ccaPlatformAndroidDev',
-    'exec:ccaAddPluginsAndroidDev', 
-    'copy:cca_splash_dev', 
-    'exec:ccaBuildAndroid', 
+    'exec:ccaAddPluginsAndroidDev',
+    'copy:cca_splash_dev',
+    'build_android_lite'
+  ]);
+  registerTask(grunt, 'build_android_lite', [
+    // Android build task that does not recreate the Cordova environment.
+    // Should only be used for building CCA modules and after running
+    // build_android, without cleaning, initially at least once.
+    'build_cca',
+    'exec:ccaBuildAndroid',
     'exec:androidReplaceXwalkDev'
   ]);
   registerTask(grunt, 'release_android', [
-    'build_cca', 
-    'copy:dist', 
-    'exec:ccaCreateDist', 
-    'exec:ccaPlatformAndroidDist', 
-    'exec:ccaAddPluginsAndroidDist', 
-    'copy:cca_splash_dist', 
-    'symlink:cca_keys', 
-    'exec:ccaReleaseAndroid', 
+    'build_cca',
+    'copy:dist',
+    'exec:ccaCreateDist',
+    'exec:ccaPlatformAndroidDist',
+    'exec:ccaAddPluginsAndroidDist',
+    'copy:cca_splash_dist',
+    'symlink:cca_keys',
+    'exec:ccaReleaseAndroid',
     'exec:androidReplaceXwalkDist'
   ]);
 
   // Emulate the mobile client for android
   registerTask(grunt, 'emulate_android', [
-    'build_android', 
+    'build_android',
     'exec:ccaEmulateAndroid'
   ]);
 
   registerTask(grunt, 'build_ios', [
-    'exec:cleanIos', 
-    'build_cca', 
-    'exec:ccaCreateIosDev', 
+    'exec:cleanIos',
+    'build_cca',
+    'exec:ccaCreateIosDev',
     'exec:ccaAddPluginsIosBuild',
     'exec:addIosrtcHook',
     'exec:ccaPrepareIosDev'
@@ -1205,13 +1214,13 @@ module.exports = function(grunt) {
   registerTask(grunt, 'socksEchoIntegrationTestModule', [
     'base',
     'copy:libsForIntegrationSocksEcho',
-    'browserify:integrationSocksEchoFreedomModule', 
-    'browserify:integrationSocksEchoChurnSpec', 
-    'browserify:integrationSocksEchoNochurnSpec', 
+    'browserify:integrationSocksEchoFreedomModule',
+    'browserify:integrationSocksEchoChurnSpec',
+    'browserify:integrationSocksEchoNochurnSpec',
     'browserify:integrationSocksEchoSlowSpec'
   ]);
   registerTask(grunt, 'socksEchoIntegrationTest', [
-    'socksEchoIntegrationTestModule', 
+    'socksEchoIntegrationTestModule',
     'jasmine_chromeapp:socksEcho'
   ]);
   registerTask(grunt, 'unit_test_nobuild', _.flatten([].concat(
@@ -1241,11 +1250,11 @@ module.exports = function(grunt) {
   // ts-linting and testing which can be annoying and slow.
   // We added jshint here because catches hard syntax errors, etc.
   registerTask(grunt, 'build', [
-    'build_chrome', 
-    'build_firefox', 
-    'build_cca', 
-    'jshint', 
-    'copy:dist', 
+    'build_chrome',
+    'build_firefox',
+    'build_cca',
+    'jshint',
+    'copy:dist',
     'jpm:xpi'
   ]);
   registerTask(grunt, 'lint', ['tslint']);

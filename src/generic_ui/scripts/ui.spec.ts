@@ -67,6 +67,9 @@ describe('UI.UserInterface', () => {
          'setBadgeNotification',
          'isConnectedToCellular'
          ]);
+    // assume start and stop proxying always resolves immediately
+    (<jasmine.Spy>mockBrowserApi.startUsingProxy).and.returnValue(Promise.resolve());
+    (<jasmine.Spy>mockBrowserApi.stopUsingProxy).and.returnValue(Promise.resolve());
 
     mockBackgroundUi = jasmine.createSpyObj('backgroundUi', [
         'registerAsFakeBackground',
