@@ -14,6 +14,7 @@ export class NodeForwardingSocket implements piece.SocksPiece {
       this.onDataCallback(buffer.buffer);
     });
     this.socket.on('end', (info: freedom.TcpSocket.DisconnectInfo) => {
+      // console.error(clientId + ': forwarding socket disconnected (' + client.bytesRead + ' bytes read, ' + client.bytesWritten + ' written)');
       this.onDisconnectCallback();
     });
   }

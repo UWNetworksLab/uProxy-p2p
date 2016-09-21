@@ -33,6 +33,8 @@ export class NodeSocksServer {
       client.on('close', (hadError: boolean) => {
         if (hadError) {
           console.error(clientId + ': client disconnected with error');
+        } else {
+          console.error(clientId + ': client disconnected (' + client.bytesRead + ' bytes read, ' + client.bytesWritten + ' written)');
         }
         session.handleDisconnect();
       });
