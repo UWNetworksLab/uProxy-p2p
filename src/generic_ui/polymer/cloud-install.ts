@@ -11,7 +11,7 @@ var ui = ui_context.ui;
 
 const DEFAULT_PROVIDER = 'digitalocean';
 
-Polymer({
+Polymer('uproxy-cloud-install', {
   // ID of the latest attempt to create a server, used to distinguish
   // between install failures that should be flagged to the user and
   // failures owing to cancellation. We use a random number rather

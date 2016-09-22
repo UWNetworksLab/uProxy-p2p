@@ -1,7 +1,7 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
-Polymer({
+Polymer('uproxy-proxy-error', {
   error: false,
   openWithError: function() {
     this.wasError = true;

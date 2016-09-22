@@ -17,7 +17,7 @@ export enum StatusState {
   KEY_VALUE_ERROR
 };
 
-Polymer({
+Polymer('uproxy-advanced-settings', {
   settings: '',
   portControlSupport: null,
   reproxyCheck: uproxy_core_api.ReproxyCheck.UNCHECKED,

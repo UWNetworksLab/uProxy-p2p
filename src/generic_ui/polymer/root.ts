@@ -27,7 +27,7 @@ var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 var reusableDialogClosedPromise = Promise.resolve<void>();
 var fulfillReusableDialogClosed :Function;
 
-Polymer({
+Polymer('uproxy-root', {
   dialog: {
     message: '',
     heading: '',

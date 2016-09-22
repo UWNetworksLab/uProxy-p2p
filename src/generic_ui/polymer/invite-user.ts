@@ -143,4 +143,4 @@ var inviteUser = {
   }
 };
 
-Polymer(inviteUser);
+Polymer('uproxy-invite-user', inviteUser);

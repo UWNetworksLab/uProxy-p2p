@@ -16,7 +16,7 @@ var core = ui_context.core;
 // generic_ui/scripts/ui.ts: Model
 var model = ui_context.model;
 
-Polymer({
+Polymer('uproxy-instance', {
   // Two component constructor arguments:
   //  user :User (generic_ui/scripts/user.ts)
   //  instance :InstanceData (interfaces/social.ts)

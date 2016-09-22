@@ -16,7 +16,7 @@ interface FullfillAndReject {
 var background: Background = null;
 var dialogClickFn: (fulfill: boolean, data?: Object) => void = null;
 
-Polymer({
+Polymer('uprox-state', {
   ready: function() {
     this.ui = ui_context.ui;
     this.core = ui_context.core;

@@ -8,7 +8,7 @@ import user = require('../scripts/user');
 
 var model = ui_context.model;
 
-Polymer({
+Polymer('uproxy-roster-group', {
   sortedContacts: [],
   created: function() {
     // this gets expensive, especially during initialization, if we are calling

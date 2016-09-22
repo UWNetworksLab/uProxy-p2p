@@ -3,7 +3,7 @@ import translator_module = require('../scripts/translator');
 
 declare var PolymerExpressions: any;
 
-Polymer({
+Polymer('uproxy-logs', {
   logs: '',
   loadingLogs: true,
   openLogs: function() {

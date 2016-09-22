@@ -8,7 +8,7 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
-Polymer({
+Polymer('uproxy-network-in-settings', {
   signedIn: false,
   networkInfo: null,
   updateSignedIn: function() {

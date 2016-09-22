@@ -20,7 +20,7 @@ interface Language {
   languageCode :string;
 }
 
-Polymer({
+Polymer('uproxy-settings', {
   accountChooserOpen: false,
   connectedNetwork: '',
   showRestartButton: false,

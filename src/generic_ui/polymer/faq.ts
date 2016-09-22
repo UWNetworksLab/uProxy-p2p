@@ -5,7 +5,7 @@ import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
 var ui = ui_context.ui;
 
-Polymer({
+Polymer('uproxy-faq', {
   close: function() {
     this.$.faqPanel.close();
   },

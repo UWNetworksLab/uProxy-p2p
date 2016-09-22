@@ -6,7 +6,7 @@ declare module browserified_exports {
 }
 import copypaste = browserified_exports.copypaste;
 
-Polymer({
+Polymer('copypaste-start', {
   giveMode: function() {
     copypaste.model.givingOrGetting = 'giving';
   },

@@ -3,7 +3,7 @@
 
 import ui_constants = require('../../interfaces/ui');
 
-Polymer({
+Polymer('uproxy-roster', {
   ready: function() {
     this.ui_constants = ui_constants;
   },

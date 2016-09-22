@@ -21,7 +21,7 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
-Polymer({
+Polymer('uproxy-splash', {
   state: 0,
   SPLASH_STATES: {
     INTRO: 0,

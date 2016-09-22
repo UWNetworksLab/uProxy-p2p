@@ -9,7 +9,7 @@ import copypaste = browserified_exports.copypaste;
 import I18nUtil = require('../i18n-util.types');
 declare var i18nUtil :I18nUtil;
 
-Polymer({
+Polymer('copypaste-getter', {
   model: copypaste.model,
   generateIceCandidates: function() {
     this.$.generateIceCandidatesButton.disabled = true;

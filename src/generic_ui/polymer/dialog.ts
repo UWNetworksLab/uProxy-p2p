@@ -14,7 +14,7 @@
 // be a few pixels over to the right), but it's not going to be noticeable by
 // 99% of our users, only occurs on ititial startup, seems to only occur about
 // 1/10 times, and is immediately fixed by closing and re-opening the panel.
-Polymer({
+Polymer('uproxy-dialog', {
   repositionTarget: function() {
     this.super(arguments);
 

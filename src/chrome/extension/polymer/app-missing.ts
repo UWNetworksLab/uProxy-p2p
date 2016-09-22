@@ -32,7 +32,7 @@ function openDownloadAppPage() : void {
   });
 }
 
-Polymer({
+Polymer('uproxy-app-missing', {
   downloadApp: function() {
     openDownloadAppPage();
   },

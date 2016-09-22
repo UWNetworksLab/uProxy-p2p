@@ -10,7 +10,7 @@ var ui = ui_context.ui;
 var model = ui_context.model;
 var core = ui_context.core;
 
-Polymer({
+Polymer('uproxy-network-invite-user', {
   generateInviteUrl: function(networkName: string) {
     var selectedNetwork = model.getNetwork(networkName);
     var createInviteArgs :uproxy_core_api.CreateInviteArgs = {

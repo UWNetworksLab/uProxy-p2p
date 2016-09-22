@@ -12,7 +12,7 @@ import dialogs = require('../scripts/dialogs');
 
 const DEFAULT_PROVIDER = 'digitalocean';
 
-Polymer({
+Polymer('uproxy-contact', {
   created: function() {
     this.offeringInstancesChanged = _.throttle(this.offeringInstancesChanged.bind(this), 100);
   },

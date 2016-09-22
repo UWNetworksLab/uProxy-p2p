@@ -1,6 +1,6 @@
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 
-Polymer({
+Polymer('uproxy-troubleshoot', {
   analyzingNetwork: false,
   analyzedNetwork: false,
   natType: '',

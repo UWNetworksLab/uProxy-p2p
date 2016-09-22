@@ -1,4 +1,4 @@
-Polymer({
+Polymer('uproxy-bubble', {
   active: false,
   close: function() {
     this.fire('closed');

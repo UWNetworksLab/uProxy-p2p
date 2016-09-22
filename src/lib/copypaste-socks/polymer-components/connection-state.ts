@@ -6,7 +6,7 @@ declare module browserified_exports {
 }
 import copypaste = browserified_exports.copypaste;
 
-Polymer({
+Polymer('copypaste-connection-state', {
   model: copypaste.model,
   stopProxying: function() {
     copypaste.onceReady.then((copypasteModule) => {
