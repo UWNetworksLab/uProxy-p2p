@@ -19,4 +19,12 @@ export var ui :user_interface.UserInterface =
 
 export var model :ui_model.Model = ui.model;
 
+// TODO: Stop using globals.
+(global as {[key :string]: any})['ui_context'] = {
+  ui: ui,
+  core: core,
+  model: model,
+  browserConnector: browserConnector
+};
+
 console.log('Loaded dependencies for Chrome Extension.');
