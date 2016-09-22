@@ -1061,76 +1061,134 @@ module.exports = function(grunt) {
   // =========================================================================
 
   registerTask(grunt, 'build_chrome_ext', [
+    'copy:chromeExtBase',
+    'copy:chromeExtResources',
+    'copy:chromeExtDigitalOcean',
     'chromeExtBackground',
-    'chromeExtContext',
-    'chromeExtRoot',
-    'copy:chromeExt',
-    'copy:chromeExtAdditional',
+    'chromeExtIndexHtml',
+  ]);
+  registerTask(grunt, 'chromeExtIndexJs',
+      'Builds build/src/chrome/extension/generic_ui/index.static.js', [
+    'compileTypescript',
+    'browserify:chromeExtIndexJs',
+    // 'copy:chromeExtIndexJs',  // Need to copy all dependencies for browserify
+  ]);
+  registerTask(grunt, 'chromeExtIndexHtml',
+      'Builds build/src/chrome/extension/generic_ui/vulcanized.{html,js}', [
+    'symlink:bower',
+    'chromeExtIndexJs',
+    'copy:chromeExtIndexHtml',
+    'vulcanize:chromeExtIndexHtml'
   ]);
   registerTask(grunt, 'chromeExtBackground', 
       'Builds build/src/chrome/extension/scripts/background.static.js', [
     'compileTypescript',
     'browserify:chromeExtBackground'
   ]);
-  registerTask(grunt, 'chromeExtContext', 
-      'Builds build/src/chrome/extension/scripts/context.static.js', [
-    'compileTypescript',
-    'browserify:chromeExtContext'    
-  ]);
-  registerTask(grunt, 'chromeExtRoot',
-      'Builds build/src/chrome/extension/generic_ui/polymer/vulcanized.{html,static.js}', [
-    'compileTypescript',
-    'copy:resources',
-    'copy:chromeExt',
-    'copy:chromeExtAdditional',
-  ].concat(fullyVulcanize('chrome/extension/generic_ui/polymer', 'root', 'vulcanized', true)));
-  
+
   grunt.config.merge({
     browserify: {
-      chromeExtBackground: Rule.browserify('chrome/extension/scripts/background', {
+      chromeExtIndexJs: Rule.browserify('chrome/extension/index', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
       }),
-      chromeExtContext: Rule.browserify('chrome/extension/scripts/context', {
+      chromeExtBackground: Rule.browserify('chrome/extension/scripts/background', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
       }),
     },
     copy: {
-      chromeExt: Rule.copyLibs({
-        npmLibNames: [],
-        pathsFromDevBuild: ['generic_ui', 'interfaces', 'icons', 'fonts'],
-        pathsFromThirdPartyBuild: ['bower'],
-        files: [
-          {
-            expand: true, cwd: devBuildPath, flatten: true,
-            src: FILES.uproxy_common,
-            dest: chromeExtDevPath + '/generic_ui/scripts'
-          }, {
-            expand: true, cwd: devBuildPath, flatten: true,
-            src: FILES.uproxy_common,
-            dest: chromeExtDevPath + '/scripts'
-          }, {
-            expand: true, cwd: devBuildPath, flatten: true,
-            src: FILES.uproxy_common,
-            dest: chromeExtDevPath + '/generic'
-          }
-        ],
-        localDestPath: 'chrome/extension'
-      }),
-      chromeExtAdditional: {
-        files: [
-          {  // Copy chrome extension panel components from the background
-            expand: true,
-            cwd: chromeExtDevPath,
-            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*', '*.html'],
-            dest: chromeExtDevPath + '/generic_ui'
-          }
-        ]
+      chromeExtIndexHtml: {
+        files: [{
+          expand: true, cwd: 'src',
+          src: [
+            'chrome/extension/**/*.html',
+            'fonts/**/*',
+            'icons/**/*',
+            'generic_ui/style/**/*',
+            'generic_ui/polymer/**/*'
+          ],
+          dest: devBuildPath
+        }],
+      },
+      chromeExtResources: {
+        files: [{
+          expand: true, cwd: 'src',
+          src: [
+            'icons/**/*',
+            'fonts/**/*',
+          ],
+          dest: chromeExtDevPath
+        }]
+      },
+      chromeExtBase: {
+        files: [{
+          expand: true, cwd: 'src',
+          src: 'chrome/extension/**/*',
+          dest: devBuildPath
+        }]
+      },
+      chromeExtDigitalOcean: {
+        files: [{
+          expand: true, cwd: 'src',
+          src: 'generic_ui/scripts/content_digitalocean.js',
+          dest: chromeExtDevPath
+        }]
+      },
+      // chromeExt: Rule.copyLibs({
+      //   npmLibNames: [],
+      //   pathsFromDevBuild: ['generic_ui', 'interfaces', 'icons', 'fonts'],
+      //   pathsFromThirdPartyBuild: ['bower'],
+      //   files: [
+      //     {
+      //       expand: true, cwd: devBuildPath, flatten: true,
+      //       src: FILES.uproxy_common,
+      //       dest: chromeExtDevPath + '/generic_ui/scripts'
+      //     }, {
+      //       expand: true, cwd: devBuildPath, flatten: true,
+      //       src: FILES.uproxy_common,
+      //       dest: chromeExtDevPath + '/scripts'
+      //     }, {
+      //       expand: true, cwd: devBuildPath, flatten: true,
+      //       src: FILES.uproxy_common,
+      //       dest: chromeExtDevPath + '/generic'
+      //     }
+      //   ],
+      //   localDestPath: 'chrome/extension'
+      // }),
+      // chromeExtAdditional: {
+      //   files: [
+      //     {  // Copy chrome extension panel components from the background
+      //       expand: true,
+      //       cwd: chromeExtDevPath,
+      //       src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*', '*.html'],
+      //       dest: chromeExtDevPath + '/generic_ui'
+      //     }
+      //   ]
+      // }
+    },
+    symlink: {
+      bower: {
+        files: [{
+          src: 'third_party/bower',
+          dest: path.join(devBuildPath, 'bower')
+        }]
       }
     },
+    vulcanize: {
+      chromeExtIndexHtml: {
+        options: {
+          inline: true,
+          csp: 'index_vulcanized.js',
+        },
+        files: [{
+          src: 'build/src/chrome/extension/index.html',
+          dest: 'build/src/chrome/extension/index_vulcanized.html'
+        }]
+      }
+    }
   });
 
   // =========================================================================

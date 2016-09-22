@@ -9,7 +9,6 @@ declare var require :(path :string) => Object;
 
 import ui_constants = require('../../interfaces/ui');
 import translator = require('../scripts/translator');
-import _ = require('lodash');
 
 interface Language {
   description :string;

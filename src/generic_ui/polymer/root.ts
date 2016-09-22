@@ -2,6 +2,8 @@
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
+import './i18n-filter';
+
 import _ = require('lodash');
 import social = require('../../interfaces/social');
 import translator = require('../scripts/translator');
@@ -10,6 +12,7 @@ import user_interface = require('../scripts/ui');
 import user_module = require('../scripts/user');
 import dialogs = require('../scripts/dialogs');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import state = require('./state');
 
 var ui = ui_context.ui;
 var model = ui_context.model;

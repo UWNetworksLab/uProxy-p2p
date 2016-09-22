@@ -11,13 +11,11 @@
 <link rel="import" href="../../bower/core-overlay/core-overlay.html">
 <link rel='import' href='advanced-settings.html'>
 <link rel='import' href='app-bar.html'>
-<link rel='import' href='browser-elements.html'>
 <link rel='import' href='bubble.html'>
 <link rel='import' href='button.html'>
 <link rel='import' href='dialog.html'>
 <link rel="import" href='faq.html'>
 <link rel='import' href='feedback.html'>
-<link rel="import" href="i18n-filter.html">
 <link rel='import' href='icons.html'>
 <link rel='import' href='invite-user.html'>
 <link rel="import" href='logs.html'>
@@ -458,7 +456,7 @@
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>
-      <img src='../icons/128_error.png'>
+      <img src='../../icons/128_error.png'>
       <div id="disconnectDialogText">
         <h1>{{ "DISCONNECTED_TITLE" | $$(model.globalSettings.language) }}</h1>
         <div id='progressWrapper' hidden?='{{ !ui.mapInstanceIdToUser_[core.disconnectedWhileProxying] }}'>
@@ -500,7 +498,4 @@
     <uproxy-reconnect></uproxy-reconnect>
 
   </template>
-
-  <script src='root.js'></script>
-
 </polymer-element>
