@@ -11,7 +11,7 @@ link.href = 'ui_components_vulcanized.html'
 link.onload = function() {
   console.debug('Finished importing ui_components_vulcanized.html');
   requirejs(['main'], function(main) {
-    main();
+    main.main();
   });
 };
 link.onerror = function(e) {

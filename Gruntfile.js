@@ -668,6 +668,13 @@ module.exports = function(grunt) {
           '!src/integration/**/*.ts'
         ],
         outDir: 'build'
+      },
+      chromeExtMain: {
+        options: {
+          module: 'amd'
+        },
+        src: ['src/chrome/extension/main.ts'],
+        outDir: 'build'
       }
     },
     browserify: {
@@ -1061,10 +1068,16 @@ module.exports = function(grunt) {
   // =========================================================================
 
   registerTask(grunt, 'build_chrome_ext', [
-    'symlink:chromeExtThirdParty',
     'chromeExtBackground',
+    'chromeExtIndex',
+  ]);
+  registerTask(grunt, 'chromeExtIndex', 
+      'Builds build/src/chrome/extension/index.html', [
+    'ts:chromeExtMain',
+    'symlink:chromeExtThirdParty',
     'copy:chromeExtBase',
     'copy:chromeExtResources',
+    'copy:chromeExtJs',
     'vulcanize:chromeExtUiComponentsHtml',
   ]);
   registerTask(grunt, 'chromeExtBackground', 
@@ -1120,6 +1133,13 @@ module.exports = function(grunt) {
         //   dest: chromeExtDevPath
         // }]
         }],
+      },
+      chromeExtJs: {
+        files: [{
+          expand: true, cwd: devBuildPath,
+          src: '**/*.js',
+          dest: chromeExtDevPath
+        }]
       },
       chromeExtBase: {
         files: [{
