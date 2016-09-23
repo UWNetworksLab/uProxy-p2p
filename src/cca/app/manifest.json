@@ -37,5 +37,6 @@
   "externally_connectable": {
     "matches" : ["*://*.uproxy.org/*", "*://uproxysite.appspot.com/*", "*://test-dot-uproxysite.appspot.com/*", "*://beta-dot-uproxysite.appspot.com/*"]
   },
+  "minSdkVersion": 16,  // Limited by Crosswalk 22
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk6KrQptZchMYwQN8CsbRVmhV/COoR0lxansERcz+OrkPctUBSTQVYJw3t17+6JyMPnKYR2DMKCTeYQGrmXzm2U0KpujEKN3WSTtZI4ynTzKbGhWIYo6exaHufcslJngEG91ua/q1fJz3e5Mla8+tIsT9bVdVf4NLfODNbky/Uo0M6KpOLO9r2zJoiO0yg4ThBH+TkNwH8icvHJbt2LzZVRSZtQ1Wl1uT15vnwJPOEYVQkpnEMY5yMBPxyOZ1AmUx714YAas80pSZ7+BlM9ReIirYB7lxeY6hAqs4u8iP5SDh5bg6YFXeYecwQyvnKglLdHq6djy9QyVLKUKxFzMH/wIDAQAB"
 }

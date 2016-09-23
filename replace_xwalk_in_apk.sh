@@ -26,7 +26,7 @@ fi
 APK_UNALIGNED="$APK_PATH/android-armv7-$1-unaligned.apk"
 APK_FINAL="$APK_PATH/android-armv7-$1.apk"
 
-LIB_URL="https://github.com/uProxy/webrtc-mod/releases/download/20-1/libxwalkcore.so"
+LIB_URL="https://github.com/uProxy/webrtc-mod/releases/download/v22.1/libxwalkcore.so"
 if [ -z "$TMPDIR" ]; then TMPDIR="/tmp"; fi
 LIB_PATH="lib/armeabi-v7a"
 LIB_NAME="libxwalkcore.so"
