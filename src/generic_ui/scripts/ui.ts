@@ -680,7 +680,8 @@ export class UserInterface implements ui_constants.UiApi {
 
       // regardless, let the user know
       this.bringUproxyToFront();
-    } else if (this.instanceGettingAccessFrom_ === null) {
+    } else if (this.instanceGettingAccessFrom_ === null &&
+               this.instanceTryingToGetAccessFrom === null) {
       // Clear the browser proxy settings only if there is no active connection.
       // Otherwise, this is a connection handover and clearing the proxy
       // settings will interrupt the active session.
@@ -734,6 +735,11 @@ export class UserInterface implements ui_constants.UiApi {
 
   public startGettingFromInstance =
       (instanceId :string, accessMode: ProxyAccessMode): Promise<void> => {
+    if (this.instanceTryingToGetAccessFrom !== null) {
+      // Cancel the existing proxying attempt before starting a new connection.
+      this.userCancelledGetAttempt_ = true;
+      this.core.stop(this.getInstancePath_(this.instanceTryingToGetAccessFrom));
+    }
     this.instanceTryingToGetAccessFrom = instanceId;
 
     return this.core.start(this.getInstancePath_(instanceId))
