@@ -15,7 +15,7 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
       return self.wfile.write('cannot access path %s' % (self.path))
 
 if __name__ == '__main__':
-  if len(sys.argv) != 4:
+  if len(sys.argv) != 3:
     print 'Usage: python logs-server.py <PORT> <FILE>'
   else:
     restricted_file = sys.argv[2]
