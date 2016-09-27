@@ -15,7 +15,7 @@ Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwS
 uProxy is built using the following tools:
  - [Grunt](http://gruntjs.com/) to write the tasks that build uProxy
  - [TypeScript](http://www.typescriptlang.org/) as the primary language we code in; this compiles to JavaScript. It gives us type-checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
- - [Jasmine](http://pivotal.github.io/jasmine/) for testing
+ - [Jasmine](http://jasmine.github.io/) for testing
  - [Polymer](http://www.polymer-project.org/) for UI
  - [Travis](https://travis-ci.org/) for continuous integration
  - [Shippable](https://app.shippable.com/) for docker-integrated continuous integration
