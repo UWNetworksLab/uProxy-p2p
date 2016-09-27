@@ -11,6 +11,8 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
   def do_GET(self):
     if self.path == restricted_path:
       return SimpleHTTPRequestHandler.do_GET(self)
+    else:
+      return self.wfile.write('cannot access path %s' % (self.path))
 
 if __name__ == '__main__':
   if len(sys.argv) != 3:
