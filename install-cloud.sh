@@ -102,7 +102,7 @@ do_install() {
   fi
   if [ -n "$KEY" ]
   then
-    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k $KEY"
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k \"$KEY\""
   fi
   ./run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }

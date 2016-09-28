@@ -186,7 +186,7 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
     fi
     if [ -n "$KEY" ]
     then
-      ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -k $KEY"
+      ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -k \"$KEY\""
     fi
     if [ -n "$INVITE_CODE" ]
     then
