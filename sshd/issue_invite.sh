@@ -10,25 +10,30 @@ set -e
 INVITE_CODE=
 USERNAME=getter
 AUTOMATED=false
+KEY=
 
 function usage () {
-  echo "$0 [-u username] [-i invite code] [-a]"
+  echo "$0 [-u username] [-i invite code] [-a] [-k key]"
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
   echo "  -a: do not output complete invite URL"
+  echo "  -k: public key (if unspecified, a new key is generated)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts i:u:ah? opt; do
+while getopts i:u:k:ah? opt; do
   case $opt in
     i) INVITE_CODE="$OPTARG" ;;
     u) USERNAME="$OPTARG" ;;
     a) AUTOMATED=true ;;
+    k) KEY="$OPTARG" ;;
     *) usage ;;
   esac
 done
 shift $((OPTIND-1))
+
+echo "issue_invite: key is $KEY"  # TODO: remove
 
 TMP=`mktemp -d`
 

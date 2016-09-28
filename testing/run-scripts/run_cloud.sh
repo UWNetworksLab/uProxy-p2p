@@ -19,11 +19,12 @@ WIPE=false
 PUBLIC_IP=
 BANNER=
 AUTOMATED=false
+KEY=
 
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
+  echo "$0 [-p path] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] [-k key]"
   echo "  -p: path to uproxy repo"
   echo "  -z: use a specified Zork image (defaults to uproxy/zork)"
   echo "  -s: use a specified sshd image (defaults to uproxy/sshd)"
@@ -33,11 +34,12 @@ function usage () {
   echo "  -d: override the detected public IP (for development only)"
   echo "  -b: name to use in contacts list"
   echo "  -a: do not output complete invite URL"
+  echo "  -k: public key (if unspecified, a new key is generated)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts p:z:s:i:uwd:b:ah? opt; do
+while getopts p:z:s:i:uwd:b:k:ah? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
     z) ZORK_IMAGE="$OPTARG" ;;
@@ -48,10 +50,13 @@ while getopts p:z:s:i:uwd:b:ah? opt; do
     d) PUBLIC_IP="$OPTARG" ;;
     b) BANNER="$OPTARG" ;;
     a) AUTOMATED=true ;;
+    k) KEY="$OPTARG" ;;
     *) usage ;;
   esac
 done
 shift $((OPTIND-1))
+
+echo "run_cloud: key is $KEY"  # TODO: remove
 
 if [ "$UPDATE" = true ]
 then
@@ -178,6 +183,10 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
     if [ "$AUTOMATED" = true ]
     then
       ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -a"
+    fi
+    if [ -n "$KEY" ]
+    then
+      ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -k $KEY"
     fi
     if [ -n "$INVITE_CODE" ]
     then
