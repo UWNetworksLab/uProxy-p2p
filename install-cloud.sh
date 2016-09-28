@@ -89,7 +89,9 @@ do_install() {
   TMP_DIR=`mktemp -d`
   git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
   cd $TMP_DIR/testing/run-scripts
+  echo "running git checkout"
   git checkout dborkan-cloud-deploy  # TODO: remove when checking in
+  echo "finished git checkout"
 
   RUN_CLOUD_ARGS=
   if [ "$AUTOMATED" = true ]
