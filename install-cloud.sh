@@ -106,6 +106,7 @@ do_install() {
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k \"$KEY\""
   fi
+  echo "running cloud with args: $RUN_CLOUD_ARGS"
   ./run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
 
