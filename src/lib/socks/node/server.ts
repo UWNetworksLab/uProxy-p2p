@@ -27,6 +27,11 @@ export class NodeSocksServer {
         client.remoteAddress + ':' + client.remotePort);
       const session = this.getSocksSession(clientId);
 
+      const ignoreDataForSocksClient = () => {
+        console.info('now ignoring data for client socket');
+        session.onDataForSocksClient((ab) => { });
+      };
+
       // complete list of events:
       //   https://nodejs.org/dist/latest-v4.x/docs/api/net.html#net_class_net_socket
 
@@ -36,6 +41,8 @@ export class NodeSocksServer {
         } else {
           console.error(clientId + ': client disconnected (' + client.bytesRead + ' bytes read, ' + client.bytesWritten + ' written)');
         }
+
+        ignoreDataForSocksClient();
         session.handleDisconnect();
       });
 
@@ -66,6 +73,7 @@ export class NodeSocksServer {
 
       client.on('error', (e: Error) => {
         console.error(clientId + ': client socket closed with error', e);
+        ignoreDataForSocksClient();
       });
 
       client.on('timeout', () => {
