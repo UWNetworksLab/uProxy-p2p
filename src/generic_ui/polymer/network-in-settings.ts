@@ -51,7 +51,7 @@ Polymer({
       }
     }
 
-    var confirmLogout = Promise.resolve<void>();
+    var confirmLogout = Promise.resolve();
     if (isGettingForThisNetwork || isSharingForThisNetwork) {
       var confirmationMessage = dialogs.getLogoutConfirmationMessage(isGettingForThisNetwork, isSharingForThisNetwork);
       confirmLogout = this.$.state.openDialog(dialogs.getConfirmationDialogDescription('', confirmationMessage));

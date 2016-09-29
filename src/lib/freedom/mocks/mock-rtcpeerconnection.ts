@@ -26,7 +26,7 @@ class MockFreedomRtcPeerConnection extends MockEventHandler
   }
 
   public setLocalDescription(desc:RTCSessionDescription) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   public getLocalDescription() : Promise<RTCSessionDescription> {
@@ -34,7 +34,7 @@ class MockFreedomRtcPeerConnection extends MockEventHandler
   }
 
   public setRemoteDescription(desc:RTCSessionDescription) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   public getRemoteDescription() : Promise<RTCSessionDescription> {
@@ -46,11 +46,11 @@ class MockFreedomRtcPeerConnection extends MockEventHandler
   }
 
   public updateIce(configuration:RTCConfiguration) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   public addIceCandidate(candidate:RTCIceCandidate) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   public getIceGatheringState() : Promise<string> {
@@ -78,15 +78,15 @@ class MockFreedomRtcPeerConnection extends MockEventHandler
   }
 
   public addStream(ref:string) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   public removeStream(ref:string) : Promise<void> {
-   return Promise.resolve<void>();
+   return Promise.resolve();
   }
 
   public close() : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   public createDataChannel(label:string, init:RTCDataChannelInit)

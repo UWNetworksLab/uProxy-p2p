@@ -17,8 +17,8 @@ class IntegrationTestConnector implements browser_connector.CoreBrowserConnector
   }
 
   public connect = () :Promise<void> => {
-    this.onceConnected = Promise.resolve<void>();
-    return Promise.resolve<void>();
+    this.onceConnected = Promise.resolve();
+    return Promise.resolve();
   }
 
   public onUpdate = (update :uproxy_core_api.Update, handler :Function) => {

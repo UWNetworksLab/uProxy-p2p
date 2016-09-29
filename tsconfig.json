@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "target": "es5",
+    "removeComments": false,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    // sourceMap: false,
+    "rootDir": ".",
+    "outDir": "build",
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise",
+      "es2015.iterable",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "build",
+    "node_modules",
+    "**/*.spec.ts",
+    "src/**/*.d.ts",
+    "src/lib/build-tools/**/*",
+    "src/integration/**/*",
+    "src/**/*.core-env.ts",
+    "src/**/*.core-env.spec.ts"
+  ],
+  "compileOnSave": true
+}

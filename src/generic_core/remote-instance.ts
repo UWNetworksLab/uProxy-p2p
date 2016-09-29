@@ -250,7 +250,7 @@ import ui = ui_connector.connector;
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
-          return Promise.resolve<void>();
+          return Promise.resolve();
         }
 
         // Create a new RtcToNet instance each time a new round of client peer
@@ -289,7 +289,7 @@ import ui = ui_connector.connector;
         type: type,
         data: signalFromRemote
       });
-      return Promise.resolve<void>();
+      return Promise.resolve();
     }
 
     public verifyUser = (firstMsg ?:any) : void => {
@@ -381,7 +381,7 @@ import ui = ui_connector.connector;
       log.debug('startShare_');
       if (this.connection_.localSharingWithRemote === social.SharingState.NONE) {
         // Stop any existing sharing attempts with this instance.
-        sharingStopped = Promise.resolve<void>();
+        sharingStopped = Promise.resolve();
       } else {
         // Implies that the SharingState is TRYING_TO_SHARE_ACCESS because
         // the client peer should never be able to try to get if they are
@@ -421,7 +421,7 @@ import ui = ui_connector.connector;
       log.debug('stopShare()');
       if (this.connection_.localSharingWithRemote === social.SharingState.NONE) {
         log.warn('Cannot stop sharing while currently not sharing.');
-        return Promise.resolve<void>();
+        return Promise.resolve();
       }
 
       if (this.connection_.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {

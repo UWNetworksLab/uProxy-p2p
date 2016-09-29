@@ -21,7 +21,7 @@ var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 // The Promise is fulfilled by default, and also after a
 // "core-overlay-open-completed" event is observed.
 // The Promise is reset each time we open the dialog.
-var reusableDialogClosedPromise = Promise.resolve<void>();
+var reusableDialogClosedPromise = Promise.resolve();
 var fulfillReusableDialogClosed :Function;
 
 Polymer({

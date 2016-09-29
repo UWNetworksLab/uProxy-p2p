@@ -25,8 +25,8 @@ class FirefoxConnector implements browser_connector.CoreBrowserConnector {
 
   public connect = () :Promise<void> => {
     this.emit('core_connect');
-    this.onceConnected = Promise.resolve<void>();
-    return Promise.resolve<void>();
+    this.onceConnected = Promise.resolve();
+    return Promise.resolve();
   }
 
   /**

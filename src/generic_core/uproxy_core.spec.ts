@@ -37,7 +37,7 @@ describe('Core', () => {
   network.getUser = null;
   network.getStorePath = function() { return 'network-store-path'; };
   network['login'] = (loginType :uproxy_core_api.LoginType) => {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   };
   network['myInstance'] =
             new local_instance.LocalInstance(network, 'localUserId');

@@ -34,7 +34,7 @@ var mockConnectionInfo :tcp.ConnectionInfo = {
   remote: mockRemoteEndpoint
 };
 
-var voidPromise = Promise.resolve<void>();
+var voidPromise = Promise.resolve();
 
 // Neither fulfills nor rejects.
 // Useful in a bunch of tests where a promise must be returned

@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
+    "target": "es6",
     "module": "commonjs",
     "noImplicitAny": true
-  }
+  },
+  "files": [
+    "common-grunt-rules.ts"
+  ]
 }
