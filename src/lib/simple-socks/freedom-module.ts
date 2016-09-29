@@ -47,112 +47,112 @@ const giver = peerconnection.createPeerConnection(PEERCONNECTION_CONFIG);
 // BACKWARDS COMPATIBLE VERSION FOLLOWS
 // ====================================
 
-giver.signalForPeerQueue.setSyncHandler(getter.handleSignalMessage);
+// giver.signalForPeerQueue.setSyncHandler(getter.handleSignalMessage);
 
-const giverPool = new Pool(giver, 'giver');
-giver.onceConnected.then(() => {
-  log.info('giver connected!');
-  giverPool.peerOpenedChannelQueue.setSyncHandler((channel) => {
-    const sessionId = channel.getLabel();
-    log.info('%1: new socks session', sessionId);
-    const socksSession = new session.SocksSession(sessionId);
+// const giverPool = new Pool(giver, 'giver');
+// giver.onceConnected.then(() => {
+//   log.info('giver connected!');
+//   giverPool.peerOpenedChannelQueue.setSyncHandler((channel) => {
+//     const sessionId = channel.getLabel();
+//     log.info('%1: new socks session', sessionId);
+//     const socksSession = new session.SocksSession(sessionId);
 
-    enum CompatStates {
-      NEW,
-      SOCKS_TO_RTC_HANDSHAKE,
-      SOCKS_TO_RTC_RESPONSE,
-      PASSTHROUGH
-    };
-    let state = CompatStates.NEW;
+//     enum CompatStates {
+//       NEW,
+//       SOCKS_TO_RTC_HANDSHAKE,
+//       SOCKS_TO_RTC_RESPONSE,
+//       PASSTHROUGH
+//     };
+//     let state = CompatStates.NEW;
 
-    // datachannel -> SOCKS session.
-    channel.dataFromPeerQueue.setSyncHandler((data) => {
-      if (data.str) {
-        log.debug('%1: SocksToRtc detected, running in compatibility mode', sessionId);
-        state = CompatStates.SOCKS_TO_RTC_HANDSHAKE;
+//     // datachannel -> SOCKS session.
+//     channel.dataFromPeerQueue.setSyncHandler((data) => {
+//       if (data.str) {
+//         log.debug('%1: SocksToRtc detected, running in compatibility mode', sessionId);
+//         state = CompatStates.SOCKS_TO_RTC_HANDSHAKE;
 
-        const handshakeBytes = socks_headers.composeAuthHandshakeBuffer([socks_headers.Auth.NOAUTH]);
-        socksSession.handleDataFromSocksClient(handshakeBytes);
+//         const handshakeBytes = socks_headers.composeAuthHandshakeBuffer([socks_headers.Auth.NOAUTH]);
+//         socksSession.handleDataFromSocksClient(handshakeBytes);
 
-        // convert from JSON -> bytes
-        try {
-          const socksRequest = socks_headers.composeRequestBuffer(JSON.parse(data.str));
-          socksSession.handleDataFromSocksClient(socksRequest);
-        } catch (e) {
-          log.warn('%1: could not decode SocksToRtc-style request: %2', sessionId, e.message);
-          // TODO: close the channel
-        }
-      } else {
-        socksSession.handleDataFromSocksClient(data.buffer);
-      }
-    });
+//         // convert from JSON -> bytes
+//         try {
+//           const socksRequest = socks_headers.composeRequestBuffer(JSON.parse(data.str));
+//           socksSession.handleDataFromSocksClient(socksRequest);
+//         } catch (e) {
+//           log.warn('%1: could not decode SocksToRtc-style request: %2', sessionId, e.message);
+//           // TODO: close the channel
+//         }
+//       } else {
+//         socksSession.handleDataFromSocksClient(data.buffer);
+//       }
+//     });
 
-    // datachannel <- SOCKS session
-    socksSession.onDataForSocksClient((bytes:ArrayBuffer) => {
-      switch (state) {
-        // SocksToRtc does not need the handshake response; filter it out here. 
-        case CompatStates.SOCKS_TO_RTC_HANDSHAKE:
-          log.debug('%1: filtering AUTH handshake for SocksToRtc mode', sessionId);
-          state = CompatStates.SOCKS_TO_RTC_RESPONSE;
-          break;
-        case CompatStates.SOCKS_TO_RTC_RESPONSE:
-          log.debug('%1: translating SOCKS response for SocksToRtc mode', sessionId);
-          state = CompatStates.PASSTHROUGH;
-          try {
-            const responseJson = JSON.stringify(socks_headers.interpretResponseBuffer(bytes));
-            channel.send({
-              str: responseJson
-            });
-          } catch (e) {
-            log.warn('%1: could not encode response: %2', sessionId, e.message);
-            // TODO: close the channel
-          }
-        case CompatStates.PASSTHROUGH:
-          channel.send({
-            buffer: bytes
-          });
-          break;
-        default:
-          log.warn('%1: data for socks client received in unexpected state %2', sessionId, CompatStates[state]);
-      }
-    });
+//     // datachannel <- SOCKS session
+//     socksSession.onDataForSocksClient((bytes:ArrayBuffer) => {
+//       switch (state) {
+//         // SocksToRtc does not need the handshake response; filter it out here. 
+//         case CompatStates.SOCKS_TO_RTC_HANDSHAKE:
+//           log.debug('%1: filtering AUTH handshake for SocksToRtc mode', sessionId);
+//           state = CompatStates.SOCKS_TO_RTC_RESPONSE;
+//           break;
+//         case CompatStates.SOCKS_TO_RTC_RESPONSE:
+//           log.debug('%1: translating SOCKS response for SocksToRtc mode', sessionId);
+//           state = CompatStates.PASSTHROUGH;
+//           try {
+//             const responseJson = JSON.stringify(socks_headers.interpretResponseBuffer(bytes));
+//             channel.send({
+//               str: responseJson
+//             });
+//           } catch (e) {
+//             log.warn('%1: could not encode response: %2', sessionId, e.message);
+//             // TODO: close the channel
+//           }
+//         case CompatStates.PASSTHROUGH:
+//           channel.send({
+//             buffer: bytes
+//           });
+//           break;
+//         default:
+//           log.warn('%1: data for socks client received in unexpected state %2', sessionId, CompatStates[state]);
+//       }
+//     });
 
-    socksSession.onDisconnect(() => {
-      log.info('%1: forwarding socket terminated, closing datachannel', sessionId);
-      // TODO: destroy the socket
+//     socksSession.onDisconnect(() => {
+//       log.info('%1: forwarding socket terminated, closing datachannel', sessionId);
+//       // TODO: destroy the socket
 
-      // TODO: WTF as soon as i point firefox at this server, close() returns undefined??? 
-      channel.close().catch((e) => {
-        log.error('%1: failed to close datachannel: %1', sessionId, e);
-      })
+//       // TODO: WTF as soon as i point firefox at this server, close() returns undefined??? 
+//       channel.close().catch((e) => {
+//         log.error('%1: failed to close datachannel: %1', sessionId, e);
+//       })
 
-    });
-    channel.onceClosed.then(() => {
-      log.info('%1: channel closed, discarding session', sessionId);
-      socksSession.handleDisconnect();
-    });
+//     });
+//     channel.onceClosed.then(() => {
+//       log.info('%1: channel closed, discarding session', sessionId);
+//       socksSession.handleDisconnect();
+//     });
 
-    socksSession.onForwardingSocketRequired((host:string, port:number) => {
-      const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
+//     socksSession.onForwardingSocketRequired((host:string, port:number) => {
+//       const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
 
-      return forwardingSocket.connect(host, port).then(() => {
-        return forwardingSocket;
-      });
-    });
-  });
-});
+//       return forwardingSocket.connect(host, port).then(() => {
+//         return forwardingSocket;
+//       });
+//     });
+//   });
+// });
 
-const socksToRtc = new socks_to_rtc.SocksToRtc();
-socksToRtc.start(new tcp.Server({
-  address: SERVER_ADDRESS,
-  port: SERVER_PORT
-}), getter).then((endpoint: net.Endpoint) => {
-  log.info('SocksToRtc listening on %1', endpoint);
-  log.info('curl -x socks5h://%1:%2 www.example.com', endpoint.address, endpoint.port);
-}, (e) => {
-  log.error('failed to start SocksToRtc: %1', e.message);
-});
-socksToRtc.signalsForPeer.setSyncHandler(giver.handleSignalMessage);
+// const socksToRtc = new socks_to_rtc.SocksToRtc();
+// socksToRtc.start(new tcp.Server({
+//   address: SERVER_ADDRESS,
+//   port: SERVER_PORT
+// }), getter).then((endpoint: net.Endpoint) => {
+//   log.info('SocksToRtc listening on %1', endpoint);
+//   log.info('curl -x socks5h://%1:%2 www.example.com', endpoint.address, endpoint.port);
+// }, (e) => {
+//   log.error('failed to start SocksToRtc: %1', e.message);
+// });
+// socksToRtc.signalsForPeer.setSyncHandler(giver.handleSignalMessage);
 
 // ===============================================
 // NON-BACKWARDS COMPATIBLE WEBRTC VERSION FOLLOWS
@@ -250,21 +250,21 @@ socksToRtc.signalsForPeer.setSyncHandler(giver.handleSignalMessage);
 // ==========================
 // NON-WEBRTC VERSION FOLLOWS
 // ==========================
-// let numSessions = 0;
-// new freedom_server.FreedomSocksServer(SERVER_ADDRESS, SERVER_PORT, SERVER_NAME).onConnection(() => {
-//   const clientId = 'p' + (numSessions++) + 'p';
-//   log.info('new SOCKS session %1', clientId);
-//   const socksSession = new session.SocksSession(SERVER_NAME, clientId);
-//   socksSession.onForwardingSocketRequired((host, port) => {
-//     const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
-//     // TODO: destroy the socket on disconnect
-//     return forwardingSocket.connect(host, port).then(() => {
-//       return forwardingSocket;
-//     });
-//   });
-//   return socksSession;
-// }).listen().then(() => {
-//   log.info('curl -x socks5h://%1:%2 www.example.com', SERVER_ADDRESS, SERVER_PORT);
-// }, (e) => {
-//   log.error('failed to start SOCKS server: %1', e.message);
-// });
+let numSessions = 0;
+new freedom_server.FreedomSocksServer(SERVER_ADDRESS, SERVER_PORT, SERVER_NAME).onConnection(() => {
+  const clientId = 'p' + (numSessions++) + 'p';
+  log.info('new SOCKS session %1', clientId);
+  const socksSession = new session.SocksSession(clientId);
+  socksSession.onForwardingSocketRequired((host, port) => {
+    const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
+    // TODO: destroy the socket on disconnect
+    return forwardingSocket.connect(host, port).then(() => {
+      return forwardingSocket;
+    });
+  });
+  return socksSession;
+}).listen().then(() => {
+  log.info('curl -x socks5h://%1:%2 www.example.com', SERVER_ADDRESS, SERVER_PORT);
+}, (e) => {
+  log.error('failed to start SOCKS server: %1', e.message);
+});

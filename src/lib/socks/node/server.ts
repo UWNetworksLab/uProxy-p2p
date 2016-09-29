@@ -2,8 +2,9 @@
 
 import net = require('net');
 import piece = require('../piece');
+import socks_server = require('../server');
 
-export class NodeSocksServer {
+export class NodeSocksServer implements socks_server.SocksServer {
   private getSocksSession: (clientId: string) => piece.SocksPiece;
   private numSessions = 0;
 
@@ -12,7 +13,7 @@ export class NodeSocksServer {
     private requestedPort_: number) { }
 
   // Configures a callback which is invoked when a new SOCKS client has connected.
-  public onConnection = (callback: (clientId: string) => piece.SocksPiece): NodeSocksServer => {
+  public onConnection = (callback: (clientId: string) => piece.SocksPiece) => {
     this.getSocksSession = callback;
     return this;
   }
@@ -94,7 +95,7 @@ export class NodeSocksServer {
       console.info('server socket closed');
     });
 
-    return new Promise((F, R) => {
+    return new Promise<void>((F, R) => {
       try {
         server.listen({
           host: this.requestedAddress_,

@@ -7,6 +7,8 @@ import session = require('../session');
 const SERVER_ADDRESS = '0.0.0.0';
 const SERVER_PORT = 9999;
 
+// TODO: command-line args, e.g. port
+
 new node_server.NodeSocksServer(SERVER_ADDRESS, SERVER_PORT).onConnection((clientId) => {
   const socksSession = new session.SocksSession(clientId);
   socksSession.onForwardingSocketRequired((host, port) => {

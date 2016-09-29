@@ -8,20 +8,20 @@ declare const freedom: freedom.FreedomInModuleEnv;
 const log: logging.Log = new logging.Log('freedom forwarding socket');
 
 export class FreedomForwardingSocket implements piece.SocksPiece {
-  private socket_ = freedom['core.tcpsocket']();
+  private socket = freedom['core.tcpsocket']();
 
   constructor() {
-    this.socket_.on('onData', (info: freedom.TcpSocket.ReadInfo) => {
-      this.onData_(info.data);
+    this.socket.on('onData', (info: freedom.TcpSocket.ReadInfo) => {
+      this.onData(info.data);
     });
-    this.socket_.on('onDisconnect', (info: freedom.TcpSocket.DisconnectInfo) => {
+    this.socket.on('onDisconnect', (info: freedom.TcpSocket.DisconnectInfo) => {
       this.onDisconnect_();
     });
   }
 
-  private onData_: (buffer: ArrayBuffer) => void;
+  private onData: (buffer: ArrayBuffer) => void;
   public onDataForSocksClient = (callback: (buffer: ArrayBuffer) => void): FreedomForwardingSocket => {
-    this.onData_ = callback;
+    this.onData = callback;
     return this;
   }
 
@@ -32,7 +32,7 @@ export class FreedomForwardingSocket implements piece.SocksPiece {
   }
 
   public handleDataFromSocksClient = (buffer: ArrayBuffer) => {
-    this.socket_.write(buffer);
+    this.socket.write(buffer);
   };
 
   public handleDisconnect = () => {
@@ -40,6 +40,6 @@ export class FreedomForwardingSocket implements piece.SocksPiece {
   }
 
   public connect = (host: string, port: number) => {
-    return this.socket_.connect(host, port);
+    return this.socket.connect(host, port);
   }
 }

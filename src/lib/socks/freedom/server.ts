@@ -2,14 +2,15 @@
 
 import logging = require('../../logging/logging');
 import piece = require('../piece');
+import socks_server = require('../server');
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
 const log: logging.Log = new logging.Log('freedom socks server');
 
-export class FreedomSocksServer {
+export class FreedomSocksServer implements socks_server.SocksServer {
   // Number of instances created, for logging purposes.
-  private static id_ = 0;
+  private static id = 0;
 
   private serverSocket: freedom.TcpSocket.Socket = freedom['core.tcpsocket']();
 
@@ -17,56 +18,55 @@ export class FreedomSocksServer {
   private numSessions_ = 0;
 
   constructor(
-    private requestedAddress_: string,
-    private requestedPort_: number,
-    private name_: string = 'unnamed-socks-server-' + FreedomSocksServer.id_) {
-    FreedomSocksServer.id_++;
+    private requestedAddress: string,
+    private requestedPort: number,
+    private name: string = 'unnamed-socks-server-' + FreedomSocksServer.id) {
+    FreedomSocksServer.id++;
   }
 
-  private getSocksSession_: () => Promise<piece.SocksPiece>;
+  private getSocksSession: () => piece.SocksPiece;
 
-  // Configures a callback which is invoked when a new SOCKS client has connected.
-  public onConnection = (callback: () => Promise<piece.SocksPiece>): FreedomSocksServer => {
-    this.getSocksSession_ = callback;
+  public onConnection = (callback: () => piece.SocksPiece) => {
+    this.getSocksSession = callback;
     return this;
   }
 
   public listen = () => {
-    return this.serverSocket.listen(this.requestedAddress_, this.requestedPort_).then(() => {
+    return this.serverSocket.listen(this.requestedAddress, this.requestedPort).then(() => {
       this.serverSocket.on('onConnection', (connectInfo) => {
         const clientId = connectInfo.host + ':' + connectInfo.port;
-        log.info('%1: new SOCKS client %2', this.name_, clientId);
-        this.getSocksSession_().then((socksSession) => {
-          const clientSocket = freedom['core.tcpsocket'](connectInfo.socket);
+        log.info('%1: new SOCKS client %2', this.name, clientId);
 
-          // The SOCKS session has something it wants to send to the SOCKS client.
-          // This is always data from the forwarding socket *except* while we're
-          // establishing the SOCKS session, in which case it's some type of
-          // SOCKS headers.
-          socksSession.onDataForSocksClient((buffer) => {
-            clientSocket.write(buffer);
-          });
+        const socksSession = this.getSocksSession();
+        const clientSocket = freedom['core.tcpsocket'](connectInfo.socket);
 
-          // The SOCKS session is *done*. This is either because the forwarding
-          // socket has disconnected or SOCKS protocol negotiation failed.
-          socksSession.onDisconnect(() => {
-            log.debug('%1: forwarding socket for SOCKS client %2 has disconnected', this.name_, clientId);
-          });
+        // The SOCKS session has something it wants to send to the SOCKS client.
+        // This is always data from the forwarding socket *except* while we're
+        // establishing the SOCKS session, in which case it's some type of
+        // SOCKS headers.
+        socksSession.onDataForSocksClient((buffer) => {
+          clientSocket.write(buffer);
+        });
 
-          // We received some data from the SOCKS client.
-          // Whatever it is, we need to forward it to the SOCKS session.
-          clientSocket.on('onData', (info) => {
-            socksSession.handleDataFromSocksClient(info.data);
-          });
+        // The SOCKS session is *done*. This is either because the forwarding
+        // socket has disconnected or SOCKS protocol negotiation failed.
+        socksSession.onDisconnect(() => {
+          log.debug('%1: forwarding socket for SOCKS client %2 has disconnected', this.name, clientId);
+        });
 
-          // The SOCKS client has disconnected. Notify the SOCKS session
-          // so it perform cleanup, such as disconnecting the forwarding socket.
-          clientSocket.on('onDisconnect', (info) => {
-            log.info('%1: disconnected from SOCKS client %2 (%3)', this.name_, clientId, info);
-            // TODO: use counter to guard against early onDisconnect notifications
-            freedom['core.tcpsocket'].close(clientSocket);
-            socksSession.handleDisconnect();
-          });
+        // We received some data from the SOCKS client.
+        // Whatever it is, we need to forward it to the SOCKS session.
+        clientSocket.on('onData', (info) => {
+          socksSession.handleDataFromSocksClient(info.data);
+        });
+
+        // The SOCKS client has disconnected. Notify the SOCKS session
+        // so it perform cleanup, such as disconnecting the forwarding socket.
+        clientSocket.on('onDisconnect', (info) => {
+          log.info('%1: disconnected from SOCKS client %2 (%3)', this.name, clientId, info);
+          // TODO: use counter to guard against early onDisconnect notifications
+          freedom['core.tcpsocket'].close(clientSocket);
+          socksSession.handleDisconnect();
         });
       });
     });
