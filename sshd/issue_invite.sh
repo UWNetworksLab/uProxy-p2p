@@ -33,13 +33,12 @@ while getopts i:u:k:ah? opt; do
 done
 shift $((OPTIND-1))
 
-echo "issue_invite: key is $KEY"  # TODO: remove
-
 if [ -n "$KEY" ]
 then
   HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
   mkdir -p $HOMEDIR/.ssh
   echo "$KEY" | base64 -d >> $HOMEDIR/.ssh/authorized_keys
+  echo "" >> $HOMEDIR/.ssh/authorized_keys  # Add newline
 else
   TMP=`mktemp -d`
 

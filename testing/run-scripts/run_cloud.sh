@@ -56,8 +56,6 @@ while getopts p:z:s:i:uwd:b:k:ah? opt; do
 done
 shift $((OPTIND-1))
 
-echo "run_cloud: key is $KEY"  # TODO: remove
-
 if [ "$UPDATE" = true ]
 then
   # Wipe any existing containers, first backing up data from the sshd

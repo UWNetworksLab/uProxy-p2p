@@ -36,8 +36,6 @@ while getopts k:auh? opt; do
 done
 shift $((OPTIND-1))
 
-echo "install-cloud: key is $KEY"  # TODO: remove
-
 command_exists() {
   command -v "$@" > /dev/null 2>&1
 }
@@ -87,13 +85,8 @@ do_install() {
 
   echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
-  # TODO: use this
-  #git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
-  git clone https://github.com/uProxy/uproxy-docker.git $TMP_DIR
+  git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
   cd $TMP_DIR/testing/run-scripts
-  echo "running git checkout"  # TODO: remove
-  git checkout dborkan-cloud-deploy  # TODO: remove when checking in
-  echo "finished git checkout"  # TODO: remove
 
   RUN_CLOUD_ARGS=
   if [ "$AUTOMATED" = true ]
@@ -108,7 +101,6 @@ do_install() {
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k $KEY"
   fi
-  echo "running cloud with args: $RUN_CLOUD_ARGS"
   ./run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
 
