@@ -55,7 +55,7 @@ giver.onceConnected.then(() => {
   giverPool.peerOpenedChannelQueue.setSyncHandler((channel) => {
     const sessionId = channel.getLabel();
     log.info('%1: new socks session', sessionId);
-    const socksSession = new session.SocksSession(SERVER_NAME, sessionId);
+    const socksSession = new session.SocksSession(sessionId);
 
     enum CompatStates {
       NEW,
@@ -88,7 +88,7 @@ giver.onceConnected.then(() => {
     });
 
     // datachannel <- SOCKS session
-    socksSession.onDataForSocksClient((bytes) => {
+    socksSession.onDataForSocksClient((bytes:ArrayBuffer) => {
       switch (state) {
         // SocksToRtc does not need the handshake response; filter it out here. 
         case CompatStates.SOCKS_TO_RTC_HANDSHAKE:
@@ -132,7 +132,7 @@ giver.onceConnected.then(() => {
       socksSession.handleDisconnect();
     });
 
-    socksSession.onForwardingSocketRequired((host, port) => {
+    socksSession.onForwardingSocketRequired((host:string, port:number) => {
       const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
 
       return forwardingSocket.connect(host, port).then(() => {
