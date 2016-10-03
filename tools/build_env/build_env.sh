@@ -3,7 +3,7 @@
 set -eu
 
 readonly BASE_NAME="uproxy/build"
-VARIANT=default
+VARIANT=node
 BUILD=false
 PUBLISH=false
 
@@ -16,7 +16,7 @@ function usage() {
 Usage: $0 [-b] [-p] [-v variant] commands
   -b (re-)build Docker image
   -p publish Docker image to Docker Hub (you must be logged in)
-  -v target-specific variant, e.g. android
+  -v target-specific variant, e.g. android (default: node)
 
 Examples:
   $0 npm run clean

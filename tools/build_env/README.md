@@ -23,7 +23,7 @@ So, to install dependencies and build uProxy for Chrome:
 
 What's happening when you use this "script prefix"? Roughly:
 
- 1. Starts a new Docker container, fetching the `uproxy/build-default` image from Docker Hub if necessary.
+ 1. Starts a new Docker container, fetching the `uproxy/build-node` image from Docker Hub if necessary.
  1. Runs the specified command in the container.
  1. Makes you the owner of all files in the repository (because commands in the container run as `root`, any new files created in the previous step will be owned by `root`).
  1. Deletes the container.
