@@ -1,5 +1,7 @@
 # Python script to create a webserver which serves only 1 file over HTTP
 # (uncrypted), and returns a 404 error for all other requests.
+# HTTPS is not supported, as this server is expected to be run on a newly
+# created virtual machine, which would not have a domain name or certificate.
 # Designed for serving uProxy cloud install logs to monitor install progress,
 # but can be re-used for other purposes.
 #
@@ -13,7 +15,8 @@ import sys
 class SingleFileRequestHandler(SimpleHTTPRequestHandler):
   restricted_file = ''
   def end_headers(self):
-    # Allow HTTP requests to come from any origin.
+    # Allow HTTP requests to come from any origin.  This is so other origins
+    # like uproxy.org can check query server running on a uProxy cloud machine.
     self.send_header('Access-Control-Allow-Origin', '*')
     SimpleHTTPRequestHandler.end_headers(self)
   def do_GET(self):
