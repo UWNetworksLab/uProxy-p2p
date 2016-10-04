@@ -2,7 +2,8 @@
 
 set -eu
 
-readonly IMAGE_NAME="uproxy/build"
+readonly BASE_NAME="uproxy/build"
+VARIANT=node
 BUILD=false
 PUBLISH=false
 
@@ -12,23 +13,24 @@ function error() {
 
 function usage() {
   cat <<-EOM
-Usage: $0 [-b] [-p] commands
+Usage: $0 [-b] [-p] [-v variant] commands
   -b (re-)build Docker image
   -p publish Docker image to Docker Hub (you must be logged in)
+  -v target-specific variant, e.g. android (default: node)
 
 Examples:
-  $0 -b
   $0 npm run clean
   $0 npm install
-  $0 grunt build_chrome
+  $0 -v android npm run grunt build_android
 EOM
 exit 1
 }
 
-while getopts bph? opt; do
+while getopts bpv:h? opt; do
   case $opt in
     b) BUILD=true ;;
     p) PUBLISH=true ;;
+    v) VARIANT="$OPTARG" ;;
     *) usage ;;
   esac
 done
@@ -39,14 +41,16 @@ if ! which docker > /dev/null; then
   exit 1
 fi
 
+readonly IMAGE_NAME=$BASE_NAME-$VARIANT
+
 if [[ $BUILD = true ]]; then
-  readonly DOCKER_ROOT="$(dirname $0)"
+  readonly DOCKER_ROOT="$(dirname $0)/$VARIANT"
   docker build --rm -t $IMAGE_NAME $DOCKER_ROOT
 fi
 
 if [[ $PUBLISH = true ]]; then
   docker push $IMAGE_NAME
-  echo "Find the new image at https://hub.docker.com/r/$IMAGE_NAME/tags/"
+  echo "Find the new image at https://hub.docker.com/r/$IMAGE_NAME"
 fi
 
 if (( $# > 0 )); then
