@@ -18,15 +18,24 @@ Thereafter, you just need to add this prefix to your commands: `./tools/build_en
 So, to install dependencies and build uProxy for Chrome:
 ```bash
 ./tools/build_env/build_env.sh npm install
-./tools/build_env/build_env.sh grunt build_chrome
+./tools/build_env/build_env.sh npm run grunt build_chrome
 ```
 
 What's happening when you use this "script prefix"? Roughly:
 
- 1. Starts a new Docker container, fetching the `uproxy/build` image from Docker Hub if necessary.
+ 1. Starts a new Docker container, fetching the `uproxy/build-node` image from Docker Hub if necessary.
  1. Runs the specified command in the container.
  1. Makes you the owner of all files in the repository (because commands in the container run as `root`, any new files created in the previous step will be owned by `root`).
  1. Deletes the container.
+
+### Android
+
+**This image won't work for `build_android`.** The Android tools are **huge**: we maintain a separate image for Android development.
+
+It's named `uproxy/build-android` and can be used via `-v`, e.g.:
+```bash
+./tools/build_env/build_env.sh -v android npm run grunt build_chrome
+```
 
 ## Updating the Image
 
@@ -42,3 +51,5 @@ Upload to Docker Hub:
 ```
 
 The `-b` and `-p` switches may be used together but please test before uploading to Docker Hub.
+
+**Note: Add `-t android` for Android builds.**
