@@ -27,6 +27,7 @@ export class SocksSession implements piece.SocksPiece {
 
   public onForwardingSocketRequired = (callback: (host: string, port: number) => Promise<piece.SocksPiece>) => {
     this.getForwardingSocket_ = callback;
+    return this;
   }
 
   // Sets a callback which is invoked when there is something to be sent

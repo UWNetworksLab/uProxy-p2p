@@ -254,15 +254,13 @@ let numSessions = 0;
 new freedom_server.FreedomSocksServer(SERVER_ADDRESS, SERVER_PORT, SERVER_NAME).onConnection(() => {
   const clientId = 'p' + (numSessions++) + 'p';
   log.info('new SOCKS session %1', clientId);
-  const socksSession = new session.SocksSession(clientId);
-  socksSession.onForwardingSocketRequired((host, port) => {
+  return new session.SocksSession(clientId).onForwardingSocketRequired((host, port) => {
     const forwardingSocket = new freedom_socket.FreedomForwardingSocket();
     // TODO: destroy the socket on disconnect
     return forwardingSocket.connect(host, port).then(() => {
       return forwardingSocket;
     });
   });
-  return socksSession;
 }).listen().then(() => {
   log.info('curl -x socks5h://%1:%2 www.example.com', SERVER_ADDRESS, SERVER_PORT);
 }, (e) => {
