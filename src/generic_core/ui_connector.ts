@@ -53,21 +53,21 @@ export class UIConnector {
           console.warn('Unexpected return value from command ' + cmd + ' with ' +
                        'no way to send result');
         }
-        return Promise.resolve<void>();
+        return Promise.resolve();
       }
 
       if (!result) {
         this.fulfillPromise_(args.promiseId, cmd, null);
         log.warn('Handler for command ' + cmd + ' did not return the expected ' +
                  'value');
-        return Promise.resolve<void>();
+        return Promise.resolve();
       }
 
       if (!(<Promise<any>>result).then) {
         log.warn('Handler for command ' + cmd + ' returned a value instead of ' +
                  'a promise');
         this.fulfillPromise_(args.promiseId, cmd, result);
-        return Promise.resolve<void>();
+        return Promise.resolve();
       }
 
       return (<Promise<any>>result).then((result?:any) => {

@@ -218,7 +218,7 @@ class Provisioner {
     }).catch((e: any) => {
       if (e.errcode === 'VM_DNE') {
         // Don't return an error if droplet doesn't exist
-        return Promise.resolve<void>();
+        return Promise.resolve();
       }
       return Promise.reject(e);
     });
@@ -368,10 +368,10 @@ class Provisioner {
     ]).then((results: string[]) => {
       if (results[0] && results[1]) {
         log.debug('found SSH keys for', name, 'in storage');
-        return {
+        return Promise.resolve({
           public: results[0],
           private: results[1]
-        };
+        });
       }
 
       try {
@@ -381,7 +381,7 @@ class Provisioner {
           this.storage_.set(storageKeyPub, result.public),
           this.storage_.set(storageKeyPri, result.private)
         ]).then((ignored: any) => {
-          return result;
+          return Promise.resolve(result);
         }, (e: Error) => {
           return Promise.reject({
             message: 'error saving SSH keys to storage: ' + e.message

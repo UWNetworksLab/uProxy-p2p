@@ -202,7 +202,7 @@ class PoolChannel implements datachannel.DataChannel {
     }
 
     this.dataFromPeerQueue = new handler.Queue<datachannel.Data,void>();
-    this.lastDataFromPeerHandled_ = Promise.resolve<void>();
+    this.lastDataFromPeerHandled_ = Promise.resolve();
     this.onceOpened = new Promise<void>((F, R) => {
       this.fulfillOpened_ = F;
     });

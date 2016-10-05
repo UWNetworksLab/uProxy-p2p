@@ -26,7 +26,7 @@ var mockBoundEndpoint :net.Endpoint = {
   port: 1234
 };
 
-var voidPromise = Promise.resolve<void>();
+var voidPromise = Promise.resolve();
 
 var mockProxyConfig :ProxyConfig = {
   allowNonUnicast: true
@@ -179,7 +179,7 @@ describe('RtcToNet session', function() {
 
     mockTcpConnection.onceConnected = Promise.resolve(mockConnectionInfo);
     mockTcpConnection.onceClosed = noopPromise;
-    mockDataChannel.onceClosed = Promise.resolve<void>();
+    mockDataChannel.onceClosed = Promise.resolve();
 
     session.start().then(session.onceStopped).then(done);
   });

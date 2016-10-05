@@ -880,6 +880,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         log.info('Successfully logged out of %1 network because roster is empty', network.name);
       });
     }
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 }  // class uProxyCore

@@ -32,25 +32,25 @@ function makeMockFreedomModuleFactory<T>(f:Function)
     : freedom.FreedomModuleFactoryManager<T> {
   var factoryManager :freedom.FreedomModuleFactoryManager<T>;
   factoryManager = <freedom.FreedomModuleFactoryManager<T>>f;
-  factoryManager.close = () => { return Promise.resolve<void>(); };
+  factoryManager.close = () => { return Promise.resolve(); };
   return factoryManager;
 }
 
 export class MockFreedomConsole implements freedom.Console.Console {
   public log(source:string, message:string) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
   public debug(source:string, message:string) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
   public info(source:string, message:string) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
   public warn(source:string, message:string) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
   public error(source:string, message:string) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 }
 
