@@ -1240,6 +1240,10 @@ module.exports = function(grunt) {
   ]);
   registerTask(grunt, 'default', ['build']);
 
+  grunt.registerTask('printConfig', function() {
+    grunt.log.writeln(JSON.stringify(grunt.config.getRaw(), null, 2));
+  });
+
   //-------------------------------------------------------------------------
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-clean');
