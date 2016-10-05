@@ -81,11 +81,12 @@ export class BackgroundUi {
   }
 
   public showToast = (
-      message: string,
+      toastMessage: string,
       unableToGet: boolean = false,
       unableToShare: boolean = false): void => {
+    // This object must match the shape expected in root.ts.
     return this.fireSignal('show-toast', {
-      message: message,
+      toastMessage: toastMessage,
       unableToGet: unableToGet,
       unableToShare: unableToShare
     });
