@@ -4,7 +4,7 @@ export class MockStorage implements storage_interface.Storage {
   constructor(private data_ ?:any) {
   }
   public reset = () : Promise<void> => {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
   public load<T>(key :string) : Promise<T> {
     if (this.data_[key]) {

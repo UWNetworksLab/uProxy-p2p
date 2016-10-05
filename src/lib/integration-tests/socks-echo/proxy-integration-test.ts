@@ -74,7 +74,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
 
   public setRepeat = (repeat:number) : Promise<void> => {
     this.repeat_ = repeat;
-    return Promise.resolve<void>();
+    return Promise.resolve();
   };
 
   private static stripIPv4_ = (obj:any) : void => {
@@ -324,7 +324,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
           response: response
         });
       });
-      return Promise.resolve<void>();
+      return Promise.resolve();
     } catch (e) {
       return Promise.reject(e);
     }

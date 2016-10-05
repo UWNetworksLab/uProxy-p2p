@@ -94,7 +94,7 @@ class Background {
     var network = ui_context.model.getNetwork(networkInfo.name);
     if (!network) {
       console.warn('Network is not logged in');
-      return Promise.resolve<void>();
+      return Promise.resolve();
     }
 
     network.logoutExpected = true;

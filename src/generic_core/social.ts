@@ -702,7 +702,7 @@ export function notifyUI(networkName :string, userId :string) {
           user.saveToStorage();
           // No need to update UI until they accept our invite.
         }
-        return Promise.resolve<void>();
+        return Promise.resolve();
       });
     }
 

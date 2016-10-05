@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "removeComments": false,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "rootDir": ".",
+    "outDir": "build",
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise",
+      "es2015.iterable",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "build",
+    "node_modules",
+    "src/lib/build-tools/**/*",
+    "src/integration/**/*"
+  ],
+  "compileOnSave": true
+}

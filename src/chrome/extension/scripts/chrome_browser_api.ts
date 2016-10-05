@@ -179,7 +179,7 @@ class ChromeBrowserApi implements BrowserAPI {
     } else if (this.popupState_ == PopupState.LAUNCHED) {
       // If the popup is already open, simply focus on it.
       chrome.windows.update(this.popupWindowId_, {focused: true});
-      return Promise.resolve<void>();
+      return Promise.resolve();
     } else {
       console.log('Waiting for popup to launch...');
       return this.onceLaunched_;

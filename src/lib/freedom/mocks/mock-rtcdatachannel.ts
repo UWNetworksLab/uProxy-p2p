@@ -12,7 +12,7 @@ import MockEventHandler = require('./mock-eventhandler');
 
 function makeMockSend<T>() : freedom.Method1<T,void> {
   var f : any = (x:T) => {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   };
   f.reckless = (x:T) => {};
   return f;
@@ -44,12 +44,12 @@ class MockFreedomRtcDataChannel extends MockEventHandler
 
   public getBufferedAmount() : Promise<number> { return Promise.resolve(null); }
 
-  public close() : Promise<void> { return Promise.resolve<void>(); }
+  public close() : Promise<void> { return Promise.resolve(); }
 
   public getBinaryType() : Promise<string> { return Promise.resolve(null); }
 
   public setBinaryType(type:string) : Promise<void> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   public send = makeMockSend<string>()

@@ -109,7 +109,7 @@ var generateProxyingSessionId_ = (): string => {
         log.info('proxying session %1 initiated by remote peer', message.proxyingId);
         this.proxyingId_ = message.proxyingId;
       }
-      return Promise.resolve<void>();
+      return Promise.resolve();
     }
 
     // Forwards a signalling message to the RemoteConnection.
@@ -199,7 +199,7 @@ var generateProxyingSessionId_ = (): string => {
     public stopShare = () :Promise<void> => {
       if (this.localSharingWithRemote === social.SharingState.NONE) {
         log.warn('Cannot stop sharing when neither sharing nor trying to share.');
-        return Promise.resolve<void>();
+        return Promise.resolve();
       }
 
       this.localSharingWithRemote = social.SharingState.NONE;

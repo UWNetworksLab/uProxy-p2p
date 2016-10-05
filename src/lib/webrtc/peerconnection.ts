@@ -497,7 +497,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
           return this.handleCandidateSignalMessage_(message.candidate);
         });
       case signals.Type.NO_MORE_CANDIDATES:
-        return Promise.resolve<void>();
+        return Promise.resolve();
       default:
         return Promise.reject(new Error(
             'unexpected signalling message type ' + message.type));

@@ -150,7 +150,7 @@ class Pipe {
         log.warn('%1: no transformer config specified', this.name_);
       }
 
-      return Promise.resolve<void>();
+      return Promise.resolve();
     } catch (e) {
       return Promise.reject(e);
     }
@@ -272,7 +272,7 @@ class Pipe {
     }
     this.browserEndpoints_[browserEndpoint.address] = browserEndpoint.port;
     this.browserPorts_[browserEndpoint.port] = true;
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   // Establishes an empty data structure to hold mirror sockets for this remote
