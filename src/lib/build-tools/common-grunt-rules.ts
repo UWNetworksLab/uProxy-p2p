@@ -84,9 +84,6 @@ export class Rule {
     return {
       options: {
         vendor: [
-          // phantomjs does not yet understand Promises natively:
-          //   https://github.com/ariya/phantomjs/issues/14166
-          require.resolve('es6-promise'),
           // Declares globals, notably freedom, without which test
           // environments implementing strict mode will fail.
           './src/lib/build-tools/testing/globals.js'
@@ -143,7 +140,12 @@ export class Rule {
         browserifyOptions: { standalone: 'browserified_exports' }
       }) : BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildPath, filepath + '.spec.js') ],
+      src: [
+        // phantomjs does not yet understand Promises natively:
+        // https://github.com/ariya/phantomjs/issues/14166
+        require.resolve('es6-promise/auto'),
+        path.join(this.config.devBuildPath, filepath + '.spec.js')
+      ],
       dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
       options: options
     };
