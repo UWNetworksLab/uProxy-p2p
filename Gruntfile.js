@@ -757,38 +757,12 @@ module.exports = function(grunt) {
       }
     },
 
-    // One pass for code running inside freedom.js modules and another
-    // for code running outside, due to the differences in the meaning
-    // of the (global) freedom object between the two environments.
     ts: {
-      options: {
-        target: 'es5',
-        comments: true,
-        noImplicitAny: true,
-        sourceMap: false,
-        module: 'commonjs',
-        fast: 'always',
-        rootDir: '.'
-      },
-      moduleEnv: {
-        src: [
-          'src/**/*.ts',
-          '!src/**/*.d.ts',
-          '!src/lib/build-tools/**/*',
-          '!src/integration/**/*',
-          '!src/**/*.core-env.ts',
-          '!src/**/*.core-env.spec.ts'
-        ],
-        outDir: 'build'
-      },
-      coreEnv: {
-        src: [
-          'src/**/*.core-env.ts',
-          'src/**/*.core-env.spec.ts',
-          '!src/lib/build-tools/**/*.ts',
-          '!src/integration/**/*.ts'
-        ],
-        outDir: 'build'
+      default: {
+        tsconfig: {
+          tsconfig: 'tsconfig.json',
+          passThrough: true
+        }
       }
     },
     browserify: {

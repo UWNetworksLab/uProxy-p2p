@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "module": "commonjs",
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "lib": ["dom", "es5", "es2015.promise"]
   },
   "files": [
     "common-grunt-rules.ts"
