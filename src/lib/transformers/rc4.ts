@@ -3,8 +3,8 @@
 
 import * as crypto from 'crypto';
 import * as logging from '../logging/logging';
-var RC4 = require('simple-rc4');
 import * as transformer from './transformer';
+import RC4 from 'simple-rc4';
 
 const log = new logging.Log('rc4 transformer');
 
