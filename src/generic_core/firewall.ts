@@ -16,7 +16,7 @@
  *    visual trickery.  See http://www.unicode.org/reports/tr36/#visual_spoofing
  */
 
-import logging = require('../lib/logging/logging');
+import * as logging from '../lib/logging/logging';
 
 var log :logging.Log = new logging.Log('firewall');
 

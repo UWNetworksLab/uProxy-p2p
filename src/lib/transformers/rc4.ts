@@ -1,10 +1,10 @@
 /// <reference path='../../../third_party/simple-rc4/simple-rc4.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import crypto = require('crypto');
-import logging = require('../logging/logging');
-import rc4 = require('simple-rc4');
-import transformer = require('./transformer');
+import * as crypto from 'crypto';
+import * as logging from '../logging/logging';
+import rc4 from 'simple-rc4';
+import * as transformer from './transformer';
 
 const log = new logging.Log('rc4 transformer');
 

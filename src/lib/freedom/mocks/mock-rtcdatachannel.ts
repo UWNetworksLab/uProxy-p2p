@@ -8,7 +8,7 @@ import RTCPeerConnection = freedom.RTCPeerConnection.RTCPeerConnection;
 import RTCSessionDescription = freedom.RTCPeerConnection.RTCSessionDescription;
 import RTCDataChannel = freedom.RTCDataChannel.RTCDataChannel;
 
-import MockEventHandler = require('./mock-eventhandler');
+import MockEventHandler from './mock-eventhandler';
 
 function makeMockSend<T>() : freedom.Method1<T,void> {
   var f : any = (x:T) => {
@@ -18,7 +18,7 @@ function makeMockSend<T>() : freedom.Method1<T,void> {
   return f;
 }
 
-class MockFreedomRtcDataChannel extends MockEventHandler
+export default class MockFreedomRtcDataChannel extends MockEventHandler
     implements RTCDataChannel {
   constructor() {
     super(['onopen', 'onerror', 'onclose', 'onmessage']);
@@ -56,5 +56,3 @@ class MockFreedomRtcDataChannel extends MockEventHandler
 
   public sendBuffer = makeMockSend<ArrayBuffer>()
 }
-
-export = MockFreedomRtcDataChannel;

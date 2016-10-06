@@ -8,16 +8,16 @@
 
 import browser_api =  require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
-import user_interface = require('../../../generic_ui/scripts/ui');
-import net = require('../../../lib/net/net.types');
-import port = require('./port');
+import * as user_interface from '../../../generic_ui/scripts/ui';
+import * as net from '../../../lib/net/net.types';
+import * as port from './port';
 
 interface FullfillAndReject {
   fulfill :Function;
   reject :Function;
 }
 
-class FirefoxBrowserApi implements BrowserAPI {
+export default class FirefoxBrowserApi implements BrowserAPI {
 
   public browserSpecificElement :string;
   public canProxy = true;
@@ -156,5 +156,3 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('setBadgeNotification', notification);
   }
 }
-
-export = FirefoxBrowserApi;

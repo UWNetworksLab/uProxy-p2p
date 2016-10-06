@@ -1,5 +1,5 @@
-import translator = require('./translator');
-import ui = require('../../interfaces/ui');
+import * as translator from './translator';
+import * as ui from '../../interfaces/ui';
 
 /**
  * This gets a description object for a dialog that will simply show the text

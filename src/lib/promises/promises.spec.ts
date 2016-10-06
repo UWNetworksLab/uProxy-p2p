@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import promises = require('./promises');
+import * as promises from './promises';
 
 describe('retry', () => {
   const MAX_ATTEMPTS = 5;

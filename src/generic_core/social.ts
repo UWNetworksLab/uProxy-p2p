@@ -21,19 +21,19 @@
  *    ...
  */
 
-import firewall = require('./firewall');
-import globals = require('./globals');
-import local_instance = require('./local-instance');
-import logging = require('../lib/logging/logging');
-import metrics = require('./metrics');
-import network_options = require('../generic/network-options');
-import remote_user = require('./remote-user');
-import social = require('../interfaces/social');
-import freedom_social2 = require('../interfaces/social2');
-import ui_connector = require('./ui_connector');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as firewall from './firewall';
+import * as globals from './globals';
+import * as local_instance from './local-instance';
+import * as logging from '../lib/logging/logging';
+import * as metrics from './metrics';
+import * as network_options from '../generic/network-options';
+import * as remote_user from './remote-user';
+import * as social from '../interfaces/social';
+import * as freedom_social2 from '../interfaces/social2';
+import * as ui_connector from './ui_connector';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 import ui = ui_connector.connector;
-import jsurl = require('jsurl');
+import * as jsurl from 'jsurl';
 import storage = globals.storage;
 
 declare var freedom: freedom.FreedomInModuleEnv;

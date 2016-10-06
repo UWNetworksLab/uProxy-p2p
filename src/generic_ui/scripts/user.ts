@@ -6,12 +6,12 @@
  * This is the UI-specific representation of a User.
  */
 
-import model = require('./model');
-import social = require('../../interfaces/social');
-import user_interface = require('./ui');
-import translator_module = require('./translator');
-import _ = require('lodash');
-import Constants = require('./constants');
+import * as model from './model';
+import * as social from '../../interfaces/social';
+import * as user_interface from './ui';
+import * as translator_module from './translator';
+import * as _ from 'lodash';
+import * as Constants from './constants';
 
 var i18n_t = translator_module.i18n_t;
 

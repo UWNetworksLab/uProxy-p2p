@@ -1,5 +1,5 @@
-import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
-import handler_queue = require('../lib/handler/queue');
+import * as rtc_to_net from '../lib/rtc-to-net/rtc-to-net';
+import * as handler_queue from '../lib/handler/queue';
 
 export class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
   public signalsForPeer = new handler_queue.Queue<Object, void>();

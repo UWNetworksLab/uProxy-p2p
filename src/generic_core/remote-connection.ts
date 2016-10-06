@@ -7,18 +7,18 @@
  * It handles the signaling channel between two peers, regardless of permission.
  */
 
-import bridge = require('../lib/bridge/bridge');
-import constants = require('./constants');
-import globals = require('./globals');
-import logging = require('../lib/logging/logging');
-import net = require('../lib/net/net.types');
-import peerconnection = require('../lib/webrtc/peerconnection');
-import rc4 = require('../lib/transformers/rc4');
-import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
-import social = require('../interfaces/social');
-import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
-import tcp = require('../lib/net/tcp');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as bridge from '../lib/bridge/bridge';
+import * as constants from './constants';
+import * as globals from './globals';
+import * as logging from '../lib/logging/logging';
+import * as net from '../lib/net/net.types';
+import * as peerconnection from '../lib/webrtc/peerconnection';
+import * as rc4 from '../lib/transformers/rc4';
+import * as rtc_to_net from '../lib/rtc-to-net/rtc-to-net';
+import * as social from '../interfaces/social';
+import * as socks_to_rtc from '../lib/socks-to-rtc/socks-to-rtc';
+import * as tcp from '../lib/net/tcp';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 declare var freedom: freedom.FreedomInModuleEnv;
 

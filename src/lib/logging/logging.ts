@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import loggingProviderTypes = require('../loggingprovider/loggingprovider.types');
-import CircularJSON = require('circular-json');
+import * as loggingProviderTypes from '../loggingprovider/loggingprovider.types';
+import * as CircularJSON from 'circular-json';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

@@ -1,7 +1,7 @@
-import transformer = require('./transformer');
+import * as transformer from './transformer';
 
 /** An obfuscator which does nothing. */
-class PassThrough implements transformer.Transformer {
+export default class PassThrough implements transformer.Transformer {
 
   public constructor() {}
 
@@ -15,5 +15,3 @@ class PassThrough implements transformer.Transformer {
     return [buffer];
   }
 }
-
-export = PassThrough;

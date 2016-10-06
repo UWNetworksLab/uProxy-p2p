@@ -1,11 +1,11 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import social = require('../../interfaces/social');
-import ui_constants = require('../../interfaces/ui');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import user_module = require('./user');
+import * as social from '../../interfaces/social';
+import * as ui_constants from '../../interfaces/ui';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import * as user_module from './user';
 import User = user_module.User;
-import _ = require('lodash');
+import * as _ from 'lodash';
 
 export interface ContactCategory {
   [type :string] :User[];

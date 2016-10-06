@@ -1,5 +1,5 @@
-import browser_connector = require('../interfaces/browser_connector');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as browser_connector from '../interfaces/browser_connector';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 /**
  * Integration test connector.  This class is modeled after FirefoxConnector.

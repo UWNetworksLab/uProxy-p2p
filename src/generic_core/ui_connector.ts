@@ -1,11 +1,11 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
-import browser_connector = require('../interfaces/browser_connector');
-import globals = require('./globals');
-import logging = require('../lib/logging/logging');
-import social_network = require('./social');
-import social = require('../interfaces/social');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as browser_connector from '../interfaces/browser_connector';
+import * as globals from './globals';
+import * as logging from '../lib/logging/logging';
+import * as social_network from './social';
+import * as social from '../interfaces/social';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 declare var freedom: freedom.FreedomInModuleEnv;
 

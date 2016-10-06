@@ -7,14 +7,14 @@
  * Handles all connection and communication with the uProxy core and ui..
  */
 
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
-import browser_connector = require('../../../interfaces/browser_connector');
-import port = require('./port');
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as browser_connector from '../../../interfaces/browser_connector';
+import * as port from './port';
 
 /**
  * Firefox-specific uProxy CoreBrowserConnector implementation.
  */
-class FirefoxConnector implements browser_connector.CoreBrowserConnector {
+export default class FirefoxConnector implements browser_connector.CoreBrowserConnector {
 
   public status :browser_connector.StatusObject;
   public onceConnected :Promise<void>;
@@ -62,5 +62,3 @@ class FirefoxConnector implements browser_connector.CoreBrowserConnector {
   }
 
 }  // class FirefoxConnector
-
-export = FirefoxConnector;

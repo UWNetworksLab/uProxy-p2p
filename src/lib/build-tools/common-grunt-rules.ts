@@ -1,7 +1,7 @@
 // common-grunt-rules
 
-import fs = require('fs');
-import path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
 export interface RuleConfig {
   // The path where code in this repository should be built in.

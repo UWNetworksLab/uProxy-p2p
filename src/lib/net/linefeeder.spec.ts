@@ -1,8 +1,8 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import linefeeder = require('./linefeeder');
-import queue = require('../handler/queue');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as linefeeder from './linefeeder';
+import * as queue from '../handler/queue';
 
 describe('LineFeeder', function() {
   let bufferQueue: queue.Queue<ArrayBuffer, void>;

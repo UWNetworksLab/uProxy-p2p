@@ -1,15 +1,15 @@
 /// <reference path='../../../../third_party/typings/index.d.ts'/>
 
-import browser_connector = require('../../../interfaces/browser_connector');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
-import uproxy_chrome = require('../../../interfaces/chrome');
+import * as browser_connector from '../../../interfaces/browser_connector';
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as uproxy_chrome from '../../../interfaces/chrome';
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 var installedFreedomHooks :number[] = [];
 
-class ChromeUIConnector {
+export default class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
   private onCredentials_ :(credentials?:Object, error?:Object) => void;
@@ -137,5 +137,3 @@ class ChromeUIConnector {
     this.onCredentials_ = onCredentials;
   }
 }
-
-export = ChromeUIConnector;

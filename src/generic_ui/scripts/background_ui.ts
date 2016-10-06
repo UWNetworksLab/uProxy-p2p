@@ -1,11 +1,11 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import _ = require('lodash');
+import * as _ from 'lodash';
 
-import CoreConnector = require('./core_connector');
-import panel_connector = require('../../interfaces/panel_connector');
-import ui = require('../../interfaces/ui');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import CoreConnector from './core_connector';
+import * as panel_connector from '../../interfaces/panel_connector';
+import * as ui from '../../interfaces/ui';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
 interface FullfillAndReject {
   fulfill: Function;

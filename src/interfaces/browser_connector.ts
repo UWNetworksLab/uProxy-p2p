@@ -1,4 +1,4 @@
-import uproxy_core_api = require('./uproxy_core_api');
+import * as uproxy_core_api from './uproxy_core_api';
 
 // Status object for connected. This is an object so it can be bound in
 // angular. connected = true iff connected to the app which is running

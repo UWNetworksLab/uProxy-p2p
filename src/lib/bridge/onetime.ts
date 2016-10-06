@@ -1,11 +1,11 @@
 /// <reference path='../../../third_party/browserify-zlib/browserify-zlib.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import bridge = require('./bridge');
-import churn_types = require('../churn/churn.types');
-import logging = require('../logging/logging');
-import signals = require('../webrtc/signals');
-import zlib = require('browserify-zlib');
+import * as bridge from './bridge';
+import * as churn_types from '../churn/churn.types';
+import * as logging from '../logging/logging';
+import * as signals from '../webrtc/signals';
+import * as zlib from 'browserify-zlib';
 
 var log :logging.Log = new logging.Log('signal batcher');
 

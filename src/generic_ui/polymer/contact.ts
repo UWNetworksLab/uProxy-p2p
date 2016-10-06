@@ -2,13 +2,13 @@
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import ui_constants = require('../../interfaces/ui');
-import social = require('../../interfaces/social');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import _ = require('lodash');
-import translator = require('../scripts/translator');
-import user = require('../scripts/user');
-import dialogs = require('../scripts/dialogs');
+import * as ui_constants from '../../interfaces/ui';
+import * as social from '../../interfaces/social';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import * as _ from 'lodash';
+import * as translator from '../scripts/translator';
+import * as user from '../scripts/user';
+import * as dialogs from '../scripts/dialogs';
 
 const DEFAULT_PROVIDER = 'digitalocean';
 

@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import counter = require('./counter');
+import * as counter from './counter';
 
 describe('socket call counter', function() {
   // One wrapped call, then destroy.

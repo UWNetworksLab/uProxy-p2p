@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import queue = require('../handler/queue');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as queue from '../handler/queue';
 
 // Transforms a raw network-like ArrayBuffer-based queue into
 // a telnet-style string-based queue.

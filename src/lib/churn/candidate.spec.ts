@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import candidate = require('./candidate');
+import * as candidate from './candidate';
 import Candidate = candidate.Candidate;
 
 describe('extractEndpointFromCandidateLine', function() {

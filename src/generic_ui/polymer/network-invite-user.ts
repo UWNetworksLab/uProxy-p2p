@@ -1,10 +1,10 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
-import social = require('../../interfaces/social');
-import translator = require('../scripts/translator');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import dialogs = require('../scripts/dialogs');
+import * as social from '../../interfaces/social';
+import * as translator from '../scripts/translator';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import * as dialogs from '../scripts/dialogs';
 
 var ui = ui_context.ui;
 var model = ui_context.model;

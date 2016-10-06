@@ -1,7 +1,7 @@
 /// <reference path='../../../../third_party/typings/index.d.ts' />
 
-import AbstractProxyIntegrationTest = require('./proxy-integration-test');
-import loggingTypes = require('../../loggingprovider/loggingprovider.types');
+import AbstractProxyIntegrationTest from './proxy-integration-test';
+import * as loggingTypes from '../../loggingprovider/loggingprovider.types';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

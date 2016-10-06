@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import churn_types = require('../churn/churn.types');
-import net = require('../net/net.types');
+import * as churn_types from '../churn/churn.types';
+import * as net from '../net/net.types';
 
 export interface MirrorMapping {
   local: net.Endpoint;

@@ -6,10 +6,10 @@
  * Chrome-specific implementation of the Browser API.
  */
 
-import browser_api = require('../../../interfaces/browser_api');
+import * as browser_api from '../../../interfaces/browser_api';
 import BrowserAPI = browser_api.BrowserAPI;
-import net = require('../../../lib/net/net.types');
-import Constants = require('../../../generic_ui/scripts/constants');
+import * as net from '../../../lib/net/net.types';
+import * as Constants from '../../../generic_ui/scripts/constants';
 
 enum PopupState {
     NOT_LAUNCHED,
@@ -19,7 +19,7 @@ enum PopupState {
 
 declare var Notification :any; //TODO remove this
 
-class ChromeBrowserApi implements BrowserAPI {
+export default class ChromeBrowserApi implements BrowserAPI {
 
   public browserSpecificElement = 'uproxy-app-missing';
 
@@ -247,5 +247,3 @@ class ChromeBrowserApi implements BrowserAPI {
     chrome.browserAction.setBadgeText({text: notification});
   }
 }
-
-export = ChromeBrowserApi;

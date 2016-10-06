@@ -1,6 +1,6 @@
 /// <reference path='../../../../third_party/typings/index.d.ts' />
 
-import provider = require('./provider');
+import * as provider from './provider';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

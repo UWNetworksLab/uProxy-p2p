@@ -1,7 +1,7 @@
 /// <reference path='../../../../third_party/typings/index.d.ts' />
 
-import logging = require('../../logging/logging');
-import loggingTypes = require('../../loggingprovider/loggingprovider.types');
+import * as logging from '../../logging/logging';
+import * as loggingTypes from '../../loggingprovider/loggingprovider.types';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

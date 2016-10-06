@@ -1,11 +1,11 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import model = require('./model');
-import user_interface = require('./ui');
-import translator = require('./translator');
-import user = require('./user');
-import social = require('../../interfaces/social');
-import _ = require('lodash');
+import * as model from './model';
+import * as user_interface from './ui';
+import * as translator from './translator';
+import * as user from './user';
+import * as social from '../../interfaces/social';
+import * as _ from 'lodash';
 
 describe('UI.User', () => {
   var sampleUser :user.User;

@@ -9,9 +9,9 @@
  * requirement and ensures consistency.
  */
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
 
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
@@ -21,14 +21,14 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'portControl': () => { return new Object },
 });
 
-import globals = require('./globals');
-import social = require('../interfaces/social');
-import social_network = require('./social');
-import remote_user = require('./remote-user');
-import local_instance = require('./local-instance');
-import remote_instance = require('./remote-instance');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import uproxy_core = require('./uproxy_core');
+import * as globals from './globals';
+import * as social from '../interfaces/social';
+import * as social_network from './social';
+import * as remote_user from './remote-user';
+import * as local_instance from './local-instance';
+import * as remote_instance from './remote-instance';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
+import * as uproxy_core from './uproxy_core';
 
 describe('Core', () => {
 

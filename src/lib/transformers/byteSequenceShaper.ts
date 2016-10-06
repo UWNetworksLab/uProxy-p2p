@@ -1,7 +1,7 @@
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import crypto = require('crypto');
-import logging = require('../logging/logging');
-import transformer = require('./transformer');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as crypto from 'crypto';
+import * as logging from '../logging/logging';
+import * as transformer from './transformer';
 
 const log :logging.Log = new logging.Log('byte sequence shaper');
 

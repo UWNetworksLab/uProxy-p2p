@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import HandlerQueue = require('./queue');
-import Aggregate = require('./aggregate');
+import * as HandlerQueue from './queue';
+import * as Aggregate from './aggregate';
 
 import Queue = HandlerQueue.Queue;
 

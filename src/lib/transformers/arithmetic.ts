@@ -1,5 +1,5 @@
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import logging = require('../logging/logging');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as logging from '../logging/logging';
 
 var log :logging.Log = new logging.Log('arithmetic shaper');
 

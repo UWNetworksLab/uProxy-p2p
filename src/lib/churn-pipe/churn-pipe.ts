@@ -1,19 +1,19 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import aqm = require('../aqm/aqm');
-import caesar = require('../transformers/caesar');
-import churn_types = require('../churn/churn.types');
-import decompression = require('../transformers/decompressionShaper');
-import fragmentation = require('../transformers/fragmentationShaper');
-import ipaddr = require('ipaddr.js');
-import logging = require('../logging/logging');
-import net = require('../net/net.types');
-import PassThrough = require('../transformers/passthrough');
-import promises = require('../promises/promises');
-import protean = require('../transformers/protean');
-import rc4 = require('../transformers/rc4');
-import sequence = require('../transformers/byteSequenceShaper');
-import transformer = require('../transformers/transformer');
+import * as aqm from '../aqm/aqm';
+import * as caesar from '../transformers/caesar';
+import * as churn_types from '../churn/churn.types';
+import * as decompression from '../transformers/decompressionShaper';
+import * as fragmentation from '../transformers/fragmentationShaper';
+import * as ipaddr from 'ipaddr.js';
+import * as logging from '../logging/logging';
+import * as net from '../net/net.types';
+import PassThrough from '../transformers/passthrough';
+import * as promises from '../promises/promises';
+import * as protean from '../transformers/protean';
+import * as rc4 from '../transformers/rc4';
+import * as sequence from '../transformers/byteSequenceShaper';
+import * as transformer from '../transformers/transformer';
 
 import Socket = freedom.UdpSocket.Socket;
 
@@ -56,7 +56,7 @@ interface MirrorSet {
  * us to achieve the same performance while allocating fewer ports, at the cost
  * of slightly more complex logic.
  */
-class Pipe {
+export default class Pipe {
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
@@ -523,4 +523,3 @@ class Pipe {
   }
 }
 
-export = Pipe;

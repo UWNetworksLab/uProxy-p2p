@@ -1,5 +1,5 @@
 
-import translator_module = require('../scripts/translator');
+import * as translator_module from '../scripts/translator';
 
 declare var PolymerExpressions: any;
 

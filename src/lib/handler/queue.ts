@@ -23,7 +23,7 @@
 // CONSIDER: This is kind of similar to functional parsing. May be good to
 // formalize the relationship in comments here.
 
-import baseQueue = require('../queue/queue');
+import * as baseQueue from '../queue/queue';
 
 // The |QueueFeeder| is the abstraction for events to be handled.
 export interface QueueFeeder<Feed,Result> {

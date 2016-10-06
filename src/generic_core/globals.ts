@@ -1,19 +1,25 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
-import _ = require('lodash');
-import constants = require('./constants');
-import local_storage = require('./storage');
-import logging = require('../lib/logging/logging');
-import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
-import metrics_module = require('./metrics');
-import user_interface = require('../interfaces/ui');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as _ from 'lodash';
+import * as constants from './constants';
+import * as local_storage from './storage';
+import * as logging from '../lib/logging/logging';
+import * as loggingprovider from '../lib/loggingprovider/loggingprovider.types';
+import * as metrics_module from './metrics';
+import * as user_interface from '../interfaces/ui';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('globals');
 
 export var storage = new local_storage.Storage();
+
+// Replaces the global storage for tests.
+// TODO: Use dependency injection instead of globals.
+export function setGlobalStorageForTest(newStorage: local_storage.Storage): void {
+  storage = newStorage;
+}
 
 // Initially, the STUN servers are a copy of the default.
 // We need to use slice to copy the values, otherwise modifying this
@@ -46,6 +52,12 @@ export var settings :uproxy_core_api.GlobalSettings = {
 };
 
 export var natType :string = '';
+
+// Sets the NAT type.
+// TODO: Use dependency injection rather than globals.
+export function setGlobalNatType(newNatType: string): void {
+  natType = newNatType;
+}
 
 export var loadSettings :Promise<void> =
   storage.load<uproxy_core_api.GlobalSettings>('globalSettings')

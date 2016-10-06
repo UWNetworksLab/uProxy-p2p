@@ -9,17 +9,17 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
-import background_ui = require('../../../generic_ui/scripts/background_ui');
-import chrome_panel_connector = require('./chrome_panel_connector');
-import ChromeBrowserApi = require('./chrome_browser_api');
-import ChromeCoreConnector = require('./chrome_core_connector');
-import ChromeTabAuth = require('./chrome_tab_auth');
-import Constants = require('../../../generic_ui/scripts/constants');
-import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import user_interface = require('../../../generic_ui/scripts/ui');
+import * as background_ui from '../../../generic_ui/scripts/background_ui';
+import * as chrome_panel_connector from './chrome_panel_connector';
+import ChromeBrowserApi from './chrome_browser_api';
+import ChromeCoreConnector from './chrome_core_connector';
+import ChromeTabAuth from './chrome_tab_auth';
+import * as Constants from '../../../generic_ui/scripts/constants';
+import CoreConnector from '../../../generic_ui/scripts/core_connector';
+import * as user_interface from '../../../generic_ui/scripts/ui';
 
-import compareVersion = require('compare-version');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import compareVersion from 'compare-version';
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
 /// <reference path='../../third_party/chrome/chrome.d.ts'/>

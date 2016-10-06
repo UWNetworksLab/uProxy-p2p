@@ -1,13 +1,13 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
-import social = require('../../interfaces/social');
-import ui_constants = require('../../interfaces/ui');
-import net = require('../../lib/net/net.types');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import translator = require('../scripts/translator');
-import user_interface = require('../scripts/ui');
-import browser_api = require('../../interfaces/browser_api');
+import * as social from '../../interfaces/social';
+import * as ui_constants from '../../interfaces/ui';
+import * as net from '../../lib/net/net.types';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import * as translator from '../scripts/translator';
+import * as user_interface from '../scripts/ui';
+import * as browser_api from '../../interfaces/browser_api';
 
 // generic_ui/scripts/ui.ts: UserInterface
 var ui = ui_context.ui;

@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import ChurnPipe = require('./churn-pipe');
+import ChurnPipe from './churn-pipe';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

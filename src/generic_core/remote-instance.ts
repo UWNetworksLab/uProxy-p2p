@@ -8,23 +8,23 @@
  * consent, proxying status, and any other signalling information.
  */
 
-import arraybuffers = require('../lib/arraybuffers/arraybuffers');
-import bridge = require('../lib/bridge/bridge');
-import consent = require('./consent');
-import crypto = require('./crypto');
-import globals = require('./globals');
-import key_verify = require('./key-verify');
-import _ = require('lodash');
-import logging = require('../lib/logging/logging');
-import net = require('../lib/net/net.types');
-import Persistent = require('../interfaces/persistent');
-import remote_connection = require('./remote-connection');
-import remote_user = require('./remote-user');
-import signals = require('../lib/webrtc/signals');
-import social = require('../interfaces/social');
-import ui_connector = require('./ui_connector');
-import user_interface = require('../interfaces/ui');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as arraybuffers from '../lib/arraybuffers/arraybuffers';
+import * as bridge from '../lib/bridge/bridge';
+import * as consent from './consent';
+import * as crypto from './crypto';
+import * as globals from './globals';
+import * as key_verify from './key-verify';
+import * as _ from 'lodash';
+import * as logging from '../lib/logging/logging';
+import * as net from '../lib/net/net.types';
+import Persistent from '../interfaces/persistent';
+import * as remote_connection from './remote-connection';
+import * as remote_user from './remote-user';
+import * as signals from '../lib/webrtc/signals';
+import * as social from '../interfaces/social';
+import * as ui_connector from './ui_connector';
+import * as user_interface from '../interfaces/ui';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 import storage = globals.storage;
 import ui = ui_connector.connector;

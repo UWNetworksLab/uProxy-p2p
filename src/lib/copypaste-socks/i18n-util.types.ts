@@ -3,4 +3,4 @@ interface I18nUtil {
   changeLanguage(language:string) : void;
   getBrowserLanguage() : string;
 }
-export = I18nUtil;
+export default I18nUtil;
