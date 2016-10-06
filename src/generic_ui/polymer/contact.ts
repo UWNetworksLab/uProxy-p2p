@@ -195,7 +195,7 @@ Polymer({
         });
       });
     }
-    return Promise.resolve<void>();
+    return Promise.resolve();
   },
   ready: function() {
     this.ui = ui_context.ui;

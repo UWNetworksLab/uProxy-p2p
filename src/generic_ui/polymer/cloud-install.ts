@@ -144,7 +144,7 @@ Polymer({
       }).catch((e: Error) => {
         // Locally created cloud server does not exist
         // so no need to remove contact
-        return Promise.resolve<void>();
+        return Promise.resolve();
       });
     }).then(() => this.createServer());
   },

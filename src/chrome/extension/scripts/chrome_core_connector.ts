@@ -77,7 +77,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
     console.log('trying to connect to app');
     if (this.status.connected) {
       console.warn('Already connected.');
-      return Promise.resolve<void>();
+      return Promise.resolve();
     }
 
     return this.connect_().then(this.flushQueue).then(() => {

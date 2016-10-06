@@ -49,7 +49,7 @@ export class Storage {
         return Promise.reject('non-existing key');
       }
       log.debug('Loaded [%1]: %2', key, result);
-      return <T>JSON.parse(result);
+      return Promise.resolve(<T>JSON.parse(result));
     });
   }
 
@@ -80,10 +80,10 @@ export class Storage {
     log.debug('Removing key %1 from storage ', key);
     return fStorage.remove(key).then((result :string) => {
       log.debug('Successfully removed key %1 from storage', key);
-      return Promise.resolve<void>();
+      return Promise.resolve();
     }).catch((e) => {
       log.warn('Destroy operation failed', e.message);
-      return Promise.resolve<void>();
+      return Promise.resolve();
     });
   }
 

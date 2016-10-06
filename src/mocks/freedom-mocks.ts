@@ -42,7 +42,7 @@ export class MockFreedomStorage implements freedom.Storage.Storage {
 
   public clear = () => {
     this.store_ = {};
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
 }  // class MockFreedomStorage
@@ -78,7 +78,7 @@ export class MockTcpSocket extends MockEventHandler {
 
 export class PgpProvider {
   public setup = (passphrase :string, userId :string) :Promise<void>=> {
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   public exportKey = () : Promise<Object> => {

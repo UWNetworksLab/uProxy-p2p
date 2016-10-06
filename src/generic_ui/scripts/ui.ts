@@ -471,7 +471,7 @@ export class UserInterface implements ui_constants.UiApi {
       return Promise.reject('Error parsing invite token');
     }
 
-    var getConfirmation = Promise.resolve<void>();
+    var getConfirmation = Promise.resolve();
     if (showConfirmation) {
       if (networkName === 'Cloud') {
         userName = this.i18n_t('CLOUD_VIRTUAL_MACHINE');
@@ -556,7 +556,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (networkName == 'Cloud') {
       // Log into cloud if needed.
-      var loginPromise = Promise.resolve<void>();
+      var loginPromise = Promise.resolve();
       if (!this.model.getNetwork('Cloud')) {
         loginPromise = this.login('Cloud');
       }

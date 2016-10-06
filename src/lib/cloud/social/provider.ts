@@ -379,7 +379,7 @@ export class CloudSocialProvider {
         connection.end();
       });
     }
-    return Promise.resolve<void>();
+    return Promise.resolve();
   }
 
   ////
@@ -421,7 +421,7 @@ export class CloudSocialProvider {
         log.warn('failed to log into cloud server during invite accept: %1', e.message);
       });
 
-      return Promise.resolve<void>();
+      return Promise.resolve();
     } catch (e) {
       return Promise.reject(new Error('could not parse invite code: ' + e.message));
     }
@@ -439,7 +439,7 @@ export class CloudSocialProvider {
     if (!(host in this.savedContacts_)) {
       // Do not return an error because result is as expected.
       log.warn('cloud contact %1 is not in %2 - cannot remove from storage', host, STORAGE_KEY);
-      return Promise.resolve<void>();
+      return Promise.resolve();
     }
     // Remove host from savedContacts and clients
     delete this.savedContacts_[host];

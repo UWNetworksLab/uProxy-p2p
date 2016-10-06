@@ -17,7 +17,7 @@ import peerconnection_types = require('../webrtc/signals');
 // For mocking async functions.
 ////////
 
-var voidPromise = Promise.resolve<void>();
+var voidPromise = Promise.resolve();
 var noopPromise = new Promise<void>((F, R) => {});
 
 ////////

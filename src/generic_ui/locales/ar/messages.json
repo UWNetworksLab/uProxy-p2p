@@ -1,9 +1,15 @@
 {
+  "OTHER_PROXY_IN_USE_ERR": {
+    "message": "إعدادات الخادم الوكيل الأخرى قيد الاستخدام"
+  }, 
   "INVITE_SENT_CONFIRMATION": {
     "message": "تم إرسال الدعوة إلى __name__."
   }, 
   "WILL_UPROXY_WORK": {
     "message": "أين يعمل uProxy؟"
+  }, 
+  "TOR_PORT_FALSE": {
+    "message": "تعذّر العثور على الخادم الذي يتلقى الاتصال على المنفذ رقم __number__"
   }, 
   "WHAT_IS_UPROXY": {
     "message": "ما المقصود بعبارة uProxy؟"
@@ -95,6 +101,9 @@
   "CREATE_A_NEW_ACCOUNT": {
     "message": "إنشاء حساب في DigitalOcean"
   }, 
+  "TOR_PORT_PENDING": {
+    "message": "جارٍ البحث عن الخادم الذي يتلقى الاتصال على المنفذ رقم __number__"
+  }, 
   "ENTER_INVITATION": {
     "message": "إدخال دعوة"
   }, 
@@ -104,8 +113,11 @@
   "DOES_UPROXY_LOG_DATA_ANSWER": {
     "message": "<p>عند عدم تمكين تقارير البيانات في uProxy، لن يتم رفع تقارير ببيانات عن استخدامك إطلاقًا. ولكن في حال تمكين تقارير البيانات، سيتم إخفاء هويتك من بيانات الاستخدام قبل مغادرتها جهاز الكمبيوتر، باستخدام أحدث تكنولوجيا <a href=\"http://googleresearch.blogspot.com/2014/10/learning-statistics- with-privacy-aided.html\">الخوارزميات</a> المستخدمة للحفاظ على الخصوصية في Google Chrome.</p><p>وإذا كنت تستخدم أداة \"إرسال التعليقات\" في قائمة الإعدادات يدويًا، فسيكون لديك خيار تضمين سجلات من استخدامك الأخير على uProxy. قد تحتوي السجلات على معلومات يمكن من خلالها تحديد الهوية الشخصية (PII). ولكن لا يتم مطلقًا مشاركة معلومات PII خارج نطاق فريق عمل uProxy، ويتم الاحتفاظ بأي سجلات تحتوي على معلومات PII لمدة ثلاثة أشهر كحد أقصى قبل التخلص منها.</p><p>يتم إرسال جميع التقارير على نحو يجعل من الصعب على أي مراقب لحركة البيانات اكتشاف استخدامك uProxy.</p><p>يمكنك الاطلاع على مزيد من المعلومات حول جمع البيانات في uProxy <a href=\"https://github.com/uProxy/uproxy/wiki/Data- Collection\">هنا</a>.<p>"
   }, 
-  "LOGOUT": {
-    "message": "تسجيل الخروج من uProxy"
+  "TROUBLE_STARTING_CONNECTION": {
+    "message": "لا يمكنني بدء اتصال."
+  }, 
+  "PROCEED_TO_UPROXY_TITLE": {
+    "message": "اكتمل إعداد حسابك في DigitalOcean"
   }, 
   "SIGN_ME_IN": {
     "message": "تسجيل دخولي"
@@ -125,17 +137,23 @@
   "UPROXY_NETWORK_CHOOSE_A_USER_NAME": {
     "message": "اختيار اسم مستخدم"
   }, 
-  "EDIT_ADVANCED_SETTINGS": {
-    "message": "تعديل الإعدادات أدناه"
+  "SUBMIT_BUTTON_TEXT": {
+    "message": "إرسال"
+  }, 
+  "TOR_ENABLE": {
+    "message": "هل تريد المشاركة عبر Tor؟"
+  }, 
+  "NO_FRIENDS_TITLE": {
+    "message": "No friends to proxy from"
+  }, 
+  "TOR_PORT_UNCHECKED": {
+    "message": "تحققْ مما إذا كان الخادم يتلقى الاتصال عبر المنفذ المحدد"
   }, 
   "EXT_MISSING_TITLE": {
     "message": "أنت على استعداد تقريبًا لاستخدام uProxy."
   }, 
   "PROCEED_TO_UPROXY": {
     "message": "المتابعة إلى uProxy"
-  }, 
-  "THANK_YOU": {
-    "message": "شكرًا لك"
   }, 
   "ASKING_FOR_ACCESS": {
     "message": "جارٍ طلب الحصول على إمكانية الوصول"
@@ -148,6 +166,9 @@
   }, 
   "REQUEST_ACCESS": {
     "message": "طلب إمكانية الوصول"
+  }, 
+  "CANT_START_CONNECTION_TITLE": {
+    "message": "Can't start connection"
   }, 
   "OFFERED_YOU_ACCESS": {
     "message": "لديك من هذا الشخص عرض إمكانية وصول."
@@ -187,6 +208,9 @@
   }, 
   "CLOUD_INSTALL_INSTALLING_MESSAGE": {
     "message": "بعد اتصالك، يمكنك مشاركة إمكانية الوصول مع أصدقائك وأفراد العائلة من خادمك الشخصي."
+  }, 
+  "NO_FRIENDS_HELP": {
+    "message": "يمكنك استخدام خوادم uProxy في السحاب.  نشكرك على تعليقاتك. <uproxy-faq-link anchor='whatAreCloudServers'>مزيد من المعلومات.</uproxy- faq-link>"
   }, 
   "EMPTY_ROSTER_INSTRUCTIONS": {
     "message": "يمكنك الحصول على إمكانية الوصول ومشاركتها مع أحد أصدقائك أو خادم سحابي خاص."
@@ -244,6 +268,9 @@
   }, 
   "HOW_DOES_UPROXY_COMPARE_ANSWER": {
     "message": "<p>تم تصميم uProxy بحيث يمكن الوثوق به والاعتماد عليه في مواجهة الحظر.</p><p>عادة ما يتصل مستخدمو الشبكات الظاهرية الخاصة بخوادم يسهل تحديد هويتها، ومن ثم يمكن بسهولة الوقوف على حركة بيانات الشبكة الظاهرية الخاصة وحظرها. على النقيض، يتصل مستخدمو uProxy ببعضهم وليس بخوادم مشتركة، كما يصعب في uProxy التعرف على حركة البيانات ومن ثم يصعب حظرها.</p><p>علاوة على ذلك، يمكن لخدمات الشبكة الظاهرية الخاصة مراقبة مواقع الويب التي تنتقل إليها، والعديد منها لا يحتفظ بخصوصية هذه البيانات. يمكن لمستخدمي uProxy الوثوق في اتصالاتهم مع الأصدقاء، على العكس من خدمات الشبكة الظاهرية الخاصة التي ربما لا يعرفون سوى القليل عنها.</p><p>وإلى جانب الغموض بشأن تصرفات الشبكات الظاهرية الخاصة في بيانات التصفح التابعة للمستخدمين، قد يصعب معرفة عميل الشبكة الظاهرية الخاصة وبرنامج الخادم وقد يصعب كذلك الوثوق بهما، خاصة عندما يكون مصدرًا مغلقًا. على العكس من ذلك، فإن uProxy يوفر مصدرًا مفتوحًا ويتعرض لفحص عام ودقيق بشكل مستمر. ومتى أمكن يتجنب uProxy مطالبة المستخدمين بالوثوق ثقة عمياء في برامجه التي لا يمكن التحقق من موثوقيتها.</p>"
+  }, 
+  "REPROXY_ERROR_DETAILS": {
+    "message": "المشاركة معطّلة لأنه تعذَّر على uProxy الاتصال بمنفذ إدخال Tor. يُرجى بدء تشغيل Tor أو تعطيل \"المشاركة عبر Tor\" في الإعدادات المتقدمة."
   }, 
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "message": "<p>مقابل $10 شهريًا، يمكنك الحصول على خادم uProxy السحابي الخاص بك، حتى تتمكن من استخدامه على مدار اليوم وطوال أيام الأسبوع (ومشاركته مع الأصدقاء كذلك). <uproxy-faq- link anchor='whatAreCloudServers'>تعرَّف على مزيد من المعلومات حول الخوادم السحابية </uproxy-faq-link></p><p>تعمل الخوادم السحابية في الصدارة على DigitalOcean. وإذا لم يكن لديك حساب بعد في DigitalOcean، فيمكنك إنشاء حساب من خلال الزر التالي. سيُطلب منك إضافة طريقة دفع، ولكن إذا اشتركت من خلال uProxy، فستحصل على أول شهر مجانًا. <uproxy-faq-link anchor='whatIsDigitalOcean'>مزيد من المعلومات حول DigitalOcean</uproxy- faq-link></p>", 
@@ -468,14 +495,14 @@
   "UPROXY_NETWORK_SIGN_IN": {
     "message": "تسجيل الدخول"
   }, 
+  "TROUBLE_SIGNING_IN_HELP": {
+    "message": "لن ينجح تسجيل الدخول عند تجربة شبكة اجتماعية تم حظرها.  نشكرك على تعليقاتك. <uproxy-faq-link anchor='willUproxyWork'>مزيد من المعلومات.</uproxy-faq-link>"
+  }, 
   "RESPOND_TO_FRIEND_REQUEST": {
     "message": "الرد على طلب صديق"
   }, 
   "DESCRIPTION_DEFAULT": {
     "message": "الكمبيوتر رقم __number__"
-  }, 
-  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
-    "message": "مزيد من المعلومات"
   }, 
   "UPROXY_NETWORK_INVITE_LOGIN_MESSAGE": {
     "message": "لإضافة __name__ كصديق، يُرجى تسجيل الدخول إلى شبكة uProxy"
@@ -534,8 +561,8 @@
   "GET_HELP": {
     "message": "الحصول على مساعدة"
   }, 
-  "SUBMIT_BUTTON_TEXT": {
-    "message": "إرسال"
+  "EDIT_ADVANCED_SETTINGS": {
+    "message": "تعديل الإعدادات أدناه"
   }, 
   "NEXT": {
     "message": "التالي"
@@ -560,6 +587,9 @@
   }, 
   "SHARING_UNAVAILABLE_TITLE": {
     "message": "المشاركة غير متاحة"
+  }, 
+  "FEEDBACK_TITLE": {
+    "message": "Thank you!"
   }, 
   "WE_WONT_POST_LEARN_MORE": {
     "message": "لن نشارك بياناتك أو مشاركتك على نطاق عام بدون موافقتك. <uproxy-faq-link anchor='whyDoesUproxyConnect'>مزيد من المعلومات</uproxy- faq-link>"
@@ -603,6 +633,9 @@
   "ADD_A_CLOUD_FRIEND": {
     "message": "إضافة صديق في السحاب"
   }, 
+  "TROUBLE_SIGNING_IN_TITLE": {
+    "message": "Trouble signing in"
+  }, 
   "PRIVACY_POLICY": {
     "message": "سياسة الخصوصية"
   }, 
@@ -624,8 +657,8 @@
   "WHAT_ISNT_PROXIED_ANSWER": {
     "message": "<p>لا يتم نقل الملفات في uProxy إلا لمتصفح الويب الذي يعمل على uProxy، وليس لأي تطبيقات أخرى. وهناك بعض المواقف النادرة التي قد يقدِّم المتصفح فيها طلبات بدون الخادم الوكيل، كما أن هناك بعض تقنيات الويب، أهمها Flash وWebRTC، يمكنها تقديم طلبات لا تتم عبر الخادم الوكيل. تسري التحذيرات نفسها غالبًا على الشبكات الظاهرية الخاصة. ويُوصى المستخدمون الذين لديهم متطلبات خصوصية قوية بتجربة استخدام <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor Browser</a>، الذي تم تصميمه خصيصًا للحد من المعلومات التي يمكن أن يحصل عليها مراقب حركة البيانات حول أنشطتك.</p>"
   }, 
-  "TROUBLE_STARTING_CONNECTION": {
-    "message": "لا يمكنني بدء اتصال."
+  "LOGOUT": {
+    "message": "تسجيل الخروج من uProxy"
   }, 
   "DESTROY_CLOUD_SERVER_CONFIRMATION": {
     "message": "سيؤدي هذا إلى تدمير خادم uProxy السحابي التابع لك. وتجدر الإشارة إلى أنه لن يكون بإمكان أصدقائك وأفراد عائلتك استخدام هذا الخادم السحابي مرة أخرى بعد تدميره."
@@ -693,6 +726,9 @@
   "SHARE_ACCESS": {
     "message": "مشاركة إمكانية الوصول"
   }, 
+  "CANT_START_CONNECTION_HELP": {
+    "message": "يعتمد uProxy أحيانًا على التحكم في المنفذ لإنشاء اتصال، إلا أن ذلك قد لا يكون متاحًا لشبكتك.  نشكرك على تعليقاتك. <uproxy-faq-link anchor='whatIsPortControl'>مزيد من المعلومات .</uproxy-faq-link>"
+  }, 
   "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY": {
     "message": "جارٍ تنزيل وتثبيت صورة uProxy..."
   }, 
@@ -740,6 +776,9 @@
   }, 
   "PORT_CONTROL_PENDING": {
     "message": "جارٍ فحص جهاز التوجيه لدعم التحكم في المنفذ..."
+  }, 
+  "TOR_PORT_PLACEHOLDER": {
+    "message": "المنفذ"
   }, 
   "APP_MISSING_MESSAGE": {
     "message": "يمكنك تنزيل الجزء 2 من uProxy وتمكينه للبدء."
@@ -828,8 +867,8 @@
   "LANGUAGE": {
     "message": "اللغة"
   }, 
-  "SUBMIT_FEEDBACK_SENTENCE_CASE": {
-    "message": "إرسال التعليقات"
+  "TOR_ENABLE_WARNING": {
+    "message": "تحذير: هذا الإعداد سيؤدي إلى تعطيل uProxy ما لم تتم تهيئة Tor بشكل صحيح لتلقي الاتصال عبر المنفذ المحلي المحدد. ويمكن تمكين هذا الإعداد فقط عن طريق مشاركة المستخدمين لاتصالهم مع الآخرين."
   }, 
   "CONNECT": {
     "message": "اتصال"
@@ -855,8 +894,8 @@
   "HOW_DO_I_SUBMIT_ANSWER": {
     "message": "<p>لإرسال تعليقات من داخل uProxy، يمكنك الانتقال إلى القائمة (رمز ≡) واختيار \"إرسال تعليقات\". كما يمكنك مراسلتنا عبر البريد الإلكتروني على العنوان <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>.</p>"
   }, 
-  "PROCEED_TO_UPROXY_TITLE": {
-    "message": "اكتمل إعداد حسابك في DigitalOcean"
+  "REPROXY_ERR": {
+    "message": "تتعذر المشاركة عبر Tor"
   }, 
   "PORT_CONTROL_NOT_SUPPORTED": {
     "message": "لم يتم تمكين التحكم في المنفذ على جهاز التوجيه."
@@ -887,6 +926,9 @@
       }
     }
   }, 
+  "TOR_HOW_ENABLE_REPROXY": {
+    "message": "كيف يمكن للمشاركين توفير إمكانية الوصول الآمن إلى أشخاص بالرغم من عدم ثقتهم الكاملة في هؤلاء الأشخاص؟"
+  }, 
   "GITHUB_INVITE_PLACEHOLDER": {
     "message": "اسم مستخدم الصديق على GitHub"
   }, 
@@ -895,6 +937,9 @@
   }, 
   "CLOUD_INVITE_PLACEHOLDER": {
     "message": "رمز الدعوة"
+  }, 
+  "TOR_HOW_ENABLE_REPROXY_ANSWER": {
+    "message": "<p>يسمح uProxy للمشاركين بتوجيه اتصالات الأشخاص الذين يصلون عبر شبكة Tor، مع إخفاء هوية المشاركين عن مواقع الويب التي تتم زيارتها. وهذا يقلل من حجم المخاطر التي يمكن أن تحدث للمشارك في حالة ما إذا كان هناك شخص يستخدم الاتصال الذي تمت مشاركته لفعل شيء مسيء؛ ولكن قد يؤدي نقل بيانات الاتصال عبر شبكة Tor إلى بطء أداء الشبكة للشخص الذي يستخدم هذه الطريقة للاتصال بالإنترنت. يجدر بالذكر أيضًا أن الشخص الذي يستخدم هذا الاتصال الذي تمت مشاركته عليه عدم الثقة بشكل قوي في أن هويته ستكون مجهولة، لأنه لن يستخدم إعدادات الأمان التي تقيِّد الاتصال والموجودة في حزمة متصفح Tor.</p><p>لإرسال بيانات الاتصال الذي يتم تلقيه عبر Tor، يجب أولاً <a href=\"https://www.torproject.org/download/download\">تنزيل</a> Tor. وعندما يتم تشغيل Tor على جهازك، انتقل أولاً إلى لوحة الإعدادات المتقدمة في uProxy وانقر على \"تمكين خيار Tor\"، ثم أدخل رقم المنفذ لتطبيق Tor؛ والمنفذ 9050 هو المنفذ الافتراضي المستقل بذاته لتطبيق Tor كما أن 9150 هو المنفذ الافتراضي لحزمة متصفح Tor. انقر على \"تعيين\" لحفظ التغييرات. وسيتم الآن توجيه كل طلبات الاتصالات الجديدة عبر Tor.</p>"
   }, 
   "NO": {
     "message": "لا"
@@ -964,6 +1009,9 @@
   }, 
   "UNABLE_TO_GET_FROM": {
     "message": "يتعذر الحصول على إمكانية وصول من __name__"
+  }, 
+  "TOR_PORT_TRUE": {
+    "message": "تم العثور على الخادم الذي يتلقى الاتصال على المنفذ رقم __number__"
   }, 
   "ACCEPT_LINK_FROM_INVITE_PAGE": {
     "message": "أريد إدخال دعوة بدلاً من ذلك."
@@ -1039,6 +1087,9 @@
   }, 
   "LOGS_TITLE": {
     "message": "السجلات وتحليل الشبكة"
+  }, 
+  "SUBMIT_FEEDBACK_SENTENCE_CASE": {
+    "message": "إرسال التعليقات"
   }, 
   "ENTER_INVITATION_DESCRIPTION": {
     "message": "إذا تلقيت دعوة من صديق تريد مشاركتك في استخدام uProxy، فيمكنك لصق الدعوة هنا."

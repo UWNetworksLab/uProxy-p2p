@@ -160,7 +160,7 @@ describe('remote_instance.RemoteInstance', () => {
       expect(aliceState.localGettingFromRemote).toEqual(social.GettingState.NONE);
       alice.user.consent.localRequestsAccessFromRemote = true;
       alice.wireConsentFromRemote.isOffering = true;
-      spyOn(socksToRtc, 'start').and.returnValue(Promise.resolve<void>());
+      spyOn(socksToRtc, 'start').and.returnValue(Promise.resolve());
 
       alice.start().then(() => {
         aliceState = alice.currentStateForUi();
@@ -230,7 +230,7 @@ describe('remote_instance.RemoteInstance', () => {
 
     beforeEach(() => {
       alice = new remote_instance.RemoteInstance(user, 'instance-alice');
-      alice['connection_'].onceSharerCreated = Promise.resolve<void>();
+      alice['connection_'].onceSharerCreated = Promise.resolve();
 
       user.consent.localGrantsAccessToRemote = true;
 
@@ -259,7 +259,7 @@ describe('remote_instance.RemoteInstance', () => {
 
     it('handles signal from server peer as client', (done) => {
       alice.wireConsentFromRemote.isOffering = true;
-      spyOn(socksToRtc, 'start').and.returnValue(Promise.resolve<void>());
+      spyOn(socksToRtc, 'start').and.returnValue(Promise.resolve());
 
       alice.start().then(() => {
         alice.handleSignal({

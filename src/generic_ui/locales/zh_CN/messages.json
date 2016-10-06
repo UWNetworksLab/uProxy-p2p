@@ -1,9 +1,15 @@
 {
+  "OTHER_PROXY_IN_USE_ERR": {
+    "message": "其他代理设置正在使用中"
+  }, 
   "INVITE_SENT_CONFIRMATION": {
     "message": "邀请已发送给 __name__！"
   }, 
   "WILL_UPROXY_WORK": {
     "message": "uProxy 适用于哪些情况？"
+  }, 
+  "TOR_PORT_FALSE": {
+    "message": "无法找到在端口 __number__ 上进行侦听的服务器"
   }, 
   "WHAT_IS_UPROXY": {
     "message": "什么是 uProxy？"
@@ -95,6 +101,9 @@
   "CREATE_A_NEW_ACCOUNT": {
     "message": "创建 DigitalOcean 帐户"
   }, 
+  "TOR_PORT_PENDING": {
+    "message": "正在搜索在端口 __number__ 上进行侦听的服务器"
+  }, 
   "ENTER_INVITATION": {
     "message": "请输入邀请"
   }, 
@@ -104,8 +113,11 @@
   "DOES_UPROXY_LOG_DATA_ANSWER": {
     "message": "<p>如果您没有启用 uProxy 的数据报告功能，系统将不会报告与您的使用情况有关的任何数据。如果您启用了该功能，系统在将任何使用情况数据从您的计算机发送到其他地方之前，都会使用 Google Chrome 中所用的先进的隐私保护<a href=\"http://googleresearch.blogspot.com/2014/10/learning-statistics- with-privacy-aided.html\">算法</a>对其进行匿名化处理。</p><p>如果您手动使用设置菜单中的“提交反馈”工具，则可以选择包含近期的 uProxy 使用情况日志。日志中可能包含个人身份信息 (PII)。我们绝不会将您的个人身份信息提供给 uProxy 团队以外的第三方，并且包含个人身份信息的所有日志最多保留 3 个月即会被清除。</p><p>所有报告的提交方式均可以确保流量监测工具很难检测到您在使用 uProxy。</p><p>要了解与 uProxy 的数据收集有关的更多信息，请点击<a href=\"https://github.com/uProxy/uproxy/wiki/Data- Collection\">此处</a>。<p>"
   }, 
-  "LOGOUT": {
-    "message": "退出 uProxy"
+  "TROUBLE_STARTING_CONNECTION": {
+    "message": "我无法建立连接。"
+  }, 
+  "PROCEED_TO_UPROXY_TITLE": {
+    "message": "您的 DigitalOcean 帐户已设置完毕！"
   }, 
   "SIGN_ME_IN": {
     "message": "登录！"
@@ -125,17 +137,23 @@
   "UPROXY_NETWORK_CHOOSE_A_USER_NAME": {
     "message": "请选择用户名"
   }, 
-  "EDIT_ADVANCED_SETTINGS": {
-    "message": "在下方修改您的设置"
+  "SUBMIT_BUTTON_TEXT": {
+    "message": "提交"
+  }, 
+  "TOR_ENABLE": {
+    "message": "要通过 Tor 分享吗？"
+  }, 
+  "NO_FRIENDS_TITLE": {
+    "message": "No friends to proxy from"
+  }, 
+  "TOR_PORT_UNCHECKED": {
+    "message": "请查看服务器是否正在指定端口上进行侦听"
   }, 
   "EXT_MISSING_TITLE": {
     "message": "使用 uProxy 的准备工作已基本就绪！"
   }, 
   "PROCEED_TO_UPROXY": {
     "message": "转到 uProxy"
-  }, 
-  "THANK_YOU": {
-    "message": "谢谢！"
   }, 
   "ASKING_FOR_ACCESS": {
     "message": "正在请求上网权限"
@@ -148,6 +166,9 @@
   }, 
   "REQUEST_ACCESS": {
     "message": "请求上网权限"
+  }, 
+  "CANT_START_CONNECTION_TITLE": {
+    "message": "Can't start connection"
   }, 
   "OFFERED_YOU_ACCESS": {
     "message": "他们向您提供了上网权限。"
@@ -187,6 +208,9 @@
   }, 
   "CLOUD_INSTALL_INSTALLING_MESSAGE": {
     "message": "连接之后，您就可以通过私有服务器与亲朋好友分享上网权限了。"
+  }, 
+  "NO_FRIENDS_HELP": {
+    "message": "请考虑使用 uProxy 云服务器。感谢您提交反馈！<uproxy-faq-link anchor='whatAreCloudServers'>了解详情</uproxy- faq-link>。"
   }, 
   "EMPTY_ROSTER_INSTRUCTIONS": {
     "message": "通过好友或私有云服务器获取和分享上网权限。"
@@ -244,6 +268,9 @@
   }, 
   "HOW_DOES_UPROXY_COMPARE_ANSWER": {
     "message": "<p>uProxy 是一款值得信赖且能够防止流量被屏蔽的扩展程序。</p><p>VPN 用户通常连接到能被轻易识别出的服务器，VPN 流量则可以被轻易地识别出来并被屏蔽。而 uProxy 用户是彼此之间建立连接（而不是连接到常用的服务器），uProxy 则能够使其流量难以被识别出来，并因此而难以被屏蔽。</p><p>此外，VPN 服务可以监控您访问的网站，并且很多 VPN 服务不会对此类数据保密。uProxy 用户信任的是他们通过好友建立的连接，而不是他们可能不甚了解的 VPN 服务。</p><p>除了不了解 VPN 会如何处理用户的浏览数据外，用户也很难了解并信任 VPN 客户端和服务器软件，尤其当它们是封闭源代码客户端/软件的情况下。而 uProxy 是开放源代码扩展程序，持续接受公众监督。uProxy 会尽可能避免让用户盲目信任可信度无法得到验证的软件。</p>"
+  }, 
+  "REPROXY_ERROR_DETAILS": {
+    "message": "由于 uProxy 无法连接到 Tor 的输入端口，因此分享过程已中断。请在“高级设置”中启用 Tor 或停用“通过 Tor 分享”。"
   }, 
   "CLOUD_INSTALL_GET_STARTED_MESSAGE": {
     "message": "<p>每月只需 10 美元，您就可以拥有自己的 uProxy 云服务器，畅享全天候无阻上网的便利，还可以与好友分享上网权限。<uproxy-faq- link anchor='whatAreCloudServers'>详细了解云服务器</uproxy-faq-link></p><p>云服务器运行在 DigitalOcean 之上。如果您还没有 DigitalOcean 帐户，请点击以下按钮创建一个。系统将提示您添加付款方式，不过如果您通过 uProxy 登录，第一个月将免费！<uproxy-faq-link anchor='whatIsDigitalOcean'>详细了解 DigitalOcean</uproxy- faq-link></p>"
@@ -458,14 +485,14 @@
   "UPROXY_NETWORK_SIGN_IN": {
     "message": "登录"
   }, 
+  "TROUBLE_SIGNING_IN_HELP": {
+    "message": "如果您尝试使用被屏蔽的社交网络，登录将会失败。感谢您提交反馈！<uproxy-faq-link anchor='willUproxyWork'>了解详情</uproxy-faq-link>。"
+  }, 
   "RESPOND_TO_FRIEND_REQUEST": {
     "message": "回应加好友请求"
   }, 
   "DESCRIPTION_DEFAULT": {
     "message": "计算机 __number__"
-  }, 
-  "PORT_CONTROL_NOT_SUPPORTED_INFO_LINK": {
-    "message": "更多信息。"
   }, 
   "UPROXY_NETWORK_INVITE_LOGIN_MESSAGE": {
     "message": "要将 __name__ 添加为好友，请登录 uProxy 网络"
@@ -524,8 +551,8 @@
   "GET_HELP": {
     "message": "获取帮助"
   }, 
-  "SUBMIT_BUTTON_TEXT": {
-    "message": "提交"
+  "EDIT_ADVANCED_SETTINGS": {
+    "message": "在下方修改您的设置"
   }, 
   "NEXT": {
     "message": "继续"
@@ -550,6 +577,9 @@
   }, 
   "SHARING_UNAVAILABLE_TITLE": {
     "message": "无法分享"
+  }, 
+  "FEEDBACK_TITLE": {
+    "message": "Thank you!"
   }, 
   "WE_WONT_POST_LEARN_MORE": {
     "message": "未经您的同意，我们不会分享或公开发布您的数据。<uproxy-faq-link anchor='whyDoesUproxyConnect'>了解详情</uproxy- faq-link>"
@@ -593,6 +623,9 @@
   "ADD_A_CLOUD_FRIEND": {
     "message": "添加云好友"
   }, 
+  "TROUBLE_SIGNING_IN_TITLE": {
+    "message": "Trouble signing in"
+  }, 
   "PRIVACY_POLICY": {
     "message": "隐私权政策"
   }, 
@@ -614,8 +647,8 @@
   "WHAT_ISNT_PROXIED_ANSWER": {
     "message": "<p>uProxy 仅代理自己所在网络浏览器的流量，不代理其他应用的流量。在一些不常见的情况下，浏览器可能会发出不经由代理的请求，并且某些网络技术（尤其是 Flash 和 WebRTC）能够发出不经由代理的请求。VPN 也经常会出现同样的情况。建议隐私需求较高的用户考虑使用 <a href=\"https://www.torproject.org/projects/torbrowser.html\">Tor 浏览器</a>，该浏览器经过专门设计，能够最大限度地防范流量监测工具获取与您的活动相关的信息。</p>"
   }, 
-  "TROUBLE_STARTING_CONNECTION": {
-    "message": "我无法建立连接。"
+  "LOGOUT": {
+    "message": "退出 uProxy"
   }, 
   "DESTROY_CLOUD_SERVER_CONFIRMATION": {
     "message": "这将销毁您的 uProxy 云服务器。请注意，这个云服务器销毁之后，您的亲朋好友将无法再使用它。"
@@ -683,6 +716,9 @@
   "SHARE_ACCESS": {
     "message": "分享上网权限"
   }, 
+  "CANT_START_CONNECTION_HELP": {
+    "message": "uProxy 有时依靠端口控制来建立连接，但这种方式可能不适用于您的网络。感谢您提交反馈！<uproxy-faq-link anchor='whatIsPortControl'>了解详情</uproxy-faq-link>。"
+  }, 
   "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY": {
     "message": "正在下载并安装 uProxy 映像…"
   }, 
@@ -731,6 +767,9 @@
   "PORT_CONTROL_PENDING": {
     "message": "正在探查路由器是否支持端口控制…"
   }, 
+  "TOR_PORT_PLACEHOLDER": {
+    "message": "端口"
+  }, 
   "APP_MISSING_MESSAGE": {
     "message": "下载并启用 uProxy 的第 2 部分，即可开始使用。"
   }, 
@@ -747,7 +786,7 @@
     "message": "正在检索日志并分析您的网络…"
   }, 
   "MORE_INFO": {
-    "message": "更多信息"
+    "message": "更多信息。"
   }, 
   "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY": {
     "message": "正在等待 uProxy 启动…"
@@ -818,8 +857,8 @@
   "LANGUAGE": {
     "message": "语言"
   }, 
-  "SUBMIT_FEEDBACK_SENTENCE_CASE": {
-    "message": "提交反馈"
+  "TOR_ENABLE_WARNING": {
+    "message": "警告：除非 Tor 已经过正确配置，可以在指定的本地端口上进行侦听，否则启用此设置会断开 uProxy 连接。只有与他人分享自己连接的用户才应该启用此设置。"
   }, 
   "CONNECT": {
     "message": "连接"
@@ -845,8 +884,8 @@
   "HOW_DO_I_SUBMIT_ANSWER": {
     "message": "<p>要在 uProxy 中提交反馈，请转到菜单（≡ 图标）并选择“提交反馈”。您也可以向我们发送电子邮件，电子邮件地址是 <a href=\"mailto:info@uproxy.org\">info@uproxy.org</a>。</p>"
   }, 
-  "PROCEED_TO_UPROXY_TITLE": {
-    "message": "您的 DigitalOcean 帐户已设置完毕！"
+  "REPROXY_ERR": {
+    "message": "无法通过 Tor 分享"
   }, 
   "PORT_CONTROL_NOT_SUPPORTED": {
     "message": "您的路由器未启用端口控制。"
@@ -869,6 +908,9 @@
   "WHAT_IS_DIGITAL_OCEAN_ANSWER": {
     "message": "<p>DigitalOcean 是一家云托管服务提供商。在您创建帐户并设置付款方式之后，uProxy 将能够在您帐户名下创建服务器。默认情况下，uProxy 将设置每月费用为 10 美元的服务器（DigitalOcean 提供的服务器起价为每月 5 美元，我们计划在未来支持这些服务器；但为了保证使用性能，目前要求使用高一档的服务器）。除了信用卡之外，DigitalOcean 还接受 PayPal（集成了多种付款系统，包括银联）。您可以随时暂停自己的服务器或终止自己的 DigitalOcean 帐户。</p>"
   }, 
+  "TOR_HOW_ENABLE_REPROXY": {
+    "message": "分享者如何才能安全地为自己可能并不完全信任的用户提供上网权限？"
+  }, 
   "GITHUB_INVITE_PLACEHOLDER": {
     "message": "好友的 GitHub 用户名"
   }, 
@@ -877,6 +919,9 @@
   }, 
   "CLOUD_INVITE_PLACEHOLDER": {
     "message": "邀请代码"
+  }, 
+  "TOR_HOW_ENABLE_REPROXY_ANSWER": {
+    "message": "<p>uProxy 可让分享者路由通过 Tor 网络获取上网权限的用户的连接，同时会向所访问的网站隐藏分享者的身份。这样就会在获取上网权限的用户滥用连接时，降低分享者的风险。不过，通过 Tor 网络进行传输可能会减慢获取上网权限的用户的网络连接速度。由于获取上网权限的用户并不会使用 Tor Browser Bundle 的限制性安全设置，因此，他们也不会对匿名化处理抱有过高的期望。</p><p>要通过 Tor 向获取上网权限的用户发送流量，您必须先<a href=\"https://www.torproject.org/download/download\">下载</a> Tor。在您的机器上运行 Tor 后，请先转到 uProxy 中的“高级设置”面板，点击“启用 Tor”选项，然后输入 Tor 的端口号；独立版 Tor 的默认端口号为 9050，而 Tor Browser Bundle 的默认端口号则为 9150。点击“设置”以保存更改。此时所有的新连接均将通过 Tor 路由其请求。</p>"
   }, 
   "NO": {
     "message": "否"
@@ -946,6 +991,9 @@
   }, 
   "UNABLE_TO_GET_FROM": {
     "message": "无法通过 __name__ 获取上网权限"
+  }, 
+  "TOR_PORT_TRUE": {
+    "message": "已找到在端口 __number__ 上进行侦听的服务器"
   }, 
   "ACCEPT_LINK_FROM_INVITE_PAGE": {
     "message": "我想改为输入邀请。"
@@ -1021,6 +1069,9 @@
   }, 
   "LOGS_TITLE": {
     "message": "日志和网络分析"
+  }, 
+  "SUBMIT_FEEDBACK_SENTENCE_CASE": {
+    "message": "提交反馈"
   }, 
   "ENTER_INVITATION_DESCRIPTION": {
     "message": "如果您收到了好友的邀请并想与其一起使用 uProxy，请将邀请粘贴在此处："

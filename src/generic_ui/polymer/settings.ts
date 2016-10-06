@@ -31,7 +31,7 @@ Polymer({
     var isGetting = ui.isGettingAccess();
     var isSharing = ui.isGivingAccess();
     var confirmationMessage: string = null;
-    var confirmLogout = Promise.resolve<void>();
+    var confirmLogout = Promise.resolve();
 
     if (isGetting || isSharing) {
       var confirmationMessage = dialogs.getLogoutConfirmationMessage(ui.isGettingAccess(), ui.isGivingAccess());
