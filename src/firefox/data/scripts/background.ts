@@ -4,7 +4,7 @@ import FirefoxBrowserApi from './firefox_browser_api';
 import FirefoxCoreConnector from './firefox_connector';
 import * as ui_model from '../../../generic_ui/scripts/model';
 import * as panel_connector from '../../../interfaces/panel_connector';
-import * as port from './port';
+import port from './port';
 import * as same_context_panel_connector from '../../../generic_ui/scripts/same_context_panel_connector';
 import * as user_interface from '../../../generic_ui/scripts/ui';
 

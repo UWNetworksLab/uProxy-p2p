@@ -8,7 +8,7 @@ import * as uproxy_core_api from '../interfaces/uproxy_core_api';
  * This allows us to use a CoreConnector in our integration tests, rather than
  * just making .on and .emit calls.
  */
-class IntegrationTestConnector implements browser_connector.CoreBrowserConnector {
+export default class IntegrationTestConnector implements browser_connector.CoreBrowserConnector {
   public status :browser_connector.StatusObject;
   public onceConnected :Promise<void>;
 
@@ -46,5 +46,3 @@ class IntegrationTestConnector implements browser_connector.CoreBrowserConnector
     }
   }
 }  // class IntegrationTestConnector
-
-export = IntegrationTestConnector;

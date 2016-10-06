@@ -50,7 +50,7 @@ var exported = {
   rtc_to_net: rtc_to_net,
   globals: globals
 };
-export = exported;
+export default exported;
 
 // Note: Our mechanism for dispatching commands requires that the
 // members of core are bound closures.  E.g.:

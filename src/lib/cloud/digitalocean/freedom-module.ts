@@ -6,4 +6,4 @@ declare const freedom: freedom.FreedomInModuleEnv;
 
 freedom().providePromises(Provisioner);
 
-export = Provisioner
+export default Provisioner;

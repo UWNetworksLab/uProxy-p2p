@@ -8,4 +8,4 @@ if (typeof freedom !== 'undefined') {
   freedom['churnPipe']().providePromises(ChurnPipe);
 }
 
-export = ChurnPipe
+export default ChurnPipe

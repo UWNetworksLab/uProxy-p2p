@@ -838,4 +838,3 @@ import ProxyConfig from './proxyconfig';
   }  // Session
 
 //}  // module RtcToNet
-//export = RtcToNet;

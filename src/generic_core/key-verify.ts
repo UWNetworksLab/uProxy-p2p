@@ -1,8 +1,7 @@
 import * as crypto from 'crypto';
 import * as globals from './globals';
 import * as logging from '../lib/logging/logging';
-import loggingTypes =
-  require('../lib/loggingprovider/loggingprovider.types');
+import * as loggingTypes from '../lib/loggingprovider/loggingprovider.types';
 var log :logging.Log = new logging.Log('KeyVerify');
 
 // KeyVerify's callbacks API from ZRTP protocol.

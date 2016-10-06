@@ -6,11 +6,11 @@
  * Firefox-specific implementation of the Browser API.
  */
 
-import browser_api =  require('../../../interfaces/browser_api');
+import * as browser_api from '../../../interfaces/browser_api';
 import BrowserAPI = browser_api.BrowserAPI;
 import * as user_interface from '../../../generic_ui/scripts/ui';
 import * as net from '../../../lib/net/net.types';
-import * as port from './port';
+import port from './port';
 
 interface FullfillAndReject {
   fulfill :Function;

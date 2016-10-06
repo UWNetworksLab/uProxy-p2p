@@ -9,7 +9,7 @@
 
 import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 import * as browser_connector from '../../../interfaces/browser_connector';
-import * as port from './port';
+import port from './port';
 
 /**
  * Firefox-specific uProxy CoreBrowserConnector implementation.

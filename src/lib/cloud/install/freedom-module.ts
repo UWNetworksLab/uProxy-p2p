@@ -6,4 +6,4 @@ declare const freedom: freedom.FreedomInModuleEnv;
 
 freedom().providePromises(CloudInstaller);
 
-export = CloudInstaller
+export default CloudInstaller;

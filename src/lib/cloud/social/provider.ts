@@ -1,6 +1,6 @@
 /// <reference path='../../../../third_party/typings/index.d.ts' />
 
-require('../social/monkey/process');
+import '../social/monkey/process';
 
 import * as arraybuffers from '../../arraybuffers/arraybuffers';
 import * as crypto from 'crypto';
