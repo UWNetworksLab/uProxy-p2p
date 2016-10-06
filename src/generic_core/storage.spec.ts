@@ -1,8 +1,8 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
 
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
@@ -11,11 +11,9 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'portControl': () => { return new Object },
 });
 
-import local_storage = require('./storage');
-import globals = require('./globals');
+import * as local_storage from './storage';
+import * as globals from './globals';
 import storage = globals.storage;
-
-local_storage.DEBUG_STATESTORAGE = false;
 
 // Depends on the MockFreedomStorage that executes everything synchronously.
 describe('local_storage.Storage', () => {

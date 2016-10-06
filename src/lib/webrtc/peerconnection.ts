@@ -1,9 +1,9 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import datachannel = require('./datachannel');
-import handler = require('../handler/queue');
-import logging = require('../logging/logging');
-import signals = require('./signals');
+import * as datachannel from './datachannel';
+import * as handler from '../handler/queue';
+import * as logging from '../logging/logging';
+import * as signals from './signals';
 
 import RTCSessionDescription = freedom.RTCPeerConnection.RTCSessionDescription;
 

@@ -1,10 +1,10 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
-import caesar = require('./caesar');
+import * as caesar from './caesar';
 
 describe('caesar cipher', function() {
   var transformer :caesar.CaesarCipher;

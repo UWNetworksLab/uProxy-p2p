@@ -1,4 +1,4 @@
-import social = require('./social');
+import * as social from './social';
 
 /**
  * Enumeration of mutually-exclusive view states.

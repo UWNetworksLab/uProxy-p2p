@@ -49,4 +49,4 @@ interface Persistent {
 
 }  // interface Persistent
 
-export = Persistent;
+export default Persistent;

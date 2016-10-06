@@ -1,10 +1,10 @@
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import decompression = require('./decompressionShaper');
-import fragmentation = require('./fragmentationShaper');
-import logging = require('../logging/logging');
-import rc4 = require('./rc4');
-import sequence = require('./byteSequenceShaper');
-import transformer = require('./transformer');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as decompression from './decompressionShaper';
+import * as fragmentation from './fragmentationShaper';
+import * as logging from '../logging/logging';
+import * as rc4 from './rc4';
+import * as sequence from './byteSequenceShaper';
+import * as transformer from './transformer';
 
 const log :logging.Log = new logging.Log('protean');
 

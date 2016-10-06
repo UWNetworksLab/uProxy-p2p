@@ -3,7 +3,7 @@
 // A simple mock implementation of the freedom event handler that lets you cause
 // fake events. Useful for mocking out freedom freedom modules that will raise
 // events.
-class MockFreedomEventHandler implements freedom.EventHandler {
+export default class MockFreedomEventHandler implements freedom.EventHandler {
   private onHandlerTable_ : {[eventName:string] : Function[]} = {};
   private onceHandlerTable_ : {[eventName:string] : Function[]} = {};
 
@@ -45,5 +45,3 @@ class MockFreedomEventHandler implements freedom.EventHandler {
     this.onceHandlerTable_[eventName] = [];
   }
 }
-
-export = MockFreedomEventHandler;

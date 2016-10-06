@@ -1,4 +1,4 @@
-import social = require('../interfaces/social');
+import * as social from '../interfaces/social';
 
 function lenMinusOne(keys:string[]) :number {
   return keys.length -1;

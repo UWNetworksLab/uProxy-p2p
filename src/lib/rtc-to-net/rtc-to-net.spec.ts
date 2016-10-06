@@ -1,22 +1,22 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 (<any>window).freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import peerconnection = require('../webrtc/peerconnection');
-import signals = require('../webrtc/signals');
-import handler = require('../handler/queue');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as peerconnection from '../webrtc/peerconnection';
+import * as signals from '../webrtc/signals';
+import * as handler from '../handler/queue';
 
-import rtc_to_net = require('./rtc-to-net');
-import net = require('../net/net.types');
-import tcp = require('../net/tcp');
-import socks_headers = require('../socks/headers');
+import * as rtc_to_net from './rtc-to-net';
+import * as net from '../net/net.types';
+import * as tcp from '../net/tcp';
+import * as socks_headers from '../socks/headers';
 
-import logging = require('../logging/logging');
+import * as logging from '../logging/logging';
 
-import ProxyConfig = require('./proxyconfig');
+import ProxyConfig from './proxyconfig';
 
 var log :logging.Log = new logging.Log('socks-to-rtc spec');
 

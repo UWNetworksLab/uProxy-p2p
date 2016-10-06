@@ -8,6 +8,5 @@ declare module 'simple-rc4' {
     // Returns the supplied Buffer, encoded.
     update(msg: Buffer): Buffer;
   }
-
   export = RC4;
 }

@@ -1,7 +1,7 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
-import mockFreedomRtcPeerConnection = require('../lib/freedom/mocks/mock-rtcpeerconnection');
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
+import mockFreedomRtcPeerConnection from '../lib/freedom/mocks/mock-rtcpeerconnection';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
@@ -13,8 +13,8 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'portControl': () => { return new Object },
 });
 
-import freedom_mocks = require('../mocks/freedom-mocks');
-import firewall = require('./firewall');
+import * as freedom_mocks from '../mocks/freedom-mocks';
+import * as firewall from './firewall';
 
 class MockPolicy implements firewall.ResponsePolicy {
   failures : number = 0;

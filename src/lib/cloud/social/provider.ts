@@ -1,12 +1,12 @@
 /// <reference path='../../../../third_party/typings/index.d.ts' />
 
-require('../social/monkey/process');
+import '../social/monkey/process';
 
-import arraybuffers = require('../../arraybuffers/arraybuffers');
-import crypto = require('crypto');
-import linefeeder = require('../../net/linefeeder');
-import logging = require('../../logging/logging');
-import queue = require('../../handler/queue');
+import * as arraybuffers from '../../arraybuffers/arraybuffers';
+import * as crypto from 'crypto';
+import * as linefeeder from '../../net/linefeeder';
+import * as logging from '../../logging/logging';
+import * as queue from '../../handler/queue';
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
 import * as ssh2 from 'ssh2';

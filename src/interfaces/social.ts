@@ -3,8 +3,8 @@
  * interface to be extended as classes specific to particular components.
  */
 
-import net = require('../lib/net/net.types');
-import uproxy_core_api = require('./uproxy_core_api');
+import * as net from '../lib/net/net.types';
+import * as uproxy_core_api from './uproxy_core_api';
 
 export interface UserPath {
   network :SocialNetworkInfo;

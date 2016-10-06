@@ -2,11 +2,11 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 /// <reference path='../../third_party/freedomjs-anonymized-metrics/index.d.ts' />
 
-import _ = require('lodash');
-import logging = require('../lib/logging/logging');
-import random = require('random-lib');
-import storage = require('../interfaces/storage');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as _ from 'lodash';
+import * as logging from '../lib/logging/logging';
+import * as random from 'random-lib';
+import * as storage from '../interfaces/storage';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

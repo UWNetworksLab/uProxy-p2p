@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import Socks = require('./headers');
+import * as Socks from './headers';
 
 // TODO: add tests for IPv6 address parsing
 describe('socks', function() {

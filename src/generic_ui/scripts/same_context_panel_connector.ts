@@ -4,7 +4,7 @@
  * its state will never be altered.  Given that all scripts are running in the
  * same environment, we have an insanely simple way of representing that here
  */
-import panel_connector = require('../../interfaces/panel_connector');
+import * as panel_connector from '../../interfaces/panel_connector';
 
 export class SameContextPanelConnector implements panel_connector.BrowserPanelConnector {
   private connectHandler: panel_connector.PanelConnectHandler;

@@ -1,10 +1,10 @@
 /// <reference path='../../../../third_party/typings/index.d.ts'/>
 
-import core_connector = require('../../../generic_ui/scripts/core_connector');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
-import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import chromeInterface = require('../../../interfaces/chrome');
-import background = require('./background');
+import * as core_connector from '../../../generic_ui/scripts/core_connector';
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import CoreConnector from '../../../generic_ui/scripts/core_connector';
+import * as chromeInterface from '../../../interfaces/chrome';
+import * as background from './background';
 
 // TODO: write a similar class for Firefox that will implement a common
 // interface as Chrome
@@ -14,7 +14,7 @@ import background = require('./background');
 // - getOauthUrl(redirectUrl): returns the Oauth URL
 // - extractCode(url): returns a promise that fulfills with credentials on
 //   success.
-class ChromeTabAuth {
+export default class ChromeTabAuth {
 
   constructor() {
   }
@@ -64,5 +64,3 @@ class ChromeTabAuth {
         uproxy_core_api.Command.SEND_CREDENTIALS, url);
   }
 }
-
-export = ChromeTabAuth;

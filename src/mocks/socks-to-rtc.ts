@@ -1,5 +1,5 @@
-import handler = require('../lib/handler/queue');
-import net = require('../lib/net/net.types');
+import * as handler from '../lib/handler/queue';
+import * as net from '../lib/net/net.types';
 
 export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public resolveStart :(v :Object) => void;

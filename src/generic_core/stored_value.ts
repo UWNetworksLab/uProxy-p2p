@@ -1,9 +1,9 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
-import globals = require('./globals');
-import _ = require('lodash');
+import * as globals from './globals';
+import * as _ from 'lodash';
 
-class StoredValue<T> {
+export default class StoredValue<T> {
   private loaded_ :Promise<void>;
 
   // accepts the name of the key to load from storage and the default value for
@@ -46,5 +46,3 @@ class StoredValue<T> {
     return saved;
   }
 }
-
-export = StoredValue;

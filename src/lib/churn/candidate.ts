@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import net = require('../net/net.types');
+import * as net from '../net/net.types';
 
 // Throughout this file "RTCIceCandidate" refers to the JSON structure
 // produced and consumed by Freedom, not an actual browser

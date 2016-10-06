@@ -1,9 +1,9 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import logging = require('../logging/logging');
-import loggingTypes = require('../loggingprovider/loggingprovider.types');
-import net = require('../net/net.types');
-import tcp = require('../net/tcp');
+import * as logging from '../logging/logging';
+import * as loggingTypes from '../loggingprovider/loggingprovider.types';
+import * as net from '../net/net.types';
+import * as tcp from '../net/tcp';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

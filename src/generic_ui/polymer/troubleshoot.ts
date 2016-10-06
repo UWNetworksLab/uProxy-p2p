@@ -1,4 +1,4 @@
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
 Polymer({
   analyzingNetwork: false,

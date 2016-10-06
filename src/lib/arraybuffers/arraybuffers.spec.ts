@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import arraybuffers = require('./arraybuffers');
+import * as arraybuffers from './arraybuffers';
 
 const array1 = new Uint8Array([12, 118, 101, 114, 105, 115]).buffer;
 const array2 = new Uint8Array([0, 2, 129, 128, 0, 1, 0, 5, 0]).buffer;

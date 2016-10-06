@@ -1,12 +1,12 @@
 /// <reference path='../../../../third_party/typings/index.d.ts' />
 
-require('../social/monkey/process');
+import '../social/monkey/process';
 
-import arraybuffers = require('../../arraybuffers/arraybuffers');
-import linefeeder = require('../../net/linefeeder');
-import logging = require('../../logging/logging');
-import Pinger = require('../../net/pinger');
-import queue = require('../../handler/queue');
+import * as arraybuffers from '../../arraybuffers/arraybuffers';
+import * as linefeeder from '../../net/linefeeder';
+import * as logging from '../../logging/logging';
+import Pinger from '../../net/pinger';
+import * as queue from '../../handler/queue';
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
 import * as ssh2 from 'ssh2';
@@ -40,7 +40,7 @@ const KEEPALIVE_MAX_FAILURES = 120;
 // Installs uProxy on a server, via SSH.
 // The process is as close as possible to a manual install
 // so that we have fewer paths to test.
-class CloudInstaller {
+export default class CloudInstaller {
   constructor(private dispatchEvent_: (name: string, args: Object) => void) {}
 
   // Runs the install command via SSH, resolving with the invitation URL.
@@ -153,5 +153,3 @@ class CloudInstaller {
     });
   }
 }
-
-export = CloudInstaller;

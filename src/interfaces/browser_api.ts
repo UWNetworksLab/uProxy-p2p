@@ -1,6 +1,6 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
-import net = require('../lib/net/net.types');
+import * as net from '../lib/net/net.types';
 
 // Describes the interface for functions that have different implications
 // for different browsers.

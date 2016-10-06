@@ -8,9 +8,9 @@
  * after that connection is established
  */
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
 
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
@@ -20,14 +20,14 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'portControl': () => { return new Object },
 });
 
-import constants = require('./constants');
-import remote_connection = require('./remote-connection');
-import social = require('../interfaces/social');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
-import rtc_to_net_mock = require('../mocks/rtc-to-net');
-import socks_to_rtc_mock = require('../mocks/socks-to-rtc');
+import * as constants from './constants';
+import * as remote_connection from './remote-connection';
+import * as social from '../interfaces/social';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
+import * as rtc_to_net from '../lib/rtc-to-net/rtc-to-net';
+import * as socks_to_rtc from '../lib/socks-to-rtc/socks-to-rtc';
+import * as rtc_to_net_mock from '../mocks/rtc-to-net';
+import * as socks_to_rtc_mock from '../mocks/socks-to-rtc';
 
 describe('remote_connection.RemoteConnection', () => {
   var connection :remote_connection.RemoteConnection;

@@ -1,6 +1,6 @@
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import fragments = require('./fragment');
-import logging = require('../logging/logging');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as fragments from './fragment';
+import * as logging from '../logging/logging';
 
 var log :logging.Log = new logging.Log('defragmenter');
 

@@ -1,5 +1,5 @@
-import logging = require('../logging/logging');
-import transformer = require('./transformer');
+import * as logging from '../logging/logging';
+import * as transformer from './transformer';
 
 var log :logging.Log = new logging.Log('caesar');
 

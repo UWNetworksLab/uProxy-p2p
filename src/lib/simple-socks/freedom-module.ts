@@ -1,12 +1,12 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import bridge = require('../bridge/bridge');
-import logging = require('../logging/logging');
-import loggingTypes = require('../loggingprovider/loggingprovider.types');
-import net = require('../net/net.types');
-import rtc_to_net = require('../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
-import tcp = require('../net/tcp');
+import * as bridge from '../bridge/bridge';
+import * as logging from '../logging/logging';
+import * as loggingTypes from '../loggingprovider/loggingprovider.types';
+import * as net from '../net/net.types';
+import * as rtc_to_net from '../rtc-to-net/rtc-to-net';
+import * as socks_to_rtc from '../socks-to-rtc/socks-to-rtc';
+import * as tcp from '../net/tcp';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

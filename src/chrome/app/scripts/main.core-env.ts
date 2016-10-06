@@ -7,10 +7,10 @@
  * loaded.
  */
 
-import Chrome_oauth = require('./chrome_oauth');
-import ChromeUIConnector = require('./chrome_ui_connector');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
-import _ = require('lodash');
+import Chrome_oauth from './chrome_oauth';
+import ChromeUIConnector from './chrome_ui_connector';
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as _ from 'lodash';
 
 declare const freedom: freedom.FreedomInCoreEnv;
 

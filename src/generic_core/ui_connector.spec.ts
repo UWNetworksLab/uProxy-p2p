@@ -1,9 +1,9 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
-import mockFreedomRtcPeerConnection = require('../lib/freedom/mocks/mock-rtcpeerconnection');
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
+import * as mockFreedomRtcPeerConnection from '../lib/freedom/mocks/mock-rtcpeerconnection';
 
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
 });
@@ -14,9 +14,9 @@ var fakeFreedom = freedom();
 var nextCommand = 12345;
 var nextPromise = 12345;
 
-import ui_connector = require('./ui_connector');
+import * as ui_connector from './ui_connector';
 import UIConnector = ui_connector.UIConnector;
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 describe('UIConnector', () => {
   var connector :UIConnector;

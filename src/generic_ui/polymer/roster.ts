@@ -1,7 +1,7 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
-import ui_constants = require('../../interfaces/ui');
+import * as ui_constants from '../../interfaces/ui';
 
 Polymer({
   ready: function() {

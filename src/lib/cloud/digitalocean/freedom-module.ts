@@ -1,9 +1,9 @@
 /// <reference path='../../../../third_party/typings/index.d.ts' />
 
-import Provisioner = require('./provisioner');
+import Provisioner from './provisioner';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
 freedom().providePromises(Provisioner);
 
-export = Provisioner
+export default Provisioner;

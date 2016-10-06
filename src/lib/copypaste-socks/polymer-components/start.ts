@@ -1,6 +1,6 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-import copypaste_api = require('../copypaste-api');
+import * as copypaste_api from '../copypaste-api';
 declare module browserified_exports {
   var copypaste :copypaste_api.CopypasteApi;
 }

@@ -4,9 +4,9 @@
 */
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import ipaddr = require('ipaddr.js');
-import net = require('../net/net.types');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as ipaddr from 'ipaddr.js';
+import * as net from '../net/net.types';
 
 // VERSION - Socks protocol and subprotocol version headers
 export enum Version {

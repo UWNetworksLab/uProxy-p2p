@@ -1,9 +1,9 @@
 /// <reference path='../../third_party/typings/index.d.ts' />
 
-import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
-import net = require('../lib/net/net.types');
-import social = require('./social');
-import ui = require('./ui');
+import * as loggingTypes from '../lib/loggingprovider/loggingprovider.types';
+import * as net from '../lib/net/net.types';
+import * as social from './social';
+import * as ui from './ui';
 
 // --- Core <--> UI Interfaces ---
 

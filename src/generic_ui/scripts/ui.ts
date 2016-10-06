@@ -9,28 +9,28 @@
  * Common User Interface state holder and changer.
  */
 
-import _ = require('lodash');
-import ui_constants = require('../../interfaces/ui');
-import background_ui = require('./background_ui');
-import CoreConnector = require('./core_connector');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import browser_api = require('../../interfaces/browser_api');
+import * as _ from 'lodash';
+import * as ui_constants from '../../interfaces/ui';
+import * as background_ui from './background_ui';
+import CoreConnector from './core_connector';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import * as browser_api from '../../interfaces/browser_api';
 import ProxyAccessMode = browser_api.ProxyAccessMode;
 import BrowserAPI = browser_api.BrowserAPI;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
-import net = require('../../lib/net/net.types');
-import user_module = require('./user');
+import * as net from '../../lib/net/net.types';
+import * as user_module from './user';
 import User = user_module.User;
-import social = require('../../interfaces/social');
-import Constants = require('./constants');
-import translator_module = require('./translator');
-import network_options = require('../../generic/network-options');
-import model = require('./model');
-import dialogs = require('./dialogs');
-import jsurl = require('jsurl');
-import uparams = require('uparams');
-import crypto = require('crypto');
-import jdenticon = require('jdenticon');
+import * as social from '../../interfaces/social';
+import * as Constants from './constants';
+import * as translator_module from './translator';
+import * as network_options from '../../generic/network-options';
+import * as model from './model';
+import * as dialogs from './dialogs';
+import * as jsurl from 'jsurl';
+import uparams from 'uparams';
+import * as crypto from 'crypto';
+import * as jdenticon from 'jdenticon';
 
 var NETWORK_OPTIONS = network_options.NETWORK_OPTIONS;
 

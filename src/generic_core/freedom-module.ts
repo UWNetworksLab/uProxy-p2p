@@ -12,19 +12,19 @@
  *  - Instances, which is a list of active uProxy installs.
  */
 
-import browser_connector = require('../interfaces/browser_connector');
-import globals = require('./globals');
-import logging = require('../lib/logging/logging');
-import loggingprovider = require('../lib/loggingprovider/loggingprovider.types');
-import metrics_module = require('./metrics');
-import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
-import social_network = require('./social');
-import social = require('../interfaces/social');
-import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
-import ui = require('./ui_connector');
-import uproxy_core = require('./uproxy_core');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import version = require('../generic/version');
+import * as browser_connector from '../interfaces/browser_connector';
+import * as globals from './globals';
+import * as logging from '../lib/logging/logging';
+import * as loggingprovider from '../lib/loggingprovider/loggingprovider.types';
+import * as metrics_module from './metrics';
+import * as rtc_to_net from '../lib/rtc-to-net/rtc-to-net';
+import * as social_network from './social';
+import * as social from '../interfaces/social';
+import * as socks_to_rtc from '../lib/socks-to-rtc/socks-to-rtc';
+import * as ui from './ui_connector';
+import * as uproxy_core from './uproxy_core';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
+import * as version from '../generic/version';
 
 import ui_connector = ui.connector;
 
@@ -50,7 +50,7 @@ var exported = {
   rtc_to_net: rtc_to_net,
   globals: globals
 };
-export = exported;
+export default exported;
 
 // Note: Our mechanism for dispatching commands requires that the
 // members of core are bound closures.  E.g.:

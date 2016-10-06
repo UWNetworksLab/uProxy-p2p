@@ -1,8 +1,8 @@
-import arithmetic = require('./arithmetic');
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import decompression = require('./decompressionShaper');
-import logging = require('../logging/logging');
-import transformer = require('./transformer');
+import * as arithmetic from './arithmetic';
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as decompression from './decompressionShaper';
+import * as logging from '../logging/logging';
+import * as transformer from './transformer';
 
 const log :logging.Log = new logging.Log('decompression shaper');
 

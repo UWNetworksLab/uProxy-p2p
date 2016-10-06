@@ -1,10 +1,10 @@
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import signals = require('../webrtc/signals');
-import net = require('../net/net.types');
-import copypaste_api = require('../copypaste-socks/copypaste-api');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as signals from '../webrtc/signals';
+import * as net from '../net/net.types';
+import * as copypaste_api from '../copypaste-socks/copypaste-api';
 
 // Platform-specific function to load the freedomjs module.
 declare var loadModule: () => Promise<freedom.OnAndEmit<any, any>>;

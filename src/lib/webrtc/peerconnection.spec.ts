@@ -1,19 +1,17 @@
 /// <reference path='../../../third_party/typings/index.d.ts' />
 
-import MockFreedomRtcDataChannel =
-  require('../freedom/mocks/mock-rtcdatachannel');
-import MockFreedomRtcPeerConnection =
-  require('../freedom/mocks/mock-rtcpeerconnection');
+import MockFreedomRtcDataChannel from '../freedom/mocks/mock-rtcdatachannel';
+import MockFreedomRtcPeerConnection from '../freedom/mocks/mock-rtcpeerconnection';
 import RTCPeerConnection = freedom.RTCPeerConnection.RTCPeerConnection;
 import RTCDataChannelInit = freedom.RTCPeerConnection.RTCDataChannelInit;
 
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
-import signals = require('./signals');
-import peerconnection = require('./peerconnection');
-import datachannel = require('./datachannel');
+import * as signals from './signals';
+import * as peerconnection from './peerconnection';
+import * as datachannel from './datachannel';
 
 describe('PeerConnection', function() {
   var mockRtcPeerConnection :MockFreedomRtcPeerConnection;
