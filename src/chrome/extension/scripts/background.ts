@@ -18,7 +18,7 @@ import * as Constants from '../../../generic_ui/scripts/constants';
 import CoreConnector from '../../../generic_ui/scripts/core_connector';
 import * as user_interface from '../../../generic_ui/scripts/ui';
 
-import compareVersion from 'compare-version';
+import compareVersion = require('compare-version');
 import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
