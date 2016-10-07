@@ -34,7 +34,7 @@ function usage () {
   echo "  -d: override the detected public IP (for development only)"
   echo "  -b: name to use in contacts list"
   echo "  -a: do not output complete invite URL"
-  echo "  -k: public key, base64 encoded (if unspecified, a new invite code is generated)"
+  echo "  -k: public key, base64 encoded in PEM format (if unspecified, a new invite code is generated)"
   echo "  -h, -?: this help message"
   exit 1
 }
