@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
 import * as core_connector from '../../../generic_ui/scripts/core_connector';
 import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 import CoreConnector from '../../../generic_ui/scripts/core_connector';

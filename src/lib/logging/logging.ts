@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as loggingProviderTypes from '../loggingprovider/loggingprovider.types';
 import * as CircularJSON from 'circular-json';
 

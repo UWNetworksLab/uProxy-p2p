@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as model from './model';
 import * as user_interface from './ui';
 import * as translator from './translator';

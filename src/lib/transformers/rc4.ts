@@ -1,5 +1,5 @@
 /// <reference path='../../../third_party/simple-rc4/simple-rc4.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
+
 
 import * as crypto from 'crypto';
 import * as logging from '../logging/logging';

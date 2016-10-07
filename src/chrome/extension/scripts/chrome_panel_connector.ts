@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
 import * as panel_connector from '../../../interfaces/panel_connector';
 
 export class ChromePanelConnector implements panel_connector.BrowserPanelConnector {

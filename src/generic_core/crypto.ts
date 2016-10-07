@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 import * as arraybuffers from '../lib/arraybuffers/arraybuffers';
 import * as globals from './globals';
 import pgp = globals.pgp;

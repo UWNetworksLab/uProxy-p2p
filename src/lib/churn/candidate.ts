@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as net from '../net/net.types';
 
 // Throughout this file "RTCIceCandidate" refers to the JSON structure

@@ -1,4 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../generic_ui/polymer/context.d.ts' />
 
 import * as ui_model from '../../../generic_ui/scripts/model';

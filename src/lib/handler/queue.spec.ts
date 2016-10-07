@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as HandlerQueue from './queue';
 import * as Aggregate from './aggregate';
 

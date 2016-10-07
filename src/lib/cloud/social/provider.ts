@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 import '../social/monkey/process';
 
 import * as arraybuffers from '../../arraybuffers/arraybuffers';

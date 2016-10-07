@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 declare const freedom: freedom.FreedomInCoreEnv;
 
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};

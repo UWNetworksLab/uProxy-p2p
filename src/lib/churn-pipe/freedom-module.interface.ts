@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as churn_types from '../churn/churn.types';
 import * as net from '../net/net.types';
 

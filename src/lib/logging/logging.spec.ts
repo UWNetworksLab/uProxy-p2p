@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 import MockFreedomEventHandler from '../freedom/mocks/mock-eventhandler';
 import * as loggingProviderTypes from '../loggingprovider/loggingprovider.types';

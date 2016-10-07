@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 import * as loggingTypes from '../lib/loggingprovider/loggingprovider.types';
 import * as net from '../lib/net/net.types';
 import * as social from './social';
