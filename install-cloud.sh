@@ -20,7 +20,7 @@ UPDATE=false
 usage() {
   echo "$0 [-a] [-k key] [-u] [-h]"
   echo "  -a: do not output complete invite URL"
-  echo "  -k: public key (if unspecified, a new key is generated)"
+  echo "  -k: public key, base64 encoded (if unspecified, a new invite code is generated)"
   echo "  -u: update Docker images (preserves invites and metadata)"
   echo "  -h, -?: this help message"
   exit 1

@@ -17,7 +17,7 @@ function usage () {
   echo "  -i: invite code (if unspecified, a new invite code is generated)"
   echo "  -u: username (default: getter)"
   echo "  -a: do not output complete invite URL"
-  echo "  -k: public key (if unspecified, a new key is generated)"
+  echo "  -k: public key, base64 encoded (if unspecified, a new invite code is generated)"
   echo "  -h, -?: this help message"
   exit 1
 }
@@ -33,15 +33,24 @@ while getopts i:u:k:ah? opt; do
 done
 shift $((OPTIND-1))
 
+# Prevent user from using both -i and -k, which could have conflicting keys
+if [ -n "$INVITE_CODE" ] && [ -n "$KEY" ]
+then
+  echo "Cannot specify both -i and -k"
+  usage
+fi
+
+
+
+TMP=`mktemp -d`
 if [ -n "$KEY" ]
 then
-  HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
-  mkdir -p $HOMEDIR/.ssh
-  echo "$KEY" | base64 -d >> $HOMEDIR/.ssh/authorized_keys
-  echo "" >> $HOMEDIR/.ssh/authorized_keys  # Add newline
+  # Decode the base64 public key, add newline, and write it to a temporary file.
+  # If the -k option is used, we should not output the invite code as this
+  # output may be served over unencrypted HTTP (for cloud deployment from a
+  # website).
+  (echo "$KEY" | base64 -D; echo) > $TMP/id_rsa.pub
 else
-  TMP=`mktemp -d`
-
   # Either read the supplied invite code or generate a new one.
   if [ -n "$INVITE_CODE" ]
   then
@@ -72,13 +81,6 @@ else
     ENCODED_KEY=`base64 -w 0 $TMP/id_rsa`
   fi
 
-  # Apply the credentials to the account, with access restrictions.
-  # man sshd for the complete list of authorized_keys options.
-  KEY_OPTS='command="/login.sh",permitopen="zork:9000",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding'
-  HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
-  mkdir -p $HOMEDIR/.ssh
-  echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys
-
   # Output the actual invite code.
   PUBLIC_IP=`cat /hostname`
   CLOUD_INSTANCE_DETAILS_JSON="{\"host\":\"$PUBLIC_IP\",\"user\":\"$USERNAME\",\"key\":\"$ENCODED_KEY\"}"
@@ -104,3 +106,11 @@ else
   # TODO: have uproxy pass -a and hide this when passed
   echo "CLOUD_INSTANCE_DETAILS_JSON: $CLOUD_INSTANCE_DETAILS_JSON"
 fi
+
+
+# Apply the credentials to the account, with access restrictions.
+# man sshd for the complete list of authorized_keys options.
+KEY_OPTS='command="/login.sh",permitopen="zork:9000",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding'
+HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
+mkdir -p $HOMEDIR/.ssh
+echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys

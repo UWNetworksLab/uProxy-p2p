@@ -34,7 +34,7 @@ function usage () {
   echo "  -d: override the detected public IP (for development only)"
   echo "  -b: name to use in contacts list"
   echo "  -a: do not output complete invite URL"
-  echo "  -k: public key (if unspecified, a new key is generated)"
+  echo "  -k: public key, base64 encoded (if unspecified, a new invite code is generated)"
   echo "  -h, -?: this help message"
   exit 1
 }
@@ -84,11 +84,16 @@ then
       GIVER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/giver/.ssh/authorized_keys | base64 -w 0 || echo -n ""`
       GETTER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys | base64 -w 0|| echo -n ""`
 
-      # Because it's unclear what it would mean to migrate authorized_keys files
-      # when -i is supplied, restrict use of -i to new or wiping (-w) installs.
+      # Because it's unclear what it would mean to migrate authorized_keys files,
+      # restrict use of -i and -k to new or wiping (-w) installs.
       if [ -n "$INVITE_CODE" ]
       then
         echo "-i can only be used for new installs or with -w"
+        usage
+      fi
+      if [ -n "$KEY" ]
+      then
+        echo "-k can only be used for new installs or with -w"
         usage
       fi
     fi
