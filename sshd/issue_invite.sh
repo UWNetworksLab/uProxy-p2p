@@ -41,7 +41,6 @@ then
 fi
 
 
-
 TMP=`mktemp -d`
 if [ -n "$KEY" ]
 then
@@ -49,7 +48,7 @@ then
   # If the -k option is used, we should not output the invite code as this
   # output may be served over unencrypted HTTP (for cloud deployment from a
   # website).
-  (echo "$KEY" | base64 -D; echo) > $TMP/id_rsa.pub
+  (echo "$KEY" | base64 -d; echo) > $TMP/id_rsa.pub
 else
   # Either read the supplied invite code or generate a new one.
   if [ -n "$INVITE_CODE" ]
