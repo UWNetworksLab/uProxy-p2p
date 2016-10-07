@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 // TODO: move this file elsewhere..  this was copied from freedom-social-github
 
 // Typescript file for:

@@ -1,5 +1,3 @@
-/// <reference path='../typings/index.d.ts' />
-
 // TypeScript definitions for browserify-zlib:
 //   https://github.com/devongovett/browserify-zlib
 //

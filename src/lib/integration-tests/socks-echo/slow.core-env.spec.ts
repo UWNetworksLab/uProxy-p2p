@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 import * as socks_headers from '../../socks/headers';
 
 import * as proxyintegrationtesttypes from './proxy-integration-test.types';

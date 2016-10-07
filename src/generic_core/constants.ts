@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 export const STORAGE_VERSION = 1;
 
 export enum MESSAGE_VERSIONS {

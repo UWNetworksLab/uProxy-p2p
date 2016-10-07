@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 import * as arraybuffers from '../../arraybuffers/arraybuffers';
 import * as tcp from '../../net/tcp';
 import * as net from '../../net/net.types';

@@ -1,6 +1,5 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import * as _ from 'lodash';
 import * as social from '../../interfaces/social';

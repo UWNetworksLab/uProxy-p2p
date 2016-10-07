@@ -1,5 +1,4 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import * as caesar from '../transformers/caesar';
 import * as candidate from '../churn/candidate';

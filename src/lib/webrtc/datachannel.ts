@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 // DataPeer - a class that wraps peer connections and data channels.
 //
 // This class assumes WebRTC is available; this is provided by the cross-

@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as user_interface from './ui';
 import * as ui_constants from '../../interfaces/ui';
 import * as browser_api from '../../interfaces/browser_api';

@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as candidate from './candidate';
 import Candidate = candidate.Candidate;
 

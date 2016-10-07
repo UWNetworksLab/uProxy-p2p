@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 import * as globals from './globals';
 import * as _ from 'lodash';
 

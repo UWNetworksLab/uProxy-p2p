@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as churn from '../churn/churn';
 import * as churn_types from '../churn/churn.types';
 import * as handler from '../handler/queue';

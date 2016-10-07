@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as arraybuffers from '../arraybuffers/arraybuffers';
 import * as bridge from '../bridge/bridge';
 import * as churn_types from '../churn/churn.types';

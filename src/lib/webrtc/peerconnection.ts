@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as datachannel from './datachannel';
 import * as handler from '../handler/queue';
 import * as logging from '../logging/logging';

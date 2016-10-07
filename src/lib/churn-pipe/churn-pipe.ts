@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as aqm from '../aqm/aqm';
 import * as caesar from '../transformers/caesar';
 import * as churn_types from '../churn/churn.types';

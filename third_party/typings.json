@@ -1,5 +1,0 @@
-{
-  "globalDependencies": {
-    "chrome-app": "registry:dt/chrome-app#0.0.0+20160705130918"
-  }
-}
