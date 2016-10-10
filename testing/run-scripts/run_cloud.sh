@@ -19,11 +19,12 @@ WIPE=false
 PUBLIC_IP=
 BANNER=
 AUTOMATED=false
+KEY=
 
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a]"
+  echo "$0 [-p path] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] [-k key]"
   echo "  -p: path to uproxy repo"
   echo "  -z: use a specified Zork image (defaults to uproxy/zork)"
   echo "  -s: use a specified sshd image (defaults to uproxy/sshd)"
@@ -33,11 +34,12 @@ function usage () {
   echo "  -d: override the detected public IP (for development only)"
   echo "  -b: name to use in contacts list"
   echo "  -a: do not output complete invite URL"
+  echo "  -k: public key, base64 encoded in PEM format (if unspecified, a new invite code is generated)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts p:z:s:i:uwd:b:ah? opt; do
+while getopts p:z:s:i:uwd:b:k:ah? opt; do
   case $opt in
     p) PREBUILT="$OPTARG" ;;
     z) ZORK_IMAGE="$OPTARG" ;;
@@ -48,6 +50,7 @@ while getopts p:z:s:i:uwd:b:ah? opt; do
     d) PUBLIC_IP="$OPTARG" ;;
     b) BANNER="$OPTARG" ;;
     a) AUTOMATED=true ;;
+    k) KEY="$OPTARG" ;;
     *) usage ;;
   esac
 done
@@ -81,11 +84,16 @@ then
       GIVER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/giver/.ssh/authorized_keys | base64 -w 0 || echo -n ""`
       GETTER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys | base64 -w 0|| echo -n ""`
 
-      # Because it's unclear what it would mean to migrate authorized_keys files
-      # when -i is supplied, restrict use of -i to new or wiping (-w) installs.
+      # Because it's unclear what it would mean to migrate authorized_keys files,
+      # restrict use of -i and -k to new or wiping (-w) installs.
       if [ -n "$INVITE_CODE" ]
       then
         echo "-i can only be used for new installs or with -w"
+        usage
+      fi
+      if [ -n "$KEY" ]
+      then
+        echo "-k can only be used for new installs or with -w"
         usage
       fi
     fi
@@ -178,6 +186,10 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
     if [ "$AUTOMATED" = true ]
     then
       ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -a"
+    fi
+    if [ -n "$KEY" ]
+    then
+      ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -k $KEY"
     fi
     if [ -n "$INVITE_CODE" ]
     then

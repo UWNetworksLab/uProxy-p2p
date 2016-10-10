@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Quick and easy install via curl and wget.
-# 
+#
 # All of the heavy lifting is done by run_cloud.sh: this
 # script just clones the uproxy-docker repo and executes
 # run_cloud.sh from there.
@@ -14,19 +14,22 @@ set -e
 REQUIRED_COMMANDS="docker git nc"
 
 AUTOMATED=false
+KEY=
 UPDATE=false
 
 usage() {
-  echo "$0 [-a] [-u] [-h]"
+  echo "$0 [-a] [-k key] [-u] [-h]"
   echo "  -a: do not output complete invite URL"
+  echo "  -k: public key, base64 encoded (if unspecified, a new invite code is generated)"
   echo "  -u: update Docker images (preserves invites and metadata)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts auh? opt; do
+while getopts k:auh? opt; do
   case $opt in
     a) AUTOMATED=true ;;
+    k) KEY="$OPTARG" ;;
     u) UPDATE=true ;;
     *) usage ;;
   esac
@@ -93,6 +96,10 @@ do_install() {
   if [ "$UPDATE" = true ]
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -u"
+  fi
+  if [ -n "$KEY" ]
+  then
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k $KEY"
   fi
   ./run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
