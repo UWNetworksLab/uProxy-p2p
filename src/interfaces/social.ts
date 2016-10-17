@@ -100,6 +100,7 @@ export interface InstanceData {
   localGettingFromRemote :GettingState;
   localSharingWithRemote :SharingState;
   activeEndpoint         :net.Endpoint;
+  proxyingId            ?:string;
 }
 
 export interface UserData {
@@ -195,8 +196,10 @@ export interface PermissionTokenMessage {
 // assuming consent is GRANTED for that particular pathway.
 export enum GettingState {
   NONE = 100,
-  TRYING_TO_GET_ACCESS,
-  GETTING_ACCESS
+  TRYING_TO_GET_ACCESS,  // Initial connection is in progress
+  GETTING_ACCESS,
+  FAILED,  // Connection has failed, but user hasn't cancelled.  Might retry.
+  RETRYING
 }
 
 export enum SharingState {

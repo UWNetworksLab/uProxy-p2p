@@ -31,10 +31,6 @@ export default class CoreConnector implements uproxy_core_api.CoreApi {
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
 
-  // If non-null, the ID of the instance from which we are presently
-  // disconnected.
-  public disconnectedWhileProxying :string = null;
-
   constructor(private browserConnector_ :browser_connector.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_FULFILLED,
                                     this.handleRequestFulfilled_);
