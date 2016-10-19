@@ -28,7 +28,9 @@ import * as network_options from '../../generic/network-options';
 import * as model from './model';
 import * as dialogs from './dialogs';
 import * as jsurl from 'jsurl';
-import uparams from 'uparams';
+// TODO: remove uparams as it doesn't work with ES6 imports and TypeScript,
+// see https://github.com/uProxy/uproxy/issues/2782
+import uparams = require('uparams');
 import * as crypto from 'crypto';
 import * as jdenticon from 'jdenticon';
 
