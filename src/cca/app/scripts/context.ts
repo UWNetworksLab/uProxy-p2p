@@ -26,18 +26,27 @@ var backgroundUi = new background_ui.BackgroundUi(panelConnector, core);
 // You can test it with
 // curl -v -x socks5h://localhost:52612 www.example.com
 class Proxy {
-  public constructor(private core: uproxy_core_api.CoreApi, private userId: string) {}
+  private instancePath_: social.InstancePath;
 
-  public start(): Promise<net.Endpoint> {
-    console.log('Starting proxy');
-    return this.core.start(<social.InstancePath>{
+  public constructor(private core: uproxy_core_api.CoreApi, userId: string) {
+    this.instancePath_ = {
       network: {
         name: 'Cloud',
         userId: 'me'
       },
-      userId: this.userId,
-      instanceId: this.userId
-    });
+      userId: userId,
+      instanceId: userId
+    }
+  }
+
+  public start(): Promise<net.Endpoint> {
+    console.debug('Starting proxy');
+    return this.core.start(this.instancePath_);
+  }
+
+  public stop(): Promise<void> {
+    console.debug('Stopping proxy');
+    return this.core.stop(this.instancePath_);
   }
 }
 
@@ -74,12 +83,18 @@ function main() {
       return new Proxy(core, (token.networkData as any).host);
     }).catch(console.error);
 
-  document.getElementById('connect-button').onclick = (ev) => {
-    console.debug('Pressed Connect Button');
+  document.getElementById('start-button').onclick = (ev) => {
+    console.debug('Pressed Start Button');
     proxyPromise.then((proxy) => {
       return proxy.start();
     }).then((endpoint) => {
       console.log('Endpoint: ', endpoint);
+    }).catch(console.error);
+  };
+  document.getElementById('stop-button').onclick = (ev) => {
+    console.debug('Pressed Stop Button');
+    proxyPromise.then((proxy) => {
+      return proxy.stop();
     }).catch(console.error);
   };
 }
