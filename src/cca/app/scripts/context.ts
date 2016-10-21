@@ -29,15 +29,20 @@ var backgroundUi = new background_ui.BackgroundUi(panelConnector, core);
 class AccessProvider {
   private instancePath_: social.InstancePath;
 
-  public constructor(private core_: uproxy_core_api.CoreApi, userId: string) {
+  public constructor(private core_: uproxy_core_api.CoreApi,
+                     private ipAddress_: string) {
     this.instancePath_ = {
       network: {
         name: 'Cloud',
         userId: 'me'
       },
-      userId: userId,
-      instanceId: userId
+      userId: ipAddress_,
+      instanceId: ipAddress_
     }
+  }
+
+  public ipAddress(): string {
+    return this.ipAddress_;
   }
 
   public startProxy(): Promise<net.Endpoint> {
@@ -99,11 +104,21 @@ class ProviderRepository {
 // For debugging
 (window as any).context = this;
 
+class EventLog {
+  constructor(private element_: HTMLElement) {}
+  public append(text: string) {
+    let wrapped = document.createElement('div');
+    wrapped.innerText = text;
+    this.element_.appendChild(wrapped);
+  }
+}
+
 function main() {
   let providers = new ProviderRepository(core);
   let selectedProviderPromise: Promise<AccessProvider> = Promise.reject('No provider selected');
 
   // UI Code Below
+  let log = new EventLog(document.getElementById('event-log'));
   let addWidget = document.getElementById('add-widget') as HTMLDivElement;
   let addTokenText = document.getElementById('add-token-text') as HTMLTextAreaElement;
   let addButton = document.getElementById('add-button') as HTMLButtonElement;
@@ -112,13 +127,13 @@ function main() {
 
   addButton.onclick = (ev) => {
     console.debug('Pressed Add Button');
-    addButton.disabled = true;
     selectedProviderPromise = providers.addProvider(addTokenText.textContent);
-    selectedProviderPromise.then(() => {
+    selectedProviderPromise.then((provider) => {
       startButton.disabled = false;
+      log.append(`Added server at ${provider.ipAddress()}`)
     }).catch((error) => {
       console.error(error);
-      addButton.disabled = false;
+      log.append(error);
     });
   };
   startButton.onclick = (ev) => {
@@ -128,15 +143,18 @@ function main() {
       return provider.startProxy();
     }).then((endpoint) => {
       console.log('Endpoint: ', endpoint);
+      log.append(`Proxy running on port ${endpoint.port}`);
       stopButton.disabled = false;
     }).catch((error) => {
       console.error(error);
+      log.append(error);
       startButton.disabled = false;
     });
   };
   stopButton.onclick = (ev) => {
     console.debug('Pressed Stop Button');
     selectedProviderPromise.then((provider) => {
+      log.append('Proxy stopped');
       return provider.stopProxy();
     }).then(() => {
       startButton.disabled = false;
