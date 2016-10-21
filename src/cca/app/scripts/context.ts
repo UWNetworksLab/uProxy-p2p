@@ -85,22 +85,42 @@ function main() {
     networkData: JSON.parse(jsurl.parse('~%27*7b*22host*22*3a*2245.55.107.160*22*2c*22user*22*3a*22getter*22*2c*22key*22*3a*22LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlEZlFJQkFBS0J3UUM1M2R4WWU5U1hTNmx3MGh4RE5qSjdvWExoRXE3MGxnRTJhRnFrYVJROFNLcW9vSjhQCmJxRE1QWTBjekVxSGZYcEZEaGZ0MXF1MkpVQ3ZxZXZwRTQ3SmpSaitrSTlQZmF2eTQ3U2RtM3RmT0lSN0IzNVkKRGN2UW12UkpVQTdyV1JNNVV6TndoaTBzZm5EdzVlVmhTOVdPMWRCdWgwSUNHSC80Q3QrWjMrendjV1huc2U2cwoyd0Z5b2dyUUpnL3hVSGJzMk1IeWNLNEtxQnZWTVp2OVFJV3ROZXBBUHFMS3F3M3VKckdJbFZUb0Rvd3hzNE9tCnh6a2NEZ1IvclYrVjVSY0NBd0VBQVFLQndRQ1BidjRQTHFpVmhTY2lVSkxNNzNNdjR4eXpRbWJQaXo4dVRJTysKb3ZTaHZQWXVJWjMrRzhKdE93YTk5WTJDVjd2V3RKU1V6M2c5blN2NUkrbFJPZTJUN3BZZVJWTEM1bG1lbkVpUwo1QnptRThodzVReUVTVWxERjRGelhodlZWU3ZtK09kRTRCZk1OYk9RWExJNzdJa0xwR1VDcDE5UzlGNG81RXhuClBMY29Nbm1IMDlwZkZSbjNBb3E1ZlFGZWhlZzdYUmZQMzgraGZzWHFoT0FSdGtuckc0ei9DVmFGME9rbmFRVFYKUlRqMVU5R1JweXpRT0htdVNqZG1Oa3c0eHBrQ1lRRGRXejZsRXRQZnMwOUVwZVcxSnJPaTU0dUs3MENsSkZZYgpkZWtRb0llZWhSQ0hXU2RLVnFNODArTUJvblVHa2QyRVczM2dieEtzSEo4dzRteDBiZDNTenZzSWh1blVRK2lUCjlFVGtxdzhTc1RCZnhya1ZMN1plTC9OeGhiNWxvK1VDWVFEVzlMTkZYMEFIcldKeGRMd0hVd0NxTFFXWW55WEsKaUc3UkxPUWlRVHN3OFVLUFpqVHVzaVE3WEU2Y04ya20zME9qeS9JS0JVdGR2amxqc1FyU3lmdE12dHR4ZmNIVApMa2dydHJQd2J4VTJVYjlZL0NRdVBoMXRFNld4VEQxSFRVc0NZUURQNTAxMVdiT3FYZzNMbWsyZjBWUFRZOHFLCm1hQ0wrdzd0QjlmNWgrMFpGRDJzQWk2SEFjeWI2eDlCZjhhT2Z4NGhuSlVqNE84V3ZHTkFWTW9zcUt3NXZiSEcKRm9FMG52dXBTem9SMUNCNkcvWWxYczZqZVlhOS9DZVlybGRmdTRrQ1lBa2J1MUR3TlUxZCtuTG1TR1ZqRGY4bwpBem14WEsrVlVtVElxeTRNWjQ2dVdteXJId2tTUVZqR2s0b3BDdXFid1VqNmhsb0lXV1l5ZmtvTUlYSkhIci9rCnduV3ZwM3ZrVlNpTkNGaml6QnBPSW5hSjBKcXBCU1F2RmZGS1VycG51d0pnYjUzaWZBWEJPeW1OOEpwYmliaDYKRkZOOXE1aTZoZlNIQ0N6b1k5bXpKdUtNSEY3ZGRhMElpQXdQMTQ2QnZnT1Z2ZzQ4TnhCclBTYXlweS9PUm11OApyeC9GZS9mWUhUK3M5bStaSEo1OXlrR3BEOVJpQzh4VmtiSGhxWmhIdkVETgotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo*3d*22*7d'))
   };
 
-  document.getElementById('add-button').onclick = (ev) => {
+  // UI Code Below
+  let addButton = document.getElementById('add-button') as HTMLButtonElement;
+  let startButton = document.getElementById('start-button') as HTMLButtonElement;
+  let stopButton = document.getElementById('stop-button') as HTMLButtonElement;
+
+  addButton.onclick = (ev) => {
     console.debug('Pressed Add Button');
-    selectedProviderPromise = providers.addProvider(token).catch(console.error);
+    addButton.disabled = true;
+    selectedProviderPromise = providers.addProvider(token);
+    selectedProviderPromise.then(() => {
+      startButton.disabled = false;
+    }).catch((error) => {
+      console.error(error);
+      addButton.disabled = false;
+    });
   };
-  document.getElementById('start-button').onclick = (ev) => {
+  startButton.onclick = (ev) => {
     console.debug('Pressed Start Button');
     selectedProviderPromise.then((provider) => {
+      startButton.disabled = true;
       return provider.startProxy();
     }).then((endpoint) => {
       console.log('Endpoint: ', endpoint);
-    }).catch(console.error);
+      stopButton.disabled = false;
+    }).catch((error) => {
+      console.error(error);
+      startButton.disabled = false;
+    });
   };
-  document.getElementById('stop-button').onclick = (ev) => {
+  stopButton.onclick = (ev) => {
     console.debug('Pressed Stop Button');
     selectedProviderPromise.then((provider) => {
       return provider.stopProxy();
+    }).then(() => {
+      startButton.disabled = false;
+      stopButton.disabled = true;
     }).catch(console.error);
   };
 }
