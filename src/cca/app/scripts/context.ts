@@ -25,10 +25,10 @@ var backgroundUi = new background_ui.BackgroundUi(panelConnector, core);
 
 // You can test it with
 // curl -v -x socks5h://localhost:52612 www.example.com
-class Proxy {
+class AccessProvider {
   private instancePath_: social.InstancePath;
 
-  public constructor(private core: uproxy_core_api.CoreApi, userId: string) {
+  public constructor(private core_: uproxy_core_api.CoreApi, userId: string) {
     this.instancePath_ = {
       network: {
         name: 'Cloud',
@@ -39,36 +39,44 @@ class Proxy {
     }
   }
 
-  public start(): Promise<net.Endpoint> {
+  public startProxy(): Promise<net.Endpoint> {
     console.debug('Starting proxy');
-    return this.core.start(this.instancePath_);
+    return this.core_.start(this.instancePath_);
   }
 
-  public stop(): Promise<void> {
+  public stopProxy(): Promise<void> {
     console.debug('Stopping proxy');
-    return this.core.stop(this.instancePath_);
+    return this.core_.stop(this.instancePath_);
+  }
+}
+
+class ProviderRepository {
+  private loginPromise: Promise<uproxy_core_api.LoginResult>;
+
+  constructor(private core_: CoreConnector) {
+    this.loginPromise = this.core_.login({
+      network: 'Cloud',
+      loginType: uproxy_core_api.LoginType.INITIAL,
+    });
+  }
+
+  public addProvider(token: social.InviteTokenData): Promise<AccessProvider> {
+    // Do I need loginPromise?
+    return this.core_.acceptInvitation({
+      network: {name: 'Cloud'},
+      tokenObj: token
+    }).then(() => {
+      return new AccessProvider(this.core_, (token.networkData as any).host);
+    });
   }
 }
 
 // For debugging
 (window as any).context = this;
 
-function login(): Promise<uproxy_core_api.LoginResult> {
-  return core.login({
-    network: 'Cloud',
-    loginType: uproxy_core_api.LoginType.INITIAL,
-  });
-}
-
-function addPeer(core: CoreConnector, token: social.InviteTokenData): Promise<void> {
-  return core.acceptInvitation({
-    network: {name: 'Cloud'},
-    tokenObj: token
-  });
-}
-
 function main() {
-  let loginPromise = login();
+  let providers = new ProviderRepository(core);
+  let selectedProviderPromise: Promise<AccessProvider> = Promise.reject('No provider selected');
 
   let token: social.InviteTokenData = {
     v: 2,
@@ -77,24 +85,22 @@ function main() {
     networkData: JSON.parse(jsurl.parse('~%27*7b*22host*22*3a*2245.55.107.160*22*2c*22user*22*3a*22getter*22*2c*22key*22*3a*22LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlEZlFJQkFBS0J3UUM1M2R4WWU5U1hTNmx3MGh4RE5qSjdvWExoRXE3MGxnRTJhRnFrYVJROFNLcW9vSjhQCmJxRE1QWTBjekVxSGZYcEZEaGZ0MXF1MkpVQ3ZxZXZwRTQ3SmpSaitrSTlQZmF2eTQ3U2RtM3RmT0lSN0IzNVkKRGN2UW12UkpVQTdyV1JNNVV6TndoaTBzZm5EdzVlVmhTOVdPMWRCdWgwSUNHSC80Q3QrWjMrendjV1huc2U2cwoyd0Z5b2dyUUpnL3hVSGJzMk1IeWNLNEtxQnZWTVp2OVFJV3ROZXBBUHFMS3F3M3VKckdJbFZUb0Rvd3hzNE9tCnh6a2NEZ1IvclYrVjVSY0NBd0VBQVFLQndRQ1BidjRQTHFpVmhTY2lVSkxNNzNNdjR4eXpRbWJQaXo4dVRJTysKb3ZTaHZQWXVJWjMrRzhKdE93YTk5WTJDVjd2V3RKU1V6M2c5blN2NUkrbFJPZTJUN3BZZVJWTEM1bG1lbkVpUwo1QnptRThodzVReUVTVWxERjRGelhodlZWU3ZtK09kRTRCZk1OYk9RWExJNzdJa0xwR1VDcDE5UzlGNG81RXhuClBMY29Nbm1IMDlwZkZSbjNBb3E1ZlFGZWhlZzdYUmZQMzgraGZzWHFoT0FSdGtuckc0ei9DVmFGME9rbmFRVFYKUlRqMVU5R1JweXpRT0htdVNqZG1Oa3c0eHBrQ1lRRGRXejZsRXRQZnMwOUVwZVcxSnJPaTU0dUs3MENsSkZZYgpkZWtRb0llZWhSQ0hXU2RLVnFNODArTUJvblVHa2QyRVczM2dieEtzSEo4dzRteDBiZDNTenZzSWh1blVRK2lUCjlFVGtxdzhTc1RCZnhya1ZMN1plTC9OeGhiNWxvK1VDWVFEVzlMTkZYMEFIcldKeGRMd0hVd0NxTFFXWW55WEsKaUc3UkxPUWlRVHN3OFVLUFpqVHVzaVE3WEU2Y04ya20zME9qeS9JS0JVdGR2amxqc1FyU3lmdE12dHR4ZmNIVApMa2dydHJQd2J4VTJVYjlZL0NRdVBoMXRFNld4VEQxSFRVc0NZUURQNTAxMVdiT3FYZzNMbWsyZjBWUFRZOHFLCm1hQ0wrdzd0QjlmNWgrMFpGRDJzQWk2SEFjeWI2eDlCZjhhT2Z4NGhuSlVqNE84V3ZHTkFWTW9zcUt3NXZiSEcKRm9FMG52dXBTem9SMUNCNkcvWWxYczZqZVlhOS9DZVlybGRmdTRrQ1lBa2J1MUR3TlUxZCtuTG1TR1ZqRGY4bwpBem14WEsrVlVtVElxeTRNWjQ2dVdteXJId2tTUVZqR2s0b3BDdXFid1VqNmhsb0lXV1l5ZmtvTUlYSkhIci9rCnduV3ZwM3ZrVlNpTkNGaml6QnBPSW5hSjBKcXBCU1F2RmZGS1VycG51d0pnYjUzaWZBWEJPeW1OOEpwYmliaDYKRkZOOXE1aTZoZlNIQ0N6b1k5bXpKdUtNSEY3ZGRhMElpQXdQMTQ2QnZnT1Z2ZzQ4TnhCclBTYXlweS9PUm11OApyeC9GZS9mWUhUK3M5bStaSEo1OXlrR3BEOVJpQzh4VmtiSGhxWmhIdkVETgotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo*3d*22*7d'))
   };
 
-  let proxyPromise: Promise<Proxy> = loginPromise
-    .then(() => { return addPeer(core, token); })
-    .then(() => {
-      return new Proxy(core, (token.networkData as any).host);
-    }).catch(console.error);
-
+  document.getElementById('add-button').onclick = (ev) => {
+    console.debug('Pressed Add Button');
+    selectedProviderPromise = providers.addProvider(token).catch(console.error);
+  };
   document.getElementById('start-button').onclick = (ev) => {
     console.debug('Pressed Start Button');
-    proxyPromise.then((proxy) => {
-      return proxy.start();
+    selectedProviderPromise.then((provider) => {
+      return provider.startProxy();
     }).then((endpoint) => {
       console.log('Endpoint: ', endpoint);
     }).catch(console.error);
   };
   document.getElementById('stop-button').onclick = (ev) => {
     console.debug('Pressed Stop Button');
-    proxyPromise.then((proxy) => {
-      return proxy.stop();
+    selectedProviderPromise.then((provider) => {
+      return provider.stopProxy();
     }).catch(console.error);
   };
 }
@@ -106,68 +112,3 @@ document.addEventListener('DOMContentLoaded', function (event) {
     main();
   });
 });
-
-// function main() {
-//   chrome.runtime.getBackgroundPage((bgPage) => {
-//     var ui_context = (<any>bgPage).ui_context;
-//     ui = new user_interface.UserInterface(core, ui_context.browserApi, backgroundUi);
-//     model = ui.model;
-//     console.log('Got references from background page; importing vulcanized');
-//     // loadPolymer();
-//   });
-
-//   document.getElementById('connect-button').onclick = (ev) => {
-//     console.debug('Connect');
-
-//     let localProxy = new socks_to_rtc.SocksToRtc();
-
-//     let tcpServer = new tcp.Server({
-//         address: '127.0.0.1',
-//         port: 0
-//     });
-
-//     let config :freedom.RTCPeerConnection.RTCConfiguration = {
-//       iceServers: constants.DEFAULT_STUN_SERVERS.slice(0)
-//     };
-//     let peerConnection = new peerconnection.PeerConnectionClass(
-//       freedom['core.rtcpeerconnection'](config), 'sockstortc');
-//     localProxy.start(tcpServer, peerConnection).then((endpoint) => {
-//       console.log('Connected %s', endpoint);
-//     }).catch((error) => {
-//       console.error('Failed to start Socks-to-RTC server: %s', error);
-//     });
-//   };state
-
-//   // Force a repaint every 300 ms.
-//   // Extremely hacky workaround for https://crbug.com/612836
-
-//   let sendResize = true;
-
-//   setInterval(function () {
-//     if (sendResize) {
-//       window.dispatchEvent(new Event('resize'));
-//     } else {
-//       console.debug('suppressed resize event');
-//     }
-//   }, 300);
-
-//   // Workaround for janky inviteUserPanel transition,
-//   // which is caused by the workaround above.
-//   // https://github.com/uProxy/uproxy/issues/2659
-//   document.addEventListener('uproxy-root-ready', function () {
-//     // The 'uproxy-root-ready' event is dispatched in the `ready()` method of
-//     // the uproxy root object instantiated in src/generic_ui/polymer/root.ts.
-//     console.debug('got uproxy-root-ready');
-//     let inviteButton = document.querySelector('uproxy-root /deep/ #inviteButton');
-//     if (!inviteButton) {
-//       console.error('#inviteButton missing:', inviteButton);
-//       return;
-//     }
-//     inviteButton.addEventListener('tap', function () {
-//       sendResize = false;
-//       setTimeout(function () { sendResize = true; }, 2000);
-//     });
-//   });
-// }
-
-
