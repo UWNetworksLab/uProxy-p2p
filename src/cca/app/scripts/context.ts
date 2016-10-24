@@ -16,6 +16,9 @@ import * as net from '../../../lib/net/net.types';
 import * as provider from '../../../lib/cloud/social/provider';
 import uparams = require('uparams');
 
+// For debugging
+(window as any).context = this;
+
 export var browserConnector = new CordovaCoreConnector({name: 'uproxy-ui-to-core-connector'});
 export var core = new CoreConnector(browserConnector);
 export var ui :user_interface.UserInterface;
@@ -101,8 +104,48 @@ class ProviderRepository {
   }
 }
 
-// For debugging
-(window as any).context = this;
+interface VpnDevice {
+  start(port: number, onDisconnect: (msg: string) => void) : Promise<string>;
+  stop() : Promise<string>;
+}
+
+class Tun2SocksVpnDevice implements VpnDevice {
+  private onDisconnect_: (msg: string) => void;
+
+  public constructor(private tun2socks_: Tun2Socks) {
+    this.onDisconnect_ = () => {};
+    this.tun2socks_.onDisconnect().then((msg) => {
+      this.onDisconnect_(msg);
+    });
+  }
+
+  // TODO: What's the return string?
+  public start(port: number, onDisconnect: (msg: string) => void) : Promise<string> {
+    this.onDisconnect_ = onDisconnect;
+    // TODO: Is stop() called?
+    return this.tun2socks_.start(`127.0.0.1:${port}`);
+  }
+
+  // TODO: What's the return string?
+  public stop() : Promise<string> {
+    return this.tun2socks_.stop();
+  }
+}
+
+function GetGlobalVpnDevice(): Promise<VpnDevice> {
+  if (!window.tun2socks) {
+    return Promise.reject('Device does not support VPN');
+  }
+  return window.tun2socks.deviceSupportsPlugin().then((supportsVpn) => {
+    if (!supportsVpn) {
+      throw new Error(`Device does not support VPN`);
+    }
+    if (!GetGlobalVpnDevice.prototype.device_) {
+      GetGlobalVpnDevice.prototype.device_ = new Tun2SocksVpnDevice(window.tun2socks);
+    }
+    return GetGlobalVpnDevice.prototype.device_;
+  });
+}
 
 class EventLog {
   constructor(private element_: HTMLElement) {}
@@ -115,15 +158,16 @@ class EventLog {
 
 function main() {
   let providers = new ProviderRepository(core);
-  let selectedProviderPromise: Promise<AccessProvider> = Promise.reject('No provider selected');
+  let selectedProviderPromise: Promise<AccessProvider> = null;
+  let proxyEndpoint: net.Endpoint = null;
 
   // UI Code Below
   let log = new EventLog(document.getElementById('event-log'));
-  let addWidget = document.getElementById('add-widget') as HTMLDivElement;
-  let addTokenText = document.getElementById('add-token-text') as HTMLTextAreaElement;
-  let addButton = document.getElementById('add-button') as HTMLButtonElement;
-  let startButton = document.getElementById('start-button') as HTMLButtonElement;
-  let stopButton = document.getElementById('stop-button') as HTMLButtonElement;
+  let addWidget = document.getElementById('setup-widget') as HTMLDivElement;
+  let addTokenText = document.getElementById('token-text') as HTMLTextAreaElement;
+  let addButton = document.getElementById('set-proxy-button') as HTMLButtonElement;
+  let startButton = document.getElementById('start-proxy-button') as HTMLButtonElement;
+  let stopButton = document.getElementById('stop-proxy-button') as HTMLButtonElement;
 
   addButton.onclick = (ev) => {
     console.debug('Pressed Add Button');
@@ -138,12 +182,16 @@ function main() {
   };
   startButton.onclick = (ev) => {
     console.debug('Pressed Start Button');
+    if (!selectedProviderPromise) {
+      throw new Error('No proxy set');
+    }
     selectedProviderPromise.then((provider) => {
       startButton.disabled = true;
       return provider.startProxy();
     }).then((endpoint) => {
-      console.log('Endpoint: ', endpoint);
-      log.append(`Proxy running on port ${endpoint.port}`);
+      proxyEndpoint = endpoint;
+      console.log('Endpoint: ', proxyEndpoint);
+      log.append(`Proxy running on port ${proxyEndpoint.port}`);
       stopButton.disabled = false;
     }).catch((error) => {
       console.error(error);
@@ -153,12 +201,40 @@ function main() {
   };
   stopButton.onclick = (ev) => {
     console.debug('Pressed Stop Button');
+    if (!selectedProviderPromise) {
+      throw new Error('No proxy set');
+    }
     selectedProviderPromise.then((provider) => {
       log.append('Proxy stopped');
       return provider.stopProxy();
     }).then(() => {
       startButton.disabled = false;
       stopButton.disabled = true;
+    }).catch(console.error);
+  };
+
+  // VPN
+  let vpnDevicePromise = GetGlobalVpnDevice();
+  vpnDevicePromise.catch((error) => { log.append(error); });
+
+  let startVpnButton = document.getElementById('start-vpn-button') as HTMLButtonElement;
+  let stopVpnButton = document.getElementById('stop-vpn-button') as HTMLButtonElement;
+  startVpnButton.onclick = (ev) => {
+    console.debug('Pressed VPN Start Button');
+    vpnDevicePromise.then((vpnDevice) => {
+      return vpnDevice.start(proxyEndpoint.port, ((msg) => {
+        log.append(`Vpn started: ${msg}`);
+      }));
+    }).then((msg) => {
+      log.append(`Tun2Socks start: ${msg}`);
+    }).catch(console.error);
+  };
+  stopVpnButton.onclick = (ev) => {
+    console.debug('Pressed VPN Stop Button');
+    vpnDevicePromise.then((vpnDevice) => {
+      return vpnDevice.stop();
+    }).then((msg) => {
+      log.append(`VPN stopped: ${msg}`);
     }).catch(console.error);
   };
 }
