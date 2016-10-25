@@ -17,8 +17,8 @@ Thereafter, you just need to add this prefix to your commands: `./tools/build_en
 
 So, to install dependencies and build uProxy for Chrome:
 ```bash
-./tools/build_env/build_env.sh npm install
-./tools/build_env/build_env.sh npm run grunt build_chrome
+./tools/build_env/build_env.sh yarn install
+./tools/build_env/build_env.sh yarn run grunt build_chrome
 ```
 
 What's happening when you use this "script prefix"? Roughly:
@@ -34,7 +34,7 @@ What's happening when you use this "script prefix"? Roughly:
 
 It's named `uproxy/build-android` and can be used via `-v`, e.g.:
 ```bash
-./tools/build_env/build_env.sh -v android npm run grunt build_chrome
+./tools/build_env/build_env.sh -v android yarn run grunt build_chrome
 ```
 
 ## Updating the Image
