@@ -1189,10 +1189,16 @@ module.exports = function(grunt) {
   // =========================================================================
 
   registerTask(grunt, 'build_cca', [
-    'base',
+    'copy:resources', 
+    'copy:devGenericCore', 
+    'compileTypescript', 
+    'browserify:genericCoreFreedomModule', 
+    'browserify:loggingProvider', 
+    'browserify:churnPipeFreedomModule', 
+    'browserify:cloudSocialProviderFreedomModule', 
+    //'base',
     'ccaMainCoreEnv',
     'ccaContext',
-    'ccaRoot',
     'copy:cca',
     'copy:ccaAdditional',
   ]);
@@ -1206,13 +1212,6 @@ module.exports = function(grunt) {
     'compileTypescript',
     'browserify:ccaContext'    
   ]);
-  registerTask(grunt, 'ccaRoot',
-      'Builds build/src/cca/app/generic_ui/polymer/vulcanized.{html,static.js}', [
-    'compileTypescript',
-    'copy:resources',
-    'copy:cca',
-    'copy:ccaAdditional',
-  ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
 
   grunt.config.merge({
     browserify: {
