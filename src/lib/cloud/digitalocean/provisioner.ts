@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 import * as logging from '../../logging/logging';
 import Pinger from '../../net/pinger';
 

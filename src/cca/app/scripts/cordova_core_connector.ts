@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
 /**
  * cordova_core_connector.ts
  *

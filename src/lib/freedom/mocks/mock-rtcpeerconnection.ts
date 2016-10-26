@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 import RTCConfiguration = freedom.RTCPeerConnection.RTCConfiguration;
 import RTCDataChannelInit = freedom.RTCPeerConnection.RTCDataChannelInit;
 import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;

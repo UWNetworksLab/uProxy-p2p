@@ -1,6 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-/// <reference path='../../../generic_ui/polymer/context.d.ts' />
-
 import * as background_ui from '../../../generic_ui/scripts/background_ui';
 import * as ui_model from '../../../generic_ui/scripts/model';
 import * as user_interface from '../../../generic_ui/scripts/ui';

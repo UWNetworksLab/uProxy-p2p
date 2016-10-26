@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import MockFreedomRtcDataChannel from '../freedom/mocks/mock-rtcdatachannel';
 import MockFreedomRtcPeerConnection from '../freedom/mocks/mock-rtcpeerconnection';
 import RTCPeerConnection = freedom.RTCPeerConnection.RTCPeerConnection;

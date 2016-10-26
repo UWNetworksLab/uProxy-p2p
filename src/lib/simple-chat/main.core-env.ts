@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 var sendButtonA = document.getElementById('sendButtonA');
 var sendButtonB = document.getElementById('sendButtonB');
 

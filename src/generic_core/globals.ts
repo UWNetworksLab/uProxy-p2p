@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 import * as _ from 'lodash';
 import * as constants from './constants';
 import * as local_storage from './storage';

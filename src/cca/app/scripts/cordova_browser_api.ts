@@ -1,9 +1,9 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../../third_party/cordova/themeablebrowser.d.ts'/>
 /// <reference path='../../../../third_party/cordova/webintents.d.ts'/>
 /// <reference path='../../../../third_party/cordova/tun2socks.d.ts'/>
 /// <reference path='../../../../third_party/cordova/backbutton.d.ts'/>
 /// <reference path='../../../../third_party/cordova/app.d.ts'/>
+/// <reference types="chrome/chrome-app" />
 
 /**
  * cordova_browser_api.ts

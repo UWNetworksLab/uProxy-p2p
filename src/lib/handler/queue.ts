@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 // This file defines 'handler queues'. These are an abstraction for a stream of
 // events (but think of an event as an element of data to be handled) along with
 // a stream of functions to handle the events. Each event is guarenteed to be

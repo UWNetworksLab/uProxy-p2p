@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as Socks from './headers';
 
 // TODO: add tests for IPv6 address parsing

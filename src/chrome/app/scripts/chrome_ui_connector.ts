@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
 import * as browser_connector from '../../../interfaces/browser_connector';
 import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 import * as uproxy_chrome from '../../../interfaces/chrome';

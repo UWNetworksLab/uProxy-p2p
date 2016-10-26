@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as queue from './queue';
 import Queue = queue.Queue;
 

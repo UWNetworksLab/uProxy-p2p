@@ -12,4 +12,4 @@ script:
 sudo: false
 cache:
   directories:
-    - node_modules
+    - $HOME/.yarn-cache

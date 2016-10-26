@@ -1,5 +1,4 @@
 /// <reference path='../../../node_modules/i18next-client/typescript/i18next.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import * as i18next from 'i18next-client';
 import * as xregexp from 'xregexp';

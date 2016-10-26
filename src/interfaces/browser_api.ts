@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 import * as net from '../lib/net/net.types';
 
 // Describes the interface for functions that have different implications

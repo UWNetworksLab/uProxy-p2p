@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as arraybuffers from './arraybuffers';
 
 const array1 = new Uint8Array([12, 118, 101, 114, 105, 115]).buffer;

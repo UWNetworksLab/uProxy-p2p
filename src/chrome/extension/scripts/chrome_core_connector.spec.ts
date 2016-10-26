@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
 import * as background_ui from '../../../generic_ui/scripts/background_ui';
 import ChromeCoreConnector from './chrome_core_connector';
 import ChromeBrowserApi from './chrome_browser_api';
