@@ -24,7 +24,7 @@
   version "0.0.28"
   resolved "https://registry.yarnpkg.com/@types/filewriter/-/filewriter-0.0.28.tgz#c054e8af4d9dd75db4e63abc76f885168714d4b3"
 
-"@types/freedom@^0.6.32":
+"@types/freedom":
   version "0.6.32"
   resolved "https://registry.yarnpkg.com/@types/freedom/-/freedom-0.6.32.tgz#01fbb4668cd1fdbebd21d4f0fbccdb3ba8d9716f"
 
