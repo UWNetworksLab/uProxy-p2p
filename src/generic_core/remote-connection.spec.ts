@@ -13,6 +13,7 @@ import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env'
 import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.online': () => { return new freedom_mocks.MockFreedomOnline(); },
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
   'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
   'metrics': () => { return new freedom_mocks.MockMetrics(); },

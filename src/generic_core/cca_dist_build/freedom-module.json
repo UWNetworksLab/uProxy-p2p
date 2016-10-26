@@ -50,6 +50,7 @@
   },
   "permissions": [
     "core.crypto",
+    "core.online",
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
     "core.storage",

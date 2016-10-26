@@ -7,7 +7,7 @@ LABEL description="Docker container for uProxy build environment"
 RUN apk update
 RUN apk add git
 
-RUN npm install -g grunt-cli
+RUN npm install -g --production grunt-cli yarn
 
 # Without this, NPM 2.x silently drops install/postinstall scripts:
 #   https://github.com/nodejs/docker-node/issues/93
