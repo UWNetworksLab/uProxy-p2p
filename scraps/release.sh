@@ -26,7 +26,7 @@ function openPages {
 
 function makeBuilds {
   # do the build
-  npm install && grunt dist
+  yarn install && grunt dist
 
   # make the zip files
   cd build/dist
