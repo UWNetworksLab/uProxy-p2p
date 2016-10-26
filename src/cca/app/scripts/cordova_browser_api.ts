@@ -3,6 +3,7 @@
 /// <reference path='../../../../third_party/cordova/tun2socks.d.ts'/>
 /// <reference path='../../../../third_party/cordova/backbutton.d.ts'/>
 /// <reference path='../../../../third_party/cordova/app.d.ts'/>
+/// <reference types="chrome/chrome-app" />
 
 /**
  * cordova_browser_api.ts

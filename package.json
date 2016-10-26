@@ -21,7 +21,7 @@
     }
   ],
   "devDependencies": {
-    "@types/chrome": "0.0.34",
+    "@types/chrome": "^0.0.35",
     "@types/circular-json": "^0.1.30",
     "@types/compare-version": "^0.1.30",
     "@types/filesystem": "0.0.28",
