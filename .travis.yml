@@ -3,7 +3,6 @@ node_js:
   - "4.4"
 before_install:
   - npm install -g --production yarn
-  - yarn run clean
 install:
   - yarn install
 script:
