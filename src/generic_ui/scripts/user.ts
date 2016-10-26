@@ -67,7 +67,7 @@ export class User implements social.BaseUser {
   }
 
   /**
-   * Update user details.
+   * Update user details.  Does not alter its argument.
    */
   public update = (payload :social.UserData) => {
     var profile :social.UserProfileMessage = payload.user;
@@ -95,7 +95,7 @@ export class User implements social.BaseUser {
     this.imageData = user_interface.getImageData(this.userId, this.imageData,
                                                  profile.imageData);
 
-    this.mergeOfferingInstaces_(payload.offeringInstances);
+    this.mergeOfferingInstances_(payload.offeringInstances);
 
     this.allInstanceIds = payload.allInstanceIds;
     this.updateInstanceDescriptions_();
@@ -142,24 +142,27 @@ export class User implements social.BaseUser {
     }
   }
 
-  private mergeOfferingInstaces_ = (newOfferingIrstances: social.InstanceData[]): void => {
+  private mergeOfferingInstances_ = (newOfferingInstances: social.InstanceData[]): void => {
+    // Work with a shallow copy of the new instances, so that we can safely
+    // delete entries that have been processed for easier bookkeeping.
+    newOfferingInstances = newOfferingInstances.slice();
     // iterate backwards to allow removing elements
     var i = this.offeringInstances.length;
     while (i--) {
-      var found = _.findIndex(newOfferingIrstances, (obj) => {
+      let found = _.findIndex(newOfferingInstances, (obj) => {
         return obj.instanceId === this.offeringInstances[i].instanceId;
       });
 
       if (found !== -1) {
-        _.merge(this.offeringInstances[i], newOfferingIrstances[found]);
-        newOfferingIrstances.splice(found, 1);
+        _.merge(this.offeringInstances[i], newOfferingInstances[found]);
+        newOfferingInstances.splice(found, 1);
       } else {
         this.offeringInstances.splice(i, 1);
       }
     }
 
-    for (var j in newOfferingIrstances) {
-      this.offeringInstances.push(newOfferingIrstances[j]);
+    for (let j in newOfferingInstances) {
+      this.offeringInstances.push(newOfferingInstances[j]);
     }
   }
 

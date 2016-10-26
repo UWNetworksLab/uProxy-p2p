@@ -297,15 +297,19 @@ describe('UI.UserInterface', () => {
     });
 
     it('Extension icon changes when you stop getting access', () => {
-      syncUserAndInstance('userId', 'userName', 'testGiverId');
+      let userFriend = getUserAndInstance('userId', 'userName', 'testGiverId');
+      ui.syncUser(userFriend);
       ui.startGettingInUiAndConfig(
           'testGiverId', { address : 'testAddress' , port : 0 },
           browser_api.ProxyAccessMode.IN_APP);
-      ui['instanceGettingAccessFrom_'] = 'testGiverId';
+      let update:social.UserData = _.cloneDeep(userFriend);
+      update.instancesSharingWithLocal.push(update.allInstanceIds[0]);
+      updateToHandlerMap[uproxy_core_api.Update.USER_FRIEND]
+          .call(ui, update);
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
-      updateToHandlerMap[uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND]
-          .call(ui, {instanceId: 'testGiverId', error: false});
+      updateToHandlerMap[uproxy_core_api.Update.USER_FRIEND]
+          .call(ui, userFriend);
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.DEFAULT_ICON);
     });

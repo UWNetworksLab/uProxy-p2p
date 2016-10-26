@@ -29,14 +29,14 @@ To manage dependencies we use:
 
 ### Prerequisites
 
- * NPM. The easiest way to install this is as part of [Node.js](http://nodejs.org/).
- * [grunt-cli](https://www.npmjs.com/package/grunt-cli) (once you've installed NPM, simply execute `npm install -g grunt-cli`)
+ * [Yarn](https://yarnpkg.com/en/docs/install). If you have npm, you can install with `npm install -g --production yarn`.
+ * [grunt-cli](https://www.npmjs.com/package/grunt-cli) (once you've installed NPM, simply execute `yarn global add --prod grunt-cli`)
 
 ### Building
 
 First, to install required NPMs and configure the `build/` directory for TypeScript compilation, execute:
 ```bash
-npm install
+yarn
 ```
 
 Then, to compile the TypeScript code and build uProxy and all of the demo apps, execute:
@@ -46,7 +46,7 @@ grunt
 
 Having problems? To clean up from a partial, broken, or extremely out-dated build, try executing this command before repeating the above steps:
 ```bash
-npm run clean
+yarn run clean
 ```
 
 ### IDE
@@ -101,7 +101,7 @@ To run Chrome apps:
  - open `chrome://extensions`, enable check Developer Mode, and load the unpacked extension from the relevant directory, e.g. `build/src/samples/simple-socks-chromeapp/`.
 
 To run Firefox add-ons:
-- install [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) via NPM, e.g. `npm install jpm -g`, `cd` to the relevant directory, e.g. `build/src/samples/simple-socks-firefoxapp/`, and execute ``jpm run -b `which firefox` ``.
+- install [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) via NPM, e.g. `yarn install jpm -g`, `cd` to the relevant directory, e.g. `build/src/samples/simple-socks-firefoxapp/`, and execute ``jpm run -b `which firefox` ``.
 
 To run Node.js apps:
  - Directly run `node` with the entry point, e.g. `node build/src/samples/zork-node/index.js`

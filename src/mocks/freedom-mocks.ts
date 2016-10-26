@@ -45,6 +45,16 @@ export class MockFreedomStorage implements freedom.Storage.Storage {
 
 }  // class MockFreedomStorage
 
+export class MockFreedomOnline extends MockEventHandler {
+  constructor() {
+    super(['online', 'offline']);
+  }
+
+  public isOnline = () : Promise<boolean> => {
+    return Promise.resolve<boolean>(true);
+  }
+}
+
 export class MockLoggingController {
   public setDefaultFilter = (destination :number, level :number) => {}
 }

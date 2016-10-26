@@ -85,6 +85,24 @@ describe('UI.User', () => {
     expect(sampleUser.offeringInstances[0].description).toEqual('');
   });
 
+  it('update does not change its argument', () => {
+    let m1 = makeUpdateMessage({
+      allInstanceIds: [
+        'instance1'
+      ],
+      offeringInstances: [
+        getInstance('instance1', '')
+      ]
+    });
+    let m2 = JSON.parse(JSON.stringify(m1));
+    expect(m1).toEqual(m2);
+    sampleUser.update(m1);
+    // Regression test: passing the same input twice would previously
+    // cause instances to be removed because they are already known.
+    sampleUser.update(m1);
+    expect(m1).toEqual(m2);
+  });
+
   it('updates empty descriptions when multiple instances', () => {
     sampleUser.update(makeUpdateMessage({
       allInstanceIds: [

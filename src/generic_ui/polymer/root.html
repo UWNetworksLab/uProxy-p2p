@@ -457,11 +457,11 @@
     </uproxy-action-dialog>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
-        opened="{{ !!core.disconnectedWhileProxying }}" autoCloseDisabled>
+        opened="{{ !!ui.disconnectedWhileProxying }}" autoCloseDisabled>
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
         <h1>{{ "DISCONNECTED_TITLE" | $$(model.globalSettings.language) }}</h1>
-        <div id='progressWrapper' hidden?='{{ !ui.mapInstanceIdToUser_[core.disconnectedWhileProxying] }}'>
+        <div id='progressWrapper' hidden?='{{ !ui.mapInstanceIdToUser_[ui.disconnectedWhileProxying] }}'>
           <div hidden?='{{ !ui.instanceTryingToGetAccessFrom }}'>
             <strong>{{ 'RECONNECTING' | $$(model.globalSettings.language) }}</strong>
             <paper-progress indeterminate='true'></paper-progress>

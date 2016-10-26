@@ -55,12 +55,7 @@ Polymer({
       });
   },
   stop: function() {
-    if (this.instance.localGettingFromRemote ==
-        this.GettingState.TRYING_TO_GET_ACCESS) {
-      ui.stopUsingProxy(true);
-    } else {
-      ui.stopUsingProxy();
-    }
+    ui.stopUsingProxy();
     ui.stopGettingFromInstance(this.instance.instanceId);
   },
   startBrowsing: function() {

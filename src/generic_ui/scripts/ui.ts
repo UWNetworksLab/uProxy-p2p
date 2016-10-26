@@ -27,7 +27,9 @@ import * as network_options from '../../generic/network-options';
 import * as model from './model';
 import * as dialogs from './dialogs';
 import * as jsurl from 'jsurl';
-import uparams from 'uparams';
+// TODO: remove uparams as it doesn't work with ES6 imports and TypeScript,
+// see https://github.com/uProxy/uproxy/issues/2782
+import uparams = require('uparams');
 import * as crypto from 'crypto';
 import * as jdenticon from 'jdenticon';
 
@@ -105,10 +107,14 @@ export class UserInterface implements ui_constants.UiApi {
   public instancesGivingAccessTo :{[instanceId :string] :boolean} = {};
   private mapInstanceIdToUser_ :{[instanceId :string] :User} = {};
 
+  // If non-null, the ID of the instance from which we are presently
+  // disconnected.  Set by syncDisconnectedState_
+  public disconnectedWhileProxying :string = null;
+
   /* Getting and sharing */
   public isSharingDisabled :boolean = false;
-  public proxyingId: string; // ID of the most recent failed proxying attempt.
-  private userCancelledGetAttempt_ :boolean = false;
+  // Set by syncUser.  Used to identify sessions in failure logs.
+  public lastFailedProxyingId: string;
 
   /* Translation */
   public i18n_t = translator_module.i18n_t;
@@ -170,11 +176,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.REMOVE_FRIEND, this.removeFriend);
 
-    core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
-        (data :social.StopProxyInfo) => { // TODO better type
-        this.stoppedGetting(data);
-    });
-
     var checkConnectivityIntervalId: NodeJS.Timer;
     core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
         (instanceId :string) => {
@@ -233,34 +234,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       let toastMessage = translator_module.i18n_t('UNABLE_TO_SHARE_WITH', { name: info.name });
       this.backgroundUi.showToast(toastMessage, false, true);
-      this.proxyingId = info.proxyingId;
-    });
-
-    core.onUpdate(uproxy_core_api.Update.FAILED_TO_GET,
-        (info:uproxy_core_api.FailedToGetOrGive) => {
-      if (this.userCancelledGetAttempt_) {
-        console.error('proxying attempt ' + info.proxyingId +
-            ' cancelled (getting)');
-        this.userCancelledGetAttempt_ = false; // Reset.
-      } else {
-        console.error('proxying attempt ' + info.proxyingId +
-            ' failed (getting)');
-        if (!this.core.disconnectedWhileProxying) {
-          // This is an immediate failure, i.e. failure of a connection attempt
-          // that never connected.  It is not a retry.
-          // Show the error toast indicating that a get attempt failed.
-          var user = this.mapInstanceIdToUser_[info.name];
-          if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-            this.restartServer_('digitalocean');
-          } else {
-            let toastMessage = translator_module.i18n_t('UNABLE_TO_GET_FROM', { name: info.name });
-            this.backgroundUi.showToast(toastMessage, true, false);
-          }
-        }
-      }
-      this.instanceTryingToGetAccessFrom = null;
-      this.proxyingId = info.proxyingId;
-      this.bringUproxyToFront();
+      this.lastFailedProxyingId = info.proxyingId;
     });
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
@@ -329,6 +303,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public restartServer_ = (providerName :string) => {
+    console.warn('Restarting server on ' + providerName);
     this.getConfirmation(
       this.i18n_t('RESTART_SERVER_TITLE'),
       this.i18n_t('RESTART_SERVER_TEXT'),
@@ -652,7 +627,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   /**
    * Takes all actions required when getting stops, including removing proxy
-   * indicators from the UI, and retrying the connection if appropriate.
+   * indicators from the UI.
    * If user didn't end proxying, so if proxy session ended because of some
    * unexpected reason, user should be asked before reverting proxy settings.
    * if data.instanceId is null, it means to stop active proxying.
@@ -669,11 +644,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     if (data.error) {
-      if (instanceId) {
-        // Auto-retry.
-        this.core.disconnectedWhileProxying = instanceId;
-        this.restartProxying();
-      } else {
+      if (!instanceId) {
         console.error('Received error on getting without a current instance');
       }
 
@@ -694,16 +665,28 @@ export class UserInterface implements ui_constants.UiApi {
     this.updateIcon_();
   }
 
+  private onGetFailed_ = (instanceId:string, proxyingId:string) => {
+    console.error('proxying attempt ' + proxyingId + ' failed (getting)');
+    if (!this.disconnectedWhileProxying) {
+      // This is an immediate failure, i.e. failure of a connection attempt
+      // that never connected.  It is not a retry.
+      // Show the error toast indicating that a get attempt failed.
+      let user = this.mapInstanceIdToUser_[instanceId];
+      if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
+        this.restartServer_('digitalocean');
+      } else {
+        let toastMessage = translator_module.i18n_t('UNABLE_TO_GET_FROM', { name: instanceId });
+        this.backgroundUi.showToast(toastMessage, true, false);
+      }
+    }
+    this.bringUproxyToFront();
+  }
+
   /**
    * Undoes proxy configuration (e.g. chrome.proxy settings).
    */
-  public stopUsingProxy = (userCancelled ?:boolean) => {
-    if (userCancelled) {
-      this.userCancelledGetAttempt_ = true;
-    }
-
+  public stopUsingProxy = () => {
     this.browserApi.stopUsingProxy();
-    this.core.disconnectedWhileProxying = null;
     this.updateIcon_();
 
     // revertProxySettings might call stopUsingProxy while a reconnection is
@@ -711,6 +694,8 @@ export class UserInterface implements ui_constants.UiApi {
     // in-progress connection.
     if (this.instanceTryingToGetAccessFrom) {
       this.stopGettingFromInstance(this.instanceTryingToGetAccessFrom);
+    } else if (this.disconnectedWhileProxying) {
+      this.stopGettingFromInstance(this.disconnectedWhileProxying);
     }
   }
 
@@ -728,7 +713,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public restartProxying = () => {
-    this.startGettingFromInstance(this.core.disconnectedWhileProxying,
+    this.startGettingFromInstance(this.disconnectedWhileProxying,
                                   this.proxyAccessMode_);
   }
 
@@ -736,14 +721,11 @@ export class UserInterface implements ui_constants.UiApi {
       (instanceId :string, accessMode: ProxyAccessMode): Promise<void> => {
     if (this.instanceTryingToGetAccessFrom !== null) {
       // Cancel the existing proxying attempt before starting a new connection.
-      this.userCancelledGetAttempt_ = true;
       this.core.stop(this.getInstancePath_(this.instanceTryingToGetAccessFrom));
     }
-    this.instanceTryingToGetAccessFrom = instanceId;
 
     return this.core.start(this.getInstancePath_(instanceId))
         .then((endpoint :net.Endpoint) => {
-      this.instanceTryingToGetAccessFrom = null;
       // If we were getting access from some other instance
       // turn down the connection.
       if (this.instanceGettingAccessFrom_ &&
@@ -753,19 +735,12 @@ export class UserInterface implements ui_constants.UiApi {
       // Remember access mode in case of reconnect.
       this.proxyAccessMode_ = accessMode;
       this.startGettingInUiAndConfig(instanceId, endpoint, accessMode);
-    }, (err:Error) => {
-      this.instanceTryingToGetAccessFrom = null;
-      throw err;
     });
   }
 
   public stopGettingFromInstance = (instanceId :string) :void => {
-    if (instanceId === this.instanceTryingToGetAccessFrom) {
-      // aborting pending connection
-      this.instanceTryingToGetAccessFrom = null;
-    } else if (instanceId === this.instanceGettingAccessFrom_) {
-      // instance will be unset in eventual callback from core
-    } else {
+    if (instanceId !== this.instanceTryingToGetAccessFrom &&
+        instanceId !== this.instanceGettingAccessFrom_) {
       // we have no idea what's going on
       console.error('Attempting to stop getting from unknown instance');
     }
@@ -792,8 +767,6 @@ export class UserInterface implements ui_constants.UiApi {
       return;
     }
 
-    this.core.disconnectedWhileProxying = null;
-
     this.startGettingInUi();
 
     this.updateGettingStatusBar_();
@@ -818,7 +791,7 @@ export class UserInterface implements ui_constants.UiApi {
       isGiving = this.isGivingAccess();
     }
 
-    if (this.core.disconnectedWhileProxying) {
+    if (this.disconnectedWhileProxying) {
       this.browserApi.setIcon(Constants.ERROR_ICON);
     } else if (isGetting && isGiving) {
       this.browserApi.setIcon(Constants.GETTING_SHARING_ICON);
@@ -879,7 +852,7 @@ export class UserInterface implements ui_constants.UiApi {
 
         if (!existingNetwork.logoutExpected &&
             this.supportsReconnect_(networkMsg.name) &&
-            !this.core.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
+            !this.disconnectedWhileProxying && !this.instanceGettingAccessFrom_) {
           console.warn('Unexpected logout, reconnecting to ' + networkMsg.name);
           this.reconnect_(networkMsg.name);
         } else {
@@ -947,19 +920,12 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     for (var i = 0; i < payload.offeringInstances.length; i++) {
-      var gettingState = payload.offeringInstances[i].localGettingFromRemote;
-      var instanceId = payload.offeringInstances[i].instanceId;
-      if (gettingState === social.GettingState.GETTING_ACCESS) {
-        this.startGettingInUiAndConfig(
-            instanceId, payload.offeringInstances[i].activeEndpoint,
-            this.proxyAccessMode_);
-        break;
-      } else if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS) {
-        this.instanceTryingToGetAccessFrom = instanceId;
-        this.updateGettingStatusBar_();
-        break;
-      }
+      let instance = payload.offeringInstances[i];
+      this.syncGettingState_(instance);
+      this.syncTryingToGetState_(instance);
+      this.syncDisconnectedState_(instance);
     }
+    this.updateGettingStatusBar_();
 
     for (var i = 0; i < payload.instancesSharingWithLocal.length; i++) {
       this.instancesGivingAccessTo[payload.instancesSharingWithLocal[i]] = true;
@@ -979,6 +945,62 @@ export class UserInterface implements ui_constants.UiApi {
 
     console.log('Synchronized user.', user);
   };
+
+  // Updates this.instanceGettingAccessFrom_ and related state variables.
+  private syncGettingState_ = (instance:social.InstanceData) => {
+    let gettingState = instance.localGettingFromRemote;
+    let instanceId = instance.instanceId;
+    if (gettingState === social.GettingState.GETTING_ACCESS) {
+      // Sets this.instanceGettingAccessFrom_
+      this.startGettingInUiAndConfig(
+          instanceId, instance.activeEndpoint,
+          this.proxyAccessMode_);
+    } else if (this.instanceGettingAccessFrom_ === instanceId &&
+                gettingState !== social.GettingState.TRYING_TO_GET_ACCESS) {
+      let error = false;
+      if (gettingState !== social.GettingState.NONE) {
+        error = true;
+        this.lastFailedProxyingId = instance.proxyingId;
+      }
+      // Unsets this.instanceGettingAccessFrom_
+      this.stoppedGetting({
+        instanceId: instanceId,
+        error: error
+      });
+    }
+  }
+
+  // Updates this.instanceTryingToGetAccessFrom and related state variables.
+  private syncTryingToGetState_ = (instance:social.InstanceData) => {
+    let gettingState = instance.localGettingFromRemote;
+    let instanceId = instance.instanceId;
+    let proxyingId = instance.proxyingId
+    if (gettingState === social.GettingState.TRYING_TO_GET_ACCESS ||
+        gettingState === social.GettingState.RETRYING) {
+      this.instanceTryingToGetAccessFrom = instanceId;
+    } else if (this.instanceTryingToGetAccessFrom === instanceId) {
+      this.lastFailedProxyingId = proxyingId;
+      this.instanceTryingToGetAccessFrom = null;
+      if (gettingState === social.GettingState.NONE) {
+        // Initial connection attempt failed, so we went straight to NONE.
+        this.onGetFailed_(instanceId, proxyingId);
+      }
+    }
+  }
+
+  // Updates this.disconnectedWhileProxying and related state variables.
+  private syncDisconnectedState_ = (instance:social.InstanceData) => {
+    let gettingState = instance.localGettingFromRemote;
+    let instanceId = instance.instanceId;
+    if (gettingState === social.GettingState.FAILED ||
+        gettingState === social.GettingState.RETRYING) {
+      // This instance is in a failure state.
+      this.disconnectedWhileProxying = instanceId;
+    } else if (this.disconnectedWhileProxying === instanceId) {
+      // Not in a failure state anymore.
+      this.disconnectedWhileProxying = null;
+    }
+  }
 
   /**
    * Remove a friend from the friend list by removing it from
@@ -1075,7 +1097,7 @@ export class UserInterface implements ui_constants.UiApi {
         feedback: feedback.feedback,
         logs: logs,
         feedbackType: uproxy_core_api.UserFeedbackType[feedback.feedbackType],
-        proxyingId: this.proxyingId
+        proxyingId: this.lastFailedProxyingId
       };
 
       return this.core.postReport({payload: payload, path: 'submit-feedback'});

@@ -87,6 +87,7 @@ export interface ConnectionState {
   bytesSent :number;
   bytesReceived :number;
   activeEndpoint :net.Endpoint;
+  proxyingId ?:string;
 }
 
 // Contains settings directing rtc-to-net server to go directly to net or
@@ -149,8 +150,6 @@ export enum Update {
   USER_FRIEND = 2003,  // Remote friend on the roster.
   COMMAND_FULFILLED = 2005,
   COMMAND_REJECTED = 2006,
-  START_GETTING_FROM_FRIEND = 2007,
-  STOP_GETTING_FROM_FRIEND = 2008,
   START_GIVING_TO_FRIEND = 2009,
   STOP_GIVING_TO_FRIEND = 2010,
   // TODO: "Get credentials" is a command, not an "update". Consider
@@ -160,12 +159,10 @@ export enum Update {
 
   SIGNALLING_MESSAGE = 2014, /* copypaste messages */
   START_GETTING = 2015,
-  STOP_GETTING = 2016,
   START_GIVING = 2017,
   STOP_GIVING = 2018,
   STATE = 2019,
   FAILED_TO_GIVE = 2020,
-  FAILED_TO_GET = 2023,
   CORE_UPDATE_AVAILABLE = 2024,
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
