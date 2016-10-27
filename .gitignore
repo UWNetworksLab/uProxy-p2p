@@ -17,17 +17,10 @@
 *~
 .DS_Store
 .grunt
-.mozilla_addon_sdk
 .sass-cache
 .tscache
 build
-.build
-editor_support/*/*.sublime-workspace
 node_modules
 npm-debug.log
-test_output
-tmp
 keys
 third_party/bower
-third_party/typings
-src/.baseDir.ts
