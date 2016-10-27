@@ -1,13 +1,11 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import handler = require('../handler/queue');
-import net = require('../net/net.types');
-import logging = require('../logging/logging');
-import peerconnection = require('../webrtc/peerconnection');
-import Pool = require('../pool/pool');
-import socks_headers = require('../socks/headers');
-import tcp = require('../net/tcp');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as handler from '../handler/queue';
+import * as net from '../net/net.types';
+import * as logging from '../logging/logging';
+import * as peerconnection from '../webrtc/peerconnection';
+import Pool from '../pool/pool';
+import * as socks_headers from '../socks/headers';
+import * as tcp from '../net/tcp';
 
 const log = new logging.Log('SocksToRtc');
 

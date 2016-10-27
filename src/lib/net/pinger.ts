@@ -1,7 +1,5 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import logging = require('../logging/logging');
-import promises = require('../promises/promises');
+import * as logging from '../logging/logging';
+import * as promises from '../promises/promises';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
@@ -11,7 +9,7 @@ const DEFAULT_TIMEOUT_SECS = 60;
 const DEFAULT_INTERVAL_MS = 1000;
 
 // "Pings" - in an nmap sense - a port until a TCP connection can be established.
-class Pinger {
+export default class Pinger {
   constructor(
     private host_: string,
     private port_: number,
@@ -47,5 +45,3 @@ class Pinger {
     }, this.timeout_, DEFAULT_INTERVAL_MS);
   }
 }
-
-export = Pinger;

@@ -1,6 +1,4 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-export import logging_provider = require('./loggingprovider');
+import * as logging_provider from './loggingprovider';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

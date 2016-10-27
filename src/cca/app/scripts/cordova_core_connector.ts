@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
 /**
  * cordova_core_connector.ts
  *
@@ -7,12 +5,12 @@
  * core context.
  */
 
-import browser_connector = require('../../../interfaces/browser_connector');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import * as browser_connector from '../../../interfaces/browser_connector';
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 
-import user_interface = require('../../../generic_ui/scripts/ui');
+import * as user_interface from '../../../generic_ui/scripts/ui';
 
-class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
+export default class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
 
   private appChannel_ :freedom.OnAndEmit<any,any>;
 
@@ -116,5 +114,3 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
     }
   }
 }  // class CordovaCoreConnector
-
-export = CordovaCoreConnector

@@ -1,22 +1,9 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import session = require('../socks/session');
-import piece = require('../socks/piece');
-import socks_headers = require('../socks/headers');
-
-import freedom_server = require('../socks/freedom/server');
-import freedom_socket = require('../socks/freedom/socket');
-
-import logging = require('../logging/logging');
-import loggingTypes = require('../loggingprovider/loggingprovider.types');
-
-import net = require('../net/net.types');
-import peerconnection = require('../webrtc/peerconnection');
-import peerconnection_types = require('../webrtc/signals');
-
-import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
-import tcp = require('../net/tcp');
-import Pool = require('../pool/pool');
+import * as session from '../socks/session';
+import * as freedom_server from '../socks/freedom/server';
+import * as freedom_socket from '../socks/freedom/socket';
+import * as logging from '../logging/logging';
+import * as loggingTypes from '../loggingprovider/loggingprovider.types';
+import * as peerconnection from '../webrtc/peerconnection';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

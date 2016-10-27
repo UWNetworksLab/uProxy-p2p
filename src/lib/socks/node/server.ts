@@ -1,8 +1,6 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
-import net = require('net');
-import piece = require('../piece');
-import socks_server = require('../server');
+import * as net from 'net';
+import * as piece from '../piece';
+import * as socks_server from '../server';
 
 export class NodeSocksServer implements socks_server.SocksServer {
   private getSocksSession: (clientId: string) => piece.SocksPiece;

@@ -1,6 +1,6 @@
-import model = require('./model');
+import * as model from './model';
 import Model = model.Model;
-import ui_constants = require('../../interfaces/ui');
+import * as ui_constants from '../../interfaces/ui';
 
 describe('model.Model', () => {
   var model :Model;

@@ -1,8 +1,6 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
-import logging = require('../../logging/logging');
-import piece = require('../piece');
-import socks_server = require('../server');
+import * as logging from '../../logging/logging';
+import * as piece from '../piece';
+import * as socks_server from '../server';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

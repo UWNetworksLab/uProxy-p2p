@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 /*
  * remote-instance.spec.ts
  *
@@ -9,11 +7,12 @@
  * correct consent values between remote instances.
  */
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
 
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.online': () => { return new freedom_mocks.MockFreedomOnline(); },
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
   'core.tcpsocket': () => { return new freedom_mocks.MockTcpSocket(); },
   'metrics': () => { return new freedom_mocks.MockMetrics(); },
@@ -21,20 +20,20 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'portControl': () => { return new Object },
 });
 
-import remote_user = require('./remote-user');
-import consent = require('./consent');
-import remote_instance = require('./remote-instance');
-import social = require('../interfaces/social');
-import socks_to_rtc = require('../lib/socks-to-rtc/socks-to-rtc');
-import rtc_to_net = require('../lib/rtc-to-net/rtc-to-net');
-import globals = require('./globals');
-import constants = require('./constants');
-import local_storage = require('./storage');
-import net = require('../lib/net/net.types');
-import local_instance = require('./local-instance');
-import bridge = require('../lib/bridge/bridge');
-import rtc_to_net_mock = require('../mocks/rtc-to-net');
-import socks_to_rtc_mock = require('../mocks/socks-to-rtc');
+import * as remote_user from './remote-user';
+import * as consent from './consent';
+import * as remote_instance from './remote-instance';
+import * as social from '../interfaces/social';
+import * as socks_to_rtc from '../lib/socks-to-rtc/socks-to-rtc';
+import * as rtc_to_net from '../lib/rtc-to-net/rtc-to-net';
+import * as globals from './globals';
+import * as constants from './constants';
+import * as local_storage from './storage';
+import * as net from '../lib/net/net.types';
+import * as local_instance from './local-instance';
+import * as bridge from '../lib/bridge/bridge';
+import * as rtc_to_net_mock from '../mocks/rtc-to-net';
+import * as socks_to_rtc_mock from '../mocks/socks-to-rtc';
 
 describe('remote_instance.RemoteInstance', () => {
 
@@ -111,8 +110,9 @@ describe('remote_instance.RemoteInstance', () => {
     var INSTANCE_ID = 'instance1';
 
     beforeEach((done) => {
-      globals.storage = new local_storage.Storage();
-      globals.storage.reset().then(() => {
+      let testStorage = new local_storage.Storage();
+      globals.setGlobalStorageForTest(testStorage);
+      testStorage.reset().then(() => {
         var network = <social.Network><any>jasmine.createSpyObj(
             'network', ['getUser']);
         network['getStorePath'] = function() { return 'networkPath'; };

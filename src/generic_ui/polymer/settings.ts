@@ -3,13 +3,13 @@
 
 var ui = ui_context.ui;
 
-import _ = require('lodash');
+import * as _ from 'lodash';
 
-import model = require('../scripts/model');
-import translator = require('../scripts/translator');
-import user_interface = require('../scripts/ui');
-import dialogs = require('../scripts/dialogs');
-import ui_constants = require('../../interfaces/ui');
+import * as model from '../scripts/model';
+import * as translator from '../scripts/translator';
+import * as user_interface from '../scripts/ui';
+import * as dialogs from '../scripts/dialogs';
+import * as ui_constants from '../../interfaces/ui';
 
 var languages :Language[] = <Language[]>require('../locales/all/languages.json');
 var core = ui_context.core;

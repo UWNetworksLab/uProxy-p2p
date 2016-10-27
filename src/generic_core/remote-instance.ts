@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 /**
  * remote-instance.ts
  *
@@ -8,23 +6,23 @@
  * consent, proxying status, and any other signalling information.
  */
 
-import arraybuffers = require('../lib/arraybuffers/arraybuffers');
-import bridge = require('../lib/bridge/bridge');
-import consent = require('./consent');
-import crypto = require('./crypto');
-import globals = require('./globals');
-import key_verify = require('./key-verify');
-import _ = require('lodash');
-import logging = require('../lib/logging/logging');
-import net = require('../lib/net/net.types');
-import Persistent = require('../interfaces/persistent');
-import remote_connection = require('./remote-connection');
-import remote_user = require('./remote-user');
-import signals = require('../lib/webrtc/signals');
-import social = require('../interfaces/social');
-import ui_connector = require('./ui_connector');
-import user_interface = require('../interfaces/ui');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as arraybuffers from '../lib/arraybuffers/arraybuffers';
+import * as bridge from '../lib/bridge/bridge';
+import * as consent from './consent';
+import * as crypto from './crypto';
+import * as globals from './globals';
+import * as key_verify from './key-verify';
+import * as _ from 'lodash';
+import * as logging from '../lib/logging/logging';
+import * as net from '../lib/net/net.types';
+import Persistent from '../interfaces/persistent';
+import * as remote_connection from './remote-connection';
+import * as remote_user from './remote-user';
+import * as signals from '../lib/webrtc/signals';
+import * as social from '../interfaces/social';
+import * as ui_connector from './ui_connector';
+import * as user_interface from '../interfaces/ui';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 import storage = globals.storage;
 import ui = ui_connector.connector;
@@ -89,17 +87,6 @@ import ui = ui_connector.connector;
     // received are only forwarded to the UI once every second.
     private isUIUpdatePending = false;
 
-    // Number of milliseconds before timing out socksToRtc_.start
-    public SOCKS_TO_RTC_TIMEOUT :number = 90000;
-    // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
-    // trying to connect) by timing out rtcToNet_.start 15 seconds later than
-    // socksToRtc_.start
-    public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
-    // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
-    // TODO: why are these not in remote-connection?
-    private startSocksToRtcTimeout_ :NodeJS.Timer = null;
-    private startRtcToNetTimeout_ :NodeJS.Timer = null;
-
     private connection_ :remote_connection.RemoteConnection = null;
 
     // Permission token that we have received from this instance, but have not
@@ -119,8 +106,9 @@ import ui = ui_connector.connector;
         // The User which this instance belongs to.
         public user :remote_user.User,
         public instanceId :string) {
-      this.connection_ = new remote_connection.RemoteConnection(
-          this.handleConnectionUpdate_, this.user.userId, globals.portControl);
+      this.connection_ = remote_connection.getOrCreateRemoteConnection(
+          this.handleConnectionUpdate_, this.instanceId, this.user.userId,
+          globals.portControl);
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state:RemoteInstanceState) => {
@@ -177,13 +165,6 @@ import ui = ui_connector.connector;
           break;
         case uproxy_core_api.Update.START_GIVING:
           ui.update(uproxy_core_api.Update.START_GIVING_TO_FRIEND, this.instanceId);
-          break;
-        case uproxy_core_api.Update.STOP_GETTING:
-          clearTimeout(this.startSocksToRtcTimeout_);
-          ui.update(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND, {
-            instanceId: this.instanceId,
-            error: data
-          });
           break;
         case uproxy_core_api.Update.STATE:
           this.user.notifyUI();
@@ -392,20 +373,11 @@ import ui = ui_connector.connector;
       // Start sharing only after an existing connection is stopped.
       sharingStopped.then(() => {
         log.debug('sharingStopped.then()');
-        // Set timeout to close rtcToNet_ if start() takes too long.
-        // Calling stopShare() at the end of the timeout makes the
-        // assumption that our peer failed to start getting access.
-        this.startRtcToNetTimeout_ = setTimeout(() => {
-          log.warn('Timing out rtcToNet_ connection');
-          this.stopShare();
-        }, this.RTC_TO_NET_TIMEOUT);
 
         this.connection_.startShare(this.messageVersion).then(() => {
           log.debug('this.connection_.startShare().then()');
-          clearTimeout(this.startRtcToNetTimeout_);
         }, () => {
           log.warn('Could not start sharing.');
-          clearTimeout(this.startRtcToNetTimeout_);
           // Tell the UI that sharing failed. It will show a toast.
           // TODO: Send this update from remote-connection.ts
           //       https://github.com/uProxy/uproxy/issues/1861
@@ -424,9 +396,6 @@ import ui = ui_connector.connector;
         return Promise.resolve();
       }
 
-      if (this.connection_.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {
-        clearTimeout(this.startRtcToNetTimeout_);
-      }
       return this.connection_.stopShare();
     }
 
@@ -441,26 +410,7 @@ import ui = ui_connector.connector;
         return Promise.reject(Error('Lacking permission to proxy'));
       }
 
-      // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
-      this.startSocksToRtcTimeout_ = setTimeout(() => {
-        log.warn('Timing out socksToRtc_ connection');
-        this.connection_.stopGet();
-      }, this.SOCKS_TO_RTC_TIMEOUT);
-
-      return this.connection_.startGet(this.messageVersion)
-          .then((endpoints :net.Endpoint) => {
-        clearTimeout(this.startSocksToRtcTimeout_);
-        return endpoints;
-      }).catch((e) => {
-        // Tell the UI that sharing failed. It will show a toast.
-        // TODO: Send this update from remote-connection.ts
-        //       https://github.com/uProxy/uproxy/issues/1861
-        ui.update(uproxy_core_api.Update.FAILED_TO_GET, {
-          name: this.user.name,
-          proxyingId: this.connection_.getProxyingId()
-        });
-        return Promise.reject(e);
-      });
+      return this.connection_.startGet(this.messageVersion);
     }
 
     /**
@@ -498,8 +448,6 @@ import ui = ui_connector.connector;
 
       if (!bits.isOffering &&
           this.connection_.localGettingFromRemote === social.GettingState.TRYING_TO_GET_ACCESS) {
-        // if we lose the ability to get, cancel any pending gets
-        clearTimeout(this.startSocksToRtcTimeout_);
         this.connection_.stopGet();
       }
 
@@ -586,6 +534,7 @@ import ui = ui_connector.connector;
         bytesSent:              connectionState.bytesSent,
         bytesReceived:          connectionState.bytesReceived,
         activeEndpoint:         connectionState.activeEndpoint,
+        proxyingId:             connectionState.proxyingId,
       };
     }
 

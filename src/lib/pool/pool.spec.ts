@@ -1,12 +1,10 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
-import peerconnection = require('../webrtc/peerconnection');
-import handler = require('../handler/queue');
-import Pool = require('./pool');
+import * as peerconnection from '../webrtc/peerconnection';
+import * as handler from '../handler/queue';
+import Pool from './pool';
 
 describe('pool', function() {
   var mockPeerConnection :peerconnection.PeerConnection<Object>;

@@ -5,10 +5,10 @@
  * installation.
  */
 
-import globals = require('./globals');
-import logging = require('../lib/logging/logging');
-import Persistent = require('../interfaces/persistent');
-import social = require('../interfaces/social');
+import * as globals from './globals';
+import * as logging from '../lib/logging/logging';
+import Persistent from '../interfaces/persistent';
+import * as social from '../interfaces/social';
 
 import storage = globals.storage;
 

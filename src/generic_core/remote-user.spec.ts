@@ -1,27 +1,26 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
-
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.online': () => { return new freedom_mocks.MockFreedomOnline(); },
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
   'metrics': () => { return new freedom_mocks.MockMetrics(); },
   'pgp': () => { return new freedom_mocks.PgpProvider() },
   'portControl': () => { return new Object },
 });
 
-import social = require('../interfaces/social');
-import remote_user = require('./remote-user');
-import remote_instance = require('./remote-instance');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import local_storage = require('./storage');
-import consent = require('./consent');
+import * as social from '../interfaces/social';
+import * as remote_user from './remote-user';
+import * as remote_instance from './remote-instance';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
+import * as local_storage from './storage';
+import * as consent from './consent';
 
-import constants = require('./constants');
-import globals = require('./globals');
+import * as constants from './constants';
+import * as globals from './globals';
 import storage = globals.storage;
-import local_instance = require('./local-instance');
+import * as local_instance from './local-instance';
 
 describe('remote_user.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.

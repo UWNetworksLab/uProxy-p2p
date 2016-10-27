@@ -1,6 +1,4 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
 interface ProxyConfig {
   // If |allowNonUnicast === false| then any proxy attempt that results
@@ -9,4 +7,4 @@ interface ProxyConfig {
   reproxy        ?:uproxy_core_api.reproxySettings;
 }
 
-export = ProxyConfig;
+export default ProxyConfig;

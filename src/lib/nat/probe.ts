@@ -1,7 +1,5 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import logging = require('../logging/logging');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as logging from '../logging/logging';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

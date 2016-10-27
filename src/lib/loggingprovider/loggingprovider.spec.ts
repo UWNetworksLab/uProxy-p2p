@@ -1,7 +1,5 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 // Setup freedom mock environment.
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 
 declare var freedom: freedom.FreedomInModuleEnv;
 
@@ -26,8 +24,8 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   }
 });
 
-import logging = require('./loggingprovider.types');
-import LoggingProvider = require('./loggingprovider');
+import * as logging from './loggingprovider.types';
+import * as LoggingProvider from './loggingprovider';
 
 describe('Logging Provider', () => {
   var logger :logging.Log;

@@ -1,15 +1,13 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
-import background_ui = require('../../../generic_ui/scripts/background_ui');
-import ChromeCoreConnector = require('./chrome_core_connector');
-import ChromeBrowserApi = require('./chrome_browser_api');
-import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import UI = require('../../../generic_ui/scripts/ui');
-import chrome_api = require('../../../interfaces/chrome');
+import * as background_ui from '../../../generic_ui/scripts/background_ui';
+import ChromeCoreConnector from './chrome_core_connector';
+import ChromeBrowserApi from './chrome_browser_api';
+import CoreConnector from '../../../generic_ui/scripts/core_connector';
+import * as UI from '../../../generic_ui/scripts/ui';
+import * as chrome_api from '../../../interfaces/chrome';
 import ChromeMessage = chrome_api.ChromeMessage;
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
-import browser_connector = require('../../../interfaces/browser_connector');
-import Constants = require('../../../generic_ui/scripts/constants');
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as browser_connector from '../../../interfaces/browser_connector';
+import * as Constants from '../../../generic_ui/scripts/constants';
 
 var ui :UI.UserInterface;
 

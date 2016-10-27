@@ -1,9 +1,7 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
+import mockFreedomRtcPeerConnection from '../lib/freedom/mocks/mock-rtcpeerconnection';
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
-import mockFreedomRtcPeerConnection = require('../lib/freedom/mocks/mock-rtcpeerconnection');
-
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
     'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
@@ -16,8 +14,8 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 });
 
 
-import local_instance = require('./local-instance');
-import social = require('../interfaces/social');
+import * as local_instance from './local-instance';
+import * as social from '../interfaces/social';
 
 describe('local_instance.LocalInstance', () => {
 

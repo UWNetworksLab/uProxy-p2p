@@ -1,6 +1,6 @@
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import crypto = require('crypto');
-import logging = require('../logging/logging');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as crypto from 'crypto';
+import * as logging from '../logging/logging';
 
 var log :logging.Log = new logging.Log('fragment');
 

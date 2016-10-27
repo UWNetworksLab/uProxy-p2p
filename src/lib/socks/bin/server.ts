@@ -1,8 +1,6 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
-import node_server = require('../node/server');
-import node_socket = require('../node/socket');
-import session = require('../session');
+import * as node_server from '../node/server';
+import * as node_socket from '../node/socket';
+import * as session from '../session';
 
 const SERVER_ADDRESS = '0.0.0.0';
 const SERVER_PORT = 9999;

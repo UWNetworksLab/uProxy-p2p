@@ -1,12 +1,10 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
-import arithmetic = require('./arithmetic');
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import decompression = require('./decompressionShaper');
+import * as arithmetic from './arithmetic';
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as decompression from './decompressionShaper';
 
 const frequencies :number[] = decompression.sampleConfig().frequencies;
 let encoder :arithmetic.Encoder;

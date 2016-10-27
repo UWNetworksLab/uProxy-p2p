@@ -1,14 +1,12 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 // DataPeer - a class that wraps peer connections and data channels.
 //
 // This class assumes WebRTC is available; this is provided by the cross-
 // platform compatibility library webrtc-adaptor.js (from:
 // https://code.google.com/p/webrtc/source/browse/stable/samples/js/base/adapter.js)
 
-import handler = require('../handler/queue');
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import logging = require('../logging/logging');
+import * as handler from '../handler/queue';
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as logging from '../logging/logging';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

@@ -1,7 +1,5 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
-import logging = require('../../logging/logging');
-import Pinger = require('../../net/pinger');
+import * as logging from '../../logging/logging';
+import Pinger from '../../net/pinger';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 
@@ -44,7 +42,7 @@ interface KeyPair {
   public: string;
 }
 
-class Provisioner {
+export default class Provisioner {
   constructor(
     // This argument is passed implicitly to all freedomjs module constructors:
     private dispatch_ :Function,
@@ -576,5 +574,3 @@ class Provisioner {
     });
   }
 }
-
-export = Provisioner;

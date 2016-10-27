@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 declare const freedom: freedom.FreedomInCoreEnv;
 
 // Coarse-grained tests for tcp.ts.

@@ -1,12 +1,10 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import churn = require('../churn/churn');
-import churn_types = require('../churn/churn.types');
-import handler = require('../handler/queue');
-import logging = require('../logging/logging');
-import peerconnection = require('../webrtc/peerconnection');
-import peerconnection_types = require('../webrtc/signals');
-import xchurn = require('../churn/xwalk');
+import * as churn from '../churn/churn';
+import * as churn_types from '../churn/churn.types';
+import * as handler from '../handler/queue';
+import * as logging from '../logging/logging';
+import * as peerconnection from '../webrtc/peerconnection';
+import * as peerconnection_types from '../webrtc/signals';
+import * as xchurn from '../churn/xwalk';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

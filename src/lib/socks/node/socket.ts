@@ -1,7 +1,5 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
-import net = require('net');
-import piece = require('../piece');
+import * as net from 'net';
+import * as piece from '../piece';
 
 export class NodeForwardingSocket implements piece.SocksPiece {
   private socket = new net.Socket();

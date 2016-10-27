@@ -1,17 +1,15 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); }
 });
 
-import bridge = require('./bridge');
-import datachannel = require('../webrtc/datachannel');
-import handler = require('../handler/queue');
-import mockFreedomRtcPeerConnection = require('../freedom/mocks/mock-rtcpeerconnection');
-import peerconnection = require('../webrtc/peerconnection');
-import peerconnection_types = require('../webrtc/signals');
+import * as bridge from './bridge';
+import * as datachannel from '../webrtc/datachannel';
+import * as handler from '../handler/queue';
+import mockFreedomRtcPeerConnection from '../freedom/mocks/mock-rtcpeerconnection';
+import * as peerconnection from '../webrtc/peerconnection';
+import * as peerconnection_types from '../webrtc/signals';
 
 ////////
 // For mocking async functions.

@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 import RTCConfiguration = freedom.RTCPeerConnection.RTCConfiguration;
 import RTCDataChannelInit = freedom.RTCPeerConnection.RTCDataChannelInit;
 import RTCIceCandidate = freedom.RTCPeerConnection.RTCIceCandidate;
@@ -7,9 +5,9 @@ import RTCOfferOptions = freedom.RTCPeerConnection.RTCOfferOptions;
 import RTCPeerConnection = freedom.RTCPeerConnection.RTCPeerConnection;
 import RTCSessionDescription = freedom.RTCPeerConnection.RTCSessionDescription;
 
-import MockEventHandler = require('./mock-eventhandler');
+import MockEventHandler from './mock-eventhandler';
 
-class MockFreedomRtcPeerConnection extends MockEventHandler
+export default class MockFreedomRtcPeerConnection extends MockEventHandler
     implements RTCPeerConnection {
   constructor() {
     super(['ondatachannel', 'onnegotiationneeded', 'onicecandidate',
@@ -99,5 +97,3 @@ class MockFreedomRtcPeerConnection extends MockEventHandler
   }
 
 }
-
-export = MockFreedomRtcPeerConnection;

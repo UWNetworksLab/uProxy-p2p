@@ -7,8 +7,8 @@
 // a message from the core that overwrites while this window is open, and the
 // user clicks set, we will overwrite the core change.
 
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import translator = require('../scripts/translator');
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import * as translator from '../scripts/translator';
 
 export enum StatusState {
   EMPTY,

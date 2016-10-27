@@ -1,5 +1,5 @@
 /// <reference path='./context.d.ts' />
-import ui_constants = require('../../interfaces/ui');
+import * as ui_constants from '../../interfaces/ui';
 
 Polymer({
   logout: function() {

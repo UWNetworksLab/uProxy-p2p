@@ -1,27 +1,25 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
-import bridge = require('../lib/bridge/bridge');
-import globals = require('./globals');
-import constants = require('./constants');
-import _ = require('lodash');
-import key_verify = require('./key-verify');
-import logging = require('../lib/logging/logging');
-import loggingTypes = require('../lib/loggingprovider/loggingprovider.types');
-import net = require('../lib/net/net.types');
-import nat_probe = require('../lib/nat/probe');
-import remote_connection = require('./remote-connection');
-import remote_instance = require('./remote-instance');
-import remote_user = require('./remote-user');
-import user = require('./remote-user');
-import social_network = require('./social');
-import social = require('../interfaces/social');
-import socks = require('../lib/socks/headers');
-import StoredValue = require('./stored_value');
-import tcp = require('../lib/net/tcp');
-import ui_connector = require('./ui_connector');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import version = require('../generic/version');
-import freedomXhr = require('freedom-xhr');
+import * as bridge from '../lib/bridge/bridge';
+import * as globals from './globals';
+import * as constants from './constants';
+import * as _ from 'lodash';
+import * as key_verify from './key-verify';
+import * as logging from '../lib/logging/logging';
+import * as loggingTypes from '../lib/loggingprovider/loggingprovider.types';
+import * as net from '../lib/net/net.types';
+import * as nat_probe from '../lib/nat/probe';
+import * as remote_connection from './remote-connection';
+import * as remote_instance from './remote-instance';
+import * as remote_user from './remote-user';
+import * as user from './remote-user';
+import * as social_network from './social';
+import * as social from '../interfaces/social';
+import * as socks from '../lib/socks/headers';
+import StoredValue from './stored_value';
+import * as tcp from '../lib/net/tcp';
+import * as ui_connector from './ui_connector';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
+import * as version from '../generic/version';
+import * as freedomXhr from 'freedom-xhr';
 
 import ui = ui_connector.connector;
 import storage = globals.storage;
@@ -477,7 +475,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
             return 'NAT classification timed out.';
           }),
           nat_probe.probe().then((natType:string) => {
-            globals.natType = natType;
+            globals.setGlobalNatType(natType);
             // Store NAT type for five minutes. This way, if the user previews
             // their logs, and then submits them shortly after, we do not need
             // to determine the NAT type once for the preview, and once for
@@ -486,7 +484,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
             // switch between networks while troubleshooting), then we might want
             // to remove caching.
             clearTimeout(this.natResetTimeout_);
-            this.natResetTimeout_ = setTimeout(() => {globals.natType = '';}, 300000);
+            this.natResetTimeout_ = setTimeout(() => {globals.setGlobalNatType('');}, 300000);
             return globals.natType;
           })
         ]);

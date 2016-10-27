@@ -1,15 +1,13 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 /**
  * core_connector.ts
  *
  * Handles all connection and communication with the uProxy core.
  */
 
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import browser_connector = require('../../interfaces/browser_connector');
-import social = require('../../interfaces/social');
-import net = require('../../lib/net/net.types');
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import * as browser_connector from '../../interfaces/browser_connector';
+import * as social from '../../interfaces/social';
+import * as net from '../../lib/net/net.types';
 
 interface FullfillAndReject {
   fulfill :Function;
@@ -24,16 +22,12 @@ interface FullfillAndReject {
  *    Core --[ UPDATES  ]--> UI
  *    UI   --[ COMMANDS ]--> Core
  */
-class CoreConnector implements uproxy_core_api.CoreApi {
+export default class CoreConnector implements uproxy_core_api.CoreApi {
 
   // Global unique promise ID.
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
-
-  // If non-null, the ID of the instance from which we are presently
-  // disconnected.
-  public disconnectedWhileProxying :string = null;
 
   constructor(private browserConnector_ :browser_connector.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_FULFILLED,
@@ -250,4 +244,3 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   }
 }  // class CoreConnector
 
-export = CoreConnector;

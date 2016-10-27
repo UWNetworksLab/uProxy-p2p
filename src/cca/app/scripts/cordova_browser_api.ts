@@ -1,9 +1,9 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../../third_party/cordova/themeablebrowser.d.ts'/>
 /// <reference path='../../../../third_party/cordova/webintents.d.ts'/>
 /// <reference path='../../../../third_party/cordova/tun2socks.d.ts'/>
 /// <reference path='../../../../third_party/cordova/backbutton.d.ts'/>
 /// <reference path='../../../../third_party/cordova/app.d.ts'/>
+/// <reference types="chrome/chrome-app" />
 
 /**
  * cordova_browser_api.ts
@@ -12,12 +12,12 @@
  * Derived from chrome_browser_api.ts
  */
 
-import browser_api = require('../../../interfaces/browser_api');
+import * as browser_api from '../../../interfaces/browser_api';
 import ProxyAccessMode = browser_api.ProxyAccessMode;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
-import net = require('../../../lib/net/net.types');
-import Constants = require('../../../generic_ui/scripts/constants');
+import * as net from '../../../lib/net/net.types';
+import * as Constants from '../../../generic_ui/scripts/constants';
 
 enum PopupState {
     NOT_LAUNCHED,
@@ -27,7 +27,7 @@ enum PopupState {
 
 declare var Notification :any; //TODO remove this
 
-class CordovaBrowserApi implements BrowserAPI {
+export class CordovaBrowserApi implements BrowserAPI {
 
   public browserSpecificElement = '';
 
@@ -385,5 +385,3 @@ class CordovaBrowserApi implements BrowserAPI {
     });
   }
 }
-
-export = CordovaBrowserApi;

@@ -1,15 +1,13 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
-
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'metrics': () => { return new freedom_mocks.MockMetrics(); },
 });
 
-import metrics_module = require('./metrics');
-import mock_storage = require('../mocks/mock-storage');
+import * as metrics_module from './metrics';
+import * as mock_storage from '../mocks/mock-storage';
 var MockStorage = mock_storage.MockStorage;
 
 var networkInfo = {

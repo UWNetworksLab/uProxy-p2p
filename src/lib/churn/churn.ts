@@ -1,19 +1,18 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 /// <reference path='../../../third_party/random-lib/random-lib.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import caesar = require('../transformers/caesar');
-import candidate = require('./candidate');
-import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
-import churn_types = require('./churn.types');
-import handler = require('../handler/queue');
-import ipaddr = require('ipaddr.js');
-import logging = require('../logging/logging');
-import net = require('../net/net.types');
-import peerconnection = require('../webrtc/peerconnection');
-import random = require('random-lib');
-import signals = require('../webrtc/signals');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as caesar from '../transformers/caesar';
+import * as candidate from './candidate';
+import * as churn_pipe_types from '../churn-pipe/freedom-module.interface';
+import * as churn_types from './churn.types';
+import * as handler from '../handler/queue';
+import * as ipaddr from 'ipaddr.js';
+import * as logging from '../logging/logging';
+import * as net from '../net/net.types';
+import * as peerconnection from '../webrtc/peerconnection';
+import * as random from 'random-lib';
+import * as signals from '../webrtc/signals';
 
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;

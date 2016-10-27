@@ -1,13 +1,11 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
-import churn = require('./churn');
-import net = require('../net/net.types');
+import * as churn from './churn';
+import * as net from '../net/net.types';
 
-import candidate = require('./candidate');
+import * as candidate from './candidate';
 import Candidate = candidate.Candidate;
 
 describe('filterCandidatesFromSdp', function() {

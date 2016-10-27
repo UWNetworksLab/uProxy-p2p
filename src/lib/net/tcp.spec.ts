@@ -1,10 +1,8 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
-import tcp = require('./tcp');
+import * as tcp from './tcp';
 
 describe('Tcp', function() {
   it('conversion of a connected endpoint info', () => {

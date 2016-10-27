@@ -1,4 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../../third_party/cordova/splashscreen.d.ts'/>
 
 /**
@@ -8,9 +7,9 @@
  * loaded.
  */
 
-import CordovaBrowserApi = require('./cordova_browser_api');
+import { CordovaBrowserApi } from './cordova_browser_api';
 
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 
 declare const freedom: freedom.FreedomInCoreEnv;
 

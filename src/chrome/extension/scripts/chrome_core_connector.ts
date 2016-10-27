@@ -1,20 +1,18 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
 /**
  * chrome_core_connector.ts
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
-import browser_connector = require('../../../interfaces/browser_connector');
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
-import chrome_api = require('../../../interfaces/chrome');
+import * as browser_connector from '../../../interfaces/browser_connector';
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as chrome_api from '../../../interfaces/chrome';
 import ChromeMessage = chrome_api.ChromeMessage;
-import Constants = require('../../../generic_ui/scripts/constants');
+import * as Constants from '../../../generic_ui/scripts/constants';
 
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
 
-import user_interface = require('../../../generic_ui/scripts/ui');
+import * as user_interface from '../../../generic_ui/scripts/ui';
 
 /**
  * Chrome-Extension-specific uProxy Core API implementation.
@@ -31,7 +29,7 @@ import user_interface = require('../../../generic_ui/scripts/ui');
  * that the user (which is the Extension / UI) won't have to deal with
  * connectivity explicitly, but has the option to chain promises if desired.
  */
-class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
+export default class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
 
   private appId_   :string;                // ID of target Chrome App.
   private appPort_ :chrome.runtime.Port;   // For speaking to App.
@@ -274,5 +272,3 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
     }
   }
 }  // class ChromeConnector
-
-export = ChromeCoreConnector

@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 // A Handler abstraction for events. This abstraction allows all event handlers
 // to produce an output that can be passed back to the code that causes the
 // event to be handled. This can be used for summarization/retriggering of

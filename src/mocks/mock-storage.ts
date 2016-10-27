@@ -1,4 +1,4 @@
-import storage_interface = require('../interfaces/storage');
+import * as storage_interface from '../interfaces/storage';
 
 export class MockStorage implements storage_interface.Storage {
   constructor(private data_ ?:any) {

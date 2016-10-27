@@ -1,6 +1,4 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import piece = require('./piece');
+import * as piece from './piece';
 
 export interface SocksServer {
   // callback is invoked each time a new client connects to the server.

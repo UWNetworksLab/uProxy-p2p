@@ -1,14 +1,13 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
-import caesar = require('../transformers/caesar');
-import candidate = require('../churn/candidate');
-import churn_types = require('../churn/churn.types');
-import handler = require('../handler/queue');
-import logging = require('../logging/logging');
-import peerconnection = require('../webrtc/peerconnection');
-import random = require('random-lib');
-import signals = require('../webrtc/signals');
+import * as caesar from '../transformers/caesar';
+import * as candidate from '../churn/candidate';
+import * as churn_types from '../churn/churn.types';
+import * as handler from '../handler/queue';
+import * as logging from '../logging/logging';
+import * as peerconnection from '../webrtc/peerconnection';
+import * as random from 'random-lib';
+import * as signals from '../webrtc/signals';
 
 import Candidate = candidate.Candidate;
 

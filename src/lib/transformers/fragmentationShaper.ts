@@ -1,8 +1,8 @@
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import crypto = require('crypto');
-import defragmenter = require('./defragmenter');
-import fragments = require('./fragment');
-import logging = require('../logging/logging');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as crypto from 'crypto';
+import * as defragmenter from './defragmenter';
+import * as fragments from './fragment';
+import * as logging from '../logging/logging';
 
 var log :logging.Log = new logging.Log('fragmentation shaper');
 

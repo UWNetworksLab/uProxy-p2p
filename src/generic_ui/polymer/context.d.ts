@@ -1,5 +1,5 @@
 // TODO: figure out why this line is causing compilation to fail
-//import ui_constants = require('../../interfaces/ui');
+//import * as ui_constants from '../../interfaces/ui';
 
 // TODO: replace any types with real interfaces.
 

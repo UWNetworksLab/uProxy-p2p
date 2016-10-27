@@ -1,11 +1,9 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare let freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import rc4 = require('./rc4');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as rc4 from './rc4';
 
 describe('rc4 transformer', function() {
   let transformer: rc4.Rc4Transformer;

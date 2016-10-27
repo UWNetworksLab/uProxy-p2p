@@ -1,15 +1,14 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
-import _ = require('lodash');
-import social = require('../../interfaces/social');
-import translator = require('../scripts/translator');
-import ui_types = require('../../interfaces/ui');
-import user_interface = require('../scripts/ui');
-import user_module = require('../scripts/user');
-import dialogs = require('../scripts/dialogs');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import * as _ from 'lodash';
+import * as social from '../../interfaces/social';
+import * as translator from '../scripts/translator';
+import * as ui_types from '../../interfaces/ui';
+import * as user_interface from '../scripts/ui';
+import * as user_module from '../scripts/user';
+import * as dialogs from '../scripts/dialogs';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
 var ui = ui_context.ui;
 var model = ui_context.model;
@@ -180,7 +179,7 @@ Polymer({
     }
   },
   revertProxySettings: function() {
-    this.ui.stopUsingProxy(true);
+    this.ui.stopUsingProxy();
     this.openAskForFeedback();
   },
   restartProxying: function() {

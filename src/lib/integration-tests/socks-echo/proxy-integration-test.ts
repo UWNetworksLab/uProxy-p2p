@@ -1,17 +1,15 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
+import * as arraybuffers from '../../arraybuffers/arraybuffers';
+import * as bridge from '../../bridge/bridge';
+import * as logging from '../../logging/logging';
+import * as net from '../../net/net.types';
+import * as peerconnection from '../../webrtc/peerconnection';
+import * as proxyintegrationtesttypes from './proxy-integration-test.types';
+import * as rtc_to_net from '../../rtc-to-net/rtc-to-net';
+import * as socks_headers from '../../socks/headers';
+import * as socks_to_rtc from '../../socks-to-rtc/socks-to-rtc';
+import * as tcp from '../../net/tcp';
 
-import arraybuffers = require('../../arraybuffers/arraybuffers');
-import bridge = require('../../bridge/bridge');
-import logging = require('../../logging/logging');
-import net = require('../../net/net.types');
-import peerconnection = require('../../webrtc/peerconnection');
-import proxyintegrationtesttypes = require('./proxy-integration-test.types');
-import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
-import socks_headers = require('../../socks/headers');
-import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
-import tcp = require('../../net/tcp');
-
-import ProxyConfig = require('../../rtc-to-net/proxyconfig');
+import ProxyConfig from '../../rtc-to-net/proxyconfig';
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
 
@@ -20,7 +18,7 @@ var log :logging.Log = new logging.Log('SocksClient');
 // This abstract class is converted into a real class by Freedom, which
 // fills in the unimplemented on(...) method in the process of
 // constructing a module.
-class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
+export default class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
   private socksToRtc_ :socks_to_rtc.SocksToRtc;
   private rtcToNet_ :rtc_to_net.RtcToNet;
   private socksEndpoint_ : Promise<net.Endpoint>;
@@ -362,5 +360,3 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     throw new Error('Placeholder function to keep Typescript happy');
   }
 }
-
-export = AbstractProxyIntegrationTest;

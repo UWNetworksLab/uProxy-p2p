@@ -1,12 +1,11 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
-import _ = require('lodash');
-import model = require('../scripts/model');
-import translator = require('../scripts/translator');
-import user_interface = require('../scripts/ui');
-import dialogs = require('../scripts/dialogs');
+import * as _ from 'lodash';
+import * as model from '../scripts/model';
+import * as translator from '../scripts/translator';
+import * as user_interface from '../scripts/ui';
+import * as dialogs from '../scripts/dialogs';
 
 var ui = ui_context.ui;
 var core = ui_context.core;

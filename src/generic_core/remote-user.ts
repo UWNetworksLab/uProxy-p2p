@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 /**
  * user.ts
  *
@@ -23,16 +21,16 @@
  * client, but with the 'uProxy' non-human client.
  */
 
-import bridge = require('../lib/bridge/bridge');
-import consent = require('./consent');
-import globals = require('./globals');
-import _ = require('lodash');
-import logging = require('../lib/logging/logging');
-import Persistent = require('../interfaces/persistent');
-import remote_instance = require('./remote-instance');
-import social = require('../interfaces/social');
-import ui = require('./ui_connector');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as bridge from '../lib/bridge/bridge';
+import * as consent from './consent';
+import * as globals from './globals';
+import * as _ from 'lodash';
+import * as logging from '../lib/logging/logging';
+import Persistent from '../interfaces/persistent';
+import * as remote_instance from './remote-instance';
+import * as social from '../interfaces/social';
+import * as ui from './ui_connector';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 import storage = globals.storage;
 

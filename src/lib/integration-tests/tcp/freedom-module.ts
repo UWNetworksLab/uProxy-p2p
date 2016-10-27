@@ -1,11 +1,9 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
+import * as arraybuffers from '../../arraybuffers/arraybuffers';
+import * as tcp from '../../net/tcp';
+import * as net from '../../net/net.types';
 
-import arraybuffers = require('../../arraybuffers/arraybuffers');
-import tcp = require('../../net/tcp');
-import net = require('../../net/net.types');
-
-import logging = require('../../logging/logging');
-import loggingTypes = require('../../loggingprovider/loggingprovider.types');
+import * as logging from '../../logging/logging';
+import * as loggingTypes from '../../loggingprovider/loggingprovider.types';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

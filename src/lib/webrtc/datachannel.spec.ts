@@ -1,14 +1,12 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
+import MockFreedomRtcDataChannel from '../freedom/mocks/mock-rtcdatachannel';
 
-import MockFreedomRtcDataChannel = require('../freedom/mocks/mock-rtcdatachannel');
-
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'rtcdatachannel': () => { return new MockFreedomRtcDataChannel(); }
 });
 
-import datachannel = require('./datachannel');
+import * as datachannel from './datachannel';
 
 describe('DataChannel', function() {
   var mockRtcDataChannel :MockFreedomRtcDataChannel;

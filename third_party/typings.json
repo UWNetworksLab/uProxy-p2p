@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "lodash": "registry:npm/lodash#4.0.0+20160723033700"
-  },
-  "globalDependencies": {
-    "chrome-app": "registry:dt/chrome-app#0.0.0+20160705130918",
-    "freedom": "registry:dt/freedom#0.6.29+20160505190140"
-  }
-}

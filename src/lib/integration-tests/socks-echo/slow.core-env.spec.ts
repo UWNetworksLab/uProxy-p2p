@@ -1,12 +1,10 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
+import * as socks_headers from '../../socks/headers';
 
-import socks_headers = require('../../socks/headers');
-
-import proxyintegrationtesttypes = require('./proxy-integration-test.types');
+import * as proxyintegrationtesttypes from './proxy-integration-test.types';
 import ProxyIntegrationTester = proxyintegrationtesttypes.ProxyIntegrationTester;
 import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
 
-import arraybuffers = require('../../arraybuffers/arraybuffers');
+import * as arraybuffers from '../../arraybuffers/arraybuffers';
 
 declare const freedom: freedom.FreedomInCoreEnv;
 

@@ -4,17 +4,17 @@
 /// <reference path='../../third_party/chrome/chrome.d.ts' />
 
 
-import _ = require('lodash');
-import arraybuffers = require('../../third_party/uproxy-lib/arraybuffers/arraybuffers');
-import CoreConnector = require('../generic_ui/scripts/core_connector');
-import credentials = require('./gtalk_credentials');
-import IntegrationTestConnector = require('./integration_test_connector');
-import loggingTypes = require('../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
-import mock_oauth = require('./mock_oauth');
-import net = require('../../third_party/uproxy-lib/net/net.types');
-import social = require('../interfaces/social');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import user_interface = require('../interfaces/ui');
+import * as _ from 'lodash';
+import * as arraybuffers from '../../third_party/uproxy-lib/arraybuffers/arraybuffers';
+import CoreConnector from '../generic_ui/scripts/core_connector';
+import * as credentials from './gtalk_credentials';
+import IntegrationTestConnector from './integration_test_connector';
+import * as loggingTypes from '../../third_party/uproxy-lib/loggingprovider/loggingprovider.types';
+import * as mock_oauth from './mock_oauth';
+import * as net from '../../third_party/uproxy-lib/net/net.types';
+import * as social from '../interfaces/social';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
+import * as user_interface from '../interfaces/ui';
 
 import ALICE = credentials.ALICE;
 import BOB = credentials.BOB;

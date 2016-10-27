@@ -1,6 +1,6 @@
-import logging = require('../lib/logging/logging');
-import social = require('../interfaces/social');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as logging from '../lib/logging/logging';
+import * as social from '../interfaces/social';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
 //module Consent {
   var log :logging.Log = new logging.Log('consent');

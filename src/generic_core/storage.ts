@@ -1,12 +1,10 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 /**
  * storage.ts
  *
  * Provides a promise-based interface to the storage provider.
  */
 
-import logging = require('../lib/logging/logging');
+import * as logging from '../lib/logging/logging';
 
 declare var freedom: freedom.FreedomInModuleEnv;
 
@@ -14,9 +12,6 @@ var log :logging.Log = new logging.Log('storage');
 
 // Platform-independent storage provider.
 var fStorage :freedom.Storage.Storage = freedom['core.storage']();
-
-// Set false elsewhere to disable log messages (ie. from jasmine)
-export var DEBUG_STATESTORAGE = true;
 
 /**
  * Contains all state for uProxy's core.

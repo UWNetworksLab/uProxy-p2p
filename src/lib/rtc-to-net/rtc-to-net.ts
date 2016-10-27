@@ -1,19 +1,19 @@
 // Server which handles SOCKS connections over WebRTC datachannels and send them
 // out to the internet and sending back over WebRTC the responses.
 
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import handler = require('../handler/queue');
-import ipaddr = require('ipaddr.js');
-import logging = require('../logging/logging');
-import net = require('../net/net.types');
-import peerconnection = require('../webrtc/peerconnection');
-import socks_headers = require('../socks/headers');
-import tcp = require('../net/tcp');
 
-import Pool = require('../pool/pool');
-import ProxyConfig = require('./proxyconfig');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as handler from '../handler/queue';
+import * as ipaddr from 'ipaddr.js';
+import * as logging from '../logging/logging';
+import * as net from '../net/net.types';
+import * as peerconnection from '../webrtc/peerconnection';
+import * as socks_headers from '../socks/headers';
+import * as tcp from '../net/tcp';
+
+import Pool from '../pool/pool';
+import ProxyConfig from './proxyconfig';
 
 // module RtcToNet {
 
@@ -838,4 +838,3 @@ import ProxyConfig = require('./proxyconfig');
   }  // Session
 
 //}  // module RtcToNet
-//export = RtcToNet;

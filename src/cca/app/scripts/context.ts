@@ -1,12 +1,9 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-/// <reference path='../../../generic_ui/polymer/context.d.ts' />
-
-import background_ui = require('../../../generic_ui/scripts/background_ui');
-import ui_model = require('../../../generic_ui/scripts/model');
-import user_interface = require('../../../generic_ui/scripts/ui');
-import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import CordovaCoreConnector = require('./cordova_core_connector');
-import same_context_panel_connector = require('../../../generic_ui/scripts/same_context_panel_connector');
+import * as background_ui from '../../../generic_ui/scripts/background_ui';
+import * as ui_model from '../../../generic_ui/scripts/model';
+import * as user_interface from '../../../generic_ui/scripts/ui';
+import CoreConnector from '../../../generic_ui/scripts/core_connector';
+import CordovaCoreConnector from './cordova_core_connector';
+import * as same_context_panel_connector from '../../../generic_ui/scripts/same_context_panel_connector';
 
 export var browserConnector = new CordovaCoreConnector({
   name: 'uproxy-ui-to-core-connector'

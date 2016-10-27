@@ -2,10 +2,10 @@
  * Chrome oauth provider
  **/
 
-import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
-import ChromeUIConnector = require('./chrome_ui_connector');
+import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import ChromeUIConnector from './chrome_ui_connector';
 
-class Chrome_oauth {
+export default class Chrome_oauth {
   constructor(private options_:{connector:ChromeUIConnector;}) {}
 
   public initiateOAuth(
@@ -48,5 +48,3 @@ class Chrome_oauth {
   }
 
 }  // class Chrome_oauth
-
-export = Chrome_oauth;

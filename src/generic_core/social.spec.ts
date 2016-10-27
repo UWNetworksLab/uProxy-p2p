@@ -1,25 +1,24 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
+import * as freedomMocker from '../lib/freedom/mocks/mock-freedom-in-module-env';
 
-import freedomMocker = require('../lib/freedom/mocks/mock-freedom-in-module-env');
-
-import freedom_mocks = require('../mocks/freedom-mocks');
+import * as freedom_mocks from '../mocks/freedom-mocks';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
+  'core.online': () => { return new freedom_mocks.MockFreedomOnline(); },
   'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
   'metrics': () => { return new freedom_mocks.MockMetrics(); },
   'pgp': () => { return new freedom_mocks.PgpProvider() },
   'portControl': () => { return new Object },
 });
 
-import social = require('../interfaces/social');
-import rappor_metrics = require('./metrics');
-import social_network = require('./social');
-import local_storage = require('./storage');
-import local_instance = require('./local-instance');
-import constants = require('./constants');
-import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import * as social from '../interfaces/social';
+import * as rappor_metrics from './metrics';
+import * as social_network from './social';
+import * as local_storage from './storage';
+import * as local_instance from './local-instance';
+import * as constants from './constants';
+import * as uproxy_core_api from '../interfaces/uproxy_core_api';
 
-import ui_connector = require('./ui_connector');
+import * as ui_connector from './ui_connector';
 import ui = ui_connector.connector;
 
 

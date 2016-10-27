@@ -1,17 +1,15 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import arraybuffers = require('../arraybuffers/arraybuffers');
-import bridge = require('../bridge/bridge');
-import churn_types = require('../churn/churn.types');
-import constants = require('../../generic_core/constants');
-import logging = require('../logging/logging');
-import loggingTypes = require('../loggingprovider/loggingprovider.types');
-import net = require('../net/net.types');
-import linefeeder = require('../net/linefeeder');
-import queue = require('../handler/queue');
-import rtc_to_net = require('../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
-import tcp = require('../net/tcp');
+import * as arraybuffers from '../arraybuffers/arraybuffers';
+import * as bridge from '../bridge/bridge';
+import * as churn_types from '../churn/churn.types';
+import * as constants from '../../generic_core/constants';
+import * as logging from '../logging/logging';
+import * as loggingTypes from '../loggingprovider/loggingprovider.types';
+import * as net from '../net/net.types';
+import * as linefeeder from '../net/linefeeder';
+import * as queue from '../handler/queue';
+import * as rtc_to_net from '../rtc-to-net/rtc-to-net';
+import * as socks_to_rtc from '../socks-to-rtc/socks-to-rtc';
+import * as tcp from '../net/tcp';
 
 declare const freedom: freedom.FreedomInModuleEnv;
 

@@ -1,18 +1,16 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import user_interface = require('./ui');
-import ui_constants = require('../../interfaces/ui');
-import browser_api = require('../../interfaces/browser_api');
-import background_ui = require('./background_ui');
+import * as user_interface from './ui';
+import * as ui_constants from '../../interfaces/ui';
+import * as browser_api from '../../interfaces/browser_api';
+import * as background_ui from './background_ui';
 import BrowserAPI = browser_api.BrowserAPI;
-import browser_connector = require('../../interfaces/browser_connector');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import CoreConnector = require('./core_connector');
-import social = require('../../interfaces/social');
-import user = require('./user');
+import * as browser_connector from '../../interfaces/browser_connector';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import CoreConnector from './core_connector';
+import * as social from '../../interfaces/social';
+import * as user from './user';
 import User = user.User;
-import Constants = require('./constants');
-import _ = require('lodash');
+import * as Constants from './constants';
+import * as _ from 'lodash';
 
 describe('UI.UserInterface', () => {
   var ui :user_interface.UserInterface;
@@ -299,15 +297,19 @@ describe('UI.UserInterface', () => {
     });
 
     it('Extension icon changes when you stop getting access', () => {
-      syncUserAndInstance('userId', 'userName', 'testGiverId');
+      let userFriend = getUserAndInstance('userId', 'userName', 'testGiverId');
+      ui.syncUser(userFriend);
       ui.startGettingInUiAndConfig(
           'testGiverId', { address : 'testAddress' , port : 0 },
           browser_api.ProxyAccessMode.IN_APP);
-      ui['instanceGettingAccessFrom_'] = 'testGiverId';
+      let update:social.UserData = _.cloneDeep(userFriend);
+      update.instancesSharingWithLocal.push(update.allInstanceIds[0]);
+      updateToHandlerMap[uproxy_core_api.Update.USER_FRIEND]
+          .call(ui, update);
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.GETTING_ICON);
-      updateToHandlerMap[uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND]
-          .call(ui, {instanceId: 'testGiverId', error: false});
+      updateToHandlerMap[uproxy_core_api.Update.USER_FRIEND]
+          .call(ui, userFriend);
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(Constants.DEFAULT_ICON);
     });

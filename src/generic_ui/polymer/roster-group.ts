@@ -1,10 +1,9 @@
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 /// <reference path='context.d.ts' />
 
-import _ = require('lodash');
-import ui_constants = require('../../interfaces/ui');
-import user = require('../scripts/user');
+import * as _ from 'lodash';
+import * as ui_constants from '../../interfaces/ui';
+import * as user from '../scripts/user';
 
 var model = ui_context.model;
 

@@ -1,11 +1,10 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
-import translator = require('../scripts/translator');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import ui_constants = require('../../interfaces/ui');
-import user = require('../scripts/user');
+import * as translator from '../scripts/translator';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import * as ui_constants from '../../interfaces/ui';
+import * as user from '../scripts/user';
 
 var ui = ui_context.ui;
 

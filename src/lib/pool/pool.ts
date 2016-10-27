@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 // This module provides a pool for managing data channels.  It mimics the
 // interface for creating data channels in uproxy-lib's PeerConnection,
 // but the channel objects it produces are actually "virtual channels",
@@ -15,12 +13,12 @@
 // It may therefore be worth preserving even after any platform bugs are
 // resolved.
 
-import peerconnection = require('../webrtc/peerconnection');
-import datachannel = require('../webrtc/datachannel');
-import handler = require('../handler/queue');
-import queue = require('../queue/queue');
+import * as peerconnection from '../webrtc/peerconnection';
+import * as datachannel from '../webrtc/datachannel';
+import * as handler from '../handler/queue';
+import * as queue from '../queue/queue';
 
-import logging = require('../logging/logging');
+import * as logging from '../logging/logging';
 
 var log :logging.Log = new logging.Log('pool');
 
@@ -31,7 +29,7 @@ var log :logging.Log = new logging.Log('pool');
 // and remote pools do not interfere with each other, even if they use the
 // same labels, because the browser ensures that data channels created by each
 // peer are drawn from separate ID spaces (odd vs. even).
-class Pool {
+export default class Pool {
   public peerOpenedChannelQueue
       :handler.QueueHandler<datachannel.DataChannel, void>;
 
@@ -383,5 +381,3 @@ class PoolChannel implements datachannel.DataChannel {
     return 'PoolChannel(' + this.dc_.toString() + ')';
   }
 }
-
-export = Pool;

@@ -1,7 +1,5 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import headers = require('./headers');
-import piece = require('./piece');
+import * as headers from './headers';
+import * as piece from './piece';
 
 enum State {
   AWAITING_AUTHS,

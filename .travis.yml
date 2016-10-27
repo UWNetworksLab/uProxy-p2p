@@ -1,17 +1,15 @@
 language: node_js
 node_js:
-  - "4.4"
+  - "6"
 before_install:
-  - npm install -g grunt-cli bower
+  - npm install -g --production yarn
 install:
-  - npm install
+  - yarn install
 script:
-  - grunt build
-  - grunt tslint
-  - grunt unit_test_nobuild
+  - yarn run grunt build
+  - yarn run grunt tslint
+  - yarn run grunt unit_test_nobuild
 sudo: false
 cache:
   directories:
-    - node_modules
-before_script:
-  - npm prune
+    - $HOME/.yarn-cache

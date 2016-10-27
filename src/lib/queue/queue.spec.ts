@@ -1,6 +1,4 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import queue = require('./queue');
+import * as queue from './queue';
 import Queue = queue.Queue;
 
 describe('Base Queue', function() {

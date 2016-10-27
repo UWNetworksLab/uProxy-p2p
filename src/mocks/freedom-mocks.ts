@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 /**
  * freedom-mocks.ts
  *
@@ -8,8 +6,8 @@
  * This file must be compiled independently of all other typescript in uProxy.
  */
 
-import MockEventHandler = require('../lib/freedom/mocks/mock-eventhandler');
-import arraybuffers = require('../lib/arraybuffers/arraybuffers');
+import MockEventHandler from '../lib/freedom/mocks/mock-eventhandler';
+import * as arraybuffers from '../lib/arraybuffers/arraybuffers';
 
 export class MockFreedomStorage implements freedom.Storage.Storage {
 
@@ -46,6 +44,16 @@ export class MockFreedomStorage implements freedom.Storage.Storage {
   }
 
 }  // class MockFreedomStorage
+
+export class MockFreedomOnline extends MockEventHandler {
+  constructor() {
+    super(['online', 'offline']);
+  }
+
+  public isOnline = () : Promise<boolean> => {
+    return Promise.resolve<boolean>(true);
+  }
+}
 
 export class MockLoggingController {
   public setDefaultFilter = (destination :number, level :number) => {}

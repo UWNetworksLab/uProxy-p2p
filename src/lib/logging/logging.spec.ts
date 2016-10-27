@@ -1,9 +1,7 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
-import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
-import MockFreedomEventHandler = require('../freedom/mocks/mock-eventhandler');
-import loggingProviderTypes = require('../loggingprovider/loggingprovider.types');
-import Logging = require('./logging');
+import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
+import MockFreedomEventHandler from '../freedom/mocks/mock-eventhandler';
+import * as loggingProviderTypes from '../loggingprovider/loggingprovider.types';
+import * as Logging from './logging';
 
 declare var freedom: freedom.FreedomInModuleEnv;
 

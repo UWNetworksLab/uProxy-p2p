@@ -1,10 +1,10 @@
 /// <reference path='../../../third_party/simple-rc4/simple-rc4.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
-import crypto = require('crypto');
-import logging = require('../logging/logging');
-import rc4 = require('simple-rc4');
-import transformer = require('./transformer');
+
+import * as crypto from 'crypto';
+import * as logging from '../logging/logging';
+var RC4 = require('simple-rc4');
+import * as transformer from './transformer';
 
 const log = new logging.Log('rc4 transformer');
 
@@ -78,7 +78,7 @@ export class Rc4Transformer implements transformer.Transformer {
     const hasher = crypto.createHash('sha1');
     const iv = hasher.update(Buffer.concat([this.key_, r]));
     const truncatedIv = iv.digest().slice(0, TRUNCATED_IV_LENGTH_BYTES);
-    new rc4(truncatedIv).update(bytes);
+    new RC4(truncatedIv).update(bytes);
   }
 
   public transform = (ab: ArrayBuffer): ArrayBuffer[] => {

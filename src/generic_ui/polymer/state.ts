@@ -1,11 +1,10 @@
 /// <reference path='./context.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts'/>
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
 
-import panel_connector = require('../../interfaces/panel_connector');
-import social = require('../../interfaces/social');
-import ui = require('../../interfaces/ui');
-import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import * as panel_connector from '../../interfaces/panel_connector';
+import * as social from '../../interfaces/social';
+import * as ui from '../../interfaces/ui';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
 //TODO standardize
 interface FullfillAndReject {
