@@ -135,7 +135,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
     }).then(done);
   });
 
-  it('connect to many different servers in parallel', (done) => {
+  xit('connect to many different servers in parallel', (done) => {
     var testModule = createTestModule();
     var promises = testStrings.map((s:string) : Promise<void> => {
       var buffer = arraybuffers.stringToArrayBuffer(s);
@@ -401,7 +401,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
     }).then(done);
   });
 
-  it('attempt to connect to a nonexistent DNS name with reproxy', (done) => {
+  xit('attempt to connect to a nonexistent DNS name with reproxy', (done) => {
     var testModule = createTestModule(true, undefined, undefined, true);
     testModule.connect(80, 'www.nonexistentdomain.gov').then((connectionId:string) => {
       // This code should not run, because there is no such DNS name.
