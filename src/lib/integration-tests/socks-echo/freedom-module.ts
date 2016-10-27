@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts' />
-
 import AbstractProxyIntegrationTest from './proxy-integration-test';
 import * as loggingTypes from '../../loggingprovider/loggingprovider.types';
 

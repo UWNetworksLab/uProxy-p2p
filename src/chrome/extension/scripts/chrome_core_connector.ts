@@ -1,5 +1,3 @@
-/// <reference path='../../../../third_party/typings/index.d.ts'/>
-
 /**
  * chrome_core_connector.ts
  *

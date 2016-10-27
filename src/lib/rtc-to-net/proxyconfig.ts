@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
 interface ProxyConfig {

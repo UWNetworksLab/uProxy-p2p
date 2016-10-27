@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as churn from '../churn/churn';
 import * as logging from '../logging/logging';
 import * as loggingTypes from '../loggingprovider/loggingprovider.types';

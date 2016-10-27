@@ -1,5 +1,3 @@
-/// <reference path='../../third_party/typings/index.d.ts' />
-
 import * as browser_connector from '../interfaces/browser_connector';
 import * as globals from './globals';
 import * as logging from '../lib/logging/logging';

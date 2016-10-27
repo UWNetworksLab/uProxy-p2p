@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as _ from 'lodash';
 
 import CoreConnector from './core_connector';

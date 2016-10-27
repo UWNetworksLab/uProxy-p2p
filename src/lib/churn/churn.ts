@@ -1,6 +1,5 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 /// <reference path='../../../third_party/random-lib/random-lib.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import * as arraybuffers from '../arraybuffers/arraybuffers';
 import * as caesar from '../transformers/caesar';

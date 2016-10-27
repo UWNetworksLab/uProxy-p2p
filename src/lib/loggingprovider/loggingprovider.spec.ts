@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 // Setup freedom mock environment.
 import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
 

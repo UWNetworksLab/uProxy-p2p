@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as social from '../../interfaces/social';
 import * as ui_constants from '../../interfaces/ui';
 import * as uproxy_core_api from '../../interfaces/uproxy_core_api';

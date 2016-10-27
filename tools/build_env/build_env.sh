@@ -19,9 +19,9 @@ Usage: $0 [-b] [-p] [-v variant] commands
   -v target-specific variant, e.g. android (default: node)
 
 Examples:
-  $0 npm run clean
-  $0 npm install
-  $0 -v android npm run grunt build_android
+  $0 yarn run clean
+  $0 yarn install
+  $0 -v android yarn run grunt build_android
 EOM
 exit 1
 }

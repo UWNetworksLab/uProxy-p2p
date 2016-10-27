@@ -1,5 +1,5 @@
 /// <reference path='../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
+
 
 import * as arraybuffers from '../arraybuffers/arraybuffers';
 import * as signals from '../webrtc/signals';

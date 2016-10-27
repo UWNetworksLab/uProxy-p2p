@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 import * as logging from './loggingprovider.types';
 
 declare const freedom: freedom.FreedomInModuleEnv;

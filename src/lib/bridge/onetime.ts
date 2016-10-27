@@ -1,5 +1,4 @@
 /// <reference path='../../../third_party/browserify-zlib/browserify-zlib.d.ts' />
-/// <reference path='../../../third_party/typings/index.d.ts' />
 
 import * as bridge from './bridge';
 import * as churn_types from '../churn/churn.types';

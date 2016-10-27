@@ -1,5 +1,3 @@
-/// <reference path='../../../third_party/typings/index.d.ts' />
-
 // Returns true if b1 and b2 have exactly the same bytes.
 export function byteEquality(b1: ArrayBuffer, b2: ArrayBuffer): boolean {
   // The Buffer instances share memory with their source ArrayBuffers.
