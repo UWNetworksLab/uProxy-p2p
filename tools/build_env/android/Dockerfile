@@ -21,10 +21,6 @@ zip
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get install -y nodejs
 
-# Without this, NPM silently drops install/postinstall scripts:
-#   https://github.com/nodejs/docker-node/issues/93
-RUN echo 'unsafe-perm = true' > /root/.npmrc
-
 RUN npm install -g --production grunt-cli yarn
 
 # Android SDK:
