@@ -6,7 +6,7 @@ import * as social from '../../../interfaces/social';
 import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 
 import CoreConnector from '../../../generic_ui/scripts/core_connector';
-import { SocksProxyServer } from '../../model/socks_proxy_server';
+import { SocksProxyServer } from '../model/socks_proxy_server';
 
 
 // A local Socks server that provides access to a remote uProxy Cloud server via RTC.

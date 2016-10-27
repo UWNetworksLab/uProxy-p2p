@@ -1,4 +1,4 @@
-import { VpnDevice } from '../../model/vpn_device';
+import { VpnDevice } from '../model/vpn_device';
 
 // A VpnDevice that routes the traffic through a Socks server that is running locally.
 class Tun2SocksVpnDevice implements VpnDevice {
