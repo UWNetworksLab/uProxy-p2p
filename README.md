@@ -49,6 +49,11 @@ Having problems? To clean up from a partial, broken, or extremely out-dated buil
 yarn run clean
 ```
 
+### IDE
+
+[Visual Studio Code](https://code.visualstudio.com/) supports TypeScript compilation, search, and refactoring out of the box - just point it at the directory containing your uProxy clone.
+
+
 ## Run
 
 ### uProxy
