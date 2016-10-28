@@ -237,6 +237,18 @@ module.exports = function(grunt) {
     addIosrtcHookCmd: 'cp plugins/cordova-plugin-iosrtc/extra/hooks/iosrtc-swift-support.js hooks/iosrtc-swift-support.js',
 
     exec: {
+      buildChromeWebStoreUploads: {
+        // The first, uproxy-chrome.zip, is for team fishfood.
+        // The second two, which have had their keys stripped, are
+        // for uploading to the Chrome Web Store.
+        command: 'pushd build/dist && ' +
+                 'zip -r uproxy-chrome.zip chrome && ' +
+                 'popd && ' +
+                 'python removekey.py && ' +
+                 'pushd build/dist/chrome && ' +
+                 'zip -r uproxy-chrome-app.zip app && ' +
+                 'zip -r uproxy-chrome-extension.zip extension'
+      },
       ccaCreateDev: {
         // Pipe 'no' for the first time cca.js asks whether to send usage stats.
         command: 'echo no | <%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
@@ -895,7 +907,8 @@ module.exports = function(grunt) {
   // building, tests and lints all code.
   registerTask(grunt, 'dist', [
     'build',
-    'test'
+    'test',
+    'exec:buildChromeWebStoreUploads'
   ]);
 
   registerTask(grunt, 'compileTypescript', 'Compiles all the Typescript code', [
