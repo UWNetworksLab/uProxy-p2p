@@ -6,7 +6,6 @@
 
 [![Slack Status](https://uproxy-slack.herokuapp.com/badge.svg)](https://uproxy-slack.herokuapp.com/)
 [![Travis Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
-[![Shippable Status](https://img.shields.io/shippable/54c823bf5ab6cc135289fbdc/dev.svg)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
 
 Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit) to learn more about contributing to uProxy. For a high level technical overview of uProxy, see the [uProxy Design Doc](https://docs.google.com/document/d/1t_30vX7RcrEGuWwcg0Jub-HiNI0Ko3kBOyqXgrQN3Kw/edit#).
 
@@ -18,7 +17,6 @@ uProxy is built using the following tools:
  - [Jasmine](http://jasmine.github.io/) for testing
  - [Polymer](http://www.polymer-project.org/) for UI
  - [Travis](https://travis-ci.org/) for continuous integration
- - [Shippable](https://app.shippable.com/) for docker-integrated continuous integration
 
 To manage dependencies we use:
  - [npm](https://www.npmjs.org/) to install node modules that we use for our build process.  (Specified in `package.json`)
