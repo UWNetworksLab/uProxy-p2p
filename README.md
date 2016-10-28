@@ -49,16 +49,6 @@ Having problems? To clean up from a partial, broken, or extremely out-dated buil
 yarn run clean
 ```
 
-### IDE
-
-Sublime Text 3 provides a good development experience:
-
- * Install [Sublime Text 3](http://www.sublimetext.com/3).
- * Install [Package Control](https://packagecontrol.io/).
- * Install the [TypeScript Sublime plugin](https://github.com/Microsoft/TypeScript-Sublime-Plugin).
-
-Now, TypeScript files will have syntax highlighting and include support for "jump to definition" and refactoring (renaming).
-
 ## Run
 
 ### uProxy
