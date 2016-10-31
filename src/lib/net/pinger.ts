@@ -24,6 +24,8 @@ export default class Pinger {
         this.timeout_, DEFAULT_INTERVAL_MS);
   }
 
+  // Resolves if a connection has been established, or rejects if the connection
+  // fails.  Does not retry.
   public pingOnce = () : Promise<void> => {
     const socket = freedom['core.tcpsocket']();
 
