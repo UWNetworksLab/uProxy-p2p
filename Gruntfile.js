@@ -311,7 +311,8 @@ module.exports = function(grunt) {
       installFreedomForNodeForZork: {
         // This allows our Docker containers, which do not have access to the
         // git repo's "top-level" node_modules/ folder find freedom-for-node.
-        command: 'yarn install --prefix build/src/lib/samples/zork-node freedom-for-node'
+        cwd: 'build/src/lib/samples/zork-node',
+        command: 'yarn add freedom-for-node'
       }
     },
     copy: {
