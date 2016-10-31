@@ -20,28 +20,31 @@ export default class Pinger {
   public ping = (): Promise<void> => {
     log.debug('pinging %1:%2...', this.host_ , this.port_);
 
-    return promises.retry(() => {
-      const socket = freedom['core.tcpsocket']();
+    return promises.retry(this.pingOnce.bind(this),
+        this.timeout_, DEFAULT_INTERVAL_MS);
+  }
 
-      const destructor = () => {
-        try {
-          freedom['core.tcpsocket'].close(socket);
-        } catch (e) {
-          log.warn('error destroying socket: ' + e.message);
-        }
-      };
+  public pingOnce = () : Promise<void> => {
+    const socket = freedom['core.tcpsocket']();
 
-      // TODO: Worth thinking about timeouts here but because this times
-      //       out almost immediately if nothing is listening on the port,
-      //       it works well for our purposes.
-      return socket.connect(this.host_, this.port_).then((unused: any) => {
-        log.debug('connected to ' + this.host_ + ':' + this.port_ + '...');
-        destructor();
-      }, (e: Error) => {
-        log.debug('connection failed to ' + this.host_ + ':' + this.port_ + '...');
-        destructor();
-        throw e;
-      });
-    }, this.timeout_, DEFAULT_INTERVAL_MS);
+    const destructor = () => {
+      try {
+        freedom['core.tcpsocket'].close(socket);
+      } catch (e) {
+        log.warn('error destroying socket: ' + e.message);
+      }
+    };
+
+    // TODO: Worth thinking about timeouts here but because this times
+    //       out almost immediately if nothing is listening on the port,
+    //       it works well for our purposes.
+    return socket.connect(this.host_, this.port_).then((unused: any) => {
+      log.debug('connected to ' + this.host_ + ':' + this.port_ + '...');
+      destructor();
+    }, (e: Error) => {
+      log.debug('connection failed to ' + this.host_ + ':' + this.port_ + '...');
+      destructor();
+      throw e;
+    });
   }
 }

@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import * as linefeeder from '../../net/linefeeder';
 import * as logging from '../../logging/logging';
 import * as queue from '../../handler/queue';
+import Pinger from '../../net/pinger';
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
 import * as ssh2 from 'ssh2';
@@ -123,12 +124,12 @@ function makeInstanceMessage(address:string, description?:string): any {
 
 // To see how these fields are handled, see
 // generic_core/social.ts#handleClient in the uProxy repo.
-function makeClientState(address: string): freedom.Social.ClientState {
+function makeClientState(address: string, status: string): freedom.Social.ClientState {
   return {
     userId: address,
     clientId: address,
     // https://github.com/freedomjs/freedom/blob/master/interface/social.json
-    status: 'ONLINE',
+    status: status,
     timestamp: Date.now()
   };
 }
@@ -179,6 +180,13 @@ export class CloudSocialProvider {
   // SSH connections, keyed by host.
   private clients_: { [host: string]: Promise<Connection> } = {};
 
+  // Map from host to whether it is online.  Hosts not in the map are assumed
+  // to be offline.
+  private onlineHosts_: { [host: string]: boolean } = {};
+
+  // Map from host to intervalId used for monitoring online presence.
+  private onlinePresenceMonitorIds_: { [host: string]: number } = {};
+
   constructor(private dispatchEvent_: (name: string, args: Object) => void) { }
 
   // Emits the messages necessary to make the user appear online
@@ -187,16 +195,21 @@ export class CloudSocialProvider {
     this.dispatchEvent_('onUserProfile', makeUserProfile(
         contact.invite.host, contact.invite.isAdmin));
 
-    var clientState = makeClientState(contact.invite.host);
+    var isOnline = this.isOnline_(contact.invite.host);
+
+    var clientState = makeClientState(contact.invite.host,
+        isOnline ? 'ONLINE' : 'OFFLINE');
     this.dispatchEvent_('onClientState', clientState);
 
-    // Pretend that we received a message from a remote uProxy client.
-    this.dispatchEvent_('onMessage', {
-      from: clientState,
-      // INSTANCE
-      message: JSON.stringify(makeVersionedPeerMessage(3000, makeInstanceMessage(
-          contact.invite.host, contact.description), contact.version))
-    });
+    if (isOnline) {
+      // Pretend that we received a message from a remote uProxy client.
+      this.dispatchEvent_('onMessage', {
+        from: clientState,
+        // INSTANCE
+        message: JSON.stringify(makeVersionedPeerMessage(3000, makeInstanceMessage(
+            contact.invite.host, contact.description), contact.version))
+      });
+    }
   }
 
   // Establishes an SSH connection to a server, first shutting down
@@ -214,7 +227,7 @@ export class CloudSocialProvider {
 
     const connection = new Connection(invite, (message: Object) => {
       this.dispatchEvent_('onMessage', {
-        from: makeClientState(invite.host),
+        from: makeClientState(invite.host, 'ONLINE'),
         // SIGNAL_FROM_SERVER_PEER,
         message: JSON.stringify(makeVersionedPeerMessage(3002,
             message, connection.getVersion()))
@@ -239,6 +252,8 @@ export class CloudSocialProvider {
           description: banner,
           version: connection.getVersion()
         };
+        // Cloud server must be online if it is responding with it's banner.
+        this.setOnlineStatus_(invite.host, true);
         this.notifyOfUser_(this.savedContacts_[invite.host]);
         this.saveContacts_();
       });
@@ -265,6 +280,7 @@ export class CloudSocialProvider {
         if (savedContacts.contacts) {
           for (let contact of savedContacts.contacts) {
             this.savedContacts_[contact.invite.host] = contact;
+            this.startMonitoringPresence_(contact.invite.host);
             this.notifyOfUser_(contact);
           }
         }
@@ -298,7 +314,7 @@ export class CloudSocialProvider {
     // TODO: emit an onUserProfile event, which can include an image URL
     // TODO: base this on the user's public key?
     //       (shown in the "connected accounts" page)
-    return Promise.resolve(makeClientState('me'));
+    return Promise.resolve(makeClientState('me', 'ONLINE'));
   }
 
   public sendMessage = (destinationClientId: string, message: string): Promise<void> => {
@@ -410,6 +426,7 @@ export class CloudSocialProvider {
       this.savedContacts_[invite.host] = {
         invite: invite
       };
+      this.startMonitoringPresence_(invite.host);
       this.notifyOfUser_(this.savedContacts_[invite.host]);
       this.saveContacts_();
 
@@ -439,11 +456,67 @@ export class CloudSocialProvider {
       log.warn('cloud contact %1 is not in %2 - cannot remove from storage', host, STORAGE_KEY);
       return Promise.resolve();
     }
+    this.stopMonitoringPresence_(host);
     // Remove host from savedContacts and clients
     delete this.savedContacts_[host];
     delete this.clients_[host];
     // Update storage with this.savedContacts_
     return this.saveContacts_();
+  }
+
+  private startMonitoringPresence_(host: string) {
+    if (this.onlinePresenceMonitorIds_[host]) {
+      log.error('unexpected call to startMonitoringPresence_ for ' + host);
+      return;
+    }
+    // Ping server every minute to see if it is online
+    const ping = this.ping_.bind(this, host);
+    const PING_INTERVAL = 60000;
+    this.onlinePresenceMonitorIds_[host] = setInterval(ping, PING_INTERVAL);
+    // Ping server immediately (so we don't have to wait 1 min for 1st result).
+    ping();
+  }
+
+  private stopMonitoringPresence_(host: string) {
+    if (!this.onlinePresenceMonitorIds_[host]) {
+      log.error('unexpected call to stopMonitoringPresence_ for ' + host);
+      return;
+    }
+    clearInterval(this.onlinePresenceMonitorIds_[host]);
+    delete this.onlinePresenceMonitorIds_[host];
+  }
+
+  private ping_(host: string) : Promise<boolean> {
+    var pinger = new Pinger(host, 5000);
+    return pinger.pingOnce().then(() => {
+      return Promise.resolve(true);
+    }).catch(() => {
+      return Promise.resolve(false);
+    }).then((newOnlineValue: boolean) => {
+      console.log('ping returned ' + newOnlineValue);
+      var oldOnlineValue = this.isOnline_(host);
+      this.setOnlineStatus_(host, newOnlineValue);
+      if (newOnlineValue !== oldOnlineValue) {
+        // status changed, emit a new onClientState.
+        this.notifyOfUser_(this.savedContacts_[host]);
+        if (newOnlineValue) {
+          // Connect in the background in order to fetch metadata such as
+          // the banner (description).
+          const invite = this.savedContacts_[host].invite;
+          this.reconnect_(invite).catch((e: Error) => {
+            log.error('failed to log into cloud server once online: %1', e.message);
+          });
+        }
+      }
+    });
+  }
+
+  private isOnline_(host: string) {
+    return this.onlineHosts_[host] === true;
+  }
+
+  private setOnlineStatus_(host: string, isOnline: boolean) {
+    this.onlineHosts_[host] = isOnline;
   }
 }
 
