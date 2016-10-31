@@ -440,7 +440,6 @@ export function notifyUI(networkName :string, userId :string) {
         log.error('Firewall: invalid client state:', freedomClient);
         return;
       }
-      console.log('got clientState: ', freedomClient)
       var client :social.ClientState =
         freedomClientToUproxyClient(freedomClient);
       if (client.userId == this.myInstance.userId &&

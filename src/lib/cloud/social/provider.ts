@@ -124,12 +124,12 @@ function makeInstanceMessage(address:string, description?:string): any {
 
 // To see how these fields are handled, see
 // generic_core/social.ts#handleClient in the uProxy repo.
-function makeClientState(address: string, status: string): freedom.Social.ClientState {
+function makeClientState(address: string): freedom.Social.ClientState {
   return {
     userId: address,
     clientId: address,
     // https://github.com/freedomjs/freedom/blob/master/interface/social.json
-    status: status,
+    status: this.isOnline_(address) ? 'ONLINE' : 'OFFLINE',
     timestamp: Date.now()
   };
 }
@@ -195,13 +195,10 @@ export class CloudSocialProvider {
     this.dispatchEvent_('onUserProfile', makeUserProfile(
         contact.invite.host, contact.invite.isAdmin));
 
-    var isOnline = this.isOnline_(contact.invite.host);
-
-    var clientState = makeClientState(contact.invite.host,
-        isOnline ? 'ONLINE' : 'OFFLINE');
+    var clientState = makeClientState(contact.invite.host);
     this.dispatchEvent_('onClientState', clientState);
 
-    if (isOnline) {
+    if (this.isOnline_(contact.invite.host)) {
       // Pretend that we received a message from a remote uProxy client.
       this.dispatchEvent_('onMessage', {
         from: clientState,
@@ -226,8 +223,10 @@ export class CloudSocialProvider {
     }
 
     const connection = new Connection(invite, (message: Object) => {
+      // Set the server to online, since we are receiving messages from them.
+      this.setOnlineStatus_(invite.host, true);
       this.dispatchEvent_('onMessage', {
-        from: makeClientState(invite.host, 'ONLINE'),
+        from: makeClientState(invite.host),
         // SIGNAL_FROM_SERVER_PEER,
         message: JSON.stringify(makeVersionedPeerMessage(3002,
             message, connection.getVersion()))
@@ -314,7 +313,7 @@ export class CloudSocialProvider {
     // TODO: emit an onUserProfile event, which can include an image URL
     // TODO: base this on the user's public key?
     //       (shown in the "connected accounts" page)
-    return Promise.resolve(makeClientState('me', 'ONLINE'));
+    return Promise.resolve(makeClientState('me'));
   }
 
   public sendMessage = (destinationClientId: string, message: string): Promise<void> => {
@@ -487,7 +486,7 @@ export class CloudSocialProvider {
   }
 
   private ping_(host: string) : Promise<boolean> {
-    var pinger = new Pinger(host, 5000);
+    var pinger = new Pinger(host, SSH_SERVER_PORT);
     return pinger.pingOnce().then(() => {
       return Promise.resolve(true);
     }).catch(() => {
@@ -512,7 +511,7 @@ export class CloudSocialProvider {
   }
 
   private isOnline_(host: string) {
-    return this.onlineHosts_[host] === true;
+    return host === 'me' || this.onlineHosts_[host] === true;
   }
 
   private setOnlineStatus_(host: string, isOnline: boolean) {
