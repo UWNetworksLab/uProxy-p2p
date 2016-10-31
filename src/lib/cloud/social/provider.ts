@@ -416,13 +416,6 @@ export class CloudSocialProvider {
       this.startMonitoringPresence_(invite.host);
       this.notifyOfUser_(this.savedContacts_[invite.host]);
       this.saveContacts_();
-
-      // Connect in the background in order to fetch metadata such as
-      // the banner (description).
-      this.reconnect_(invite).catch((e: Error) => {
-        log.warn('failed to log into cloud server during invite accept: %1', e.message);
-      });
-
       return Promise.resolve();
     } catch (e) {
       return Promise.reject(new Error('could not parse invite code: ' + e.message));
