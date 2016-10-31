@@ -123,18 +123,6 @@ function makeInstanceMessage(address:string, description?:string): any {
 }
 
 // To see how these fields are handled, see
-// generic_core/social.ts#handleClient in the uProxy repo.
-function makeClientState(address: string): freedom.Social.ClientState {
-  return {
-    userId: address,
-    clientId: address,
-    // https://github.com/freedomjs/freedom/blob/master/interface/social.json
-    status: this.isOnline_(address) ? 'ONLINE' : 'OFFLINE',
-    timestamp: Date.now()
-  };
-}
-
-// To see how these fields are handled, see
 // generic_core/social.ts#handleUserProfile in the uProxy repo. We omit
 // the status field since remote-user.ts#update will use FRIEND as a default.
 function makeUserProfile(
@@ -195,7 +183,7 @@ export class CloudSocialProvider {
     this.dispatchEvent_('onUserProfile', makeUserProfile(
         contact.invite.host, contact.invite.isAdmin));
 
-    var clientState = makeClientState(contact.invite.host);
+    var clientState = this.makeClientState_(contact.invite.host);
     this.dispatchEvent_('onClientState', clientState);
 
     if (this.isOnline_(contact.invite.host)) {
@@ -226,7 +214,7 @@ export class CloudSocialProvider {
       // Set the server to online, since we are receiving messages from them.
       this.setOnlineStatus_(invite.host, true);
       this.dispatchEvent_('onMessage', {
-        from: makeClientState(invite.host),
+        from: this.makeClientState_(invite.host),
         // SIGNAL_FROM_SERVER_PEER,
         message: JSON.stringify(makeVersionedPeerMessage(3002,
             message, connection.getVersion()))
@@ -313,7 +301,7 @@ export class CloudSocialProvider {
     // TODO: emit an onUserProfile event, which can include an image URL
     // TODO: base this on the user's public key?
     //       (shown in the "connected accounts" page)
-    return Promise.resolve(makeClientState('me'));
+    return Promise.resolve(this.makeClientState_('me'));
   }
 
   public sendMessage = (destinationClientId: string, message: string): Promise<void> => {
@@ -492,7 +480,6 @@ export class CloudSocialProvider {
     }).catch(() => {
       return Promise.resolve(false);
     }).then((newOnlineValue: boolean) => {
-      console.log('ping returned ' + newOnlineValue);
       var oldOnlineValue = this.isOnline_(host);
       this.setOnlineStatus_(host, newOnlineValue);
       if (newOnlineValue !== oldOnlineValue) {
@@ -516,6 +503,18 @@ export class CloudSocialProvider {
 
   private setOnlineStatus_(host: string, isOnline: boolean) {
     this.onlineHosts_[host] = isOnline;
+  }
+
+  // To see how these fields are handled, see
+  // generic_core/social.ts#handleClient in the uProxy repo.
+  private makeClientState_(address: string): freedom.Social.ClientState {
+    return {
+      userId: address,
+      clientId: address,
+      // https://github.com/freedomjs/freedom/blob/master/interface/social.json
+      status: this.isOnline_(address) ? 'ONLINE' : 'OFFLINE',
+      timestamp: Date.now()
+    };
   }
 }
 
