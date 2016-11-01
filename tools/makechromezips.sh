@@ -23,10 +23,8 @@ command_exists() {
   command -v "$@" > /dev/null 2>&1
 }
 
-for command in $REQUIRED_COMMANDS
-do
-  if ! command_exists $command
-  then
+for command in $REQUIRED_COMMANDS; do
+  if ! command_exists $command; then
     echo "could not $command, please install requirements first: $REQUIRED_COMMANDS" >&2
     exit 1
   fi
