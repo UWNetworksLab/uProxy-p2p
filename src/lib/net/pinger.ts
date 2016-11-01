@@ -20,8 +20,7 @@ export default class Pinger {
   public ping = (): Promise<void> => {
     log.debug('pinging %1:%2...', this.host_ , this.port_);
 
-    return promises.retry(this.pingOnce.bind(this),
-        this.timeout_, DEFAULT_INTERVAL_MS);
+    return promises.retry(this.pingOnce, this.timeout_, DEFAULT_INTERVAL_MS);
   }
 
   // Resolves if a connection has been established, or rejects if the connection

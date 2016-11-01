@@ -173,7 +173,9 @@ export class CloudSocialProvider {
   private onlineHosts_: { [host: string]: boolean } = {};
 
   // Map from host to intervalId used for monitoring online presence.
-  private onlinePresenceMonitorIds_: { [host: string]: number } = {};
+  private onlinePresenceMonitorIds_: { [host: string]: NodeJS.Timer } = {};
+
+  static PING_INTERVAL = 60000;
 
   constructor(private dispatchEvent_: (name: string, args: Object) => void) { }
 
@@ -224,6 +226,9 @@ export class CloudSocialProvider {
     this.clients_[invite.host] = connection.connect().then(() => {
       log.info('connected to zork on %1', invite.host);
 
+      // Cloud server is online if a connection has succeeded.
+      this.setOnlineStatus_(invite.host, true);
+
       // Fetch the banner, if available, then emit an instance message.
       connection.getBanner().then((banner: string) => {
         if (banner.length < 1) {
@@ -239,8 +244,6 @@ export class CloudSocialProvider {
           description: banner,
           version: connection.getVersion()
         };
-        // Cloud server must be online if it is responding with it's banner.
-        this.setOnlineStatus_(invite.host, true);
         this.notifyOfUser_(this.savedContacts_[invite.host]);
         this.saveContacts_();
       });
@@ -444,20 +447,42 @@ export class CloudSocialProvider {
     return this.saveContacts_();
   }
 
-  private startMonitoringPresence_(host: string) {
+  private startMonitoringPresence_ = (host: string) => {
     if (this.onlinePresenceMonitorIds_[host]) {
       log.error('unexpected call to startMonitoringPresence_ for ' + host);
       return;
     }
-    // Ping server every minute to see if it is online
-    const ping = this.ping_.bind(this, host);
-    const PING_INTERVAL = 60000;
-    this.onlinePresenceMonitorIds_[host] = setInterval(ping, PING_INTERVAL);
+    // Ping server every minute to see if it is online.  A server is considered
+    // online if a connection can be established with the SSH port.
+    const ping = () : Promise<boolean> => {
+      var pinger = new Pinger(host, SSH_SERVER_PORT);
+      return pinger.pingOnce().then(() => {
+        return true;
+      }).catch(() => {
+        return false;
+      }).then((newOnlineValue: boolean) => {
+        var oldOnlineValue = this.isOnline_(host);
+        this.setOnlineStatus_(host, newOnlineValue);
+        if (newOnlineValue !== oldOnlineValue) {
+          // status changed, emit a new onClientState.
+          this.notifyOfUser_(this.savedContacts_[host]);
+          if (newOnlineValue) {
+            // Connect in the background in order to fetch metadata such as
+            // the banner (description).
+            const invite = this.savedContacts_[host].invite;
+            this.reconnect_(invite).catch((e: Error) => {
+              log.error('failed to log into cloud server once online: %1', e.message);
+            });
+          }
+        }
+      });
+    }
+    this.onlinePresenceMonitorIds_[host] = setInterval(ping, CloudSocialProvider.PING_INTERVAL);
     // Ping server immediately (so we don't have to wait 1 min for 1st result).
     ping();
   }
 
-  private stopMonitoringPresence_(host: string) {
+  private stopMonitoringPresence_ = (host: string) => {
     if (!this.onlinePresenceMonitorIds_[host]) {
       log.error('unexpected call to stopMonitoringPresence_ for ' + host);
       return;
@@ -466,41 +491,17 @@ export class CloudSocialProvider {
     delete this.onlinePresenceMonitorIds_[host];
   }
 
-  private ping_(host: string) : Promise<boolean> {
-    var pinger = new Pinger(host, SSH_SERVER_PORT);
-    return pinger.pingOnce().then(() => {
-      return Promise.resolve(true);
-    }).catch(() => {
-      return Promise.resolve(false);
-    }).then((newOnlineValue: boolean) => {
-      var oldOnlineValue = this.isOnline_(host);
-      this.setOnlineStatus_(host, newOnlineValue);
-      if (newOnlineValue !== oldOnlineValue) {
-        // status changed, emit a new onClientState.
-        this.notifyOfUser_(this.savedContacts_[host]);
-        if (newOnlineValue) {
-          // Connect in the background in order to fetch metadata such as
-          // the banner (description).
-          const invite = this.savedContacts_[host].invite;
-          this.reconnect_(invite).catch((e: Error) => {
-            log.error('failed to log into cloud server once online: %1', e.message);
-          });
-        }
-      }
-    });
-  }
-
-  private isOnline_(host: string) {
+  private isOnline_ = (host: string) => {
     return host === 'me' || this.onlineHosts_[host] === true;
   }
 
-  private setOnlineStatus_(host: string, isOnline: boolean) {
+  private setOnlineStatus_ = (host: string, isOnline: boolean) => {
     this.onlineHosts_[host] = isOnline;
   }
 
   // To see how these fields are handled, see
   // generic_core/social.ts#handleClient in the uProxy repo.
-  private makeClientState_(address: string): freedom.Social.ClientState {
+  private makeClientState_ = (address: string) : freedom.Social.ClientState => {
     return {
       userId: address,
       clientId: address,
