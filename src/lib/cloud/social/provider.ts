@@ -175,7 +175,7 @@ export class CloudSocialProvider {
   // Map from host to intervalId used for monitoring online presence.
   private onlinePresenceMonitorIds_: { [host: string]: NodeJS.Timer } = {};
 
-  static PING_INTERVAL = 60000;
+  private static PING_INTERVAL_ = 60000;
 
   constructor(private dispatchEvent_: (name: string, args: Object) => void) { }
 
@@ -453,7 +453,9 @@ export class CloudSocialProvider {
       return;
     }
     // Ping server every minute to see if it is online.  A server is considered
-    // online if a connection can be established with the SSH port.
+    // online if a connection can be established with the SSH port.  We stop
+    // pinging for presence once the host is online, so as to not give away
+    // that we are pinging uProxy cloud servers with a regular heartbeat.
     const ping = () : Promise<boolean> => {
       var pinger = new Pinger(host, SSH_SERVER_PORT);
       return pinger.pingOnce().then(() => {
@@ -477,14 +479,15 @@ export class CloudSocialProvider {
         }
       });
     }
-    this.onlinePresenceMonitorIds_[host] = setInterval(ping, CloudSocialProvider.PING_INTERVAL);
+    this.onlinePresenceMonitorIds_[host] = setInterval(ping, CloudSocialProvider.PING_INTERVAL_);
     // Ping server immediately (so we don't have to wait 1 min for 1st result).
     ping();
   }
 
   private stopMonitoringPresence_ = (host: string) => {
     if (!this.onlinePresenceMonitorIds_[host]) {
-      log.error('unexpected call to stopMonitoringPresence_ for ' + host);
+      // We may have already stopped monitoring presence, e.g. because the
+      // host has come online.
       return;
     }
     clearInterval(this.onlinePresenceMonitorIds_[host]);
@@ -497,6 +500,10 @@ export class CloudSocialProvider {
 
   private setOnlineStatus_ = (host: string, isOnline: boolean) => {
     this.onlineHosts_[host] = isOnline;
+    if (isOnline) {
+      // Stop monitoring presence once the client is online.
+      this.stopMonitoringPresence_(host);
+    }
   }
 
   // To see how these fields are handled, see
