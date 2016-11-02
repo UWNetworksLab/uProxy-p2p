@@ -14,7 +14,7 @@ readonly REQUIRED_COMMANDS="zip jq"
 
 set -e
 
-if [ ! -d $DIST_DIR ]; then
+if [[ ! -d $DIST_DIR ]]; then
   echo "could not find directory $DIST_DIR, have you run grunt dist?" >&2
   exit 1
 fi
