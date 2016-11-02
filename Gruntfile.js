@@ -237,6 +237,9 @@ module.exports = function(grunt) {
     addIosrtcHookCmd: 'cp plugins/cordova-plugin-iosrtc/extra/hooks/iosrtc-swift-support.js hooks/iosrtc-swift-support.js',
 
     exec: {
+      makeChromeWebStoreZips: {
+        command: 'tools/makechromezips.sh'
+      },
       ccaCreateDev: {
         // Pipe 'no' for the first time cca.js asks whether to send usage stats.
         command: 'echo no | <%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
@@ -896,7 +899,8 @@ module.exports = function(grunt) {
   // building, tests and lints all code.
   registerTask(grunt, 'dist', [
     'build',
-    'test'
+    'test',
+    'exec:makeChromeWebStoreZips'
   ]);
 
   registerTask(grunt, 'compileTypescript', 'Compiles all the Typescript code', [
