@@ -519,19 +519,6 @@ module.exports = function(grunt) {
         localDestPath: 'lib/samples/copypaste-chat-webapp/'
       }),
 
-      libsForCopyPasteSocksChromeApp: Rule.copyLibs({
-        npmLibNames: ['freedom-for-chrome'],
-        pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider'],
-        pathsFromThirdPartyBuild: ['i18n', 'bower/polymer', 'freedom-pgp-e2e', 'freedom-port-control'],
-        localDestPath: 'lib/samples/copypaste-socks-chromeapp/'
-      }),
-      libsForCopyPasteSocksFirefoxApp: Rule.copyLibs({
-        npmLibNames: ['freedom-for-firefox'],
-        pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider'],
-        pathsFromThirdPartyBuild: ['i18n', 'bower', 'freedom-pgp-e2e', 'freedom-port-control'],
-        localDestPath: 'lib/samples/copypaste-socks-firefoxapp/data'
-      }),
-
       libsForSimpleSocksChromeApp: Rule.copyLibs({
         npmLibNames: ['freedom-for-chrome'],
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider'],
@@ -665,7 +652,6 @@ module.exports = function(grunt) {
       
       // uproxy-lib sample apps.
       copypasteChatFreedomModule: Rule.browserify('lib/copypaste-chat/freedom-module'),
-      copypasteSocksFreedomModule: Rule.browserify('lib/copypaste-socks/freedom-module'),
       deployerFreedomModule: Rule.browserify('lib/cloud/deployer/freedom-module'),
       echoServerFreedomModule: Rule.browserify('lib/echo/freedom-module'),
       simpleChatFreedomModule: Rule.browserify('lib/simple-chat/freedom-module'),
@@ -674,7 +660,6 @@ module.exports = function(grunt) {
       zorkFreedomModule: Rule.browserify('lib/zork/freedom-module'),
       // uproxy-lib sample apps (with UI).
       copypasteChatMain: Rule.browserify('lib/copypaste-chat/main.core-env'),
-      copypasteSocksMain: Rule.browserify('lib/copypaste-socks/main.core-env'),
       simpleChatMain: Rule.browserify('lib/simple-chat/main.core-env'),
       
       integrationTcpFreedomModule: Rule.browserify('lib/integration-tests/tcp/freedom-module'),
@@ -806,20 +791,6 @@ module.exports = function(grunt) {
         xpi: 'build/dist/',
         debug: true
       }
-    },
-    vulcanize: {
-      copypasteSocks: {
-        options: {
-          inline: true,
-          csp: true
-        },
-        files: [
-          {
-            src: path.join(devBuildPath, 'lib/copypaste-socks/polymer-components/root.html'),
-            dest: path.join(devBuildPath, 'lib/copypaste-socks/polymer-components/vulcanized.html')
-          }
-        ]
-      }
     }
   });
 
@@ -936,14 +907,6 @@ module.exports = function(grunt) {
     'copy:libsForCopypasteChatChromeApp', 
     'copy:libsForCopypasteChatFirefoxApp', 
     'copy:libsForCopypasteChatWebApp'
-  ]);
-  registerTask(grunt, 'copypasteSocks', [
-    'base', 
-    'browserify:copypasteSocksFreedomModule', 
-    'browserify:copypasteSocksMain', 
-    'vulcanize:copypasteSocks', 
-    'copy:libsForCopyPasteSocksChromeApp', 
-    'copy:libsForCopyPasteSocksFirefoxApp'
   ]);
   registerTask(grunt, 'deployer', [
     'base', 
