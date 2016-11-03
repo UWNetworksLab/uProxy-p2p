@@ -36,12 +36,12 @@ module.exports = function(grunt) {
   const chromeExtDevPath = path.join(devBuildPath, 'chrome/extension/');
   const chromeAppDevPath = path.join(devBuildPath, 'chrome/app/');
   const firefoxDevPath = path.join(devBuildPath, 'firefox/');
-  const ccaDevPath = path.join(devBuildPath, 'cca/www/');
+  const ccaDevPath = path.join(devBuildPath, 'cca/');
   const androidDevPath = path.join(devBuildPath, 'android/');
   const iosDevPath = path.join(devBuildPath, 'ios/');
   const genericPath = path.join(devBuildPath, 'generic/');
 
-  const ccaDistPath = path.join(distBuildPath, 'cca/www/');
+  const ccaDistPath = path.join(distBuildPath, 'cca/');
   const androidDistPath = path.join(distBuildPath, 'android/');
   const iosDistPath = path.join(distBuildPath, 'ios/');
 
@@ -1208,24 +1208,24 @@ module.exports = function(grunt) {
     'copy:ccaAdditional',
   ]);
   registerTask(grunt, 'ccaMainCoreEnv',
-      'Builds build/src/cca/www/scripts/main.core-env.static.js', [
+      'Builds build/src/cca/scripts/main.core-env.static.js', [
     'compileTypescript',
     'browserify:ccaMainCoreEnv'
   ]);
   registerTask(grunt, 'ccaContext',
-      'Builds build/src/cca/www/scripts/context.static.js', [
+      'Builds build/src/cca/scripts/context.static.js', [
     'compileTypescript',
     'browserify:ccaContext'    
   ]);
 
   grunt.config.merge({
     browserify: {
-     ccaMainCoreEnv: Rule.browserify('cca/www/scripts/main.core-env', {
+     ccaMainCoreEnv: Rule.browserify('cca/scripts/main.core-env', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
       }),
-      ccaContext: Rule.browserify('cca/www/scripts/context', {
+      ccaContext: Rule.browserify('cca/scripts/context', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
@@ -1248,7 +1248,7 @@ module.exports = function(grunt) {
           src: ['icons/128_online.png', 'fonts/*'],
           dest: ccaDevPath
         }),
-        localDestPath: 'cca/www/'
+        localDestPath: 'cca/'
       }),
       ccaAdditional: {
         files: [

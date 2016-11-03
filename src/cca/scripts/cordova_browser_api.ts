@@ -1,8 +1,8 @@
-/// <reference path='../../../../third_party/cordova/themeablebrowser.d.ts'/>
-/// <reference path='../../../../third_party/cordova/webintents.d.ts'/>
-/// <reference path='../../../../third_party/cordova/tun2socks.d.ts'/>
-/// <reference path='../../../../third_party/cordova/backbutton.d.ts'/>
-/// <reference path='../../../../third_party/cordova/app.d.ts'/>
+/// <reference path='../../../third_party/cordova/themeablebrowser.d.ts'/>
+/// <reference path='../../../third_party/cordova/webintents.d.ts'/>
+/// <reference path='../../../third_party/cordova/tun2socks.d.ts'/>
+/// <reference path='../../../third_party/cordova/backbutton.d.ts'/>
+/// <reference path='../../../third_party/cordova/app.d.ts'/>
 /// <reference types="chrome/chrome-app" />
 
 /**
@@ -12,12 +12,12 @@
  * Derived from chrome_browser_api.ts
  */
 
-import * as browser_api from '../../../interfaces/browser_api';
+import * as browser_api from '../../interfaces/browser_api';
 import ProxyAccessMode = browser_api.ProxyAccessMode;
 import ProxyDisconnectInfo = browser_api.ProxyDisconnectInfo;
 import BrowserAPI = browser_api.BrowserAPI;
-import * as net from '../../../lib/net/net.types';
-import * as Constants from '../../../generic_ui/scripts/constants';
+import * as net from '../../lib/net/net.types';
+import * as Constants from '../../generic_ui/scripts/constants';
 
 enum PopupState {
     NOT_LAUNCHED,

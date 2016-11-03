@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/cordova/tun2socks.d.ts'/>
+
 import { VpnDevice } from '../model/vpn_device';
 
 // A VpnDevice that routes the traffic through a Socks server that is running locally.

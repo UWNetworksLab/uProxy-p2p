@@ -1,7 +1,7 @@
-import CoreConnector from '../../../generic_ui/scripts/core_connector';
+import CoreConnector from '../../generic_ui/scripts/core_connector';
 import CordovaCoreConnector from './cordova_core_connector';
 
-import * as net from '../../../lib/net/net.types';
+import * as net from '../../lib/net/net.types';
 import { CloudSocksProxyServer, SocksProxyServerRepository } from './cloud_socks_proxy_server';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 

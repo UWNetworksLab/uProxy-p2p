@@ -1,11 +1,11 @@
 import uparams = require('uparams');
 import * as jsurl from 'jsurl';
 
-import * as net from '../../../lib/net/net.types';
-import * as social from '../../../interfaces/social';
-import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as net from '../../lib/net/net.types';
+import * as social from '../../interfaces/social';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
-import CoreConnector from '../../../generic_ui/scripts/core_connector';
+import CoreConnector from '../../generic_ui/scripts/core_connector';
 import { SocksProxyServer } from '../model/socks_proxy_server';
 
 

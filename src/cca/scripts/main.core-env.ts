@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/cordova/splashscreen.d.ts'/>
+/// <reference path='../../../third_party/cordova/splashscreen.d.ts'/>
 
 /**
  * background.ts
@@ -9,7 +9,7 @@
 
 import { CordovaBrowserApi } from './cordova_browser_api';
 
-import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
 declare const freedom: freedom.FreedomInCoreEnv;
 

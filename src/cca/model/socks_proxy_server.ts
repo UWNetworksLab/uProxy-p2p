@@ -1,4 +1,4 @@
-import * as net from '../../../lib/net/net.types';
+import * as net from '../../lib/net/net.types';
 
 // A Socks proxy server that we can control. 
 export interface SocksProxyServer {

@@ -5,10 +5,10 @@
  * core context.
  */
 
-import * as browser_connector from '../../../interfaces/browser_connector';
-import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as browser_connector from '../../interfaces/browser_connector';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
-import * as user_interface from '../../../generic_ui/scripts/ui';
+import * as user_interface from '../../generic_ui/scripts/ui';
 
 export default class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
 
