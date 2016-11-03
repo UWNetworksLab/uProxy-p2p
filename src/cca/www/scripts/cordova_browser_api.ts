@@ -81,10 +81,6 @@ export class CordovaBrowserApi implements BrowserAPI {
       // fires.
       window.top.webintent.getUri(this.onUrl_);  // Handle URL already received.
       window.top.webintent.onNewIntent(this.onUrl_);  // Handle future URLs.
-
-      window.top.document.addEventListener('backbutton', () => {
-        this.emit_('backbutton');
-      }, false);
     }, false);
 
     this.checkVpnSupport_();
