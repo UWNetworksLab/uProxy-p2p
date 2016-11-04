@@ -36,12 +36,5 @@ export var uProxyAppChannel = freedom(
 });
 
 chrome.app.runtime.onLaunched.addListener(function() {
-  // Wait for core to finish loading.
-  uProxyAppChannel.then(() => {
-    chrome.app.window.create('index.html', {}, () => {
-      if (navigator.splashscreen) {
-        navigator.splashscreen.hide();
-      }
-    });
-  });
+  chrome.app.window.create('index.html');
 });
