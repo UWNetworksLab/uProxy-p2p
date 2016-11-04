@@ -1166,15 +1166,15 @@ module.exports = function(grunt) {
     'browserify:churnPipeFreedomModule', 
     'browserify:cloudSocialProviderFreedomModule', 
     //'base',
-    'ccaMainCoreEnv',
+    'ccaBackground',
     'ccaContext',
     'copy:cca',
     'copy:ccaAdditional',
   ]);
-  registerTask(grunt, 'ccaMainCoreEnv',
-      'Builds build/src/cca/scripts/main.core-env.static.js', [
+  registerTask(grunt, 'ccaBackground',
+      'Builds build/src/cca/scripts/background.static.js', [
     'compileTypescript',
-    'browserify:ccaMainCoreEnv'
+    'browserify:ccaBackground'
   ]);
   registerTask(grunt, 'ccaContext',
       'Builds build/src/cca/scripts/context.static.js', [
@@ -1184,7 +1184,7 @@ module.exports = function(grunt) {
 
   grunt.config.merge({
     browserify: {
-     ccaMainCoreEnv: Rule.browserify('cca/scripts/main.core-env', {
+     ccaBackground: Rule.browserify('cca/scripts/background', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
