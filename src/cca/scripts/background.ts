@@ -36,5 +36,6 @@ export var uProxyAppChannel = freedom(
 });
 
 chrome.app.runtime.onLaunched.addListener(function() {
+  console.debug('Chrome onLaunched fired');
   chrome.app.window.create('index.html');
 });
