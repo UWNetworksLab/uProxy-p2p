@@ -14,6 +14,21 @@
   <link href='generic_ui/style/global.css' rel='stylesheet' shim-shadowdom>
 
   <style>
+    .header {
+        width: 100%;
+        text-align: left;
+        padding: 10px;
+        margin: 0;
+        background-color: #12a391;
+        color: #FeFeFe;
+    }
+    button {
+      background-color: #12a391;
+      border-style: none;
+      color: #fefefe;
+      padding: 5px;
+      margin: 5px;
+    }
     @font-face {
       font-family: Quicksand;
       src: url(generic_ui/fonts/Quicksand-Regular.ttf);
@@ -33,14 +48,14 @@
       margin: 0;
       font-family: Roboto, sans-serif;
       font-size: 13px;
-      background-color: white;
+      background-color: #eee;
       height: 100%;
     }
   </style>
 </head>
 
 <body touch-action='auto'>
-  <h1>Uproxy Air Client</h1>
+  <h1 class='header'>uProxy Air Client</h1>
 
   <h2>Socks-to-RTC Proxy</h2>
   <div id='setup-widget'>
