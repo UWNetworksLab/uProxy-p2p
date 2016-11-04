@@ -1,5 +1,4 @@
-import CoreConnector from '../../generic_ui/scripts/core_connector';
-import CordovaCoreConnector from './cordova_core_connector';
+import { MakeCoreConnector } from './cordova_core_connector';
 
 import * as net from '../../lib/net/net.types';
 import { CloudSocksProxyServer, SocksProxyServerRepository } from './cloud_socks_proxy_server';
@@ -8,8 +7,7 @@ import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 // For debugging
 (window as any).context = this;
 
-export var browserConnector = new CordovaCoreConnector({name: 'uproxy-ui-to-core-connector'});
-export var core = new CoreConnector(browserConnector);
+let core = MakeCoreConnector();
 
 class EventLog {
   constructor(private element_: HTMLElement) {}
@@ -22,8 +20,8 @@ class EventLog {
 }
 
 function main() {
-  let providers = new SocksProxyServerRepository(core);
-  let selectedProviderPromise: Promise<CloudSocksProxyServer> = null;
+  let servers = new SocksProxyServerRepository(core);
+  let selectedServerPromise: Promise<CloudSocksProxyServer> = null;
   let proxyEndpoint: net.Endpoint = null;
 
   // UI Code Below
@@ -36,10 +34,10 @@ function main() {
 
   addButton.onclick = (ev) => {
     console.debug('Pressed Add Button');
-    selectedProviderPromise = providers.addProxyServer(addTokenText.textContent);
-    selectedProviderPromise.then((provider) => {
+    selectedServerPromise = servers.addProxyServer(addTokenText.textContent);
+    selectedServerPromise.then((server) => {
       startButton.disabled = false;
-      log.append(`Added server at ${provider.remoteIpAddress()}`)
+      log.append(`Added server at ${server.remoteIpAddress()}`)
     }).catch((error) => {
       console.error(error);
       log.append(error);
@@ -47,12 +45,12 @@ function main() {
   };
   startButton.onclick = (ev) => {
     console.debug('Pressed Start Button');
-    if (!selectedProviderPromise) {
+    if (!selectedServerPromise) {
       throw new Error('No proxy set');
     }
-    selectedProviderPromise.then((provider) => {
+    selectedServerPromise.then((server) => {
       startButton.disabled = true;
-      return provider.start();
+      return server.start();
     }).then((endpoint) => {
       proxyEndpoint = endpoint;
       console.log('Endpoint: ', proxyEndpoint);
@@ -66,12 +64,12 @@ function main() {
   };
   stopButton.onclick = (ev) => {
     console.debug('Pressed Stop Button');
-    if (!selectedProviderPromise) {
+    if (!selectedServerPromise) {
       throw new Error('No proxy set');
     }
-    selectedProviderPromise.then((provider) => {
+    selectedServerPromise.then((server) => {
       log.append('Proxy stopped');
-      return provider.stop();
+      return server.stop();
     }).then(() => {
       startButton.disabled = false;
       stopButton.disabled = true;

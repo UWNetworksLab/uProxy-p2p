@@ -46,20 +46,10 @@ export class CordovaBrowserApi implements BrowserAPI {
   // disconnect.
   private proxyAccessMode_ = ProxyAccessMode.NONE;
 
-  public setIcon = (iconFile :string) : void => {
-  }
-
-  // The URL for the page that renders the UI.  For terminological consistency,
-  // the UI is referred to as the "popup", even though it is persistent and
-  // full-screen.
-  private POPUP_URL = 'index.html';
-  // When we tried to create UI.
-  private popupCreationStartTime_ = Date.now();
-
-  private popupState_ = PopupState.NOT_LAUNCHED;
-
-  public handlePopupLaunch :() => void;
-  private onceLaunched_ :Promise<void>;
+  // Unnecessary interface methods.
+  public setIcon(iconFile :string): void { }
+  public bringUproxyToFront(): Promise<void> { return Promise.resolve(); }
+  public handlePopupLaunch(): void {}
 
   private browser_ :Window = null;
 
@@ -262,40 +252,6 @@ export class CordovaBrowserApi implements BrowserAPI {
 
   public launchTabIfNotOpen = (relativeUrl :string) => {
     // TODO: Figure out what this means in Cordova.
-  }
-
-  public bringUproxyToFront = () : Promise<void> => {
-    // In Cordova, this function is badly misnamed.  Rather than bringing the
-    // window to front, it actually creates the window the first time it is
-    // called, and otherwise has no effect.
-    if (this.popupState_ === PopupState.NOT_LAUNCHED) {
-      this.popupState_ = PopupState.LAUNCHING;
-      this.popupCreationStartTime_ = Date.now();
-      // If neither popup nor Chrome window are open (e.g. if uProxy is launched
-      // after webstore installation), then allow the popup to open at a default
-      // location.
-      this.onceLaunched_ = new Promise<void>((F, R) => {
-        this.handlePopupLaunch = F;
-      });
-      console.log('Creating window');
-      chrome.app.window.create(this.POPUP_URL, {},
-          this.newPopupCreated_);
-      return this.onceLaunched_;
-    } else {
-      // Once the app has started, all subsequent calls to bringUproxyToFront
-      // are no-ops.
-      console.log('Waiting for popup to launch...');
-      return this.onceLaunched_;
-    }
-  }
-
-  /**
-    * Callback passed to chrome.app.window.create.
-    */
-  private newPopupCreated_ = (popup :chrome.app.window.AppWindow) => {
-    console.log('Time between browser icon click and popup launch (ms): ' +
-        (Date.now() - this.popupCreationStartTime_));
-    this.popupState_ = PopupState.LAUNCHED;
   }
 
   public showNotification = (text :string, tag :string) => {

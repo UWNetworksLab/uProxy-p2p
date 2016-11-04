@@ -7,10 +7,16 @@
 
 import * as browser_connector from '../../interfaces/browser_connector';
 import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
-
 import * as user_interface from '../../generic_ui/scripts/ui';
 
-export default class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
+import CoreConnector from '../../generic_ui/scripts/core_connector';
+
+export function MakeCoreConnector() : CoreConnector {
+  let browserConnector = new CordovaCoreConnector({name: 'uproxy-ui-to-core-connector'});
+  return new CoreConnector(browserConnector);
+}
+
+class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
 
   private appChannel_ :freedom.OnAndEmit<any,any>;
 

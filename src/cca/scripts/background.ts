@@ -17,34 +17,31 @@ export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
-// Remember which handlers freedom has installed.
-var haveAppChannel :Function;
-export var uProxyAppChannel :Promise<freedom.OnAndEmit<any,any>> =
-    new Promise((F, R) => {
-  haveAppChannel = F;
-});
-
 export var moduleName = 'uProxy App Top Level';
-export var browserApi :CordovaBrowserApi = new CordovaBrowserApi();
 
-console.log('Instantiating UI');
-// This instantiation, before the core has even started, should reduce the
-// apparent startup time, but runs the risk of leaving the UI non-responsive
-// until the core catches up.
-browserApi.bringUproxyToFront().then(() => {
-  console.log('UI instantiation complete');
-  if (navigator.splashscreen) {
-    navigator.splashscreen.hide();
-  }
-});
+// TODO(fortuna): Move browser api logic directly here. No need for the extra layer.
+var browserApi :CordovaBrowserApi = new CordovaBrowserApi();
 
 console.log('Loading core');
-freedom('generic_core/freedom-module.json', <freedom.FreedomInCoreEnvOptions>{
-  'logger': 'lib/loggingprovider/freedom-module.json',
-  'debug': 'debug',
-  'portType': 'worker'
-}).then((uProxyModuleFactory:OnEmitModuleFactory) => {
+export var uProxyAppChannel = freedom(
+    'generic_core/freedom-module.json',
+    <freedom.FreedomInCoreEnvOptions>{
+      'logger': 'lib/loggingprovider/freedom-module.json',
+      'debug': 'debug',
+      'portType': 'worker'
+    }
+).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   console.log('Core loading complete');
-  haveAppChannel(uProxyModuleFactory());
+  return uProxyModuleFactory();
 });
 
+chrome.app.runtime.onLaunched.addListener(function() {
+  // Wait for core to finish loading.
+  uProxyAppChannel.then(() => {
+    chrome.app.window.create('index.html', {}, () => {
+      if (navigator.splashscreen) {
+        navigator.splashscreen.hide();
+      }
+    });
+  });
+});
