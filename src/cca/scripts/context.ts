@@ -103,9 +103,15 @@ function main() {
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {
+  // TODO(fortuna): For some reason I'm getting:
+  // "TypeError: Cannot read property 'acceptInvitation' of null"
+  // If I click "Set Proxy" too soon after the splash screen.
   core.getFullState().then((state) => {
-    console.debug('Starting main()');
     console.log(state);
+    if (navigator.splashscreen) {
+      navigator.splashscreen.hide();
+    }
+    console.debug('Starting main()');
     main();
   });
 });
