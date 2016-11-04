@@ -38,12 +38,10 @@ module.exports = function(grunt) {
   const firefoxDevPath = path.join(devBuildPath, 'firefox/');
   const ccaDevPath = path.join(devBuildPath, 'cca/');
   const androidDevPath = path.join(devBuildPath, 'android/');
-  const iosDevPath = path.join(devBuildPath, 'ios/');
   const genericPath = path.join(devBuildPath, 'generic/');
 
   const ccaDistPath = path.join(distBuildPath, 'cca/');
   const androidDistPath = path.join(distBuildPath, 'android/');
-  const iosDistPath = path.join(distBuildPath, 'ios/');
 
 //-------------------------------------------------------------------------
   function browserifyIntegrationTest(path) {
@@ -221,21 +219,13 @@ module.exports = function(grunt) {
     ccaJsPath: path.join(ccaPath, 'src/cca.js'),
     androidDevPath: androidDevPath,
     ccaDevPath: ccaDevPath,
-    iosDevPath: iosDevPath,
     androidDistPath: androidDistPath,
     ccaDistPath: ccaDistPath,
-    iosDistPath: iosDistPath,
 
     // Create commands to run in different directories.
     ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android',
     ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git cordova-plugin-backbutton',
     
-    // Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released.
-    ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git',
-
-    // Hook needed to use 'cca run ios' command. Can only run after cordova-plugin-iosrtc has been added.
-    addIosrtcHookCmd: 'cp plugins/cordova-plugin-iosrtc/extra/hooks/iosrtc-swift-support.js hooks/iosrtc-swift-support.js',
-
     exec: {
       makeChromeWebStoreZips: {
         command: 'tools/makechromezips.sh'
@@ -277,33 +267,8 @@ module.exports = function(grunt) {
         cwd: '<%= androidDevPath %>',
         command: '<%= ccaJsPath %> run android --emulator'
       },
-      ccaCreateIosDev: {
-        command: '<%= ccaJsPath %> create <%= iosDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
-      },
-      ccaCreateIosDist: {
-        command: '<%= ccaJsPath %> create <%= iosDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
-      },
-      ccaAddPluginsIosBuild: {
-        cwd: '<%= iosDevPath %>',
-        command: '<%= ccaAddPluginsIosCmd %>'
-      },
-      addIosrtcHook: {
-        cwd: '<%= iosDevPath %>',
-        command: '<%= addIosrtcHookCmd %>'
-      },
-      ccaPrepareIosDev: {
-        cwd: '<%= iosDevPath %>',
-        command: '<%= ccaJsPath %> prepare'
-      },
-      ccaPrepareIosDist: {
-        cwd: '<%= iosDistPath %>',
-        command: '<%= ccaJsPath %> prepare'
-      },
       cleanAndroid: {
         command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
-      },
-      cleanIos: {
-        command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
       },
       androidReplaceXwalkDev: {
         command: './replace_xwalk_in_apk.sh debug'
@@ -882,8 +847,7 @@ module.exports = function(grunt) {
 
   registerTask(grunt, 'default', ['build']);
 
-  // Builds all code, including the "dist" build, but skips
-  // iOS and Android as well as
+  // Builds all code, including the "dist" build, but skips Android as well as
   // ts-linting and testing which can be annoying and slow.
   // We added jshint here because catches hard syntax errors, etc.
   registerTask(grunt, 'build', [
@@ -1307,19 +1271,6 @@ module.exports = function(grunt) {
   registerTask(grunt, 'emulate_android', [
     'build_android', 
     'exec:ccaEmulateAndroid'
-  ]);
-
-  // =========================================================================
-  // iOS
-  // =========================================================================
-  
-  registerTask(grunt, 'build_ios', [
-    'exec:cleanIos', 
-    'build_cca', 
-    'exec:ccaCreateIosDev', 
-    'exec:ccaAddPluginsIosBuild',
-    'exec:addIosrtcHook',
-    'exec:ccaPrepareIosDev'
   ]);
 
   // =========================================================================
