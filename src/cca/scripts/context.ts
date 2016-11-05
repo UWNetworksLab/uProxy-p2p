@@ -1,5 +1,6 @@
 import { MakeCoreConnector } from './cordova_core_connector';
 
+import { VpnDevice } from '../model/vpn_device';
 import * as net from '../../lib/net/net.types';
 import { CloudSocksProxyServer, SocksProxyServerRepository } from './cloud_socks_proxy_server';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
@@ -19,87 +20,125 @@ class EventLog {
   }
 }
 
-function main() {
-  let servers = new SocksProxyServerRepository(core);
-  let selectedServerPromise: Promise<CloudSocksProxyServer> = null;
-  let proxyEndpoint: net.Endpoint = null;
+class AppComponent {
+  private selectedServerPromise: Promise<CloudSocksProxyServer> = null;
+  private proxyEndpoint: net.Endpoint = null;
 
-  // UI Code Below
-  let log = new EventLog(document.getElementById('event-log'));
-  let addWidget = document.getElementById('setup-widget') as HTMLDivElement;
-  let addTokenText = document.getElementById('token-text') as HTMLTextAreaElement;
-  let addButton = document.getElementById('set-proxy-button') as HTMLButtonElement;
-  let startButton = document.getElementById('start-proxy-button') as HTMLButtonElement;
-  let stopButton = document.getElementById('stop-proxy-button') as HTMLButtonElement;
+  private log: EventLog;
 
-  addButton.onclick = (ev) => {
-    console.debug('Pressed Add Button');
-    selectedServerPromise = servers.addProxyServer(addTokenText.textContent);
-    selectedServerPromise.then((server) => {
-      startButton.disabled = false;
-      log.append(`Added server at ${server.remoteIpAddress()}`)
+  private addWidget: HTMLDivElement;
+  private addTokenText: HTMLTextAreaElement;
+  private addButton: HTMLButtonElement;
+  private startButton: HTMLButtonElement;
+  private stopButton: HTMLButtonElement;
+  private startVpnButton: HTMLButtonElement;
+  private stopVpnButton: HTMLButtonElement;
+
+  constructor(private servers: SocksProxyServerRepository, private vpnDevicePromise: Promise<VpnDevice>) {
+    // TODO: Can use root.querySelector() instead to not depend on document. 
+    this.log = new EventLog(document.getElementById('event-log'));
+    this.addWidget = document.getElementById('setup-widget') as HTMLDivElement;
+    this.addTokenText = document.getElementById('token-text') as HTMLTextAreaElement;
+
+    this.addButton = document.getElementById('set-proxy-button') as HTMLButtonElement;
+    this.addButton.onclick = (ev) => {
+      console.debug('Pressed Add Button');
+      this.pressAddServer();
+    };
+
+    this.startButton = document.getElementById('start-proxy-button') as HTMLButtonElement;
+    this.startButton.onclick = (ev) => {
+      console.debug('Pressed Start Button');
+      this.pressStart();
+    };
+
+    this.stopButton = document.getElementById('stop-proxy-button') as HTMLButtonElement;
+    this.stopButton.onclick = (ev) => {
+      console.debug('Pressed Stop Button');
+    };
+
+    this.startVpnButton = document.getElementById('start-vpn-button') as HTMLButtonElement;
+    this.stopVpnButton = document.getElementById('stop-vpn-button') as HTMLButtonElement;
+
+    this.vpnDevicePromise.catch((error) => { this.log.append(error); });
+    this.startVpnButton.onclick = (ev) => {
+      console.debug('Pressed VPN Start Button');
+      this.vpnDevicePromise.then((vpnDevice) => {
+        return vpnDevice.start(this.proxyEndpoint.port, ((msg) => {
+          this.log.append(`Vpn disconnected: ${msg}`);
+        }));
+      }).then((msg) => {
+        this.log.append(`VPN started: ${msg}`);
+      }).catch(console.error);
+    };
+    this.stopVpnButton.onclick = (ev) => {
+      console.debug('Pressed VPN Stop Button');
+      this.vpnDevicePromise.then((vpnDevice) => {
+        return vpnDevice.stop();
+      }).then((msg) => {
+        this.log.append(`VPN stopped: ${msg}`);
+      }).catch(console.error);
+    };
+  }
+
+  public enterAccessCode(code: string) {
+    this.log.append('Entered access code');
+    this.addTokenText.value = code;
+  }
+
+  public pressAddServer() {
+    this.selectedServerPromise = this.servers.addProxyServer(this.addTokenText.value);
+    this.selectedServerPromise.then((server) => {
+      this.startButton.disabled = false;
+      this.log.append(`Added server at ${server.remoteIpAddress()}`)
     }).catch((error) => {
       console.error(error);
-      log.append(error);
+      this.log.append(error);
     });
-  };
-  startButton.onclick = (ev) => {
-    console.debug('Pressed Start Button');
-    if (!selectedServerPromise) {
+  }
+
+  public pressStart() {
+    if (!this.selectedServerPromise) {
       throw new Error('No proxy set');
     }
-    selectedServerPromise.then((server) => {
-      startButton.disabled = true;
+    this.selectedServerPromise.then((server) => {
+      this.startButton.disabled = true;
       return server.start();
     }).then((endpoint) => {
-      proxyEndpoint = endpoint;
-      console.log('Endpoint: ', proxyEndpoint);
-      log.append(`Proxy running on port ${proxyEndpoint.port}`);
-      stopButton.disabled = false;
+      this.proxyEndpoint = endpoint;
+      console.log('Endpoint: ', endpoint);
+      this.log.append(`Proxy running on port ${endpoint.port}`);
+      this.stopButton.disabled = false;
     }).catch((error) => {
       console.error(error);
-      log.append(error);
-      startButton.disabled = false;
+      this.log.append(error);GetGlobalTun2SocksVpnDevice()
+      this.startButton.disabled = false;
     });
-  };
-  stopButton.onclick = (ev) => {
-    console.debug('Pressed Stop Button');
-    if (!selectedServerPromise) {
+  }
+
+  public pressStop() {
+    if (!this.selectedServerPromise) {
       throw new Error('No proxy set');
     }
-    selectedServerPromise.then((server) => {
-      log.append('Proxy stopped');
+    this.selectedServerPromise.then((server) => {
+      this.log.append('Proxy stopped');
       return server.stop();
     }).then(() => {
-      startButton.disabled = false;
-      stopButton.disabled = true;
+      this.startButton.disabled = false;
+      this.stopButton.disabled = true;
     }).catch(console.error);
-  };
+  }
+}
 
-  // VPN
-  let vpnDevicePromise = GetGlobalTun2SocksVpnDevice();
-  vpnDevicePromise.catch((error) => { log.append(error); });
-
-  let startVpnButton = document.getElementById('start-vpn-button') as HTMLButtonElement;
-  let stopVpnButton = document.getElementById('stop-vpn-button') as HTMLButtonElement;
-  startVpnButton.onclick = (ev) => {
-    console.debug('Pressed VPN Start Button');
-    vpnDevicePromise.then((vpnDevice) => {
-      return vpnDevice.start(proxyEndpoint.port, ((msg) => {
-        log.append(`Vpn disconnected: ${msg}`);
-      }));
-    }).then((msg) => {
-      log.append(`VPN started: ${msg}`);
-    }).catch(console.error);
-  };
-  stopVpnButton.onclick = (ev) => {
-    console.debug('Pressed VPN Stop Button');
-    vpnDevicePromise.then((vpnDevice) => {
-      return vpnDevice.stop();
-    }).then((msg) => {
-      log.append(`VPN stopped: ${msg}`);
-    }).catch(console.error);
-  };
+function main() {
+  console.debug('Starting main()');
+  let app = new AppComponent(new SocksProxyServerRepository(core), GetGlobalTun2SocksVpnDevice());
+  chrome.runtime.getBackgroundPage((bgPage) => {
+    (<any>bgPage).ui_context.getIntentUrl().then((url: string) => {
+       console.debug(`[Context] Url: ${url}`);
+       app.enterAccessCode(url);
+    });
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {
@@ -108,10 +147,6 @@ document.addEventListener('DOMContentLoaded', function (event) {
   // If I click "Set Proxy" too soon after the splash screen.
   core.getFullState().then((state) => {
     console.log(state);
-    if (navigator.splashscreen) {
-      navigator.splashscreen.hide();
-    }
-    console.debug('Starting main()');
     main();
   });
 });

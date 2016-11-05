@@ -22,6 +22,26 @@ export var moduleName = 'uProxy App Top Level';
 // TODO(fortuna): Move browser api logic directly here. No need for the extra layer.
 var browserApi :CordovaBrowserApi = new CordovaBrowserApi();
 
+let intentUrl = new Promise((resolve, reject) => {
+  window.top.document.addEventListener('deviceready', () => {
+    if (!window.top.webintent) {
+      reject('windomw.top.webintent not found (Not running on Android?)');
+      return;
+    }
+    window.top.webintent.getUri((url: string) => {
+      resolve(url);
+    });
+  });
+});
+
+export function getIntentUrl(): Promise<string> {
+  return intentUrl;
+}
+
+getIntentUrl().then((url) => {
+  console.debug(`[Background] Url is [${url}]`);
+});
+
 console.log('Loading core');
 export var uProxyAppChannel = freedom(
     'generic_core/freedom-module.json',
