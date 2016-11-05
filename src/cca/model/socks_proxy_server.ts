@@ -13,6 +13,3 @@ export interface SocksProxyServer {
   stop(): Promise<void>;
 }
 
-interface SocksProxyServerRepository {
-  addProvider(inviteUrl: string): Promise<SocksProxyServer>;
-}

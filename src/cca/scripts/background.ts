@@ -17,10 +17,8 @@ export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
-export var moduleName = 'uProxy App Top Level';
-
 // TODO(fortuna): Move browser api logic directly here. No need for the extra layer.
-var browserApi :CordovaBrowserApi = new CordovaBrowserApi();
+const browserApi :CordovaBrowserApi = new CordovaBrowserApi();
 
 let intentUrl = new Promise((resolve, reject) => {
   window.top.document.addEventListener('deviceready', () => {
