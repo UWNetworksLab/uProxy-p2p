@@ -1,7 +1,7 @@
 import * as net from '../../lib/net/net.types';
 
 // A Socks proxy server that we can control. 
-export interface SocksProxyServer {
+export interface SocksProxy {
   // Starts the Socks server.
   // Returns the Endpoint for the server that was started.
   //

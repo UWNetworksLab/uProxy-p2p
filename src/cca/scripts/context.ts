@@ -2,26 +2,26 @@ import { MakeCoreConnector } from './cordova_core_connector';
 
 import { VpnDevice } from '../model/vpn_device';
 import * as net from '../../lib/net/net.types';
-import { CloudSocksProxyServer, SocksProxyServerRepository } from './cloud_socks_proxy_server';
+import { CloudSocksProxy, CloudSocksProxyRepository } from './cloud_socks_proxy_server';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 
-// For debugging
+// We save this reference to allow inspection of the context state from the browser debuggin tools.
 (window as any).context = this;
 
 let core = MakeCoreConnector();
 
 class EventLog {
-  constructor(private element_: HTMLElement) {}
+  constructor(private element: HTMLElement) {}
 
   public append(text: string) {
     let wrapped = document.createElement('div');
     wrapped.innerText = text;
-    this.element_.appendChild(wrapped);
+    this.element.appendChild(wrapped);
   }
 }
 
 class AppComponent {
-  private selectedServerPromise: Promise<CloudSocksProxyServer> = null;
+  private selectedServerPromise: Promise<CloudSocksProxy> = null;
   private proxyEndpoint: net.Endpoint = null;
 
   private log: EventLog;
@@ -34,7 +34,7 @@ class AppComponent {
   private startVpnButton: HTMLButtonElement;
   private stopVpnButton: HTMLButtonElement;
 
-  constructor(private servers: SocksProxyServerRepository, private vpnDevicePromise: Promise<VpnDevice>) {
+  constructor(private servers: CloudSocksProxyRepository, private vpnDevicePromise: Promise<VpnDevice>) {
     // TODO: Can use root.querySelector() instead to not depend on document. 
     this.log = new EventLog(document.getElementById('event-log'));
     this.addWidget = document.getElementById('setup-widget') as HTMLDivElement;
@@ -87,10 +87,10 @@ class AppComponent {
   }
 
   public pressAddServer() {
-    this.selectedServerPromise = this.servers.addProxyServer(this.addTokenText.value);
+    this.selectedServerPromise = this.servers.addProxy(this.addTokenText.value);
     this.selectedServerPromise.then((server) => {
       this.startButton.disabled = false;
-      this.log.append(`Added server at ${server.remoteIpAddress()}`)
+      this.log.append(`Added server at ${server.getRemoteIpAddress()}`)
     }).catch((error) => {
       console.error(error);
       this.log.append(error);
@@ -132,7 +132,7 @@ class AppComponent {
 
 function main() {
   console.debug('Starting main()');
-  let app = new AppComponent(new SocksProxyServerRepository(core), GetGlobalTun2SocksVpnDevice());
+  let app = new AppComponent(new CloudSocksProxyRepository(core), GetGlobalTun2SocksVpnDevice());
   chrome.runtime.getBackgroundPage((bgPage) => {
     (<any>bgPage).ui_context.getIntentUrl().then((url: string) => {
        console.debug(`[Context] Url: ${url}`);

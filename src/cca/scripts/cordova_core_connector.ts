@@ -18,19 +18,19 @@ export function MakeCoreConnector() : CoreConnector {
 
 class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
 
-  private appChannel_ :freedom.OnAndEmit<any,any>;
+  private appChannel :freedom.OnAndEmit<any,any>;
 
   // Status object indicating whether we're connected to the app.
   public status :browser_connector.StatusObject;
 
-  private fulfillConnect_ :Function;
+  private fulfillConnect :Function;
   public onceConnected :Promise<void> = new Promise<void>((F, R) => {
-    this.fulfillConnect_ = F;
+    this.fulfillConnect = F;
   });
 
-  constructor(private options_ ?:chrome.runtime.ConnectInfo) {
+  constructor(private options ?:chrome.runtime.ConnectInfo) {
     this.status = { connected: false };
-    this.appChannel_ = null;
+    this.appChannel = null;
   }
 
 
@@ -48,8 +48,8 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
       return Promise.resolve();
     }
 
-    return this.connect_().then(() => {
-      this.fulfillConnect_();
+    return this.setAppChannel().then(() => {
+      this.fulfillConnect();
       this.emit('core_connect');
     });
   }
@@ -59,11 +59,11 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
    * This relies on ui_context.uProxyAppChannel being created in the core
    * context before connect() is called here in the UI context.
    */
-  private connect_ = () : Promise<void> => {
+  private setAppChannel = () : Promise<void> => {
     return new Promise<void>((F,R) => {
       chrome.runtime.getBackgroundPage((bgPage) => {
         (<any>bgPage).ui_context.uProxyAppChannel.then((channel:any) => {
-          this.appChannel_ = channel;
+          this.appChannel = channel;
           F();
         });
       });
@@ -78,7 +78,7 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
       handler :(eventData:any) => void) => {
     this.onceConnected.then(() => {
       var type = '' + update;
-      this.appChannel_.on(type, handler);
+      this.appChannel.on(type, handler);
     });
   }
 
@@ -93,11 +93,11 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
     if (payload.cmd !== 'emit') {
        throw new Error('send can only be used for emit');
     }
-    if (skipQueue && !this.appChannel_) {
+    if (skipQueue && !this.appChannel) {
       return;
     }
     this.onceConnected.then(() => {
-      this.appChannel_.emit('' + payload.type,
+      this.appChannel.emit('' + payload.type,
           {data: payload.data, promiseId: payload.promiseId});
     });
   }
@@ -108,15 +108,15 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
   public restart() {
   }
 
-  private events_ :{[name :string] :Function} = {};
+  private events :{[name :string] :Function} = {};
 
   public on = (name :string, callback :Function) => {
-    this.events_[name] = callback;
+    this.events[name] = callback;
   }
 
   private emit = (name :string, ...args :Object[]) => {
-    if (name in this.events_) {
-      this.events_[name].apply(null, args);
+    if (name in this.events) {
+      this.events[name].apply(null, args);
     }
   }
 }  // class CordovaCoreConnector
