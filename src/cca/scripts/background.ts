@@ -11,7 +11,6 @@ import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
 import { AppComponent } from './app_component';
 import { CloudSocksProxyRepository } from './cloud_socks_proxy_server';
-import { CordovaBrowserApi } from './cordova_browser_api';
 import { MakeCoreConnector } from './cordova_core_connector';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 
@@ -20,9 +19,6 @@ declare const freedom: freedom.FreedomInCoreEnv;
 export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
-
-// TODO(fortuna): Move browser api logic directly here. No need for the extra layer.
-const browserApi :CordovaBrowserApi = new CordovaBrowserApi();
 
 let intentUrl = new Promise((resolve, reject) => {
   window.top.document.addEventListener('deviceready', () => {
