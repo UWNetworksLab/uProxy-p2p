@@ -7,9 +7,13 @@
  * loaded.
  */
 
-import { CordovaBrowserApi } from './cordova_browser_api';
-
 import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+
+import { AppComponent } from './app_component';
+import { CloudSocksProxyRepository } from './cloud_socks_proxy_server';
+import { CordovaBrowserApi } from './cordova_browser_api';
+import { MakeCoreConnector } from './cordova_core_connector';
+import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 
 declare const freedom: freedom.FreedomInCoreEnv;
 
@@ -32,11 +36,7 @@ let intentUrl = new Promise((resolve, reject) => {
   });
 });
 
-export function getIntentUrl(): Promise<string> {
-  return intentUrl;
-}
-
-getIntentUrl().then((url) => {
+intentUrl.then((url) => {
   console.debug(`[Background] Url is [${url}]`);
 });
 
@@ -53,7 +53,22 @@ export var uProxyAppChannel = freedom(
   return uProxyModuleFactory();
 });
 
-chrome.app.runtime.onLaunched.addListener(function() {
+// We save this reference to allow inspection of the context state from the browser debuggin tools.
+(window as any).context = this;
+
+let core = MakeCoreConnector();
+
+chrome.app.runtime.onLaunched.addListener(function () {
   console.debug('Chrome onLaunched fired');
-  chrome.app.window.create('index.html');
+  chrome.app.window.create('index.html', null, (appWindow) => {
+    let document = appWindow.contentWindow.document;
+    document.addEventListener('DOMContentLoaded', function (event) {
+      let app = new AppComponent(appWindow.contentWindow.document,
+        new CloudSocksProxyRepository(core), GetGlobalTun2SocksVpnDevice());
+      intentUrl.then((url: string) => {
+        console.debug(`[App] Url: ${url}`);
+        app.enterAccessCode(url);
+      });
+    });
+  });
 });

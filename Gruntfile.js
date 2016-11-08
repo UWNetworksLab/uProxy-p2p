@@ -1167,7 +1167,6 @@ module.exports = function(grunt) {
     'browserify:cloudSocialProviderFreedomModule', 
     //'base',
     'ccaBackground',
-    'ccaContext',
     'copy:cca',
     'copy:ccaAdditional',
   ]);
@@ -1176,20 +1175,10 @@ module.exports = function(grunt) {
     'compileTypescript',
     'browserify:ccaBackground'
   ]);
-  registerTask(grunt, 'ccaContext',
-      'Builds build/src/cca/scripts/context.static.js', [
-    'compileTypescript',
-    'browserify:ccaContext'    
-  ]);
 
   grunt.config.merge({
     browserify: {
      ccaBackground: Rule.browserify('cca/scripts/background', {
-        browserifyOptions: {
-          standalone: 'ui_context'
-        }
-      }),
-      ccaContext: Rule.browserify('cca/scripts/context', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
