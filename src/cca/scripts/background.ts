@@ -61,7 +61,7 @@ chrome.app.runtime.onLaunched.addListener(function () {
   chrome.app.window.create('index.html', null, (appWindow) => {
     let document = appWindow.contentWindow.document;
     document.addEventListener('DOMContentLoaded', function (event) {
-      let app = new AppComponent(appWindow.contentWindow.document,
+      let app = new AppComponent(appWindow.contentWindow.document.body,
         new CloudSocksProxyRepository(core), GetGlobalTun2SocksVpnDevice());
       intentUrl.then((url: string) => {
         console.debug(`[App] Url: ${url}`);
