@@ -55,6 +55,7 @@ class AppComponent {
     this.stopButton = document.getElementById('stop-proxy-button') as HTMLButtonElement;
     this.stopButton.onclick = (ev) => {
       console.debug('Pressed Stop Button');
+      this.pressStop();
     };
 
     this.startVpnButton = document.getElementById('start-vpn-button') as HTMLButtonElement;
