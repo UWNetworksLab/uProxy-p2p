@@ -1,13 +1,11 @@
-import * as net from '../../lib/net/net.types';
-
 // A Socks proxy server that we can control. 
 export interface SocksProxy {
   // Starts the Socks server.
-  // Returns the Endpoint for the server that was started.
+  // Returns the number of the port for the server that was started.
   //
   // You can test it with
   // curl -v -x socks5h://localhost:52612 www.example.com
-  start(): Promise<net.Endpoint>;
+  start(): Promise<number>;
 
   // Stops the Socks server.
   stop(): Promise<void>;

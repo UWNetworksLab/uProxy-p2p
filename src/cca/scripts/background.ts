@@ -11,10 +11,11 @@
 
 import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
-import { AppComponent } from './app_component';
-import { CloudSocksProxyRepository } from './cloud_socks_proxy_server';
+import { ServerListPage } from '../ui_components/server_list';
+import { UproxyServerRepository } from './uproxy_server';
 import { MakeCoreConnector } from './cordova_core_connector';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
+import * as vpn_device from '../model/vpn_device';
 
 declare const freedom: freedom.FreedomInCoreEnv;
 
@@ -56,16 +57,27 @@ export var uProxyAppChannel = freedom(
 
 let core = MakeCoreConnector();
 
+let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
+  console.debug('Device supports VPN');
+  return vpnDevice;
+}).catch((error) => {
+  console.error(error);
+  return new vpn_device.NoOpVpnDevice();
+}).then((vpnDevice) => {
+  return new UproxyServerRepository(core, vpnDevice);
+});
+
 chrome.app.runtime.onLaunched.addListener(function () {
   console.debug('Chrome onLaunched fired');
   chrome.app.window.create('index.html', null, (appWindow) => {
     let document = appWindow.contentWindow.document;
     document.addEventListener('DOMContentLoaded', function (event) {
-      let app = new AppComponent(appWindow.contentWindow.document.body,
-        new CloudSocksProxyRepository(core), GetGlobalTun2SocksVpnDevice());
-      intentUrl.then((url: string) => {
-        console.debug(`[App] Url: ${url}`);
-        app.enterAccessCode(url);
+      serversPromise.then((servers) => {
+        let serverListPage = new ServerListPage(appWindow.contentWindow.document.body, servers);
+        intentUrl.then((url: string) => {
+          console.debug(`[App] Url: ${url}`);
+          serverListPage.enterAccessCode(url);
+        });
       });
     });
   });
