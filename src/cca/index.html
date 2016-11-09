@@ -17,16 +17,18 @@
         width: 100%;
         text-align: left;
         padding: 10px;
-        margin: 0;
+        margin-top: 0;
         background-color: #12a391;
         color: #FeFeFe;
     }
     button {
-      background-color: #12a391;
       border-style: none;
-      color: #fefefe;
       padding: 5px;
       margin: 5px;
+    }
+    button:enabled {
+      background-color: #12a391;
+      color: #fefefe;
     }
     @font-face {
       font-family: Quicksand;
@@ -58,10 +60,9 @@
 
   <div id='setup-widget'>
     <textarea id='token-text'></textarea>
-    <button id='set-proxy-button'>Set Proxy</button>
+    <button id='add-server-button'>Add Server</button>
   </div>
-  <button id='connect-button' disabled>Connect</button>
-  <button id='disconnect-button' disabled>Disconnect</button>
+  <div id='entry-list'></div>
 </body>
 
 </html>

@@ -36,7 +36,12 @@ export class UproxyServer implements Server {
   // Constructs a server that will use the given CoreApi to start the local proxy.
   // It takes the IP address of the uProxy cloud server it will use for Internet access.    
   public constructor(private proxy: SocksProxy,
-                     private vpnDevice: VpnDevice) {}
+                     private vpnDevice: VpnDevice,
+                     private remoteIpAddress: string) {}
+
+  public getIpAddress() {
+    return this.remoteIpAddress;
+  }
 
   public connect(onDisconnect: (msg: string) => void): Promise<void> {
     console.debug('Connecting to server');
@@ -70,7 +75,7 @@ export class UproxyServerRepository implements ServerRepository {
       tokenObj: token
     }).then(() => {
       let proxy = new CloudSocksProxy(this.core, (token.networkData as any).host);
-      return new UproxyServer(proxy, this.vpnDevice);
+      return new UproxyServer(proxy, this.vpnDevice, proxy.getRemoteIpAddress());
     });
   }
 }

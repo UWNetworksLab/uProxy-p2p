@@ -21,6 +21,11 @@ export class CloudSocksProxy implements SocksProxy {
     }
   }
 
+  // Returns the IP address of the cloud server this proxy is connecting to.
+  public getRemoteIpAddress(): string {
+    return this.remoteIpAddress;
+  }
+
   public start(): Promise<number> {
     console.debug('Starting proxy');
     return this.core.start(this.instancePath).then((endpoint) => {
