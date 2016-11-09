@@ -7,9 +7,27 @@
 
 import * as browser_connector from '../../interfaces/browser_connector';
 import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
-import * as user_interface from '../../generic_ui/scripts/ui';
 
 import CoreConnector from '../../generic_ui/scripts/core_connector';
+
+declare const freedom: freedom.FreedomInCoreEnv;
+
+export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
+export interface OnEmitModuleFactory extends
+  freedom.FreedomModuleFactoryManager<OnEmitModule> {};
+
+console.log('Loading core');
+export var uProxyAppChannel = freedom(
+    'generic_core/freedom-module.json',
+    <freedom.FreedomInCoreEnvOptions>{
+      'logger': 'lib/loggingprovider/freedom-module.json',
+      'debug': 'debug',
+      'portType': 'worker'
+    }
+).then((uProxyModuleFactory:OnEmitModuleFactory) => {
+  console.log('Core loading complete');
+  return uProxyModuleFactory();
+});
 
 export function MakeCoreConnector() : CoreConnector {
   let browserConnector = new CordovaCoreConnector({name: 'uproxy-ui-to-core-connector'});
@@ -59,13 +77,11 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
    * This relies on ui_context.uProxyAppChannel being created in the core
    * context before connect() is called here in the UI context.
    */
-  private setAppChannel = () : Promise<void> => {
-    return new Promise<void>((F,R) => {
-      chrome.runtime.getBackgroundPage((bgPage) => {
-        (<any>bgPage).ui_context.uProxyAppChannel.then((channel:any) => {
-          this.appChannel = channel;
-          F();
-        });
+  private setAppChannel = (): Promise<void> => {
+    return new Promise<void>((F, R) => {
+      uProxyAppChannel.then((channel: any) => {
+        this.appChannel = channel;
+        F();
       });
     });
   }
