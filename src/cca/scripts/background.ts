@@ -18,7 +18,8 @@ import * as intents from './intents';
 // We save this reference to allow inspection of the context state from the browser debuggin tools.
 (window as any).context = this;
 
-// TODO: Get rid of core connector and talk to the core directly.
+// TODO(fortuna): Get rid of core connector and talk to the core directly.
+// TODO(fortuna): I believe we need to somehow wait for the core to be ready.
 let core = MakeCoreConnector();
 
 // Create UproxyServerRepository.
@@ -54,4 +55,7 @@ Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()])
     console.debug(`[App] Url: ${url}`);
     serverListPage.enterAccessCode(url);
   });
+  if (navigator.splashscreen) {
+    navigator.splashscreen.hide();
+  }
 });
