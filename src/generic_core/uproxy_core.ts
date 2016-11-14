@@ -425,7 +425,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.error('Instance does not exist for proxying', path.instanceId);
       return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-    remote.stop();
+    return remote.stop();
     // TODO: Handle revoked permissions notifications.
   }
 

@@ -145,7 +145,6 @@ reject submissions. :)
 The development for mobile platforms uses the Cordova Chrome Apps (CCA) tool, also known as the [Chrome Apps for Mobile Toolchain](https://github.com/MobileChromeApps/mobile-chrome-apps). You can find the platform-specific information below:
 
 * [Android Development](https://github.com/uProxy/uproxy/wiki/Android-Development)
-* [iOS Development](https://github.com/uProxy/uproxy/wiki/iOS-Development)
 
 ## Layout of files
 

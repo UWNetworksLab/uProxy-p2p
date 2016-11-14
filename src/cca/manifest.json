@@ -10,9 +10,8 @@
   "app": {
     "background": {
       "scripts": [
-        "scripts/iosrtc-register-globals.js",
         "freedom-for-chrome/freedom-for-chrome.js",
-        "scripts/main.core-env.static.js"
+        "scripts/background.static.js"
       ]
     }
   },
