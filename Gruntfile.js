@@ -17,8 +17,6 @@ module.exports = function(grunt) {
   const distBuildPath = 'build/dist';
   // Location of where to copy/build third_party source/libs.
   const thirdPartyBuildPath = 'build/third_party';
-  // This is used for the copying of uproxy libraries into the target directory.
-  const localLibsDestPath = '';
 
   // Setup our build rules/tools
   const Rule = new rules.Rule({
@@ -26,10 +24,7 @@ module.exports = function(grunt) {
     devBuildPath: devBuildPath,
     // The path from where third party libraries should be copied. e.g. as used by
     // sample apps.
-    thirdPartyBuildPath: thirdPartyBuildPath,
-    // The path to copy modules from this repository into. e.g. as used by sample
-    // apps.
-    localLibsDestPath: localLibsDestPath
+    thirdPartyBuildPath: thirdPartyBuildPath
   });
 
 //------------------------------------------------------------------------- 
