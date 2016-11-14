@@ -49,13 +49,14 @@ let serversListPagePromise: Promise<ServerListPage> = new Promise((resolve, reje
 });
 
 // Register for url intents.
-Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()])
-.then(([serverListPage, intentInterceptor]) => {
-  intentInterceptor.addIntentListener((url: string) => {
-    console.debug(`[App] Url: ${url}`);
-    serverListPage.enterAccessCode(url);
-  });
-  if (navigator.splashscreen) {
-    navigator.splashscreen.hide();
+Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()]).then(
+  ([serverListPage, intentInterceptor]) => {
+    intentInterceptor.addIntentListener((url: string) => {
+      console.debug(`[App] Url: ${url}`);
+      serverListPage.enterAccessCode(url);
+    });
+    if (navigator.splashscreen) {
+      navigator.splashscreen.hide();
+    }
   }
-});
+);
