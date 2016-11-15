@@ -574,6 +574,9 @@ var log :logging.Log = new logging.Log('remote-user');
         // handshake is sent to the peer.
         log.error('Attempting to send instance handshake before ready');
         return;
+      } else if (this.network.name === 'Cloud') {
+        // Don't send instance handshake to cloud servers.
+        return;
       }
       // Ensure that the user is loaded so that we have correct consent bits.
       return this.onceLoaded.then(() => {

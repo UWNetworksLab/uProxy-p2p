@@ -17,8 +17,6 @@ module.exports = function(grunt) {
   const distBuildPath = 'build/dist';
   // Location of where to copy/build third_party source/libs.
   const thirdPartyBuildPath = 'build/third_party';
-  // This is used for the copying of uproxy libraries into the target directory.
-  const localLibsDestPath = '';
 
   // Setup our build rules/tools
   const Rule = new rules.Rule({
@@ -26,24 +24,19 @@ module.exports = function(grunt) {
     devBuildPath: devBuildPath,
     // The path from where third party libraries should be copied. e.g. as used by
     // sample apps.
-    thirdPartyBuildPath: thirdPartyBuildPath,
-    // The path to copy modules from this repository into. e.g. as used by sample
-    // apps.
-    localLibsDestPath: localLibsDestPath
+    thirdPartyBuildPath: thirdPartyBuildPath
   });
 
 //------------------------------------------------------------------------- 
   const chromeExtDevPath = path.join(devBuildPath, 'chrome/extension/');
   const chromeAppDevPath = path.join(devBuildPath, 'chrome/app/');
   const firefoxDevPath = path.join(devBuildPath, 'firefox/');
-  const ccaDevPath = path.join(devBuildPath, 'cca/app/');
+  const ccaDevPath = path.join(devBuildPath, 'cca/');
   const androidDevPath = path.join(devBuildPath, 'android/');
-  const iosDevPath = path.join(devBuildPath, 'ios/');
   const genericPath = path.join(devBuildPath, 'generic/');
 
-  const ccaDistPath = path.join(distBuildPath, 'cca/app/');
+  const ccaDistPath = path.join(distBuildPath, 'cca/');
   const androidDistPath = path.join(distBuildPath, 'android/');
-  const iosDistPath = path.join(distBuildPath, 'ios/');
 
 //-------------------------------------------------------------------------
   function browserifyIntegrationTest(path) {
@@ -221,22 +214,17 @@ module.exports = function(grunt) {
     ccaJsPath: path.join(ccaPath, 'src/cca.js'),
     androidDevPath: androidDevPath,
     ccaDevPath: ccaDevPath,
-    iosDevPath: iosDevPath,
     androidDistPath: androidDistPath,
     ccaDistPath: ccaDistPath,
-    iosDistPath: iosDistPath,
 
     // Create commands to run in different directories.
     ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android',
     ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git cordova-plugin-backbutton',
     
-    // Temporarily remove cordova-plugin-chrome-apps-proxy and add the MobileChromeApps version until the new version is released.
-    ccaAddPluginsIosCmd: '<%= ccaJsPath %> plugin remove cordova-plugin-chrome-apps-proxy && <%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/gitlaura/cordova-plugin-iosrtc.git https://github.com/MobileChromeApps/cordova-plugin-chrome-apps-proxy.git',
-
-    // Hook needed to use 'cca run ios' command. Can only run after cordova-plugin-iosrtc has been added.
-    addIosrtcHookCmd: 'cp plugins/cordova-plugin-iosrtc/extra/hooks/iosrtc-swift-support.js hooks/iosrtc-swift-support.js',
-
     exec: {
+      makeChromeWebStoreZips: {
+        command: 'tools/makechromezips.sh'
+      },
       ccaCreateDev: {
         // Pipe 'no' for the first time cca.js asks whether to send usage stats.
         command: 'echo no | <%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
@@ -274,33 +262,8 @@ module.exports = function(grunt) {
         cwd: '<%= androidDevPath %>',
         command: '<%= ccaJsPath %> run android --emulator'
       },
-      ccaCreateIosDev: {
-        command: '<%= ccaJsPath %> create <%= iosDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
-      },
-      ccaCreateIosDist: {
-        command: '<%= ccaJsPath %> create <%= iosDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
-      },
-      ccaAddPluginsIosBuild: {
-        cwd: '<%= iosDevPath %>',
-        command: '<%= ccaAddPluginsIosCmd %>'
-      },
-      addIosrtcHook: {
-        cwd: '<%= iosDevPath %>',
-        command: '<%= addIosrtcHookCmd %>'
-      },
-      ccaPrepareIosDev: {
-        cwd: '<%= iosDevPath %>',
-        command: '<%= ccaJsPath %> prepare'
-      },
-      ccaPrepareIosDist: {
-        cwd: '<%= iosDistPath %>',
-        command: '<%= ccaJsPath %> prepare'
-      },
       cleanAndroid: {
         command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
-      },
-      cleanIos: {
-        command: 'rm -rf <%= iosDevPath %>; rm -rf <%= iosDistPath %>'
       },
       androidReplaceXwalkDev: {
         command: './replace_xwalk_in_apk.sh debug'
@@ -311,7 +274,8 @@ module.exports = function(grunt) {
       installFreedomForNodeForZork: {
         // This allows our Docker containers, which do not have access to the
         // git repo's "top-level" node_modules/ folder find freedom-for-node.
-        command: 'yarn install --prefix build/src/lib/samples/zork-node freedom-for-node'
+        cwd: 'build/src/lib/samples/zork-node',
+        command: 'yarn add freedom-for-node'
       }
     },
     copy: {
@@ -878,8 +842,7 @@ module.exports = function(grunt) {
 
   registerTask(grunt, 'default', ['build']);
 
-  // Builds all code, including the "dist" build, but skips
-  // iOS and Android as well as
+  // Builds all code, including the "dist" build, but skips Android as well as
   // ts-linting and testing which can be annoying and slow.
   // We added jshint here because catches hard syntax errors, etc.
   registerTask(grunt, 'build', [
@@ -895,7 +858,8 @@ module.exports = function(grunt) {
   // building, tests and lints all code.
   registerTask(grunt, 'dist', [
     'build',
-    'test'
+    'test',
+    'exec:makeChromeWebStoreZips'
   ]);
 
   registerTask(grunt, 'compileTypescript', 'Compiles all the Typescript code', [
@@ -1184,39 +1148,27 @@ module.exports = function(grunt) {
   // =========================================================================
 
   registerTask(grunt, 'build_cca', [
-    'base',
-    'ccaMainCoreEnv',
-    'ccaContext',
-    'ccaRoot',
+    'copy:resources', 
+    'copy:devGenericCore', 
+    'compileTypescript', 
+    'browserify:genericCoreFreedomModule', 
+    'browserify:loggingProvider', 
+    'browserify:churnPipeFreedomModule', 
+    'browserify:cloudSocialProviderFreedomModule', 
+    //'base',
+    'ccaBackground',
     'copy:cca',
     'copy:ccaAdditional',
   ]);
-  registerTask(grunt, 'ccaMainCoreEnv',
-      'Builds build/src/cca/app/scripts/main.core-env.static.js', [
+  registerTask(grunt, 'ccaBackground',
+      'Builds build/src/cca/scripts/background.static.js', [
     'compileTypescript',
-    'browserify:ccaMainCoreEnv'
+    'browserify:ccaBackground'
   ]);
-  registerTask(grunt, 'ccaContext',
-      'Builds build/src/cca/app/scripts/context.static.js', [
-    'compileTypescript',
-    'browserify:ccaContext'    
-  ]);
-  registerTask(grunt, 'ccaRoot',
-      'Builds build/src/cca/app/generic_ui/polymer/vulcanized.{html,static.js}', [
-    'compileTypescript',
-    'copy:resources',
-    'copy:cca',
-    'copy:ccaAdditional',
-  ].concat(fullyVulcanize('cca/app/generic_ui/polymer', 'root', 'vulcanized', true)));
 
   grunt.config.merge({
     browserify: {
-     ccaMainCoreEnv: Rule.browserify('cca/app/scripts/main.core-env', {
-        browserifyOptions: {
-          standalone: 'ui_context'
-        }
-      }),
-      ccaContext: Rule.browserify('cca/app/scripts/context', {
+     ccaBackground: Rule.browserify('cca/scripts/background', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
@@ -1239,7 +1191,7 @@ module.exports = function(grunt) {
           src: ['icons/128_online.png', 'fonts/*'],
           dest: ccaDevPath
         }),
-        localDestPath: 'cca/app/'
+        localDestPath: 'cca/'
       }),
       ccaAdditional: {
         files: [
@@ -1298,19 +1250,6 @@ module.exports = function(grunt) {
   registerTask(grunt, 'emulate_android', [
     'build_android', 
     'exec:ccaEmulateAndroid'
-  ]);
-
-  // =========================================================================
-  // iOS
-  // =========================================================================
-  
-  registerTask(grunt, 'build_ios', [
-    'exec:cleanIos', 
-    'build_cca', 
-    'exec:ccaCreateIosDev', 
-    'exec:ccaAddPluginsIosBuild',
-    'exec:addIosrtcHook',
-    'exec:ccaPrepareIosDev'
   ]);
 
   // =========================================================================

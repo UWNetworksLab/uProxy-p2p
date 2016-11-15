@@ -3,15 +3,9 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>uProxy</title>
+  <title>uProxy Air</title>
   <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
-  <!-- This version of index.html is only loaded in Chrome (Crosswalk), so the shim is not needed -->
-  <!-- Needed to reintroduce the shim to support iOS -->
-  <!-- TODO: Can the shim be removed when crosswalk for ios is implemented? -->
   <script src='../bower/webcomponentsjs/webcomponents.min.js'></script>
-
-  <script src='scripts/context.static.js'></script>
-  <script src='scripts/workarounds.js'></script>
 
   <!-- The vulcanized code will be loaded asynchronously by context.static.js -->
   <!-- <link rel='import' href='polymer/vulcanized.html'> -->
@@ -19,6 +13,29 @@
   <link href='generic_ui/style/global.css' rel='stylesheet' shim-shadowdom>
 
   <style>
+    .header {
+        width: 100%;
+        text-align: left;
+        padding: 10px;
+        margin-top: 0;
+        background-color: #12a391;
+        color: #FeFeFe;
+    }
+    button {
+      border-style: none;
+      padding: 5px;
+      margin: 5px;
+    }
+    button:enabled {
+      background-color: #12a391;
+      color: #fefefe;
+    }
+    .server-entry {
+      background-color: white;
+      box-shadow: 1px 1px 3px #AAAAAA;
+      margin: 10px;
+      padding: 10px;
+    }
     @font-face {
       font-family: Quicksand;
       src: url(generic_ui/fonts/Quicksand-Regular.ttf);
@@ -38,15 +55,20 @@
       margin: 0;
       font-family: Roboto, sans-serif;
       font-size: 13px;
-      background-color: white;
+      background-color: #eee;
       height: 100%;
     }
   </style>
 </head>
 
-<body unresolved touch-action='auto'>
-  <!-- uproxy-root will be appended here after polymer is loaded (see src/cca/app/scripts/context.ts) -->
-  <!-- <uproxy-root></uproxy-root> -->
+<body touch-action='auto'>
+  <h1 class='header'>uProxy Air Client</h1>
+
+  <div id='setup-widget'>
+    <textarea id='token-text'></textarea>
+    <button id='add-server-button'>Add Server</button>
+  </div>
+  <div id='entry-list'></div>
 </body>
 
 </html>

@@ -6,7 +6,6 @@
 
 [![Slack Status](https://uproxy-slack.herokuapp.com/badge.svg)](https://uproxy-slack.herokuapp.com/)
 [![Travis Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
-[![Shippable Status](https://img.shields.io/shippable/54c823bf5ab6cc135289fbdc/dev.svg)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
 
 Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit) to learn more about contributing to uProxy. For a high level technical overview of uProxy, see the [uProxy Design Doc](https://docs.google.com/document/d/1t_30vX7RcrEGuWwcg0Jub-HiNI0Ko3kBOyqXgrQN3Kw/edit#).
 
@@ -18,7 +17,6 @@ uProxy is built using the following tools:
  - [Jasmine](http://jasmine.github.io/) for testing
  - [Polymer](http://www.polymer-project.org/) for UI
  - [Travis](https://travis-ci.org/) for continuous integration
- - [Shippable](https://app.shippable.com/) for docker-integrated continuous integration
 
 To manage dependencies we use:
  - [npm](https://www.npmjs.org/) to install node modules that we use for our build process.  (Specified in `package.json`)
@@ -51,13 +49,8 @@ yarn run clean
 
 ### IDE
 
-Sublime Text 3 provides a good development experience:
+[Visual Studio Code](https://code.visualstudio.com/) supports TypeScript compilation, search, and refactoring out of the box - just point it at the directory containing your uProxy clone.
 
- * Install [Sublime Text 3](http://www.sublimetext.com/3).
- * Install [Package Control](https://packagecontrol.io/).
- * Install the [TypeScript Sublime plugin](https://github.com/Microsoft/TypeScript-Sublime-Plugin).
-
-Now, TypeScript files will have syntax highlighting and include support for "jump to definition" and refactoring (renaming).
 
 ## Run
 
@@ -152,7 +145,6 @@ reject submissions. :)
 The development for mobile platforms uses the Cordova Chrome Apps (CCA) tool, also known as the [Chrome Apps for Mobile Toolchain](https://github.com/MobileChromeApps/mobile-chrome-apps). You can find the platform-specific information below:
 
 * [Android Development](https://github.com/uProxy/uproxy/wiki/Android-Development)
-* [iOS Development](https://github.com/uProxy/uproxy/wiki/iOS-Development)
 
 ## Layout of files
 

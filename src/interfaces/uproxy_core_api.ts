@@ -317,7 +317,7 @@ export interface CoreApi {
 
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
-  stop (path :social.InstancePath) : void;
+  stop (path :social.InstancePath) : Promise<void>;
 
   updateGlobalSettings(newSettings :GlobalSettings) :void;
   updateGlobalSetting(change: UpdateGlobalSettingArgs): void;

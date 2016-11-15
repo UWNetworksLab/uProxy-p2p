@@ -5,26 +5,50 @@
  * core context.
  */
 
-import * as browser_connector from '../../../interfaces/browser_connector';
-import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
+import * as browser_connector from '../../interfaces/browser_connector';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
-import * as user_interface from '../../../generic_ui/scripts/ui';
+import CoreConnector from '../../generic_ui/scripts/core_connector';
 
-export default class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
+declare const freedom: freedom.FreedomInCoreEnv;
 
-  private appChannel_ :freedom.OnAndEmit<any,any>;
+export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
+export interface OnEmitModuleFactory extends
+  freedom.FreedomModuleFactoryManager<OnEmitModule> {};
+
+console.log('Loading core');
+export var uProxyAppChannel = freedom(
+    'generic_core/freedom-module.json',
+    <freedom.FreedomInCoreEnvOptions>{
+      'logger': 'lib/loggingprovider/freedom-module.json',
+      'debug': 'debug',
+      'portType': 'worker'
+    }
+).then((uProxyModuleFactory:OnEmitModuleFactory) => {
+  console.log('Core loading complete');
+  return uProxyModuleFactory();
+});
+
+export function MakeCoreConnector() : CoreConnector {
+  let browserConnector = new CordovaCoreConnector({name: 'uproxy-ui-to-core-connector'});
+  return new CoreConnector(browserConnector);
+}
+
+class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
+
+  private appChannel :freedom.OnAndEmit<any,any>;
 
   // Status object indicating whether we're connected to the app.
   public status :browser_connector.StatusObject;
 
-  private fulfillConnect_ :Function;
+  private fulfillConnect :Function;
   public onceConnected :Promise<void> = new Promise<void>((F, R) => {
-    this.fulfillConnect_ = F;
+    this.fulfillConnect = F;
   });
 
-  constructor(private options_ ?:chrome.runtime.ConnectInfo) {
+  constructor(private options ?:chrome.runtime.ConnectInfo) {
     this.status = { connected: false };
-    this.appChannel_ = null;
+    this.appChannel = null;
   }
 
 
@@ -42,8 +66,8 @@ export default class CordovaCoreConnector implements browser_connector.CoreBrows
       return Promise.resolve();
     }
 
-    return this.connect_().then(() => {
-      this.fulfillConnect_();
+    return this.setAppChannel().then(() => {
+      this.fulfillConnect();
       this.emit('core_connect');
     });
   }
@@ -53,13 +77,11 @@ export default class CordovaCoreConnector implements browser_connector.CoreBrows
    * This relies on ui_context.uProxyAppChannel being created in the core
    * context before connect() is called here in the UI context.
    */
-  private connect_ = () : Promise<void> => {
-    return new Promise<void>((F,R) => {
-      chrome.runtime.getBackgroundPage((bgPage) => {
-        (<any>bgPage).ui_context.uProxyAppChannel.then((channel:any) => {
-          this.appChannel_ = channel;
-          F();
-        });
+  private setAppChannel = (): Promise<void> => {
+    return new Promise<void>((F, R) => {
+      uProxyAppChannel.then((channel: any) => {
+        this.appChannel = channel;
+        F();
       });
     });
   }
@@ -72,7 +94,7 @@ export default class CordovaCoreConnector implements browser_connector.CoreBrows
       handler :(eventData:any) => void) => {
     this.onceConnected.then(() => {
       var type = '' + update;
-      this.appChannel_.on(type, handler);
+      this.appChannel.on(type, handler);
     });
   }
 
@@ -87,11 +109,11 @@ export default class CordovaCoreConnector implements browser_connector.CoreBrows
     if (payload.cmd !== 'emit') {
        throw new Error('send can only be used for emit');
     }
-    if (skipQueue && !this.appChannel_) {
+    if (skipQueue && !this.appChannel) {
       return;
     }
     this.onceConnected.then(() => {
-      this.appChannel_.emit('' + payload.type,
+      this.appChannel.emit('' + payload.type,
           {data: payload.data, promiseId: payload.promiseId});
     });
   }
@@ -102,15 +124,15 @@ export default class CordovaCoreConnector implements browser_connector.CoreBrows
   public restart() {
   }
 
-  private events_ :{[name :string] :Function} = {};
+  private events :{[name :string] :Function} = {};
 
   public on = (name :string, callback :Function) => {
-    this.events_[name] = callback;
+    this.events[name] = callback;
   }
 
   private emit = (name :string, ...args :Object[]) => {
-    if (name in this.events_) {
-      this.events_[name].apply(null, args);
+    if (name in this.events) {
+      this.events[name].apply(null, args);
     }
   }
 }  // class CordovaCoreConnector

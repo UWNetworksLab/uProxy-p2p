@@ -425,7 +425,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       log.error('Instance does not exist for proxying', path.instanceId);
       return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
     }
-    remote.stop();
+    return remote.stop();
     // TODO: Handle revoked permissions notifications.
   }
 
@@ -862,22 +862,6 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         networkName: args.networkName,
         userId: args.userId
       });
-    }).then(() => {
-      // If we removed the only cloud friend, logout of the cloud network
-      if (args.networkName === 'Cloud') {
-        return this.logoutIfRosterEmpty_(network);
-      }
     });
-  }
-
-  private logoutIfRosterEmpty_ = (network :social.Network) : Promise<void> => {
-    if (Object.keys(network.roster).length === 0) {
-      return this.logout({
-       name: network.name
-      }).then(() => {
-        log.info('Successfully logged out of %1 network because roster is empty', network.name);
-      });
-    }
-    return Promise.resolve();
   }
 }  // class uProxyCore

@@ -156,7 +156,7 @@ export default class CoreConnector implements uproxy_core_api.CoreApi {
 
   stop = (path :social.InstancePath) => {
     console.log('Stopping proxy session.');
-    this.sendCommand(uproxy_core_api.Command.STOP_PROXYING, path);
+    return this.promiseCommand(uproxy_core_api.Command.STOP_PROXYING, path);
   }
 
   updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
