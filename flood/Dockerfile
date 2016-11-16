@@ -1,8 +1,7 @@
-FROM ubuntu:trusty
-MAINTAINER Trevor Johnston <trevj@google.com>
+FROM alpine:edge
 
-RUN apt-get update -qq
-RUN apt-get install -y nmap
+RUN apk update
+RUN apk add socat
 
 COPY flood.sh /flood.sh
 ENTRYPOINT ["/flood.sh"]
