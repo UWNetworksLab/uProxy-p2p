@@ -3,9 +3,12 @@
   "name": "uProxy",
   "description": "Get and share access to the open internet",
   "minimum_chrome_version": "41.0.2272.63",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "icons": {
-      "128": "icons/128_online.png"
+      "36": "assets/icons/launcher-ldpi.png",
+      "48": "assets/icons/launcher-mdpi.png",
+      "72": "assets/icons/launcher-hdpi.png",
+      "96": "assets/icons/launcher-xhdpi.png"
   },
   "app": {
     "background": {
