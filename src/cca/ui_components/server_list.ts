@@ -12,13 +12,13 @@ class ServerEntryComponent {
       <paper-button id='disconnect-button' disabled>Disconnect</paper-button>`;
 
     this.connectButton = root.querySelector('#connect-button') as HTMLButtonElement;
-    this.connectButton.addEventListener('click', (ev) => {
+    this.connectButton.addEventListener('tap', (ev) => {
       console.debug('Pressed Connect Button');
       this.pressStart();
     });
 
     this.disconnectButton = root.querySelector('#disconnect-button') as HTMLButtonElement;
-    this.disconnectButton.addEventListener('click', (ev) => {
+    this.disconnectButton.addEventListener('tap', (ev) => {
       console.debug('Pressed Disconnect Button');
       this.pressStop();
     });
@@ -64,10 +64,10 @@ export class ServerListPage {
     this.entryList = root.querySelector('#entry-list') as HTMLDivElement;
 
     this.addButton = root.querySelector('#add-server-button') as HTMLButtonElement;
-    this.addButton.onclick = (ev) => {
+    this.addButton.addEventListener('tap', (ev) => {
       console.debug('Pressed Add Button');
       this.pressAddServer();
-    };
+    });
   }
 
   public enterAccessCode(code: string) {
