@@ -37,10 +37,13 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
 let serversListPagePromise: Promise<ServerListPage> = new Promise((resolve, reject) => {
   chrome.app.runtime.onLaunched.addListener(() => {
     console.debug('Chrome onLaunched fired');
-    chrome.app.window.create('index.html', null, (appWindow) => {
+    chrome.app.window.create('index_vulcanized.html', null, (appWindow) => {
+      console.debug('window created');
       let document = appWindow.contentWindow.document;
       document.addEventListener('DOMContentLoaded', function (event) {
+        console.debug('dom ready');
         serversPromise.then((servers) => {
+          console.debug('servers ready');
           resolve(new ServerListPage(appWindow.contentWindow.document.body, servers));
         });
       });

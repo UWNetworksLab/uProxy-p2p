@@ -371,6 +371,7 @@ module.exports = function(grunt) {
               'manifest.json',
               'config.xml',
               'assets/**',
+              'bower_components/**',
               'freedom-for-chrome/freedom-for-chrome.js'
             ].concat(uiDistFiles, coreDistFiles, universalDistFiles),
             dest: ccaDistPath
@@ -1153,16 +1154,17 @@ module.exports = function(grunt) {
 
   registerTask(grunt, 'build_cca', [
     'copy:resources', 
-    'copy:devGenericCore', 
-    'compileTypescript', 
+    'copy:devGenericCore',
+    'compileTypescript',
     'browserify:genericCoreFreedomModule', 
     'browserify:loggingProvider', 
     'browserify:churnPipeFreedomModule', 
-    'browserify:cloudSocialProviderFreedomModule', 
+    'browserify:cloudSocialProviderFreedomModule',
     //'base',
     'ccaBackground',
     'copy:cca',
     'copy:ccaAdditional',
+    'vulcanize:ccaIndex',
   ]);
   registerTask(grunt, 'ccaBackground',
       'Builds build/src/cca/scripts/background.static.js', [
@@ -1177,6 +1179,21 @@ module.exports = function(grunt) {
           standalone: 'ui_context'
         }
       }),
+    },
+    vulcanize: {
+      ccaIndex: {
+        options: {
+          inline: true,
+          csp: true
+        },
+        files: [
+          {
+            src: path.join(ccaDevPath, 'index.html'),
+            dest: path.join(ccaDevPath, 'index_vulcanized.html')
+          }
+        ]
+      }
+
     },
     copy: {
       cca: Rule.copyLibs({
