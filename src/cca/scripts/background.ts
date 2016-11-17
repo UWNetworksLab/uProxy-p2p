@@ -16,6 +16,19 @@ import * as vpn_device from '../model/vpn_device';
 import * as intents from './intents';
 import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
 
+// https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+function getLocalStorage(): Storage {
+  try {
+    const storage = window['localStorage'];
+    const x = '__storage_test__';
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return localStorage;
+  } catch(e) {
+    throw new Error('localStorage unavailable');
+  }
+}
+
 // We save this reference to allow inspection of the context state from the browser debuggin tools.
 (window as any).context = this;
 
@@ -35,7 +48,7 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
     network: 'Cloud',
     loginType: uproxy_core_api.LoginType.INITIAL,
   }).then(() => {
-    return new UproxyServerRepository(core, vpnDevice);
+    return new UproxyServerRepository(getLocalStorage(), core, vpnDevice);
   });
 });
 

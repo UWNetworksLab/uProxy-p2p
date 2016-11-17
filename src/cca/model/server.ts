@@ -10,10 +10,8 @@ export interface Server {
 }
 
 export type AccessCode = string;
-export type OnServerCallback = (server:Server) => any;
 
 export interface ServerRepository {
-  addServer(code: AccessCode): Promise<void>
-  onServer(callback:OnServerCallback): ServerRepository;
-  restore(): void;
+  addServer(code: AccessCode): Promise<Server>
+  getSavedServers(): Promise<Server[]>;
 }

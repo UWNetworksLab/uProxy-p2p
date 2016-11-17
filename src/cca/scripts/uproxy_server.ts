@@ -1,10 +1,11 @@
-import * as _ from 'lodash';
 import uparams = require('uparams');
 import * as cloud_social_provider from '../../lib/cloud/social/provider';
 import * as jsurl from 'jsurl';
 import * as social from '../../interfaces/social';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+
 import CoreConnector from '../../generic_ui/scripts/core_connector';
-import { AccessCode, OnServerCallback, Server, ServerRepository } from '../model/server';
+import { AccessCode, Server, ServerRepository } from '../model/server';
 import { SocksProxy } from '../model/socks_proxy_server';
 import { VpnDevice } from '../model/vpn_device';
 import { CloudSocksProxy } from './cloud_socks_proxy_server';
@@ -16,7 +17,7 @@ export class UproxyServer implements Server {
   // Constructs a server that will use the given CoreApi to start the local proxy.
   // It takes the IP address of the uProxy cloud server it will use for Internet access.    
   public constructor(private proxy: SocksProxy,
-                     private vpnDevice: VpnDevice,
+    private vpnDevice: VpnDevice,
                      private remoteIpAddress: string) {}
 
   public getIpAddress() {
@@ -36,146 +37,79 @@ export class UproxyServer implements Server {
   }
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
-function getIsStorageAvailable() {
-  try {
-    const storage = window['localStorage'];
-    const x = '__storage_test__';
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch(e) {
-    return false;
-  }
-}
-const isStorageAvailable = getIsStorageAvailable();
-
 // Name by which servers are saved to storage.
-const CONTACTS_STORAGE_KEY = 'cloud-server-invites';
+const SERVERS_STORAGE_KEY = 'saved-servers';
 
+// Type of the object placed, in serialised form, in storage.
+interface SavedServers {
+  servers: { [id: string]: SavedServer }
+}
+
+// A server as saved to storage.
+interface SavedServer {
+  cloudTokens?: cloud_social_provider.Invite;
+}
+
+// Maintains a persisted set of servers and liases with the core.
 export class UproxyServerRepository implements ServerRepository {
   // core must already be logged into social networks.
-  constructor(private core: CoreConnector, private vpnDevice: VpnDevice) {
-    if (!isStorageAvailable) {
-      console.warn('localStorage unavailable - contacts will not be saved');
-      return;
-    }
+  constructor(
+    private storage: Storage,
+    private core: CoreConnector,
+    private vpnDevice: VpnDevice) { }
+
+  public getSavedServers() {
+    const servers = this.loadServers().servers;
+    return Promise.all(Object.keys(servers).map((host) => {
+      return this.notifyCoreOfServer(servers[host].cloudTokens);
+    }));
   }
 
-  public onServerCallback :OnServerCallback;
-  public onServer(callback:OnServerCallback) {
-    this.onServerCallback = callback;
-    return this;
-  }
-
-  public restore() {
-    if (!this.onServerCallback) {
-      throw new Error('must call onServer first');
-    }
-
-    for (const savedContact of this.loadContacts().contacts) {
-      this.informCoreOfServer(savedContact.invite).then((server) => {
-        try {
-          this.onServerCallback(server);
-        } catch (e) {
-          console.warn('onServer callback threw', e);
-        }
-      }, (e) => {
-        console.warn('could not inform core of saved server', e);
-      });
-    }
-  }
-
-  // returns saved contacts, which will be empty if
-  // localStorage is unavailable or no contacts are found.
-  // throws if there is an error reading from localStorage or
-  // the stored contacts could not be parsed.
-  private loadContacts(): cloud_social_provider.SavedContacts {
-    if (!isStorageAvailable) {
-      return {
-        contacts: []
-      };
-    }
-
-    const savedContactsJson = localStorage.getItem(CONTACTS_STORAGE_KEY);
-    return savedContactsJson ? <cloud_social_provider.SavedContacts>JSON.parse(
-        savedContactsJson) : {
-      contacts: []
+  private loadServers(): SavedServers {
+    return JSON.parse(this.storage.getItem(SERVERS_STORAGE_KEY)) || {
+      servers: {}
     };
   }
 
-  // merges a contact with those already saved to storage.
-  // returns true if the contact was not previously in storage.
-  // contacts are saved as a SavedContacts serialised as JSON. 
-  private saveContact(newInvite:cloud_social_provider.Invite) {
-    if (!isStorageAvailable) {
-      return true;
-    }
-
-    const savedContacts = this.loadContacts();
-
-    // merge or append, as necessary.
-    const dupeIndex = _.findIndex(savedContacts.contacts, (savedContact) => {
-      return savedContact.invite && savedContact.invite.host === newInvite.host;
-    });
-
-    const newSavedContact: cloud_social_provider.SavedContact = {
-      invite: newInvite
+  // Saves a server to storage, merging it with any already found there.
+  // Returns true if the server was not already in storage.
+  private saveServer(cloudTokens: cloud_social_provider.Invite) {
+    const savedServers = this.loadServers();
+    savedServers.servers[cloudTokens.host] = {
+      cloudTokens: cloudTokens
     };
-    if (dupeIndex > -1) {
-      savedContacts.contacts[dupeIndex] = newSavedContact;
-    } else {
-      savedContacts.contacts.push(newSavedContact);
-    }
-
-    // and save!
-    localStorage.setItem(CONTACTS_STORAGE_KEY, JSON.stringify(savedContacts));
-
-    return dupeIndex === -1;
+    this.storage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(savedServers));
   }
 
-  public addServer(inviteUrl:string): Promise<void> {
-    if (!this.onServerCallback) {
-      throw new Error('must call onServer first');
-    }
-
-    // inspired from ui.ts but uproxy air only supports v2 invites
-    // which have just three fields:
-    //  - v=2
-    //  - networkName=Cloud
-    //  - networkData=<jsurl stuff that we send, as an object, to the cloud social provider>
-    // TODO: accept only cloud invites
-    const params :social.InviteTokenData = uparams(inviteUrl);
-    if (!(params || params.v || params.networkName || params.networkData)) {
+  public addServer(accessCode: AccessCode) {
+    // This is inspired by ui.ts but note that uProxy Air only
+    // supports v2 access codes which have just three fields:
+    //  - v
+    //  - networkName
+    //  - networkData
+    // TODO: accept only cloud access codes
+    const params: social.InviteTokenData = uparams(accessCode);
+    if (!(params || params.v ||
+      params.networkName || params.networkData)) {
       return Promise.reject(new Error('could not decode URL'));
     }
 
-    const cloudInvite :cloud_social_provider.Invite = JSON.parse(
+    const cloudTokens: cloud_social_provider.Invite = JSON.parse(
         jsurl.parse(<string>params.networkData));
-
-    // inform the core of this new or updated server and, if it's new,
-    // emit an onServer event.
-    return this.informCoreOfServer(cloudInvite).then((server) => {
-      if (this.saveContact(cloudInvite)) {
-        try {
-          this.onServerCallback(server);
-        } catch (e) {
-          console.warn('onServer callback threw', e);
-        }
-      }
-    });
+    this.saveServer(cloudTokens);
+    return this.notifyCoreOfServer(cloudTokens);
   }
 
-  private informCoreOfServer(cloudInvite:cloud_social_provider.Invite) {
+  private notifyCoreOfServer(cloudTokens: cloud_social_provider.Invite) {
     return this.core.acceptInvitation({
       network: {
         name: 'Cloud'
       },
       tokenObj: {
-        networkData: cloudInvite,
+        networkData: cloudTokens,
       }
     }).then(() => {
-      let proxy = new CloudSocksProxy(this.core, cloudInvite.host);
+      let proxy = new CloudSocksProxy(this.core, cloudTokens.host);
       return new UproxyServer(proxy, this.vpnDevice, proxy.getRemoteIpAddress());
     });
   }

@@ -56,11 +56,15 @@ export class ServerListPage {
   private addButton: HTMLButtonElement;
   private entryList: HTMLDivElement;
 
+  // Hostnames of servers currently displayed.
+  // Used to prevent listing servers more than once.
+  private activeServerIds: String[] = [];
+
   // Parameters:
   // - root: Where to attach the ServerListPage to
   // - servers: the repository of the servers we can connect to.
   constructor(private root: Element,
-              private servers: ServerRepository) {
+    private servers: ServerRepository) {
     this.addWidget = root.querySelector('#setup-widget') as HTMLDivElement;
     this.addTokenText = root.querySelector('#token-text') as HTMLTextAreaElement;
     this.entryList = root.querySelector('#entry-list') as HTMLDivElement;
@@ -71,7 +75,11 @@ export class ServerListPage {
       this.pressAddServer();
     };
 
-    this.servers.onServer(this.addServer).restore();
+    servers.getSavedServers().then((restoredServers) => {
+      restoredServers.forEach((server) => {
+        this.addServer(server);
+      });
+    });
   }
 
   public enterAccessCode(code: string) {
@@ -80,12 +88,17 @@ export class ServerListPage {
   }
 
   public pressAddServer(): Promise<ServerEntryComponent> {
-    // TODO: wipe the list and re-restore if this throws
-    return this.servers.addServer(this.addTokenText.value);
+    return this.servers.addServer(this.addTokenText.value).then((server) => {
+      this.addServer(server);
+    });
   }
 
-  // since this is used as a callback we must use the arrow notation.
-  private addServer = (server:Server) => {
+  private addServer(server: Server) {
+    if (this.activeServerIds.indexOf(server.getIpAddress()) > -1) {
+      return;
+    }
+    this.activeServerIds.push(server.getIpAddress());
+
     const entryElement = this.root.ownerDocument.createElement('div');
     this.entryList.appendChild(entryElement);
     return new ServerEntryComponent(entryElement, server);

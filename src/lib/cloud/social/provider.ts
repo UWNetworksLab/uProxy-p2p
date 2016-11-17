@@ -55,14 +55,16 @@ export interface Invite {
 
 // Type of the object placed, in serialised form, in storage
 // under STORAGE_KEY.
-export interface SavedContacts {
+interface SavedContacts {
+  // TODO: remove this, invites are now embedded in contacts.
+  invites?: Invite[];
   contacts?: SavedContact[];
 }
 
 // A contact as saved to storage, consisting of the invite
 // plus any data fetched from the server on login (effectively,
 // this on-demand data is cached here).
-export interface SavedContact {
+interface SavedContact {
   invite?: Invite;
   description?: string;
   version?: number;

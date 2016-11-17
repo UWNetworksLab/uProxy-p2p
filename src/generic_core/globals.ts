@@ -32,7 +32,7 @@ export var settings :uproxy_core_api.GlobalSettings = {
   mode: user_interface.Mode.GET,
   version: constants.STORAGE_VERSION,
   statsReportingEnabled: false,
-  consoleFilter: loggingprovider.Level.debug,
+  consoleFilter: loggingprovider.Level.warn,
   language: null,  // sentinel indicating lang should be calculated from browser settings
   force_message_version: 0, // zero means "don't override"
   quiverUserName: '',
