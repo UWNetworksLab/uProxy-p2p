@@ -89,9 +89,9 @@
   },
   "scripts": {
     "grunt": "grunt",
-    "clean": "rm -rf node_modules/ build/ third_party/bower/ .tscache/",
+    "clean": "rm -rf node_modules/ build/ third_party/bower/ .tscache/ cca/bower_components",
     "install": "yarn run install-bower && yarn run build-grunt-deps && yarn run setup-third-party",
-    "install-bower": "bower install --allow-root --config.interactive=false --config.directory=third_party/bower",
+    "install-bower": "bower install --allow-root --config.interactive=false --config.directory=third_party/bower cd cca && bower install",
     "setup-third-party": "mkdir -p build/third_party && cp -r third_party/* build/third_party/ && yarn run setup-freedom-port-control",
     "build-grunt-deps": "tsc --project src/lib/build-tools --outDir build/tools/",
     "setup-freedom-port-control": "mkdir -p build/third_party/freedom-port-control && cp -r node_modules/freedom-port-control/dist build/third_party/freedom-port-control/",
