@@ -15,6 +15,7 @@
   "dependencies": {
     "paper-button": "PolymerElements/paper-button#^1.0.14",
     "paper-card": "PolymerElements/paper-card#^1.1.4",
-    "paper-header-panel": "PolymerElements/paper-header-panel#^1.1.7"
+    "paper-header-panel": "PolymerElements/paper-header-panel#^1.1.7",
+    "paper-input": "PolymerElements/paper-input#^1.1.22"
   }
 }
