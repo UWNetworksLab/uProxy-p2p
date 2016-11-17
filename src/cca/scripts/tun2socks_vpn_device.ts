@@ -26,7 +26,7 @@ class Tun2SocksVpnDevice implements VpnDevice {
   }
 }
 
-let globalTun2SocksVpnDevice = new Promise((resolve, reject) => {
+const globalTun2SocksVpnDevice = new Promise((resolve, reject) => {
   // Wait for Cordova plugins to be loaded.
   window.top.document.addEventListener('deviceready', () => {
     if (!window.tun2socks) {
