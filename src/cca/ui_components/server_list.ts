@@ -70,6 +70,8 @@ export class ServerListPage {
       console.debug('Pressed Add Button');
       this.pressAddServer();
     };
+
+    this.servers.onServer(this.addServer).restore();
   }
 
   public enterAccessCode(code: string) {
@@ -78,13 +80,12 @@ export class ServerListPage {
   }
 
   public pressAddServer(): Promise<ServerEntryComponent> {
-    return this.servers.addServer(this.addTokenText.value).then((server) => {
-      let entryElement = this.root.ownerDocument.createElement('div');
-      let serverEntry = new ServerEntryComponent(entryElement, server);
-      this.entryList.appendChild(entryElement);
-      return serverEntry;
-    }).catch((error) => {
-      console.error(error);
-    });
+    return this.servers.addServer(this.addTokenText.value).then(this.addServer);
+  }
+
+  private addServer = (server:Server) => {
+    const entryElement = this.root.ownerDocument.createElement('div');
+    this.entryList.appendChild(entryElement);
+    return new ServerEntryComponent(entryElement, server);
   }
 }

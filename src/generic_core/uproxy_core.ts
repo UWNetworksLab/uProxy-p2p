@@ -33,7 +33,7 @@ log.info('Loading core', version.UPROXY_VERSION);
 export var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(
     loggingTypes.Destination.console,
-    loggingTypes.Level.warn);
+    loggingTypes.Level.debug);
 loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
@@ -112,9 +112,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   constructor() {
     log.debug('Preparing uProxy Core');
 
-    this.refreshPortControlSupport();
+    // this.refreshPortControlSupport();
 
     globals.loadSettings.then(() => {
+      log.debug('loaded settings');
       return this.connectedNetworks_.get();
     }).then((networks :string[]) => {
       var logins :Promise<void>[] = [];
@@ -361,6 +362,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public acceptInvitation = (data :uproxy_core_api.AcceptInvitationData) : Promise<void> => {
+   log.debug('TREV: accepting invitation %1', data);
     var networkName = data.network.name;
     var networkUserId = data.network.userId;
     if (!networkUserId) {
@@ -368,8 +370,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       // Assumes the user is only signed in once to any given network.
       networkUserId = Object.keys(social_network.networks[networkName])[0];
     }
-    var network = social_network.getNetwork(networkName, networkUserId);
-    return network.acceptInvitation(data.tokenObj, data.userId);
+    try {
+      return social_network.getNetwork(networkName, networkUserId).acceptInvitation(
+          data.tokenObj, data.userId);
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 
   public getInviteUrl = (data :uproxy_core_api.CreateInviteArgs): Promise<string> => {

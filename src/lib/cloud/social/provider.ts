@@ -37,7 +37,7 @@ const DEFAULT_MESSAGE_VERSION = 4;
 
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
-interface Invite {
+export interface Invite {
   // Hostname or IP of the cloud instance.
   // This is the host on which sshd is running, so it should
   // be directly accessible from the client.
@@ -55,7 +55,7 @@ interface Invite {
 
 // Type of the object placed, in serialised form, in storage
 // under STORAGE_KEY.
-interface SavedContacts {
+export interface SavedContacts {
   // TODO: remove this, invites are now embedded in contacts.
   invites?: Invite[];
   contacts?: SavedContact[];
@@ -64,7 +64,7 @@ interface SavedContacts {
 // A contact as saved to storage, consisting of the invite
 // plus any data fetched from the server on login (effectively,
 // this on-demand data is cached here).
-interface SavedContact {
+export interface SavedContact {
   invite?: Invite;
   description?: string;
   version?: number;
@@ -409,7 +409,7 @@ export class CloudSocialProvider {
   // Parses the networkData field, serialised to JSON, of invites.
   // The contact is immediately saved and added to the contacts list.
   public acceptUserInvitation = (inviteJson: string): Promise<void> => {
-    log.debug('acceptUserInvitation');
+    log.debug('acceptUserInvitation: %1', inviteJson);
     try {
       const invite = <Invite>JSON.parse(inviteJson);
 
