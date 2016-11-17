@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import uparams = require('uparams');
 import * as cloud_social_provider from '../../lib/cloud/social/provider';
 import * as jsurl from 'jsurl';
@@ -72,8 +73,8 @@ export class UproxyServerRepository implements ServerRepository {
       throw new Error('must call onServer first');
     }
 
-    for (const contact of this.loadContacts()) {
-      this.informCoreOfServer(contact.invite).then((server) => {
+    for (const savedContact of this.loadContacts().contacts) {
+      this.informCoreOfServer(savedContact.invite).then((server) => {
         try {
           this.onServerCallback(server);
         } catch (e) {
@@ -85,47 +86,59 @@ export class UproxyServerRepository implements ServerRepository {
     }
   }
 
-  // returns saved contacts as an array, which will be empty if
+  // returns saved contacts, which will be empty if
   // localStorage is unavailable or no contacts are found.
   // throws if there is an error reading from localStorage or
   // the stored contacts could not be parsed.
-  private loadContacts(): cloud_social_provider.SavedContact[] {
+  private loadContacts(): cloud_social_provider.SavedContacts {
     if (!isStorageAvailable) {
-      return [];
+      return {
+        contacts: []
+      };
     }
 
     const savedContactsJson = localStorage.getItem(CONTACTS_STORAGE_KEY);
-    if (!savedContactsJson) {
-      return [];
-    }
-
-    return (<cloud_social_provider.SavedContacts>JSON.parse(savedContactsJson)).contacts || [];
+    return savedContactsJson ? <cloud_social_provider.SavedContacts>JSON.parse(
+        savedContactsJson) : {
+      contacts: []
+    };
   }
 
   // merges a contact with those already saved to storage.
+  // returns true if the contact was not previously in storage.
   // contacts are saved as a SavedContacts serialised as JSON. 
   private saveContact(newInvite:cloud_social_provider.Invite) {
     if (!isStorageAvailable) {
-      return;
+      return true;
     }
 
-    // TODO: save even if load fails
     const savedContacts = this.loadContacts();
-    savedContacts.push({
-      invite: newInvite
+
+    // merge or append, as necessary.
+    const dupeIndex = _.findIndex(savedContacts.contacts, (savedContact) => {
+      return savedContact.invite && savedContact.invite.host === newInvite.host;
     });
-    const contactSet: { [host: string]: cloud_social_provider.SavedContact } = {};
-    for (const contact of savedContacts) {
-      contactSet[contact.invite.host] = contact;
+
+    const newSavedContact: cloud_social_provider.SavedContact = {
+      invite: newInvite
+    };
+    if (dupeIndex > -1) {
+      savedContacts.contacts[dupeIndex] = newSavedContact;
+    } else {
+      savedContacts.contacts.push(newSavedContact);
     }
 
-    localStorage.setItem(CONTACTS_STORAGE_KEY, JSON.stringify(<cloud_social_provider.SavedContacts>{ 
-      contacts: Object.keys(contactSet).map(key => contactSet[key])
-    }));
+    // and save!
+    localStorage.setItem(CONTACTS_STORAGE_KEY, JSON.stringify(savedContacts));
+
+    return dupeIndex === -1;
   }
 
-  // TODO: de-dupe entries
-  public addServer(inviteUrl:string): Promise<Server> {
+  public addServer(inviteUrl:string): Promise<void> {
+    if (!this.onServerCallback) {
+      throw new Error('must call onServer first');
+    }
+
     // inspired from ui.ts but uproxy air only supports v2 invites
     // which have just three fields:
     //  - v=2
@@ -140,18 +153,20 @@ export class UproxyServerRepository implements ServerRepository {
     const cloudInvite :cloud_social_provider.Invite = JSON.parse(
         jsurl.parse(<string>params.networkData));
 
-    // save contact immediately so that it is not lost in case
-    // something goes wrong calling the core.
-    try {
-      this.saveContact(cloudInvite);
-    } catch (e) {
-      console.error('could not save new contact', e);
-    }
-
-    return this.informCoreOfServer(cloudInvite);
+    // inform the core of this new or updated server and, if it's new,
+    // emit an onServer event.
+    return this.informCoreOfServer(cloudInvite).then((server) => {
+      if (this.saveContact(cloudInvite)) {
+        try {
+          this.onServerCallback(server);
+        } catch (e) {
+          console.warn('onServer callback threw', e);
+        }
+      }
+    });
   }
 
-  private informCoreOfServer = (cloudInvite:cloud_social_provider.Invite) => {
+  private informCoreOfServer(cloudInvite:cloud_social_provider.Invite) {
     return this.core.acceptInvitation({
       network: {
         name: 'Cloud'

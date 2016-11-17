@@ -13,7 +13,7 @@ export type AccessCode = string;
 export type OnServerCallback = (server:Server) => any;
 
 export interface ServerRepository {
-  addServer(code: AccessCode): Promise<Server>
+  addServer(code: AccessCode): Promise<void>
   onServer(callback:OnServerCallback): ServerRepository;
   restore(): void;
 }

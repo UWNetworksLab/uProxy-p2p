@@ -80,9 +80,11 @@ export class ServerListPage {
   }
 
   public pressAddServer(): Promise<ServerEntryComponent> {
-    return this.servers.addServer(this.addTokenText.value).then(this.addServer);
+    // TODO: wipe the list and re-restore if this throws
+    return this.servers.addServer(this.addTokenText.value);
   }
 
+  // since this is used as a callback we must use the arrow notation.
   private addServer = (server:Server) => {
     const entryElement = this.root.ownerDocument.createElement('div');
     this.entryList.appendChild(entryElement);
