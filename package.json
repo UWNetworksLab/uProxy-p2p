@@ -21,6 +21,12 @@
     }
   ],
   "devDependencies": {
+    "@angular/common": "^2.2.0",
+    "@angular/compiler": "^2.2.0",
+    "@angular/core": "^2.2.0",
+    "@angular/platform-browser": "^2.2.0",
+    "@angular/platform-browser-dynamic": "^2.2.0",
+    "@angular/router": "^3.2.0",
     "@types/chrome": "^0.0.35",
     "@types/circular-json": "^0.1.30",
     "@types/compare-version": "^0.1.30",

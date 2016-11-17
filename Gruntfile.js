@@ -605,6 +605,12 @@ module.exports = function(grunt) {
           tsconfig: 'tsconfig.json',
           passThrough: true
         }
+      },
+      cca: {
+        tsconfig: {
+          tsconfig: 'cca.tsconfig.json',
+          passThrough: true
+        }
       }
     },
     browserify: {

@@ -1,3 +1,6 @@
+/// <reference path='../../../third_party/generic/jsurl.d.ts'/>
+/// <reference path='../../../third_party/generic/uparams.d.ts'/>
+
 import uparams = require('uparams');
 import * as jsurl from 'jsurl';
 import * as social from '../../interfaces/social';
