@@ -8,8 +8,8 @@ class ServerEntryComponent {
     root.classList.add('server-entry');
     root.innerHTML = `
       <h2>${server.getIpAddress()}</h2>
-      <paper-button id='connect-button'>Connect</paper-button>
-      <paper-button id='disconnect-button' disabled>Disconnect</paper-button>`;
+      <paper-button id='connect-button' raised>Connect</paper-button>
+      <paper-button id='disconnect-button' raised disabled>Disconnect</paper-button>`;
 
     this.connectButton = root.querySelector('#connect-button') as HTMLButtonElement;
     this.connectButton.addEventListener('tap', (ev) => {

@@ -6,8 +6,9 @@
   <title>uProxy Air</title>
   <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
   <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
-  <link rel="import" href="bower_components/paper-card/paper-card.html">
   <link rel="import" href="bower_components/paper-button/paper-button.html">
+  <link rel="import" href="bower_components/paper-card/paper-card.html">
+  <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
 
   <!-- The vulcanized code will be loaded asynchronously by context.static.js -->
   <!-- <link rel='import' href='polymer/vulcanized.html'> -->
@@ -15,20 +16,16 @@
   <link href='generic_ui/style/global.css' rel='stylesheet' shim-shadowdom>
 
   <style>
-    .header {
-        width: 100%;
-        text-align: left;
-        padding: 10px;
-        margin-top: 0;
+    .paper-header {
         background-color: #12a391;
         color: #FeFeFe;
+        text-align: left;
+        padding: 10px;
+        font-size: 2;
+        font-size: 1.7em;
+        font-weight: bold;
     }
-    button {
-      border-style: none;
-      padding: 5px;
-      margin: 5px;
-    }
-    button:enabled {
+    .paper-button:enabled {
       background-color: #12a391;
       color: #fefefe;
     }
@@ -37,6 +34,9 @@
       box-shadow: 1px 1px 3px #AAAAAA;
       margin: 10px;
       padding: 10px;
+    }
+    .page-content {
+      padding: 5px;
     }
     @font-face {
       font-family: Quicksand;
@@ -63,14 +63,17 @@
   </style>
 </head>
 
-<body touch-action='auto'>
-  <h1 class='header'>uProxy Air Client</h1>
-
-  <div id='add-server-widget'>
-    <textarea id='token-text'></textarea>
-    <paper-button id='add-server-button' raised>Add Server</paper-button>
-  </div>
-  <div id='entry-list'></div>
+<body touch-action='auto' class='fullbleed layout vertical'>
+  <paper-header-panel mode='waterfall' class='flex'>
+    <div class='paper-header'>uProxy Air Client</div>
+    <div class='page-content'>
+      <div id='add-server-widget'>
+        <textarea id='token-text'></textarea>
+        <paper-button id='add-server-button' raised>Add Server</paper-button>
+      </div>
+      <div id='entry-list'></div>
+    </div>
+  </paper-header-panel>
 </body>
 
 </html>
