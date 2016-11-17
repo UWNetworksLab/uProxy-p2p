@@ -17,7 +17,7 @@ export class UproxyServer implements Server {
   // Constructs a server that will use the given CoreApi to start the local proxy.
   // It takes the IP address of the uProxy cloud server it will use for Internet access.    
   public constructor(private proxy: SocksProxy,
-    private vpnDevice: VpnDevice,
+                     private vpnDevice: VpnDevice,
                      private remoteIpAddress: string) {}
 
   public getIpAddress() {
