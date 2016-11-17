@@ -27,19 +27,18 @@ class Tun2SocksVpnDevice implements VpnDevice {
 }
 
 const globalTun2SocksVpnDevice = new Promise((resolve, reject) => {
-  // Wait for Cordova plugins to be loaded.
-  window.top.document.addEventListener('deviceready', () => {
-    if (!window.tun2socks) {
-      reject('Device does not support VPN');
+  if (!window.tun2socks) {
+    reject('Device does not support VPN');
+    return;
+  }
+  window.tun2socks.deviceSupportsPlugin().then((supportsVpn) => {
+    if (!supportsVpn) {
+      reject(`Device does not support VPN`);
       return;
     }
-    window.tun2socks.deviceSupportsPlugin().then((supportsVpn) => {
-      if (!supportsVpn) {
-        reject(`Device does not support VPN`);
-        return;
-      }
-      resolve(new Tun2SocksVpnDevice(window.tun2socks));
-    });
+    resolve(new Tun2SocksVpnDevice(window.tun2socks));
+  }).catch((reason) => {
+    reject(`Error calling window.tun2socks.deviceSupportsPlugin(): ${reason}`);
   });
 });
 
