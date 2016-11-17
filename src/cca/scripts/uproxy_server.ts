@@ -1,8 +1,7 @@
 import uparams = require('uparams');
+import * as cloud_social_provider from '../../lib/cloud/social/provider';
 import * as jsurl from 'jsurl';
 import * as social from '../../interfaces/social';
-import * as cloud_social_provider from '../../lib/cloud/social/provider';
-
 import CoreConnector from '../../generic_ui/scripts/core_connector';
 import { AccessCode, OnServerCallback, Server, ServerRepository } from '../model/server';
 import { SocksProxy } from '../model/socks_proxy_server';
@@ -70,7 +69,7 @@ export class UproxyServerRepository implements ServerRepository {
 
   public restore() {
     if (!this.onServerCallback) {
-      throw new Error('must set onServer callback');
+      throw new Error('must call onServer first');
     }
 
     for (const contact of this.loadContacts()) {
@@ -110,6 +109,7 @@ export class UproxyServerRepository implements ServerRepository {
       return;
     }
 
+    // TODO: save even if load fails
     const savedContacts = this.loadContacts();
     savedContacts.push({
       invite: newInvite

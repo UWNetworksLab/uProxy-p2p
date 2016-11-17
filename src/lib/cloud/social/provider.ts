@@ -409,7 +409,7 @@ export class CloudSocialProvider {
   // Parses the networkData field, serialised to JSON, of invites.
   // The contact is immediately saved and added to the contacts list.
   public acceptUserInvitation = (inviteJson: string): Promise<void> => {
-    log.debug('acceptUserInvitation: %1', inviteJson);
+    log.debug('acceptUserInvitation');
     try {
       const invite = <Invite>JSON.parse(inviteJson);
 
