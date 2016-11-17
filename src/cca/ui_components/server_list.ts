@@ -5,7 +5,7 @@ class ServerEntryComponent {
   private disconnectButton: HTMLButtonElement;
 
   constructor(private root: Element, private server: Server) {
-    root.classList.add('server-entry');
+    root.classList.add('server-entry-card');
     root.innerHTML = `
       <h2>${server.getIpAddress()}</h2>
       <paper-button id='connect-button' raised>Connect</paper-button>
