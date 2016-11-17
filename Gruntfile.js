@@ -371,8 +371,7 @@ module.exports = function(grunt) {
             src: [
               'manifest.json',
               'config.xml',
-              // This is not browserified so we use .js instead of .static.js.
-              'polymer/vulcanized.{html,js}',
+              'assets/**',
               'freedom-for-chrome/freedom-for-chrome.js'
             ].concat(uiDistFiles, coreDistFiles, universalDistFiles),
             dest: ccaDistPath
