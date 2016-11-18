@@ -55,6 +55,10 @@ export class ServerListPage {
   private addButton: HTMLButtonElement;
   private entryList: HTMLDivElement;
 
+  // Servers currently shown, indexed by hostname.
+  // Used to prevent listing servers more than once.
+  private activeServerIds = new Set<String>();
+
   // Parameters:
   // - root: Where to attach the ServerListPage to
   // - servers: the repository of the servers we can connect to.
@@ -68,6 +72,12 @@ export class ServerListPage {
       console.debug('Pressed Add Button');
       this.pressAddServer();
     });
+
+    servers.getServers().then((restoredServers) => {
+      restoredServers.forEach((server) => {
+        this.addServer(server);
+      });
+    });
   }
 
   public enterAccessCode(code: string) {
@@ -77,12 +87,18 @@ export class ServerListPage {
 
   public pressAddServer(): Promise<ServerEntryComponent> {
     return this.servers.addServer(this.addTokenText.value).then((server) => {
-      let entryElement = this.root.ownerDocument.createElement('div');
-      let serverEntry = new ServerEntryComponent(entryElement, server);
-      this.entryList.appendChild(entryElement);
-      return serverEntry;
-    }).catch((error) => {
-      console.error(error);
+      this.addServer(server);
     });
+  }
+
+  private addServer(server: Server) {
+    if (this.activeServerIds.has(server.getIpAddress())) {
+      return;
+    }
+
+    this.activeServerIds.add(server.getIpAddress());
+    const entryElement = this.root.ownerDocument.createElement('div');
+    this.entryList.appendChild(entryElement);
+    return new ServerEntryComponent(entryElement, server);
   }
 }

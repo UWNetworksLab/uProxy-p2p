@@ -252,7 +252,8 @@ module.exports = function(grunt) {
       // compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
       ccaBuildAndroid: {
         cwd: '<%= androidDevPath %>',
-        command: '<%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
+        // Pipe 'no' for the first time cca.js asks whether to send usage stats (grunt build_android_lite).
+        command: 'echo no | <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
       },
       ccaReleaseAndroid: {
         cwd: '<%= androidDistPath %>',
