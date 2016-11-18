@@ -93,6 +93,7 @@ export class UproxyServerRepository implements ServerRepository {
     const cloudTokens: cloud_social_provider.Invite = JSON.parse(
         jsurl.parse(<string>params.networkData));
     this.saveServer(cloudTokens);
+    // TODO: only notify the core when connecting, and delete it afterwards
     return this.notifyCoreOfServer(cloudTokens);
   }
 
