@@ -82,10 +82,10 @@ export function initializeNetworks() :void {
  */
 export function getNetwork(networkName :string, userId :string) :social.Network {
   if (!(networkName in networks)) {
-    throw new Error('unknown network ' + networkName);
+    throw new Error('unknown network ${networkName}');
   }
   if (!(userId in networks[networkName])) {
-    throw new Error(userId + ' is not logged into network ' + networkName);
+    throw new Error('${userId} is not logged into network ${networkName}');
   }
   return networks[networkName][userId];
 }

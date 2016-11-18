@@ -38,12 +38,10 @@ export class UproxyServer implements Server {
 }
 
 // Name by which servers are saved to storage.
-const SERVERS_STORAGE_KEY = 'saved-servers';
+const SERVERS_STORAGE_KEY = 'servers';
 
 // Type of the object placed, in serialised form, in storage.
-interface SavedServers {
-  servers: { [id: string]: SavedServer }
-}
+type SavedServers = { [id: string]: SavedServer };
 
 // A server as saved to storage.
 interface SavedServer {
@@ -52,30 +50,28 @@ interface SavedServer {
 
 // Maintains a persisted set of servers and liases with the core.
 export class UproxyServerRepository implements ServerRepository {
-  // core must already be logged into social networks.
   constructor(
     private storage: Storage,
+    // Must already be logged into social networks.
     private core: CoreConnector,
     private vpnDevice: VpnDevice) { }
 
-  public getSavedServers() {
-    const servers = this.loadServers().servers;
+  public getServers() {
+    const servers = this.loadServers();
     return Promise.all(Object.keys(servers).map((host) => {
       return this.notifyCoreOfServer(servers[host].cloudTokens);
     }));
   }
 
   private loadServers(): SavedServers {
-    return JSON.parse(this.storage.getItem(SERVERS_STORAGE_KEY)) || {
-      servers: {}
-    };
+    return JSON.parse(this.storage.getItem(SERVERS_STORAGE_KEY)) || {};
   }
 
   // Saves a server to storage, merging it with any already found there.
   // Returns true if the server was not already in storage.
   private saveServer(cloudTokens: cloud_social_provider.Invite) {
     const savedServers = this.loadServers();
-    savedServers.servers[cloudTokens.host] = {
+    savedServers[cloudTokens.host] = {
       cloudTokens: cloudTokens
     };
     this.storage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(savedServers));

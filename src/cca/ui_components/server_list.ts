@@ -55,9 +55,9 @@ export class ServerListPage {
   private addButton: HTMLButtonElement;
   private entryList: HTMLDivElement;
 
-  // Hostnames of servers currently displayed.
+  // Servers currently shown, indexed by hostname.
   // Used to prevent listing servers more than once.
-  private activeServerIds: String[] = [];
+  private activeServerIds = new Set<String>();
 
   // Parameters:
   // - root: Where to attach the ServerListPage to
@@ -73,7 +73,7 @@ export class ServerListPage {
       this.pressAddServer();
     });
 
-    servers.getSavedServers().then((restoredServers) => {
+    servers.getServers().then((restoredServers) => {
       restoredServers.forEach((server) => {
         this.addServer(server);
       });
@@ -92,11 +92,11 @@ export class ServerListPage {
   }
 
   private addServer(server: Server) {
-    if (this.activeServerIds.indexOf(server.getIpAddress()) > -1) {
+    if (this.activeServerIds.has(server.getIpAddress())) {
       return;
     }
-    this.activeServerIds.push(server.getIpAddress());
 
+    this.activeServerIds.add(server.getIpAddress());
     const entryElement = this.root.ownerDocument.createElement('div');
     this.entryList.appendChild(entryElement);
     return new ServerEntryComponent(entryElement, server);
