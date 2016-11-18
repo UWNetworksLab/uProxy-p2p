@@ -225,12 +225,13 @@ module.exports = function(grunt) {
       makeChromeWebStoreZips: {
         command: 'tools/makechromezips.sh'
       },
+      // Pipe 'no' into any CCA command which asks on first run whether to send usage stats.
+      // It's slightly annoying on your workstation, potentially fatal on Docker and Travis.
       ccaCreateDev: {
-        // Pipe 'no' for the first time cca.js asks whether to send usage stats.
         command: 'echo no | <%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
       },
       ccaCreateDist: {
-        command: '<%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
+        command: 'echo no | <%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
       },
       ccaPlatformAndroidDev: {
         cwd: '<%= androidDevPath %>',
@@ -252,7 +253,6 @@ module.exports = function(grunt) {
       // compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
       ccaBuildAndroid: {
         cwd: '<%= androidDevPath %>',
-        // Pipe 'no' for the first time cca.js asks whether to send usage stats (grunt build_android_lite).
         command: 'echo no | <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
       },
       ccaReleaseAndroid: {
