@@ -7,8 +7,12 @@
   <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
   <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
 
+  <link rel="import" href="bower_components/iron-icons/iron-icons.html">
   <link rel="import" href="bower_components/paper-button/paper-button.html">
   <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
+  <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
+
   <!-- Figure out how to fix the CSP issue with the googleapis font import from iron-meta -->
   <!--<link rel="import" href="bower_components/paper-card/paper-card.html">-->
   <!--<link rel="import" href="bower_components/paper-input/paper-input.html">-->
@@ -17,18 +21,8 @@
   <link href='generic_ui/style/global.css' rel='stylesheet' shim-shadowdom>
 
   <style>
-    .paper-header {
-        background-color: #12a391;
-        color: #FeFeFe;
-        text-align: left;
-        padding: 10px;
-        font-size: 2;
-        font-size: 1.7em;
-        font-weight: bold;
-    }
-    .paper-button:enabled {
-      background-color: #12a391;
-      color: #fefefe;
+    paper-toolbar.uproxy {
+      background: #12a391;
     }
     .server-entry-card, .access-code-card {
       background-color: white;
@@ -60,7 +54,6 @@
     }
     body {
       display: block;
-      text-align: center;
       margin: 0;
       font-family: Roboto, sans-serif;
       font-size: 13px;
@@ -72,7 +65,12 @@
 
 <body touch-action='auto' class='fullbleed layout vertical'>
   <paper-header-panel mode='waterfall' class='flex'>
-    <div class='paper-header'>uProxy</div>
+    <div class='paper-header'>
+      <paper-toolbar class='uproxy'>
+        <paper-icon-button icon="menu"></paper-icon-button>
+        <span class="title">uProxy</span>
+      </paper-toolbar>
+    </div>
     <div class='page-content'>
       <div id='entry-list'></div>
       <div class='access-code-card'>
