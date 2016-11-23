@@ -22,3 +22,4 @@ deploy:
   on:
     repo: uProxy/uproxy
     branch: trevj-tag-test
+    all_branches: true
