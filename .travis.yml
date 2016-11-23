@@ -1,25 +1,26 @@
 language: node_js
 node_js:
-- "6"
+  - "6"
 before_install:
-- npm install -g --production yarn
+  - npm install -g --production yarn
 install:
-- yarn install
+  - yarn install
 script:
-- yarn run grunt build
-- yarn run grunt tslint
-- yarn run grunt unit_test_nobuild
+  - yarn run grunt build
+  - yarn run grunt tslint
+  - yarn run grunt unit_test_nobuild
 sudo: false
 cache:
   directories:
-  - "$HOME/.yarn-cache"
+    - $HOME/.yarn-cache
 deploy:
   provider: releases
   api_key:
     secure: YeKIPlHkpDep5GB/VXzs2XyF2ym5Lh2nQ9XMsSntvxJ4K/MR0xRpwTxFN6TH1o4CW9RvlBGhhrWdeVGyMqEwnVY9OUx7jPkfKSkKBZZYx5DFMCuXxTJ0AgxT7IQjrsuweDdOWc5wdyKyxeJEJRnPfp4GOSPd8pJYSNKpJdmSzgM=
   file:
-  - build/dist/jid1-uTe1Bgrsb76jSA@jetpack-0.9.11.xpi
+    - build/dist/uproxy-chrome-extension.zip
+    - build/dist/uproxy-chrome-app.zip
+    - build/dist/uproxy-chrome.zip
+    - build/dist/jid1-uTe1Bgrsb76jSA@jetpack-0.9.11.xpi
   on:
-    repo: uProxy/uproxy
-    branch: trevj-tag-test
-    all_branches: true
+    tags: true

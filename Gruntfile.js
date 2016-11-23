@@ -852,15 +852,15 @@ module.exports = function(grunt) {
     'build_cca', 
     'jshint', 
     'copy:dist', 
-    'jpm:xpi'
+    'jpm:xpi',
+    'exec:makeChromeWebStoreZips'
   ]);
 
   // This is run prior to releasing uProxy and, in addition to
   // building, tests and lints all code.
   registerTask(grunt, 'dist', [
     'build',
-    'test',
-    'exec:makeChromeWebStoreZips'
+    'test'
   ]);
 
   registerTask(grunt, 'compileTypescript', 'Compiles all the Typescript code', [
