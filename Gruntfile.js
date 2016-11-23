@@ -35,9 +35,6 @@ module.exports = function(grunt) {
   const androidDevPath = path.join(devBuildPath, 'android/');
   const genericPath = path.join(devBuildPath, 'generic/');
 
-  const ccaDistPath = path.join(distBuildPath, 'cca/');
-  const androidDistPath = path.join(distBuildPath, 'android/');
-
 //-------------------------------------------------------------------------
   function browserifyIntegrationTest(path) {
     return Rule.browserifySpec(path, {
@@ -214,8 +211,6 @@ module.exports = function(grunt) {
     ccaJsPath: path.join(ccaPath, 'src/cca.js'),
     androidDevPath: androidDevPath,
     ccaDevPath: ccaDevPath,
-    androidDistPath: androidDistPath,
-    ccaDistPath: ccaDistPath,
 
     // Create commands to run in different directories.
     ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android',
@@ -227,36 +222,25 @@ module.exports = function(grunt) {
       },
       // Pipe 'no' into any CCA command which asks on first run whether to send usage stats.
       // It's slightly annoying on your workstation, potentially fatal on Docker and Travis.
-      ccaCreateDev: {
+      ccaCreate: {
         command: 'echo no | <%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
       },
-      ccaCreateDist: {
-        command: 'echo no | <%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
-      },
-      ccaPlatformAndroidDev: {
+      ccaPlatformAndroid: {
         cwd: '<%= androidDevPath %>',
         command: '<%= ccaPlatformAndroidCmd %>'
       },
-      ccaPlatformAndroidDist: {
-        cwd: '<%= androidDistPath %>',
-        command: '<%= ccaPlatformAndroidCmd %>'
-      },
-      ccaAddPluginsAndroidDev: {
+      ccaAddPluginsAndroid: {
         cwd: '<%= androidDevPath %>',
-        command: '<%= ccaAddPluginsCmd %>'
-      },
-      ccaAddPluginsAndroidDist: {
-        cwd: '<%= androidDistPath %>',
         command: '<%= ccaAddPluginsCmd %>'
       },
       // Note: The fixed crosswalk version here is pinned in order to maintain
       // compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
-      ccaBuildAndroid: {
+      ccaBuildAndroidDev: {
         cwd: '<%= androidDevPath %>',
         command: 'echo no | <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
       },
-      ccaReleaseAndroid: {
-        cwd: '<%= androidDistPath %>',
+      ccaBuildAndroidRelease: {
+        cwd: '<%= androidDevPath %>',
         command: '<%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
       },
       ccaEmulateAndroid: {
@@ -264,12 +248,12 @@ module.exports = function(grunt) {
         command: '<%= ccaJsPath %> run android --emulator'
       },
       cleanAndroid: {
-        command: 'rm -rf <%= androidDevPath %>; rm -rf <%= androidDistPath %>'
+        command: 'rm -rf <%= androidDevPath %>'
       },
       androidReplaceXwalkDev: {
         command: './replace_xwalk_in_apk.sh debug'
       },
-      androidReplaceXwalkDist: {
+      androidReplaceXwalkRelease: {
         command: './replace_xwalk_in_apk.sh release'
       },
       installFreedomForNodeForZork: {
@@ -364,28 +348,10 @@ module.exports = function(grunt) {
             cwd: 'src/generic_core/dist_build/',
             src: ['*'],
             dest: 'build/dist/firefox/data/generic_core/'
-          },
-          {  // CCA app
-            expand: true,
-            cwd: ccaDevPath,
-            src: [
-              'manifest.json',
-              'config.xml',
-              'assets/**',
-              'bower_components/**',
-              'freedom-for-chrome/freedom-for-chrome.js'
-            ].concat(uiDistFiles, coreDistFiles, universalDistFiles),
-            dest: ccaDistPath
-          },
-          {  // CCA dist freedom-module.json
-            expand: true,
-            cwd: 'src/generic_core/cca_dist_build/',
-            src: ['*'],
-            dest: path.join(ccaDistPath, 'generic_core')
           }
         ]
       },
-      cca_splash_dev: {
+      cca_splash: {
         files: [
           {
             expand: true,
@@ -395,16 +361,6 @@ module.exports = function(grunt) {
           }
         ]
       },
-      cca_splash_dist: {
-        files: [
-          {
-            expand: true,
-            cwd: 'src/cca',
-            src: ['splashscreen.png'],
-            dest: path.join(androidDistPath, 'platforms/android/res/drawable-port-xhdpi')
-          }
-        ]
-      },     
       integration: {
         files: [{
           // Copy compiled Chrome App code, required for integration tests.
@@ -569,7 +525,7 @@ module.exports = function(grunt) {
               'android-release-keys.properties',
               'play_store_keys.p12'
             ],
-            dest: androidDistPath
+            dest: androidDevPath
           }
         ]
       }
@@ -1242,10 +1198,10 @@ module.exports = function(grunt) {
     // Builds Android from scratch by recreating the Cordova environment.
     'exec:cleanAndroid',
     'build_cca',
-    'exec:ccaCreateDev',
-    'exec:ccaPlatformAndroidDev',
-    'exec:ccaAddPluginsAndroidDev',
-    'copy:cca_splash_dev',
+    'exec:ccaCreate',
+    'exec:ccaPlatformAndroid',
+    'exec:ccaAddPluginsAndroid',
+    'copy:cca_splash',
     'build_android_lite'
   ]);
   registerTask(grunt, 'build_android_lite', [
@@ -1253,19 +1209,14 @@ module.exports = function(grunt) {
     // Should only be used for building CCA modules and after running
     // build_android, without cleaning, initially at least once.
     'build_cca',
-    'exec:ccaBuildAndroid',
+    'exec:ccaBuildAndroidDev',
     'exec:androidReplaceXwalkDev'
   ]);
   registerTask(grunt, 'release_android', [
-    'build_cca', 
-    'copy:dist', 
-    'exec:ccaCreateDist', 
-    'exec:ccaPlatformAndroidDist', 
-    'exec:ccaAddPluginsAndroidDist', 
-    'copy:cca_splash_dist', 
+    'build_android',
     'symlink:cca_keys', 
-    'exec:ccaReleaseAndroid', 
-    'exec:androidReplaceXwalkDist'
+    'exec:ccaBuildAndroidRelease',
+    'exec:androidReplaceXwalkRelease'
   ]);
 
   // Emulate the mobile client for android
