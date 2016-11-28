@@ -60,6 +60,7 @@
     "core.storage",
     "core.tcpsocket",
     "core.udpsocket",
-    "core.xhr"
+    "core.xhr",
+    "core.oauth"
   ]
 }
