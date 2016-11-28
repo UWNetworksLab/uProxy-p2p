@@ -5,23 +5,23 @@ class ServerEntryComponent {
   private disconnectButton: HTMLButtonElement;
 
   constructor(private root: Element, private server: Server) {
-    root.classList.add('server-entry');
+    root.classList.add('server-entry-card');
     root.innerHTML = `
       <h2>${server.getIpAddress()}</h2>
-      <button id='connect-button'>Connect</button>
-      <button id='disconnect-button' disabled>Disconnect</button>`;
+      <paper-button id='connect-button' raised>Connect</paper-button>
+      <paper-button id='disconnect-button' raised disabled>Disconnect</paper-button>`;
 
     this.connectButton = root.querySelector('#connect-button') as HTMLButtonElement;
-    this.connectButton.onclick = (ev) => {
+    this.connectButton.addEventListener('tap', (ev) => {
       console.debug('Pressed Connect Button');
       this.pressStart();
-    };
+    });
 
     this.disconnectButton = root.querySelector('#disconnect-button') as HTMLButtonElement;
-    this.disconnectButton.onclick = (ev) => {
+    this.disconnectButton.addEventListener('tap', (ev) => {
       console.debug('Pressed Disconnect Button');
       this.pressStop();
-    }
+    });
   }
 
   public pressStart() {
@@ -51,25 +51,33 @@ class ServerEntryComponent {
 }
 
 export class ServerListPage {
-  private addWidget: HTMLDivElement;
   private addTokenText: HTMLTextAreaElement;
   private addButton: HTMLButtonElement;
   private entryList: HTMLDivElement;
+
+  // Servers currently shown, indexed by hostname.
+  // Used to prevent listing servers more than once.
+  private activeServerIds = new Set<String>();
 
   // Parameters:
   // - root: Where to attach the ServerListPage to
   // - servers: the repository of the servers we can connect to.
   constructor(private root: Element,
               private servers: ServerRepository) {
-    this.addWidget = root.querySelector('#setup-widget') as HTMLDivElement;
     this.addTokenText = root.querySelector('#token-text') as HTMLTextAreaElement;
     this.entryList = root.querySelector('#entry-list') as HTMLDivElement;
 
     this.addButton = root.querySelector('#add-server-button') as HTMLButtonElement;
-    this.addButton.onclick = (ev) => {
+    this.addButton.addEventListener('tap', (ev) => {
       console.debug('Pressed Add Button');
       this.pressAddServer();
-    };
+    });
+
+    servers.getServers().then((restoredServers) => {
+      restoredServers.forEach((server) => {
+        this.addServer(server);
+      });
+    });
   }
 
   public enterAccessCode(code: string) {
@@ -79,12 +87,18 @@ export class ServerListPage {
 
   public pressAddServer(): Promise<ServerEntryComponent> {
     return this.servers.addServer(this.addTokenText.value).then((server) => {
-      let entryElement = this.root.ownerDocument.createElement('div');
-      let serverEntry = new ServerEntryComponent(entryElement, server);
-      this.entryList.appendChild(entryElement);
-      return serverEntry;
-    }).catch((error) => {
-      console.error(error);
+      this.addServer(server);
     });
+  }
+
+  private addServer(server: Server) {
+    if (this.activeServerIds.has(server.getIpAddress())) {
+      return;
+    }
+
+    this.activeServerIds.add(server.getIpAddress());
+    const entryElement = this.root.ownerDocument.createElement('div');
+    this.entryList.appendChild(entryElement);
+    return new ServerEntryComponent(entryElement, server);
   }
 }

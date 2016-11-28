@@ -225,12 +225,13 @@ module.exports = function(grunt) {
       makeChromeWebStoreZips: {
         command: 'tools/makechromezips.sh'
       },
+      // Pipe 'no' into any CCA command which asks on first run whether to send usage stats.
+      // It's slightly annoying on your workstation, potentially fatal on Docker and Travis.
       ccaCreateDev: {
-        // Pipe 'no' for the first time cca.js asks whether to send usage stats.
         command: 'echo no | <%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
       },
       ccaCreateDist: {
-        command: '<%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
+        command: 'echo no | <%= ccaJsPath %> create <%= androidDistPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDistPath %>'
       },
       ccaPlatformAndroidDev: {
         cwd: '<%= androidDevPath %>',
@@ -252,7 +253,7 @@ module.exports = function(grunt) {
       // compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
       ccaBuildAndroid: {
         cwd: '<%= androidDevPath %>',
-        command: '<%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
+        command: 'echo no | <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
       },
       ccaReleaseAndroid: {
         cwd: '<%= androidDistPath %>',
@@ -370,8 +371,8 @@ module.exports = function(grunt) {
             src: [
               'manifest.json',
               'config.xml',
-              // This is not browserified so we use .js instead of .static.js.
-              'polymer/vulcanized.{html,js}',
+              'assets/**',
+              'bower_components/**',
               'freedom-for-chrome/freedom-for-chrome.js'
             ].concat(uiDistFiles, coreDistFiles, universalDistFiles),
             dest: ccaDistPath
@@ -1149,16 +1150,17 @@ module.exports = function(grunt) {
 
   registerTask(grunt, 'build_cca', [
     'copy:resources', 
-    'copy:devGenericCore', 
-    'compileTypescript', 
+    'copy:devGenericCore',
+    'compileTypescript',
     'browserify:genericCoreFreedomModule', 
     'browserify:loggingProvider', 
     'browserify:churnPipeFreedomModule', 
-    'browserify:cloudSocialProviderFreedomModule', 
+    'browserify:cloudSocialProviderFreedomModule',
     //'base',
     'ccaBackground',
     'copy:cca',
     'copy:ccaAdditional',
+    'vulcanize:ccaIndex',
   ]);
   registerTask(grunt, 'ccaBackground',
       'Builds build/src/cca/scripts/background.static.js', [
@@ -1173,6 +1175,21 @@ module.exports = function(grunt) {
           standalone: 'ui_context'
         }
       }),
+    },
+    vulcanize: {
+      ccaIndex: {
+        options: {
+          inline: true,
+          csp: true
+        },
+        files: [
+          {
+            src: path.join(ccaDevPath, 'index.html'),
+            dest: path.join(ccaDevPath, 'index_vulcanized.html')
+          }
+        ]
+      }
+
     },
     copy: {
       cca: Rule.copyLibs({

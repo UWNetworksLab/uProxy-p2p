@@ -25,3 +25,4 @@ node_modules
 npm-debug.log
 keys
 third_party/bower
+bower_components

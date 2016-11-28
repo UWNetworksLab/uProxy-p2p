@@ -368,8 +368,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
       // Assumes the user is only signed in once to any given network.
       networkUserId = Object.keys(social_network.networks[networkName])[0];
     }
-    var network = social_network.getNetwork(networkName, networkUserId);
-    return network.acceptInvitation(data.tokenObj, data.userId);
+    try {
+      return social_network.getNetwork(networkName, networkUserId).acceptInvitation(
+          data.tokenObj, data.userId);
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 
   public getInviteUrl = (data :uproxy_core_api.CreateInviteArgs): Promise<string> => {
