@@ -5,9 +5,9 @@ class ServerEntryComponent {
   private disconnectButton: HTMLButtonElement;
 
   constructor(private root: Element, private server: Server) {
-    root.classList.add('server-entry-card');
+    root.classList.add('server-card');
     root.innerHTML = `
-      <h2>${server.getIpAddress()}</h2>
+      <div class='name'>${server.getIpAddress()}</div>
       <paper-button id='connect-button' raised>Connect</paper-button>
       <paper-button id='disconnect-button' raised disabled>Disconnect</paper-button>`;
 
@@ -51,10 +51,6 @@ class ServerEntryComponent {
 }
 
 export class ServerListPage {
-  private addTokenText: HTMLTextAreaElement;
-  private addButton: HTMLButtonElement;
-  private entryList: HTMLDivElement;
-
   // Servers currently shown, indexed by hostname.
   // Used to prevent listing servers more than once.
   private activeServerIds = new Set<String>();
@@ -64,13 +60,17 @@ export class ServerListPage {
   // - servers: the repository of the servers we can connect to.
   constructor(private root: Element,
               private servers: ServerRepository) {
-    this.addTokenText = root.querySelector('#token-text') as HTMLTextAreaElement;
-    this.entryList = root.querySelector('#entry-list') as HTMLDivElement;
-
-    this.addButton = root.querySelector('#add-server-button') as HTMLButtonElement;
-    this.addButton.addEventListener('tap', (ev) => {
-      console.debug('Pressed Add Button');
-      this.pressAddServer();
+    // for debugging!
+    this.addServer({
+      getIpAddress: () => {
+        return '192.168.1.1';
+      },
+      connect: (onDisconnect: (msg: string) => void) => {
+        return Promise.resolve();
+      },
+      disconnect: () => {
+        return Promise.resolve();
+      }
     });
 
     servers.getServers().then((restoredServers) => {
@@ -80,13 +80,8 @@ export class ServerListPage {
     });
   }
 
-  public enterAccessCode(code: string) {
-    console.debug('Entered access code');
-    this.addTokenText.value = code;
-  }
-
-  public pressAddServer(): Promise<ServerEntryComponent> {
-    return this.servers.addServer(this.addTokenText.value).then((server) => {
+  public addAccessCode(code:string): Promise<ServerEntryComponent> {
+    return this.servers.addServer(code).then((server) => {
       this.addServer(server);
     });
   }
@@ -98,7 +93,7 @@ export class ServerListPage {
 
     this.activeServerIds.add(server.getIpAddress());
     const entryElement = this.root.ownerDocument.createElement('div');
-    this.entryList.appendChild(entryElement);
+    this.root.appendChild(entryElement);
     return new ServerEntryComponent(entryElement, server);
   }
 }

@@ -48,7 +48,29 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
     network: 'Cloud',
     loginType: uproxy_core_api.LoginType.INITIAL,
   }).then(() => {
-    return new UproxyServerRepository(getLocalStorage(), core, vpnDevice);
+    let storage: Storage;
+    try {
+      storage = getLocalStorage();
+    } catch (e) {
+      console.info('local storage unavailable, faking!');
+      storage = {
+        length: 0,
+        clear: () => { },
+        getItem: (key: string) => {
+          return null;
+        },
+        key: (index: number) => {
+          return null;
+        },
+        removeItem: (key: string) => {
+          return null;
+        },
+        setItem: (key: string, data: string) => {
+          return null;
+        }
+      };
+    }
+    return new UproxyServerRepository(storage, core, vpnDevice);
   });
 });
 
@@ -63,7 +85,8 @@ let serversListPagePromise: Promise<ServerListPage> = new Promise((resolve, reje
         console.debug('dom ready');
         serversPromise.then((servers) => {
           console.debug('servers ready');
-          resolve(new ServerListPage(appWindow.contentWindow.document.body, servers));
+          const listElem = appWindow.contentWindow.document.body.querySelector('#server-list') as HTMLElement;
+          resolve(new ServerListPage(listElem, servers));
         });
       });
     });
@@ -75,7 +98,7 @@ Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()]).then
   ([serverListPage, intentInterceptor]) => {
     intentInterceptor.addIntentListener((url: string) => {
       console.debug(`[App] Url: ${url}`);
-      serverListPage.enterAccessCode(url);
+      serverListPage.addAccessCode(url);
     });
     if (navigator.splashscreen) {
       navigator.splashscreen.hide();

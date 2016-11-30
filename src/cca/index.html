@@ -24,21 +24,33 @@
     paper-toolbar.uproxy {
       background: #12a391;
     }
-    .server-entry-card, .access-code-card {
+
+    .server-list {
+      padding: 0;
+      margin: 0;
       background-color: white;
-      box-shadow: 1px 1px 3px #AAAAAA;
-      margin: 10px;
-      padding: 10px;
     }
-    .access-code-card {
-      padding: 5px;
+
+    #mainPanel {
+      background: red;
     }
-    .access-code-card input {
-      width: 20em;
+    #mainContainer {
+      background: #444;
     }
-    .page-content {
-      padding: 5px;
+
+    .server-card {
+      background: white;
+
+/* this is from the spec - consider using paper-styles */
+      padding: 24px 27px;
+      font-size: 18px;
+      color: #324148;
+      letter-spacing: 1px;
+      line-height: 24px;
+
+      height: 200px;
     }
+
     @font-face {
       font-family: Quicksand;
       src: url(generic_ui/fonts/Quicksand-Regular.ttf);
@@ -64,19 +76,13 @@
 </head>
 
 <body touch-action='auto' class='fullbleed layout vertical'>
+  <!-- TODO(fortuna): i18n this -->
   <paper-header-panel mode='waterfall' class='flex'>
     <paper-toolbar class='uproxy'>
       <paper-icon-button icon="menu"></paper-icon-button>
       <span class="title">uProxy</span>
     </paper-toolbar>
-    <div class='page-content'>
-      <div id='entry-list'></div>
-      <div class='access-code-card'>
-        <!-- TODO(fortuna): i18n this -->
-        <input type='text' id='token-text' label="Enter Access Code"></input>
-        <paper-button id='add-server-button' raised>Add Server</paper-button>
-      </div>
-    </div>
+    <div id='server-list'></div>
   </paper-header-panel>
 </body>
 
