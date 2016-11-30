@@ -662,17 +662,16 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     log.debug('creating cloud server in %1', region);
 
     const REDIRECT_URL = 'https://fmdppkkepalnkeommjadgbhiohihdhii.chromiumapp.org';
-    let oauthUrl = uproxy_cloud_install.getDigitalOceanOAuthURL(
+    const oauthUrl = uproxy_cloud_install.getDigitalOceanOAuthURL(
           '7d16974f756b4843669d0b04a13dabe89413df90e9de05b9410a829191acf076',
           REDIRECT_URL);
     let oauthProvider = freedom['core.oauth']();
     return oauthProvider.initiateOAuth([REDIRECT_URL]).then((obj: any) => {
       return oauthProvider.launchAuthFlow(oauthUrl, obj).then((responseUrl: string) => {
-        var accessToken = responseUrl.match(/access_token=([^&]*)/)[1];
+        const accessToken = responseUrl.match(/access_token=([^&]*)/)[1];
         return uproxy_cloud_install.installOnDigitalOcean(
-            accessToken, CLOUD_DROPLET_NAME, region)
-        .then((inviteUrl :string) => {
-          let params = uparams(inviteUrl);
+            accessToken, CLOUD_DROPLET_NAME, region).then((inviteUrl :string) => {
+          const params = uparams(inviteUrl);
           let networkDataObj = jsurl.parse(params['networkData']);
           // Set flag so Cloud social provider knows this invite is for the admin
           // user, who just created the server.
