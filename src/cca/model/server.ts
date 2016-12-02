@@ -12,7 +12,7 @@ export interface Server {
 export type AccessCode = string;
 
 export interface ServerRepository {
-  addServerByAccessCode(code: AccessCode): Promise<Server>
+  addServer(code: AccessCode): Promise<Server>
   // Fetches the list of servers known to this repository.
   getServers(): Promise<Server[]>;
 }

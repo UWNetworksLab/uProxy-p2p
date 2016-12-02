@@ -8,8 +8,8 @@
  * loaded.
  */
 
-import { ServerList } from '../ui_components/server_list';
-import * as uproxy_server from './uproxy_server';
+import { ServerListPage } from '../ui_components/server_list';
+import { UproxyServerRepository } from './uproxy_server';
 import { MakeCoreConnector } from './cordova_core_connector';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 import * as vpn_device from '../model/vpn_device';
@@ -50,11 +50,11 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
     loginType: uproxy_core_api.LoginType.INITIAL,
   }).then(() => {
     try {
-      return new uproxy_server.UproxyServerRepository(
+      return new UproxyServerRepository(
         getLocalStorage(), core, vpnDevice);
     } catch (e) {
       console.warn('local storage unavailable');
-      const serverRepository = new uproxy_server.UproxyServerRepository({
+      const serverRepository = new UproxyServerRepository({
         length: 0,
         clear: () => {
           throw new Error('this is mock storage');
@@ -78,18 +78,26 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
 });
 
 // Create UI.
-let serversListPagePromise: Promise<ServerList> = new Promise((resolve, reject) => {
+let serversListPagePromise: Promise<ServerListPage> = new Promise((resolve, reject) => {
   chrome.app.runtime.onLaunched.addListener(() => {
     console.debug('Chrome onLaunched fired');
-    chrome.app.window.create('index_vulcanized.html', null, (appWindow) => {
+    chrome.app.window.create('index_vulcanized.html', {
+      // When running as a Chrome extension for the first time,
+      // open in a nice Nexus 5-like 16:9 aspect ratio (vertically).
+      id: 'uProxy',
+      innerBounds: {
+        width: 400,
+        height: 712
+      }
+    }, (appWindow) => {
       console.debug('window created');
       let document = appWindow.contentWindow.document;
       document.addEventListener('DOMContentLoaded', function (event) {
         console.debug('dom ready');
-        serversPromise.then((serverRepository) => {
+        serversPromise.then((servers) => {
           console.debug('servers ready');
           const listElem = appWindow.contentWindow.document.body.querySelector('#server-list') as HTMLElement;
-          const serverListPage = new ServerList(listElem, serverRepository);
+          const serverListPage = new ServerListPage(listElem, servers);
           appWindow.contentWindow.addEventListener('resize', () => {
             serverListPage.resizeCards();
           });
@@ -105,7 +113,7 @@ Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()]).then
   ([serverListPage, intentInterceptor]) => {
     intentInterceptor.addIntentListener((url: string) => {
       console.debug(`[App] Url: ${url}`);
-      serverListPage.addByAccessCode(url);
+      serverListPage.enterAccessCode(url);
     });
     if (navigator.splashscreen) {
       navigator.splashscreen.hide();
@@ -118,11 +126,11 @@ serversListPagePromise.then((serverListPage) => {
   try {
     getLocalStorage();
   } catch (e) {
-    serverListPage.addByAccessCode('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
+    serverListPage.enterAccessCode('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
       host: '192.168.1.1',
       key: btoa('a fake SSL key')
     })));
-    serverListPage.addByAccessCode('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
+    serverListPage.enterAccessCode('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
       host: 'myhost.mydomain.com',
       key: btoa('another fake SSL key')
     })));

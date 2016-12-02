@@ -60,7 +60,8 @@ export class UproxyServerRepository implements ServerRepository {
   // loading from storage.
   public getServers() {
     try {
-      const servers = this.loadServers();
+      const servers = this.loadServers() || {};
+      console.debug('loaded servers', servers);
       return Promise.all(Object.keys(servers).map((host) => {
         return this.notifyCoreOfServer(servers[host].cloudTokens);
       }));
@@ -70,9 +71,9 @@ export class UproxyServerRepository implements ServerRepository {
     }
   }
 
-  // Loads servers from storage.
+  // Loads servers from storage, returning null if none are found.
   // Throws if there is a problem loading from storage or
-  // deserialising what is loaded.
+  // deserialising what was loaded.
   private loadServers(): SavedServers {
     try {
       const serversAsJson = this.storage.getItem(SERVERS_STORAGE_KEY);
@@ -96,7 +97,7 @@ export class UproxyServerRepository implements ServerRepository {
     this.storage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(savedServers));
   }
 
-  public addServerByAccessCode(accessCode: AccessCode) {
+  public addServer(accessCode: AccessCode) {
     // This is inspired by ui.ts but note that uProxy Air only
     // supports v2 access codes which have just three fields:
     //  - v
@@ -109,10 +110,12 @@ export class UproxyServerRepository implements ServerRepository {
       return Promise.reject(new Error('could not decode URL'));
     }
 
-    return this.addServerByCloudTokens(jsurl.parse(<string>params.networkData));
-  }
+    let cloudTokens: cloud_social_provider.Invite =
+      jsurl.parse(<string>params.networkData);
+    if (typeof cloudTokens === 'string' || cloudTokens instanceof String) {
+      cloudTokens = JSON.parse(cloudTokens.toString());
+    }
 
-  public addServerByCloudTokens(cloudTokens: cloud_social_provider.Invite) {
     try {
       this.saveServer(cloudTokens);
     } catch (e) {
