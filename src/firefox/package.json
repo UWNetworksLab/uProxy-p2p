@@ -5,7 +5,7 @@
   "author": "uProxy Team <info@uproxy.org>",
   "id": "jid1-uTe1Bgrsb76jSA@jetpack",
   "license": "Apache 2.0",
-  "version": "0.9.11",
+  "version": "0.9.12",
   "permissions": {
     "private-browsing": true
   },
