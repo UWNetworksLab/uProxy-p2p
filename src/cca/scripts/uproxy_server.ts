@@ -17,8 +17,8 @@ export class UproxyServer implements Server {
   // Constructs a server that will use the given CoreApi to start the local proxy.
   // It takes the IP address of the uProxy cloud server it will use for Internet access.    
   public constructor(private proxy: SocksProxy,
-                     private vpnDevice: VpnDevice,
-                     private remoteIpAddress: string) {}
+    private vpnDevice: VpnDevice,
+    private remoteIpAddress: string) { }
 
   public getIpAddress() {
     return this.remoteIpAddress;
@@ -56,15 +56,34 @@ export class UproxyServerRepository implements ServerRepository {
     private core: CoreConnector,
     private vpnDevice: VpnDevice) { }
 
+  // Returns an empty list if there is any error
+  // loading from storage.
   public getServers() {
-    const servers = this.loadServers();
-    return Promise.all(Object.keys(servers).map((host) => {
-      return this.notifyCoreOfServer(servers[host].cloudTokens);
-    }));
+    try {
+      const servers = this.loadServers();
+      return Promise.all(Object.keys(servers).map((host) => {
+        return this.notifyCoreOfServer(servers[host].cloudTokens);
+      }));
+    } catch (e) {
+      console.warn('could not load servers: ' + e.message);
+      return Promise.resolve([]);
+    }
   }
 
+  // Loads servers from storage.
+  // Throws if there is a problem loading from storage or
+  // deserialising what is loaded.
   private loadServers(): SavedServers {
-    return JSON.parse(this.storage.getItem(SERVERS_STORAGE_KEY)) || {};
+    try {
+      const serversAsJson = this.storage.getItem(SERVERS_STORAGE_KEY);
+      try {
+        return JSON.parse(serversAsJson);
+      } catch (e) {
+        throw new Error('could not parse saved servers: ' + e.message);
+      }
+    } catch (e) {
+      throw new Error('could not load from storage: ' + e.message);
+    }
   }
 
   // Saves a server to storage, merging it with any already found there.
@@ -77,7 +96,7 @@ export class UproxyServerRepository implements ServerRepository {
     this.storage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(savedServers));
   }
 
-  public addServer(accessCode: AccessCode) {
+  public addServerByAccessCode(accessCode: AccessCode) {
     // This is inspired by ui.ts but note that uProxy Air only
     // supports v2 access codes which have just three fields:
     //  - v
@@ -90,9 +109,16 @@ export class UproxyServerRepository implements ServerRepository {
       return Promise.reject(new Error('could not decode URL'));
     }
 
-    const cloudTokens: cloud_social_provider.Invite = JSON.parse(
-        jsurl.parse(<string>params.networkData));
-    this.saveServer(cloudTokens);
+    return this.addServerByCloudTokens(jsurl.parse(<string>params.networkData));
+  }
+
+  public addServerByCloudTokens(cloudTokens: cloud_social_provider.Invite) {
+    try {
+      this.saveServer(cloudTokens);
+    } catch (e) {
+      console.warn('could not save server', e);
+    }
+
     // TODO: only notify the core when connecting, and delete it afterwards
     return this.notifyCoreOfServer(cloudTokens);
   }
