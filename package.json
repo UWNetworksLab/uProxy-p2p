@@ -85,6 +85,7 @@
     "tslint": "^3.10.2",
     "typescript": "^2.0.3",
     "uparams": "^1.2.0",
+    "wrtc": "^0.0.61",
     "xregexp": "^2.0.0"
   },
   "scripts": {
