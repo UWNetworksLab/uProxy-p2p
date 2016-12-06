@@ -91,6 +91,9 @@ export class UproxyServerRepository implements ServerRepository {
     }
 
     params.networkData = jsurl.parse(<string>params.networkData);
+    // Due to a gradual transition to the new URL format, some older invites
+    // are actually jsurl(JSON(cloudTokens)), instead of just
+    // jsurl(cloudTokens).  This conditional ensures we parse both forms.
     const cloudTokens: cloud_social_provider.Invite =
         typeof params.networkData === 'string' ?
             JSON.parse(params.networkData) :
