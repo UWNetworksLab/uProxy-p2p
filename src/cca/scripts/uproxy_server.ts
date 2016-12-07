@@ -56,35 +56,28 @@ export class UproxyServerRepository implements ServerRepository {
     private core: CoreConnector,
     private vpnDevice: VpnDevice) { }
 
-  // Returns an empty list if there is any error
-  // loading from storage.
   public getServers() {
-    try {
-      const servers = this.loadServers() || {};
-      console.debug('loaded servers', servers);
-      return Promise.all(Object.keys(servers).map((host) => {
-        return this.notifyCoreOfServer(servers[host].cloudTokens);
-      }));
-    } catch (e) {
-      console.warn('could not load servers: ' + e.message);
-      return Promise.resolve([]);
-    }
+    const servers = this.loadServers();
+    console.debug('loaded servers', servers);
+    return Promise.all(Object.keys(servers).map((host) => {
+      return this.notifyCoreOfServer(servers[host].cloudTokens);
+    }));
   }
 
-  // Loads servers from storage, returning null if none are found.
-  // Throws if there is a problem loading from storage or
-  // deserialising what was loaded.
+  // Loads servers from storage, returning an empty object
+  // if none are found or if there was any problem loading.
   private loadServers(): SavedServers {
     try {
       const serversAsJson = this.storage.getItem(SERVERS_STORAGE_KEY);
       try {
-        return JSON.parse(serversAsJson);
+        return JSON.parse(serversAsJson) || {};
       } catch (e) {
-        throw new Error('could not parse saved servers: ' + e.message);
+        console.warn('could not parse saved servers: ' + e.message);
       }
     } catch (e) {
-      throw new Error('could not load from storage: ' + e.message);
+      console.warn('could not load from storage: ' + e.message);
     }
+    return {};
   }
 
   // Saves a server to storage, merging it with any already found there.
@@ -119,7 +112,7 @@ export class UproxyServerRepository implements ServerRepository {
     try {
       this.saveServer(cloudTokens);
     } catch (e) {
-      console.warn('could not save server', e);
+      console.warn('could not save new server: ' + e.message);
     }
 
     // TODO: only notify the core when connecting, and delete it afterwards
