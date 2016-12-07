@@ -21,6 +21,6 @@ deploy:
     - build/dist/uproxy-chrome-extension.zip
     - build/dist/uproxy-chrome-app.zip
     - build/dist/uproxy-chrome.zip
-    - build/dist/jid1-uTe1Bgrsb76jSA@jetpack-0.9.11.xpi
+    - build/dist/firefox/uproxy-firefox.xpi
   on:
     tags: true

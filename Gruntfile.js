@@ -276,6 +276,11 @@ module.exports = function(grunt) {
         // git repo's "top-level" node_modules/ folder find freedom-for-node.
         cwd: 'build/src/lib/samples/zork-node',
         command: 'yarn add freedom-for-node'
+      },
+      xpi: {
+        // yarn run with options is currently broken:
+        //   https://github.com/yarnpkg/yarn/issues/1156 
+        command: 'npm run jpm -- --addon-dir build/dist/firefox xpi'
       }
     },
     copy: {
@@ -746,13 +751,6 @@ module.exports = function(grunt) {
         }
       }
     },
-    'jpm': {
-      options: {
-        src: 'build/dist/firefox/',
-        xpi: 'build/dist/',
-        debug: true
-      }
-    },
     vulcanize: {
       copypasteSocks: {
         options: {
@@ -837,7 +835,7 @@ module.exports = function(grunt) {
     'build_cca',
     'jshint',
     'copy:dist',
-    'jpm:xpi',
+    'exec:xpi',
     'exec:makeChromeWebStoreZips'
   ]);
 
@@ -1328,7 +1326,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-exec');
   grunt.loadNpmTasks('grunt-gitinfo');
   grunt.loadNpmTasks('grunt-jasmine-chromeapp');
-  grunt.loadNpmTasks('grunt-jpm');
   grunt.loadNpmTasks('grunt-run-once');
   grunt.loadNpmTasks('grunt-string-replace');
   grunt.loadNpmTasks('grunt-ts');
