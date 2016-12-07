@@ -50,14 +50,6 @@
     "portControl": {
       "url": "../freedom-port-control/port-control.json",
       "api": "portControl"
-    },
-    "CLOUDPROVIDER-digitalocean": {
-      "url": "../lib/cloud/digitalocean/freedom-module.json",
-      "api": "digitalocean"
-    },
-    "cloudinstall": {
-      "url": "../lib/cloud/install/freedom-module.json",
-      "api": "cloudinstall"
     }
   },
   "permissions": [
@@ -68,6 +60,7 @@
     "core.storage",
     "core.tcpsocket",
     "core.udpsocket",
-    "core.xhr"
+    "core.xhr",
+    "core.oauth"
   ]
 }

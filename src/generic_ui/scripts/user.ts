@@ -176,6 +176,9 @@ export class User implements social.BaseUser {
   }
 
   private calculateGettingConsentState_ = (): GettingConsentState => {
+    if (this.network.name == 'Cloud') {
+      return GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED;
+    }
     if (this.offeringInstances.length > 0) {
       // there is an instance offering access to us
       if (this.consent_.localRequestsAccessFromRemote) {

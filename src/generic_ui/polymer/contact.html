@@ -190,6 +190,9 @@
                     on-instance-changed='{{ offeringInstancesChanged }}'>
                 </uproxy-instance>
               </template>
+              <!-- Cloud contacts are automatically set to LOCAL_REQUESTED_REMOTE_GRANTED, even
+              though there may not be any known instances yet (when waiting for server to be created).  We just display "Offline" until the server creation is finished -->
+              <span hidden?='{{sortedInstances.length > 0}}'>{{"OFFLINE" | $$(model.globalSettings.language)}}</span>
             </div>
 
             <div hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION }}'>
