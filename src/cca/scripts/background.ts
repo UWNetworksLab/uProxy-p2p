@@ -83,7 +83,9 @@ let serversListPagePromise: Promise<ServerListPage> = new Promise((resolve, reje
     console.debug('Chrome onLaunched fired');
     chrome.app.window.create('index_vulcanized.html', {
       // When running as a Chrome extension for the first time,
-      // open in a nice Nexus 5-like 16:9 aspect ratio (vertically).
+      // open in a 16:9 vertical aspect ratio. This a very common
+      // aspect ratio:
+      //   https://material.io/devices/
       id: 'uProxy',
       innerBounds: {
         width: 400,
