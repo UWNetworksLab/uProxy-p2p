@@ -262,9 +262,7 @@ module.exports = function(grunt) {
         command: 'yarn add freedom-for-node'
       },
       xpi: {
-        // yarn run with options is currently broken:
-        //   https://github.com/yarnpkg/yarn/issues/1156 
-        command: 'npm run jpm -- --addon-dir build/dist/firefox xpi'
+        command: 'yarn run jpm -- --addon-dir build/dist/firefox xpi'
       }
     },
     copy: {
