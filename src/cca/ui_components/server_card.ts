@@ -56,7 +56,7 @@ export class ServerCard {
     }
 
     this.switchState(State.CONNECTING);
-    this.status.innerHTML = 'Connecting...';
+    this.status.textContent = 'Connecting...';
 
     // TODO: um, how is the UI notified if something unexpected happens?
     return this.server.connect((msg) => {
@@ -65,7 +65,7 @@ export class ServerCard {
       this.disconnected(e);
     }).then((port) => {
       this.switchState(State.CONNECTED);
-      this.status.innerHTML = 'Connected';
+      this.status.textContent = 'Connected';
       this.button.setAttribute('src', '../../assets/button/connected.svg');
     });
   }
@@ -77,7 +77,7 @@ export class ServerCard {
     }
 
     this.switchState(State.DISCONNECTING);
-    this.status.innerHTML = 'Disconnecting...';
+    this.status.textContent = 'Disconnecting...';
     this.button.setAttribute('src', '../../assets/button/disconnected.png');
 
     return this.server.disconnect().then(() => {
@@ -90,7 +90,7 @@ export class ServerCard {
 
   private disconnected(msg: string) {
     this.switchState(State.DISCONNECTED);
-    this.status.innerHTML = msg;
+    this.status.textContent = msg;
     // TODO: show regular button
   }
 
