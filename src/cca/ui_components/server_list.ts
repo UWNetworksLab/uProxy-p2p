@@ -18,8 +18,7 @@ const MINIMUM_CARD_HEIGHT_PX = 300;
 const CARD_PEEKTHROUGH_PX = 68;
 
 export class ServerListPage {
-  // Servers currently shown, indexed by hostname.
-  // Used to prevent listing servers more than once.
+  // Server cards currently displayed, keyed by hostname.
   private cards = new Map<String, ServerCard>();
 
   // Parameters:
