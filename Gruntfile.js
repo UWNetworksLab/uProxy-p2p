@@ -240,7 +240,7 @@ module.exports = function(grunt) {
       },
       ccaBuildAndroidRelease: {
         cwd: '<%= androidDevPath %>',
-        command: '<%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
+        command: 'echo no | <%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
       },
       ccaEmulateAndroid: {
         cwd: '<%= androidDevPath %>',
@@ -1177,34 +1177,51 @@ module.exports = function(grunt) {
   // Android
   // =========================================================================
 
-  registerTask(grunt, 'build_android', [
-    // Builds Android from scratch by recreating the Cordova environment.
+  // Recreates the CCA build environment.
+  registerTask(grunt, 'recreate_cca_env', [
     'exec:cleanAndroid',
     'build_cca',
     'exec:ccaCreate',
     'exec:ccaPlatformAndroid',
     'exec:ccaAddPluginsAndroid',
     'copy:cca_splash',
-    'build_android_lite'
   ]);
-  registerTask(grunt, 'build_android_lite', [
-    // Android build task that does not recreate the Cordova environment.
-    // Should only be used for building CCA modules and after running
-    // build_android, without cleaning, initially at least once.
+
+  // Can be used for building CCA modules and after running recreate_cca_env,
+  // without cleaning, initially at least once.
+  registerTask(grunt, 'android_debug_lite', [
     'build_cca',
     'exec:ccaBuildAndroidDev',
     'exec:androidReplaceXwalkDev'
   ]);
-  registerTask(grunt, 'release_android', [
-    'build_android',
+
+  registerTask(grunt, 'android_debug', [
+    'recreate_cca_env',
+    'android_debug_lite'
+  ]);
+
+  // Can be used for building CCA modules and after running recreate_cca_env,
+  // without cleaning, initially at least once.
+  registerTask(grunt, 'android_release_lite', [
+    'build_cca',
     'symlink:cca_keys',
     'exec:ccaBuildAndroidRelease',
     'exec:androidReplaceXwalkRelease'
   ]);
 
+  registerTask(grunt, 'android_release', [
+    'recreate_cca_env',
+    'android_release_lite'
+  ]);
+
+  registerTask(grunt, 'android', [
+    'android_debug',
+    'android_release'
+  ]);
+
   // Emulate the mobile client for android
   registerTask(grunt, 'emulate_android', [
-    'build_android',
+    'android_debug',
     'exec:ccaEmulateAndroid'
   ]);
 
