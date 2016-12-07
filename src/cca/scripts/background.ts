@@ -115,7 +115,7 @@ Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()]).then
   ([serverListPage, intentInterceptor]) => {
     intentInterceptor.addIntentListener((url: string) => {
       console.debug(`[App] Url: ${url}`);
-      serverListPage.enterAccessCode(url);
+      serverListPage.addServer(url);
     });
     if (navigator.splashscreen) {
       navigator.splashscreen.hide();
@@ -128,11 +128,11 @@ serversListPagePromise.then((serverListPage) => {
   try {
     getLocalStorage();
   } catch (e) {
-    serverListPage.enterAccessCode('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
+    serverListPage.addServer('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
       host: '192.168.1.1',
       key: btoa('a fake SSL key')
     })));
-    serverListPage.enterAccessCode('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
+    serverListPage.addServer('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
       host: 'myhost.mydomain.com',
       key: btoa('another fake SSL key')
     })));

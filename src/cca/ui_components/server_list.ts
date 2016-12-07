@@ -27,7 +27,7 @@ export class ServerListPage {
   constructor(private root: Element, private servers: ServerRepository) {
     servers.getServers().then((restoredServers) => {
       restoredServers.forEach((server) => {
-        this.addServer(server);
+        this.addServerCard(server);
       });
     }, (e) => {
       console.error('could not load servers', e);
@@ -51,13 +51,13 @@ export class ServerListPage {
     });
   }
 
-  public enterAccessCode(code: string) {
+  public addServer(code: string) {
     return this.servers.addServer(code).then((server) => {
-      this.addServer(server);
+      this.addServerCard(server);
     });
   }
 
-  private addServer(server: Server) {
+  private addServerCard(server: Server) {
     if (this.cards.has(server.getIpAddress())) {
       return;
     }
