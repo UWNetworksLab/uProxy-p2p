@@ -113,7 +113,6 @@ type some stuff to verify that echo server echoes what you send it. Press ctrl-D
 `rtc-to-net` directories). This command may be used to test the proxy: `curl -x socks5h://localhost:9999 www.example.com` (`-h` indicates that DNS requests are made through the proxy too)
  * **Zork** is a distributed SOCKS proxy with a telnet-based signalling channel, intended for use with [our Docker-based integration testing](https://github.com/uProxy/uproxy-docker). Try connecting to Zork with `telnet localhost 9000`.
  * **uProbe** guess-timates your NAT type.
- * **copypaste-socks** is a distributed SOCKS proxy demo. This is essentially uProxy without any social network integration.
  * **simple-churn-chat** is just like simple-freedom-chat, except WebRTC traffic between the two peers is obfuscated. Wireshark may be used to verify that the traffic is obfuscated; the endpoints in use - along with a lot of debugging information - may be determined by examining the Javascript console.
  * **copypaste-freedom-chat** is just like copypaste-fredom-chat, except WebRTC traffic between the two peers is obfuscated.
 
