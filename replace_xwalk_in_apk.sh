@@ -14,14 +14,7 @@
 # directory of the project (which is where this script is located).
 ROOT_DIR="$(cd "$(dirname $0)"; pwd)";
 
-if [ "$1" = "debug" ]; then
-  APK_PATH="$ROOT_DIR/build/src/android/platforms/android/build/outputs/apk"
-elif [ "$1" = "release" ]; then
-  APK_PATH="$ROOT_DIR/build/dist/android/platforms/android/build/outputs/apk"
-else
-  echo "Unknown build type $1"
-  exit 1
-fi
+readonly APK_PATH="$ROOT_DIR/build/src/android/platforms/android/build/outputs/apk"
 
 APK_UNALIGNED="$APK_PATH/android-armv7-$1-unaligned.apk"
 APK_FINAL="$APK_PATH/android-armv7-$1.apk"
