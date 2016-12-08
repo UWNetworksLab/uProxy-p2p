@@ -37,7 +37,7 @@ const DEFAULT_MESSAGE_VERSION = 4;
 
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
-interface Invite {
+export interface Invite {
   // Hostname or IP of the cloud instance.
   // This is the host on which sshd is running, so it should
   // be directly accessible from the client.

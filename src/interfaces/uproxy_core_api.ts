@@ -167,10 +167,9 @@ export enum Update {
   PORT_CONTROL_STATUS = 2025,
   // Payload is a string, obtained from the SignalBatcher in uproxy-lib.
   ONETIME_MESSAGE = 2026,
-  CLOUD_INSTALL_STATUS = 2027,
+  // Deprecated: CLOUD_INSTALL_STATUS = 2027,
   REMOVE_FRIEND = 2028, // Removed friend from roster.
-  // Payload is an integer between 0 and 100.
-  CLOUD_INSTALL_PROGRESS = 2029,
+  // Deprecated: CLOUD_INSTALL_PROGRESS = 2029,
   REFRESH_GLOBAL_SETTINGS = 2030, // Sends UI new canonical version of global settings
   REPROXY_ERROR = 2031,  // Controls reproxy error bar notification to sharer
   REPROXY_WORKING = 2032
@@ -260,10 +259,7 @@ export enum PortControlSupport {PENDING, TRUE, FALSE};
 export enum ReproxyCheck {PENDING, TRUE, FALSE, UNCHECKED};
 
 export enum CloudOperationType {
-  CLOUD_INSTALL = 0,
-  CLOUD_DESTROY = 1,
-  CLOUD_REBOOT = 2,
-  CLOUD_HAS_OAUTH = 3
+  CLOUD_INSTALL = 0
 }
 
 // Arguments to cloudUpdate
@@ -273,11 +269,6 @@ export interface CloudOperationArgs {
   providerName :string;
   // Provider-specific region in which to locate a new server.
   region ?:string;
-};
-
-// Result of cloudUpdate
-export interface CloudOperationResult {
-  hasOAuth? :boolean;
 };
 
 // Argument to removeContact
@@ -317,7 +308,7 @@ export interface CoreApi {
 
   // Using peer as a proxy.
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
-  stop (path :social.InstancePath) : void;
+  stop (path :social.InstancePath) : Promise<void>;
 
   updateGlobalSettings(newSettings :GlobalSettings) :void;
   updateGlobalSetting(change: UpdateGlobalSettingArgs): void;
@@ -338,9 +329,7 @@ export interface CoreApi {
   // callers should expose CLOUD_INSTALL_STATUS updates to the user.
   // This may also invoke an OAuth flow, in order to perform operations
   // with the cloud computing provider on the user's behalf.
-  // Update: This is also now used for CloudOperationType.CLOUD_HAS_OAUTH,
-  // which is neither long-running nor potentially triggers an OAuth flow.
-  cloudUpdate(args :CloudOperationArgs): Promise<CloudOperationResult>;
+  cloudUpdate(args :CloudOperationArgs): Promise<void>;
 
   // Removes contact from roster, storage, and friend list
   removeContact(args :RemoveContactArgs) : Promise<void>;

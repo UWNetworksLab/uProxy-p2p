@@ -9,9 +9,6 @@ export interface RuleConfig {
   // The path from where third party libraries should be copied. e.g. as used by
   // sample apps.
   thirdPartyBuildPath :string;
-  // The path to copy modules from this repository into. e.g. as used by sample
-  // apps.
-  localLibsDestPath :string;
 }
 
 export interface JasmineRule {
@@ -175,7 +172,6 @@ export class Rule {
     copyInfo.files = copyInfo.files || [];
 
     var destPath = path.join(this.config.devBuildPath, copyInfo.localDestPath);
-    var destPathForLibs = path.join(destPath, this.config.localLibsDestPath);
 
     var allFilesForlibPaths :CopyFilesDescription[] = [];
 
@@ -214,7 +210,7 @@ export class Rule {
           '!' + libPath + '/**/*.spec.js',
           '!' + libPath + '/**/SpecRunner.html'
         ],
-        dest: destPathForLibs,
+        dest: destPath,
         onlyIf: 'modified'
       });
     });
