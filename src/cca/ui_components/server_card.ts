@@ -61,12 +61,12 @@ export class ServerCard {
     // TODO: um, how is the UI notified if something unexpected happens?
     return this.server.connect((msg) => {
       this.disconnected('Tap to connect');
-    }).catch((e) => {
-      this.disconnected(e);
     }).then((port) => {
       this.switchState(State.CONNECTED);
       this.status.textContent = 'Connected';
       this.button.setAttribute('src', '../../assets/button/connected.svg');
+    }, (e) => {
+      this.disconnected(e.message);
     });
   }
 

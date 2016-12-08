@@ -9,6 +9,7 @@
  */
 
 import { ServerListPage } from '../ui_components/server_list';
+import { Server, ServerRepository } from '../model/server';
 import { UproxyServerRepository } from './uproxy_server';
 import { MakeCoreConnector } from './cordova_core_connector';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
@@ -53,26 +54,39 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
       return new UproxyServerRepository(
         getLocalStorage(), core, vpnDevice);
     } catch (e) {
-      console.warn('local storage unavailable');
-      const serverRepository = new UproxyServerRepository({
-        length: 0,
-        clear: () => {
-          throw new Error('this is mock storage');
+      // Add some mock servers if we are running as a Chrome extension.
+      console.warn('local storage unavailable, showing mock servers');
+      return <ServerRepository>{
+        addServer(code) {
+          throw new Error('unsupported operation');
         },
-        getItem: (key: string) => {
-          throw new Error('this is mock storage');
-        },
-        key: (index: number) => {
-          throw new Error('this is mock storage');
-        },
-        removeItem: (key: string) => {
-          throw new Error('this is mock storage');
-        },
-        setItem: (key: string, data: string) => {
-          throw new Error('this is mock storage');
+        getServers() {
+          return Promise.resolve([
+            <Server>{
+              getIpAddress() {
+                return '192.168.1.1';
+              },
+              connect(callback) {
+                return Promise.resolve();
+              },
+              disconnect() {
+                return Promise.resolve();
+              }
+            },
+            <Server>{
+              getIpAddress() {
+                return 'broken.mydomain.com';
+              },
+              connect(callback) {
+                return Promise.reject(new Error('unreachable host'));
+              },
+              disconnect() {
+                return Promise.resolve();
+              }
+            }
+          ]);
         }
-      }, core, vpnDevice);
-      return serverRepository;
+      };
     }
   });
 });
@@ -122,19 +136,3 @@ Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()]).then
     }
   }
 );
-
-// Add some mock servers if we are running as a Chrome extension.
-serversListPagePromise.then((serverListPage) => {
-  try {
-    getLocalStorage();
-  } catch (e) {
-    serverListPage.addServer('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
-      host: '192.168.1.1',
-      key: btoa('a fake SSL key')
-    })));
-    serverListPage.addServer('/?v=2&networkName=Cloud&networkData=' + encodeURIComponent(jsurl.stringify({
-      host: 'myhost.mydomain.com',
-      key: btoa('another fake SSL key')
-    })));
-  };
-});
