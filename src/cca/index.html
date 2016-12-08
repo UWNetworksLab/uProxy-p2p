@@ -3,38 +3,41 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>uProxy Air</title>
+  <title>uProxy</title>
   <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
-  <script src='../bower/webcomponentsjs/webcomponents.min.js'></script>
+  <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
 
-  <!-- The vulcanized code will be loaded asynchronously by context.static.js -->
-  <!-- <link rel='import' href='polymer/vulcanized.html'> -->
+  <link rel="import" href="bower_components/iron-icons/iron-icons.html">
+  <link rel="import" href="bower_components/paper-button/paper-button.html">
+  <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
+  <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
+
+  <!-- Figure out how to fix the CSP issue with the googleapis font import from iron-meta -->
+  <!--<link rel="import" href="bower_components/paper-card/paper-card.html">-->
+  <!--<link rel="import" href="bower_components/paper-input/paper-input.html">-->
+
   <link href='generic_ui/fonts/Roboto.css' rel='stylesheet' type='text/css'>
   <link href='generic_ui/style/global.css' rel='stylesheet' shim-shadowdom>
 
   <style>
-    .header {
-        width: 100%;
-        text-align: left;
-        padding: 10px;
-        margin-top: 0;
-        background-color: #12a391;
-        color: #FeFeFe;
+    paper-toolbar.uproxy {
+      background: #12a391;
     }
-    button {
-      border-style: none;
-      padding: 5px;
-      margin: 5px;
-    }
-    button:enabled {
-      background-color: #12a391;
-      color: #fefefe;
-    }
-    .server-entry {
+    .server-entry-card, .access-code-card {
       background-color: white;
       box-shadow: 1px 1px 3px #AAAAAA;
       margin: 10px;
       padding: 10px;
+    }
+    .access-code-card {
+      padding: 5px;
+    }
+    .access-code-card input {
+      width: 20em;
+    }
+    .page-content {
+      padding: 5px;
     }
     @font-face {
       font-family: Quicksand;
@@ -51,7 +54,6 @@
     }
     body {
       display: block;
-      text-align: center;
       margin: 0;
       font-family: Roboto, sans-serif;
       font-size: 13px;
@@ -61,14 +63,21 @@
   </style>
 </head>
 
-<body touch-action='auto'>
-  <h1 class='header'>uProxy Air Client</h1>
-
-  <div id='setup-widget'>
-    <textarea id='token-text'></textarea>
-    <button id='add-server-button'>Add Server</button>
-  </div>
-  <div id='entry-list'></div>
+<body touch-action='auto' class='fullbleed layout vertical'>
+  <paper-header-panel mode='waterfall' class='flex'>
+    <paper-toolbar class='uproxy'>
+      <paper-icon-button icon="menu"></paper-icon-button>
+      <span class="title">uProxy</span>
+    </paper-toolbar>
+    <div class='page-content'>
+      <div id='entry-list'></div>
+      <div class='access-code-card'>
+        <!-- TODO(fortuna): i18n this -->
+        <input type='text' id='token-text' label="Enter Access Code"></input>
+        <paper-button id='add-server-button' raised>Add Server</paper-button>
+      </div>
+    </div>
+  </paper-header-panel>
 </body>
 
 </html>

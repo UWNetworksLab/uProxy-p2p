@@ -1,4 +1,5 @@
 import uparams = require('uparams');
+import * as cloud_social_provider from '../../lib/cloud/social/provider';
 import * as jsurl from 'jsurl';
 import * as social from '../../interfaces/social';
 import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
@@ -8,26 +9,6 @@ import { AccessCode, Server, ServerRepository } from '../model/server';
 import { SocksProxy } from '../model/socks_proxy_server';
 import { VpnDevice } from '../model/vpn_device';
 import { CloudSocksProxy } from './cloud_socks_proxy_server';
-
-function parseInviteUrl(inviteUrl: string): social.InviteTokenData {
-  let params = uparams(inviteUrl);
-  if (!params || !params['networkName']) {
-    throw new Error(`networkName not found: ${inviteUrl}`);
-  }
-  var permission: any;
-  if (params['permission']) {
-    permission = jsurl.parse(params['permission']);
-  }
-  return {
-    v: parseInt(params['v'], 10),
-    networkData: JSON.parse(jsurl.parse(params['networkData'])),
-    networkName: params['networkName'],
-    userName: params['userName'],
-    permission: permission,
-    userId: params['userId'],  // undefined if no permission
-    instanceId: params['instanceId'],  // undefined if no permission
-  }
-}
 
 // A local Socks server that provides access to a remote uProxy Cloud server via RTC.
 export class UproxyServer implements Server {
@@ -56,25 +37,76 @@ export class UproxyServer implements Server {
   }
 }
 
+// Name by which servers are saved to storage.
+const SERVERS_STORAGE_KEY = 'servers';
+
+// Type of the object placed, in serialised form, in storage.
+type SavedServers = { [id: string]: SavedServer };
+
+// A server as saved to storage.
+interface SavedServer {
+  cloudTokens?: cloud_social_provider.Invite;
+}
+
+// Maintains a persisted set of servers and liases with the core.
 export class UproxyServerRepository implements ServerRepository {
-  constructor(private core: CoreConnector, private vpnDevice: VpnDevice) {
-    this.core.login({
-      network: 'Cloud',
-      loginType: uproxy_core_api.LoginType.INITIAL,
-    });
+  constructor(
+    private storage: Storage,
+    // Must already be logged into social networks.
+    private core: CoreConnector,
+    private vpnDevice: VpnDevice) { }
+
+  public getServers() {
+    const servers = this.loadServers();
+    return Promise.all(Object.keys(servers).map((host) => {
+      return this.notifyCoreOfServer(servers[host].cloudTokens);
+    }));
   }
 
-  public addServer(code: AccessCode): Promise<Server> {
-    let token = parseInviteUrl(code);
-    if (!token) {
-      return Promise.reject(`Failed to parse access code: ${code}`);
+  private loadServers(): SavedServers {
+    return JSON.parse(this.storage.getItem(SERVERS_STORAGE_KEY)) || {};
+  }
+
+  // Saves a server to storage, merging it with any already found there.
+  // Returns true if the server was not already in storage.
+  private saveServer(cloudTokens: cloud_social_provider.Invite) {
+    const savedServers = this.loadServers();
+    savedServers[cloudTokens.host] = {
+      cloudTokens: cloudTokens
+    };
+    this.storage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(savedServers));
+  }
+
+  public addServer(accessCode: AccessCode) {
+    // This is inspired by ui.ts but note that uProxy Air only
+    // supports v2 access codes which have just three fields:
+    //  - v
+    //  - networkName
+    //  - networkData
+    // TODO: accept only cloud access codes
+    const params: social.InviteTokenData = uparams(accessCode);
+    if (!(params || params.v ||
+      params.networkName || params.networkData)) {
+      return Promise.reject(new Error('could not decode URL'));
     }
-    // TODO: Do I need to wait for core.login()?
+
+    const cloudTokens: cloud_social_provider.Invite = JSON.parse(
+        jsurl.parse(<string>params.networkData));
+    this.saveServer(cloudTokens);
+    // TODO: only notify the core when connecting, and delete it afterwards
+    return this.notifyCoreOfServer(cloudTokens);
+  }
+
+  private notifyCoreOfServer(cloudTokens: cloud_social_provider.Invite) {
     return this.core.acceptInvitation({
-      network: {name: 'Cloud'},
-      tokenObj: token
+      network: {
+        name: 'Cloud'
+      },
+      tokenObj: {
+        networkData: cloudTokens,
+      }
     }).then(() => {
-      let proxy = new CloudSocksProxy(this.core, (token.networkData as any).host);
+      let proxy = new CloudSocksProxy(this.core, cloudTokens.host);
       return new UproxyServer(proxy, this.vpnDevice, proxy.getRemoteIpAddress());
     });
   }

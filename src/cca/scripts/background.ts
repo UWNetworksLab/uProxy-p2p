@@ -14,6 +14,20 @@ import { MakeCoreConnector } from './cordova_core_connector';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 import * as vpn_device from '../model/vpn_device';
 import * as intents from './intents';
+import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+
+// https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+function getLocalStorage(): Storage {
+  try {
+    const storage = window['localStorage'];
+    const x = '__storage_test__';
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return localStorage;
+  } catch(e) {
+    throw new Error('localStorage unavailable');
+  }
+}
 
 // We save this reference to allow inspection of the context state from the browser debuggin tools.
 (window as any).context = this;
@@ -22,7 +36,7 @@ import * as intents from './intents';
 // TODO(fortuna): I believe we need to somehow wait for the core to be ready.
 let core = MakeCoreConnector();
 
-// Create UproxyServerRepository.
+// Log into the cloud social network and create UproxyServerRepository.
 let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
   console.debug('Device supports VPN');
   return vpnDevice;
@@ -30,17 +44,25 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
   console.error(error);
   return new vpn_device.NoOpVpnDevice();
 }).then((vpnDevice) => {
-  return new UproxyServerRepository(core, vpnDevice);
+  return core.login({
+    network: 'Cloud',
+    loginType: uproxy_core_api.LoginType.INITIAL,
+  }).then(() => {
+    return new UproxyServerRepository(getLocalStorage(), core, vpnDevice);
+  });
 });
 
 // Create UI.
 let serversListPagePromise: Promise<ServerListPage> = new Promise((resolve, reject) => {
   chrome.app.runtime.onLaunched.addListener(() => {
     console.debug('Chrome onLaunched fired');
-    chrome.app.window.create('index.html', null, (appWindow) => {
+    chrome.app.window.create('index_vulcanized.html', null, (appWindow) => {
+      console.debug('window created');
       let document = appWindow.contentWindow.document;
       document.addEventListener('DOMContentLoaded', function (event) {
+        console.debug('dom ready');
         serversPromise.then((servers) => {
+          console.debug('servers ready');
           resolve(new ServerListPage(appWindow.contentWindow.document.body, servers));
         });
       });

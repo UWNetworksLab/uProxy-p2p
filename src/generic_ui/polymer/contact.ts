@@ -128,73 +128,14 @@ Polymer({
   },
   removeCloudFriend: function(event: Event) {
     this.displayCloudRemovalConfirmation().then(() => {
-      // Destroy cloud server if created by user
-      return this.destroyCloudServerIfNeeded();
-    }).then(() => {
-      // Remove contact from friend list
-      return ui_context.core.removeContact({
-        networkName: this.contact.network.name,
-        userId: this.contact.userId
-      });
-    }).then(() => {
-      this.fire('core-signal', {
-        name: 'show-toast',
-        data: {
-          toastMessage: translator.i18n_t('REMOVE_CLOUD_SERVER_SUCCESS')
-        }
-      });
-    }).catch((e: Error) => {
-      if (!e) {
-        return;
-      }
-
-      if (e.name === 'CLOUD_ERR') {
-        this.$.state.openDialog(dialogs.getMessageDialogDescription(
-            translator.i18n_t('REMOVE_CLOUD_SERVER'),
-            translator.i18n_t('DESTROY_CLOUD_SERVER_FAILURE')));
-      } else {
-        this.$.state.openDialog(dialogs.getMessageDialogDescription(
-            translator.i18n_t('REMOVE_CLOUD_SERVER'),
-            translator.i18n_t('REMOVE_CLOUD_SERVER_FAILURE')));
-      }
+      this.ui.openTab('https://cloud.digitalocean.com/droplets');
     });
-
     event.stopPropagation();
   },
   displayCloudRemovalConfirmation: function() {
-    if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-      return this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
+    return this.$.state.openDialog(dialogs.getMessageDialogDescription(
         translator.i18n_t('REMOVE_CLOUD_SERVER'),
-        translator.i18n_t('DESTROY_CLOUD_SERVER_CONFIRMATION'),
-        translator.i18n_t('CANCEL'),
-        translator.i18n_t('CONTINUE')));
-    } else {
-      return this.$.state.openDialog(dialogs.getConfirmationDialogDescription(
-        translator.i18n_t('REMOVE_CLOUD_SERVER'),
-        translator.i18n_t('REMOVE_CLOUD_SERVER_CONFIRMATION'),
-        translator.i18n_t('CANCEL'),
-        translator.i18n_t('CONTINUE')));
-    }
-  },
-  destroyCloudServerIfNeeded: function() {
-    if (this.contact.status === this.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-      this.fire('core-signal', {
-        name: 'show-toast',
-        data: {
-          toastMessage: translator.i18n_t('REMOVING_UPROXY_CLOUD_STATUS')
-        }
-      });
-      return ui_context.core.cloudUpdate({
-        operation: uproxy_core_api.CloudOperationType.CLOUD_DESTROY,
-        providerName: DEFAULT_PROVIDER
-      }).catch((e: Error) => {
-        return Promise.reject({
-          'name':'CLOUD_ERR',
-          'message':'Could not destroy cloud server.'
-        });
-      });
-    }
-    return Promise.resolve();
+        translator.i18n_t('REMOVE_CLOUD_SERVER_CONFIRMATION')));
   },
   ready: function() {
     this.ui = ui_context.ui;
