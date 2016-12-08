@@ -85,8 +85,7 @@ do_install() {
 
   echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
-  git clone --depth 1 https://github.com/uProxy/uproxy-docker.git $TMP_DIR
-  cd $TMP_DIR/testing/run-scripts
+  git clone --depth 1 https://github.com/uProxy/uproxy.git $TMP_DIR
 
   RUN_CLOUD_ARGS=
   if [ "$AUTOMATED" = true ]
@@ -101,7 +100,7 @@ do_install() {
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k $KEY"
   fi
-  ./run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
+  $TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
 
 # Wrapped in a function for some protection against half-downloads.

@@ -11,7 +11,7 @@ set -e
 
 source "${BASH_SOURCE%/*}/utils.sh" || (echo "cannot find utils.sh" && exit 1)
 
-PREBUILT=
+PREBUILT=false
 VNC=false
 KEEP=false
 MTU=
@@ -20,8 +20,8 @@ PROXY_PORT=9999
 CONTAINER_PREFIX="uproxy"
 
 function usage () {
-  echo "$0 [-p path] [-v] [-k] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
-  echo "  -p: path to uproxy repo"
+  echo "$0 [-p] [-v] [-k] [-m mtu] [-l latency] [-s port] [-u prefix] browserspec browserspec"
+  echo "  -p: use Zork from this client rather than the Docker image"
   echo "  -v: enable VNC on containers.  They will be ports 5900 and 5901."
   echo "  -k: KEEP containers after last process exits.  This is docker's --rm."
   echo "  -m MTU: set the MTU on the getter's network interface."
@@ -37,9 +37,9 @@ function usage () {
 }
 
 # TODO: replace browser-version with a Docker image name, ala run_cloud.sh
-while getopts p:kvr:m:l:s:u:h? opt; do
+while getopts pkvr:m:l:s:u:h? opt; do
   case $opt in
-    p) PREBUILT="$OPTARG" ;;
+    p) PREBUILT=true ;;
     k) KEEP=true ;;
     v) VNC=true ;;
     m) MTU="$OPTARG" ;;
@@ -83,9 +83,9 @@ function run_docker () {
   then
     HOSTARGS="$HOSTARGS --rm=false"
   fi
-  if [ ! -z "$PREBUILT" ]
-  then
-    HOSTARGS="$HOSTARGS -v $PREBUILT/build/src/lib/samples:/test/zork"
+  if [ "$PREBUILT" = true ]; then
+    GIT_ROOT=`git rev-parse --show-toplevel`
+    HOSTARGS="$HOSTARGS -v $GIT_ROOT/build/src/lib/samples:/test/zork"
   fi
   docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /sbin/my_init -- /test/bin/load-zork.sh $RUNARGS
 }
@@ -116,7 +116,7 @@ echo
 
 echo "Connecting pair..."
 sleep 2 # make sure nc is shutdown
-./connect-pair.py localhost $GETTER_COMMAND_PORT localhost $GIVER_COMMAND_PORT
+${BASH_SOURCE%/*}/connect-pair.py localhost $GETTER_COMMAND_PORT localhost $GIVER_COMMAND_PORT
 
 echo "SOCKS proxy should be available, sample command:"
 echo "  curl -x socks5h://localhost:$PROXY_PORT www.example.com"

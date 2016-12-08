@@ -14,16 +14,17 @@
 
 import argparse
 import itertools
+import os
 import subprocess
 
-parser = argparse.ArgumentParser(
-    description='Cross-browser tests for uproxy release process.')
-parser.add_argument('clone_path', help='path to uproxy repo')
+parser = argparse.ArgumentParser(description='Cross-browser tests for uproxy release process.')
 parser.add_argument('--browsers', help='browsers to test', nargs='+', default=['chrome', 'firefox'])
 parser.add_argument('--versions', help='browser versions to test', nargs='+', default=['stable', 'beta'])
 args = parser.parse_args()
 
 test_url = 'http://www.example.com/'
+
+run_path = os.path.dirname(os.path.realpath(__file__))
 
 # Compute a hash of the page without using any proxy.
 known_small_md5sum = subprocess.check_output(
@@ -34,7 +35,7 @@ print('** small download known md5sum: ' + known_small_md5sum)
 
 # Start a flood server.
 FLOOD_SIZE_MB = 1
-flood_ip = subprocess.check_output(['./flood.sh', str(FLOOD_SIZE_MB) + 'M'],
+flood_ip = subprocess.check_output([run_path + '/flood.sh', str(FLOOD_SIZE_MB) + 'M'],
     universal_newlines=True).strip()
 print('** flood server: ' + flood_ip)
 
@@ -54,7 +55,7 @@ for getter_spec, giver_spec in itertools.product(combos, combos):
     # Start the browsers.
     print('** ' + getter_spec + ' <- ' + giver_spec)
     subprocess.call(['docker', 'rm', '-f', 'uproxy-getter', 'uproxy-giver'])
-    subprocess.call(['./run_pair.sh', '-p', args.clone_path, getter_spec, giver_spec])
+    subprocess.call([run_path + '/run_pair.sh', '-p', getter_spec, giver_spec])
 
     # small HTTP download.
     small_md5sum = subprocess.check_output(

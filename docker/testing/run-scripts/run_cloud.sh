@@ -10,7 +10,7 @@
 
 set -e
 
-PREBUILT=
+PREBUILT=false
 ZORK_IMAGE="uproxy/zork"
 SSHD_IMAGE="uproxy/sshd"
 INVITE_CODE=
@@ -24,8 +24,8 @@ KEY=
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p path] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] [-k key]"
-  echo "  -p: path to uproxy repo"
+  echo "$0 [-p] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] [-k key]"
+  echo "  -p: use Zork from this client rather than the Docker image"
   echo "  -z: use a specified Zork image (defaults to uproxy/zork)"
   echo "  -s: use a specified sshd image (defaults to uproxy/sshd)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
@@ -39,9 +39,9 @@ function usage () {
   exit 1
 }
 
-while getopts p:z:s:i:uwd:b:k:ah? opt; do
+while getopts pz:s:i:uwd:b:k:ah? opt; do
   case $opt in
-    p) PREBUILT="$OPTARG" ;;
+    p) PREBUILT=true ;;
     z) ZORK_IMAGE="$OPTARG" ;;
     s) SSHD_IMAGE="$OPTARG" ;;
     i) INVITE_CODE="$OPTARG" ;;
@@ -140,9 +140,9 @@ echo "CLOUD_INSTALL_STATUS_INSTALLING_UPROXY"
 echo "CLOUD_INSTALL_PROGRESS 10"
 if ! docker ps -a | grep uproxy-zork >/dev/null; then
   HOSTARGS=
-  if [ -n "$PREBUILT" ]
-  then
-    HOSTARGS="$HOSTARGS -v $PREBUILT/build/src/lib/samples:/test/zork"
+  if [ "$PREBUILT" = true ]; then
+    readonly GIT_ROOT=`git rev-parse --show-toplevel`
+    HOSTARGS="$HOSTARGS -v $GIT_ROOT/build/src/lib/samples:/test/zork"
   fi
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:

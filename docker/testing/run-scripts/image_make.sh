@@ -1,33 +1,35 @@
 #!/bin/bash
 
+# Packages Zork in a Docker image.
+# There are several choices for runtime environment.
+# This script will bundle whatever Zork it finds in the
+# client; this may be overridden at runtime with
+# run_pair.sh's and run_cloud.sh's -p option.
+
 set -e
 
-PREBUILT=
+# TODO: rename browser -> platform
 
 function usage () {
-  echo "$0 [-p] [-h] browser version"
-  echo "  -p: path to uproxy repo"
+  echo "$0 [-h] browser version"
   echo "  -h, -?: this help message"
-  echo
-  echo "If -p is not specified then -p must be passed to run_cloud.sh and run_pair.sh."
   exit 1;
 }
 
-while getopts p:h? opt; do
+while getopts h? opt; do
   case $opt in
-    p) PREBUILT="$OPTARG" ;;
     *) usage ;;
   esac
 done
 shift $((OPTIND-1))
 
-if [ $# -lt 2 ]
-then
+if [ $# -lt 2 ]; then
   usage
 fi
 
 BROWSER=$1
 VERSION=$2
+readonly GIT_ROOT=`git rev-parse --show-toplevel`
 
 TMP_DIR=`mktemp -d`
 
@@ -47,23 +49,19 @@ EXPOSE 9999
 EOF
 
 # Chrome and Firefox need X.
-if [ "$BROWSER" = "chrome" ] || [ "$BROWSER" = "firefox" ]
-then
+if [ "$BROWSER" = "chrome" ] || [ "$BROWSER" = "firefox" ]; then
   cat <<EOF >> $TMP_DIR/Dockerfile
 RUN apt-get install -y xvfb fvwm x11vnc
 EXPOSE 5900
 EOF
 fi
 
-if [ -n "$PREBUILT" ]
-then
-  mkdir $TMP_DIR/zork
-  cp -R $PREBUILT/build/src/lib/samples/zork-* $TMP_DIR/zork
-  cat <<EOF >> $TMP_DIR/Dockerfile
+mkdir $TMP_DIR/zork
+cp -R $GIT_ROOT/build/src/lib/samples/zork-* $TMP_DIR/zork
+cat <<EOF >> $TMP_DIR/Dockerfile
 COPY zork /test/zork/
 EOF
-fi
 
-./gen_browser.sh "$@" >> $TMP_DIR/Dockerfile
+${BASH_SOURCE%/*}/gen_browser.sh "$@" >> $TMP_DIR/Dockerfile
 
 docker build -t uproxy/$BROWSER-$VERSION $TMP_DIR
