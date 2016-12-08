@@ -361,16 +361,6 @@ module.exports = function(grunt) {
           }
         ]
       },
-      integration: {
-        files: [{
-          // Copy compiled Chrome App code, required for integration tests.
-          expand: true,
-          cwd: chromeAppDevPath,
-          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts'],
-          dest: devBuildPath + '/integration'
-        }]
-      },
-
       // uproxy-lib sample apps.
       libsForZorkChromeApp: Rule.copyLibs({
         npmLibNames: ['freedom-for-chrome'],
@@ -546,8 +536,6 @@ module.exports = function(grunt) {
       chromeExtensionCoreConnectorSpec: Rule.browserifySpec('chrome/extension/scripts/chrome_core_connector'),
       genericCoreFirewall: Rule.browserify('generic_core/firewall'),
       genericCoreFreedomModule: Rule.browserify('generic_core/freedom-module'),
-      integrationSpec: Rule.browserifySpec('integration/core'),
-      integrationFreedomModule: Rule.browserify('integration/test_connection'),
 
       // uproxy-lib
       loggingProvider: Rule.browserify('lib/loggingprovider/freedom-module'),
@@ -613,25 +601,6 @@ module.exports = function(grunt) {
       ])
     },
     jasmine_chromeapp: {
-      all: {
-        files: [
-          {
-            cwd: devBuildPath + '/integration/',
-            src: ['**/*'],
-            dest: './',
-            expand: true
-          }
-        ],
-        scripts: [
-          'freedom-for-chrome/freedom-for-chrome.js',
-          'core.spec.static.js'
-        ],
-        options: {
-          outdir: 'build/src/integration/'
-          // Uncomment this for debugging
-          // keepRunner: true,
-        }
-      },
       tcp: {
         files: [
           {
@@ -1226,7 +1195,6 @@ module.exports = function(grunt) {
     'base',
     'unit_test_nobuild'
   ]);
-  // TODO: add test_chrome once it passes reliably
   registerTask(grunt, 'integration_test', [
     'tcpIntegrationTest',
     'socksEchoIntegrationTest'
