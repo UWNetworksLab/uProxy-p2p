@@ -37,7 +37,7 @@ Polymer({
     dialogClickFn(fulfill, data);
     dialogClickFn = null;
   },
-  openDialog: function(data: ui.DialogDescription) {
+  openDialog: function(dialogDescription: ui.DialogDescription) {
     return new Promise<Object>((F, R) => {
       if (dialogClickFn) {
         console.error('Previous dialog was not cleaned up');
@@ -53,7 +53,7 @@ Polymer({
 
       this.fire('core-signal', {
         name: 'open-dialog',
-        data: data
+        data: dialogDescription
       });
     });
   }

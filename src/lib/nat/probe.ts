@@ -13,7 +13,7 @@ var TEST_PORT = 6666;
 var log :logging.Log = new logging.Log('probe');
 
 export function probe() : Promise<string> {
-  return new Promise((F, R) => {
+  return new Promise((resolve, reject) => {
     var socket :freedom.UdpSocket.Socket = freedom['core.udpsocket']();
     // The weird-looking type is due to a DefinitelyTyped weirdness
     // mentioned here:
@@ -29,31 +29,31 @@ export function probe() : Promise<string> {
       var rsp = JSON.parse(rspStr);
 
       if (rsp['answer'] === 'FullCone') {
-        F('FullCone');
+        resolve('FullCone');
       } else if (rsp['answer'] === 'RestrictedConePrepare') {
-        var peer_addr: string[] = rsp['prepare_peer'].split(':');
-        var req: ArrayBuffer = arraybuffers.stringToArrayBuffer('{"ask":""}');
+        const peer_addr: string[] = rsp['prepare_peer'].split(':');
+        const req: ArrayBuffer = arraybuffers.stringToArrayBuffer('{"ask":""}');
         log.debug('reply to RestrictedConePrepare');
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
       } else if (rsp['answer'] === 'RestrictedCone') {
-        F('RestrictedCone');
+        resolve('RestrictedCone');
       } else if (rsp['answer'] === 'PortRestrictedConePrepare') {
-        var peer_addr: string[] = rsp['prepare_peer'].split(':');
-        var req: ArrayBuffer = arraybuffers.stringToArrayBuffer('{"ask":""}');
+        const peer_addr: string[] = rsp['prepare_peer'].split(':');
+        const req: ArrayBuffer = arraybuffers.stringToArrayBuffer('{"ask":""}');
         log.debug('reply to PortRestrictedConePrepare');
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
       } else if (rsp['answer'] === 'PortRestrictedCone') {
-        F('PortRestrictedCone');
+        resolve('PortRestrictedCone');
       } else if (rsp['answer'] === 'SymmetricNATPrepare') {
-        var peer_addr: string[] = rsp['prepare_peer'].split(':');
-        var reqStr: string = JSON.stringify({ 'ask': 'AmISymmetricNAT' });
-        var req: ArrayBuffer = arraybuffers.stringToArrayBuffer(reqStr);
+        const peer_addr: string[] = rsp['prepare_peer'].split(':');
+        const reqStr: string = JSON.stringify({ 'ask': 'AmISymmetricNAT' });
+        const req: ArrayBuffer = arraybuffers.stringToArrayBuffer(reqStr);
         socket.sendTo(req, peer_addr[0], parseInt(peer_addr[1]));
         return;
       } else if (rsp['answer'] === 'SymmetricNAT') {
-        F('SymmetricNAT');
+        resolve('SymmetricNAT');
       } else {
         return;
       }
@@ -133,7 +133,7 @@ export function probe() : Promise<string> {
     }).catch((e: Error) => {
       if (e.message !== 'shortCircuit') {
         log.error('something wrong: ' + e.message);
-        R(e);
+        reject(e);
       } else {
         log.debug('shortCircuit');
       }

@@ -59,10 +59,6 @@ describe('remote_instance.RemoteInstance', () => {
   };
   user.onceNameReceived = Promise.resolve<string>('name');
 
-  var socksToRtc =
-      <socks_to_rtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
-          'onceReady'
-      ]);
   var instance :remote_instance.RemoteInstance;
   var localPeerId = {
     clientInstancePath: 'clientInstancePath',
@@ -106,7 +102,6 @@ describe('remote_instance.RemoteInstance', () => {
   });
 
   describe('updating consent from instance handshake', () => {
-    var instance :remote_instance.RemoteInstance;
     var INSTANCE_ID = 'instance1';
 
     beforeEach((done) => {
@@ -119,7 +114,7 @@ describe('remote_instance.RemoteInstance', () => {
         network['getLocalInstanceId'] = function() { return 'myInstanceId'; };
         network['myInstance'] =
             new local_instance.LocalInstance(network, 'localUserId');
-        var user = new remote_user.User(network, 'testUser');
+        user = new remote_user.User(network, 'testUser');
         user.update({userId: 'testUser', name: 'Alice'});
         instance = new remote_instance.RemoteInstance(user, INSTANCE_ID);
         user['instances_'][INSTANCE_ID] = instance;

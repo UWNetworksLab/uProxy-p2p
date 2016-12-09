@@ -500,7 +500,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (networkName == 'Cloud') {
       // Log into cloud if needed.
-      var loginPromise = Promise.resolve();
+      let loginPromise = Promise.resolve();
       if (!this.model.getNetwork('Cloud')) {
         loginPromise = this.login('Cloud');
       }
@@ -518,7 +518,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     // loginPromise should resolve when the use is logged into networkName.
-    var loginPromise :Promise<void>;
+    let loginPromise :Promise<void>;
     if (networkName == 'Quiver') {
       // Show user confirmation for Quiver login, where they can enter their
       // Quiver user name.
@@ -880,11 +880,11 @@ export class UserInterface implements ui_constants.UiApi {
 
     user.update(payload);
 
-    for (var i = 0; i < payload.allInstanceIds.length; ++i) {
+    for (let i = 0; i < payload.allInstanceIds.length; ++i) {
       this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
     }
 
-    for (var i = 0; i < payload.offeringInstances.length; i++) {
+    for (let i = 0; i < payload.offeringInstances.length; i++) {
       let instance = payload.offeringInstances[i];
       this.syncGettingState_(instance);
       this.syncTryingToGetState_(instance);
@@ -892,7 +892,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
     this.updateGettingStatusBar_();
 
-    for (var i = 0; i < payload.instancesSharingWithLocal.length; i++) {
+    for (let i = 0; i < payload.instancesSharingWithLocal.length; i++) {
       this.instancesGivingAccessTo[payload.instancesSharingWithLocal[i]] = true;
       user.isGettingFromMe = true;
     }
