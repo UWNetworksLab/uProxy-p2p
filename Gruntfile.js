@@ -361,16 +361,6 @@ module.exports = function(grunt) {
           }
         ]
       },
-      integration: {
-        files: [{
-          // Copy compiled Chrome App code, required for integration tests.
-          expand: true,
-          cwd: chromeAppDevPath,
-          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts'],
-          dest: devBuildPath + '/integration'
-        }]
-      },
-
       // uproxy-lib sample apps.
       libsForZorkChromeApp: Rule.copyLibs({
         npmLibNames: ['freedom-for-chrome'],
@@ -423,19 +413,6 @@ module.exports = function(grunt) {
         pathsFromDevBuild: ['lib/copypaste-chat', 'lib/churn-pipe', 'lib/loggingprovider'],
         pathsFromThirdPartyBuild: ['freedom-port-control'],
         localDestPath: 'lib/samples/copypaste-chat-webapp/'
-      }),
-
-      libsForCopyPasteSocksChromeApp: Rule.copyLibs({
-        npmLibNames: ['freedom-for-chrome'],
-        pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider'],
-        pathsFromThirdPartyBuild: ['i18n', 'bower/polymer', 'freedom-pgp-e2e', 'freedom-port-control'],
-        localDestPath: 'lib/samples/copypaste-socks-chromeapp/'
-      }),
-      libsForCopyPasteSocksFirefoxApp: Rule.copyLibs({
-        npmLibNames: ['freedom-for-firefox'],
-        pathsFromDevBuild: ['lib/copypaste-socks', 'lib/churn-pipe', 'lib/loggingprovider'],
-        pathsFromThirdPartyBuild: ['i18n', 'bower', 'freedom-pgp-e2e', 'freedom-port-control'],
-        localDestPath: 'lib/samples/copypaste-socks-firefoxapp/data'
       }),
 
       libsForSimpleSocksChromeApp: Rule.copyLibs({
@@ -559,8 +536,6 @@ module.exports = function(grunt) {
       chromeExtensionCoreConnectorSpec: Rule.browserifySpec('chrome/extension/scripts/chrome_core_connector'),
       genericCoreFirewall: Rule.browserify('generic_core/firewall'),
       genericCoreFreedomModule: Rule.browserify('generic_core/freedom-module'),
-      integrationSpec: Rule.browserifySpec('integration/core'),
-      integrationFreedomModule: Rule.browserify('integration/test_connection'),
 
       // uproxy-lib
       loggingProvider: Rule.browserify('lib/loggingprovider/freedom-module'),
@@ -569,7 +544,6 @@ module.exports = function(grunt) {
 
       // uproxy-lib sample apps.
       copypasteChatFreedomModule: Rule.browserify('lib/copypaste-chat/freedom-module'),
-      copypasteSocksFreedomModule: Rule.browserify('lib/copypaste-socks/freedom-module'),
       echoServerFreedomModule: Rule.browserify('lib/echo/freedom-module'),
       simpleChatFreedomModule: Rule.browserify('lib/simple-chat/freedom-module'),
       simpleSocksFreedomModule: Rule.browserify('lib/simple-socks/freedom-module'),
@@ -577,7 +551,6 @@ module.exports = function(grunt) {
       zorkFreedomModule: Rule.browserify('lib/zork/freedom-module'),
       // uproxy-lib sample apps (with UI).
       copypasteChatMain: Rule.browserify('lib/copypaste-chat/main.core-env'),
-      copypasteSocksMain: Rule.browserify('lib/copypaste-socks/main.core-env'),
       simpleChatMain: Rule.browserify('lib/simple-chat/main.core-env'),
 
       integrationTcpFreedomModule: Rule.browserify('lib/integration-tests/tcp/freedom-module'),
@@ -628,25 +601,6 @@ module.exports = function(grunt) {
       ])
     },
     jasmine_chromeapp: {
-      all: {
-        files: [
-          {
-            cwd: devBuildPath + '/integration/',
-            src: ['**/*'],
-            dest: './',
-            expand: true
-          }
-        ],
-        scripts: [
-          'freedom-for-chrome/freedom-for-chrome.js',
-          'core.spec.static.js'
-        ],
-        options: {
-          outdir: 'build/src/integration/'
-          // Uncomment this for debugging
-          // keepRunner: true,
-        }
-      },
       tcp: {
         files: [
           {
@@ -701,20 +655,6 @@ module.exports = function(grunt) {
           outDir: devBuildPath + '/lib/integration-tests/socks-echo/jasmine_chromeapp_slow/',
           keepRunner: true
         }
-      }
-    },
-    vulcanize: {
-      copypasteSocks: {
-        options: {
-          inline: true,
-          csp: true
-        },
-        files: [
-          {
-            src: path.join(devBuildPath, 'lib/copypaste-socks/polymer-components/root.html'),
-            dest: path.join(devBuildPath, 'lib/copypaste-socks/polymer-components/vulcanized.html')
-          }
-        ]
       }
     }
   });
@@ -829,14 +769,6 @@ module.exports = function(grunt) {
     'copy:libsForCopypasteChatChromeApp',
     'copy:libsForCopypasteChatFirefoxApp',
     'copy:libsForCopypasteChatWebApp'
-  ]);
-  registerTask(grunt, 'copypasteSocks', [
-    'base',
-    'browserify:copypasteSocksFreedomModule',
-    'browserify:copypasteSocksMain',
-    'vulcanize:copypasteSocks',
-    'copy:libsForCopyPasteSocksChromeApp',
-    'copy:libsForCopyPasteSocksFirefoxApp'
   ]);
   registerTask(grunt, 'deployer', [
     'base',
@@ -1263,7 +1195,6 @@ module.exports = function(grunt) {
     'base',
     'unit_test_nobuild'
   ]);
-  // TODO: add test_chrome once it passes reliably
   registerTask(grunt, 'integration_test', [
     'tcpIntegrationTest',
     'socksEchoIntegrationTest'
