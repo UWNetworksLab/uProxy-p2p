@@ -67,7 +67,7 @@ let numConnections = 0;
 let npeersGetting = 0;
 
 interface ParsedCmd {
-  id: string;        // e.g. 'ping', 'give', 'get', 'transform', etc.
+  verb: string;      // e.g. 'ping', 'give', 'get', 'transform', etc.
   source: string;    // e.g. 'transform with caesar'
   tokens: string[];  // e.g. ['transform', 'with', 'caesar']
 }
@@ -85,7 +85,7 @@ interface Context {
 // Command handlers:
 
 const handleCmdInvalid = (ctx: Context, cmd: ParsedCmd) => {
-  ctx.reply(`I don't understand that command. (${cmd.id})`);
+  ctx.reply(`I don't understand that command. (${cmd.verb})`);
 };
 
 const handleCmdPing = (ctx: Context) => {
@@ -254,7 +254,7 @@ const cmdHandlerByCmdId: {[cmdId: string]: (ctx: Context, cmd?: ParsedCmd) => vo
 const parseCmd = (cmdline: string) : ParsedCmd => {
   const tokens = cmdline.split(/\W+/);
   const cmdId = tokens[0].toLowerCase();
-  const parsed = {id: cmdId, tokens: tokens, source: cmdline};
+  const parsed = {verb: cmdId, tokens: tokens, source: cmdline};
   return parsed;
 };
 
@@ -307,7 +307,7 @@ const handleMsg = (ctx: Context, msg: string) => {
   } else {
     // Not yet in 'give' or 'get' mode. Treat msg as command.
     const cmd = parseCmd(msg);
-    const cmdHandler = cmdHandlerByCmdId[cmd.id] || handleCmdInvalid;
+    const cmdHandler = cmdHandlerByCmdId[cmd.verb] || handleCmdInvalid;
     cmdHandler(ctx, cmd);
   }
 };
