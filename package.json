@@ -32,7 +32,6 @@
     "@types/ssh2": "0.0.31",
     "@types/xregexp": "^3.0.28",
     "bower": "^1.4.1",
-    "browserify-zlib": "^0.1.4",
     "cca": "^0.8.0",
     "circular-json": "^0.3.0",
     "compare-version": "^0.1.2",
