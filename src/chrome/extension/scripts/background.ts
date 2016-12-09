@@ -27,6 +27,17 @@ export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a u
 export var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
 export var backgroundUi: background_ui.BackgroundUi;
 export var browserApi :ChromeBrowserApi;
+
+/*
+ * TODO: this is a separate user_interface object from the one we refer to
+ * elsewhere in the code.  It will register listeners for all events and
+ * commands, however, these listeners will immediately be unbound after the
+ * panel is opened for the first time.  Its version of any data should not be
+ * relied upon as canonical and no updates made to data here should be expected
+ * to persist within the general UI.
+ */
+const ui = new user_interface.UserInterface(core, browserApi, backgroundUi);
+
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked
 // or the window where the user is completing the install flow.
@@ -144,16 +155,6 @@ browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
 backgroundUi = new background_ui.BackgroundUi(
     new chrome_panel_connector.ChromePanelConnector(),
     core);
-
-/*
- * TODO: this is a separate user_interface object from the one we refer to
- * elsewhere in the code.  It will register listeners for all events and
- * commands, however, these listeners will immediately be unbound after the
- * panel is opened for the first time.  Its version of any data should not be
- * relied upon as canonical and no updates made to data here should be expected
- * to persist within the general UI.
- */
-var ui = new user_interface.UserInterface(core, browserApi, backgroundUi);
 
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {

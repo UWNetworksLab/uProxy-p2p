@@ -619,7 +619,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
 
     return new Promise<void>((fulfill, reject) => {
-      var checkIfOnline = () => {
+      let intervalId: NodeJS.Timer;
+      const checkIfOnline = () => {
         ping().then(() => {
           clearInterval(intervalId);
           fulfill();
@@ -628,7 +629,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           // we will try again on the next interval.
         });
       };
-      var intervalId = setInterval(checkIfOnline, 5000);
+      intervalId = setInterval(checkIfOnline, 5000);
       checkIfOnline();
     });
   }
