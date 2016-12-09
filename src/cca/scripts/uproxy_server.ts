@@ -76,8 +76,14 @@ export class UproxyServerRepository implements ServerRepository {
       throw new Error('could not decode URL');
     }
 
-    const cloudTokens: cloud_social_provider.Invite = JSON.parse(
-        jsurl.parse(<string>params.networkData));
+    params.networkData = jsurl.parse(<string>params.networkData);
+    // Due to a gradual transition to the new URL format, some older invites
+    // are actually jsurl(JSON(cloudTokens)), instead of just
+    // jsurl(cloudTokens).  This conditional ensures we parse both forms.
+    const cloudTokens: cloud_social_provider.Invite =
+        typeof params.networkData === 'string' ?
+            JSON.parse(params.networkData) :
+            params.networkData;
     this.saveServer(cloudTokens);
     // TODO: only notify the core when connecting, and delete it afterwards
     return this.createServer(cloudTokens);
