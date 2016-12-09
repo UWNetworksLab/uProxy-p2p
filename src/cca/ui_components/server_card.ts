@@ -39,10 +39,6 @@ export class ServerCard {
     });
   }
 
-  public setHeight(newHeight: number) {
-    this.root.style.height = newHeight + 'px';
-  }
-
   private switchState(newState: State) {
     if (!(newState in State)) {
       throw new Error('unknown state ' + newState);

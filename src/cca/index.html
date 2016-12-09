@@ -65,14 +65,23 @@
 
     #server-list {
       height: 100%;
+      overflow: auto;
     }
     
-    #mainContainer::-webkit-scrollbar {
+    #server-list::-webkit-scrollbar {
       display: none;
     }
     
     .server-card {
       width: 100%;
+      /*
+        Ballpark figure chosen to be comfortably more than
+        the combined height of the toolbar, button, and status.
+        Really only relevant for testing since virtually no
+        real Android device will be this short.
+      */
+      min-height: 300px;
+
       display: flex;
       flex-direction: column;
     }
@@ -104,6 +113,22 @@
       justify-content: center;
     }
     
+    .server-card:only-child {
+      height: 100%;
+    }
+
+    .server-card:not(:only-child) {
+      /*
+        68px is an amount by which a subsequent card will
+        "peek through" when there are multiple cards:
+         - gap between cards (12px) +
+         - vertical padding (24px) +
+         - toolbar font size (20px) +
+         -  1/2 vertical padding (12px) = 68px
+      */
+      height: calc(100% - 68px);
+    }
+
     .server-card:not(:last-child) {
       margin-bottom: 12px;
     }

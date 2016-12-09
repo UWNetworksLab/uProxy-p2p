@@ -54,7 +54,6 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
       return new UproxyServerRepository(
         getLocalStorage(), core, vpnDevice);
     } catch (e) {
-      // Add some mock servers if we are running as a Chrome extension.
       console.warn('local storage unavailable, showing mock servers');
       return <ServerRepository>{
         addServer(code) {
@@ -112,12 +111,9 @@ let serversListPagePromise: Promise<ServerListPage> = new Promise((resolve, reje
         console.debug('dom ready');
         serversPromise.then((servers) => {
           console.debug('servers ready');
-          const listElem = appWindow.contentWindow.document.body.querySelector('#server-list') as HTMLElement;
-          const serverListPage = new ServerListPage(listElem, servers);
-          appWindow.contentWindow.addEventListener('resize', () => {
-            serverListPage.resizeCards();
-          });
-          resolve(serverListPage);
+          resolve(new ServerListPage(
+            appWindow.contentWindow.document.body.querySelector('#server-list'),
+            servers));
         });
       });
     });
@@ -129,7 +125,7 @@ Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()]).then
   ([serverListPage, intentInterceptor]) => {
     intentInterceptor.addIntentListener((url: string) => {
       console.debug(`[App] Url: ${url}`);
-      serverListPage.addServer(url);
+      serverListPage.enterAccessCode(url);
     });
     if (navigator.splashscreen) {
       navigator.splashscreen.hide();
