@@ -58,32 +58,37 @@ export class UproxyServerRepository implements ServerRepository {
 
   public getServers() {
     const servers = this.loadServers();
-    console.debug('loaded servers', servers);
     return Promise.all(Object.keys(servers).map((host) => {
       return this.notifyCoreOfServer(servers[host].cloudTokens);
     }));
   }
 
-  // Loads servers from storage, returning an empty object
-  // if none are found or if there was any problem loading.
+  // Loads servers from storage, returning an empty object if
+  // none are found and raising an error if there is any problem
+  // loading.
   private loadServers(): SavedServers {
     try {
       const serversAsJson = this.storage.getItem(SERVERS_STORAGE_KEY);
       try {
         return JSON.parse(serversAsJson) || {};
       } catch (e) {
-        console.warn('could not parse saved servers: ' + e.message);
+        throw new Error('could not parse saved servers: ' + e.message);
       }
     } catch (e) {
-      console.warn('could not load from storage: ' + e.message);
+      throw new Error('could not load from storage: ' + e.message);
     }
-    return {};
   }
 
   // Saves a server to storage, merging it with any already found there.
   // Returns true if the server was not already in storage.
   private saveServer(cloudTokens: cloud_social_provider.Invite) {
-    const savedServers = this.loadServers();
+    let savedServers: SavedServers;
+    try {
+      const savedServers = this.loadServers();
+    } catch (e) {
+      console.warn('could not load currently saved servers', e);
+      savedServers = {};
+    }
     savedServers[cloudTokens.host] = {
       cloudTokens: cloudTokens
     };
@@ -103,11 +108,8 @@ export class UproxyServerRepository implements ServerRepository {
       return Promise.reject(new Error('could not decode URL'));
     }
 
-    let cloudTokens: cloud_social_provider.Invite =
-      jsurl.parse(<string>params.networkData);
-    if (typeof cloudTokens === 'string' || cloudTokens instanceof String) {
-      cloudTokens = JSON.parse(cloudTokens.toString());
-    }
+    const cloudTokens: cloud_social_provider.Invite = JSON.parse(
+        jsurl.parse(<string>params.networkData));
 
     try {
       this.saveServer(cloudTokens);
