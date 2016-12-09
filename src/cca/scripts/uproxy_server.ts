@@ -17,8 +17,8 @@ export class UproxyServer implements Server {
   // Constructs a server that will use the given CoreApi to start the local proxy.
   // It takes the IP address of the uProxy cloud server it will use for Internet access.    
   public constructor(private proxy: SocksProxy,
-                     private vpnDevice: VpnDevice,
-                     private remoteIpAddress: string) {}
+    private vpnDevice: VpnDevice,
+    private remoteIpAddress: string) { }
 
   public getIpAddress() {
     return this.remoteIpAddress;
@@ -78,19 +78,43 @@ export class UproxyServerRepository implements ServerRepository {
 
     const cloudTokens: cloud_social_provider.Invite = JSON.parse(
         jsurl.parse(<string>params.networkData));
-    this.saveServer(cloudTokens);
+
+    try {
+      this.saveServer(cloudTokens);
+    } catch (e) {
+      console.warn('could not save new server: ' + e.message);
+    }
+
     // TODO: only notify the core when connecting, and delete it afterwards
     return this.createServer(cloudTokens);
   }
 
+  // Loads servers from storage, returning an empty object if
+  // none are found and raising an error if there is any problem
+  // loading.
   private loadServers(): SavedServers {
-    return JSON.parse(this.storage.getItem(SERVERS_STORAGE_KEY)) || {};
+    try {
+      const serversAsJson = this.storage.getItem(SERVERS_STORAGE_KEY);
+      try {
+        return JSON.parse(serversAsJson) || {};
+      } catch (e) {
+        throw new Error('could not parse saved servers: ' + e.message);
+      }
+    } catch (e) {
+      throw new Error('could not load from storage: ' + e.message);
+    }
   }
 
   // Saves a server to storage, merging it with any already found there.
   // Returns true if the server was not already in storage.
   private saveServer(cloudTokens: cloud_social_provider.Invite) {
-    const savedServers = this.loadServers();
+    let savedServers: SavedServers;
+    try {
+      savedServers = this.loadServers();
+    } catch (e) {
+      console.warn('could not load currently saved servers', e);
+      savedServers = {};
+    }
     savedServers[cloudTokens.host] = {
       cloudTokens: cloudTokens
     };
