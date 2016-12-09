@@ -22,7 +22,7 @@ export class ServerCard {
         <div class='paper-font-title'></div>
       </div>
       <div class='button'>
-        <paper-icon-button src='../../assets/button/disconnected.png' class='connect-button'></paper-icon-button>
+        <paper-icon-button class='connect-button'></paper-icon-button>
       </div>
       <div class='status paper-font-subhead'></div>`;
 
@@ -32,7 +32,7 @@ export class ServerCard {
 
     this.title.textContent = server.getIpAddress();
 
-    this.disconnected('Tap to connect');
+    this.disconnected();
 
     this.button.addEventListener('tap', (e) => {
       this.press();
@@ -58,9 +58,8 @@ export class ServerCard {
     this.switchState(State.CONNECTING);
     this.status.textContent = 'Connecting...';
 
-    // TODO: um, how is the UI notified if something unexpected happens?
     return this.server.connect((msg) => {
-      this.disconnected('Tap to connect');
+      this.disconnected();
     }).then((port) => {
       this.switchState(State.CONNECTED);
       this.status.textContent = 'Connected';
@@ -78,20 +77,20 @@ export class ServerCard {
 
     this.switchState(State.DISCONNECTING);
     this.status.textContent = 'Disconnecting...';
-    this.button.setAttribute('src', '../../assets/button/disconnected.png');
+    this.button.setAttribute('src', '../../assets/button/disconnected.svg');
 
     return this.server.disconnect().then(() => {
-      this.disconnected('Tap to connect');
+      this.disconnected();
     }, (e) => {
       console.warn('something weird happened while disconnecting', e);
-      this.disconnected('Tap to connect');
+      this.disconnected();
     });
   }
 
-  private disconnected(msg: string) {
+  private disconnected(msg = 'Tap to connect') {
     this.switchState(State.DISCONNECTED);
     this.status.textContent = msg;
-    // TODO: show regular button
+    this.button.setAttribute('src', '../../assets/button/disconnected.svg');
   }
 
   public press() {
