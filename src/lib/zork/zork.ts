@@ -45,7 +45,15 @@ const RTC_PEER_CONFIG = {
 // MSG_DELIM_RE so that \r\n sent by e.g. a telnet client will also be treated
 // as a delimiter. https://en.wikipedia.org/wiki/Robustness_principle
 // "Be conservative in what you send, be liberal in what you accept."
+const MSG_DELIM = '\n';
 const MSG_DELIM_RE = /\r?\n/;
+
+const makeReplyFunction = (socket: net.Socket) : ((msg: string) => void)  => {
+  return (msg: string) => {
+    socket.write(msg);
+    socket.write(MSG_DELIM);
+  };
+};
 
 const SOCKS_HOST = '0.0.0.0';
 const SOCKS_PORT = 9999;
@@ -67,6 +75,7 @@ interface ParsedCmd {
 interface Context {
   clientId: number;
   socket: net.Socket;
+  reply: (msg: string) => void;
   mode: string;  // 'give', 'get', or null (still awaiting a 'give' or 'get' command)
   peerConn: any; // using wrtc.RTCPeerConnection upsets tsc
   transformer: any;
@@ -76,19 +85,19 @@ interface Context {
 // Command handlers:
 
 const handleCmdInvalid = (ctx: Context, cmd: ParsedCmd) => {
-  ctx.socket.write(`I don't understand that command. (${cmd.id})\n`);
+  ctx.reply(`I don't understand that command. (${cmd.id})`);
 };
 
 const handleCmdPing = (ctx: Context) => {
-  ctx.socket.write(`ping\n`);
+  ctx.reply(`ping`);
 };
 
 const handleCmdXyzzy = (ctx: Context) => {
-  ctx.socket.write(`Nothing happens.\n`);
+  ctx.reply(`Nothing happens.`);
 };
 
 const handleCmdVersion = (ctx: Context) => {
-  ctx.socket.write(`${constants.MESSAGE_VERSION}\n`);
+  ctx.reply(`${constants.MESSAGE_VERSION}`);
 };
 
 const handleCmdQuit = (ctx: Context) => {
@@ -96,7 +105,7 @@ const handleCmdQuit = (ctx: Context) => {
 };
 
 const handleCmdGetters = (ctx: Context) => {
-  ctx.socket.write(`${npeersGetting}\n`);
+  ctx.reply(`${npeersGetting}`);
 };
 
 const handleCmdTransform = (ctx: Context, cmd: ParsedCmd) => {
@@ -109,7 +118,7 @@ const handleCmdTransform = (ctx: Context, cmd: ParsedCmd) => {
     const config = cmd.source.substring(idx);
     ctx.transformer = {config: config};
   } else {
-    ctx.socket.write(`usage: transform (with name|config json)\n`);
+    ctx.reply(`usage: transform (with name|config json)`);
   }
 };
 
@@ -128,7 +137,7 @@ const handleCmdGive = (ctx: Context) => {
     console.info(`[give] icecandidate from peerConn`);//: ${json}`);
     if (event.candidate) {
       console.info(`[give] event.candidate -> sending event`);
-      ctx.socket.write(`${json}\n`);
+      ctx.reply(`${json}`);
     } else {
       console.error(`[give] event.candidate missing, ignoring`);
     }
@@ -175,7 +184,7 @@ const handleCmdGive = (ctx: Context) => {
     const json = JSON.stringify(offer);
     console.info(`created offer`);//: ${json}`);
     ctx.peerConn.setLocalDescription(offer);
-    ctx.socket.write(`${json}\n`);
+    ctx.reply(`${json}`);
   }, console.error);
 };
 
@@ -274,7 +283,7 @@ const handleMsgForModeGet = (ctx: Context, msg: string) => {
       const answerJson = JSON.stringify(answer);
       console.info(`[get] created answer`);//: ${answerJson}`);
       ctx.peerConn.setLocalDescription(answer);
-      ctx.socket.write(`${JSON.stringify(answer)}\n`);
+      ctx.reply(`${JSON.stringify(answer)}`);
     }, console.error);
   } else {
     console.error(`[get] unexpected msg: ${msg}`);
@@ -308,6 +317,7 @@ const zorkServer = net.createServer((client) => {
   const ctx: Context = {
     clientId: numConnections++,
     socket: client,
+    reply: makeReplyFunction(client),
     mode: null,
     transformer: null,
     peerConn: null
@@ -342,7 +352,9 @@ const zorkServer = net.createServer((client) => {
     buffer = msgs.pop();
     // Process the complete messages we've received.
     for (let msg of msgs) {
-      handleMsg(ctx, msg);
+      if (msg) {  // Ignore empty messages.
+        handleMsg(ctx, msg);
+      }
     }
   });
 
