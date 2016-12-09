@@ -221,7 +221,6 @@ describe('core-connector', () => {
   // ChromeAppConnector into a consistent state for testing the communications
   // specs.
   it('reconnects to App when it returns.', (done) => {
-    var port = mockAppPort();
     var acker :Function = null;
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
     spyOn(port.onMessage, 'addListener').and.callFake((handler :Function) => {
@@ -247,13 +246,13 @@ describe('core-connector', () => {
   });
 
   it('flushes the queue correctly.', () => {
-    var flushed :browser_connector.Payload[] = [];
+    var flushQueue :browser_connector.Payload[] = [];
     spyOn(chromeCoreConnector, 'send').and.callFake((payload :browser_connector.Payload) => {
-      flushed.push(payload);
+      flushQueue.push(payload);
     });
     chromeCoreConnector.flushQueue();
     expect(chromeCoreConnector['queue_']).toEqual([]);
-    expect(flushed).toEqual([
+    expect(flushQueue).toEqual([
         jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),
         { cmd: 'test1', type: 1 },
         jasmine.objectContaining({ cmd: 'emit', type: 1019, data: undefined }),

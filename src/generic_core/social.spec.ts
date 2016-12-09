@@ -135,7 +135,7 @@ describe('social_network.FreedomNetwork', () => {
           'dummy-instance-id/roster/somefriend', ''));
 
       Promise.all(savedToStorage).then(() => {
-        var loginPromise = network.login(uproxy_core_api.LoginType.INITIAL);
+        loginPromise = network.login(uproxy_core_api.LoginType.INITIAL);
         return loginPromise;
       }).then(() => {
         expect(network.myInstance).toBeDefined();

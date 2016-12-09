@@ -104,6 +104,8 @@ describe('PeerConnection', function() {
     spyOn(mockRtcPeerConnection, 'addIceCandidate').and.returnValue(
         Promise.resolve());
 
+    const pc = new peerconnection.PeerConnectionClass(mockRtcPeerConnection);
+
     var setRemoteDescriptionSpy = spyOn(mockRtcPeerConnection,
         'setRemoteDescription').and.callFake(
         (desc:freedom.RTCPeerConnection.RTCSessionDescription) => {
@@ -118,7 +120,6 @@ describe('PeerConnection', function() {
       return Promise.resolve();
     });
 
-    var pc = new peerconnection.PeerConnectionClass(mockRtcPeerConnection);
     pc.negotiateConnection();
     pc.handleSignalMessage({
       type: signals.Type.ANSWER,
@@ -130,6 +131,7 @@ describe('PeerConnection', function() {
       expect(mockRtcPeerConnection.addIceCandidate).toHaveBeenCalled();
       done();
     });
+
   });
 });
 

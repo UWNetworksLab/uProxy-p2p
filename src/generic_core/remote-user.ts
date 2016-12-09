@@ -219,8 +219,8 @@ var log :logging.Log = new logging.Log('remote-user');
 
         case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
         case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          var instance = this.getInstance(this.clientToInstance(clientId));
-          if (!instance) {
+          const recipientInstance = this.getInstance(this.clientToInstance(clientId));
+          if (!recipientInstance) {
             // TODO: this may occur due to a race condition where uProxy has
             // received an onUserProfile and onClientState event, but not yet
             // recieved and instance message, and the peer tries to start
@@ -229,7 +229,7 @@ var log :logging.Log = new logging.Log('remote-user');
             log.error('failed to get instance', clientId);
             return;
           }
-          instance.handleSignal(msg);
+          recipientInstance.handleSignal(msg);
           return;
 
         case social.PeerMessageType.INSTANCE_REQUEST:
@@ -260,13 +260,13 @@ var log :logging.Log = new logging.Log('remote-user');
           log.debug('got instance key-verify mssage', msg);
           // Find the RemoteInstance representing the peer, and relay
           // the message there.
-          var instance = this.getInstance(this.clientToInstance(clientId));
-          if (!instance) {
+          let peerInstance = this.getInstance(this.clientToInstance(clientId));
+          if (!peerInstance) {
             // issues: https://github.com/uProxy/uproxy/pull/732
             log.error('failed to get instance', clientId);
             return;
           }
-         instance.handleKeyVerifyMessage(msg.data);
+         peerInstance.handleKeyVerifyMessage(msg.data);
         return;
 
         default:
@@ -633,7 +633,7 @@ var log :logging.Log = new logging.Log('remote-user');
         // If remote is currently an active client, but user revokes access, also
         // stop the proxy session.
         if (uproxy_core_api.ConsentUserAction.CANCEL_OFFER === action) {
-          for (var instanceId in this.instances_) {
+          for (const instanceId in this.instances_) {
             var instanceData = this.instances_[instanceId].currentStateForUi();
             if (instanceData.localSharingWithRemote == social.SharingState.SHARING_ACCESS) {
               this.instances_[instanceId].stopShare();
@@ -642,7 +642,7 @@ var log :logging.Log = new logging.Log('remote-user');
         }
 
         // Send new consent bits to all remote clients, and save to storage.
-        for (var instanceId in this.instances_) {
+        for (const instanceId in this.instances_) {
           if (this.isInstanceOnline(instanceId)) {
             this.sendInstanceHandshake(this.instanceToClient(instanceId));
           }
