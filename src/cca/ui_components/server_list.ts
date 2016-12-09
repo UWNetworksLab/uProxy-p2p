@@ -11,22 +11,21 @@ export class ServerListPage {
   // - servers: the repository of the servers we can connect to.
   constructor(private root: Element,
               private servers: ServerRepository) {
-    servers.getServers().then((restoredServers) => {
-      restoredServers.forEach((server) => {
-        this.addServer(server);
+    try {
+      servers.getServers().forEach((server) => {
+        this.addServerCard(server);
       });
-    }, (e) => {
+    } catch(e) {
       console.error('could not load servers', e);
-    });
+    }
   }
 
   public enterAccessCode(code: string) {
-    return this.servers.addServer(code).then((server) => {
-      this.addServer(server);
-    });
+    console.debug(`Received access code ${code}`);
+    return this.addServerCard(this.servers.addServer(code));
   }
 
-  private addServer(server: Server) {
+  private addServerCard(server: Server) {
     if (this.activeServerIds.has(server.getIpAddress())) {
       return;
     }

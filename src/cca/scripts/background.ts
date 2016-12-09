@@ -11,7 +11,7 @@
 import { ServerListPage } from '../ui_components/server_list';
 import { Server, ServerRepository } from '../model/server';
 import { UproxyServerRepository } from './uproxy_server';
-import { MakeCoreConnector } from './cordova_core_connector';
+import { makeCoreConnector } from './cordova_core_connector';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 import * as vpn_device from '../model/vpn_device';
 import * as intents from './intents';
@@ -35,59 +35,52 @@ function getLocalStorage(): Storage {
 (window as any).context = this;
 
 // TODO(fortuna): Get rid of core connector and talk to the core directly.
-// TODO(fortuna): I believe we need to somehow wait for the core to be ready.
-let core = MakeCoreConnector();
+let corePromise = makeCoreConnector();
 
-// Log into the cloud social network and create UproxyServerRepository.
 let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
   console.debug('Device supports VPN');
   return vpnDevice;
 }).catch((error) => {
+  // TODO(fortuna): Properly notify the user that the device is not supported.
   console.error(error);
   return new vpn_device.NoOpVpnDevice();
 }).then((vpnDevice) => {
-  return core.login({
-    network: 'Cloud',
-    loginType: uproxy_core_api.LoginType.INITIAL,
-  }).then(() => {
-    try {
-      return new UproxyServerRepository(
-        getLocalStorage(), core, vpnDevice);
-    } catch (e) {
-      console.warn('local storage unavailable, showing mock servers');
-      return <ServerRepository>{
-        addServer(code) {
-          throw new Error('unsupported operation');
-        },
-        getServers() {
-          return Promise.resolve([
-            <Server>{
-              getIpAddress() {
-                return '192.168.1.1';
-              },
-              connect(callback) {
-                return Promise.resolve();
-              },
-              disconnect() {
-                return Promise.resolve();
-              }
+  try {
+    return new UproxyServerRepository(getLocalStorage(), corePromise, vpnDevice);
+  } catch (e) {
+    console.warn('local storage unavailable, showing mock servers');
+    return <ServerRepository>{
+      addServer(code) {
+        throw new Error('unsupported operation');
+      },
+      getServers() {
+        return [
+          <Server>{
+            getIpAddress() {
+              return '192.168.1.1';
             },
-            <Server>{
-              getIpAddress() {
-                return 'broken.mydomain.com';
-              },
-              connect(callback) {
-                return Promise.reject(new Error('unreachable host'));
-              },
-              disconnect() {
-                return Promise.resolve();
-              }
+            connect(callback) {
+              return Promise.resolve();
+            },
+            disconnect() {
+              return Promise.resolve();
             }
-          ]);
-        }
-      };
-    }
-  });
+          },
+          <Server>{
+            getIpAddress() {
+              return 'broken.mydomain.com';
+            },
+            connect(callback) {
+              return Promise.reject(new Error('unreachable host'));
+            },
+            disconnect() {
+              return Promise.resolve();
+            }
+          }
+        ];
+      }
+    };
+  }
 });
 
 // Create UI.

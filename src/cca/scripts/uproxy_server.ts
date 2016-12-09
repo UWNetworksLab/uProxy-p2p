@@ -8,7 +8,7 @@ import CoreConnector from '../../generic_ui/scripts/core_connector';
 import { AccessCode, Server, ServerRepository } from '../model/server';
 import { SocksProxy } from '../model/socks_proxy_server';
 import { VpnDevice } from '../model/vpn_device';
-import { CloudSocksProxy } from './cloud_socks_proxy_server';
+import { CloudSocksProxy, makeCloudSocksProxy } from './cloud_socks_proxy_server';
 
 // A local Socks server that provides access to a remote uProxy Cloud server via RTC.
 export class UproxyServer implements Server {
@@ -53,14 +53,40 @@ export class UproxyServerRepository implements ServerRepository {
   constructor(
     private storage: Storage,
     // Must already be logged into social networks.
-    private core: CoreConnector,
+    private corePromise: Promise<CoreConnector>,
     private vpnDevice: VpnDevice) { }
 
-  public getServers() {
+  public getServers(): UproxyServer[] {
     const servers = this.loadServers();
-    return Promise.all(Object.keys(servers).map((host) => {
-      return this.notifyCoreOfServer(servers[host].cloudTokens);
-    }));
+    return Object.keys(servers).map((host) => {
+      return this.createServer(servers[host].cloudTokens);
+    });
+  }
+
+  public addServer(accessCode: AccessCode): UproxyServer {
+    // This is inspired by ui.ts but note that uProxy Air only
+    // supports v2 access codes which have just three fields:
+    //  - v
+    //  - networkName
+    //  - networkData
+    // TODO: accept only cloud access codes
+    const params: social.InviteTokenData = uparams(accessCode);
+    if (!(params || params.v ||
+      params.networkName || params.networkData)) {
+      throw new Error('could not decode URL');
+    }
+
+    const cloudTokens: cloud_social_provider.Invite = JSON.parse(
+        jsurl.parse(<string>params.networkData));
+
+    try {
+      this.saveServer(cloudTokens);
+    } catch (e) {
+      console.warn('could not save new server: ' + e.message);
+    }
+
+    // TODO: only notify the core when connecting, and delete it afterwards
+    return this.createServer(cloudTokens);
   }
 
   // Loads servers from storage, returning an empty object if
@@ -95,43 +121,8 @@ export class UproxyServerRepository implements ServerRepository {
     this.storage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(savedServers));
   }
 
-  public addServer(accessCode: AccessCode) {
-    // This is inspired by ui.ts but note that uProxy Air only
-    // supports v2 access codes which have just three fields:
-    //  - v
-    //  - networkName
-    //  - networkData
-    // TODO: accept only cloud access codes
-    const params: social.InviteTokenData = uparams(accessCode);
-    if (!(params || params.v ||
-      params.networkName || params.networkData)) {
-      return Promise.reject(new Error('could not decode URL'));
-    }
-
-    const cloudTokens: cloud_social_provider.Invite = JSON.parse(
-        jsurl.parse(<string>params.networkData));
-
-    try {
-      this.saveServer(cloudTokens);
-    } catch (e) {
-      console.warn('could not save new server: ' + e.message);
-    }
-
-    // TODO: only notify the core when connecting, and delete it afterwards
-    return this.notifyCoreOfServer(cloudTokens);
-  }
-
-  private notifyCoreOfServer(cloudTokens: cloud_social_provider.Invite) {
-    return this.core.acceptInvitation({
-      network: {
-        name: 'Cloud'
-      },
-      tokenObj: {
-        networkData: cloudTokens,
-      }
-    }).then(() => {
-      let proxy = new CloudSocksProxy(this.core, cloudTokens.host);
-      return new UproxyServer(proxy, this.vpnDevice, proxy.getRemoteIpAddress());
-    });
+  private createServer(cloudTokens: cloud_social_provider.Invite): UproxyServer {
+    let proxy = makeCloudSocksProxy(this.corePromise, cloudTokens);
+    return new UproxyServer(proxy, this.vpnDevice, cloudTokens.host);
   }
 }
