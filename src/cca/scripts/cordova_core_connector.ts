@@ -17,7 +17,7 @@ export interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
 console.log('Loading core');
-export var uProxyAppChannel = freedom(
+export var uProxyAppChannelPromise = freedom(
     'generic_core/freedom-module.json',
     <freedom.FreedomInCoreEnvOptions>{
       'logger': 'lib/loggingprovider/freedom-module.json',
@@ -29,15 +29,22 @@ export var uProxyAppChannel = freedom(
   return uProxyModuleFactory();
 });
 
-export function MakeCoreConnector() : CoreConnector {
-  let browserConnector = new CordovaCoreConnector({name: 'uproxy-ui-to-core-connector'});
-  return new CoreConnector(browserConnector);
+export function MakeCoreConnector() : Promise<CoreConnector> {
+  return uProxyAppChannelPromise.then((channel) => {
+    let browserConnector = new CordovaCoreConnector(
+        channel, {name: 'uproxy-ui-to-core-connector'});
+    let core = new CoreConnector(browserConnector);
+    return core.login({
+      network: 'Cloud',
+      loginType: uproxy_core_api.LoginType.INITIAL,
+    }).then((loginResult) => {
+      console.debug(`Logged in to Cloud network. userId: ${loginResult.userId}, instanceId: ${loginResult.instanceId}`);
+      return core;
+    });
+  });
 }
 
 class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
-
-  private appChannel :freedom.OnAndEmit<any,any>;
-
   // Status object indicating whether we're connected to the app.
   public status :browser_connector.StatusObject;
 
@@ -46,9 +53,9 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
     this.fulfillConnect = F;
   });
 
-  constructor(private options ?:chrome.runtime.ConnectInfo) {
+  constructor(private appChannel: freedom.OnAndEmit<any,any>,
+      private options ?:chrome.runtime.ConnectInfo) {
     this.status = { connected: false };
-    this.appChannel = null;
   }
 
 
@@ -60,30 +67,13 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
    * Returns a promise fulfilled upon connection.
    */
   public connect = () : Promise<void> => {
-    console.log('trying to connect to app');
-    if (this.status.connected) {
-      console.warn('Already connected.');
-      return Promise.resolve();
-    }
-
-    return this.setAppChannel().then(() => {
+    console.log('CordovaCoreConnector.connect()');
+    if (!this.status.connected) {
       this.fulfillConnect();
       this.emit('core_connect');
-    });
-  }
-
-  /**
-   * Promise internal implementation of the connection sequence.
-   * This relies on ui_context.uProxyAppChannel being created in the core
-   * context before connect() is called here in the UI context.
-   */
-  private setAppChannel = (): Promise<void> => {
-    return new Promise<void>((F, R) => {
-      uProxyAppChannel.then((channel: any) => {
-        this.appChannel = channel;
-        F();
-      });
-    });
+      this.status.connected = true;
+    }
+    return Promise.resolve();
   }
 
   // --- Communication ---
@@ -109,7 +99,7 @@ class CordovaCoreConnector implements browser_connector.CoreBrowserConnector {
     if (payload.cmd !== 'emit') {
        throw new Error('send can only be used for emit');
     }
-    if (skipQueue && !this.appChannel) {
+    if (skipQueue) {
       return;
     }
     this.onceConnected.then(() => {

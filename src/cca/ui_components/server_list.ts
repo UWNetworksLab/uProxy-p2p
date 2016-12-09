@@ -7,10 +7,11 @@ class ServerEntryComponent {
   constructor(private root: Element, private server: Server) {
     root.classList.add('server-entry-card');
     root.innerHTML = `
-      <h2>${server.getIpAddress()}</h2>
+      <h2 id='server-name'></h2>
       <paper-button id='connect-button' raised>Connect</paper-button>
       <paper-button id='disconnect-button' raised disabled>Disconnect</paper-button>`;
 
+    root.querySelector('#server-name').textContent = server.getIpAddress();
     this.connectButton = root.querySelector('#connect-button') as HTMLButtonElement;
     this.connectButton.addEventListener('tap', (ev) => {
       console.debug('Pressed Connect Button');
@@ -75,7 +76,7 @@ export class ServerListPage {
 
     servers.getServers().then((restoredServers) => {
       restoredServers.forEach((server) => {
-        this.addServer(server);
+        this.addServerCard(server);
       });
     });
   }
@@ -85,13 +86,12 @@ export class ServerListPage {
     this.addTokenText.value = code;
   }
 
-  public pressAddServer(): Promise<ServerEntryComponent> {
-    return this.servers.addServer(this.addTokenText.value).then((server) => {
-      this.addServer(server);
-    });
+  public pressAddServer(): ServerEntryComponent {
+    console.debug(`Pressed Add Server with ${this.addTokenText.value}`);
+    return this.addServerCard(this.servers.addServer(this.addTokenText.value));
   }
 
-  private addServer(server: Server) {
+  private addServerCard(server: Server) {
     if (this.activeServerIds.has(server.getIpAddress())) {
       return;
     }

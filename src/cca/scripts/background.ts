@@ -33,10 +33,8 @@ function getLocalStorage(): Storage {
 (window as any).context = this;
 
 // TODO(fortuna): Get rid of core connector and talk to the core directly.
-// TODO(fortuna): I believe we need to somehow wait for the core to be ready.
-let core = MakeCoreConnector();
+let corePromise = MakeCoreConnector();
 
-// Log into the cloud social network and create UproxyServerRepository.
 let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
   console.debug('Device supports VPN');
   return vpnDevice;
@@ -44,12 +42,7 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
   console.error(error);
   return new vpn_device.NoOpVpnDevice();
 }).then((vpnDevice) => {
-  return core.login({
-    network: 'Cloud',
-    loginType: uproxy_core_api.LoginType.INITIAL,
-  }).then(() => {
-    return new UproxyServerRepository(getLocalStorage(), core, vpnDevice);
-  });
+  return new UproxyServerRepository(getLocalStorage(), corePromise, vpnDevice);
 });
 
 // Create UI.
