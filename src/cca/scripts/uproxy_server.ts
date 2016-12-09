@@ -84,7 +84,7 @@ export class UproxyServerRepository implements ServerRepository {
   private saveServer(cloudTokens: cloud_social_provider.Invite) {
     let savedServers: SavedServers;
     try {
-      const savedServers = this.loadServers();
+      savedServers = this.loadServers();
     } catch (e) {
       console.warn('could not load currently saved servers', e);
       savedServers = {};
