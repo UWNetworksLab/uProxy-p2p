@@ -46,12 +46,12 @@ Polymer({
   // We will only check that the number and names of keys are identical.
   // This will fail if the user tries to change key order.
   checkSettings_: function(oldSettings :any, newSettings :any) {
-    for (var key in oldSettings){
+    for (const key in oldSettings){
       if (!(key in newSettings)) {
         return false;
       }
     }
-    for (var key in newSettings){
+    for (const key in newSettings){
       if (!(key in oldSettings)) {
         return false;
       }

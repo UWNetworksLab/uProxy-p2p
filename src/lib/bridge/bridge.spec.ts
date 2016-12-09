@@ -1,13 +1,12 @@
 import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
+import mockFreedomRtcPeerConnection from '../freedom/mocks/mock-rtcpeerconnection';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); }
 });
-
 import * as bridge from './bridge';
 import * as datachannel from '../webrtc/datachannel';
 import * as handler from '../handler/queue';
-import mockFreedomRtcPeerConnection from '../freedom/mocks/mock-rtcpeerconnection';
 import * as peerconnection from '../webrtc/peerconnection';
 import * as peerconnection_types from '../webrtc/signals';
 

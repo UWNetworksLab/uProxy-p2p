@@ -168,11 +168,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    */
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
+    let network :social.Network;
     if (networkInfo.userId) {
       const userId = networkInfo.userId;
-      var network = social_network.getNetwork(networkName, userId);
+      network = social_network.getNetwork(networkName, userId);
     } else {
-      var network = this.getNetworkByName_(networkName);
+      network = this.getNetworkByName_(networkName);
     }
 
     if (null === network) {
@@ -618,7 +619,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     }
 
     return new Promise<void>((fulfill, reject) => {
-      var checkIfOnline = () => {
+      let intervalId: NodeJS.Timer;
+      const checkIfOnline = () => {
         ping().then(() => {
           clearInterval(intervalId);
           fulfill();
@@ -627,7 +629,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
           // we will try again on the next interval.
         });
       };
-      var intervalId = setInterval(checkIfOnline, 5000);
+      intervalId = setInterval(checkIfOnline, 5000);
       checkIfOnline();
     });
   }
