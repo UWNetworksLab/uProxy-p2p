@@ -11,6 +11,7 @@ enum State {
 export class ServerCard {
   private state = State.DISCONNECTED;
 
+  private title: HTMLElement;
   private button: HTMLButtonElement;
   private status: HTMLElement;
 
@@ -18,15 +19,18 @@ export class ServerCard {
     root.classList.add('server-card');
     root.innerHTML = `
       <div class='toolbar'>
-        <div class='paper-font-title'>${server.getIpAddress()}</div>
+        <div class='paper-font-title'></div>
       </div>
       <div class='button'>
         <paper-icon-button src='../../assets/button/disconnected.png' class='connect-button'></paper-icon-button>
       </div>
       <div class='status paper-font-subhead'></div>`;
 
+    this.title =  root.querySelector('.paper-font-title') as HTMLElement;
     this.button = root.querySelector('.connect-button') as HTMLButtonElement;
     this.status = root.querySelector('.status') as HTMLElement;
+
+    this.title.textContent = server.getIpAddress();
 
     this.disconnected('Tap to connect');
 
