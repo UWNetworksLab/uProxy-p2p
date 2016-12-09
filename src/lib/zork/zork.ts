@@ -9,18 +9,21 @@
  */
 
 
-// TODO: Use any specified `transform` settings once they are supported.
-//       Currently we stash them in the context but then ignore them.
-// TODO: Verify p2p proxy connection setup is sane:
-//       - dummy IGNORED datachannel necessary? (see "IGNORED" TODO below)
-//       - all required states or messages handled?
-//         (see "event.candidate -> TODO" below)
-//       - no resource leaks (see "cleanup" TODO below)
-// TODO: Implement backpressure (see "backpressure" TODO below)
-// TODO: Factor out logic duplicated in ../socks/bin/webrtc.ts
-// TODO: Replace console log calls with something more structured?
-// TODO: Do error states ever need to be indicated to clients rather than
-//       just logged locally?
+// TODO list summary:
+// - Use any specified `transform` settings once they are supported.
+//   Currently we stash them in the context but then ignore them.
+// - Consider sending a response to acknowledge successful processing of the
+//   `transform` command (protocol-level change, see TODO below)
+// - Verify p2p proxy connection setup is sane:
+//   - dummy IGNORED datachannel necessary? (see "IGNORED" TODO below)
+//   - all required states or messages handled?
+//     (see "event.candidate -> TODO" below)
+//   - make sure there are no resource leaks (see "cleanup" TODO below)
+// - Implement backpressure (see "backpressure" TODO below)
+// - Factor out logic duplicated in ../socks/bin/webrtc.ts
+// - Replace console log calls with something more structured?
+// - Do error states ever need to be indicated to clients rather than
+// - just logged locally?
 
 
 import * as constants from '../../generic_core/constants';
@@ -97,6 +100,7 @@ const handleCmdGetters = (ctx: Context) => {
 };
 
 const handleCmdTransform = (ctx: Context, cmd: ParsedCmd) => {
+  // TODO: change protocol to acknowledge when processing was successful?
   const t1 = cmd.tokens[1];
   if (t1 === 'with') {
     ctx.transformer = {name: cmd.tokens[2]};
