@@ -36,7 +36,6 @@ describe('remote_user.User', () => {
       new local_instance.LocalInstance(network, 'localUserId');
 
   var user :remote_user.User;
-  var instance :remote_instance.RemoteInstance;
 
   it('creates with the correct userId', (done) => {
     user = new remote_user.User(network, 'fakeuser');
@@ -191,6 +190,7 @@ describe('remote_user.User', () => {
 
   describe('client <---> instance', () => {
     it('syncs clientId <--> instanceId mapping', (done) => {
+      var instance :remote_instance.RemoteInstance;
       var realStorage = new local_storage.Storage;
       storage.save = function(key :string, value :Object) {
         return realStorage.save(key, value);
@@ -234,7 +234,7 @@ describe('remote_user.User', () => {
   });  // describe client <---> instance
 
   describe('local consent towards remote proxy', () => {
-    var user = new remote_user.User(network, 'fakeuser2');
+    user = new remote_user.User(network, 'fakeuser2');
 
     it('can request access, and cancel that request', (done) => {
       user.modifyConsent(uproxy_core_api.ConsentUserAction.REQUEST).then(() => {

@@ -9,6 +9,7 @@
       true,
       "spaces"
     ],
-    "no-trailing-whitespace": true
+    "no-trailing-whitespace": true,
+    "no-shadowed-variable": true
   }
 }

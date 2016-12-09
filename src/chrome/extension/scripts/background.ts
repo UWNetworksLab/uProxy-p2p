@@ -73,19 +73,19 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
   return true;
 });
 
-chrome.runtime.onUpdateAvailable.addListener((details) => {
+chrome.runtime.onUpdateAvailable.addListener((updateInfo) => {
   console.log('Update available');
 
   core.getVersion().then(function(versions) {
-    if (compareVersion(details.version, versions.version) > 0) {
+    if (compareVersion(updateInfo.version, versions.version) > 0) {
       // Only update if the new version is the same as or older than the app
       // version.  If we are not able to update now, this will be taken care of
       // by restarting at the same time as the core update.
       return;
     }
 
-    chrome.proxy.settings.get({}, (details) => {
-      if (details.levelOfControl === 'controlled_by_this_extension') {
+    chrome.proxy.settings.get({}, (proxyInfo) => {
+      if (proxyInfo.levelOfControl === 'controlled_by_this_extension') {
         return;
       }
 

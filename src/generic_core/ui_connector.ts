@@ -68,8 +68,8 @@ export class UIConnector {
         return Promise.resolve();
       }
 
-      return (<Promise<any>>result).then((result?:any) => {
-        this.fulfillPromise_(args.promiseId, cmd, result);
+      return (<Promise<any>>result).then((result2?:any) => {
+        this.fulfillPromise_(args.promiseId, cmd, result2);
       }, (error :Error) => {
         this.rejectPromise_(args.promiseId, error);
       });

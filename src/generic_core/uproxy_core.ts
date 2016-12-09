@@ -168,11 +168,12 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    */
   public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
+    let network :social.Network;
     if (networkInfo.userId) {
       const userId = networkInfo.userId;
-      var network = social_network.getNetwork(networkName, userId);
+      network = social_network.getNetwork(networkName, userId);
     } else {
-      var network = this.getNetworkByName_(networkName);
+      network = this.getNetworkByName_(networkName);
     }
 
     if (null === network) {

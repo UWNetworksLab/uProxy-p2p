@@ -633,7 +633,7 @@ var log :logging.Log = new logging.Log('remote-user');
         // If remote is currently an active client, but user revokes access, also
         // stop the proxy session.
         if (uproxy_core_api.ConsentUserAction.CANCEL_OFFER === action) {
-          for (var instanceId in this.instances_) {
+          for (const instanceId in this.instances_) {
             var instanceData = this.instances_[instanceId].currentStateForUi();
             if (instanceData.localSharingWithRemote == social.SharingState.SHARING_ACCESS) {
               this.instances_[instanceId].stopShare();
@@ -642,7 +642,7 @@ var log :logging.Log = new logging.Log('remote-user');
         }
 
         // Send new consent bits to all remote clients, and save to storage.
-        for (var instanceId in this.instances_) {
+        for (const instanceId in this.instances_) {
           if (this.isInstanceOnline(instanceId)) {
             this.sendInstanceHandshake(this.instanceToClient(instanceId));
           }

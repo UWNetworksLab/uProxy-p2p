@@ -50,7 +50,7 @@ export class Defragmenter {
       // A fragment for an existing packet
 
       // Get list of fragment contents for this packet identifier
-      var fragmentList :ArrayBuffer[] = this.tracker_[hexid].pieces;
+      const fragmentList :ArrayBuffer[] = this.tracker_[hexid].pieces;
       if (fragmentList[fragment.index] !== null) {
         // Duplicate fragment
 
@@ -86,7 +86,7 @@ export class Defragmenter {
       // A new fragment for a new packet
 
       // Make an empty list of fragments.
-      var fragmentList :ArrayBuffer[] = [];
+      const fragmentList :ArrayBuffer[] = [];
       for(var i = 0; i < fragment.count; i++) {
         fragmentList.push(null);
       }

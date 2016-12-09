@@ -57,13 +57,13 @@ export class AbstractLoggingDestination {
   private doFilterChanges_ = (doChange :Function) => {
     var oldLevels :{[tag :string] :logging.Level} = {};
 
-    for (var tag in listeners) {
+    for (const tag in listeners) {
       oldLevels[tag] = getMinLevel(tag);
     }
 
     doChange();
 
-    for (var tag in oldLevels) {
+    for (const tag in oldLevels) {
       if (oldLevels[tag] !== getMinLevel(tag)) {
         updateTag(tag);
       }
