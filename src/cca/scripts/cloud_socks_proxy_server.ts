@@ -5,9 +5,9 @@ import CoreConnector from '../../generic_ui/scripts/core_connector'
 
 import { SocksProxy } from '../model/socks_proxy_server';
 
-export function MakeCloudSocksProxy(corePromise: Promise<CoreConnector>,
+export function makeCloudSocksProxy(corePromise: Promise<CoreConnector>,
     cloudTokens: cloud_social_provider.Invite): CloudSocksProxy {
-  let coreAcceptedPromise = corePromise.then((core) => {
+  const coreAcceptedPromise = corePromise.then((core) => {
     return core.acceptInvitation({
       network: {
         name: 'Cloud'

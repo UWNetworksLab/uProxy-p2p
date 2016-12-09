@@ -74,10 +74,8 @@ export class ServerListPage {
       this.pressAddServer();
     });
 
-    servers.getServers().then((restoredServers) => {
-      restoredServers.forEach((server) => {
-        this.addServerCard(server);
-      });
+    servers.getServers().forEach((server) => {
+      this.addServerCard(server);
     });
   }
 

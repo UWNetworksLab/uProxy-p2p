@@ -8,7 +8,7 @@ import CoreConnector from '../../generic_ui/scripts/core_connector';
 import { AccessCode, Server, ServerRepository } from '../model/server';
 import { SocksProxy } from '../model/socks_proxy_server';
 import { VpnDevice } from '../model/vpn_device';
-import { CloudSocksProxy, MakeCloudSocksProxy } from './cloud_socks_proxy_server';
+import { CloudSocksProxy, makeCloudSocksProxy } from './cloud_socks_proxy_server';
 
 // A local Socks server that provides access to a remote uProxy Cloud server via RTC.
 export class UproxyServer implements Server {
@@ -56,11 +56,11 @@ export class UproxyServerRepository implements ServerRepository {
     private corePromise: Promise<CoreConnector>,
     private vpnDevice: VpnDevice) { }
 
-  public getServers(): Promise<UproxyServer[]> {
+  public getServers(): UproxyServer[] {
     const servers = this.loadServers();
-    return Promise.all(Object.keys(servers).map((host) => {
+    return Object.keys(servers).map((host) => {
       return this.createServer(servers[host].cloudTokens);
-    }));
+    });
   }
 
   public addServer(accessCode: AccessCode): UproxyServer {
@@ -98,7 +98,7 @@ export class UproxyServerRepository implements ServerRepository {
   }
 
   private createServer(cloudTokens: cloud_social_provider.Invite): UproxyServer {
-    let proxy = MakeCloudSocksProxy(this.corePromise, cloudTokens);
+    let proxy = makeCloudSocksProxy(this.corePromise, cloudTokens);
     return new UproxyServer(proxy, this.vpnDevice, cloudTokens.host);
   }
 }

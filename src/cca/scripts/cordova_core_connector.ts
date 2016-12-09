@@ -12,12 +12,13 @@ import CoreConnector from '../../generic_ui/scripts/core_connector';
 
 declare const freedom: freedom.FreedomInCoreEnv;
 
-export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
-export interface OnEmitModuleFactory extends
+interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
+interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
 console.log('Loading core');
-export var uProxyAppChannelPromise = freedom(
+// TODO: Handle failure.
+var uProxyAppChannelPromise = freedom(
     'generic_core/freedom-module.json',
     <freedom.FreedomInCoreEnvOptions>{
       'logger': 'lib/loggingprovider/freedom-module.json',
@@ -29,11 +30,12 @@ export var uProxyAppChannelPromise = freedom(
   return uProxyModuleFactory();
 });
 
-export function MakeCoreConnector() : Promise<CoreConnector> {
+export function makeCoreConnector() : Promise<CoreConnector> {
   return uProxyAppChannelPromise.then((channel) => {
-    let browserConnector = new CordovaCoreConnector(
-        channel, {name: 'uproxy-ui-to-core-connector'});
-    let core = new CoreConnector(browserConnector);
+    const browserConnector = new CordovaCoreConnector(channel, {
+      name: 'uproxy-ui-to-core-connector'
+    });
+    const core = new CoreConnector(browserConnector);
     return core.login({
       network: 'Cloud',
       loginType: uproxy_core_api.LoginType.INITIAL,

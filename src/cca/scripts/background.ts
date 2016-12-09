@@ -10,7 +10,7 @@
 
 import { ServerListPage } from '../ui_components/server_list';
 import { UproxyServerRepository } from './uproxy_server';
-import { MakeCoreConnector } from './cordova_core_connector';
+import { makeCoreConnector } from './cordova_core_connector';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 import * as vpn_device from '../model/vpn_device';
 import * as intents from './intents';
@@ -33,12 +33,13 @@ function getLocalStorage(): Storage {
 (window as any).context = this;
 
 // TODO(fortuna): Get rid of core connector and talk to the core directly.
-let corePromise = MakeCoreConnector();
+let corePromise = makeCoreConnector();
 
 let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
   console.debug('Device supports VPN');
   return vpnDevice;
 }).catch((error) => {
+  // TODO(fortuna): Properly notify the user that the device is not supported.
   console.error(error);
   return new vpn_device.NoOpVpnDevice();
 }).then((vpnDevice) => {
