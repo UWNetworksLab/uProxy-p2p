@@ -10,6 +10,7 @@
       "spaces"
     ],
     "no-trailing-whitespace": true,
-    "no-shadowed-variable": true
+    "no-shadowed-variable": true,
+    "no-duplicate-variable": true
   }
 }

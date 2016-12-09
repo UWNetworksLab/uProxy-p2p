@@ -219,8 +219,8 @@ var log :logging.Log = new logging.Log('remote-user');
 
         case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
         case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
-          var instance = this.getInstance(this.clientToInstance(clientId));
-          if (!instance) {
+          const recipientInstance = this.getInstance(this.clientToInstance(clientId));
+          if (!recipientInstance) {
             // TODO: this may occur due to a race condition where uProxy has
             // received an onUserProfile and onClientState event, but not yet
             // recieved and instance message, and the peer tries to start
@@ -229,7 +229,7 @@ var log :logging.Log = new logging.Log('remote-user');
             log.error('failed to get instance', clientId);
             return;
           }
-          instance.handleSignal(msg);
+          recipientInstance.handleSignal(msg);
           return;
 
         case social.PeerMessageType.INSTANCE_REQUEST:
@@ -260,13 +260,13 @@ var log :logging.Log = new logging.Log('remote-user');
           log.debug('got instance key-verify mssage', msg);
           // Find the RemoteInstance representing the peer, and relay
           // the message there.
-          var instance = this.getInstance(this.clientToInstance(clientId));
-          if (!instance) {
+          let peerInstance = this.getInstance(this.clientToInstance(clientId));
+          if (!peerInstance) {
             // issues: https://github.com/uProxy/uproxy/pull/732
             log.error('failed to get instance', clientId);
             return;
           }
-         instance.handleKeyVerifyMessage(msg.data);
+         peerInstance.handleKeyVerifyMessage(msg.data);
         return;
 
         default:
