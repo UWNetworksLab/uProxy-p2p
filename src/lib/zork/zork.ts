@@ -240,7 +240,7 @@ const handleCmdGet = (ctx: Context) => {
   };
 };
 
-const cmdHandlerByCmdId: {[cmdId: string]: (ctx: Context, cmd?: ParsedCmd) => void} = {
+const cmdHandlerByVerb: {[verb: string]: (ctx: Context, cmd?: ParsedCmd) => void} = {
   'ping': handleCmdPing,
   'xyzzy': handleCmdXyzzy,
   'version': handleCmdVersion,
@@ -253,8 +253,8 @@ const cmdHandlerByCmdId: {[cmdId: string]: (ctx: Context, cmd?: ParsedCmd) => vo
 
 const parseCmd = (cmdline: string) : ParsedCmd => {
   const tokens = cmdline.split(/\W+/);
-  const cmdId = tokens[0].toLowerCase();
-  const parsed = {verb: cmdId, tokens: tokens, source: cmdline};
+  const verb = tokens[0].toLowerCase();
+  const parsed = {verb: verb, tokens: tokens, source: cmdline};
   return parsed;
 };
 
@@ -307,7 +307,7 @@ const handleMsg = (ctx: Context, msg: string) => {
   } else {
     // Not yet in 'give' or 'get' mode. Treat msg as command.
     const cmd = parseCmd(msg);
-    const cmdHandler = cmdHandlerByCmdId[cmd.verb] || handleCmdInvalid;
+    const cmdHandler = cmdHandlerByVerb[cmd.verb] || handleCmdInvalid;
     cmdHandler(ctx, cmd);
   }
 };
