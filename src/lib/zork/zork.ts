@@ -55,7 +55,7 @@ const ZORK_SERVER_PORT_INCREMENT = 10;
 const ZORK_SERVER_BIND_MAXTRIES = 3;
 let zorkServerPort = ZORK_SERVER_PORT_START;
 let zorkServerBindNtries = 0;
-let nconnectionsMade = 0;
+let numConnections = 0;
 let npeersGetting = 0;
 
 interface ParsedCmd {
@@ -306,7 +306,7 @@ const handleMsg = (ctx: Context, msg: string) => {
 const zorkServer = net.createServer((client) => {
 
   const ctx: Context = {
-    clientId: nconnectionsMade++,
+    clientId: numConnections++,
     socket: client,
     mode: null,
     transformer: null,
