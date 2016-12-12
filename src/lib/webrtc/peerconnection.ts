@@ -293,7 +293,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // response, and goes to 'disconnected' or 'failed' if pings consistently
   // fail.
   private onIceConnectionStateChange_ = () : void => {
-    var state = this.pc_.getIceConnectionState().then((state:string) => {
+    this.pc_.getIceConnectionState().then((state:string) => {
       log.debug('%1: ice connection state: %2', this.peerName_, state);
 
       if (state === 'disconnected') {

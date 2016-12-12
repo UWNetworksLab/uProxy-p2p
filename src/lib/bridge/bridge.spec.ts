@@ -1,13 +1,12 @@
 import * as freedomMocker from '../freedom/mocks/mock-freedom-in-module-env';
+import mockFreedomRtcPeerConnection from '../freedom/mocks/mock-rtcpeerconnection';
 declare var freedom: freedom.FreedomInModuleEnv;
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); }
 });
-
 import * as bridge from './bridge';
 import * as datachannel from '../webrtc/datachannel';
 import * as handler from '../handler/queue';
-import mockFreedomRtcPeerConnection from '../freedom/mocks/mock-rtcpeerconnection';
 import * as peerconnection from '../webrtc/peerconnection';
 import * as peerconnection_types from '../webrtc/signals';
 
@@ -44,100 +43,6 @@ var noMoreCandidatesSignal: peerconnection_types.Message = {
 ////////
 // Static helpers.
 ////////
-
-describe('isTerminatingSignal', function() {
-  it('ignores messages without signals', () => {
-    expect(bridge.isTerminatingSignal({
-      errorOnLastMessage: true
-    })).toBeFalsy();
-  });
-
-  it('handles non-terminating PLAIN signal', () => {
-    expect(bridge.isTerminatingSignal({
-      signals: {
-        PLAIN: [
-          {
-            type: peerconnection_types.Type.CANDIDATE
-          }
-        ]
-      }
-    })).toBeFalsy();
-  });
-
-  it('handles terminating PLAIN signal', () => {
-    expect(bridge.isTerminatingSignal({
-      signals: {
-        PLAIN: [
-          {
-            type: peerconnection_types.Type.NO_MORE_CANDIDATES
-          }
-        ]
-      }
-    })).toBeTruthy();
-  });
-
-  it('handles non-terminating CHURN signal', () => {
-    expect(bridge.isTerminatingSignal({
-      signals: {
-        CHURN: [
-          {
-            caesar: 94
-          }
-        ]
-      }
-    })).toBeFalsy();
-  });
-
-  it('handles terminating CHURN signal', () => {
-    expect(bridge.isTerminatingSignal({
-      signals: {
-        CHURN: [
-          {
-            webrtcMessage: {
-              type: peerconnection_types.Type.NO_MORE_CANDIDATES
-            }
-          }
-        ]
-      }
-    })).toBeTruthy();
-  });
-
-  it('rejects multiple providers', () => {
-    expect(() => {
-      bridge.isTerminatingSignal({
-        signals: {
-          CHURN: [
-            {
-              caesar: 94
-            }
-          ],
-          HOLO_ICE: [
-            {
-              caesar: 94
-            }
-          ]
-        }
-      });
-    }).toThrow();
-  });
-
-  it('rejects multiple signals', () => {
-    expect(() => {
-      bridge.isTerminatingSignal({
-        signals: {
-          CHURN: [
-            {
-              caesar: 94
-            },
-            {
-              caesar: 94
-            }
-          ]
-        }
-      });
-    }).toThrow();
-  });
-});
 
 describe('makeSingleProviderMessage', function() {
   it('basic', () => {

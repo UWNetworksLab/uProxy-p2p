@@ -588,8 +588,8 @@ import ProxyConfig from './proxyconfig';
                       [this.longId(), userpass]);
             this.tcpConnection_.send(userpassRequest);
             return this.tcpConnection_.receiveNext()
-              .then((buffer:ArrayBuffer) :void => {
-                var success :boolean = socks_headers.interpretUserPassResponse(buffer);
+              .then((userPassResponseBuffer:ArrayBuffer) :void => {
+                var success :boolean = socks_headers.interpretUserPassResponse(userPassResponseBuffer);
                 log.debug('%1: Received userpass subnegotiation reply: %2',
                           [this.longId(), success]);
                 if (!success) {

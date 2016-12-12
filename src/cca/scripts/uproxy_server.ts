@@ -8,7 +8,7 @@ import CoreConnector from '../../generic_ui/scripts/core_connector';
 import { AccessCode, Server, ServerRepository } from '../model/server';
 import { SocksProxy } from '../model/socks_proxy_server';
 import { VpnDevice } from '../model/vpn_device';
-import { CloudSocksProxy } from './cloud_socks_proxy_server';
+import { CloudSocksProxy, makeCloudSocksProxy } from './cloud_socks_proxy_server';
 
 // A local Socks server that provides access to a remote uProxy Cloud server via RTC.
 export class UproxyServer implements Server {
@@ -17,8 +17,8 @@ export class UproxyServer implements Server {
   // Constructs a server that will use the given CoreApi to start the local proxy.
   // It takes the IP address of the uProxy cloud server it will use for Internet access.    
   public constructor(private proxy: SocksProxy,
-                     private vpnDevice: VpnDevice,
-                     private remoteIpAddress: string) {}
+    private vpnDevice: VpnDevice,
+    private remoteIpAddress: string) { }
 
   public getIpAddress() {
     return this.remoteIpAddress;
@@ -53,31 +53,17 @@ export class UproxyServerRepository implements ServerRepository {
   constructor(
     private storage: Storage,
     // Must already be logged into social networks.
-    private core: CoreConnector,
+    private corePromise: Promise<CoreConnector>,
     private vpnDevice: VpnDevice) { }
 
-  public getServers() {
+  public getServers(): UproxyServer[] {
     const servers = this.loadServers();
-    return Promise.all(Object.keys(servers).map((host) => {
-      return this.notifyCoreOfServer(servers[host].cloudTokens);
-    }));
+    return Object.keys(servers).map((host) => {
+      return this.createServer(servers[host].cloudTokens);
+    });
   }
 
-  private loadServers(): SavedServers {
-    return JSON.parse(this.storage.getItem(SERVERS_STORAGE_KEY)) || {};
-  }
-
-  // Saves a server to storage, merging it with any already found there.
-  // Returns true if the server was not already in storage.
-  private saveServer(cloudTokens: cloud_social_provider.Invite) {
-    const savedServers = this.loadServers();
-    savedServers[cloudTokens.host] = {
-      cloudTokens: cloudTokens
-    };
-    this.storage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(savedServers));
-  }
-
-  public addServer(accessCode: AccessCode) {
+  public addServer(accessCode: AccessCode): UproxyServer {
     // This is inspired by ui.ts but note that uProxy Air only
     // supports v2 access codes which have just three fields:
     //  - v
@@ -87,27 +73,56 @@ export class UproxyServerRepository implements ServerRepository {
     const params: social.InviteTokenData = uparams(accessCode);
     if (!(params || params.v ||
       params.networkName || params.networkData)) {
-      return Promise.reject(new Error('could not decode URL'));
+      throw new Error('could not decode URL');
     }
 
     const cloudTokens: cloud_social_provider.Invite = JSON.parse(
         jsurl.parse(<string>params.networkData));
-    this.saveServer(cloudTokens);
+
+    try {
+      this.saveServer(cloudTokens);
+    } catch (e) {
+      console.warn('could not save new server: ' + e.message);
+    }
+
     // TODO: only notify the core when connecting, and delete it afterwards
-    return this.notifyCoreOfServer(cloudTokens);
+    return this.createServer(cloudTokens);
   }
 
-  private notifyCoreOfServer(cloudTokens: cloud_social_provider.Invite) {
-    return this.core.acceptInvitation({
-      network: {
-        name: 'Cloud'
-      },
-      tokenObj: {
-        networkData: cloudTokens,
+  // Loads servers from storage, returning an empty object if
+  // none are found and raising an error if there is any problem
+  // loading.
+  private loadServers(): SavedServers {
+    try {
+      const serversAsJson = this.storage.getItem(SERVERS_STORAGE_KEY);
+      try {
+        return JSON.parse(serversAsJson) || {};
+      } catch (e) {
+        throw new Error('could not parse saved servers: ' + e.message);
       }
-    }).then(() => {
-      let proxy = new CloudSocksProxy(this.core, cloudTokens.host);
-      return new UproxyServer(proxy, this.vpnDevice, proxy.getRemoteIpAddress());
-    });
+    } catch (e) {
+      throw new Error('could not load from storage: ' + e.message);
+    }
+  }
+
+  // Saves a server to storage, merging it with any already found there.
+  // Returns true if the server was not already in storage.
+  private saveServer(cloudTokens: cloud_social_provider.Invite) {
+    let savedServers: SavedServers;
+    try {
+      savedServers = this.loadServers();
+    } catch (e) {
+      console.warn('could not load currently saved servers', e);
+      savedServers = {};
+    }
+    savedServers[cloudTokens.host] = {
+      cloudTokens: cloudTokens
+    };
+    this.storage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(savedServers));
+  }
+
+  private createServer(cloudTokens: cloud_social_provider.Invite): UproxyServer {
+    let proxy = makeCloudSocksProxy(this.corePromise, cloudTokens);
+    return new UproxyServer(proxy, this.vpnDevice, cloudTokens.host);
   }
 }

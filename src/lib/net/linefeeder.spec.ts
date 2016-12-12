@@ -38,10 +38,10 @@ describe('LineFeeder', function() {
     bufferQueue.handle(arraybuffers.stringToArrayBuffer('a\nb\n'));
     lines.flush();
 
-    lines.setSyncNextHandler((result: string) => {
-      expect(result).toEqual('a');
-      lines.setSyncNextHandler((result: string) => {
-        expect(result).toEqual('b');
+    lines.setSyncNextHandler((result1: string) => {
+      expect(result1).toEqual('a');
+      lines.setSyncNextHandler((result2: string) => {
+        expect(result2).toEqual('b');
         done();
       });
     });

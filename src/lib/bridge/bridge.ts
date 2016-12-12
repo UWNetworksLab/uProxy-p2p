@@ -81,39 +81,6 @@ export interface SignallingMessage {
 // Static helper functions.
 ////////
 
-// Returns true iff message is a "terminating" message,
-// i.e. NO_MORE_CANDIDATES. This is intended for use in copy/paste
-// scenarios where it's important for the caller to know when
-// signalling is complete. Handles all providers known to the bridge
-// but does *not* handle "flattened" signalling messages, nor
-// messages with multiple providers.
-export var isTerminatingSignal = (message:SignallingMessage) : boolean => {
-  if (message.signals === undefined) {
-    return false;
-  }
-  var keys = Object.keys(message.signals);
-  if (keys.length !== 1) {
-    throw new Error('only one provider supported');
-  }
-  var providerName = keys[0];
-  var signals = message.signals[providerName];
-  if (signals.length !== 1) {
-    throw new Error('only one signal supported');
-  }
-  switch (providerName) {
-    case ProviderType[ProviderType.PLAIN]:
-      var oldSignal = <peerconnection_types.Message>signals[0];
-      return oldSignal.type === peerconnection_types.Type.NO_MORE_CANDIDATES;
-    case ProviderType[ProviderType.CHURN]:
-    case ProviderType[ProviderType.HOLO_ICE]:
-      var churnSignal = <churn_types.ChurnSignallingMessage>signals[0];
-      return churnSignal.webrtcMessage && churnSignal.webrtcMessage.type ===
-          peerconnection_types.Type.NO_MORE_CANDIDATES;
-    default:
-      throw new Error('no supported provider type found');
-  }
-}
-
 // Constructs a signalling message suitable for the initial offer.
 // Public for testing.
 export var makeSingleProviderMessage = (

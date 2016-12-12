@@ -17,6 +17,8 @@ export var logBuffer: logging.Message[] = [];
 
 export var enabled = true;
 
+const listeners :{[tag :string] :LoggingListener[]} = {};
+
 // This represents a possible destination for log messages.  To make use of
 // this, the class should be inherited from and the log_ method reimplemented
 // to record the message in whichever way is best for that transport.
@@ -57,13 +59,13 @@ export class AbstractLoggingDestination {
   private doFilterChanges_ = (doChange :Function) => {
     var oldLevels :{[tag :string] :logging.Level} = {};
 
-    for (var tag in listeners) {
+    for (const tag in listeners) {
       oldLevels[tag] = getMinLevel(tag);
     }
 
     doChange();
 
-    for (var tag in oldLevels) {
+    for (const tag in oldLevels) {
       if (oldLevels[tag] !== getMinLevel(tag)) {
         updateTag(tag);
       }
@@ -192,8 +194,6 @@ export class Log implements logging.Log {
     this.log_(logging.Level.error, source, msg);
   }
 }
-
-var listeners :{[tag :string] :LoggingListener[]} = {};
 
 function getMinLevel(tag :string) {
   var min = logging.Level.error;

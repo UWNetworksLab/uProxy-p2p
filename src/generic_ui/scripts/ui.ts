@@ -239,14 +239,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.onUpdate(uproxy_core_api.Update.CORE_UPDATE_AVAILABLE, this.coreUpdateAvailable_);
 
-    core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_STATUS, (status: string) => {
-      this.fireSignal('cloud-install-status', status);
-    });
-
-    core.onUpdate(uproxy_core_api.Update.CLOUD_INSTALL_PROGRESS, (progress: number) => {
-      this.fireSignal('cloud-install-progress', progress);
-    });
-
     core.onUpdate(
         uproxy_core_api.Update.REFRESH_GLOBAL_SETTINGS,
         (globalSettings: uproxy_core_api.GlobalSettings) => {
@@ -300,28 +292,6 @@ export class UserInterface implements ui_constants.UiApi {
     switch(name) {
       /* holding for more operations as needed */
     }
-  }
-
-  public restartServer_ = (providerName :string) => {
-    console.warn('Restarting server on ' + providerName);
-    this.getConfirmation(
-      this.i18n_t('RESTART_SERVER_TITLE'),
-      this.i18n_t('RESTART_SERVER_TEXT'),
-      this.i18n_t('CANCEL'),
-      this.i18n_t('RESTART_SERVER')
-    ).then(() => {
-      this.backgroundUi.showToast(translator_module.i18n_t('RESTARTING_SERVER'));
-      return this.core.cloudUpdate({
-        operation: uproxy_core_api.CloudOperationType.CLOUD_REBOOT,
-        providerName: providerName
-      }).then(() => {
-        this.backgroundUi.showToast(translator_module.i18n_t('RESTART_SUCCESS'));
-      }).catch((e: Error) => {
-        this.showDialog(this.i18n_t('RESTART_FAILURE_TITLE'), this.i18n_t('RESTART_FAILURE_TEXT'));
-      });
-    }).then(() => {
-      this.bringUproxyToFront();
-    });
   }
 
   private notifyUserIfConnectedToCellular_ = () => {
@@ -530,7 +500,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (networkName == 'Cloud') {
       // Log into cloud if needed.
-      var loginPromise = Promise.resolve();
+      let loginPromise = Promise.resolve();
       if (!this.model.getNetwork('Cloud')) {
         loginPromise = this.login('Cloud');
       }
@@ -548,7 +518,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
 
     // loginPromise should resolve when the use is logged into networkName.
-    var loginPromise :Promise<void>;
+    let loginPromise :Promise<void>;
     if (networkName == 'Quiver') {
       // Show user confirmation for Quiver login, where they can enter their
       // Quiver user name.
@@ -671,13 +641,8 @@ export class UserInterface implements ui_constants.UiApi {
       // This is an immediate failure, i.e. failure of a connection attempt
       // that never connected.  It is not a retry.
       // Show the error toast indicating that a get attempt failed.
-      let user = this.mapInstanceIdToUser_[instanceId];
-      if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-        this.restartServer_('digitalocean');
-      } else {
-        let toastMessage = translator_module.i18n_t('UNABLE_TO_GET_FROM', { name: instanceId });
-        this.backgroundUi.showToast(toastMessage, true, false);
-      }
+      let toastMessage = translator_module.i18n_t('UNABLE_TO_GET_FROM', { name: instanceId });
+      this.backgroundUi.showToast(toastMessage, true, false);
     }
     this.bringUproxyToFront();
   }
@@ -915,11 +880,11 @@ export class UserInterface implements ui_constants.UiApi {
 
     user.update(payload);
 
-    for (var i = 0; i < payload.allInstanceIds.length; ++i) {
+    for (let i = 0; i < payload.allInstanceIds.length; ++i) {
       this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
     }
 
-    for (var i = 0; i < payload.offeringInstances.length; i++) {
+    for (let i = 0; i < payload.offeringInstances.length; i++) {
       let instance = payload.offeringInstances[i];
       this.syncGettingState_(instance);
       this.syncTryingToGetState_(instance);
@@ -927,7 +892,7 @@ export class UserInterface implements ui_constants.UiApi {
     }
     this.updateGettingStatusBar_();
 
-    for (var i = 0; i < payload.instancesSharingWithLocal.length; i++) {
+    for (let i = 0; i < payload.instancesSharingWithLocal.length; i++) {
       this.instancesGivingAccessTo[payload.instancesSharingWithLocal[i]] = true;
       user.isGettingFromMe = true;
     }
@@ -1011,20 +976,6 @@ export class UserInterface implements ui_constants.UiApi {
     var user = this.model.getUser(network, args.userId);
     this.model.removeContact(user);
     console.log('Removed user from contacts', user);
-  }
-
-  public getCloudUserCreatedByLocal = () : Promise<Object> => {
-    const network = this.model.getNetwork('Cloud');
-    if (!network) {
-      return Promise.reject('not logged into cloud network');
-    }
-    for (let userId in network.roster) {
-      let user = this.model.getUser(network, userId);
-      if (user.status === social.UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL) {
-        return Promise.resolve(user);
-      }
-    }
-    return Promise.reject('locally created cloud contact does not exist');
   }
 
   public openTab = (url: string) => {
@@ -1117,7 +1068,6 @@ export class UserInterface implements ui_constants.UiApi {
   public updateInitialState = (state :uproxy_core_api.InitialState) => {
     console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
     this.model.networkNames = state.networkNames;
-    this.model.cloudProviderNames = state.cloudProviderNames;
     this.availableVersion = state.availableVersion;
     if (!state.globalSettings.language) {
       // Set state.globalSettings.language based on browser settings:
@@ -1218,7 +1168,7 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public cloudUpdate = (args :uproxy_core_api.CloudOperationArgs)
-      :Promise<uproxy_core_api.CloudOperationResult> => {
+      :Promise<void> => {
     return this.core.cloudUpdate(args);
   }
 
