@@ -11,6 +11,10 @@
   <link rel="import" href="bower_components/paper-button/paper-button.html">
   <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
   <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+  <!-- Typography and shadow (classes). -->
+  <link rel="import" href="bower_components/paper-styles/default-theme.html">
+  <link rel="import" href="bower_components/paper-styles/paper-styles-classes.html">
+  <!-- Colour (variables). -->
   <link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
 
   <!-- Figure out how to fix the CSP issue with the googleapis font import from iron-meta -->
@@ -21,44 +25,132 @@
   <link href='generic_ui/style/global.css' rel='stylesheet' shim-shadowdom>
 
   <style>
-    paper-toolbar.uproxy {
-      background: #12a391;
-    }
-    .server-entry-card, .access-code-card {
-      background-color: white;
-      box-shadow: 1px 1px 3px #AAAAAA;
-      margin: 10px;
-      padding: 10px;
-    }
-    .access-code-card {
-      padding: 5px;
-    }
-    .access-code-card input {
-      width: 20em;
-    }
-    .page-content {
-      padding: 5px;
-    }
     @font-face {
       font-family: Quicksand;
       src: url(generic_ui/fonts/Quicksand-Regular.ttf);
     }
+    
     @font-face {
       font-family: Quicksand;
       src: url(generic_ui/fonts/Quicksand-Bold.ttf);
       font-weight: 700;
     }
-    html {
-      height: 100%;
-      position: relative;
-    }
+    
     body {
-      display: block;
-      margin: 0;
       font-family: Roboto, sans-serif;
-      font-size: 13px;
-      background-color: #eee;
+    }
+    
+    paper-toolbar.uproxy {
+      background: #12a391;
+    }
+
+    /*
+      Server cards use Flexbox to achieve the several
+      required instances of vertical centering.
+
+      It's a three column layout with the columns
+      comprising, from top to bottom:
+       - network name (toolbar)
+       - connect/disconnect button
+       - connection status
+
+      The top and bottom elements are configured with
+      an equal flex-grow attribute, leaving the button
+      sandwiched perfectly in the middle of the card.
+      
+      This interactive code snippet may help with
+      understanding the approach:
+        https://codepen.io/anon/pen/MbrpyK
+    */
+
+    #server-list {
       height: 100%;
+      overflow: auto;
+    }
+    
+    #server-list::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .server-card {
+      width: 100%;
+      /*
+        Ballpark figure chosen to be comfortably more than
+        the combined height of the toolbar, button, and status.
+        Really only relevant for testing since virtually no
+        real Android device will be this short.
+      */
+      min-height: 300px;
+
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .server-card .toolbar {
+      flex-grow: 1;
+      flex-basis: 0;
+    }
+    
+    .server-card .toolbar > div {
+      margin-top: 24px;
+      margin-left: 24px;
+    }
+    
+    .server-card .button {
+      align-self: center;
+    }
+    
+    .server-card .button > paper-icon-button {
+      width: 175px;
+      height: 175px;
+    }
+    
+    .server-card .status {
+      flex-grow: 1;
+      flex-basis: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .server-card:only-child {
+      height: 100%;
+    }
+
+    .server-card:not(:only-child) {
+      /*
+        68px is an amount by which a subsequent card will
+        "peek through" when there are multiple cards:
+         - gap between cards (12px) +
+         - vertical padding (24px) +
+         - toolbar font size (20px) +
+         -  1/2 vertical padding (12px) = 68px
+      */
+      height: calc(100% - 68px);
+    }
+
+    .server-card:not(:last-child) {
+      margin-bottom: 12px;
+    }
+  </style>
+
+  <style is="custom-style">
+    #server-list {
+      background: var(--light-theme-divider-color);
+    }
+
+    .server-card {
+      background: var(--primary-background-color);
+    }
+
+    .server-card .toolbar {
+      color: var(--primary-text-color);
+      opacity: var(--dark-primary-opacity);
+    }
+
+    .server-card .status {
+      color: var(--secondary-text-color);
+      opacity: var(--dark-secondary-opacity);
     }
   </style>
 </head>
@@ -69,14 +161,7 @@
       <paper-icon-button icon="menu"></paper-icon-button>
       <span class="title">uProxy</span>
     </paper-toolbar>
-    <div class='page-content'>
-      <div id='entry-list'></div>
-      <div class='access-code-card'>
-        <!-- TODO(fortuna): i18n this -->
-        <input type='text' id='token-text' label="Enter Access Code"></input>
-        <paper-button id='add-server-button' raised>Add Server</paper-button>
-      </div>
-    </div>
+    <div id='server-list'></div>
   </paper-header-panel>
 </body>
 
