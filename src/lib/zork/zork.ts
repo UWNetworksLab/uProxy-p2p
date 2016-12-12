@@ -1,11 +1,10 @@
 /// <reference path='../../../third_party/wrtc/wrtc.d.ts' />
 
 /*
- * Pure Node implementation of zork (no freedomjs).
+ * Pure Node implementation of Zork for uProxy Cloud Servers.
  * Rough lifecycle is to process single word commands such as "ping" until
  * "give" or "get" is received, at which point a p2p proxy session is
  * established and further input is treated as signaling channel messages.
- * This logic can be found in `handleMsg()` below.
  */
 
 
@@ -14,11 +13,8 @@
 //   Currently we stash them in the context but then ignore them.
 // - Consider sending a response to acknowledge successful processing of the
 //   `transform` command (protocol-level change, see TODO below)
-// - Verify p2p proxy connection setup is sane:
-//   - dummy IGNORED datachannel necessary? (see "IGNORED" TODO below)
-//   - all required states or messages handled?
-//     (see "event.candidate -> TODO" below)
-//   - make sure there are no resource leaks (see "cleanup" TODO below)
+// - Remove BOOTSTRAP data channel if possible (see TODO below)
+// - Make sure there are no resource leaks (see "cleanup" TODO below)
 // - Implement backpressure (see "backpressure" TODO below)
 // - Factor out logic duplicated in ../socks/bin/webrtc.ts
 // - Replace console log calls with something more structured?
@@ -26,20 +22,13 @@
 // - just logged locally?
 
 
-import * as constants from '../../generic_core/constants';
 import * as net from 'net';
-import * as node_server from '../socks/node/server';
-import * as node_socket from '../socks/node/socket';
-import * as socks_session from '../socks/session';
-import * as wrtc from 'wrtc';
+import {MESSAGE_VERSION} from '../../generic_core/constants';
+import {NodeSocksServer as SocksServer} from '../socks/node/server';
+import {NodeForwardingSocket as ForwardingSocket} from '../socks/node/socket';
+import {SocksSession} from '../socks/session';
+import {RTCPeerConnection} from 'wrtc';
 
-const RTC_PEER_CONFIG = {
-  iceServers: [
-    {url: 'stun:stun.l.google.com:19302'},
-    {url: 'stun:stun1.l.google.com:19302'},
-    {url: 'stun:stun.services.mozilla.com'}
-  ]
-};
 
 // The delimiter for Zork messages is just \n, but we use \r?\n for
 // MSG_DELIM_RE so that \r\n sent by e.g. a telnet client will also be treated
@@ -48,23 +37,26 @@ const RTC_PEER_CONFIG = {
 const MSG_DELIM = '\n';
 const MSG_DELIM_RE = /\r?\n/;
 
-const makeReplyFunction = (socket: net.Socket) : ((msg: string) => void)  => {
-  return (msg: string) => {
-    socket.write(msg);
-    socket.write(MSG_DELIM);
-  };
+const ZORK_PORT_DEFAULT = 9000;
+const ZORK_PORT = Number(process.argv[2] || ZORK_PORT_DEFAULT);
+const SOCKS_HOST = '127.0.0.1';
+const SOCKS_PORT_DEFAULT = 9999;
+const SOCKS_PORT = Number(process.argv[3] || SOCKS_PORT_DEFAULT);
+if (isNaN(ZORK_PORT) || isNaN(SOCKS_PORT)) {
+  console.error(`Usage: ${process.argv[0]} ${process.argv[1]} [ZORK_PORT] [SOCKS_PORT]`);
+  process.exit(1);
+}
+let numZorkConnections = 0;  // ever made (as opposed to currently active)
+let numGetters = 0;  // currently active (not ever)
+let socksServer: SocksServer = null;  // initialized lazily, on 'get' command
+const BOOTSTRAP_CHANNEL_ID = 'BOOTSTRAP-DATACHANNEL__CLOSED-ON-CONNECT';
+const RTC_PEER_CONFIG = {
+  iceServers: [
+    {url: 'stun:stun.l.google.com:19302'},
+    {url: 'stun:stun1.l.google.com:19302'},
+    {url: 'stun:stun.services.mozilla.com'}
+  ]
 };
-
-const SOCKS_HOST = '0.0.0.0';
-const SOCKS_PORT = 9999;
-
-const ZORK_SERVER_PORT_START = 9000;
-const ZORK_SERVER_PORT_INCREMENT = 10;
-const ZORK_SERVER_BIND_MAXTRIES = 3;
-let zorkServerPort = ZORK_SERVER_PORT_START;
-let zorkServerBindNtries = 0;
-let numConnections = 0;
-let npeersGetting = 0;
 
 interface ParsedCmd {
   verb: string;      // e.g. 'ping', 'give', 'get', 'transform', etc.
@@ -72,13 +64,21 @@ interface ParsedCmd {
   tokens: string[];  // e.g. ['transform', 'with', 'caesar']
 }
 
+interface RTCState {
+  conn: any;
+  remoteReceived: boolean;
+  pendingCandidates: any[];
+}
+
 interface Context {
-  clientId: number;
-  socket: net.Socket;
-  reply: (msg: string) => void;
-  mode: string;  // 'give', 'get', or null (still awaiting a 'give' or 'get' command)
-  peerConn: any; // using wrtc.RTCPeerConnection upsets tsc
-  transformer: any;
+  clientId: string;
+  socket: net.Socket;  // Connection to the zork client. Becomes the signaling channel.
+  reply: (msg: string) => void;  // Helper function to reply to the client.
+  log: any;  // Helper function for contextual logging.
+  mode: string;  // 'give', 'get', or null to indicate still waiting for a 'give' or 'get' command
+  transformer: any;  // Stores any requested transform settings.
+  socksSession: SocksSession;  // Set to a socks session if we're giving access.
+  rtc: RTCState;
 }
 
 
@@ -97,7 +97,7 @@ const handleCmdXyzzy = (ctx: Context) => {
 };
 
 const handleCmdVersion = (ctx: Context) => {
-  ctx.reply(`${constants.MESSAGE_VERSION}`);
+  ctx.reply(`${MESSAGE_VERSION}`);
 };
 
 const handleCmdQuit = (ctx: Context) => {
@@ -105,7 +105,7 @@ const handleCmdQuit = (ctx: Context) => {
 };
 
 const handleCmdGetters = (ctx: Context) => {
-  ctx.reply(`${npeersGetting}`);
+  ctx.reply(`${numGetters}`);
 };
 
 const handleCmdTransform = (ctx: Context, cmd: ParsedCmd) => {
@@ -122,122 +122,98 @@ const handleCmdTransform = (ctx: Context, cmd: ParsedCmd) => {
   }
 };
 
+const initPeerConnection = (ctx: Context) => {
+  const conn = ctx.rtc.conn = new RTCPeerConnection(RTC_PEER_CONFIG);
+  conn.onsignalingstatechange = (event: any) => ctx.log(`signaling state change`);
+  conn.oniceconnectionstatechange = (event: any) => ctx.log(`ice connection state change`);
+  conn.onicegatheringstatechange = (event: any) => ctx.log(`ice gathering state change`);
+  conn.onicecandidate = (event: any) => ctx.reply(JSON.stringify(event));
+  conn.ondatachannel = (event: any) => onDataChannel(ctx, event.channel);
+};
+
+const onDataChannel = (ctx: Context, channel: any) => {
+  const channelId = channel.label;
+  if (ctx.mode === 'get') {
+    // ondatachannel events don't fire for the peer creating the datachannel.
+    // getter creates datachannels -> this should only run when we're the giver.
+    ctx.log(`onDataChannel: ignoring unexpected datachannel ${channelId} created by giver`);
+    return;
+  }
+  if (channelId === BOOTSTRAP_CHANNEL_ID) {
+    ctx.log(`onDataChannel: BOOTSTRAP datachannel`);
+    return;
+  }
+  ctx.log(`onDataChannel: [channelId ${channelId}] [channel.readyState ${channel.readyState}]`);
+  initSocksSession(ctx, channel);
+  channel.onopen = () => ctx.log(`[channelId ${channelId}] datachannel opened`);
+  channel.onclose = () => ctx.log(`[channelId ${channelId}] datachannel closed`);
+  channel.onerror = (err: any) => ctx.log.error(`[channelId ${channelId}] datachannel error: ${err}`);
+  channel.onmessage = (event: any) => ctx.socksSession.handleDataFromSocksClient(event.data);
+};
+
 /*
  * Start giving access to the peer.
- * Create a local socks server and connect it to the peer connection.
  */
 const handleCmdGive = (ctx: Context) => {
-  console.info(`Got "give" command`);
   ctx.mode = 'give';
-  npeersGetting++;
-  console.info(`incremented npeersGetting to ${npeersGetting}`);
-  ctx.peerConn = new wrtc.RTCPeerConnection(RTC_PEER_CONFIG);
-  ctx.peerConn.onicecandidate = (event: any) => {
-    const json = JSON.stringify(event);
-    console.info(`[give] icecandidate from peerConn`);//: ${json}`);
-    if (event.candidate) {
-      console.info(`[give] event.candidate -> sending event`);
-      ctx.reply(`${json}`);
-    } else {
-      console.error(`[give] event.candidate missing, ignoring`);
-    }
-  }
-  // TODO: any way to avoid creating this initial dummy IGNORED datachannel?
-  // If not, add a comment here that explains this?
-  ctx.peerConn.createDataChannel('IGNORED').onopen = () => {
-    console.info(`[give] ${ctx.clientId}: datachannel opened`);
-    const socksServer = new node_server.NodeSocksServer(SOCKS_HOST, SOCKS_PORT);
-    socksServer.onConnection((sessionId: any) => {
-      console.info(`[give] ${ctx.clientId}: new socks server connection: ${sessionId}`);
-      const channel = ctx.peerConn.createDataChannel(sessionId);
-      channel.onclose = () => {
-        console.info(`[give] ${sessionId}: datachannel closed (zork client ${ctx.clientId})`);
-      };
-      return {
-        // SOCKS client -> datachannel
-        handleDataFromSocksClient: (bytes: ArrayBuffer) => {
-          channel.send(bytes);
-        },
-        // SOCKS client <- datachannel
-        onDataForSocksClient: (callback: (buffer: ArrayBuffer) => void) => {
-          channel.onmessage = (event: any) => {
-            callback(event.data);
-          };
-          return this;
-        },
-        handleDisconnect: () => {
-          console.info(`[give] ${sessionId}: socks client disconnected, closing datachannel (zork client ${ctx.clientId})`);
-          channel.close();
-        },
-        onDisconnect: (callback: () => void) => {
-          return this;
-        }
-      };
-    }).listen().then(() => {
-      console.info(`socks server listening on ${SOCKS_HOST}:${SOCKS_PORT}`);
-      console.info(`e.g. curl -x socks5h://${SOCKS_HOST}:${SOCKS_PORT} www.example.com`);
-    }, (e: any) => {
-      console.error('failed to start SOCKS server', e);
-    });
-  };
-  ctx.peerConn.createOffer((offer: any) => {
-    const json = JSON.stringify(offer);
-    console.info(`created offer`);//: ${json}`);
-    ctx.peerConn.setLocalDescription(offer);
-    ctx.reply(`${json}`);
-  }, console.error);
+  ctx.log(`set mode to "give"`);
+  initPeerConnection(ctx);
 };
 
 /*
  * Start getting access from the peer.
- * Create a socks client and connect it to the peer connection.
  */
 const handleCmdGet = (ctx: Context) => {
-  console.info(`Got "get" command`);
   ctx.mode = 'get';
-  ctx.peerConn = new wrtc.RTCPeerConnection(RTC_PEER_CONFIG);
-  ctx.peerConn.onicecandidate = (event: any) => {
-    const json = JSON.stringify(event);
-    console.info(`[get] icecandidate from peerConn`);//: ${json}`);
-    if (event.candidate) {
-      console.info('[get] event.candidate -> TODO');
+  ctx.log('set mode to "get"');
+
+  if (!socksServer) {
+    ctx.log(`starting socks server....`);
+    socksServer = new SocksServer(SOCKS_HOST, SOCKS_PORT);
+    socksServer.onConnection((sessionId) => onSocksConnection(ctx, sessionId));
+    socksServer.listen().then(() => {
+      ctx.log(`[socksServer] listening on ${SOCKS_HOST}:${SOCKS_PORT}`);
+      ctx.log(`Test with e.g. curl -x socks5h://${SOCKS_HOST}:${SOCKS_PORT} httpbin.org/ip`);
+    });
+  }
+  initPeerConnection(ctx);
+
+  // Connection stalls unless we do this here. TODO: Remove if possible.
+  ctx.rtc.conn.createDataChannel(BOOTSTRAP_CHANNEL_ID);
+
+  // Getter is offerer.
+  ctx.rtc.conn.createOffer((offer: any) => {
+    ctx.rtc.conn.setLocalDescription(offer);
+    const json = JSON.stringify(offer);
+    ctx.log(`forwarding offer: ${json}`);
+    ctx.reply(json);
+  }, ctx.log.error);
+};
+
+const initSocksSession = (ctx: Context, channel: any) => {
+  ctx.log(`initSocksSession: client ${ctx.clientId}`);
+
+  const session = ctx.socksSession = new SocksSession(ctx.clientId);
+
+  session.onForwardingSocketRequired((host: any, port: any) => {
+    const forwardingSocket = new ForwardingSocket();
+    return forwardingSocket.connect(host, port).then(() => {
+      return forwardingSocket;
+    });
+  });
+
+  // datachannel <- SOCKS session
+  session.onDataForSocksClient((bytes: any) => {
+    // When too much is buffered, the channel closes/fails.
+    const BUFFTHRESHOLD = 16000000;  // 16 megabytes
+    if (channel.bufferedAmount < BUFFTHRESHOLD) {
+      channel.send(bytes);
     } else {
-      console.error(`[get] event.candidate missing, ignoring`);
+      ctx.log.error(`datachannel congested, dropping bytes! TODO: backpressure`);
     }
-  };
-  ctx.peerConn.ondatachannel = (event: any) => {
-    console.info(`[get] ${ctx.clientId}: ondatachannel`);
-    const channel: any = event.channel;
-    const sessionId = channel.label;
-    const socksSession = new socks_session.SocksSession(sessionId);
-    socksSession.onForwardingSocketRequired((host, port) => {
-      const forwardingSocket = new node_socket.NodeForwardingSocket();
-      return forwardingSocket.connect(host, port).then(() => {
-        return forwardingSocket;
-      });
-    });
-    // datachannel -> SOCKS session
-    channel.onmessage = (event: any) => {
-      socksSession.handleDataFromSocksClient(event.data);
-    };
-    // datachannel <- SOCKS session
-    socksSession.onDataForSocksClient((bytes) => {
-      // When too much is buffered, the channel closes/fails.
-      // TODO: backpressure!
-      const BUFFTHRESHOLD = 16000000;  // 16 megabytes
-      if (channel.bufferedAmount < BUFFTHRESHOLD) {
-        channel.send(bytes);
-      } else {
-        console.warn('channel congested, dropping bytes')
-      }
-    });
-    socksSession.onDisconnect(() => {
-      console.info(`[get] ${sessionId}: socks session disconnected`);
-    });
-    channel.onclose = () => {
-      console.info(`[get] ${sessionId}: channel closed (giver side)`);
-    };
-  };
+  });
+
+  session.onDisconnect(() => ctx.log(`SOCKS session disconnected`));
 };
 
 const cmdHandlerByVerb: {[verb: string]: (ctx: Context, cmd?: ParsedCmd) => void} = {
@@ -251,6 +227,51 @@ const cmdHandlerByVerb: {[verb: string]: (ctx: Context, cmd?: ParsedCmd) => void
   'get': handleCmdGet
 };
 
+
+const handleSignaling = (ctx: Context, msg: string) => {
+  const data = JSON.parse(msg);
+  if (data.type === 'icecandidate' && data.candidate) {
+    handleIce(ctx, data);
+  } else if (data.type === 'offer' && data.sdp && ctx.mode === 'give') {
+    // Getter is offerer, so giver receives the offer.
+    ctx.rtc.remoteReceived = true;
+    ctx.log(`got offer: ${msg} -> remoteReceived = true`);
+    numGetters++;
+    ctx.log(`incremented numGetters to ${numGetters}`);
+    ctx.rtc.conn.setRemoteDescription(data, () => {
+      while (ctx.rtc.pendingCandidates.length) {
+        ctx.rtc.conn.addIceCandidate(ctx.rtc.pendingCandidates.shift());
+      }
+      ctx.rtc.conn.createAnswer((answer: any) => {
+        ctx.log(`created answer, setting local description`);
+        ctx.rtc.conn.setLocalDescription(answer, () => {
+          const json = JSON.stringify(answer);
+          ctx.log(`forwarding answer: ${json}`);
+          ctx.reply(json);
+        }, ctx.log.error);
+      }, ctx.log.error);
+    }, ctx.log.error);
+  } else if (data.type === 'answer' && data.sdp && ctx.mode === 'get') {
+    // Giver is answerer, so getter receives the answer.
+    ctx.rtc.remoteReceived = true;
+    ctx.log(`got answer: ${msg} -> remoteReceived = true`);
+    ctx.rtc.conn.setRemoteDescription(data);
+  } else {
+    ctx.log(`handleSignaling: ignoring msg: ${msg}`);
+  }
+};
+
+const handleIce = (ctx: Context, data: any) => {
+  if (ctx.rtc.remoteReceived) {
+    ctx.log(`handleIce: remoteReceived: adding ice candidate...`);
+    ctx.rtc.conn.addIceCandidate(data.candidate);
+  } else {
+    ctx.log(`handleIce: !remoteReceived: adding pending ice candidate`);
+    ctx.rtc.pendingCandidates.push(data.candidate);
+  }
+};
+
+
 const parseCmd = (cmdline: string) : ParsedCmd => {
   const tokens = cmdline.split(/\W+/);
   const verb = tokens[0].toLowerCase();
@@ -259,98 +280,70 @@ const parseCmd = (cmdline: string) : ParsedCmd => {
 };
 
 
-// Message handlers:
-
-const handleMsgForModeGive = (ctx: Context, msg: string) => {
-  const parsed = JSON.parse(msg);
-  if (parsed.sdp) {
-    console.info(`[give] got sdp`);//: ${msg}`);
-    ctx.peerConn.setRemoteDescription(parsed);
-  } else {
-    console.info(`[give] parsed.sdp missing, ignoring msg`);//: ${msg}`);
-  }
-};
-
-const handleMsgForModeGet = (ctx: Context, msg: string) => {
-  const parsed = JSON.parse(msg);
-  if (parsed.type === 'icecandidate') {
-    console.info(`[get] icecandidate from client ${ctx.clientId}`);//: ${msg}`);
-    ctx.peerConn.addIceCandidate(parsed.candidate);
-  } else if (parsed.type === 'offer') {
-    console.info(`[get] got offer`);//: ${msg}`);
-    ctx.peerConn.setRemoteDescription(parsed);
-    ctx.peerConn.createAnswer((answer: any) => {
-      const answerJson = JSON.stringify(answer);
-      console.info(`[get] created answer`);//: ${answerJson}`);
-      ctx.peerConn.setLocalDescription(answer);
-      ctx.reply(`${JSON.stringify(answer)}`);
-    }, console.error);
-  } else {
-    console.error(`[get] unexpected msg: ${msg}`);
-  }
-};
-
-const msgHandlerByMode: {[mode: string]: (ctx: Context, msg: string) => void} = {
-  'give': handleMsgForModeGive,
-  'get': handleMsgForModeGet
-};
-
 const handleMsg = (ctx: Context, msg: string) => {
-  if (ctx.mode) {
-    // Already in 'give' or 'get' mode. Dispatch to corresponding message handler.
-    const msgHandler = msgHandlerByMode[ctx.mode];
-    if (msgHandler) {
-      msgHandler(ctx, msg);
-    } else {
-      console.error(`no message handler for mode: ${ctx.mode}`);
-    }
-  } else {
-    // Not yet in 'give' or 'get' mode. Treat msg as command.
+  if (ctx.mode) { // Already in 'give' or 'get' mode. Treat msg as signaling.
+    handleSignaling(ctx, msg);
+  } else { // Not yet in 'give' or 'get' mode. Treat msg as command.
     const cmd = parseCmd(msg);
     const cmdHandler = cmdHandlerByVerb[cmd.verb] || handleCmdInvalid;
     cmdHandler(ctx, cmd);
   }
 };
 
-const zorkServer = net.createServer((client) => {
 
+const onSocksConnection = (ctx: Context, sessionId: any) => {
+  ctx.log(`[socksServer] new connection: ${sessionId}`);
+  const channel = ctx.rtc.conn.createDataChannel(sessionId);
+  return {
+    // SOCKS client -> datachannel
+    handleDataFromSocksClient: (bytes: ArrayBuffer) => channel.send(bytes),
+    // SOCKS client <- datachannel
+    onDataForSocksClient: (callback: (buffer: ArrayBuffer) => void) => {
+      channel.onmessage = (event: any) => callback(event.data);
+      return this;
+    },
+    handleDisconnect: () => {
+      channel.close();
+      ctx.log(`[socksServer] [session ${sessionId}] client disconnect, closed datachannel`);
+    },
+    onDisconnect: (callback: () => void) => {
+      ctx.log(`[socksServer] [session ${sessionId}] client disconnected`);
+      return this;
+    }
+  };
+};
+
+
+const zorkServer = net.createServer((client) => {
+  const clientId = `zc${numZorkConnections++}`;
   const ctx: Context = {
-    clientId: numConnections++,
+    clientId: clientId,
     socket: client,
     reply: makeReplyFunction(client),
+    log: null,
     mode: null,
     transformer: null,
-    peerConn: null
+    socksSession: null,
+    rtc: {
+      conn: null,
+      remoteReceived: false,
+      pendingCandidates: []
+    }
   };
+  ctx.log = makeLogger(ctx);
+  ctx.log(`[zorkServer] client connected`);
 
-  console.info(`client ${ctx.clientId} connected`);
-
-  // Handle receiving data from this client.
-  // Buffer for partially transmitted messages.
   let buffer = '';
-
   client.on('data', (data) => {
     const chunk = data.toString();
     const msgs = chunk.split(MSG_DELIM_RE);
     const msgDelimNotFound = msgs.length === 1;
     if (msgDelimNotFound) {
-      // No delimiter found means we only have part of a message. Continue
-      // adding it to `buffer` (potentially in subsequent callbacks as well)
-      // until we do reach a delimiter.
       buffer += chunk;
       return;
     }
-    // Message delimiter found. After adding any message parts we buffered
-    // previously, we should now have at least one complete message.
     msgs[0] = buffer + msgs[0];
-    // If the data we've read off the socket ended with the message delimiter,
-    // the last element of `msgs` is empty string.
-    // Otherwise, the last element is only part of a message which we will have
-    // to reconstruct in a future callback once more data is available.
-    // Popping off this last element and setting `buffer` to it handles both
-    // cases.
     buffer = msgs.pop();
-    // Process the complete messages we've received.
     for (let msg of msgs) {
       if (msg) {  // Ignore empty messages.
         handleMsg(ctx, msg);
@@ -359,36 +352,35 @@ const zorkServer = net.createServer((client) => {
   });
 
   client.on('end', () => {
-    console.info(`client ${ctx.clientId} disconnected`);
-    if (ctx.mode === 'give') {
-      npeersGetting--;
-      console.info('decremented npeersGetting to', npeersGetting);
+    ctx.log(`[zorkServer] client disconnected`);
+    if (ctx.mode === 'give' && ctx.rtc.conn) {
+      numGetters--;
+      ctx.log(`decremented numGetters to ${numGetters}`);
     }
-    // TODO: any further cleanup necessary to make sure resources allocated
-    // for this client will be reclaimed?
+    // TODO: any cleanup necessary here to make sure resources allocated
+    // for this client will be reclaimed? e.g. need to set `ctx = null` for gc?
   });
 });
+zorkServer.listen(ZORK_PORT);
+zorkServer.on('listening', () => console.info('[zorkServer] listening on port', ZORK_PORT));
 
+const makeReplyFunction = (socket: net.Socket) : ((msg: string) => void)  => {
+  return (msg: string) => {
+    socket.write(msg);
+    socket.write(MSG_DELIM);
+  };
+};
 
-const tryToBindZorkServerToNextPort = (lastError?: any) => {
-  if (lastError) {
-    // Handle EADDRINUSE errors by trying to bind to a new port.
-    // Don't respond to any other errors.
-    if (lastError.errno !== 'EADDRINUSE') {
-      return;
-    }
-    zorkServerPort += ZORK_SERVER_PORT_INCREMENT;
-  }
-  if (zorkServerBindNtries >= ZORK_SERVER_BIND_MAXTRIES) {
-    console.error('Reached ZORK_SERVER_BIND_MAXTRIES, giving up.');
-    return;
-  }
-  console.info('Attempting to bind zork server to port', zorkServerPort);
-  zorkServerBindNtries++;
-  zorkServer.listen(zorkServerPort);
-}
-zorkServer.on('error', tryToBindZorkServerToNextPort);
-zorkServer.on('listening', () => {
-  console.info('zork server listening on port', zorkServerPort);
-});
-tryToBindZorkServerToNextPort();
+const makeLogger = (ctx: Context) => {
+  const prefix = (level: string) => {
+    const now = new Date();
+    const s = `[${now.toTimeString().substring(0, 8)}.${now.getMilliseconds()}]`
+            + ` [${level}]`
+            + ` [client ${ctx.clientId}]`
+            + ` [${ctx.mode}]`;
+    return s;
+  };
+  let logger: any = (...args: any[]) => console.info(prefix('INFO'), ...args);
+  logger.error = (...args: any[]) => console.error(prefix('ERROR'), ...args);
+  return logger;
+};

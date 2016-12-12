@@ -103,5 +103,5 @@ export class NodeSocksServer implements socks_server.SocksServer {
         R(e);
       }
     });
-  }
+  };
 }
