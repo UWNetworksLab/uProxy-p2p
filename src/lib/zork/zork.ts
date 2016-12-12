@@ -19,7 +19,7 @@
 // - Factor out logic duplicated in ../socks/bin/webrtc.ts
 // - Replace console log calls with something more structured?
 // - Do error states ever need to be indicated to clients rather than
-// - just logged locally?
+//   just logged locally?
 
 
 import * as net from 'net';
@@ -140,7 +140,8 @@ const onDataChannel = (ctx: Context, channel: any) => {
     return;
   }
   if (channelId === BOOTSTRAP_CHANNEL_ID) {
-    ctx.log(`onDataChannel: BOOTSTRAP datachannel`);
+    channel.close();
+    ctx.log(`onDataChannel: got BOOTSTRAP datachannel; closed.`);
     return;
   }
   ctx.log(`onDataChannel: [channelId ${channelId}] [channel.readyState ${channel.readyState}]`);
