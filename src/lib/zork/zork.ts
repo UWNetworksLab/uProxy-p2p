@@ -3,8 +3,31 @@
 /*
  * Pure Node implementation of Zork for uProxy Cloud Servers.
  * Rough lifecycle is to process single word commands such as "ping" until
- * "give" or "get" is received, at which point a p2p proxy session is
+ * "give" or "get" is received, at which point an RTC proxy session is
  * established and further input is treated as signaling channel messages.
+ *
+ *
+ * If a "get" command is received, we start a local SOCKS server, send an RTC
+ * offer to establish an RTC connection with the remote peer we'll be getting
+ * access from, and set things up to pipe data between our local SOCKS server
+ * and the peer connection.
+ * As the getter, we are the one that creates the offer, as well as all RTC
+ * datachannels. This includes a bootstrap datachannel which transmits no data
+ * and is just required to bootstrap the connection, as well as a datachannel
+ * for each local SOCKS connection which actually forwards data for it.
+ *
+ *
+ * If a "give" command is received, we wait for an RTC offer from the getter,
+ * and then send our answer (see handleSignaling below). Once an RTC connection
+ * is established, we wait for the getter to create datachannels with us.
+ * Each datachannel is created by the getter when they get a connection to
+ * their local SOCKS server. When we detect a getter-initiated datachannel,
+ * we create a SocksSession for it and set it up to forward data between the
+ * Internet and the datachannel.
+ *
+ *
+ * Note: Zork can be giving to one or more clients at the same time it is
+ * getting from one or more clients. Each Zork session is independent.
  */
 
 
@@ -13,7 +36,6 @@
 //   Currently we stash them in the context but then ignore them.
 // - Consider sending a response to acknowledge successful processing of the
 //   `transform` command (protocol-level change, see TODO below)
-// - Remove BOOTSTRAP data channel if possible (see TODO below)
 // - Make sure there are no resource leaks (see "cleanup" TODO below)
 // - Implement backpressure (see "backpressure" TODO below)
 // - Factor out logic duplicated in ../socks/bin/webrtc.ts
@@ -47,9 +69,9 @@ if (isNaN(ZORK_PORT) || isNaN(SOCKS_PORT)) {
   process.exit(1);
 }
 let numZorkConnections = 0;  // ever made (as opposed to currently active)
+let numGivers = 0;  // currently active (not ever)
 let numGetters = 0;  // currently active (not ever)
-let socksServer: SocksServer = null;  // initialized lazily, on 'get' command
-const BOOTSTRAP_CHANNEL_ID = 'BOOTSTRAP-DATACHANNEL__CLOSED-ON-CONNECT';
+const BOOTSTRAP_CHANNEL_ID = 'BOOTSTRAP-DATACHANNEL';
 const RTC_PEER_CONFIG = {
   iceServers: [
     {url: 'stun:stun.l.google.com:19302'},
@@ -58,11 +80,7 @@ const RTC_PEER_CONFIG = {
   ]
 };
 
-interface ParsedCmd {
-  verb: string;      // e.g. 'ping', 'give', 'get', 'transform', etc.
-  source: string;    // e.g. 'transform with caesar'
-  tokens: string[];  // e.g. ['transform', 'with', 'caesar']
-}
+type Mode = 'give' | 'get';
 
 interface RTCState {
   conn: any;
@@ -75,10 +93,17 @@ interface Context {
   socket: net.Socket;  // Connection to the zork client. Becomes the signaling channel.
   reply: (msg: string) => void;  // Helper function to reply to the client.
   log: any;  // Helper function for contextual logging.
-  mode: string;  // 'give', 'get', or null to indicate still waiting for a 'give' or 'get' command
+  mode: Mode;  // null indicates still waiting for a 'give' or 'get' command
   transformer: any;  // Stores any requested transform settings.
-  socksSession: SocksSession;  // Set to a socks session if we're giving access.
+  socksServer: SocksServer;  // Set to a SOCKS server if we're getting access.
+  socksSession: SocksSession;  // Set to a SOCKS session if we're giving access.
   rtc: RTCState;
+}
+
+interface ParsedCmd {
+  verb: string;      // e.g. 'ping', 'give', 'get', 'transform', etc.
+  source: string;    // e.g. 'transform with caesar'
+  tokens: string[];  // e.g. ['transform', 'with', 'caesar']
 }
 
 
@@ -122,64 +147,21 @@ const handleCmdTransform = (ctx: Context, cmd: ParsedCmd) => {
   }
 };
 
-const initPeerConnection = (ctx: Context) => {
-  const conn = ctx.rtc.conn = new RTCPeerConnection(RTC_PEER_CONFIG);
-  conn.onsignalingstatechange = (event: any) => ctx.log(`signaling state change`);
-  conn.oniceconnectionstatechange = (event: any) => ctx.log(`ice connection state change`);
-  conn.onicegatheringstatechange = (event: any) => ctx.log(`ice gathering state change`);
-  conn.onicecandidate = (event: any) => ctx.reply(JSON.stringify(event));
-  conn.ondatachannel = (event: any) => onDataChannel(ctx, event.channel);
-};
-
-const onDataChannel = (ctx: Context, channel: any) => {
-  const channelId = channel.label;
-  if (ctx.mode === 'get') {
-    // ondatachannel events don't fire for the peer creating the datachannel.
-    // getter creates datachannels -> this should only run when we're the giver.
-    ctx.log(`onDataChannel: ignoring unexpected datachannel ${channelId} created by giver`);
-    return;
-  }
-  if (channelId === BOOTSTRAP_CHANNEL_ID) {
-    channel.close();
-    ctx.log(`onDataChannel: got BOOTSTRAP datachannel; closed.`);
-    return;
-  }
-  ctx.log(`onDataChannel: [channelId ${channelId}] [channel.readyState ${channel.readyState}]`);
-  initSocksSession(ctx, channel);
-  channel.onopen = () => ctx.log(`[channelId ${channelId}] datachannel opened`);
-  channel.onclose = () => ctx.log(`[channelId ${channelId}] datachannel closed`);
-  channel.onerror = (err: any) => ctx.log.error(`[channelId ${channelId}] datachannel error: ${err}`);
-  channel.onmessage = (event: any) => ctx.socksSession.handleDataFromSocksClient(event.data);
-};
-
-/*
- * Start giving access to the peer.
- */
 const handleCmdGive = (ctx: Context) => {
   ctx.mode = 'give';
   ctx.log(`set mode to "give"`);
   initPeerConnection(ctx);
 };
 
-/*
- * Start getting access from the peer.
- */
 const handleCmdGet = (ctx: Context) => {
   ctx.mode = 'get';
   ctx.log('set mode to "get"');
 
-  if (!socksServer) {
-    ctx.log(`starting socks server....`);
-    socksServer = new SocksServer(SOCKS_HOST, SOCKS_PORT);
-    socksServer.onConnection((sessionId) => onSocksConnection(ctx, sessionId));
-    socksServer.listen().then(() => {
-      ctx.log(`[socksServer] listening on ${SOCKS_HOST}:${SOCKS_PORT}`);
-      ctx.log(`Test with e.g. curl -x socks5h://${SOCKS_HOST}:${SOCKS_PORT} httpbin.org/ip`);
-    });
-  }
+  initSocksServer(ctx);
   initPeerConnection(ctx);
 
-  // Connection stalls unless we do this here. TODO: Remove if possible.
+  // RTC connection stalls if no datachannel created before creating the offer,
+  // so we need to create a bootstrap datachannel before creating the offer.
   ctx.rtc.conn.createDataChannel(BOOTSTRAP_CHANNEL_ID);
 
   // Getter is offerer.
@@ -189,6 +171,108 @@ const handleCmdGet = (ctx: Context) => {
     ctx.log(`forwarding offer: ${json}`);
     ctx.reply(json);
   }, ctx.log.error);
+};
+
+// End command handlers. Add them to cmdHandlerByVerb map:
+const cmdHandlerByVerb: {[verb: string]: (ctx: Context, cmd?: ParsedCmd) => void} = {
+  'ping': handleCmdPing,
+  'xyzzy': handleCmdXyzzy,
+  'version': handleCmdVersion,
+  'quit': handleCmdQuit,
+  'getters': handleCmdGetters,
+  'transform': handleCmdTransform,
+  'give': handleCmdGive,
+  'get': handleCmdGet
+};
+
+
+// Helper functions for RTC and proxy session establishment:
+
+const initPeerConnection = (ctx: Context) => {
+  const conn = ctx.rtc.conn = new RTCPeerConnection(RTC_PEER_CONFIG);
+  conn.onsignalingstatechange = (event: any) => ctx.log(`signaling state change: ${ctx.rtc.conn.signalingState}`);
+  conn.onicegatheringstatechange = (event: any) => ctx.log(`ice gathering state change: ${ctx.rtc.conn.iceGatheringState}`);
+  conn.oniceconnectionstatechange = (event: any) => {
+    const state = ctx.rtc.conn.iceConnectionState;
+    ctx.log(`ice connection state change: ${state}`);
+    if (state === 'connected') {
+      if (ctx.mode === 'give') {
+        ctx.socket.end();  // Zork connection closed from give side.
+        ctx.log(`closed zork connection, handoff to RTC complete`);
+        numGetters++;
+        ctx.log(`incremented numGetters to ${numGetters}`);
+      } else if (ctx.mode === 'get') {
+        numGivers++;
+        ctx.log(`incremented numGivers to ${numGivers}`);
+      }
+    } else if (state === 'disconnected') {
+      if (ctx.mode === 'give') {
+        numGetters--;
+        ctx.log(`decremented numGetters to ${numGetters}`);
+      } else if (ctx.mode === 'get') {
+        numGivers--;
+        ctx.log(`decremented numGivers to ${numGivers}`);
+      }
+    }
+  };
+  conn.onicecandidate = (event: any) => ctx.reply(JSON.stringify(event));
+  conn.ondatachannel = (event: any) => onDataChannel(ctx, event.channel);
+};
+
+const initSocksServer = (ctx: Context) => {
+  // If we're already getting access from a peer, we already have a SOCKS
+  // server running on SOCKS_PORT, so use 0 so OS grabs us a free port.
+  const port = numGivers ? 0 : SOCKS_PORT;
+  ctx.log(`starting local SOCKS server on port ${port ? port : '[TBD]'}`);
+  const server = ctx.socksServer = new SocksServer(SOCKS_HOST, port);
+  server.onConnection((sessionId) => onSocksConnection(ctx, sessionId));
+  server.listen().then(() => {
+    const port = server.address().port;
+    ctx.log(`[socksServer] listening on ${SOCKS_HOST}:${port}`);
+    ctx.log(`[socksServer] Test with e.g. curl -x socks5h://${SOCKS_HOST}:${port} httpbin.org/ip`);
+  });
+};
+
+const onDataChannel = (ctx: Context, channel: any) => {
+  const channelId = channel.label;
+  ctx.log(`onDataChannel: [channel ${channelId}] [channel.readyState ${channel.readyState}]`);
+
+  channel.onclose = () => ctx.log(`[channel ${channelId}] datachannel closed`);
+  channel.onerror = (err: any) => ctx.log.error(`[channel ${channelId}] datachannel error: ${err}`);
+  if (ctx.mode === 'get' || channelId === BOOTSTRAP_CHANNEL_ID) {
+    // ondatachannel events don't fire for the peer creating the datachannel.
+    // Since the getter is the one that creates datachannels, we don't expect
+    // this to run when we're the getter, so just close the datachannel. Also
+    // close it if it's the bootstrap datachannel, as it's served its purpose.
+    channel.onopen = () => channel.close();
+  } else {
+    channel.onopen = () => ctx.log(`[channel ${channelId}] datachannel opened`);
+    initSocksSession(ctx, channel);
+    channel.onmessage = (event: any) => ctx.socksSession.handleDataFromSocksClient(event.data);
+  }
+};
+
+const onSocksConnection = (ctx: Context, sessionId: any) => {
+  ctx.log(`[socksServer] new connection: ${sessionId}`);
+  const channel = ctx.rtc.conn.createDataChannel(sessionId);
+  return {
+    // SOCKS client -> datachannel
+    handleDataFromSocksClient: (bytes: ArrayBuffer) => channel.send(bytes),
+    // SOCKS client <- datachannel
+    onDataForSocksClient: (callback: (buffer: ArrayBuffer) => void) => {
+      channel.onmessage = (event: any) => callback(event.data);
+      return this;
+    },
+    handleDisconnect: () => {
+      channel.close();
+      ctx.log(`[socksServer] [session ${sessionId}] client disconnect, closed datachannel`);
+    },
+    onDisconnect: (callback: () => void) => {
+      // This callback calls client.end(), so we ignore it.
+      ctx.log(`[socksServer] [session ${sessionId}] client disconnected`);
+      return this;
+    }
+  };
 };
 
 const initSocksSession = (ctx: Context, channel: any) => {
@@ -210,22 +294,11 @@ const initSocksSession = (ctx: Context, channel: any) => {
     if (channel.bufferedAmount < BUFFTHRESHOLD) {
       channel.send(bytes);
     } else {
-      ctx.log.error(`datachannel congested, dropping bytes! TODO: backpressure`);
+      ctx.log.error(`[socksSession] datachannel congested, dropping bytes! TODO: backpressure`);
     }
   });
 
-  session.onDisconnect(() => ctx.log(`SOCKS session disconnected`));
-};
-
-const cmdHandlerByVerb: {[verb: string]: (ctx: Context, cmd?: ParsedCmd) => void} = {
-  'ping': handleCmdPing,
-  'xyzzy': handleCmdXyzzy,
-  'version': handleCmdVersion,
-  'quit': handleCmdQuit,
-  'getters': handleCmdGetters,
-  'transform': handleCmdTransform,
-  'give': handleCmdGive,
-  'get': handleCmdGet
+  session.onDisconnect(() => ctx.log(`[socksSession] disconnected`));
 };
 
 
@@ -237,8 +310,6 @@ const handleSignaling = (ctx: Context, msg: string) => {
     // Getter is offerer, so giver receives the offer.
     ctx.rtc.remoteReceived = true;
     ctx.log(`got offer: ${msg} -> remoteReceived = true`);
-    numGetters++;
-    ctx.log(`incremented numGetters to ${numGetters}`);
     ctx.rtc.conn.setRemoteDescription(data, () => {
       while (ctx.rtc.pendingCandidates.length) {
         ctx.rtc.conn.addIceCandidate(ctx.rtc.pendingCandidates.shift());
@@ -264,66 +335,27 @@ const handleSignaling = (ctx: Context, msg: string) => {
 
 const handleIce = (ctx: Context, data: any) => {
   if (ctx.rtc.remoteReceived) {
-    ctx.log(`handleIce: remoteReceived: adding ice candidate...`);
     ctx.rtc.conn.addIceCandidate(data.candidate);
+    ctx.log(`handleIce: remoteReceived: added ice candidate`);
   } else {
-    ctx.log(`handleIce: !remoteReceived: adding pending ice candidate`);
     ctx.rtc.pendingCandidates.push(data.candidate);
+    ctx.log(`handleIce: !remoteReceived: added pending ice candidate`);
   }
 };
 
 
-const parseCmd = (cmdline: string) : ParsedCmd => {
-  const tokens = cmdline.split(/\W+/);
-  const verb = tokens[0].toLowerCase();
-  const parsed = {verb: verb, tokens: tokens, source: cmdline};
-  return parsed;
-};
-
-
-const handleMsg = (ctx: Context, msg: string) => {
-  if (ctx.mode) { // Already in 'give' or 'get' mode. Treat msg as signaling.
-    handleSignaling(ctx, msg);
-  } else { // Not yet in 'give' or 'get' mode. Treat msg as command.
-    const cmd = parseCmd(msg);
-    const cmdHandler = cmdHandlerByVerb[cmd.verb] || handleCmdInvalid;
-    cmdHandler(ctx, cmd);
-  }
-};
-
-
-const onSocksConnection = (ctx: Context, sessionId: any) => {
-  ctx.log(`[socksServer] new connection: ${sessionId}`);
-  const channel = ctx.rtc.conn.createDataChannel(sessionId);
-  return {
-    // SOCKS client -> datachannel
-    handleDataFromSocksClient: (bytes: ArrayBuffer) => channel.send(bytes),
-    // SOCKS client <- datachannel
-    onDataForSocksClient: (callback: (buffer: ArrayBuffer) => void) => {
-      channel.onmessage = (event: any) => callback(event.data);
-      return this;
-    },
-    handleDisconnect: () => {
-      channel.close();
-      ctx.log(`[socksServer] [session ${sessionId}] client disconnect, closed datachannel`);
-    },
-    onDisconnect: (callback: () => void) => {
-      ctx.log(`[socksServer] [session ${sessionId}] client disconnected`);
-      return this;
-    }
-  };
-};
-
+// End RTC/proxy helper functions. Create and start the Zork server:
 
 const zorkServer = net.createServer((client) => {
   const clientId = `zc${numZorkConnections++}`;
-  const ctx: Context = {
+  const ctx: Context = {  // Create a context holding the state for this connection
     clientId: clientId,
     socket: client,
     reply: makeReplyFunction(client),
     log: null,
     mode: null,
     transformer: null,
+    socksServer: null,
     socksSession: null,
     rtc: {
       conn: null,
@@ -354,16 +386,33 @@ const zorkServer = net.createServer((client) => {
 
   client.on('end', () => {
     ctx.log(`[zorkServer] client disconnected`);
-    if (ctx.mode === 'give' && ctx.rtc.conn) {
-      numGetters--;
-      ctx.log(`decremented numGetters to ${numGetters}`);
-    }
     // TODO: any cleanup necessary here to make sure resources allocated
     // for this client will be reclaimed? e.g. need to set `ctx = null` for gc?
   });
-});
-zorkServer.listen(ZORK_PORT);
-zorkServer.on('listening', () => console.info('[zorkServer] listening on port', ZORK_PORT));
+}).listen(ZORK_PORT).on('listening', () => console.info('[zorkServer] listening on port', ZORK_PORT));
+
+
+// Zork server helper functions:
+
+const handleMsg = (ctx: Context, msg: string) => {
+  if (ctx.mode === null) {  // Not yet in 'give' or 'get' mode. Treat msg as command.
+    const cmd = parseCmd(msg);
+    const cmdHandler = cmdHandlerByVerb[cmd.verb] || handleCmdInvalid;
+    cmdHandler(ctx, cmd);
+  } else {  // Already in 'give' or 'get' mode. Treat msg as signaling.
+    handleSignaling(ctx, msg);
+  }
+};
+
+const parseCmd = (cmdline: string) : ParsedCmd => {
+  const tokens = cmdline.split(/\W+/);
+  const verb = tokens[0].toLowerCase();
+  const parsed = {verb: verb, tokens: tokens, source: cmdline};
+  return parsed;
+};
+
+
+// Context helper functions:
 
 const makeReplyFunction = (socket: net.Socket) : ((msg: string) => void)  => {
   return (msg: string) => {
@@ -375,7 +424,9 @@ const makeReplyFunction = (socket: net.Socket) : ((msg: string) => void)  => {
 const makeLogger = (ctx: Context) => {
   const prefix = (level: string) => {
     const now = new Date();
-    const s = `[${now.toTimeString().substring(0, 8)}.${now.getMilliseconds()}]`
+    const ms = now.getMilliseconds();
+    const s = `[${now.toTimeString().substring(0, 8)}`
+            + `.${ms < 100 ? '0' : ''}${ms}]`
             + ` [${level}]`
             + ` [client ${ctx.clientId}]`
             + ` [${ctx.mode}]`;
