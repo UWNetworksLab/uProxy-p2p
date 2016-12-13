@@ -19,14 +19,28 @@ import * as user_interface from '../../../generic_ui/scripts/ui';
 import compareVersion = require('compare-version');
 import * as uproxy_core_api from '../../../interfaces/uproxy_core_api';
 
-/// <reference path='../../../freedom/typings/social.d.ts' />
-/// <reference path='../../third_party/chrome/chrome.d.ts'/>
-
 // --------------------- Communicating with the App ----------------------------
-export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
-export var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
-export var backgroundUi: background_ui.BackgroundUi;
-export var browserApi :ChromeBrowserApi;
+
+export const browserApi = new ChromeBrowserApi();
+
+// way for ui to speak to a uProxy.CoreApi
+export const browserConnector = new ChromeCoreConnector({
+  name: 'uproxy-extension-to-app-port'
+});
+browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
+    browserApi.bringUproxyToFront);
+
+// way for ui to speak to a uProxy.CoreApi
+export const core = new CoreConnector(browserConnector);
+
+export const backgroundUi = new background_ui.BackgroundUi(
+    new chrome_panel_connector.ChromePanelConnector(),
+    core);
+
+const oAuth = new ChromeTabAuth();
+
+browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
+                         oAuth.login.bind(oAuth));
 
 /*
  * TODO: this is a separate user_interface object from the one we refer to
@@ -111,10 +125,6 @@ chrome.runtime.onUpdateAvailable.addListener((updateInfo) => {
  * Primary initialization of the Chrome Extension. Installs hooks so that
  * updates from the Chrome App side propogate to the UI.
  */
-browserApi = new ChromeBrowserApi();
-browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
-                          browserApi.bringUproxyToFront);
 
 // TODO (lucyhe): Make sure that the "install" event isn't missed if we
 // are adding the listener after the event is fired.
@@ -142,19 +152,11 @@ chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails
       }
   });
 });
+
 chrome.browserAction.onClicked.addListener((tab) => {
   // When the extension icon is clicked, open uProxy.
   browserApi.bringUproxyToFront();
 });
-
-core = new CoreConnector(browserConnector);
-var oAuth = new ChromeTabAuth();
-browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
-                         oAuth.login.bind(oAuth));
-
-backgroundUi = new background_ui.BackgroundUi(
-    new chrome_panel_connector.ChromePanelConnector(),
-    core);
 
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
