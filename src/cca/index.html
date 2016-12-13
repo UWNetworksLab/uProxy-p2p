@@ -100,6 +100,37 @@
       align-self: center;
     }
     
+    @-webkit-keyframes spin { 100% { -webkit-transform: rotate(-360deg); } }
+    @keyframes spin { 100% { transform: rotate(-360deg); } }
+    /* Apply rotation to the image, so that the ink is not cropped by the parent box. */
+    .spin img {
+      -webkit-animation:spin 4s linear infinite;
+      animation:spin 4s linear infinite;
+    }
+
+    @-webkit-keyframes pulse {
+      0% {
+        opacity: 0.5;
+      }
+      100% {
+        -webkit-transform: scale(0.97);
+        opacity: 0.25;
+      }
+    }
+    @keyframes pulse {
+      0% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(0.97);
+        opacity: 0.25;
+      }
+    }
+    .pulse {
+      -webkit-animation: pulse 0.5s ease-in-out infinite alternate;
+      animation: pulse 0.5s ease-in-out infinite alternate;
+    }
+
     .server-card .button > paper-icon-button {
       width: 175px;
       height: 175px;
@@ -155,7 +186,7 @@
   </style>
 </head>
 
-<body touch-action='auto' class='fullbleed layout vertical'>
+<body unresolved touch-action='auto' class='fullbleed layout vertical'>
   <paper-header-panel mode='waterfall' class='flex'>
     <paper-toolbar class='uproxy'>
       <paper-icon-button icon="menu"></paper-icon-button>

@@ -14,6 +14,7 @@ export class ServerCard {
   private title: HTMLElement;
   private button: HTMLButtonElement;
   private status: HTMLElement;
+  private onTap: () => Promise<void>;
 
   constructor(private root: HTMLElement, private server: Server) {
     root.classList.add('server-card');
@@ -31,82 +32,73 @@ export class ServerCard {
     this.status = root.querySelector('.status') as HTMLElement;
 
     this.title.textContent = server.getIpAddress();
-
-    this.disconnected();
-
+    this.setState(State.DISCONNECTED);
     this.button.addEventListener('tap', (e) => {
-      this.press();
+      this.onTap();
     });
   }
 
-  private switchState(newState: State) {
-    if (!(newState in State)) {
-      throw new Error('unknown state ' + newState);
+  private setState(newState: State) {
+    switch (this.state) {
+      case State.CONNECTING:
+        this.button.classList.remove('pulse');
+        break;
+      case State.CONNECTED:
+        this.button.classList.remove('spin');
+        break;
+    }
+
+    switch (newState) {
+      case State.DISCONNECTED:
+        this.status.textContent = 'Tap to connect';
+        this.button.setAttribute('src', '../../assets/button/disconnected.svg');
+        this.button.disabled = false;
+        this.onTap = this.connect;
+        break;
+      case State.CONNECTING:
+        this.status.textContent = 'Connecting';
+        this.button.setAttribute('src', '../../assets/button/disconnected.svg');
+        this.button.classList.add('pulse');
+        this.button.disabled = true;
+        break;
+      case State.CONNECTED:
+        this.status.textContent = 'Connected';
+        this.button.setAttribute('src', '../../assets/button/connected.svg');
+        this.button.disabled = false;
+        this.button.classList.add('spin');
+        this.onTap = this.disconnect;
+        break;
+      case State.DISCONNECTING:
+        this.status.textContent = 'Disconnecting...';
+        this.button.setAttribute('src', '../../assets/button/connected.svg');
+        this.button.disabled = true;
+        break;
+      default:
+        throw new Error('unknown state ' + newState);
     }
     console.info(State[this.state] + ' -> ' + State[newState]);
     this.state = newState;
   }
 
-  // TODO: Disable the button in every other card in the
-  //       parent server list. 
-  private connect() {
-    if (this.state !== State.DISCONNECTED) {
-      console.warn('can only connect while disconnected');
-      return;
-    }
-
-    this.switchState(State.CONNECTING);
-    this.status.textContent = 'Connecting...';
-
+  private connect(): Promise<void> {
+    this.setState(State.CONNECTING);
     return this.server.connect((msg) => {
-      this.disconnected();
+      this.setState(State.DISCONNECTED);
     }).then((port) => {
-      this.switchState(State.CONNECTED);
-      this.status.textContent = 'Connected';
-      this.button.setAttribute('src', '../../assets/button/connected.svg');
+      this.setState(State.CONNECTED);
     }, (e) => {
-      this.disconnected(e.message);
+      this.setState(State.DISCONNECTED);
+      console.warn('Failed to connect: ', e);
     });
   }
 
-  private disconnect() {
-    if (this.state !== State.CONNECTED) {
-      console.warn('can only disconnect while connected');
-      return;
-    }
-
-    this.switchState(State.DISCONNECTING);
-    this.status.textContent = 'Disconnecting...';
-    this.button.setAttribute('src', '../../assets/button/disconnected.svg');
-
+  private disconnect(): Promise<void> {
+    this.setState(State.DISCONNECTING);
     return this.server.disconnect().then(() => {
-      this.disconnected();
+      this.setState(State.DISCONNECTED);
     }, (e) => {
       console.warn('something weird happened while disconnecting', e);
-      this.disconnected();
+      this.setState(State.DISCONNECTED);
     });
-  }
-
-  private disconnected(msg = 'Tap to connect') {
-    this.switchState(State.DISCONNECTED);
-    this.status.textContent = msg;
-    this.button.setAttribute('src', '../../assets/button/disconnected.svg');
-  }
-
-  public press() {
-    // TODO: cancellation!
-    switch (this.state) {
-      case State.DISCONNECTED:
-        this.connect();
-        break;
-      case State.CONNECTING:
-        console.warn('cannot cancel');
-        break;
-      case State.CONNECTED:
-        this.disconnect();
-        break;
-      default:
-        console.error('ignoring press while ' + State[this.state]);
-    }
   }
 }
