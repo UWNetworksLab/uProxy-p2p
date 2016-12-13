@@ -82,7 +82,7 @@
     "ssh2": "^0.5.2",
     "time-grunt": "^1.4.0",
     "tslint": "^3.10.2",
-    "typescript": "^2.0.3",
+    "typescript": "~2.0.3",
     "uparams": "^1.2.0",
     "uproxy-cloud-install": "^1.0.17",
     "xregexp": "^2.0.0"
