@@ -43,6 +43,14 @@ var PORTS = [9000, 9010, 9020];
 // Number of getters.
 let numOfGetters = 0;
 
+let isMetricsEnabled = false;
+if (typeof freedom !== 'undefined') {
+  var parentFreedomModule = freedom();
+  parentFreedomModule.on('setMetricsEnablement', function(newValue) {
+    isMetricsEnabled = newValue;
+  });
+}
+
 // Starts a TCP server on the first free port listed in PORTS.
 // Rejects if no port is free.
 function bind(i:number = 0) : Promise<tcp.Server> {
