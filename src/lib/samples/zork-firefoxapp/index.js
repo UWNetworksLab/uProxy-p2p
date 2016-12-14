@@ -15,7 +15,7 @@ function checkIfMetricsEnabled() {
         let decoder = new TextDecoder();
         let text = decoder.decode(array);
         let options = JSON.parse(text);
-        return options['areMetricsEnabled'] === true;
+        return options['isMetricsEnabled'] === true;
       } catch (e) {
         console.error('Could not parse options file');
         return false;
