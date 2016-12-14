@@ -3,6 +3,7 @@ import * as piece from '../piece';
 import * as socks_server from '../server';
 
 export class NodeSocksServer implements socks_server.SocksServer {
+  private tcpServer: net.Server;
   private getSocksSession: (clientId: string) => piece.SocksPiece;
   private numSessions = 0;
 
@@ -14,12 +15,16 @@ export class NodeSocksServer implements socks_server.SocksServer {
   public onConnection = (callback: (clientId: string) => piece.SocksPiece) => {
     this.getSocksSession = callback;
     return this;
-  }
+  };
+
+  public address = () => {
+    return this.tcpServer.address();
+  };
 
   public listen = () => {
     // complete list of events:
     //   https://nodejs.org/dist/latest-v4.x/docs/api/net.html#net_class_net_server
-    const server = net.createServer((client) => {
+    const server = this.tcpServer = net.createServer((client) => {
       const clientId = 'p' + (this.numSessions++) + 'p';
 
       console.info(clientId + ': new client from ' +
