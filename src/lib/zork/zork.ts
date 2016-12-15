@@ -12,9 +12,9 @@
  * access from, and set things up to pipe data between our local SOCKS server
  * and the peer connection.
  * As the getter, we are the one that creates the offer, as well as all RTC
- * datachannels. This includes a bootstrap datachannel which transmits no data
- * and is just required to bootstrap the connection, as well as a datachannel
- * for each local SOCKS connection which actually forwards data for it.
+ * datachannels. This includes a heartbeat datachannel which is required to
+ * bootstrap the connection and demonstrate it's still alive, as well as a
+ * datachannel for each SOCKS connection which actually forwards proxy data.
  *
  *
  * If a "give" command is received, we wait for an RTC offer from the getter,
@@ -68,10 +68,13 @@ if (isNaN(ZORK_PORT) || isNaN(SOCKS_PORT)) {
   console.error(`Usage: ${process.argv[0]} ${process.argv[1]} [ZORK_PORT] [SOCKS_PORT]`);
   process.exit(1);
 }
+let startedSocksServer = false;  // ever started any local SOCKS server
 let numZorkConnections = 0;  // ever made (as opposed to currently active)
-let numGivers = 0;  // currently active (not ever)
 let numGetters = 0;  // currently active (not ever)
-const BOOTSTRAP_CHANNEL_ID = 'BOOTSTRAP-DATACHANNEL';
+const HEARTBEAT_CHANNEL_ID = 'HEARTBEAT';
+const HEARTBEAT_INTERVAL_MS = 5000;
+const HEARTBEAT_TIMEOUT_MS = 15000;
+const HEARTBEAT_MSG = 'heartbeat';
 const RTC_PEER_CONFIG = {
   iceServers: [
     {url: 'stun:stun.l.google.com:19302'},
@@ -97,6 +100,8 @@ interface Context {
   transformer: any;  // Stores any requested transform settings.
   socksServer: SocksServer;  // Set to a SOCKS server if we're getting access.
   socksSession: SocksSession;  // Set to a SOCKS session if we're giving access.
+  heartbeatTimeoutId: number;
+  onHeartbeatTimeout: Function;
   rtc: RTCState;
 }
 
@@ -150,6 +155,7 @@ const handleCmdTransform = (ctx: Context, cmd: ParsedCmd) => {
 const handleCmdGive = (ctx: Context) => {
   ctx.mode = 'give';
   ctx.log(`set mode to "give"`);
+  initOnHeartbeatTimeout(ctx);
   initPeerConnection(ctx);
 };
 
@@ -161,8 +167,10 @@ const handleCmdGet = (ctx: Context) => {
   initPeerConnection(ctx);
 
   // RTC connection stalls if no datachannel created before creating the offer,
-  // so we need to create a bootstrap datachannel before creating the offer.
-  ctx.rtc.conn.createDataChannel(BOOTSTRAP_CHANNEL_ID);
+  // so we need to create a datachannel before creating the offer to bootstrap
+  // the connection. Use the heartbeat data channel for this purpose.
+  const heartbeatChannel = ctx.rtc.conn.createDataChannel(HEARTBEAT_CHANNEL_ID);
+  setInterval(() => heartbeatChannel.send(HEARTBEAT_MSG), HEARTBEAT_INTERVAL_MS);
 
   // Getter is offerer.
   ctx.rtc.conn.createOffer((offer: any) => {
@@ -188,46 +196,38 @@ const cmdHandlerByVerb: {[verb: string]: (ctx: Context, cmd?: ParsedCmd) => void
 
 // Helper functions for RTC and proxy session establishment:
 
-const initPeerConnection = (ctx: Context) => {
-  const conn = ctx.rtc.conn = new RTCPeerConnection(RTC_PEER_CONFIG);
-  conn.onsignalingstatechange = (event: any) => ctx.log(`signaling state change: ${ctx.rtc.conn.signalingState}`);
-  conn.onicegatheringstatechange = (event: any) => ctx.log(`ice gathering state change: ${ctx.rtc.conn.iceGatheringState}`);
-  conn.oniceconnectionstatechange = (event: any) => {
-    const state = ctx.rtc.conn.iceConnectionState;
-    ctx.log(`ice connection state change: ${state}`);
-    if (state === 'connected') {
-      if (ctx.mode === 'give') {
-        ctx.socket.end();  // Zork connection closed from give side.
-        ctx.log(`closed zork connection, handoff to RTC complete`);
-        numGetters++;
-        ctx.log(`incremented numGetters to ${numGetters}`);
-      } else if (ctx.mode === 'get') {
-        numGivers++;
-        ctx.log(`incremented numGivers to ${numGivers}`);
-      }
-    } else if (state === 'disconnected') {
-      if (ctx.mode === 'give') {
-        numGetters--;
-        ctx.log(`decremented numGetters to ${numGetters}`);
-      } else if (ctx.mode === 'get') {
-        numGivers--;
-        ctx.log(`decremented numGivers to ${numGivers}`);
-      }
+const initOnHeartbeatTimeout = (ctx: Context) => {
+  ctx.onHeartbeatTimeout = () => {
+    ctx.log(`${HEARTBEAT_TIMEOUT_MS / 1000}s elapsed with no heartbeat`);
+    // TODO: do something here to forcibly end this RTC connection?
+    numGetters--;
+    ctx.log(`decremented numGetters to ${numGetters}`);
+    if (numGetters < 0) {  // should not get here === famous last words
+      numGetters = 0;
+      ctx.log.error(`numGetters < 0; reset to 0.`);
     }
   };
+};
+
+const initPeerConnection = (ctx: Context) => {
+  const conn = ctx.rtc.conn = new RTCPeerConnection(RTC_PEER_CONFIG);
   conn.onicecandidate = (event: any) => ctx.reply(JSON.stringify(event));
   conn.ondatachannel = (event: any) => onDataChannel(ctx, event.channel);
+  conn.onsignalingstatechange = (event: any) => ctx.log(`signaling state change: ${ctx.rtc.conn.signalingState}`);
+  conn.onicegatheringstatechange = (event: any) => ctx.log(`ice gathering state change: ${ctx.rtc.conn.iceGatheringState}`);
+  conn.oniceconnectionstatechange = (event: any) => ctx.log(`ice connection state change: ${ctx.rtc.conn.iceConnectionState}`);
 };
 
 const initSocksServer = (ctx: Context) => {
-  // If we're already getting access from a peer, we already have a SOCKS
-  // server running on SOCKS_PORT, so use 0 so OS grabs us a free port.
-  const port = numGivers ? 0 : SOCKS_PORT;
+  // If we've already started a local SOCKS server running on SOCKS_PORT,
+  // use 0 for the port so the OS assigns us a free port.
+  const port = startedSocksServer ? 0 : SOCKS_PORT;
   ctx.log(`starting local SOCKS server on port ${port ? port : '[TBD]'}`);
   const server = ctx.socksServer = new SocksServer(SOCKS_HOST, port);
   server.onConnection((sessionId) => onSocksConnection(ctx, sessionId));
   server.listen().then(() => {
-    const port = server.address().port;
+    startedSocksServer = true;
+    const port = server.address().port;  // in case OS assigned
     ctx.log(`[socksServer] listening on ${SOCKS_HOST}:${port}`);
     ctx.log(`[socksServer] Test with e.g. curl -x socks5h://${SOCKS_HOST}:${port} httpbin.org/ip`);
   });
@@ -239,17 +239,39 @@ const onDataChannel = (ctx: Context, channel: any) => {
 
   channel.onclose = () => ctx.log(`[channel ${channelId}] datachannel closed`);
   channel.onerror = (err: any) => ctx.log.error(`[channel ${channelId}] datachannel error: ${err}`);
-  if (ctx.mode === 'get' || channelId === BOOTSTRAP_CHANNEL_ID) {
-    // ondatachannel events don't fire for the peer creating the datachannel.
-    // Since the getter is the one that creates datachannels, we don't expect
-    // this to run when we're the getter, so just close the datachannel. Also
-    // close it if it's the bootstrap datachannel, as it's served its purpose.
-    channel.onopen = () => channel.close();
-  } else {
-    channel.onopen = () => ctx.log(`[channel ${channelId}] datachannel opened`);
-    initSocksSession(ctx, channel);
-    channel.onmessage = (event: any) => ctx.socksSession.handleDataFromSocksClient(event.data);
+
+  // ondatachannel events don't fire for the peer creating the datachannel.
+  // Since the getter is always the one that creates datachannels, a getter
+  // doesn't expect any giver-created datachannels, so just closes any onopen.
+  if (ctx.mode === 'get') {
+    channel.onopen = () => {
+      channel.close();
+      ctx.log.error(`closed unexpected giver-created datachannel`);
+    };
+    return;
   }
+  // Got here -> we're the giver.
+
+  if (channelId === HEARTBEAT_CHANNEL_ID) {  // heartbeat datachannel
+    ctx.socket.end();
+    ctx.log(`closed zork connection, handoff to RTC complete`);
+    numGetters++;
+    ctx.log(`incremented numGetters to ${numGetters}`);
+    ctx.heartbeatTimeoutId = setTimeout(ctx.onHeartbeatTimeout, HEARTBEAT_TIMEOUT_MS);
+    channel.onmessage = (event: any) => {
+      ctx.log(`heartbeat message: "${event.data}"`);
+      clearTimeout(ctx.heartbeatTimeoutId);
+      ctx.heartbeatTimeoutId = setTimeout(ctx.onHeartbeatTimeout, HEARTBEAT_TIMEOUT_MS);
+    };
+    return;
+  }
+
+  // Got here -> we're the giver, and this is a non-heartbeat datachannel.
+  // Initialize a SOCKS session for it, and set its onmessage handler so that
+  // it forwards data for the SOCKS session.
+  channel.onopen = () => ctx.log(`[channel ${channelId}] datachannel opened`);
+  initSocksSession(ctx, channel);
+  channel.onmessage = (event: any) => ctx.socksSession.handleDataFromSocksClient(event.data);
 };
 
 const onSocksConnection = (ctx: Context, sessionId: any) => {
@@ -357,6 +379,8 @@ const zorkServer = net.createServer((client) => {
     transformer: null,
     socksServer: null,
     socksSession: null,
+    onHeartbeatTimeout: null,
+    heartbeatTimeoutId: null,
     rtc: {
       conn: null,
       remoteReceived: false,
@@ -426,10 +450,10 @@ const makeLogger = (ctx: Context) => {
     const now = new Date();
     const ms = now.getMilliseconds();
     const s = `[${now.toTimeString().substring(0, 8)}`
-            + `.${ms < 100 ? '0' : ''}${ms}]`
+            + `.${ms < 10 ? '00' : ms < 100 ? '0' : ''}${ms}]`
             + ` [${level}]`
             + ` [client ${ctx.clientId}]`
-            + ` [${ctx.mode}]`;
+            + ` [${ctx.mode || 'cmd'}]`;
     return s;
   };
   let logger: any = (...args: any[]) => console.info(prefix('INFO'), ...args);
