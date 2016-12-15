@@ -87,7 +87,7 @@ function run_docker () {
     GIT_ROOT=`git rev-parse --show-toplevel`
     HOSTARGS="$HOSTARGS -v $GIT_ROOT/build/src/lib/samples:/test/zork"
   fi
-  docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /sbin/my_init -- /test/bin/load-zork.sh $RUNARGS
+  docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-zork.sh $RUNARGS
 }
 
 run_docker $CONTAINER_PREFIX-getter $1 $VNCOPTS1 -p :9000 -p $PROXY_PORT:9999
@@ -102,12 +102,12 @@ echo
 
 if [ -n "$MTU" ]
 then
-  ./set-mtu.sh $CONTAINER_PREFIX-getter $MTU
+  ${BASH_SOURCE%/*}/set-mtu.sh $CONTAINER_PREFIX-getter $MTU
 fi
 
 if [ -n "$LATENCY" ]
 then
-  ./set-latency.sh $CONTAINER_PREFIX-getter qdisc add dev eth0 root netem delay "$LATENCY"ms
+  ${BASH_SOURCE%/*}/set-latency.sh $CONTAINER_PREFIX-getter qdisc add dev eth0 root netem delay "$LATENCY"ms
 fi
 
 echo -n "Waiting for giver to come up"

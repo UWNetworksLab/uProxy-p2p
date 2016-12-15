@@ -253,12 +253,6 @@ module.exports = function(grunt) {
       androidReplaceXwalkRelease: {
         command: './replace_xwalk_in_apk.sh release'
       },
-      installFreedomForNodeForZork: {
-        // This allows our Docker containers, which do not have access to the
-        // git repo's "top-level" node_modules/ folder find freedom-for-node.
-        cwd: 'build/src/lib/samples/zork-node',
-        command: 'yarn add freedom-for-node'
-      },
       xpi: {
         command: 'yarn run jpm -- --addon-dir build/dist/firefox xpi'
       }
@@ -374,11 +368,6 @@ module.exports = function(grunt) {
         pathsFromThirdPartyBuild: ['freedom-port-control'],
         localDestPath: 'lib/samples/zork-firefoxapp/data/'
       }),
-      libsForZorkNode: Rule.copyLibs({
-        pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork'],
-        pathsFromThirdPartyBuild: ['freedom-port-control'],
-        localDestPath: 'lib/samples/zork-node/'
-      }),
 
       libsForEchoServerChromeApp: Rule.copyLibs({
         npmLibNames: ['freedom-for-chrome'],
@@ -389,11 +378,6 @@ module.exports = function(grunt) {
         npmLibNames: ['freedom-for-firefox'],
         pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider'],
         localDestPath: 'lib/samples/echo-server-firefoxapp/data/'
-      }),
-      libsForEchoServerNode: Rule.copyLibs({
-        npmLibNames: ['freedom-for-node'],
-        pathsFromDevBuild: ['lib/echo', 'lib/loggingprovider'],
-        localDestPath: 'lib/samples/echo-server-node/'
       }),
 
       libsForCopypasteChatChromeApp: Rule.copyLibs({
@@ -426,12 +410,6 @@ module.exports = function(grunt) {
         pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider'],
         pathsFromThirdPartyBuild: ['freedom-port-control'],
         localDestPath: 'lib/samples/simple-socks-firefoxapp/data/'
-      }),
-      libsForSimpleSocksNode: Rule.copyLibs({
-        npmLibNames: ['freedom-for-node'],
-        pathsFromDevBuild: ['lib/simple-socks', 'lib/churn-pipe', 'lib/loggingprovider'],
-        pathsFromThirdPartyBuild: ['uproxy-obfuscators', 'freedom-port-control'],
-        localDestPath: 'lib/samples/simple-socks-node/'
       }),
 
       libsForSimpleChatChromeApp: Rule.copyLibs({
@@ -793,14 +771,6 @@ module.exports = function(grunt) {
     'browserify:uprobeFreedomModule',
     'copy:libsForUprobeChromeApp',
     'copy:libsForUprobeFirefoxApp'
-  ]);
-  registerTask(grunt, 'zork', [
-    'base',
-    'browserify:zorkFreedomModule',
-    'copy:libsForZorkChromeApp',
-    'copy:libsForZorkFirefoxApp',
-    'copy:libsForZorkNode',
-    'exec:installFreedomForNodeForZork'
   ]);
 
   // Chrome

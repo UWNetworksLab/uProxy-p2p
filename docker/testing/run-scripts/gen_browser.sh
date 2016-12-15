@@ -128,7 +128,7 @@ EOF
   case $1 in
     stable)
       cat <<EOF
-RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 EOF
             ;;
     *)
@@ -137,6 +137,12 @@ EOF
   esac
   cat <<EOF
 RUN apt-get install -y nodejs
+
+# TESTING: this was necessary to prevent wrtc segfaulting on my VM *outside* of docker
+#          maybe it's necessary for the docker image, too? i think the stacktrace
+#          was somehow getting swallowed
+RUN apt-get install -y alsa-base pulseaudio
+
 EOF
 
 }

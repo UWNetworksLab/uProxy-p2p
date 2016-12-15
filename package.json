@@ -40,7 +40,6 @@
     "freedom": "^0.6.36",
     "freedom-for-chrome": "^0.4.28",
     "freedom-for-firefox": "^0.6.26",
-    "freedom-for-node": "^0.2.20",
     "freedom-pgp-e2e": "^0.6.2",
     "freedom-port-control": "^0.9.0",
     "freedom-social-firebase": "^2.0.0",
@@ -85,7 +84,6 @@
     "typescript": "^2.0.3",
     "uparams": "^1.2.0",
     "uproxy-cloud-install": "^1.0.17",
-    "wrtc": "^0.0.61",
     "xregexp": "^2.0.0"
   },
   "scripts": {

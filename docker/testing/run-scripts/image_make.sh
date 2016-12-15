@@ -36,10 +36,10 @@ TMP_DIR=`mktemp -d`
 cp -R ${BASH_SOURCE%/*}/../integration/test $TMP_DIR/test
 
 cat <<EOF > $TMP_DIR/Dockerfile
-FROM phusion/baseimage:0.9.19
+FROM ubuntu:yakkety
 
 RUN apt-get -qq update
-RUN apt-get -qq install wget unzip bzip2 supervisor iptables unattended-upgrades
+RUN apt-get -qq install wget unzip bzip2 supervisor iptables unattended-upgrades curl
 
 RUN mkdir /test
 COPY test /test
@@ -48,16 +48,26 @@ EXPOSE 9000
 EXPOSE 9999
 EOF
 
+mkdir $TMP_DIR/zork
+
 # Chrome and Firefox need X.
 if [ "$BROWSER" = "chrome" ] || [ "$BROWSER" = "firefox" ]; then
   cat <<EOF >> $TMP_DIR/Dockerfile
 RUN apt-get install -y xvfb fvwm x11vnc
 EXPOSE 5900
 EOF
+
+  cp -R $GIT_ROOT/build/src/lib/samples/zork-* $TMP_DIR/zork
 fi
 
-mkdir $TMP_DIR/zork
-cp -R $GIT_ROOT/build/src/lib/samples/zork-* $TMP_DIR/zork
+# Node needs the whole src/ folder to resolve dependencies (no browserify).
+if [ "$BROWSER" = "node" ]; then
+  # TODO: Copying the whole node_modules is crazy: it's >500MB.
+  #       We should sort out ourn dev/runtime dependencies and
+  #       only package the runtime deps (yarn --production --ignore-scripts).
+  cp -RL $GIT_ROOT/{build,node_modules} $TMP_DIR/zork/
+fi
+
 cat <<EOF >> $TMP_DIR/Dockerfile
 COPY zork /test/zork/
 EOF

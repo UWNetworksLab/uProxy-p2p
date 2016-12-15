@@ -61,7 +61,7 @@ const MSG_DELIM_RE = /\r?\n/;
 
 const ZORK_PORT_DEFAULT = 9000;
 const ZORK_PORT = Number(process.argv[2] || ZORK_PORT_DEFAULT);
-const SOCKS_HOST = '127.0.0.1';
+const SOCKS_HOST = '0.0.0.0';
 const SOCKS_PORT_DEFAULT = 9999;
 const SOCKS_PORT = Number(process.argv[3] || SOCKS_PORT_DEFAULT);
 if (isNaN(ZORK_PORT) || isNaN(SOCKS_PORT)) {
