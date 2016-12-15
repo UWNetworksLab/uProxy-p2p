@@ -10,13 +10,13 @@
 
 import { ServerListPage } from '../ui_components/server_list';
 import { Server, ServerRepository } from '../model/server';
-import { UproxyServerRepository } from './uproxy_server';
-import { makeCoreConnector } from './cordova_core_connector';
+import { UproxyServer, UproxyServerRepository } from './uproxy_server';
+import { SshSocksProxy } from './ssh_socks_proxy';
 import { GetGlobalTun2SocksVpnDevice } from './tun2socks_vpn_device';
 import * as vpn_device from '../model/vpn_device';
 import * as intents from './intents';
 import * as jsurl from 'jsurl';
-import * as uproxy_core_api from '../../interfaces/uproxy_core_api';
+import uparams = require('uparams');
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
 function getLocalStorage(): Storage {
@@ -34,9 +34,6 @@ function getLocalStorage(): Storage {
 // We save this reference to allow inspection of the context state from the browser debuggin tools.
 (window as any).context = this;
 
-// TODO(fortuna): Get rid of core connector and talk to the core directly.
-let corePromise = makeCoreConnector();
-
 let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
   console.debug('Device supports VPN');
   return vpnDevice;
@@ -45,42 +42,8 @@ let serversPromise = GetGlobalTun2SocksVpnDevice().then((vpnDevice) => {
   console.error(error);
   return new vpn_device.NoOpVpnDevice();
 }).then((vpnDevice) => {
-  try {
-    return new UproxyServerRepository(getLocalStorage(), corePromise, vpnDevice);
-  } catch (e) {
-    console.warn('local storage unavailable, showing mock servers');
-    return <ServerRepository>{
-      addServer(code) {
-        throw new Error('unsupported operation');
-      },
-      getServers() {
-        return [
-          <Server>{
-            getIpAddress() {
-              return '192.168.1.1';
-            },
-            connect(callback) {
-              return Promise.resolve();
-            },
-            disconnect() {
-              return Promise.resolve();
-            }
-          },
-          <Server>{
-            getIpAddress() {
-              return 'broken.mydomain.com';
-            },
-            connect(callback) {
-              return Promise.reject(new Error('unreachable host'));
-            },
-            disconnect() {
-              return Promise.resolve();
-            }
-          }
-        ];
-      }
-    };
-  }
+  let servers = new UproxyServerRepository(getLocalStorage(), vpnDevice);
+  return servers;
 });
 
 // Create UI.
@@ -118,7 +81,13 @@ Promise.all([serversListPagePromise, intents.GetGlobalIntentInterceptor()]).then
   ([serverListPage, intentInterceptor]) => {
     intentInterceptor.addIntentListener((url: string) => {
       console.debug(`[App] Url: ${url}`);
-      serverListPage.enterAccessCode(url);
+      const params = uparams(url);
+      if (!('code' in params)) {
+        return;
+      }
+      const accessCode = params.code;
+      console.debug(`Access code: ${accessCode}`);
+      serverListPage.enterAccessCode(accessCode);
     });
     if (navigator.splashscreen) {
       navigator.splashscreen.hide();

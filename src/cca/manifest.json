@@ -13,7 +13,6 @@
   "app": {
     "background": {
       "scripts": [
-        "freedom-for-chrome/freedom-for-chrome.js",
         "scripts/background.static.js"
       ]
     }

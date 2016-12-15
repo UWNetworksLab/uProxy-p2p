@@ -212,7 +212,7 @@ module.exports = function(grunt) {
 
     // Create commands to run in different directories.
     ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android',
-    ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git',
+    ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git https://github.com/bemasc/cordova-plugin-ssh.git',
     exec: {
       makeChromeWebStoreZips: {
         command: 'tools/makechromezips.sh'
@@ -1022,10 +1022,6 @@ module.exports = function(grunt) {
     'copy:resources',
     'copy:devGenericCore',
     'compileTypescript',
-    'browserify:genericCoreFreedomModule',
-    'browserify:loggingProvider',
-    'browserify:churnPipeFreedomModule',
-    'browserify:cloudSocialProviderFreedomModule',
     //'base',
     'ccaBackground',
     'copy:cca',
@@ -1063,7 +1059,7 @@ module.exports = function(grunt) {
     },
     copy: {
       cca: Rule.copyLibs({
-        npmLibNames: ['freedom-for-chrome', 'forge-min'],
+        npmLibNames: ['forge-min'],
         pathsFromDevBuild: [
           'generic_core',
           'generic_ui',
@@ -1118,7 +1114,6 @@ module.exports = function(grunt) {
   registerTask(grunt, 'android_debug_lite', [
     'build_cca',
     'exec:ccaBuildAndroidDev',
-    'exec:androidReplaceXwalkDev'
   ]);
 
   registerTask(grunt, 'android_debug', [
@@ -1132,7 +1127,6 @@ module.exports = function(grunt) {
     'build_cca',
     'symlink:cca_keys',
     'exec:ccaBuildAndroidRelease',
-    'exec:androidReplaceXwalkRelease'
   ]);
 
   registerTask(grunt, 'android_release', [
