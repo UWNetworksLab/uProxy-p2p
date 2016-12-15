@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Internet without borders",
-  "version": "0.9.11",
+  "version": "0.9.12",
   "private": true,
   "repository": {
     "type": "git",
@@ -32,7 +32,6 @@
     "@types/ssh2": "0.0.31",
     "@types/xregexp": "^3.0.28",
     "bower": "^1.4.1",
-    "browserify-zlib": "^0.1.4",
     "cca": "^0.8.0",
     "circular-json": "^0.3.0",
     "compare-version": "^0.1.2",
@@ -41,7 +40,6 @@
     "freedom": "^0.6.36",
     "freedom-for-chrome": "^0.4.28",
     "freedom-for-firefox": "^0.6.26",
-    "freedom-for-node": "^0.2.20",
     "freedom-pgp-e2e": "^0.6.2",
     "freedom-port-control": "^0.9.0",
     "freedom-social-firebase": "^2.0.0",
@@ -63,7 +61,6 @@
     "grunt-exec": "^1.0.0",
     "grunt-gitinfo": "^0.1.7",
     "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",
-    "grunt-jpm": "^0.1.3",
     "grunt-run-once": "^0.2.0",
     "grunt-string-replace": "^1.0.0",
     "grunt-subgrunt": "^1.2.0",
@@ -75,6 +72,7 @@
     "i18next-client": "^1.11.4",
     "ipaddr.js": "^1.2.0",
     "jdenticon": "^1.3.2",
+    "jpm": "^1.2.2",
     "jshint": "^2.9.2",
     "jsurl": "^0.1.2",
     "lodash": "^3.10.1",
@@ -85,7 +83,7 @@
     "tslint": "^3.10.2",
     "typescript": "^2.0.3",
     "uparams": "^1.2.0",
-    "wrtc": "^0.0.61",
+    "uproxy-cloud-install": "^1.0.17",
     "xregexp": "^2.0.0"
   },
   "scripts": {
@@ -96,6 +94,7 @@
     "setup-third-party": "mkdir -p build/third_party && cp -r third_party/* build/third_party/ && yarn run setup-freedom-port-control",
     "build-grunt-deps": "tsc --project src/lib/build-tools --outDir build/tools/",
     "setup-freedom-port-control": "mkdir -p build/third_party/freedom-port-control && cp -r node_modules/freedom-port-control/dist build/third_party/freedom-port-control/",
-    "test": "grunt test"
+    "test": "grunt test",
+    "jpm": "jpm"
   }
 }

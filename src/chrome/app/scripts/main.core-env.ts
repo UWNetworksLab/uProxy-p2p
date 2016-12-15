@@ -16,6 +16,8 @@ export interface OnEmitModule extends freedom.OnAndEmit<any,any> {};
 export interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
+let chromeUIConnector :ChromeUIConnector;
+
 function getPolicyFromManagedStorage() :Promise<Object> {
   return new Promise((fulfill, reject) => {
     chrome.storage.managed.get(null, (contents) => {
@@ -40,8 +42,6 @@ var oauthOptions :{connector:ChromeUIConnector;} = {
 };
 export var uProxyAppChannel :freedom.OnAndEmit<any,any>;
 export var moduleName = 'uProxy App Top Level';
-
-var chromeUIConnector :ChromeUIConnector;
 
 freedom('generic_core/freedom-module.json', <freedom.FreedomInCoreEnvOptions>{
   'logger': 'lib/loggingprovider/freedom-module.json',

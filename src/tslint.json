@@ -9,6 +9,9 @@
       true,
       "spaces"
     ],
-    "no-trailing-whitespace": true
+    "no-trailing-whitespace": true,
+    "no-shadowed-variable": true,
+    "no-duplicate-variable": true,
+    "no-use-before-declare": true
   }
 }

@@ -326,7 +326,7 @@ export function interpretRequest(byteArray:Uint8Array) : Request {
   }
 
   // Fail if client is not talking Socks version 5.
-  var version = byteArray[0];
+  version = byteArray[0];
   if (version !== Version.VERSION5) {
     throw new Error('must be SOCKS5');
   }
