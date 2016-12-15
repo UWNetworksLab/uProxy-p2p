@@ -17,6 +17,14 @@ export class NodeForwardingSocket implements piece.SocksPiece {
     });
   }
 
+  public pause = () => {
+    this.socket.pause();
+  };
+
+  public resume = () => {
+    this.socket.resume();
+  };
+
   public onDataForSocksClient = (callback: (buffer: ArrayBuffer) => void): NodeForwardingSocket => {
     this.onDataCallback = callback;
     return this;

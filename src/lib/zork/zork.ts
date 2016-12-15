@@ -34,11 +34,9 @@
 // TODO list summary:
 // - Use any specified `transform` settings once they are supported.
 //   Currently we stash them in the context but then ignore them.
-// - Consider sending a response to acknowledge successful processing of the
-//   `transform` command (protocol-level change, see TODO below)
-// - Make sure there are no resource leaks (see "cleanup" TODO below)
-// - Implement backpressure (see "backpressure" TODO below)
+// - Make sure there are no resource leaks (see "cleanup" TODO's below)
 // - Factor out logic duplicated in ../socks/bin/webrtc.ts
+// - Refactor SocksPiece to reduce callback inversion?
 // - Replace console log calls with something more structured?
 // - Do error states ever need to be indicated to clients rather than
 //   just logged locally?
@@ -75,6 +73,10 @@ const HEARTBEAT_CHANNEL_ID = 'HEARTBEAT';
 const HEARTBEAT_INTERVAL_MS = 5000;
 const HEARTBEAT_TIMEOUT_MS = 15000;
 const HEARTBEAT_MSG = 'heartbeat';
+const PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES = 1;   // high water mark
+const RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES = 0;  // low water mark
+const WAIT_MS = 1000;  // how long to wait for a slow getter to drain channel buffer from high to low water mark
+const NUMTRIES_MAX = 30;  // don't wait forever for a slow getter
 const RTC_PEER_CONFIG = {
   iceServers: [
     {url: 'stun:stun.l.google.com:19302'},
@@ -98,8 +100,8 @@ interface Context {
   log: any;  // Helper function for contextual logging.
   mode: Mode;  // null indicates still waiting for a 'give' or 'get' command
   transformer: any;  // Stores any requested transform settings.
-  socksServer: SocksServer;  // Set to a SOCKS server if we're getting access.
-  socksSession: SocksSession;  // Set to a SOCKS session if we're giving access.
+  socksServer: SocksServer;  // Set if we're getting access.
+  socksSession: SocksSession;  // Set if we're giving access.
   heartbeatTimeoutId: number;
   onHeartbeatTimeout: Function;
   rtc: RTCState;
@@ -270,7 +272,7 @@ const onDataChannel = (ctx: Context, channel: any) => {
   // Initialize a SOCKS session for it, and set its onmessage handler so that
   // it forwards data for the SOCKS session.
   channel.onopen = () => ctx.log(`[channel ${channelId}] datachannel opened`);
-  initSocksSession(ctx, channel);
+  initSocksSessionAndFwdSocket(ctx, channel);
   channel.onmessage = (event: any) => ctx.socksSession.handleDataFromSocksClient(event.data);
 };
 
@@ -297,29 +299,44 @@ const onSocksConnection = (ctx: Context, sessionId: any) => {
   };
 };
 
-const initSocksSession = (ctx: Context, channel: any) => {
-  ctx.log(`initSocksSession: client ${ctx.clientId}`);
+const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
+  ctx.log(`initSocksSessionAndFwdSocket: client ${ctx.clientId}`);
 
   const session = ctx.socksSession = new SocksSession(ctx.clientId);
+  const forwardingSocket = new ForwardingSocket();
 
-  session.onForwardingSocketRequired((host: any, port: any) => {
-    const forwardingSocket = new ForwardingSocket();
-    return forwardingSocket.connect(host, port).then(() => {
-      return forwardingSocket;
-    });
-  });
+  session.onForwardingSocketRequired((host: any, port: any) =>
+    forwardingSocket.connect(host, port).then(() => forwardingSocket));
 
   // datachannel <- SOCKS session
   session.onDataForSocksClient((bytes: any) => {
-    // When too much is buffered, the channel closes/fails.
-    const BUFFTHRESHOLD = 16000000;  // 16 megabytes
-    if (channel.bufferedAmount < BUFFTHRESHOLD) {
-      channel.send(bytes);
-    } else {
-      ctx.log.error(`[socksSession] datachannel congested, dropping bytes! TODO: backpressure`);
-    }
+    // Try to avoid bufferbloat by adding some basic backpressure when needed.
+    let numTries = 0;
+    const sendOrQueueBytes = () => {
+      const buffNumBytes = channel.bufferedAmount;
+      if (numTries > NUMTRIES_MAX) {
+        ctx.log.error(`deferred sending too many times, dropping bytes`);
+        // TODO: close the datachannel or any other cleanup?
+        return;
+      }
+      if (buffNumBytes < PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
+        channel.send(bytes);
+        numTries = 0;
+        ctx.log(`channel.bufferedAmount under high water mark (${buffNumBytes} bytes) -> sent data`);
+      } else {
+        numTries++;
+        forwardingSocket.pause();  // ok to pause an already-paused socket (no-op)
+        ctx.log(`channel.bufferedAmount over high water mark (${buffNumBytes} bytes) -> paused forwarding socket, queued bytes (try ${numTries}), will retry sending in ${WAIT_MS}ms`);
+        setTimeout(sendOrQueueBytes, WAIT_MS);
+      }
+      if (buffNumBytes < RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
+        forwardingSocket.resume();  // ok to resume an already-resumed socket (no-op)
+        ctx.log(`channel.bufferedAmount under low water mark (${buffNumBytes} bytes) -> resumed forwarding socket`);
+      }
+    };
+    sendOrQueueBytes();
+    return this;
   });
-
   session.onDisconnect(() => ctx.log(`[socksSession] disconnected`));
 };
 
