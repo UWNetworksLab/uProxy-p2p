@@ -73,10 +73,9 @@ const HEARTBEAT_CHANNEL_ID = 'HEARTBEAT';
 const HEARTBEAT_INTERVAL_MS = 5000;
 const HEARTBEAT_TIMEOUT_MS = 15000;
 const HEARTBEAT_MSG = 'heartbeat';
-const PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES = 1;   // high water mark
-const RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES = 0;  // low water mark
-const WAIT_MS = 1000;  // how long to wait for a slow getter to drain channel buffer from high to low water mark
-const NUMTRIES_MAX = 30;  // don't wait forever for a slow getter
+const PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES = 500000;  // 500K high water mark
+const RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES = 500000;  // 500K low water mark
+const POLL_INTERVAL_MS = 50;  //
 const RTC_PEER_CONFIG = {
   iceServers: [
     {url: 'stun:stun.l.google.com:19302'},
@@ -300,7 +299,8 @@ const onSocksConnection = (ctx: Context, sessionId: any) => {
 };
 
 const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
-  ctx.log(`initSocksSessionAndFwdSocket: client ${ctx.clientId}`);
+  const channelId = channel.label;
+  ctx.log(`initSocksSessionAndFwdSocket: client ${ctx.clientId} channel ${channelId}`);
 
   const session = ctx.socksSession = new SocksSession(ctx.clientId);
   const forwardingSocket = new ForwardingSocket();
@@ -308,33 +308,28 @@ const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
   session.onForwardingSocketRequired((host: any, port: any) =>
     forwardingSocket.connect(host, port).then(() => forwardingSocket));
 
+  let intervalId: any = null;
+
   // datachannel <- SOCKS session
   session.onDataForSocksClient((bytes: any) => {
-    // Try to avoid bufferbloat by adding some basic backpressure when needed.
-    let numTries = 0;
-    const sendOrQueueBytes = () => {
-      const buffNumBytes = channel.bufferedAmount;
-      if (numTries > NUMTRIES_MAX) {
-        ctx.log.error(`deferred sending too many times, dropping bytes`);
-        // TODO: close the datachannel or any other cleanup?
-        return;
+    // Avoid bufferbloat by adding some basic backpressure when needed.
+    const numBytesSent = bytes.byteLength;
+    channel.send(bytes);
+    ctx.log(`[channel ${channelId}] sent ${numBytesSent} bytes`);
+    if (channel.bufferedAmount >= PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
+      forwardingSocket.pause();
+      ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) over high water mark -> paused forwarding socket`);
+      if (!intervalId) {
+        intervalId = setInterval(() => {
+          if (channel.bufferedAmount < RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
+            forwardingSocket.resume();
+            clearInterval(intervalId);
+            intervalId = null;
+            ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) under low water mark -> resumed forwarding socket`);
+          }
+        }, POLL_INTERVAL_MS);
       }
-      if (buffNumBytes < PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
-        channel.send(bytes);
-        numTries = 0;
-        ctx.log(`channel.bufferedAmount under high water mark (${buffNumBytes} bytes) -> sent data`);
-      } else {
-        numTries++;
-        forwardingSocket.pause();  // ok to pause an already-paused socket (no-op)
-        ctx.log(`channel.bufferedAmount over high water mark (${buffNumBytes} bytes) -> paused forwarding socket, queued bytes (try ${numTries}), will retry sending in ${WAIT_MS}ms`);
-        setTimeout(sendOrQueueBytes, WAIT_MS);
-      }
-      if (buffNumBytes < RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
-        forwardingSocket.resume();  // ok to resume an already-resumed socket (no-op)
-        ctx.log(`channel.bufferedAmount under low water mark (${buffNumBytes} bytes) -> resumed forwarding socket`);
-      }
-    };
-    sendOrQueueBytes();
+    }
     return this;
   });
   session.onDisconnect(() => ctx.log(`[socksSession] disconnected`));
