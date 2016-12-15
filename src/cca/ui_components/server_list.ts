@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/cordova/backgroundwebview.d.ts'/>
+
 import { Server, ServerRepository } from '../model/server';
 
 class ServerEntryComponent {
@@ -56,6 +58,8 @@ export class ServerListPage {
   private addButton: HTMLButtonElement;
   private entryList: HTMLDivElement;
 
+  private counter = true;
+
   // Servers currently shown, indexed by hostname.
   // Used to prevent listing servers more than once.
   private activeServerIds = new Set<String>();
@@ -88,6 +92,26 @@ export class ServerListPage {
 
   public pressAddServer(): ServerEntryComponent {
     console.debug(`Pressed Add Server with ${this.addTokenText.value}`);
+    // return this.addServerCard(this.servers.addServer(this.addTokenText.value));
+  // public pressAddServer(): Promise<ServerEntryComponent> {
+    // return this.servers.addServer(this.addTokenText.value).then((server) => {
+    //   this.addServer(server);
+    // });
+    if (this.counter) {
+      window.backgroundWebView.start('/android_asset/www/core_test.js').then(function() {
+         console.log("background webview started");
+      }).catch(function(err) {
+         console.log("ERROR: background webview");
+      });
+    } else {
+      window.backgroundWebView.stop().then(function() {
+         console.log("background webview stopped");
+      }).catch(function(err) {
+         console.log("ERROR: background webview");
+      });
+    }
+    this.counter = !this.counter;
+
     return this.addServerCard(this.servers.addServer(this.addTokenText.value));
   }
 

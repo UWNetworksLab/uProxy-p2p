@@ -12,8 +12,8 @@ export enum MESSAGE_VERSIONS {
   RC4 = 6
 };
 
-// TODO: make this RC4 once FF48 is released
-export const MESSAGE_VERSION = MESSAGE_VERSIONS.ENCRYPTED_SIGNALS;
+// TREVJ: just for testing!
+export const MESSAGE_VERSION = MESSAGE_VERSIONS.BRIDGE;
 
 export const DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.l.google.com:19302']},

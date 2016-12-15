@@ -63,9 +63,9 @@ export class Log {
   }
 
   private log_ = (level :loggingProviderTypes.Level, arg :Object, args :Object[]) :void => {
-    if (!this.shouldLog_(level)) {
-      return;
-    }
+    // if (!this.shouldLog_(level)) {
+    //   return;
+    // }
 
     // arg exists to make sure at least one argument is given, we want to treat
     // all the arguments as a single array however
@@ -78,20 +78,21 @@ export class Log {
     }
 
     var message = formatStringMessageWithArgs_(args);
+    console.log(message);
 
-    this.logger.then((logger :freedom.Logger) => {
-      // essentially do logger[loggingProviderTypes.Level[level]](message) minus the type warning
-      switch (level) {
-        case loggingProviderTypes.Level.debug:
-          return logger.debug(message);
-        case loggingProviderTypes.Level.info:
-          return logger.info(message);
-        case loggingProviderTypes.Level.warn:
-          return logger.warn(message);
-        case loggingProviderTypes.Level.error:
-          return logger.error(message);
-      }
-    });
+    // this.logger.then((logger :freedom.Logger) => {
+    //   // essentially do logger[loggingProviderTypes.Level[level]](message) minus the type warning
+    //   switch (level) {
+    //     case loggingProviderTypes.Level.debug:
+    //       return logger.debug(message);
+    //     case loggingProviderTypes.Level.info:
+    //       return logger.info(message);
+    //     case loggingProviderTypes.Level.warn:
+    //       return logger.warn(message);
+    //     case loggingProviderTypes.Level.error:
+    //       return logger.error(message);
+    //   }
+    // });
   }
 
   // Logs message in debug level.

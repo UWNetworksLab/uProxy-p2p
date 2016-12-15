@@ -212,7 +212,11 @@ module.exports = function(grunt) {
 
     // Create commands to run in different directories.
     ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android',
-    ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git',
+    // ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git',
+    // Here's why we pin the cordova-custom-config version:
+    //   https://github.com/uProxy/uproxy/issues/2835
+    ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add https://github.com/bemasc/cordova-plugin-themeablebrowser.git https://github.com/bemasc/cordova-plugin-splashscreen cordova-custom-config@3.0.14 https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks#bemasc-undead cordova-plugin-backbutton /Users/alalama/Desktop/uproxy/service-webview/cordova-plugin-background-webview cordova-plugin-device && <%= ccaJsPath %> plugin rm cordova-plugin-chrome-apps-sockets-tcp cordova-plugin-chrome-apps-sockets-tcpserver && <%= ccaJsPath %> plugin add https://github.com/albertolalama/cordova-plugin-chrome-apps-sockets-tcp.git https://github.com/albertolalama/cordova-plugin-chrome-apps-sockets-tcpServer.git',
+    // ccaAddPatchedPluginsCmd: ,
     exec: {
       makeChromeWebStoreZips: {
         command: 'tools/makechromezips.sh'

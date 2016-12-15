@@ -302,7 +302,8 @@ var generateProxyingSessionId_ = (): string => {
 
       this.currentGetRemoteVersion_ = remoteVersion;
       var localVersion = globals.effectiveMessageVersion();
-      var commonVersion = Math.min(localVersion, remoteVersion);
+      // TREVJ: this should ACTUALLY work to disable obfuscation
+      var commonVersion = constants.MESSAGE_VERSIONS.BRIDGE;
       log.info('lowest shared client version is %1 (me: %2, peer: %3)',
           commonVersion, localVersion, remoteVersion);
       // See globals.ts for a description of each version.

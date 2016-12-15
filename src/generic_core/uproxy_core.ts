@@ -32,13 +32,13 @@ import storage = globals.storage;
 declare var freedom: freedom.FreedomInModuleEnv;
 
 var log :logging.Log = new logging.Log('core');
-log.info('Loading core', version.UPROXY_VERSION);
+log.info('Loading core $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$', version.UPROXY_VERSION);
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 export var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(
     loggingTypes.Destination.console,
-    loggingTypes.Level.warn);
+    loggingTypes.Level.debug);
 loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
@@ -258,7 +258,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     loggingController.setDefaultFilter(
       loggingTypes.Destination.console,
-      globals.settings.consoleFilter);
+      0);
   }
 
   public getFullState = () :Promise<uproxy_core_api.InitialState> => {

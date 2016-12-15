@@ -17,17 +17,18 @@ export interface OnEmitModuleFactory extends
   freedom.FreedomModuleFactoryManager<OnEmitModule> {};
 
 console.log('Loading core');
-export var uProxyAppChannelPromise = freedom(
-    'generic_core/freedom-module.json',
-    <freedom.FreedomInCoreEnvOptions>{
-      'logger': 'lib/loggingprovider/freedom-module.json',
-      'debug': 'debug',
-      'portType': 'worker'
-    }
-).then((uProxyModuleFactory:OnEmitModuleFactory) => {
-  console.log('Core loading complete');
-  return uProxyModuleFactory();
-});
+export var uProxyAppChannelPromise = new Promise<freedom.OnAndEmit<any, any>>((F, R) => {});
+// export var uProxyAppChannelPromise = freedom(
+//     'generic_core/freedom-module.json',
+//     <freedom.FreedomInCoreEnvOptions>{
+//       'logger': 'lib/loggingprovider/freedom-module.json',
+//       'debug': 'debug',
+//       'portType': 'worker'
+//     }
+// ).then((uProxyModuleFactory:OnEmitModuleFactory) => {
+//   console.log('Core loading complete');
+//   return uProxyModuleFactory();
+// });
 
 export function MakeCoreConnector() : Promise<CoreConnector> {
   return uProxyAppChannelPromise.then((channel) => {

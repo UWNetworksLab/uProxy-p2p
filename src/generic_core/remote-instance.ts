@@ -405,12 +405,17 @@ import ui = ui_connector.connector;
      */
     public start = () :Promise<net.Endpoint> => {
       log.debug('start()');
-      if (!this.wireConsentFromRemote.isOffering) {
-        log.warn('Lacking permission to proxy');
-        return Promise.reject(Error('Lacking permission to proxy'));
-      }
+      let delay = new Promise<void>((F, R) => {
+        setTimeout(F, 10000);
+      });
+      // if (!this.wireConsentFromRemote.isOffering) {
+      //   log.warn('Lacking permission to proxy');
+      //   return Promise.reject(Error('Lacking permission to proxy'));
+      // }
 
-      return this.connection_.startGet(this.messageVersion);
+      return delay.then(() => {
+        return this.connection_.startGet(this.messageVersion);
+      });
     }
 
     /**
