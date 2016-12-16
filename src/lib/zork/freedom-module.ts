@@ -45,7 +45,7 @@ let numOfGetters = 0;
 
 let isMetricsEnabled = false;
 if (typeof freedom !== 'undefined') {
-  var parentFreedomModule = freedom();
+  const parentFreedomModule = freedom();
   parentFreedomModule.on('setMetricsEnablement', function(newValue) {
     isMetricsEnabled = newValue;
   });

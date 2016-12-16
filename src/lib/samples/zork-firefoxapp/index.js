@@ -9,19 +9,17 @@ const OPTIONS_FILE_PATH = '/zork-options';
 
 // Returns Promise<boolean>
 function checkIfMetricsEnabled() {
-  return OS.File.read(OPTIONS_FILE_PATH).then(
-    function onSuccess(array) {
-      try {
-        let decoder = new TextDecoder();
-        let text = decoder.decode(array);
-        let options = JSON.parse(text);
-        return options['isMetricsEnabled'] === true;
-      } catch (e) {
-        console.error('Could not parse options file');
-        return false;
-      }
+  return OS.File.read(OPTIONS_FILE_PATH).then((array) => {
+    try {
+      let decoder = new TextDecoder();
+      let text = decoder.decode(array);
+      let options = JSON.parse(text);
+      return options['isMetricsEnabled'] === true;
+    } catch (e) {
+      console.error('Could not parse options file');
+      return false;
     }
-  ).catch(function(e) {
+  }).catch((e) => {
     console.warn('Could not find options file');
     return false;  // Options file not found, not an error.
   });
@@ -29,12 +27,11 @@ function checkIfMetricsEnabled() {
 
 var manifest = self.data.url("lib/zork/freedom-module.json");
 var loggingProviderManifest = self.data.url("lib/loggingprovider/freedom-module.json");
-var provider;
 freedom(manifest, {
   'logger': loggingProviderManifest,
   'debug': 'debug'
 }).then(function(moduleFactory) {
-  let provider = moduleFactory();
+  const provider = moduleFactory();
   checkIfMetricsEnabled().then(function(isEnabled) {
     provider.emit('setMetricsEnablement', isEnabled);
   });
