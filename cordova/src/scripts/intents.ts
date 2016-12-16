@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/cordova/webintents.d.ts'/>		
+/// <reference path='../types/webintents.d.ts'/>		
 
 class IntentInterceptor {
   private listeners: ((url: string) => void)[] = [];

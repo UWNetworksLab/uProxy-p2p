@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/cordova/tun2socks.d.ts'/>
+/// <reference path='../types/tun2socks.d.ts'/>
 
 import { VpnDevice } from '../model/vpn_device';
 

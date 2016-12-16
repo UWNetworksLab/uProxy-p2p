@@ -27,7 +27,7 @@ export class UproxyServer implements Server {
 
   public disconnect(): Promise<void> {
     console.debug('Disconnecting from server');
-    return Promise.all([this.proxy.stop(), this.vpnDevice.stop()]);
+    return Promise.all([this.proxy.stop(), this.vpnDevice.stop()]).then(()=>{});
   }
 }
 
