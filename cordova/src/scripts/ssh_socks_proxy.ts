@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/cordova/ssh.d.ts'/>
+/// <reference path='../types/ssh.d.ts'/>
 
 import { SocksProxy } from '../model/socks_proxy_server';
 

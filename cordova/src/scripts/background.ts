@@ -1,6 +1,3 @@
-/// <reference path='../../../third_party/cordova/splashscreen.d.ts'/>
-/// <reference types="chrome/chrome-app" />
-
 /**
  * background.ts
  *

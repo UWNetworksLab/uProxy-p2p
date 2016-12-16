@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "removeComments": false,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "rootDir": "src",
+    "outDir": "genfiles/js",
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise",
+      "es2015.iterable",
+      "es2015.collection",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "src/scripts/background.ts",
+    "src/types/**/*.d.ts"
+  ]
+}

@@ -1,2 +1,5 @@
+bower_components/
+genfiles/
+node_modules/
 platforms/
 plugins/
