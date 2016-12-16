@@ -11,9 +11,9 @@ const OPTIONS_FILE_PATH = '/zork-options';
 function checkIfMetricsEnabled() {
   return OS.File.read(OPTIONS_FILE_PATH).then((array) => {
     try {
-      let decoder = new TextDecoder();
-      let text = decoder.decode(array);
-      let options = JSON.parse(text);
+      const decoder = new TextDecoder();
+      const text = decoder.decode(array);
+      const options = JSON.parse(text);
       return options['isMetricsEnabled'] === true;
     } catch (e) {
       console.error('Could not parse options file');
