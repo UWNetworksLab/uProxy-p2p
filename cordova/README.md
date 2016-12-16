@@ -1,6 +1,6 @@
 ## uProxy Air Client
 
-All commands must be run from the 'cordova/' directory.
+All commands must be run from the `cordova/` directory.
 
 Install Dependencies
 
