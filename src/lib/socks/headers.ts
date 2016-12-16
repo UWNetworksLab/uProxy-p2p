@@ -720,7 +720,7 @@ export function composeResponseBufferV4(response:Response) : ArrayBuffer {
     code,
     ipv4: ipaddr.IPv4.parse(response.endpoint.address),
     port: response.endpoint.port
-  });
+  }).buffer;
 }
 
 export function interpretResponseBufferV4(buffer:ArrayBuffer) : Response {
