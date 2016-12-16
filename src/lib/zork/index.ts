@@ -46,8 +46,9 @@ import * as net from 'net';
 import {MESSAGE_VERSION} from '../../generic_core/constants';
 import {NodeSocksServer as SocksServer} from '../socks/node/server';
 import {NodeForwardingSocket as ForwardingSocket} from '../socks/node/socket';
-import {SocksSession} from '../socks/session';
+import {SocksSession, State} from '../socks/session';
 import {RTCPeerConnection} from 'wrtc';
+import * as socks_headers from '../socks/headers';
 
 
 // The delimiter for Zork messages is just \n, but we use \r?\n for
@@ -104,6 +105,7 @@ interface Context {
   heartbeatTimeoutId: number;
   onHeartbeatTimeout: Function;
   rtc: RTCState;
+  legacy: boolean; // Are we speaking with a legacy uProxy client?
 }
 
 interface ParsedCmd {
@@ -212,7 +214,25 @@ const initOnHeartbeatTimeout = (ctx: Context) => {
 
 const initPeerConnection = (ctx: Context) => {
   const conn = ctx.rtc.conn = new RTCPeerConnection(RTC_PEER_CONFIG);
-  conn.onicecandidate = (event: any) => ctx.reply(JSON.stringify(event));
+  conn.onicecandidate = (event: any) => {
+    if (ctx.legacy) {
+      event = {
+        signals: {
+          PLAIN: [
+            {
+              type: 2,
+              candidate: event.candidate
+            }
+          ]
+        }
+      };
+    }
+
+    const json = JSON.stringify(event);
+    ctx.log(`candidate: ${json}`);
+
+    ctx.reply(json);
+  };
   conn.ondatachannel = (event: any) => onDataChannel(ctx, event.channel);
   conn.onsignalingstatechange = (event: any) => ctx.log(`signaling state change: ${ctx.rtc.conn.signalingState}`);
   conn.onicegatheringstatechange = (event: any) => ctx.log(`ice gathering state change: ${ctx.rtc.conn.iceGatheringState}`);
@@ -272,7 +292,47 @@ const onDataChannel = (ctx: Context, channel: any) => {
   // it forwards data for the SOCKS session.
   channel.onopen = () => ctx.log(`[channel ${channelId}] datachannel opened`);
   initSocksSessionAndFwdSocket(ctx, channel);
-  channel.onmessage = (event: any) => ctx.socksSession.handleDataFromSocksClient(event.data);
+  channel.onmessage = (event: any) => {
+    let bytesForSession = event.data;
+
+    // only legacy clients send us string messages.
+    if (typeof event.data === 'string') {
+      // this is done by peerconnection.ts - a one word string ('heartbeat')
+      if (event.data === HEARTBEAT_MSG) {
+        channel.send(HEARTBEAT_MSG);
+        return;
+      }
+
+      const request = JSON.parse(event.data);
+      if (request.control) {
+        // pool.ts
+        const command = request.control;
+        switch (command) {
+          case 'OPEN':
+            ctx.log('pool OPEN - resetting session!');
+            initSocksSessionAndFwdSocket(ctx, channel);
+            break;
+          case 'CLOSE':
+            ctx.log('ignoring pool CLOSE');
+            break;
+          default:
+            ctx.log(`unknown pool command ${command}`);
+        }
+        return;
+      }
+
+      try {
+        // pool.ts adds an additional layer of wrapping.
+        // the actual message is in a field called data, again encoded as JSON.
+        bytesForSession = socks_headers.composeRequestBuffer(<socks_headers.Request>JSON.parse(request.data));
+      } catch (e) {
+        ctx.log(`cannot parse legacy endpoint: ${event.data} (${e.message})`);
+        // TODO: fail!
+      }
+    }
+
+    ctx.socksSession.handleDataFromSocksClient(bytesForSession);
+  };
 };
 
 const onSocksConnection = (ctx: Context, sessionId: any) => {
@@ -302,7 +362,8 @@ const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
   const channelId = channel.label;
   ctx.log(`initSocksSessionAndFwdSocket: client ${ctx.clientId} channel ${channelId}`);
 
-  const session = ctx.socksSession = new SocksSession(ctx.clientId);
+  const session = ctx.socksSession = new SocksSession(ctx.clientId,
+      ctx.legacy ? State.AWAITING_REQUEST : State.AWAITING_AUTHS);
   const forwardingSocket = new ForwardingSocket();
 
   session.onForwardingSocketRequired((host: any, port: any) =>
@@ -311,11 +372,30 @@ const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
   let intervalId: any = null;
 
   // datachannel <- SOCKS session
+  let firstPacket = true;
   session.onDataForSocksClient((bytes: any) => {
+    let bytesForChannel = bytes;
+
+    if (ctx.legacy && firstPacket) {
+      firstPacket = false;
+      ctx.log('JSON-ifying connection response for legacy client');
+      try {
+        const response = socks_headers.interpretResponseBuffer(bytes);
+        const sending = JSON.stringify(response);
+        channel.send(JSON.stringify({
+          data: sending
+        }));
+      } catch (e) {
+        ctx.log(`cannot stringify SOCKS response: ${e.message}`);
+        // TODO: fail!
+      }
+    } else {
+      const numBytesSent = bytes.byteLength;
+      channel.send(bytes);
+      ctx.log(`[channel ${channelId}] sent ${numBytesSent} bytes`);
+    }
+
     // Avoid bufferbloat by adding some basic backpressure when needed.
-    const numBytesSent = bytes.byteLength;
-    channel.send(bytes);
-    ctx.log(`[channel ${channelId}] sent ${numBytesSent} bytes`);
     if (channel.bufferedAmount >= PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
       forwardingSocket.pause();
       ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) over high water mark -> paused forwarding socket`);
@@ -335,11 +415,28 @@ const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
   session.onDisconnect(() => ctx.log(`[socksSession] disconnected`));
 };
 
-
 const handleSignaling = (ctx: Context, msg: string) => {
-  const data = JSON.parse(msg);
-  if (data.type === 'icecandidate' && data.candidate) {
-    handleIce(ctx, data);
+  let data = JSON.parse(msg);
+
+  if (data.signals) {
+    ctx.log('legacy client detected');
+    ctx.legacy = true;
+
+    // bridge.ts
+    if (!('PLAIN' in data.signals)) {
+      throw new Error('only support PLAIN signalling');
+    }
+    const plainMessages = data.signals['PLAIN'];
+    if (plainMessages.length !== 1) {
+      throw new Error('only support one message per signal');
+    }
+    data = plainMessages[0];
+    // now...it's either type 0 (offer) or 2 (ice candidate)
+    data = data.type == 0 ? data.description : data;
+  }
+
+  if (data.candidate) {
+    handleIce(ctx, data.candidate);
   } else if (data.type === 'offer' && data.sdp && ctx.mode === 'give') {
     // Getter is offerer, so giver receives the offer.
     ctx.rtc.remoteReceived = true;
@@ -351,6 +448,18 @@ const handleSignaling = (ctx: Context, msg: string) => {
       ctx.rtc.conn.createAnswer((answer: any) => {
         ctx.log(`created answer, setting local description`);
         ctx.rtc.conn.setLocalDescription(answer, () => {
+          if (ctx.legacy) {
+            answer = {
+              signals: {
+                PLAIN: [
+                  {
+                    type: 1,
+                    description: answer
+                  }
+                ]
+              }
+            };
+          }
           const json = JSON.stringify(answer);
           ctx.log(`forwarding answer: ${json}`);
           ctx.reply(json);
@@ -367,12 +476,12 @@ const handleSignaling = (ctx: Context, msg: string) => {
   }
 };
 
-const handleIce = (ctx: Context, data: any) => {
+const handleIce = (ctx: Context, data: string) => {
   if (ctx.rtc.remoteReceived) {
-    ctx.rtc.conn.addIceCandidate(data.candidate);
+    ctx.rtc.conn.addIceCandidate(data);
     ctx.log(`handleIce: remoteReceived: added ice candidate`);
   } else {
-    ctx.rtc.pendingCandidates.push(data.candidate);
+    ctx.rtc.pendingCandidates.push(data);
     ctx.log(`handleIce: !remoteReceived: added pending ice candidate`);
   }
 };
@@ -397,7 +506,8 @@ const zorkServer = net.createServer((client) => {
       conn: null,
       remoteReceived: false,
       pendingCandidates: []
-    }
+    },
+    legacy: false
   };
   ctx.log = makeLogger(ctx);
   ctx.log(`[zorkServer] client connected`);
