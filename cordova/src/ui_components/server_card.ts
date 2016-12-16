@@ -51,26 +51,26 @@ export class ServerCard {
     switch (newState) {
       case State.DISCONNECTED:
         this.status.textContent = 'Tap to connect';
-        this.button.setAttribute('src', '../../res/button/disconnected.svg');
+        this.button.setAttribute('src', 'assets/button/disconnected.svg');
         this.button.disabled = false;
         this.onTap = this.connect;
         break;
       case State.CONNECTING:
         this.status.textContent = 'Connecting';
-        this.button.setAttribute('src', '../../res/button/disconnected.svg');
+        this.button.setAttribute('src', 'assets/button/disconnected.svg');
         this.button.classList.add('pulse');
         this.button.disabled = true;
         break;
       case State.CONNECTED:
         this.status.textContent = 'Connected';
-        this.button.setAttribute('src', '../../res/button/connected.svg');
+        this.button.setAttribute('src', 'assets/button/connected.svg');
         this.button.disabled = false;
         this.button.classList.add('spin');
         this.onTap = this.disconnect;
         break;
       case State.DISCONNECTING:
         this.status.textContent = 'Disconnecting...';
-        this.button.setAttribute('src', '../../res/button/connected.svg');
+        this.button.setAttribute('src', 'assets/res/button/connected.svg');
         this.button.disabled = true;
         break;
       default:

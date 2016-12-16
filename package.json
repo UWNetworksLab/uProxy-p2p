@@ -32,9 +32,9 @@
     "@types/ssh2": "0.0.31",
     "@types/xregexp": "^3.0.28",
     "bower": "^1.4.1",
-    "cca": "^0.8.0",
     "circular-json": "^0.3.0",
     "compare-version": "^0.1.2",
+    "cordova": "^6.4.0",
     "es6-promise": "^4.0.5",
     "forge-min": "^0.6.20",
     "freedom": "^0.6.36",
@@ -91,11 +91,12 @@
     "grunt": "grunt",
     "clean": "rm -rf node_modules/ build/ third_party/bower/ .tscache/ src/cca/bower_components/",
     "install": "yarn run install-bower && yarn run build-grunt-deps && yarn run setup-third-party",
-    "install-bower": "bower install --allow-root --config.interactive=false --config.directory=third_party/bower && cd src/cca && bower install",
+    "install-bower": "bower install --allow-root --config.interactive=false --config.directory=third_party/bower && cd src/cordova && bower install",
     "setup-third-party": "mkdir -p build/third_party && cp -r third_party/* build/third_party/ && yarn run setup-freedom-port-control",
     "build-grunt-deps": "tsc --project src/lib/build-tools --outDir build/tools/",
     "setup-freedom-port-control": "mkdir -p build/third_party/freedom-port-control && cp -r node_modules/freedom-port-control/dist build/third_party/freedom-port-control/",
     "test": "grunt test",
     "jpm": "jpm"
-  }
+  },
+  "dependencies": {}
 }

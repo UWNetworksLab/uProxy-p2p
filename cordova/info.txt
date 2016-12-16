@@ -1,3 +1,9 @@
+Node version: v4.6.1
+
+Cordova version: 6.4.0
+
+Config.xml file: 
+
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="org.uproxy" version="0.0.8" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>uProxy</name>
@@ -5,21 +11,17 @@
         Get and share access to the open internet
     </description>
 
-    <icon src="res/icons/launcher-ldpi.png" platform="android" density="ldpi" />
-    <icon src="res/icons/launcher-mdpi.png" platform="android" density="mdpi" />
-    <icon src="res/icons/launcher-hdpi.png" platform="android" density="hdpi" />
-    <icon src="res/icons/launcher-xhdpi.png" platform="android" density="xhdpi" />
+    <icon src="assets/icons/launcher-ldpi.png" density="ldpi" />
+    <icon src="assets/icons/launcher-mdpi.png" density="mdpi" />
+    <icon src="assets/icons/launcher-hdpi.png" density="hdpi" />
+    <icon src="assets/icons/launcher-xhdpi.png" density="xhdpi" />
 
     <content src="index.html" />
 
-    <preference name="SplashScreen" value="splashscreen" />
+    <!--<preference name="SplashScreen" value="splashscreen" />
     <preference name="SplashScreenDelay" value="2000" />
     <preference name="SplashMaintainAspectRatio" value="true" />
-    <preference name="ShowSplashScreenSpinner" value="false"/>
-
-    <!-- This plugin allows us to select the architecture (ARM and/or x86)
-         to build the Android APK. The default is only ARM. -->
-    <plugin name="cordova-build-architecture" spec="https://github.com/MBuchalik/cordova-build-architecture.git#v1.0.1" source="git" />
+    <preference name="ShowSplashScreenSpinner" value="false"/>-->
 
     <access origin="*" />
     <allow-intent href="http://*/*" />
@@ -28,10 +30,6 @@
     <preference name="android-minSdkVersion" value="16" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <platform name="android">
-        <icon src="assets/icons/launcher-ldpi.png" density="ldpi" />
-        <icon src="assets/icons/launcher-mdpi.png" density="mdpi" />
-        <icon src="assets/icons/launcher-hdpi.png" density="hdpi" />
-        <icon src="assets/icons/launcher-xhdpi.png" density="xhdpi" />
         <config-file target="AndroidManifest.xml" parent="./application/activity/[@android:name='MainActivity']">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -55,3 +53,14 @@
     <plugin name="cordova-plugin-tun2socks" spec="https://github.com/uProxy/cordova-plugin-tun2socks.git" />
     <plugin name="cordova-plugin-ssh" spec="https://github.com/bemasc/cordova-plugin-ssh.git" />
 </widget>
+
+
+Plugins: 
+
+com.borismus.webintent,cordova-custom-config,cordova-plugin-splashscreen,cordova-plugin-ssh,cordova-plugin-tun2socks
+
+Error retrieving Android platform information: 
+Android SDK is not set up properly. Make sure that the Android SDK 'tools' and 'platform-tools' directories are in the PATH variable. 
+
+Error: android: Command failed with exit code ENOENT
+

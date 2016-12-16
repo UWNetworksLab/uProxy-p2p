@@ -31,7 +31,7 @@ module.exports = function(grunt) {
   const chromeExtDevPath = path.join(devBuildPath, 'chrome/extension/');
   const chromeAppDevPath = path.join(devBuildPath, 'chrome/app/');
   const firefoxDevPath = path.join(devBuildPath, 'firefox/');
-  const ccaDevPath = path.join(devBuildPath, 'cca/');
+  const cordovaDevPath = path.join(devBuildPath, 'cca/');
   const androidDevPath = path.join(devBuildPath, 'android/');
   const genericPath = path.join(devBuildPath, 'generic/');
 
@@ -46,7 +46,7 @@ module.exports = function(grunt) {
 
 //-------------------------------------------------------------------------
   const basePath = process.cwd();
-  const ccaPath = path.join(basePath, 'node_modules/cca/');
+  const cordovaPath = path.join(basePath, 'node_modules/cordova/');
   const freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'));
 
 //-------------------------------------------------------------------------
@@ -206,43 +206,45 @@ module.exports = function(grunt) {
 
     //-------------------------------------------------------------------------
     // Import global names into config name space.
-    ccaJsPath: path.join(ccaPath, 'src/cca.js'),
+    cordovaJsPath: path.join(cordovaPath, 'bin/cordova'),
     androidDevPath: androidDevPath,
-    ccaDevPath: ccaDevPath,
+    cordovaDevPath: cordovaDevPath,
 
     // Create commands to run in different directories.
-    ccaPlatformAndroidCmd: '<%= ccaJsPath %> platform add android',
-    ccaAddPluginsCmd: '<%= ccaJsPath %> plugin add cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git https://github.com/bemasc/cordova-plugin-ssh.git',
+    cordovaPlatformAndroidCmd: '<%= cordovaJsPath %> platform add android',
+    cordovaAddPluginsCmd: '<%= cordovaJsPath %> plugin add cordova-plugin-splashscreen cordova-custom-config https://github.com/Initsogar/cordova-webintent.git https://github.com/uProxy/cordova-plugin-tun2socks.git https://github.com/bemasc/cordova-plugin-ssh.git',
     exec: {
       makeChromeWebStoreZips: {
         command: 'tools/makechromezips.sh'
       },
-      // Pipe 'no' into any CCA command which asks on first run whether to send usage stats.
+      // Pipe 'no' into any cordova command which asks on first run whether to send usage stats.
       // It's slightly annoying on your workstation, potentially fatal on Docker and Travis.
-      ccaCreate: {
-        command: 'echo no | <%= ccaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" --link-to=<%= ccaDevPath %>'
+      cordovaCreate: {
+        // We create the project then replace the www/ directory by a link to the real directory.
+        // This was supposed to be done by cordova create --link-to, but it doesn't seem to be working. 
+        command: 'echo no | <%= cordovaJsPath %> create <%= androidDevPath %> org.uproxy.uProxy "uProxy" && rm -rf <%= androidDevPath %>/www && ln -s $(pwd)/<%= cordovaDevPath %> <%= androidDevPath %>/www'
       },
-      ccaPlatformAndroid: {
+      cordovaPlatformAndroid: {
         cwd: '<%= androidDevPath %>',
-        command: '<%= ccaPlatformAndroidCmd %>'
+        command: '<%= cordovaPlatformAndroidCmd %>'
       },
-      ccaAddPluginsAndroid: {
+      cordovaAddPluginsAndroid: {
         cwd: '<%= androidDevPath %>',
-        command: '<%= ccaAddPluginsCmd %>'
+        command: '<%= cordovaAddPluginsCmd %>'
       },
       // Note: The fixed crosswalk version here is pinned in order to maintain
       // compatibility with the modified libxwalkcore.so that provides obfuscated WebRTC.
-      ccaBuildAndroidDev: {
+      cordovaBuildAndroidDev: {
         cwd: '<%= androidDevPath %>',
-        command: 'echo no | <%= ccaJsPath %> build android --debug --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
+        command: 'echo no | <%= cordovaJsPath %> build android --debug'
       },
-      ccaBuildAndroidRelease: {
+      cordovaBuildAndroidRelease: {
         cwd: '<%= androidDevPath %>',
-        command: 'echo no | <%= ccaJsPath %> build android --release --webview=crosswalk@org.xwalk:xwalk_core_library_beta:22.52.561.2'
+        command: 'echo no | <%= cordovaJsPath %> build android --release'
       },
-      ccaEmulateAndroid: {
+      cordovaEmulateAndroid: {
         cwd: '<%= androidDevPath %>',
-        command: '<%= ccaJsPath %> run android --emulator'
+        command: '<%= cordovaJsPath %> run android --emulator'
       },
       cleanAndroid: {
         command: 'rm -rf <%= androidDevPath %>'
@@ -351,7 +353,7 @@ module.exports = function(grunt) {
           }
         ]
       },
-      cca_splash: {
+      cordova_splash: {
         files: [
           {
             expand: true,
@@ -482,7 +484,7 @@ module.exports = function(grunt) {
     },
 
     symlink: {
-      cca_keys: {
+      cordova_keys: {
         files: [
           {
             expand: true,
@@ -724,7 +726,7 @@ module.exports = function(grunt) {
   registerTask(grunt, 'build', [
     'build_chrome',
     'build_firefox',
-    'build_cca',
+    'build_cordova',
     'jshint',
     'copy:dist',
     'exec:xpi',
@@ -1015,50 +1017,50 @@ module.exports = function(grunt) {
   });
 
   // =========================================================================
-  // CCA
+  // cordova
   // =========================================================================
 
-  registerTask(grunt, 'build_cca', [
+  registerTask(grunt, 'build_cordova', [
     'copy:resources',
     'copy:devGenericCore',
     'compileTypescript',
     //'base',
-    'ccaBackground',
-    'copy:cca',
-    'copy:ccaAdditional',
-    'vulcanize:ccaIndex',
+    'cordovaBackground',
+    'copy:cordova',
+    'copy:cordovaAdditional',
+    'vulcanize:cordovaIndex',
   ]);
-  registerTask(grunt, 'ccaBackground',
-      'Builds build/src/cca/scripts/background.static.js', [
+  registerTask(grunt, 'cordovaBackground',
+      'Builds build/src/cordova/src/scripts/background.static.js', [
     'compileTypescript',
-    'browserify:ccaBackground'
+    'browserify:cordovaBackground'
   ]);
 
   grunt.config.merge({
     browserify: {
-     ccaBackground: Rule.browserify('cca/scripts/background', {
+     cordovaBackground: Rule.browserify('../cordova/src/scripts/background', {
         browserifyOptions: {
           standalone: 'ui_context'
         }
       }),
     },
     vulcanize: {
-      ccaIndex: {
+      cordovaIndex: {
         options: {
           inline: true,
           csp: true
         },
         files: [
           {
-            src: path.join(ccaDevPath, 'index.html'),
-            dest: path.join(ccaDevPath, 'index_vulcanized.html')
+            src: path.join(cordovaDevPath, 'index.html'),
+            dest: path.join(cordovaDevPath, 'index_vulcanized.html')
           }
         ]
       }
 
     },
     copy: {
-      cca: Rule.copyLibs({
+      cordova: Rule.copyLibs({
         npmLibNames: ['forge-min'],
         pathsFromDevBuild: [
           'generic_core',
@@ -1068,27 +1070,27 @@ module.exports = function(grunt) {
           'fonts'
         ].concat(backendFreedomModulePaths),
         pathsFromThirdPartyBuild: backendThirdPartyBuildPaths,
-        files: getExtraFilesForCoreBuild(ccaDevPath).concat({
+        files: getExtraFilesForCoreBuild(cordovaDevPath).concat({
           expand: true,
           cwd: 'src/',
           src: ['icons/128_online.png', 'fonts/*'],
-          dest: ccaDevPath
+          dest: cordovaDevPath
         }),
         localDestPath: 'cca/'
       }),
-      ccaAdditional: {
+      cordovaAdditional: {
         files: [
           {  // Copy chrome extension panel components from the background
             expand: true,
-            cwd: ccaDevPath,
+            cwd: cordovaDevPath,
             src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*', '*.html'],
-            dest: ccaDevPath + '/generic_ui'
+            dest: cordovaDevPath + '/generic_ui'
           },
           {  // Copy generic files used by core and UI.
             expand: true,
             cwd: genericPath,
             src: ['*.js'],
-            dest: ccaDevPath + '/generic'
+            dest: cordovaDevPath + '/generic'
           }
         ]
       },
@@ -1099,38 +1101,38 @@ module.exports = function(grunt) {
   // Android
   // =========================================================================
 
-  // Recreates the CCA build environment.
-  registerTask(grunt, 'recreate_cca_env', [
+  // Recreates the cordova build environment.
+  registerTask(grunt, 'recreate_cordova_env', [
     'exec:cleanAndroid',
-    'build_cca',
-    'exec:ccaCreate',
-    'exec:ccaPlatformAndroid',
-    'exec:ccaAddPluginsAndroid',
-    'copy:cca_splash',
+    'build_cordova',
+    'exec:cordovaCreate',
+    'exec:cordovaPlatformAndroid',
+    'exec:cordovaAddPluginsAndroid',
+    'copy:cordova_splash',
   ]);
 
-  // Can be used for building CCA modules and after running recreate_cca_env,
+  // Can be used for building cordova modules and after running recreate_cordova_env,
   // without cleaning, initially at least once.
   registerTask(grunt, 'android_debug_lite', [
-    'build_cca',
-    'exec:ccaBuildAndroidDev',
+    'build_cordova',
+    'exec:cordovaBuildAndroidDev',
   ]);
 
   registerTask(grunt, 'android_debug', [
-    'recreate_cca_env',
+    'recreate_cordova_env',
     'android_debug_lite'
   ]);
 
-  // Can be used for building CCA modules and after running recreate_cca_env,
+  // Can be used for building cordova modules and after running recreate_cordova_env,
   // without cleaning, initially at least once.
   registerTask(grunt, 'android_release_lite', [
-    'build_cca',
-    'symlink:cca_keys',
-    'exec:ccaBuildAndroidRelease',
+    'build_cordova',
+    'symlink:cordova_keys',
+    'exec:cordovaBuildAndroidRelease',
   ]);
 
   registerTask(grunt, 'android_release', [
-    'recreate_cca_env',
+    'recreate_cordova_env',
     'android_release_lite'
   ]);
 
@@ -1142,7 +1144,7 @@ module.exports = function(grunt) {
   // Emulate the mobile client for android
   registerTask(grunt, 'emulate_android', [
     'android_debug',
-    'exec:ccaEmulateAndroid'
+    'exec:cordovaEmulateAndroid'
   ]);
 
   // =========================================================================

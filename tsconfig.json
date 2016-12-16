@@ -16,6 +16,7 @@
     ]
   },
   "include": [
+    "cordova/src/scripts/background.ts",
     "src/**/*.ts"
   ],
   "exclude": [

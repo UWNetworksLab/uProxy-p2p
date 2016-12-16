@@ -1,38 +1,22 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="org.uproxy" version="0.0.8" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<widget id="org.uproxy" version="0.0.8" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>uProxy</name>
     <description>
         Get and share access to the open internet
     </description>
-
-    <icon src="res/icons/launcher-ldpi.png" platform="android" density="ldpi" />
-    <icon src="res/icons/launcher-mdpi.png" platform="android" density="mdpi" />
-    <icon src="res/icons/launcher-hdpi.png" platform="android" density="hdpi" />
-    <icon src="res/icons/launcher-xhdpi.png" platform="android" density="xhdpi" />
-
     <content src="index.html" />
-
-    <preference name="SplashScreen" value="splashscreen" />
-    <preference name="SplashScreenDelay" value="2000" />
-    <preference name="SplashMaintainAspectRatio" value="true" />
-    <preference name="ShowSplashScreenSpinner" value="false"/>
-
-    <!-- This plugin allows us to select the architecture (ARM and/or x86)
-         to build the Android APK. The default is only ARM. -->
-    <plugin name="cordova-build-architecture" spec="https://github.com/MBuchalik/cordova-build-architecture.git#v1.0.1" source="git" />
-
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
-
     <preference name="android-minSdkVersion" value="16" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
+    <preference name="SplashScreenDelay" value="0" />
     <platform name="android">
-        <icon src="assets/icons/launcher-ldpi.png" density="ldpi" />
-        <icon src="assets/icons/launcher-mdpi.png" density="mdpi" />
-        <icon src="assets/icons/launcher-hdpi.png" density="hdpi" />
-        <icon src="assets/icons/launcher-xhdpi.png" density="xhdpi" />
-        <config-file target="AndroidManifest.xml" parent="./application/activity/[@android:name='MainActivity']">
+        <icon density="ldpi" src="resources/icons/launcher-ldpi.png" />
+        <icon density="mdpi" src="resources/icons/launcher-mdpi.png" />
+        <icon density="hdpi" src="resources/icons/launcher-hdpi.png" />
+        <icon density="xhdpi" src="resources/icons/launcher-xhdpi.png" />
+        <config-file parent="./application/activity/[@android:name='MainActivity']" target="AndroidManifest.xml">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -47,11 +31,11 @@
             </intent-filter>
         </config-file>
     </platform>
-
-    <engine name="android" spec="~6.0.0" />
+    <plugin name="cordova-plugin-whitelist" spec="1" />
     <plugin name="cordova-plugin-splashscreen" spec="~4.0.1" />
     <plugin name="cordova-custom-config" spec="~3.1.2" />
     <plugin name="com.borismus.webintent" spec="https://github.com/Initsogar/cordova-webintent.git" />
     <plugin name="cordova-plugin-tun2socks" spec="https://github.com/uProxy/cordova-plugin-tun2socks.git" />
     <plugin name="cordova-plugin-ssh" spec="https://github.com/bemasc/cordova-plugin-ssh.git" />
+    <engine name="android" spec="~5.2.2" />
 </widget>

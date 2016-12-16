@@ -26,7 +26,7 @@ class IntentInterceptor {
 
 let intentInterceptorPromise: Promise<IntentInterceptor> = new Promise((resolve, reject) => {
   // Need to wait for the Cordova plugins to be loaded. 
-  document.addEventListener('deviceready', () => {
+  window.top.document.addEventListener('deviceready', () => {
     if (!window.top.webintent) {
       reject('window.top.webintent not found (Not running on Android?)');
       return;
@@ -37,7 +37,7 @@ let intentInterceptorPromise: Promise<IntentInterceptor> = new Promise((resolve,
       window.top.webintent.onNewIntent(callback);
       resolve(intentInterceptor);
     });
-  }, false);
+  });
 });
 
 export function GetGlobalIntentInterceptor() {

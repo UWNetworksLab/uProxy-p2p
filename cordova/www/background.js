@@ -1,0 +1,1 @@
+../../build/cordova/src/scripts/background.static.js

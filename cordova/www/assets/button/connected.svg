@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="175px" height="175px" viewBox="0 0 175 175" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41 (35326) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="78.3369348%" y1="21.6711957%" x2="97.6510555%" y2="0%" id="linearGradient-1">
+            <stop stop-color="#1DE9B6" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="003" transform="translate(-93.000000, -261.000000)">
+            <g id="Group" transform="translate(93.000000, 261.000000)">
+                <path d="M175,87.5 C175,135.82561 135.82561,175 87.5,175 C39.1743902,175 0,135.82561 0,87.5 C0,39.1743902 39.1743902,0 87.5,0 C135.82561,0 175,39.1743902 175,87.5" id="Fill-1" fill="#1DE9B6"></path>
+                <path d="M134,89.0066035 C134,88.9675407 129.81523,89.1145403 129.81523,89.1145403 C129.818366,112.223287 110.608984,131.000172 86.9984319,131.000172 C63.3878799,131.000172 44.1795434,112.278797 44.1795434,89.0621138 C44.1795434,89.023051 40,89.1145403 40,89.1145403 C39.9979092,114.490987 61.0817087,135 86.9984319,135 C112.915155,135 134,114.490987 134,89.0066035 Z" id="Fill-5" fill="url(#linearGradient-1)"></path>
+                <path d="M134,43.0066035 C134,42.9675407 129.81523,43.1145403 129.81523,43.1145403 C129.818366,66.2232872 110.608984,85.000172 86.9984319,85.000172 C63.3878799,85.000172 44.1795434,66.2787975 44.1795434,43.0621138 C44.1795434,43.023051 40,43.1145403 40,43.1145403 C39.9979092,68.4909871 61.0817087,89 86.9984319,89 C112.915155,89 134,68.4909871 134,43.0066035 Z" id="Fill-5-Copy" fill="url(#linearGradient-1)" transform="translate(87.000000, 66.000000) rotate(-180.000000) translate(-87.000000, -66.000000) "></path>
+                <circle id="Oval-6" fill="#FFFFFF" cx="42" cy="89" r="2"></circle>
+                <ellipse id="Oval-6-Copy" fill="#FFFFFF" cx="132" cy="89" rx="2" ry="2"></ellipse>
+            </g>
+        </g>
+    </g>
+</svg>
