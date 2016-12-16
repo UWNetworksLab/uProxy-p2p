@@ -75,7 +75,7 @@ const HEARTBEAT_TIMEOUT_MS = 15000;
 const HEARTBEAT_MSG = 'heartbeat';
 const PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES = 500000;  // 500K high water mark
 const RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES = 500000;  // 500K low water mark
-const POLL_INTERVAL_MS = 50;  //
+const CHECK_BUFF_TO_RESUME_FWD_SOCK_INTERVAL_MS = 50;
 const RTC_PEER_CONFIG = {
   iceServers: [
     {url: 'stun:stun.l.google.com:19302'},
@@ -99,8 +99,6 @@ interface Context {
   log: any;  // Helper function for contextual logging.
   mode: Mode;  // null indicates still waiting for a 'give' or 'get' command
   transformer: any;  // Stores any requested transform settings.
-  socksServer: SocksServer;  // Set if we're getting access.
-  socksSession: SocksSession;  // Set if we're giving access.
   heartbeatTimeoutId: number;
   onHeartbeatTimeout: Function;
   rtc: RTCState;
@@ -224,7 +222,7 @@ const initSocksServer = (ctx: Context) => {
   // use 0 for the port so the OS assigns us a free port.
   const port = startedSocksServer ? 0 : SOCKS_PORT;
   ctx.log(`starting local SOCKS server on port ${port ? port : '[TBD]'}`);
-  const server = ctx.socksServer = new SocksServer(SOCKS_HOST, port);
+  const server = new SocksServer(SOCKS_HOST, port);
   server.onConnection((sessionId) => onSocksConnection(ctx, sessionId));
   server.listen().then(() => {
     startedSocksServer = true;
@@ -260,7 +258,7 @@ const onDataChannel = (ctx: Context, channel: any) => {
     ctx.log(`incremented numGetters to ${numGetters}`);
     ctx.heartbeatTimeoutId = setTimeout(ctx.onHeartbeatTimeout, HEARTBEAT_TIMEOUT_MS);
     channel.onmessage = (event: any) => {
-      ctx.log(`heartbeat message: "${event.data}"`);
+      //ctx.log(`heartbeat message: "${event.data}"`);
       clearTimeout(ctx.heartbeatTimeoutId);
       ctx.heartbeatTimeoutId = setTimeout(ctx.onHeartbeatTimeout, HEARTBEAT_TIMEOUT_MS);
     };
@@ -272,7 +270,6 @@ const onDataChannel = (ctx: Context, channel: any) => {
   // it forwards data for the SOCKS session.
   channel.onopen = () => ctx.log(`[channel ${channelId}] datachannel opened`);
   initSocksSessionAndFwdSocket(ctx, channel);
-  channel.onmessage = (event: any) => ctx.socksSession.handleDataFromSocksClient(event.data);
 };
 
 const onSocksConnection = (ctx: Context, sessionId: any) => {
@@ -302,37 +299,44 @@ const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
   const channelId = channel.label;
   ctx.log(`initSocksSessionAndFwdSocket: client ${ctx.clientId} channel ${channelId}`);
 
-  const session = ctx.socksSession = new SocksSession(ctx.clientId);
+  const session = new SocksSession(`${ctx.clientId}:${channelId}`);
   const forwardingSocket = new ForwardingSocket();
 
   session.onForwardingSocketRequired((host: any, port: any) =>
     forwardingSocket.connect(host, port).then(() => forwardingSocket));
 
-  let intervalId: any = null;
+  // datachannel -> SOCKS session
+  channel.onmessage = (event: any) => session.handleDataFromSocksClient(event.data);
+
+  let checkBuffToResumeSockInterval: NodeJS.Timer = null;
 
   // datachannel <- SOCKS session
   session.onDataForSocksClient((bytes: any) => {
-    // Avoid bufferbloat by adding some basic backpressure when needed.
     const numBytesSent = bytes.byteLength;
     channel.send(bytes);
     ctx.log(`[channel ${channelId}] sent ${numBytesSent} bytes`);
+    // Pause the forwarding socket when the channel's buffer gets too big to add backpressure.
     if (channel.bufferedAmount >= PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
       forwardingSocket.pause();
-      ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) over high water mark -> paused forwarding socket`);
-      if (!intervalId) {
-        intervalId = setInterval(() => {
-          if (channel.bufferedAmount < RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
-            forwardingSocket.resume();
-            clearInterval(intervalId);
-            intervalId = null;
-            ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) under low water mark -> resumed forwarding socket`);
-          }
-        }, POLL_INTERVAL_MS);
+      if (!checkBuffToResumeSockInterval) {
+        ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) over high water mark -> paused forwarding socket`);
+        checkBuffToResumeSockInterval = setInterval(checkBuffToResumeSock, CHECK_BUFF_TO_RESUME_FWD_SOCK_INTERVAL_MS); 
       }
     }
     return this;
   });
-  session.onDisconnect(() => ctx.log(`[socksSession] disconnected`));
+
+  // Resume the forwarding socket when the channel's buffer has drained enough.
+  const checkBuffToResumeSock = () => {
+    if (channel.bufferedAmount < RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
+      forwardingSocket.resume();
+      clearInterval(checkBuffToResumeSockInterval);
+      checkBuffToResumeSockInterval = null;
+      ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) under low water mark -> resumed forwarding socket`);
+    }
+  };
+
+  session.onDisconnect(() => ctx.log(`[socksSession ${channelId}] disconnected`));
 };
 
 
@@ -389,8 +393,6 @@ const zorkServer = net.createServer((client) => {
     log: null,
     mode: null,
     transformer: null,
-    socksServer: null,
-    socksSession: null,
     onHeartbeatTimeout: null,
     heartbeatTimeoutId: null,
     rtc: {
