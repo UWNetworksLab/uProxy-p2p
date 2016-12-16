@@ -1,7 +1,7 @@
 import * as headers from './headers';
 import * as piece from './piece';
 
-enum State {
+export enum State {
   AWAITING_AUTHS,
   AWAITING_REQUEST,
   AWAITING_CONNECTION,
@@ -10,14 +10,11 @@ enum State {
 }
 
 export class SocksSession implements piece.SocksPiece {
-  private state_ = State.AWAITING_AUTHS;
-
   // Connection to the remote server. This is created once the SOCKS
   // client has sent us the address with which it wishes to connect.
   private forwardingSocket_: piece.SocksPiece;
 
-  constructor(private id_: string) {
-  }
+  constructor(private id_: string, private state_ = State.AWAITING_AUTHS) {}
 
   private getForwardingSocket_: (host: string, port: number) => Promise<piece.SocksPiece>;
   private sendToSocksClient_: (buffer: ArrayBuffer) => void;

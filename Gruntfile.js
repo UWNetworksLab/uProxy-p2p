@@ -368,6 +368,11 @@ module.exports = function(grunt) {
         pathsFromThirdPartyBuild: ['freedom-port-control'],
         localDestPath: 'lib/samples/zork-firefoxapp/data/'
       }),
+      libsForZorkNode: Rule.copyLibs({
+        pathsFromDevBuild: ['lib/churn-pipe', 'lib/loggingprovider', 'lib/zork'],
+        pathsFromThirdPartyBuild: ['freedom-port-control'],
+        localDestPath: 'lib/samples/zork-node/'
+      }),
 
       libsForEchoServerChromeApp: Rule.copyLibs({
         npmLibNames: ['freedom-for-chrome'],
@@ -728,7 +733,10 @@ module.exports = function(grunt) {
     'copy:resources',
     'copy:devGenericCore',
     'compileTypescript',
+    'browserify:genericCoreFreedomModule',
     'browserify:loggingProvider',
+    'browserify:churnPipeFreedomModule',
+    'browserify:cloudSocialProviderFreedomModule'
   ]);
   registerTask(grunt, 'echoServer', [
     'base',
@@ -771,6 +779,12 @@ module.exports = function(grunt) {
     'browserify:uprobeFreedomModule',
     'copy:libsForUprobeChromeApp',
     'copy:libsForUprobeFirefoxApp'
+  ]);
+  registerTask(grunt, 'zork', [
+    'base',
+    'browserify:zorkFreedomModule',
+    'copy:libsForZorkChromeApp',
+    'copy:libsForZorkFirefoxApp'
   ]);
 
   // Chrome

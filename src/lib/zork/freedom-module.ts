@@ -172,8 +172,8 @@ function get(
     :void {
   var socksToRtc = new socks_to_rtc.SocksToRtc();
 
-  socksToRtc.start(new tcp.Server(socksEndpoint), bridge.best('sockstortc',
-      pcConfig, undefined, transformerConfig)).then((endpoint:net.Endpoint) => {
+  // TODO: really need to be able to configure this at runtime
+  socksToRtc.start(new tcp.Server(socksEndpoint), bridge.preObfuscation('sockstortc', pcConfig)).then((endpoint:net.Endpoint) => {
     log.info('%1: SOCKS server listening on %2 (curl -x socks5h://%3:%4 www.example.com)',
         connection.connectionId, endpoint,endpoint.address, endpoint.port);
     connection.close();
@@ -189,6 +189,7 @@ function get(
   });
 
   lines.setSyncHandler((signal:string): void => {
+
     log.info('%1: received signalling message: %2',
       connection.connectionId, signal);
     try {
