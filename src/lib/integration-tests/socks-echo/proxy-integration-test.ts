@@ -201,6 +201,37 @@ export default class AbstractProxyIntegrationTest implements ProxyIntegrationTes
       });
   }
 
+  private connectThroughSocksV4_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
+    var connection = new tcp.Connection({endpoint: socksEndpoint});
+    connection.onceClosed.then(() => {
+      console.log('Socket ' + connection.connectionId + ' has closed');
+      this.dispatchEvent_('sockClosed', connection.connectionId);
+    });
+
+    let request :socks_headers.Request = {
+      command: socks_headers.Command.TCP_CONNECT,
+      endpoint: webEndpoint,
+    };
+    connection.send(socks_headers.composeRequestBufferV4(request));
+    var connected = new Promise<tcp.ConnectionInfo>((F, R) => {
+      connection.onceConnected.then(F);
+      connection.onceClosed.then(R);
+    });
+    var firstBufferPromise :Promise<ArrayBuffer> = connection.receiveNext();
+    return connected.then((i:tcp.ConnectionInfo) => {
+      return firstBufferPromise;
+    }).then((buffer:ArrayBuffer) : Promise<tcp.Connection> => {
+      let response = socks_headers.interpretResponseBufferV4(buffer);
+      log.debug('Received request response: %1', [response]);
+      if (response.reply !== socks_headers.Reply.SUCCEEDED) {
+        // TODO: Fix bad style: reject should only and always be an error.
+        // We should be resolving with result status.
+        return Promise.reject(response);
+      }
+      return Promise.resolve(connection);
+    });
+  }
+
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
     var connection = new tcp.Connection({endpoint: socksEndpoint});
     connection.onceClosed.then(() => {
@@ -246,13 +277,16 @@ export default class AbstractProxyIntegrationTest implements ProxyIntegrationTes
     });
   }
 
-  public connect = (port:number, address?:string) : Promise<string> => {
+  public connect = (port:number, address?:string, useV4?:boolean) : Promise<string> => {
     try {
       return this.socksEndpoint_.then((socksEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
         var echoEndpoint :net.Endpoint = {
           address: address || this.localhost_,
           port: port
         };
+        if (useV4) {
+          return this.connectThroughSocksV4_(socksEndpoint, echoEndpoint)
+        }
         return this.connectThroughSocks_(socksEndpoint, echoEndpoint);
       }).then((connection:tcp.Connection) => {
         this.connections_[connection.connectionId] = connection;

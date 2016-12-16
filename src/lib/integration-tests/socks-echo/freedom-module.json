@@ -39,7 +39,7 @@
       },
       "connect": {
         "type": "method",
-        "value": ["number", "string"],
+        "value": ["number", "string", "boolean"],
         "ret": "string"
       },
       "setRepeat": {
