@@ -165,7 +165,11 @@ export function interpretAuthHandshakeBuffer(buffer:ArrayBuffer) : Auth[] {
   // Only SOCKS Version 5 is supported.
   var socksVersion = handshakeBytes[0];
   if (socksVersion != Version.VERSION5) {
-    throw new Error('unsupported SOCKS version: ' + socksVersion);
+    let errmsg = `unsupported SOCKS version: ${socksVersion}`;
+    if (socksVersion === 71) {
+      errmsg += ` 71 == 'G' as in 'GET'. Accidentally set as HTTP proxy rather than SOCKS proxy?`;
+    }
+    throw new Error(errmsg);
   }
 
   // Check AUTH methods on SOCKS handshake.
@@ -321,8 +325,8 @@ export function interpretRequest(byteArray:Uint8Array) : Request {
   var destination :Destination;
 
   // Fail if the request is too short to be valid.
-  if(byteArray.length < 9) {
-    throw new Error('SOCKS request too short');
+  if (byteArray.length < 9) {
+    throw new Error(`SOCKS request too short: ${byteArray.length}`);
   }
 
   // Fail if client is not talking Socks version 5.
