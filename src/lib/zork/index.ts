@@ -32,6 +32,7 @@
 
 
 // TODO list summary:
+// - Make sure numGetters logic can track getters with legacy clients.
 // - Use any specified `transform` settings once they are supported.
 //   Currently we stash them in the context but then ignore them.
 // - Make sure there are no resource leaks (see "cleanup" TODO's below)
@@ -46,8 +47,9 @@ import * as net from 'net';
 import {MESSAGE_VERSION} from '../../generic_core/constants';
 import {NodeSocksServer as SocksServer} from '../socks/node/server';
 import {NodeForwardingSocket as ForwardingSocket} from '../socks/node/socket';
-import {SocksSession} from '../socks/session';
+import {SocksSession, State} from '../socks/session';
 import {RTCPeerConnection} from 'wrtc';
+import * as socks_headers from '../socks/headers';
 
 
 // The delimiter for Zork messages is just \n, but we use \r?\n for
@@ -94,14 +96,17 @@ interface RTCState {
 
 interface Context {
   clientId: string;
+  legacy: boolean;  // Are we speaking with a legacy uProxy client?
   socket: net.Socket;  // Connection to the zork client. Becomes the signaling channel.
   reply: (msg: string) => void;  // Helper function to reply to the client.
   log: any;  // Helper function for contextual logging.
   mode: Mode;  // null indicates still waiting for a 'give' or 'get' command
-  transformer: any;  // Stores any requested transform settings.
-  heartbeatTimeoutId: number;
-  onHeartbeatTimeout: Function;
   rtc: RTCState;
+  // Only used when we're the giver:
+  onHeartbeatTimeout: Function;
+  heartbeatTimeoutId: number;
+  transformer: any;
+  socksSessionByChannelId: {[id: string]: any};
 }
 
 interface ParsedCmd {
@@ -210,8 +215,15 @@ const initOnHeartbeatTimeout = (ctx: Context) => {
 
 const initPeerConnection = (ctx: Context) => {
   const conn = ctx.rtc.conn = new RTCPeerConnection(RTC_PEER_CONFIG);
-  conn.onicecandidate = (event: any) => ctx.reply(JSON.stringify(event));
-  conn.ondatachannel = (event: any) => onDataChannel(ctx, event.channel);
+  conn.onicecandidate = (event: any) => {
+    if (ctx.legacy) {
+      event = {signals: {PLAIN: [{type: 2, candidate: event.candidate}]}};
+    }
+    const json = JSON.stringify(event);
+    ctx.log(`candidate: ${json}`);
+    ctx.reply(json);
+  };
+  conn.ondatachannel = (event: any) => handleDataChannel(ctx, event.channel);
   conn.onsignalingstatechange = (event: any) => ctx.log(`signaling state change: ${ctx.rtc.conn.signalingState}`);
   conn.onicegatheringstatechange = (event: any) => ctx.log(`ice gathering state change: ${ctx.rtc.conn.iceGatheringState}`);
   conn.oniceconnectionstatechange = (event: any) => ctx.log(`ice connection state change: ${ctx.rtc.conn.iceConnectionState}`);
@@ -223,7 +235,7 @@ const initSocksServer = (ctx: Context) => {
   const port = startedSocksServer ? 0 : SOCKS_PORT;
   ctx.log(`starting local SOCKS server on port ${port ? port : '[TBD]'}`);
   const server = new SocksServer(SOCKS_HOST, port);
-  server.onConnection((sessionId) => onSocksConnection(ctx, sessionId));
+  server.onConnection((sessionId) => handleSocksConnection(ctx, sessionId));
   server.listen().then(() => {
     startedSocksServer = true;
     const port = server.address().port;  // in case OS assigned
@@ -232,47 +244,100 @@ const initSocksServer = (ctx: Context) => {
   });
 };
 
-const onDataChannel = (ctx: Context, channel: any) => {
+const handleDataChannel = (ctx: Context, channel: any) => {
   const channelId = channel.label;
-  ctx.log(`onDataChannel: [channel ${channelId}] [channel.readyState ${channel.readyState}]`);
+  ctx.log(`handleDataChannel: [channel ${channelId}] [channel.readyState ${channel.readyState}]`);
 
+  channel.onopen = () => ctx.log(`[channel ${channelId}] datachannel opened`);
   channel.onclose = () => ctx.log(`[channel ${channelId}] datachannel closed`);
   channel.onerror = (err: any) => ctx.log.error(`[channel ${channelId}] datachannel error: ${err}`);
 
-  // ondatachannel events don't fire for the peer creating the datachannel.
-  // Since the getter is always the one that creates datachannels, a getter
-  // doesn't expect any giver-created datachannels, so just closes any onopen.
   if (ctx.mode === 'get') {
-    channel.onopen = () => {
-      channel.close();
-      ctx.log.error(`closed unexpected giver-created datachannel`);
-    };
+    handleGiverCreatedDataChannel(ctx, channel);
     return;
   }
   // Got here -> we're the giver.
 
-  if (channelId === HEARTBEAT_CHANNEL_ID) {  // heartbeat datachannel
-    ctx.socket.end();
-    ctx.log(`closed zork connection, handoff to RTC complete`);
-    numGetters++;
-    ctx.log(`incremented numGetters to ${numGetters}`);
-    ctx.heartbeatTimeoutId = setTimeout(ctx.onHeartbeatTimeout, HEARTBEAT_TIMEOUT_MS);
-    channel.onmessage = (event: any) => {
-      //ctx.log(`heartbeat message: "${event.data}"`);
-      clearTimeout(ctx.heartbeatTimeoutId);
-      ctx.heartbeatTimeoutId = setTimeout(ctx.onHeartbeatTimeout, HEARTBEAT_TIMEOUT_MS);
-    };
+  if (channelId === HEARTBEAT_CHANNEL_ID) {
+    handleHeartbeatDataChannel(ctx, channel);
     return;
   }
 
   // Got here -> we're the giver, and this is a non-heartbeat datachannel.
-  // Initialize a SOCKS session for it, and set its onmessage handler so that
-  // it forwards data for the SOCKS session.
-  channel.onopen = () => ctx.log(`[channel ${channelId}] datachannel opened`);
-  initSocksSessionAndFwdSocket(ctx, channel);
+  handleProxyDataChannel(ctx, channel);
 };
 
-const onSocksConnection = (ctx: Context, sessionId: any) => {
+const handleProxyDataChannel = (ctx: Context, channel: any) => {
+  // Initialize a SOCKS session for this datachannel, and set its onmessage
+  // handler so that it forwards data for the SOCKS session.
+  initSocksSessionAndFwdSocket(ctx, channel);
+
+  channel.onmessage = (event: any) => {
+    let bytesForSession = event.data;
+    const legacyMessage = typeof event.data === 'string';  // only legacy clients send string messages.
+    if (legacyMessage) {
+      bytesForSession = handleLegacyMessage(ctx, channel, event.data);
+      if (!bytesForSession) {
+        return;
+      }
+    }
+    const session = ctx.socksSessionByChannelId[channel.label];
+    session.handleDataFromSocksClient(bytesForSession);
+  };
+};
+
+const handleLegacyMessage = (ctx: Context, channel: any, msg: any) => {
+  if (msg === HEARTBEAT_MSG) {  // done by peerconnection.ts
+    channel.send(HEARTBEAT_MSG);
+    return null;
+  }
+  const request = JSON.parse(msg);
+  if (request.control) {  // pool.ts
+    const command = request.control;
+    switch (command) {
+      case 'OPEN':
+        ctx.log('pool OPEN - resetting session!');
+        initSocksSessionAndFwdSocket(ctx, channel);
+        break;
+      case 'CLOSE':
+        ctx.log('ignoring pool CLOSE');
+        break;
+      default:
+        ctx.log.error(`unknown pool command ${command}`);
+    }
+    return null;
+  }
+  // pool.ts adds an additional layer of wrapping.
+  // The actual message is in a field called data, again encoded as JSON.
+  const bytesForSession = socks_headers.composeRequestBuffer(
+      <socks_headers.Request>JSON.parse(request.data));
+  return bytesForSession;
+};
+
+const handleGiverCreatedDataChannel = (ctx: Context, channel: any) => {
+  // ondatachannel events don't fire for the peer creating the datachannel.
+  // Since the getter is always the one that creates datachannels, a getter
+  // doesn't expect any giver-created datachannels, so just closes any onopen.
+  channel.onopen = () => {
+    channel.close();
+    ctx.log.error(`closed unexpected giver-created datachannel`);
+  };
+};
+
+const handleHeartbeatDataChannel = (ctx: Context, channel: any) => {
+  ctx.socket.end();
+  ctx.log(`heartbeat datachannel created -> closed zork connection, handoff to RTC complete`);
+  numGetters++;
+  ctx.log(`incremented numGetters to ${numGetters}`);
+  ctx.heartbeatTimeoutId = setTimeout(ctx.onHeartbeatTimeout, HEARTBEAT_TIMEOUT_MS);
+  channel.onmessage = (event: any) => {
+    //ctx.log(`heartbeat message: "${event.data}"`);
+    clearTimeout(ctx.heartbeatTimeoutId);
+    ctx.heartbeatTimeoutId = setTimeout(ctx.onHeartbeatTimeout, HEARTBEAT_TIMEOUT_MS);
+  };
+};
+
+const handleSocksConnection = (ctx: Context, sessionId: any) => {
   ctx.log(`[socksServer] new connection: ${sessionId}`);
   const channel = ctx.rtc.conn.createDataChannel(sessionId);
   return {
@@ -284,7 +349,7 @@ const onSocksConnection = (ctx: Context, sessionId: any) => {
       return this;
     },
     handleDisconnect: () => {
-      channel.close();
+      //channel.close();  // TODO need this?
       ctx.log(`[socksServer] [session ${sessionId}] client disconnect, closed datachannel`);
     },
     onDisconnect: (callback: () => void) => {
@@ -297,53 +362,88 @@ const onSocksConnection = (ctx: Context, sessionId: any) => {
 
 const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
   const channelId = channel.label;
-  ctx.log(`initSocksSessionAndFwdSocket: client ${ctx.clientId} channel ${channelId}`);
+  ctx.log(`initSocksSessionAndFwdSocket: channel ${channelId}`);
 
-  const session = new SocksSession(`${ctx.clientId}:${channelId}`);
   const forwardingSocket = new ForwardingSocket();
+
+  const session = new SocksSession(`${ctx.clientId}:${channelId}`,
+      ctx.legacy ? State.AWAITING_REQUEST : State.AWAITING_AUTHS);
+
+  ctx.socksSessionByChannelId[channelId] = session;
 
   session.onForwardingSocketRequired((host: any, port: any) =>
     forwardingSocket.connect(host, port).then(() => forwardingSocket));
 
-  // datachannel -> SOCKS session
-  channel.onmessage = (event: any) => session.handleDataFromSocksClient(event.data);
-
-  let checkBuffToResumeSockInterval: NodeJS.Timer = null;
-
-  // datachannel <- SOCKS session
+  let firstPacket = true;
   session.onDataForSocksClient((bytes: any) => {
-    const numBytesSent = bytes.byteLength;
-    channel.send(bytes);
-    ctx.log(`[channel ${channelId}] sent ${numBytesSent} bytes`);
-    // Pause the forwarding socket when the channel's buffer gets too big to add backpressure.
-    if (channel.bufferedAmount >= PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
+    if (ctx.legacy && firstPacket) {
+      firstPacket = false;
+      const response = socks_headers.interpretResponseBuffer(bytes);
+      const data = JSON.stringify(response);
+      const json = JSON.stringify({data: data});
+      channel.send(json);
+      ctx.log('[channel ${channelId}] sent JSON connection response to legacy client');
+    } else {
+      // datachannel <- SOCKS session
+      const numBytesSent = bytes.byteLength;
+      channel.send(bytes);
+      ctx.log(`[channel ${channelId}] sent ${numBytesSent} bytes`);
+    }
+
+    let checkBuffToResumeSockInterval: NodeJS.Timer = null;
+
+    // Resume the forwarding socket when the channel's buffer has drained enough.
+    const checkBuffToResumeSock = () => {
+      const buffAmnt = channel.bufferedAmount;
+      if (buffAmnt < RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
+        forwardingSocket.resume();
+        clearInterval(checkBuffToResumeSockInterval);
+        checkBuffToResumeSockInterval = null;
+        ctx.log(`[channel ${channelId}] bufferedAmount (${buffAmnt}) under low water mark -> resumed forwarding socket`);
+      }
+    };
+
+    // Pause the forwarding socket when the channel's buffer gets too big (backpressure).
+    const buffAmnt = channel.bufferedAmount;
+    if (buffAmnt >= PAUSE_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
       forwardingSocket.pause();
       if (!checkBuffToResumeSockInterval) {
-        ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) over high water mark -> paused forwarding socket`);
+        ctx.log(`[channel ${channelId}] bufferedAmount (${buffAmnt}) over high water mark -> paused forwarding socket`);
         checkBuffToResumeSockInterval = setInterval(checkBuffToResumeSock, CHECK_BUFF_TO_RESUME_FWD_SOCK_INTERVAL_MS); 
       }
     }
+
     return this;
   });
 
-  // Resume the forwarding socket when the channel's buffer has drained enough.
-  const checkBuffToResumeSock = () => {
-    if (channel.bufferedAmount < RESUME_FWD_SOCK_ON_BUFFERED_NUMBYTES) {
-      forwardingSocket.resume();
-      clearInterval(checkBuffToResumeSockInterval);
-      checkBuffToResumeSockInterval = null;
-      ctx.log(`channel ${channelId} bufferedAmount (${channel.bufferedAmount} bytes) under low water mark -> resumed forwarding socket`);
-    }
-  };
-
-  session.onDisconnect(() => ctx.log(`[socksSession ${channelId}] disconnected`));
+  session.onDisconnect(() => {
+    delete ctx.socksSessionByChannelId[channelId];
+    ctx.log(`[socksSession ${channelId}] disconnected -> removed ref`)
+  });
 };
 
-
 const handleSignaling = (ctx: Context, msg: string) => {
-  const data = JSON.parse(msg);
-  if (data.type === 'icecandidate' && data.candidate) {
-    handleIce(ctx, data);
+  let data = JSON.parse(msg);
+
+  if (data.signals) {
+    ctx.log('legacy client detected');
+    ctx.legacy = true;
+
+    // bridge.ts
+    if (!('PLAIN' in data.signals)) {
+      throw new Error('only support PLAIN signalling');
+    }
+    const plainMessages = data.signals['PLAIN'];
+    if (plainMessages.length !== 1) {
+      throw new Error('only support one message per signal');
+    }
+    data = plainMessages[0];
+    // data.type is either 0 (offer) or 2 (ice candidate)
+    data = data.type == 0 ? data.description : data;
+  }
+
+  if (data.candidate) {
+    handleIce(ctx, data.candidate);
   } else if (data.type === 'offer' && data.sdp && ctx.mode === 'give') {
     // Getter is offerer, so giver receives the offer.
     ctx.rtc.remoteReceived = true;
@@ -355,6 +455,9 @@ const handleSignaling = (ctx: Context, msg: string) => {
       ctx.rtc.conn.createAnswer((answer: any) => {
         ctx.log(`created answer, setting local description`);
         ctx.rtc.conn.setLocalDescription(answer, () => {
+          if (ctx.legacy) {
+            answer = {signals: {PLAIN: [{type: 1, description: answer}]}};
+          }
           const json = JSON.stringify(answer);
           ctx.log(`forwarding answer: ${json}`);
           ctx.reply(json);
@@ -371,12 +474,12 @@ const handleSignaling = (ctx: Context, msg: string) => {
   }
 };
 
-const handleIce = (ctx: Context, data: any) => {
+const handleIce = (ctx: Context, data: string) => {
   if (ctx.rtc.remoteReceived) {
-    ctx.rtc.conn.addIceCandidate(data.candidate);
+    ctx.rtc.conn.addIceCandidate(data);
     ctx.log(`handleIce: remoteReceived: added ice candidate`);
   } else {
-    ctx.rtc.pendingCandidates.push(data.candidate);
+    ctx.rtc.pendingCandidates.push(data);
     ctx.log(`handleIce: !remoteReceived: added pending ice candidate`);
   }
 };
@@ -388,6 +491,7 @@ const zorkServer = net.createServer((client) => {
   const clientId = `zc${numZorkConnections++}`;
   const ctx: Context = {  // Create a context holding the state for this connection
     clientId: clientId,
+    legacy: false,
     socket: client,
     reply: makeReplyFunction(client),
     log: null,
@@ -395,6 +499,7 @@ const zorkServer = net.createServer((client) => {
     transformer: null,
     onHeartbeatTimeout: null,
     heartbeatTimeoutId: null,
+    socksSessionByChannelId: {},
     rtc: {
       conn: null,
       remoteReceived: false,

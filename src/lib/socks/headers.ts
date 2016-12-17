@@ -161,10 +161,14 @@ export interface UdpMessage {
 //
 export function interpretAuthHandshakeBuffer(buffer:ArrayBuffer) : Auth[] {
   var handshakeBytes = new Uint8Array(buffer);
+  console.log(`***** handshakeBytes: ${handshakeBytes[0]} ${handshakeBytes[1]} ${handshakeBytes[2]}`);
 
   // Only SOCKS Version 5 is supported.
   var socksVersion = handshakeBytes[0];
   if (socksVersion != Version.VERSION5) {
+    if (socksVersion === 71 /* 'G' as in 'GET' */) {
+      console.error('Make sure you set a SOCKS proxy and not an HTTP proxy!')
+    }
     throw new Error('unsupported SOCKS version: ' + socksVersion);
   }
 
@@ -321,8 +325,8 @@ export function interpretRequest(byteArray:Uint8Array) : Request {
   var destination :Destination;
 
   // Fail if the request is too short to be valid.
-  if(byteArray.length < 9) {
-    throw new Error('SOCKS request too short');
+  if (byteArray.length < 9) {
+    throw new Error(`SOCKS request too short: ${byteArray[0]} ${byteArray[1]} ${byteArray[2]} ${byteArray[3]} ${byteArray[4]} `);
   }
 
   // Fail if client is not talking Socks version 5.

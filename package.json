@@ -84,6 +84,7 @@
     "typescript": "^2.0.3",
     "uparams": "^1.2.0",
     "uproxy-cloud-install": "^1.0.17",
+    "wrtc": "^0.0.61",
     "xregexp": "^2.0.0"
   },
   "scripts": {
