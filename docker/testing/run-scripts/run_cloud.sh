@@ -152,7 +152,7 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
   docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d $ZORK_IMAGE
   # TODO: switch based on input arg
-  docker exec  bash -c "echo '{\"isMetricsEnabled\": true, \"serverId\": \"$SERVER_ID\"}' >/zork-options"
+  docker exec uproxy-zork bash -c "echo '{\"isMetricsEnabled\": true, \"serverId\": \"$SERVER_ID\"}' >/zork-options"
   docker exec uproxy-zork /sbin/my_init -- /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
