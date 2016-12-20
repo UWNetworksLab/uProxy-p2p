@@ -44,11 +44,38 @@ var PORTS = [9000, 9010, 9020];
 let numOfGetters = 0;
 
 let isMetricsEnabled = false;
+let serverId :string = null;
 if (typeof freedom !== 'undefined') {
   const parentFreedomModule = freedom();
+  // TODO: type checking?  is newVale really a boolean?
   parentFreedomModule.on('setMetricsEnablement', function(newValue) {
+    console.error('setMetricsEnablement: ' + newValue);
     isMetricsEnabled = newValue;
   });
+  parentFreedomModule.on('setServerId', function(newValue) {
+    console.error('setServerId: ' + newValue);
+    serverId = newValue;
+  });
+}
+
+function postMetrics(startUtcMs :number, endUtcMs :number) {
+  if (!isMetricsEnabled || !serverId) {
+    return;
+  }
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://cloud-install-bigquery-dot-uproxysite.appspot.com/server-metrics');
+  xhr.onload = function() { console.error('xhr onload ' + this.status); };
+  xhr.onerror = function(e :ErrorEvent) { console.error('error posting metrics: ' + e) };
+  let data = {
+    serverId: serverId,
+    getterId: 'someGetter',  // TODO: set getter
+    startUtcMilliseconds: startUtcMs,
+    endUtcMilliseconds: endUtcMs,
+    bytesDownloadedByGetter: 1234
+  }
+  console.error('making XHR: ' + JSON.stringify(data));
+  xhr.send(JSON.stringify(data));
 }
 
 // Starts a TCP server on the first free port listed in PORTS.
@@ -216,6 +243,8 @@ function give(
     :void {
   var rtcToNet = new rtc_to_net.RtcToNet();
 
+  let startUtcMs = Date.now();
+
   rtcToNet.start({
     allowNonUnicast: true
   }, bridge.best('rtctonet', pcConfig)).then(() => {
@@ -230,6 +259,8 @@ function give(
 
   rtcToNet.onceStopped.then(() => {
     numOfGetters--;
+    let endUtcMs = Date.now();
+    postMetrics(startUtcMs, endUtcMs);
   });
 
   // Must do this after calling start.
