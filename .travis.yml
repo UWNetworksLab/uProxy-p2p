@@ -6,8 +6,7 @@ script:
   - yarn run grunt tslint
   - yarn run grunt unit_test_nobuild
 sudo: false
-cache:
-  yarn: true
+cache: yarn
 deploy:
   provider: releases
   api_key:
