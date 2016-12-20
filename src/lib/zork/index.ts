@@ -353,7 +353,10 @@ const handleSocksConnection = (ctx: Context, sessionId: any) => {
       return this;
     },
     handleDisconnect: () => {
-      //channel.close();  // TODO need this?
+      // Don't close the datachannel here; getters are responsible for
+      // creating and closing datachannels. Legacy getters may recycle used
+      // datachannels back into a pool. Closing from the give side here results
+      // in "'node…' terminated by signal SIGSEGV (Address boundary error)".
       ctx.log(`[socksServer] [session ${sessionId}] client disconnect, closed datachannel`);
     },
     onDisconnect: (callback: () => void) => {
