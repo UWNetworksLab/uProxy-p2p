@@ -16,20 +16,23 @@ REQUIRED_COMMANDS="docker git nc"
 AUTOMATED=false
 KEY=
 UPDATE=false
+SERVER_ID=
 
 usage() {
-  echo "$0 [-a] [-k key] [-u] [-h]"
+  echo "$0 [-a] [-k key] [-m serverIdForMetrics] [-u] [-h]"
   echo "  -a: do not output complete invite URL"
   echo "  -k: public key, base64 encoded (if unspecified, a new invite code is generated)"
+  echo "  -m: unique serverId, used for metrics"
   echo "  -u: update Docker images (preserves invites and metadata)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts k:auh? opt; do
+while getopts k:m:auh? opt; do
   case $opt in
     a) AUTOMATED=true ;;
     k) KEY="$OPTARG" ;;
+    m) SERVER_ID="$OPTARG" ;;
     u) UPDATE=true ;;
     *) usage ;;
   esac
@@ -99,6 +102,10 @@ do_install() {
   if [ -n "$KEY" ]
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k $KEY"
+  fi
+  if [ -n "$SERVER_ID" ]
+  then
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -m $SERVER_ID"
   fi
   $TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
