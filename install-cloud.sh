@@ -88,7 +88,11 @@ do_install() {
 
   echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
-  git clone --depth 1 https://github.com/uProxy/uproxy.git $TMP_DIR
+  # TODO: use this
+  #git clone --depth 1 https://github.com/uProxy/uproxy.git $TMP_DIR
+  git clone https://github.com/uProxy/uproxy.git $TMP_DIR
+  cd $TMP_DIR
+  git checkout dborkan-server-metrics
 
   RUN_CLOUD_ARGS=
   if [ "$AUTOMATED" = true ]
@@ -107,7 +111,9 @@ do_install() {
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -m $SERVER_ID"
   fi
-  $TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
+  # TODO: use this
+  #$TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
+  docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
 
 # Wrapped in a function for some protection against half-downloads.
