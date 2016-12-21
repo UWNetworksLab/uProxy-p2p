@@ -11,7 +11,7 @@
 set -e
 
 PREBUILT=false
-ZORK_IMAGE="uproxy/zork"
+ZORK_IMAGE="dborkan/zork"
 SSHD_IMAGE="uproxy/sshd"
 INVITE_CODE=
 UPDATE=false
