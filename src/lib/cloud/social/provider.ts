@@ -177,6 +177,8 @@ export class CloudSocialProvider {
 
   private static PING_INTERVAL_ = 60000;
 
+  private instanceId_ :string;
+
   constructor(private dispatchEvent_: (name: string, args: Object) => void) { }
 
   // Emits the messages necessary to make the user appear online
@@ -297,10 +299,13 @@ export class CloudSocialProvider {
     });
   }
 
-  public login = (options: freedom.Social.LoginRequest):
+  // public login = (options: freedom.Social.LoginRequest):
+  public login = (options: any):
       Promise<freedom.Social.ClientState> => {
     log.debug('login: %1', options);
     this.loadContacts_();
+    this.instanceId_ = options.userName;
+    console.error('got this.instanceId_ ' + this.instanceId_);
     // TODO: emit an onUserProfile event, which can include an image URL
     // TODO: base this on the user's public key?
     //       (shown in the "connected accounts" page)
@@ -332,6 +337,7 @@ export class CloudSocialProvider {
           }
           return this.reconnect_(this.savedContacts_[destinationClientId].invite).then(
               (connection: Connection) => {
+            connection.sendMessage('instanceId ' + this.instanceId_);
             connection.sendMessage('give');
           });
         } else {

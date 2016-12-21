@@ -58,8 +58,9 @@ if (typeof freedom !== 'undefined') {
   });
 }
 
-function postMetrics(startUtcMs :number, endUtcMs :number) {
-  if (!isMetricsEnabled || !serverId) {
+// TODO: getterInstanceId not optional
+function postMetrics(startUtcMs :number, endUtcMs :number, getterInstanceId ?:string) {
+  if (!isMetricsEnabled || !serverId || !getterInstanceId) {
     return;
   }
 
@@ -69,7 +70,7 @@ function postMetrics(startUtcMs :number, endUtcMs :number) {
   xhr.onerror = function(e :ErrorEvent) { console.error('error posting metrics: ' + e) };
   let data = {
     serverId: serverId,
-    getterId: 'someGetter',  // TODO: set getter
+    getterId: getterInstanceId,
     startUtcMilliseconds: startUtcMs,
     endUtcMilliseconds: endUtcMs,
     bytesDownloadedByGetter: 1234
@@ -112,6 +113,7 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 function serveConnection(connection: tcp.Connection): void {
   var transformerName: string;
   var transformerConfig: string;
+  var getterInstanceId: string;
 
   const lineFeeder = new linefeeder.LineFeeder(connection.dataFromSocketQueue);
   var processCommand = (command: string) => {
@@ -128,7 +130,15 @@ function serveConnection(connection: tcp.Connection): void {
         } : undefined);
         break;
       case 'give':
-        give(lineFeeder, connection);
+        give(lineFeeder, connection, getterInstanceId);
+        break;
+      case 'instanceId':
+        try {
+          getterInstanceId = words[1];
+        } catch (e) {
+          // TODO: better error handling
+          console.error('could not get instanceId')
+        }
         break;
       case 'ping':
         sendReply('ping', connection);
@@ -239,7 +249,8 @@ function get(
 // connection.
 function give(
     lines: queue.QueueHandler<string, void>,
-    connection: tcp.Connection)
+    connection: tcp.Connection,
+    getterInstanceId?: string)
     :void {
   var rtcToNet = new rtc_to_net.RtcToNet();
 
@@ -260,7 +271,7 @@ function give(
   rtcToNet.onceStopped.then(() => {
     numOfGetters--;
     let endUtcMs = Date.now();
-    postMetrics(startUtcMs, endUtcMs);
+    postMetrics(startUtcMs, endUtcMs, getterInstanceId);
   });
 
   // Must do this after calling start.

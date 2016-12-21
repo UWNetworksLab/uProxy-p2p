@@ -18,6 +18,7 @@
           "agent": "string",
           "version": "string",
           "url": "string",
+          "userName": "string",
           "interactive": "boolean",
           "rememberLogin": "boolean"
         }],

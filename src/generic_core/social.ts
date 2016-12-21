@@ -565,6 +565,11 @@ export function notifyUI(networkName :string, userId :string) {
           interactive: interactive,
           rememberLogin: rememberLogin
         };
+        // TODO: clean up
+        if (this.name === 'Cloud') {
+          // TODO: get instanceId..  right now this isn't set until after login
+          request.userName = Math.random().toString();
+        }
       }
 
       this.onceLoggedIn_ = this.freedomApi_.login(request)
