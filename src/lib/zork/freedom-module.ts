@@ -130,16 +130,22 @@ function serveConnection(connection: tcp.Connection): void {
         } : undefined);
         break;
       case 'give':
-        give(lineFeeder, connection, getterInstanceId);
-        break;
-      case 'instanceid':
         try {
           getterInstanceId = words[1];
         } catch (e) {
           // TODO: better error handling
           console.error('could not get instanceId')
         }
+        give(lineFeeder, connection, getterInstanceId);
         break;
+      // case 'instanceid':
+      //   try {
+      //     getterInstanceId = words[1];
+      //   } catch (e) {
+      //     // TODO: better error handling
+      //     console.error('could not get instanceId')
+      //   }
+      //   break;
       case 'ping':
         sendReply('ping', connection);
         keepParsing = true;
