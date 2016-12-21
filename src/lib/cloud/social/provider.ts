@@ -337,7 +337,7 @@ export class CloudSocialProvider {
           }
           return this.reconnect_(this.savedContacts_[destinationClientId].invite).then(
               (connection: Connection) => {
-            connection.sendMessage('instanceId ' + this.instanceId_);
+            connection.sendMessage('instanceid ' + this.instanceId_);
             connection.sendMessage('give');
           });
         } else {

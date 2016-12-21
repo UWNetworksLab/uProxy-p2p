@@ -132,7 +132,7 @@ function serveConnection(connection: tcp.Connection): void {
       case 'give':
         give(lineFeeder, connection, getterInstanceId);
         break;
-      case 'instanceId':
+      case 'instanceid':
         try {
           getterInstanceId = words[1];
         } catch (e) {
