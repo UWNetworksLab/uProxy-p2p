@@ -503,23 +503,11 @@ export function notifyUI(networkName :string, userId :string) {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (loginType :uproxy_core_api.LoginType,
-                    userName ?:string) : Promise<void> => {
-      var interactive :boolean;
-      var rememberLogin :boolean;
-      if (loginType === uproxy_core_api.LoginType.INITIAL) {
-        interactive = true;
-        rememberLogin = true;
-      } else if (loginType === uproxy_core_api.LoginType.RECONNECT) {
-        interactive = false;
-        rememberLogin = false;
-      } else if (loginType === uproxy_core_api.LoginType.TEST) {
-        // interactive is true so that MockOAuth is used, rather than looking
-        // for refresh tokens in storage.
-        interactive = true;
-        rememberLogin = false;
-      }
-      var request :freedom_social2.LoginRequest = null;
+    private getLoginRequest_ = (userName :string, interactive :boolean, rememberLogin :boolean) : Promise<freedom_social2.LoginRequest> => {
+      var request :freedom_social2.LoginRequest;
+      // TODO: clean all of this up once we remove social networks other than Cloud/Quiver.
+      // We can then generate the instanceId prior to login and simplify this logic (remove async
+      // prepareLocalInstance call).
       if (this.isFirebase_()) {
         // Firebase enforces only 1 login per agent per userId at a time.
         // TODO: ideally we should use the instanceId for the agent string,
@@ -536,19 +524,19 @@ export function notifyUI(networkName :string, userId :string) {
         // Firebase code to change disconnected clients to OFFLINE, rather
         // than removing them.
         var agent = 'uproxy' + Math.random().toString().substring(2, 12);
-        request = {
+        return Promise.resolve({
           agent: agent,
           version: '0.1',
           url: 'https://popping-heat-4874.firebaseio.com/',
           interactive: interactive,
           rememberLogin: rememberLogin
-        };
+        });
       } else if (this.name === 'Quiver') {
         if (!userName) {
           // userName may not be passed in for reconnect.
           userName = globals.settings.quiverUserName;
         }
-        request = {
+        return Promise.resolve({
           agent: Math.random().toString().substring(2, 12),
           version: '0.1',
           url: 'https://github.com/uProxy/uProxy',
@@ -556,7 +544,7 @@ export function notifyUI(networkName :string, userId :string) {
           rememberLogin: rememberLogin,
           userName: userName,
           pgpKeyName: '<uproxy>'
-        };
+        });
       } else {
         request = {
           agent: 'uproxy',
@@ -565,54 +553,78 @@ export function notifyUI(networkName :string, userId :string) {
           interactive: interactive,
           rememberLogin: rememberLogin
         };
-        // TODO: clean up
         if (this.name === 'Cloud') {
-          // TODO: get instanceId..  right now this isn't set until after login
-          request.userName = Math.random().toString();
+          return this.prepareLocalInstance_('me').then(() => {
+            // TODO: change this to instanceId once we get rid of FreedomJS.
+            request.userName = this.myInstance.instanceId;
+            return Promise.resolve(request);
+          });
+        } else {
+          return Promise.resolve(request);
         }
       }
+    }
 
-      this.onceLoggedIn_ = this.freedomApi_.login(request)
-          .then((freedomClient :freedom.Social.ClientState) => {
-            var userId = freedomClient.userId;
-            if (userId in networks[this.name]) {
-              // If user is already logged in with the same (network, userId)
-              // log out from existing network before replacing it.
-              networks[this.name][userId].logout();
-            }
-            networks[this.name][userId] = this;
+    public login = (loginType :uproxy_core_api.LoginType,
+                    userName ?:string) : Promise<void> => {
+      var interactive :boolean;
+      var rememberLogin :boolean;
+      if (loginType === uproxy_core_api.LoginType.INITIAL) {
+        interactive = true;
+        rememberLogin = true;
+      } else if (loginType === uproxy_core_api.LoginType.RECONNECT) {
+        interactive = false;
+        rememberLogin = false;
+      } else if (loginType === uproxy_core_api.LoginType.TEST) {
+        // interactive is true so that MockOAuth is used, rather than looking
+        // for refresh tokens in storage.
+        interactive = true;
+        rememberLogin = false;
+      }
 
-            // Upon successful login, save local client information.
-            this.startMonitor_();
-            log.info('logged into network', this.name);
-            return this.prepareLocalInstance_(userId).then(() => {
-              this.myInstance.clientId = freedomClient.clientId;
-              // Notify UI that this network is online before we fulfill
-              // the onceLoggedIn_ promise.  This ensures that the UI knows
-              // that the network is online before we send user updates.
-              notifyUI(this.name, userId);
-            });
-          });
-      return this.onceLoggedIn_
-          .then(() => {
-            this.onceLoggedOut_ = new Promise((F, R) => {
-              this.fulfillLogout_ = F;
-            }).then(() => {
-              this.stopMonitor_();
-              for (var userId in this.roster) {
-                this.roster[userId].handleLogout();
+      return this.getLoginRequest_(userName, interactive, rememberLogin).then((request) => {
+        this.onceLoggedIn_ = this.freedomApi_.login(request)
+            .then((freedomClient :freedom.Social.ClientState) => {
+              var userId = freedomClient.userId;
+              if (userId in networks[this.name]) {
+                // If user is already logged in with the same (network, userId)
+                // log out from existing network before replacing it.
+                networks[this.name][userId].logout();
               }
-              removeNetwork(this.name, this.myInstance.userId);
-              log.debug('Fulfilling onceLoggedOut_');
-            }).catch((e) => {
-              log.error('Error fulfilling onceLoggedOut_', e.message);
+              networks[this.name][userId] = this;
+
+              // Upon successful login, save local client information.
+              this.startMonitor_();
+              log.info('logged into network', this.name);
+              return this.prepareLocalInstance_(userId).then(() => {
+                this.myInstance.clientId = freedomClient.clientId;
+                // Notify UI that this network is online before we fulfill
+                // the onceLoggedIn_ promise.  This ensures that the UI knows
+                // that the network is online before we send user updates.
+                notifyUI(this.name, userId);
+              });
             });
-            this.restoreFromStorage();
-          })
-          .catch((e) => {
-            log.error('Could not login to network');
-            throw e;
-          });
+        return this.onceLoggedIn_
+            .then(() => {
+              this.onceLoggedOut_ = new Promise((F, R) => {
+                this.fulfillLogout_ = F;
+              }).then(() => {
+                this.stopMonitor_();
+                for (var userId in this.roster) {
+                  this.roster[userId].handleLogout();
+                }
+                removeNetwork(this.name, this.myInstance.userId);
+                log.debug('Fulfilling onceLoggedOut_');
+              }).catch((e) => {
+                log.error('Error fulfilling onceLoggedOut_', e.message);
+              });
+              this.restoreFromStorage();
+            })
+            .catch((e) => {
+              log.error('Could not login to network');
+              throw e;
+            });
+      });
     }
 
     public logout = () : Promise<void> => {
