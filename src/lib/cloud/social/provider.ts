@@ -51,6 +51,8 @@ export interface Invite {
   // Host key that should be used to verify the server, base-64 encoded
   // (from known_hosts file or public key)
   hostKey?: string;
+  // Server name, if set.  Old uProxy cloud servers may not have a name set.
+  name?: string;
 }
 
 // Type of the object placed, in serialised form, in storage
@@ -125,14 +127,12 @@ function makeInstanceMessage(address:string, description?:string): any {
 // To see how these fields are handled, see
 // generic_core/social.ts#handleUserProfile in the uProxy repo. We omit
 // the status field since remote-user.ts#update will use FRIEND as a default.
-function makeUserProfile(
-    address: string,
-    isAdmin ?:boolean): freedom.Social.UserProfile {
-  var status = isAdmin ? UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL :
+function makeUserProfile(invite :Invite): freedom.Social.UserProfile {
+  var status = invite.isAdmin ? UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL :
       UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
   return {
-    userId: address,
-    name: address,
+    userId: invite.host,
+    name: invite.name || invite.host,
     status: status
   };
 }
@@ -184,8 +184,7 @@ export class CloudSocialProvider {
   // Emits the messages necessary to make the user appear online
   // in the contacts list.
   private notifyOfUser_ = (contact: SavedContact) : void => {
-    this.dispatchEvent_('onUserProfile', makeUserProfile(
-        contact.invite.host, contact.invite.isAdmin));
+    this.dispatchEvent_('onUserProfile', makeUserProfile(contact.invite));
 
     var clientState = this.makeClientState_(contact.invite.host);
     this.dispatchEvent_('onClientState', clientState);
@@ -403,12 +402,16 @@ export class CloudSocialProvider {
         message: 'unknown cloud instance ' + host
       });
     }
-    const invite = this.savedContacts_[host].invite;
-    return Promise.resolve(<Invite>{
-      host: invite.host,
-      user: invite.user,
-      key: invite.key
-    });
+    const originalInvite = this.savedContacts_[host].invite;
+    var newInvite :Invite = {
+      host: originalInvite.host,
+      user: originalInvite.user,
+      key: originalInvite.key
+    }
+    if (originalInvite.name) {
+      newInvite.name = name;
+    }
+    return Promise.resolve(newInvite);
   }
 
   // Parses the networkData field, serialised to JSON, of invites.
