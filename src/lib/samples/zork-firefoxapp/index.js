@@ -12,15 +12,11 @@ function setIfMetricsEnabled(provider) {
     try {
       const decoder = new TextDecoder();
       const text = decoder.decode(array);
-      console.error('read text: ' + text);
       const options = JSON.parse(text);
-      console.error('loaded options: ', options);
       if (options['isMetricsEnabled'] === true) {
-        console.error('emiting isMetricsEnabled');
         provider.emit('setMetricsEnablement', true);
       }
       if (options['serverId']) {
-        console.error('emiting setServerId');
         provider.emit('setServerId', options['serverId']);
       }
     } catch (e) {

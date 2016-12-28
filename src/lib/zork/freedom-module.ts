@@ -62,8 +62,12 @@ function postMetrics(startUtcMs: number, endUtcMs: number, getterInstanceId?: st
 
   var xhr = new XMLHttpRequest();
   xhr.open('POST', 'https://cloud-install-bigquery-dot-uproxysite.appspot.com/server-metrics');
-  xhr.onload = function() { console.error('xhr onload ' + this.status); };
-  xhr.onerror = function(e :ErrorEvent) { console.error('error posting metrics: ' + e) };
+  xhr.onload = function() {
+    log.info('Posted metrics with result ' + this.status);
+  };
+  xhr.onerror = function(e :ErrorEvent) {
+    log.error('error posting metrics: ', e)
+  };
   let data = {
     serverId: serverId,
     getterId: getterInstanceId,
@@ -71,7 +75,6 @@ function postMetrics(startUtcMs: number, endUtcMs: number, getterInstanceId?: st
     endUtcMilliseconds: endUtcMs,
     bytesDownloadedByGetter: 1234
   }
-  console.error('making XHR: ' + JSON.stringify(data));
   xhr.send(JSON.stringify(data));
 }
 

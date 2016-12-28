@@ -304,7 +304,6 @@ export class CloudSocialProvider {
     log.debug('login: %1', options);
     this.loadContacts_();
     this.instanceId_ = options.userName;
-    console.error('got this.instanceId_ ' + this.instanceId_);
     // TODO: emit an onUserProfile event, which can include an image URL
     // TODO: base this on the user's public key?
     //       (shown in the "connected accounts" page)
