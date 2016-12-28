@@ -11,7 +11,7 @@
 set -e
 
 PREBUILT=false
-ZORK_IMAGE="dborkan/zork"
+ZORK_IMAGE="dborkan/zork"   # TODO: change this before merging
 SSHD_IMAGE="uproxy/sshd"
 INVITE_CODE=
 UPDATE=false

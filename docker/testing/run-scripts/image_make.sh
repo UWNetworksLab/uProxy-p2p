@@ -64,4 +64,5 @@ EOF
 
 ${BASH_SOURCE%/*}/gen_browser.sh "$@" >> $TMP_DIR/Dockerfile
 
+# TODO: remove dborkan before merging
 docker build -t dborkan/$BROWSER-$VERSION $TMP_DIR
