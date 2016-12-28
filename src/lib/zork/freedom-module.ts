@@ -44,22 +44,18 @@ var PORTS = [9000, 9010, 9020];
 let numOfGetters = 0;
 
 let isMetricsEnabled = false;
-let serverId :string = null;
+let serverId :string = null;  // Must be set in order to post metrics.
 if (typeof freedom !== 'undefined') {
   const parentFreedomModule = freedom();
-  // TODO: type checking?  is newVale really a boolean?
   parentFreedomModule.on('setMetricsEnablement', function(newValue) {
-    console.error('setMetricsEnablement: ' + newValue);
     isMetricsEnabled = newValue;
   });
   parentFreedomModule.on('setServerId', function(newValue) {
-    console.error('setServerId: ' + newValue);
     serverId = newValue;
   });
 }
 
-// TODO: getterInstanceId not optional
-function postMetrics(startUtcMs :number, endUtcMs :number, getterInstanceId ?:string) {
+function postMetrics(startUtcMs: number, endUtcMs: number, getterInstanceId?: string) {
   if (!isMetricsEnabled || !serverId || !getterInstanceId) {
     return;
   }
@@ -130,22 +126,13 @@ function serveConnection(connection: tcp.Connection): void {
         } : undefined);
         break;
       case 'give':
-        try {
+        // Getter's may send instanceId (used for metrics) as 2nd word.
+        // Old getters will not set this.
+        if (words.length >= 2) {
           getterInstanceId = words[1];
-        } catch (e) {
-          // TODO: better error handling
-          console.error('could not get instanceId')
         }
         give(lineFeeder, connection, getterInstanceId);
         break;
-      // case 'instanceid':
-      //   try {
-      //     getterInstanceId = words[1];
-      //   } catch (e) {
-      //     // TODO: better error handling
-      //     console.error('could not get instanceId')
-      //   }
-      //   break;
       case 'ping':
         sendReply('ping', connection);
         keepParsing = true;

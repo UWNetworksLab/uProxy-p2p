@@ -88,7 +88,7 @@ do_install() {
 
   echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
-  # TODO: use this
+  # TODO: remove dborkan-server-metrics code before merging
   #git clone --depth 1 https://github.com/uProxy/uproxy.git $TMP_DIR
   git clone https://github.com/uProxy/uproxy.git $TMP_DIR
   cd $TMP_DIR
@@ -111,7 +111,7 @@ do_install() {
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -m $SERVER_ID"
   fi
-  # TODO: use this
+  # TODO: remove $TMP_DIR/ use before merging
   #$TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
   docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }

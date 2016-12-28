@@ -39,7 +39,7 @@ cat <<EOF > $TMP_DIR/Dockerfile
 FROM phusion/baseimage:0.9.19
 
 RUN apt-get -qq update
-RUN apt-get -qq --fix-missing install wget unzip bzip2 supervisor iptables unattended-upgrades
+RUN apt-get -qq install wget unzip bzip2 supervisor iptables unattended-upgrades
 
 RUN mkdir /test
 COPY test /test
