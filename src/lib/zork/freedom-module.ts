@@ -68,12 +68,12 @@ function postMetrics(startUtcMs: number, endUtcMs: number, getterInstanceId?: st
   xhr.onerror = function(e :ErrorEvent) {
     log.error('error posting metrics: ', e)
   };
+  // TODO: set bytesDownloadedByGetter
   let data = {
     serverId: serverId,
     getterId: getterInstanceId,
     startUtcMilliseconds: startUtcMs,
-    endUtcMilliseconds: endUtcMs,
-    bytesDownloadedByGetter: 1234
+    endUtcMilliseconds: endUtcMs
   }
   xhr.send(JSON.stringify(data));
 }
