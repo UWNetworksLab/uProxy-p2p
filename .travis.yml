@@ -6,10 +6,7 @@ script:
   - yarn run grunt tslint
   - yarn run grunt unit_test_nobuild
 sudo: false
-cache:
-  yarn: true
-  directories:
-    - node_modules
+cache: yarn
 deploy:
   provider: releases
   api_key:
