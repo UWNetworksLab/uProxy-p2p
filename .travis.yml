@@ -1,18 +1,12 @@
 language: node_js
 node_js:
   - "6"
-before_install:
-  - npm install -g --production yarn
-install:
-  - yarn install
 script:
   - yarn run grunt build
   - yarn run grunt tslint
   - yarn run grunt unit_test_nobuild
 sudo: false
-cache:
-  directories:
-    - $HOME/.yarn-cache
+cache: yarn
 deploy:
   provider: releases
   api_key:
