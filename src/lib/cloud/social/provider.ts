@@ -624,7 +624,7 @@ class Connection {
                     this.version_ = DEFAULT_MESSAGE_VERSION;
                   } else {
                     log.debug('%1: server is running MESSAGE_VERSION %2',
-                      this.name_, this.version_);
+                      this.name_, parsedVersion);
                     this.version_ = parsedVersion;
                   }
                   this.setState_(ConnectionState.ESTABLISHED);
