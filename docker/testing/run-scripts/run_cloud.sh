@@ -141,13 +141,17 @@ echo "CLOUD_INSTALL_PROGRESS 10"
 if ! docker ps -a | grep uproxy-zork >/dev/null; then
   HOSTARGS=
   if [ "$PREBUILT" = true ]; then
-    readonly GIT_ROOT=`git rev-parse --show-toplevel`
-    HOSTARGS="$HOSTARGS -v $GIT_ROOT/build/src/lib/samples:/test/zork"
+    GIT_ROOT=`git rev-parse --show-toplevel`
+    if [[ $ZORK_IMAGE == *'node'* ]]; then
+      HOSTARGS="$HOSTARGS -v $GIT_ROOT:/test/zork"
+    else
+      HOSTARGS="$HOSTARGS -v $GIT_ROOT/build/src/lib/samples:/test/zork"
+    fi
   fi
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
   #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
-  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d $ZORK_IMAGE /sbin/my_init -- /test/bin/load-zork.sh -z
+  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d $ZORK_IMAGE /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
   echo "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY"

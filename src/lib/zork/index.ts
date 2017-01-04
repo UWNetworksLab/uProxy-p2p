@@ -44,7 +44,7 @@
 
 
 import * as net from 'net';
-import {MESSAGE_VERSION} from '../../generic_core/constants';
+import {MESSAGE_VERSIONS} from '../../generic_core/constants';
 import {NodeSocksServer as SocksServer} from '../socks/node/server';
 import {NodeForwardingSocket as ForwardingSocket} from '../socks/node/socket';
 import {SocksSession, State} from '../socks/session';
@@ -131,7 +131,8 @@ const handleCmdXyzzy = (ctx: Context) => {
 };
 
 const handleCmdVersion = (ctx: Context) => {
-  ctx.reply(`${MESSAGE_VERSION}`);
+  // No obfuscation!
+  ctx.reply(`${MESSAGE_VERSIONS.BRIDGE}`);
 };
 
 const handleCmdQuit = (ctx: Context) => {
