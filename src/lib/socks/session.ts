@@ -70,8 +70,8 @@ export class SocksSession implements piece.SocksPiece {
 
               this.forwardingSocket_ = forwardingSocket;
 
-              this.forwardingSocket_.onDataForSocksClient((buffer: ArrayBuffer) => {
-                this.sendToSocksClient_(buffer);
+              this.forwardingSocket_.onDataForSocksClient((buffer_: ArrayBuffer) => {
+                this.sendToSocksClient_(buffer_);
               });
 
               this.forwardingSocket_.onDisconnect(() => {

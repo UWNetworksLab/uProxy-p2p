@@ -232,15 +232,15 @@ const initPeerConnection = (ctx: Context) => {
 const initSocksServer = (ctx: Context) => {
   // If we've already started a local SOCKS server running on SOCKS_PORT,
   // use 0 for the port so the OS assigns us a free port.
-  const port = startedSocksServer ? 0 : SOCKS_PORT;
-  ctx.log(`starting local SOCKS server on port ${port ? port : '[TBD]'}`);
-  const server = new SocksServer(SOCKS_HOST, port);
+  const tryPort = startedSocksServer ? 0 : SOCKS_PORT;
+  ctx.log(`starting local SOCKS server on port ${tryPort ? tryPort : '[TBD]'}`);
+  const server = new SocksServer(SOCKS_HOST, tryPort);
   server.onConnection((sessionId) => handleSocksConnection(ctx, sessionId));
   server.listen().then(() => {
     startedSocksServer = true;
-    const port = server.address().port;  // in case OS assigned
-    ctx.log(`[socksServer] listening on ${SOCKS_HOST}:${port}`);
-    ctx.log(`[socksServer] Test with e.g. curl -x socks5h://${SOCKS_HOST}:${port} httpbin.org/ip`);
+    const boundPort = server.address().port;  // in case OS assigned
+    ctx.log(`[socksServer] listening on ${SOCKS_HOST}:${boundPort}`);
+    ctx.log(`[socksServer] Test with e.g. curl -x socks5h://${SOCKS_HOST}:${boundPort} httpbin.org/ip`);
   });
 };
 
@@ -416,7 +416,7 @@ const initSocksSessionAndFwdSocket = (ctx: Context, channel: any) => {
       forwardingSocket.pause();
       if (!checkBuffToResumeSockInterval) {
         ctx.log(`[channel ${channelId}] bufferedAmount (${buffAmnt}) over high water mark -> paused forwarding socket`);
-        checkBuffToResumeSockInterval = setInterval(checkBuffToResumeSock, CHECK_BUFF_TO_RESUME_FWD_SOCK_INTERVAL_MS); 
+        checkBuffToResumeSockInterval = setInterval(checkBuffToResumeSock, CHECK_BUFF_TO_RESUME_FWD_SOCK_INTERVAL_MS);
       }
     }
 

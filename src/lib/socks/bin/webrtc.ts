@@ -42,8 +42,8 @@ giver.ondatachannel = (event: any) => {
   });
 
   // datachannel -> SOCKS session
-  channel.onmessage = (event: any) => {
-    socksSession.handleDataFromSocksClient(event.data);
+  channel.onmessage = (event_: any) => {
+    socksSession.handleDataFromSocksClient(event_.data);
   };
   // datachannel <- SOCKS session
   socksSession.onDataForSocksClient((bytes) => {

@@ -11,7 +11,11 @@
     ],
     "no-trailing-whitespace": true,
     "no-shadowed-variable": true,
-    "no-duplicate-variable": true,
-    "no-use-before-declare": true
+    "no-duplicate-variable": true
+  },
+  "rules_disabled": {
+    "no-var-keyword": {"disabled_reason": "Violations in the codebase need to be fixed first."},
+    "no-unused-variable": {"disabled_reason": "Violations in the codebase need to be fixed first."},
+    "no-use-before-declare": {"disabled_reason": "Forces helper functions to be put above higher-level functions even though they'll definitely be defined by the time they're called (e.g. when both are defined at the top level). Putting higher-level functions first aids comprehension when reading code from top to bottom."}
   }
 }
