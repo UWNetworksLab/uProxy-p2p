@@ -85,7 +85,11 @@ function run_docker () {
   fi
   if [ "$PREBUILT" = true ]; then
     GIT_ROOT=`git rev-parse --show-toplevel`
-    HOSTARGS="$HOSTARGS -v $GIT_ROOT/build/src/lib/samples:/test/zork"
+    if [[ $IMAGE == *'node'* ]]; then
+      HOSTARGS="$HOSTARGS -v $GIT_ROOT:/test/zork"
+    else
+      HOSTARGS="$HOSTARGS -v $GIT_ROOT/build/src/lib/samples:/test/zork"
+    fi
   fi
   docker run $HOSTARGS $@ --name $NAME $(docker_run_args $IMAGENAME) -d $IMAGENAME /test/bin/load-zork.sh $RUNARGS
 }
