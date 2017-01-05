@@ -398,7 +398,7 @@ export class CloudSocialProvider {
       });
     }
     const originalInvite = this.savedContacts_[host].invite;
-    var newInvite :Invite = {
+    let newInvite :Invite = {
       host: originalInvite.host,
       user: originalInvite.user,
       key: originalInvite.key
