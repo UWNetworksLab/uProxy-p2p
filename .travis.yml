@@ -12,9 +12,9 @@ deploy:
   api_key:
     secure: YeKIPlHkpDep5GB/VXzs2XyF2ym5Lh2nQ9XMsSntvxJ4K/MR0xRpwTxFN6TH1o4CW9RvlBGhhrWdeVGyMqEwnVY9OUx7jPkfKSkKBZZYx5DFMCuXxTJ0AgxT7IQjrsuweDdOWc5wdyKyxeJEJRnPfp4GOSPd8pJYSNKpJdmSzgM=
   file:
-    - build/dist/uproxy-chrome-extension.zip
-    - build/dist/uproxy-chrome-app.zip
     - build/dist/uproxy-chrome.zip
+    - build/dist/chrome/uproxy-chrome-extension.zip
+    - build/dist/chrome/uproxy-chrome-app.zip
     - build/dist/firefox/uproxy-firefox.xpi
   on:
     tags: true
