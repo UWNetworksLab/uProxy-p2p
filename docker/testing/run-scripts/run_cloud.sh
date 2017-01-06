@@ -13,7 +13,6 @@ set -e
 PREBUILT=false
 ZORK_IMAGE="uproxy/zork"
 SSHD_IMAGE="uproxy/sshd"
-INVITE_CODE=
 UPDATE=false
 WIPE=false
 PUBLIC_IP=
@@ -24,11 +23,10 @@ KEY=
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] [-k key]"
+  echo "$0 [-p] [-z zork_image] [-s sshd_image] [-u] [-w] [-d ip] [-b banner] [-a] [-k key]"
   echo "  -p: use Zork from this client rather than the Docker image"
   echo "  -z: use a specified Zork image (defaults to uproxy/zork)"
   echo "  -s: use a specified sshd image (defaults to uproxy/sshd)"
-  echo "  -i: bootstrap invite (only for new installs, or with -w)"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
   echo "  -d: override the detected public IP (for development only)"
@@ -39,12 +37,11 @@ function usage () {
   exit 1
 }
 
-while getopts pz:s:i:uwd:b:k:ah? opt; do
+while getopts pz:s:uwd:b:k:ah? opt; do
   case $opt in
     p) PREBUILT=true ;;
     z) ZORK_IMAGE="$OPTARG" ;;
     s) SSHD_IMAGE="$OPTARG" ;;
-    i) INVITE_CODE="$OPTARG" ;;
     u) UPDATE=true ;;
     w) WIPE=true ;;
     d) PUBLIC_IP="$OPTARG" ;;
@@ -80,17 +77,10 @@ then
         PUBLIC_IP=`docker exec uproxy-sshd cat /hostname || echo -n ""`
       fi
 
-      # giver and getter accounts' authorized_keys.
-      GIVER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/giver/.ssh/authorized_keys | base64 -w 0 || echo -n ""`
-      GETTER_AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys | base64 -w 0|| echo -n ""`
+      AUTH_KEYS=`docker exec uproxy-sshd cat /home/getter/.ssh/authorized_keys | base64 -w 0|| echo -n ""`
 
       # Because it's unclear what it would mean to migrate authorized_keys files,
-      # restrict use of -i and -k to new or wiping (-w) installs.
-      if [ -n "$INVITE_CODE" ]
-      then
-        echo "-i can only be used for new installs or with -w"
-        usage
-      fi
+      # restrict use of -k to new or wiping (-w) installs.
       if [ -n "$KEY" ]
       then
         echo "-k can only be used for new installs or with -w"
@@ -166,21 +156,15 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
   docker run --restart=always -d -p $SSHD_PORT:22 --name uproxy-sshd --add-host zork:$HOST_IP $SSHD_IMAGE > /dev/null
   docker exec uproxy-sshd sh -c "echo \"$BANNER\" > /banner"
   docker exec uproxy-sshd chmod 644 /banner
-  docker exec uproxy-sshd chown giver: /banner
   docker exec uproxy-sshd sh -c "echo \"$PUBLIC_IP\" > /hostname"
   docker exec uproxy-sshd chmod 644 /hostname
-  docker exec uproxy-sshd chown giver: /hostname
 
   # Configure access.
-  # In descending order of preference:
-  #  - migrate authorized_keys or apply -i
-  #  - issue a new invite
   echo "CLOUD_INSTALL_STATUS_CONFIGURING_SSH"
   echo "CLOUD_INSTALL_PROGRESS 90"
-  if [ -n "$GIVER_AUTH_KEYS" ] || [ -n "$GETTER_AUTH_KEYS" ]
+  if [ -n "$AUTH_KEYS" ]
   then
-    docker exec uproxy-sshd sh -c "echo $GIVER_AUTH_KEYS | base64 -d > /home/giver/.ssh/authorized_keys"
-    docker exec uproxy-sshd sh -c "echo $GETTER_AUTH_KEYS | base64 -d  > /home/getter/.ssh/authorized_keys"
+    docker exec uproxy-sshd sh -c "echo $AUTH_KEYS | base64 -d  > /home/getter/.ssh/authorized_keys"
   else
     ISSUE_INVITE_ARGS=
     if [ "$AUTOMATED" = true ]
@@ -191,12 +175,7 @@ if ! docker ps -a | grep uproxy-sshd >/dev/null; then
     then
       ISSUE_INVITE_ARGS="$ISSUE_INVITE_ARGS -k $KEY"
     fi
-    if [ -n "$INVITE_CODE" ]
-    then
-      docker exec uproxy-sshd /issue_invite.sh $ISSUE_INVITE_ARGS -i "$INVITE_CODE"
-    else
-      docker exec uproxy-sshd /issue_invite.sh $ISSUE_INVITE_ARGS
-    fi
+    docker exec uproxy-sshd /issue_invite.sh $ISSUE_INVITE_ARGS
   fi
 fi
 
