@@ -36,8 +36,9 @@ if [ -z "$ENCODED_PUBLIC_KEY" ]; then
 fi
 
 # Apply the credentials to the account, with access restrictions.
-# man sshd for the complete list of authorized_keys options.
-KEY_OPTS='command="/login.sh",permitopen="zork:9000",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding'
+# The restrict option was added in OpenSSH 7.2; full options:
+#   http://man.openbsd.org/sshd.8
+KEY_OPTS='restrict,command="/login.sh",permitopen="zork:9000"'
 HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
 echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys
 
