@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Internet without borders",
-  "version": "0.9.12",
+  "version": "0.9.13",
   "private": true,
   "repository": {
     "type": "git",
@@ -83,7 +83,7 @@
     "tslint": "^3.10.2",
     "typescript": "^2.0.3",
     "uparams": "^1.2.0",
-    "uproxy-cloud-install": "^1.0.17",
+    "uproxy-cloud-install": "^1.0.21",
     "wrtc": "^0.0.61",
     "xregexp": "^2.0.0"
   },
