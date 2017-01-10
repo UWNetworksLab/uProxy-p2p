@@ -1,7 +1,6 @@
 FROM alpine:3.5
 
-RUN apk update
-RUN apk add openssh supervisor
+RUN apk add --no-cache openssh supervisor
 
 RUN addgroup getter
 RUN adduser -s /bin/sh -D -G getter -g uProxy getter
