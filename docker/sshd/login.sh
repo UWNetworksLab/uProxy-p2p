@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Run on login, via the command option in authorized_keys.
 

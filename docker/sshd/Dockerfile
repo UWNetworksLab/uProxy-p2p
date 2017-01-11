@@ -1,30 +1,27 @@
-FROM library/ubuntu:trusty
+FROM alpine:3.5
 
-RUN apt-get update -qq
-RUN apt-get install -y openssh-server supervisor dnsutils jq unattended-upgrades
-
-RUN addgroup giver
-RUN adduser --disabled-password --gecos 'uProxy Giver' --ingroup giver giver
-RUN mkdir -p /home/giver/.ssh && chown -R giver: /home/giver/.ssh
-RUN touch /home/giver/.ssh/authorized_keys && chown giver: /home/giver/.ssh/authorized_keys
+RUN apk add --no-cache openssh supervisor
 
 RUN addgroup getter
-RUN adduser --disabled-password --gecos 'uProxy Getter' --ingroup getter getter
-RUN mkdir -p /home/getter/.ssh && chown -R getter: /home/getter/.ssh
-RUN touch /home/getter/.ssh/authorized_keys && chown getter: /home/getter/.ssh/authorized_keys
+RUN adduser -s /bin/sh -D -G getter -g uProxy getter
+RUN mkdir -p /home/getter/.ssh
+
+# sshd running without UsePAM, which is the case in Alpine, interprets
+# passwords of ! in /etc/shadow as *disabled* rather than passwordless.
+# This prevents key-based authentication from working for the user.
+# To make it work we can set the password to *. This is safe because *
+# cannot be the hash of any real password.
+RUN echo getter:* | chpasswd -e
 
 COPY issue_invite.sh /
 RUN chown root:root /issue_invite.sh
 RUN chmod 755 /issue_invite.sh
-# http://ubuntuforums.org/showthread.php?t=1132821
-RUN echo 'giver ALL=(root)NOPASSWD:/issue_invite.sh "",/issue_invite.sh -d *' > /etc/sudoers
 
 COPY login.sh /
 RUN chown root:root /login.sh && chmod 755 /login.sh
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-RUN mkdir -p /var/run/sshd
+RUN mkdir /etc/supervisor.d/
+COPY sshd.ini /etc/supervisor.d/
 
 EXPOSE 22
 CMD /usr/bin/supervisord -n
