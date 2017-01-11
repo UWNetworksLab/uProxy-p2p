@@ -11,7 +11,7 @@
 set -e
 
 PREBUILT=false
-ZORK_IMAGE="uproxy/zork"
+ZORK_IMAGE="dborkan/zork"   # TODO: change this before merging
 SSHD_IMAGE="uproxy/sshd"
 INVITE_CODE=
 UPDATE=false
@@ -20,15 +20,17 @@ PUBLIC_IP=
 BANNER=
 AUTOMATED=false
 KEY=
+SERVER_ID=
 
 SSHD_PORT=5000
 
 function usage () {
-  echo "$0 [-p] [-z zork_image] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] [-k key]"
+  echo "$0 [-p] [-z zork_image] [-m serverIdForMetrics] [-s sshd_image] [-i invite code] [-u] [-w] [-d ip] [-b banner] [-a] [-k key]"
   echo "  -p: use Zork from this client rather than the Docker image"
   echo "  -z: use a specified Zork image (defaults to uproxy/zork)"
   echo "  -s: use a specified sshd image (defaults to uproxy/sshd)"
   echo "  -i: bootstrap invite (only for new installs, or with -w)"
+  echo "  -m: unique serverId, used for metrics"
   echo "  -u: rebuild Docker images (preserves invites and metadata unless -w used)"
   echo "  -w: when -u used, do not copy invites or metadata from current installation"
   echo "  -d: override the detected public IP (for development only)"
@@ -39,7 +41,7 @@ function usage () {
   exit 1
 }
 
-while getopts pz:s:i:uwd:b:k:ah? opt; do
+while getopts pz:s:i:m:uwd:b:k:ah? opt; do
   case $opt in
     p) PREBUILT=true ;;
     z) ZORK_IMAGE="$OPTARG" ;;
@@ -51,6 +53,7 @@ while getopts pz:s:i:uwd:b:k:ah? opt; do
     b) BANNER="$OPTARG" ;;
     a) AUTOMATED=true ;;
     k) KEY="$OPTARG" ;;
+    m) SERVER_ID="$OPTARG" ;;
     *) usage ;;
   esac
 done
@@ -147,7 +150,12 @@ if ! docker ps -a | grep uproxy-zork >/dev/null; then
   # NET_ADMIN is required to run iptables inside the container.
   # Full list of capabilities:
   #   https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
-  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d $ZORK_IMAGE /sbin/my_init -- /test/bin/load-zork.sh -z
+  docker run --restart=always --net=host --cap-add NET_ADMIN $HOSTARGS --name uproxy-zork -d $ZORK_IMAGE
+  if [ -n "$SERVER_ID" ]
+  then
+    docker exec uproxy-zork bash -c "echo '{\"isMetricsEnabled\": true, \"serverId\": \"$SERVER_ID\"}' >/zork-options"
+  fi
+  docker exec -d uproxy-zork /sbin/my_init -- /test/bin/load-zork.sh -z
 
   echo -n "Waiting for Zork to come up..."
   echo "CLOUD_INSTALL_STATUS_WAITING_FOR_UPROXY"

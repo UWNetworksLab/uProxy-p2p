@@ -16,20 +16,23 @@ REQUIRED_COMMANDS="docker git nc"
 AUTOMATED=false
 KEY=
 UPDATE=false
+SERVER_ID=
 
 usage() {
-  echo "$0 [-a] [-k key] [-u] [-h]"
+  echo "$0 [-a] [-k key] [-m serverIdForMetrics] [-u] [-h]"
   echo "  -a: do not output complete invite URL"
   echo "  -k: public key, base64 encoded (if unspecified, a new invite code is generated)"
+  echo "  -m: unique serverId, used for metrics"
   echo "  -u: update Docker images (preserves invites and metadata)"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts k:auh? opt; do
+while getopts k:m:auh? opt; do
   case $opt in
     a) AUTOMATED=true ;;
     k) KEY="$OPTARG" ;;
+    m) SERVER_ID="$OPTARG" ;;
     u) UPDATE=true ;;
     *) usage ;;
   esac
@@ -85,7 +88,11 @@ do_install() {
 
   echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
-  git clone --depth 1 https://github.com/uProxy/uproxy.git $TMP_DIR
+  # TODO: remove dborkan-server-metrics code before merging
+  #git clone --depth 1 https://github.com/uProxy/uproxy.git $TMP_DIR
+  git clone https://github.com/uProxy/uproxy.git $TMP_DIR
+  cd $TMP_DIR
+  git checkout dborkan-server-metrics
 
   RUN_CLOUD_ARGS=
   if [ "$AUTOMATED" = true ]
@@ -100,7 +107,13 @@ do_install() {
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k $KEY"
   fi
-  $TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
+  if [ -n "$SERVER_ID" ]
+  then
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -m $SERVER_ID"
+  fi
+  # TODO: remove $TMP_DIR/ use before merging
+  #$TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
+  docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
 }
 
 # Wrapped in a function for some protection against half-downloads.

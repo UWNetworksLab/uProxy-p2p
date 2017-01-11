@@ -7,14 +7,18 @@ Cu.import(self.data.url("freedom-for-firefox/freedom-for-firefox.jsm"));
 
 const OPTIONS_FILE_PATH = '/zork-options';
 
-// Returns Promise<boolean>
-function checkIfMetricsEnabled() {
+function setIfMetricsEnabled(provider) {
   return OS.File.read(OPTIONS_FILE_PATH).then((array) => {
     try {
       const decoder = new TextDecoder();
       const text = decoder.decode(array);
       const options = JSON.parse(text);
-      return options['isMetricsEnabled'] === true;
+      if (options['isMetricsEnabled'] === true) {
+        provider.emit('setMetricsEnablement', true);
+      }
+      if (options['serverId']) {
+        provider.emit('setServerId', options['serverId']);
+      }
     } catch (e) {
       console.error('Could not parse options file');
       return false;
@@ -32,9 +36,7 @@ freedom(manifest, {
   'debug': 'debug'
 }).then(function(moduleFactory) {
   const provider = moduleFactory();
-  checkIfMetricsEnabled().then(function(isEnabled) {
-    provider.emit('setMetricsEnablement', isEnabled);
-  });
+  setIfMetricsEnabled(provider);
 }, function() {
   console.error('could not load freedomjs module');
 });

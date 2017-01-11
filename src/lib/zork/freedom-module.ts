@@ -44,11 +44,38 @@ var PORTS = [9000, 9010, 9020];
 let numOfGetters = 0;
 
 let isMetricsEnabled = false;
+let serverId :string = null;  // Must be set in order to post metrics.
 if (typeof freedom !== 'undefined') {
   const parentFreedomModule = freedom();
   parentFreedomModule.on('setMetricsEnablement', function(newValue) {
     isMetricsEnabled = newValue;
   });
+  parentFreedomModule.on('setServerId', function(newValue) {
+    serverId = newValue;
+  });
+}
+
+function postMetrics(startUtcMs: number, endUtcMs: number, getterInstanceId?: string) {
+  if (!isMetricsEnabled || !serverId || !getterInstanceId) {
+    return;
+  }
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://cloud-install-bigquery-dot-uproxysite.appspot.com/server-metrics');
+  xhr.onload = function() {
+    log.info('Posted metrics with result ' + this.status);
+  };
+  xhr.onerror = function(e :ErrorEvent) {
+    log.error('error posting metrics: ', e)
+  };
+  // TODO: set bytesDownloadedByGetter
+  let data = {
+    serverId: serverId,
+    getterId: getterInstanceId,
+    startUtcMilliseconds: startUtcMs,
+    endUtcMilliseconds: endUtcMs
+  }
+  xhr.send(JSON.stringify(data));
 }
 
 // Starts a TCP server on the first free port listed in PORTS.
@@ -85,6 +112,7 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 function serveConnection(connection: tcp.Connection): void {
   var transformerName: string;
   var transformerConfig: string;
+  var getterInstanceId: string;
 
   const lineFeeder = new linefeeder.LineFeeder(connection.dataFromSocketQueue);
   var processCommand = (command: string) => {
@@ -101,7 +129,12 @@ function serveConnection(connection: tcp.Connection): void {
         } : undefined);
         break;
       case 'give':
-        give(lineFeeder, connection);
+        // Getter's may send instanceId (used for metrics) as 2nd word.
+        // Old getters will not set this.
+        if (words.length >= 2) {
+          getterInstanceId = words[1];
+        }
+        give(lineFeeder, connection, getterInstanceId);
         break;
       case 'ping':
         sendReply('ping', connection);
@@ -212,9 +245,12 @@ function get(
 // connection.
 function give(
     lines: queue.QueueHandler<string, void>,
-    connection: tcp.Connection)
+    connection: tcp.Connection,
+    getterInstanceId?: string)
     :void {
   var rtcToNet = new rtc_to_net.RtcToNet();
+
+  let startUtcMs = Date.now();
 
   rtcToNet.start({
     allowNonUnicast: true
@@ -230,6 +266,8 @@ function give(
 
   rtcToNet.onceStopped.then(() => {
     numOfGetters--;
+    let endUtcMs = Date.now();
+    postMetrics(startUtcMs, endUtcMs, getterInstanceId);
   });
 
   // Must do this after calling start.
