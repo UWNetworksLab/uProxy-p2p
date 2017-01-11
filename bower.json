@@ -1,6 +1,6 @@
 {
   "name": "uProxy",
-  "version": "0.9.13",
+  "version": "0.9.14",
   "dependencies": {
     "core-collapse": "Polymer/core-collapse#^0.5.6",
     "core-drawer-panel": "Polymer/core-drawer-panel#^0.5.6",
