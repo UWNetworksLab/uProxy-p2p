@@ -42,7 +42,7 @@ fi
 # any future features being enabled on us by default.
 KEY_OPTS='restrict,command="/login.sh",port-forwarding,permitopen="zork:9000"'
 HOMEDIR=`getent passwd $USERNAME | cut -d: -f6`
-echo "$KEY_OPTS" `cat $TMP/id_rsa.pub` >> $HOMEDIR/.ssh/authorized_keys
+echo "$KEY_OPTS $ENCODED_PUBLIC_KEY" >> $HOMEDIR/.ssh/authorized_keys
 
 # If we generated an access code, output that access code.
 if [ -n "ENCODED_PRIVATE_KEY" ]; then
