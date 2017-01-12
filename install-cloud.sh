@@ -16,21 +16,33 @@ REQUIRED_COMMANDS="docker git nc"
 AUTOMATED=false
 KEY=
 UPDATE=false
+BRANCH=
+PUBLIC_IP=
+ZORK_IMAGE=
+SSHD_IMAGE=
 
 usage() {
-  echo "$0 [-a] [-k key] [-u] [-h]"
+  echo "$0 [-a] [-k key] [-u] [-d ip] [-z zork_image] [-s sshd_image] [-b branch] [-h]"
   echo "  -a: do not output complete invite URL"
   echo "  -k: public key, base64 encoded (if unspecified, a new invite code is generated)"
   echo "  -u: update Docker images (preserves invites and metadata)"
+  echo "  -d: override the detected public IP (for development only)"
+  echo "  -z: override default Zork image"
+  echo "  -s: override default sshd image"
+  echo "  -b: github branch from which to run setup scripts"
   echo "  -h, -?: this help message"
   exit 1
 }
 
-while getopts k:auh? opt; do
+while getopts k:aud:z:s:b:h? opt; do
   case $opt in
     a) AUTOMATED=true ;;
     k) KEY="$OPTARG" ;;
     u) UPDATE=true ;;
+    d) PUBLIC_IP="$OPTARG" ;;
+    s) SSHD_IMAGE="$OPTARG" ;;
+    z) ZORK_IMAGE="$OPTARG" ;;
+    b) BRANCH="$OPTARG" ;;
     *) usage ;;
   esac
 done
@@ -85,7 +97,12 @@ do_install() {
 
   echo "CLOUD_INSTALL_STATUS_DOWNLOADING_INSTALL_SCRIPTS"
   TMP_DIR=`mktemp -d`
-  git clone --depth 1 https://github.com/uProxy/uproxy.git $TMP_DIR
+  GIT_CLONE_ARGS=
+  if [ -n "$BRANCH" ]
+  then
+    GIT_CLONE_ARGS="$GIT_CLONE_ARGS -b $BRANCH"
+  fi
+  git clone --depth 1 $GIT_CLONE_ARGS https://github.com/uProxy/uproxy.git $TMP_DIR
 
   RUN_CLOUD_ARGS=
   if [ "$AUTOMATED" = true ]
@@ -100,7 +117,19 @@ do_install() {
   then
     RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -k $KEY"
   fi
-  $TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS firefox-stable
+  if [ -n "$PUBLIC_IP" ]
+  then
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -d $PUBLIC_IP"
+  fi
+  if [ -n "$ZORK_IMAGE" ]
+  then
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -z $ZORK_IMAGE"
+  fi
+  if [ -n "$SSHD_IMAGE" ]
+  then
+    RUN_CLOUD_ARGS="$RUN_CLOUD_ARGS -s $SSHD_IMAGE"
+  fi
+  $TMP_DIR/docker/testing/run-scripts/run_cloud.sh $RUN_CLOUD_ARGS
 }
 
 # Wrapped in a function for some protection against half-downloads.
