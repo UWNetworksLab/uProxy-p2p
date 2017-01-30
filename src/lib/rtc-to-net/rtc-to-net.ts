@@ -61,13 +61,19 @@ import ProxyConfig from './proxyconfig';
     // Public for tests.
     public static SESSION_LIMIT = 10000;
 
+    // The length of each interval used to calculate bandwidth, in milliseconds.
+    // This value should not be too small, because pausing/resuming is a fraction
+    // of this value; if the connection is paused and resumed too quickly, the bandwidth
+    // is not accurately limited. In other words, even though the connection is paused,
+    // the consequence of a very short pause is that many bits are transferred in the
+    // time it takes to call the method again, which increases the bandwidth.
     public static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
     // Number of live sessions by user, if greater than zero.
     private static numSessions_ : { [userId:string] :number } = {};
-
-    private stopBandwidthCalcTotal :boolean = false;
-    private prevBytesTotal :number = 0;
+    private static limitBandwidth: boolean = false;
+    // The maximum amount of bandwidth the sharer allows each user proxying through them to use.
+    private static bandwidthLimit: number = 1000000;
 
     // Returns true if the addition was successful.
     private static addUserSession_ = (userId:string) : boolean => {
@@ -132,6 +138,8 @@ import ProxyConfig from './proxyconfig';
     public statusUpdates :handler.Queue<Status, void> =
         new handler.Queue<Status, void>();
 
+    private stopBandwidthCalc: boolean = false;
+
     // Fulfills once the module is ready to allocate sockets.
     // Rejects if a peerconnection could not be made for any reason.
     public onceReady :Promise<void>;
@@ -180,7 +188,7 @@ import ProxyConfig from './proxyconfig';
       if (this.peerConnection_) {
         throw new Error('already configured');
       }
-      this.stopBandwidthCalcTotal = false;
+      this.stopBandwidthCalc = false;
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(peerconnection, 'RtcToNet');
       this.proxyConfig = proxyConfig;
@@ -193,7 +201,7 @@ import ProxyConfig from './proxyconfig';
       // fulfills first.  https://github.com/uProxy/uproxy/issues/760
       this.onceReady = this.peerConnection_.onceConnected.then(() => {});
       this.onceReady.catch(this.fulfillStopping_);
-      this.calculateBandwidthTotal();
+      this.calculateBandwidth();
       this.peerConnection_.onceClosed
         .then(() => {
           log.debug('peerconnection terminated');
@@ -207,6 +215,11 @@ import ProxyConfig from './proxyconfig';
       //this.onceReady.then(this.initiateSnapshotting);
 
       return this.onceReady;
+    }
+
+    public static updateBandwidthSettings = (enabled:boolean, limit:number) => {
+      RtcToNet.limitBandwidth = enabled;
+      RtcToNet.bandwidthLimit = limit;
     }
 
     // Loops until onceStopped fulfills.
@@ -292,7 +305,7 @@ import ProxyConfig from './proxyconfig';
       // TODO(ldixon): explore why not not just return
       // this.peerConnection_.close(); call the PeerConnection's close and
       // return synchronously.
-      this.stopBandwidthCalcTotal = true;
+      this.stopBandwidthCalc = true;
       return new Promise<void>((F, R) => {
         this.peerConnection_.close();
         F();
@@ -303,19 +316,68 @@ import ProxyConfig from './proxyconfig';
       return this.peerConnection_.handleSignalMessage(message);
     }
 
-    private calculateBandwidthTotal = () : void => {
-      if (!this.stopBandwidthCalcTotal) {
-        var currBytesTotal = 0;
-        for (var label in this.sessions_) {
-          currBytesTotal += this.sessions_[label].currBytes_;
-        }
-        var bitsTransferredTotal = (currBytesTotal - this.prevBytesTotal) * 8;
-        // Bandwidth is measured in bits/sec.
-        var bandwidthTotal  = bitsTransferredTotal / (RtcToNet.BANDWIDTH_MONITOR_INTERVAL / 1000);
-        log.debug('Current bandwidth for whole connection: %1 bits/sec', bandwidthTotal);
-        this.prevBytesTotal = currBytesTotal;
-        setTimeout(this.calculateBandwidthTotal, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
+    private calculateBandwidth = (): void => {
+      if (this.stopBandwidthCalc) {
+        return;
       }
+
+      var totalBandwidth = 0;
+      var bufferBandwidth = 0;
+      var sessionsOverLimit = 0;
+      var numSessions = Object.keys(this.sessions_).length;
+      if (numSessions == 0) {
+        setTimeout(this.calculateBandwidth, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
+        log.debug('Number of sessions: 0');
+        return;
+      }
+
+      var perSessionBandwidthLimit = RtcToNet.bandwidthLimit / numSessions;
+      log.debug('Number of sessions: %1; bandwidth limit for each: %2', numSessions, perSessionBandwidthLimit);
+
+      for (var label in this.sessions_) {
+        let session = this.sessions_[label];
+        // Calculate bandwidth of the current session.
+        session.calculateBandwidth();
+        totalBandwidth += session.currBandwidth;
+        // If the bandwidth of this session is less than the allowed limit per session, add leftover bw to extra bw pool.
+        if (session.currBandwidth <= perSessionBandwidthLimit) {
+          bufferBandwidth += (perSessionBandwidthLimit - session.currBandwidth);
+        } else { // If the bandwidth of this session is more than the allowed limit per session, add to sessionsOverLimit.
+          sessionsOverLimit++;
+        }
+      }
+
+      log.debug('Total bandwidth for this interval: %1', totalBandwidth);
+      log.debug('Buffer bandwidth for this interval: %1', bufferBandwidth);
+      // We only need to pause sessions if the total bandwidth is over the limit, even if some individual sessions
+      // went over their alloted limit.
+      if (RtcToNet.limitBandwidth) {
+        if (totalBandwidth > RtcToNet.bandwidthLimit) {
+          // If there is any buffer bandwidth, split that evenly among sessions that went over the limit.
+          // If the total went over the limit, sessionsOverLimit has to have at least 1 session in it.
+          perSessionBandwidthLimit += bufferBandwidth / sessionsOverLimit;
+          log.debug('Updated perSessionBandwidthLimit: %1', perSessionBandwidthLimit);
+          // Go through all the sessions that went over the limit, and pause each one.
+          for (var label in this.sessions_) {
+            let session = this.sessions_[label];
+            // After redistributing buffer bandwidth, the session may no longer need to be paused.
+            if (session.currBandwidth > perSessionBandwidthLimit) {
+              session.notPausedFrac = perSessionBandwidthLimit / session.currBandwidth;
+              var timeToPause = RtcToNet.BANDWIDTH_MONITOR_INTERVAL * (1 - session.notPausedFrac);
+              session.pauseSession(timeToPause);
+            } else {
+              session.resetForNoPause();
+            }
+          }
+        } else {
+          // reset all "not paused fractions" because no sessions are pausing.
+          for (var label in this.sessions_) {
+            let session = this.sessions_[label];
+            session.resetForNoPause();
+          }
+        }
+      }
+      setTimeout(this.calculateBandwidth, RtcToNet.BANDWIDTH_MONITOR_INTERVAL);
     }
 
     public toString = () : string => {
@@ -372,17 +434,26 @@ import ProxyConfig from './proxyconfig';
     private channelSentBytes_ :number = 0;
     private channelReceivedBytes_ :number = 0;
 
+    private pausedForBandwidthOverflow_: boolean = false;
+    private pausedForChannelOverflow_: boolean = false;
+
+    public startTime: number = 0;
+    // The current bandwidth for this session.
+    public currBandwidth: number = 0;
+    // The fraction of the last interval not paused.
+    public notPausedFrac: number = 1;
+    // Records the bytes sent to and from peer, for the current time interval.
+    private currBytes: number = 0;
+    // Records the bytes sent to and from peer, for the previous time interval.
+    private prevBytes: number = null;
+    // The last time the session was paused for socket overflow.
+    private socketOverflowPauseStart: number = 0;
+    // The last time the session was resumed after socket overflow.
+    private socketOverflowPauseResume: number = 0;
+    // The additional amount of time paused during the interval due to socket overflow.
+    private socketOverflowAdditionalTime: number = 0;
     // Flag to keep track of reproxy status and send status updates accordingly
     private reproxyError_ :boolean = false;
-
-    // Used to stop the calculation of bandwidth.
-    private stopBandwidthCalc_:boolean = false;
-    // Records the bytes sent to and from peer, for the current time interval.
-    public currBytes_:number = 0;
-    // Records the bytes sent to and from peer, for the previous time interval.
-    public prevBytes_:number = 0;
-    // The length of each interval used to calculate bandwidth, in milliseconds.
-    private static BANDWIDTH_MONITOR_INTERVAL = 5000;
 
     // The supplied datachannel must already be successfully established.
     constructor(
@@ -463,9 +534,7 @@ import ProxyConfig from './proxyconfig';
         });
 
       this.onceReady.then(this.linkSocketAndChannel_, this.fulfillStopping_);
-      //Reset bandwidth loop check.
-      this.stopBandwidthCalc_ = false;
-      this.calculateBandwidth_();
+      this.startTime = new Date().getTime();
       // Shutdown once the data channel terminates.
       this.dataChannel_.onceClosed.then(() => {
         if (this.dataChannel_.dataFromPeerQueue.getLength() > 0) {
@@ -498,7 +567,6 @@ import ProxyConfig from './proxyconfig';
       // effectively immediate.  However, we wrap it in a promise to ensure
       // that any exception is sent to the Promise.catch, rather than
       // propagating synchronously up the stack.
-      this.stopBandwidthCalc_ = true;
       var shutdownPromises :Promise<any>[] = [
         new Promise((F, R) => { this.dataChannel_.close(); F(); })
       ];
@@ -682,7 +750,7 @@ import ProxyConfig from './proxyconfig';
         throw new Error('received non-buffer data from datachannel');
       }
       this.bytesReceivedFromPeer_.handle(data.buffer.byteLength);
-      this.currBytes_ += data.buffer.byteLength;
+      this.currBytes += data.buffer.byteLength;
       this.channelReceivedBytes_ += data.buffer.byteLength;
       this.tcpConnection_.send(data.buffer);
     }
@@ -695,7 +763,7 @@ import ProxyConfig from './proxyconfig';
       var socketReader = (data:ArrayBuffer) => {
         this.sendOnChannel_(data);
         this.bytesSentToPeer_.handle(data.byteLength);
-        this.currBytes_ += data.byteLength;
+        this.currBytes += data.byteLength;
         this.channelSentBytes_ += data.byteLength;
       };
       this.tcpConnection_.dataFromSocketQueue.setSyncHandler(socketReader);
@@ -730,14 +798,41 @@ import ProxyConfig from './proxyconfig';
         if (this.tcpConnection_.isClosed()) {
           return;
         }
-
+        // Need to pause for overflow.
         if (overflow) {
-          this.tcpConnection_.pause();
-          log.debug('%1: Hit overflow, pausing socket', this.longId());
+          // Check if connection is not already paused for bandwidth overflow.
+          if (!this.pausedForBandwidthOverflow_) {
+            this.tcpConnection_.pause();
+            log.debug('%1: Hit overflow, pausing socket', this.longId());
+            this.socketOverflowPauseStart = new Date().getTime();
+            log.debug('Socket overflow paused at time: ' + this.socketOverflowPauseStart);
+          } else {
+            log.debug('%1: Hit overflow, but connection is already paused', this.longId());
+            this.socketOverflowPauseStart = 0;
+            log.debug('Socket overflow supposed to pause: ' + this.socketOverflowPauseStart);
+          }
         } else {
-          this.tcpConnection_.resume();
-          log.debug('%1: Exited  overflow, resuming socket', this.longId());
+          // Check if the connection is still paused for bandwidth overflow; do not resume if it is.
+          if (!this.pausedForBandwidthOverflow_) {
+            this.tcpConnection_.resume();
+            log.debug('%1: Exited  overflow, resuming socket', this.longId());
+            if (this.socketOverflowPauseStart > 0) {
+              this.socketOverflowPauseResume = new Date().getTime();
+              this.socketOverflowAdditionalTime += this.socketOverflowPauseResume - this.socketOverflowPauseStart;
+              log.debug('Time socket was paused: ' + this.socketOverflowPauseStart + '; time socket was resumed: ' + this.socketOverflowPauseResume);
+            } else {
+              // was paused in the middle of being paused; don't do anything
+              this.socketOverflowPauseResume = 0;
+              log.debug('Socket resumed, but was paused at a bad time: ' + this.socketOverflowPauseResume);
+            }
+          } else {
+            log.debug('%1: Exited overflow, but connection is still paused for bandwidth', this.longId());
+            this.socketOverflowPauseResume = 0;
+            log.debug('Socket supposed to resume: ' + this.socketOverflowPauseResume);
+
+          }
         }
+        this.pausedForChannelOverflow_ = overflow;
       });
     }
 
@@ -750,20 +845,74 @@ import ProxyConfig from './proxyconfig';
       return true;
     }
 
-    // Calculates bandwidth over BANDWIDTH_MONITOR_INTERVAL millisecond intervals based on
-    // total bytes sent and received by this session. We want to calculate
-    // bandwidth over a certain time interval; doing it continuously would
-    // not help us stop a random peak in bandwidth usage if the overall
-    // average is still low.
-    private calculateBandwidth_ = () : void => {
-      if (!this.stopBandwidthCalc_) {
-        // There are 8 bits in a byte
-        var bitsTransferred_ = (this.currBytes_ - this.prevBytes_) * 8;
-        // Bandwidth is measured in bits/sec.
-        var bandwidthSession_  = bitsTransferred_ / (Session.BANDWIDTH_MONITOR_INTERVAL / 1000);
-        log.debug('%1: current bandwidth %2 bits/sec', this.channelLabel(), bandwidthSession_);
-        this.prevBytes_ = this.currBytes_;
-        setTimeout(this.calculateBandwidth_, Session.BANDWIDTH_MONITOR_INTERVAL);
+    public calculateBandwidth = (): void => {
+      // Bandwidth is measured in bps.
+      if (this.prevBytes === null) {
+        var bitsInterval = this.currBytes * 8;
+        var currTime = new Date().getTime();
+        var timeDifference = currTime - this.startTime;
+        log.debug('It has been %1 milliseconds since the session %2 was started', timeDifference, this.channelLabel());
+      } else {
+        var bitsInterval = (this.currBytes - this.prevBytes) * 8;
+        var timeDifference = RtcToNet.BANDWIDTH_MONITOR_INTERVAL * this.notPausedFrac;
+      }
+      // If session has been paused for socket overflow but has not yet resumed
+      if (this.pausedForChannelOverflow_) {
+          var diffAtEnd = new Date().getTime() - this.socketOverflowPauseStart;
+          this.socketOverflowAdditionalTime += diffAtEnd;
+      }
+      log.debug('Additional time paused: ' + this.socketOverflowAdditionalTime);
+      // Make sure bandwidth is calculated based on the time in last interval NOT paused, for either bandwidth or socket overflow.
+      var bandwidthSession = bitsInterval / ((timeDifference-this.socketOverflowAdditionalTime)/ 1000);
+      log.debug('%1: This session current bw: %2', this.channelLabel(), bandwidthSession);
+      // Update prevBytes of this session.
+      this.prevBytes = this.currBytes;
+      this.currBandwidth = bandwidthSession;
+    }
+
+    public pauseSession = (timeToPause: number): void => {
+      log.debug('%1 is pausing (total experimenting) for %2; total bytes sent/rec: %3', this.channelLabel(), timeToPause, this.currBytes);
+      this.socketOverflowPauseStart = 0;
+      this.socketOverflowPauseResume = 0;
+      this.socketOverflowAdditionalTime = 0;
+      this.pauseForBandwidthOverflow(timeToPause);
+    }
+
+    // Called when there is no bandwidth overflow pausing.
+    public resetForNoPause = (): void => {
+      this.notPausedFrac = 1;
+      // If session has been paused but not yet resumed, and session will not pause for bandwidth overflow, update socketOverflowPauseStart.
+      if (this.pausedForChannelOverflow_) {
+        this.socketOverflowPauseStart = new Date().getTime();
+      } else {
+        this.socketOverflowPauseStart = 0;
+      }
+      this.socketOverflowPauseResume = 0;
+      this.socketOverflowAdditionalTime = 0;
+    }
+
+    private pauseForBandwidthOverflow = (pauseTime: number): void => {
+      this.pausedForBandwidthOverflow_ = true;
+      // Check if connection is already paused for channel overflow; don't pause again if it is.
+      if (!this.pausedForChannelOverflow_){
+        this.tcpConnection_.pause();
+        log.debug('%1: pausing for %2 ms; current bytes sent/received: %3', this.channelLabel(), pauseTime, this.currBytes);
+      } else {
+        log.debug('%1: pausing for %2 ms (connection is already paused); current bytes sent/received: %3', this.channelLabel(), pauseTime, this.currBytes);
+      }
+      setTimeout(this.resumeAfterBandwidthOverflow, pauseTime);
+    }
+
+    private resumeAfterBandwidthOverflow = (): void => {
+      this.pausedForBandwidthOverflow_ = false;
+      // Check if connection is still paused due to overflow; don't prematurely resume, and let the overflow handler resume it.
+      if (!this.pausedForChannelOverflow_) {
+        this.tcpConnection_.resume();
+        log.debug('%1: resuming; current bytes sent/received: %2', this.channelLabel(), this.currBytes);
+      } else {
+        log.debug('%1: Done pausing for bandwidth overflow, but connection is still paused for channel overflow; current bytes sent/received: %2', this.channelLabel(), this.currBytes);
+        // If the connection is still paused for socket overflow, update new socketOverflowPauseStart time.
+        this.socketOverflowPauseStart = new Date().getTime();
       }
     }
 

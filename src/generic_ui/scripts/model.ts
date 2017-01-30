@@ -72,7 +72,11 @@ export class Model {
     crypto: true,
     reproxy: {
       enabled: false,
-      socksEndpoint: {address: '127.0.0.1', port: 9050}
+      socksEndpoint: {address: '127.0.0.1', port: 9050},
+    },
+    bandwidthSettings: {
+      enabled: false,
+      limit: 1000000,
     }
   };
 
