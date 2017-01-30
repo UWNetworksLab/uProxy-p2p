@@ -1,0 +1,14 @@
+{
+  "name": "@uproxy-metrics/metrics_server",
+  "version": "1.0.0-beta",
+  "author": "uProxy",
+  "private": true,
+  "description": "Metrics server for uProxy",
+  "dependencies": {
+    "express": "^4.14.0",
+    "gcloud": "^0.37.0"
+  },
+  "engines": {
+    "node": ">=4"
+  }
+}

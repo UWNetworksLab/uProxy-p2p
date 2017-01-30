@@ -1,0 +1,36 @@
+{
+  "name": "uproxy-metrics",
+  "version": "1.0.0-beta",
+  "author": "uProxy",
+  "description": "Metrics systems for uProxy",
+  "devDependencies": {
+    "jasmine": "^2.4.1",
+    "typescript": "^1.8.10",
+    "typings": "^1.3.2"
+  },
+  "//": "For start-datastore, see https://cloud.google.com/datastore/docs/tools/datastore-emulator",
+  "scripts": {
+    "install": "npm install adaptors/ metrics_server/ model/ tools/ && typings install",
+
+    "build-server": "npm run clean-out && npm run ts-compile && cp -R node_modules/@uproxy-metrics/metrics_server/node_modules/ metrics_server/app.yaml out && echo \"require('./metrics_server/server')\" > out/server.js",
+    "build-tools": "npm run clean-out && npm run ts-compile && cp -R node_modules/@uproxy-metrics/tools/node_modules/ out",
+    "ts-compile": "tsc",
+
+    "test": "npm run ts-compile && JASMINE_CONFIG_PATH=jasmine.json jasmine",
+    "test-use-repository": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/adaptors/datastore_use_events_repository_test.js",
+
+    "clean": "npm run clean-out && npm run clean-install",
+    "clean-install": "rm -rf ./node_modules ./typings",
+    "clean-out": "rm -rf ./out",
+
+    "env": "env",
+
+    "datastore-start": "gcloud beta emulators datastore start --project=uproxy-metrics --no-legacy --no-store-on-disk --host-port=localhost:8081",
+    "datastore-load": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/datastore_load_sample.js",
+    "datastore-report": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 node out/tools/generate_report.js",
+
+    "start": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 node out/server.js",
+    "monitor": "DATASTORE_EMULATOR_HOST=127.0.0.1:8081 PORT=8080 nodemon out/server.js",
+    "deploy": "gcloud --project=uproxy-metrics app deploy out/app.yaml"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "uproxy-metrics",
+  "globalDependencies": {
+    "csv-parse": "registry:dt/csv-parse#1.1.0+20160602150508",
+    "express": "registry:dt/express#4.0.0+20160708185218",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#4.0.0+20160715232503",
+    "jasmine": "registry:dt/jasmine#2.2.0+20160621224255",
+    "mime": "registry:dt/mime#0.0.0+20160316155526",
+    "node-4": "registry:dt/node-4#4.0.0+20160801161248",
+    "serve-static": "registry:dt/serve-static#0.0.0+20160606155157"
+  }
+}
