@@ -202,7 +202,7 @@
     <uproxy-state id="state"></uproxy-state>
     <core-signals on-core-signal-open-invite-user-dialog='{{ openInviteUserPanel }}'></core-signals>
 
-    <core-overlay id='inviteUserPanel'>
+    <core-overlay id='inviteUserPanel' transition='none'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ closeInviteUserPanel }}'>
           {{ "CONNECT_WITH_A_FRIEND" | $$(model.globalSettings.language) }}
