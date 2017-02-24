@@ -43,7 +43,7 @@ export class WeekBuffer<T> {
     if (now - this.timestamps_[this.timestamps_.length-1] > ONE_DAY_MS) {
       if (this.timestamps_.length >= 7) {
         // this can't happen.
-        log.error('WeekBuffer buckets corrupt!');
+        log.error('WeekBuffer buckets corrupt!!');
       }
       this.timestamps_.push(now);
       this.values_.push(value);
