@@ -508,9 +508,9 @@ boom@2.x.x:
   dependencies:
     hoek "2.x.x"
 
-bower@^1.4.1:
-  version "1.7.9"
-  resolved "https://registry.yarnpkg.com/bower/-/bower-1.7.9.tgz#b7296c2393e0d75edaa6ca39648132dd255812b0"
+bower@^1.8.8:
+  version "1.8.8"
+  resolved "https://registry.yarnpkg.com/bower/-/bower-1.8.8.tgz#82544be34a33aeae7efb8bdf9905247b2cffa985"
 
 bplist-parser@^0.1.0:
   version "0.1.1"
