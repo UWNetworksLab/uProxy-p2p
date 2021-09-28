@@ -409,4 +409,18 @@ export function socksEchoTestDescription(useChurn:boolean) {
       expect(e.reply).toEqual(socks_headers.Reply.HOST_UNREACHABLE);
     }).then(done);
   });
+
+  it('run a simple echo test using SOCKS 4', (done) => {
+    var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
+    var testModule = createTestModule();
+    testModule.startEchoServer().then((port:number) => {
+      return testModule.connect(port, '127.0.0.1', /* useV4 */ true);
+    }).then((connectionId:string) => {
+      return testModule.echo(connectionId, input);
+    }).then((output:ArrayBuffer) => {
+      expect(arraybuffers.byteEquality(input, output)).toBe(true);
+    }).catch((e:any) => {
+      expect(e).toBeUndefined();
+    }).then(done);
+  });
 };

@@ -10,7 +10,9 @@ import * as net from '../net/net.types';
 
 // VERSION - Socks protocol and subprotocol version headers
 export enum Version {
+  VERSION0 = 0x00,
   VERSION1 = 0x01,
+  VERSION4 = 0x04,
   VERSION5 = 0x05
 }
 
@@ -50,6 +52,12 @@ export enum Reply {
   UNSUPPORTED_COMMAND = 0x07,  // Command not supported
   ADDRESS_TYPE        = 0x08,  // Address type not supported
   RESERVED            = 0x09   // 0x09 - 0xFF unassigned
+}
+
+// Result Code (CD) in SOCKS 4.
+export enum ResultCode4 {
+  REQUEST_GRANTED = 90,
+  REQUEST_FAILED = 91
 }
 
 // Represents the destination portion of a SOCKS request.
@@ -143,7 +151,14 @@ export interface UdpMessage {
   data           :Uint8Array;
 }
 
-
+export function checkVersion(buffer:ArrayBuffer) : Version {
+  let handshakeBytes = new Uint8Array(buffer);
+  let socksVersion = handshakeBytes[0];
+  if (socksVersion != Version.VERSION5 && socksVersion != Version.VERSION4) {
+    throw new Error('unsupported SOCKS version: ' + socksVersion);
+  }
+  return socksVersion;
+}
 
 // Client to Server (Step 1)
 // Authentication method negotiation
@@ -577,4 +592,179 @@ export function interpretResponseBuffer(buffer:ArrayBuffer) : Response {
   }
 
   return response;
+}
+
+// SOCKS 4 and 4a support.
+// These protocols consist of a single message:
+//              +----+----+----+----+----+----+----+----+----+----+....+----+
+//              | VN | CD | DSTPORT |      DSTIP        | USERID       |NULL|
+//              +----+----+----+----+----+----+----+----+----+----+....+----+
+//  # of bytes:    1    1      2              4           variable       1
+// Where VN is 4 and CD is 1 for CONNECT (2 for BIND).
+// In SOCKS 4, a DSTIP of 0.0.0.x means that the command is followed by the
+// domain, which is x bytes long, followed by another NULL byte.
+//
+// The server responds
+//              +----+----+----+----+----+----+----+----+
+//              | VN | CD | DSTPORT |      DSTIP        |
+//              +----+----+----+----+----+----+----+----+
+//  # of bytes:	   1    1      2              4
+// To confirm a successful (CD = 90) or failed (CD = 91) connection.
+// See https://www.openssh.com/txt/socks4.protocol and
+// https://www.openssh.com/txt/socks4a.protocol.
+
+interface HeaderV4 {
+  version:Version;
+  code:Command|ResultCode4;
+  port:number;
+  ipv4:ipaddr.IPv4Address;
+}
+
+export function composeRequestBufferV4(request:Request) : ArrayBuffer {
+  let destination = makeDestinationFromEndpoint(request.endpoint);
+
+  // SOCKS 4
+  let address :string = request.endpoint.address;
+  let extraBytes = 0;
+  if (destination.addressType === AddressType.DNS) {
+    // SOCKS 4a
+    address = '0.0.0.' + request.endpoint.address.length;
+    extraBytes = request.endpoint.address.length + 1;
+  }
+
+  let ipv4 = ipaddr.IPv4.parse(address);
+  let header = composeHeaderBufferV4({
+    version: Version.VERSION4,
+    code: Command.TCP_CONNECT,
+    ipv4,
+    port: request.endpoint.port
+  });
+
+  let userId = '';  // This implementation does not support userId.
+
+  // The shortest possible request packet is 9 bytes
+  let byteArray = new Uint8Array(9 + userId.length + extraBytes);
+  byteArray.set(header, 0);
+  byteArray.set(new Buffer(userId, 'ascii'), 8);
+  byteArray[8 + userId.length] = 0;  // NULL
+  if (extraBytes > 0) {
+    // SOCKS 4a
+    byteArray.set(new Buffer(request.endpoint.address, 'ascii'),
+        9 + userId.length);
+    byteArray[9 + userId.length + request.endpoint.address.length] = 0;
+  }
+
+  return byteArray.buffer;
+}
+
+export function interpretRequestBufferV4(buffer:ArrayBuffer) : Request {
+  let byteArray = new Uint8Array(buffer);
+
+  // Fail if the request is too short to be valid.
+  if (byteArray.length < 9) {
+    throw new Error('SOCKS4 request too short');
+  }
+
+  let header: HeaderV4 = interpretHeaderBufferV4(buffer);
+
+  // Fail if client is not talking Socks version 4.
+  if (header.version !== Version.VERSION4) {
+    throw new Error('expecting SOCKS4');
+  }
+
+  // Fail unless we got a CONNECT command.
+  if (header.code !== Command.TCP_CONNECT) {
+    throw new Error('unsupported SOCKS4 command: ' + header.code);
+  }
+
+  let userIdChars : string[] = [];
+  let i : number;
+  for (i = 8; byteArray[i] !== 0; ++i) {
+    userIdChars.push(String.fromCharCode(byteArray[i]));
+  }
+  let userId = userIdChars.join('');
+  let address :string;
+  if (header.ipv4.range() === 'unspecified') {
+    // SOCKS 4a
+    let addressChars : string[] = [];
+    for (++i; byteArray[i] !== 0; ++i) {
+      addressChars.push(String.fromCharCode(byteArray[i]));
+    }
+    address = addressChars.join('');
+    if (address.length !== header.ipv4.octets[3]) {
+      throw new Error('Address "' + address +
+          '" doesn\'t have expected length ' + header.ipv4.octets[3]);
+    }
+  } else {
+    // SOCKS 4
+    address = header.ipv4.toString();
+  }
+  let request :Request = {
+    command: header.code,
+    endpoint: {address, port: header.port}
+  };
+
+  if (!isValidRequest(request)) {
+    throw new Error('Constructed invalid request object: ' +
+                    JSON.stringify(request));
+  }
+
+  return request;
+}
+
+export function composeResponseBufferV4(response:Response) : ArrayBuffer {
+  let code :ResultCode4 = response.reply === Reply.SUCCEEDED ?
+      ResultCode4.REQUEST_GRANTED : ResultCode4.REQUEST_FAILED;
+  return composeHeaderBufferV4({
+    version: Version.VERSION0,
+    code,
+    ipv4: ipaddr.IPv4.parse(response.endpoint.address),
+    port: response.endpoint.port
+  }).buffer;
+}
+
+export function interpretResponseBufferV4(buffer:ArrayBuffer) : Response {
+  let header = interpretHeaderBufferV4(buffer);
+  if (header.version !== Version.VERSION0) {
+    throw new Error('Unexpected version ' + header.version);
+  }
+
+  if (!(header.code in ResultCode4)) {
+    throw new Error('Unexpected code ' + header.code);
+  }
+
+  let reply = header.code === ResultCode4.REQUEST_GRANTED ?
+      Reply.SUCCEEDED : Reply.FAILURE;
+  let endpoint :net.Endpoint = {
+    address: header.ipv4.toString(),
+    port: header.port
+  };
+  return {reply, endpoint};
+}
+
+function composeHeaderBufferV4(header:HeaderV4) : Uint8Array {
+  let byteArray = new Uint8Array(8);
+  byteArray[0] = header.version;
+  byteArray[1] = header.code;
+  byteArray[2] = header.port >> 8;
+  byteArray[3] = header.port & 0xFF;
+  byteArray.set(header.ipv4.octets, 4);
+  return byteArray;
+}
+
+function interpretHeaderBufferV4(buffer:ArrayBuffer) : HeaderV4 {
+  let byteArray = new Uint8Array(buffer);
+
+  // Fail if the request is too short to be valid.
+  if (byteArray.length < 8) {
+    throw new Error('SOCKS4 header is too short');
+  }
+
+  // Fail if client is not talking Socks version 4.
+  let version :number = byteArray[0];
+  let code :number = byteArray[1];
+  let port = byteArray[2] << 8 | byteArray[3];
+  let ipv4Bytes :number[] = Array.prototype.slice.call(byteArray.subarray(4, 8));
+  let ipv4 = new ipaddr.IPv4(ipv4Bytes);
+  return {version, code, ipv4, port};
 }

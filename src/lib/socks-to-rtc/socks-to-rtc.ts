@@ -224,8 +224,7 @@ export class Session {
 
     // The session is ready once we've completed both
     // auth and request handshakes.
-    this.onceReady = this.doAuthHandshake_().then(
-        this.doRequestHandshake_).then((response:socks_headers.Response) => {
+    this.onceReady = this.doHandshake_().then((response:socks_headers.Response) => {
       if (response.reply !== socks_headers.Reply.SUCCEEDED) {
         throw new Error('handshake failed with reply code ' +
             socks_headers.Reply[response.reply]);
@@ -300,20 +299,29 @@ export class Session {
     });
   }
 
+  private doHandshake_ = () : Promise<socks_headers.Response> => {
+    return this.tcpConnection_.receiveNext().then((firstBuffer:ArrayBuffer) => {
+      let version = socks_headers.checkVersion(firstBuffer);
+      if (version === socks_headers.Version.VERSION5) {
+        return this.doAuthHandshake_(firstBuffer).then(this.doRequestHandshake_);
+      } else if (version === socks_headers.Version.VERSION4) {
+        return this.doV4Handshake_(firstBuffer);
+      } else {
+        throw new Error('Invalid SOCKS version ' + version);
+      }
+    });
+  }
+
   // Receive a socks connection and send the initial Auth messages.
   // Assumes: no packet fragmentation.
   // TODO: send failure to client if auth fails
   // TODO: handle packet fragmentation:
   //   https://github.com/uProxy/uproxy/issues/323
   // TODO: Needs unit tests badly since it's mocked by several other tests.
-  private doAuthHandshake_ = ()
-      : Promise<void> => {
-    return this.tcpConnection_.receiveNext()
-      .then(socks_headers.interpretAuthHandshakeBuffer)
-      .then((auths:socks_headers.Auth[]) => {
-        this.tcpConnection_.send(
+  private doAuthHandshake_ = (authRequestBuffer:ArrayBuffer) : Promise<void> => {
+    let auths:socks_headers.Auth[] = socks_headers.interpretAuthHandshakeBuffer(authRequestBuffer);
+    return this.tcpConnection_.send(
             socks_headers.composeAuthResponse(socks_headers.Auth.NOAUTH));
-      });
   }
 
   // Handles the SOCKS handshake, fulfilling with the socks.Response instance
@@ -332,14 +340,20 @@ export class Session {
   private doRequestHandshake_ = () : Promise<socks_headers.Response> => {
     return this.tcpConnection_.receiveNext()
       .then(socks_headers.interpretRequestBuffer)
-      .then((request:socks_headers.Request) => {
-        // The domain name is very sensitive, so we keep it out of the
-        // info-level logs, which may be uploaded.
-        log.debug('%1: received endpoint from SOCKS client: %2', [
-            this.longId(), JSON.stringify(request.endpoint)]);
-        this.tcpConnection_.pause();
-        return this.dataChannel_.send({ str: JSON.stringify(request) });
-      })
+      .then(this.handshakeWithPeer_)
+      .then((response:socks_headers.Response) => {
+        return this.tcpConnection_.send(socks_headers.composeResponseBuffer(
+            response)).then((discard:any) => { return response; });
+      });
+  }
+
+  private handshakeWithPeer_ = (request:socks_headers.Request) : Promise<socks_headers.Response> => {
+    // The domain name is very sensitive, so we keep it out of the
+    // info-level logs, which may be uploaded.
+    log.debug('%1: received endpoint from SOCKS client: %2', [
+        this.longId(), JSON.stringify(request.endpoint)]);
+    this.tcpConnection_.pause();
+    return this.dataChannel_.send({ str: JSON.stringify(request) })
       .then(() => {
         // Equivalent to channel.receiveNext(), if it existed.
         return new Promise((F, R) => {
@@ -370,11 +384,15 @@ export class Session {
         return {
           reply: socks_headers.Reply.FAILURE
         };
-      })
-      .then((response:socks_headers.Response) => {
-        return this.tcpConnection_.send(socks_headers.composeResponseBuffer(
-            response)).then((discard:any) => { return response; });
       });
+  }
+
+  private doV4Handshake_ = (buffer:ArrayBuffer) : Promise<socks_headers.Response> => {
+    let request = socks_headers.interpretRequestBufferV4(buffer);
+    return this.handshakeWithPeer_(request).then((response:socks_headers.Response) => {
+      return this.tcpConnection_.send(socks_headers.composeResponseBufferV4(
+            response)).then((discard:any) => { return response; });
+    });
   }
 
   // Sends a packet over the data channel.

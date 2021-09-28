@@ -234,4 +234,87 @@ describe('socks', function() {
     udpMessageArray[2] = 7;
     expect(() => { Socks.interpretUdpMessage(udpMessageArray); }).toThrow();
   });
+
+  it('roundtrip SOCKS 4 request', () => {
+    let request : Socks.Request = {
+      command: Socks.Command.TCP_CONNECT,
+      endpoint: {
+        address: '192.0.2.4',
+        port: 54321
+      }
+    };
+    let requestBuffer = Socks.composeRequestBufferV4(request);
+    let requestArray = new Uint8Array(requestBuffer);
+    expect(requestArray[0]).toEqual(Socks.Version.VERSION4);
+    expect(requestArray[1]).toEqual(Socks.Command.TCP_CONNECT);
+    expect(requestArray[2] << 8 | requestArray[3]).toEqual(request.endpoint.port);
+    expect(requestArray[8]).toEqual(0);
+    expect(requestArray.length).toEqual(9);
+    let requestAgain = Socks.interpretRequestBufferV4(requestBuffer);
+    expect(requestAgain).toEqual(request);
+  });
+
+  it('roundtrip SOCKS 4a request', () => {
+    let request : Socks.Request = {
+      command: Socks.Command.TCP_CONNECT,
+      endpoint: {
+        address: 'www.example.com',
+        port: 1200
+      }
+    };
+    let requestBuffer = Socks.composeRequestBufferV4(request);
+    let requestArray = new Uint8Array(requestBuffer);
+    expect(requestArray[0]).toEqual(Socks.Version.VERSION4);
+    expect(requestArray[1]).toEqual(Socks.Command.TCP_CONNECT);
+    expect(requestArray[2] << 8 | requestArray[3]).toEqual(request.endpoint.port);
+    expect(requestArray[4] | requestArray[5] | requestArray[6]).toEqual(0);
+    expect(requestArray[7]).toEqual(request.endpoint.address.length);
+    expect(requestArray[8]).toEqual(0);
+    expect(requestArray.length).toEqual(10 + request.endpoint.address.length);
+    let requestAgain = Socks.interpretRequestBufferV4(requestBuffer);
+    expect(requestAgain).toEqual(request);
+  });
+
+  it('check SOCKS 4 version', () => {
+    let request : Socks.Request = {
+      command: Socks.Command.TCP_CONNECT,
+      endpoint: {
+        address: '192.0.2.4',
+        port: 54321
+      }
+    };
+    let requestBuffer = Socks.composeRequestBufferV4(request);
+    let version = Socks.checkVersion(requestBuffer);
+    expect(version).toEqual(Socks.Version.VERSION4);
+  });
+
+  it('check SOCKS 5 version', () => {
+    let request : Socks.Request = {
+      command: Socks.Command.TCP_CONNECT,
+      endpoint: {
+        address: '192.0.2.4',
+        port: 54321
+      }
+    };
+    let requestBuffer = Socks.composeRequestBuffer(request);
+    let version = Socks.checkVersion(requestBuffer);
+    expect(version).toEqual(Socks.Version.VERSION5);
+  });
+
+  it('roundtrip IPv4 response', () => {
+    let response :Socks.Response = {
+      reply: Socks.Reply.SUCCEEDED,
+      endpoint: {
+        address: '255.0.1.77',
+        port: 65535
+      }
+    };
+    let responseBuffer = Socks.composeResponseBufferV4(response);
+    let responseArray = new Uint8Array(responseBuffer);
+    expect(responseArray[0]).toEqual(Socks.Version.VERSION0);
+    expect(responseArray[1]).toEqual(Socks.ResultCode4.REQUEST_GRANTED);
+    expect(responseArray[2] << 8 | responseArray[3]).toEqual(response.endpoint.port);
+    let responseAgain = Socks.interpretResponseBufferV4(responseBuffer);
+    expect(responseAgain).toEqual(response);
+  });
 });

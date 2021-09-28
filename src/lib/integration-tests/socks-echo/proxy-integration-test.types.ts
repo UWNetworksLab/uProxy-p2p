@@ -6,7 +6,7 @@ export interface ReceivedDataEvent {
 export interface ProxyIntegrationTester {
   startEchoServer() :Promise<number>;
   // Returns a unique identifier for the connection (the connectionId).
-  connect(port:number, address?:string) :Promise<string>;
+  connect(port:number, address?:string, useV4?:boolean) :Promise<string>;
   // Sets the number of concatenated copies of the input to echo.  (default: 1)
   setRepeat(repeat:number) :Promise<void>;
   echo(connectionId:string, content:ArrayBuffer) :Promise<ArrayBuffer>;
